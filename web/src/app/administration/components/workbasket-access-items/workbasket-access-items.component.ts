@@ -31,7 +31,7 @@ import {
 } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Actions, ofActionCompleted, Select, Store } from '@ngxs/store';
-import { FormArray, FormBuilder, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { Workbasket } from 'app/shared/models/workbasket';
 import { customFieldCount, WorkbasketAccessItems } from 'app/shared/models/workbasket-access-items';
@@ -81,7 +81,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
   accessItemsClone: WorkbasketAccessItems[];
   accessItemsResetClone: WorkbasketAccessItems[];
   AccessItemsForm = this.formBuilder.group({
-    accessItemsGroups: this.formBuilder.array([])
+    accessItemsGroups: this.formBuilder.array<FormGroup>([])
   });
 
   toggleValidationAccessIdMap = new Map<number, boolean>();
@@ -310,10 +310,6 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
     this.setAccessItemsGroups(this.accessItemsResetClone);
     this.accessItemsClone = this.cloneAccessItems();
     this.notificationsService.showSuccess('WORKBASKET_ACCESS_ITEM_RESTORE');
-  }
-
-  isFieldValid(field: string, index: number): boolean {
-    return this.formsValidatorService.isFieldValid(this.accessItemsGroups[index], field);
   }
 
   onSubmit() {

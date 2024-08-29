@@ -54,7 +54,7 @@
       position: relative;
       left: 40px;
       height: 100%;
-      transform:skew(-45deg,0deg);
+      transform: skew(-45deg, 0deg);
       border-right: 1px solid #dee2e6;
     }
 
@@ -65,7 +65,7 @@
       left: 50%;
       bottom: 0;
       text-align: left;
-      transform:skew(45deg,0deg) rotate(315deg);
+      transform: skew(45deg, 0deg) rotate(315deg);
       transform-origin: left center;
       display: -webkit-box;
       -webkit-line-clamp: 2;

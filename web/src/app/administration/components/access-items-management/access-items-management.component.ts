@@ -51,9 +51,7 @@ import { WorkbasketAccessItemQueryFilterParameter } from '../../../shared/models
 })
 export class AccessItemsManagementComponent implements OnInit {
   accessIdPrevious: string;
-  isRequired: boolean = false;
   accessIdName: string;
-  panelState: boolean = false;
   accessItemsForm: FormGroup;
   accessId: AccessId;
   groups: AccessId[];
@@ -66,7 +64,6 @@ export class AccessItemsManagementComponent implements OnInit {
   };
   accessItems: WorkbasketAccessItems[];
   isGroup: boolean = false;
-  isPermission: boolean = false;
 
   @Select(EngineConfigurationSelectors.accessItemsCustomisation)
   accessItemsCustomization$: Observable<AccessItemsCustomisation>;
