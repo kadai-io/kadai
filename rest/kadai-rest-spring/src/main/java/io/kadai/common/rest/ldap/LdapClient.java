@@ -240,10 +240,9 @@ public class LdapClient {
     if (!CN.equals(getGroupNameAttribute())) {
       orFilter.or(new WhitespaceWildcardsFilter(CN, name));
     }
-    final AndFilter andFilter2 = new AndFilter();
-    andFilter2.and(new NotPresentFilter(getUserPermissionsAttribute()));
+
     andFilter.and(orFilter);
-    andFilter2.and(andFilter);
+    final AndFilter andFilter2 = getPermissionsNotPresentAndFilter(andFilter);
 
     LOGGER.debug("Using filter '{}' for LDAP query.", andFilter);
 
@@ -279,6 +278,9 @@ public class LdapClient {
 
   public List<AccessIdRepresentationModel> searchPermissionsByName(final String name)
       throws InvalidArgumentException {
+    if (permissionsAreEmpty()) {
+      return Collections.emptyList();
+    }
     isInitOrFail();
     testMinSearchForLength(name);
 
@@ -341,10 +343,8 @@ public class LdapClient {
       orFilter.or(new EqualsFilter(getGroupsOfUserName(), accessId));
     }
     orFilter.or(new EqualsFilter(getGroupsOfUserName(), dn));
-    final AndFilter andFilter2 = new AndFilter();
-    andFilter2.and(new NotPresentFilter(getUserPermissionsAttribute()));
     andFilter.and(orFilter);
-    andFilter2.and(andFilter);
+    final AndFilter andFilter2 = getPermissionsNotPresentAndFilter(andFilter);
 
     String[] userAttributesToReturn = {getUserIdAttribute(), getGroupNameAttribute()};
     if (LOGGER.isDebugEnabled()) {
@@ -364,6 +364,9 @@ public class LdapClient {
 
   public List<AccessIdRepresentationModel> searchPermissionsAccessIdHas(final String accessId)
       throws InvalidArgumentException, InvalidNameException {
+    if (permissionsAreEmpty()) {
+      return Collections.emptyList();
+    }
     isInitOrFail();
     testMinSearchForLength(accessId);
 
@@ -467,6 +470,9 @@ public class LdapClient {
   }
 
   private List<String> searchDnForPermissionAccessId(String accessId) {
+    if (permissionsAreEmpty()) {
+      return Collections.emptyList();
+    }
     final AndFilter andFilter = new AndFilter();
     andFilter.and(
         new EqualsFilter(getPermissionSearchFilterName(), getPermissionSearchFilterValue()));
@@ -776,6 +782,22 @@ public class LdapClient {
   }
 
   String[] getLookUpUserInfoAttributesToReturn() {
+    if (permissionsAreEmpty()) {
+      return new String[] {
+          getUserIdAttribute(),
+          getUserMemberOfGroupAttribute(),
+          getUserFirstnameAttribute(),
+          getUserLastnameAttribute(),
+          getUserFullnameAttribute(),
+          getUserPhoneAttribute(),
+          getUserMobilePhoneAttribute(),
+          getUserEmailAttribute(),
+          getUserOrgLevel1Attribute(),
+          getUserOrgLevel2Attribute(),
+          getUserOrgLevel3Attribute(),
+          getUserOrgLevel4Attribute()
+      };
+    }
     return new String[] {
       getUserIdAttribute(),
       getUserMemberOfGroupAttribute(),
@@ -894,9 +916,11 @@ public class LdapClient {
   }
 
   private Set<String> getPermissionIdsFromContext(final DirContextOperations context) {
-    String[] permissionAttributes = context.getStringAttributes(getUserPermissionsAttribute());
+    boolean permissionsAreNotEmpty = !permissionsAreEmpty()
+        && context.getStringAttributes(getUserPermissionsAttribute()) != null;
     Set<String> permissions =
-        permissionAttributes != null ? Set.of(permissionAttributes) : Collections.emptySet();
+        permissionsAreNotEmpty ? Set.of(context.getStringAttributes(getUserPermissionsAttribute()))
+            : Collections.emptySet();
     if (useLowerCaseForAccessIds) {
       permissions =
           permissions.stream()
@@ -905,6 +929,22 @@ public class LdapClient {
               .collect(Collectors.toSet());
     }
     return permissions;
+  }
+
+  private boolean permissionsAreEmpty() {
+    return getUserPermissionsAttribute() == null || getPermissionSearchFilterName() == null
+        || getUserPermissionsAttribute().isEmpty() || getPermissionSearchFilterName().isEmpty();
+  }
+
+  private AndFilter getPermissionsNotPresentAndFilter(AndFilter andFilter) {
+    if (getUserPermissionsAttribute() == null || getUserPermissionsAttribute().isEmpty()) {
+      return andFilter;
+    }
+    final AndFilter
+        andFilter2 = new AndFilter();
+    andFilter2.and(new NotPresentFilter(getUserPermissionsAttribute()));
+    andFilter2.and(andFilter);
+    return andFilter2;
   }
 
   /** Context Mapper for user entries. */
@@ -985,7 +1025,8 @@ public class LdapClient {
         String firstName = context.getStringAttribute(getUserFirstnameAttribute());
         String lastName = context.getStringAttribute(getUserLastnameAttribute());
         accessId.setName(String.format("%s, %s", lastName, firstName));
-      } else if (context.getStringAttribute(getUserPermissionsAttribute()) == null) {
+      } else if (getUserPermissionsAttribute() == null || getUserPermissionsAttribute().isEmpty()
+          || context.getStringAttribute(getUserPermissionsAttribute()) == null) {
         if (useDnForGroups()) {
           accessId.setAccessId(getDnFromContext(context)); // fully qualified dn
         } else {
