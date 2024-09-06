@@ -1,7 +1,7 @@
 <settings>
     <profiles>
         <profile>
-            <id>ossrh</id>
+            <id>central</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -13,11 +13,11 @@
         </profile>
     </profiles>
 
-    <servers>
-        <server>
-            <id>ossrh</id>
-            <username>44pdzWD8</username>
-            <password>eJZ25rsRdH7ZiePJO52JUy7LyVkNIgXxXEBmnTNH3aOM</password>
-        </server>
-    </servers>
+  <servers>
+    <server>
+      <id>central</id>
+      <username>${env.MAVEN_USERNAME}</username>
+      <password>${env.MAVEN_PASSWORD}</password>
+    </server>
+  </servers>
 </settings>
