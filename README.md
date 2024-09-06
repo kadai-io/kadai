@@ -223,8 +223,8 @@ via [GitHub Discussions](https://github.com/orgs/kadai-iodiscussions).
 
 We love listening to your feedback, and of course also discussing the project roadmap and possible use cases with you!
 
-This open source project is being developed by [Envite Consulting GmbH](https://www.envite.de/)
-and [envite consulting GmbH](https://envite.de/) with the support of the open source community.
+This open source project is being developed by [envite consulting GmbH](https://www.envite.de/) 
+with the support of the open source community.
 
 ---
 [![envite consulting GmbH](docs/images/envite-black.png)](https://envite.de/)
