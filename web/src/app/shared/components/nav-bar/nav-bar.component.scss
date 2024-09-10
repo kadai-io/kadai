@@ -1,7 +1,7 @@
 @import '../../../../theme/variables';
 
 .navbar {
-  background-color: $dark-green;
+  background-color: $aquamarine;
   max-height: 52px;
   overflow-x: hidden;
   padding-right: 50px;
@@ -9,18 +9,17 @@
 
 .navbar__logo {
   margin: auto;
+  display: flex;
+  align-items: center;
 }
 
 svg-icon.navbar__logo-icon {
-  float: left;
-  width: 150px;
-  height: 50px;
-  padding: 4px 10px 0 0;
-  position: initial;
+  width: 130px;
+  padding-right: 10px;
+  position: unset;
 }
 
 .navbar__title {
-  padding-top: 9px;
   color: white;
   font-size: 1.25rem;
   @media only screen and (max-width: 700px) {

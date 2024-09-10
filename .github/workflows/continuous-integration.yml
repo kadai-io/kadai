@@ -406,7 +406,7 @@ jobs:
         run: |
           ci/change_version.sh -i -m .
           ci/update_kadai_dependency_for_wildfly.sh -i
-          ci/commitPoms.sh rest/kadai-rest-spring-example-wildfly/src/test/java/pro/kadai/example/wildfly/AbstractAccTest.java
+          ci/commitPoms.sh rest/kadai-rest-spring-example-wildfly/src/test/java/io/kadai/example/wildfly/AbstractAccTest.java
         env:
           GH_EMAIL: ${{ secrets.GH_EMAIL }}
           GH_USERNAME: ${{ secrets.GH_USERNAME }}

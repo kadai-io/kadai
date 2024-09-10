@@ -1,5 +1,5 @@
-body,html{
-    height:100%;
+body, html {
+    height: 100%;
 }
 
 h1 {
@@ -15,7 +15,7 @@ body:before {
     content: ' ';
 }
 
-.logo{
+.logo {
     margin-top: 20px;
     width: 100px;
     height: 100px;
@@ -23,6 +23,18 @@ body:before {
 
 div > form {
     margin-top: 150px;
+}
+
+/*Override btn-info properties from bootstrap.css*/
+.btn-info {
+    background-color: #5fbca1;
+    border-color: #5fbca1;
+}
+
+/*Override btn-info properties from bootstrap.css*/
+.btn-info:hover {
+    background-color: #5d9e90;
+    border-color: #5d9e90
 }
 
 @media screen and (max-width: 768px) {
