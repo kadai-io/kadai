@@ -458,7 +458,7 @@ jobs:
       - name: Deploy to Microsoft Azure
         uses: Azure/webapps-deploy@v2
         with:
-          app-name: kadaiio
+          app-name: kadai-io
           package: rest/kadai-rest-spring-example-boot/target/kadai-rest-spring-example-boot.jar
       - name: Wait for Azure for 60 seconds
         uses: jakejarvis/wait-action@master

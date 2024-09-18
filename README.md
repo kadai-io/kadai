@@ -14,7 +14,7 @@ KADAI adds workbaskets and classifications to control and monitor a large amount
 a larger organization.
 
 * Web Site: http://kadai.io/
-* Demo Environment: https://kadaiio.azurewebsites.net/kadai
+* Demo Environment: https://kadai-io.azurewebsites.net/kadai
 * Issue Tracker: https://github.com/kadai-io/kadai/issues
 * License: Apache License, Version 2.0  https://www.apache.org/licenses/LICENSE-2.0
 
