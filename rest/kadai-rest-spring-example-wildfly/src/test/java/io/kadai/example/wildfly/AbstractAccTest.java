@@ -41,7 +41,7 @@ import org.springframework.http.ResponseEntity;
 @KadaiSpringBootTest
 public class AbstractAccTest {
 
-  protected static final String DEPENDENCY_VERSION = "8.3.5-SNAPSHOT";
+  protected static final String DEPENDENCY_VERSION = "9.0.0-SNAPSHOT";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAccTest.class);
 
