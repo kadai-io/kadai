@@ -21,6 +21,7 @@ import { Observable, of } from 'rxjs';
 import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-filter-parameter';
 import { ClearTaskFilter, ClearWorkbasketFilter, SetTaskFilter, SetWorkbasketFilter } from './filter.actions';
 import { TaskQueryFilterParameter } from '../../models/task-query-filter-parameter';
+import { isEqual } from 'lodash';
 
 const emptyWorkbasketFilter: WorkbasketQueryFilterParameter = {
   'description-like': [],
@@ -81,7 +82,8 @@ export class FilterState implements NgxsOnInit {
       filter[key] = [...param[key]];
     });
 
-    const isWildcardSearch = filter['wildcard-search-value'].length !== 0 && filter['wildcard-search-value'] !== [''];
+    const isWildcardSearch =
+      filter['wildcard-search-value'].length !== 0 && !isEqual(filter['wildcard-search-value'], ['']);
     filter['wildcard-search-fields'] = isWildcardSearch ? this.initWildcardFields() : [];
 
     // Delete wildcard search field 'NAME' if 'name-like' exists

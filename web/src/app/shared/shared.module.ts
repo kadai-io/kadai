@@ -39,7 +39,6 @@ import { IconTypeComponent } from 'app/administration/components/type-icon/icon-
 import { FieldErrorDisplayComponent } from 'app/shared/components/field-error-display/field-error-display.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
-import { MatRadioModule } from '@angular/material/radio';
 import { SortComponent } from './components/sort/sort.component';
 import { PaginationComponent } from './components/pagination/pagination.component';
 import { ProgressSpinnerComponent } from './components/progress-spinner/progress-spinner.component';
@@ -130,7 +129,6 @@ const DECLARATIONS = [
   declarations: [DECLARATIONS],
   imports: [
     MODULES,
-    MatRadioModule,
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,

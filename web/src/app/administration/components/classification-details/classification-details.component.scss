@@ -16,7 +16,7 @@
  *
  */
 
-@import 'src/theme/_colors.scss';
+@import 'colors';
 
 .classification-details {
   height: calc(100vh - 100px);
@@ -94,6 +94,10 @@
 
   &__red-button {
     color: $invalid;
+  }
+
+  &__mat-icon {
+    margin-left: 8px;
   }
 }
 

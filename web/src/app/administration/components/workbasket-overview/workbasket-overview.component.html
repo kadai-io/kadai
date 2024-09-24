@@ -19,18 +19,22 @@
 <div class="workbasket-overview">
 
   <div #workbasketList class="workbasket-overview__list">
-    <kadai-administration-workbasket-list [expanded]="expanded"></kadai-administration-workbasket-list>
+    <kadai-administration-workbasket-list
+        [expanded]="expanded"></kadai-administration-workbasket-list>
   </div>
 
   <div class="vertical-right-divider">
     <span #toggleButton (click)="toggleWidth()" class="workbasket-overview__toggle-view-button">
-      <mat-icon *ngIf="expanded" class="md-36">chevron_left</mat-icon>
-      <mat-icon *ngIf="!expanded" class="md-36">chevron_right</mat-icon>
+      <mat-icon *ngIf="expanded"
+                class="vertical-right-divider__mat-icon md-36">chevron_left</mat-icon>
+      <mat-icon *ngIf="!expanded"
+                class="vertical-right-divider__mat-icon md-36">chevron_right</mat-icon>
     </span>
   </div>
 
   <div *ngIf="showDetail; else showEmptyPage" class="workbasket-overview__details">
-    <kadai-administration-workbasket-details [expanded]="expanded"></kadai-administration-workbasket-details>
+    <kadai-administration-workbasket-details
+        [expanded]="expanded"></kadai-administration-workbasket-details>
   </div>
 
   <ng-template #showEmptyPage>

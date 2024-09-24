@@ -17,7 +17,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
+import { CanActivate, Router, UrlTree } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
 import { catchError, map } from 'rxjs/operators';
@@ -28,7 +28,7 @@ import { catchError, map } from 'rxjs/operators';
 export class TaskRoutingGuard implements CanActivate {
   constructor(private kadaiEngineService: KadaiEngineService, public router: Router) {}
 
-  canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean | UrlTree> {
+  canActivate(): Observable<boolean | UrlTree> {
     return this.kadaiEngineService.isCustomRoutingRulesEnabled().pipe(
       map((value) => {
         if (value) {

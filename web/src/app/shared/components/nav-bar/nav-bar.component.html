@@ -18,12 +18,14 @@
 
 <mat-toolbar class="navbar">
   <div class="navbar__button">
+    <!--navbar_button-toggle is probably useless, but there is a test which references the class...
+    Leaving it for the moment, because it does not do anything.-->
     <button (click)="toggleSidenav()" class="navbar_button-toggle" mat-icon-button>
       <mat-icon>menu</mat-icon>
     </button>
   </div>
   <div class="navbar__logo">
     <svg-icon class="navbar__logo-icon" src="./assets/icons/logo.svg"></svg-icon>
-    <div class="navbar__title">{{title}}</div>
+    <div class="navbar__title">{{ title }}</div>
   </div>
 </mat-toolbar>

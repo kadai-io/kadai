@@ -21,22 +21,25 @@
   <div class="workbasket-list-toolbar__action-toolbar">
 
     <!-- ACTION BUTTONS -->
-    <button (click)="addWorkbasket()" class="workbasket-list-toolbar__add-button mr-1" mat-flat-button
+    <button (click)="addWorkbasket()" class="workbasket-list-toolbar__add-button mr-1"
+            mat-flat-button
             matTooltip="Create new workbasket">
       Add
       <mat-icon class="md-20">add</mat-icon>
     </button>
 
     <!-- IMPORT EXPORT -->
-    <kadai-administration-import-export *ngIf="workbasketListExpanded" [currentSelection]="selectionToImport"
+    <kadai-administration-import-export *ngIf="workbasketListExpanded"
+                                        [currentSelection]="selectionToImport"
                                         [parentComponent]="'workbaskets'"></kadai-administration-import-export>
 
     <span class="workbasket-details__spacer" style="flex: 1 1 auto"> </span>
 
     <!-- SORTING -->
     <kadai-shared-sort
-      (performSorting)="sorting($event)" [defaultSortBy]="workbasketDefaultSortBy" [sortingFields]="sortingFields"
-      style="margin-right: 4px;">
+        (performSorting)="sorting($event)" [defaultSortBy]="workbasketDefaultSortBy"
+        [sortingFields]="sortingFields"
+        style="margin-right: 4px;">
     </kadai-shared-sort>
 
   </div>
@@ -45,8 +48,8 @@
   <div class="workbasket-list-toolbar__filter">
     <button (click)="onClickFilter()" class="filter__filter-button" mat-stroked-button
             matTooltip="Display more filter options">
-      <mat-icon *ngIf="!isExpanded">keyboard_arrow_down</mat-icon>
-      <mat-icon *ngIf="isExpanded">keyboard_arrow_up</mat-icon>
+      <mat-icon *ngIf="!isExpanded" class="filter__mat-icon">keyboard_arrow_down</mat-icon>
+      <mat-icon *ngIf="isExpanded" class="filter__mat-icon">keyboard_arrow_up</mat-icon>
     </button>
 
     <div class="filter__filter-component-wrapper">

@@ -112,10 +112,19 @@ describe('ClassificationListComponent', () => {
         InputStub
       ],
       providers: [
-        { provide: ClassificationsService, useValue: classificationServiceSpy },
-        { provide: ClassificationCategoriesService, useValue: classificationCategoriesServiceSpy },
+        {
+          provide: ClassificationsService,
+          useValue: classificationServiceSpy
+        },
+        {
+          provide: ClassificationCategoriesService,
+          useValue: classificationCategoriesServiceSpy
+        },
         { provide: DomainService, useValue: domainServiceSpy },
-        { provide: ImportExportService, useValue: importExportServiceSpy },
+        {
+          provide: ImportExportService,
+          useValue: importExportServiceSpy
+        },
         { provide: RequestInProgressService, useValue: requestInProgressServiceSpy }
       ]
     }).compileComponents();
@@ -168,7 +177,7 @@ describe('ClassificationListComponent', () => {
   it('should display filter button', () => {
     const button = debugElement.nativeElement.querySelector('.classification-list__filter-button');
     expect(button).toBeTruthy();
-    expect(button.textContent).toBe('filter_list');
+    expect(button.textContent.trim()).toBe('filter_list');
   });
 
   it('should change selectedCategory property when button is clicked', () => {

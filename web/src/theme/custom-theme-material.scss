@@ -17,6 +17,8 @@
  */
 
 @use '@angular/material' as mat;
+
+@include mat.all-component-typographies();
 @include mat.core();
 
 $my-app-primary: mat.define-palette(mat.$blue-grey-palette);

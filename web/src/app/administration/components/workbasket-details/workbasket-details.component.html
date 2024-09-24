@@ -22,7 +22,7 @@
     <!-- TITLE -->
     <h4 class="workbasket-details__title">
       <span class="workbasket-details__title-name"
-            matTooltip="{{workbasket.name}}">{{workbasket.name}}</span>
+            matTooltip="{{workbasket.name}}">{{ workbasket.name }}</span>
       <span class="workbasket-details__title-badge"
             matTooltip="{{ badgeMessage$ | async }}"> {{ badgeMessage$ | async }}</span>
     </h4>
@@ -46,7 +46,7 @@
     <button [matMenuTriggerFor]="buttonMenu" class="action-toolbar__button"
             id="action-toolbar__more-buttons" mat-stroked-button
             matTooltip="More actions">
-      <mat-icon>more_vert</mat-icon>
+      <mat-icon class="workbasket-details__mat-icon">more_vert</mat-icon>
     </button>
 
     <mat-menu #buttonMenu="matMenu">
@@ -84,7 +84,7 @@
   <!-- TABS -->
   <mat-tab-group (selectedIndexChange)="selectComponent($event)"
                  [selectedIndex]="selectedTab$ | async"
-                 animationDuration="0ms">
+                 animationDuration="0ms" mat-stretch-tabs="false">
     <mat-tab label="Information">
       <kadai-administration-workbasket-information [action]="action" [workbasket]="workbasket">
       </kadai-administration-workbasket-information>

@@ -16,7 +16,7 @@
  *
  */
 
-@import '../../../../theme/colors';
+@import 'colors';
 
 :host {
   flex-grow: 1;
@@ -95,21 +95,8 @@
   &__tab-wrapper {
     padding: 12px;
   }
-}
 
-::ng-deep .mat-tab-body-wrapper {
-  height: 100%;
-  max-height: calc(100vh - 182px);
-}
-
-::ng-deep
-  .task-details__tab-group-wrapper
-  > .mat-tab-group
-  > .mat-tab-header
-  > .mat-tab-label-container
-  > .mat-tab-list
-  > .mat-tab-labels
-  > .mat-tab-label {
-  min-width: 0 !important;
-  height: 36px !important;
+  &__mat-icon {
+    margin-left: 8px;
+  }
 }

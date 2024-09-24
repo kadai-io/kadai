@@ -16,10 +16,9 @@
  *
  */
 
-@import 'src/theme/_colors.scss';
+@import 'colors';
 
 .task-list-toolbar {
-  // padding: 4px 16px 16px 16px;
   padding: 0 0 16px 0;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 
@@ -46,27 +45,23 @@
   &__button--primary {
     background-color: $aquamarine;
     color: white;
-    height: 36px;
     margin-right: 4px;
   }
 
   &__button--secondary {
-    height: 36px;
     top: 12px;
     color: #555;
   }
+
+  &__mat-icon {
+    margin-left: 8px;
+  }
 }
 
-::ng-deep
-  .task-list-toolbar
-  > .mat-tab-group
-  > .mat-tab-header
-  > .mat-tab-label-container
-  > .mat-tab-list
-  > .mat-tab-labels {
+::ng-deep .task-list-toolbar * .mat-mdc-tab-labels {
   background-color: $light-grey;
 }
 
-::ng-deep .task-list-toolbar__filter-input .mat-form-field-wrapper {
+::ng-deep .task-list-toolbar__filter-input .mat-mdc-text-field-wrapper {
   width: 240px;
 }

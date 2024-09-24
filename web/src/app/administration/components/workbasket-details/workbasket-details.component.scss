@@ -16,7 +16,7 @@
  *
  */
 
-@import 'src/theme/_colors.scss';
+@import 'colors';
 
 .workbasket-details {
   &__toolbar {
@@ -66,5 +66,9 @@
 
   &__button-red {
     color: $invalid;
+  }
+
+  &__mat-icon {
+    margin-left: 8px;
   }
 }

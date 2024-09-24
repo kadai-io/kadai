@@ -16,7 +16,8 @@
  *
  */
 
-@import 'src/theme/_colors.scss';
+@import 'colors';
+
 .distribution-targets-list {
   &__header {
     text-overflow: ellipsis;
@@ -26,6 +27,7 @@
       max-width: 100px;
     }
   }
+
   &__action-button {
     margin-left: 0.5rem;
   }
@@ -42,6 +44,7 @@
       min-height: 83px;
     }
   }
+
   &__list--with-filter {
     min-width: 100%;
     background-color: white;
@@ -54,16 +57,20 @@
       min-height: 83px;
     }
   }
+
   &__item-wrapper {
     display: flex;
   }
+
   &__item-icon {
     padding: 32px 24px 24px 8px;
   }
+
   &__item-info {
     display: block;
     padding: 8px 0;
   }
+
   &__empty-list {
     height: calc(100vh - 360px);
     border-radius: 10px;
@@ -84,15 +91,18 @@
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
   }
+
+  &__mat-icon {
+    margin-left: 8px;
+  }
 }
 
-.mat-list-item {
+::ng-deep .distribution-targets-list * .cdk-virtual-scroll-content-wrapper {
+  width: 100%;
+}
+
+.mat-mdc-list-item {
   height: 90px !important;
-}
-
-.mat-list-single-selected-option {
-  background-color: $green !important;
-  color: white;
 }
 
 p {

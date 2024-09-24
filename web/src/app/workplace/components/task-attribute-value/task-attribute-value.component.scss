@@ -16,7 +16,7 @@
  *
  */
 
-@import 'src/theme/_colors.scss';
+@import 'colors';
 
 .task-attribute-value {
   line-height: 1.5;
@@ -25,11 +25,6 @@
     background-color: $aquamarine;
     color: white;
     margin-top: 16px;
-  }
-
-  &__button--secondary {
-    min-width: 16px;
-    left: 8px;
   }
 
   &__table {
@@ -46,22 +41,18 @@
   &__row {
     display: flex;
     flex-direction: row;
-    flex-wrap: nowrap;
-    padding: 8px 0;
   }
 
   &__column--button {
-    width: 60px;
     display: flex;
     align-items: center;
+    padding: 0 4px 0 8px;
   }
 
   &__column--inputs {
+    display: flex;
     flex-grow: 1;
-  }
-
-  &__spacer {
-    width: 8px;
+    padding: 22px 4px 0 4px;
   }
 
   &__background-grey {
@@ -71,18 +62,8 @@
   &__background-white {
     background-color: white;
   }
-}
 
-::ng-deep .mat-form-field-wrapper {
-  padding: 0;
-}
-
-::ng-deep
-  .task-attribute-value__column--inputs
-  > .mat-form-field-appearance-outline
-  > div.mat-form-field-wrapper
-  > div.mat-form-field-flex
-  > div.mat-form-field-infix {
-  border-top-width: 0;
-  height: 40px;
+  &__mat-icon {
+    margin-left: 8px;
+  }
 }

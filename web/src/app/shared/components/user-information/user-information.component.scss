@@ -16,16 +16,21 @@
  *
  */
 
-@import '../../../../theme/variables';
+@import 'variables';
 
 .big {
   width: 64px;
   height: 64px;
 }
 
+:host ::ng-deep .user-info > .mat-mdc-button {
+  color: white;
+}
+
 .user-info {
   margin-top: 85px;
   color: white;
+
   > span {
     margin: 0 15px 0 15px;
     font-size: 20px;
@@ -82,11 +87,13 @@
 button.transparent {
   border: none;
   background-color: transparent;
+
   &:hover {
     border: none;
     background-color: transparent;
     color: #22a39f;
   }
+
   &:focus {
     border: none;
     background-color: transparent;
@@ -95,7 +102,7 @@ button.transparent {
   }
 }
 
-.mat-button {
+.mat-mdc-button {
   border: none;
   outline: none;
   left: 28%;

@@ -23,10 +23,7 @@
 
     <!-- HEADER -->
     <div class="task-attribute-value__row">
-      <div style="width: 60px"></div>
-      <div class="task-attribute-value__spacer"></div>
       <div class="task-attribute-value__header"> Attribute</div>
-      <div class="task-attribute-value__spacer"></div>
       <div class="task-attribute-value__header"> Value</div>
     </div>
 
@@ -36,33 +33,29 @@
     <div *ngFor="let entry of attributes; let i = index">
 
       <div
-        class="task-attribute-value__row {{(i % 2 === 0)? 'task-attribute-value__background-grey' : 'task-attribute-value__background-white'}}">
+          class="task-attribute-value__row {{(i % 2 === 0)? 'task-attribute-value__background-grey' : 'task-attribute-value__background-white'}}">
 
         <!-- REMOVE BUTTON -->
         <div class="task-attribute-value__column--button">
-          <button (click)="removeAttribute(i)" class="task-attribute-value__button--secondary" color="warn"
+          <button (click)="removeAttribute(i)" color="warn"
                   mat-stroked-button
                   matTooltip="Remove attribute">
-            <mat-icon>clear</mat-icon>
+            <mat-icon class="task-attribute-value__mat-icon">clear</mat-icon>
           </button>
         </div>
 
-        <div class="task-attribute-value__spacer"></div>
-        <div class="task-attribute-value__spacer"></div>
-
         <!-- ATTRIBUTE INPUT -->
         <div class="task-attribute-value__column--inputs">
-          <mat-form-field appearance="outline" style="width: 98%">
-            <input [(ngModel)]="entry.key" matInput name="{{callbackInfo ? 'callback-info' : 'custom-attribute'}}-{{i}}"
+          <mat-form-field appearance="outline" style="width: 100%">
+            <input [(ngModel)]="entry.key" matInput
+                   name="{{callbackInfo ? 'callback-info' : 'custom-attribute'}}-{{i}}"
                    type="text">
           </mat-form-field>
         </div>
 
-        <div class="task-attribute-value__spacer"></div>
-
         <!-- VALUE INPUT -->
         <div class="task-attribute-value__column--inputs">
-          <mat-form-field appearance="outline" style="width: 98%">
+          <mat-form-field appearance="outline" style="width: 100%">
             <input [(ngModel)]="entry.value" matInput
                    name="{{callbackInfo ? 'callback-info' : 'custom-attribute'}}-{{i}}-val"
                    type="text">
@@ -78,14 +71,15 @@
 
   <!-- NO CUSTOM ATTRIBUTE OR CALLBACK INFORMATION -->
   <ng-template #noAttributes>
-    <div> There is currently no {{ callbackInfo ? 'callback information' : 'custom attribute'}}.</div>
+    <div> There is currently no {{ callbackInfo ? 'callback information' : 'custom attribute' }}.
+    </div>
   </ng-template>
 
 
   <!-- ADD BUTTON -->
   <button (click)="addAttribute()" class="task-attribute-value__button--primary"
           mat-flat-button>
-    <span> Add {{ callbackInfo ? 'callback information' : 'custom attribute'}} </span>
+    <span> Add {{ callbackInfo ? 'callback information' : 'custom attribute' }} </span>
     <mat-icon>add</mat-icon>
   </button>
 

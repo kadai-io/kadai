@@ -508,16 +508,19 @@ li.list-group-item:hover {
 .node-content-wrapper {
   margin: 0 18px !important;
 }
+
 /* our header has a z-index of 1031 and the default z-index of the
  mat-dialog is just 1000 which leads to undesirable overlap*/
 .cdk-overlay-container {
   z-index: 1337;
 }
-.mat-menu-content {
+
+.mat-mdc-menu-content {
   padding-top: 0 !important;
   padding-bottom: 0 !important;
 }
-.mat-select-value-text {
+
+.mat-mdc-select-value-text {
   color: #4a5568 !important;
 }
 

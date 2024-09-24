@@ -38,26 +38,19 @@ import { takeUntil } from 'rxjs/operators';
   styleUrls: ['./pagination.component.scss']
 })
 export class PaginationComponent implements OnInit, OnChanges {
-  @Input()
-  page: Page;
+  @Input() page: Page;
 
-  @Input()
-  type: String;
+  @Input() type: String;
 
-  @Input()
-  numberOfItems: number;
+  @Input() numberOfItems: number;
 
-  @Input()
-  expanded: boolean = true;
+  @Input() expanded: boolean = true;
 
-  @Input()
-  resetPaging: Observable<null>;
+  @Input() resetPaging: Observable<null>;
 
-  @Output()
-  changePage = new EventEmitter<number>();
+  @Output() changePage = new EventEmitter<number>();
 
-  @ViewChild(MatPaginator, { static: true })
-  paginator: MatPaginator;
+  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
 
   @ViewChild('pagination') paginationWrapper: ElementRef;
 
@@ -74,8 +67,8 @@ export class PaginationComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    const rangeLabel = this.paginationWrapper?.nativeElement?.querySelector('.mat-paginator-range-label');
-    const container = this.paginationWrapper?.nativeElement?.querySelector('.mat-paginator-container');
+    const rangeLabel = this.paginationWrapper?.nativeElement?.querySelector('.mat-mdc-paginator-range-label');
+    const container = this.paginationWrapper?.nativeElement?.querySelector('.mat-mdc-paginator-container');
     if (rangeLabel && container) {
       if (!this.expanded) {
         container.style.justifyContent = 'center';
@@ -148,10 +141,5 @@ export class PaginationComponent implements OnInit, OnChanges {
     const input = document.getElementById('inputTypeAhead') as HTMLInputElement;
     input.focus();
     input.select();
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

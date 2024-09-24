@@ -16,7 +16,7 @@
  *
  */
 
-@import 'src/theme/_colors.scss';
+@import 'colors';
 
 .workbasket-list {
   height: calc(100vh - 156px);
@@ -67,12 +67,15 @@ p {
   max-height: 20px;
 }
 
-.mat-list-item {
+.mat-mdc-list-item {
   height: 90px !important;
   overflow: hidden;
 }
 
-.mat-list-single-selected-option {
+.mdc-list-item--selected {
   background-color: $green !important;
+}
+
+.mdc-list-item--selected * .workbasket-list__list-item--info {
   color: white;
 }
