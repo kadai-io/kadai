@@ -27,9 +27,10 @@
   </section>
 
   <!-- WORKBASKET LIST -->
-  <div *ngIf="((workbasketsSummary$ | async) && (workbasketsSummary$ | async)?.length > 0) else empty_workbaskets"
-       class="workbasket-list__list-items">
-    <mat-selection-list #workbasket [multiple]="false">
+  <div
+      *ngIf="((workbasketsSummary$ | async) && (workbasketsSummary$ | async)?.length > 0) else empty_workbaskets"
+      class="workbasket-list__list-items">
+    <mat-selection-list #workbasket [multiple]="false" hideSingleSelectionIndicator="true">
       <mat-list-option (click)="selectWorkbasket(workbasket.workbasketId)"
                        *ngFor="let workbasket of (workbasketsSummary$ | async);"
                        [selected]="workbasket.workbasketId == selectedId"
@@ -41,7 +42,8 @@
 
           <!-- ICON -->
           <div *ngIf="expanded" class="workbasket-list__list-item--icon">
-            <kadai-administration-icon-type [selected]="workbasket.workbasketId === selectedId" [type]="workbasket.type"
+            <kadai-administration-icon-type [selected]="workbasket.workbasketId === selectedId"
+                                            [type]="workbasket.type"
                                             size="large"
                                             tooltip="true"></kadai-administration-icon-type>
           </div>
@@ -50,15 +52,16 @@
           <div class="workbasket-list__list-item--info">
 
             <div class="workbasket-list__list-item--wrap">
-              <b>{{workbasket.name}}</b>, <i>{{workbasket.key}}</i>
+              <b>{{ workbasket.name }}</b>, <i>{{ workbasket.key }}</i>
             </div>
-            <p class="workbasket-list__list-item--no-wrap">{{workbasket.description}}</p>
-            <p class="workbasket-list__list-item--no-wrap">{{workbasket.owner}}</p>
+            <p class="workbasket-list__list-item--no-wrap">{{ workbasket.description }}</p>
+            <p class="workbasket-list__list-item--no-wrap">{{ workbasket.owner }}</p>
 
             <div *ngIf="workbasket.markedForDeletion" class="workbasket-list__list-item--marked">
-              <span class="material-icons md-20 {{workbasket.workbasketId === selectedId ? 'white': 'red' }} "
-                    data-toggle="tooltip"
-                    title="Marked for deletion">error</span>
+              <span
+                  class="material-icons md-20 {{workbasket.workbasketId === selectedId ? 'white': 'red' }} "
+                  data-toggle="tooltip"
+                  title="Marked for deletion">error</span>
             </div>
 
           </div>
@@ -82,10 +85,10 @@
 <!-- PAGINATION -->
 
 <kadai-shared-pagination
-  (changePage)="changePage($event)"
-  [expanded]="expanded"
-  [numberOfItems]="(workbasketsSummary$ | async)?.length"
-  [page]="(workbasketsSummaryRepresentation$ | async) ? (workbasketsSummaryRepresentation$ | async)?.page : (workbasketsSummaryRepresentation$ | async)"
-  [resetPaging]="resetPagingSubject.asObservable()"
-  [type]="type">
+    (changePage)="changePage($event)"
+    [expanded]="expanded"
+    [numberOfItems]="(workbasketsSummary$ | async)?.length"
+    [page]="(workbasketsSummaryRepresentation$ | async) ? (workbasketsSummaryRepresentation$ | async)?.page : (workbasketsSummaryRepresentation$ | async)"
+    [resetPaging]="resetPagingSubject.asObservable()"
+    [type]="type">
 </kadai-shared-pagination>

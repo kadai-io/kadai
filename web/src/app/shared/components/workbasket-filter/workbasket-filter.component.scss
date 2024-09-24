@@ -16,12 +16,11 @@
  *
  */
 
-@import 'src/theme/_colors.scss';
+@import 'colors';
 
 .filter {
   &__collapsed-filter {
     display: flex;
-    height: 36px;
   }
 
   &__expanded-filter {
@@ -36,9 +35,8 @@
   }
 
   &__collapsed-filter-input-field {
-    top: -10px;
     flex-grow: 1;
-    margin: 0 8px 0 8px;
+    margin: -10px 8px 0 8px;
   }
 
   &__undo-buttons {
@@ -61,5 +59,17 @@
     padding: 10px 0;
     display: flex;
     justify-content: space-between;
+  }
+
+  &__mat-icon {
+    margin-left: 8px;
+  }
+
+  &__input-field-left {
+    margin-right: 4px;
+  }
+
+  &__input-field-right {
+    margin-left: 4px;
   }
 }

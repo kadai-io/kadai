@@ -16,7 +16,7 @@
  *
  */
 
-@import 'src/theme/_colors.scss';
+@import 'colors';
 
 .task-filter {
   display: flex;
@@ -35,17 +35,16 @@
     top: 24px;
   }
 
-  .task-filter__row {
+  &__row {
     display: flex;
     flex-direction: row;
   }
 
   &__input-field--large {
-    width: 320px;
+    flex-grow: 1;
   }
 
   &__input-field--small {
-    flex-grow: 1;
     min-width: 140px;
   }
 }

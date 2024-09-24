@@ -18,17 +18,19 @@
 
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h4 *ngIf="metaInformation">{{getTitle()}} ({{metaInformation?.date | germanTimeFormat}})</h4>
+    <h4 *ngIf="metaInformation">{{ getTitle() }} ({{ metaInformation?.date | germanTimeFormat }}
+      )</h4>
   </div>
-  <mat-tab-group (selectedIndexChange)="selectComponent($event)" animationDuration="0ms" class="panel-body">
+  <mat-tab-group (selectedIndexChange)="selectComponent($event)" animationDuration="0ms"
+                 class="panel-body" mat-stretch-tabs="false">
     <mat-tab label="Due Date">
       <kadai-monitor-workbasket-report-due-date
-        (metaInformation)="getMetaInformation($event)">
+          (metaInformation)="getMetaInformation($event)">
       </kadai-monitor-workbasket-report-due-date>
     </mat-tab>
     <mat-tab label="Planned Date">
       <kadai-monitor-workbasket-report-planned-date
-        (metaInformation)="getMetaInformation($event)">
+          (metaInformation)="getMetaInformation($event)">
       </kadai-monitor-workbasket-report-planned-date>
     </mat-tab>
   </mat-tab-group>

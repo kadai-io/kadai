@@ -16,19 +16,32 @@
  *
  */
 
-@import '../../../../theme/variables';
+@import 'variables';
 
 .navbar {
   background-color: $aquamarine;
   max-height: 52px;
   overflow-x: hidden;
   padding-right: 50px;
-}
 
-.navbar__logo {
-  margin: auto;
-  display: flex;
-  align-items: center;
+  &__logo {
+    margin: auto;
+    display: flex;
+    align-items: center;
+  }
+
+  &__title {
+    color: white;
+    font-size: 1.25rem;
+    @media only screen and (max-width: 700px) {
+      display: none;
+    }
+  }
+
+  &__button > .mdc-icon-button {
+    // Workaround to center the icon...
+    font-size: 13px;
+  }
 }
 
 svg-icon.navbar__logo-icon {
@@ -37,15 +50,7 @@ svg-icon.navbar__logo-icon {
   position: unset;
 }
 
-.navbar__title {
-  color: white;
-  font-size: 1.25rem;
-  @media only screen and (max-width: 700px) {
-    display: none;
-  }
-}
-
-.mat-icon-button {
+.mat-mdc-icon-button {
   outline: none;
 }
 

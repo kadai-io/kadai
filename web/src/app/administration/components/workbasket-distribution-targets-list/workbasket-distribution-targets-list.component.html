@@ -18,7 +18,7 @@
 
 <div class="distribution-targets-list">
   <mat-toolbar>
-    <span class="distribution-targets-list__header" matTooltip="{{header}}">{{header}}</span>
+    <span class="distribution-targets-list__header" matTooltip="{{header}}">{{ header }}</span>
 
     <!-- FILTER BUTTON -->
     <button (click)="changeToolbarState(!toolbarState)"
@@ -39,9 +39,11 @@
     <!-- SELECT ALL BUTTON -->
     <button (click)="selectAll(!allSelected);" class="distribution-targets-list__action-button"
             mat-flat-button>
-      <mat-icon *ngIf="allSelected" class="button-icon" matTooltip="Deselect all items">check_box
+      <mat-icon *ngIf="allSelected" class="distribution-targets-list__mat-icon button-icon"
+                matTooltip="Deselect all items">check_box
       </mat-icon>
-      <mat-icon *ngIf="!allSelected" class="button-icon" matTooltip="Select all items">
+      <mat-icon *ngIf="!allSelected" class=" distribution-targets-list__mat-icon button-icon"
+                matTooltip="Select all items">
         check_box_outline_blank
       </mat-icon>
     </button>
@@ -73,11 +75,11 @@
                                  class="{{toolbarState?  'distribution-targets-list__list--with-filter' : 'distribution-targets-list__list--no-filter'}}"
                                  itemSize="90">
       <mat-list-option
-        (click)="updateSelectAll(!workbasket.selected) && (workbasket.selected = !workbasket.selected)"
-        *cdkVirtualFor="let workbasket of distributionTargets| orderBy: ['name']; templateCacheSize: 0"
-        [selected]="workbasket.selected"
-        [value]="workbasket.workbasketId"
-        class="workbasket-distribution-targets__workbaskets-item">
+          (click)="updateSelectAll(!workbasket.selected) && (workbasket.selected = !workbasket.selected)"
+          *cdkVirtualFor="let workbasket of distributionTargets| orderBy: ['name']; templateCacheSize: 0"
+          [selected]="workbasket.selected"
+          [value]="workbasket.workbasketId"
+          class="workbasket-distribution-targets__workbaskets-item">
 
         <div class="distribution-targets-list__item-wrapper">
 
@@ -90,18 +92,18 @@
           <!-- INFO -->
           <div class="distribution-targets-list__item-info">
             <div class="distribution-targets-list__item--no-wrap">
-              <b>{{workbasket.name}}</b>, <i>{{workbasket.key}}</i>
+              <b>{{ workbasket.name }}</b>, <i>{{ workbasket.key }}</i>
             </div>
-            <p class="distribution-targets-list__item--no-wrap">{{workbasket.description}}</p>
-            <p class="distribution-targets-list__item--no-wrap">{{workbasket.owner}}</p>
+            <p class="distribution-targets-list__item--no-wrap">{{ workbasket.description }}</p>
+            <p class="distribution-targets-list__item--no-wrap">{{ workbasket.owner }}</p>
           </div>
 
           <!-- MARKED FOR DELETION -->
           <div *ngIf="workbasket.markedForDeletion" class="workbaskets-item__marked">
             <span
-              class="material-icons md-20 red "
-              matTooltip="Marked for deletion"
-              title="Marked for deletion">error</span>
+                class="material-icons md-20 red "
+                matTooltip="Marked for deletion"
+                title="Marked for deletion">error</span>
           </div>
         </div>
 

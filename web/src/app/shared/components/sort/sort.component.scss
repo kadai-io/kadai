@@ -16,18 +16,24 @@
  *
  */
 
-@import 'src/theme/_colors.scss';
+@import 'colors';
 
-.sort__selected-value {
-  color: $aquamarine;
-  font-weight: bold;
+.sort {
+  &__selected-value {
+    color: $aquamarine;
+    font-weight: bold;
+  }
+
+  &__button {
+    outline: none;
+    color: #555;
+  }
+
+  &__mat-icon {
+    margin-left: 8px;
+  }
 }
 
-.sort__button {
-  outline: none;
-  color: #555;
-}
-
-.mat-menu-item {
+.mat-mdc-menu-item {
   outline: none;
 }

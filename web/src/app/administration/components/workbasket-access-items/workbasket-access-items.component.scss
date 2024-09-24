@@ -16,7 +16,7 @@
  *
  */
 
-@import '../../../../theme/colors';
+@import 'colors';
 
 .workbasket-access-items {
   height: calc(100vh - 213px);
@@ -100,13 +100,13 @@
     color: white;
     border: none;
     background: $aquamarine;
-    margin: 10px 3px 0px 6px;
+    margin: 10px 3px 0 6px;
     outline: none;
   }
 
   &__buttons-delete-access {
     color: red;
-    margin: 2px 0px 0px 3px;
+    margin: 10px 3px 0 6px;
     outline: none;
   }
 
@@ -142,19 +142,13 @@
   color: red;
 }
 
-::ng-deep .workbasket-access-items__form .mat-form-field-wrapper {
-  padding-bottom: 0em;
-  height: 58px;
+::ng-deep .workbasket-access-items__typeahead .type-ahead__form-field .mat-mdc-form-field-infix {
+  padding-top: 24px;
+  padding-bottom: 0;
 }
 
-::ng-deep .workbasket-access-items__typeahead .type-ahead__form-field .mat-form-field-infix {
-  padding: 0 0 0 0;
-  position: initial;
-  font-size: medium;
-}
-
-::ng-deep .mat-form-field-appearance-outline .mat-form-field-flex {
-  margin-top: 0.7em;
+::ng-deep .workbasket-access-items__typeahead .type-ahead__form-field .mdc-notched-outline {
+  padding-top: 16px;
 }
 
 table {

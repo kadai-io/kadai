@@ -16,7 +16,7 @@
  *
  */
 
-@import 'src/theme/_colors.scss';
+@import 'colors';
 
 .task-list {
   &__task {
@@ -42,13 +42,16 @@ p {
   line-height: 1.5;
 }
 
-.mat-list-item {
+.mat-mdc-list-item {
   height: 90px !important;
   overflow: hidden;
 }
 
-.mat-list-single-selected-option {
+.mdc-list-item--selected {
   background-color: $green !important;
+}
+
+.mdc-list-item--selected * .task-list__task-info {
   color: white;
 }
 

@@ -18,7 +18,7 @@
 
 <!-- TASK LIST -->
 <div *ngIf="(tasks && tasks.length > 0); else empty_list">
-  <mat-selection-list [multiple]="false">
+  <mat-selection-list [multiple]="false" hideSingleSelectionIndicator="true">
     <mat-list-option (click)="selectTask(task.taskId)"
                      *ngFor="let task of tasks"
                      [selected]="task.taskId == selectedId"
@@ -29,14 +29,15 @@
         <!-- TASK PRIORITY -->
         <div class="task-list__task-priority-badge"
              matBadge="{{task.priority}}"
-             matBadgePosition="{{task.taskId == selectedId? 'above' : 'below'}}" matTooltip="Priority">
+             matBadgePosition="{{task.taskId == selectedId? 'above' : 'below'}}"
+             matTooltip="Priority">
         </div>
 
         <!-- TASK INFORMATION -->
         <div class="task-list__task-info">
-          <p><b>{{task.name}}</b>,&nbsp;<i *ngIf="task.owner">{{task.owner}} </i></p>
-          <p> State: {{task.state}} </p>
-          <p> Due: {{task.due | germanTimeFormat }} </p>
+          <p><b>{{ task.name }}</b>,&nbsp;<i *ngIf="task.owner">{{ task.owner }} </i></p>
+          <p> State: {{ task.state }} </p>
+          <p> Due: {{ task.due | germanTimeFormat }} </p>
         </div>
 
       </div>
@@ -52,6 +53,7 @@
 <ng-template #empty_list>
   <div class="container-no-items center-block" style="margin-top: 60px">
     <h3 class="grey">Select a Workbasket</h3>
-    <svg-icon class="img-responsive empty-icon workbasket-icon" src="./assets/icons/wb-empty.svg"></svg-icon>
+    <svg-icon class="img-responsive empty-icon workbasket-icon"
+              src="./assets/icons/wb-empty.svg"></svg-icon>
   </div>
 </ng-template>

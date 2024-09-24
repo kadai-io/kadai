@@ -28,7 +28,6 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { ClassificationTypesSelectorComponent } from 'app/administration/components/classification-types-selector/classification-types-selector.component';
 import { ClassificationCategoriesService } from 'app/shared/services/classification-categories/classification-categories.service';
 import { AccessItemsManagementComponent } from 'app/administration/components/access-items-management/access-items-management.component';
-import { MatRadioModule } from '@angular/material/radio';
 import { AdministrationRoutingModule } from './administration-routing.module';
 /**
  * Components
@@ -111,7 +110,6 @@ const DECLARATIONS = [
   declarations: DECLARATIONS,
   imports: [
     MODULES,
-    MatRadioModule,
     MatFormFieldModule,
     MatSelectModule,
     MatMenuModule,

@@ -50,7 +50,6 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatRadioModule } from '@angular/material/radio';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -94,7 +93,6 @@ const DECLARATIONS = [
     MatTooltipModule,
     MatIconModule,
     MatButtonModule,
-    MatRadioModule,
     MatMenuModule,
     MatSelectModule,
     MatDatepickerModule,

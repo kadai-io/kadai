@@ -26,13 +26,15 @@
   <div *ngIf="expanded" class="pagination__go-to">
     <div class="pagination__go-to-label">Page:</div>
     <mat-form-field>
-      <input (click)="onSelectText()" (focus)="filter(pageSelected)" (ngModelChange)="filter(pageSelected)"
+      <input (click)="onSelectText()" (focus)="filter(pageSelected)"
+             (ngModelChange)="filter(pageSelected)"
              [(ngModel)]="pageSelected" [matAutocomplete]="auto"
              id="inputTypeAhead"
              matInput name="accessId" type="text"/>
-      <mat-autocomplete #auto="matAutocomplete" #autoComplete (optionSelected)="goToPage($event.option.value)"
+      <mat-autocomplete #auto="matAutocomplete" (optionSelected)="goToPage($event.option.value)"
                         autoActiveFirstOption>
-        <mat-option *ngFor="let pageNumber of filteredPages" [value]="pageNumber">{{ pageNumber }}</mat-option>
+        <mat-option *ngFor="let pageNumber of filteredPages" [value]="pageNumber">{{ pageNumber }}
+        </mat-option>
       </mat-autocomplete>
     </mat-form-field>
   </div>

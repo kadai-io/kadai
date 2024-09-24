@@ -88,3 +88,8 @@
     width: 100%;
   }
 }
+
+::ng-deep .general__description-and-type > .mat-mdc-form-field {
+  display: unset;
+  flex-direction: unset;
+}

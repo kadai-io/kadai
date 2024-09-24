@@ -16,7 +16,7 @@
  *
  */
 
-@import '../../../../theme/colors';
+@import 'colors';
 
 .type-ahead {
   min-height: 0;
@@ -36,10 +36,6 @@
   &__error--accessId {
     white-space: nowrap;
     padding-top: 8px;
-  }
-
-  ::ng-deep &--small > .mat-form-field-appearance-outline div.mat-form-field-infix {
-    padding: 0.25em;
   }
 }
 

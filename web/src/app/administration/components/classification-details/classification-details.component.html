@@ -18,20 +18,21 @@
 
 <div class="classification-details">
 
-  <div *ngIf="classification && !requestInProgress" class="classification-details-wrapper" id="classification-details">
+  <div *ngIf="classification && !requestInProgress" class="classification-details-wrapper"
+       id="classification-details">
 
     <!-- TITLE + ACTION BUTTONS -->
     <mat-toolbar class="action-toolbar">
       <h4 class="action-toolbar__headline">
         <span
-          class="{{isCreatingNewClassification? 'action-toolbar__title-badge' : 'action-toolbar__title'}}"
-          matTooltip="{{classification.name}}&nbsp; [{{classification.type}}]">
-          {{classification.name}}&nbsp; [{{classification.type}}]
+            class="{{isCreatingNewClassification? 'action-toolbar__title-badge' : 'action-toolbar__title'}}"
+            matTooltip="{{classification.name}}&nbsp; [{{classification.type}}]">
+          {{ classification.name }}&nbsp; [{{ classification.type }}]
         </span>
         <span
-          *ngIf="isCreatingNewClassification" class="action-toolbar__badge-message"
-          matTooltip="{{badgeMessage$ | async}}">
-          {{badgeMessage$ | async}}
+            *ngIf="isCreatingNewClassification" class="action-toolbar__badge-message"
+            matTooltip="{{badgeMessage$ | async}}">
+          {{ badgeMessage$ | async }}
         </span>
       </h4>
 
@@ -48,9 +49,10 @@
           <mat-icon class="action-toolbar__aquamarine-button md-20">restore</mat-icon>
         </button>
 
-        <button [matMenuTriggerFor]="buttonMenu" class="action-toolbar__button" id="action-toolbar__more-buttons"
+        <button [matMenuTriggerFor]="buttonMenu" class="action-toolbar__button"
+                id="action-toolbar__more-buttons"
                 mat-stroked-button matTooltip="More actions">
-          <mat-icon>more_vert</mat-icon>
+          <mat-icon class="action-toolbar__mat-icon">more_vert</mat-icon>
         </button>
 
         <mat-menu #buttonMenu="matMenu">
@@ -66,7 +68,8 @@
             <span>Delete</span>
           </button>
           <button (click)="onCloseClassification()" class="action-toolbar__dropdown" mat-menu-item
-                  matTooltip="Close this classification and discard all changes" style="border-bottom-style: none;">
+                  matTooltip="Close this classification and discard all changes"
+                  style="border-bottom-style: none;">
             <mat-icon>close</mat-icon>
             <span>Close</span>
           </button>
@@ -93,13 +96,14 @@
               <mat-form-field appearance="outline">
                 <mat-label>Key</mat-label>
                 <label for="classification-key"></label>
-                <input #key="ngModel" (input)="validateInputOverflow(key, 32)" [(ngModel)]="classification.key"
+                <input #key="ngModel" (input)="validateInputOverflow(key, 32)"
+                       [(ngModel)]="classification.key"
                        [disabled]="!isCreatingNewClassification" id="classification-key"
                        matInput
                        maxlength="32" name="classification.key" placeholder="Key"
                        required type="text">
               </mat-form-field>
-              <div *ngIf="inputOverflowMap.get(key.name)" class="error">{{lengthError}}</div>
+              <div *ngIf="inputOverflowMap.get(key.name)" class="error">{{ lengthError }}</div>
               <!-- <kadai-shared-field-error-display [displayError]="key.invalid && key.dirty"
               errorMessage="* Key is required">
               </kadai-shared-field-error-display> -->
@@ -108,13 +112,14 @@
               <mat-form-field appearance="outline">
                 <mat-label>Name</mat-label>
                 <label for="classification-name"></label>
-                <input #name="ngModel" (input)="validateInputOverflow(name, 255)" [(ngModel)]="classification.name"
+                <input #name="ngModel" (input)="validateInputOverflow(name, 255)"
+                       [(ngModel)]="classification.name"
                        id="classification-name" matInput
                        maxlength="255" name="classification.name"
                        placeholder="Name" required
                        type="text">
               </mat-form-field>
-              <div *ngIf="inputOverflowMap.get(name.name)" class="error">{{lengthError}}</div>
+              <div *ngIf="inputOverflowMap.get(name.name)" class="error">{{ lengthError }}</div>
               <!--
               <kadai-shared-field-error-display [displayError]="name.invalid && name.dirty"
                                                   errorMessage="* Name is required">
@@ -134,7 +139,8 @@
                           maxlength="255" name="classification.description"
                           placeholder="Description"></textarea>
               </mat-form-field>
-              <div *ngIf="inputOverflowMap.get(description.name)" class="error">{{lengthError}}</div>
+              <div *ngIf="inputOverflowMap.get(description.name)" class="error">{{ lengthError }}
+              </div>
             </div>
 
 
@@ -148,7 +154,8 @@
               <mat-form-field appearance="outline">
                 <mat-label>Domain</mat-label>
                 <label for="classification-domain"></label>
-                <input [(ngModel)]="classification.domain" disabled id="classification-domain" matInput
+                <input [(ngModel)]="classification.domain" disabled id="classification-domain"
+                       matInput
                        name="classification.domain" placeholder="Domain"
                        type="text">
               </mat-form-field>
@@ -156,8 +163,10 @@
               <div *ngIf="!masterDomainSelected()" class="detailed-fields__domain-checkbox">
                 Valid in Domain
                 <a (click)="validChanged()" title="Valid in Domain">
-                  <mat-icon class="detailed-fields__domain-checkbox-icon">{{classification.isValidInDomain ? 'check_box'
-                    : 'check_box_outline_blank'}}
+                  <mat-icon class="detailed-fields__domain-checkbox-icon">{{
+                      classification.isValidInDomain ? 'check_box'
+                          : 'check_box_outline_blank'
+                    }}
                   </mat-icon>
                 </a>
               </div>
@@ -170,13 +179,17 @@
                   <mat-form-field appearance="outline" style="width: 100%">
                     <mat-label> Service Level</mat-label>
                     <label for="classification-service-level"></label>
-                    <input #serviceLevel="ngModel" (input)="validateInputOverflow(serviceLevel, 255)"
-                           [(ngModel)]="classification.serviceLevel" id="classification-service-level"
+                    <input #serviceLevel="ngModel"
+                           (input)="validateInputOverflow(serviceLevel, 255)"
+                           [(ngModel)]="classification.serviceLevel"
+                           id="classification-service-level"
                            matInput maxlength="255"
                            name="classification.serviceLevel" placeholder="Service Level"
                            required type="text">
                   </mat-form-field>
-                  <div *ngIf="inputOverflowMap.get(serviceLevel.name)" class="error">{{lengthError}}</div>
+                  <div *ngIf="inputOverflowMap.get(serviceLevel.name)"
+                       class="error">{{ lengthError }}
+                  </div>
                 </div>
 
                 <!-- PRIORITY-->
@@ -184,14 +197,15 @@
                   <mat-form-field appearance="outline" style="width: 100%">
                     <mat-label>Priority</mat-label>
                     <label for="classification-priority"></label>
-                    <input [(ngModel)]="classification.priority" id="classification-priority" matInput
+                    <input [(ngModel)]="classification.priority" id="classification-priority"
+                           matInput
                            min="0" name="classification.priority" required type="number">
                   </mat-form-field>
 
                   <kadai-shared-field-error-display
-                    [displayError]="!isFieldValid('classification.priority')"
-                    [validationTrigger]="this.toggleValidationMap.get('classification.priority.name')"
-                    errorMessage="* Priority is required">
+                      [displayError]="!isFieldValid('classification.priority')"
+                      [validationTrigger]="this.toggleValidationMap.get('classification.priority.name')"
+                      errorMessage="* Priority is required">
                   </kadai-shared-field-error-display>
                 </div>
               </div>
@@ -205,10 +219,13 @@
                        id="classification-application-entry-point"
                        matInput
                        maxlength="255"
-                       name="classification.applicationEntryPoint" placeholder="Application entry point"
+                       name="classification.applicationEntryPoint"
+                       placeholder="Application entry point"
                        type="text">
               </mat-form-field>
-              <div *ngIf="inputOverflowMap.get(appEntryPoint.name)" class="error">{{lengthError}}</div>
+              <div *ngIf="inputOverflowMap.get(appEntryPoint.name)"
+                   class="error">{{ lengthError }}
+              </div>
 
               <!-- CATEGORY -->
               <mat-form-field appearance="outline">
@@ -216,15 +233,15 @@
                 <mat-select [(value)]="this.classification.category" required>
                   <mat-select-trigger>
                     <svg-icon
-                      [src]="(getCategoryIcon(this.classification.category) | async)?.left"
-                      class="detailed-fields__category-icon">
+                        [src]="(getCategoryIcon(this.classification.category) | async)?.left"
+                        class="detailed-fields__category-icon">
                     </svg-icon>
-                    {{this.classification.category}}
+                    {{ this.classification.category }}
                   </mat-select-trigger>
                   <mat-option *ngFor="let category of categories$ | async" value="{{category}}">
                     <svg-icon [src]="(getCategoryIcon(category) | async)?.left"
                               class="detailed-fields__category-icon"></svg-icon>
-                    {{category}}
+                    {{ category }}
                   </mat-option>
                 </mat-select>
               </mat-form-field>
@@ -240,7 +257,7 @@
             <ng-container *ngFor="let customField of (customFields$ | async), let i = index">
               <div *ngIf="customField.visible" class="detailed-fields__input-custom-field">
                 <mat-form-field appearance="outline" style="width: 100%">
-                  <mat-label>{{customField.field}}</mat-label>
+                  <mat-label>{{ customField.field }}</mat-label>
                   <label for="classification-custom-{{i + 1}}"></label>
                   <input #custom="ngModel" (input)="validateInputOverflow(custom, 255)"
                          [(ngModel)]="classification[getClassificationCustom(i + 1)]"
@@ -249,7 +266,7 @@
                          name="classification.custom{{i + 1}}" placeholder="{{customField.field}}"
                          type="text">
                 </mat-form-field>
-                <div *ngIf="inputOverflowMap.get(custom.name)" class="error">{{lengthError}}</div>
+                <div *ngIf="inputOverflowMap.get(custom.name)" class="error">{{ lengthError }}</div>
               </div>
             </ng-container>
           </div>

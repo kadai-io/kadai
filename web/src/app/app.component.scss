@@ -16,8 +16,8 @@
  *
  */
 
-@import '../theme/variables';
-@import 'src/theme/_colors.scss';
+@import 'variables';
+@import 'colors';
 
 .sidenav {
   position: absolute;
@@ -26,56 +26,61 @@
   left: 0;
   right: 0;
   margin-top: 0;
-}
 
-.sidenav__drawer {
-  position: absolute;
-  z-index: 999;
-  box-shadow: none;
-  width: 350px;
-  background-color: $dark-green;
+  &__drawer {
+    position: absolute;
+    z-index: 999;
+    box-shadow: none;
+    width: 350px;
+    background-color: $dark-green;
+
+    &__container {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      color: white;
+      margin-top: 5px;
+    }
+
+    &__container * .mdc-icon-button {
+      // Workaround to center the icon...
+      font-size: 13px;
+    }
+
+    &__container-menu {
+      margin-left: 15px;
+    }
+
+    &__container-logout {
+      text-align: end;
+      margin-right: 15px;
+    }
+  }
+
+  &__drawer-list-item {
+    margin-left: 30px;
+  }
+
+  &__drawer-version {
+    color: white;
+    position: absolute;
+    bottom: 5px;
+    left: 16px;
+    font-size: 12px;
+  }
+
+  &__drawer-user-info {
+    margin-top: 30px;
+    margin-bottom: 50px;
+    margin-left: -16px;
+  }
 }
 
 .mat-drawer-content {
   overflow: hidden !important;
 }
 
-.sidenav__drawer-list-item {
-  margin-left: 30px;
-}
-
-.sidenav__drawer__container {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  color: white;
-  margin-top: 5px;
-}
-
-.sidenav__drawer__container-menu {
-  margin-left: 15px;
-}
-
-.sidenav__drawer__container-logout {
-  text-align: end;
-  margin-right: 15px;
-}
-
-.sidenav__drawer-version {
-  color: white;
-  position: absolute;
-  bottom: 5px;
-  left: 16px;
-  font-size: 12px;
-}
-
-.sidenav__drawer-user-info {
-  margin-top: 30px;
-  margin-bottom: 50px;
-  margin-left: -16px;
-}
-
-.mat-icon-button {
+.mat-mdc-icon-button {
   outline: none;
 }
 
@@ -91,12 +96,4 @@
 
 ::ng-deep .mat-drawer {
   overflow-y: visible !important;
-}
-
-::ng-deep mat-tooltip-component {
-  word-break: break-word;
-}
-
-mat-progress-bar {
-  height: 3px;
 }

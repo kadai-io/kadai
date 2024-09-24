@@ -16,7 +16,7 @@
  *
  */
 
-@import '../../../../theme/colors';
+@import 'colors';
 
 .nav-bar {
   background-color: $light-grey;
@@ -24,12 +24,11 @@
   border: none;
 }
 
-.mat-tab-link {
+.mat-mdc-tab-link {
   color: #1a202c !important;
 }
 
-.mat-tab-label-active {
+.mdc-tab--active {
   font-weight: bolder !important;
-  color: unset;
   opacity: 1;
 }

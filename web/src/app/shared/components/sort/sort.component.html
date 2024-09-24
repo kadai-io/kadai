@@ -17,8 +17,9 @@
   -->
 
 <div class="sort">
-  <button [matMenuTriggerFor]="sortMenu" class="sort__button" mat-stroked-button matTooltip="Modify sorting order">
-    <mat-icon>sort</mat-icon>
+  <button [matMenuTriggerFor]="sortMenu" class="sort__button" mat-stroked-button
+          matTooltip="Modify sorting order">
+    <mat-icon class="sort__mat-icon">sort</mat-icon>
 
     <mat-menu #sortMenu="matMenu">
       <button [matMenuTriggerFor]="sortDirection" mat-menu-item>Sort direction</button>
@@ -54,23 +55,16 @@
 
     <!-- SORT VALUE -->
     <mat-menu #sortValue="matMenu">
-      <button (click)="changeSortBy(sortingField.key)" *ngFor="let sortingField of sortingFields | mapValues"
+      <button (click)="changeSortBy(sortingField.key)"
+              *ngFor="let sortingField of sortingFields | mapValues"
               mat-menu-item>
         <span class="{{sortingField.key === sort['sort-by']  ? 'sort__selected-value' : ''}}">
-          {{sortingField.value}}
+          {{ sortingField.value }}
         </span>
-        <ng-template #coloredValue>
-          <span>{{sortingField.value}}</span>
+        <ng-template>
+          <span>{{ sortingField.value }}</span>
         </ng-template>
       </button>
     </mat-menu>
   </button>
 </div>
-
-
-<!-- with radio buttons
-<mat-radio-group name="sort" class="radio-group">
-  <mat-radio-button *ngFor="let sortingField of sortingFields | mapValues"
-                    name="sort" [checked]="sortingField.key === defaultSortBy"
-                    (change)="changeSortBy(sortingField.key)" [value]="sortingField.value"> {{ sortingField.value }}</mat-radio-button>
-</mat-radio-group> -->

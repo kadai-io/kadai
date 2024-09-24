@@ -45,15 +45,11 @@
   }
 }
 
-.task-status-details .mat-form-field {
+.task-status-details .mat-mdc-form-field {
   margin-top: 0.7rem;
   flex-grow: 1;
 }
 
-.mat-input-element:disabled {
+.mat-mdc-input-element:disabled {
   color: gray;
-}
-
-::ng-deep .mat-form-field-outline {
-  color: lightgray !important;
 }
