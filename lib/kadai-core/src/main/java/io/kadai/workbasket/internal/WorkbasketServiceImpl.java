@@ -1028,15 +1028,25 @@ public class WorkbasketServiceImpl implements WorkbasketService {
                       + "- the WBID does not match. Target-WBID=''%s'' WorkbasketAccessItem=%s",
                   workbasketId, workbasketAccessItem));
         }
+
+        String accessId = wbAccessItemImpl.getAccessId();
+        if (accessId == null || accessId.isBlank()) {
+          throw new InvalidArgumentException(
+              String.format(
+                  "Checking the preconditions of the current WorkbasketAccessItem failed "
+                      + "- accessId is null or empty. WorkbasketAccessItem=%s, accessId=%s",
+                  workbasketAccessItem, accessId));
+        }
+
         if (wbAccessItemImpl.getId() == null || wbAccessItemImpl.getId().isEmpty()) {
           wbAccessItemImpl.setId(
               IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_AUTHORIZATION));
         }
-        if (ids.contains(wbAccessItemImpl.getAccessId())) {
+        if (ids.contains(accessId)) {
           throw new WorkbasketAccessItemAlreadyExistException(
-              wbAccessItemImpl.getAccessId(), wbAccessItemImpl.getWorkbasketId());
+              accessId, wbAccessItemImpl.getWorkbasketId());
         }
-        ids.add(wbAccessItemImpl.getAccessId());
+        ids.add(accessId);
         accessItems.add(wbAccessItemImpl);
       }
     }

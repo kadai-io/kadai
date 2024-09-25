@@ -62,14 +62,11 @@ import { ButtonAction } from '../../models/button-action';
   styleUrls: ['./workbasket-access-items.component.scss']
 })
 export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit, AfterViewChecked {
-  @Input()
-  workbasket: Workbasket;
+  @Input() workbasket: Workbasket;
 
-  @Input()
-  expanded: boolean;
+  @Input() expanded: boolean;
 
-  @ViewChildren('htmlInputElement')
-  inputs: QueryList<ElementRef>;
+  @ViewChildren('htmlInputElement') inputs: QueryList<ElementRef>;
 
   selectedRows: number[] = [];
   workbasketClone: Workbasket;
@@ -90,8 +87,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
   isAccessItemsTabSelected = false;
   destroy$ = new Subject<void>();
 
-  @Select(WorkbasketSelectors.selectedWorkbasket)
-  selectedWorkbasket$: Observable<Workbasket>;
+  @Select(WorkbasketSelectors.selectedWorkbasket) selectedWorkbasket$: Observable<Workbasket>;
 
   @Select(EngineConfigurationSelectors.accessItemsCustomisation)
   accessItemsCustomization$: Observable<AccessItemsCustomisation>;
@@ -99,11 +95,9 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
   @Select(WorkbasketSelectors.workbasketAccessItems)
   accessItemsRepresentation$: Observable<WorkbasketAccessItemsRepresentation>;
 
-  @Select(WorkbasketSelectors.buttonAction)
-  buttonAction$: Observable<ButtonAction>;
+  @Select(WorkbasketSelectors.buttonAction) buttonAction$: Observable<ButtonAction>;
 
-  @Select(WorkbasketSelectors.selectedComponent)
-  selectedComponent$: Observable<WorkbasketComponent>;
+  @Select(WorkbasketSelectors.selectedComponent) selectedComponent$: Observable<WorkbasketComponent>;
 
   constructor(
     private requestInProgressService: RequestInProgressService,
@@ -175,13 +169,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
       this.selectedWorkbasket$.pipe(take(1)).subscribe((workbasket) => {
         this.accessItemsRepresentation._links = { self: { href: workbasket._links.accessItems.href } };
         this.setWorkbasketIdForCopy(workbasket.workbasketId);
-        this.formsValidatorService
-          .validateFormAccess(this.accessItemsGroups, this.toggleValidationAccessIdMap)
-          .then((value) => {
-            if (value) {
-              this.onSave();
-            }
-          });
+        this.onSubmit();
       });
     });
 
@@ -314,13 +302,15 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
 
   onSubmit() {
     this.formsValidatorService.formSubmitAttempt = true;
-    this.formsValidatorService
+
+    const shouldSaveWorkbasket = this.formsValidatorService
       .validateFormAccess(this.accessItemsGroups, this.toggleValidationAccessIdMap)
-      .then((value) => {
-        if (value) {
-          this.onSave();
-        }
-      });
+      .then((isFormValid) => isFormValid)
+      .catch(() => false);
+
+    if (shouldSaveWorkbasket) {
+      this.onSave();
+    }
   }
 
   onSave() {

@@ -19,12 +19,15 @@
 package acceptance.workbasket.update;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import acceptance.AbstractAccTest;
+import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
 import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.models.WorkbasketAccessItem;
+import io.kadai.workbasket.internal.models.WorkbasketAccessItemImpl;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,5 +50,37 @@ class UpdateWorkbasketAuthorizations2AccTest extends AbstractAccTest {
     List<WorkbasketAccessItem> updatedAccessItems =
         WORKBASKET_SERVICE.getWorkbasketAccessItems(wbId);
     assertThat(updatedAccessItems).isEmpty();
+  }
+
+  @WithAccessId(user = "businessadmin")
+  @Test
+  void testUpdatedAccessItemList_accessId_null() throws Exception {
+    final String wbId = "WBI:100000000000000000000000000000000002";
+    List<WorkbasketAccessItem> accessItems = WORKBASKET_SERVICE.getWorkbasketAccessItems(wbId);
+    assertThat(accessItems).hasSize(1);
+
+    WorkbasketAccessItemImpl workbasketAccessItem = ((WorkbasketAccessItemImpl) accessItems.get(0));
+    workbasketAccessItem.setAccessId(null);
+
+    assertThatThrownBy(
+            () -> WORKBASKET_SERVICE.setWorkbasketAccessItems(wbId, List.of(workbasketAccessItem)))
+        .isInstanceOf(InvalidArgumentException.class)
+        .hasMessageContaining("accessId is null or empty");
+  }
+
+  @WithAccessId(user = "businessadmin")
+  @Test
+  void testUpdatedAccessItemList_accessId_blank() throws Exception {
+    final String wbId = "WBI:100000000000000000000000000000000003";
+    List<WorkbasketAccessItem> accessItems = WORKBASKET_SERVICE.getWorkbasketAccessItems(wbId);
+    assertThat(accessItems).hasSize(1);
+
+    WorkbasketAccessItemImpl workbasketAccessItem = ((WorkbasketAccessItemImpl) accessItems.get(0));
+    workbasketAccessItem.setAccessId("   ");
+
+    assertThatThrownBy(
+            () -> WORKBASKET_SERVICE.setWorkbasketAccessItems(wbId, List.of(workbasketAccessItem)))
+        .isInstanceOf(InvalidArgumentException.class)
+        .hasMessageContaining("accessId is null or empty");
   }
 }
