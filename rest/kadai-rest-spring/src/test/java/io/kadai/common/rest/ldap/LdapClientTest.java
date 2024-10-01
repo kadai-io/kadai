@@ -80,7 +80,7 @@ class LdapClientTest {
     setUpEnvMock();
     cut.init();
 
-    cut.searchAccessIdByDn(arg1);
+    cut.lookupAccessIdByDn(arg1);
 
     verify(ldapTemplate)
         .lookup(eq(new LdapName(arg2)), any(), any(LdapClient.DnContextMapper.class));
