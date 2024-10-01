@@ -69,7 +69,7 @@ class AbstractKadaiJobAccTest {
 
   @AfterEach
   void cleanupJobs() {
-    // Dirty Hack, please refactor me with ticket https://github.com/kadai-iokadai/issues/2238
+    // Dirty Hack, please refactor me with ticket https://github.com/kadai-io/kadai/issues/46
     jobMapper.deleteMultiple(TaskCleanupJob.class.getName());
     jobMapper.deleteMultiple(TaskRefreshJob.class.getName());
     jobMapper.deleteMultiple(ClassificationChangedJob.class.getName());

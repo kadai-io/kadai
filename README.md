@@ -191,35 +191,25 @@ Currently, KADAI provides the following SPIs:
 
 * [`io.kadai.spi.history.api.KadaiHistory`](https://github.com/kadai-io/kadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/history/api/KadaiHistory.java)
 * [`io.kadai.spi.priority.api.PriorityServiceProvider`](https://github.com/kadai-io/kadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/priority/api/PriorityServiceProvider.java)
-* [`io.kadai.spi.routing.api.TaskRoutingProvider`](https://github.com/kadai-iokadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/routing/api/TaskRoutingProvider.java)
-* [`io.kadai.spi.task.api.AfterRequestChangesProvider`](https://github.com/kadai-iokadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/task/api/AfterRequestChangesProvider.java)
-* [`io.kadai.spi.task.api.AfterRequestReviewProvider`](https://github.com/kadai-iokadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/task/api/AfterRequestReviewProvider.java)
-* [`io.kadai.spi.task.api.BeforeRequestChangesProvider`](https://github.com/kadai-iokadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/task/api/BeforeRequestChangesProvider.java)
-* [`io.kadai.spi.task.api.BeforeRequestReviewProvider`](https://github.com/kadai-iokadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/task/api/BeforeRequestReviewProvider.java)
-* [`io.kadai.spi.task.api.CreateTaskPreprocessor`](https://github.com/kadai-iokadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/task/api/CreateTaskPreprocessor.java)
-* [`io.kadai.spi.task.api.ReviewRequiredProvider`](https://github.com/kadai-iokadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/task/api/ReviewRequiredProvider.java)
-* [`io.kadai.spi.user.api.RefreshUserPostprocessor`](https://github.com/kadai-iokadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/user/api/RefreshUserPostprocessor.java)
+* [`io.kadai.spi.routing.api.TaskRoutingProvider`](https://github.com/kadai-io/kadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/routing/api/TaskRoutingProvider.java)
+* [`io.kadai.spi.task.api.AfterRequestChangesProvider`](https://github.com/kadai-io/kadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/task/api/AfterRequestChangesProvider.java)
+* [`io.kadai.spi.task.api.AfterRequestReviewProvider`](https://github.com/kadai-io/kadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/task/api/AfterRequestReviewProvider.java)
+* [`io.kadai.spi.task.api.BeforeRequestChangesProvider`](https://github.com/kadai-io/kadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/task/api/BeforeRequestChangesProvider.java)
+* [`io.kadai.spi.task.api.BeforeRequestReviewProvider`](https://github.com/kadai-io/kadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/task/api/BeforeRequestReviewProvider.java)
+* [`io.kadai.spi.task.api.CreateTaskPreprocessor`](https://github.com/kadai-io/kadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/task/api/CreateTaskPreprocessor.java)
+* [`io.kadai.spi.task.api.ReviewRequiredProvider`](https://github.com/kadai-io/kadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/task/api/ReviewRequiredProvider.java)
+* [`io.kadai.spi.user.api.RefreshUserPostprocessor`](https://github.com/kadai-io/kadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/user/api/RefreshUserPostprocessor.java)
 
 # 📚Releases
 
-The list of [releases](https://github.com/kadai-iokadai/releases) contains a detailed changelog.
+The list of [releases](https://github.com/kadai-io/kadai/releases) contains a detailed changelog.
 
 We use [Semantic Versioning](https://semver.org/).
 
-The following compatibility matrix shows the officially supported Spring version for each release.
-Other combinations might also work but have not been tested.
-
-| Release | SpringBoot |
-|---------|------------|
-| 7.0.0   | 2.7.16     |
-| 6.3.2   | 2.7.14     |
-| 6.2.2   | 2.7.12     |
-| 6.1.1   | 2.7.10     |
-
 # 📨Contact
 
-If you have any questions or ideas feel free to create an [issue](https://github.com/kadai-iokadai/issues) or contact us
-via [GitHub Discussions](https://github.com/orgs/kadai-iodiscussions).
+If you have any questions or ideas feel free to create an [issue](https://github.com/kadai-io/kadai/issues) or contact us
+via [GitHub Discussions](https://github.com/kadai-io/kadai/discussions).
 
 We love listening to your feedback, and of course also discussing the project roadmap and possible use cases with you!
 
