@@ -692,7 +692,7 @@ class ClassificationQueryFilteringAccTest {
         Stream.concat(columnIsValidInDomainList.stream(), columnIsValidInDomainMasterList.stream())
             .collect(Collectors.toList());
 
-    // Expecting "0" for H2 (==> false in Oracle DBs) and "f" for POSTGRES (==> abbreviation of
+    // Expecting "0" for H2 and "f" for POSTGRES (==> abbreviation of
     // false)
     assertThat(columnIsValidInDomainAllList).containsAnyOf("f", "0");
   }

@@ -307,7 +307,7 @@ public interface TaskMapper {
           + "SELECT t.ID, t.WORKBASKET_ID FROM TASK t WHERE t.ID IN(<foreach item='taskSummary' collection='taskSummaries' separator=',' >#{taskSummary.taskId}</foreach>)"
           + "AND NOT (t.WORKBASKET_ID IN ( "
           + "<choose>"
-          + "<when test=\"_databaseId == 'db2' || _databaseId == 'oracle'\">"
+          + "<when test=\"_databaseId == 'db2'\">"
           + "SELECT WID from (SELECT WORKBASKET_ID as WID, MAX(PERM_READ) as MAX_READ FROM WORKBASKET_ACCESS_LIST s where "
           + "</when>"
           + "<otherwise>"
