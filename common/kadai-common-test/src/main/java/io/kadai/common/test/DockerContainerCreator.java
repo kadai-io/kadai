@@ -27,7 +27,6 @@ import javax.sql.DataSource;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.testcontainers.containers.Db2Container;
 import org.testcontainers.containers.JdbcDatabaseContainer;
-import org.testcontainers.containers.OracleContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
 import org.testcontainers.utility.DockerImageName;
@@ -40,13 +39,6 @@ public class DockerContainerCreator {
 
   public static Optional<JdbcDatabaseContainer<?>> createDockerContainer(DB db) {
     switch (db) {
-      case ORACLE:
-        return Optional.of(
-            new OracleContainer("gvenzl/oracle-xe:18-slim-faststart")
-                .withDatabaseName("kadai")
-                .withUsername("TEST_USER")
-                .withPassword("testPassword")
-                .withEnv("TZ", "Europe/Berlin"));
       case DB2:
         return Optional.of(
             new Db2Container(

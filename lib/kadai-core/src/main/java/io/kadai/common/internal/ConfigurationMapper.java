@@ -29,16 +29,6 @@ import org.apache.ibatis.annotations.Update;
 public interface ConfigurationMapper {
 
   @Select(
-      databaseId = "oracle",
-      value =
-          OPENING_SCRIPT_TAG
-              + "SELECT c1.ENFORCE_SECURITY FROM CONFIGURATION c1 "
-              + "WHERE c1.rowid = (SELECT c2.rowid FROM CONFIGURATION c2 FETCH FIRST 1 ROWS ONLY) "
-              + "<if test='lockForUpdate == true'>"
-              + "FOR UPDATE"
-              + "</if>"
-              + CLOSING_SCRIPT_TAG)
-  @Select(
       OPENING_SCRIPT_TAG
           + "SELECT ENFORCE_SECURITY FROM CONFIGURATION "
           + "<if test='lockForUpdate == true'>"
@@ -51,16 +41,6 @@ public interface ConfigurationMapper {
   @Update("UPDATE CONFIGURATION SET ENFORCE_SECURITY = #{securityEnabled} WHERE NAME = 'MASTER'")
   void setSecurityEnabled(@Param("securityEnabled") boolean securityEnabled);
 
-  @Select(
-      databaseId = "oracle",
-      value =
-          OPENING_SCRIPT_TAG
-              + "SELECT c1.CUSTOM_ATTRIBUTES FROM CONFIGURATION c1 "
-              + "WHERE c1.rowid = (SELECT c2.rowid FROM CONFIGURATION c2 FETCH FIRST 1 ROWS ONLY) "
-              + "<if test='lockForUpdate == true'>"
-              + "FOR UPDATE"
-              + "</if>"
-              + CLOSING_SCRIPT_TAG)
   @Select(
       OPENING_SCRIPT_TAG
           + "SELECT CUSTOM_ATTRIBUTES FROM CONFIGURATION "
