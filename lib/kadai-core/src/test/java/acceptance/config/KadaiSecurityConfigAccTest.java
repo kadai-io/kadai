@@ -25,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.exceptions.SystemException;
-import io.kadai.common.internal.configuration.DB;
 import io.kadai.common.internal.configuration.DbSchemaCreator;
 import io.kadai.common.test.config.DataSourceGenerator;
 import io.kadai.sampledata.SampleDataGenerator;
@@ -132,15 +131,9 @@ class KadaiSecurityConfigAccTest {
 
     try (Connection connection = DataSourceGenerator.getDataSource().getConnection()) {
 
-      DB db = DB.getDB(connection);
-
       String sql;
-      final String securityFlagAsString;
-      if (DB.ORACLE == db) {
-        securityFlagAsString = securityFlag ? "1" : "0";
-      } else {
-        securityFlagAsString = String.valueOf(securityFlag);
-      }
+      final String securityFlagAsString = String.valueOf(securityFlag);
+
       sql =
           String.format(
               "UPDATE %s.CONFIGURATION SET ENFORCE_SECURITY = %s WHERE NAME = 'MASTER'",

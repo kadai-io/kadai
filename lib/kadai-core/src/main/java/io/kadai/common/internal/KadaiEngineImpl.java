@@ -42,7 +42,6 @@ import io.kadai.common.internal.jobs.JobScheduler;
 import io.kadai.common.internal.jobs.RealClock;
 import io.kadai.common.internal.persistence.InstantTypeHandler;
 import io.kadai.common.internal.persistence.MapTypeHandler;
-import io.kadai.common.internal.persistence.StringTypeHandler;
 import io.kadai.common.internal.security.CurrentUserContextImpl;
 import io.kadai.common.internal.workingtime.HolidaySchedule;
 import io.kadai.common.internal.workingtime.WorkingDayCalculatorImpl;
@@ -431,12 +430,6 @@ public class KadaiEngineImpl implements KadaiEngine {
     }
 
     // register type handlers
-    if (DB.ORACLE == db) {
-      // Use NULL instead of OTHER when jdbcType is not specified for null values,
-      // otherwise oracle driver will chunk on null values
-      configuration.setJdbcTypeForNull(JdbcType.NULL);
-      configuration.getTypeHandlerRegistry().register(String.class, new StringTypeHandler());
-    }
 
     configuration.getTypeHandlerRegistry().register(new MapTypeHandler());
     configuration.getTypeHandlerRegistry().register(Instant.class, new InstantTypeHandler());
@@ -459,19 +452,7 @@ public class KadaiEngineImpl implements KadaiEngine {
     configuration.addMapper(UserMapper.class);
     configuration.addMapper(ConfigurationMapper.class);
 
-    SqlSessionFactory localSessionFactory;
-    if (DB.ORACLE == db) {
-      localSessionFactory =
-          new SqlSessionFactoryBuilder() {
-            @Override
-            public SqlSessionFactory build(Configuration config) {
-              return new OracleSqlSessionFactory(config);
-            }
-          }.build(configuration);
-    } else {
-      localSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
-    }
-
+    SqlSessionFactory localSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
     return SqlSessionManager.newInstance(localSessionFactory);
   }
 

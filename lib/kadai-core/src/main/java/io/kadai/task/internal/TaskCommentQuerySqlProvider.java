@@ -124,7 +124,7 @@ public class TaskCommentQuerySqlProvider {
         + "SELECT WID "
         + "FROM ("
         + "<choose>"
-        + "<when test=\"_databaseId == 'db2' || _databaseId == 'oracle'\">"
+        + "<when test=\"_databaseId == 'db2'\">"
         + "SELECT WORKBASKET_ID as WID, MAX(PERM_READ) as MAX_READ "
         + "</when>"
         + "<otherwise>"

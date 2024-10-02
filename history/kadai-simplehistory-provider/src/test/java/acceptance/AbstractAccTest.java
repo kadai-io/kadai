@@ -18,14 +18,11 @@
 
 package acceptance;
 
-import static io.kadai.common.test.OracleSchemaHelper.initOracleSchema;
-
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
 import io.kadai.common.internal.JobMapper;
 import io.kadai.common.internal.KadaiEngineImpl;
-import io.kadai.common.internal.configuration.DB;
 import io.kadai.common.internal.util.IdGenerator;
 import io.kadai.common.test.config.DataSourceGenerator;
 import io.kadai.sampledata.SampleDataGenerator;
@@ -39,7 +36,6 @@ import io.kadai.task.api.TaskService;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.internal.models.ObjectReferenceImpl;
 import java.lang.reflect.Field;
-import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.apache.ibatis.session.SqlSessionManager;
@@ -110,12 +106,6 @@ public abstract class AbstractAccTest {
         schemaName != null && !schemaName.isEmpty()
             ? schemaName
             : DataSourceGenerator.getSchemaName();
-    try (Connection connection = dataSource.getConnection()) {
-      DB db = DB.getDB(connection);
-      if (DB.ORACLE == db) {
-        initOracleSchema(dataSource, schemaNameTmp);
-      }
-    }
     KadaiConfiguration configuration =
         new KadaiConfiguration.Builder(dataSource, false, schemaNameTmp)
             .initKadaiProperties()
