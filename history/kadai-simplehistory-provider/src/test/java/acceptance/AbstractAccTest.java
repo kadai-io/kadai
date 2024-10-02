@@ -18,8 +18,6 @@
 
 package acceptance;
 
-import static io.kadai.common.test.OracleSchemaHelper.initOracleSchema;
-
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
@@ -110,12 +108,6 @@ public abstract class AbstractAccTest {
         schemaName != null && !schemaName.isEmpty()
             ? schemaName
             : DataSourceGenerator.getSchemaName();
-    try (Connection connection = dataSource.getConnection()) {
-      DB db = DB.getDB(connection);
-      if (DB.ORACLE == db) {
-        initOracleSchema(dataSource, schemaNameTmp);
-      }
-    }
     KadaiConfiguration configuration =
         new KadaiConfiguration.Builder(dataSource, false, schemaNameTmp)
             .initKadaiProperties()

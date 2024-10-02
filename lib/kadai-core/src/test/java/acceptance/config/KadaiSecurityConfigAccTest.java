@@ -132,15 +132,9 @@ class KadaiSecurityConfigAccTest {
 
     try (Connection connection = DataSourceGenerator.getDataSource().getConnection()) {
 
-      DB db = DB.getDB(connection);
-
       String sql;
-      final String securityFlagAsString;
-      if (DB.ORACLE == db) {
-        securityFlagAsString = securityFlag ? "1" : "0";
-      } else {
-        securityFlagAsString = String.valueOf(securityFlag);
-      }
+      final String securityFlagAsString = String.valueOf(securityFlag);
+
       sql =
           String.format(
               "UPDATE %s.CONFIGURATION SET ENFORCE_SECURITY = %s WHERE NAME = 'MASTER'",

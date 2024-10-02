@@ -13,10 +13,7 @@ SETLOCAL
     ECHO 3 - Start POSTGRES 14
     ECHO 4 - Stop  POSTGRES 14
     ECHO.
-    ECHO 5 - Start ORACLE 18
-    ECHO 6 - Stop  ORACLE 18
-    ECHO.
-    ECHO 7 - Stop all
+    ECHO 5 - Stop all
     ECHO.
     SET /P MENU=Select task then press ENTER:
     ECHO.
@@ -24,8 +21,6 @@ SETLOCAL
     IF [%MENU%]==[2] GOTO STOP_DB2_11_5
     IF [%MENU%]==[3] GOTO START_POSTGRES_14
     IF [%MENU%]==[4] GOTO STOP_POSTGRES_14
-    IF [%MENU%]==[5] GOTO START_ORACLE_18
-    IF [%MENU%]==[6] GOTO STOP_ORACLE_18
     IF [%MENU%]==[7] GOTO STOP_ALL
     EXIT /B
 
@@ -57,22 +52,6 @@ SETLOCAL
     ECHO docker stop kadai-postgres_14
     ECHO docker compose -f %~dp0/docker-compose.yml rm -f -s -v kadai-postgres_14
     docker compose -f %~dp0/docker-compose.yml rm -f -s -v kadai-postgres_14
-    ECHO ---
-    GOTO MENU
-
-:START_ORACLE_18
-    ECHO ---
-    ECHO docker compose -f %~dp0/docker-compose.yml up -d kadai-oracle-18
-    docker compose -f %~dp0/docker-compose.yml up -d kadai-oracle-18
-
-    ECHO ---
-    GOTO MENU
-
-:STOP_ORACLE_18
-    ECHO ---
-    ECHO docker stop kadai-oracle-18
-    ECHO docker compose -f %~dp0/docker-compose.yml rm -f -s -v kadai-oracle-18
-    docker compose -f %~dp0/docker-compose.yml rm -f -s -v kadai-oracle-18
     ECHO ---
     GOTO MENU
 

@@ -123,7 +123,7 @@ public class WorkbasketAccessSqlProvider {
   public static String findByWorkbasketAndAccessId() {
     return OPENING_SCRIPT_TAG
         + "<choose>"
-        + "<when test=\"_databaseId == 'db2' || _databaseId == 'oracle'\">"
+        + "<when test=\"_databaseId == 'db2'\">"
         + "SELECT "
         + getMaximumPermissionStatement(false)
         + "</when>"
@@ -142,7 +142,7 @@ public class WorkbasketAccessSqlProvider {
   public static String findByWorkbasketKeyDomainAndAccessId() {
     return OPENING_SCRIPT_TAG
         + "<choose>"
-        + "<when test=\"_databaseId == 'db2' || _databaseId == 'oracle'\">"
+        + "<when test=\"_databaseId == 'db2'\">"
         + "SELECT "
         + getMaximumPermissionStatement(false)
         + "</when>"
@@ -175,12 +175,12 @@ public class WorkbasketAccessSqlProvider {
         .collect(Collectors.joining(", ", "", " "));
   }
 
-  private static String getMaximumPermissionStatement(boolean isNotDb2AndNotOracle) {
+  private static String getMaximumPermissionStatement(boolean isNotDb2) {
     return PERMISSIONS.stream()
         .map(
             perm -> {
               String temp = "MAX(" + perm.getLeft();
-              if (isNotDb2AndNotOracle) {
+              if (isNotDb2) {
                 temp += "::int";
               }
               temp += ") AS " + perm.getLeft();

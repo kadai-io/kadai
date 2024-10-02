@@ -95,13 +95,8 @@ final class SqlReplacer {
 
   private static String parseAndReplace(BufferedReader bufferedReader, ZonedDateTime now, DB db) {
     String sql = bufferedReader.lines().collect(Collectors.joining(System.lineSeparator()));
-    if (DB.DB2 == db || DB.ORACLE == db) {
+    if (DB.DB2 == db) {
       sql = replaceBooleanWithInteger(sql);
-    }
-    if (DB.ORACLE == db) {
-      sql = replaceEmptyStringWithPlaceholder(sql);
-      // Oracle needs to be informed about the timestamp format used in data scripts
-      sql = "ALTER SESSION SET NLS_TIMESTAMP_FORMAT = 'YYYY-MM-DD HH24:MI:SS.FF3';\n" + sql;
     }
     return replaceDatePlaceholder(now, sql);
   }

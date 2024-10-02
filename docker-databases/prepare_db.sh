@@ -20,7 +20,6 @@ export TOP_PID=$$
 #H database:
 #H   - DB2 | DB2_11_5
 #H   - POSTGRES | POSTGRES_14
-#H   - ORACLE | ORACLE_18
 # Arguments:
 #   $1: exit code
 function helpAndExit() {
@@ -40,9 +39,6 @@ function mapDBToDockerComposeServiceName() {
     POSTGRES|POSTGRES_14)
       echo "kadai-postgres_14"
       ;;
-    ORACLE|ORACLE_18)
-      echo "kadai-oracle-18"
-      ;;
     *)
       echo "unknown database '$1'" >&2 && kill -s TERM $TOP_PID
   esac
@@ -59,9 +55,6 @@ function main() {
     docker compose -f $scriptDir/docker-compose.yml up -d "$(mapDBToDockerComposeServiceName "$1")"
     ;;
   POSTGRES|POSTGRES_14)
-    docker compose -f $scriptDir/docker-compose.yml up -d "$(mapDBToDockerComposeServiceName "$1")"
-    ;;
-  ORACLE|ORACLE_18)
     docker compose -f $scriptDir/docker-compose.yml up -d "$(mapDBToDockerComposeServiceName "$1")"
     ;;
   stop)

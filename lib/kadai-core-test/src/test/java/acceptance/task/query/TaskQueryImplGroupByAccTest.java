@@ -51,7 +51,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 @KadaiIntegrationTest
-@DisabledIfEnvironmentVariable(named = "DB", matches = "ORACLE")
 class TaskQueryImplGroupByAccTest implements KadaiConfigurationModifier {
   @KadaiInject TaskService taskService;
   @KadaiInject WorkbasketService workbasketService;
