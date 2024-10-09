@@ -456,7 +456,7 @@ jobs:
         with:
           creds: '{"clientId":"${{ secrets.CLIENT_ID }}","clientSecret":"${{ secrets.CLIENT_SECRET }}","subscriptionId":"${{ secrets.SUBSCRIPTION_ID }}","tenantId":"${{ secrets.TENANT_ID }}"}'
       - name: Deploy to Microsoft Azure
-        uses: Azure/webapps-deploy@v2
+        uses: Azure/webapps-deploy@v3
         with:
           app-name: kadai-io
           package: rest/kadai-rest-spring-example-boot/target/kadai-rest-spring-example-boot.jar
