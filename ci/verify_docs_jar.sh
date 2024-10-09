@@ -15,9 +15,9 @@ set +x
 JAR_CONTENT=$(jar -tf "$JAR_FILE_LOCATION")
 set -x
 
-verifyDocs "$REL/../lib/kadai-core/target/apidocs" "/static/docs/java/kadai-core"
-verifyDocs "$REL/../lib/kadai-cdi/target/apidocs" "/static/docs/java/kadai-cdi"
-verifyDocs "$REL/../lib/kadai-spring/target/apidocs" "/static/docs/java/kadai-spring"
+verifyDocs "$REL/../lib/kadai-core/target/reports/apidocs" "/static/docs/java/kadai-core"
+verifyDocs "$REL/../lib/kadai-cdi/target/reports/apidocs" "/static/docs/java/kadai-cdi"
+verifyDocs "$REL/../lib/kadai-spring/target/reports/apidocs" "/static/docs/java/kadai-spring"
 test -n "$(jar -tf "$JAR_FILE_LOCATION" | grep /static/docs/java/kadai-core/index.html)"
 test -n "$(jar -tf "$JAR_FILE_LOCATION" | grep /static/docs/java/kadai-spring/index.html)"
 test -n "$(jar -tf "$JAR_FILE_LOCATION" | grep /static/docs/java/kadai-cdi/io/kadai/common/internal/package-summary.html)"
