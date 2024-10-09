@@ -167,7 +167,7 @@
                             <resources>
                                 <resource>
                                     <directory>
-                                        ../../lib/kadai-core/target/apidocs
+                                        ../../lib/kadai-core/target/reports/apidocs
                                     </directory>
                                 </resource>
                             </resources>
@@ -186,7 +186,7 @@
                             <resources>
                                 <resource>
                                     <directory>
-                                        ../../lib/kadai-cdi/target/apidocs
+                                        ../../lib/kadai-cdi/target/reports/apidocs
                                     </directory>
                                 </resource>
                             </resources>
@@ -205,7 +205,7 @@
                             <resources>
                                 <resource>
                                     <directory>
-                                        ../../lib/kadai-spring/target/apidocs
+                                        ../../lib/kadai-spring/target/reports/apidocs
                                     </directory>
                                 </resource>
                             </resources>
