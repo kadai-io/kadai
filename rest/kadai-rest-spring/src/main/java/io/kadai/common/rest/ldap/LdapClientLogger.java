@@ -18,10 +18,12 @@
 
 package io.kadai.common.rest.ldap;
 
+import java.util.Arrays;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.Marker;
 
-public class LdapClientLogger implements Logger {
+public class LdapClientLogger {
 
   private final Logger delegateLogger;
 
@@ -29,405 +31,354 @@ public class LdapClientLogger implements Logger {
     this.delegateLogger = delegateLogger;
   }
 
-  @Override
   public String getName() {
     return delegateLogger.getName();
   }
 
-  @Override
   public boolean isTraceEnabled() {
     return delegateLogger.isTraceEnabled();
   }
 
-  @Override
   public boolean isTraceEnabled(Marker marker) {
     return delegateLogger.isTraceEnabled(marker);
   }
 
-  @Override
   public void trace(String msg) {
     if (delegateLogger.isTraceEnabled()) {
       delegateLogger.trace(msg);
     }
   }
 
-  @Override
-  public void trace(String format, Object arg) {
+  public void trace(String format, Supplier<Object> arg) {
     if (delegateLogger.isTraceEnabled()) {
-      delegateLogger.trace(format, arg);
+      delegateLogger.trace(format, arg.get());
     }
   }
 
-  @Override
-  public void trace(String format, Object arg1, Object arg2) {
+  public void trace(String format, Supplier<Object> arg1, Supplier<Object> arg2) {
     if (delegateLogger.isTraceEnabled()) {
-      delegateLogger.trace(format, arg1, arg2);
+      delegateLogger.trace(format, arg1.get(), arg2.get());
     }
   }
 
-  @Override
-  public void trace(String format, Object... arguments) {
+  @SafeVarargs
+  public final void trace(String format, Supplier<Object>... arguments) {
     if (delegateLogger.isTraceEnabled()) {
-      delegateLogger.trace(format, arguments);
+      delegateLogger.trace(format, Arrays.stream(arguments).map(Supplier::get).toArray());
     }
   }
 
-  @Override
   public void trace(String msg, Throwable t) {
     if (delegateLogger.isTraceEnabled()) {
       delegateLogger.trace(msg, t);
     }
   }
 
-  @Override
   public void trace(Marker marker, String msg) {
     if (delegateLogger.isTraceEnabled()) {
       delegateLogger.trace(marker, msg);
     }
   }
 
-  @Override
-  public void trace(Marker marker, String format, Object arg) {
+  public void trace(Marker marker, String format, Supplier<Object> arg) {
     if (delegateLogger.isTraceEnabled()) {
-      delegateLogger.trace(marker, format, arg);
+      delegateLogger.trace(marker, format, arg.get());
     }
   }
 
-  @Override
-  public void trace(Marker marker, String format, Object arg1, Object arg2) {
+  public void trace(Marker marker, String format, Supplier<Object> arg1, Supplier<Object> arg2) {
     if (delegateLogger.isTraceEnabled()) {
-      delegateLogger.trace(marker, format, arg1, arg2);
+      delegateLogger.trace(marker, format, arg1.get(), arg2.get());
     }
   }
 
-  @Override
-  public void trace(Marker marker, String format, Object... argArray) {
+  @SafeVarargs
+  public final void trace(Marker marker, String format, Supplier<Object>... arguments) {
     if (delegateLogger.isTraceEnabled()) {
-      delegateLogger.trace(marker, format, argArray);
+      delegateLogger.trace(marker, format, Arrays.stream(arguments).map(Supplier::get).toArray());
     }
   }
 
-  @Override
   public void trace(Marker marker, String msg, Throwable t) {
     if (delegateLogger.isTraceEnabled()) {
       delegateLogger.trace(marker, msg, t);
     }
   }
 
-  @Override
   public boolean isDebugEnabled() {
     return delegateLogger.isDebugEnabled();
   }
 
-  @Override
   public boolean isDebugEnabled(Marker marker) {
     return delegateLogger.isDebugEnabled(marker);
   }
 
-  @Override
   public void debug(String msg) {
     if (delegateLogger.isDebugEnabled()) {
       delegateLogger.debug(msg);
     }
   }
 
-  @Override
-  public void debug(String format, Object arg) {
+  public void debug(String format, Supplier<Object> arg) {
     if (delegateLogger.isDebugEnabled()) {
-      delegateLogger.debug(format, arg);
+      delegateLogger.debug(format, arg.get());
     }
   }
 
-  @Override
-  public void debug(String format, Object arg1, Object arg2) {
+  public void debug(String format, Supplier<Object> arg1, Supplier<Object> arg2) {
     if (delegateLogger.isDebugEnabled()) {
-      delegateLogger.debug(format, arg1, arg2);
+      delegateLogger.debug(format, arg1.get(), arg2.get());
     }
   }
 
-  @Override
-  public void debug(String format, Object... arguments) {
+  @SafeVarargs
+  public final void debug(String format, Supplier<Object>... arguments) {
     if (delegateLogger.isDebugEnabled()) {
-      delegateLogger.debug(format, arguments);
+      delegateLogger.debug(format, Arrays.stream(arguments).map(Supplier::get).toArray());
     }
   }
 
-  @Override
   public void debug(String msg, Throwable t) {
     if (delegateLogger.isDebugEnabled()) {
       delegateLogger.debug(msg, t);
     }
   }
 
-  @Override
   public void debug(Marker marker, String msg) {
     if (delegateLogger.isDebugEnabled()) {
       delegateLogger.debug(marker, msg);
     }
   }
 
-  @Override
-  public void debug(Marker marker, String format, Object arg) {
+  public void debug(Marker marker, String format, Supplier<Object> arg) {
     if (delegateLogger.isDebugEnabled()) {
-      delegateLogger.debug(marker, format, arg);
+      delegateLogger.debug(marker, format, arg.get());
     }
   }
 
-  @Override
-  public void debug(Marker marker, String format, Object arg1, Object arg2) {
+  public void debug(Marker marker, String format, Supplier<Object> arg1, Supplier<Object> arg2) {
     if (delegateLogger.isDebugEnabled()) {
-      delegateLogger.debug(marker, format, arg1, arg2);
+      delegateLogger.debug(marker, format, arg1.get(), arg2.get());
     }
   }
 
-  @Override
-  public void debug(Marker marker, String format, Object... arguments) {
+  @SafeVarargs
+  public final void debug(Marker marker, String format, Supplier<Object>... arguments) {
     if (delegateLogger.isDebugEnabled()) {
-      delegateLogger.debug(marker, format, arguments);
+      delegateLogger.debug(marker, format, Arrays.stream(arguments).map(Supplier::get).toArray());
     }
   }
 
-  @Override
   public void debug(Marker marker, String msg, Throwable t) {
     if (delegateLogger.isDebugEnabled()) {
       delegateLogger.debug(marker, msg, t);
     }
   }
 
-  @Override
   public boolean isInfoEnabled() {
     return delegateLogger.isInfoEnabled();
   }
 
-  @Override
   public boolean isInfoEnabled(Marker marker) {
     return delegateLogger.isInfoEnabled(marker);
   }
 
-  @Override
   public void info(String msg) {
     if (delegateLogger.isInfoEnabled()) {
       delegateLogger.info(msg);
     }
   }
 
-  @Override
-  public void info(String format, Object arg) {
+  public void info(String format, Supplier<Object> arg) {
     if (delegateLogger.isInfoEnabled()) {
-      delegateLogger.info(format, arg);
+      delegateLogger.info(format, arg.get());
     }
   }
 
-  @Override
-  public void info(String format, Object arg1, Object arg2) {
+  public void info(String format, Supplier<Object> arg1, Supplier<Object> arg2) {
     if (delegateLogger.isInfoEnabled()) {
-      delegateLogger.info(format, arg1, arg2);
+      delegateLogger.info(format, arg1.get(), arg2.get());
     }
   }
 
-  @Override
-  public void info(String format, Object... arguments) {
+  @SafeVarargs
+  public final void info(String format, Supplier<Object>... arguments) {
     if (delegateLogger.isInfoEnabled()) {
-      delegateLogger.info(format, arguments);
+      delegateLogger.info(format, Arrays.stream(arguments).map(Supplier::get).toArray());
     }
   }
 
-  @Override
   public void info(String msg, Throwable t) {
     if (delegateLogger.isInfoEnabled()) {
       delegateLogger.info(msg, t);
     }
   }
 
-  @Override
   public void info(Marker marker, String msg) {
     if (delegateLogger.isInfoEnabled()) {
       delegateLogger.info(marker, msg);
     }
   }
 
-  @Override
-  public void info(Marker marker, String format, Object arg) {
+  public void info(Marker marker, String format, Supplier<Object> arg) {
     if (delegateLogger.isInfoEnabled()) {
-      delegateLogger.info(marker, format, arg);
+      delegateLogger.info(marker, format, arg.get());
     }
   }
 
-  @Override
-  public void info(Marker marker, String format, Object arg1, Object arg2) {
+  public void info(Marker marker, String format, Supplier<Object> arg1, Supplier<Object> arg2) {
     if (delegateLogger.isInfoEnabled()) {
-      delegateLogger.info(marker, format, arg1, arg2);
+      delegateLogger.info(marker, format, arg1.get(), arg2.get());
     }
   }
 
-  @Override
-  public void info(Marker marker, String format, Object... arguments) {
+  @SafeVarargs
+  public final void info(Marker marker, String format, Supplier<Object>... arguments) {
     if (delegateLogger.isInfoEnabled()) {
-      delegateLogger.info(marker, format, arguments);
+      delegateLogger.info(marker, format, Arrays.stream(arguments).map(Supplier::get).toArray());
     }
   }
 
-  @Override
   public void info(Marker marker, String msg, Throwable t) {
     if (delegateLogger.isInfoEnabled()) {
       delegateLogger.info(marker, msg, t);
     }
   }
 
-  @Override
   public boolean isWarnEnabled() {
     return delegateLogger.isWarnEnabled();
   }
 
-  @Override
   public boolean isWarnEnabled(Marker marker) {
     return delegateLogger.isWarnEnabled(marker);
   }
 
-  @Override
   public void warn(String msg) {
     if (delegateLogger.isWarnEnabled()) {
       delegateLogger.warn(msg);
     }
   }
 
-  @Override
-  public void warn(String format, Object arg) {
+  public void warn(String format, Supplier<Object> arg) {
     if (delegateLogger.isWarnEnabled()) {
-      delegateLogger.warn(format, arg);
+      delegateLogger.warn(format, arg.get());
     }
   }
 
-  @Override
-  public void warn(String format, Object... arguments) {
+  @SafeVarargs
+  public final void warn(String format, Supplier<Object>... arguments) {
     if (delegateLogger.isWarnEnabled()) {
-      delegateLogger.warn(format, arguments);
+      delegateLogger.warn(format, Arrays.stream(arguments).map(Supplier::get).toArray());
     }
   }
 
-  @Override
-  public void warn(String format, Object arg1, Object arg2) {
+  public void warn(String format, Supplier<Object> arg1, Supplier<Object> arg2) {
     if (delegateLogger.isWarnEnabled()) {
-      delegateLogger.warn(format, arg1, arg2);
+      delegateLogger.warn(format, arg1.get(), arg2.get());
     }
   }
 
-  @Override
   public void warn(String msg, Throwable t) {
     if (delegateLogger.isWarnEnabled()) {
       delegateLogger.warn(msg, t);
     }
   }
 
-  @Override
   public void warn(Marker marker, String msg) {
     if (delegateLogger.isWarnEnabled()) {
       delegateLogger.warn(marker, msg);
     }
   }
 
-  @Override
-  public void warn(Marker marker, String format, Object arg) {
+  public void warn(Marker marker, String format, Supplier<Object> arg) {
     if (delegateLogger.isWarnEnabled()) {
-      delegateLogger.warn(marker, format, arg);
+      delegateLogger.warn(marker, format, arg.get());
     }
   }
 
-  @Override
-  public void warn(Marker marker, String format, Object arg1, Object arg2) {
+  public void warn(Marker marker, String format, Supplier<Object> arg1, Supplier<Object> arg2) {
     if (delegateLogger.isWarnEnabled()) {
-      delegateLogger.warn(marker, format, arg1, arg2);
+      delegateLogger.warn(marker, format, arg1.get(), arg2.get());
     }
   }
 
-  @Override
-  public void warn(Marker marker, String format, Object... arguments) {
+  @SafeVarargs
+  public final void warn(Marker marker, String format, Supplier<Object>... arguments) {
     if (delegateLogger.isWarnEnabled()) {
-      delegateLogger.warn(marker, format, arguments);
+      delegateLogger.warn(marker, format, Arrays.stream(arguments).map(Supplier::get).toArray());
     }
   }
 
-  @Override
   public void warn(Marker marker, String msg, Throwable t) {
     if (delegateLogger.isWarnEnabled()) {
       delegateLogger.warn(marker, msg, t);
     }
   }
 
-  @Override
   public boolean isErrorEnabled() {
     return delegateLogger.isErrorEnabled();
   }
 
-  @Override
   public boolean isErrorEnabled(Marker marker) {
     return delegateLogger.isErrorEnabled(marker);
   }
 
-  @Override
   public void error(String msg) {
     if (delegateLogger.isErrorEnabled()) {
       delegateLogger.error(msg);
     }
   }
 
-  @Override
-  public void error(String format, Object arg) {
+  public void error(String format, Supplier<Object> arg) {
     if (delegateLogger.isErrorEnabled()) {
-      delegateLogger.error(format, arg);
+      delegateLogger.error(format, arg.get());
     }
   }
 
-  @Override
-  public void error(String format, Object arg1, Object arg2) {
+  public void error(String format, Supplier<Object> arg1, Supplier<Object> arg2) {
     if (delegateLogger.isErrorEnabled()) {
-      delegateLogger.error(format, arg1, arg2);
+      delegateLogger.error(format, arg1.get(), arg2.get());
     }
   }
 
-  @Override
-  public void error(String format, Object... arguments) {
+  @SafeVarargs
+  public final void error(String format, Supplier<Object>... arguments) {
     if (delegateLogger.isErrorEnabled()) {
-      delegateLogger.error(format, arguments);
+      delegateLogger.error(format, Arrays.stream(arguments).map(Supplier::get).toArray());
     }
   }
 
-  @Override
   public void error(String msg, Throwable t) {
     if (delegateLogger.isErrorEnabled()) {
       delegateLogger.error(msg, t);
     }
   }
 
-  @Override
   public void error(Marker marker, String msg) {
     if (delegateLogger.isErrorEnabled()) {
       delegateLogger.error(marker, msg);
     }
   }
 
-  @Override
-  public void error(Marker marker, String format, Object arg) {
+  public void error(Marker marker, String format, Supplier<Object> arg) {
     if (delegateLogger.isErrorEnabled()) {
-      delegateLogger.error(marker, format, arg);
+      delegateLogger.error(marker, format, arg.get());
     }
   }
 
-  @Override
-  public void error(Marker marker, String format, Object arg1, Object arg2) {
+  public void error(Marker marker, String format, Supplier<Object> arg1, Supplier<Object> arg2) {
     if (delegateLogger.isErrorEnabled()) {
-      delegateLogger.error(marker, format, arg1, arg2);
+      delegateLogger.error(marker, format, arg1.get(), arg2.get());
     }
   }
 
-  @Override
-  public void error(Marker marker, String format, Object... arguments) {
+  @SafeVarargs
+  public final void error(Marker marker, String format, Supplier<Object>... arguments) {
     if (delegateLogger.isErrorEnabled()) {
-      delegateLogger.error(marker, format, arguments);
+      delegateLogger.error(marker, format, Arrays.stream(arguments).map(Supplier::get).toArray());
     }
   }
 
-  @Override
   public void error(Marker marker, String msg, Throwable t) {
     if (delegateLogger.isErrorEnabled()) {
       delegateLogger.error(marker, msg, t);

@@ -84,13 +84,13 @@ class LdapClientLoggerTest {
     ldapClientLogger.trace("Test message");
     verify(mockLogger).trace("Test message");
 
-    ldapClientLogger.trace("Test message: {}", "arg1");
+    ldapClientLogger.trace("Test message: {}", () -> "arg1");
     verify(mockLogger).trace("Test message: {}", "arg1");
 
-    ldapClientLogger.trace("Test message: {}, {}", "arg1", "arg2");
+    ldapClientLogger.trace("Test message: {}, {}", () -> "arg1", () -> "arg2");
     verify(mockLogger).trace("Test message: {}, {}", "arg1", "arg2");
 
-    ldapClientLogger.trace("Test message: {}, {}, {}", "arg1", "arg2", "arg3");
+    ldapClientLogger.trace("Test message: {}, {}, {}", () -> "arg1", () -> "arg2", () -> "arg3");
     verify(mockLogger).trace("Test message: {}, {}, {}", "arg1", "arg2", "arg3");
 
     Throwable testThrowable = new Throwable("Test throwable");
@@ -102,13 +102,14 @@ class LdapClientLoggerTest {
     ldapClientLogger.trace(testMarker, "Test message");
     verify(mockLogger).trace(testMarker, "Test message");
 
-    ldapClientLogger.trace(testMarker, "Test message {}", "arg1");
+    ldapClientLogger.trace(testMarker, "Test message {}", () -> "arg1");
     verify(mockLogger).trace(testMarker, "Test message {}", "arg1");
 
-    ldapClientLogger.trace(testMarker, "Test message {}, {}", "arg1", "arg2");
+    ldapClientLogger.trace(testMarker, "Test message {}, {}", () -> "arg1", () -> "arg2");
     verify(mockLogger).trace(testMarker, "Test message {}, {}", "arg1", "arg2");
 
-    ldapClientLogger.trace(testMarker, "Test message {}, {}, {}", "arg1", "arg2", "arg3");
+    ldapClientLogger.trace(
+        testMarker, "Test message {}, {}, {}", () -> "arg1", () -> "arg2", () -> "arg3");
     verify(mockLogger).trace(testMarker, "Test message {}, {}, {}", "arg1", "arg2", "arg3");
 
     ldapClientLogger.trace(testMarker, "Test message", testThrowable);
@@ -122,13 +123,13 @@ class LdapClientLoggerTest {
     ldapClientLogger.trace("Test message");
     verify(mockLogger, never()).trace("Test message");
 
-    ldapClientLogger.trace("Test message: {}", "arg1");
+    ldapClientLogger.trace("Test message: {}", () -> "arg1");
     verify(mockLogger, never()).trace("Test message: {}", "arg1");
 
-    ldapClientLogger.trace("Test message: {}, {}", "arg1", "arg2");
+    ldapClientLogger.trace("Test message: {}, {}", () -> "arg1", () -> "arg2");
     verify(mockLogger, never()).trace("Test message: {}, {}", "arg1", "arg2");
 
-    ldapClientLogger.trace("Test message: {}, {}, {}", "arg1", "arg2", "arg3");
+    ldapClientLogger.trace("Test message: {}, {}, {}", () -> "arg1", () -> "arg2", () -> "arg3");
     verify(mockLogger, never()).trace("Test message: {}, {}, {}", "arg1", "arg2", "arg3");
 
     Throwable testThrowable = new Throwable("Test throwable");
@@ -140,13 +141,14 @@ class LdapClientLoggerTest {
     ldapClientLogger.trace(testMarker, "Test message");
     verify(mockLogger, never()).trace(testMarker, "Test message");
 
-    ldapClientLogger.trace(testMarker, "Test message {}", "arg1");
+    ldapClientLogger.trace(testMarker, "Test message {}", () -> "arg1");
     verify(mockLogger, never()).trace(testMarker, "Test message {}", "arg1");
 
-    ldapClientLogger.trace(testMarker, "Test message {}, {}", "arg1", "arg2");
+    ldapClientLogger.trace(testMarker, "Test message {}, {}", () -> "arg1", () -> "arg2");
     verify(mockLogger, never()).trace(testMarker, "Test message {}, {}", "arg1", "arg2");
 
-    ldapClientLogger.trace(testMarker, "Test message {}, {}, {}", "arg1", "arg2", "arg3");
+    ldapClientLogger.trace(
+        testMarker, "Test message {}, {}, {}", () -> "arg1", () -> "arg2", () -> "arg3");
     verify(mockLogger, never())
         .trace(testMarker, "Test message {}, {}, {}", "arg1", "arg2", "arg3");
 
@@ -189,13 +191,13 @@ class LdapClientLoggerTest {
     ldapClientLogger.debug("Test message");
     verify(mockLogger).debug("Test message");
 
-    ldapClientLogger.debug("Test message: {}", "arg1");
+    ldapClientLogger.debug("Test message: {}", () -> "arg1");
     verify(mockLogger).debug("Test message: {}", "arg1");
 
-    ldapClientLogger.debug("Test message: {}, {}", "arg1", "arg2");
+    ldapClientLogger.debug("Test message: {}, {}", () -> "arg1", () -> "arg2");
     verify(mockLogger).debug("Test message: {}, {}", "arg1", "arg2");
 
-    ldapClientLogger.debug("Test message: {}, {}, {}", "arg1", "arg2", "arg3");
+    ldapClientLogger.debug("Test message: {}, {}, {}", () -> "arg1", () -> "arg2", () -> "arg3");
     verify(mockLogger).debug("Test message: {}, {}, {}", "arg1", "arg2", "arg3");
 
     Throwable testThrowable = new Throwable("Test throwable");
@@ -207,13 +209,14 @@ class LdapClientLoggerTest {
     ldapClientLogger.debug(testMarker, "Test message");
     verify(mockLogger).debug(testMarker, "Test message");
 
-    ldapClientLogger.debug(testMarker, "Test message {}", "arg1");
+    ldapClientLogger.debug(testMarker, "Test message {}", () -> "arg1");
     verify(mockLogger).debug(testMarker, "Test message {}", "arg1");
 
-    ldapClientLogger.debug(testMarker, "Test message {}, {}", "arg1", "arg2");
+    ldapClientLogger.debug(testMarker, "Test message {}, {}", () -> "arg1", () -> "arg2");
     verify(mockLogger).debug(testMarker, "Test message {}, {}", "arg1", "arg2");
 
-    ldapClientLogger.debug(testMarker, "Test message {}, {}, {}", "arg1", "arg2", "arg3");
+    ldapClientLogger.debug(
+        testMarker, "Test message {}, {}, {}", () -> "arg1", () -> "arg2", () -> "arg3");
     verify(mockLogger).debug(testMarker, "Test message {}, {}, {}", "arg1", "arg2", "arg3");
 
     ldapClientLogger.debug(testMarker, "Test message", testThrowable);
@@ -227,13 +230,13 @@ class LdapClientLoggerTest {
     ldapClientLogger.debug("Test message");
     verify(mockLogger, never()).debug("Test message");
 
-    ldapClientLogger.debug("Test message: {}", "arg1");
+    ldapClientLogger.debug("Test message: {}", () -> "arg1");
     verify(mockLogger, never()).debug("Test message: {}", "arg1");
 
-    ldapClientLogger.debug("Test message: {}, {}", "arg1", "arg2");
+    ldapClientLogger.debug("Test message: {}, {}", () -> "arg1", () -> "arg2");
     verify(mockLogger, never()).debug("Test message: {}, {}", "arg1", "arg2");
 
-    ldapClientLogger.debug("Test message: {}, {}, {}", "arg1", "arg2", "arg3");
+    ldapClientLogger.debug("Test message: {}, {}, {}", () -> "arg1", () -> "arg2", () -> "arg3");
     verify(mockLogger, never()).debug("Test message: {}, {}, {}", "arg1", "arg2", "arg3");
 
     Throwable testThrowable = new Throwable("Test throwable");
@@ -245,13 +248,14 @@ class LdapClientLoggerTest {
     ldapClientLogger.debug(testMarker, "Test message");
     verify(mockLogger, never()).debug(testMarker, "Test message");
 
-    ldapClientLogger.debug(testMarker, "Test message {}", "arg1");
+    ldapClientLogger.debug(testMarker, "Test message {}", () -> "arg1");
     verify(mockLogger, never()).debug(testMarker, "Test message {}", "arg1");
 
-    ldapClientLogger.debug(testMarker, "Test message {}, {}", "arg1", "arg2");
+    ldapClientLogger.debug(testMarker, "Test message {}, {}", () -> "arg1", () -> "arg2");
     verify(mockLogger, never()).debug(testMarker, "Test message {}, {}", "arg1", "arg2");
 
-    ldapClientLogger.debug(testMarker, "Test message {}, {}, {}", "arg1", "arg2", "arg3");
+    ldapClientLogger.debug(
+        testMarker, "Test message {}, {}, {}", () -> "arg1", () -> "arg2", () -> "arg3");
     verify(mockLogger, never())
         .debug(testMarker, "Test message {}, {}, {}", "arg1", "arg2", "arg3");
 
@@ -294,13 +298,13 @@ class LdapClientLoggerTest {
     ldapClientLogger.info("Test message");
     verify(mockLogger).info("Test message");
 
-    ldapClientLogger.info("Test message: {}", "arg1");
+    ldapClientLogger.info("Test message: {}", () -> "arg1");
     verify(mockLogger).info("Test message: {}", "arg1");
 
-    ldapClientLogger.info("Test message: {}, {}", "arg1", "arg2");
+    ldapClientLogger.info("Test message: {}, {}", () -> "arg1", () -> "arg2");
     verify(mockLogger).info("Test message: {}, {}", "arg1", "arg2");
 
-    ldapClientLogger.info("Test message: {}, {}, {}", "arg1", "arg2", "arg3");
+    ldapClientLogger.info("Test message: {}, {}, {}", () -> "arg1", () -> "arg2", () -> "arg3");
     verify(mockLogger).info("Test message: {}, {}, {}", "arg1", "arg2", "arg3");
 
     Throwable testThrowable = new Throwable("Test throwable");
@@ -312,13 +316,14 @@ class LdapClientLoggerTest {
     ldapClientLogger.info(testMarker, "Test message");
     verify(mockLogger).info(testMarker, "Test message");
 
-    ldapClientLogger.info(testMarker, "Test message {}", "arg1");
+    ldapClientLogger.info(testMarker, "Test message {}", () -> "arg1");
     verify(mockLogger).info(testMarker, "Test message {}", "arg1");
 
-    ldapClientLogger.info(testMarker, "Test message {}, {}", "arg1", "arg2");
+    ldapClientLogger.info(testMarker, "Test message {}, {}", () -> "arg1", () -> "arg2");
     verify(mockLogger).info(testMarker, "Test message {}, {}", "arg1", "arg2");
 
-    ldapClientLogger.info(testMarker, "Test message {}, {}, {}", "arg1", "arg2", "arg3");
+    ldapClientLogger.info(
+        testMarker, "Test message {}, {}, {}", () -> "arg1", () -> "arg2", () -> "arg3");
     verify(mockLogger).info(testMarker, "Test message {}, {}, {}", "arg1", "arg2", "arg3");
 
     ldapClientLogger.info(testMarker, "Test message", testThrowable);
@@ -332,13 +337,13 @@ class LdapClientLoggerTest {
     ldapClientLogger.info("Test message");
     verify(mockLogger, never()).info("Test message");
 
-    ldapClientLogger.info("Test message: {}", "arg1");
+    ldapClientLogger.info("Test message: {}", () -> "arg1");
     verify(mockLogger, never()).info("Test message: {}", "arg1");
 
-    ldapClientLogger.info("Test message: {}, {}", "arg1", "arg2");
+    ldapClientLogger.info("Test message: {}, {}", () -> "arg1", () -> "arg2");
     verify(mockLogger, never()).info("Test message: {}, {}", "arg1", "arg2");
 
-    ldapClientLogger.info("Test message: {}, {}, {}", "arg1", "arg2", "arg3");
+    ldapClientLogger.info("Test message: {}, {}, {}", () -> "arg1", () -> "arg2", () -> "arg3");
     verify(mockLogger, never()).info("Test message: {}, {}, {}", "arg1", "arg2", "arg3");
 
     Throwable testThrowable = new Throwable("Test throwable");
@@ -350,13 +355,14 @@ class LdapClientLoggerTest {
     ldapClientLogger.info(testMarker, "Test message");
     verify(mockLogger, never()).info(testMarker, "Test message");
 
-    ldapClientLogger.info(testMarker, "Test message {}", "arg1");
+    ldapClientLogger.info(testMarker, "Test message {}", () -> "arg1");
     verify(mockLogger, never()).info(testMarker, "Test message {}", "arg1");
 
-    ldapClientLogger.info(testMarker, "Test message {}, {}", "arg1", "arg2");
+    ldapClientLogger.info(testMarker, "Test message {}, {}", () -> "arg1", () -> "arg2");
     verify(mockLogger, never()).info(testMarker, "Test message {}, {}", "arg1", "arg2");
 
-    ldapClientLogger.info(testMarker, "Test message {}, {}, {}", "arg1", "arg2", "arg3");
+    ldapClientLogger.info(
+        testMarker, "Test message {}, {}, {}", () -> "arg1", () -> "arg2", () -> "arg3");
     verify(mockLogger, never()).info(testMarker, "Test message {}, {}, {}", "arg1", "arg2", "arg3");
 
     ldapClientLogger.info(testMarker, "Test message", testThrowable);
@@ -398,13 +404,13 @@ class LdapClientLoggerTest {
     ldapClientLogger.warn("Test message");
     verify(mockLogger).warn("Test message");
 
-    ldapClientLogger.warn("Test message: {}", "arg1");
+    ldapClientLogger.warn("Test message: {}", () -> "arg1");
     verify(mockLogger).warn("Test message: {}", "arg1");
 
-    ldapClientLogger.warn("Test message: {}, {}", "arg1", "arg2");
+    ldapClientLogger.warn("Test message: {}, {}", () -> "arg1", () -> "arg2");
     verify(mockLogger).warn("Test message: {}, {}", "arg1", "arg2");
 
-    ldapClientLogger.warn("Test message: {}, {}, {}", "arg1", "arg2", "arg3");
+    ldapClientLogger.warn("Test message: {}, {}, {}", () -> "arg1", () -> "arg2", () -> "arg3");
     verify(mockLogger).warn("Test message: {}, {}, {}", "arg1", "arg2", "arg3");
 
     Throwable testThrowable = new Throwable("Test throwable");
@@ -416,13 +422,14 @@ class LdapClientLoggerTest {
     ldapClientLogger.warn(testMarker, "Test message");
     verify(mockLogger).warn(testMarker, "Test message");
 
-    ldapClientLogger.warn(testMarker, "Test message {}", "arg1");
+    ldapClientLogger.warn(testMarker, "Test message {}", () -> "arg1");
     verify(mockLogger).warn(testMarker, "Test message {}", "arg1");
 
-    ldapClientLogger.warn(testMarker, "Test message {}, {}", "arg1", "arg2");
+    ldapClientLogger.warn(testMarker, "Test message {}, {}", () -> "arg1", () -> "arg2");
     verify(mockLogger).warn(testMarker, "Test message {}, {}", "arg1", "arg2");
 
-    ldapClientLogger.warn(testMarker, "Test message {}, {}, {}", "arg1", "arg2", "arg3");
+    ldapClientLogger.warn(
+        testMarker, "Test message {}, {}, {}", () -> "arg1", () -> "arg2", () -> "arg3");
     verify(mockLogger).warn(testMarker, "Test message {}, {}, {}", "arg1", "arg2", "arg3");
 
     ldapClientLogger.warn(testMarker, "Test message", testThrowable);
@@ -436,13 +443,13 @@ class LdapClientLoggerTest {
     ldapClientLogger.warn("Test message");
     verify(mockLogger, never()).warn("Test message");
 
-    ldapClientLogger.warn("Test message: {}", "arg1");
+    ldapClientLogger.warn("Test message: {}", () -> "arg1");
     verify(mockLogger, never()).warn("Test message: {}", "arg1");
 
-    ldapClientLogger.warn("Test message: {}, {}", "arg1", "arg2");
+    ldapClientLogger.warn("Test message: {}, {}", () -> "arg1", () -> "arg2");
     verify(mockLogger, never()).warn("Test message: {}, {}", "arg1", "arg2");
 
-    ldapClientLogger.warn("Test message: {}, {}, {}", "arg1", "arg2", "arg3");
+    ldapClientLogger.warn("Test message: {}, {}, {}", () -> "arg1", () -> "arg2", () -> "arg3");
     verify(mockLogger, never()).warn("Test message: {}, {}, {}", "arg1", "arg2", "arg3");
 
     Throwable testThrowable = new Throwable("Test throwable");
@@ -454,13 +461,14 @@ class LdapClientLoggerTest {
     ldapClientLogger.warn(testMarker, "Test message");
     verify(mockLogger, never()).warn(testMarker, "Test message");
 
-    ldapClientLogger.warn(testMarker, "Test message {}", "arg1");
+    ldapClientLogger.warn(testMarker, "Test message {}", () -> "arg1");
     verify(mockLogger, never()).warn(testMarker, "Test message {}", "arg1");
 
-    ldapClientLogger.warn(testMarker, "Test message {}, {}", "arg1", "arg2");
+    ldapClientLogger.warn(testMarker, "Test message {}, {}", () -> "arg1", () -> "arg2");
     verify(mockLogger, never()).warn(testMarker, "Test message {}, {}", "arg1", "arg2");
 
-    ldapClientLogger.warn(testMarker, "Test message {}, {}, {}", "arg1", "arg2", "arg3");
+    ldapClientLogger.warn(
+        testMarker, "Test message {}, {}, {}", () -> "arg1", () -> "arg2", () -> "arg3");
     verify(mockLogger, never()).warn(testMarker, "Test message {}, {}, {}", "arg1", "arg2", "arg3");
 
     ldapClientLogger.warn(testMarker, "Test message", testThrowable);
@@ -502,13 +510,13 @@ class LdapClientLoggerTest {
     ldapClientLogger.error("Test message");
     verify(mockLogger).error("Test message");
 
-    ldapClientLogger.error("Test message: {}", "arg1");
+    ldapClientLogger.error("Test message: {}", () -> "arg1");
     verify(mockLogger).error("Test message: {}", "arg1");
 
-    ldapClientLogger.error("Test message: {}, {}", "arg1", "arg2");
+    ldapClientLogger.error("Test message: {}, {}", () -> "arg1", () -> "arg2");
     verify(mockLogger).error("Test message: {}, {}", "arg1", "arg2");
 
-    ldapClientLogger.error("Test message: {}, {}, {}", "arg1", "arg2", "arg3");
+    ldapClientLogger.error("Test message: {}, {}, {}", () -> "arg1", () -> "arg2", () -> "arg3");
     verify(mockLogger).error("Test message: {}, {}, {}", "arg1", "arg2", "arg3");
 
     Throwable testThrowable = new Throwable("Test throwable");
@@ -520,13 +528,14 @@ class LdapClientLoggerTest {
     ldapClientLogger.error(testMarker, "Test message");
     verify(mockLogger).error(testMarker, "Test message");
 
-    ldapClientLogger.error(testMarker, "Test message {}", "arg1");
+    ldapClientLogger.error(testMarker, "Test message {}", () -> "arg1");
     verify(mockLogger).error(testMarker, "Test message {}", "arg1");
 
-    ldapClientLogger.error(testMarker, "Test message {}, {}", "arg1", "arg2");
+    ldapClientLogger.error(testMarker, "Test message {}, {}", () -> "arg1", () -> "arg2");
     verify(mockLogger).error(testMarker, "Test message {}, {}", "arg1", "arg2");
 
-    ldapClientLogger.error(testMarker, "Test message {}, {}, {}", "arg1", "arg2", "arg3");
+    ldapClientLogger.error(
+        testMarker, "Test message {}, {}, {}", () -> "arg1", () -> "arg2", () -> "arg3");
     verify(mockLogger).error(testMarker, "Test message {}, {}, {}", "arg1", "arg2", "arg3");
 
     ldapClientLogger.error(testMarker, "Test message", testThrowable);
@@ -540,13 +549,13 @@ class LdapClientLoggerTest {
     ldapClientLogger.error("Test message");
     verify(mockLogger, never()).error("Test message");
 
-    ldapClientLogger.error("Test message: {}", "arg1");
+    ldapClientLogger.error("Test message: {}", () -> "arg1");
     verify(mockLogger, never()).error("Test message: {}", "arg1");
 
-    ldapClientLogger.error("Test message: {}, {}", "arg1", "arg2");
+    ldapClientLogger.error("Test message: {}, {}", () -> "arg1", () -> "arg2");
     verify(mockLogger, never()).error("Test message: {}, {}", "arg1", "arg2");
 
-    ldapClientLogger.error("Test message: {}, {}, {}", "arg1", "arg2", "arg3");
+    ldapClientLogger.error("Test message: {}, {}, {}", () -> "arg1", () -> "arg2", () -> "arg3");
     verify(mockLogger, never()).error("Test message: {}, {}, {}", "arg1", "arg2", "arg3");
 
     Throwable testThrowable = new Throwable("Test throwable");
@@ -558,13 +567,14 @@ class LdapClientLoggerTest {
     ldapClientLogger.error(testMarker, "Test message");
     verify(mockLogger, never()).error(testMarker, "Test message");
 
-    ldapClientLogger.error(testMarker, "Test message {}", "arg1");
+    ldapClientLogger.error(testMarker, "Test message {}", () -> "arg1");
     verify(mockLogger, never()).error(testMarker, "Test message {}", "arg1");
 
-    ldapClientLogger.error(testMarker, "Test message {}, {}", "arg1", "arg2");
+    ldapClientLogger.error(testMarker, "Test message {}, {}", () -> "arg1", () -> "arg2");
     verify(mockLogger, never()).error(testMarker, "Test message {}, {}", "arg1", "arg2");
 
-    ldapClientLogger.error(testMarker, "Test message {}, {}, {}", "arg1", "arg2", "arg3");
+    ldapClientLogger.error(
+        testMarker, "Test message {}, {}, {}", () -> "arg1", () -> "arg2", () -> "arg3");
     verify(mockLogger, never())
         .error(testMarker, "Test message {}, {}, {}", "arg1", "arg2", "arg3");
 

@@ -44,7 +44,6 @@ import java.util.stream.Stream;
 import javax.naming.InvalidNameException;
 import javax.naming.directory.SearchControls;
 import javax.naming.ldap.LdapName;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -64,7 +63,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class LdapClient {
 
-  private static final Logger LOGGER =
+  private static final LdapClientLogger LOGGER =
       new LdapClientLogger(LoggerFactory.getLogger(LdapClient.class));
   private static final String CN = "cn";
 
@@ -100,10 +99,9 @@ public class LdapClient {
     isInitOrFail();
     testMinSearchForLength(name);
 
-    String sanitizedNameForLog = LogSanitizer.stripLineBreakingChars(name);
-
     LOGGER.debug(
-        "Starting LDAP search for users, groups and permissions... [name={}]", sanitizedNameForLog);
+        "Starting LDAP search for users, groups and permissions... [name={}]",
+        () -> LogSanitizer.stripLineBreakingChars(name));
 
     List<AccessIdRepresentationModel> accessIds = new ArrayList<>();
     if (nameIsDn(name)) {
@@ -119,8 +117,8 @@ public class LdapClient {
 
     LOGGER.debug(
         "LDAP search for users, groups and permissions completed! [name={}, accessIds={}]",
-        sanitizedNameForLog,
-        accessIds);
+        () -> LogSanitizer.stripLineBreakingChars(name),
+        () -> accessIds);
 
     sortListOfAccessIdResources(accessIds);
     return getFirstPageOfaResultList(accessIds);
@@ -133,7 +131,7 @@ public class LdapClient {
 
     LOGGER.debug(
         "Starting LDAP search for users by name or accessId in user role... [nameOrAccessId={}]",
-        LogSanitizer.stripLineBreakingChars(nameOrAccessId));
+        () -> LogSanitizer.stripLineBreakingChars(nameOrAccessId));
 
     final OrFilter userDetailsOrFilter = new OrFilter();
     userDetailsOrFilter.or(
@@ -167,8 +165,8 @@ public class LdapClient {
     LOGGER.debug(
         "LDAP search for users by name or accessId in user role completed! "
             + "[nameOrAccessId={}, accessIds={}]",
-        LogSanitizer.stripLineBreakingChars(nameOrAccessId),
-        accessIds);
+        () -> LogSanitizer.stripLineBreakingChars(nameOrAccessId),
+        () -> accessIds);
 
     return accessIds;
   }
@@ -194,7 +192,7 @@ public class LdapClient {
             getLookUpUserInfoAttributesToReturn(),
             new UserInfoContextMapper());
 
-    LOGGER.debug("LDAP search for users in user role completed! [users={}]", users);
+    LOGGER.debug("LDAP search for users in user role completed! [users={}]", () -> users);
 
     return users;
   }
@@ -206,7 +204,7 @@ public class LdapClient {
 
     LOGGER.debug(
         "Starting LDAP search for users by name or accessId... [name={}]",
-        LogSanitizer.stripLineBreakingChars(name));
+        () -> LogSanitizer.stripLineBreakingChars(name));
 
     final AndFilter andFilter = new AndFilter();
     andFilter.and(new EqualsFilter(getUserSearchFilterName(), getUserSearchFilterValue()));
@@ -228,8 +226,8 @@ public class LdapClient {
 
     LOGGER.debug(
         "LDAP search for users by name or accessId completed! [name={}, accessIds={}]",
-        LogSanitizer.stripLineBreakingChars(name),
-        accessIds);
+        () -> LogSanitizer.stripLineBreakingChars(name),
+        () -> accessIds);
 
     return accessIds;
   }
@@ -239,7 +237,7 @@ public class LdapClient {
 
     LOGGER.debug(
         "Starting LDAP search for users by accessId... [accessId={}]",
-        LogSanitizer.stripLineBreakingChars(accessId));
+        () -> LogSanitizer.stripLineBreakingChars(accessId));
 
     final AndFilter andFilter = new AndFilter();
     andFilter.and(new EqualsFilter(getUserSearchFilterName(), getUserSearchFilterValue()));
@@ -259,8 +257,8 @@ public class LdapClient {
 
     LOGGER.debug(
         "LDAP search for users by accessId completed! [accessId={}, accessIds={}]",
-        LogSanitizer.stripLineBreakingChars(accessId),
-        accessIds);
+        () -> LogSanitizer.stripLineBreakingChars(accessId),
+        () -> accessIds);
 
     return accessIds;
   }
@@ -272,7 +270,7 @@ public class LdapClient {
 
     LOGGER.debug(
         "Starting LDAP search for groups by name... [name={}]",
-        LogSanitizer.stripLineBreakingChars(name));
+        () -> LogSanitizer.stripLineBreakingChars(name));
 
     final AndFilter andFilter = new AndFilter();
     andFilter.and(new EqualsFilter(getGroupSearchFilterName(), getGroupSearchFilterValue()));
@@ -296,8 +294,8 @@ public class LdapClient {
 
     LOGGER.debug(
         "LDAP search for groups by name completed! [name={}, accessIds={}]",
-        LogSanitizer.stripLineBreakingChars(name),
-        accessIds);
+        () -> LogSanitizer.stripLineBreakingChars(name),
+        () -> accessIds);
 
     return accessIds;
   }
@@ -306,7 +304,8 @@ public class LdapClient {
       throws InvalidNameException {
 
     LOGGER.debug(
-        "Starting LDAP search for access id for groups and permissions by dn... [dns={}]", dns);
+        "Starting LDAP search for access id for groups and permissions by dn... [dns={}]",
+        () -> dns);
 
     List<String> accessIdsOfGroupsAndPermissions = new ArrayList<>();
     List<AccessIdRepresentationModel> permissions = new ArrayList<>();
@@ -334,8 +333,8 @@ public class LdapClient {
     LOGGER.debug(
         "LDAP search for access id for groups and permissions by dn completed! "
             + "[dns={}, accessIdsOfPermissionsAndGroups={}]",
-        dns,
-        accessIdsOfPermissionsAndGroups);
+        () -> dns,
+        () -> accessIdsOfPermissionsAndGroups);
 
     return accessIdsOfPermissionsAndGroups;
   }
@@ -347,7 +346,7 @@ public class LdapClient {
 
     LOGGER.debug(
         "Starting LDAP search for permissions by name... [name={}]",
-        LogSanitizer.stripLineBreakingChars(name));
+        () -> LogSanitizer.stripLineBreakingChars(name));
 
     final AndFilter andFilter = new AndFilter();
     andFilter.and(
@@ -372,8 +371,8 @@ public class LdapClient {
 
     LOGGER.debug(
         "LDAP search for permissions by name completed! [name={}, accessIds={}]",
-        LogSanitizer.stripLineBreakingChars(name),
-        accessIds);
+        () -> LogSanitizer.stripLineBreakingChars(name),
+        () -> accessIds);
 
     return accessIds;
   }
@@ -384,7 +383,7 @@ public class LdapClient {
 
     LOGGER.debug(
         "Starting LDAP lookup for access id by dn... [name={}]",
-        LogSanitizer.stripLineBreakingChars(name));
+        () -> LogSanitizer.stripLineBreakingChars(name));
 
     // Obviously Spring LdapTemplate does have a inconsistency and always adds the base name to the
     // given DN.
@@ -392,10 +391,10 @@ public class LdapClient {
     // Therefore we have to remove the base name from the dn before performing the lookup
     String nameWithoutBaseDn = getNameWithoutBaseDn(name).toLowerCase();
 
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug(
-          "Removed baseDN {} from given DN. New DN to be used: {}", getBaseDn(), nameWithoutBaseDn);
-    }
+    LOGGER.debug(
+        "Removed baseDN {} from given DN. New DN to be used: {}",
+        this::getBaseDn,
+        () -> nameWithoutBaseDn);
 
     LdapName dn = new LdapName(nameWithoutBaseDn);
     String[] attributes = getLookUpUserAndGroupAndPermissionAttributesToReturn();
@@ -405,8 +404,8 @@ public class LdapClient {
 
     LOGGER.debug(
         "LDAP lookup for access id by dn completed! [name={}, accessId={}]",
-        LogSanitizer.stripLineBreakingChars(name),
-        accessId);
+        () -> LogSanitizer.stripLineBreakingChars(name),
+        () -> accessId);
 
     return accessId;
   }
@@ -418,7 +417,7 @@ public class LdapClient {
 
     LOGGER.debug(
         "Starting LDAP search for groups by access ids... [accessId={}]",
-        LogSanitizer.stripLineBreakingChars(accessId));
+        () -> LogSanitizer.stripLineBreakingChars(accessId));
 
     String dn = searchDnForAccessId(accessId);
     if (dn == null || dn.isEmpty()) {
@@ -449,8 +448,8 @@ public class LdapClient {
 
     LOGGER.debug(
         "LDAP search for groups by access ids completed! [accessId={}, accessIds={}]",
-        LogSanitizer.stripLineBreakingChars(accessId),
-        accessIds);
+        () -> LogSanitizer.stripLineBreakingChars(accessId),
+        () -> accessIds);
 
     return accessIds;
   }
@@ -462,7 +461,7 @@ public class LdapClient {
 
     LOGGER.debug(
         "Starting LDAP search for permissions by access id... [accessId={}]",
-        LogSanitizer.stripLineBreakingChars(accessId));
+        () -> LogSanitizer.stripLineBreakingChars(accessId));
 
     String dn = searchDnForAccessId(accessId);
     if (dn == null || dn.isEmpty()) {
@@ -494,8 +493,8 @@ public class LdapClient {
 
     LOGGER.debug(
         "LDAP search for permissions by access id completed! [accessId={}, accessIds={}]",
-        LogSanitizer.stripLineBreakingChars(accessId),
-        accessIds);
+        () -> LogSanitizer.stripLineBreakingChars(accessId),
+        () -> accessIds);
 
     return accessIds;
   }
@@ -514,7 +513,7 @@ public class LdapClient {
 
     LOGGER.debug(
         "Starting LDAP search for dn given access id... [accessId={}]",
-        LogSanitizer.stripLineBreakingChars(accessId));
+        () -> LogSanitizer.stripLineBreakingChars(accessId));
 
     String dn =
         nameIsDn(accessId)
@@ -523,8 +522,8 @@ public class LdapClient {
 
     LOGGER.debug(
         "LDAP search for dn given access id completed! [accessId={}, dn={}]",
-        LogSanitizer.stripLineBreakingChars(accessId),
-        dn);
+        () -> LogSanitizer.stripLineBreakingChars(accessId),
+        () -> dn);
 
     return dn;
   }
@@ -855,22 +854,20 @@ public class LdapClient {
   private AccessIdRepresentationModel lookup(
       LdapName dn, String[] attributes, DnContextMapper mapper) {
 
-    String mapperSimpleName = mapper.getClass().getSimpleName();
-
     LOGGER.debug(
         "Starting LDAP lookup... [dn={}, attributes={}, mapperSimpleName={}]",
-        dn,
-        attributes,
-        mapperSimpleName);
+        () -> dn,
+        () -> attributes,
+        () -> mapper.getClass().getSimpleName());
 
     AccessIdRepresentationModel accessId = ldapTemplate.lookup(dn, attributes, mapper);
 
     LOGGER.debug(
         "LDAP lookup completed! [dn={}, attributes={}, mapperSimpleName={}, accessId={}]",
-        dn,
-        attributes,
-        mapperSimpleName,
-        accessId);
+        () -> dn,
+        () -> attributes,
+        () -> mapper.getClass().getSimpleName(),
+        () -> accessId);
 
     return accessId;
   }
@@ -882,16 +879,14 @@ public class LdapClient {
       String[] attributes,
       AbstractContextMapper<T> mapper) {
 
-    String simpleName = mapper.getClass().getSimpleName();
-
     LOGGER.debug(
         "Starting LDAP search... "
             + "[base={}, filter={}, searchScope={}, attributes={}, mapperSimpleName={}]",
-        base,
-        filter,
-        searchScope,
-        attributes,
-        simpleName);
+        () -> base,
+        () -> filter,
+        () -> searchScope,
+        () -> attributes,
+        () -> mapper.getClass().getSimpleName());
 
     List<T> searchResults = ldapTemplate.search(base, filter, searchScope, attributes, mapper);
 
@@ -899,12 +894,12 @@ public class LdapClient {
         "LDAP search completed! "
             + "[base={}, filter={}, searchScope={}, attributes={}, "
             + "mapperSimpleName={}, searchResults={}]",
-        base,
-        filter,
-        searchScope,
-        attributes,
-        simpleName,
-        searchResults);
+        () -> base,
+        () -> filter,
+        () -> searchScope,
+        () -> attributes,
+        () -> mapper.getClass().getSimpleName(),
+        () -> searchResults);
 
     return searchResults;
   }
@@ -938,7 +933,7 @@ public class LdapClient {
 
     LOGGER.debug(
         "Starting LDAP search for dn given user access id... [accessId={}]",
-        LogSanitizer.stripLineBreakingChars(accessId));
+        () -> LogSanitizer.stripLineBreakingChars(accessId));
 
     final AndFilter andFilter = new AndFilter();
     andFilter.and(new EqualsFilter(getUserSearchFilterName(), getUserSearchFilterValue()));
@@ -956,8 +951,8 @@ public class LdapClient {
 
     LOGGER.debug(
         "LDAP search for dn given user access id completed! [accessId={}, dns={}]",
-        LogSanitizer.stripLineBreakingChars(accessId),
-        dns);
+        () -> LogSanitizer.stripLineBreakingChars(accessId),
+        () -> dns);
 
     return dns;
   }
@@ -966,7 +961,7 @@ public class LdapClient {
 
     LOGGER.debug(
         "Starting LDAP search for dn given permission access id... [accessId={}]",
-        LogSanitizer.stripLineBreakingChars(accessId));
+        () -> LogSanitizer.stripLineBreakingChars(accessId));
 
     final AndFilter andFilter = new AndFilter();
     andFilter.and(
@@ -988,8 +983,8 @@ public class LdapClient {
 
     LOGGER.debug(
         "LDAP search for dn given permission access id completed! [accessId={}, dns={}]",
-        LogSanitizer.stripLineBreakingChars(accessId),
-        dns);
+        () -> LogSanitizer.stripLineBreakingChars(accessId),
+        () -> dns);
 
     return dns;
   }
@@ -998,7 +993,7 @@ public class LdapClient {
 
     LOGGER.debug(
         "Starting LDAP search for dn given group access id... [accessId={}]",
-        LogSanitizer.stripLineBreakingChars(accessId));
+        () -> LogSanitizer.stripLineBreakingChars(accessId));
 
     final AndFilter andFilter = new AndFilter();
     andFilter.and(new EqualsFilter(getGroupSearchFilterName(), getGroupSearchFilterValue()));
@@ -1019,8 +1014,8 @@ public class LdapClient {
 
     LOGGER.debug(
         "LDAP search for dn given group access id completed! [accessId={}, dns={}]",
-        LogSanitizer.stripLineBreakingChars(accessId),
-        dns);
+        () -> LogSanitizer.stripLineBreakingChars(accessId),
+        () -> dns);
 
     return dns;
   }
