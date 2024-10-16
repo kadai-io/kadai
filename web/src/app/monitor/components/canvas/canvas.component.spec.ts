@@ -20,7 +20,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { NgxsModule, Store } from '@ngxs/store';
 import { CanvasComponent } from './canvas.component';
-import { workbasketReportMock } from '../task-priority-report/monitor-mock-data';
+import { workbasketReportMock } from '../monitor-mock-data';
 import { SettingsState } from '../../../shared/store/settings-store/settings.state';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { settingsStateMock } from '../../../shared/store/mock-data/mock-store';

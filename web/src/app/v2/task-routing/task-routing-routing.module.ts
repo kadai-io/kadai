@@ -16,15 +16,34 @@
  *
  */
 
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { inject, NgModule } from '@angular/core';
+import { Router, RouterModule, Routes, UrlTree } from '@angular/router';
 import { RoutingUploadComponent } from './components/routing-upload/routing-upload.component';
-import { TaskRoutingGuard } from './guards/task-routing.guard';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+import { KadaiEngineService } from '../../shared/services/kadai-engine/kadai-engine.service';
 
 const routes: Routes = [
   {
     path: '',
-    canActivate: [TaskRoutingGuard],
+    canActivate: [
+      (): Observable<boolean | UrlTree> => {
+        const kadaiEngineService = inject(KadaiEngineService);
+        const router = inject(Router);
+
+        return kadaiEngineService.isCustomRoutingRulesEnabled().pipe(
+          map((value) => {
+            if (value) {
+              return value;
+            }
+            return router.parseUrl('/kadai/workplace');
+          }),
+          catchError(() => {
+            return of(router.parseUrl('/kadai/workplace'));
+          })
+        );
+      }
+    ],
     component: RoutingUploadComponent
   }
 ];

@@ -16,36 +16,88 @@
  *
  */
 
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { inject, NgModule } from '@angular/core';
+import { Router, RouterModule, Routes, UrlTree } from '@angular/router';
 
-import { BusinessAdminGuard } from './shared/guards/business-admin.guard';
-import { MonitorGuard } from './shared/guards/monitor.guard';
-import { UserGuard } from './shared/guards/user.guard';
-import { HistoryGuard } from './shared/guards/history.guard';
+import { UserRoles } from './shared/roles/user.roles';
 import { NoAccessComponent } from './shared/components/no-access/no-access.component';
+import { KadaiEngineService } from './shared/services/kadai-engine/kadai-engine.service';
+import { MonitorRoles } from './shared/roles/monitor.roles';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+import { BusinessAdminRoles } from './shared/roles/business-admin.roles';
+
+const businessAdminGuard = (): boolean | UrlTree => {
+  const kadaiEngineService = inject(KadaiEngineService);
+  const router = inject(Router);
+
+  if (kadaiEngineService.hasRole(Object.values(BusinessAdminRoles))) {
+    return true;
+  }
+
+  return router.parseUrl('/kadai/workplace');
+};
 
 const appRoutes: Routes = [
   {
     path: 'kadai',
     children: [
       {
-        canActivate: [BusinessAdminGuard],
+        canActivate: [businessAdminGuard],
         path: 'administration',
         loadChildren: () => import('./administration/administration.module').then((m) => m.AdministrationModule)
       },
       {
-        canActivate: [MonitorGuard],
+        canActivate: [
+          (): boolean | UrlTree => {
+            const kadaiEngineService = inject(KadaiEngineService);
+            const router = inject(Router);
+
+            if (kadaiEngineService.hasRole(Object.values(MonitorRoles))) {
+              return true;
+            }
+
+            return router.parseUrl('/kadai/workplace');
+          }
+        ],
         path: 'monitor',
         loadChildren: () => import('./monitor/monitor.module').then((m) => m.MonitorModule)
       },
       {
-        canActivate: [UserGuard],
+        canActivate: [
+          (): boolean | UrlTree => {
+            const kadaiEngineService = inject(KadaiEngineService);
+            const router = inject(Router);
+
+            if (kadaiEngineService.hasRole(Object.values(UserRoles))) {
+              return true;
+            }
+
+            return router.parseUrl('/kadai/no-role');
+          }
+        ],
         path: 'workplace',
         loadChildren: () => import('./workplace/workplace.module').then((m) => m.WorkplaceModule)
       },
       {
-        canActivate: [HistoryGuard],
+        canActivate: [
+          (): Observable<boolean | UrlTree> => {
+            const kadaiEngineService = inject(KadaiEngineService);
+            const router = inject(Router);
+
+            return kadaiEngineService.isHistoryProviderEnabled().pipe(
+              map((value) => {
+                if (value) {
+                  return value;
+                }
+                return router.parseUrl('/kadai/workplace');
+              }),
+              catchError(() => {
+                return of(router.parseUrl('/kadai/workplace'));
+              })
+            );
+          }
+        ],
         path: 'history',
         loadChildren: () => import('./history/history.module').then((m) => m.HistoryModule)
       },
@@ -58,12 +110,12 @@ const appRoutes: Routes = [
         redirectTo: 'administration/workbaskets'
       },
       {
-        canActivate: [BusinessAdminGuard],
+        canActivate: [businessAdminGuard],
         path: 'settings',
         loadChildren: () => import('./settings/settings.module').then((m) => m.SettingsModule)
       },
       {
-        canActivate: [BusinessAdminGuard],
+        canActivate: [businessAdminGuard],
         path: '**',
         redirectTo: 'administration/workbaskets'
       }
@@ -74,7 +126,7 @@ const appRoutes: Routes = [
     component: NoAccessComponent
   },
   {
-    canActivate: [BusinessAdminGuard],
+    canActivate: [businessAdminGuard],
     path: '**',
     redirectTo: 'kadai/administration/workbaskets'
   }

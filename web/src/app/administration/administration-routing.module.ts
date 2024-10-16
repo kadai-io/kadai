@@ -16,25 +16,38 @@
  *
  */
 
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { inject, NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
 
-import { DomainGuard } from 'app/shared/guards/domain.guard';
 import { AccessItemsManagementComponent } from './components/access-items-management/access-items-management.component';
 import { ClassificationOverviewComponent } from './components/classification-overview/classification-overview.component';
 import { WorkbasketOverviewComponent } from './components/workbasket-overview/workbasket-overview.component';
 import { AdministrationOverviewComponent } from './components/administration-overview/administration-overview.component';
+import { catchError, map } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { DomainService } from '../shared/services/domain/domain.service';
+
+const domainGuard = () => {
+  const domainService = inject(DomainService);
+
+  return domainService.getDomains().pipe(
+    map(() => true),
+    catchError(() => {
+      return of(false);
+    })
+  );
+};
 
 const routes: Routes = [
   {
     path: '',
     component: AdministrationOverviewComponent,
-    canActivate: [DomainGuard],
+    canActivate: [domainGuard],
     children: [
       {
         path: 'workbaskets',
         component: WorkbasketOverviewComponent,
-        canActivate: [DomainGuard],
+        canActivate: [domainGuard],
         children: [
           {
             path: '',
@@ -55,7 +68,7 @@ const routes: Routes = [
       {
         path: 'classifications',
         component: ClassificationOverviewComponent,
-        canActivate: [DomainGuard],
+        canActivate: [domainGuard],
         children: [
           {
             path: '',
@@ -76,7 +89,7 @@ const routes: Routes = [
       {
         path: 'access-items-management',
         component: AccessItemsManagementComponent,
-        canActivate: [DomainGuard],
+        canActivate: [domainGuard],
         children: [
           {
             path: '**',
@@ -86,7 +99,7 @@ const routes: Routes = [
       },
       {
         path: 'task-routing',
-        canActivate: [DomainGuard],
+        canActivate: [domainGuard],
         loadChildren: () => import('@task-routing/task-routing.module').then((m) => m.TaskRoutingModule)
       }
     ]

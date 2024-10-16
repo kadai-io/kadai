@@ -2,7 +2,6 @@ const { pathsToModuleNameMapper } = require('ts-jest');
 const { compilerOptions } = require('./tsconfig');
 
 module.exports = {
-  globalSetup: 'jest-preset-angular/global-setup',
   preset: 'jest-preset-angular',
   roots: ['<rootDir>/src'],
   modulePaths: ['<rootDir>'],
@@ -11,7 +10,6 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/src/test.ts'],
   collectCoverage: true,
   coverageReporters: ['text'],
-  // coverageReporters: ['html', 'text'],
   coverageDirectory: 'coverage/kadai-web',
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths || {}, {
     prefix: `<rootDir>/${compilerOptions.baseUrl}/`

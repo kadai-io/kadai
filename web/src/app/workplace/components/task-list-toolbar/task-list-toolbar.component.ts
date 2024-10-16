@@ -158,7 +158,7 @@ export class TaskListToolbarComponent implements OnInit {
   }
 
   onTabChange(search) {
-    const tab = search.path[0].innerText;
+    const tab = search.target.innerText;
     this.requestInProgressService.setRequestInProgress(true);
     if (tab === 'Workbaskets') {
       this.router.navigate(['kadai/workplace'], { queryParams: { component: 'workbaskets' } });
@@ -221,7 +221,7 @@ export class TaskListToolbarComponent implements OnInit {
   createTask() {
     this.taskService.selectTask();
     this.router.navigate([{ outlets: { detail: 'taskdetail/new-task' } }], {
-      relativeTo: this.route,
+      relativeTo: this.route.parent,
       queryParamsHandling: 'merge'
     });
   }

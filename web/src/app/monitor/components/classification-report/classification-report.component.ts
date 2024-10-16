@@ -20,8 +20,8 @@ import { Component, OnInit } from '@angular/core';
 import { MonitorService } from 'app/monitor/services/monitor.service';
 import { ChartData } from 'app/monitor/models/chart-data';
 import { ReportData } from '../../models/report-data';
-import { ChartColorsDefinition } from '../../models/chart-colors';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { ChartConfiguration } from 'chart.js';
 
 @Component({
   selector: 'kadai-monitor-classification-report',
@@ -35,11 +35,15 @@ export class ClassificationReportComponent implements OnInit {
   lineChartLegend = true;
   lineChartType = 'line';
   lineChartData: Array<ChartData>;
-  lineChartOptions: any = {
-    responsive: true
+  lineChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: true,
+    elements: {
+      line: {
+        tension: 0.4
+      }
+    }
   };
-
-  lineChartColors = ChartColorsDefinition.getColors();
 
   constructor(
     private restConnectorService: MonitorService,
@@ -54,9 +58,5 @@ export class ClassificationReportComponent implements OnInit {
       this.lineChartLabels = this.reportData.meta.header;
       this.requestInProgressService.setRequestInProgress(false);
     });
-  }
-
-  getTitle(): string {
-    return 'Tasks grouped by classification, querying by due date';
   }
 }

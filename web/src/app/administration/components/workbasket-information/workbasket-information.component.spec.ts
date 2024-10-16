@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, flush, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { WorkbasketInformationComponent } from './workbasket-information.component';
 import { Component, DebugElement, Input } from '@angular/core';
 import { Actions, NgxsModule, ofActionDispatched, Store } from '@ngxs/store';
@@ -232,6 +232,7 @@ describe('WorkbasketInformationComponent', () => {
 
     tick();
     fixture.detectChanges();
+    flush();
 
     expect(component.workbasket['custom3']).toBe('');
     expect(component.workbasket['custom4']).toBe(newValue);

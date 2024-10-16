@@ -83,13 +83,17 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
         ]
       },
       options: {
-        rotation: Math.PI,
-        circumference: Math.PI,
-        title: {
-          display: true,
-          text: String(row.total),
-          position: 'bottom',
-          fontSize: 18
+        rotation: 270,
+        circumference: 180,
+        plugins: {
+          title: {
+            display: true,
+            text: String(row.total),
+            position: 'bottom',
+            font: {
+              size: 18
+            }
+          }
         }
       }
     });

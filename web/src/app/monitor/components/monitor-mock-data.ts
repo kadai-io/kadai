@@ -16,7 +16,7 @@
  *
  */
 
-import { ReportData } from '../../models/report-data';
+import { ReportData } from '../models/report-data';
 
 export const workbasketReportMock: ReportData = {
   meta: {
