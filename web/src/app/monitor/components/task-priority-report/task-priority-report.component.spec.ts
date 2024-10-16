@@ -24,7 +24,7 @@ import { TaskPriorityReportComponent } from './task-priority-report.component';
 import { MonitorService } from '../../services/monitor.service';
 import { of } from 'rxjs';
 import { MatTableModule } from '@angular/material/table';
-import { workbasketReportMock } from './monitor-mock-data';
+import { workbasketReportMock } from '../monitor-mock-data';
 import { settingsStateMock } from '../../../shared/store/mock-data/mock-store';
 import { SettingsState } from '../../../shared/store/settings-store/settings.state';
 import { HttpClientTestingModule } from '@angular/common/http/testing';

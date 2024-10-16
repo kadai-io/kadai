@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, flush, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { TypeAheadComponent } from './type-ahead.component';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
@@ -93,6 +93,8 @@ describe('TypeAheadComponent with AccessId input', () => {
 
     tick(50);
     fixture.detectChanges();
+    flush();
+
     expect(emitSpy).toHaveBeenCalledWith(false);
   }));
 
@@ -103,6 +105,8 @@ describe('TypeAheadComponent with AccessId input', () => {
 
     tick(50);
     fixture.detectChanges();
+    flush();
+
     expect(emitSpy).toHaveBeenCalledWith(true);
   }));
 });
