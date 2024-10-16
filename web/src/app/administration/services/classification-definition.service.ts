@@ -27,7 +27,10 @@ import { Observable } from 'rxjs';
 
 @Injectable()
 export class ClassificationDefinitionService {
-  constructor(private httpClient: HttpClient, private startupService: StartupService) {}
+  constructor(
+    private httpClient: HttpClient,
+    private startupService: StartupService
+  ) {}
 
   get url(): string {
     return this.startupService.getKadaiRestUrl() + '/v1/classification-definitions';

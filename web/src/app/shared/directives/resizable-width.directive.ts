@@ -24,7 +24,10 @@ import { Directive, HostListener, Renderer2, ElementRef } from '@angular/core';
 export class ResizableWidthDirective {
   private startX: number;
 
-  constructor(private renderer: Renderer2, private el: ElementRef) {}
+  constructor(
+    private renderer: Renderer2,
+    private el: ElementRef
+  ) {}
 
   @HostListener('mouseover', ['$event'])
   onMouseover() {

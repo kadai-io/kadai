@@ -31,7 +31,10 @@ export class DialogPopUpComponent implements OnInit {
   callback: Function;
   isDataSpecified: boolean;
 
-  constructor(@Inject(MAT_DIALOG_DATA) private data: any, private obtainMessageService: ObtainMessageService) {}
+  constructor(
+    @Inject(MAT_DIALOG_DATA) private data: any,
+    private obtainMessageService: ObtainMessageService
+  ) {}
 
   ngOnInit() {
     this.isDataSpecified = this.data?.message && this.data?.callback;

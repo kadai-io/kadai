@@ -18,27 +18,22 @@
 
 package acceptance.jobs;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import acceptance.AbstractAccTest;
-import io.kadai.classification.internal.jobs.ClassificationChangedJob;
 import io.kadai.common.api.BaseQuery;
-import io.kadai.common.api.ScheduledJob;
-import io.kadai.common.internal.jobs.AbstractKadaiJob;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.internal.jobs.TaskCleanupJob;
-import io.kadai.task.internal.jobs.TaskRefreshJob;
 import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
 import io.kadai.workbasket.internal.jobs.WorkbasketCleanupJob;
-import java.time.Instant;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Acceptance test for all "jobs workbasket runner" scenarios. */
 @ExtendWith(JaasExtension.class)
@@ -104,37 +99,6 @@ class WorkbasketCleanupJobAccTest extends AbstractAccTest {
 
     totalWorkbasketCount = workbasketService.createWorkbasketQuery().count();
     assertThat(totalWorkbasketCount).isEqualTo(26);
-  }
-
-  @WithAccessId(user = "admin")
-  @Test
-  void should_DeleteOldWorkbasketCleanupJobs_When_InitializingSchedule() throws Exception {
-
-    for (int i = 0; i < 10; i++) {
-      ScheduledJob job = new ScheduledJob();
-      job.setType(WorkbasketCleanupJob.class.getName());
-      kadaiEngine.getJobService().createJob(job);
-      job.setType(TaskRefreshJob.class.getName());
-      kadaiEngine.getJobService().createJob(job);
-      job.setType(ClassificationChangedJob.class.getName());
-      kadaiEngine.getJobService().createJob(job);
-    }
-
-    List<ScheduledJob> jobsToRun = getJobMapper(kadaiEngine).findJobsToRun(Instant.now());
-
-    assertThat(jobsToRun).hasSize(30);
-
-    List<ScheduledJob> workbasketCleanupJobs =
-        jobsToRun.stream()
-            .filter(
-                scheduledJob -> scheduledJob.getType().equals(WorkbasketCleanupJob.class.getName()))
-            .collect(Collectors.toList());
-
-    AbstractKadaiJob.initializeSchedule(kadaiEngine, WorkbasketCleanupJob.class);
-
-    jobsToRun = getJobMapper(kadaiEngine).findJobsToRun(Instant.now());
-
-    assertThat(jobsToRun).doesNotContainAnyElementsOf(workbasketCleanupJobs);
   }
 
   private long getNumberTaskNotCompleted(String workbasketId) {

@@ -17,11 +17,11 @@
  */
 
 import { Component, OnInit } from '@angular/core';
-import { BusinessAdminGuard } from 'app/shared/guards/business-admin.guard';
-import { MonitorGuard } from 'app/shared/guards/monitor.guard';
-import { UserGuard } from 'app/shared/guards/user.guard';
 import { Router } from '@angular/router';
 import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.service';
+import { MonitorRoles } from '../../roles/monitor.roles';
+import { UserRoles } from '../../roles/user.roles';
+import { BusinessAdminRoles } from '../../roles/business-admin.roles';
 
 @Component({
   selector: 'kadai-shared-no-access',
@@ -30,14 +30,17 @@ import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.ser
 })
 export class NoAccessComponent implements OnInit {
   showNoAccess = false;
-  constructor(private kadaiEngineService: KadaiEngineService, public router: Router) {}
+  constructor(
+    private kadaiEngineService: KadaiEngineService,
+    public router: Router
+  ) {}
 
   ngOnInit() {
-    if (this.kadaiEngineService.hasRole(BusinessAdminGuard.roles)) {
+    if (this.kadaiEngineService.hasRole(Object.values(BusinessAdminRoles))) {
       this.router.navigate(['administration']);
-    } else if (this.kadaiEngineService.hasRole(MonitorGuard.roles)) {
+    } else if (this.kadaiEngineService.hasRole(Object.values(MonitorRoles))) {
       this.router.navigate(['monitor']);
-    } else if (this.kadaiEngineService.hasRole(UserGuard.roles)) {
+    } else if (this.kadaiEngineService.hasRole(Object.values(UserRoles))) {
       this.router.navigate(['workplace']);
     } else {
       this.showNoAccess = true;

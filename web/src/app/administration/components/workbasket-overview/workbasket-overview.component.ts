@@ -42,7 +42,10 @@ export class WorkbasketOverviewComponent implements OnInit {
   @ViewChild('workbasketList') workbasketList: ElementRef;
   @ViewChild('toggleButton') toggleButton: ElementRef;
 
-  constructor(private route: ActivatedRoute, private store: Store) {}
+  constructor(
+    private route: ActivatedRoute,
+    private store: Store
+  ) {}
 
   ngOnInit() {
     if (this.route.url) {

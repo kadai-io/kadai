@@ -22,7 +22,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 import { RouterModule } from '@angular/router';
-import { TreeModule } from '@circlon/angular-tree-component';
 import { AlertModule } from 'ngx-bootstrap/alert';
 import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
 import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
@@ -78,6 +77,7 @@ import { AccessIdsService } from './services/access-ids/access-ids.service';
 import { DragAndDropDirective } from './directives/drag-and-drop.directive';
 import { GermanTimeFormatPipe } from './pipes/german-time-format.pipe';
 import { ResizableWidthDirective } from './directives/resizable-width.directive';
+import { TreeModule } from '@ali-hm/angular-tree-component';
 
 const MODULES = [
   CommonModule,

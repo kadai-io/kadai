@@ -46,6 +46,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import io.kadai.workbasket.internal.jobs.WorkbasketCleanupJob;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DynamicTest;
@@ -74,6 +76,7 @@ class AbstractKadaiJobAccTest {
     jobMapper.deleteMultiple(TaskRefreshJob.class.getName());
     jobMapper.deleteMultiple(ClassificationChangedJob.class.getName());
     jobMapper.deleteMultiple(HistoryCleanupJob.class.getName());
+    jobMapper.deleteMultiple(WorkbasketCleanupJob.class.getName());
   }
 
   @WithAccessId(user = "admin")
@@ -106,7 +109,8 @@ class AbstractKadaiJobAccTest {
     List<Pair<String, Class<?>>> testCases =
         List.of(
             Pair.of("Delete Old Task Cleanup Jobs", TaskCleanupJob.class),
-            Pair.of("Delete Old History Cleanup Jobs", HistoryCleanupJob.class));
+            Pair.of("Delete Old History Cleanup Jobs", HistoryCleanupJob.class),
+            Pair.of("Delete Old Workbasket Cleanup Jobs", WorkbasketCleanupJob.class));
     ThrowingConsumer<Pair<String, Class<?>>> test =
         t -> {
           for (int i = 0; i < 10; i++) {

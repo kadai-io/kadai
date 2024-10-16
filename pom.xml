@@ -79,9 +79,9 @@
         <version.jakarta.servlet>6.1.0</version.jakarta.servlet>
         <version.arquillian>1.9.1.Final</version.arquillian>
         <version.arquillian.managed.wildfly>5.0.1.Final</version.arquillian.managed.wildfly>
-        <version.shrinkwrap>3.3.1</version.shrinkwrap>
+        <version.shrinkwrap>3.3.2</version.shrinkwrap>
         <version.arquillian.jakarta>10.0.0.Final</version.arquillian.jakarta>
-        <version.junit.bom>5.11.2</version.junit.bom>
+        <version.junit.bom>5.11.3</version.junit.bom>
 
         <!-- test dependencies -->
         <version.archunit>1.3.0</version.archunit>
@@ -90,7 +90,7 @@
         <version.openpojo>0.9.1</version.openpojo>
         <version.jacoco>0.8.12</version.jacoco>
         <version.slf4j-test>3.0.1</version.slf4j-test>
-        <version.testcontainers>1.20.2</version.testcontainers>
+        <version.testcontainers>1.20.3</version.testcontainers>
         <version.spring-openapi>2.6.0</version.spring-openapi>
 
         <!-- AspectJ dependencies -->
@@ -106,7 +106,6 @@
 
         <!-- database driver versions -->
         <version.db2>11.5.9.0</version.db2>
-        <version.oracle>23.5.0.24.07</version.oracle>
 
         <!-- sonar settings -->
         <sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>

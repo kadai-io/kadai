@@ -52,7 +52,10 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
   @Select(SettingsSelectors.getSettings)
   settings$: Observable<Settings>;
 
-  constructor(private monitorService: MonitorService, private requestInProgressService: RequestInProgressService) {}
+  constructor(
+    private monitorService: MonitorService,
+    private requestInProgressService: RequestInProgressService
+  ) {}
 
   ngOnInit() {
     this.requestInProgressService.setRequestInProgress(true);

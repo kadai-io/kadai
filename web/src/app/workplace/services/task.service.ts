@@ -36,7 +36,10 @@ export class TaskService {
   private taskDeletedSource = new Subject<Task>();
   taskDeletedStream = this.taskDeletedSource.asObservable();
 
-  constructor(private httpClient: HttpClient, private startupService: StartupService) {}
+  constructor(
+    private httpClient: HttpClient,
+    private startupService: StartupService
+  ) {}
 
   get url(): string {
     return this.startupService.getKadaiRestUrl() + '/v1/tasks';

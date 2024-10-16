@@ -32,7 +32,10 @@ import { asUrlQueryString } from '../../../shared/util/query-parameters-v2';
   providedIn: 'root'
 })
 export class TaskHistoryQueryService {
-  constructor(private httpClient: HttpClient, private startupService: StartupService) {}
+  constructor(
+    private httpClient: HttpClient,
+    private startupService: StartupService
+  ) {}
 
   get url(): string {
     return this.startupService.getKadaiRestUrl();

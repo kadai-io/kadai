@@ -174,60 +174,6 @@ public class TaskQuerySqlProvider {
         + CLOSING_SCRIPT_TAG;
   }
 
-  /**
-   * you cant lock a view in oracle. the sql code `FETCH FIRST ROW ONLY` would create in oracle a
-   * view therefore we must first select a rowid based on where criteria then we select everything
-   * based on rowid and lock this rowid
-   *
-   * @return SELECT Statement for oracle claiming
-   */
-  @SuppressWarnings("unused")
-  public static String queryTaskSummariesOracle() {
-    return OPENING_SCRIPT_TAG
-        + "SELECT "
-        + commonSelectFieldsOracle()
-        + "<if test=\"addAttachmentColumnsToSelectClauseForOrdering\">"
-        + ", a2.CLASSIFICATION_ID, a2.CLASSIFICATION_KEY, a2.CHANNEL, a2.REF_VALUE, a2.RECEIVED"
-        + "</if>"
-        + "<if test=\"addClassificationNameToSelectClauseForOrdering\">, c2.NAME </if>"
-        + "<if test=\"addAttachmentClassificationNameToSelectClauseForOrdering\">, ac2.NAME </if>"
-        + "<if test=\"addWorkbasketNameToSelectClauseForOrdering\">, w2.NAME </if>"
-        + "<if test=\"joinWithUserInfo\">, u2.LONG_NAME </if>"
-        + "FROM TASK t2 "
-        + "<if test=\"joinWithAttachments\">LEFT JOIN ATTACHMENT a2 ON t2.ID = a2.TASK_ID </if>"
-        + "<if test=\"joinWithSecondaryObjectReferences\">LEFT JOIN OBJECT_REFERENCE o2 "
-        + "ON t2.ID = o2.TASK_ID </if>"
-        + "<if test=\"joinWithClassifications\">LEFT JOIN CLASSIFICATION c2 "
-        + "ON t2.CLASSIFICATION_ID = c2.ID </if>"
-        + "<if test=\"joinWithAttachmentClassifications\">LEFT JOIN CLASSIFICATION ac2 "
-        + "ON a2.CLASSIFICATION_ID = ac2.ID </if>"
-        + "<if test=\"joinWithWorkbaskets\">LEFT JOIN WORKBASKET w2 "
-        + "ON t2.WORKBASKET_ID = w2.ID </if>"
-        + "<if test=\"joinWithUserInfo\">LEFT JOIN USER_INFO u2 ON t2.owner = u2.USER_ID </if>"
-        + "WHERE t2.rowid = (SELECT <if test=\"useDistinctKeyword\">DISTINCT</if> t.rowid "
-        + "FROM TASK t "
-        + "<if test=\"joinWithAttachments\">LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID </if>"
-        + "<if test=\"joinWithSecondaryObjectReferences\">LEFT JOIN OBJECT_REFERENCE o "
-        + "ON t.ID = o.TASK_ID </if>"
-        + "<if test=\"joinWithClassifications\">LEFT JOIN CLASSIFICATION c "
-        + "ON t.CLASSIFICATION_ID = c.ID </if>"
-        + "<if test=\"joinWithAttachmentClassifications\">LEFT JOIN CLASSIFICATION ac "
-        + "ON a.CLASSIFICATION_ID = ac.ID </if>"
-        + "<if test=\"joinWithWorkbaskets\">LEFT JOIN WORKBASKET w "
-        + "ON t.WORKBASKET_ID = w.ID </if>"
-        + "<if test=\"joinWithUserInfo\">LEFT JOIN USER_INFO u ON t.owner = u.USER_ID </if>"
-        + OPENING_WHERE_TAG
-        + commonTaskWhereStatement()
-        + "<if test='selectAndClaim == true'> AND t.STATE = 'READY' </if>"
-        + CLOSING_WHERE_TAG
-        + "<if test='!orderByOuter.isEmpty()'>"
-        + "ORDER BY <foreach item='item' collection='orderByOuter' separator=',' >${item}</foreach>"
-        + "</if> "
-        + "fetch first 1 rows only "
-        + ") FOR UPDATE"
-        + CLOSING_SCRIPT_TAG;
-  }
-
   @SuppressWarnings("unused")
   public static String countQueryTasks() {
     return OPENING_SCRIPT_TAG
@@ -382,9 +328,6 @@ public class TaskQuerySqlProvider {
         .collect(Collectors.joining(", "));
   }
 
-  private static String commonSelectFieldsOracle() {
-    return commonSelectFields().replace("t.id", "t2.id").replace(", t", ", t2");
-  }
 
   private static String db2selectFields() {
     // needs to be the same order as the commonSelectFields (TaskQueryColumnValue)
@@ -412,7 +355,7 @@ public class TaskQuerySqlProvider {
         + "SELECT WID "
         + "FROM ("
         + "<choose>"
-        + "<when test=\"_databaseId == 'db2' || _databaseId == 'oracle'\">"
+        + "<when test=\"_databaseId == 'db2'\">"
         + "SELECT WORKBASKET_ID as WID, MAX(PERM_READ) as MAX_READ, "
         + "MAX(PERM_READTASKS) as MAX_READTASKS "
         + "</when>"

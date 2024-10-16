@@ -22,6 +22,7 @@ import { MonitorService } from '../../services/monitor.service';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
+import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 
 @Component({
   selector: 'kadai-monitor-task-report',
@@ -29,13 +30,19 @@ import { RequestInProgressService } from 'app/shared/services/request-in-progres
   styleUrls: ['./task-report.component.scss']
 })
 export class TaskReportComponent implements OnInit {
-  pieChartLabels: string[];
-  pieChartData: number[] = [];
-  pieChartType = 'pie';
+  pieChartData: ChartData<'pie', number[], string> = { labels: [], datasets: [] };
+  pieChartType: ChartType = 'pie';
+  pieChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: true
+  };
   reportData: ReportData;
   private destroy$ = new Subject<void>();
 
-  constructor(private monitorService: MonitorService, private requestInProgressService: RequestInProgressService) {}
+  constructor(
+    private monitorService: MonitorService,
+    private requestInProgressService: RequestInProgressService
+  ) {}
 
   ngOnInit() {
     this.requestInProgressService.setRequestInProgress(true);
@@ -44,15 +51,9 @@ export class TaskReportComponent implements OnInit {
       .pipe(takeUntil(this.destroy$))
       .subscribe((report) => {
         this.reportData = report;
-        this.pieChartLabels = this.reportData.meta.header;
-        this.reportData.sumRow[0].cells.forEach((cell) => {
-          this.pieChartData.push(cell);
-        });
+        this.pieChartData.labels = this.reportData.meta.header;
+        this.pieChartData.datasets.push({ data: this.reportData.sumRow[0].cells });
         this.requestInProgressService.setRequestInProgress(false);
       });
-  }
-
-  getTitle(): string {
-    return 'Tasks status grouped by domain';
   }
 }

@@ -80,16 +80,6 @@ public class UserMapperSqlProvider {
         + CLOSING_SCRIPT_TAG;
   }
 
-  public static String insertGroupsOracle() {
-    return OPENING_SCRIPT_TAG
-        + "INSERT ALL "
-        + "<foreach item='group' collection='groups' separator='\n'>"
-        + "INTO GROUP_INFO (USER_ID, GROUP_ID) VALUES ( #{id}, #{group} )"
-        + "</foreach> "
-        + "SELECT 1 FROM DUAL"
-        + CLOSING_SCRIPT_TAG;
-  }
-
   public static String insertPermissions() {
     return OPENING_SCRIPT_TAG
         + "INSERT INTO PERMISSION_INFO (USER_ID, PERMISSION_ID) VALUES "
@@ -97,16 +87,6 @@ public class UserMapperSqlProvider {
         + "open='(' separator='),(' close=')'>"
         + "#{id}, #{permission}"
         + "</foreach> "
-        + CLOSING_SCRIPT_TAG;
-  }
-
-  public static String insertPermissionsOracle() {
-    return OPENING_SCRIPT_TAG
-        + "INSERT ALL "
-        + "<foreach item='permission' collection='permissions' separator='\n'>"
-        + "INTO PERMISSION_INFO (USER_ID, PERMISSION_ID) VALUES ( #{id}, #{permission} )"
-        + "</foreach> "
-        + "SELECT 1 FROM DUAL"
         + CLOSING_SCRIPT_TAG;
   }
 

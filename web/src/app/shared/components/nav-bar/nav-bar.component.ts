@@ -41,7 +41,10 @@ export class NavBarComponent implements OnInit {
 
   destroy$ = new Subject();
 
-  constructor(private selectedRouteService: SelectedRouteService, private sidenavService: SidenavService) {}
+  constructor(
+    private selectedRouteService: SelectedRouteService,
+    private sidenavService: SidenavService
+  ) {}
 
   ngOnInit() {
     this.selectedRouteService

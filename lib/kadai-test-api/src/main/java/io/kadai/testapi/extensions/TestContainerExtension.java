@@ -20,7 +20,6 @@ package io.kadai.testapi.extensions;
 
 import static io.kadai.testapi.DockerContainerCreator.createDataSource;
 import static io.kadai.testapi.DockerContainerCreator.createDockerContainer;
-import static io.kadai.testapi.OracleSchemaHelper.initOracleSchema;
 import static io.kadai.testapi.util.ExtensionCommunicator.getClassLevelStore;
 import static io.kadai.testapi.util.ExtensionCommunicator.isTopLevelClass;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
@@ -79,9 +78,7 @@ public class TestContainerExtension implements InvocationInterceptor {
 
   public static String determineSchemaName() {
     String uniqueId = "A" + UUID.randomUUID().toString().replace("-", "_");
-    if (EXECUTION_DATABASE == DB.ORACLE) {
-      uniqueId = uniqueId.substring(0, 26);
-    } else if (EXECUTION_DATABASE == DB.POSTGRES) {
+    if (EXECUTION_DATABASE == DB.POSTGRES) {
       uniqueId = uniqueId.toLowerCase();
     }
     return uniqueId;
@@ -115,9 +112,6 @@ public class TestContainerExtension implements InvocationInterceptor {
       String schemaName = determineSchemaName();
       store.put(STORE_SCHEMA_NAME, schemaName);
       store.put(STORE_DATA_SOURCE, DATA_SOURCE);
-      if (DB.ORACLE == EXECUTION_DATABASE) {
-        initOracleSchema(DATA_SOURCE, schemaName);
-      }
     } else if (KadaiConfigurationModifier.class.isAssignableFrom(testClass)
         || isAnnotated(testClass, WithServiceProvider.class)) {
       // since the implementation of KadaiConfigurationModifier implies the generation of a

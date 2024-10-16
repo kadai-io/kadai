@@ -42,7 +42,7 @@ public interface JobMapper {
           + "INSERT INTO SCHEDULED_JOB (JOB_ID, PRIORITY, CREATED, DUE, STATE, LOCKED_BY, LOCK_EXPIRES, TYPE, RETRY_COUNT, ARGUMENTS) "
           + "VALUES ("
           + "<choose>"
-          + "<when test=\"_databaseId == 'db2' || _databaseId == 'oracle'\">"
+          + "<when test=\"_databaseId == 'db2'\">"
           + "SCHEDULED_JOB_SEQ.NEXTVAL"
           + "</when>"
           + "<otherwise>"

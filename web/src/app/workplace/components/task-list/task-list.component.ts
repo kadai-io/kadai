@@ -35,7 +35,10 @@ export class TaskListComponent implements OnInit {
   @Output()
   selectedIdChange = new EventEmitter<string>();
 
-  constructor(private router: Router, private route: ActivatedRoute) {}
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {}
 
@@ -43,7 +46,7 @@ export class TaskListComponent implements OnInit {
     this.selectedId = taskId;
     this.selectedIdChange.emit(taskId);
     this.router.navigate([{ outlets: { detail: `taskdetail/${this.selectedId}` } }], {
-      relativeTo: this.route,
+      relativeTo: this.route.parent,
       queryParamsHandling: 'merge'
     });
   }

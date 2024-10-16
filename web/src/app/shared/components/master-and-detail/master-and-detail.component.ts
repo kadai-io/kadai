@@ -17,7 +17,7 @@
  */
 
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute, NavigationStart, RouterEvent } from '@angular/router';
+import { Router, NavigationStart, RouterEvent } from '@angular/router';
 import { MasterAndDetailService } from 'app/shared/services/master-and-detail/master-and-detail.service';
 
 @Component({
@@ -34,7 +34,6 @@ export class MasterAndDetailComponent implements OnInit {
   showDetail = false;
   currentRoute = '';
   constructor(
-    private route: ActivatedRoute,
     private router: Router,
     private masterAndDetailService: MasterAndDetailService
   ) {}
@@ -48,10 +47,6 @@ export class MasterAndDetailComponent implements OnInit {
         this.masterAndDetailService.setShowDetail(this.showDetail);
       }
     });
-  }
-
-  backClicked(): void {
-    this.router.navigate(['../'], { relativeTo: this.route, queryParamsHandling: 'merge' });
   }
 
   private showDetails(event?: RouterEvent): boolean {

@@ -18,8 +18,6 @@
 
 package io.kadai.sampledata;
 
-import static io.kadai.common.internal.persistence.StringTypeHandler.EMPTY_PLACEHOLDER;
-
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.configuration.DB;
 import java.io.BufferedReader;
@@ -39,6 +37,7 @@ final class SqlReplacer {
   static final Pattern RELATIVE_DATE_PATTERN = Pattern.compile(RELATIVE_DATE_REGEX);
   static final DateTimeFormatter DATE_TIME_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+  public static final String EMPTY_PLACEHOLDER = "#EMPTY#";
 
   // to prevent initialization
   private SqlReplacer() {}
@@ -89,19 +88,10 @@ final class SqlReplacer {
     return sql.replaceAll("(?i)true", "1").replaceAll("(?i)false", "0");
   }
 
-  private static String replaceEmptyStringWithPlaceholder(String sql) {
-    return sql.replace("''", String.format("'%s'", EMPTY_PLACEHOLDER));
-  }
-
   private static String parseAndReplace(BufferedReader bufferedReader, ZonedDateTime now, DB db) {
     String sql = bufferedReader.lines().collect(Collectors.joining(System.lineSeparator()));
-    if (DB.DB2 == db || DB.ORACLE == db) {
+    if (DB.DB2 == db) {
       sql = replaceBooleanWithInteger(sql);
-    }
-    if (DB.ORACLE == db) {
-      sql = replaceEmptyStringWithPlaceholder(sql);
-      // Oracle needs to be informed about the timestamp format used in data scripts
-      sql = "ALTER SESSION SET NLS_TIMESTAMP_FORMAT = 'YYYY-MM-DD HH24:MI:SS.FF3';\n" + sql;
     }
     return replaceDatePlaceholder(now, sql);
   }

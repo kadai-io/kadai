@@ -32,7 +32,10 @@ export class ClassificationTypesSelectorComponent {
   @Select(ClassificationSelectors.selectedClassificationType) classificationTypeSelected$: Observable<string>;
   @Select(ClassificationSelectors.classificationTypes) classificationTypes$: Observable<string[]>;
 
-  constructor(private store: Store, private location: Location) {}
+  constructor(
+    private store: Store,
+    private location: Location
+  ) {}
 
   select(value: string): void {
     this.store.dispatch(new SetSelectedClassificationType(value));

@@ -41,11 +41,6 @@
             <artifactId>postgresql</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.oracle.database.jdbc</groupId>
-            <artifactId>ojdbc8</artifactId>
-            <version>${version.oracle}</version>
-        </dependency>
-        <dependency>
             <groupId>io.kadai</groupId>
             <artifactId>kadai-rest-spring-example-common</artifactId>
             <version>${project.version}</version>

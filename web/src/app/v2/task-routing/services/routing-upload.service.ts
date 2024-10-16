@@ -24,7 +24,10 @@ import { StartupService } from 'app/shared/services/startup/startup.service';
   providedIn: 'root'
 })
 export class RoutingUploadService {
-  constructor(private httpClient: HttpClient, private startupService: StartupService) {}
+  constructor(
+    private httpClient: HttpClient,
+    private startupService: StartupService
+  ) {}
 
   get url(): string {
     return this.startupService.getKadaiRestUrl() + '/v1/routing-rules/default';

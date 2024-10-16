@@ -60,8 +60,6 @@ public class TaskQueryImpl implements TaskQuery {
       "io.kadai.task.internal.TaskQueryMapper.queryTaskSummaries";
   private static final String LINK_TO_MAPPER_DB2 =
       "io.kadai.task.internal.TaskQueryMapper.queryTaskSummariesDb2";
-  private static final String LINK_TO_MAPPER_ORACLE =
-      "io.kadai.task.internal.TaskQueryMapper.queryTaskSummariesOracle";
   private static final String LINK_TO_COUNTER =
       "io.kadai.task.internal.TaskQueryMapper.countQueryTasks";
   private static final String LINK_TO_COUNTER_DB2 =
@@ -2157,8 +2155,6 @@ public class TaskQueryImpl implements TaskQuery {
         && lockResults == 0
         && kadaiEngine.getEngine().getConfiguration().isUseSpecificDb2Taskquery()) {
       return LINK_TO_MAPPER_DB2;
-    } else if (selectAndClaim && DB.ORACLE == getDB()) {
-      return LINK_TO_MAPPER_ORACLE;
     } else {
       return LINK_TO_MAPPER;
     }

@@ -27,7 +27,10 @@ import { NotificationService } from '../../services/notifications/notification.s
 @Injectable()
 @State<SettingsStateModel>({ name: 'settings' })
 export class SettingsState implements NgxsAfterBootstrap {
-  constructor(private settingsService: SettingsService, private notificationService: NotificationService) {}
+  constructor(
+    private settingsService: SettingsService,
+    private notificationService: NotificationService
+  ) {}
 
   @Action(RetrieveSettings)
   initializeStore(ctx: StateContext<SettingsStateModel>) {

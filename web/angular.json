@@ -28,7 +28,7 @@
             "styles": [
               "./node_modules/@ngneat/hot-toast/src/styles/styles.css",
               "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
-              "./node_modules/@circlon/angular-tree-component/css/angular-tree-component.css",
+              "./node_modules/@ali-hm/angular-tree-component/css/angular-tree-component.css",
               "src/theme/_main.scss",
               "src/theme/custom-theme-material.scss"
             ],
@@ -66,18 +66,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "kadai-web:build"
+            "buildTarget": "kadai-web:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "kadai-web:build:production"
+              "buildTarget": "kadai-web:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "kadai-web:build"
+            "buildTarget": "kadai-web:build"
           }
         }
       }

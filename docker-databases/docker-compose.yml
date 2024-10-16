@@ -12,13 +12,3 @@ services:
       - LICENSE=accept
     ports:
       - "5101:50000"
-  kadai-oracle-18:
-    image: gvenzl/oracle-xe:18-slim-faststart
-    environment:
-      - ORACLE_PASSWORD=testPassword
-      - ORACLE_DATABASE=kadai
-      - APP_USER=TEST_USER
-      - APP_USER_PASSWORD=testPassword
-      - TZ=Europe/Berlin
-    ports:
-      - "5103:1521"
