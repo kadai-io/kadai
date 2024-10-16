@@ -22,14 +22,13 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule, HttpClientXsrfModule, HttpXsrfTokenExtractor } from '@angular/common/http';
+import { HttpClientModule, HttpClientXsrfModule } from '@angular/common/http';
 import { NgxsModule } from '@ngxs/store';
 import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
 import { AlertModule } from 'ngx-bootstrap/alert';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 import { TabsModule } from 'ngx-bootstrap/tabs';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { TreeModule } from '@circlon/angular-tree-component';
 import { SharedModule } from 'app/shared/shared.module';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
@@ -66,19 +65,13 @@ import { SidenavListComponent } from 'app/shared/components/sidenav-list/sidenav
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 /**
- * Guards
- */
-import { DomainGuard } from './shared/guards/domain.guard';
-import { BusinessAdminGuard } from './shared/guards/business-admin.guard';
-import { MonitorGuard } from './shared/guards/monitor.guard';
-import { UserGuard } from './shared/guards/user.guard';
-/**
  * Store
  */
 import { ClassificationCategoriesService } from './shared/services/classification-categories/classification-categories.service';
 import { environment } from '../environments/environment';
 import { STATES } from './shared/store';
 import { NgxsRouterPluginModule } from '@ngxs/router-plugin';
+import { TreeModule } from '@ali-hm/angular-tree-component';
 
 const DECLARATIONS = [AppComponent, NavBarComponent, UserInformationComponent, NoAccessComponent, SidenavListComponent];
 
@@ -116,10 +109,6 @@ const PROVIDERS = [
   RequestInProgressService,
   OrientationService,
   SelectedRouteService,
-  DomainGuard,
-  BusinessAdminGuard,
-  MonitorGuard,
-  UserGuard,
   StartupService,
   MasterAndDetailService,
   KadaiEngineService,

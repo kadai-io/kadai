@@ -17,13 +17,13 @@
  */
 
 import { Component, OnInit } from '@angular/core';
-import { BusinessAdminGuard } from 'app/shared/guards/business-admin.guard';
-import { MonitorGuard } from 'app/shared/guards/monitor.guard';
-import { UserGuard } from 'app/shared/guards/user.guard';
 import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.service';
 import { SidenavService } from '../../services/sidenav/sidenav.service';
 import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
 import { Router } from '@angular/router';
+import { MonitorRoles } from '../../roles/monitor.roles';
+import { UserRoles } from '../../roles/user.roles';
+import { BusinessAdminRoles } from '../../roles/business-admin.roles';
 
 @Component({
   selector: 'kadai-sidenav-list',
@@ -58,9 +58,9 @@ export class SidenavListComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.administrationAccess = this.kadaiEngineService.hasRole(BusinessAdminGuard.roles);
-    this.monitorAccess = this.kadaiEngineService.hasRole(MonitorGuard.roles);
-    this.workplaceAccess = this.kadaiEngineService.hasRole(UserGuard.roles);
+    this.administrationAccess = this.kadaiEngineService.hasRole(Object.values(BusinessAdminRoles));
+    this.monitorAccess = this.kadaiEngineService.hasRole(Object.values(MonitorRoles));
+    this.workplaceAccess = this.kadaiEngineService.hasRole(Object.values(UserRoles));
     this.kadaiEngineService.isHistoryProviderEnabled().subscribe((value) => {
       this.historyAccess = value;
     });

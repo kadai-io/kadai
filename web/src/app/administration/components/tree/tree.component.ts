@@ -30,7 +30,7 @@ import {
 } from '@angular/core';
 import { TreeNodeModel } from 'app/administration/models/tree-node';
 
-import { ITreeOptions, KEYS, TREE_ACTIONS, TreeComponent } from '@circlon/angular-tree-component';
+import { ITreeOptions, KEYS, TREE_ACTIONS, TreeComponent } from '@ali-hm/angular-tree-component';
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { filter, map, takeUntil } from 'rxjs/operators';
 import { Select, Store } from '@ngxs/store';

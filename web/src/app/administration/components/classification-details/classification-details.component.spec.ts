@@ -22,7 +22,7 @@ import { EMPTY, Observable, of } from 'rxjs';
 import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { ImportExportService } from '../../services/import-export.service';
-import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, flush, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { Actions, NgxsModule, ofActionDispatched, Store } from '@ngxs/store';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
@@ -418,6 +418,7 @@ describe('ClassificationDetailsComponent', () => {
 
     tick();
     fixture.detectChanges();
+    flush();
 
     expect(component.classification['custom3']).toBe(undefined);
     expect(component.classification['custom4']).toBe(newValue);
