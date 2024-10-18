@@ -22,10 +22,12 @@ import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.internal.util.CheckedFunction;
 import io.kadai.common.internal.util.LogSanitizer;
 import io.kadai.common.internal.util.SpiLoader;
+import io.kadai.spi.routing.api.RoutingTarget;
 import io.kadai.spi.routing.api.TaskRoutingProvider;
 import io.kadai.task.api.models.Task;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -88,6 +90,43 @@ public final class TaskRoutingManager {
       }
     }
     return workbasketId;
+  }
+
+  /**
+   * Determines a {@linkplain RoutingTarget} for a given {@linkplain Task}.
+   * Algorithm: see {@linkplain TaskRoutingManager#determineWorkbasketId(Task)}.
+   *
+   * @param task the {@linkplain Task} for which a {@linkplain RoutingTarget} is to be determined
+   * @return the {@linkplain RoutingTarget} for the creation of the {@linkplain Task}
+   */
+  public Optional<RoutingTarget> determineRoutingTarget(Task task) {
+    RoutingTarget routingTarget = null;
+    if (isEnabled()) {
+      Set<RoutingTarget> routingTargets =
+          taskRoutingProviders.stream()
+              .map(
+                  CheckedFunction.wrap(
+                      taskRoutingProvider -> taskRoutingProvider.determineRoutingTarget(task)))
+              .filter(Optional::isPresent)
+              .map(Optional::get)
+              .collect(Collectors.toSet());
+      if (routingTargets.isEmpty()) {
+        if (LOGGER.isErrorEnabled()) {
+          LOGGER.error(
+              "No TaskRouter determined a workbasket for task {}.",
+              LogSanitizer.stripLineBreakingChars(task));
+        }
+      } else if (routingTargets.size() > 1) {
+        if (LOGGER.isErrorEnabled()) {
+          LOGGER.error(
+              "The TaskRouters determined more than one workbasket for task {}",
+              LogSanitizer.stripLineBreakingChars(task));
+        }
+      } else {
+        routingTarget = routingTargets.iterator().next();
+      }
+    }
+    return Optional.ofNullable(routingTarget);
   }
 
   public boolean isEnabled() {

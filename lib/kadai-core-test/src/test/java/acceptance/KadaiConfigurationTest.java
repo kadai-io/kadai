@@ -254,6 +254,7 @@ class KadaiConfigurationTest {
       boolean expectedSecurityEnabled = false;
       List<String> expectedDomains = List.of("A", "B");
       boolean expectedEnforceServiceLevel = false;
+      boolean expectedIncludeOwnerWhenRouting = true;
 
       // authentication configuration
       Map<KadaiRole, Set<String>> expectedRoleMap =
@@ -327,6 +328,7 @@ class KadaiConfigurationTest {
               // general configuration
               .domains(expectedDomains)
               .enforceServiceLevel(expectedEnforceServiceLevel)
+              .includeOwnerWhenRouting(expectedIncludeOwnerWhenRouting)
               // authentication configuration
               .roleMap(expectedRoleMap)
               // classification configuration
@@ -396,6 +398,8 @@ class KadaiConfigurationTest {
       assertThat(configuration.isSecurityEnabled()).isEqualTo(expectedSecurityEnabled);
       assertThat(configuration.getDomains()).isEqualTo(expectedDomains);
       assertThat(configuration.isEnforceServiceLevel()).isEqualTo(expectedEnforceServiceLevel);
+      assertThat(configuration.isIncludeOwnerWhenRouting())
+          .isEqualTo(expectedIncludeOwnerWhenRouting);
       // authentication configuration
       assertThat(configuration.getRoleMap()).isEqualTo(expectedRoleMap);
       // classification configuration
@@ -472,6 +476,7 @@ class KadaiConfigurationTest {
               // general configuration
               .domains(List.of("A", "B"))
               .enforceServiceLevel(false)
+              .includeOwnerWhenRouting(true)
               // authentication configuration
               .roleMap(Map.of(KadaiRole.ADMIN, Set.of("admin")))
               // classification configuration
