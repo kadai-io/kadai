@@ -18,14 +18,18 @@
 
 package io.kadai.example.boot.security;
 
+import static io.kadai.common.rest.ldap.LdapConfiguration.KADAI_LDAP_CONTEXT_SOURCE;
+
 import io.kadai.common.rest.SpringSecurityToJaasFilter;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.ldap.core.ContextSource;
 import org.springframework.ldap.core.support.BaseLdapPathContextSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
@@ -134,6 +138,33 @@ public class BootWebSecurityConfigurer {
     return http.build();
   }
 
+  @Bean
+  public LdapAuthoritiesPopulator authoritiesPopulator(
+      @Qualifier(KADAI_LDAP_CONTEXT_SOURCE) ContextSource contextSource) {
+    Function<Map<String, List<String>>, GrantedAuthority> authorityMapper =
+        recordVar -> new SimpleGrantedAuthority(recordVar.get("spring.security.ldap.dn").get(0));
+
+    DefaultLdapAuthoritiesPopulator populator =
+        new DefaultLdapAuthoritiesPopulator(contextSource, ldapGroupSearchBase);
+    populator.setGroupSearchFilter(ldapGroupSearchFilter);
+    populator.setSearchSubtree(true);
+    populator.setRolePrefix("");
+    populator.setAuthorityMapper(authorityMapper);
+    return populator;
+  }
+
+  @Bean(name = KADAI_LDAP_CONTEXT_SOURCE)
+  public BaseLdapPathContextSource ldapContextSource() {
+    return new DefaultSpringSecurityContextSource(ldapServerUrl + "/" + ldapBaseDn);
+  }
+
+  @Bean
+  public GrantedAuthoritiesMapper grantedAuthoritiesMapper() {
+    SimpleAuthorityMapper grantedAuthoritiesMapper = new SimpleAuthorityMapper();
+    grantedAuthoritiesMapper.setPrefix("");
+    return grantedAuthoritiesMapper;
+  }
+
   protected void addLoginPageConfiguration(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests(
             authorizeHttpRequests -> authorizeHttpRequests.anyRequest().fullyAuthenticated())
@@ -155,33 +186,6 @@ public class BootWebSecurityConfigurer {
                     .permitAll());
   }
 
-  @Bean
-  public LdapAuthoritiesPopulator authoritiesPopulator(
-      DefaultSpringSecurityContextSource contextSource) {
-    Function<Map<String, List<String>>, GrantedAuthority> authorityMapper =
-        recordVar -> new SimpleGrantedAuthority(recordVar.get("spring.security.ldap.dn").get(0));
-
-    DefaultLdapAuthoritiesPopulator populator =
-        new DefaultLdapAuthoritiesPopulator(contextSource, ldapGroupSearchBase);
-    populator.setGroupSearchFilter(ldapGroupSearchFilter);
-    populator.setSearchSubtree(true);
-    populator.setRolePrefix("");
-    populator.setAuthorityMapper(authorityMapper);
-    return populator;
-  }
-
-  @Bean
-  public DefaultSpringSecurityContextSource defaultSpringSecurityContextSource() {
-    return new DefaultSpringSecurityContextSource(ldapServerUrl + "/" + ldapBaseDn);
-  }
-
-  @Bean
-  public GrantedAuthoritiesMapper grantedAuthoritiesMapper() {
-    SimpleAuthorityMapper grantedAuthoritiesMapper = new SimpleAuthorityMapper();
-    grantedAuthoritiesMapper.setPrefix("");
-    return grantedAuthoritiesMapper;
-  }
-
   protected JaasApiIntegrationFilter jaasApiIntegrationFilter() {
     JaasApiIntegrationFilter filter = new JaasApiIntegrationFilter();
     filter.setCreateEmptySubject(true);
@@ -190,7 +194,8 @@ public class BootWebSecurityConfigurer {
 
   @Bean
   AuthenticationManager ldapAuthenticationManager(
-      BaseLdapPathContextSource contextSource, LdapAuthoritiesPopulator authorities) {
+      @Qualifier(KADAI_LDAP_CONTEXT_SOURCE) BaseLdapPathContextSource contextSource,
+      LdapAuthoritiesPopulator authorities) {
     @SuppressWarnings("deprecation")
     LdapPasswordComparisonAuthenticationManagerFactory factory =
         new LdapPasswordComparisonAuthenticationManagerFactory(
