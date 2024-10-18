@@ -28,11 +28,6 @@ import java.util.Arrays;
 public enum DB {
   H2("H2", "h2", "/sql/h2/schema-detection-h2.sql", "/sql/h2/kadai-schema-h2.sql"),
   DB2("DB2", "db2", "/sql/db2/schema-detection-db2.sql", "/sql/db2/kadai-schema-db2.sql"),
-  ORACLE(
-      "Oracle",
-      "oracle",
-      "/sql/oracle/schema-detection-oracle.sql",
-      "/sql/oracle/kadai-schema-oracle.sql"),
   POSTGRES(
       "PostgreSQL",
       "postgres",

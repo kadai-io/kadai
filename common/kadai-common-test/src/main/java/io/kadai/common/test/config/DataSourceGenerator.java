@@ -18,8 +18,6 @@
 
 package io.kadai.common.test.config;
 
-import static io.kadai.common.test.OracleSchemaHelper.initOracleSchema;
-
 import io.kadai.common.internal.configuration.DB;
 import io.kadai.common.test.DockerContainerCreator;
 import java.util.Optional;
@@ -49,9 +47,6 @@ public final class DataSourceGenerator {
     if (dockerContainer.isPresent()) {
       dockerContainer.get().start();
       DATA_SOURCE = DockerContainerCreator.createDataSource(dockerContainer.get());
-      if (DB.ORACLE == db) {
-        initOracleSchema(DATA_SOURCE, SCHEMA_NAME);
-      }
     } else {
       DATA_SOURCE = createDataSourceForH2();
     }

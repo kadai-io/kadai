@@ -276,30 +276,20 @@ jobs:
             database: POSTGRES
           - module: kadai-core
             database: DB2
-          - module: kadai-core
-            database: ORACLE
           - module: kadai-core-test
             database: POSTGRES
           - module: kadai-core-test
             database: DB2
-          - module: kadai-core-test
-            database: ORACLE
           - module: kadai-test-api
             database: POSTGRES
           - module: kadai-test-api
             database: DB2
-          - module: kadai-test-api
-            database: ORACLE
           - module: kadai-simplehistory-provider
             database: DB2
           - module: kadai-simplehistory-provider
             database: POSTGRES
-          - module: kadai-simplehistory-provider
-            database: ORACLE
           - module: kadai-rest-spring-example-boot
             database: DB2
-          - module: kadai-rest-spring-example-boot
-            database: ORACLE
           - module: kadai-rest-spring-example-wildfly
             database: POSTGRES
     steps:
