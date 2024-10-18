@@ -39,6 +39,10 @@
             <artifactId>json</artifactId>
             <version>${version.json}</version>
         </dependency>
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
         <!-- test dependencies -->
         <dependency>
             <groupId>io.kadai</groupId>

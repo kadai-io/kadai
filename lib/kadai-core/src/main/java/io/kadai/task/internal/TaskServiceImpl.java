@@ -51,6 +51,7 @@ import io.kadai.spi.history.api.events.task.TaskTerminatedEvent;
 import io.kadai.spi.history.api.events.task.TaskUpdatedEvent;
 import io.kadai.spi.history.internal.HistoryEventManager;
 import io.kadai.spi.priority.internal.PriorityServiceManager;
+import io.kadai.spi.routing.api.RoutingTarget;
 import io.kadai.spi.task.internal.AfterRequestChangesManager;
 import io.kadai.spi.task.internal.AfterRequestReviewManager;
 import io.kadai.spi.task.internal.BeforeRequestChangesManager;
@@ -393,12 +394,11 @@ public class TaskServiceImpl implements TaskService {
       } else if (task.getWorkbasketKey() != null) {
         workbasket = workbasketService.getWorkbasket(task.getWorkbasketKey(), task.getDomain());
       } else {
-        String workbasketId = kadaiEngine.getTaskRoutingManager().determineWorkbasketId(task);
-        if (workbasketId != null) {
-          workbasket = workbasketService.getWorkbasket(workbasketId);
-        } else {
-          throw new InvalidArgumentException("Cannot create a Task outside a Workbasket");
-        }
+        RoutingTarget routingTarget = calculateWorkbasketDuringTaskCreation(task);
+        String owner = routingTarget.getOwner() == null
+            ? task.getOwner() : routingTarget.getOwner();
+        workbasket = workbasketService.getWorkbasket(routingTarget.getWorkbasketId());
+        task.setOwner(owner);
       }
 
       if (workbasket.isMarkedForDeletion()) {
@@ -2021,6 +2021,24 @@ public class TaskServiceImpl implements TaskService {
         createTasksCompletedEvents(taskSummaryList);
       }
     }
+  }
+
+  private RoutingTarget calculateWorkbasketDuringTaskCreation(TaskImpl task) {
+    RoutingTarget routingTarget;
+    if (!kadaiEngine.getEngine().getConfiguration().isIncludeOwnerWhenRouting()) {
+      String workbasketId = kadaiEngine.getTaskRoutingManager().determineWorkbasketId(task);
+      if (workbasketId == null) {
+        throw new InvalidArgumentException("Cannot create a Task outside a Workbasket");
+      }
+      routingTarget = new RoutingTarget(workbasketId);
+    } else {
+      routingTarget = kadaiEngine.getTaskRoutingManager()
+          .determineRoutingTarget(task).orElseThrow(
+              () -> new InvalidArgumentException(
+                  "Cannot create a Task in an empty RoutingTarget")
+          );
+    }
+    return routingTarget;
   }
 
   private Map<String, WorkbasketSummary> findWorkbasketsForTasks(

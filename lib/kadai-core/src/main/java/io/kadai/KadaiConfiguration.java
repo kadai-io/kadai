@@ -80,6 +80,7 @@ public class KadaiConfiguration {
 
   private final List<String> domains;
   private final boolean enforceServiceLevel;
+  private final boolean includeOwnerWhenRouting;
   // endregion
 
   // region authentication configuration
@@ -165,6 +166,7 @@ public class KadaiConfiguration {
     this.securityEnabled = builder.securityEnabled;
     this.domains = Collections.unmodifiableList(builder.domains);
     this.enforceServiceLevel = builder.enforceServiceLevel;
+    this.includeOwnerWhenRouting = builder.includeOwnerWhenRouting;
     // authentication configuration
     this.roleMap =
         builder.roleMap.entrySet().stream()
@@ -293,6 +295,11 @@ public class KadaiConfiguration {
   public boolean isEnforceServiceLevel() {
     return enforceServiceLevel;
   }
+
+  public boolean isIncludeOwnerWhenRouting() {
+    return includeOwnerWhenRouting;
+  }
+
 
   public Map<KadaiRole, Set<String>> getRoleMap() {
     return roleMap;
@@ -490,6 +497,7 @@ public class KadaiConfiguration {
         securityEnabled,
         domains,
         enforceServiceLevel,
+        includeOwnerWhenRouting,
         roleMap,
         classificationTypes,
         classificationCategoriesByType,
@@ -549,6 +557,7 @@ public class KadaiConfiguration {
     return useManagedTransactions == other.useManagedTransactions
         && securityEnabled == other.securityEnabled
         && enforceServiceLevel == other.enforceServiceLevel
+        && includeOwnerWhenRouting == other.includeOwnerWhenRouting
         && useWorkingTimeCalculation == other.useWorkingTimeCalculation
         && germanPublicHolidaysEnabled == other.germanPublicHolidaysEnabled
         && germanPublicHolidaysCorpusChristiEnabled
@@ -629,6 +638,8 @@ public class KadaiConfiguration {
         + domains
         + ", enforceServiceLevel="
         + enforceServiceLevel
+        + ", includeOwnerWhenRouting="
+        + includeOwnerWhenRouting
         + ", roleMap="
         + roleMap
         + ", classificationTypes="
@@ -742,6 +753,9 @@ public class KadaiConfiguration {
 
     @KadaiProperty("kadai.servicelevel.validation.enforce")
     private boolean enforceServiceLevel = true;
+
+    @KadaiProperty("kadai.routing.includeOwner")
+    private boolean includeOwnerWhenRouting = false;
 
     // endregion
 
@@ -958,6 +972,7 @@ public class KadaiConfiguration {
       this.securityEnabled = securityEnabled;
       this.domains = conf.domains;
       this.enforceServiceLevel = conf.enforceServiceLevel;
+      this.includeOwnerWhenRouting = conf.includeOwnerWhenRouting;
       // authentication configuration
       this.roleMap = conf.roleMap;
       // classification configuration
@@ -1087,6 +1102,11 @@ public class KadaiConfiguration {
 
     public Builder domains(List<String> domains) {
       this.domains = domains;
+      return this;
+    }
+
+    public Builder includeOwnerWhenRouting(boolean includeOwnerWhenRouting) {
+      this.includeOwnerWhenRouting = includeOwnerWhenRouting;
       return this;
     }
 
