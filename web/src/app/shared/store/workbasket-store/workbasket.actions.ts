@@ -88,7 +88,10 @@ export class CopyWorkbasket {
 export class UpdateWorkbasket {
   static readonly type = '[Workbasket] Update a workbasket';
 
-  constructor(public url: string, public workbasket: Workbasket) {}
+  constructor(
+    public url: string,
+    public workbasket: Workbasket
+  ) {}
 }
 
 export class MarkWorkbasketForDeletion {
@@ -113,7 +116,10 @@ export class GetWorkbasketAccessItems {
 export class UpdateWorkbasketAccessItems {
   static readonly type = '[Workbasket] Update selected workbaskets access items';
 
-  constructor(public url: string, public workbasketAccessItems: WorkbasketAccessItems[]) {}
+  constructor(
+    public url: string,
+    public workbasketAccessItems: WorkbasketAccessItems[]
+  ) {}
 }
 
 export class UpdateWorkbasketDistributionTargets {
@@ -146,5 +152,8 @@ export class FetchAvailableDistributionTargets {
 export class TransferDistributionTargets {
   static readonly type = '[Workbasket] Transfer a set of workbasket distribution targets';
 
-  constructor(public targetSide: Side, public workbasketSummaries: WorkbasketSummary[]) {}
+  constructor(
+    public targetSide: Side,
+    public workbasketSummaries: WorkbasketSummary[]
+  ) {}
 }

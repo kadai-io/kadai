@@ -33,7 +33,10 @@ export class MasterAndDetailComponent implements OnInit {
 
   showDetail = false;
   currentRoute = '';
-  constructor(private router: Router, private masterAndDetailService: MasterAndDetailService) {}
+  constructor(
+    private router: Router,
+    private masterAndDetailService: MasterAndDetailService
+  ) {}
 
   ngOnInit(): void {
     this.showDetail = this.showDetails();

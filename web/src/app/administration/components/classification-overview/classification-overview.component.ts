@@ -40,7 +40,10 @@ export class ClassificationOverviewComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   routerParams: any;
 
-  constructor(private route: ActivatedRoute, private store: Store) {}
+  constructor(
+    private route: ActivatedRoute,
+    private store: Store
+  ) {}
 
   ngOnInit() {
     if (this.route.firstChild) {

@@ -31,7 +31,10 @@ import { PagedTaskSummary } from '@task/models/paged-task';
   providedIn: 'root'
 })
 export class TaskService {
-  constructor(private httpClient: HttpClient, private startupService: StartupService) {}
+  constructor(
+    private httpClient: HttpClient,
+    private startupService: StartupService
+  ) {}
 
   get url(): string {
     return this.startupService.getKadaiRestUrl() + '/v1/tasks';

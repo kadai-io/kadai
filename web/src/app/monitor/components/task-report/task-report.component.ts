@@ -39,7 +39,10 @@ export class TaskReportComponent implements OnInit {
   reportData: ReportData;
   private destroy$ = new Subject<void>();
 
-  constructor(private monitorService: MonitorService, private requestInProgressService: RequestInProgressService) {}
+  constructor(
+    private monitorService: MonitorService,
+    private requestInProgressService: RequestInProgressService
+  ) {}
 
   ngOnInit() {
     this.requestInProgressService.setRequestInProgress(true);

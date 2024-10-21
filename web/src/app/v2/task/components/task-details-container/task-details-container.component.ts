@@ -27,7 +27,10 @@ import { debounceTime } from 'rxjs';
   styleUrls: ['./task-details-container.component.scss']
 })
 export class TaskDetailsContainerComponent implements OnInit {
-  constructor(private route: ActivatedRoute, private taskFacade: TaskFacadeService) {}
+  constructor(
+    private route: ActivatedRoute,
+    private taskFacade: TaskFacadeService
+  ) {}
 
   ngOnInit(): void {
     //TODO add takeuntil destroy, can use https://github.com/ngneat/until-destroy

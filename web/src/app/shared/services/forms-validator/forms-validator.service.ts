@@ -33,7 +33,10 @@ export class FormsValidatorService {
   private inputOverflow = new Subject<Map<string, boolean>>();
   private overflowErrorSubscriptionMap = new Map<string, Subscription>();
 
-  constructor(private notificationsService: NotificationService, private accessIdsService: AccessIdsService) {}
+  constructor(
+    private notificationsService: NotificationService,
+    private accessIdsService: AccessIdsService
+  ) {}
 
   async validateFormInformation(form: NgForm, toggleValidationMap: Map<any, boolean>): Promise<any> {
     let validSync = true;

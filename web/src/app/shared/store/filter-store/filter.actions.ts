@@ -22,7 +22,10 @@ import { TaskQueryFilterParameter } from '../../models/task-query-filter-paramet
 // Workbasket Filter
 export class SetWorkbasketFilter {
   static readonly type = '[Workbasket filter] Set workbasket filter parameter';
-  constructor(public parameters: WorkbasketQueryFilterParameter, public component: string) {}
+  constructor(
+    public parameters: WorkbasketQueryFilterParameter,
+    public component: string
+  ) {}
 }
 
 export class ClearWorkbasketFilter {
