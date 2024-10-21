@@ -43,7 +43,10 @@ export class WorkbasketService {
   public workbasketActionToolbarExpanded = new Subject<boolean>();
   private workbasketSummaryRef: Observable<WorkbasketSummaryRepresentation> = new Observable();
 
-  constructor(private httpClient: HttpClient, private domainService: DomainService) {}
+  constructor(
+    private httpClient: HttpClient,
+    private domainService: DomainService
+  ) {}
 
   // #region "REST calls"
   // GET

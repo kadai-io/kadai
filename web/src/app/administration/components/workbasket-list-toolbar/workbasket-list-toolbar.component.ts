@@ -53,7 +53,10 @@ export class WorkbasketListToolbarComponent implements OnInit {
   destroy$ = new Subject<void>();
   action: ACTION;
 
-  constructor(private store: Store, private workbasketService: WorkbasketService) {}
+  constructor(
+    private store: Store,
+    private workbasketService: WorkbasketService
+  ) {}
 
   ngOnInit() {
     this.workbasketActiveAction$.pipe(takeUntil(this.destroy$)).subscribe((action) => {

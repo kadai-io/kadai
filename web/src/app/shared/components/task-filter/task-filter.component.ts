@@ -35,7 +35,10 @@ export class TaskFilterComponent implements OnInit, OnDestroy {
 
   allStates: Map<TaskState, string> = ALL_STATES;
 
-  constructor(private store: Store, private ngxsActions$: Actions) {}
+  constructor(
+    private store: Store,
+    private ngxsActions$: Actions
+  ) {}
 
   ngOnInit() {
     this.clear();

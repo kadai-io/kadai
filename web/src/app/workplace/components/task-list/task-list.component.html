@@ -27,10 +27,10 @@
       <div class="task-list__task">
 
         <!-- TASK PRIORITY -->
-        <div class="task-list__task-priority-badge"
-             matBadge="{{task.priority}}"
-             matBadgePosition="{{task.taskId == selectedId? 'above' : 'below'}}"
-             matTooltip="Priority">
+        <div
+            class="task-list__task-priority-badge {{task.taskId == selectedId ? 'task-list__task-priority-badge_selected' : ''}}"
+        >
+          {{ task.priority }}
         </div>
 
         <!-- TASK INFORMATION -->

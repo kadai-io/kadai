@@ -66,18 +66,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "kadai-web:build"
+            "buildTarget": "kadai-web:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "kadai-web:build:production"
+              "buildTarget": "kadai-web:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "kadai-web:build"
+            "buildTarget": "kadai-web:build"
           }
         }
       }

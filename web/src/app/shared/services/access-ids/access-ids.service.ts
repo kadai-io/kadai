@@ -32,7 +32,10 @@ import { asUrlQueryString } from '../../util/query-parameters-v2';
   providedIn: 'root'
 })
 export class AccessIdsService {
-  constructor(private httpClient: HttpClient, private startupService: StartupService) {}
+  constructor(
+    private httpClient: HttpClient,
+    private startupService: StartupService
+  ) {}
 
   get url(): string {
     return this.startupService.getKadaiRestUrl() + '/v1/access-ids';

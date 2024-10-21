@@ -35,7 +35,10 @@ export class TaskListComponent implements OnInit {
   @Output()
   selectedIdChange = new EventEmitter<string>();
 
-  constructor(private router: Router, private route: ActivatedRoute) {}
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {}
 

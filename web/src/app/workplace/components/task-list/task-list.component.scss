@@ -21,6 +21,7 @@
 .task-list {
   &__task {
     display: flex;
+    align-items: center;
   }
 
   &__task-info {
@@ -29,9 +30,18 @@
   }
 
   &__task-priority-badge {
-    top: 24px;
     height: 24px;
-    width: 40px;
+    width: 24px;
+    border-radius: 50%;
+    text-align: center;
+    margin-right: 16px;
+    color: white;
+    background-color: $green;
+  }
+
+  &__task-priority-badge_selected {
+    color: $green;
+    background-color: white;
   }
 }
 
@@ -53,17 +63,4 @@ p {
 
 .mdc-list-item--selected * .task-list__task-info {
   color: white;
-}
-
-.mat-badge-medium.mat-badge-above .mat-badge-content {
-  top: 1px;
-  right: 16px;
-  color: $green;
-  background-color: white;
-}
-
-.mat-badge-medium.mat-badge-below .mat-badge-content {
-  top: 1px;
-  right: 16px;
-  background-color: $green;
 }

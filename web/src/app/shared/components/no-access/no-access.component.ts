@@ -30,7 +30,10 @@ import { BusinessAdminRoles } from '../../roles/business-admin.roles';
 })
 export class NoAccessComponent implements OnInit {
   showNoAccess = false;
-  constructor(private kadaiEngineService: KadaiEngineService, public router: Router) {}
+  constructor(
+    private kadaiEngineService: KadaiEngineService,
+    public router: Router
+  ) {}
 
   ngOnInit() {
     if (this.kadaiEngineService.hasRole(Object.values(BusinessAdminRoles))) {

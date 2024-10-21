@@ -27,7 +27,10 @@ import { StartupService } from '../../shared/services/startup/startup.service';
 
 @Injectable()
 export class WorkbasketDefinitionService {
-  constructor(private httpClient: HttpClient, private startupService: StartupService) {}
+  constructor(
+    private httpClient: HttpClient,
+    private startupService: StartupService
+  ) {}
 
   get url(): string {
     return this.startupService.getKadaiRestUrl() + '/v1/workbasket-definitions';

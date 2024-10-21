@@ -85,7 +85,10 @@ export class WorkbasketDistributionTargetsListComponent
   private filter: WorkbasketQueryFilterParameter;
   private allSelectedDiff = 0;
 
-  constructor(private changeDetector: ChangeDetectorRef, private store: Store) {}
+  constructor(
+    private changeDetector: ChangeDetectorRef,
+    private store: Store
+  ) {}
 
   ngOnInit(): void {
     this.requestInProgress = 2;
