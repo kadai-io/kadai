@@ -36,7 +36,7 @@ export class WorkbasketSelectors {
 
   @Selector([WorkbasketState])
   static workbasketsSummary(state: WorkbasketStateModel): WorkbasketSummary[] {
-    return state.paginatedWorkbasketsSummary.workbaskets;
+    return state.paginatedWorkbasketsSummary?.workbaskets;
   }
 
   @Selector([WorkbasketState])
@@ -73,7 +73,7 @@ export class WorkbasketSelectors {
 
   @Selector([WorkbasketState])
   static buttonAction(state: WorkbasketStateModel): ButtonAction {
-    return state.button;
+    return state?.button;
   }
 
   // Workbasket Access Items

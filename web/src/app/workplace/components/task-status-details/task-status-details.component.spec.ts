@@ -16,15 +16,14 @@
  *
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { TaskStatusDetailsComponent } from './task-status-details.component';
 
 xdescribe('TaskStatusDetailsComponent', () => {
   let component: TaskStatusDetailsComponent;
   let fixture: ComponentFixture<TaskStatusDetailsComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [TaskStatusDetailsComponent]
     }).compileComponents();

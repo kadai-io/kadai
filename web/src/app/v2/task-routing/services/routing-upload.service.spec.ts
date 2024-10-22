@@ -19,18 +19,24 @@
 import { TestBed } from '@angular/core/testing';
 
 import { RoutingUploadService } from './routing-upload.service';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { StartupService } from 'app/shared/services/startup/startup.service';
 import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
 import { WindowRefService } from 'app/shared/services/window/window.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('RoutingUploadService', () => {
   let service: RoutingUploadService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [StartupService, KadaiEngineService, WindowRefService]
+      providers: [
+        StartupService,
+        KadaiEngineService,
+        WindowRefService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+      ]
     });
     service = TestBed.inject(RoutingUploadService);
   });

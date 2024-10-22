@@ -16,7 +16,7 @@
  *
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { WorkbasketAccessItemsComponent } from './workbasket-access-items.component';
 import { Component, DebugElement, Input } from '@angular/core';
 import { Actions, NgxsModule, ofActionDispatched, Store } from '@ngxs/store';
@@ -30,7 +30,7 @@ import { NotificationService } from '../../../shared/services/notifications/noti
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -56,6 +56,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 @Component({ selector: 'kadai-shared-spinner', template: '' })
 class SpinnerStub {
@@ -89,14 +90,13 @@ describe('WorkbasketAccessItemsComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         FormsModule,
         ReactiveFormsModule,
         TypeaheadModule.forRoot(),
         NgxsModule.forRoot([WorkbasketState, EngineConfigurationState]),
-        HttpClientTestingModule,
         RouterTestingModule.withRoutes([]),
         NoopAnimationsModule,
         MatFormFieldModule,
@@ -110,16 +110,27 @@ describe('WorkbasketAccessItemsComponent', () => {
       ],
       declarations: [WorkbasketAccessItemsComponent, TypeAheadComponent, SpinnerStub],
       providers: [
-        { provide: RequestInProgressService, useValue: requestInProgressServiceSpy },
-        { provide: FormsValidatorService, useValue: formValidatorServiceSpy },
-        { provide: NotificationService, useValue: notificationServiceSpy },
+        {
+          provide: RequestInProgressService,
+          useValue: requestInProgressServiceSpy
+        },
+        {
+          provide: FormsValidatorService,
+          useValue: formValidatorServiceSpy
+        },
+        {
+          provide: NotificationService,
+          useValue: notificationServiceSpy
+        },
         ClassificationCategoriesService,
         WorkbasketService,
         DomainService,
         SelectedRouteService,
         StartupService,
         KadaiEngineService,
-        WindowRefService
+        WindowRefService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 
@@ -139,7 +150,7 @@ describe('WorkbasketAccessItemsComponent', () => {
     });
   }));
 
-  afterEach(async(() => {
+  afterEach(waitForAsync(() => {
     component.workbasket = { ...selectedWorkbasketMock };
   }));
 
@@ -147,7 +158,7 @@ describe('WorkbasketAccessItemsComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize when accessItems exist', async(() => {
+  it('should initialize when accessItems exist', waitForAsync(() => {
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(GetWorkbasketAccessItems)).subscribe(() => (actionDispatched = true));
     component.init();

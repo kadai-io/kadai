@@ -16,24 +16,26 @@
  *
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { MonitorComponent } from './monitor.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterModule } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('MonitorComponent', () => {
   let component: MonitorComponent;
   let fixture: ComponentFixture<MonitorComponent>;
   let debugElement: DebugElement;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [MonitorComponent],
-      imports: [MatTabsModule, RouterModule, RouterTestingModule, HttpClientTestingModule, NoopAnimationsModule]
+      imports: [MatTabsModule, RouterModule, RouterTestingModule, NoopAnimationsModule],
+      providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
     }).compileComponents();
   }));
 

@@ -21,11 +21,12 @@ import { Component, DebugElement } from '@angular/core';
 import { NavBarComponent } from './nav-bar.component';
 import { SelectedRouteService } from '../../services/selected-route/selected-route';
 import { SidenavService } from '../../services/sidenav/sidenav.service';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { EMPTY } from 'rxjs';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 jest.mock('angular-svg-icon');
 
@@ -49,10 +50,12 @@ describe('NavBarComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [NavBarComponent, SvgIconStub],
-      imports: [MatIconModule, HttpClientTestingModule, MatToolbarModule],
+      imports: [MatIconModule, MatToolbarModule],
       providers: [
         { provide: SidenavService, useValue: SidenavServiceSpy },
-        { provide: SelectedRouteService, useValue: SelectedRouteServiceSpy }
+        { provide: SelectedRouteService, useValue: SelectedRouteServiceSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
       ]
     }).compileComponents();
   }));

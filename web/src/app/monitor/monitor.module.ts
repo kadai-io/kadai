@@ -18,7 +18,6 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { AlertModule } from 'ngx-bootstrap/alert';
 import { TabsModule } from 'ngx-bootstrap/tabs';
@@ -57,6 +56,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
+import { provideHttpClient } from '@angular/common/http';
 
 const MODULES = [
   CommonModule,
@@ -65,7 +65,6 @@ const MODULES = [
   AlertModule.forRoot(),
   NgChartsModule,
   TabsModule.forRoot(),
-  HttpClientModule,
   AngularSvgIconModule,
   SharedModule,
   MatTabsModule,
@@ -92,6 +91,6 @@ const DECLARATIONS = [
 @NgModule({
   declarations: DECLARATIONS,
   imports: [MODULES],
-  providers: [MonitorService, MapToIterable]
+  providers: [MonitorService, MapToIterable, provideHttpClient()]
 })
 export class MonitorModule {}

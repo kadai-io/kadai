@@ -17,9 +17,18 @@
  */
 
 import { CommonModule } from '@angular/common';
-import { NgModule } from '@angular/core';
+import { inject, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import {
+  HttpErrorResponse,
+  HttpHandlerFn,
+  HttpHeaders,
+  HttpInterceptorFn,
+  HttpRequest,
+  HttpXsrfTokenExtractor,
+  provideHttpClient,
+  withInterceptors
+} from '@angular/common/http';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 import { RouterModule } from '@angular/router';
 import { AlertModule } from 'ngx-bootstrap/alert';
@@ -57,7 +66,6 @@ import { DateTimeZonePipe } from './pipes/date-time-zone.pipe';
 /**
  * Services
  */
-import { HttpClientInterceptor } from './services/http-client-interceptor/http-client-interceptor.service';
 import { DialogPopUpComponent } from './components/popup/dialog-pop-up.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -78,6 +86,10 @@ import { DragAndDropDirective } from './directives/drag-and-drop.directive';
 import { GermanTimeFormatPipe } from './pipes/german-time-format.pipe';
 import { ResizableWidthDirective } from './directives/resizable-width.directive';
 import { TreeModule } from '@ali-hm/angular-tree-component';
+import { environment } from '../../environments/environment';
+import { tap } from 'rxjs/operators';
+import { RequestInProgressService } from './services/request-in-progress/request-in-progress.service';
+import { NotificationService } from './services/notifications/notification.service';
 
 const MODULES = [
   CommonModule,
@@ -87,7 +99,6 @@ const MODULES = [
   AccordionModule.forRoot(),
   BsDatepickerModule.forRoot(),
   AngularSvgIconModule,
-  HttpClientModule,
   MatDialogModule,
   MatButtonModule,
   RouterModule,
@@ -125,6 +136,45 @@ const DECLARATIONS = [
   GermanTimeFormatPipe
 ];
 
+export const httpClientInterceptor: HttpInterceptorFn = (request: HttpRequest<unknown>, next: HttpHandlerFn) => {
+  const requestInProgressService = inject(RequestInProgressService);
+  const tokenExtractor = inject(HttpXsrfTokenExtractor);
+  const notificationService = inject(NotificationService);
+
+  let req = request.clone();
+  if (req.headers.get('Content-Type') === 'multipart/form-data') {
+    const headers = new HttpHeaders();
+    req = req.clone({ headers });
+  } else {
+    req = req.clone({ setHeaders: { 'Content-Type': 'application/hal+json' } });
+  }
+  let token = tokenExtractor.getToken() as string;
+  if (token !== null) {
+    req = req.clone({ setHeaders: { 'X-XSRF-TOKEN': token } });
+  }
+  if (!environment.production) {
+    req = req.clone({ headers: req.headers.set('Authorization', 'Basic YWRtaW46YWRtaW4=') });
+  }
+  return next(req).pipe(
+    tap(
+      () => {},
+      (error) => {
+        requestInProgressService.setRequestInProgress(false);
+        if (
+          error.status !== 404 &&
+          (!(error instanceof HttpErrorResponse) || error.url.indexOf('environment-information.json') === -1)
+        ) {
+          const { key, messageVariables } = error.error.error || {
+            key: 'FALLBACK',
+            messageVariables: {}
+          };
+          notificationService.showError(key, messageVariables);
+        }
+      }
+    )
+  );
+};
+
 @NgModule({
   declarations: [DECLARATIONS],
   imports: [
@@ -141,15 +191,11 @@ const DECLARATIONS = [
   ],
   exports: [DECLARATIONS, GermanTimeFormatPipe],
   providers: [
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: HttpClientInterceptor,
-      multi: true
-    },
     AccessIdsService,
     ClassificationsService,
     WorkbasketService,
-    ObtainMessageService
+    ObtainMessageService,
+    provideHttpClient(withInterceptors([httpClientInterceptor]))
   ]
 })
 export class SharedModule {}

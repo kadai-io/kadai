@@ -16,19 +16,18 @@
  *
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
-import { HttpClientModule } from '@angular/common/http';
 import { Routes } from '@angular/router';
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { WorkplaceService } from 'app/workplace/services/workplace.service';
 import { TaskListComponent } from './task-list.component';
 import { DateTimeZonePipe } from '../../../shared/pipes/date-time-zone.pipe';
 import { MatSelectModule } from '@angular/material/select';
 import { MatListModule } from '@angular/material/list';
 import { MatBadgeModule } from '@angular/material/badge';
+import { provideHttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'kadai-dummy-detail',
@@ -48,18 +47,11 @@ describe('TaskListComponent', () => {
 
   const routes: Routes = [{ path: '*', component: DummyDetailComponent }];
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
-        FormsModule,
-        RouterTestingModule.withRoutes(routes),
-        HttpClientModule,
-        MatSelectModule,
-        MatListModule,
-        MatBadgeModule
-      ],
+      imports: [FormsModule, RouterTestingModule.withRoutes(routes), MatSelectModule, MatListModule, MatBadgeModule],
       declarations: [TaskListComponent, DummyDetailComponent, MockSvgIconComponent, DateTimeZonePipe],
-      providers: [WorkplaceService, ChangeDetectorRef]
+      providers: [WorkplaceService, ChangeDetectorRef, provideHttpClient()]
     }).compileComponents();
   }));
 

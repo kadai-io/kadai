@@ -141,7 +141,7 @@ export class ClassificationState implements NgxsAfterBootstrap {
   createClassification(
     ctx: StateContext<ClassificationStateModel>,
     action: SaveCreatedClassification
-  ): Observable<any> {
+  ): Observable<Classification> {
     return this.classificationsService.postClassification(action.classification).pipe(
       take(1),
       tap((classification) =>
@@ -263,9 +263,8 @@ export class ClassificationState implements NgxsAfterBootstrap {
   }
 
   // initialize after Startup service has configured the kadaiRestUrl properly.
-  ngxsAfterBootstrap(ctx: StateContext<ClassificationStateModel>): Observable<null> {
+  ngxsAfterBootstrap(ctx: StateContext<ClassificationStateModel>): void {
     ctx.dispatch(new InitializeStore());
-    return of(null);
   }
 }
 

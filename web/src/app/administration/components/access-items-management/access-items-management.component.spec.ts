@@ -16,7 +16,7 @@
  *
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { AccessItemsManagementComponent } from './access-items-management.component';
 import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
 import { Actions, NgxsModule, ofActionDispatched, Store } from '@ngxs/store';
@@ -24,7 +24,7 @@ import { Component, DebugElement, EventEmitter, Input, Output } from '@angular/c
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
 import { AccessItemsManagementState } from '../../../shared/store/access-items-management-store/access-items-management.state';
@@ -51,6 +51,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTableModule } from '@angular/material/table';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 jest.mock('angular-svg-icon');
 
@@ -88,10 +89,9 @@ describe('AccessItemsManagementComponent', () => {
     @Output() performSorting = new EventEmitter<Sorting<WorkbasketAccessItemQuerySortParameter>>();
   }
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
-        HttpClientTestingModule,
         NgxsModule.forRoot([EngineConfigurationState, AccessItemsManagementState]),
         FormsModule,
         ReactiveFormsModule,
@@ -119,13 +119,21 @@ describe('AccessItemsManagementComponent', () => {
         SvgIconStub
       ],
       providers: [
-        { provide: FormsValidatorService, useValue: formValidatorServiceSpy },
-        { provide: NotificationService, useValue: notificationServiceSpy },
+        {
+          provide: FormsValidatorService,
+          useValue: formValidatorServiceSpy
+        },
+        {
+          provide: NotificationService,
+          useValue: notificationServiceSpy
+        },
         RequestInProgressService,
         ClassificationCategoriesService,
         StartupService,
         KadaiEngineService,
-        WindowRefService
+        WindowRefService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 
@@ -193,7 +201,7 @@ describe('AccessItemsManagementComponent', () => {
     expect(permissions).toMatchObject({});
   });
 
-  it('should dispatch GetAccessItems action in searchForAccessItemsWorkbaskets', async((done) => {
+  it('should dispatch GetAccessItems action in searchForAccessItemsWorkbaskets', waitForAsync((done) => {
     app.accessId = { accessId: '1', name: 'max' };
     app.groups = [
       { accessId: '1', name: 'users' },
@@ -219,7 +227,7 @@ describe('AccessItemsManagementComponent', () => {
     });
   }));
 
-  it('should display a dialog when access is revoked', async(() => {
+  it('should display a dialog when access is revoked', waitForAsync(() => {
     app.accessId = { accessId: 'xyz', name: 'xyz' };
     const notificationService = TestBed.inject(NotificationService);
     const showDialogSpy = jest.spyOn(notificationService, 'showDialog').mockImplementation();
