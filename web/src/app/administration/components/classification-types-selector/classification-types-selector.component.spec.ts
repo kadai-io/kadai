@@ -17,7 +17,7 @@
  */
 
 import { ClassificationTypesSelectorComponent } from './classification-types-selector.component';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { NgxsModule, Store } from '@ngxs/store';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
@@ -40,13 +40,19 @@ describe('ClassificationTypesSelectorComponent', () => {
   let component: ClassificationTypesSelectorComponent;
   let store: Store;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [NgxsModule.forRoot([ClassificationState]), MatFormFieldModule, MatSelectModule, NoopAnimationsModule],
       declarations: [ClassificationTypesSelectorComponent],
       providers: [
-        { provide: ClassificationsService, useValue: classificationServiceSpy },
-        { provide: ClassificationCategoriesService, useValue: classificationCategoriesServiceSpy },
+        {
+          provide: ClassificationsService,
+          useValue: classificationServiceSpy
+        },
+        {
+          provide: ClassificationCategoriesService,
+          useValue: classificationCategoriesServiceSpy
+        },
         { provide: DomainService, useValue: domainServiceSpy }
       ]
     }).compileComponents();

@@ -16,14 +16,13 @@
  *
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { SpinnerComponent } from 'app/shared/components/spinner/spinner.component';
 import { FormsModule } from '@angular/forms';
 import { Routes } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Component } from '@angular/core';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { WorkplaceService } from '../../services/workplace.service';
 import { TaskService } from '../../services/task.service';
@@ -46,7 +45,7 @@ xdescribe('TaskDetailsComponent', () => {
   let component: TaskDetailsComponent;
   let fixture: ComponentFixture<TaskDetailsComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         TaskDetailsComponent,
@@ -56,8 +55,8 @@ xdescribe('TaskDetailsComponent', () => {
         TaskInformationComponent,
         DummyDetailComponent
       ],
-      imports: [FormsModule, RouterTestingModule.withRoutes(routes), HttpClientModule],
-      providers: [TaskService, HttpClient, WorkplaceService, RequestInProgressService, NotificationService]
+      imports: [FormsModule, RouterTestingModule.withRoutes(routes)],
+      providers: [TaskService, WorkplaceService, RequestInProgressService, NotificationService, provideHttpClient()]
     }).compileComponents();
   }));
 

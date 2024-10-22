@@ -16,8 +16,7 @@
  *
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { TaskCustomFieldsComponent } from './task-custom-fields.component';
 
@@ -26,7 +25,7 @@ xdescribe('TaskCustomFieldsComponent', () => {
   let component: TaskCustomFieldsComponent;
   let fixture: ComponentFixture<TaskCustomFieldsComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [FormsModule],
       declarations: [TaskCustomFieldsComponent]

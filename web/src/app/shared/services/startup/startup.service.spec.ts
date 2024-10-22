@@ -18,8 +18,8 @@
 
 import { TestBed, inject, getTestBed } from '@angular/core/testing';
 
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { StartupService } from './startup.service';
 import { KadaiEngineService } from '../kadai-engine/kadai-engine.service';
 import { WindowRefService } from '../window/window.service';
@@ -34,13 +34,18 @@ describe('StartupService', () => {
     kadaiLogoutUrl: someLogoutUrl
   };
 
-  let httpMock;
-  let service;
+  let httpMock: HttpTestingController;
+  let service: StartupService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientModule, HttpClientTestingModule],
-      providers: [StartupService, HttpClient, KadaiEngineService, WindowRefService]
+      providers: [
+        StartupService,
+        KadaiEngineService,
+        WindowRefService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+      ]
     });
   });
 
@@ -72,7 +77,7 @@ describe('StartupService', () => {
   it('should initialize rest and logout url from external file and override previous config', (done) => {
     environment.kadaiRestUrl = 'oldRestUrl';
     environment.kadaiLogoutUrl = 'oldLogoutUrl';
-    service.getEnvironmentFilePromise().then((res) => {
+    service.getEnvironmentFilePromise().then(() => {
       expect(environment.kadaiRestUrl).toBe(someRestUrl);
       expect(environment.kadaiLogoutUrl).toBe(someLogoutUrl);
       done();

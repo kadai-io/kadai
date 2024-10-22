@@ -16,13 +16,12 @@
  *
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Routes } from '@angular/router';
-
 import { SpinnerComponent } from 'app/shared/components/spinner/spinner.component';
 import { FormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
 import { Component } from '@angular/core';
 import { DomainService } from 'app/shared/services/domain/domain.service';
@@ -45,18 +44,18 @@ xdescribe('TaskProcessingComponent', () => {
   let component: TaskProcessingComponent;
   let fixture: ComponentFixture<TaskProcessingComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [FormsModule, HttpClientModule, RouterTestingModule.withRoutes(routes)],
+      imports: [FormsModule, RouterTestingModule.withRoutes(routes)],
       declarations: [TaskProcessingComponent, SpinnerComponent, DummyDetailComponent],
       providers: [
         TaskService,
-        HttpClient,
         WorkbasketService,
         DomainService,
         RequestInProgressService,
         SelectedRouteService,
-        ClassificationsService
+        ClassificationsService,
+        provideHttpClient()
       ]
     }).compileComponents();
   }));

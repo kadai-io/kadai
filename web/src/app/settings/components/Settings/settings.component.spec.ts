@@ -31,8 +31,9 @@ import { SettingsState } from '../../../shared/store/settings-store/settings.sta
 import { SettingsComponent } from './settings.component';
 import { settingsStateMock } from '../../../shared/store/mock-data/mock-store';
 import { SetSettings } from '../../../shared/store/settings-store/settings.actions';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 const notificationServiceSpy: Partial<NotificationService> = {
   showError: jest.fn(),
@@ -51,7 +52,6 @@ describe('SettingsComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         NgxsModule.forRoot([SettingsState]),
-        HttpClientTestingModule,
         FormsModule,
         MatIconModule,
         MatFormFieldModule,
@@ -65,7 +65,9 @@ describe('SettingsComponent', () => {
         {
           provide: NotificationService,
           useValue: notificationServiceSpy
-        }
+        },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 

@@ -16,12 +16,12 @@
  *
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { WorkbasketListToolbarComponent } from './workbasket-list-toolbar.component';
 import { Component, DebugElement, EventEmitter, Input, Output } from '@angular/core';
 import { Actions, NgxsModule, ofActionDispatched, Store } from '@ngxs/store';
 import { Observable, of } from 'rxjs';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
 import { DomainService } from '../../../shared/services/domain/domain.service';
@@ -34,6 +34,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { RouterTestingModule } from '@angular/router/testing';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 const getDomainFn = jest.fn().mockReturnValue(true);
 const domainServiceMock: Partial<DomainService> = {
@@ -68,10 +69,9 @@ describe('WorkbasketListToolbarComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
-        HttpClientTestingModule,
         RouterTestingModule,
         NgxsModule.forRoot([WorkbasketState]),
         NoopAnimationsModule,
@@ -80,9 +80,17 @@ describe('WorkbasketListToolbarComponent', () => {
       ],
       declarations: [WorkbasketListToolbarComponent, ImportExportStub, SortStub, FilterStub],
       providers: [
-        { provide: DomainService, useValue: domainServiceMock },
-        { provide: RequestInProgressService, useValue: requestInProgressServiceSpy },
-        WorkbasketService
+        {
+          provide: DomainService,
+          useValue: domainServiceMock
+        },
+        {
+          provide: RequestInProgressService,
+          useValue: requestInProgressServiceSpy
+        },
+        WorkbasketService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 
@@ -101,7 +109,7 @@ describe('WorkbasketListToolbarComponent', () => {
 
   /* Typescript */
 
-  it('should dispatch CreateWorkbasket when addWorkbasket is called', async((done) => {
+  it('should dispatch CreateWorkbasket when addWorkbasket is called', waitForAsync(() => {
     component.action = ACTION.COPY;
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(CreateWorkbasket)).subscribe(() => (actionDispatched = true));
@@ -109,7 +117,7 @@ describe('WorkbasketListToolbarComponent', () => {
     expect(actionDispatched).toBe(true);
   }));
 
-  it('should not dispatch action in addWorkbasket when action is CREATE', async((done) => {
+  it('should not dispatch action in addWorkbasket when action is CREATE', waitForAsync(() => {
     component.action = ACTION.CREATE;
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(CreateWorkbasket)).subscribe(() => (actionDispatched = true));

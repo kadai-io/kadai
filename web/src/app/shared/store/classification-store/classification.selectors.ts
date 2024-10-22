@@ -48,7 +48,7 @@ export class ClassificationSelectors {
 
   @Selector([ClassificationState])
   static selectedClassificationId(state: ClassificationStateModel): string {
-    return state.selectedClassification.classificationId;
+    return state.selectedClassification?.classificationId;
   }
 
   @Selector([ClassificationState])

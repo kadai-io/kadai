@@ -22,9 +22,10 @@ import { NgxsModule, Store } from '@ngxs/store';
 import { CanvasComponent } from './canvas.component';
 import { workbasketReportMock } from '../monitor-mock-data';
 import { SettingsState } from '../../../shared/store/settings-store/settings.state';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { settingsStateMock } from '../../../shared/store/mock-data/mock-store';
 import { MatDialogModule } from '@angular/material/dialog';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('CanvasComponent', () => {
   let fixture: ComponentFixture<CanvasComponent>;
@@ -33,7 +34,8 @@ describe('CanvasComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [NgxsModule.forRoot([SettingsState]), HttpClientTestingModule, MatDialogModule],
+      imports: [NgxsModule.forRoot([SettingsState]), MatDialogModule],
+      providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
       declarations: [CanvasComponent]
     }).compileComponents();
 

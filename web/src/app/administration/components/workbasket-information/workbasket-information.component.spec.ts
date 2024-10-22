@@ -26,7 +26,7 @@ import { WorkbasketType } from '../../../shared/models/workbasket-type';
 import { MapValuesPipe } from '../../../shared/pipes/map-values.pipe';
 import { RemoveNoneTypePipe } from '../../../shared/pipes/remove-empty-type.pipe';
 import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
@@ -58,6 +58,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { By } from '@angular/platform-browser';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 @Component({ selector: 'kadai-shared-field-error-display', template: '' })
 class FieldErrorDisplayStub {
@@ -108,7 +109,6 @@ describe('WorkbasketInformationComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         FormsModule,
-        HttpClientTestingModule,
         MatDialogModule,
         NgxsModule.forRoot([EngineConfigurationState, WorkbasketState]),
         TypeaheadModule.forRoot(),
@@ -141,7 +141,9 @@ describe('WorkbasketInformationComponent', () => {
         ClassificationCategoriesService,
         StartupService,
         KadaiEngineService,
-        WindowRefService
+        WindowRefService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 
