@@ -27,9 +27,10 @@ import { MatTableModule } from '@angular/material/table';
 import { workbasketReportMock } from '../monitor-mock-data';
 import { settingsStateMock } from '../../../shared/store/mock-data/mock-store';
 import { SettingsState } from '../../../shared/store/settings-store/settings.state';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatDividerModule } from '@angular/material/divider';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 @Pipe({ name: 'germanTimeFormat' })
 class GermanTimeFormatPipe implements PipeTransform {
@@ -63,12 +64,14 @@ describe('TaskPriorityReportComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [NgxsModule.forRoot([SettingsState]), MatTableModule, HttpClientTestingModule, MatDividerModule],
+      imports: [NgxsModule.forRoot([SettingsState]), MatTableModule, MatDividerModule],
       declarations: [TaskPriorityReportComponent, GermanTimeFormatPipe, CanvasStub, TaskPriorityReportFilterStub],
       providers: [
         RequestInProgressService,
         { provide: MonitorService, useValue: monitorServiceSpy },
-        { provide: NotificationService, useValue: notificationServiceSpy }
+        { provide: NotificationService, useValue: notificationServiceSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 

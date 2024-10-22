@@ -22,7 +22,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule, HttpClientXsrfModule } from '@angular/common/http';
 import { NgxsModule } from '@ngxs/store';
 import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
 import { AlertModule } from 'ngx-bootstrap/alert';
@@ -72,6 +71,7 @@ import { environment } from '../environments/environment';
 import { STATES } from './shared/store';
 import { NgxsRouterPluginModule } from '@ngxs/router-plugin';
 import { TreeModule } from '@ali-hm/angular-tree-component';
+import { provideHttpClient, withXsrfConfiguration } from '@angular/common/http';
 
 const DECLARATIONS = [AppComponent, NavBarComponent, UserInformationComponent, NoAccessComponent, SidenavListComponent];
 
@@ -82,7 +82,6 @@ const MODULES = [
   FormsModule,
   AppRoutingModule,
   AngularSvgIconModule.forRoot(),
-  HttpClientModule,
   BrowserAnimationsModule,
   ReactiveFormsModule,
   TreeModule,
@@ -99,8 +98,7 @@ const MODULES = [
   MatProgressSpinnerModule,
   NgxsModule.forRoot(STATES, { developmentMode: !environment.production }),
   NgxsReduxDevtoolsPluginModule.forRoot({ disabled: environment.production, maxAge: 25 }),
-  NgxsRouterPluginModule.forRoot(),
-  HttpClientXsrfModule
+  NgxsRouterPluginModule.forRoot()
 ];
 
 const PROVIDERS = [
@@ -121,7 +119,8 @@ const PROVIDERS = [
     useFactory: startupServiceFactory,
     deps: [StartupService],
     multi: true
-  }
+  },
+  provideHttpClient(withXsrfConfiguration({ cookieName: 'XSRF-TOKEN', headerName: 'X-XSRF-TOKEN' }))
 ];
 
 @NgModule({

@@ -16,7 +16,7 @@
  *
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Component, DebugElement } from '@angular/core';
 import { Actions, NgxsModule, ofActionDispatched, Store } from '@ngxs/store';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
@@ -65,15 +65,24 @@ describe('ClassificationOverviewComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [NgxsModule.forRoot([ClassificationState])],
       declarations: [ClassificationOverviewComponent, ClassificationDetailsStub, ClassificationListStub, SvgIconStub],
       providers: [
-        { provide: ClassificationsService, useValue: classificationServiceSpy },
-        { provide: ClassificationCategoriesService, useValue: classificationCategoriesServiceSpy },
+        {
+          provide: ClassificationsService,
+          useValue: classificationServiceSpy
+        },
+        {
+          provide: ClassificationCategoriesService,
+          useValue: classificationCategoriesServiceSpy
+        },
         { provide: DomainService, useValue: domainServiceSpy },
-        { provide: ActivatedRoute, useValue: activatedRouteMock }
+        {
+          provide: ActivatedRoute,
+          useValue: activatedRouteMock
+        }
       ]
     }).compileComponents();
 

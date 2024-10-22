@@ -183,18 +183,17 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
       this.store
         .dispatch(new SaveCreatedClassification(this.classification))
         .pipe(take(1))
-        .subscribe((store) => {
-          this.notificationsService.showSuccess('CLASSIFICATION_CREATE', {
-            classificationKey: store.classification.selectedClassification.key
+        .subscribe(() => {
+          this.selectedClassification$.pipe(take(1)).subscribe((classification) => {
+            this.notificationsService.showSuccess('CLASSIFICATION_CREATE', {
+              classificationKey: classification.key
+            });
+            this.location.go(
+              this.location
+                .path()
+                .replace(/(classifications).*/g, `classifications/(detail:${classification.classificationId})`)
+            );
           });
-          this.location.go(
-            this.location
-              .path()
-              .replace(
-                /(classifications).*/g,
-                `classifications/(detail:${store.classification.selectedClassification.classificationId})`
-              )
-          );
           this.afterRequest();
         });
     } else {

@@ -19,7 +19,13 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import {
+  HttpHandlerFn,
+  HttpInterceptorFn,
+  HttpRequest,
+  provideHttpClient,
+  withInterceptors
+} from '@angular/common/http';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 import { AlertModule } from 'ngx-bootstrap/alert';
 import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
@@ -40,7 +46,6 @@ import { TaskStatusDetailsComponent } from './components/task-status-details/tas
 import { TaskListComponent } from './components/task-list/task-list.component';
 
 import { TaskService } from './services/task.service';
-import { TokenInterceptor } from './services/token-interceptor.service';
 import { WorkplaceService } from './services/workplace.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -55,6 +60,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatTabsModule } from '@angular/material/tabs';
+import { environment } from '../../environments/environment';
 
 const MODULES = [
   TypeaheadModule.forRoot(),
@@ -62,7 +68,6 @@ const MODULES = [
   BsDropdownModule.forRoot(),
   CommonModule,
   FormsModule,
-  HttpClientModule,
   AngularSvgIconModule,
   WorkplaceRoutingModule,
   AlertModule,
@@ -84,6 +89,14 @@ const DECLARATIONS = [
   TaskListComponent
 ];
 
+export const tokenInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
+  let request = req;
+  if (!environment.production) {
+    request = req.clone({ headers: req.headers.set('Authorization', 'Basic YWRtaW46YWRtaW4=') });
+  }
+  return next(request);
+};
+
 @NgModule({
   declarations: DECLARATIONS,
   imports: [
@@ -103,11 +116,7 @@ const DECLARATIONS = [
     TaskService,
     ClassificationCategoriesService,
     WorkplaceService,
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: TokenInterceptor,
-      multi: true
-    }
+    provideHttpClient(withInterceptors([tokenInterceptor]))
   ]
 })
 export class WorkplaceModule {}

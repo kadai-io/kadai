@@ -21,12 +21,13 @@ import { DebugElement } from '@angular/core';
 import { NgxsModule, Store } from '@ngxs/store';
 import { settingsStateMock } from '../../../shared/store/mock-data/mock-store';
 import { SettingsState } from '../../../shared/store/settings-store/settings.state';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TaskPriorityReportFilterComponent } from './task-priority-report-filter.component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialogModule } from '@angular/material/dialog';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('TaskPriorityReportFilterComponent', () => {
   let fixture: ComponentFixture<TaskPriorityReportFilterComponent>;
@@ -37,13 +38,13 @@ describe('TaskPriorityReportFilterComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         NgxsModule.forRoot([SettingsState]),
-        HttpClientTestingModule,
         MatCheckboxModule,
         MatExpansionModule,
         NoopAnimationsModule,
         MatDialogModule
       ],
-      declarations: [TaskPriorityReportFilterComponent]
+      declarations: [TaskPriorityReportFilterComponent],
+      providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
     }).compileComponents();
 
     fixture = TestBed.createComponent(TaskPriorityReportFilterComponent);
