@@ -81,7 +81,7 @@
         <version.arquillian.managed.wildfly>5.0.1.Final</version.arquillian.managed.wildfly>
         <version.shrinkwrap>3.3.1</version.shrinkwrap>
         <version.arquillian.jakarta>10.0.0.Final</version.arquillian.jakarta>
-        <version.junit.bom>5.11.2</version.junit.bom>
+        <version.junit.bom>5.11.3</version.junit.bom>
 
         <!-- test dependencies -->
         <version.archunit>1.3.0</version.archunit>
