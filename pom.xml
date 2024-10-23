@@ -79,7 +79,7 @@
         <version.jakarta.servlet>6.1.0</version.jakarta.servlet>
         <version.arquillian>1.9.1.Final</version.arquillian>
         <version.arquillian.managed.wildfly>5.0.1.Final</version.arquillian.managed.wildfly>
-        <version.shrinkwrap>3.3.1</version.shrinkwrap>
+        <version.shrinkwrap>3.3.2</version.shrinkwrap>
         <version.arquillian.jakarta>10.0.0.Final</version.arquillian.jakarta>
         <version.junit.bom>5.11.3</version.junit.bom>
 
