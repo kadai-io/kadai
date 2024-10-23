@@ -40,11 +40,11 @@ import io.kadai.testapi.KadaiConfigurationModifier;
 import io.kadai.testapi.KadaiInject;
 import io.kadai.testapi.KadaiIntegrationTest;
 import io.kadai.testapi.security.WithAccessId;
+import io.kadai.workbasket.internal.jobs.WorkbasketCleanupJob;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.AfterEach;
@@ -56,6 +56,11 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 
+/**
+ * Acceptance test for the AbstractKadaiJob class.
+ * This is not an abstract test class, but a concrete test implementation that verifies
+ * the functionality of the AbstractKadaiJob class.
+ */
 @KadaiIntegrationTest
 class AbstractKadaiJobAccTest {
 
@@ -74,6 +79,7 @@ class AbstractKadaiJobAccTest {
     jobMapper.deleteMultiple(TaskRefreshJob.class.getName());
     jobMapper.deleteMultiple(ClassificationChangedJob.class.getName());
     jobMapper.deleteMultiple(HistoryCleanupJob.class.getName());
+    jobMapper.deleteMultiple(WorkbasketCleanupJob.class.getName());
   }
 
   @WithAccessId(user = "admin")
@@ -102,11 +108,12 @@ class AbstractKadaiJobAccTest {
 
   @WithAccessId(user = "admin")
   @TestFactory
-  Stream<DynamicTest> should_DeleteOldCleanupJobs_When_InitializingSchedule() throws Exception {
+  Stream<DynamicTest> should_DeleteOldCleanupJobs_When_InitializingSchedule() {
     List<Pair<String, Class<?>>> testCases =
         List.of(
             Pair.of("Delete Old Task Cleanup Jobs", TaskCleanupJob.class),
-            Pair.of("Delete Old History Cleanup Jobs", HistoryCleanupJob.class));
+            Pair.of("Delete Old History Cleanup Jobs", HistoryCleanupJob.class),
+            Pair.of("Delete Old Workbasket Cleanup Jobs", WorkbasketCleanupJob.class));
     ThrowingConsumer<Pair<String, Class<?>>> test =
         t -> {
           for (int i = 0; i < 10; i++) {
@@ -124,7 +131,7 @@ class AbstractKadaiJobAccTest {
           List<ScheduledJob> cleanupJobs =
               jobsToRun.stream()
                   .filter(scheduledJob -> scheduledJob.getType().equals(t.getRight().getName()))
-                  .collect(Collectors.toList());
+                  .toList();
 
           AbstractKadaiJob.initializeSchedule(kadaiEngine, t.getRight());
 
