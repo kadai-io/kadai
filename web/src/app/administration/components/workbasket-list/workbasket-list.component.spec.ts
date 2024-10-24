@@ -16,7 +16,7 @@
  *
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { WorkbasketListComponent } from './workbasket-list.component';
 import { Component, DebugElement, EventEmitter, Input, Output } from '@angular/core';
 import { Actions, NgxsModule, ofActionDispatched, Store } from '@ngxs/store';
@@ -107,7 +107,7 @@ describe('WorkbasketListComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         NgxsModule.forRoot([WorkbasketState]),
@@ -120,10 +120,19 @@ describe('WorkbasketListComponent', () => {
       ],
       declarations: [WorkbasketListComponent, WorkbasketListToolbarStub, IconTypeStub, PaginationStub, SvgIconStub],
       providers: [
-        { provide: WorkbasketService, useValue: workbasketServiceMock },
-        { provide: OrientationService, useValue: orientationServiceMock },
+        {
+          provide: WorkbasketService,
+          useValue: workbasketServiceMock
+        },
+        {
+          provide: OrientationService,
+          useValue: orientationServiceMock
+        },
         { provide: ImportExportService, useValue: importExportServiceMock },
-        { provide: DomainService, useValue: domainServiceSpy },
+        {
+          provide: DomainService,
+          useValue: domainServiceSpy
+        },
         { provide: RequestInProgressService, useValue: requestInProgressServiceSpy }
       ]
     }).compileComponents();
@@ -140,7 +149,7 @@ describe('WorkbasketListComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should dispatch SelectWorkbasket when selecting a workbasket', async((done) => {
+  it('should dispatch SelectWorkbasket when selecting a workbasket', waitForAsync(() => {
     component.selectedId = undefined;
     fixture.detectChanges();
     let actionDispatched = false;
@@ -149,7 +158,7 @@ describe('WorkbasketListComponent', () => {
     expect(actionDispatched).toBe(true);
   }));
 
-  it('should dispatch DeselectWorkbasket when selecting a workbasket again', async((done) => {
+  it('should dispatch DeselectWorkbasket when selecting a workbasket again', waitForAsync(() => {
     component.selectedId = '123';
     fixture.detectChanges();
     let actionDispatched = false;

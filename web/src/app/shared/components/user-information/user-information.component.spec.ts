@@ -16,14 +16,15 @@
  *
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Component, DebugElement, Input } from '@angular/core';
 import { UserInformationComponent } from './user-information.component';
 import { BrowserModule, By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.service';
 import { KadaiEngineServiceMock } from '../../services/kadai-engine/kadai-engine.mock.service';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 jest.mock('angular-svg-icon');
 
@@ -38,11 +39,15 @@ describe('UserInformationComponent', () => {
   let fixture: ComponentFixture<UserInformationComponent>;
   let debugElement: DebugElement;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [UserInformationComponent, SvgIconStub],
-      imports: [BrowserModule, HttpClientTestingModule, NoopAnimationsModule],
-      providers: [{ provide: KadaiEngineService, useClass: KadaiEngineServiceMock }]
+      imports: [BrowserModule, NoopAnimationsModule],
+      providers: [
+        { provide: KadaiEngineService, useClass: KadaiEngineServiceMock },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+      ]
     }).compileComponents();
   }));
 

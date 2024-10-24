@@ -16,7 +16,7 @@
  *
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { WorkbasketDetailsComponent } from './workbasket-details.component';
 import { Component, DebugElement, Input } from '@angular/core';
 import { Actions, NgxsModule, Store } from '@ngxs/store';
@@ -26,7 +26,7 @@ import { ACTION } from '../../../shared/models/action';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { ImportExportService } from '../../services/import-export.service';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
 import { RouterTestingModule } from '@angular/router/testing';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
@@ -45,6 +45,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { CopyWorkbasket, CreateWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { take } from 'rxjs/operators';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 @Component({ selector: 'kadai-administration-workbasket-information', template: '<div>i</div>' })
 class WorkbasketInformationStub {
@@ -73,20 +74,11 @@ const domainServiceSpy: Partial<DomainService> = {
   getDomains: jest.fn().mockReturnValue(of())
 };
 
-export const workbasketCopyState = {
-  selectedWorkbasket: selectedWorkbasketMock,
-  action: ACTION.COPY
-};
-
-export const workbasketCreateState = {
-  selectedWorkbasket: selectedWorkbasketMock,
-  action: ACTION.CREATE
-};
-
 export const workbasketReadState = {
   selectedWorkbasket: selectedWorkbasketMock,
   action: ACTION.READ
 };
+
 describe('WorkbasketDetailsComponent', () => {
   let fixture: ComponentFixture<WorkbasketDetailsComponent>;
   let debugElement: DebugElement;
@@ -94,11 +86,10 @@ describe('WorkbasketDetailsComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         NgxsModule.forRoot([WorkbasketState]),
-        HttpClientTestingModule,
         RouterTestingModule.withRoutes([]),
         MatDialogModule,
         MatIconModule,
@@ -116,14 +107,19 @@ describe('WorkbasketDetailsComponent', () => {
         WorkbasketInformationStub
       ],
       providers: [
-        { provide: DomainService, useValue: domainServiceSpy },
+        {
+          provide: DomainService,
+          useValue: domainServiceSpy
+        },
         ImportExportService,
         WorkbasketService,
         RequestInProgressService,
         SelectedRouteService,
         StartupService,
         KadaiEngineService,
-        WindowRefService
+        WindowRefService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 

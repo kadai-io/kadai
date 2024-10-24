@@ -16,14 +16,14 @@
  *
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { WorkbasketOverviewComponent } from './workbasket-overview.component';
 import { Component, DebugElement, Input } from '@angular/core';
 import { Actions, NgxsModule, ofActionCompleted, ofActionDispatched, Store } from '@ngxs/store';
 import { Observable, of } from 'rxjs';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { RouterTestingModule } from '@angular/router/testing';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
@@ -37,6 +37,7 @@ import { WindowRefService } from '../../../shared/services/window/window.service
 import { workbasketReadStateMock } from '../../../shared/store/mock-data/mock-store';
 import { MatIconModule } from '@angular/material/icon';
 import { take } from 'rxjs/operators';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 const showDialogFn = jest.fn().mockReturnValue(true);
 const NotificationServiceSpy: Partial<NotificationService> = {
@@ -78,6 +79,7 @@ class WorkbasketListStub {
 class WorkbasketDetailsStub {
   @Input() expanded: boolean;
 }
+
 @Component({ selector: 'svg-icon', template: '' })
 class SvgIconStub {}
 
@@ -88,26 +90,29 @@ describe('WorkbasketOverviewComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
-        MatIconModule,
-        HttpClientTestingModule,
-        RouterTestingModule.withRoutes([]),
-        NgxsModule.forRoot([WorkbasketState])
-      ],
+      imports: [MatIconModule, RouterTestingModule.withRoutes([]), NgxsModule.forRoot([WorkbasketState])],
       declarations: [WorkbasketOverviewComponent, WorkbasketListStub, WorkbasketDetailsStub, SvgIconStub],
       providers: [
         WorkbasketService,
-        { provide: NotificationService, useValue: NotificationServiceSpy },
+        {
+          provide: NotificationService,
+          useValue: NotificationServiceSpy
+        },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
-        { provide: DomainService, useValue: domainServiceSpy },
+        {
+          provide: DomainService,
+          useValue: domainServiceSpy
+        },
         DomainService,
         RequestInProgressService,
         SelectedRouteService,
         StartupService,
         KadaiEngineService,
-        WindowRefService
+        WindowRefService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 
@@ -137,7 +142,7 @@ describe('WorkbasketOverviewComponent', () => {
     expect(debugElement.nativeElement.querySelector('kadai-administration-workbasket-details')).toBeTruthy();
   });
 
-  it('should display details when params id exists', async((done) => {
+  it('should display details when params id exists', waitForAsync((done) => {
     actions$.pipe(ofActionCompleted(CreateWorkbasket), take(1)).subscribe(() => {
       expect(component.routerParams.id).toMatch('new-workbasket');
       expect(component.showDetail).toBeTruthy();
@@ -154,25 +159,28 @@ describe('WorkbasketOverviewComponent Alternative Params ID', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
-        MatIconModule,
-        HttpClientTestingModule,
-        RouterTestingModule.withRoutes([]),
-        NgxsModule.forRoot([WorkbasketState])
-      ],
+      imports: [MatIconModule, RouterTestingModule.withRoutes([]), NgxsModule.forRoot([WorkbasketState])],
       declarations: [WorkbasketOverviewComponent, WorkbasketListStub, WorkbasketDetailsStub, SvgIconStub],
       providers: [
         WorkbasketService,
-        { provide: NotificationService, useValue: NotificationServiceSpy },
-        { provide: ActivatedRoute, useValue: mockActivatedRouteAlternative },
+        {
+          provide: NotificationService,
+          useValue: NotificationServiceSpy
+        },
+        {
+          provide: ActivatedRoute,
+          useValue: mockActivatedRouteAlternative
+        },
         DomainService,
         RequestInProgressService,
         SelectedRouteService,
         StartupService,
         KadaiEngineService,
-        WindowRefService
+        WindowRefService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
       ]
     }).compileComponents();
     fixture = TestBed.createComponent(WorkbasketOverviewComponent);
@@ -182,7 +190,7 @@ describe('WorkbasketOverviewComponent Alternative Params ID', () => {
     fixture.detectChanges();
   }));
 
-  it('should display details when params id exists', async(() => {
+  it('should display details when params id exists', waitForAsync(() => {
     expect(component.routerParams.id).toBeTruthy();
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(SelectWorkbasket)).subscribe(() => (actionDispatched = true));
@@ -197,25 +205,28 @@ describe('WorkbasketOverviewComponent No Params', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
-        MatIconModule,
-        HttpClientTestingModule,
-        RouterTestingModule.withRoutes([]),
-        NgxsModule.forRoot([WorkbasketState])
-      ],
+      imports: [MatIconModule, RouterTestingModule.withRoutes([]), NgxsModule.forRoot([WorkbasketState])],
       declarations: [WorkbasketOverviewComponent, WorkbasketListStub, WorkbasketDetailsStub, SvgIconStub],
       providers: [
         WorkbasketService,
-        { provide: NotificationService, useValue: NotificationServiceSpy },
-        { provide: ActivatedRoute, useValue: mockActivatedRouteNoParams },
+        {
+          provide: NotificationService,
+          useValue: NotificationServiceSpy
+        },
+        {
+          provide: ActivatedRoute,
+          useValue: mockActivatedRouteNoParams
+        },
         DomainService,
         RequestInProgressService,
         SelectedRouteService,
         StartupService,
         KadaiEngineService,
-        WindowRefService
+        WindowRefService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
       ]
     }).compileComponents();
     fixture = TestBed.createComponent(WorkbasketOverviewComponent);

@@ -24,7 +24,7 @@ import { TaskQueryFilterParameter } from '../../models/task-query-filter-paramet
 export class FilterSelectors {
   @Selector([FilterState])
   static getAvailableDistributionTargetsFilter(state: FilterStateModel): WorkbasketQueryFilterParameter {
-    return state.availableDistributionTargets;
+    return state?.availableDistributionTargets;
   }
 
   @Selector([FilterState])
@@ -34,7 +34,7 @@ export class FilterSelectors {
 
   @Selector([FilterState])
   static getWorkbasketListFilter(state: FilterStateModel): WorkbasketQueryFilterParameter {
-    return state.workbasketList;
+    return state?.workbasketList;
   }
 
   @Selector([FilterState])

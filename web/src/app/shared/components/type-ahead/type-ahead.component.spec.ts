@@ -22,7 +22,6 @@ import { TypeAheadComponent } from './type-ahead.component';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
 import { of } from 'rxjs';
 import { NgxsModule, Store } from '@ngxs/store';
-import { HttpClientModule } from '@angular/common/http';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -32,6 +31,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { EngineConfigurationState } from '../../store/engine-configuration-store/engine-configuration.state';
 import { ClassificationCategoriesService } from '../../services/classification-categories/classification-categories.service';
 import { engineConfigurationMock } from '../../store/mock-data/mock-store';
+import { provideHttpClient } from '@angular/common/http';
 
 const accessIdService: Partial<AccessIdsService> = {
   searchForAccessId: jest.fn().mockReturnValue(of([{ accessId: 'user-g-1', name: 'Gerda' }]))
@@ -53,11 +53,14 @@ describe('TypeAheadComponent with AccessId input', () => {
         MatTooltipModule,
         NoopAnimationsModule,
         FormsModule,
-        ReactiveFormsModule,
-        HttpClientModule
+        ReactiveFormsModule
       ],
       declarations: [TypeAheadComponent],
-      providers: [{ provide: AccessIdsService, useValue: accessIdService }, ClassificationCategoriesService]
+      providers: [
+        { provide: AccessIdsService, useValue: accessIdService },
+        ClassificationCategoriesService,
+        provideHttpClient()
+      ]
     }).compileComponents();
 
     store = TestBed.inject(Store);

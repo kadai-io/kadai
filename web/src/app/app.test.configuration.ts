@@ -22,7 +22,7 @@ import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@ang
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 import { KadaiEngineServiceMock } from './shared/services/kadai-engine/kadai-engine.mock.service';
 import { KadaiEngineService } from './shared/services/kadai-engine/kadai-engine.service';
@@ -44,14 +44,7 @@ export const configureTests = (configure: (testBed: TestBed) => void) => {
 
   configure(testBed);
   testBed.configureTestingModule({
-    imports: [
-      BrowserAnimationsModule,
-      SharedModule,
-      FormsModule,
-      ReactiveFormsModule,
-      HttpClientModule,
-      AngularSvgIconModule
-    ],
+    imports: [BrowserAnimationsModule, SharedModule, FormsModule, ReactiveFormsModule, AngularSvgIconModule],
     providers: [
       { provide: KadaiEngineService, useClass: KadaiEngineServiceMock },
       { provide: DomainService, useClass: DomainServiceMock },
@@ -59,7 +52,8 @@ export const configureTests = (configure: (testBed: TestBed) => void) => {
       RequestInProgressService,
       OrientationService,
       SelectedRouteService,
-      FormsValidatorService
+      FormsValidatorService,
+      provideHttpClient()
     ]
   });
 
