@@ -61,9 +61,10 @@ class UpdateWorkbasketAuthorizations2AccTest extends AbstractAccTest {
 
     WorkbasketAccessItemImpl workbasketAccessItem = ((WorkbasketAccessItemImpl) accessItems.get(0));
     workbasketAccessItem.setAccessId(null);
+    List<WorkbasketAccessItem> workbasketAccessItems = List.of(workbasketAccessItem);
 
     assertThatThrownBy(
-            () -> WORKBASKET_SERVICE.setWorkbasketAccessItems(wbId, List.of(workbasketAccessItem)))
+            () -> WORKBASKET_SERVICE.setWorkbasketAccessItems(wbId, workbasketAccessItems))
         .isInstanceOf(InvalidArgumentException.class)
         .hasMessageContaining("accessId is null or empty");
   }
@@ -77,9 +78,10 @@ class UpdateWorkbasketAuthorizations2AccTest extends AbstractAccTest {
 
     WorkbasketAccessItemImpl workbasketAccessItem = ((WorkbasketAccessItemImpl) accessItems.get(0));
     workbasketAccessItem.setAccessId("   ");
+    List<WorkbasketAccessItem> workbasketAccessItems = List.of(workbasketAccessItem);
 
     assertThatThrownBy(
-            () -> WORKBASKET_SERVICE.setWorkbasketAccessItems(wbId, List.of(workbasketAccessItem)))
+            () -> WORKBASKET_SERVICE.setWorkbasketAccessItems(wbId, workbasketAccessItems))
         .isInstanceOf(InvalidArgumentException.class)
         .hasMessageContaining("accessId is null or empty");
   }
