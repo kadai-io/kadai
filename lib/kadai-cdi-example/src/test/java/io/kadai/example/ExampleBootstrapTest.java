@@ -18,10 +18,7 @@
 
 package io.kadai.example;
 
-import static org.awaitility.Awaitility.await;
-import static org.awaitility.Durations.ONE_HUNDRED_MILLISECONDS;
-import static org.awaitility.Durations.TWO_SECONDS;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,8 +29,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import org.apache.commons.io.FileUtils;
-import org.h2.jdbc.JdbcSQLNonTransientConnectionException;
-import org.h2.jdbc.JdbcSQLSyntaxErrorException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
@@ -41,15 +36,18 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.EnterpriseArchive;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(Arquillian.class)
 public class ExampleBootstrapTest {
 
-  @Deployment(testable = false, order = 10)
-  public static Archive<?> createDeployment() throws Exception {
+  @Deployment(testable = false)
+  public static Archive<?> createDeployment() throws IOException {
+    Path kadaiH2Data = Path.of(System.getProperty("user.home"), "kadai-h2-data");
+    if (Files.exists(kadaiH2Data)) {
+      FileUtils.forceDelete(kadaiH2Data.toFile());
+    }
     EnterpriseArchive deployment = ShrinkWrap.create(EnterpriseArchive.class, "kadai.ear");
 
     File[] libs =
@@ -67,39 +65,13 @@ public class ExampleBootstrapTest {
     deployment.addAsModule(ejbModule);
 
     deployment.addAsManifestResource("META-INF/beans.xml", "beans.xml");
-    return deployment;
-  }
 
-  @BeforeClass
-  public static void cleanKadaiH2DataFolder() throws IOException {
-    // Delete Kadai folder if exists
-    Path kadaiH2Data = Path.of(System.getProperty("user.home"), "kadai-h2-data");
-    if (Files.exists(kadaiH2Data)) {
-      FileUtils.forceDelete(kadaiH2Data.toFile());
-    }
+    return deployment;
   }
 
   @Test
   public void should_count_tasks_after_example_cdi_application_was_deployed() throws Exception {
-    // this test method is started that fast that the commit
-    // from io.kadai.example.ExampleBootstrap.init is not completed
-    // so we need to wait here a bit
-    // https://www.baeldung.com/awaitility-testing
-    await()
-        .atLeast(ONE_HUNDRED_MILLISECONDS)
-        .atMost(TWO_SECONDS)
-        .with()
-        .pollInterval(ONE_HUNDRED_MILLISECONDS)
-        .until(
-            () -> {
-              try {
-                return countTasksByName("BootstrapTask");
-              } catch (JdbcSQLSyntaxErrorException | JdbcSQLNonTransientConnectionException e) {
-                // ignore this Exception, because in the beginning the schema is not created
-                return 0;
-              }
-            },
-            equalTo(1));
+    assertThat(countTasksByName("BootstrapTask")).isEqualTo(1);
   }
 
   private Connection getConnection() throws Exception {

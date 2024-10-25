@@ -45,7 +45,6 @@ import org.jboss.shrinkwrap.api.spec.EnterpriseArchive;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -61,7 +60,12 @@ public class KadaiProducersTest {
           .build();
 
   @Deployment(testable = false)
-  public static Archive<?> createDeployment() throws Exception {
+  public static Archive<?> createDeployment() throws IOException {
+    Path kadaiH2Data = Path.of(System.getProperty("user.home"), "kadai-h2-data");
+    if (Files.exists(kadaiH2Data)) {
+      FileUtils.forceDelete(kadaiH2Data.toFile());
+    }
+
     EnterpriseArchive deployment = ShrinkWrap.create(EnterpriseArchive.class, "kadai.ear");
 
     File[] libs =
@@ -86,16 +90,8 @@ public class KadaiProducersTest {
     deployment.addAsModule(webArchive);
 
     deployment.addAsManifestResource("META-INF/beans.xml", "beans.xml");
-    return deployment;
-  }
 
-  @BeforeClass
-  public static void beforeClass() throws IOException {
-    // Delete Kadai folder if exists
-    Path kadaiH2Data = Path.of(System.getProperty("user.home"), "kadai-h2-data");
-    if (Files.exists(kadaiH2Data)) {
-      FileUtils.forceDelete(kadaiH2Data.toFile());
-    }
+    return deployment;
   }
 
   @Test
