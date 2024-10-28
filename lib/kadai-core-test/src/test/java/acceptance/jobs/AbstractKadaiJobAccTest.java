@@ -57,9 +57,8 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 
 /**
- * Acceptance test for the AbstractKadaiJob class.
- * This is not an abstract test class, but a concrete test implementation that verifies
- * the functionality of the AbstractKadaiJob class.
+ * Acceptance test for the AbstractKadaiJob class. This is not an abstract test class, but a
+ * concrete test implementation that verifies the functionality of the AbstractKadaiJob class.
  */
 @KadaiIntegrationTest
 class AbstractKadaiJobAccTest {
@@ -114,6 +113,7 @@ class AbstractKadaiJobAccTest {
             Pair.of("Delete Old Task Cleanup Jobs", TaskCleanupJob.class),
             Pair.of("Delete Old History Cleanup Jobs", HistoryCleanupJob.class),
             Pair.of("Delete Old Workbasket Cleanup Jobs", WorkbasketCleanupJob.class));
+
     ThrowingConsumer<Pair<String, Class<?>>> test =
         t -> {
           for (int i = 0; i < 10; i++) {
@@ -126,18 +126,22 @@ class AbstractKadaiJobAccTest {
             kadaiEngine.getJobService().createJob(job);
           }
 
-          List<ScheduledJob> jobsToRun = jobMapper.findJobsToRun(Instant.now());
+          final Instant now = Instant.now();
 
           List<ScheduledJob> cleanupJobs =
-              jobsToRun.stream()
+              jobMapper.findJobsToRun(now).stream()
                   .filter(scheduledJob -> scheduledJob.getType().equals(t.getRight().getName()))
                   .toList();
 
+          assertThat(cleanupJobs).isNotEmpty();
+
           AbstractKadaiJob.initializeSchedule(kadaiEngine, t.getRight());
 
-          jobsToRun = jobMapper.findJobsToRun(Instant.now());
+          final List<ScheduledJob> jobsToRun = jobMapper.findJobsToRun(now);
 
+          assertThat(jobsToRun).isNotEmpty();
           assertThat(jobsToRun).doesNotContainAnyElementsOf(cleanupJobs);
+
           cleanupJobs();
         };
 
