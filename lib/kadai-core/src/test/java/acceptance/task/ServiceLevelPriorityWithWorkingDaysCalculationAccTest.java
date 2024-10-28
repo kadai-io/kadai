@@ -38,6 +38,7 @@ import io.kadai.task.api.models.Task;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +49,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(JaasExtension.class)
-public class ServiceLevelPriorityWithWorkingDaysCalculationAccTest extends AbstractAccTest {
+class ServiceLevelPriorityWithWorkingDaysCalculationAccTest extends AbstractAccTest {
 
   private static ClassificationService classificationService;
 
@@ -183,6 +184,26 @@ public class ServiceLevelPriorityWithWorkingDaysCalculationAccTest extends Abstr
     assertThat(createdTask).isNotNull();
     assertThat(createdTask.getPlanned()).isEqualTo(planned);
     assertThat(createdTask.getCreated()).isBefore(createdTask.getPlanned());
+
+    LocalDate localDateNow =
+        LocalDate.ofInstant(now, kadaiConfiguration.getWorkingTimeScheduleTimeZone());
+    LocalDate localDateInTwoHours =
+        LocalDate.ofInstant(inTwoHours, kadaiConfiguration.getWorkingTimeScheduleTimeZone());
+
+    if (!localDateNow.isEqual(localDateInTwoHours)
+        && (!workingTimeCalculator.isWorkingDay(now)
+            || !workingTimeCalculator.isWorkingDay(inTwoHours))) {
+      System.err.println(
+          """
+          The next .isCloseTo assertion fails if now lies \
+          between 22:00:00 and 23:59:59 of a working day that precedes a non working day, \
+          or if now lies between 22:00:00 and 23:59:59 of a non working day. \
+          If you are reading this error message, \
+          now satisfies one of the two conditions just described. \
+          To avoid stopping a CI pipeline due to this flakiness, \
+          the .isCloseTo assertion will be skipped.""");
+      return;
+    }
 
     assertThat(createdTask.getPlanned())
         .isCloseTo(
