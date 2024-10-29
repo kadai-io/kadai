@@ -43,6 +43,7 @@ import {
 import { AccessItemsManagementSelector } from '../../../shared/store/access-items-management-store/access-items-management.selector';
 import { MatDialog } from '@angular/material/dialog';
 import { WorkbasketAccessItemQueryFilterParameter } from '../../../shared/models/workbasket-access-item-query-filter-parameter';
+import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 
 @Component({
   selector: 'kadai-administration-access-items-management',
@@ -77,6 +78,7 @@ export class AccessItemsManagementComponent implements OnInit {
     private formsValidatorService: FormsValidatorService,
     private notificationService: NotificationService,
     private store: Store,
+    private requestInProgressService: RequestInProgressService,
     public dialog: MatDialog
   ) {}
 
@@ -84,9 +86,12 @@ export class AccessItemsManagementComponent implements OnInit {
     this.groups$.pipe(takeUntil(this.destroy$)).subscribe((groups) => {
       this.groups = groups;
     });
+
     this.permissions$.pipe(takeUntil(this.destroy$)).subscribe((permissions) => {
       this.permissions = permissions;
     });
+
+    this.requestInProgressService.setRequestInProgress(false);
   }
 
   onSelectAccessId(selected: AccessId) {
