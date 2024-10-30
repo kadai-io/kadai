@@ -56,7 +56,7 @@
         </div>
       </div>
     </ng-container>
-    <button (click)="addRows()" color="accent" mat-flat-button>Add more rows</button>
+    <button (click)="showMoreRows()" color="accent" [disabled]="!hasMoreRows()" mat-flat-button>Show more rows</button>
   </div>
   <div class="table-footer">
     <ng-container *ngFor="let row of reportData.sumRow; let i = index">
