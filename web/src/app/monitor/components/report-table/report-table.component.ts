@@ -56,11 +56,15 @@ export class ReportTableComponent implements OnChanges {
     }
   }
 
-  addRows() {
-    if (typeof this.fullRowsData !== 'undefined' && this.fullRowsData[0]) {
+  showMoreRows() {
+    if (this.hasMoreRows()) {
       this.reportData.rows = [...this.reportData.rows, ...this.fullRowsData[0]];
       this.fullRowsData.splice(0, 1);
     }
+  }
+
+  hasMoreRows() {
+    return typeof this.fullRowsData !== 'undefined' && this.fullRowsData[0];
   }
 
   toggleFold(indexNumber: number, sumRow: boolean = false) {
