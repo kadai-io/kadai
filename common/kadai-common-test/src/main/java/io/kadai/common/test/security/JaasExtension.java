@@ -70,8 +70,7 @@ public class JaasExtension implements InvocationInterceptor, TestTemplateInvocat
       Iterable<DynamicNode> nodes, Map<String, List<DynamicNode>> childrenMap) {
     nodes.forEach(
         node -> {
-          if (node instanceof DynamicContainer) {
-            DynamicContainer container = (DynamicContainer) node;
+          if (node instanceof DynamicContainer container) {
             List<DynamicNode> children = container.getChildren().collect(Collectors.toList());
             childrenMap.put(container.hashCode() + container.getDisplayName(), children);
             persistDynamicContainerChildren(children, childrenMap);
@@ -81,8 +80,7 @@ public class JaasExtension implements InvocationInterceptor, TestTemplateInvocat
 
   private static DynamicNode duplicateDynamicNode(
       DynamicNode node, Map<String, List<DynamicNode>> lookupMap) {
-    if (node instanceof DynamicContainer) {
-      DynamicContainer container = (DynamicContainer) node;
+    if (node instanceof DynamicContainer container) {
       Stream<DynamicNode> children =
           lookupMap.get(node.hashCode() + node.getDisplayName()).stream()
               .map(x -> duplicateDynamicNode(x, lookupMap));
@@ -191,17 +189,17 @@ public class JaasExtension implements InvocationInterceptor, TestTemplateInvocat
 
       Iterable<DynamicNode> newChildrenForDynamicContainer;
       // TestFactory must have one of the following return types. See link above for further details
-      if (factoryResult instanceof DynamicNode) {
-        newChildrenForDynamicContainer = Collections.singleton((DynamicNode) factoryResult);
-      } else if (factoryResult instanceof Stream) {
-        Stream<DynamicNode> nodes = (Stream<DynamicNode>) factoryResult;
+      if (factoryResult instanceof DynamicNode dynamicNode) {
+        newChildrenForDynamicContainer = Collections.singleton(dynamicNode);
+      } else if (factoryResult instanceof Stream<?> stream) {
+        Stream<DynamicNode> nodes = (Stream<DynamicNode>) stream;
         newChildrenForDynamicContainer = nodes.toList();
-      } else if (factoryResult instanceof Iterable) {
-        newChildrenForDynamicContainer = (Iterable<DynamicNode>) factoryResult;
-      } else if (factoryResult instanceof Iterator) {
-        newChildrenForDynamicContainer = () -> (Iterator<DynamicNode>) factoryResult;
-      } else if (factoryResult instanceof DynamicNode[]) {
-        newChildrenForDynamicContainer = Arrays.asList((DynamicNode[]) factoryResult);
+      } else if (factoryResult instanceof Iterable<?> iterable) {
+        newChildrenForDynamicContainer = (Iterable<DynamicNode>) iterable;
+      } else if (factoryResult instanceof Iterator<?> iterator) {
+        newChildrenForDynamicContainer = () -> (Iterator<DynamicNode>) iterator;
+      } else if (factoryResult instanceof DynamicNode[] dynamicNodes) {
+        newChildrenForDynamicContainer = Arrays.asList(dynamicNodes);
       } else {
         throw new SystemException(
             String.format(

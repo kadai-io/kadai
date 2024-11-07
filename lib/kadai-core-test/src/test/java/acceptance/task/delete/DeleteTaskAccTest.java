@@ -279,7 +279,7 @@ class DeleteTaskAccTest {
         .buildAndStore(taskService, "admin");
   }
 
-  private Attachment createNewAttachment() throws Exception {
+  private Attachment createNewAttachment() {
     return TaskAttachmentBuilder.newAttachment()
         .classificationSummary(defaultClassificationSummary)
         .objectReference(defaultObjectReference)

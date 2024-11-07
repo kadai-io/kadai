@@ -70,7 +70,7 @@ class SimpleHistoryServiceImplTest {
   @Mock private SqlSession sqlSessionMock;
 
   @Test
-  void should_VerifyMethodInvocations_When_CreateTaskHistoryEvent() throws Exception {
+  void should_VerifyMethodInvocations_When_CreateTaskHistoryEvent() {
     TaskHistoryEvent expectedWb =
         AbstractAccTest.createTaskHistoryEvent(
             "wbKey1", "taskId1", "type1", "wbKey2", "someUserId", "someDetails");
@@ -81,7 +81,7 @@ class SimpleHistoryServiceImplTest {
   }
 
   @Test
-  void should_VerifyMethodInvocations_When_CreateWorkbasketHisoryEvent() throws Exception {
+  void should_VerifyMethodInvocations_When_CreateWorkbasketHisoryEvent() {
     WorkbasketHistoryEvent expectedEvent =
         AbstractAccTest.createWorkbasketHistoryEvent(
             "wbKey1", WorkbasketHistoryEventType.CREATED.getName(), "someUserId", "someDetails");
@@ -92,7 +92,7 @@ class SimpleHistoryServiceImplTest {
   }
 
   @Test
-  void should_VerifyMethodInvocations_When_QueryTaskHistoryEvent() throws Exception {
+  void should_VerifyMethodInvocations_When_QueryTaskHistoryEvent() {
     List<TaskHistoryEvent> returnList = new ArrayList<>();
     returnList.add(
         AbstractAccTest.createTaskHistoryEvent(
@@ -118,7 +118,7 @@ class SimpleHistoryServiceImplTest {
   }
 
   @Test
-  void should_VerifyMethodInvocations_When_QueryWorkbasketHisoryEvent() throws Exception {
+  void should_VerifyMethodInvocations_When_QueryWorkbasketHisoryEvent() {
     List<WorkbasketHistoryEvent> returnList = new ArrayList<>();
     returnList.add(
         AbstractAccTest.createWorkbasketHistoryEvent(

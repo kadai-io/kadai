@@ -38,39 +38,51 @@ public class DockerContainerCreator {
   }
 
   public static Optional<JdbcDatabaseContainer<?>> createDockerContainer(DB db) {
-    switch (db) {
-      case DB2:
-        return Optional.of(
+    return switch (db) {
+      case DB2 -> {
+        try (Db2Container db2Container =
             new Db2Container(
-                    DockerImageName.parse("taskana/db2:11.5")
-                        .asCompatibleSubstituteFor("ibmcom/db2"))
-                .waitingFor(
-                    new LogMessageWaitStrategy()
-                        .withRegEx(".*DB2START processing was successful.*")
-                        .withStartupTimeout(Duration.of(60, SECONDS)))
-                .withUsername("db2inst1")
-                .withPassword("db2inst1-pwd")
-                .withDatabaseName("TSKDB"));
-      case POSTGRES:
-        return Optional.of(
-            new PostgreSQLContainer<>(DockerImageName.parse("postgres:14.7"))
-                .withUsername("postgres")
-                .withPassword("postgres")
-                .withDatabaseName("postgres")
-                .withCommand(
-                    "/bin/sh",
-                    "-c",
-                    "localedef -i de_DE -c -f UTF-8 -A /usr/share/locale/locale.alias de_DE.UTF-8 "
-                        + "&& export LANG=de_DE.UTF-8 "
-                        + "&& /usr/local/bin/docker-entrypoint.sh postgres -c fsync=off")
-                .waitingFor(
-                    new LogMessageWaitStrategy()
-                        .withRegEx(".*Datenbanksystem ist bereit, um Verbindungen anzunehmen.*\\s")
-                        .withTimes(2)
-                        .withStartupTimeout(Duration.of(60, SECONDS))));
-      default:
-        return Optional.empty();
-    }
+                DockerImageName.parse("taskana/db2:11.5")
+                    .asCompatibleSubstituteFor("ibmcom/db2"))) {
+
+          yield Optional.of(
+              db2Container
+                  .waitingFor(
+                      new LogMessageWaitStrategy()
+                          .withRegEx(".*DB2START processing was successful.*")
+                          .withStartupTimeout(Duration.of(60, SECONDS)))
+                  .withUsername("db2inst1")
+                  .withPassword("db2inst1-pwd")
+                  .withDatabaseName("TSKDB"));
+        }
+      }
+      case POSTGRES -> {
+        try (PostgreSQLContainer<?> selfPostgreSQLContainer =
+            new PostgreSQLContainer<>(DockerImageName.parse("postgres:14.7"))) {
+
+          yield Optional.of(
+              selfPostgreSQLContainer
+                  .withUsername("postgres")
+                  .withPassword("postgres")
+                  .withDatabaseName("postgres")
+                  .withCommand(
+                      "/bin/sh",
+                      "-c",
+                      """
+                          localedef -i de_DE -c -f UTF-8 -A \
+                          /usr/share/locale/locale.alias de_DE.UTF-8 \
+                          && export LANG=de_DE.UTF-8 \
+                          && /usr/local/bin/docker-entrypoint.sh postgres -c fsync=off""")
+                  .waitingFor(
+                      new LogMessageWaitStrategy()
+                          .withRegEx(
+                              ".*Datenbanksystem ist bereit, um Verbindungen anzunehmen.*\\s")
+                          .withTimes(2)
+                          .withStartupTimeout(Duration.of(60, SECONDS))));
+        }
+      }
+      default -> Optional.empty();
+    };
   }
 
   public static DataSource createDataSource(JdbcDatabaseContainer<?> container) {

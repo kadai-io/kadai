@@ -30,7 +30,6 @@ import io.kadai.monitor.api.reports.row.SingleRow;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,7 +38,7 @@ import org.junit.jupiter.api.Test;
 class ReportTest {
 
   private static final List<TimeIntervalColumnHeader> HEADERS =
-      IntStream.range(0, 4).mapToObj(TimeIntervalColumnHeader::new).collect(Collectors.toList());
+      IntStream.range(0, 4).mapToObj(TimeIntervalColumnHeader::new).toList();
   private Report<MonitorQueryItem, TimeIntervalColumnHeader> report;
   private MonitorQueryItem item;
 
@@ -82,13 +81,13 @@ class ReportTest {
   @Test
   void should_CreateFoldableRowAndSetKey_When_InsertingItemWithUnknownKey() {
     // when
-    ReportWithFoldableRow report =
+    ReportWithFoldableRow reportWithFoldableRow =
         new ReportWithFoldableRow(HEADERS, new String[] {"rowDesc", "foldableRowDesc"});
-    report.addItem(item);
+    reportWithFoldableRow.addItem(item);
 
     // then
-    assertThat(report.getRows()).hasSize(1);
-    FoldableTestRow row = report.getRow("key");
+    assertThat(reportWithFoldableRow.getRows()).hasSize(1);
+    FoldableTestRow row = reportWithFoldableRow.getRow("key");
     assertThat(row.getKey()).isEqualTo("key");
 
     assertThat(row.getFoldableRowCount()).isOne();
@@ -99,13 +98,13 @@ class ReportTest {
   @Test
   void should_AppendItemValueInFoldableRow_When_ItemIsInserted() {
     // when
-    ReportWithFoldableRow report =
+    ReportWithFoldableRow reportWithFoldableRow =
         new ReportWithFoldableRow(HEADERS, new String[] {"rowDesc", "foldableRowDesc"});
-    report.addItem(item);
+    reportWithFoldableRow.addItem(item);
 
     // then
-    assertThat(report.getRows()).hasSize(1);
-    FoldableTestRow row = report.getRow("key");
+    assertThat(reportWithFoldableRow.getRows()).hasSize(1);
+    FoldableTestRow row = reportWithFoldableRow.getRow("key");
     assertThat(row.getCells()).isEqualTo(new int[] {item.getValue(), 0, 0, 0});
     assertThat(row.getTotalValue()).isEqualTo(item.getValue());
 
@@ -157,9 +156,9 @@ class ReportTest {
     // given
     int overrideValue = 5;
     QueryItemPreprocessor<MonitorQueryItem> preprocessor =
-        item -> {
-          item.setNumberOfTasks(overrideValue);
-          return item;
+        queryItem -> {
+          queryItem.setNumberOfTasks(overrideValue);
+          return queryItem;
         };
     item.setAgeInDays(1);
 
@@ -183,9 +182,9 @@ class ReportTest {
     // given
     int overrideValue = 5;
     QueryItemPreprocessor<MonitorQueryItem> preprocessor =
-        (item) -> {
-          item.setNumberOfTasks(overrideValue);
-          return item;
+        queryItem -> {
+          queryItem.setNumberOfTasks(overrideValue);
+          return queryItem;
         };
     // when
     report.addItems(List.of(item, item), preprocessor);
@@ -269,16 +268,16 @@ class ReportTest {
 
   @Test
   void should_SetDisplayNameForFoldableRows_When_DisplayMapContainsNames() {
-    ReportWithFoldableRow report =
+    ReportWithFoldableRow reportWithFoldableRow =
         new ReportWithFoldableRow(HEADERS, new String[] {"totalDesc", "foldalbeRowDesc"});
-    report.addItem(item);
+    reportWithFoldableRow.addItem(item);
 
     HashMap<String, String> displayMap = new HashMap<>();
     displayMap.put("key", "displayname for key");
     displayMap.put("KEY", "displayname for KEY");
-    report.augmentDisplayNames(displayMap);
+    reportWithFoldableRow.augmentDisplayNames(displayMap);
 
-    FoldableTestRow row = report.getRow("key");
+    FoldableTestRow row = reportWithFoldableRow.getRow("key");
     assertThat(row.getDisplayName()).isEqualTo("displayname for key");
     assertThat(row.getFoldableRow("KEY").getDisplayName()).isEqualTo("displayname for KEY");
   }
@@ -314,7 +313,7 @@ class ReportTest {
   private static class FoldableTestRow extends FoldableRow<MonitorQueryItem> {
 
     protected FoldableTestRow(String key, int columnSize) {
-      super(key, columnSize, (item) -> item.getKey().toUpperCase());
+      super(key, columnSize, queryItem -> queryItem.getKey().toUpperCase());
     }
 
     @Override

@@ -46,7 +46,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
@@ -82,7 +81,7 @@ class QueryTasksWithSortingAccTest extends AbstractAccTest {
             results.stream()
                 .map(TaskSummary::getId)
                 .sorted(Comparator.reverseOrder())
-                .collect(Collectors.toList());
+                .toList();
 
         for (int i = 0; i < results.size(); i++) {
           assertThat(results.get(i).getId()).isEqualTo(idsDesc.get(i));
@@ -99,7 +98,7 @@ class QueryTasksWithSortingAccTest extends AbstractAccTest {
         assertThat(results).hasSizeGreaterThan(2);
 
         List<String> idsAsc =
-            results.stream().map(TaskSummary::getId).sorted().collect(Collectors.toList());
+            results.stream().map(TaskSummary::getId).sorted().toList();
 
         for (int i = 0; i < results.size(); i++) {
           assertThat(results.get(i).getId()).isEqualTo(idsAsc.get(i));
@@ -210,8 +209,7 @@ class QueryTasksWithSortingAccTest extends AbstractAccTest {
                             .getPrimaryObjRef()
                             .getSystem()
                             .compareToIgnoreCase(previousSummary.getPrimaryObjRef().getSystem())
-                        <= 0)
-                .isTrue();
+                        ).isNotPositive();
           }
           previousSummary = taskSummary;
         }
@@ -246,8 +244,8 @@ class QueryTasksWithSortingAccTest extends AbstractAccTest {
                             .getSystemInstance()
                             .compareToIgnoreCase(
                                 previousSummary.getPrimaryObjRef().getSystemInstance())
-                        <= 0)
-                .isTrue();
+                        )
+                .isNotPositive();
           }
           previousSummary = taskSummary;
         }
@@ -272,17 +270,13 @@ class QueryTasksWithSortingAccTest extends AbstractAccTest {
         assertThat(results).hasSize(25);
         TaskSummary previousSummary = null;
         for (TaskSummary taskSummary : results) {
-          // System.out.println("porCompany: " + taskSummary.getPrimaryObjRef().getCompany() + ",
-          // claimed: "
-          // + taskSummary.getClaimed());
           if (previousSummary != null) {
             assertThat(
                     taskSummary
-                            .getPrimaryObjRef()
-                            .getCompany()
-                            .compareToIgnoreCase(previousSummary.getPrimaryObjRef().getCompany())
-                        <= 0)
-                .isTrue();
+                        .getPrimaryObjRef()
+                        .getCompany()
+                        .compareToIgnoreCase(previousSummary.getPrimaryObjRef().getCompany()))
+                .isNotPositive();
           }
           previousSummary = taskSummary;
         }
@@ -315,8 +309,8 @@ class QueryTasksWithSortingAccTest extends AbstractAccTest {
                             .getWorkbasketSummary()
                             .getKey()
                             .compareToIgnoreCase(previousSummary.getWorkbasketSummary().getKey())
-                        >= 0)
-                .isTrue();
+                        )
+                .isNotNegative();
           }
           previousSummary = taskSummary;
         }
@@ -348,8 +342,8 @@ class QueryTasksWithSortingAccTest extends AbstractAccTest {
                     taskSummary
                             .getBusinessProcessId()
                             .compareToIgnoreCase(previousSummary.getBusinessProcessId())
-                        >= 0)
-                .isTrue();
+                        )
+                .isNotNegative();
           }
           previousSummary = taskSummary;
         }

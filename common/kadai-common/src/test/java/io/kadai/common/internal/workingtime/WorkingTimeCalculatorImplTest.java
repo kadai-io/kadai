@@ -163,14 +163,19 @@ class WorkingTimeCalculatorImplTest {
 
       @Test
       void withNegativeDuration() {
+        Instant workStart = Instant.now();
+        Duration workingTime = Duration.ofMillis(-1);
+
         assertThatExceptionOfType(InvalidArgumentException.class)
-            .isThrownBy(() -> cut.addWorkingTime(Instant.now(), Duration.ofMillis(-1)));
+            .isThrownBy(() -> cut.addWorkingTime(workStart, workingTime));
       }
 
       @Test
       void withNullInstant() {
+        Duration workingTime = Duration.ofMillis(1);
+
         assertThatExceptionOfType(NullPointerException.class)
-            .isThrownBy(() -> cut.addWorkingTime(null, Duration.ofMillis(1)));
+            .isThrownBy(() -> cut.addWorkingTime(null, workingTime));
       }
     }
 
@@ -281,14 +286,19 @@ class WorkingTimeCalculatorImplTest {
 
       @Test
       void withNegativeDuration() {
+        Instant workStart = Instant.now();
+        Duration workingTime = Duration.ofMillis(-1);
+
         assertThatExceptionOfType(InvalidArgumentException.class)
-            .isThrownBy(() -> cut.subtractWorkingTime(Instant.now(), Duration.ofMillis(-1)));
+            .isThrownBy(() -> cut.subtractWorkingTime(workStart, workingTime));
       }
 
       @Test
       void withNullInstant() {
+        Duration workingTime = Duration.ofMillis(1);
+
         assertThatExceptionOfType(NullPointerException.class)
-            .isThrownBy(() -> cut.subtractWorkingTime(null, Duration.ofMillis(1)));
+            .isThrownBy(() -> cut.subtractWorkingTime(null, workingTime));
       }
     }
 
@@ -377,14 +387,18 @@ class WorkingTimeCalculatorImplTest {
 
       @Test
       void failsIfFromIsNull() {
+        Instant second = Instant.now();
+
         assertThatExceptionOfType(InvalidArgumentException.class)
-            .isThrownBy(() -> cut.workingTimeBetween(null, Instant.now()));
+            .isThrownBy(() -> cut.workingTimeBetween(null, second));
       }
 
       @Test
       void failsIfToIsNull() {
+        Instant first = Instant.now();
+
         assertThatExceptionOfType(InvalidArgumentException.class)
-            .isThrownBy(() -> cut.workingTimeBetween(Instant.now(), null));
+            .isThrownBy(() -> cut.workingTimeBetween(first, null));
       }
     }
   }

@@ -133,7 +133,7 @@ class KadaiConfigurationTest {
       assertThat(configuration.getLogHistoryLoggerName()).isNull();
       // job configuration
       assertThat(configuration.isJobSchedulerEnabled()).isTrue();
-      assertThat(configuration.getJobSchedulerInitialStartDelay()).isEqualTo(0);
+      assertThat(configuration.getJobSchedulerInitialStartDelay()).isZero();
       assertThat(configuration.getJobSchedulerPeriod()).isEqualTo(5);
       assertThat(configuration.getJobSchedulerPeriodTimeUnit()).isEqualTo(TimeUnit.MINUTES);
       assertThat(configuration.getMaxNumberOfJobRetries()).isEqualTo(3);
@@ -196,8 +196,6 @@ class KadaiConfigurationTest {
                   Map.entry("TASK", List.of("EXTERNAL", "MANUAL", "AUTOMATIC", "PROCESS")),
                   Map.entry("DOCUMENT", List.of("EXTERNAL"))));
       // working time configuration
-      //
-      // assertThat(configuration.getWorkingTimeSchedule()).isEqualTo(defaultWorkingTimeSchedule);
       assertThat(configuration.getWorkingTimeScheduleTimeZone()).isEqualTo(ZoneId.of("UTC"));
       assertThat(configuration.getCustomHolidays())
           .isEqualTo(Set.of(CustomHoliday.of(31, 7), CustomHoliday.of(16, 12)));

@@ -82,7 +82,7 @@ import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 
 @KadaiIntegrationTest
-public class UpdateTaskAccTest {
+class UpdateTaskAccTest {
   @KadaiInject TaskService taskService;
   @KadaiInject UserService userService;
 
@@ -257,8 +257,7 @@ public class UpdateTaskAccTest {
   @WithAccessId(user = "user-1-2")
   @TestFactory
   Stream<DynamicTest>
-      should_ThrowException_When_MandatoryPrimaryObjectReferenceIsNotSetOrIncomplete()
-          throws Exception {
+      should_ThrowException_When_MandatoryPrimaryObjectReferenceIsNotSetOrIncomplete() {
     List<Pair<String, ObjectReference>> list =
         List.of(
             Pair.of("When Primary Object Reference is null", null),
@@ -412,12 +411,11 @@ public class UpdateTaskAccTest {
   @WithAccessId(user = "user-1-2")
   @Test
   void should_ThrowException_When_UpdatingTaskWithInvalidId() throws Exception {
-    Task task =
-        TaskBuilder.newTask()
-            .classificationSummary(defaultClassificationSummary)
-            .workbasketSummary(defaultWorkbasketSummary)
-            .primaryObjRef(defaultObjectReference)
-            .buildAndStore(taskService, "admin");
+    TaskBuilder.newTask()
+        .classificationSummary(defaultClassificationSummary)
+        .workbasketSummary(defaultWorkbasketSummary)
+        .primaryObjRef(defaultObjectReference)
+        .buildAndStore(taskService, "admin");
 
     ThrowingCallable call = () -> taskService.setTaskRead("INVALID", true);
 
@@ -505,7 +503,7 @@ public class UpdateTaskAccTest {
 
   @WithAccessId(user = "user-1-2")
   @TestFactory
-  Stream<DynamicTest> should_UpdateNoTasksWithPor_When_UserHasMissingPermission() throws Exception {
+  Stream<DynamicTest> should_UpdateNoTasksWithPor_When_UserHasMissingPermission() {
     List<Pair<String, WorkbasketSummary>> list =
         List.of(
             Pair.of("With Missing Read Permission", wbWithoutRead),
@@ -618,8 +616,7 @@ public class UpdateTaskAccTest {
 
   @WithAccessId(user = "user-1-2")
   @TestFactory
-  Stream<DynamicTest> should_UpdateNoTasksWithTaskId_When_UserHasMissingPermission()
-      throws Exception {
+  Stream<DynamicTest> should_UpdateNoTasksWithTaskId_When_UserHasMissingPermission() {
     List<Pair<String, WorkbasketSummary>> list =
         List.of(
             Pair.of("With Missing Read Permission", wbWithoutRead),
@@ -685,7 +682,7 @@ public class UpdateTaskAccTest {
 
   @WithAccessId(user = "user-1-2")
   @TestFactory
-  Stream<DynamicTest> should_ThrowException_When_MissingOneOfThePermissions() throws Exception {
+  Stream<DynamicTest> should_ThrowException_When_MissingOneOfThePermissions() {
     List<Triplet<String, WorkbasketSummary, WorkbasketPermission>> list =
         List.of(
             Triplet.of("With Missing Read Permission", wbWithoutRead, WorkbasketPermission.READ),

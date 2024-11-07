@@ -19,5 +19,9 @@
 package io.kadai.common.api;
 
 public class SharedConstants {
-  public static String MASTER_DOMAIN = "";
+
+  private SharedConstants() {
+  }
+
+  public static final String MASTER_DOMAIN = "";
 }

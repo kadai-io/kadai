@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class TaskImpl extends TaskSummaryImpl implements Task {
@@ -316,14 +317,19 @@ public class TaskImpl extends TaskSummaryImpl implements Task {
 
   @Override
   public Attachment removeAttachment(String attachmentId) {
-    Attachment result = null;
-    for (Attachment attachment : attachments) {
-      if (attachment.getId().equals(attachmentId) && attachments.remove(attachment)) {
-        result = attachment;
-        break;
-      }
+
+    if (attachmentId == null) {
+      return null;
     }
-    return result;
+
+    Optional<Attachment> removedAttachment =
+        attachments.stream()
+            .filter(attachment -> attachmentId.equals(attachment.getId()))
+            .findFirst();
+
+    removedAttachment.ifPresent(attachment -> attachments.remove(attachment));
+
+    return removedAttachment.orElse(null);
   }
 
   @Override

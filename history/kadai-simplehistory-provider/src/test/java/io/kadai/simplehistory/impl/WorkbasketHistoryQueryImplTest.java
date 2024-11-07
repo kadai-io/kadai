@@ -55,15 +55,17 @@ class WorkbasketHistoryQueryImplTest {
   }
 
   @Test
-  void should_ReturnList_When_CallingListMethodOnWorkbasketHistoryQuery() throws Exception {
-    List<WorkbasketHistoryEvent> returnList = new ArrayList<>();
-    returnList.add(
-        createHistoryEvent(
-            "abcd",
-            WorkbasketHistoryEventType.CREATED.getName(),
-            "someUserId",
-            "someDetails",
-            null));
+  void should_ReturnList_When_CallingListMethodOnWorkbasketHistoryQuery() {
+    WorkbasketHistoryEvent historyEvent = new WorkbasketHistoryEvent();
+    historyEvent.setId(
+        IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT));
+    historyEvent.setUserId("someUserId");
+    historyEvent.setDetails("someDetails");
+    historyEvent.setKey("abcd");
+    historyEvent.setEventType(WorkbasketHistoryEventType.CREATED.getName());
+    historyEvent.setCreated(null);
+
+    List<WorkbasketHistoryEvent> returnList = List.of(historyEvent);
     TimeInterval interval = new TimeInterval(Instant.now().minusNanos(1000), Instant.now());
 
     doNothing().when(internalKadaiEngineMock).openConnection();
@@ -81,17 +83,5 @@ class WorkbasketHistoryQueryImplTest {
 
     validateMockitoUsage();
     assertThat(result).isEqualTo(returnList);
-  }
-
-  private WorkbasketHistoryEvent createHistoryEvent(
-      String workbasketKey, String type, String userId, String details, Instant created) {
-    WorkbasketHistoryEvent he = new WorkbasketHistoryEvent();
-    he.setId(IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT));
-    he.setUserId(userId);
-    he.setDetails(details);
-    he.setKey(workbasketKey);
-    he.setEventType(type);
-    he.setCreated(created);
-    return he;
   }
 }

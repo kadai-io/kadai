@@ -31,8 +31,6 @@ import io.kadai.workbasket.api.WorkbasketCustomField;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.ibatis.session.RowBounds;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
 
@@ -43,10 +41,6 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
           + "WorkbasketHistoryQueryMapper.queryHistoryColumnValues";
   private static final String LINK_TO_COUNTER =
       "io.kadai.simplehistory.impl.workbasket.WorkbasketHistoryQueryMapper.countHistoryEvents";
-  private static final Logger LOGGER = LoggerFactory.getLogger(WorkbasketHistoryQueryImpl.class);
-
-  private static final String SQL_EXCEPTION_MESSAGE =
-      "Method openConnection() could not open a connection to the database.";
 
   private final InternalKadaiEngine internalKadaiEngine;
   private final List<String> orderColumns;
@@ -454,48 +448,36 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
   @Override
   public WorkbasketHistoryQuery orderByCustomAttribute(int num, SortDirection sortDirection)
       throws InvalidArgumentException {
-
-    switch (num) {
-      case 1:
-        return addOrderCriteria("CUSTOM_1", sortDirection);
-      case 2:
-        return addOrderCriteria("CUSTOM_2", sortDirection);
-      case 3:
-        return addOrderCriteria("CUSTOM_3", sortDirection);
-      case 4:
-        return addOrderCriteria("CUSTOM_4", sortDirection);
-      default:
-        throw new InvalidArgumentException(
-            "Custom number has to be between 1 and 4, but this is: " + num);
-    }
+    return switch (num) {
+      case 1 -> addOrderCriteria("CUSTOM_1", sortDirection);
+      case 2 -> addOrderCriteria("CUSTOM_2", sortDirection);
+      case 3 -> addOrderCriteria("CUSTOM_3", sortDirection);
+      case 4 -> addOrderCriteria("CUSTOM_4", sortDirection);
+      default ->
+          throw new InvalidArgumentException(
+              "Custom number has to be between 1 and 4, but this is: " + num);
+    };
   }
 
   @Override
   public WorkbasketHistoryQuery orderByOrgLevel(int num, SortDirection sortDirection)
       throws InvalidArgumentException {
-
-    switch (num) {
-      case 1:
-        return addOrderCriteria("ORGLEVEL_1", sortDirection);
-      case 2:
-        return addOrderCriteria("ORGLEVEL_2", sortDirection);
-      case 3:
-        return addOrderCriteria("ORGLEVEL_3", sortDirection);
-      case 4:
-        return addOrderCriteria("ORGLEVEL_4", sortDirection);
-      default:
-        throw new InvalidArgumentException(
-            "Org number has to be between 1 and 4, but this is: " + num);
-    }
+    return switch (num) {
+      case 1 -> addOrderCriteria("ORGLEVEL_1", sortDirection);
+      case 2 -> addOrderCriteria("ORGLEVEL_2", sortDirection);
+      case 3 -> addOrderCriteria("ORGLEVEL_3", sortDirection);
+      case 4 -> addOrderCriteria("ORGLEVEL_4", sortDirection);
+      default ->
+          throw new InvalidArgumentException(
+              "Org number has to be between 1 and 4, but this is: " + num);
+    };
   }
 
   @Override
   public List<WorkbasketHistoryEvent> list() {
-    List<WorkbasketHistoryEvent> result = new ArrayList<>();
     try {
       internalKadaiEngine.openConnection();
-      result = internalKadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this);
-      return result;
+      return internalKadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this);
     } finally {
       internalKadaiEngine.returnConnection();
     }
@@ -503,12 +485,10 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
 
   @Override
   public List<WorkbasketHistoryEvent> list(int offset, int limit) {
-    List<WorkbasketHistoryEvent> result = new ArrayList<>();
     try {
       internalKadaiEngine.openConnection();
       RowBounds rowBounds = new RowBounds(offset, limit);
-      result = internalKadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this, rowBounds);
-      return result;
+      return internalKadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this, rowBounds);
     } finally {
       internalKadaiEngine.returnConnection();
     }
@@ -517,7 +497,6 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
   @Override
   public List<String> listValues(
       WorkbasketHistoryQueryColumnName dbColumnName, SortDirection sortDirection) {
-    List<String> result = new ArrayList<>();
     this.columnName = dbColumnName;
     List<String> cacheOrderBy = this.orderBy;
     this.orderBy.clear();
@@ -525,8 +504,7 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
 
     try {
       internalKadaiEngine.openConnection();
-      result = internalKadaiEngine.getSqlSession().selectList(LINK_TO_VALUE_MAPPER, this);
-      return result;
+      return internalKadaiEngine.getSqlSession().selectList(LINK_TO_VALUE_MAPPER, this);
     } finally {
       this.orderBy = cacheOrderBy;
       this.columnName = null;
@@ -537,12 +515,9 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
 
   @Override
   public WorkbasketHistoryEvent single() {
-    WorkbasketHistoryEvent result = null;
     try {
       internalKadaiEngine.openConnection();
-      result = internalKadaiEngine.getSqlSession().selectOne(LINK_TO_MAPPER, this);
-
-      return result;
+      return internalKadaiEngine.getSqlSession().selectOne(LINK_TO_MAPPER, this);
     } finally {
       internalKadaiEngine.returnConnection();
     }
@@ -550,10 +525,9 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
 
   @Override
   public long count() {
-    Long rowCount;
     try {
       internalKadaiEngine.openConnection();
-      rowCount = internalKadaiEngine.getSqlSession().selectOne(LINK_TO_COUNTER, this);
+      Long rowCount = internalKadaiEngine.getSqlSession().selectOne(LINK_TO_COUNTER, this);
       return (rowCount == null) ? 0L : rowCount;
     } finally {
       internalKadaiEngine.returnConnection();

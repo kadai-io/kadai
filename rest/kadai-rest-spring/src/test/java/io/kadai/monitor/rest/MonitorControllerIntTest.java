@@ -31,7 +31,6 @@ import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -259,7 +258,7 @@ class MonitorControllerIntTest {
     assertThat(
             response.getBody().getRows().stream()
                 .map(RowRepresentationModel::getDesc)
-                .collect(Collectors.toList()))
+                .toList())
         .hasSize(3)
         .containsExactlyInAnyOrder(descArray);
   }
@@ -280,7 +279,7 @@ class MonitorControllerIntTest {
     assertThat(
             response.getBody().getRows().stream()
                 .map(RowRepresentationModel::getDesc)
-                .collect(Collectors.toList()))
+                .toList())
         .hasSize(6);
   }
 
@@ -349,7 +348,7 @@ class MonitorControllerIntTest {
     assertThat(
             response.getBody().getRows().stream()
                 .map(RowRepresentationModel::getDesc)
-                .collect(Collectors.toList()))
+                .toList())
         .hasSize(3)
         .containsExactlyInAnyOrder(descArray);
   }

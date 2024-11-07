@@ -23,11 +23,9 @@ import static io.kadai.rest.test.RestHelper.TEMPLATE;
 import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
 import java.io.File;
-import javax.sql.DataSource;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
@@ -45,17 +43,11 @@ class DmnUploadControllerIntTest {
   private static final String EXCEL_NAME = "testExcelRouting.xlsx";
   private static final String HTTP_BODY_FILE_NAME = "excelRoutingFile";
   private final RestHelper restHelper;
-  private final DataSource dataSource;
-  private final String schemaName;
 
   @Autowired
   DmnUploadControllerIntTest(
-      RestHelper restHelper,
-      DataSource dataSource,
-      @Value("${kadai.schemaName:KADAI}") String schemaName) {
+      RestHelper restHelper) {
     this.restHelper = restHelper;
-    this.dataSource = dataSource;
-    this.schemaName = schemaName;
   }
 
   @Test

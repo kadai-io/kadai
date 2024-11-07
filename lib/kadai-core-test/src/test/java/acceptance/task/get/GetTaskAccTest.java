@@ -36,7 +36,6 @@ import io.kadai.task.api.TaskState;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.Task;
-import io.kadai.task.api.models.TaskComment;
 import io.kadai.testapi.KadaiConfigurationModifier;
 import io.kadai.testapi.KadaiInject;
 import io.kadai.testapi.KadaiIntegrationTest;
@@ -179,21 +178,19 @@ class GetTaskAccTest {
             .primaryObjRef(defaultObjectReference)
             .buildAndStore(taskService);
 
-    TaskComment comment1 =
-        TaskCommentBuilder.newTaskComment()
-            .taskId(task.getId())
-            .textField("Text1")
-            .created(Instant.now())
-            .modified(Instant.now())
-            .buildAndStore(taskService);
+    TaskCommentBuilder.newTaskComment()
+        .taskId(task.getId())
+        .textField("Text1")
+        .created(Instant.now())
+        .modified(Instant.now())
+        .buildAndStore(taskService);
 
-    TaskComment comment2 =
-        TaskCommentBuilder.newTaskComment()
-            .taskId(task.getId())
-            .textField("Text1")
-            .created(Instant.now())
-            .modified(Instant.now())
-            .buildAndStore(taskService);
+    TaskCommentBuilder.newTaskComment()
+        .taskId(task.getId())
+        .textField("Text1")
+        .created(Instant.now())
+        .modified(Instant.now())
+        .buildAndStore(taskService);
   }
 
   @WithAccessId(user = "user-1-1")
@@ -206,7 +203,7 @@ class GetTaskAccTest {
     assertThat(readTask.getCreator()).isEqualTo("admin");
     assertThat(readTask.getDescription()).isEqualTo("Lorem ipsum was n Quatsch dolor sit amet.");
     assertThat(readTask.getNote()).isEqualTo("Some custom Note");
-    assertThat(readTask.getPriority()).isEqualTo(0);
+    assertThat(readTask.getPriority()).isZero();
     assertThat(readTask.getState()).isEqualTo(TaskState.CLAIMED);
     assertThat(readTask.getClassificationCategory())
         .isEqualTo(defaultClassificationSummary.getCategory());

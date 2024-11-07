@@ -125,8 +125,7 @@ class CreateTaskAccTest {
 
   @WithAccessId(user = "user-1-2")
   @Test
-  void should_NotSetAttachmentSummariesToNull_When_CreatingNewTaskWithTaskService()
-      throws Exception {
+  void should_NotSetAttachmentSummariesToNull_When_CreatingNewTaskWithTaskService() {
     Task task = taskService.newTask(defaultWorkbasketSummary.getId());
 
     assertThat(task.getAttachments()).isNotNull();
@@ -213,7 +212,7 @@ class CreateTaskAccTest {
 
   @WithAccessId(user = "user-1-2")
   @Test
-  void should_PreventTimestampServiceLevelMismatch_When_ConfigurationPreventsIt() throws Exception {
+  void should_PreventTimestampServiceLevelMismatch_When_ConfigurationPreventsIt() {
     Task task = createDefaultTask();
     Instant planned = Instant.parse("2018-01-02T00:00:00Z");
     task.setPlanned(planned);
@@ -287,8 +286,7 @@ class CreateTaskAccTest {
     // verify that the map is correctly retrieved from the database
     Task retrievedTask = taskService.getTask(createdTask.getId());
     Map<String, String> customAttributesFromDb = retrievedTask.getCustomAttributeMap();
-    assertThat(customAttributesFromDb).isNotNull();
-    assertThat(customAttributesFromDb).isEqualTo(customAttributesForCreate);
+    assertThat(customAttributesFromDb).isNotNull().isEqualTo(customAttributesForCreate);
   }
 
   @WithAccessId(user = "user-1-2")
@@ -443,7 +441,7 @@ class CreateTaskAccTest {
 
   @WithAccessId(user = "user-1-2")
   @TestFactory
-  Stream<DynamicTest> should_ThrowException_When_AttachmentIsInvalid() throws Exception {
+  Stream<DynamicTest> should_ThrowException_When_AttachmentIsInvalid() {
     List<Pair<String, ObjectReference>> list =
         List.of(
             Pair.of("With Object Reference set to Null", null),
@@ -509,7 +507,7 @@ class CreateTaskAccTest {
     Task createdTask = taskService.createTask(task);
 
     assertThat(createdTask).isNotNull();
-    assertThat(createdTask.getPriority()).isEqualTo(0);
+    assertThat(createdTask.getPriority()).isZero();
     assertThat(createdTask.getClassificationSummary()).isEqualTo(defaultClassificationSummary);
   }
 
@@ -632,7 +630,7 @@ class CreateTaskAccTest {
     NotAuthorizedOnWorkbasketException e =
         catchThrowableOfType(NotAuthorizedOnWorkbasketException.class, call);
     assertThat(e.getWorkbasketId()).isEqualTo(defaultWorkbasketSummary.getId());
-    assertThat(e.getCurrentUserId()).isEqualTo(null);
+    assertThat(e.getCurrentUserId()).isNull();
     assertThat(e.getRequiredPermissions()).containsExactly(WorkbasketPermission.READ);
   }
 
@@ -648,7 +646,7 @@ class CreateTaskAccTest {
 
   @WithAccessId(user = "user-1-1")
   @Test
-  void should_ThrowException_When_UserNotAuthorizedOnWorkbasket() throws Exception {
+  void should_ThrowException_When_UserNotAuthorizedOnWorkbasket() {
     Task task = createDefaultTask();
 
     ThrowingCallable call = () -> taskService.createTask(task);

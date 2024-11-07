@@ -33,7 +33,6 @@ import io.kadai.workbasket.rest.models.WorkbasketSummaryPagedRepresentationModel
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +91,7 @@ class GeneralExceptionHandlingTest {
     List<String> expectedValues =
         Arrays.stream(WorkbasketPermission.values())
             .map(Object::toString)
-            .collect(Collectors.toList());
+            .toList();
     ErrorCode errorCode =
         ErrorCode.of(
             "QUERY_PARAMETER_MALFORMED",
@@ -125,7 +124,7 @@ class GeneralExceptionHandlingTest {
                     WorkbasketSummaryPagedRepresentationModel.class));
 
     List<String> expectedValuesForQueryParameterType =
-        Arrays.stream(WorkbasketType.values()).map(Object::toString).collect(Collectors.toList());
+        Arrays.stream(WorkbasketType.values()).map(Object::toString).toList();
     ErrorCode errorCode =
         ErrorCode.of(
             "QUERY_PARAMETER_MALFORMED",
@@ -162,7 +161,7 @@ class GeneralExceptionHandlingTest {
                     WorkbasketSummaryPagedRepresentationModel.class));
 
     List<String> expectedValuesForQueryParameterType =
-        Arrays.stream(WorkbasketType.values()).map(Object::toString).collect(Collectors.toList());
+        Arrays.stream(WorkbasketType.values()).map(Object::toString).toList();
     ErrorCode errorCode =
         ErrorCode.of(
             "QUERY_PARAMETER_MALFORMED",
@@ -197,11 +196,11 @@ class GeneralExceptionHandlingTest {
                     WorkbasketSummaryPagedRepresentationModel.class));
 
     List<String> expectedValuesForQueryParameterType =
-        Arrays.stream(WorkbasketType.values()).map(Object::toString).collect(Collectors.toList());
+        Arrays.stream(WorkbasketType.values()).map(Object::toString).toList();
     List<String> expectedValuesForQueryParameterRequiredPermission =
         Arrays.stream(WorkbasketPermission.values())
             .map(Object::toString)
-            .collect(Collectors.toList());
+            .toList();
     ErrorCode errorCode =
         ErrorCode.of(
             "QUERY_PARAMETER_MALFORMED",

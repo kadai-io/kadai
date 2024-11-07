@@ -104,7 +104,6 @@ class WorkbasketSummaryRepresentationModelAssemblerTest {
     WorkbasketSummaryRepresentationModel repModel = assembler.toModel(workbasketSummary);
     // then
     testEquality(workbasketSummary, repModel);
-    testLinks(repModel);
   }
 
   @Test
@@ -165,6 +164,4 @@ class WorkbasketSummaryRepresentationModelAssemblerTest {
         .isNotSameAs(workbasketSummary2)
         .isEqualTo(workbasketSummary2);
   }
-
-  private void testLinks(WorkbasketSummaryRepresentationModel repModel) {}
 }

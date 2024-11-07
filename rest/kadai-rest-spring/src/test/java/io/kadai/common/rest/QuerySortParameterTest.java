@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 class QuerySortParameterTest {
 
   @Test
-  void should_ApplySortBy_When_SortByParameterIsCalled() throws Exception {
+  void should_ApplySortBy_When_SortByParameterIsCalled() {
     MockQuery query = mock(MockQuery.class);
     MockSortBy sortBy = mock(MockSortBy.class);
 
@@ -45,7 +45,7 @@ class QuerySortParameterTest {
   }
 
   @Test
-  void should_ApplySortDirectionAsc_When_OrderByIsNull() throws Exception {
+  void should_ApplySortDirectionAsc_When_OrderByIsNull() {
     MockQuery query = mock(MockQuery.class);
     MockSortBy sortBy = mock(MockSortBy.class);
 
@@ -58,7 +58,7 @@ class QuerySortParameterTest {
   }
 
   @Test
-  void should_ApplySortDirectionAsc_When_OrderByIsEmpty() throws Exception {
+  void should_ApplySortDirectionAsc_When_OrderByIsEmpty() {
     MockQuery query = mock(MockQuery.class);
     MockSortBy sortBy = mock(MockSortBy.class);
 
@@ -71,7 +71,7 @@ class QuerySortParameterTest {
   }
 
   @Test
-  void should_ApplySortByDesc_When_OrderByIsDesc() throws Exception {
+  void should_ApplySortByDesc_When_OrderByIsDesc() {
     MockQuery query = mock(MockQuery.class);
     MockSortBy sortBy = mock(MockSortBy.class);
 
@@ -84,7 +84,7 @@ class QuerySortParameterTest {
   }
 
   @Test
-  void should_ApplySortByMultipleTimes_When_SortByListContainsMultipleElements() throws Exception {
+  void should_ApplySortByMultipleTimes_When_SortByListContainsMultipleElements() {
     MockQuery query = mock(MockQuery.class);
     MockSortBy sortBy1 = mock(MockSortBy.class);
     MockSortBy sortBy2 = mock(MockSortBy.class);
@@ -103,17 +103,22 @@ class QuerySortParameterTest {
   void should_ThrowException_When_SortByAndOrderByLengthDoesNotMatch() {
     MockSortBy sortBy = mock(MockSortBy.class);
     SortDirection sortDirection = SortDirection.ASCENDING;
+    List<MockSortBy> sortBy1 = List.of(sortBy, sortBy);
+    List<SortDirection> sortDirection1 = List.of(sortDirection);
     assertThatThrownBy(
-            () -> new QuerySortParameter<>(List.of(sortBy, sortBy), List.of(sortDirection)))
+            () -> new QuerySortParameter<>(sortBy1, sortDirection1))
         .isInstanceOf(InvalidArgumentException.class);
+    List<MockSortBy> sortBy2 = List.of(sortBy);
+    List<SortDirection> sortDirection2 = List.of(sortDirection, sortDirection);
     assertThatThrownBy(
-            () -> new QuerySortParameter<>(List.of(sortBy), List.of(sortDirection, sortDirection)))
+            () -> new QuerySortParameter<>(sortBy2, sortDirection2))
         .isInstanceOf(InvalidArgumentException.class);
   }
 
   @Test
   void should_ThrowException_When_SortByIsNull() {
-    assertThatThrownBy(() -> new QuerySortParameter<>(null, List.of()))
+    List<SortDirection> order = List.of();
+    assertThatThrownBy(() -> new QuerySortParameter<>(null, order))
         .isInstanceOf(InvalidArgumentException.class);
   }
 

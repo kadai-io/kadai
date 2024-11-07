@@ -153,8 +153,7 @@ public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(BeanInstantiationException.class)
   protected ResponseEntity<Object> handleBeanInstantiationException(
       BeanInstantiationException ex, WebRequest req) {
-    if (ex.getCause() instanceof InvalidArgumentException) {
-      InvalidArgumentException cause = (InvalidArgumentException) ex.getCause();
+    if (ex.getCause() instanceof InvalidArgumentException cause) {
       return handleKadaiRuntimeException(cause, req);
     }
     return buildResponse(null, ex, req, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -231,9 +230,8 @@ public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
   private List<MalformedQueryParameter> extractMalformedQueryParameters(FieldError fieldError) {
     if (fieldError.contains(TypeMismatchException.class)) {
       TypeMismatchException typeMismatchException = fieldError.unwrap(TypeMismatchException.class);
-      if (typeMismatchException.getCause() instanceof ConversionFailedException) {
-        ConversionFailedException conversionFailedException =
-            (ConversionFailedException) typeMismatchException.getCause();
+      if (typeMismatchException.getCause()
+          instanceof ConversionFailedException conversionFailedException) {
         Class<?> targetType = conversionFailedException.getTargetType().getType();
         if (targetType.isEnum()) {
           String queryParameter = fieldError.getField();

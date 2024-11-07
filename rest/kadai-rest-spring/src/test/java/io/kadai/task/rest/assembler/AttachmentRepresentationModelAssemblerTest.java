@@ -98,7 +98,6 @@ class AttachmentRepresentationModelAssemblerTest {
     AttachmentRepresentationModel repModel = assembler.toModel(attachment);
 
     testEquality(attachment, repModel);
-    testLinks(repModel);
   }
 
   @Test
@@ -132,6 +131,4 @@ class AttachmentRepresentationModelAssemblerTest {
 
     assertThat(attachment.getCustomAttributeMap()).isEqualTo(repModel.getCustomAttributes());
   }
-
-  void testLinks(AttachmentRepresentationModel repModel) {}
 }

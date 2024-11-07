@@ -23,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.camunda.bpm.model.dmn.Dmn;
 import org.camunda.bpm.model.dmn.DmnModelInstance;
 import org.camunda.bpm.model.dmn.instance.InputEntry;
@@ -42,8 +41,7 @@ class InputEntriesSanitizerAccTest {
     File testDmnModel = new ClassPathResource(TEST_DMN).getFile();
     DmnModelInstance dmnModelInstance = Dmn.readModelFromFile(testDmnModel);
 
-    List<Rule> allRules =
-        dmnModelInstance.getModelElementsByType(Rule.class).stream().collect(Collectors.toList());
+    List<Rule> allRules = dmnModelInstance.getModelElementsByType(Rule.class).stream().toList();
 
     List<InputEntry> inputEntriesOfFirstRuleToSanitize =
         new ArrayList(allRules.get(1).getInputEntries());
@@ -64,7 +62,7 @@ class InputEntriesSanitizerAccTest {
     InputEntriesSanitizer.sanitizeRegexInsideInputEntries(dmnModelInstance);
 
     List<Rule> allRulesAfterSanitzing =
-        dmnModelInstance.getModelElementsByType(Rule.class).stream().collect(Collectors.toList());
+        dmnModelInstance.getModelElementsByType(Rule.class).stream().toList();
 
     List<InputEntry> inputEntriesOfFirstRuleAfterSanitizing =
         new ArrayList(allRulesAfterSanitzing.get(1).getInputEntries());

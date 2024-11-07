@@ -67,7 +67,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.security.auth.Subject;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
@@ -161,7 +160,7 @@ class TaskQueryImplAccTest {
 
         List<TaskSummary> returnedTasks = Collections.synchronizedList(new ArrayList<>());
         List<String> accessIds =
-            Collections.synchronizedList(Stream.of("admin", "admin").collect(Collectors.toList()));
+            Collections.synchronizedList(new ArrayList<>(List.of("admin", "admin")));
 
         ParallelThreadHelper.runInThread(
             getRunnableTest(returnedTasks, accessIds), accessIds.size());
@@ -201,26 +200,24 @@ class TaskQueryImplAccTest {
 
         Consumer<TaskService> consumer =
             CheckedConsumer.wrap(
-                taskService -> {
-                  internalKadaiEngine.executeInDatabaseConnection(
-                      () -> {
-                        List<TaskSummary> results =
-                            taskService
-                                .createTaskQuery()
-                                .workbasketIdIn(wb1.getId())
-                                .stateIn(TaskState.READY)
-                                .lockResultsEquals(LOCK_RESULTS_EQUALS)
-                                .list();
-                        listedTasks.addAll(results);
-                        for (TaskSummary task : results) {
-                          try {
-                            taskService.claim(task.getId());
-                          } catch (Exception e) {
-                            throw new SystemException(e.getMessage());
-                          }
+                taskService -> internalKadaiEngine.executeInDatabaseConnection(
+                    () -> {
+                      List<TaskSummary> results =
+                          taskService
+                              .createTaskQuery()
+                              .workbasketIdIn(wb1.getId())
+                              .stateIn(TaskState.READY)
+                              .lockResultsEquals(LOCK_RESULTS_EQUALS)
+                              .list();
+                      listedTasks.addAll(results);
+                      for (TaskSummary task : results) {
+                        try {
+                          taskService.claim(task.getId());
+                        } catch (Exception e) {
+                          throw new SystemException(e.getMessage());
                         }
-                      });
-                });
+                      }
+                    }));
 
         PrivilegedAction<Void> action =
             () -> {

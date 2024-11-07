@@ -83,8 +83,9 @@ public class DbSchemaCreator {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug(outWriter.toString());
     }
-    if (!errorWriter.toString().trim().isEmpty()) {
-      LOGGER.error(errorWriter.toString());
+    if (!errorWriter.getBuffer().isEmpty()) {
+      String errorLogMessage = errorWriter.toString();
+      LOGGER.error(errorLogMessage);
     }
     return false;
   }

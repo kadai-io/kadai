@@ -155,10 +155,10 @@ class UpdateTaskAttachmentsAccTest extends AbstractAccTest {
     task = taskService.getTask(task.getId());
     assertThat(task.getAttachments()).isEmpty();
 
-    AttachmentImpl attachment = (AttachmentImpl) this.attachment;
-    attachment.setId("TAI:000017");
-    task.addAttachment(attachment);
-    task.addAttachment(attachment);
+    AttachmentImpl attachmentImpl = (AttachmentImpl) this.attachment;
+    attachmentImpl.setId("TAI:000017");
+    task.addAttachment(attachmentImpl);
+    task.addAttachment(attachmentImpl);
     task = taskService.updateTask(task);
 
     assertThat(task.getAttachments())
@@ -176,10 +176,10 @@ class UpdateTaskAttachmentsAccTest extends AbstractAccTest {
     task = taskService.getTask(task.getId());
     assertThat(task.getAttachments()).isEmpty();
 
-    AttachmentImpl attachment = (AttachmentImpl) this.attachment;
-    attachment.setId("TAI:000017");
-    task.getAttachments().add(attachment);
-    task.getAttachments().add(attachment);
+    AttachmentImpl attachmentImpl = (AttachmentImpl) this.attachment;
+    attachmentImpl.setId("TAI:000017");
+    task.getAttachments().add(attachmentImpl);
+    task.getAttachments().add(attachmentImpl);
     ThrowingCallable call = () -> taskService.updateTask(task);
     assertThatThrownBy(call).isInstanceOf(AttachmentPersistenceException.class);
   }
@@ -316,15 +316,14 @@ class UpdateTaskAttachmentsAccTest extends AbstractAccTest {
     assertThat(task.getPriority()).isOne();
     assertThat(task.getDue()).isEqualTo(Instant.parse("2018-01-30T15:54:59.999Z"));
 
-    Attachment attachment = this.attachment;
-    task.addAttachment(attachment);
+    task.addAttachment(this.attachment);
     task = taskService.updateTask(task);
     assertThat(task.getPriority()).isEqualTo(99);
     assertThat(task.getDue()).isEqualTo(Instant.parse("2018-01-30T15:54:59.999Z"));
 
     final int attachmentCount = task.getAttachments().size();
 
-    String newChannel = attachment.getChannel() + "-X";
+    String newChannel = this.attachment.getChannel() + "-X";
     task.getAttachments().get(0).setChannel(newChannel);
     Classification newClassification =
         kadaiEngine

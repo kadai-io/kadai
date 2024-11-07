@@ -31,8 +31,6 @@ import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.ibatis.session.RowBounds;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ClassificationHistoryQueryImpl implements ClassificationHistoryQuery {
 
@@ -44,12 +42,6 @@ public class ClassificationHistoryQueryImpl implements ClassificationHistoryQuer
       CLASSIFICATION_PACKAGE_PATH + "ClassificationHistoryQueryMapper.queryHistoryColumnValues";
   private static final String LINK_TO_COUNTER =
       CLASSIFICATION_PACKAGE_PATH + "ClassificationHistoryQueryMapper.countHistoryEvents";
-
-  private static final Logger LOGGER =
-      LoggerFactory.getLogger(ClassificationHistoryQueryImpl.class);
-
-  private static final String SQL_EXCEPTION_MESSAGE =
-      "Method openConnection() could not open a connection to the database.";
 
   private final InternalKadaiEngine internalKadaiEngine;
 
@@ -408,27 +400,18 @@ public class ClassificationHistoryQueryImpl implements ClassificationHistoryQuer
   public ClassificationHistoryQuery orderByCustomAttribute(int num, SortDirection sortDirection)
       throws InvalidArgumentException {
 
-    switch (num) {
-      case 1:
-        return addOrderCriteria("CUSTOM_1", sortDirection);
-      case 2:
-        return addOrderCriteria("CUSTOM_2", sortDirection);
-      case 3:
-        return addOrderCriteria("CUSTOM_3", sortDirection);
-      case 4:
-        return addOrderCriteria("CUSTOM_4", sortDirection);
-      case 5:
-        return addOrderCriteria("CUSTOM_5", sortDirection);
-      case 6:
-        return addOrderCriteria("CUSTOM_6", sortDirection);
-      case 7:
-        return addOrderCriteria("CUSTOM_7", sortDirection);
-      case 8:
-        return addOrderCriteria("CUSTOM_8", sortDirection);
-      default:
-        throw new InvalidArgumentException(
-            "Custom number has to be between 1 and 8, but this is: " + num);
-    }
+    return switch (num) {
+      case 1 -> addOrderCriteria("CUSTOM_1", sortDirection);
+      case 2 -> addOrderCriteria("CUSTOM_2", sortDirection);
+      case 3 -> addOrderCriteria("CUSTOM_3", sortDirection);
+      case 4 -> addOrderCriteria("CUSTOM_4", sortDirection);
+      case 5 -> addOrderCriteria("CUSTOM_5", sortDirection);
+      case 6 -> addOrderCriteria("CUSTOM_6", sortDirection);
+      case 7 -> addOrderCriteria("CUSTOM_7", sortDirection);
+      case 8 -> addOrderCriteria("CUSTOM_8", sortDirection);
+      default -> throw new InvalidArgumentException(
+          "Custom number has to be between 1 and 8, but this is: " + num);
+    };
   }
 
   @Override

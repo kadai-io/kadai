@@ -115,10 +115,8 @@ public class DmnConverterService {
     finalDmn.append(dmnString, 0, splitPosition);
     finalDmn.append(serializedRules);
     finalDmn.append(dmnString.substring(splitPosition));
-    DmnModelInstance patchedModel =
-        Dmn.readModelFromStream(new ByteArrayInputStream(finalDmn.toString().getBytes()));
 
-    return patchedModel;
+    return Dmn.readModelFromStream(new ByteArrayInputStream(finalDmn.toString().getBytes()));
   }
 
   private Set<KeyDomain> getOutputKeyDomains(DmnModelInstance dmnModel) {

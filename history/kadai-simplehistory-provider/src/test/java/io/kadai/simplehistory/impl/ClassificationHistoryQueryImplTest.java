@@ -53,11 +53,15 @@ class ClassificationHistoryQueryImplTest {
   }
 
   @Test
-  void should_returnList_When_CallingListMethodOnTaskHistoryQuery() throws Exception {
-    List<ClassificationHistoryEvent> returnList = new ArrayList<>();
-    returnList.add(
-        createHistoryEvent(
-            ClassificationHistoryEventType.CREATED.getName(), "admin", "someDetails"));
+  void should_returnList_When_CallingListMethodOnTaskHistoryQuery() {
+    ClassificationHistoryEvent historyEvent = new ClassificationHistoryEvent();
+    historyEvent.setId(
+        IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT));
+    historyEvent.setUserId("admin");
+    historyEvent.setDetails("someDetails");
+    historyEvent.setEventType(ClassificationHistoryEventType.CREATED.getName());
+
+    List<ClassificationHistoryEvent> returnList = List.of(historyEvent);
 
     doNothing().when(internalKadaiEngineMock).openConnection();
     doNothing().when(internalKadaiEngineMock).returnConnection();
@@ -72,15 +76,5 @@ class ClassificationHistoryQueryImplTest {
 
     validateMockitoUsage();
     assertThat(result).isEqualTo(returnList);
-  }
-
-  private ClassificationHistoryEvent createHistoryEvent(
-      String type, String userId, String details) {
-    ClassificationHistoryEvent he = new ClassificationHistoryEvent();
-    he.setId(IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT));
-    he.setUserId(userId);
-    he.setDetails(details);
-    he.setEventType(type);
-    return he;
   }
 }

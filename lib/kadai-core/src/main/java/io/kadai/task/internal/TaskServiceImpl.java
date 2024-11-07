@@ -107,6 +107,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -236,9 +237,46 @@ public class TaskServiceImpl implements TaskService {
     task.setOwner(userId);
   }
 
-  private static boolean taskIsNotClaimed(TaskSummary task) {
-    return task.getClaimed() == null
-        || (task.getState() != TaskState.CLAIMED && task.getState() != TaskState.IN_REVIEW);
+  @Override
+  public List<String> updateTasks(
+      ObjectReference selectionCriteria, Map<TaskCustomField, String> customFieldsToUpdate)
+      throws InvalidArgumentException {
+
+    ObjectReferenceImpl.validate(selectionCriteria, "ObjectReference", "updateTasks call");
+    validateCustomFields(customFieldsToUpdate);
+    TaskCustomPropertySelector fieldSelector = new TaskCustomPropertySelector();
+    TaskImpl updated = initUpdatedTask(customFieldsToUpdate, fieldSelector);
+
+    try {
+      kadaiEngine.openConnection();
+
+      // use query in order to find only those tasks that are visible to the current user
+      List<TaskSummary> taskSummaries = getTasksToChange(selectionCriteria);
+
+      List<TaskSummary> tasksWithPermissions = new ArrayList<>();
+      for (TaskSummary taskSummary : taskSummaries) {
+        if (checkEditTasksPerm(taskSummary)) {
+          tasksWithPermissions.add(taskSummary);
+        }
+      }
+
+      List<String> changedTasks = new ArrayList<>();
+      if (!tasksWithPermissions.isEmpty()) {
+        changedTasks = tasksWithPermissions.stream().map(TaskSummary::getId).toList();
+        taskMapper.updateTasks(changedTasks, updated, fieldSelector);
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("updateTasks() updated the following tasks: {} ", changedTasks);
+        }
+
+      } else {
+        if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("updateTasks() found no tasks for update ");
+        }
+      }
+      return changedTasks;
+    } finally {
+      kadaiEngine.returnConnection();
+    }
   }
 
   private static void checkIfTaskIsTerminatedOrCancelled(TaskSummary task)
@@ -867,49 +905,6 @@ public class TaskServiceImpl implements TaskService {
 
   @Override
   public List<String> updateTasks(
-      ObjectReference selectionCriteria, Map<TaskCustomField, String> customFieldsToUpdate)
-      throws InvalidArgumentException {
-
-    ObjectReferenceImpl.validate(selectionCriteria, "ObjectReference", "updateTasks call");
-    validateCustomFields(customFieldsToUpdate);
-    TaskCustomPropertySelector fieldSelector = new TaskCustomPropertySelector();
-    TaskImpl updated = initUpdatedTask(customFieldsToUpdate, fieldSelector);
-
-    try {
-      kadaiEngine.openConnection();
-
-      // use query in order to find only those tasks that are visible to the current user
-      List<TaskSummary> taskSummaries = getTasksToChange(selectionCriteria);
-
-      List<TaskSummary> tasksWithPermissions = new ArrayList<>();
-      for (TaskSummary taskSummary : taskSummaries) {
-        if (checkEditTasksPerm(taskSummary)) {
-          tasksWithPermissions.add(taskSummary);
-        }
-      }
-
-      List<String> changedTasks = new ArrayList<>();
-      if (!tasksWithPermissions.isEmpty()) {
-        changedTasks =
-            tasksWithPermissions.stream().map(TaskSummary::getId).collect(Collectors.toList());
-        taskMapper.updateTasks(changedTasks, updated, fieldSelector);
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("updateTasks() updated the following tasks: {} ", changedTasks);
-        }
-
-      } else {
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("updateTasks() found no tasks for update ");
-        }
-      }
-      return changedTasks;
-    } finally {
-      kadaiEngine.returnConnection();
-    }
-  }
-
-  @Override
-  public List<String> updateTasks(
       List<String> taskIds, Map<TaskCustomField, String> customFieldsToUpdate)
       throws InvalidArgumentException {
 
@@ -932,8 +927,7 @@ public class TaskServiceImpl implements TaskService {
 
       List<String> changedTasks = new ArrayList<>();
       if (!tasksWithPermissions.isEmpty()) {
-        changedTasks =
-            tasksWithPermissions.stream().map(TaskSummary::getId).collect(Collectors.toList());
+        changedTasks = tasksWithPermissions.stream().map(TaskSummary::getId).toList();
         taskMapper.updateTasks(changedTasks, updatedTask, fieldSelector);
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("updateTasks() updated the following tasks: {} ", changedTasks);
@@ -948,6 +942,53 @@ public class TaskServiceImpl implements TaskService {
     } finally {
       kadaiEngine.returnConnection();
     }
+  }
+
+  @Override
+  public Task cancelTask(String taskId)
+      throws TaskNotFoundException, NotAuthorizedOnWorkbasketException, InvalidTaskStateException {
+
+    TaskImpl cancelledTask;
+
+    try {
+      kadaiEngine.openConnection();
+      if (taskId == null || taskId.isEmpty()) {
+        throw new TaskNotFoundException(taskId);
+      }
+      cancelledTask = (TaskImpl) getTask(taskId);
+      TaskState state = cancelledTask.getState();
+      if (state.isEndState()) {
+        throw new InvalidTaskStateException(
+            taskId,
+            state,
+            TaskState.READY,
+            TaskState.CLAIMED,
+            TaskState.READY_FOR_REVIEW,
+            TaskState.IN_REVIEW);
+      }
+
+      terminateCancelCommonActions(cancelledTask, TaskState.CANCELLED);
+      cancelledTask =
+          (TaskImpl) taskEndstatePreprocessorManager.processTaskBeforeEndstate(cancelledTask);
+      taskMapper.update(cancelledTask);
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug(
+            "Task '{}' cancelled by user '{}'.",
+            cancelledTask.getId(),
+            kadaiEngine.getEngine().getCurrentUserContext().getUserid());
+      }
+      if (historyEventManager.isEnabled()) {
+        historyEventManager.createEvent(
+            new TaskCancelledEvent(
+                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                cancelledTask,
+                kadaiEngine.getEngine().getCurrentUserContext().getUserid()));
+      }
+    } finally {
+      kadaiEngine.returnConnection();
+    }
+
+    return cancelledTask;
   }
 
   @Override
@@ -1081,53 +1122,6 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
-  public Task cancelTask(String taskId)
-      throws TaskNotFoundException, NotAuthorizedOnWorkbasketException, InvalidTaskStateException {
-
-    TaskImpl cancelledTask;
-
-    try {
-      kadaiEngine.openConnection();
-      if (taskId == null || taskId.isEmpty()) {
-        throw new TaskNotFoundException(taskId);
-      }
-      cancelledTask = (TaskImpl) getTask(taskId);
-      TaskState state = cancelledTask.getState();
-      if (state.isEndState()) {
-        throw new InvalidTaskStateException(
-            taskId,
-            state,
-            TaskState.READY,
-            TaskState.CLAIMED,
-            TaskState.READY_FOR_REVIEW,
-            TaskState.IN_REVIEW);
-      }
-
-      terminateCancelCommonActions(cancelledTask, TaskState.CANCELLED);
-      cancelledTask =
-          (TaskImpl) taskEndstatePreprocessorManager.processTaskBeforeEndstate(cancelledTask);
-      taskMapper.update(cancelledTask);
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug(
-            "Task '{}' cancelled by user '{}'.",
-            taskId,
-            kadaiEngine.getEngine().getCurrentUserContext().getUserid());
-      }
-      if (historyEventManager.isEnabled()) {
-        historyEventManager.createEvent(
-            new TaskCancelledEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                cancelledTask,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserid()));
-      }
-    } finally {
-      kadaiEngine.returnConnection();
-    }
-
-    return cancelledTask;
-  }
-
-  @Override
   public Task terminateTask(String taskId)
       throws TaskNotFoundException,
           NotAuthorizedException,
@@ -1162,7 +1156,7 @@ public class TaskServiceImpl implements TaskService {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug(
             "Task '{}' cancelled by user '{}'.",
-            taskId,
+            terminatedTask.getId(),
             kadaiEngine.getEngine().getCurrentUserContext().getUserid());
       }
       if (historyEventManager.isEnabled()) {
@@ -1197,7 +1191,7 @@ public class TaskServiceImpl implements TaskService {
         attachmentMapper.findTaskIdsAndPlannedAffectedByClassificationChange(classificationId);
 
     List<String> taskIdsFromAttachments =
-        taskIdsAndPlannedFromAttachments.stream().map(Pair::getLeft).collect(Collectors.toList());
+        taskIdsAndPlannedFromAttachments.stream().map(Pair::getLeft).toList();
     List<Pair<String, Instant>> filteredTaskIdsAndPlannedFromAttachments =
         taskIdsFromAttachments.isEmpty()
             ? new ArrayList<>()
@@ -1209,7 +1203,7 @@ public class TaskServiceImpl implements TaskService {
             .sorted(Comparator.comparing(Pair::getRight))
             .distinct()
             .map(Pair::getLeft)
-            .collect(Collectors.toList());
+            .toList();
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug(
@@ -1218,6 +1212,35 @@ public class TaskServiceImpl implements TaskService {
           affectedTaskIds);
     }
     return affectedTaskIds;
+  }
+
+  Pair<List<MinimalTaskSummary>, BulkLog> filterTasksAuthorizedForAndLogErrorsForNotAuthorized(
+      List<MinimalTaskSummary> existingTasks) {
+    BulkLog bulkLog = new BulkLog();
+    // check authorization only for non-admin or task-admin users
+    if (kadaiEngine.getEngine().isUserInRole(KadaiRole.ADMIN, KadaiRole.TASK_ADMIN)) {
+      return Pair.of(existingTasks, bulkLog);
+    } else {
+      List<String> accessIds = kadaiEngine.getEngine().getCurrentUserContext().getAccessIds();
+      List<Pair<String, String>> taskAndWorkbasketIdsNotAuthorizedFor =
+          taskMapper.getTaskAndWorkbasketIdsNotAuthorizedFor(existingTasks, accessIds);
+      String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+
+      for (Pair<String, String> taskAndWorkbasketIds : taskAndWorkbasketIdsNotAuthorizedFor) {
+        bulkLog.addError(
+            taskAndWorkbasketIds.getLeft(),
+            new NotAuthorizedOnWorkbasketException(
+                userId, taskAndWorkbasketIds.getRight(), WorkbasketPermission.READ));
+      }
+
+      Set<String> taskIdsToRemove =
+          taskAndWorkbasketIdsNotAuthorizedFor.stream()
+              .map(Pair::getLeft)
+              .collect(Collectors.toSet());
+      List<MinimalTaskSummary> tasksAuthorizedFor =
+          existingTasks.stream().filter(not(t -> taskIdsToRemove.contains(t.getTaskId()))).toList();
+      return Pair.of(tasksAuthorizedFor, bulkLog);
+    }
   }
 
   public void refreshPriorityAndDueDatesOfTasksOnClassificationUpdate(
@@ -1257,35 +1280,9 @@ public class TaskServiceImpl implements TaskService {
     return Pair.of(filteredPair.getLeft(), bulkLog);
   }
 
-  Pair<List<MinimalTaskSummary>, BulkLog> filterTasksAuthorizedForAndLogErrorsForNotAuthorized(
-      List<MinimalTaskSummary> existingTasks) {
-    BulkLog bulkLog = new BulkLog();
-    // check authorization only for non-admin or task-admin users
-    if (kadaiEngine.getEngine().isUserInRole(KadaiRole.ADMIN, KadaiRole.TASK_ADMIN)) {
-      return Pair.of(existingTasks, bulkLog);
-    } else {
-      List<String> accessIds = kadaiEngine.getEngine().getCurrentUserContext().getAccessIds();
-      List<Pair<String, String>> taskAndWorkbasketIdsNotAuthorizedFor =
-          taskMapper.getTaskAndWorkbasketIdsNotAuthorizedFor(existingTasks, accessIds);
-      String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
-
-      for (Pair<String, String> taskAndWorkbasketIds : taskAndWorkbasketIdsNotAuthorizedFor) {
-        bulkLog.addError(
-            taskAndWorkbasketIds.getLeft(),
-            new NotAuthorizedOnWorkbasketException(
-                userId, taskAndWorkbasketIds.getRight(), WorkbasketPermission.READ));
-      }
-
-      Set<String> taskIdsToRemove =
-          taskAndWorkbasketIdsNotAuthorizedFor.stream()
-              .map(Pair::getLeft)
-              .collect(Collectors.toSet());
-      List<MinimalTaskSummary> tasksAuthorizedFor =
-          existingTasks.stream()
-              .filter(not(t -> taskIdsToRemove.contains(t.getTaskId())))
-              .collect(Collectors.toList());
-      return Pair.of(tasksAuthorizedFor, bulkLog);
-    }
+  private static boolean taskIsNotClaimed(TaskSummary task) {
+    return task.getClaimed() == null
+        || task.getState() != TaskState.CLAIMED && task.getState() != TaskState.IN_REVIEW;
   }
 
   BulkLog addExceptionsForNonExistingTasksToBulkLog(
@@ -1479,7 +1476,7 @@ public class TaskServiceImpl implements TaskService {
       claimActionsOnTask(task, userId, userLongName, now);
       taskMapper.update(task);
       if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Task '{}' claimed by user '{}'.", taskId, userId);
+        LOGGER.debug("Task '{}' claimed by user '{}'.", task.getId(), userId);
       }
       if (historyEventManager.isEnabled()) {
         String changeDetails =
@@ -1530,7 +1527,7 @@ public class TaskServiceImpl implements TaskService {
 
       taskMapper.requestReview(task);
       if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Requested review for Task '{}' by user '{}'.", taskId, userId);
+        LOGGER.debug("Requested review for Task '{}' by user '{}'.", task.getId(), userId);
       }
       if (historyEventManager.isEnabled()) {
         String changeDetails =
@@ -1582,7 +1579,7 @@ public class TaskServiceImpl implements TaskService {
 
       taskMapper.requestChanges(task);
       if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Requested changes for Task '{}' by user '{}'.", taskId, userId);
+        LOGGER.debug("Requested changes for Task '{}' by user '{}'.", task.getId(), userId);
       }
       if (historyEventManager.isEnabled()) {
         String changeDetails =
@@ -1678,7 +1675,7 @@ public class TaskServiceImpl implements TaskService {
       cancelClaimActionsOnTask(task, now, keepOwner);
       taskMapper.update(task);
       if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Task '{}' unclaimed by user '{}'.", taskId, userId);
+        LOGGER.debug("Task '{}' unclaimed by user '{}'.", task.getId(), userId);
       }
       if (historyEventManager.isEnabled()) {
         String changeDetails =
@@ -1728,7 +1725,7 @@ public class TaskServiceImpl implements TaskService {
       task = (TaskImpl) taskEndstatePreprocessorManager.processTaskBeforeEndstate(task);
       taskMapper.update(task);
       if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Task '{}' completed by user '{}'.", taskId, userId);
+        LOGGER.debug("Task '{}' completed by user '{}'.", task.getId(), userId);
       }
       if (historyEventManager.isEnabled()) {
         historyEventManager.createEvent(
@@ -1755,10 +1752,10 @@ public class TaskServiceImpl implements TaskService {
       kadaiEngine.openConnection();
       task = (TaskImpl) getTask(taskId);
 
-      if (!(task.getState().isEndState()) && !forceDelete) {
+      if (!task.getState().isEndState() && !forceDelete) {
         throw new InvalidTaskStateException(taskId, task.getState(), TaskState.END_STATES);
       }
-      if ((!task.getState().in(TaskState.TERMINATED, TaskState.CANCELLED))
+      if (!task.getState().in(TaskState.TERMINATED, TaskState.CANCELLED)
           && CallbackState.CALLBACK_PROCESSING_REQUIRED.equals(task.getCallbackState())) {
         throw new InvalidCallbackStateException(
             taskId,
@@ -1783,7 +1780,7 @@ public class TaskServiceImpl implements TaskService {
       }
 
       if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Task {} deleted.", taskId);
+        LOGGER.debug("Task {} deleted.", task.getId());
       }
     } finally {
       kadaiEngine.returnConnection();
@@ -1807,14 +1804,14 @@ public class TaskServiceImpl implements TaskService {
       if (foundSummary == null) {
         bulkLog.addError(currentTaskId, new TaskNotFoundException(currentTaskId));
         taskIdIterator.remove();
-      } else if (!(foundSummary.getTaskState().isEndState())) {
+      } else if (!foundSummary.getTaskState().isEndState()) {
         bulkLog.addError(
             currentTaskId,
             new InvalidTaskStateException(
                 currentTaskId, foundSummary.getTaskState(), TaskState.END_STATES));
         taskIdIterator.remove();
       } else {
-        if ((!foundSummary.getTaskState().in(TaskState.CANCELLED, TaskState.TERMINATED))
+        if (!foundSummary.getTaskState().in(TaskState.CANCELLED, TaskState.TERMINATED)
             && CallbackState.CALLBACK_PROCESSING_REQUIRED.equals(foundSummary.getCallbackState())) {
           bulkLog.addError(
               currentTaskId,
@@ -1990,22 +1987,24 @@ public class TaskServiceImpl implements TaskService {
 
   private void updateTasksToBeCompleted(Stream<TaskSummaryImpl> taskSummaries, Instant now) {
 
-    List<String> taskIds = new ArrayList<>();
-    List<String> updateClaimedTaskIds = new ArrayList<>();
     List<TaskSummary> taskSummaryList =
         taskSummaries
-            .peek(
-                summary ->
-                    completeActionsOnTask(
-                        summary, kadaiEngine.getEngine().getCurrentUserContext().getUserid(), now))
-            .peek(summary -> taskIds.add(summary.getId()))
-            .peek(
+            .map(
                 summary -> {
-                  if (summary.getClaimed().equals(now)) {
-                    updateClaimedTaskIds.add(summary.getId());
-                  }
+                  completeActionsOnTask(
+                      summary, kadaiEngine.getEngine().getCurrentUserContext().getUserid(), now);
+                  return (TaskSummary) summary;
                 })
-            .collect(Collectors.toList());
+            .toList();
+
+    List<String> taskIds = taskSummaryList.stream().map(TaskSummary::getId).toList();
+
+    List<String> updateClaimedTaskIds =
+        taskSummaryList.stream()
+            .filter(summary -> now.equals(summary.getClaimed()))
+            .map(TaskSummary::getId)
+            .toList();
+
     TaskSummary claimedReference =
         taskSummaryList.stream()
             .filter(summary -> updateClaimedTaskIds.contains(summary.getId()))
@@ -2228,7 +2227,7 @@ public class TaskServiceImpl implements TaskService {
     TaskImpl newTask = new TaskImpl();
     newTask.setModified(Instant.now());
 
-    for (Map.Entry<TaskCustomField, String> entry : customFieldsToUpdate.entrySet()) {
+    for (Entry<TaskCustomField, String> entry : customFieldsToUpdate.entrySet()) {
       TaskCustomField key = entry.getKey();
       fieldSelector.setCustomProperty(key, true);
       newTask.setCustomField(key, entry.getValue());
@@ -2263,7 +2262,7 @@ public class TaskServiceImpl implements TaskService {
       throws InvalidArgumentException, ClassificationNotFoundException, InvalidTaskStateException {
 
     if (oldTaskImpl.getExternalId() == null
-        || !(oldTaskImpl.getExternalId().equals(newTaskImpl.getExternalId()))) {
+        || !oldTaskImpl.getExternalId().equals(newTaskImpl.getExternalId())) {
       throw new InvalidArgumentException(
           "A task's external Id cannot be changed via update of the task");
     }

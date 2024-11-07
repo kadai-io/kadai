@@ -27,7 +27,6 @@ import io.kadai.classification.internal.jobs.ClassificationChangedJob;
 import io.kadai.common.api.JobService;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.ScheduledJob;
-import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.internal.JobMapper;
 import io.kadai.common.internal.jobs.AbstractKadaiJob;
 import io.kadai.common.internal.jobs.JobRunner;
@@ -185,7 +184,9 @@ class AbstractKadaiJobAccTest {
     }
 
     @Override
-    protected void execute() throws KadaiException {}
+    protected void execute() {
+      // NOOP
+    }
   }
 
   @Nested
@@ -205,8 +206,7 @@ class AbstractKadaiJobAccTest {
 
     @WithAccessId(user = "admin")
     @Test
-    void should_FindNoJobsToRunUntilFirstRunIsReached_When_CleanupScheduleIsInitialized()
-        throws Exception {
+    void should_FindNoJobsToRunUntilFirstRunIsReached_When_CleanupScheduleIsInitialized() {
       AbstractKadaiJob.initializeSchedule(kadaiEngine, TaskCleanupJob.class);
 
       List<ScheduledJob> nextJobs = jobMapper.findJobsToRun(Instant.now());

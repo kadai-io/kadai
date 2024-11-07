@@ -196,14 +196,15 @@ public class UserController {
                       examples =
                           @ExampleObject(
                               value =
-                                  "{\n"
-                                      + "  \"userId\": \"user-10-2\",\n"
-                                      + "  \"groups\": [],\n"
-                                      + "  \"permissions\": [],\n"
-                                      + "  \"domains\": [],\n"
-                                      + "  \"firstName\": \"Hans\",\n"
-                                      + "  \"lastName\": \"Georg\"\n"
-                                      + "}"))),
+                                  """
+                                      {
+                                        "userId": "user-10-2",
+                                        "groups": [],
+                                        "permissions": [],
+                                        "domains": [],
+                                        "firstName": "Hans",
+                                        "lastName": "Georg"
+                                      }"""))),
       responses = {
         @ApiResponse(
             responseCode = "201",
@@ -254,24 +255,25 @@ public class UserController {
                       examples = {
                         @ExampleObject(
                             value =
-                                "{\n"
-                                    + "  \"userId\": \"teamlead-1\",\n"
-                                    + "  \"groups\": [],\n"
-                                    + "  \"permissions\": [],\n"
-                                    + "  \"domains\": [\"DOMAIN_A\"],\n"
-                                    + "  \"firstName\": \"new name\",\n"
-                                    + "  \"lastName\": \"Toll\",\n"
-                                    + "  \"fullName\": \"Toll, Titus\",\n"
-                                    + "  \"longName\": \"Toll, Titus - (teamlead-1)\",\n"
-                                    + "  \"email\": \"titus.toll@web.de\",\n"
-                                    + "  \"phone\": \"040-2951854\",\n"
-                                    + "  \"mobilePhone\": \"015637683197\",\n"
-                                    + "  \"orgLevel4\": \"Envite\",\n"
-                                    + "  \"orgLevel3\": \"BPM\",\n"
-                                    + "  \"orgLevel2\": \"Human Workflow\",\n"
-                                    + "  \"orgLevel1\": \"KADAI\",\n"
-                                    + "  \"data\": \"xy\"\n"
-                                    + "}")
+                                """
+                                    {
+                                      "userId": "teamlead-1",
+                                      "groups": [],
+                                      "permissions": [],
+                                      "domains": ["DOMAIN_A"],
+                                      "firstName": "new name",
+                                      "lastName": "Toll",
+                                      "fullName": "Toll, Titus",
+                                      "longName": "Toll, Titus - (teamlead-1)",
+                                      "email": "titus.toll@web.de",
+                                      "phone": "040-2951854",
+                                      "mobilePhone": "015637683197",
+                                      "orgLevel4": "Envite",
+                                      "orgLevel3": "BPM",
+                                      "orgLevel2": "Human Workflow",
+                                      "orgLevel1": "KADAI",
+                                      "data": "xy"
+                                    }""")
                       })),
       responses = {
         @ApiResponse(

@@ -62,7 +62,7 @@ class JobSchedulerInitAccTest implements KadaiConfigurationModifier {
   }
 
   @Test
-  void should_StartTheJobsImmediately_When_StartMethodIsCalled() throws Exception {
+  void should_StartTheJobsImmediately_When_StartMethodIsCalled() {
     List<ScheduledJob> nextJobs = jobMapper.findJobsToRun(Instant.now().plus(runEvery));
     assertThat(nextJobs).extracting(ScheduledJob::getDue).containsOnly(firstRun.plus(runEvery));
     assertThat(nextJobs)

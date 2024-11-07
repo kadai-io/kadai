@@ -119,7 +119,7 @@ class ReportRepresentationModelAssemblerTest {
 
     // rows
     List<ReportRepresentationModel.RowRepresentationModel> rows = resource.getRows();
-    assertThat(rows.size()).isEqualTo(1);
+    assertThat(rows).hasSize(1);
     ReportRepresentationModel.RowRepresentationModel row = rows.get(0);
     assertThat(row.getDesc()).isEqualTo(new String[] {"key"});
     assertThat(row.getDepth()).isZero();
@@ -129,7 +129,7 @@ class ReportRepresentationModelAssemblerTest {
     assertThat(row.getCells()).isEqualTo(new int[] {0, 0, 0, 0, 2});
 
     // sumRow
-    assertThat(resource.getSumRow().size()).isEqualTo(1);
+    assertThat(resource.getSumRow()).hasSize(1);
     ReportRepresentationModel.RowRepresentationModel sumRow = resource.getSumRow().get(0);
     assertThat(sumRow.getDesc()).isEqualTo(new String[] {"Total"});
     assertThat(sumRow.isDisplay()).isTrue();
@@ -165,7 +165,7 @@ class ReportRepresentationModelAssemblerTest {
 
     // rows
     List<ReportRepresentationModel.RowRepresentationModel> rows = resource.getRows();
-    assertThat(rows.size()).isEqualTo(2);
+    assertThat(rows).hasSize(2);
 
     ReportRepresentationModel.RowRepresentationModel row = rows.get(0);
     assertThat(row.getDesc()).isEqualTo(new String[] {"key"});

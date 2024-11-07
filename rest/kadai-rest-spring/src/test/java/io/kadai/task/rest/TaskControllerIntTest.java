@@ -55,7 +55,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import javax.sql.DataSource;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Nested;
@@ -67,7 +66,6 @@ import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpEntity;
@@ -90,18 +88,11 @@ class TaskControllerIntTest {
   private static final ParameterizedTypeReference<TaskRepresentationModel> TASK_MODEL_TYPE =
       ParameterizedTypeReference.forType(TaskRepresentationModel.class);
   private final RestHelper restHelper;
-  private final DataSource dataSource;
-  private final String schemaName;
   @Autowired KadaiConfiguration kadaiConfiguration;
 
   @Autowired
-  TaskControllerIntTest(
-      RestHelper restHelper,
-      DataSource dataSource,
-      @Value("${kadai.schemaName:KADAI}") String schemaName) {
+  TaskControllerIntTest(RestHelper restHelper) {
     this.restHelper = restHelper;
-    this.dataSource = dataSource;
-    this.schemaName = schemaName;
   }
 
   @Test
@@ -450,9 +441,9 @@ class TaskControllerIntTest {
                 .isInstanceOf(HttpStatusCodeException.class)
                 .hasMessageContaining(
                     String.format(
-                        "Each interval in 'custom-int-"
-                            + i
-                            + "-within' shouldn't consist of two 'null' values",
+                        """
+                            Each interval in 'custom-int-%s-within' \
+                            shouldn't consist of two 'null' values""",
                         i))
                 .extracting(HttpStatusCodeException.class::cast)
                 .extracting(HttpStatusCodeException::getStatusCode)

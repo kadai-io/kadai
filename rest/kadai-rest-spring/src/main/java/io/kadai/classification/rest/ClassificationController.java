@@ -200,13 +200,14 @@ public class ClassificationController {
                       examples =
                           @ExampleObject(
                               value =
-                                  "{\n"
-                                      + "  \"key\" : \"Key0815casdgdgh\",\n"
-                                      + "  \"domain\" : \"DOMAIN_B\",\n"
-                                      + "  \"priority\" : 0,\n"
-                                      + "  \"serviceLevel\" : \"P1D\",\n"
-                                      + "  \"type\" : \"TASK\"\n"
-                                      + "}"))),
+                                  """
+                                      {
+                                        "key" : "Key0815casdgdgh",
+                                        "domain" : "DOMAIN_B",
+                                        "priority" : 0,
+                                        "serviceLevel" : "P1D",
+                                        "type" : "TASK"
+                                      }"""))),
       responses = {
         @ApiResponse(
             responseCode = "201",
@@ -266,32 +267,33 @@ public class ClassificationController {
                       examples =
                           @ExampleObject(
                               value =
-                                  "{\n"
-                                      + "  \"classificationId\" : "
-                                      + "\"CLI:100000000000000000000000000000000009\",\n"
-                                      + "  \"key\" : \"L140101\",\n"
-                                      + "  \"applicationEntryPoint\" : \"\",\n"
-                                      + "  \"category\" : \"EXTERNAL\",\n"
-                                      + "  \"domain\" : \"DOMAIN_A\",\n"
-                                      + "  \"name\" : \"new name\",\n"
-                                      + "  \"parentId\" : \"\",\n"
-                                      + "  \"parentKey\" : \"\",\n"
-                                      + "  \"priority\" : 2,\n"
-                                      + "  \"serviceLevel\" : \"P2D\",\n"
-                                      + "  \"type\" : \"TASK\",\n"
-                                      + "  \"custom1\" : \"VNR\",\n"
-                                      + "  \"custom2\" : \"\",\n"
-                                      + "  \"custom3\" : \"\",\n"
-                                      + "  \"custom4\" : \"\",\n"
-                                      + "  \"custom5\" : \"\",\n"
-                                      + "  \"custom6\" : \"\",\n"
-                                      + "  \"custom7\" : \"\",\n"
-                                      + "  \"custom8\" : \"\",\n"
-                                      + "  \"isValidInDomain\" : true,\n"
-                                      + "  \"created\" : \"2018-02-01T12:00:00.000Z\",\n"
-                                      + "  \"modified\" : \"2018-02-01T12:00:00.000Z\",\n"
-                                      + "  \"description\" : \"Zustimmungserklärung\"\n"
-                                      + "}"))),
+                                  """
+                                      {
+                                        "classificationId" : \
+                                      "CLI:100000000000000000000000000000000009",
+                                        "key" : "L140101",
+                                        "applicationEntryPoint" : "",
+                                        "category" : "EXTERNAL",
+                                        "domain" : "DOMAIN_A",
+                                        "name" : "new name",
+                                        "parentId" : "",
+                                        "parentKey" : "",
+                                        "priority" : 2,
+                                        "serviceLevel" : "P2D",
+                                        "type" : "TASK",
+                                        "custom1" : "VNR",
+                                        "custom2" : "",
+                                        "custom3" : "",
+                                        "custom4" : "",
+                                        "custom5" : "",
+                                        "custom6" : "",
+                                        "custom7" : "",
+                                        "custom8" : "",
+                                        "isValidInDomain" : true,
+                                        "created" : "2018-02-01T12:00:00.000Z",
+                                        "modified" : "2018-02-01T12:00:00.000Z",
+                                        "description" : "Zustimmungserklärung"
+                                      }"""))),
       responses = {
         @ApiResponse(
             responseCode = "200",

@@ -110,7 +110,7 @@ public class JaasExtension implements InvocationInterceptor, TestTemplateInvocat
       return Stream.concat(
               Stream.of(withAccessId.user()).map(UserPrincipal::new),
               Arrays.stream(withAccessId.groups()).map(GroupPrincipal::new))
-          .collect(Collectors.toList());
+          .toList();
     }
     return Collections.emptyList();
   }
@@ -193,7 +193,7 @@ public class JaasExtension implements InvocationInterceptor, TestTemplateInvocat
         newChildrenForDynamicContainer = Collections.singleton(dynamicNode);
       } else if (factoryResult instanceof Stream) {
         Stream<DynamicNode> nodes = (Stream<DynamicNode>) factoryResult;
-        newChildrenForDynamicContainer = nodes.collect(Collectors.toList());
+        newChildrenForDynamicContainer = nodes.toList();
       } else if (factoryResult instanceof Iterable) {
         newChildrenForDynamicContainer = (Iterable<DynamicNode>) factoryResult;
       } else if (factoryResult instanceof Iterator) {

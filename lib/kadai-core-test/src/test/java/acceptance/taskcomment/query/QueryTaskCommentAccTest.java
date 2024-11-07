@@ -496,7 +496,7 @@ class QueryTaskCommentAccTest {
 
     @WithAccessId(user = "user-1-1")
     @Test
-    void should_NotSetCreatorFullName_When_PropertyDisabled() throws Exception {
+    void should_NotSetCreatorFullName_When_PropertyDisabled() {
       List<TaskComment> taskComments =
           taskService.createTaskCommentQuery().idIn(comment1.getId()).list();
 

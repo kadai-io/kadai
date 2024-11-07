@@ -34,7 +34,6 @@ import io.kadai.testapi.KadaiInject;
 import io.kadai.testapi.KadaiIntegrationTest;
 import io.kadai.testapi.WithServiceProvider;
 import io.kadai.testapi.security.WithAccessId;
-import java.sql.SQLException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -63,7 +62,7 @@ class HistoryCleanupJobAccTest {
 
   @WithAccessId(user = "businessadmin")
   @BeforeAll
-  void setup() throws Exception {
+  void setup() {
     historyService = new SimpleHistoryServiceImpl();
     historyService.initialize(kadaiEngine);
   }
@@ -138,7 +137,7 @@ class HistoryCleanupJobAccTest {
 
     @WithAccessId(user = "businessadmin")
     @BeforeAll
-    void setup() throws Exception {
+    void setup() {
       historyService = new SimpleHistoryServiceImpl();
       historyService.initialize(kadaiEngine);
     }
@@ -335,8 +334,7 @@ class HistoryCleanupJobAccTest {
     @WithAccessId(user = "admin")
     @TestFactory
     Stream<DynamicTest>
-        should_CleanTaskHistoryEventsWithParentProcessIdEmptyOrNull_When_TaskCompleted()
-            throws SQLException {
+        should_CleanTaskHistoryEventsWithParentProcessIdEmptyOrNull_When_TaskCompleted() {
       Iterator<String> iterator = Arrays.asList("", null).iterator();
       String taskId1 = "taskId1";
       String taskId2 = "taskId2";
@@ -392,7 +390,7 @@ class HistoryCleanupJobAccTest {
 
     @WithAccessId(user = "businessadmin")
     @BeforeAll
-    void setup() throws Exception {
+    void setup() {
       historyService = new SimpleHistoryServiceImpl();
       historyService.initialize(kadaiEngine);
     }

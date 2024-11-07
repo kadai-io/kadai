@@ -268,8 +268,7 @@ class TaskCleanupJobAccTest {
     @WithAccessId(user = "admin")
     @TestFactory
     Stream<DynamicTest>
-        should_DeleteCompletedTaskWithParentBusinessEmptyOrNull_When_RunningCleanupJob()
-            throws Exception {
+        should_DeleteCompletedTaskWithParentBusinessEmptyOrNull_When_RunningCleanupJob() {
       Iterator<String> iterator = Arrays.asList("", null).iterator();
 
       ThrowingConsumer<String> test =

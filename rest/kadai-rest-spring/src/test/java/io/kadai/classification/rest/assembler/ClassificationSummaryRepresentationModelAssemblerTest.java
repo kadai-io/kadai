@@ -103,7 +103,6 @@ class ClassificationSummaryRepresentationModelAssemblerTest {
     ClassificationSummaryRepresentationModel repModel = assembler.toModel(classification);
     // then
     testEquality(classification, repModel);
-    testLinks(repModel);
   }
 
   @Test
@@ -167,6 +166,4 @@ class ClassificationSummaryRepresentationModelAssemblerTest {
         .isNotSameAs(secondClassification)
         .isEqualTo(secondClassification);
   }
-
-  private void testLinks(ClassificationSummaryRepresentationModel repModel) {}
 }

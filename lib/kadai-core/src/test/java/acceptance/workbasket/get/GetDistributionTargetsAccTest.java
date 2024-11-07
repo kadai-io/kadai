@@ -88,10 +88,8 @@ class GetDistributionTargetsAccTest extends AbstractAccTest {
 
   @WithAccessId(user = "businessadmin")
   @Test
-  void should_ThrowException_When_QueriedWithInvalidWorkbasket() throws Exception {
+  void should_ThrowException_When_QueriedWithInvalidWorkbasket() {
     WorkbasketService workbasketService = kadaiEngine.getWorkbasketService();
-    String existingWb = "WBI:100000000000000000000000000000000001";
-    String nonExistingWb = "WBI:100000000000000000000000000000000xx1";
 
     ThrowingCallable call =
         () -> {

@@ -33,7 +33,6 @@ import com.openpojo.validation.test.impl.SetterTester;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
@@ -45,26 +44,26 @@ import org.junit.jupiter.api.TestFactory;
 /** check classes with a custom equals and hashcode implementation for correctness. */
 class PojoTest {
 
-  private static final List<Class<?>> POJO_CLASSES = getPojoClasses();
-
-  private static List<Class<?>> getPojoClasses() {
-    // TODO how to identify pojos? Is overwritten equals method enough?
-    return new ClassFileImporter()
-        .importPackages("io.kadai").stream()
-            .filter(javaClass -> javaClass.tryGetMethod("equals", Object.class).isPresent())
-            .filter(
-                javaClass ->
-                    !javaClass.getSimpleName().equals("TaskHistoryEvent")
-                        && !javaClass.getSimpleName().equals("WorkbasketHistoryEvent")
-                        && !javaClass.getSimpleName().equals("ClassificationHistoryEvent")
-                        && !javaClass.getSimpleName().equals("ComparableVersion")
-                        && !javaClass.getSimpleName().equals("StringItem")
-                        && !javaClass.getSimpleName().equals("BigIntegerItem")
-                        && !javaClass.getSimpleName().equals("IntItem")
-                        && !javaClass.getSimpleName().equals("LongItem"))
-            .map(JavaClass::reflect)
-            .collect(Collectors.toList());
-  }
+  private static final List<? extends Class<?>> POJO_CLASSES =
+      new ClassFileImporter()
+          .importPackages("io.kadai").stream()
+              .filter(javaClass -> javaClass.tryGetMethod("equals", Object.class).isPresent())
+              .filter(
+                  javaClass ->
+                      !javaClass.getSimpleName().equals("TaskHistoryEvent")
+                          && !javaClass.getSimpleName().equals("WorkbasketHistoryEvent")
+                          && !javaClass.getSimpleName().equals("ClassificationHistoryEvent")
+                          && !javaClass.getSimpleName().equals("ComparableVersion")
+                          && !javaClass.getSimpleName().equals("StringItem")
+                          && !javaClass.getSimpleName().equals("BigIntegerItem")
+                          && !javaClass.getSimpleName().equals("IntItem")
+                          && !javaClass.getSimpleName().equals("LongItem")
+                          // This is a record, it has a getter per definition
+                          && !javaClass.getSimpleName().equals("DurationPrioHolder")
+                          // This is a record, it has a getter per definition
+                          && !javaClass.getSimpleName().equals("CustomHoliday"))
+              .map(JavaClass::reflect)
+              .toList();
 
   @Test
   void testsThatPojoClassesAreFound() {

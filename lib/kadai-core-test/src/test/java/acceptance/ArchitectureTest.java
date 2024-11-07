@@ -226,7 +226,7 @@ class ArchitectureTest {
   private static ArchCondition<JavaClass> notUseCurrentTimestampSqlFunction() {
     Function<JavaMethod, List<String>> getSqlStringsFromMethod =
         wrap(
-            (method) -> {
+            method -> {
               List<String> values = new ArrayList<>();
 
               final List<Select> select =
