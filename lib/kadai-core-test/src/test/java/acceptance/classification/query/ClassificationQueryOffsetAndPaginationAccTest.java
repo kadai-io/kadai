@@ -31,7 +31,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 @KadaiIntegrationTest
-public class ClassificationQueryOffsetAndPaginationAccTest {
+class ClassificationQueryOffsetAndPaginationAccTest {
 
   @KadaiInject ClassificationService classificationService;
 
@@ -64,7 +64,7 @@ public class ClassificationQueryOffsetAndPaginationAccTest {
   void should_GetZeroClassifications_When_OffsetIsNegativeAndLimitIsNegative() {
     List<ClassificationSummary> results =
         classificationService.createClassificationQuery().domainIn("DOMAIN_A").list(-1, -1);
-    assertThat(results).hasSize(0);
+    assertThat(results).isEmpty();
   }
 
   @WithAccessId(user = "businessadmin")
@@ -72,7 +72,7 @@ public class ClassificationQueryOffsetAndPaginationAccTest {
   void should_GetZeroClassifications_When_LimitIsNegative() {
     List<ClassificationSummary> results =
         classificationService.createClassificationQuery().domainIn("DOMAIN_A").list(0, -1);
-    assertThat(results).hasSize(0);
+    assertThat(results).isEmpty();
   }
 
   @WithAccessId(user = "businessadmin")
@@ -80,7 +80,7 @@ public class ClassificationQueryOffsetAndPaginationAccTest {
   void should_GetZeroClassifications_When_OffsetAndLimitAreZero() {
     List<ClassificationSummary> results =
         classificationService.createClassificationQuery().domainIn("DOMAIN_A").list(0, 0);
-    assertThat(results).hasSize(0);
+    assertThat(results).isEmpty();
   }
 
   @WithAccessId(user = "businessadmin")
@@ -120,7 +120,7 @@ public class ClassificationQueryOffsetAndPaginationAccTest {
   void should_GetZeroClassifications_When_UsingPaginationWithSizeZero() {
     List<ClassificationSummary> results =
         classificationService.createClassificationQuery().domainIn("DOMAIN_A").listPage(1, 0);
-    assertThat(results).hasSize(0);
+    assertThat(results).isEmpty();
   }
 
   @WithAccessId(user = "businessadmin")
@@ -128,7 +128,7 @@ public class ClassificationQueryOffsetAndPaginationAccTest {
   void should_GetZeroClassifications_When_UsingPaginationWithNegativeSize() {
     List<ClassificationSummary> results =
         classificationService.createClassificationQuery().domainIn("DOMAIN_A").listPage(1, -1);
-    assertThat(results).hasSize(0);
+    assertThat(results).isEmpty();
   }
 
   @WithAccessId(user = "businessadmin")

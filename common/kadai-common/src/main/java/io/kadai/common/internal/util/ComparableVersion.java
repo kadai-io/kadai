@@ -269,23 +269,18 @@ public class ComparableVersion implements Comparable<ComparableVersion> {
         return (value == 0) ? 0 : 1; // 1.0 == 1, 1.1 > 1
       }
 
-      switch (item.getType()) {
-        case INT_ITEM:
+      return switch (item.getType()) {
+        case INT_ITEM -> {
           int itemValue = ((IntItem) item).value;
-          return Integer.compare(value, itemValue);
-        case LONG_ITEM:
-        case BIGINTEGER_ITEM:
-          return -1;
+          yield Integer.compare(value, itemValue);
+        }
+        case LONG_ITEM, BIGINTEGER_ITEM -> -1;
+        case STRING_ITEM -> 1; // 1.1 > 1-sp
 
-        case STRING_ITEM:
-          return 1; // 1.1 > 1-sp
+        case LIST_ITEM -> 1; // 1.1 > 1-1
 
-        case LIST_ITEM:
-          return 1; // 1.1 > 1-1
-
-        default:
-          throw new IllegalStateException("invalid item: " + item.getClass());
-      }
+        default -> throw new IllegalStateException("invalid item: " + item.getClass());
+      };
     }
 
     @Override
@@ -406,23 +401,15 @@ public class ComparableVersion implements Comparable<ComparableVersion> {
         return BigInteger.ZERO.equals(value) ? 0 : 1; // 1.0 == 1, 1.1 > 1
       }
 
-      switch (item.getType()) {
-        case INT_ITEM:
-        case LONG_ITEM:
-          return 1;
+      return switch (item.getType()) {
+        case INT_ITEM, LONG_ITEM -> 1;
+        case BIGINTEGER_ITEM -> value.compareTo(((BigIntegerItem) item).value);
+        case STRING_ITEM -> 1; // 1.1 > 1-sp
 
-        case BIGINTEGER_ITEM:
-          return value.compareTo(((BigIntegerItem) item).value);
+        case LIST_ITEM -> 1; // 1.1 > 1-1
 
-        case STRING_ITEM:
-          return 1; // 1.1 > 1-sp
-
-        case LIST_ITEM:
-          return 1; // 1.1 > 1-1
-
-        default:
-          throw new IllegalStateException("invalid item: " + item.getClass());
-      }
+        default -> throw new IllegalStateException("invalid item: " + item.getClass());
+      };
     }
 
     @Override
@@ -526,22 +513,15 @@ public class ComparableVersion implements Comparable<ComparableVersion> {
         // 1-rc < 1, 1-ga > 1
         return comparableQualifier(value).compareTo(RELEASE_VERSION_INDEX);
       }
-      switch (item.getType()) {
-        case INT_ITEM:
-        case LONG_ITEM:
-        case BIGINTEGER_ITEM:
-          return -1; // 1.any < 1.1 ?
+      return switch (item.getType()) {
+        case INT_ITEM, LONG_ITEM, BIGINTEGER_ITEM -> -1; // 1.any < 1.1 ?
 
-        case STRING_ITEM:
-          return comparableQualifier(value)
-              .compareTo(comparableQualifier(((StringItem) item).value));
+        case STRING_ITEM -> comparableQualifier(value)
+            .compareTo(comparableQualifier(((StringItem) item).value));
+        case LIST_ITEM -> -1; // 1.any < 1-1
 
-        case LIST_ITEM:
-          return -1; // 1.any < 1-1
-
-        default:
-          throw new IllegalStateException("invalid item: " + item.getClass());
-      }
+        default -> throw new IllegalStateException("invalid item: " + item.getClass());
+      };
     }
 
     @Override
@@ -596,9 +576,7 @@ public class ComparableVersion implements Comparable<ComparableVersion> {
         return first.compareTo(null);
       }
       switch (item.getType()) {
-        case INT_ITEM:
-        case LONG_ITEM:
-        case BIGINTEGER_ITEM:
+        case INT_ITEM, LONG_ITEM, BIGINTEGER_ITEM:
           return -1; // 1-1 < 1.0.x
 
         case STRING_ITEM:

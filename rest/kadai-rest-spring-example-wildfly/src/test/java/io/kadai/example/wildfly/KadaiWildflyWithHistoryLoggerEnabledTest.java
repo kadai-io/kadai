@@ -28,12 +28,6 @@ import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
-import org.jboss.shrinkwrap.resolver.api.maven.PackagingType;
-import org.jboss.shrinkwrap.resolver.api.maven.ScopeType;
-import org.jboss.shrinkwrap.resolver.api.maven.coordinate.MavenCoordinate;
-import org.jboss.shrinkwrap.resolver.api.maven.coordinate.MavenCoordinates;
-import org.jboss.shrinkwrap.resolver.api.maven.coordinate.MavenDependency;
-import org.jboss.shrinkwrap.resolver.impl.maven.coordinate.MavenDependencyImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -60,17 +54,6 @@ public class KadaiWildflyWithHistoryLoggerEnabledTest extends AbstractAccTest {
 
     LOGGER.info(
         "Running with db.type '{}' and using property file '{}'", dbType, applicationPropertyFile);
-
-    MavenCoordinate historyLoggerCoordinate =
-        MavenCoordinates.createCoordinate(
-            "io.kadai.history",
-            "kadai-loghistory-provider",
-            DEPENDENCY_VERSION,
-            PackagingType.JAR,
-            null);
-
-    MavenDependency historyLoggerDependency =
-        new MavenDependencyImpl(historyLoggerCoordinate, ScopeType.TEST, false);
 
     File[] files =
         Maven.resolver()

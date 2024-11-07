@@ -161,17 +161,20 @@ public class UserServiceImpl implements UserService {
   @Override
   public void deleteUser(String id)
       throws UserNotFoundException, InvalidArgumentException, NotAuthorizedException {
+
     internalKadaiEngine.getEngine().checkRoleMembership(KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
-    getUser(id);
+
+    User user = getUser(id);
+    String userId = user.getId();
 
     internalKadaiEngine.executeInDatabaseConnection(
         () -> {
-          userMapper.delete(id);
-          userMapper.deleteGroups(id);
-          userMapper.deletePermissions(id);
+          userMapper.delete(userId);
+          userMapper.deleteGroups(userId);
+          userMapper.deletePermissions(userId);
         });
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Method deleteUser() deleted User with id '{}'.", id);
+      LOGGER.debug("Method deleteUser() deleted User with id '{}'.", userId);
     }
   }
 

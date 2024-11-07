@@ -31,6 +31,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles({"emptySearchRoots"})
 class LdapEmptySearchRootsTest extends LdapTest {
 
+  @Override
   @Test
   void should_FindGroupsForUser_When_UserIdIsProvided() throws Exception {
     List<AccessIdRepresentationModel> groups =
@@ -43,6 +44,7 @@ class LdapEmptySearchRootsTest extends LdapTest {
                 + "cn=organisation,ou=test,o=kadai");
   }
 
+  @Override
   @Test
   void should_FindPermissionsForUser_When_UserIdIsProvided() throws Exception {
     List<AccessIdRepresentationModel> permissions =
@@ -53,6 +55,7 @@ class LdapEmptySearchRootsTest extends LdapTest {
             "kadai:callcenter:ab:ab/a:callcenter", "kadai:callcenter:ab:ab/a:callcenter-vip");
   }
 
+  @Override
   @Test
   void should_ReturnFullDnForUser_When_AccessIdOfUserIsGiven() throws Exception {
     String dn = ldapClient.searchDnForAccessId("otheruser");

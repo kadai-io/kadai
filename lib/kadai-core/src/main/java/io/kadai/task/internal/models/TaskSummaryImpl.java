@@ -34,6 +34,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /** Entity which contains the most important information about a Task. */
@@ -566,15 +567,16 @@ public class TaskSummaryImpl implements TaskSummary {
 
   @Override
   public ObjectReference removeSecondaryObjectReference(String objectReferenceId) {
-    ObjectReference result = null;
-    for (ObjectReference objectReference : secondaryObjectReferences) {
-      if (objectReference.getId().equals(objectReferenceId)
-          && secondaryObjectReferences.remove(objectReference)) {
-        result = objectReference;
-        break;
-      }
-    }
-    return result;
+
+    Optional<ObjectReference> removedObjectReference =
+        secondaryObjectReferences.stream()
+            .filter(objectReference -> objectReferenceId.equals(objectReference.getId()))
+            .findFirst();
+
+    removedObjectReference.ifPresent(
+        objectReference -> secondaryObjectReferences.remove(objectReference));
+
+    return removedObjectReference.orElse(null);
   }
 
   // auxiliary Method to enable Mybatis to access classificationSummary

@@ -78,6 +78,7 @@ class TaskRoutingAccTest {
 
     @Override
     public void initialize(KadaiEngine kadaiEngine) {
+      // NOOP
     }
 
     @Override
@@ -93,13 +94,13 @@ class TaskRoutingAccTest {
 
     @Override
     public void initialize(KadaiEngine kadaiEngine) {
+      // NOOP
     }
 
     @Override
     public Optional<RoutingTarget> determineRoutingTarget(Task task) {
       if ("DOMAIN_A".equals(task.getDomain())) {
-        RoutingTarget routingTarget = new RoutingTarget(domainAWorkbasket.getId(),
-            "user-1-1");
+        RoutingTarget routingTarget = new RoutingTarget(domainAWorkbasket.getId(), "user-1-1");
         return Optional.of(routingTarget);
       }
       return Optional.empty();
@@ -110,6 +111,7 @@ class TaskRoutingAccTest {
 
     @Override
     public void initialize(KadaiEngine kadaiEngine) {
+      // NOOP
     }
 
     @Override
@@ -129,8 +131,7 @@ class TaskRoutingAccTest {
       serviceProviders = TaskRoutingProviderForDomainA.class)
   class DetermineWorkbasketIdWithServiceProvider {
 
-    @KadaiInject
-    TaskService taskService;
+    @KadaiInject TaskService taskService;
 
     @WithAccessId(user = "user-1-1")
     @Test
@@ -195,7 +196,6 @@ class TaskRoutingAccTest {
 
         assertThat(createdTask.getWorkbasketSummary()).isEqualTo(domainAWorkbasket);
         assertThat(createdTask.getOwner()).isEqualTo("user-1-1");
-
       }
     }
 
@@ -238,7 +238,6 @@ class TaskRoutingAccTest {
 
         assertThat(createdTask.getWorkbasketSummary()).isEqualTo(domainAWorkbasket);
         assertThat(createdTask.getOwner()).isEqualTo("user-1-2");
-
       }
     }
   }

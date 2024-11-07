@@ -162,8 +162,7 @@ public class KadaiInitializationExtension
       KadaiConfiguration.Builder kadaiConfigurationBuilder =
           createDefaultKadaiConfigurationBuilder(store);
 
-      if (testInstance instanceof KadaiConfigurationModifier) {
-        KadaiConfigurationModifier modifier = (KadaiConfigurationModifier) testInstance;
+      if (testInstance instanceof KadaiConfigurationModifier modifier) {
         kadaiConfigurationBuilder = modifier.modify(kadaiConfigurationBuilder);
       }
 

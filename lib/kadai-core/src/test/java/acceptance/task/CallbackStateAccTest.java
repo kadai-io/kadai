@@ -38,7 +38,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -348,7 +347,7 @@ class CallbackStateAccTest extends AbstractAccTest {
     List<TaskSummary> completedTasks =
         taskService.createTaskQuery().stateIn(TaskState.COMPLETED).list();
     List<String> externalIds =
-        completedTasks.stream().map(TaskSummary::getExternalId).collect(Collectors.toList());
+        completedTasks.stream().map(TaskSummary::getExternalId).toList();
     BulkOperationResults<String, KadaiException> bulkResultCompleted =
         taskService.setCallbackStateForTasks(
             externalIds, CallbackState.CALLBACK_PROCESSING_REQUIRED);
@@ -370,7 +369,7 @@ class CallbackStateAccTest extends AbstractAccTest {
     assertThat(tasksToBeActedUpon).hasSize(numberOfCompletedTasksAtStartOfTest);
     // now we set callback state to callback_processing_completed
     externalIds =
-        tasksToBeActedUpon.stream().map(TaskSummary::getExternalId).collect(Collectors.toList());
+        tasksToBeActedUpon.stream().map(TaskSummary::getExternalId).toList();
     BulkOperationResults<String, KadaiException> bulkResult =
         taskService.setCallbackStateForTasks(
             externalIds, CallbackState.CALLBACK_PROCESSING_COMPLETED);

@@ -263,17 +263,18 @@ public class TaskCommentController {
                       examples =
                           @ExampleObject(
                               value =
-                                  "{\n"
-                                      + "  \"taskCommentId\": "
-                                      + "\"TCI:000000000000000000000000000000000000\",\n"
-                                      + "  \"taskId\": "
-                                      + "\"TKI:000000000000000000000000000000000000\",\n"
-                                      + "  \"textField\": \"updated text in textfield\",\n"
-                                      + "  \"creator\": \"user-1-1\",\n"
-                                      + "  \"creatorFullName\": \"Mustermann, Max\",\n"
-                                      + "  \"created\": \"2017-01-29T15:55:00Z\",\n"
-                                      + "  \"modified\": \"2018-01-30T15:55:00Z\"\n"
-                                      + "}"))),
+                                  """
+                                      {
+                                        "taskCommentId": \
+                                      "TCI:000000000000000000000000000000000000",
+                                        "taskId": \
+                                      "TKI:000000000000000000000000000000000000",
+                                        "textField": "updated text in textfield",
+                                        "creator": "user-1-1",
+                                        "creatorFullName": "Mustermann, Max",
+                                        "created": "2017-01-29T15:55:00Z",
+                                        "modified": "2018-01-30T15:55:00Z"
+                                      }"""))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -342,11 +343,12 @@ public class TaskCommentController {
                       examples =
                           @ExampleObject(
                               value =
-                                  "{\n"
-                                      + "  \"taskId\": "
-                                      + "\"TKI:000000000000000000000000000000000000\",\n"
-                                      + "  \"textField\": \"some text in textfield\"\n"
-                                      + "}"))),
+                                  """
+                                      {
+                                        "taskId": \
+                                      "TKI:000000000000000000000000000000000000",
+                                        "textField": "some text in textfield"
+                                      }"""))),
       responses = {
         @ApiResponse(
             responseCode = "201",

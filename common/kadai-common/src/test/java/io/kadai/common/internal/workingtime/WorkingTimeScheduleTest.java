@@ -25,46 +25,49 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import org.junit.jupiter.api.Test;
 
 class WorkingTimeScheduleTest {
 
   @Test
   void creationFailsIfWorkingTimesOverlap() {
+    Map<DayOfWeek, Set<LocalTimeInterval>> workingTimeByDayOfWeek =
+        Map.of(
+            DayOfWeek.MONDAY,
+            Set.of(
+                new LocalTimeInterval(LocalTime.MIN, LocalTime.MAX),
+                new LocalTimeInterval(LocalTime.NOON, LocalTime.MAX)));
+
     assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(
-            () ->
-                new WorkingTimeSchedule(
-                    Map.of(
-                        DayOfWeek.MONDAY,
-                        Set.of(
-                            new LocalTimeInterval(LocalTime.MIN, LocalTime.MAX),
-                            new LocalTimeInterval(LocalTime.NOON, LocalTime.MAX)))));
+        .isThrownBy(() -> new WorkingTimeSchedule(workingTimeByDayOfWeek));
   }
 
   @Test
   void workSlotsForReturnsUnmodifiableSets() {
-    WorkingTimeSchedule cut =
+    SortedSet<LocalTimeInterval> workSlots =
         new WorkingTimeSchedule(
-            Map.of(DayOfWeek.MONDAY, Set.of(new LocalTimeInterval(LocalTime.MIN, LocalTime.MAX))));
+                Map.of(
+                    DayOfWeek.MONDAY, Set.of(new LocalTimeInterval(LocalTime.MIN, LocalTime.MAX))))
+            .workSlotsFor(DayOfWeek.MONDAY);
+
+    LocalTimeInterval workSlot = new LocalTimeInterval(LocalTime.NOON, LocalTime.MIDNIGHT);
 
     assertThatExceptionOfType(UnsupportedOperationException.class)
-        .isThrownBy(
-            () ->
-                cut.workSlotsFor(DayOfWeek.MONDAY)
-                    .add(new LocalTimeInterval(LocalTime.NOON, LocalTime.MIDNIGHT)));
+        .isThrownBy(() -> workSlots.add(workSlot));
   }
 
   @Test
   void workSlotsForReversedReturnsUnmodifiableSets() {
-    WorkingTimeSchedule cut =
+    SortedSet<LocalTimeInterval> workSlots =
         new WorkingTimeSchedule(
-            Map.of(DayOfWeek.MONDAY, Set.of(new LocalTimeInterval(LocalTime.MIN, LocalTime.MAX))));
+                Map.of(
+                    DayOfWeek.MONDAY, Set.of(new LocalTimeInterval(LocalTime.MIN, LocalTime.MAX))))
+            .workSlotsForReversed(DayOfWeek.MONDAY);
+
+    LocalTimeInterval workSlot = new LocalTimeInterval(LocalTime.NOON, LocalTime.MIDNIGHT);
 
     assertThatExceptionOfType(UnsupportedOperationException.class)
-        .isThrownBy(
-            () ->
-                cut.workSlotsForReversed(DayOfWeek.MONDAY)
-                    .add(new LocalTimeInterval(LocalTime.NOON, LocalTime.MIDNIGHT)));
+        .isThrownBy(() -> workSlots.add(workSlot));
   }
 }

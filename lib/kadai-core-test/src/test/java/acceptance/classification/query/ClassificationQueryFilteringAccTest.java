@@ -51,7 +51,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
@@ -161,7 +160,7 @@ class ClassificationQueryFilteringAccTest {
   }
 
   @Test
-  void should_FindAllAccessibleClassifications_When_QueryingNotAuthenticated() throws Exception {
+  void should_FindAllAccessibleClassifications_When_QueryingNotAuthenticated() {
     List<ClassificationSummary> classificationSummaryList =
         classificationService
             .createClassificationQuery()
@@ -633,7 +632,7 @@ class ClassificationQueryFilteringAccTest {
             .listValues(NAME, null);
     List<String> columnNameAllList =
         Stream.concat(columnNameList.stream(), columnNameMasterList.stream())
-            .collect(Collectors.toList());
+            .toList();
 
     assertThat(columnNameAllList).containsOnly("Classification Name");
   }
@@ -661,7 +660,7 @@ class ClassificationQueryFilteringAccTest {
             .listValues(TYPE, null);
     List<String> columnTypeAllList =
         Stream.concat(columnTypeList.stream(), columnTypeMasterList.stream())
-            .collect(Collectors.toList());
+            .toList();
 
     assertThat(columnTypeAllList).containsOnly("DOCUMENT");
   }
@@ -690,7 +689,7 @@ class ClassificationQueryFilteringAccTest {
             .listValues(TYPE, null);
     List<String> columnIsValidInDomainAllList =
         Stream.concat(columnIsValidInDomainList.stream(), columnIsValidInDomainMasterList.stream())
-            .collect(Collectors.toList());
+            .toList();
 
     // Expecting "0" for H2 and "f" for POSTGRES (==> abbreviation of
     // false)
@@ -727,7 +726,7 @@ class ClassificationQueryFilteringAccTest {
             .listValues(CREATED, null);
     List<String> columnCreatedAllList =
         Stream.concat(columnCreatedList.stream(), columnCreatedMasterList.stream())
-            .collect(Collectors.toList());
+            .toList();
 
     assertThat(columnCreatedAllList)
         .isNotEmpty()

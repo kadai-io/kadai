@@ -148,7 +148,7 @@ class ServiceLevelHandler {
     if (newTaskImpl.isManualPriorityActive()) {
       newTaskImpl.setPriority(newTaskImpl.getManualPriority());
     } else {
-      newTaskImpl.setPriority(durationPrioHolder.getPriority());
+      newTaskImpl.setPriority(durationPrioHolder.priority());
     }
     if (onlyPriority) {
       return newTaskImpl;
@@ -156,10 +156,10 @@ class ServiceLevelHandler {
 
     // creation of new task
     if (oldTaskImpl == null) {
-      return updatePlannedDueOnCreationOfNewTask(newTaskImpl, durationPrioHolder.getDuration());
+      return updatePlannedDueOnCreationOfNewTask(newTaskImpl, durationPrioHolder.duration());
     } else {
       return updatePlannedDueOnTaskUpdate(
-          newTaskImpl, oldTaskImpl, durationPrioHolder.getDuration());
+          newTaskImpl, oldTaskImpl, durationPrioHolder.duration());
     }
   }
 
@@ -689,23 +689,7 @@ class ServiceLevelHandler {
 
   static class BulkLog extends BulkOperationResults<String, KadaiException> {}
 
-  static final class DurationPrioHolder {
-
-    private final Duration duration;
-    private final int priority;
-
-    DurationPrioHolder(Duration duration, int priority) {
-      this.duration = duration;
-      this.priority = priority;
-    }
-
-    Duration getDuration() {
-      return duration;
-    }
-
-    int getPriority() {
-      return priority;
-    }
+  record DurationPrioHolder(Duration duration, int priority) {
   }
 
   private static final class TaskDuration {

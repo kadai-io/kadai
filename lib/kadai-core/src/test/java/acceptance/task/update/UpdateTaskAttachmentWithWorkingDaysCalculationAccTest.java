@@ -50,7 +50,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(JaasExtension.class)
-public class UpdateTaskAttachmentWithWorkingDaysCalculationAccTest extends AbstractAccTest {
+class UpdateTaskAttachmentWithWorkingDaysCalculationAccTest extends AbstractAccTest {
 
   private Task task;
   private Attachment attachment;
@@ -159,10 +159,10 @@ public class UpdateTaskAttachmentWithWorkingDaysCalculationAccTest extends Abstr
     task = taskService.getTask(task.getId());
     assertThat(task.getAttachments()).isEmpty();
 
-    AttachmentImpl attachment = (AttachmentImpl) this.attachment;
-    attachment.setId("TAI:000017");
-    task.addAttachment(attachment);
-    task.addAttachment(attachment);
+    AttachmentImpl attachmentImpl = (AttachmentImpl) this.attachment;
+    attachmentImpl.setId("TAI:000017");
+    task.addAttachment(attachmentImpl);
+    task.addAttachment(attachmentImpl);
     task = taskService.updateTask(task);
 
     assertThat(task.getAttachments())
@@ -181,10 +181,10 @@ public class UpdateTaskAttachmentWithWorkingDaysCalculationAccTest extends Abstr
     task = taskService.getTask(task.getId());
     assertThat(task.getAttachments()).hasSize(attachmentCount);
 
-    AttachmentImpl attachment = (AttachmentImpl) this.attachment;
-    attachment.setId("TAI:000017");
-    task.getAttachments().add(attachment);
-    task.getAttachments().add(attachment);
+    AttachmentImpl attachmentImpl = (AttachmentImpl) this.attachment;
+    attachmentImpl.setId("TAI:000017");
+    task.getAttachments().add(attachmentImpl);
+    task.getAttachments().add(attachmentImpl);
     ThrowingCallable call = () -> taskService.updateTask(task);
     assertThatThrownBy(call).isInstanceOf(AttachmentPersistenceException.class);
   }
@@ -321,15 +321,15 @@ public class UpdateTaskAttachmentWithWorkingDaysCalculationAccTest extends Abstr
     assertThat(task.getPriority()).isEqualTo(1);
     assertThat(task.getPlanned().plus(Duration.ofDays(1))).isEqualTo(task.getDue());
 
-    Attachment attachment = this.attachment;
-    task.addAttachment(attachment);
+    Attachment attachmentToAdd = this.attachment;
+    task.addAttachment(attachmentToAdd);
     task = taskService.updateTask(task);
     assertThat(task.getPriority()).isEqualTo(99);
     assertThat(task.getPlanned().plus(Duration.ofDays(1))).isEqualTo(task.getDue());
 
     final int attachmentCount = task.getAttachments().size();
 
-    String newChannel = attachment.getChannel() + "-X";
+    String newChannel = attachmentToAdd.getChannel() + "-X";
     task.getAttachments().get(0).setChannel(newChannel);
     Classification newClassification =
         kadaiEngine

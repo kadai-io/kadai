@@ -52,8 +52,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(JaasExtension.class)
-public class UpdateObjectsUseUtcTimeStampsWithWorkingDaysCalculationAccTest
-    extends AbstractAccTest {
+class UpdateObjectsUseUtcTimeStampsWithWorkingDaysCalculationAccTest extends AbstractAccTest {
 
   @BeforeAll
   protected static void setupTest() throws Exception {

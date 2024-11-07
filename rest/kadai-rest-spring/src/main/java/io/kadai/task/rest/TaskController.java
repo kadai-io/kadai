@@ -1079,94 +1079,95 @@ public class TaskController {
                       examples =
                           @ExampleObject(
                               value =
-                                  "{\n"
-                                      + "  \"taskId\": "
-                                      + "\"TKI:000000000000000000000000000000000003\",\n"
-                                      + "  \"externalId\": "
-                                      + "\"ETI:000000000000000000000000000000000003\",\n"
-                                      + "  \"created\": \"2018-02-01T12:00:00.000Z\",\n"
-                                      + "  \"modified\": \"2018-02-01T12:00:00.000Z\",\n"
-                                      + "  \"planned\": \"2024-05-27T15:27:56.595Z\",\n"
-                                      + "  \"received\": \"2024-05-29T15:27:56.595Z\",\n"
-                                      + "  \"due\": \"2024-05-29T15:27:56.595Z\",\n"
-                                      + "  \"name\": \"Widerruf\",\n"
-                                      + "  \"creator\": \"creator_user_id\",\n"
-                                      + "  \"description\": \"new description\",\n"
-                                      + "  \"priority\": 2,\n"
-                                      + "  \"manualPriority\": -1,\n"
-                                      + "  \"state\": \"READY\",\n"
-                                      + "  \"classificationSummary\": {\n"
-                                      + "    \"classificationId\": "
-                                      + "\"CLI:100000000000000000000000000000000003\",\n"
-                                      + "    \"key\": \"L1050\",\n"
-                                      + "    \"applicationEntryPoint\": \"\",\n"
-                                      + "    \"category\": \"EXTERNAL\",\n"
-                                      + "    \"domain\": \"DOMAIN_A\",\n"
-                                      + "    \"name\": \"Widerruf\",\n"
-                                      + "    \"parentId\": \"\",\n"
-                                      + "    \"parentKey\": \"\",\n"
-                                      + "    \"priority\": 1,\n"
-                                      + "    \"serviceLevel\": \"P13D\",\n"
-                                      + "    \"type\": \"TASK\",\n"
-                                      + "    \"custom1\": \"VNR,RVNR,KOLVNR\",\n"
-                                      + "    \"custom2\": \"\",\n"
-                                      + "    \"custom3\": \"\",\n"
-                                      + "    \"custom4\": \"\",\n"
-                                      + "    \"custom5\": \"\",\n"
-                                      + "    \"custom6\": \"\",\n"
-                                      + "    \"custom7\": \"\",\n"
-                                      + "    \"custom8\": \"\"\n"
-                                      + "  },\n"
-                                      + "  \"workbasketSummary\": {\n"
-                                      + "    \"workbasketId\": "
-                                      + "\"WBI:100000000000000000000000000000000001\",\n"
-                                      + "    \"key\": \"GPK_KSC\",\n"
-                                      + "    \"name\": \"Gruppenpostkorb KSC\",\n"
-                                      + "    \"domain\": \"DOMAIN_A\",\n"
-                                      + "    \"type\": \"GROUP\",\n"
-                                      + "    \"description\": \"Gruppenpostkorb KSC\",\n"
-                                      + "    \"owner\": \"teamlead-1\",\n"
-                                      + "    \"custom1\": \"ABCQVW\",\n"
-                                      + "    \"custom2\": \"\",\n"
-                                      + "    \"custom3\": \"xyz4\",\n"
-                                      + "    \"custom4\": \"\",\n"
-                                      + "    \"custom5\": \"\",\n"
-                                      + "    \"custom6\": \"\",\n"
-                                      + "    \"custom7\": \"\",\n"
-                                      + "    \"custom8\": \"\",\n"
-                                      + "    \"orgLevel1\": \"\",\n"
-                                      + "    \"orgLevel2\": \"\",\n"
-                                      + "    \"orgLevel3\": \"\",\n"
-                                      + "    \"orgLevel4\": \"\",\n"
-                                      + "    \"markedForDeletion\": false\n"
-                                      + "  },\n"
-                                      + "  \"businessProcessId\": \"PI_0000000000003\",\n"
-                                      + "  \"parentBusinessProcessId\": "
-                                      + "\"DOC_0000000000000000003\",\n"
-                                      + "  \"primaryObjRef\": {\n"
-                                      + "    \"company\": \"00\",\n"
-                                      + "    \"system\": \"PASystem\",\n"
-                                      + "    \"systemInstance\": \"00\",\n"
-                                      + "    \"type\": \"VNR\",\n"
-                                      + "    \"value\": \"11223344\"\n"
-                                      + "  },\n"
-                                      + "  \"custom1\": \"efg\",\n"
-                                      + "  \"custom14\": \"abc\",\n"
-                                      + "  \"customInt1\": 1,\n"
-                                      + "  \"customInt2\": 2,\n"
-                                      + "  \"customInt3\": 3,\n"
-                                      + "  \"customInt4\": 4,\n"
-                                      + "  \"customInt5\": 5,\n"
-                                      + "  \"customInt6\": 6,\n"
-                                      + "  \"customInt7\": 7,\n"
-                                      + "  \"customInt8\": 8,\n"
-                                      + "  \"secondaryObjectReferences\": [],\n"
-                                      + "  \"customAttributes\": [],\n"
-                                      + "  \"callbackInfo\": [],\n"
-                                      + "  \"attachments\": [],\n"
-                                      + "  \"read\": false,\n"
-                                      + "  \"transferred\": false\n"
-                                      + "}"))),
+                                  """
+                                      {
+                                        "taskId": \
+                                      "TKI:000000000000000000000000000000000003",
+                                        "externalId": \
+                                      "ETI:000000000000000000000000000000000003",
+                                        "created": "2018-02-01T12:00:00.000Z",
+                                        "modified": "2018-02-01T12:00:00.000Z",
+                                        "planned": "2024-05-27T15:27:56.595Z",
+                                        "received": "2024-05-29T15:27:56.595Z",
+                                        "due": "2024-05-29T15:27:56.595Z",
+                                        "name": "Widerruf",
+                                        "creator": "creator_user_id",
+                                        "description": "new description",
+                                        "priority": 2,
+                                        "manualPriority": -1,
+                                        "state": "READY",
+                                        "classificationSummary": {
+                                          "classificationId": \
+                                      "CLI:100000000000000000000000000000000003",
+                                          "key": "L1050",
+                                          "applicationEntryPoint": "",
+                                          "category": "EXTERNAL",
+                                          "domain": "DOMAIN_A",
+                                          "name": "Widerruf",
+                                          "parentId": "",
+                                          "parentKey": "",
+                                          "priority": 1,
+                                          "serviceLevel": "P13D",
+                                          "type": "TASK",
+                                          "custom1": "VNR,RVNR,KOLVNR",
+                                          "custom2": "",
+                                          "custom3": "",
+                                          "custom4": "",
+                                          "custom5": "",
+                                          "custom6": "",
+                                          "custom7": "",
+                                          "custom8": ""
+                                        },
+                                        "workbasketSummary": {
+                                          "workbasketId": \
+                                      "WBI:100000000000000000000000000000000001",
+                                          "key": "GPK_KSC",
+                                          "name": "Gruppenpostkorb KSC",
+                                          "domain": "DOMAIN_A",
+                                          "type": "GROUP",
+                                          "description": "Gruppenpostkorb KSC",
+                                          "owner": "teamlead-1",
+                                          "custom1": "ABCQVW",
+                                          "custom2": "",
+                                          "custom3": "xyz4",
+                                          "custom4": "",
+                                          "custom5": "",
+                                          "custom6": "",
+                                          "custom7": "",
+                                          "custom8": "",
+                                          "orgLevel1": "",
+                                          "orgLevel2": "",
+                                          "orgLevel3": "",
+                                          "orgLevel4": "",
+                                          "markedForDeletion": false
+                                        },
+                                        "businessProcessId": "PI_0000000000003",
+                                        "parentBusinessProcessId": \
+                                      "DOC_0000000000000000003",
+                                        "primaryObjRef": {
+                                          "company": "00",
+                                          "system": "PASystem",
+                                          "systemInstance": "00",
+                                          "type": "VNR",
+                                          "value": "11223344"
+                                        },
+                                        "custom1": "efg",
+                                        "custom14": "abc",
+                                        "customInt1": 1,
+                                        "customInt2": 2,
+                                        "customInt3": 3,
+                                        "customInt4": 4,
+                                        "customInt5": 5,
+                                        "customInt6": 6,
+                                        "customInt7": 7,
+                                        "customInt8": 8,
+                                        "secondaryObjectReferences": [],
+                                        "customAttributes": [],
+                                        "callbackInfo": [],
+                                        "attachments": [],
+                                        "read": false,
+                                        "transferred": false
+                                      }"""))),
       responses = {
         @ApiResponse(
             responseCode = "200",

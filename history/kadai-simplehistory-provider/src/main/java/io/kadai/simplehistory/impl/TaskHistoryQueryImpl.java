@@ -30,8 +30,6 @@ import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.ibatis.session.RowBounds;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Implementation for generating dynamic sql. */
 public class TaskHistoryQueryImpl implements TaskHistoryQuery {
@@ -42,11 +40,6 @@ public class TaskHistoryQueryImpl implements TaskHistoryQuery {
       "io.kadai.simplehistory.impl.task.TaskHistoryQueryMapper.queryHistoryColumnValues";
   private static final String LINK_TO_COUNTER =
       "io.kadai.simplehistory.impl.task.TaskHistoryQueryMapper.countHistoryEvents";
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(TaskHistoryQueryImpl.class);
-
-  private static final String SQL_EXCEPTION_MESSAGE =
-      "Method openConnection() could not open a connection to the database.";
 
   private final InternalKadaiEngine internalKadaiEngine;
   private final List<String> orderBy;
@@ -648,11 +641,9 @@ public class TaskHistoryQueryImpl implements TaskHistoryQuery {
 
   @Override
   public List<TaskHistoryEvent> list() {
-    List<TaskHistoryEvent> result = new ArrayList<>();
     try {
       internalKadaiEngine.openConnection();
-      result = internalKadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this);
-      return result;
+      return internalKadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this);
     } finally {
       internalKadaiEngine.returnConnection();
     }
@@ -660,12 +651,10 @@ public class TaskHistoryQueryImpl implements TaskHistoryQuery {
 
   @Override
   public List<TaskHistoryEvent> list(int offset, int limit) {
-    List<TaskHistoryEvent> result = new ArrayList<>();
     try {
       internalKadaiEngine.openConnection();
       RowBounds rowBounds = new RowBounds(offset, limit);
-      result = internalKadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this, rowBounds);
-      return result;
+      return internalKadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this, rowBounds);
     } finally {
       internalKadaiEngine.returnConnection();
     }
@@ -674,7 +663,6 @@ public class TaskHistoryQueryImpl implements TaskHistoryQuery {
   @Override
   public List<String> listValues(
       TaskHistoryQueryColumnName dbColumnName, SortDirection sortDirection) {
-    List<String> result = new ArrayList<>();
     this.columnName = dbColumnName;
     this.orderBy.clear();
     this.addOrderCriteria(columnName.toString(), sortDirection);
@@ -686,8 +674,7 @@ public class TaskHistoryQueryImpl implements TaskHistoryQuery {
 
     try {
       internalKadaiEngine.openConnection();
-      result = internalKadaiEngine.getSqlSession().selectList(LINK_TO_VALUE_MAPPER, this);
-      return result;
+      return internalKadaiEngine.getSqlSession().selectList(LINK_TO_VALUE_MAPPER, this);
     } finally {
       this.orderColumns.remove(orderColumns.size() - 1);
       internalKadaiEngine.returnConnection();
@@ -696,13 +683,9 @@ public class TaskHistoryQueryImpl implements TaskHistoryQuery {
 
   @Override
   public TaskHistoryEvent single() {
-    TaskHistoryEvent result = null;
     try {
       internalKadaiEngine.openConnection();
-      result = internalKadaiEngine.getSqlSession().selectOne(LINK_TO_MAPPER, this);
-
-      return result;
-
+      return internalKadaiEngine.getSqlSession().selectOne(LINK_TO_MAPPER, this);
     } finally {
       internalKadaiEngine.returnConnection();
     }
@@ -710,10 +693,9 @@ public class TaskHistoryQueryImpl implements TaskHistoryQuery {
 
   @Override
   public long count() {
-    Long rowCount;
     try {
       internalKadaiEngine.openConnection();
-      rowCount = internalKadaiEngine.getSqlSession().selectOne(LINK_TO_COUNTER, this);
+      Long rowCount = internalKadaiEngine.getSqlSession().selectOne(LINK_TO_COUNTER, this);
       return (rowCount == null) ? 0L : rowCount;
     } finally {
       internalKadaiEngine.returnConnection();

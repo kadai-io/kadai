@@ -93,7 +93,6 @@ class WorkbasketAccessItemRepresentationModelAssemblerTest {
     WorkbasketAccessItemRepresentationModel repModel = assembler.toModel(accessItem);
     // then
     testEquality(accessItem, repModel);
-    testLinks(repModel);
   }
 
   @Test
@@ -197,6 +196,4 @@ class WorkbasketAccessItemRepresentationModelAssemblerTest {
     assertThat(repModel.isPermCustom11()).isEqualTo(accessItem.getPermission(CUSTOM_11));
     assertThat(repModel.isPermCustom12()).isEqualTo(accessItem.getPermission(CUSTOM_12));
   }
-
-  private void testLinks(WorkbasketAccessItemRepresentationModel repModel) {}
 }

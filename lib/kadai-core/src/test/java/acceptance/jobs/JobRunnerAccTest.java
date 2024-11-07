@@ -34,7 +34,6 @@ import io.kadai.common.test.util.ParallelThreadHelper;
 import io.kadai.task.internal.jobs.TaskCleanupJob;
 import io.kadai.task.internal.jobs.TaskUpdatePriorityJob;
 import io.kadai.workbasket.internal.jobs.WorkbasketCleanupJob;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
@@ -47,9 +46,6 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.ThrowingConsumer;
-import org.mockito.Mockito;
-import org.mockito.internal.stubbing.answers.CallsRealMethods;
-import org.mockito.invocation.InvocationOnMock;
 
 @Disabled
 class JobRunnerAccTest extends AbstractAccTest {
@@ -76,13 +72,6 @@ class JobRunnerAccTest extends AbstractAccTest {
                 KadaiEngine.buildKadaiEngine(
                     kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
             DataSource dataSource = DataSourceGenerator.getDataSource();
-            // We have to slow down the transaction.
-            // This is necessary to guarantee the execution of
-            // both test threads and therefore test the database lock.
-            // Without the slow down the test threads would execute too fast and
-            // would not request executable jobs from the database at the same time.
-            // TODO: please fix this. With the slowdown the test suite fails often
-            // dataSource = slowDownDatabaseTransaction(dataSource);
             PlainJavaTransactionProvider transactionProvider =
                 new PlainJavaTransactionProvider(kadaiEngine, dataSource);
             JobRunner runner = new JobRunner(kadaiEngine);
@@ -154,33 +143,5 @@ class JobRunnerAccTest extends AbstractAccTest {
     job.setDue(firstDue);
     jobService.createJob(job);
     return job;
-  }
-
-  private DataSource slowDownDatabaseTransaction(DataSource dataSource) throws Exception {
-    dataSource = Mockito.spy(dataSource);
-    Mockito.doAnswer(
-            invocationOnMock -> {
-              Connection connection = (Connection) invocationOnMock.callRealMethod();
-              connection = Mockito.spy(connection);
-              Mockito.doAnswer(new CallsRealMethodsWithDelay(100)).when(connection).commit();
-              return connection;
-            })
-        .when(dataSource)
-        .getConnection();
-    return dataSource;
-  }
-
-  private static class CallsRealMethodsWithDelay extends CallsRealMethods {
-    private final int delay;
-
-    private CallsRealMethodsWithDelay(int delay) {
-      this.delay = delay;
-    }
-
-    @Override
-    public Object answer(InvocationOnMock invocation) throws Throwable {
-      Thread.sleep(delay);
-      return super.answer(invocation);
-    }
   }
 }

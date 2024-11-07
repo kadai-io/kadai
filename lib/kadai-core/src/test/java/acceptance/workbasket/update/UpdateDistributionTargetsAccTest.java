@@ -30,7 +30,6 @@ import io.kadai.workbasket.api.exceptions.WorkbasketNotFoundException;
 import io.kadai.workbasket.api.models.Workbasket;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestTemplate;
@@ -189,7 +188,7 @@ class UpdateDistributionTargetsAccTest extends AbstractAccTest {
     assertThat(newDistributionTargets).hasSize(2);
 
     List<String> newDistributionTargetIds =
-        newDistributionTargets.stream().map(WorkbasketSummary::getId).collect(Collectors.toList());
+        newDistributionTargets.stream().map(WorkbasketSummary::getId).toList();
 
     workbasketService.setDistributionTargets(sourceWorkbasket.getId(), newDistributionTargetIds);
     List<WorkbasketSummary> changedTargets =

@@ -16,6 +16,7 @@
 package io.kadai.routing.dmn.service;
 
 import java.util.List;
+import java.util.Random;
 import org.camunda.bpm.dmn.xlsx.CellContentHandler;
 import org.camunda.bpm.dmn.xlsx.DmnConversionContext;
 import org.camunda.bpm.dmn.xlsx.DmnValueNumberConverter;
@@ -62,6 +63,7 @@ public class XlsxWorksheetConverter {
     CellContentHandler.DEFAULT_HANDLERS.add(new DmnValueNumberConverter());
   }
 
+  private final Random random = new Random();
   protected XlsxWorksheetContext worksheetContext;
   protected DmnConversionContext dmnConversionContext;
   protected SpreadsheetAdapter spreadsheetAdapter;
@@ -90,7 +92,6 @@ public class XlsxWorksheetConverter {
     convertInputsOutputs(dmnModel, decisionTable);
     convertRules(
         dmnModel,
-        decisionTable,
         spreadsheetAdapter.determineRuleRows(worksheetContext),
         serializedRules);
 
@@ -113,8 +114,7 @@ public class XlsxWorksheetConverter {
 
   public <E extends DmnElement> E generateElement(
       DmnModelInstance modelInstance, Class<E> elementClass) {
-    // TODO: use a proper generator for random IDs
-    String generatedId = elementClass.getSimpleName() + (int) (Integer.MAX_VALUE * Math.random());
+    String generatedId = elementClass.getSimpleName() + random.nextInt(Integer.MAX_VALUE);
     return generateElement(modelInstance, elementClass, generatedId);
   }
 
@@ -177,21 +177,18 @@ public class XlsxWorksheetConverter {
 
   protected void convertRules(
       DmnModelInstance dmnModel,
-      DecisionTable decisionTable,
       List<SpreadsheetRow> rulesRows,
       StringBuilder serializedRules) {
     for (SpreadsheetRow rule : rulesRows) {
-      convertRule(dmnModel, decisionTable, rule, serializedRules);
+      convertRule(dmnModel, rule, serializedRules);
     }
   }
 
   protected void convertRule(
       DmnModelInstance dmnModel,
-      DecisionTable decisionTable,
       SpreadsheetRow ruleRow,
       StringBuilder serializedRules) {
     Rule rule = generateElement(dmnModel, Rule.class, "excelRow" + ruleRow.getRaw().getR());
-    // decisionTable.addChildElement(rule);
 
     IndexedDmnColumns dmnColumns = dmnConversionContext.getIndexedDmnColumns();
 

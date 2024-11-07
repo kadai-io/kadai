@@ -43,7 +43,6 @@ import io.kadai.testapi.security.WithAccessId;
 import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -131,7 +130,7 @@ class CreateTaskWithSorAccTest {
 
   @WithAccessId(user = "user-1-1")
   @Test
-  void should_ThrowException_When_InvalidObjectReference() throws Exception {
+  void should_ThrowException_When_InvalidObjectReference() {
     ObjectReference sor1 =
         taskService.newObjectReference(
             "FirstCompany", "FirstSystem", null, "FirstType", "FirstValue");
@@ -190,6 +189,6 @@ class CreateTaskWithSorAccTest {
         .doesNotContainAnyElementsOf(
             readOldTask.getSecondaryObjectReferences().stream()
                 .map(ObjectReference::getTaskId)
-                .collect(Collectors.toList()));
+                .toList());
   }
 }

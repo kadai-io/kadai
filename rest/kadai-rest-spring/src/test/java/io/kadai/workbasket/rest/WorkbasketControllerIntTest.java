@@ -38,7 +38,6 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -438,7 +437,7 @@ class WorkbasketControllerIntTest {
     assertThat(
             responseGetDistributionTargets.getBody().getContent().stream()
                 .map(WorkbasketSummaryRepresentationModel::getWorkbasketId)
-                .collect(Collectors.toList()))
+                .toList())
         .containsExactlyInAnyOrder(
             "WBI:100000000000000000000000000000000003", "WBI:100000000000000000000000000000000004");
   }

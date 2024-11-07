@@ -18,13 +18,10 @@
 
 package io.kadai.task.rest.assembler;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-
 import io.kadai.classification.rest.assembler.ClassificationSummaryRepresentationModelAssembler;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.models.Attachment;
 import io.kadai.task.internal.models.AttachmentImpl;
-import io.kadai.task.rest.AttachmentController;
 import io.kadai.task.rest.models.AttachmentRepresentationModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
@@ -65,7 +62,6 @@ public class AttachmentRepresentationModelAssembler
     repModel.setObjectReference(objectReferenceAssembler.toModel(attachment.getObjectReference()));
     repModel.setChannel(attachment.getChannel());
     repModel.setCustomAttributes(attachment.getCustomAttributeMap());
-    repModel.add(linkTo(AttachmentController.class).slash(attachment.getId()).withSelfRel());
     return repModel;
   }
 

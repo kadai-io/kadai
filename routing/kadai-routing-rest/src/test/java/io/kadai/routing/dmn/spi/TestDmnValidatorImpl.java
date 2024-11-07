@@ -25,10 +25,12 @@ import org.camunda.bpm.model.dmn.DmnModelInstance;
 public class TestDmnValidatorImpl implements DmnValidator {
 
   @Override
-  public void initialize(KadaiEngine kadaiEngine) {}
+  public void initialize(KadaiEngine kadaiEngine) {
+    // NOOP
+  }
 
   @Override
   public void validate(DmnModelInstance dmnModelInstance) {
-    // custom validation logic
+    // NOOP
   }
 }

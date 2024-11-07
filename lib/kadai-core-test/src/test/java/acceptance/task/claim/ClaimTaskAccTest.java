@@ -305,8 +305,7 @@ class ClaimTaskAccTest implements KadaiConfigurationModifier {
 
   @WithAccessId(user = "user-1-2")
   @TestFactory
-  Stream<DynamicTest> should_ThrowException_When_ForceClaimingTaskWithMissingPermission()
-      throws Exception {
+  Stream<DynamicTest> should_ThrowException_When_ForceClaimingTaskWithMissingPermission() {
     List<Triplet<String, WorkbasketSummary, WorkbasketPermission>> list =
         List.of(
             Triplet.of("With Missing Read Permission", wbWithoutRead, WorkbasketPermission.READ),
@@ -504,8 +503,7 @@ class ClaimTaskAccTest implements KadaiConfigurationModifier {
 
   @WithAccessId(user = "user-1-2")
   @TestFactory
-  Stream<DynamicTest> should_ThrowException_When_CancelClaimingTaskWithMissingPermission()
-      throws Exception {
+  Stream<DynamicTest> should_ThrowException_When_CancelClaimingTaskWithMissingPermission() {
     List<Triplet<String, WorkbasketSummary, WorkbasketPermission>> list =
         List.of(
             Triplet.of("With Missing Read Permission", wbWithoutRead, WorkbasketPermission.READ),
@@ -593,8 +591,7 @@ class ClaimTaskAccTest implements KadaiConfigurationModifier {
 
   @WithAccessId(user = "user-1-2")
   @TestFactory
-  Stream<DynamicTest> should_ThrowException_When_ForceCancelClaimingTaskWithMissingPermission()
-      throws Exception {
+  Stream<DynamicTest> should_ThrowException_When_ForceCancelClaimingTaskWithMissingPermission() {
     List<Triplet<String, WorkbasketSummary, WorkbasketPermission>> list =
         List.of(
             Triplet.of("With Missing Read Permission", wbWithoutRead, WorkbasketPermission.READ),
@@ -676,8 +673,7 @@ class ClaimTaskAccTest implements KadaiConfigurationModifier {
 
   @WithAccessId(user = "user-1-2")
   @TestFactory
-  Stream<DynamicTest> should_ThrowException_When_ClaimingTaskWithMissingPermission()
-      throws Exception {
+  Stream<DynamicTest> should_ThrowException_When_ClaimingTaskWithMissingPermission() {
     List<Triplet<String, WorkbasketSummary, WorkbasketPermission>> list =
         List.of(
             Triplet.of("With Missing Read Permission", wbWithoutRead, WorkbasketPermission.READ),

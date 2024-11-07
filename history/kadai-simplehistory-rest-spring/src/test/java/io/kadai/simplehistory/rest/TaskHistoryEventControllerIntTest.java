@@ -28,7 +28,6 @@ import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
 import io.kadai.simplehistory.rest.models.TaskHistoryEventPagedRepresentationModel;
 import io.kadai.simplehistory.rest.models.TaskHistoryEventRepresentationModel;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -54,11 +53,11 @@ class TaskHistoryEventControllerIntTest {
 
   private static final ParameterizedTypeReference<TaskHistoryEventPagedRepresentationModel>
       TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE =
-          new ParameterizedTypeReference<TaskHistoryEventPagedRepresentationModel>() {};
+          new ParameterizedTypeReference<>() {};
 
   private static final ParameterizedTypeReference<TaskHistoryEventRepresentationModel>
       TASK_HISTORY_EVENT_REPRESENTATION_MODEL_TYPE =
-          new ParameterizedTypeReference<TaskHistoryEventRepresentationModel>() {};
+          new ParameterizedTypeReference<>() {};
 
   private final RestHelper restHelper;
 
@@ -238,8 +237,7 @@ class TaskHistoryEventControllerIntTest {
   // region Get Specific Task History Event
 
   @Test
-  void should_GenerateSelfLink_When_SpecificTaskHistoryEventIsRequested()
-      throws UnsupportedEncodingException {
+  void should_GenerateSelfLink_When_SpecificTaskHistoryEventIsRequested() {
     String id = "THI:000000000000000000000000000000000000";
     String expectedUrl =
         UriComponentsBuilder.fromPath(HistoryRestEndpoints.URL_HISTORY_EVENTS_ID)

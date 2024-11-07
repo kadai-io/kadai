@@ -688,7 +688,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
         LOGGER.debug(
             "setDistributionTargets set {} distribution targets to source workbasket {} ",
             targetWorkbasketIds == null ? 0 : targetWorkbasketIds.size(),
-            sourceWorkbasketId);
+            LogSanitizer.stripLineBreakingChars(sourceWorkbasketId));
       }
     }
   }
@@ -782,8 +782,8 @@ public class WorkbasketServiceImpl implements WorkbasketService {
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug(
               "removeDistributionTarget deleted distribution target sourceId = {}, targetId = {}",
-              sourceWorkbasketId,
-              targetWorkbasketId);
+              LogSanitizer.stripLineBreakingChars(sourceWorkbasketId),
+              LogSanitizer.stripLineBreakingChars(targetWorkbasketId));
         }
 
         try {

@@ -35,7 +35,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguration;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
@@ -100,7 +99,7 @@ class UserInfoRefreshJobIntTest {
         List<String> ldapGroups =
             ldapUser.getGroups().stream()
                 .sorted(Comparator.naturalOrder())
-                .collect(Collectors.toList());
+                .toList();
 
         // we know that our users from ldap have groups defined
         // so non should be empty
@@ -120,7 +119,7 @@ class UserInfoRefreshJobIntTest {
         List<String> ldapPermissions =
             ldapUser.getPermissions().stream()
                 .sorted(Comparator.naturalOrder())
-                .collect(Collectors.toList());
+                .toList();
 
         assertThat(permissionIds)
             .hasSameSizeAs(ldapPermissions)
@@ -162,7 +161,8 @@ class UserInfoRefreshJobIntTest {
       users.add(rs.getString("USER_ID"));
     }
 
-    return users.stream().map(wrap(userService::getUser)).collect(Collectors.toList());
+    List<User> userList = users.stream().map(wrap(userService::getUser)).toList();
+    return new ArrayList<>(userList);
   }
 
   private List<String> getGroupInfo(Connection connection, String userId) throws Exception {

@@ -80,8 +80,7 @@ public class JobServiceImpl implements JobService {
               jobClass, KadaiConfiguration.class));
     } catch (InvocationTargetException | IllegalAccessException e) {
       throw new SystemException(
-          String.format(
-              "Caught Exception while invoking method 'getLockExpirationPeriod' by reflection"));
+              "Caught Exception while invoking method 'getLockExpirationPeriod' by reflection");
     }
 
     job.setRetryCount(job.getRetryCount() - 1);

@@ -80,7 +80,7 @@ public class KadaiCdiTestRestController {
 
     Task result = kadaiEjb.getTaskService().createTask(task);
 
-    LOGGER.info(result.getId() + ":" + result.getOwner());
+    LOGGER.info("{}:{}", result.getId(), result.getOwner());
     return Response.status(200).entity(result.getId()).build();
   }
 

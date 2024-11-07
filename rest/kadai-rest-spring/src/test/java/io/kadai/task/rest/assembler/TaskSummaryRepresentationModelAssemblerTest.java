@@ -81,8 +81,7 @@ class TaskSummaryRepresentationModelAssemblerTest {
     this.classificationService = classificationService;
   }
 
-  static void testEquality(TaskSummary taskSummary, TaskSummaryRepresentationModel repModel)
-      throws Exception {
+  static void testEquality(TaskSummary taskSummary, TaskSummaryRepresentationModel repModel) {
     assertThat(taskSummary).hasNoNullFieldsOrProperties();
     assertThat(repModel).hasNoNullFieldsOrProperties();
     assertThat(taskSummary.getId()).isEqualTo(repModel.getTaskId());
@@ -165,8 +164,7 @@ class TaskSummaryRepresentationModelAssemblerTest {
   }
 
   @Test
-  void should_ReturnRepresentationModel_When_ConvertingEntityToRepresentationModel()
-      throws Exception {
+  void should_ReturnRepresentationModel_When_ConvertingEntityToRepresentationModel() {
     ObjectReferenceImpl primaryObjRef = new ObjectReferenceImpl();
     primaryObjRef.setId("abc");
     ClassificationSummary classification =
@@ -235,11 +233,10 @@ class TaskSummaryRepresentationModelAssemblerTest {
     TaskSummaryRepresentationModel repModel = assembler.toModel(task);
 
     testEquality(task, repModel);
-    testLinks(repModel);
   }
 
   @Test
-  void should_ReturnEntity_When_ConvertingRepresentationModelToEntity() throws Exception {
+  void should_ReturnEntity_When_ConvertingRepresentationModelToEntity() {
     ObjectReferenceRepresentationModel primaryObjRef = new ObjectReferenceRepresentationModel();
     primaryObjRef.setId("abc");
     WorkbasketSummaryRepresentationModel workbasketResource =
@@ -413,6 +410,4 @@ class TaskSummaryRepresentationModelAssemblerTest {
     // then
     assertThat(task).hasNoNullFieldsOrProperties().isNotSameAs(task2).isEqualTo(task2);
   }
-
-  private void testLinks(TaskSummaryRepresentationModel repModel) {}
 }

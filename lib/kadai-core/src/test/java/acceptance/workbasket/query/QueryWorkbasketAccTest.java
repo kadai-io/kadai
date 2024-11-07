@@ -475,7 +475,7 @@ class QueryWorkbasketAccTest extends AbstractAccTest {
 
   @WithAccessId(user = "admin")
   @Test
-  void should_ApplyFilter_When_QueryingForCustom5In() throws Exception {
+  void should_ApplyFilter_When_QueryingForCustom5In() {
 
     List<WorkbasketSummary> results =
         WORKBASKET_SERVICE
@@ -488,7 +488,7 @@ class QueryWorkbasketAccTest extends AbstractAccTest {
 
   @WithAccessId(user = "admin")
   @Test
-  void should_ApplyFilter_When_QueryingForCustom5Like() throws Exception {
+  void should_ApplyFilter_When_QueryingForCustom5Like() {
 
     List<WorkbasketSummary> results =
         WORKBASKET_SERVICE
@@ -500,7 +500,7 @@ class QueryWorkbasketAccTest extends AbstractAccTest {
 
   @WithAccessId(user = "admin")
   @Test
-  void should_ApplyFilter_When_QueryingForCustom6In() throws Exception {
+  void should_ApplyFilter_When_QueryingForCustom6In() {
     List<WorkbasketSummary> results =
         WORKBASKET_SERVICE
             .createWorkbasketQuery()
@@ -512,7 +512,7 @@ class QueryWorkbasketAccTest extends AbstractAccTest {
 
   @WithAccessId(user = "admin")
   @Test
-  void should_ApplyFilter_When_QueryingForCustom6Like() throws Exception {
+  void should_ApplyFilter_When_QueryingForCustom6Like() {
     List<WorkbasketSummary> results =
         WORKBASKET_SERVICE
             .createWorkbasketQuery()
@@ -523,7 +523,7 @@ class QueryWorkbasketAccTest extends AbstractAccTest {
 
   @WithAccessId(user = "admin")
   @Test
-  void should_ApplyFilter_When_QueryingForCustom7In() throws Exception {
+  void should_ApplyFilter_When_QueryingForCustom7In() {
     List<WorkbasketSummary> results =
         WORKBASKET_SERVICE
             .createWorkbasketQuery()
@@ -535,7 +535,7 @@ class QueryWorkbasketAccTest extends AbstractAccTest {
 
   @WithAccessId(user = "admin")
   @Test
-  void should_ApplyFilter_When_QueryingForCustom7Like() throws Exception {
+  void should_ApplyFilter_When_QueryingForCustom7Like() {
     List<WorkbasketSummary> results =
         WORKBASKET_SERVICE
             .createWorkbasketQuery()
@@ -546,7 +546,7 @@ class QueryWorkbasketAccTest extends AbstractAccTest {
 
   @WithAccessId(user = "admin")
   @Test
-  void should_ApplyFilter_When_QueryingForCustom8In() throws Exception {
+  void should_ApplyFilter_When_QueryingForCustom8In() {
     List<WorkbasketSummary> results =
         WORKBASKET_SERVICE
             .createWorkbasketQuery()
@@ -558,7 +558,7 @@ class QueryWorkbasketAccTest extends AbstractAccTest {
 
   @WithAccessId(user = "admin")
   @Test
-  void should_ApplyFilter_When_QueryingForCustom8Like() throws Exception {
+  void should_ApplyFilter_When_QueryingForCustom8Like() {
     List<WorkbasketSummary> results =
         WORKBASKET_SERVICE
             .createWorkbasketQuery()

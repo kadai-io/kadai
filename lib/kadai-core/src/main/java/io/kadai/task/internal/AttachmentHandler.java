@@ -59,8 +59,8 @@ public class AttachmentHandler {
           InvalidArgumentException,
           ClassificationNotFoundException {
     List<Attachment> newAttachments =
-        newTaskImpl.getAttachments().stream().filter(Objects::nonNull).collect(Collectors.toList());
-    newTaskImpl.setAttachments(newAttachments);
+        newTaskImpl.getAttachments().stream().filter(Objects::nonNull).toList();
+    newTaskImpl.setAttachments(new ArrayList<>(newAttachments));
 
     for (Attachment attachment : newAttachments) {
       verifyAttachment((AttachmentImpl) attachment, newTaskImpl.getDomain());
@@ -109,7 +109,7 @@ public class AttachmentHandler {
     List<Attachment> newAttachments =
         newTaskImpl.getAttachments().stream()
             .filter(not(a -> oldAttachmentIds.contains(a.getId())))
-            .collect(Collectors.toList());
+            .toList();
 
     for (Attachment attachment : newAttachments) {
       insertNewAttachmentOnTaskUpdate(newTaskImpl, attachment);
@@ -142,7 +142,7 @@ public class AttachmentHandler {
     List<String> newAttachmentIds = new ArrayList<>();
     if (newAttachments != null && !newAttachments.isEmpty()) {
       newAttachmentIds =
-          newAttachments.stream().map(Attachment::getId).collect(Collectors.toList());
+          newAttachments.stream().map(Attachment::getId).toList();
     }
     List<Attachment> oldAttachments = oldTaskImpl.getAttachments();
     if (oldAttachments != null && !oldAttachments.isEmpty()) {

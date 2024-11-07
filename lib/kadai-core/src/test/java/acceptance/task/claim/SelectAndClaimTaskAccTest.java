@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.security.auth.Subject;
 import org.junit.jupiter.api.BeforeAll;
@@ -89,8 +88,7 @@ class SelectAndClaimTaskAccTest extends AbstractAccTest {
 
     List<String> accessIds =
         Collections.synchronizedList(
-            Stream.of("admin", "teamlead-1", "teamlead-2", "taskadmin")
-                .collect(Collectors.toList()));
+            new ArrayList<>(List.of("admin", "teamlead-1", "teamlead-2", "taskadmin")));
 
     ParallelThreadHelper.runInThread(
         getRunnableTest(selectedAndClaimedTasks, accessIds), accessIds.size());
@@ -200,7 +198,6 @@ class SelectAndClaimTaskAccTest extends AbstractAccTest {
     task.setPrimaryObjRef(objectReference);
     task.setOwner("user-1-2");
 
-    Task createdTask = taskService.createTask(task);
-    return createdTask;
+    return taskService.createTask(task);
   }
 }

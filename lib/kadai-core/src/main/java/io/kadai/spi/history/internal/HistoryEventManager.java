@@ -20,6 +20,7 @@ package io.kadai.spi.history.internal;
 
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.internal.util.CheckedConsumer;
+import io.kadai.common.internal.util.LogSanitizer;
 import io.kadai.common.internal.util.SpiLoader;
 import io.kadai.spi.history.api.KadaiHistory;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
@@ -52,21 +53,26 @@ public final class HistoryEventManager {
 
   public void createEvent(TaskHistoryEvent event) {
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Sending event to history service providers: {}", event);
+      LOGGER.debug(
+          "Sending {} to history service providers: {}", event.getClass().getSimpleName(), event);
     }
     kadaiHistories.forEach(CheckedConsumer.wrap(historyProvider -> historyProvider.create(event)));
   }
 
   public void createEvent(WorkbasketHistoryEvent event) {
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Sending event to history service providers: {}", event);
+      LOGGER.debug(
+          "Sending {} to history service providers: {}",
+          event.getClass().getSimpleName(),
+          LogSanitizer.stripLineBreakingChars(event));
     }
     kadaiHistories.forEach(CheckedConsumer.wrap(historyProvider -> historyProvider.create(event)));
   }
 
   public void createEvent(ClassificationHistoryEvent event) {
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Sending event to history service providers: {}", event);
+      LOGGER.debug(
+          "Sending {} to history service providers: {}", event.getClass().getSimpleName(), event);
     }
 
     kadaiHistories.forEach(CheckedConsumer.wrap(historyProvider -> historyProvider.create(event)));
@@ -74,7 +80,9 @@ public final class HistoryEventManager {
 
   public void deleteEvents(List<String> taskIds) {
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Sending taskIds to history service providers: {}", taskIds);
+      LOGGER.debug(
+          "Sending taskIds to history service providers: {}",
+          taskIds.stream().map(LogSanitizer::stripLineBreakingChars).toList());
     }
 
     kadaiHistories.forEach(

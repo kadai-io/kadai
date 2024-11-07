@@ -245,13 +245,6 @@ public class WorkingTimeCalculatorImpl implements WorkingTimeCalculator {
     return instant.atZone(zoneId);
   }
 
-  private ZonedDateTime toZonedDateTime(LocalDateTime localDateTime) {
-    return localDateTime.atZone(zoneId);
-  }
-
-  private ZonedDateTime toZonedDateTime(LocalDate day, LocalTime time) {
-    return toZonedDateTime(LocalDateTime.of(day, time));
-  }
 
   private LocalDate toLocalDate(Instant instant) {
     return LocalDate.ofInstant(instant, zoneId);
@@ -269,6 +262,14 @@ public class WorkingTimeCalculatorImpl implements WorkingTimeCalculator {
       } else {
         this.end = toZonedDateTime(day, interval.getEnd());
       }
+    }
+
+    private ZonedDateTime toZonedDateTime(LocalDate day, LocalTime time) {
+      return toZonedDateTime(LocalDateTime.of(day, time));
+    }
+
+    private ZonedDateTime toZonedDateTime(LocalDateTime localDateTime) {
+      return localDateTime.atZone(zoneId);
     }
 
     private ZonedDateTime subtractWorkingTime(ZonedDateTime workStart, Duration workingTime) {

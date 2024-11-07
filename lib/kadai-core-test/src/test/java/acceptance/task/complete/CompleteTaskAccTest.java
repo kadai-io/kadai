@@ -252,8 +252,7 @@ class CompleteTaskAccTest implements KadaiConfigurationModifier {
 
   @WithAccessId(user = "user-1-1")
   @TestFactory
-  Stream<DynamicTest> should_ThrowException_When_ForceCompleteTaskWithMissingPermission()
-      throws Exception {
+  Stream<DynamicTest> should_ThrowException_When_ForceCompleteTaskWithMissingPermission() {
     List<Triplet<String, WorkbasketSummary, WorkbasketPermission>> list =
         List.of(
             Triplet.of("With Missing Read Permission", wbWithoutRead, WorkbasketPermission.READ),
@@ -793,8 +792,7 @@ class CompleteTaskAccTest implements KadaiConfigurationModifier {
 
   @WithAccessId(user = "user-1-1")
   @TestFactory
-  Stream<DynamicTest> should_ThrowException_When_CompleteTaskWithMissingPermission()
-      throws Exception {
+  Stream<DynamicTest> should_ThrowException_When_CompleteTaskWithMissingPermission() {
     List<Triplet<String, WorkbasketSummary, WorkbasketPermission>> list =
         List.of(
             Triplet.of("With Missing Read Permission", wbWithoutRead, WorkbasketPermission.READ),

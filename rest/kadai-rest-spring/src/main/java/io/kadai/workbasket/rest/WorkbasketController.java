@@ -298,13 +298,14 @@ public class WorkbasketController {
                       examples =
                           @ExampleObject(
                               value =
-                                  "{\n"
-                                      + "  \"key\" : \"asdasdasd\",\n"
-                                      + "  \"name\" : \"this is a wonderful workbasket name\",\n"
-                                      + "  \"domain\" : \"DOMAIN_A\",\n"
-                                      + "  \"type\" : \"GROUP\",\n"
-                                      + "  \"markedForDeletion\" : false\n"
-                                      + "}"))),
+                                  """
+                                      {
+                                        "key" : "asdasdasd",
+                                        "name" : "this is a wonderful workbasket name",
+                                        "domain" : "DOMAIN_A",
+                                        "type" : "GROUP",
+                                        "markedForDeletion" : false
+                                      }"""))),
       responses = {
         @ApiResponse(
             responseCode = "201",
@@ -365,31 +366,32 @@ public class WorkbasketController {
                       examples =
                           @ExampleObject(
                               value =
-                                  "{\n"
-                                      + "  \"workbasketId\" : "
-                                      + "\"WBI:100000000000000000000000000000000001\",\n"
-                                      + "  \"key\" : \"GPK_KSC\",\n"
-                                      + "  \"name\" : \"new name\",\n"
-                                      + "  \"domain\" : \"DOMAIN_A\",\n"
-                                      + "  \"type\" : \"GROUP\",\n"
-                                      + "  \"description\" : \"Gruppenpostkorb KSC\",\n"
-                                      + "  \"owner\" : \"teamlead-1\",\n"
-                                      + "  \"custom1\" : \"ABCQVW\",\n"
-                                      + "  \"custom2\" : \"\",\n"
-                                      + "  \"custom3\" : \"xyz4\",\n"
-                                      + "  \"custom4\" : \"\",\n"
-                                      + "  \"custom5\" : \"\",\n"
-                                      + "  \"custom6\" : \"\",\n"
-                                      + "  \"custom7\" : \"\",\n"
-                                      + "  \"custom8\" : \"\",\n"
-                                      + "  \"orgLevel1\" : \"\",\n"
-                                      + "  \"orgLevel2\" : \"\",\n"
-                                      + "  \"orgLevel3\" : \"\",\n"
-                                      + "  \"orgLevel4\" : \"\",\n"
-                                      + "  \"markedForDeletion\" : false,\n"
-                                      + "  \"created\" : \"2018-02-01T12:00:00.000Z\",\n"
-                                      + "  \"modified\" : \"2018-02-01T12:00:00.000Z\"\n"
-                                      + "}"))),
+                                  """
+                                      {
+                                        "workbasketId" : \
+                                      "WBI:100000000000000000000000000000000001",
+                                        "key" : "GPK_KSC",
+                                        "name" : "new name",
+                                        "domain" : "DOMAIN_A",
+                                        "type" : "GROUP",
+                                        "description" : "Gruppenpostkorb KSC",
+                                        "owner" : "teamlead-1",
+                                        "custom1" : "ABCQVW",
+                                        "custom2" : "",
+                                        "custom3" : "xyz4",
+                                        "custom4" : "",
+                                        "custom5" : "",
+                                        "custom6" : "",
+                                        "custom7" : "",
+                                        "custom8" : "",
+                                        "orgLevel1" : "",
+                                        "orgLevel2" : "",
+                                        "orgLevel3" : "",
+                                        "orgLevel4" : "",
+                                        "markedForDeletion" : false,
+                                        "created" : "2018-02-01T12:00:00.000Z",
+                                        "modified" : "2018-02-01T12:00:00.000Z"
+                                      }"""))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -515,33 +517,34 @@ public class WorkbasketController {
                       examples =
                           @ExampleObject(
                               value =
-                                  "{\n"
-                                      + "  \"accessItems\" : [ {\n"
-                                      + "    \"workbasketId\" : "
-                                      + "\"WBI:100000000000000000000000000000000001\",\n"
-                                      + "    \"accessId\" : \"new-access-id\",\n"
-                                      + "    \"accessName\" : \"new-access-name\",\n"
-                                      + "    \"permRead\" : false,\n"
-                                      + "    \"permReadTasks\" : false,\n"
-                                      + "    \"permOpen\" : true,\n"
-                                      + "    \"permAppend\" : false,\n"
-                                      + "    \"permEditTasks\" : false,\n"
-                                      + "    \"permTransfer\" : false,\n"
-                                      + "    \"permDistribute\" : false,\n"
-                                      + "    \"permCustom1\" : false,\n"
-                                      + "    \"permCustom2\" : false,\n"
-                                      + "    \"permCustom3\" : false,\n"
-                                      + "    \"permCustom4\" : false,\n"
-                                      + "    \"permCustom5\" : false,\n"
-                                      + "    \"permCustom6\" : false,\n"
-                                      + "    \"permCustom7\" : false,\n"
-                                      + "    \"permCustom8\" : false,\n"
-                                      + "    \"permCustom9\" : false,\n"
-                                      + "    \"permCustom10\" : false,\n"
-                                      + "    \"permCustom11\" : false,\n"
-                                      + "    \"permCustom12\" : false\n"
-                                      + "  } ]\n"
-                                      + "}"))),
+                                  """
+                                      {
+                                        "accessItems" : [ {
+                                          "workbasketId" : \
+                                      "WBI:100000000000000000000000000000000001",
+                                          "accessId" : "new-access-id",
+                                          "accessName" : "new-access-name",
+                                          "permRead" : false,
+                                          "permReadTasks" : false,
+                                          "permOpen" : true,
+                                          "permAppend" : false,
+                                          "permEditTasks" : false,
+                                          "permTransfer" : false,
+                                          "permDistribute" : false,
+                                          "permCustom1" : false,
+                                          "permCustom2" : false,
+                                          "permCustom3" : false,
+                                          "permCustom4" : false,
+                                          "permCustom5" : false,
+                                          "permCustom6" : false,
+                                          "permCustom7" : false,
+                                          "permCustom8" : false,
+                                          "permCustom9" : false,
+                                          "permCustom10" : false,
+                                          "permCustom11" : false,
+                                          "permCustom12" : false
+                                        } ]
+                                      }"""))),
       responses = {
         @ApiResponse(
             responseCode = "200",

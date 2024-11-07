@@ -172,21 +172,21 @@ class DeleteTaskCommentAccTest {
 
   @WithAccessId(user = "user-1-1")
   @Test
-  void should_FailToDeleteTaskComment_When_TaskCommentIdIsInvalid() throws Exception {
+  void should_FailToDeleteTaskComment_When_TaskCommentIdIsInvalid() {
     assertThatThrownBy(() -> taskService.deleteTaskComment(""))
         .isInstanceOf(InvalidArgumentException.class);
   }
 
   @WithAccessId(user = "user-1-1")
   @Test
-  void should_FailToDeleteTaskComment_When_TaskCommentIdIsNull() throws Exception {
+  void should_FailToDeleteTaskComment_When_TaskCommentIdIsNull() {
     assertThatThrownBy(() -> taskService.deleteTaskComment(null))
         .isInstanceOf(InvalidArgumentException.class);
   }
 
   @WithAccessId(user = "user-1-1")
   @Test
-  void should_FailToDeleteTaskComment_When_CommentIdDoesNotExist() throws Exception {
+  void should_FailToDeleteTaskComment_When_CommentIdDoesNotExist() {
 
     ThrowingCallable call = () -> taskService.deleteTaskComment("non existing task comment id");
     TaskCommentNotFoundException e = catchThrowableOfType(TaskCommentNotFoundException.class, call);

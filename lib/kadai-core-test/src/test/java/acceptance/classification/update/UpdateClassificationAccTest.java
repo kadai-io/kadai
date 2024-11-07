@@ -57,7 +57,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
@@ -359,7 +358,7 @@ class UpdateClassificationAccTest {
       List<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> zippedTestInputList =
           IntStream.range(0, inputs.size())
               .mapToObj(i -> Pair.of(inputs.get(i), outputs.get(i)))
-              .collect(Collectors.toList());
+              .toList();
 
       ThrowingConsumer<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> test =
           input -> {
@@ -410,7 +409,7 @@ class UpdateClassificationAccTest {
       List<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> zippedTestInputList =
           IntStream.range(0, inputs.size())
               .mapToObj(i -> Pair.of(inputs.get(i), outputs.get(i)))
-              .collect(Collectors.toList());
+              .toList();
 
       ThrowingConsumer<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> test =
           input -> {
@@ -462,7 +461,7 @@ class UpdateClassificationAccTest {
       List<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> zippedTestInputList =
           IntStream.range(0, inputs.size())
               .mapToObj(i -> Pair.of(inputs.get(i), outputs.get(i)))
-              .collect(Collectors.toList());
+              .toList();
 
       ThrowingConsumer<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> test =
           input -> {
@@ -515,7 +514,7 @@ class UpdateClassificationAccTest {
       List<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> zippedTestInputList =
           IntStream.range(0, inputs.size())
               .mapToObj(i -> Pair.of(inputs.get(i), outputs.get(i)))
-              .collect(Collectors.toList());
+              .toList();
 
       ThrowingConsumer<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> test =
           input -> {
@@ -567,7 +566,7 @@ class UpdateClassificationAccTest {
       List<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> zippedTestInputList =
           IntStream.range(0, inputs.size())
               .mapToObj(i -> Pair.of(inputs.get(i), outputs.get(i)))
-              .collect(Collectors.toList());
+              .toList();
 
       ThrowingConsumer<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> test =
           input -> {
@@ -619,7 +618,7 @@ class UpdateClassificationAccTest {
       List<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> zippedTestInputList =
           IntStream.range(0, inputs.size())
               .mapToObj(i -> Pair.of(inputs.get(i), outputs.get(i)))
-              .collect(Collectors.toList());
+              .toList();
 
       ThrowingConsumer<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> test =
           input -> {

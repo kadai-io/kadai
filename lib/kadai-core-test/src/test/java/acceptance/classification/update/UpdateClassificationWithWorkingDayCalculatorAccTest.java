@@ -61,7 +61,6 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
@@ -76,8 +75,7 @@ import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 
 @KadaiIntegrationTest
-public class UpdateClassificationWithWorkingDayCalculatorAccTest
-    implements KadaiConfigurationModifier {
+class UpdateClassificationWithWorkingDayCalculatorAccTest implements KadaiConfigurationModifier {
 
   @KadaiInject ClassificationService classificationService;
   @KadaiInject KadaiEngine kadaiEngine;
@@ -428,7 +426,7 @@ public class UpdateClassificationWithWorkingDayCalculatorAccTest
       List<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> zippedTestInputList =
           IntStream.range(0, inputs.size())
               .mapToObj(i -> Pair.of(inputs.get(i), outputs.get(i)))
-              .collect(Collectors.toList());
+              .toList();
 
       ThrowingConsumer<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> test =
           input -> {
@@ -479,7 +477,7 @@ public class UpdateClassificationWithWorkingDayCalculatorAccTest
       List<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> zippedTestInputList =
           IntStream.range(0, inputs.size())
               .mapToObj(i -> Pair.of(inputs.get(i), outputs.get(i)))
-              .collect(Collectors.toList());
+              .toList();
 
       ThrowingConsumer<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> test =
           input -> {
@@ -531,7 +529,7 @@ public class UpdateClassificationWithWorkingDayCalculatorAccTest
       List<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> zippedTestInputList =
           IntStream.range(0, inputs.size())
               .mapToObj(i -> Pair.of(inputs.get(i), outputs.get(i)))
-              .collect(Collectors.toList());
+              .toList();
 
       ThrowingConsumer<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> test =
           input -> {
@@ -584,7 +582,7 @@ public class UpdateClassificationWithWorkingDayCalculatorAccTest
       List<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> zippedTestInputList =
           IntStream.range(0, inputs.size())
               .mapToObj(i -> Pair.of(inputs.get(i), outputs.get(i)))
-              .collect(Collectors.toList());
+              .toList();
 
       ThrowingConsumer<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> test =
           input -> {
@@ -636,7 +634,7 @@ public class UpdateClassificationWithWorkingDayCalculatorAccTest
       List<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> zippedTestInputList =
           IntStream.range(0, inputs.size())
               .mapToObj(i -> Pair.of(inputs.get(i), outputs.get(i)))
-              .collect(Collectors.toList());
+              .toList();
 
       ThrowingConsumer<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> test =
           input -> {
@@ -688,7 +686,7 @@ public class UpdateClassificationWithWorkingDayCalculatorAccTest
       List<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> zippedTestInputList =
           IntStream.range(0, inputs.size())
               .mapToObj(i -> Pair.of(inputs.get(i), outputs.get(i)))
-              .collect(Collectors.toList());
+              .toList();
 
       ThrowingConsumer<Pair<Pair<String, Integer>, Pair<Integer, Integer>>> test =
           input -> {
