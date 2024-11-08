@@ -38,7 +38,7 @@
     "@ngxs/router-plugin": "18.1.3",
     "@ngxs/store": "18.1.4",
     "angular-svg-icon": "13.0.0",
-    "chart.js": "4.4.4",
+    "chart.js": "4.4.6",
     "core-js": "3.21.1",
     "file-saver": "2.0.5",
     "globals": "^15.11.0",
