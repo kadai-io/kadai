@@ -5899,12 +5899,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@npm:4.4.4":
-  version: 4.4.4
-  resolution: "chart.js@npm:4.4.4"
+"chart.js@npm:4.4.6":
+  version: 4.4.6
+  resolution: "chart.js@npm:4.4.6"
   dependencies:
     "@kurkle/color": "npm:^0.3.0"
-  checksum: 10c0/9fa3206403a6103916f7762c2665d322c42b0cc07fba91526b1d033ddb887c1ba74b3ebc0bd0748a9e55abd1017f25fdb2292cdd6579d8c2d3bcb1c58f71281c
+  checksum: 10c0/456d16a030c35fa16182945e91d4fdd89510343454309b783f5e060ea89baaed3bc9b43d2d9b3acadd385e5921718e27ed2fcae8b5efa277d27bc4da4af639f2
   languageName: node
   linkType: hard
 
@@ -10265,7 +10265,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin-tslint": "npm:7.0.2"
     "@typescript-eslint/parser": "npm:8.10.0"
     angular-svg-icon: "npm:13.0.0"
-    chart.js: "npm:4.4.4"
+    chart.js: "npm:4.4.6"
     compression-webpack-plugin: "npm:9.2.0"
     core-js: "npm:3.21.1"
     cypress: "npm:9.5.4"
