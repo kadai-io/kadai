@@ -32,7 +32,7 @@
     "@angular/material": "18.2.9",
     "@angular/platform-browser": "18.2.8",
     "@angular/platform-browser-dynamic": "18.2.11",
-    "@angular/router": "18.2.8",
+    "@angular/router": "18.2.11",
     "@ngneat/hot-toast": "5.0.2",
     "@ngneat/overview": "3.0.4",
     "@ngxs/router-plugin": "18.1.3",
