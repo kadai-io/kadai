@@ -15,7 +15,11 @@
   </parent>
 
   <properties>
-    <sonar.skip>true</sonar.skip>
+    <sonar.sources>src</sonar.sources>
+    <sonar.tests>src</sonar.tests>
+    <sonar.inclusions>**/*.ts,**/*.js,**/*.html,**/*.scss</sonar.inclusions>
+    <sonar.test.inclusions>**/*.spec.ts,**/*.spec.js</sonar.test.inclusions>
+    <sonar.exclusions>node_modules</sonar.exclusions>
   </properties>
 
   <build>
