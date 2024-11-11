@@ -34,7 +34,7 @@ import { RouterModule } from '@angular/router';
 import { AlertModule } from 'ngx-bootstrap/alert';
 import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
 import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
-import { HotToastModule } from '@ngneat/hot-toast';
+import { provideHotToastConfig } from '@ngneat/hot-toast';
 import { AccordionModule } from 'ngx-bootstrap/accordion';
 
 /**
@@ -103,12 +103,7 @@ const MODULES = [
   MatButtonModule,
   RouterModule,
   TreeModule,
-  MatAutocompleteModule,
-  HotToastModule.forRoot({
-    style: {
-      'max-width': '520px'
-    }
-  })
+  MatAutocompleteModule
 ];
 
 const DECLARATIONS = [
@@ -195,7 +190,12 @@ export const httpClientInterceptor: HttpInterceptorFn = (request: HttpRequest<un
     ClassificationsService,
     WorkbasketService,
     ObtainMessageService,
-    provideHttpClient(withInterceptors([httpClientInterceptor]))
+    provideHttpClient(withInterceptors([httpClientInterceptor])),
+    provideHotToastConfig({
+      style: {
+        'max-width': '520px'
+      }
+    })
   ]
 })
 export class SharedModule {}
