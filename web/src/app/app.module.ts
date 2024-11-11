@@ -73,6 +73,9 @@ import { NgxsRouterPluginModule } from '@ngxs/router-plugin';
 import { TreeModule } from '@ali-hm/angular-tree-component';
 import { provideHttpClient, withXsrfConfiguration } from '@angular/common/http';
 
+import { registerLocaleData } from '@angular/common';
+import localeDe from '@angular/common/locales/de';
+
 const DECLARATIONS = [AppComponent, NavBarComponent, UserInformationComponent, NoAccessComponent, SidenavListComponent];
 
 const MODULES = [
@@ -122,6 +125,8 @@ const PROVIDERS = [
   },
   provideHttpClient(withXsrfConfiguration({ cookieName: 'XSRF-TOKEN', headerName: 'X-XSRF-TOKEN' }))
 ];
+
+registerLocaleData(localeDe);
 
 @NgModule({
   declarations: DECLARATIONS,

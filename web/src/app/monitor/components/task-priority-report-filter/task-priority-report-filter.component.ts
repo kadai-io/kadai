@@ -22,11 +22,21 @@ import { Observable, Subject } from 'rxjs';
 import { SettingsSelectors } from '../../../shared/store/settings-store/settings.selectors';
 import { Settings } from '../../../settings/models/settings';
 import { takeUntil } from 'rxjs/operators';
+import {
+  MatAccordion,
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle
+} from '@angular/material/expansion';
+import { NgFor, NgIf } from '@angular/common';
+import { MatCheckbox } from '@angular/material/checkbox';
 
 @Component({
   selector: 'kadai-monitor-task-priority-report-filter',
   templateUrl: './task-priority-report-filter.component.html',
-  styleUrls: ['./task-priority-report-filter.component.scss']
+  styleUrls: ['./task-priority-report-filter.component.scss'],
+  standalone: true,
+  imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgFor, MatCheckbox, NgIf]
 })
 export class TaskPriorityReportFilterComponent implements OnInit, OnDestroy {
   isPanelOpen = false;

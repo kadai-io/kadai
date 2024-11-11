@@ -16,8 +16,8 @@
  *
  */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { NgModule, LOCALE_ID } from '@angular/core';
+import { CommonModule, registerLocaleData } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { SharedModule } from 'app/shared/shared.module';
@@ -25,6 +25,7 @@ import { HistoryRoutingModule } from './history-routing.module';
 import { TaskHistoryQueryComponent } from './task-history-query/task-history-query.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
+import localeDe from '@angular/common/locales/de';
 
 @NgModule({
   imports: [
@@ -36,6 +37,11 @@ import { MatSortModule } from '@angular/material/sort';
     MatTableModule,
     MatSortModule
   ],
-  declarations: [TaskHistoryQueryComponent]
+  declarations: [TaskHistoryQueryComponent],
+  providers: [{ provide: LOCALE_ID, useValue: 'de' }]
 })
-export class HistoryModule {}
+export class HistoryModule {
+  constructor() {
+    registerLocaleData(localeDe);
+  }
+}

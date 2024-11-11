@@ -16,8 +16,8 @@
  *
  */
 
-import { CommonModule } from '@angular/common';
-import { NgModule } from '@angular/core';
+import { CommonModule, registerLocaleData } from '@angular/common';
+import { NgModule, LOCALE_ID } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   HttpHandlerFn,
@@ -61,6 +61,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { environment } from '../../environments/environment';
+import localeDe from '@angular/common/locales/de';
 
 const MODULES = [
   TypeaheadModule.forRoot(),
@@ -116,7 +117,12 @@ export const tokenInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, n
     TaskService,
     ClassificationCategoriesService,
     WorkplaceService,
-    provideHttpClient(withInterceptors([tokenInterceptor]))
+    provideHttpClient(withInterceptors([tokenInterceptor])),
+    { provide: LOCALE_ID, useValue: 'de' }
   ]
 })
-export class WorkplaceModule {}
+export class WorkplaceModule {
+  constructor() {
+    registerLocaleData(localeDe);
+  }
+}

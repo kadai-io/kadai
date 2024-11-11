@@ -22,11 +22,17 @@ import { ChartData } from 'app/monitor/models/chart-data';
 import { ReportData } from '../../models/report-data';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { ChartConfiguration } from 'chart.js';
+import { CommonModule } from '@angular/common';
+import { ReportTableComponent } from '../report-table/report-table.component';
+import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 @Component({
   selector: 'kadai-monitor-classification-report',
   templateUrl: './classification-report.component.html',
-  styleUrls: ['./classification-report.component.scss']
+  styleUrls: ['./classification-report.component.scss'],
+  standalone: true,
+  imports: [CommonModule, ReportTableComponent, BaseChartDirective],
+  providers: [provideCharts(withDefaultRegisterables())]
 })
 export class ClassificationReportComponent implements OnInit {
   reportData: ReportData;

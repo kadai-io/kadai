@@ -83,7 +83,6 @@ import { ClassificationsService } from 'app/shared/services/classifications/clas
 import { ObtainMessageService } from './services/obtain-message/obtain-message.service';
 import { AccessIdsService } from './services/access-ids/access-ids.service';
 import { DragAndDropDirective } from './directives/drag-and-drop.directive';
-import { GermanTimeFormatPipe } from './pipes/german-time-format.pipe';
 import { ResizableWidthDirective } from './directives/resizable-width.directive';
 import { TreeModule } from '@ali-hm/angular-tree-component';
 import { environment } from '../../environments/environment';
@@ -132,8 +131,7 @@ const DECLARATIONS = [
   WorkbasketFilterComponent,
   TaskFilterComponent,
   DragAndDropDirective,
-  ResizableWidthDirective,
-  GermanTimeFormatPipe
+  ResizableWidthDirective
 ];
 
 export const httpClientInterceptor: HttpInterceptorFn = (request: HttpRequest<unknown>, next: HttpHandlerFn) => {
@@ -189,7 +187,7 @@ export const httpClientInterceptor: HttpInterceptorFn = (request: HttpRequest<un
     ReactiveFormsModule,
     MatProgressSpinnerModule
   ],
-  exports: [DECLARATIONS, GermanTimeFormatPipe],
+  exports: [DECLARATIONS],
   providers: [
     AccessIdsService,
     ClassificationsService,

@@ -42,7 +42,7 @@
 
     <ng-container matColumnDef="created">
       <th *matHeaderCellDef disableClear mat-header-cell mat-sort-header>Created</th>
-      <td *matCellDef="let element" mat-cell>{{convertToTaskHistoryEventData(element).created | germanTimeFormat}}</td>
+      <td *matCellDef="let element" mat-cell>{{convertToTaskHistoryEventData(element).created | date: 'medium'}}</td>
     </ng-container>
 
     <ng-container matColumnDef="userId">

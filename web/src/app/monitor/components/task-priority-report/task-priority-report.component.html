@@ -20,7 +20,7 @@
 
   <!-- HEADER -->
   <div class="task-priority-report__header">
-    <h4 class="task-priority-report__headline"> {{reportData?.meta.name}} ({{reportData?.meta.date | germanTimeFormat
+    <h4 class="task-priority-report__headline"> {{reportData?.meta.name}} ({{reportData?.meta.date | date: 'medium'
       }}) </h4>
     <kadai-monitor-task-priority-report-filter
       (applyFilter)="applyFilter($event)"></kadai-monitor-task-priority-report-filter>

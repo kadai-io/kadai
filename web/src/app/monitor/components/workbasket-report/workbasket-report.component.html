@@ -18,7 +18,7 @@
 
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h4 *ngIf="metaInformation">{{ getTitle() }} ({{ metaInformation?.date | germanTimeFormat }}
+    <h4 *ngIf="metaInformation">{{ getTitle() }} ({{ metaInformation?.date| date:'medium' }}
       )</h4>
   </div>
   <mat-tab-group (selectedIndexChange)="selectComponent($event)" animationDuration="0ms"

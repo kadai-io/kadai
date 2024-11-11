@@ -10383,7 +10383,7 @@ __metadata:
     jest: "npm:29.7.0"
     jest-preset-angular: "npm:14.2.4"
     lodash: "npm:4.17.21"
-    ng2-charts: "npm:5.0.4"
+    ng2-charts: "npm:6.0.1"
     ngx-bootstrap: "npm:18.1.3"
     ngx-infinite-scroll: "npm:18.0.0"
     prettier: "npm:3.3.3"
@@ -11254,20 +11254,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ng2-charts@npm:5.0.4":
-  version: 5.0.4
-  resolution: "ng2-charts@npm:5.0.4"
+"ng2-charts@npm:6.0.1":
+  version: 6.0.1
+  resolution: "ng2-charts@npm:6.0.1"
   dependencies:
     lodash-es: "npm:^4.17.15"
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/cdk": ">=16.0.0"
-    "@angular/common": ">=16.0.0"
-    "@angular/core": ">=16.0.0"
-    "@angular/platform-browser": ">=16.0.0"
+    "@angular/cdk": ">=17.0.0"
+    "@angular/common": ">=17.0.0"
+    "@angular/core": ">=17.0.0"
+    "@angular/platform-browser": ">=17.0.0"
     chart.js: ^3.4.0 || ^4.0.0
     rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/09c423c4e0bb2e39b03377bbd611ff454c70c1191c8739792226f01faf6d2ed19a390c1acbd1a9e02013f2f32891c318d0013680af4535af806d7942337ebcc2
+  checksum: 10c0/9a2aae7b1560e6b6408712887eb30d1cf6de70e2abee6c507ec1bc72c405b01d2334a127cf550c737e88cd2b587a963c59af608bbd4e9fe2cac7ac0f53650a80
   languageName: node
   linkType: hard
 

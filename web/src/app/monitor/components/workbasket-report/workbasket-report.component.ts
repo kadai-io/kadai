@@ -18,6 +18,11 @@
 
 import { Component, OnInit } from '@angular/core';
 import { MetaInfoData } from '../../models/meta-info-data';
+import { CommonModule } from '@angular/common';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { WorkbasketReportDueDateComponent } from '../workbasket-report-due-date/workbasket-report-due-date.component';
+import { WorkbasketReportPlannedDateComponent } from '../workbasket-report-planned-date/workbasket-report-planned-date.component';
+
 enum WorkbasketReports {
   DUE_DATE,
   PLANNED_DATE
@@ -26,7 +31,9 @@ enum WorkbasketReports {
 @Component({
   selector: 'kadai-monitor-workbasket-report',
   templateUrl: './workbasket-report.component.html',
-  styleUrls: ['./workbasket-report.component.scss']
+  styleUrls: ['./workbasket-report.component.scss'],
+  standalone: true,
+  imports: [CommonModule, MatTabGroup, MatTab, WorkbasketReportDueDateComponent, WorkbasketReportPlannedDateComponent]
 })
 export class WorkbasketReportComponent implements OnInit {
   metaInformation: MetaInfoData;
