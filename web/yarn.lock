@@ -4560,10 +4560,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:17.0.23":
-  version: 17.0.23
-  resolution: "@types/node@npm:17.0.23"
-  checksum: 10c0/5c70285a5454aa1daa1f515c1b6df8ccdc85ba18c19d650355f32ac00f82494d9b0ec4c6f943bcc4081acc5662aa68ff84f4e91f35f0b23087b3ed4682f73ad4
+"@types/node@npm:22.9.0":
+  version: 22.9.0
+  resolution: "@types/node@npm:22.9.0"
+  dependencies:
+    undici-types: "npm:~6.19.8"
+  checksum: 10c0/3f46cbe0a49bab4ba30494025e4c8a6e699b98ac922857aa1f0209ce11a1313ee46e6808b8f13fe5b8b960a9d7796b77c8d542ad4e9810e85ef897d5593b5d51
   languageName: node
   linkType: hard
 
@@ -10383,7 +10385,7 @@ __metadata:
     "@ngxs/store": "npm:18.1.4"
     "@types/jest": "npm:29.5.14"
     "@types/lodash": "npm:4.17.13"
-    "@types/node": "npm:17.0.23"
+    "@types/node": "npm:22.9.0"
     "@typescript-eslint/eslint-plugin": "npm:8.13.0"
     "@typescript-eslint/eslint-plugin-tslint": "npm:7.0.2"
     "@typescript-eslint/parser": "npm:8.13.0"
@@ -14177,7 +14179,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici-types@npm:~6.19.2":
+"undici-types@npm:~6.19.2, undici-types@npm:~6.19.8":
   version: 6.19.8
   resolution: "undici-types@npm:6.19.8"
   checksum: 10c0/078afa5990fba110f6824823ace86073b4638f1d5112ee26e790155f481f2a868cc3e0615505b6f4282bdf74a3d8caad715fd809e870c2bb0704e3ea6082f344
