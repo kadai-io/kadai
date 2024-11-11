@@ -58,7 +58,7 @@
     "@angular/compiler": "18.2.11",
     "@angular/compiler-cli": "18.2.11",
     "@ngxs/devtools-plugin": "18.1.4",
-    "@types/jest": "27.4.1",
+    "@types/jest": "29.5.14",
     "@types/lodash": "4.14.181",
     "@types/node": "17.0.23",
     "@typescript-eslint/eslint-plugin": "8.13.0",
