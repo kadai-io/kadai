@@ -4375,10 +4375,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:4.14.181":
-  version: 4.14.181
-  resolution: "@types/lodash@npm:4.14.181"
-  checksum: 10c0/92754f2829371d0ebea231b19a7167657680db5d1eb9a32d176dc4c2d180ea0f53a860000b427bcd0220a0b85eccbcad3c89334fd4fbbef0e6fdfb356895853d
+"@types/lodash@npm:4.17.13":
+  version: 4.17.13
+  resolution: "@types/lodash@npm:4.17.13"
+  checksum: 10c0/c3d0b7efe7933ac0369b99f2f7bff9240d960680fdb74b41ed4bd1b3ca60cca1e31fe4046d9abbde778f941a41bc2a75eb629abf8659fa6c27b66efbbb0802a9
   languageName: node
   linkType: hard
 
@@ -10229,7 +10229,7 @@ __metadata:
     "@ngxs/router-plugin": "npm:18.1.4"
     "@ngxs/store": "npm:18.1.4"
     "@types/jest": "npm:29.5.14"
-    "@types/lodash": "npm:4.14.181"
+    "@types/lodash": "npm:4.17.13"
     "@types/node": "npm:17.0.23"
     "@typescript-eslint/eslint-plugin": "npm:8.13.0"
     "@typescript-eslint/eslint-plugin-tslint": "npm:7.0.2"
