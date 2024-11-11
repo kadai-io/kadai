@@ -16,12 +16,11 @@
  *
  */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { NgModule, LOCALE_ID } from '@angular/core';
+import { CommonModule, registerLocaleData } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AlertModule } from 'ngx-bootstrap/alert';
 import { TabsModule } from 'ngx-bootstrap/tabs';
-import { NgChartsModule } from 'ng2-charts';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 import { MapToIterable } from 'app/shared/pipes/map-to-iterable.pipe';
 import { SharedModule } from '../shared/shared.module';
@@ -58,12 +57,13 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
 import { provideHttpClient } from '@angular/common/http';
 
+import localeDe from '@angular/common/locales/de';
+
 const MODULES = [
   CommonModule,
   MonitorRoutingModule,
   FormsModule,
   AlertModule.forRoot(),
-  NgChartsModule,
   TabsModule.forRoot(),
   AngularSvgIconModule,
   SharedModule,
@@ -89,8 +89,11 @@ const DECLARATIONS = [
 ];
 
 @NgModule({
-  declarations: DECLARATIONS,
-  imports: [MODULES],
-  providers: [MonitorService, MapToIterable, provideHttpClient()]
+  imports: [MODULES, ...DECLARATIONS],
+  providers: [MonitorService, MapToIterable, provideHttpClient(), { provide: LOCALE_ID, useValue: 'de' }]
 })
-export class MonitorModule {}
+export class MonitorModule {
+  constructor() {
+    registerLocaleData(localeDe);
+  }
+}

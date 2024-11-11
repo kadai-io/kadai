@@ -35,8 +35,7 @@ describe('CanvasComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [NgxsModule.forRoot([SettingsState]), MatDialogModule],
-      providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
-      declarations: [CanvasComponent]
+      providers: [CanvasComponent, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
     }).compileComponents();
 
     fixture = TestBed.createComponent(CanvasComponent);

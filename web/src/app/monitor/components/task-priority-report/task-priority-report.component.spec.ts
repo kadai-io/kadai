@@ -31,13 +31,9 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatDividerModule } from '@angular/material/divider';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-
-@Pipe({ name: 'germanTimeFormat' })
-class GermanTimeFormatPipe implements PipeTransform {
-  transform(value: number): number {
-    return value;
-  }
-}
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { registerLocaleData } from '@angular/common';
+import localeDe from '@angular/common/locales/de';
 
 @Component({ selector: 'kadai-monitor-canvas', template: '' })
 class CanvasStub {
@@ -63,15 +59,18 @@ describe('TaskPriorityReportComponent', () => {
   let component: TaskPriorityReportComponent;
 
   beforeEach(waitForAsync(() => {
+    registerLocaleData(localeDe);
+
     TestBed.configureTestingModule({
-      imports: [NgxsModule.forRoot([SettingsState]), MatTableModule, MatDividerModule],
-      declarations: [TaskPriorityReportComponent, GermanTimeFormatPipe, CanvasStub, TaskPriorityReportFilterStub],
+      imports: [NgxsModule.forRoot([SettingsState]), MatTableModule, MatDividerModule, NoopAnimationsModule],
+      declarations: [CanvasStub, TaskPriorityReportFilterStub],
       providers: [
         RequestInProgressService,
         { provide: MonitorService, useValue: monitorServiceSpy },
         { provide: NotificationService, useValue: notificationServiceSpy },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        TaskPriorityReportComponent
       ]
     }).compileComponents();
 

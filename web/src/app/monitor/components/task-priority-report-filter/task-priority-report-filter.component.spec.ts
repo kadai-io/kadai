@@ -41,9 +41,9 @@ describe('TaskPriorityReportFilterComponent', () => {
         MatCheckboxModule,
         MatExpansionModule,
         NoopAnimationsModule,
-        MatDialogModule
+        MatDialogModule,
+        TaskPriorityReportFilterComponent
       ],
-      declarations: [TaskPriorityReportFilterComponent],
       providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
     }).compileComponents();
 

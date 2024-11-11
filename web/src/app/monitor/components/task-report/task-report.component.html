@@ -18,11 +18,17 @@
 
 <div *ngIf="reportData" class="panel panel-default">
   <div class="panel-heading">
-    <h4>{{reportData.meta.name}} ({{reportData.meta.date | germanTimeFormat}})</h4>
+    <h4>{{reportData.meta.name}} ({{reportData.meta.date | date: 'medium' }})</h4>
   </div>
   <div class="panel-body">
     <div style="position: relative; width:50vw; margin: 0 auto;">
-      <canvas [type]="pieChartType" [data]="pieChartData" [options]="pieChartOptions" baseChart></canvas>
+      <canvas
+        baseChart
+        [data]="pieChartData"
+        [type]="pieChartType"
+        [options]="pieChartOptions"
+        >
+      </canvas>
     </div>
     <kadai-monitor-report-table [reportData]="reportData"></kadai-monitor-report-table>
   </div>

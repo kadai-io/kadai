@@ -17,7 +17,6 @@
  */
 
 import 'jest-preset-angular/setup-jest';
-import { fakeAsync } from '@angular/core/testing';
 
 Object.defineProperty(window, 'CSS', { value: null });
 Object.defineProperty(window, 'getComputedStyle', {

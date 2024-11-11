@@ -17,7 +17,7 @@
  */
 
 import { AfterViewInit, Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { Chart } from 'chart.js';
+import { Chart, DoughnutController, ArcElement, Tooltip, Legend, Title } from 'chart.js';
 import { ReportRow } from '../../models/report-row';
 import { Select } from '@ngxs/store';
 import { SettingsSelectors } from '../../../shared/store/settings-store/settings.selectors';
@@ -25,11 +25,14 @@ import { Observable, Subject } from 'rxjs';
 import { Settings } from '../../../settings/models/settings';
 import { takeUntil } from 'rxjs/operators';
 import { SettingMembers } from '../../../settings/components/Settings/expected-members';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 @Component({
   selector: 'kadai-monitor-canvas',
   templateUrl: './canvas.component.html',
-  styleUrls: ['./canvas.component.scss']
+  styleUrls: ['./canvas.component.scss'],
+  providers: [provideCharts(withDefaultRegisterables())],
+  standalone: true
 })
 export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() row: ReportRow;
@@ -103,5 +106,9 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     document.getElementById(this.id).outerHTML = ''; // destroy HTML element
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  constructor() {
+    Chart.register(DoughnutController, ArcElement, Tooltip, Legend, Title);
   }
 }
