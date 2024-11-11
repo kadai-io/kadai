@@ -6232,15 +6232,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"compression-webpack-plugin@npm:9.2.0":
-  version: 9.2.0
-  resolution: "compression-webpack-plugin@npm:9.2.0"
+"compression-webpack-plugin@npm:11.1.0":
+  version: 11.1.0
+  resolution: "compression-webpack-plugin@npm:11.1.0"
   dependencies:
-    schema-utils: "npm:^4.0.0"
-    serialize-javascript: "npm:^6.0.0"
+    schema-utils: "npm:^4.2.0"
+    serialize-javascript: "npm:^6.0.2"
   peerDependencies:
     webpack: ^5.1.0
-  checksum: 10c0/6c2cf07844fe2e0a4789d2fd478dbcd947de4fc405d86b209b27d84a5fc48524eb0cd25a4e9bf2fb55cd70535edc15d32d273337a90abe0a3ec4fc810f48bd09
+  checksum: 10c0/387043d1e7dd776768bbc92071953ae0459891337f1ca908c0b4c9fe98322caf19847fae3713876e3976d894599712f784ccf13baa6d1c64ecb915786a54f2ec
   languageName: node
   linkType: hard
 
@@ -10320,7 +10320,7 @@ __metadata:
     "@typescript-eslint/parser": "npm:8.13.0"
     angular-svg-icon: "npm:13.0.0"
     chart.js: "npm:4.4.6"
-    compression-webpack-plugin: "npm:9.2.0"
+    compression-webpack-plugin: "npm:11.1.0"
     core-js: "npm:3.21.1"
     cypress: "npm:9.5.4"
     cypress-intellij-reporter: "npm:0.0.7"
@@ -12964,7 +12964,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"serialize-javascript@npm:^6.0.0, serialize-javascript@npm:^6.0.1, serialize-javascript@npm:^6.0.2":
+"serialize-javascript@npm:^6.0.1, serialize-javascript@npm:^6.0.2":
   version: 6.0.2
   resolution: "serialize-javascript@npm:6.0.2"
   dependencies:
