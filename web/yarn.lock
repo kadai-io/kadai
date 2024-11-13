@@ -3570,17 +3570,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ngxs/router-plugin@npm:18.1.4":
-  version: 18.1.4
-  resolution: "@ngxs/router-plugin@npm:18.1.4"
+"@ngxs/router-plugin@npm:18.1.5":
+  version: 18.1.5
+  resolution: "@ngxs/router-plugin@npm:18.1.5"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
     "@angular/core": ">=16.0.0 <19.0.0"
     "@angular/router": ">=16.0.0 <19.0.0"
-    "@ngxs/store": ^18.1.4 || ^18.1.4-dev
+    "@ngxs/store": ^18.1.5 || ^18.1.5-dev
     rxjs: ">=6.5.5"
-  checksum: 10c0/8df848a8903da78061ba852b528d76a61049b1bb64454111b3b8750951cf512518fbff244710caab328d56493f69b22f7bcbd72b01938f62c259ad5b155cba98
+  checksum: 10c0/f9fbdc1a9ffa82cec69ba4c6ccf60b21832267c678000df0f1be45ec7e7add7505ebd0632d872756902c5d208fd5e092015067a090929eeb033e39f6ced32b43
   languageName: node
   linkType: hard
 
@@ -10360,7 +10360,7 @@ __metadata:
     "@ngneat/hot-toast": "npm:7.0.0"
     "@ngneat/overview": "npm:6.1.1"
     "@ngxs/devtools-plugin": "npm:18.1.4"
-    "@ngxs/router-plugin": "npm:18.1.4"
+    "@ngxs/router-plugin": "npm:18.1.5"
     "@ngxs/store": "npm:18.1.4"
     "@types/jest": "npm:29.5.14"
     "@types/lodash": "npm:4.17.13"
