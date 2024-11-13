@@ -35,7 +35,7 @@ env:
 jobs:
   compile_backend:
     name: Compile all maven modules
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Git checkout
         uses: actions/checkout@v4
@@ -74,7 +74,7 @@ jobs:
 
   compile_frontend:
     name: Compile kadai-web
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Git checkout
         uses: actions/checkout@v4
@@ -129,7 +129,7 @@ jobs:
         uses: andymckay/cancel-action@0.5
 
   test_frontend:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     name: Test kadai-web
     needs: [ compile_frontend ]
     steps:
@@ -173,7 +173,7 @@ jobs:
         uses: andymckay/cancel-action@0.5
 
   test_e2e:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     name: Test E2E
     needs: [ compile_frontend, compile_backend ]
     steps:
@@ -243,7 +243,7 @@ jobs:
         uses: andymckay/cancel-action@0.5
 
   test_backend:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     name: Test ${{ matrix.module }} on ${{ matrix.database }}
     needs: [ compile_backend ]
     strategy:
@@ -392,6 +392,16 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+      - name: Cancel workflow
+        if: failure()
+        uses: andymckay/cancel-action@0.5
+
+  update_version:
+    runs-on: ubuntu-22.04
+    name: Update version to next snapshot and push back
+    if: github.repository == 'kadai-io/kadai' && startsWith(github.ref, 'refs/tags/v') && github.head_ref == ''
+    needs: [ release_artifacts ]
+    steps:
       - name: Update version to next snapshot and push back
         run: |
           ci/change_version.sh -i -m .
@@ -405,7 +415,7 @@ jobs:
         uses: andymckay/cancel-action@0.5
 
   deploy_to_azure:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     name: Deploy demo app to Microsoft Azure
     if: github.repository == 'kadai-io/kadai' && github.ref == 'refs/heads/master' && github.head_ref == ''
     needs: [ test_frontend, test_e2e, test_backend ]
@@ -460,7 +470,7 @@ jobs:
         if: failure()
         uses: andymckay/cancel-action@0.5
   upload_to_sonar:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     name: Upload SonarQube analysis to sonarcloud
     # no pull request and not on release
     if: github.head_ref == '' && !startsWith(github.ref, 'refs/tags')
