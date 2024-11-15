@@ -596,15 +596,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/common@npm:18.2.11":
-  version: 18.2.11
-  resolution: "@angular/common@npm:18.2.11"
+"@angular/common@npm:18.2.12":
+  version: 18.2.12
+  resolution: "@angular/common@npm:18.2.12"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/core": 18.2.11
+    "@angular/core": 18.2.12
     rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/7fcb29226356d1ea60580e849e92c8349b5001b4b0f3c94db365f45150df781133eddb5432502b6d70ea004f1deed47b039be18028f2e9ac0bcb685ba5777672
+  checksum: 10c0/953426d0d2ebc72214fd60f8513ce6054a55d4077b5eec91ac35b204917e2785b78008f349d47a63d66af50f6762d8bb1f0250a2c16673501bf5f00b679b5bf7
   languageName: node
   linkType: hard
 
@@ -10355,7 +10355,7 @@ __metadata:
     "@angular/build": "npm:^18.2.11"
     "@angular/cdk": "npm:18.2.13"
     "@angular/cli": "npm:18.2.11"
-    "@angular/common": "npm:18.2.11"
+    "@angular/common": "npm:18.2.12"
     "@angular/compiler": "npm:18.2.11"
     "@angular/compiler-cli": "npm:18.2.11"
     "@angular/core": "npm:18.2.11"
