@@ -526,7 +526,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/build@npm:18.2.12":
+"@angular/build@npm:18.2.12, @angular/build@npm:^18.2.12":
   version: 18.2.12
   resolution: "@angular/build@npm:18.2.12"
   dependencies:
@@ -583,66 +583,6 @@ __metadata:
     tailwindcss:
       optional: true
   checksum: 10c0/9f64bb1cd344a400b10a8d61e1ba7b95851907f882cfac201553ebfb55fae3ad6acf9590d5d47fb9d1d87b722e2eb7e939b54a5c85760a70110cf60ed7927680
-  languageName: node
-  linkType: hard
-
-"@angular/build@npm:^18.2.11":
-  version: 18.2.11
-  resolution: "@angular/build@npm:18.2.11"
-  dependencies:
-    "@ampproject/remapping": "npm:2.3.0"
-    "@angular-devkit/architect": "npm:0.1802.11"
-    "@babel/core": "npm:7.25.2"
-    "@babel/helper-annotate-as-pure": "npm:7.24.7"
-    "@babel/helper-split-export-declaration": "npm:7.24.7"
-    "@babel/plugin-syntax-import-attributes": "npm:7.24.7"
-    "@inquirer/confirm": "npm:3.1.22"
-    "@vitejs/plugin-basic-ssl": "npm:1.1.0"
-    browserslist: "npm:^4.23.0"
-    critters: "npm:0.0.24"
-    esbuild: "npm:0.23.0"
-    fast-glob: "npm:3.3.2"
-    https-proxy-agent: "npm:7.0.5"
-    listr2: "npm:8.2.4"
-    lmdb: "npm:3.0.13"
-    magic-string: "npm:0.30.11"
-    mrmime: "npm:2.0.0"
-    parse5-html-rewriting-stream: "npm:7.0.0"
-    picomatch: "npm:4.0.2"
-    piscina: "npm:4.6.1"
-    rollup: "npm:4.22.4"
-    sass: "npm:1.77.6"
-    semver: "npm:7.6.3"
-    vite: "npm:5.4.6"
-    watchpack: "npm:2.4.1"
-  peerDependencies:
-    "@angular/compiler-cli": ^18.0.0
-    "@angular/localize": ^18.0.0
-    "@angular/platform-server": ^18.0.0
-    "@angular/service-worker": ^18.0.0
-    less: ^4.2.0
-    postcss: ^8.4.0
-    tailwindcss: ^2.0.0 || ^3.0.0
-    typescript: ">=5.4 <5.6"
-  dependenciesMeta:
-    esbuild:
-      built: true
-    puppeteer:
-      built: true
-  peerDependenciesMeta:
-    "@angular/localize":
-      optional: true
-    "@angular/platform-server":
-      optional: true
-    "@angular/service-worker":
-      optional: true
-    less:
-      optional: true
-    postcss:
-      optional: true
-    tailwindcss:
-      optional: true
-  checksum: 10c0/aef5c17b6c7f33b3ea3ae04c47e6694bf12035a3de601ae9c870c242af62b811b46e10448ccc8f7ea88ae76b5bafc4a88d3ac330eb9ed30b972b7e84ea401add
   languageName: node
   linkType: hard
 
@@ -10451,7 +10391,7 @@ __metadata:
     "@angular-builders/custom-webpack": "npm:18.0.0"
     "@angular-devkit/build-angular": "npm:18.2.12"
     "@angular/animations": "npm:18.2.11"
-    "@angular/build": "npm:^18.2.11"
+    "@angular/build": "npm:^18.2.12"
     "@angular/cdk": "npm:18.2.13"
     "@angular/cli": "npm:18.2.11"
     "@angular/common": "npm:18.2.12"
