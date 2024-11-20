@@ -93,9 +93,12 @@ describe('WorkbasketOverviewComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [MatIconModule, RouterTestingModule.withRoutes([]), NgxsModule.forRoot([WorkbasketState])],
-      declarations: [WorkbasketOverviewComponent, WorkbasketListStub, WorkbasketDetailsStub, SvgIconStub],
+      declarations: [WorkbasketOverviewComponent],
       providers: [
         WorkbasketService,
+        WorkbasketListStub,
+        WorkbasketDetailsStub,
+        SvgIconStub,
         {
           provide: NotificationService,
           useValue: NotificationServiceSpy
@@ -162,9 +165,12 @@ describe('WorkbasketOverviewComponent Alternative Params ID', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [MatIconModule, RouterTestingModule.withRoutes([]), NgxsModule.forRoot([WorkbasketState])],
-      declarations: [WorkbasketOverviewComponent, WorkbasketListStub, WorkbasketDetailsStub, SvgIconStub],
+      declarations: [WorkbasketOverviewComponent],
       providers: [
         WorkbasketService,
+        WorkbasketListStub,
+        WorkbasketDetailsStub,
+        SvgIconStub,
         {
           provide: NotificationService,
           useValue: NotificationServiceSpy
@@ -208,9 +214,12 @@ describe('WorkbasketOverviewComponent No Params', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [MatIconModule, RouterTestingModule.withRoutes([]), NgxsModule.forRoot([WorkbasketState])],
-      declarations: [WorkbasketOverviewComponent, WorkbasketListStub, WorkbasketDetailsStub, SvgIconStub],
+      declarations: [WorkbasketOverviewComponent],
       providers: [
         WorkbasketService,
+        WorkbasketListStub,
+        WorkbasketDetailsStub,
+        SvgIconStub,
         {
           provide: NotificationService,
           useValue: NotificationServiceSpy

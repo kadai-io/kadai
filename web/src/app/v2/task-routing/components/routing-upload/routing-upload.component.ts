@@ -24,7 +24,8 @@ import { HotToastService } from '@ngneat/hot-toast';
 @Component({
   selector: 'kadai-routing-upload',
   templateUrl: './routing-upload.component.html',
-  styleUrls: ['./routing-upload.component.scss']
+  styleUrls: ['./routing-upload.component.scss'],
+  standalone: false
 })
 export class RoutingUploadComponent implements OnInit {
   file: File | null = null;

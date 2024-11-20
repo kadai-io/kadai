@@ -26,7 +26,8 @@ import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-
 @Component({
   selector: 'kadai-administration-overview',
   templateUrl: './administration-overview.component.html',
-  styleUrls: ['./administration-overview.component.scss']
+  styleUrls: ['./administration-overview.component.scss'],
+  standalone: false
 })
 export class AdministrationOverviewComponent implements OnInit {
   @Input() selectedTab = '';

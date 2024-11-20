@@ -111,13 +111,7 @@ describe('AccessItemsManagementComponent', () => {
         MatExpansionModule,
         MatTableModule
       ],
-      declarations: [
-        AccessItemsManagementComponent,
-        TypeAheadComponent,
-        KadaiSharedSortStub,
-        KadaiSharedSpinnerStub,
-        SvgIconStub
-      ],
+      declarations: [AccessItemsManagementComponent, TypeAheadComponent],
       providers: [
         {
           provide: FormsValidatorService,
@@ -132,6 +126,9 @@ describe('AccessItemsManagementComponent', () => {
         StartupService,
         KadaiEngineService,
         WindowRefService,
+        KadaiSharedSortStub,
+        KadaiSharedSpinnerStub,
+        SvgIconStub,
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()
       ]

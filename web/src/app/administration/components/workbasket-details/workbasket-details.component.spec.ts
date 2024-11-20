@@ -100,12 +100,7 @@ describe('WorkbasketDetailsComponent', () => {
         MatTooltipModule,
         NoopAnimationsModule
       ],
-      declarations: [
-        WorkbasketDetailsComponent,
-        WorkbasketAccessItemsStub,
-        WorkbasketDistributionTargetsStub,
-        WorkbasketInformationStub
-      ],
+      declarations: [WorkbasketDetailsComponent],
       providers: [
         {
           provide: DomainService,
@@ -118,6 +113,9 @@ describe('WorkbasketDetailsComponent', () => {
         StartupService,
         KadaiEngineService,
         WindowRefService,
+        WorkbasketAccessItemsStub,
+        WorkbasketDistributionTargetsStub,
+        WorkbasketInformationStub,
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()
       ]

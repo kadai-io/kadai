@@ -49,9 +49,10 @@ describe('NavBarComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [NavBarComponent, SvgIconStub],
+      declarations: [NavBarComponent],
       imports: [MatIconModule, MatToolbarModule],
       providers: [
+        SvgIconStub,
         { provide: SidenavService, useValue: SidenavServiceSpy },
         { provide: SelectedRouteService, useValue: SelectedRouteServiceSpy },
         provideHttpClient(withInterceptorsFromDi()),

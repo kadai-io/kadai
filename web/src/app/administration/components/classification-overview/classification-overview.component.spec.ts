@@ -68,8 +68,11 @@ describe('ClassificationOverviewComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [NgxsModule.forRoot([ClassificationState])],
-      declarations: [ClassificationOverviewComponent, ClassificationDetailsStub, ClassificationListStub, SvgIconStub],
+      declarations: [ClassificationOverviewComponent],
       providers: [
+        ClassificationDetailsStub,
+        ClassificationListStub,
+        SvgIconStub,
         {
           provide: ClassificationsService,
           useValue: classificationServiceSpy

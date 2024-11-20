@@ -21,7 +21,8 @@ import { Component, Input } from '@angular/core';
 @Component({
   selector: 'kadai-shared-progress-spinner',
   templateUrl: './progress-spinner.component.html',
-  styleUrls: ['./progress-spinner.component.scss']
+  styleUrls: ['./progress-spinner.component.scss'],
+  standalone: false
 })
 export class ProgressSpinnerComponent {
   @Input()

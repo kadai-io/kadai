@@ -31,7 +31,8 @@ import { RequestInProgressService } from '../../../shared/services/request-in-pr
 @Component({
   selector: 'kadai-task-processing',
   templateUrl: './task-processing.component.html',
-  styleUrls: ['./task-processing.component.scss']
+  styleUrls: ['./task-processing.component.scss'],
+  standalone: false
 })
 export class TaskProcessingComponent implements OnInit, OnDestroy {
   routeSubscription: Subscription;

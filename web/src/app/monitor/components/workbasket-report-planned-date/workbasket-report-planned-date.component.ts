@@ -31,7 +31,6 @@ import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2
   selector: 'kadai-monitor-workbasket-report-planned-date',
   templateUrl: './workbasket-report-planned-date.component.html',
   styleUrls: ['./workbasket-report-planned-date.component.scss'],
-  standalone: true,
   imports: [NgIf, ReportTableComponent, BaseChartDirective],
   providers: [provideCharts(withDefaultRegisterables())]
 })

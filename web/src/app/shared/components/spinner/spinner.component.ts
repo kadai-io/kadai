@@ -24,7 +24,8 @@ declare let $: any;
 @Component({
   selector: 'kadai-shared-spinner',
   templateUrl: './spinner.component.html',
-  styleUrls: ['./spinner.component.scss']
+  styleUrls: ['./spinner.component.scss'],
+  standalone: false
 })
 export class SpinnerComponent implements OnDestroy {
   showSpinner: boolean;

@@ -108,8 +108,9 @@ describe('WorkbasketAccessItemsComponent', () => {
         MatIconModule,
         MatTooltipModule
       ],
-      declarations: [WorkbasketAccessItemsComponent, TypeAheadComponent, SpinnerStub],
+      declarations: [WorkbasketAccessItemsComponent, TypeAheadComponent],
       providers: [
+        SpinnerStub,
         {
           provide: RequestInProgressService,
           useValue: requestInProgressServiceSpy

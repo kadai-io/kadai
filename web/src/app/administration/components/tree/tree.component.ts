@@ -54,7 +54,8 @@ import { RequestInProgressService } from '../../../shared/services/request-in-pr
 @Component({
   selector: 'kadai-administration-tree',
   templateUrl: './tree.component.html',
-  styleUrls: ['./tree.component.scss']
+  styleUrls: ['./tree.component.scss'],
+  standalone: false
 })
 export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
   treeNodes: TreeNodeModel[];

@@ -48,7 +48,6 @@ import {
   selector: 'kadai-monitor-task-priority-report',
   templateUrl: './task-priority-report.component.html',
   styleUrls: ['./task-priority-report.component.scss'],
-  standalone: true,
   imports: [
     CommonModule,
     TaskPriorityReportFilterComponent,

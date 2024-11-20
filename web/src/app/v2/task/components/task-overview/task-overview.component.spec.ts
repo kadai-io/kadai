@@ -26,7 +26,7 @@ describe('TaskOverviewComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TaskOverviewComponent]
+      providers: [TaskOverviewComponent]
     }).compileComponents();
   });
 

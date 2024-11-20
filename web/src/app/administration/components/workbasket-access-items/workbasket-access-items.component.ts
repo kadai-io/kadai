@@ -59,7 +59,8 @@ import { ButtonAction } from '../../models/button-action';
   selector: 'kadai-administration-workbasket-access-items',
   templateUrl: './workbasket-access-items.component.html',
   animations: [highlight],
-  styleUrls: ['./workbasket-access-items.component.scss']
+  styleUrls: ['./workbasket-access-items.component.scss'],
+  standalone: false
 })
 export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit, AfterViewChecked {
   @Input() workbasket: Workbasket;

@@ -39,7 +39,8 @@ import { RequestInProgressService } from '../../../shared/services/request-in-pr
 @Component({
   selector: 'kadai-task-master',
   templateUrl: './task-master.component.html',
-  styleUrls: ['./task-master.component.scss']
+  styleUrls: ['./task-master.component.scss'],
+  standalone: false
 })
 export class TaskMasterComponent implements OnInit, OnDestroy {
   tasks: Task[];

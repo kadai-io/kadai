@@ -36,8 +36,8 @@ describe('IconTypeComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [],
-      declarations: [IconTypeComponent, SvgIconStub],
-      providers: []
+      declarations: [IconTypeComponent],
+      providers: [SvgIconStub]
     }).compileComponents();
 
     fixture = TestBed.createComponent(IconTypeComponent);

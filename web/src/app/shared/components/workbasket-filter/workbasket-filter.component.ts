@@ -28,7 +28,8 @@ import { takeUntil } from 'rxjs/operators';
 @Component({
   selector: 'kadai-shared-workbasket-filter',
   templateUrl: './workbasket-filter.component.html',
-  styleUrls: ['./workbasket-filter.component.scss']
+  styleUrls: ['./workbasket-filter.component.scss'],
+  standalone: false
 })
 export class WorkbasketFilterComponent implements OnInit, OnDestroy {
   allTypes: Map<WorkbasketType, string> = ALL_TYPES;

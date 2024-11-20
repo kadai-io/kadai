@@ -27,7 +27,8 @@ import { takeUntil } from 'rxjs/operators';
   selector: 'kadai-shared-nav-bar',
   templateUrl: './nav-bar.component.html',
   styleUrls: ['./nav-bar.component.scss'],
-  animations: [expandRight]
+  animations: [expandRight],
+  standalone: false
 })
 export class NavBarComponent implements OnInit {
   selectedRoute = '';

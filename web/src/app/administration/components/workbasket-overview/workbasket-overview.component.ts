@@ -29,7 +29,8 @@ import { Workbasket } from '../../../shared/models/workbasket';
 @Component({
   selector: 'kadai-administration-workbasket-overview',
   templateUrl: './workbasket-overview.component.html',
-  styleUrls: ['./workbasket-overview.component.scss']
+  styleUrls: ['./workbasket-overview.component.scss'],
+  standalone: false
 })
 export class WorkbasketOverviewComponent implements OnInit {
   showDetail = false;

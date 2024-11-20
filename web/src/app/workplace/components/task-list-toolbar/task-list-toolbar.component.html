@@ -101,7 +101,7 @@
         <div class="task-list-toolbar__filter-input">
           <mat-form-field>
             <mat-label>Filter Tasks</mat-label>
-            <input (keyup.enter)="onFilter(); this.searched = true;" (ngModelChange)="updateState()"
+            <input (keyup.enter)="onFilter(); searched = true;" (ngModelChange)="updateState()"
                    [(ngModel)]="filterInput" matInput
                    placeholder="Filter" type="text">
           </mat-form-field>
@@ -110,14 +110,14 @@
         <div class="task-list-toolbar__spacer"></div>
 
         <!-- SEARCH BUTTON -->
-        <button (click)="onFilter(); this.searched = true"
+        <button (click)="onFilter(); searched = true"
                 class="task-list-toolbar__button--primary"
                 mat-stroked-button matTooltip="Filter Tasks" style="top: 11px">
           <mat-icon class="task-list-toolbar__mat-icon">search</mat-icon>
         </button>
 
         <!-- CLEAR BUTTON -->
-        <button (click)="onClearFilter(); this.searched = true;"
+        <button (click)="onClearFilter(); searched = true;"
                 class="task-list-toolbar__button--secondary"
                 mat-stroked-button matTooltip="Clear Filter" style="top: 11px;">
           <mat-icon class="task-list-toolbar__mat-icon">clear</mat-icon>

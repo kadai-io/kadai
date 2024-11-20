@@ -118,8 +118,12 @@ describe('WorkbasketListComponent', () => {
         MatSelectModule,
         MatListModule
       ],
-      declarations: [WorkbasketListComponent, WorkbasketListToolbarStub, IconTypeStub, PaginationStub, SvgIconStub],
+      declarations: [WorkbasketListComponent],
       providers: [
+        WorkbasketListToolbarStub,
+        IconTypeStub,
+        PaginationStub,
+        SvgIconStub,
         {
           provide: WorkbasketService,
           useValue: workbasketServiceMock

@@ -22,7 +22,8 @@ import { Task } from 'app/workplace/models/task';
 @Component({
   selector: 'kadai-task-status-details',
   templateUrl: './task-status-details.component.html',
-  styleUrls: ['./task-status-details.component.scss']
+  styleUrls: ['./task-status-details.component.scss'],
+  standalone: false
 })
 export class TaskStatusDetailsComponent implements OnInit {
   @Input() task: Task;

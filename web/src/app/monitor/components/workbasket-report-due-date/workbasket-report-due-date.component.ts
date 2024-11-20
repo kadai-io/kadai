@@ -31,7 +31,6 @@ import { ReportTableComponent } from '../report-table/report-table.component';
   selector: 'kadai-monitor-workbasket-report-due-date',
   templateUrl: './workbasket-report-due-date.component.html',
   styleUrls: ['./workbasket-report-due-date.component.scss'],
-  standalone: true,
   imports: [NgIf, BaseChartDirective, ReportTableComponent],
   providers: [provideCharts(withDefaultRegisterables())]
 })

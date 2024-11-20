@@ -27,7 +27,8 @@ import { Subject } from 'rxjs';
 @Component({
   selector: 'kadai-shared-task-filter',
   templateUrl: './task-filter.component.html',
-  styleUrls: ['./task-filter.component.scss']
+  styleUrls: ['./task-filter.component.scss'],
+  standalone: false
 })
 export class TaskFilterComponent implements OnInit, OnDestroy {
   filter: TaskQueryFilterParameter;

@@ -32,7 +32,6 @@ enum WorkbasketReports {
   selector: 'kadai-monitor-workbasket-report',
   templateUrl: './workbasket-report.component.html',
   styleUrls: ['./workbasket-report.component.scss'],
-  standalone: true,
   imports: [CommonModule, MatTabGroup, MatTab, WorkbasketReportDueDateComponent, WorkbasketReportPlannedDateComponent]
 })
 export class WorkbasketReportComponent implements OnInit {

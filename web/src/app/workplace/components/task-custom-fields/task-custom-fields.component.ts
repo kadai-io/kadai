@@ -25,7 +25,8 @@ import { Subject } from 'rxjs';
 @Component({
   selector: 'kadai-task-custom-fields',
   templateUrl: './task-custom-fields.component.html',
-  styleUrls: ['./task-custom-fields.component.scss']
+  styleUrls: ['./task-custom-fields.component.scss'],
+  standalone: false
 })
 export class TaskCustomFieldsComponent implements OnInit, OnDestroy {
   @Input() task: Task;

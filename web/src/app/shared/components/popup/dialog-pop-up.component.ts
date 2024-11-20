@@ -24,7 +24,8 @@ import { messageTypes } from '../../services/obtain-message/message-types';
 @Component({
   selector: 'kadai-shared-dialog-pop-up',
   templateUrl: './dialog-pop-up.component.html',
-  styleUrls: ['./dialog-pop-up.component.scss']
+  styleUrls: ['./dialog-pop-up.component.scss'],
+  standalone: false
 })
 export class DialogPopUpComponent implements OnInit {
   message: string;

@@ -103,15 +103,13 @@ describe('ClassificationListComponent', () => {
         NoopAnimationsModule,
         MatProgressBarModule
       ],
-      declarations: [
-        ClassificationListComponent,
+      declarations: [ClassificationListComponent],
+      providers: [
         ClassificationTypesSelectorStub,
         TreeStub,
         SvgIconStub,
         ImportExportStub,
-        InputStub
-      ],
-      providers: [
+        InputStub,
         {
           provide: ClassificationsService,
           useValue: classificationServiceSpy

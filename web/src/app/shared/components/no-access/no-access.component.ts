@@ -26,7 +26,8 @@ import { BusinessAdminRoles } from '../../roles/business-admin.roles';
 @Component({
   selector: 'kadai-shared-no-access',
   templateUrl: './no-access.component.html',
-  styleUrls: ['./no-access.component.scss']
+  styleUrls: ['./no-access.component.scss'],
+  standalone: false
 })
 export class NoAccessComponent implements OnInit {
   showNoAccess = false;

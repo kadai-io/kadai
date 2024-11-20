@@ -41,7 +41,8 @@ import { Pair } from '../../../shared/models/pair';
 @Component({
   selector: 'kadai-administration-classification-list',
   templateUrl: './classification-list.component.html',
-  styleUrls: ['./classification-list.component.scss']
+  styleUrls: ['./classification-list.component.scss'],
+  standalone: false
 })
 export class ClassificationListComponent implements OnInit, OnDestroy {
   kadaiType = KadaiType;

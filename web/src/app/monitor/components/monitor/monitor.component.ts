@@ -24,7 +24,6 @@ import { MatTabNav, MatTabLink, MatTabNavPanel } from '@angular/material/tabs';
   selector: 'kadai-monitor',
   templateUrl: './monitor.component.html',
   styleUrls: ['./monitor.component.scss'],
-  standalone: true,
   imports: [MatTabNav, MatTabLink, RouterLink, MatTabNavPanel, RouterOutlet]
 })
 export class MonitorComponent implements OnInit {

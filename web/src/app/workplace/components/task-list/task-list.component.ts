@@ -23,7 +23,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 @Component({
   selector: 'kadai-task-list',
   templateUrl: './task-list.component.html',
-  styleUrls: ['./task-list.component.scss']
+  styleUrls: ['./task-list.component.scss'],
+  standalone: false
 })
 export class TaskListComponent implements OnInit {
   @Input()
