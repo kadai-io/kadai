@@ -671,20 +671,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/material@npm:18.2.13":
-  version: 18.2.13
-  resolution: "@angular/material@npm:18.2.13"
+"@angular/material@npm:19.0.0":
+  version: 19.0.0
+  resolution: "@angular/material@npm:19.0.0"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/animations": ^18.0.0 || ^19.0.0
-    "@angular/cdk": 18.2.13
-    "@angular/common": ^18.0.0 || ^19.0.0
-    "@angular/core": ^18.0.0 || ^19.0.0
-    "@angular/forms": ^18.0.0 || ^19.0.0
-    "@angular/platform-browser": ^18.0.0 || ^19.0.0
+    "@angular/animations": ^19.0.0 || ^20.0.0
+    "@angular/cdk": 19.0.0
+    "@angular/common": ^19.0.0 || ^20.0.0
+    "@angular/core": ^19.0.0 || ^20.0.0
+    "@angular/forms": ^19.0.0 || ^20.0.0
+    "@angular/platform-browser": ^19.0.0 || ^20.0.0
     rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/59e4df379bb3ef5658f29b38190584ee62368d4734b3302d598dad159fbc430253268b3125ff421594a5cc0b48ff453f2b6311a4e8f7e070fff80f505159c8f3
+  checksum: 10c0/dd8ad1a2fac0b9437dd2f22e04c5c3c1b9aeaff936cc10c4044489063e4a83a8eced8ddcd42654995a8d78182348e1431d227a667151fde8fc06a208d3728115
   languageName: node
   linkType: hard
 
@@ -10364,7 +10364,7 @@ __metadata:
     "@angular/compiler-cli": "npm:18.2.12"
     "@angular/core": "npm:18.2.12"
     "@angular/forms": "npm:18.2.12"
-    "@angular/material": "npm:18.2.13"
+    "@angular/material": "npm:19.0.0"
     "@angular/platform-browser": "npm:18.2.12"
     "@angular/platform-browser-dynamic": "npm:18.2.12"
     "@angular/router": "npm:18.2.12"
