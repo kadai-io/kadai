@@ -123,15 +123,10 @@ describe('WorkbasketInformationComponent', () => {
         MatAutocompleteModule,
         MatTooltipModule
       ],
-      declarations: [
-        WorkbasketInformationComponent,
+      declarations: [WorkbasketInformationComponent, TypeAheadComponent, MapValuesPipe, RemoveNoneTypePipe],
+      providers: [
         FieldErrorDisplayStub,
         IconTypeStub,
-        TypeAheadComponent,
-        MapValuesPipe,
-        RemoveNoneTypePipe
-      ],
-      providers: [
         { provide: WorkbasketService, useValue: workbasketServiceMock },
         { provide: FormsValidatorService, useValue: formValidatorServiceMock },
         { provide: NotificationService, useValue: notificationServiceMock },

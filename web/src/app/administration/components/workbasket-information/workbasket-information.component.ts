@@ -46,7 +46,8 @@ import { trimForm } from '../../../shared/util/form-trimmer';
 @Component({
   selector: 'kadai-administration-workbasket-information',
   templateUrl: './workbasket-information.component.html',
-  styleUrls: ['./workbasket-information.component.scss']
+  styleUrls: ['./workbasket-information.component.scss'],
+  standalone: false
 })
 export class WorkbasketInformationComponent implements OnInit, OnChanges, OnDestroy {
   @Input()

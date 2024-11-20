@@ -78,8 +78,11 @@ describe('WorkbasketListToolbarComponent', () => {
         MatIconModule,
         MatDialogModule
       ],
-      declarations: [WorkbasketListToolbarComponent, ImportExportStub, SortStub, FilterStub],
+      declarations: [WorkbasketListToolbarComponent],
       providers: [
+        ImportExportStub,
+        SortStub,
+        FilterStub,
         {
           provide: DomainService,
           useValue: domainServiceMock

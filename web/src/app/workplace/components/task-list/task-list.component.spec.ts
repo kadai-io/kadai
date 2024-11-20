@@ -50,8 +50,8 @@ describe('TaskListComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [FormsModule, RouterTestingModule.withRoutes(routes), MatSelectModule, MatListModule, MatBadgeModule],
-      declarations: [TaskListComponent, DummyDetailComponent, MockSvgIconComponent, DateTimeZonePipe],
-      providers: [WorkplaceService, ChangeDetectorRef, provideHttpClient()]
+      declarations: [TaskListComponent, DateTimeZonePipe],
+      providers: [WorkplaceService, ChangeDetectorRef, DummyDetailComponent, MockSvgIconComponent, provideHttpClient()]
     }).compileComponents();
   }));
 

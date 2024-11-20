@@ -45,7 +45,8 @@ import { FilterSelectors } from '../../../shared/store/filter-store/filter.selec
 @Component({
   selector: 'kadai-administration-workbasket-list',
   templateUrl: './workbasket-list.component.html',
-  styleUrls: ['./workbasket-list.component.scss']
+  styleUrls: ['./workbasket-list.component.scss'],
+  standalone: false
 })
 export class WorkbasketListComponent implements OnInit, OnDestroy {
   selectedId = '';

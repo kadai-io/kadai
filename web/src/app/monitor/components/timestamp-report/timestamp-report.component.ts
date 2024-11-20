@@ -27,7 +27,6 @@ import { ReportTableComponent } from '../report-table/report-table.component';
   selector: 'kadai-monitor-timestamp-report',
   templateUrl: './timestamp-report.component.html',
   styleUrls: ['./timestamp-report.component.scss'],
-  standalone: true,
   imports: [ReportTableComponent, CommonModule]
 })
 export class TimestampReportComponent implements OnInit {

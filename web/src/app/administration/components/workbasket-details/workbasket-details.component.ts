@@ -45,7 +45,8 @@ import { cloneDeep } from 'lodash';
 @Component({
   selector: 'kadai-administration-workbasket-details',
   templateUrl: './workbasket-details.component.html',
-  styleUrls: ['./workbasket-details.component.scss']
+  styleUrls: ['./workbasket-details.component.scss'],
+  standalone: false
 })
 export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
   workbasket: Workbasket;

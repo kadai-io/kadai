@@ -54,9 +54,9 @@ class IconTypeStub {
   @Input() text: string;
 }
 
-@Pipe({ name: 'orderBy' })
+@Pipe({ name: 'orderBy', standalone: false })
 class OrderByMock implements PipeTransform {
-  transform(list, sortBy): any {
+  transform(list): any {
     return list;
   }
 }
@@ -104,8 +104,11 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
         NoopAnimationsModule,
         NgxsModule.forRoot([WorkbasketState])
       ],
-      declarations: [WorkbasketDistributionTargetsListComponent, FilterStub, SpinnerStub, IconTypeStub, OrderByMock],
+      declarations: [WorkbasketDistributionTargetsListComponent, OrderByMock],
       providers: [
+        FilterStub,
+        SpinnerStub,
+        IconTypeStub,
         { provide: HttpClient, useValue: httpSpy },
         {
           provide: DomainService,

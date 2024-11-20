@@ -30,7 +30,8 @@ import { RequestInProgressService } from '../../../shared/services/request-in-pr
 @Component({
   selector: 'kadai-administration-settings',
   templateUrl: './settings.component.html',
-  styleUrls: ['./settings.component.scss']
+  styleUrls: ['./settings.component.scss'],
+  standalone: false
 })
 export class SettingsComponent implements OnInit, OnDestroy {
   settingTypes = SettingTypes;

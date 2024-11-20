@@ -25,7 +25,8 @@ import { expandDown } from '../../animations/expand.animation';
   selector: 'kadai-shared-user-information',
   templateUrl: './user-information.component.html',
   styleUrls: ['./user-information.component.scss'],
-  animations: [expandDown]
+  animations: [expandDown],
+  standalone: false
 })
 export class UserInformationComponent implements OnInit {
   userInformation: UserInfo;

@@ -41,9 +41,10 @@ describe('UserInformationComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [UserInformationComponent, SvgIconStub],
+      declarations: [UserInformationComponent],
       imports: [BrowserModule, NoopAnimationsModule],
       providers: [
+        SvgIconStub,
         { provide: KadaiEngineService, useClass: KadaiEngineServiceMock },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()

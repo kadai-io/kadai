@@ -35,7 +35,8 @@ import { ObjectReference } from '../../models/object-reference';
 @Component({
   selector: 'kadai-task-details',
   templateUrl: './task-details.component.html',
-  styleUrls: ['./task-details.component.scss']
+  styleUrls: ['./task-details.component.scss'],
+  standalone: false
 })
 export class TaskDetailsComponent implements OnInit, OnDestroy {
   task: Task;

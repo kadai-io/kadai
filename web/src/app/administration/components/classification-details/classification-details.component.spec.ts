@@ -139,8 +139,12 @@ describe('ClassificationDetailsComponent', () => {
         MatTooltipModule,
         NoopAnimationsModule
       ],
-      declarations: [ClassificationDetailsComponent, InputStub, FieldErrorDisplayStub, SvgIconStub, TextareaStub],
+      declarations: [ClassificationDetailsComponent],
       providers: [
+        InputStub,
+        FieldErrorDisplayStub,
+        SvgIconStub,
+        TextareaStub,
         { provide: ClassificationsService, useValue: classificationServiceSpy },
         { provide: ClassificationCategoriesService, useValue: classificationCategoriesServiceSpy },
         { provide: DomainService, useValue: domainServiceSpy },

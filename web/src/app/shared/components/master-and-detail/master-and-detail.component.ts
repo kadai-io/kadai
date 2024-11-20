@@ -23,7 +23,8 @@ import { MasterAndDetailService } from 'app/shared/services/master-and-detail/ma
 @Component({
   selector: 'kadai-shared-master-and-detail',
   templateUrl: './master-and-detail.component.html',
-  styleUrls: ['./master-and-detail.component.scss']
+  styleUrls: ['./master-and-detail.component.scss'],
+  standalone: false
 })
 export class MasterAndDetailComponent implements OnInit {
   private classifications = 'classifications';

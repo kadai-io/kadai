@@ -22,7 +22,8 @@ import { CustomAttribute } from 'app/workplace/models/task';
 @Component({
   selector: 'kadai-task-attribute-value',
   templateUrl: './task-attribute-value.component.html',
-  styleUrls: ['./task-attribute-value.component.scss']
+  styleUrls: ['./task-attribute-value.component.scss'],
+  standalone: false
 })
 export class TaskAttributeValueComponent implements OnInit {
   @Input() callbackInfo = false;

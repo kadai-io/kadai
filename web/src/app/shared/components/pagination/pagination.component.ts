@@ -35,7 +35,8 @@ import { takeUntil } from 'rxjs/operators';
 @Component({
   selector: 'kadai-shared-pagination',
   templateUrl: './pagination.component.html',
-  styleUrls: ['./pagination.component.scss']
+  styleUrls: ['./pagination.component.scss'],
+  standalone: false
 })
 export class PaginationComponent implements OnInit, OnChanges {
   @Input() page: Page;

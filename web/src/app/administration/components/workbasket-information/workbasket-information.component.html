@@ -43,7 +43,7 @@
             </mat-form-field>
             <div *ngIf="inputOverflowMap.get(key.name)" class="error">{{lengthError}}</div>
             <kadai-shared-field-error-display *ngIf="action != 3" [displayError]="!isFieldValid('workbasket.key')"
-                                              [validationTrigger]="this.toggleValidationMap.get('workbasket.key')"
+                                              [validationTrigger]="toggleValidationMap.get('workbasket.key')"
                                               errorMessage="* Key is required">
             </kadai-shared-field-error-display>
 
@@ -58,7 +58,7 @@
             </mat-form-field>
             <div *ngIf="inputOverflowMap.get(name.name)" class="error">{{lengthError}}</div>
             <kadai-shared-field-error-display [displayError]="!isFieldValid('workbasket.name')"
-                                              [validationTrigger]="this.toggleValidationMap.get('workbasket.name')"
+                                              [validationTrigger]="toggleValidationMap.get('workbasket.name')"
                                               errorMessage="* Name is required">
             </kadai-shared-field-error-display>
 
@@ -79,7 +79,7 @@
                      type="text">
               <div *ngIf="inputOverflowMap.get(owner.name)" class="error">{{lengthError}}</div>
               <kadai-shared-field-error-display [displayError]="!isFieldValid('workbasket.owner')"
-                                                [validationTrigger]="this.toggleValidationMap.get('workbasket.owner')"
+                                                [validationTrigger]="toggleValidationMap.get('workbasket.owner')"
                                                 errorMessage="* Owner is required">
               </kadai-shared-field-error-display>
             </ng-template>
@@ -90,7 +90,7 @@
               <!-- TYPE -->
               <mat-form-field appearance="outline" style="width: 28%">
                 <mat-label>Type</mat-label>
-                <mat-select [(value)]="this.workbasket.type">
+                <mat-select [(value)]="workbasket.type">
                   <mat-select-trigger>
                     <kadai-administration-icon-type [type]='workbasket.type'></kadai-administration-icon-type>
                     {{allTypes.get(workbasket.type)}}

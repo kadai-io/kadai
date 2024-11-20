@@ -35,7 +35,8 @@ import { takeUntil } from 'rxjs/operators';
 @Component({
   selector: 'kadai-administration-import-export',
   templateUrl: './import-export.component.html',
-  styleUrls: ['./import-export.component.scss']
+  styleUrls: ['./import-export.component.scss'],
+  standalone: false
 })
 export class ImportExportComponent implements OnInit, OnDestroy {
   @Input() currentSelection: KadaiType;

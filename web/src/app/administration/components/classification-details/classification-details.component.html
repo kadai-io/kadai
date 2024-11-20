@@ -61,7 +61,7 @@
             <mat-icon class="action-toolbar__aquamarine-button">content_copy</mat-icon>
             <span>Copy</span>
           </button>
-          <button (click)="onRemoveClassification()" *ngIf="this.classification?.classificationId"
+          <button (click)="onRemoveClassification()" *ngIf="classification?.classificationId"
                   class="action-toolbar__dropdown"
                   mat-menu-item matTooltip="Delete this classification">
             <mat-icon class="action-toolbar__red-button">delete</mat-icon>
@@ -204,7 +204,7 @@
 
                   <kadai-shared-field-error-display
                       [displayError]="!isFieldValid('classification.priority')"
-                      [validationTrigger]="this.toggleValidationMap.get('classification.priority.name')"
+                      [validationTrigger]="toggleValidationMap.get('classification.priority.name')"
                       errorMessage="* Priority is required">
                   </kadai-shared-field-error-display>
                 </div>
@@ -230,13 +230,13 @@
               <!-- CATEGORY -->
               <mat-form-field appearance="outline">
                 <mat-label>Category</mat-label>
-                <mat-select [(value)]="this.classification.category" required>
+                <mat-select [(value)]="classification.category" required>
                   <mat-select-trigger>
                     <svg-icon
-                        [src]="(getCategoryIcon(this.classification.category) | async)?.left"
+                        [src]="(getCategoryIcon(classification.category) | async)?.left"
                         class="detailed-fields__category-icon">
                     </svg-icon>
-                    {{ this.classification.category }}
+                    {{ classification.category }}
                   </mat-select-trigger>
                   <mat-option *ngFor="let category of categories$ | async" value="{{category}}">
                     <svg-icon [src]="(getCategoryIcon(category) | async)?.left"

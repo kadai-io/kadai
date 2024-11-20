@@ -37,7 +37,8 @@ import { ClearWorkbasketFilter } from '../../../shared/store/filter-store/filter
 @Component({
   selector: 'kadai-administration-workbasket-distribution-targets',
   templateUrl: './workbasket-distribution-targets.component.html',
-  styleUrls: ['./workbasket-distribution-targets.component.scss']
+  styleUrls: ['./workbasket-distribution-targets.component.scss'],
+  standalone: false
 })
 export class WorkbasketDistributionTargetsComponent implements OnInit, OnDestroy {
   sideEnum = Side;

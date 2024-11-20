@@ -44,7 +44,8 @@ export enum Search {
   selector: 'kadai-task-list-toolbar',
   animations: [expandDown],
   templateUrl: './task-list-toolbar.component.html',
-  styleUrls: ['./task-list-toolbar.component.scss']
+  styleUrls: ['./task-list-toolbar.component.scss'],
+  standalone: false
 })
 export class TaskListToolbarComponent implements OnInit {
   @Input() taskDefaultSortBy: TaskQuerySortParameter;

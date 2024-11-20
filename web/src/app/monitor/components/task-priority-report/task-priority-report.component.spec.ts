@@ -63,14 +63,15 @@ describe('TaskPriorityReportComponent', () => {
 
     TestBed.configureTestingModule({
       imports: [NgxsModule.forRoot([SettingsState]), MatTableModule, MatDividerModule, NoopAnimationsModule],
-      declarations: [CanvasStub, TaskPriorityReportFilterStub],
       providers: [
         RequestInProgressService,
         { provide: MonitorService, useValue: monitorServiceSpy },
         { provide: NotificationService, useValue: notificationServiceSpy },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),
-        TaskPriorityReportComponent
+        TaskPriorityReportComponent,
+        CanvasStub,
+        TaskPriorityReportFilterStub
       ]
     }).compileComponents();
 

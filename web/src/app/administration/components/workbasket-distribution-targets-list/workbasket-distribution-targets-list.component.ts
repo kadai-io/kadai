@@ -50,7 +50,8 @@ import { WorkbasketDistributionTarget } from '../../../shared/models/workbasket-
   selector: 'kadai-administration-workbasket-distribution-targets-list',
   templateUrl: './workbasket-distribution-targets-list.component.html',
   styleUrls: ['./workbasket-distribution-targets-list.component.scss'],
-  animations: [expandDown]
+  animations: [expandDown],
+  standalone: false
 })
 export class WorkbasketDistributionTargetsListComponent
   implements AfterContentChecked, OnChanges, OnInit, AfterViewInit

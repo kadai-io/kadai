@@ -22,7 +22,8 @@ import { By } from '@angular/platform-browser';
 import { ResizableWidthDirective } from './resizable-width.directive';
 
 @Component({
-  template: ` <div kadaiResizableWidth></div>`
+  template: ` <div kadaiResizableWidth></div>`,
+  standalone: false
 })
 class TestComponent {}
 

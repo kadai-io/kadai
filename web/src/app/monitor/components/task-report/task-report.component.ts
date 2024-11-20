@@ -31,7 +31,6 @@ import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2
   selector: 'kadai-monitor-task-report',
   templateUrl: './task-report.component.html',
   styleUrls: ['./task-report.component.scss'],
-  standalone: true,
   imports: [CommonModule, ReportTableComponent, BaseChartDirective],
   providers: [provideCharts(withDefaultRegisterables())]
 })

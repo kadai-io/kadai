@@ -48,7 +48,8 @@ import { RequestInProgressService } from '../../../shared/services/request-in-pr
 @Component({
   selector: 'kadai-administration-access-items-management',
   templateUrl: './access-items-management.component.html',
-  styleUrls: ['./access-items-management.component.scss']
+  styleUrls: ['./access-items-management.component.scss'],
+  standalone: false
 })
 export class AccessItemsManagementComponent implements OnInit {
   accessIdPrevious: string;

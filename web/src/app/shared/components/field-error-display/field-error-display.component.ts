@@ -23,7 +23,8 @@ import { highlight } from 'app/shared/animations/validation.animation';
   selector: 'kadai-shared-field-error-display',
   templateUrl: './field-error-display.component.html',
   animations: [highlight],
-  styleUrls: ['./field-error-display.component.scss']
+  styleUrls: ['./field-error-display.component.scss'],
+  standalone: false
 })
 export class FieldErrorDisplayComponent implements OnInit {
   @Input()

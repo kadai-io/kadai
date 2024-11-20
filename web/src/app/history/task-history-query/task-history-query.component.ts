@@ -32,7 +32,8 @@ import { Pair } from '../../shared/models/pair';
 @Component({
   selector: 'kadai-task-query',
   templateUrl: './task-history-query.component.html',
-  styleUrls: ['./task-history-query.component.scss']
+  styleUrls: ['./task-history-query.component.scss'],
+  standalone: false
 })
 export class TaskHistoryQueryComponent implements OnInit {
   data: TaskHistoryEventData[] = [];

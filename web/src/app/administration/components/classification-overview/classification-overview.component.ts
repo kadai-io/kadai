@@ -32,7 +32,8 @@ import { Classification } from '../../../shared/models/classification';
 @Component({
   selector: 'kadai-administration-classification-overview',
   templateUrl: './classification-overview.component.html',
-  styleUrls: ['./classification-overview.component.scss']
+  styleUrls: ['./classification-overview.component.scss'],
+  standalone: false
 })
 export class ClassificationOverviewComponent implements OnInit, OnDestroy {
   showDetail = false;

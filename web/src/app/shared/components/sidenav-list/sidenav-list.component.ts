@@ -28,7 +28,8 @@ import { BusinessAdminRoles } from '../../roles/business-admin.roles';
 @Component({
   selector: 'kadai-sidenav-list',
   templateUrl: './sidenav-list.component.html',
-  styleUrls: ['./sidenav-list.component.scss']
+  styleUrls: ['./sidenav-list.component.scss'],
+  standalone: false
 })
 export class SidenavListComponent implements OnInit {
   toggle: boolean = false;

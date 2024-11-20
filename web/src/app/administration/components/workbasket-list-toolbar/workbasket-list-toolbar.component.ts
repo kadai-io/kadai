@@ -33,7 +33,8 @@ import { WorkbasketService } from '../../../shared/services/workbasket/workbaske
   selector: 'kadai-administration-workbasket-list-toolbar',
   animations: [expandDown],
   templateUrl: './workbasket-list-toolbar.component.html',
-  styleUrls: ['./workbasket-list-toolbar.component.scss']
+  styleUrls: ['./workbasket-list-toolbar.component.scss'],
+  standalone: false
 })
 export class WorkbasketListToolbarComponent implements OnInit {
   @Input() workbasketListExpanded: boolean = true;

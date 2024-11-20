@@ -22,7 +22,8 @@ import { Direction, Sorting } from 'app/shared/models/sorting';
 @Component({
   selector: 'kadai-shared-sort',
   templateUrl: './sort.component.html',
-  styleUrls: ['./sort.component.scss']
+  styleUrls: ['./sort.component.scss'],
+  standalone: false
 })
 export class SortComponent<T> implements OnInit {
   @Input() sortingFields: Map<T, string>;

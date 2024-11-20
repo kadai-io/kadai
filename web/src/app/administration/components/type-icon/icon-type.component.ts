@@ -22,7 +22,8 @@ import { WorkbasketType } from 'app/shared/models/workbasket-type';
 @Component({
   selector: 'kadai-administration-icon-type',
   templateUrl: './icon-type.component.html',
-  styleUrls: ['./icon-type.component.scss']
+  styleUrls: ['./icon-type.component.scss'],
+  standalone: false
 })
 export class IconTypeComponent implements OnInit, OnChanges {
   @Input()

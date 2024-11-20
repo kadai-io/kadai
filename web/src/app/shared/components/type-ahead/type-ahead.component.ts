@@ -31,7 +31,8 @@ import { GlobalCustomisation } from '../../models/customisation';
 @Component({
   selector: 'kadai-shared-type-ahead',
   templateUrl: './type-ahead.component.html',
-  styleUrls: ['./type-ahead.component.scss']
+  styleUrls: ['./type-ahead.component.scss'],
+  standalone: false
 })
 export class TypeAheadComponent implements OnInit, OnDestroy {
   @Input() savedAccessId;

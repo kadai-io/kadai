@@ -53,7 +53,8 @@ import { trimForm } from '../../../shared/util/form-trimmer';
   selector: 'kadai-administration-classification-details',
   templateUrl: './classification-details.component.html',
   animations: [highlight],
-  styleUrls: ['./classification-details.component.scss']
+  styleUrls: ['./classification-details.component.scss'],
+  standalone: false
 })
 export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   classification: Classification;

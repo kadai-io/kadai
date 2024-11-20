@@ -35,7 +35,6 @@ import { MatCheckbox } from '@angular/material/checkbox';
   selector: 'kadai-monitor-task-priority-report-filter',
   templateUrl: './task-priority-report-filter.component.html',
   styleUrls: ['./task-priority-report-filter.component.scss'],
-  standalone: true,
   imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgFor, MatCheckbox, NgIf]
 })
 export class TaskPriorityReportFilterComponent implements OnInit, OnDestroy {

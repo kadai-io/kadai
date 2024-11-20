@@ -26,7 +26,8 @@ import { Location } from '@angular/common';
 @Component({
   selector: 'kadai-administration-classification-types-selector',
   templateUrl: './classification-types-selector.component.html',
-  styleUrls: ['./classification-types-selector.component.scss']
+  styleUrls: ['./classification-types-selector.component.scss'],
+  standalone: false
 })
 export class ClassificationTypesSelectorComponent {
   @Select(ClassificationSelectors.selectedClassificationType) classificationTypeSelected$: Observable<string>;

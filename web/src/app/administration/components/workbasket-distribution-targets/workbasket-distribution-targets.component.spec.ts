@@ -85,8 +85,9 @@ describe('WorkbasketDistributionTargetsComponent', () => {
         MatButtonModule,
         NgxsModule.forRoot([WorkbasketState])
       ],
-      declarations: [WorkbasketDistributionTargetsComponent, WorkbasketDistributionTargetsListStub],
+      declarations: [WorkbasketDistributionTargetsComponent],
       providers: [
+        WorkbasketDistributionTargetsListStub,
         { provide: WorkbasketService, useValue: workbasketServiceSpy },
         { provide: NotificationService, useValue: notificationsServiceSpy },
         { provide: ActivatedRoute, useValue: activatedRouteMock },

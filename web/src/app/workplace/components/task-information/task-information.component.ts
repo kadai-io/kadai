@@ -42,7 +42,8 @@ import { AccessId } from '../../../shared/models/access-id';
 @Component({
   selector: 'kadai-task-information',
   templateUrl: './task-information.component.html',
-  styleUrls: ['./task-information.component.scss']
+  styleUrls: ['./task-information.component.scss'],
+  standalone: false
 })
 export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
   @Input()

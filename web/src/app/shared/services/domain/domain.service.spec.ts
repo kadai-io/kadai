@@ -48,9 +48,9 @@ describe('DomainService', () => {
         StartupService,
         KadaiEngineService,
         WindowRefService,
+        DummyDetailComponent,
         provideHttpClient()
-      ],
-      declarations: [DummyDetailComponent]
+      ]
     });
   });
 
