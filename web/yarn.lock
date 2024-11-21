@@ -3584,15 +3584,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ngxs/store@npm:18.1.5":
-  version: 18.1.5
-  resolution: "@ngxs/store@npm:18.1.5"
+"@ngxs/store@npm:18.1.6":
+  version: 18.1.6
+  resolution: "@ngxs/store@npm:18.1.6"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
     "@angular/core": ">=16.0.0 <19.0.0"
     rxjs: ">=7.0.0"
-  checksum: 10c0/6ed928fdce466ec1be20aa981f063a55fdc1fb197e525f9dbfc0e44d740364d974d0e6aeaefa97c905b10648d63c21297030b800effc5c9f135631a442904ff7
+  checksum: 10c0/92277c17971fa660cf6790f4aeaa31eacbfd49f95a325051c089d39eccf3890af9f1a01701e2d6c375c28c1f85e1a1075fb4288f89894487c5d4a7316ca43f2f
   languageName: node
   linkType: hard
 
@@ -10372,7 +10372,7 @@ __metadata:
     "@ngneat/overview": "npm:6.1.1"
     "@ngxs/devtools-plugin": "npm:18.1.6"
     "@ngxs/router-plugin": "npm:18.1.6"
-    "@ngxs/store": "npm:18.1.5"
+    "@ngxs/store": "npm:18.1.6"
     "@types/jest": "npm:29.5.14"
     "@types/lodash": "npm:4.17.13"
     "@types/node": "npm:22.9.1"
