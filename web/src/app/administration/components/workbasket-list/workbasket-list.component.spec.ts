@@ -185,15 +185,15 @@ describe('WorkbasketListComponent', () => {
     expect(component.filterBy).toMatchObject({ 'name-like': ['workbasket'], domain: ['123'] });
   });
 
-  it('should call performFilter when filter value from store is obtained', () => {
-    const performFilter = jest.spyOn(component, 'performFilter');
-    component.ngOnInit();
-    expect(performFilter).toHaveBeenCalled();
-  });
-
   it('should change page value when change page function is called ', () => {
     const page = 2;
     component.changePage(page);
     expect(component.pageParameter.page).toBe(page);
+  });
+
+  it('should call performFilter when filter value from store is obtained', () => {
+    const performFilter = jest.spyOn(component, 'performFilter');
+    component.ngOnInit();
+    expect(performFilter).toHaveBeenCalled();
   });
 });
