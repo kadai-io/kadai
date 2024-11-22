@@ -1257,8 +1257,10 @@ class TaskControllerIntTest {
     void should_GetAllTasks_For_GettingLastTaskSummaryPageSortedByPorValue() {
       String url =
           restHelper.toUrl(RestEndpoints.URL_TASKS)
-              + "?state=READY&state=CLAIMED&sort-by=POR_VALUE"
-              + "&order=DESCENDING&page-size=5&page=16";
+              + "?state=READY&state=CLAIMED"
+              + "&sort-by=POR_VALUE&order=DESCENDING"
+              + "&sort-by=TASK_ID&order=ASCENDING"
+              + "&page-size=5&page=16";
       HttpEntity<String> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
 
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
@@ -1273,8 +1275,11 @@ class TaskControllerIntTest {
       assertThat(response.getBody().getLink(IanaLinkRelations.SELF)).isNotNull();
       assertThat(response.getBody().getRequiredLink(IanaLinkRelations.SELF).getHref())
           .endsWith(
-              "/api/v1/tasks?state=READY&state=CLAIMED"
-                  + "&sort-by=POR_VALUE&order=DESCENDING&page-size=5&page=16");
+              "/api/v1/tasks"
+                  + "?state=READY&state=CLAIMED"
+                  + "&sort-by=POR_VALUE&sort-by=TASK_ID"
+                  + "&order=DESCENDING&order=ASCENDING"
+                  + "&page-size=5&page=16");
       assertThat(response.getBody().getLink(IanaLinkRelations.FIRST)).isNotNull();
       assertThat(response.getBody().getLink(IanaLinkRelations.LAST)).isNotNull();
       assertThat(response.getBody().getLink(IanaLinkRelations.PREV)).isNotNull();

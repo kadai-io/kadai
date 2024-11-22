@@ -35,7 +35,7 @@ import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 /** Test for {@link WorkbasketDefinitionRepresentationModelAssembler}. */
 @KadaiSpringBootTest
@@ -43,9 +43,9 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 class WorkbasketDefinitionRepresentationModelAssemblerTest {
 
   private final WorkbasketDefinitionRepresentationModelAssembler assembler;
-  @SpyBean private WorkbasketService workbasketService;
-  @SpyBean private WorkbasketAccessItemRepresentationModelAssembler accessItemAssembler;
-  @SpyBean private WorkbasketRepresentationModelAssembler workbasketAssembler;
+  @MockitoSpyBean private WorkbasketService workbasketService;
+  @MockitoSpyBean private WorkbasketAccessItemRepresentationModelAssembler accessItemAssembler;
+  @MockitoSpyBean private WorkbasketRepresentationModelAssembler workbasketAssembler;
 
   @Autowired
   WorkbasketDefinitionRepresentationModelAssemblerTest(
