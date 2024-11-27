@@ -20,7 +20,10 @@ package acceptance;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import io.kadai.KadaiConfiguration;
+import io.kadai.KadaiConfiguration.Builder;
 import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
 import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.spi.priority.api.PriorityServiceProvider;
 import io.kadai.spi.priority.internal.PriorityServiceManager;
@@ -28,17 +31,25 @@ import io.kadai.task.api.models.TaskSummary;
 import io.kadai.testapi.KadaiInject;
 import io.kadai.testapi.KadaiIntegrationTest;
 import io.kadai.testapi.WithServiceProvider;
+import io.kadai.testapi.extensions.TestContainerExtension;
 import java.lang.reflect.Field;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.OptionalInt;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 
+@ExtendWith(OutputCaptureExtension.class)
 @KadaiIntegrationTest
-public class KadaiEngineInitalizationTest {
+public class KadaiEngineInitializationTest {
 
   static class MyPriorityServiceProvider implements PriorityServiceProvider {
 
@@ -53,6 +64,35 @@ public class KadaiEngineInitalizationTest {
     public OptionalInt calculatePriority(TaskSummary taskSummary) {
       return OptionalInt.empty();
     }
+  }
+
+  @Test
+  void should_FilterKadaiProperties_When_Logging(CapturedOutput output) throws SQLException {
+    // should filter out properties that are not kadai.* and also sensitive properties containing
+    // passwords
+    KadaiConfiguration kadaiConfiguration =
+        new Builder(TestContainerExtension.createDataSourceForH2(), true, "KADAI")
+            .initKadaiProperties("/fullKadai.properties")
+            .build();
+
+    KadaiEngineImpl.createKadaiEngine(
+        kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT, null);
+    assertThat(output.getAll()).isNotEmpty();
+    String[] properties = extractPropertiesSection(output.getAll()).split(",");
+    for (String property : properties) {
+
+      assertThat(property.trim().split("=")[0].trim()).startsWith("kadai.");
+      assertThat(property.toLowerCase()).doesNotContain("password");
+    }
+  }
+
+  private String extractPropertiesSection(String logOutput) {
+    String regex = "properties=\\{([^}]+)\\}";
+    Matcher matcher = Pattern.compile(regex).matcher(logOutput);
+    if (matcher.find()) {
+      return matcher.group(1);
+    }
+    return null;
   }
 
   @Nested

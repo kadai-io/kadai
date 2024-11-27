@@ -730,8 +730,15 @@ public class KadaiConfiguration {
         + ", useSpecificDb2Taskquery="
         + useSpecificDb2Taskquery
         + ", properties="
-        + properties
+        + filterOutNonKadaiAndSensitiveProperties()
         + '}';
+  }
+
+  private Map<String, String> filterOutNonKadaiAndSensitiveProperties() {
+    return properties.entrySet().stream()
+        .filter(entry ->  entry.getKey().startsWith("kadai."))
+        .filter((entry -> !entry.getKey().toLowerCase().contains("password")))
+        .collect(Collectors.toUnmodifiableMap(Entry::getKey, Entry::getValue));
   }
 
   // endregion
