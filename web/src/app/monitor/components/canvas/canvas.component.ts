@@ -25,14 +25,11 @@ import { Observable, Subject } from 'rxjs';
 import { Settings } from '../../../settings/models/settings';
 import { takeUntil } from 'rxjs/operators';
 import { SettingMembers } from '../../../settings/components/Settings/expected-members';
-import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 @Component({
   selector: 'kadai-monitor-canvas',
   templateUrl: './canvas.component.html',
-  styleUrls: ['./canvas.component.scss'],
-  providers: [provideCharts(withDefaultRegisterables())],
-  standalone: true
+  styleUrls: ['./canvas.component.scss']
 })
 export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() row: ReportRow;
