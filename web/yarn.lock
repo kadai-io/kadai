@@ -766,17 +766,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/forms@npm:19.0.1":
-  version: 19.0.1
-  resolution: "@angular/forms@npm:19.0.1"
+"@angular/forms@npm:19.0.3":
+  version: 19.0.3
+  resolution: "@angular/forms@npm:19.0.3"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/common": 19.0.1
-    "@angular/core": 19.0.1
-    "@angular/platform-browser": 19.0.1
+    "@angular/common": 19.0.3
+    "@angular/core": 19.0.3
+    "@angular/platform-browser": 19.0.3
     rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/0dc8bd1737469bf733f8d5386ef0cac7753bac170eb7f4d309f54f71d3808e8ed906ee87d45d4560d19f118bc51f25c7b5c8845b606b0fe74689f03e63d76926
+  checksum: 10c0/a2a276514ece196489f794eab3ef4b9fa5f3ef4b8cfa0c006682a0fd35fe99bc6f68aa3ca95aa292e2649ee4f2b3f1e0a6499a39cd1c99da6cf1639b0b379057
   languageName: node
   linkType: hard
 
@@ -11077,7 +11077,7 @@ __metadata:
     "@angular/compiler": "npm:19.0.3"
     "@angular/compiler-cli": "npm:19.0.3"
     "@angular/core": "npm:19.0.1"
-    "@angular/forms": "npm:19.0.1"
+    "@angular/forms": "npm:19.0.3"
     "@angular/material": "npm:19.0.2"
     "@angular/platform-browser": "npm:19.0.3"
     "@angular/platform-browser-dynamic": "npm:19.0.3"
