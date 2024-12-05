@@ -5,17 +5,17 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"@ali-hm/angular-tree-component@npm:18.0.5":
-  version: 18.0.5
-  resolution: "@ali-hm/angular-tree-component@npm:18.0.5"
+"@ali-hm/angular-tree-component@npm:19.0.1":
+  version: 19.0.1
+  resolution: "@ali-hm/angular-tree-component@npm:19.0.1"
   dependencies:
     mobx: "npm:~4.14.1"
     tslib: "npm:^2.5.0"
   peerDependencies:
-    "@angular/common": ">=18.0.0"
-    "@angular/core": ">=18.0.0"
+    "@angular/common": ">=19.0.0"
+    "@angular/core": ">=19.0.0"
     mobx: ~4.14.1
-  checksum: 10c0/738fded9bd32779217364b0cc9c657039f9ea0eb0dedc1706690e28f6b0f7628f9b68d29616859cfa570fda4d712bdfdcbf6c193e29b910a392ddcfe77be90c0
+  checksum: 10c0/192ef8846ab82d0da04912a826b43d439ac8392c402f7f992f169189e98a8e747e35255c34f10799eefda724f8563223d0a14ac24abb4e2a28fcc5df7b066e92
   languageName: node
   linkType: hard
 
@@ -10960,7 +10960,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "kadai@workspace:."
   dependencies:
-    "@ali-hm/angular-tree-component": "npm:18.0.5"
+    "@ali-hm/angular-tree-component": "npm:19.0.1"
     "@angular-builders/custom-webpack": "npm:18.0.0"
     "@angular-devkit/build-angular": "npm:19.0.2"
     "@angular/animations": "npm:19.0.1"
