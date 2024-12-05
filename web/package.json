@@ -55,7 +55,7 @@
     "@angular-builders/custom-webpack": "18.0.0",
     "@angular/build": "^19.0.2",
     "@angular/cli": "19.0.2",
-    "@angular/compiler": "19.0.1",
+    "@angular/compiler": "19.0.3",
     "@angular/compiler-cli": "19.0.1",
     "@ngxs/devtools-plugin": "19.0.0",
     "@types/jest": "29.5.14",
