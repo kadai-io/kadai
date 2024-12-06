@@ -288,12 +288,12 @@ public class LdapClient {
     andFilter.and(
         new EqualsFilter(getPermissionSearchFilterName(), getPermissionSearchFilterValue()));
     final OrFilter orFilter = new OrFilter();
-    orFilter.or(new WhitespaceWildcardsFilter(getUserPermissionsAttribute(), name));
-    if (!CN.equals(getUserPermissionsAttribute())) {
+    orFilter.or(new WhitespaceWildcardsFilter(getPermissionNameAttribute(), name));
+    if (!CN.equals(getPermissionNameAttribute())) {
       orFilter.or(new WhitespaceWildcardsFilter(CN, name));
     }
     final AndFilter andFilter2 = new AndFilter();
-    andFilter2.and(new PresentFilter(getUserPermissionsAttribute()));
+    andFilter2.and(new PresentFilter(getPermissionNameAttribute()));
     andFilter.and(orFilter);
     andFilter2.and(andFilter);
 
@@ -384,11 +384,12 @@ public class LdapClient {
     }
     orFilter.or(new EqualsFilter(getPermissionsOfUserName(), dn));
     final AndFilter andFilter2 = new AndFilter();
-    andFilter2.and(new PresentFilter(getUserPermissionsAttribute()));
+    andFilter2.and(new PresentFilter(getPermissionNameAttribute()));
     andFilter.and(orFilter);
     andFilter2.and(andFilter);
 
-    String[] userAttributesToReturn = {getUserIdAttribute(), getUserPermissionsAttribute()};
+    String[] attributesRepresentingTheAccessId = {getUserIdAttribute(),
+        getPermissionNameAttribute()};
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug(
           "Using filter '{}' for LDAP query with group search base {}.",
@@ -400,7 +401,7 @@ public class LdapClient {
         getPermissionSearchBase(),
         andFilter2.encode(),
         SearchControls.SUBTREE_SCOPE,
-        userAttributesToReturn,
+        attributesRepresentingTheAccessId,
         new PermissionContextMapper());
   }
 
@@ -477,9 +478,9 @@ public class LdapClient {
     andFilter.and(
         new EqualsFilter(getPermissionSearchFilterName(), getPermissionSearchFilterValue()));
     final OrFilter orFilter = new OrFilter();
-    orFilter.or(new EqualsFilter(getUserPermissionsAttribute(), accessId));
+    orFilter.or(new EqualsFilter(getPermissionNameAttribute(), accessId));
     final AndFilter andFilterPermission2 = new AndFilter();
-    andFilter.and(new PresentFilter(getUserPermissionsAttribute()));
+    andFilter.and(new PresentFilter(getPermissionNameAttribute()));
     andFilter.and(orFilter);
     andFilterPermission2.and(andFilter);
 
@@ -502,7 +503,7 @@ public class LdapClient {
     final OrFilter orFilter = new OrFilter();
     orFilter.or(new EqualsFilter(getGroupNameAttribute(), accessId));
     final AndFilter andFilter2 = new AndFilter();
-    andFilter2.and(new NotPresentFilter(getUserPermissionsAttribute()));
+    andFilter2.and(new NotPresentFilter(getPermissionNameAttribute()));
     andFilter.and(orFilter);
     andFilter2.and(andFilter);
 
@@ -613,8 +614,8 @@ public class LdapClient {
     return LdapSettings.KADAI_LDAP_USER_MEMBER_OF_GROUP_ATTRIBUTE.getValueFromEnv(env);
   }
 
-  public String getUserPermissionsAttribute() {
-    return LdapSettings.KADAI_LDAP_USER_PERMISSIONS_ATTRIBUTE.getValueFromEnv(env);
+  public String getPermissionNameAttribute() {
+    return LdapSettings.KADAI_LDAP_PERMISSION_NAME_ATTRIBUTE.getValueFromEnv(env);
   }
 
   public String getPermissionSearchBase() {
@@ -629,8 +630,8 @@ public class LdapClient {
     return LdapSettings.KADAI_LDAP_PERMISSION_SEARCH_FILTER_VALUE.getValueFromEnv(env);
   }
 
-  public String getPermissionNameAttribute() {
-    return LdapSettings.KADAI_LDAP_PERMISSION_NAME_ATTRIBUTE.getValueFromEnv(env);
+  public String getUserPermissionsAttribute() {
+    return LdapSettings.KADAI_LDAP_USER_PERMISSIONS_ATTRIBUTE.getValueFromEnv(env);
   }
 
   public String getGroupSearchBase() {
@@ -760,7 +761,7 @@ public class LdapClient {
   }
 
   String[] getLookUpPermissionAttributesToReturn() {
-    return new String[] {getUserPermissionsAttribute(), getPermissionSearchFilterName()};
+    return new String[] {getPermissionNameAttribute(), getPermissionSearchFilterName()};
   }
 
   String[] getLookUpUserAndGroupAndPermissionAttributesToReturn() {
@@ -801,7 +802,7 @@ public class LdapClient {
     return new String[] {
       getUserIdAttribute(),
       getUserMemberOfGroupAttribute(),
-      getUserPermissionsAttribute(),
+      getPermissionNameAttribute(),
       getUserFirstnameAttribute(),
       getUserLastnameAttribute(),
       getUserFullnameAttribute(),
@@ -907,7 +908,7 @@ public class LdapClient {
   }
 
   private String getPermissionIdFromContext(final DirContextOperations context) {
-    String permissionId = context.getStringAttribute(getUserPermissionsAttribute());
+    String permissionId = context.getStringAttribute(getPermissionNameAttribute());
     if (permissionId != null && useLowerCaseForAccessIds) {
       return permissionId.toLowerCase();
     } else {
@@ -917,9 +918,9 @@ public class LdapClient {
 
   private Set<String> getPermissionIdsFromContext(final DirContextOperations context) {
     boolean permissionsAreNotEmpty = !permissionsAreEmpty()
-        && context.getStringAttributes(getUserPermissionsAttribute()) != null;
+        && context.getStringAttributes(getPermissionNameAttribute()) != null;
     Set<String> permissions =
-        permissionsAreNotEmpty ? Set.of(context.getStringAttributes(getUserPermissionsAttribute()))
+        permissionsAreNotEmpty ? Set.of(context.getStringAttributes(getPermissionNameAttribute()))
             : Collections.emptySet();
     if (useLowerCaseForAccessIds) {
       permissions =
@@ -932,17 +933,17 @@ public class LdapClient {
   }
 
   private boolean permissionsAreEmpty() {
-    return getUserPermissionsAttribute() == null || getPermissionSearchFilterName() == null
-        || getUserPermissionsAttribute().isEmpty() || getPermissionSearchFilterName().isEmpty();
+    return getPermissionNameAttribute() == null || getPermissionSearchFilterName() == null
+        || getPermissionNameAttribute().isEmpty() || getPermissionSearchFilterName().isEmpty();
   }
 
   private AndFilter getPermissionsNotPresentAndFilter(AndFilter andFilter) {
-    if (getUserPermissionsAttribute() == null || getUserPermissionsAttribute().isEmpty()) {
+    if (getPermissionNameAttribute() == null || getPermissionNameAttribute().isEmpty()) {
       return andFilter;
     }
     final AndFilter
         andFilter2 = new AndFilter();
-    andFilter2.and(new NotPresentFilter(getUserPermissionsAttribute()));
+    andFilter2.and(new NotPresentFilter(getPermissionNameAttribute()));
     andFilter2.and(andFilter);
     return andFilter2;
   }
@@ -969,7 +970,7 @@ public class LdapClient {
     public AccessIdRepresentationModel doMapFromContext(final DirContextOperations context) {
       final AccessIdRepresentationModel accessId = new AccessIdRepresentationModel();
       accessId.setAccessId(getPermissionIdFromContext(context)); // fully qualified dn
-      accessId.setName(context.getStringAttribute(getUserPermissionsAttribute()));
+      accessId.setName(context.getStringAttribute(getPermissionNameAttribute()));
       return accessId;
     }
   }
@@ -1025,8 +1026,8 @@ public class LdapClient {
         String firstName = context.getStringAttribute(getUserFirstnameAttribute());
         String lastName = context.getStringAttribute(getUserLastnameAttribute());
         accessId.setName(String.format("%s, %s", lastName, firstName));
-      } else if (getUserPermissionsAttribute() == null || getUserPermissionsAttribute().isEmpty()
-          || context.getStringAttribute(getUserPermissionsAttribute()) == null) {
+      } else if (getPermissionNameAttribute() == null || getPermissionNameAttribute().isEmpty()
+          || context.getStringAttribute(getPermissionNameAttribute()) == null) {
         if (useDnForGroups()) {
           accessId.setAccessId(getDnFromContext(context)); // fully qualified dn
         } else {
@@ -1035,7 +1036,7 @@ public class LdapClient {
         accessId.setName(context.getStringAttribute(getGroupNameAttribute()));
       } else {
         accessId.setAccessId(getPermissionIdFromContext(context));
-        accessId.setName(context.getStringAttribute(getUserPermissionsAttribute()));
+        accessId.setName(context.getStringAttribute(getPermissionNameAttribute()));
       }
       return accessId;
     }
