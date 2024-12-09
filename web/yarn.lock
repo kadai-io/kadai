@@ -5792,16 +5792,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"angular-svg-icon@npm:19.0.0":
-  version: 19.0.0
-  resolution: "angular-svg-icon@npm:19.0.0"
+"angular-svg-icon@npm:19.0.1":
+  version: 19.0.1
+  resolution: "angular-svg-icon@npm:19.0.1"
   dependencies:
     tslib: "npm:^2.3.1"
   peerDependencies:
     "@angular/common": ">=19.0.0"
     "@angular/core": ">=19.0.0"
     rxjs: ">=6.6.3"
-  checksum: 10c0/0483f90ec62e68d933b15450a6f91e21a4efe43fed86ba46129f5554b93e870e9640fcdce7d7d2655aef1d313098b5480a869585462e7078fdd0767c416b6ab4
+  checksum: 10c0/30915e917a4c5c2715e394c6bb9fc534691e62ebf40ddb838be610bc1d2dc0961ef8fb12813ecbee35c234e88139bab3a5373407cca77221a522351a0a7360bc
   languageName: node
   linkType: hard
 
@@ -10941,7 +10941,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:8.17.0"
     "@typescript-eslint/eslint-plugin-tslint": "npm:7.0.2"
     "@typescript-eslint/parser": "npm:8.17.0"
-    angular-svg-icon: "npm:19.0.0"
+    angular-svg-icon: "npm:19.0.1"
     chart.js: "npm:4.4.7"
     compression-webpack-plugin: "npm:11.1.0"
     core-js: "npm:3.39.0"
