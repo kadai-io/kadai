@@ -17,6 +17,7 @@ import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskSummary;
 import io.kadai.task.rest.TaskController.TaskQuerySortParameter;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
+import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryCollectionRepresentationModel;
@@ -1222,6 +1223,134 @@ public interface TaskApi {
       @PathVariable("workbasketId") String workbasketId,
       @RequestBody TransferTaskRepresentationModel transferTaskRepresentationModel)
       throws NotAuthorizedOnWorkbasketException, WorkbasketNotFoundException;
+
+  /**
+   * Distributes tasks to one or more destination workbaskets based on the provided distribution
+   * strategy and additional information. The tasks to be distributed are passed in the request
+   * body.
+   *
+   * <p>This endpoint provides flexible distribution options:
+   *
+   * <ul>
+   *   <li>If destination workbasket IDs are provided, tasks will be distributed to those specific
+   *       workbaskets.
+   *   <li>If a distribution strategy name is provided, the specified strategy will determine how
+   *       tasks are allocated.
+   *   <li>Additional information can be passed to further customize the distribution logic.
+   * </ul>
+   *
+   * <p>Tasks that cannot be distributed (e.g., due to errors) will remain in their original
+   * workbaskets.
+   *
+   * @title Distribute Tasks
+   * @param distributionTasksRepresentationModel a JSON-formatted request body containing:
+   *     <ul>
+   *       <li>{@code taskIds} ({@code List<String>}): A list of task IDs to be distributed from a
+   *           given sourceworkbasket (optional).
+   *       <li>{@code destinationWorkbasketIds} ({@code List<String>}): A list of destination
+   *           workbasket IDs (optional).
+   *       <li>{@code distributionStrategyName} ({@code String}): The name of the distribution
+   *           strategy to use (optional).
+   *       <li>{@code additionalInformation} ({@code Map<String, Object>}): Additional details to
+   *           customize the distribution logic (optional).
+   *     </ul>
+   *
+   * @param workbasketId the ID of the workbasket from which the tasks are to be distributed.
+   * @return a {@link ResponseEntity} containing a {@link BulkOperationResultsRepresentationModel}
+   *     that includes:
+   *     <ul>
+   *       <li>A map of task IDs and corresponding error codes for failed distributions.
+   *     </ul>
+   *
+   * @throws WorkbasketNotFoundException if the destination workbaskets cannot be found.
+   * @throws NotAuthorizedOnWorkbasketException if the current user lacks permission to perform this
+   *     operation.
+   * @throws InvalidTaskStateException if one or more tasks are in a state that prevents
+   *     distribution.
+   * @throws TaskNotFoundException if specific tasks referenced in the operation cannot be found.
+   * @throws InvalidArgumentException if no task IDs are provided.
+   */
+  @Operation(
+      summary = "Distribute Tasks to Destination Workbaskets",
+      description =
+          """
+        This endpoint distributes tasks to one or more destination workbaskets based on the
+        provided distribution strategy and additional information.
+
+        - If destination workbasket IDs are provided, tasks will be distributed to those specific
+          workbaskets.
+        - If a distribution strategy name is provided, the specified strategy will determine how
+          tasks are allocated.
+        - Additional information can be passed to further customize the distribution logic.
+
+        Tasks that cannot be distributed (e.g., due to errors) will remain in their original
+        workbaskets.
+      """,
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              description =
+                  "The JSON-formatted request body containing the details for task distribution.",
+              required = true,
+              content =
+                  @Content(
+                      schema = @Schema(implementation = DistributionTasksRepresentationModel.class),
+                      examples =
+                          @ExampleObject(
+                              value =
+                                  """
+                        {
+                          "taskIds": ["TKI:abcdef1234567890abcdef1234567890"],
+                          "destinationWorkbasketIds": [
+                              "WBI:abcdef1234567890abcdef1234567890",
+                              "WBI:1234567890abcdef1234567890abcdef"
+                          ],
+                          "distributionStrategyName": "CustomDistributionStrategy"
+                          }
+      """))),
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description =
+                "The bulk operation result containing details of successfully "
+                    + "distributed tasks or errors.",
+            content =
+                @Content(
+                    mediaType = MediaTypes.HAL_JSON_VALUE,
+                    schema =
+                        @Schema(implementation = BulkOperationResultsRepresentationModel.class))),
+        @ApiResponse(
+            responseCode = "400",
+            description = "TASK_INVALID_STATE",
+            content = {
+              @Content(schema = @Schema(implementation = InvalidTaskStateException.class))
+            }),
+        @ApiResponse(
+            responseCode = "403",
+            description =
+                "NOT_AUTHORIZED_ON_WORKBASKET_WITH_ID, "
+                    + "NOT_AUTHORIZED_ON_WORKBASKET_WITH_KEY_AND_DOMAIN",
+            content = {
+              @Content(schema = @Schema(implementation = NotAuthorizedOnWorkbasketException.class))
+            }),
+        @ApiResponse(
+            responseCode = "404",
+            description =
+                "WORKBASKET_WITH_ID_NOT_FOUND, WORKBASKET_WITH_KEY_NOT_FOUND, TASK_NOT_FOUND",
+            content = {
+              @Content(
+                  schema =
+                      @Schema(
+                          anyOf = {WorkbasketNotFoundException.class, TaskNotFoundException.class}))
+            })
+      })
+  ResponseEntity<BulkOperationResultsRepresentationModel> distributeTasks(
+      @RequestBody DistributionTasksRepresentationModel distributionTasksRepresentationModel,
+      @PathVariable("workbasketId") String workbasketId)
+      throws NotAuthorizedOnWorkbasketException,
+          WorkbasketNotFoundException,
+          InvalidTaskStateException,
+          TaskNotFoundException,
+          InvalidArgumentException;
 
   /**
    * This endpoint updates a requested Task.
