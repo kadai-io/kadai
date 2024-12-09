@@ -48,6 +48,7 @@ import io.kadai.task.rest.assembler.BulkOperationResultsRepresentationModelAssem
 import io.kadai.task.rest.assembler.TaskRepresentationModelAssembler;
 import io.kadai.task.rest.assembler.TaskSummaryRepresentationModelAssembler;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
+import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryCollectionRepresentationModel;
@@ -59,6 +60,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.beans.ConstructorProperties;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -406,6 +408,79 @@ public class TaskController implements TaskApi {
         bulkOperationResultsRepresentationModelAssembler.toModel(result);
 
     return ResponseEntity.ok(repModel);
+  }
+
+  @PostMapping(path = RestEndpoints.URL_DISTRIBUTE)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<BulkOperationResultsRepresentationModel> distributeTasks(
+      @RequestBody DistributionTasksRepresentationModel distributionTasksRepresentationModel,
+      @PathVariable("workbasketId") String workbasketId)
+      throws NotAuthorizedOnWorkbasketException,
+          WorkbasketNotFoundException,
+          InvalidTaskStateException,
+          TaskNotFoundException,
+          InvalidArgumentException {
+
+    BulkOperationResults<String, KadaiException> result =
+        distributeTasksInternal(
+            workbasketId,
+            distributionTasksRepresentationModel.getTaskIds(),
+            distributionTasksRepresentationModel.getDestinationWorkbasketIds(),
+            distributionTasksRepresentationModel.getDistributionStrategyName(),
+            distributionTasksRepresentationModel.getAdditionalInformation());
+
+    BulkOperationResultsRepresentationModel repModel =
+        bulkOperationResultsRepresentationModelAssembler.toModel(result);
+
+    return ResponseEntity.ok(repModel);
+  }
+
+  private BulkOperationResults<String, KadaiException> distributeTasksInternal(
+      String workbasketId,
+      List<String> taskIds,
+      List<String> destinationWorkbasketIds,
+      String distributionStrategyName,
+      Map<String, Object> additionalInformation)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          WorkbasketNotFoundException {
+
+    if (taskIds == null) {
+      if (destinationWorkbasketIds != null && distributionStrategyName != null) {
+        return taskService.distribute(
+            workbasketId,
+            destinationWorkbasketIds,
+            distributionStrategyName,
+            additionalInformation);
+      }
+      if (destinationWorkbasketIds != null) {
+        return taskService.distributeWithDestinations(workbasketId, destinationWorkbasketIds);
+      }
+      if (distributionStrategyName != null) {
+        return taskService.distributeWithStrategy(
+            workbasketId, distributionStrategyName, additionalInformation);
+      }
+      return taskService.distribute(workbasketId);
+    }
+
+    if (destinationWorkbasketIds != null && distributionStrategyName != null) {
+      return taskService.distribute(
+          workbasketId,
+          taskIds,
+          destinationWorkbasketIds,
+          distributionStrategyName,
+          additionalInformation);
+    }
+    if (destinationWorkbasketIds != null) {
+      return taskService.distributeWithDestinations(
+          workbasketId, taskIds, destinationWorkbasketIds);
+    }
+    if (distributionStrategyName != null) {
+      return taskService.distributeWithStrategy(
+          workbasketId, taskIds, distributionStrategyName, additionalInformation);
+    }
+    return taskService.distribute(workbasketId, taskIds);
   }
 
   @PutMapping(path = RestEndpoints.URL_TASKS_ID)

@@ -31,6 +31,8 @@ import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.rest.models.AttachmentRepresentationModel;
+import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
+import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
 import io.kadai.task.rest.models.ObjectReferenceRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
@@ -69,9 +71,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.testcontainers.shaded.com.google.common.collect.Lists;
 
@@ -2106,6 +2111,175 @@ class TaskControllerIntTest {
                 .containsEntry("taskId", "TKI:000000000000000000000000000000000039");
           };
       return DynamicTest.stream(iterator, c -> "for setTransferFlag and owner: " + c, test);
+    }
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  class DistributeTasks {
+
+    @Test
+    void should_ThrowException_When_SourceWorkbasketIdIsMissing() {
+      DistributionTasksRepresentationModel requestBody =
+          new DistributionTasksRepresentationModel(null, null, null, null);
+
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_DISTRIBUTE.replace("{workbasketId}", "dummyId"));
+
+      HttpEntity<DistributionTasksRepresentationModel> requestEntity =
+          new HttpEntity<>(requestBody, RestHelper.generateHeadersForUser("admin"));
+
+      assertThatThrownBy(
+              () ->
+                  TEMPLATE.exchange(
+                      url, HttpMethod.POST, requestEntity, TaskRepresentationModel.class))
+          .isInstanceOf(HttpClientErrorException.NotFound.class)
+          .hasMessageContaining("Workbasket with id 'dummyId' was not found.");
+    }
+
+    @Test
+    void should_CallDistributeWithTaskIdsAndWithDestinationWorkbasketIds_When_Provided() {
+      List<String> taskIds = List.of("TKI:000000000000000000000000000000000039");
+      List<String> destinationWorkbasketIds = List.of("WBI:100000000000000000000000000000000006");
+
+      DistributionTasksRepresentationModel requestBody =
+          new DistributionTasksRepresentationModel(taskIds, destinationWorkbasketIds, null, null);
+
+      String url =
+          restHelper.toUrl(
+              RestEndpoints.URL_DISTRIBUTE, "WBI:100000000000000000000000000000000006");
+
+      HttpEntity<DistributionTasksRepresentationModel> auth =
+          new HttpEntity<>(requestBody, RestHelper.generateHeadersForUser("admin"));
+
+      ResponseEntity<Map<String, Object>> response =
+          TEMPLATE.exchange(url, HttpMethod.POST, auth, BULK_RESULT_TASKS_MODEL_TYPE);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody()).isNotNull();
+
+      Map<String, Object> result = response.getBody();
+      assertThat(result).isNotNull().containsKey("tasksWithErrors");
+
+      Map<String, Object> tasksWithErrors = (Map<String, Object>) result.get("tasksWithErrors");
+
+      assertThat(tasksWithErrors)
+          .hasSize(1)
+          .containsKey("TKI:000000000000000000000000000000000039");
+
+      Map<String, Object> errorDetails =
+          (Map<String, Object>) tasksWithErrors.get("TKI:000000000000000000000000000000000039");
+
+      assertThat(errorDetails)
+          .containsEntry("key", "TASK_INVALID_STATE")
+          .containsKey("messageVariables");
+
+      Map<String, Object> messageVariables =
+          (Map<String, Object>) errorDetails.get("messageVariables");
+
+      // **Überprüfen, ob die `requiredTaskStates` korrekt sind**
+      assertThat(messageVariables).containsKey("requiredTaskStates");
+      assertThat((List<String>) messageVariables.get("requiredTaskStates"))
+          .containsExactlyInAnyOrder("READY", "CLAIMED", "READY_FOR_REVIEW", "IN_REVIEW");
+
+      // **Zusätzliche Variablen prüfen**
+      assertThat(messageVariables)
+          .containsEntry("taskState", "COMPLETED")
+          .containsEntry("taskId", "TKI:000000000000000000000000000000000039");
+    }
+
+    @Test
+    void should_ThrowException_When_InvalidDistributionStrategyProvided() {
+      List<String> taskIds = List.of("TKI:000000000000000000000000000000000039");
+      String invalidDistributionStrategyName = "ROUND_ROBIN";
+      DistributionTasksRepresentationModel requestBody =
+          new DistributionTasksRepresentationModel(
+              taskIds, null, invalidDistributionStrategyName, null);
+
+      String url =
+          restHelper.toUrl(
+              RestEndpoints.URL_DISTRIBUTE, "WBI:100000000000000000000000000000000006");
+      HttpEntity<DistributionTasksRepresentationModel> auth =
+          new HttpEntity<>(requestBody, RestHelper.generateHeadersForUser("admin"));
+
+      assertThatThrownBy(
+              () ->
+                  TEMPLATE.exchange(
+                      url, HttpMethod.POST, auth, BulkOperationResultsRepresentationModel.class))
+          .isInstanceOf(HttpClientErrorException.class)
+          .extracting(HttpClientErrorException.class::cast)
+          .extracting(HttpClientErrorException::getStatusCode)
+          .isEqualTo(HttpStatus.BAD_REQUEST);
+
+      assertThatThrownBy(
+              () ->
+                  TEMPLATE.exchange(
+                      url, HttpMethod.POST, auth, BulkOperationResultsRepresentationModel.class))
+          .isInstanceOf(HttpClientErrorException.class)
+          .hasMessageContaining("The distribution strategy 'ROUND_ROBIN' does not exist.");
+    }
+
+    @Test
+    void should_ThrowNotAuthorizedOnWorkbasketException() {
+      HttpHeaders headers = RestHelper.generateHeadersForUser("user-1-1");
+      headers.setContentType(MediaType.APPLICATION_JSON);
+
+      String sourceWorkbasketId = "WBI:100000000000000000000000000000000001";
+      DistributionTasksRepresentationModel requestBody =
+          new DistributionTasksRepresentationModel(null, null, null, null);
+
+      HttpEntity<DistributionTasksRepresentationModel> requestEntity =
+          new HttpEntity<>(requestBody, headers);
+
+      String url = restHelper.toUrl(RestEndpoints.URL_DISTRIBUTE, sourceWorkbasketId);
+
+      ThrowingCallable response =
+          () ->
+              TEMPLATE.exchange(
+                  url,
+                  HttpMethod.POST,
+                  requestEntity,
+                  BulkOperationResultsRepresentationModel.class);
+
+      assertThatThrownBy(response).isInstanceOf(HttpClientErrorException.class);
+    }
+
+    @Test
+    void should_CallDistributeWithWIdWithAdditionalInformation_When_OnlySourceWtIdProvided() {
+      String sourceWorkbasketId = "WBI:100000000000000000000000000000000006";
+      DistributionTasksRepresentationModel requestBody =
+          new DistributionTasksRepresentationModel(null, null, null, Map.of("priority", "high"));
+
+      String url = restHelper.toUrl(RestEndpoints.URL_DISTRIBUTE, sourceWorkbasketId);
+      HttpEntity<DistributionTasksRepresentationModel> auth =
+          new HttpEntity<>(requestBody, RestHelper.generateHeadersForUser("admin"));
+
+      ResponseEntity<BulkOperationResultsRepresentationModel> response =
+          TEMPLATE.exchange(
+              url, HttpMethod.POST, auth, BulkOperationResultsRepresentationModel.class);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody()).isNotNull();
+    }
+
+    @Test
+    void should_CallDistributeWithWIdAndWithDestinationWorkbasketIds_When_Provided() {
+      String sourceWorkbasketId = "WBI:100000000000000000000000000000000006";
+      List<String> destinationWorkbasketIds = List.of("WBI:100000000000000000000000000000000005");
+      DistributionTasksRepresentationModel requestBody =
+          new DistributionTasksRepresentationModel(
+              null, destinationWorkbasketIds, null, Map.of("priority", "high"));
+
+      String url = restHelper.toUrl(RestEndpoints.URL_DISTRIBUTE, sourceWorkbasketId);
+      HttpEntity<DistributionTasksRepresentationModel> auth =
+          new HttpEntity<>(requestBody, RestHelper.generateHeadersForUser("admin"));
+
+      ResponseEntity<BulkOperationResultsRepresentationModel> response =
+          TEMPLATE.exchange(
+              url, HttpMethod.POST, auth, BulkOperationResultsRepresentationModel.class);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody()).isNotNull();
     }
   }
 
