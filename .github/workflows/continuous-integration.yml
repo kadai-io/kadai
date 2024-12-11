@@ -392,6 +392,16 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+      - name: Cancel workflow
+        if: failure()
+        uses: andymckay/cancel-action@0.5
+
+  update_version:
+    runs-on: ubuntu-22.04
+    name: Update version to next snapshot and push back
+    if: github.repository == 'kadai-io/kadai' && startsWith(github.ref, 'refs/tags/v') && github.head_ref == ''
+    needs: [ test_frontend, test_e2e, test_backend ]
+    steps:
       - name: Update version to next snapshot and push back
         run: |
           ci/change_version.sh -i -m .
