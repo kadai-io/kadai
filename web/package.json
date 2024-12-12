@@ -61,7 +61,7 @@
     "@types/jest": "29.5.14",
     "@types/lodash": "4.17.13",
     "@types/node": "22.10.2",
-    "@typescript-eslint/eslint-plugin": "8.17.0",
+    "@typescript-eslint/eslint-plugin": "8.18.0",
     "@typescript-eslint/eslint-plugin-tslint": "7.0.2",
     "@typescript-eslint/parser": "8.17.0",
     "compression-webpack-plugin": "11.1.0",
