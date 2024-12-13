@@ -138,8 +138,8 @@ objectclass: top
 givenName: Elena
 description: desc
 memberOf: cn=ksc-users,cn=groups,OU=Test,O=KADAI
-permission: Kadai:CallCenter:AB:AB/A:CallCenter
-permission: Kadai:CallCenter:AB:AB/A:CallCenter-vip
+userPerm: Kadai:CallCenter:AB:AB/A:CallCenter
+userPerm: Kadai:CallCenter:AB:AB/A:CallCenter-vip
 memberOf: cn=Organisationseinheit KSC 1,cn=Organisationseinheit KSC,cn=organisation,OU=Test,O=KADAI
 uid: user-1-2
 sn: Eifrig
@@ -189,7 +189,7 @@ givenName: Simone
 description: desc
 memberOf: cn=Organisationseinheit KSC 2,cn=Organisationseinheit KSC,cn=organisation,OU=Test,O=KADAI
 memberOf: cn=ksc-users,cn=groups,OU=Test,O=KADAI
-permission: Kadai:CallCenter:AB:AB/A:CallCenter
+userPerm: Kadai:CallCenter:AB:AB/A:CallCenter
 uid: user-2-1
 sn: Müller
 ou: Organisationseinheit/Organisationseinheit KSC/Organisationseinheit KSC 2
