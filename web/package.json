@@ -37,7 +37,7 @@
     "@ngneat/overview": "6.1.1",
     "@ngxs/router-plugin": "19.0.0",
     "@ngxs/store": "19.0.0",
-    "angular-svg-icon": "19.0.1",
+    "angular-svg-icon": "19.1.0",
     "chart.js": "4.4.7",
     "core-js": "3.39.0",
     "file-saver": "2.0.5",
