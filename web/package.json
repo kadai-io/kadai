@@ -43,7 +43,7 @@
     "file-saver": "2.0.5",
     "globals": "^15.14.0",
     "lodash": "4.17.21",
-    "ng2-charts": "7.0.0",
+    "ng2-charts": "8.0.0",
     "ngx-bootstrap": "19.0.2",
     "ngx-infinite-scroll": "19.0.0",
     "rxjs": "7.8.1",
