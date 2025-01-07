@@ -10948,7 +10948,7 @@ __metadata:
     jest-preset-angular: "npm:14.4.2"
     lodash: "npm:4.17.21"
     ng2-charts: "npm:7.0.0"
-    ngx-bootstrap: "npm:19.0.1"
+    ngx-bootstrap: "npm:19.0.2"
     ngx-infinite-scroll: "npm:19.0.0"
     prettier: "npm:3.4.2"
     rxjs: "npm:7.8.1"
@@ -11972,9 +11972,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ngx-bootstrap@npm:19.0.1":
-  version: 19.0.1
-  resolution: "ngx-bootstrap@npm:19.0.1"
+"ngx-bootstrap@npm:19.0.2":
+  version: 19.0.2
+  resolution: "ngx-bootstrap@npm:19.0.2"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
@@ -11983,7 +11983,7 @@ __metadata:
     "@angular/core": ^19.0.1
     "@angular/forms": ^19.0.1
     rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/914f77d2e5b9c220278f2667f0d02501eeb4d4295dd8e28fb939bed922c149fb645ff602e24932300b9ef26e9f179724574c903d7d1e5200779d9b2bca3d8fcc
+  checksum: 10c0/e4a1c79cb8bb632e3ee6582fa69c25adcb3138cf77b39406c7785d7ef50e16fc410398d466f44373e98cccab322d4a017343aef87cf5244535bc5260ff9a7d41
   languageName: node
   linkType: hard
 
