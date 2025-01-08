@@ -394,6 +394,7 @@ uniquemember: uid=user-2-2,cn=users,OU=Test,O=KADAI
 cn: ksc-users
 objectclass: groupofuniquenames
 objectclass: top
+gid: ksc-users
 
 dn: cn=ksc-teamleads,cn=groups,OU=Test,O=KADAI
 uniquemember: uid=teamlead-1,cn=users,OU=Test,O=KADAI
@@ -401,6 +402,7 @@ uniquemember: uid=teamlead-2,cn=users,OU=Test,O=KADAI
 cn: ksc-teamleads
 objectclass: groupofuniquenames
 objectclass: top
+gid: ksc-teamleads
 
 dn: cn=business-admins,cn=groups,OU=Test,O=KADAI
 uniquemember: uid=teamlead-1,cn=users,OU=Test,O=KADAI
@@ -416,6 +418,7 @@ uniquemember: uid=teamlead-2,cn=users,OU=Test,O=KADAI
 cn: monitor-users
 objectclass: groupofuniquenames
 objectclass: top
+gid: monitor-users-ID
 
 ########################
 # Permissions
@@ -428,6 +431,7 @@ permission: Kadai:CallCenter:AB:AB/A:CallCenter
 cn: g01
 objectclass: groupofuniquenames
 objectclass: top
+pid: Kadai:CallCenter:AB:AB/A:CallCenter
 
 dn: cn=g02,cn=groups,OU=Test,O=KADAI
 uniquemember: uid=user-1-2,cn=users,OU=Test,O=KADAI
@@ -435,6 +439,16 @@ permission: Kadai:CallCenter:AB:AB/A:CallCenter-vip
 cn: g02
 objectclass: groupofuniquenames
 objectclass: top
+pid: Kadai:CallCenter:AB:AB/A:CallCenter-vip
+
+
+dn: cn=g03,cn=groups,OU=Test,O=KADAI
+permission: permission-name
+cn: g02
+objectclass: groupofuniquenames
+objectclass: top
+pid: g03-permission-id
+
 
 ######################
 # Organizational Units
@@ -469,6 +483,7 @@ uniquemember: uid=user-2-10,cn=users,OU=Test,O=KADAI
 cn: Organisationseinheit KSC 2
 objectclass: groupofuniquenames
 objectclass: top
+gid: Organisationseinheit KSC 2
 
 dn: cn=Organisationseinheit B,cn=organisation,OU=Test,O=KADAI
 cn: Organisationseinheit B

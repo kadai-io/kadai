@@ -416,6 +416,7 @@ uniquemember: uid=teamlead-2,cn=users,OU=Test,O=KADAI
 cn: monitor-users
 objectclass: groupofuniquenames
 objectclass: top
+gid: monitor-users-id
 
 ########################
 # Permissions
