@@ -67,7 +67,7 @@
     "compression-webpack-plugin": "11.1.0",
     "cypress": "13.17.0",
     "cypress-intellij-reporter": "0.0.7",
-    "eslint": "9.17.0",
+    "eslint": "9.18.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-import": "2.31.0",
     "eslint-plugin-prettier": "5.2.1",
