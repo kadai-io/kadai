@@ -490,17 +490,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/router@npm:19.0.6":
-  version: 19.0.6
-  resolution: "@angular/router@npm:19.0.6"
+"@angular/router@npm:19.1.0":
+  version: 19.1.0
+  resolution: "@angular/router@npm:19.1.0"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/common": 19.0.6
-    "@angular/core": 19.0.6
-    "@angular/platform-browser": 19.0.6
+    "@angular/common": 19.1.0
+    "@angular/core": 19.1.0
+    "@angular/platform-browser": 19.1.0
     rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/16670d34144ca6f07f20e2e3c6312db6b257c4cb9bb8725e34186960ddf24ba840043cebbb771381025e8312e95f1dba9c08637e924a96b451f85c1ccb5fb9b5
+  checksum: 10c0/e41534cb85e74e09a0ed129c2d7154f2ff1ad9d05ed81774c054b7a923c7560461142900b03ab9d6aa3864b300f5ccebf8055f77313350c4d518b8987735c22d
   languageName: node
   linkType: hard
 
@@ -9901,7 +9901,7 @@ __metadata:
     "@angular/material": "npm:19.0.5"
     "@angular/platform-browser": "npm:19.0.6"
     "@angular/platform-browser-dynamic": "npm:19.0.6"
-    "@angular/router": "npm:19.0.6"
+    "@angular/router": "npm:19.1.0"
     "@ngneat/hot-toast": "npm:7.0.0"
     "@ngneat/overview": "npm:6.1.1"
     "@ngxs/devtools-plugin": "npm:19.0.0"
