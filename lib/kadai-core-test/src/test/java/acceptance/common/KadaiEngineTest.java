@@ -25,12 +25,15 @@ import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
 import io.kadai.common.internal.configuration.DbSchemaCreator;
 import io.kadai.testapi.extensions.TestContainerExtension;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
-class KadaiEngineExplicitTest {
+class KadaiEngineTest {
 
-  @Test
-  void should_CreateKadaiEngine_When_ExplizitModeIsActive() throws Exception {
+  @ParameterizedTest
+  @EnumSource(ConnectionManagementMode.class)
+  void should_CreateKadaiEngine_When_GivenConnectionManagementModeIsActive(
+      ConnectionManagementMode connectionManagementMode) throws Exception {
 
     String schemaName = TestContainerExtension.determineSchemaName();
 
@@ -39,7 +42,7 @@ class KadaiEngineExplicitTest {
             .initKadaiProperties()
             .build();
 
-    KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.EXPLICIT);
+    KadaiEngine.buildKadaiEngine(kadaiConfiguration, connectionManagementMode);
 
     DbSchemaCreator dsc =
         new DbSchemaCreator(kadaiConfiguration.getDataSource(), kadaiConfiguration.getSchemaName());
