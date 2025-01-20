@@ -248,8 +248,7 @@ class LdapClientTest {
   @Test
   void testLdap_checkForMissingConfigurations() {
     final int optionalCount = 22;
-    assertThat(cut.checkForMissingConfigurations())
-        .hasSize(LdapSettings.values().length - optionalCount);
+    assertThat(cut.checkForMissingConfigurations()).hasSize(LdapSettings.values().length - optionalCount);
   }
 
   @Test
