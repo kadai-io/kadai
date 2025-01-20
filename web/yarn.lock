@@ -71,21 +71,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular-devkit/architect@npm:0.1901.1":
-  version: 0.1901.1
-  resolution: "@angular-devkit/architect@npm:0.1901.1"
-  dependencies:
-    "@angular-devkit/core": "npm:19.1.1"
-    rxjs: "npm:7.8.1"
-  dependenciesMeta:
-    esbuild:
-      built: true
-    puppeteer:
-      built: true
-  checksum: 10c0/f570e07aabfdf9f552413d3d4794cedfe8f7498d1b40b1957bfb0ba948a90484519bb078b49ce124b545c240b553538366ea58933378ed47853baa7b0437e757
-  languageName: node
-  linkType: hard
-
 "@angular-devkit/architect@npm:0.1901.2":
   version: 0.1901.2
   resolution: "@angular-devkit/architect@npm:0.1901.2"
@@ -365,30 +350,6 @@ __metadata:
     chokidar:
       optional: true
   checksum: 10c0/f35477d774f7e9e9a611d1e8efc7224164f0567ec01eb3ee06ce52e4384a8e5604bba2a47ac4030cbcd6ec4a948d04998f89b23ee9a01bbb61e180848a4e904f
-  languageName: node
-  linkType: hard
-
-"@angular-devkit/core@npm:19.1.1":
-  version: 19.1.1
-  resolution: "@angular-devkit/core@npm:19.1.1"
-  dependencies:
-    ajv: "npm:8.17.1"
-    ajv-formats: "npm:3.0.1"
-    jsonc-parser: "npm:3.3.1"
-    picomatch: "npm:4.0.2"
-    rxjs: "npm:7.8.1"
-    source-map: "npm:0.7.4"
-  peerDependencies:
-    chokidar: ^4.0.0
-  dependenciesMeta:
-    esbuild:
-      built: true
-    puppeteer:
-      built: true
-  peerDependenciesMeta:
-    chokidar:
-      optional: true
-  checksum: 10c0/2764e6de89eaebc73cf4ced8da9642afb2175f3c2acbe5a668b88d8bcc4a6eddcdb5ebcbccc912c69e2b2e8774f8e8e3f347405ad1c544cd18665ca657151432
   languageName: node
   linkType: hard
 
