@@ -94,6 +94,42 @@ public interface UserService {
   List<User> getUsers(Set<String> ids) throws InvalidArgumentException;
 
   /**
+   * Gets multiple {@linkplain User Users} with given orgLevel1.
+   *
+   * @param orgLevel1 the {@linkplain User#getOrgLevel1() orgLevel1} of the {@linkplain User Users} to be retrieved
+   * @return the retrieved {@linkplain User Users}
+   * @throws InvalidArgumentException if the orgLevel1 parameter is NULL
+   */
+  List<User> getUsersWithOrgLevel1(String orgLevel1) throws InvalidArgumentException;
+
+  /**
+   * Gets multiple {@linkplain User Users} with given orgLevel2.
+   *
+   * @param orgLevel2 the {@linkplain User#getOrgLevel2() orgLevel2} of the {@linkplain User Users} to be retrieved
+   * @return the retrieved {@linkplain User Users}
+   * @throws InvalidArgumentException if the orgLevel2 parameter is NULL
+   */
+  List<User> getUsersWithOrgLevel2(String orgLevel2) throws InvalidArgumentException;
+
+  /**
+   * Gets multiple {@linkplain User Users} with given orgLevel3.
+   *
+   * @param orgLevel3 the {@linkplain User#getOrgLevel3() orgLevel3} of the {@linkplain User Users} to be retrieved
+   * @return the retrieved {@linkplain User Users}
+   * @throws InvalidArgumentException if the orgLevel3 parameter is NULL
+   */
+  List<User> getUsersWithOrgLevel3(String orgLevel3) throws InvalidArgumentException;
+
+  /**
+   * Gets multiple {@linkplain User Users} with given orgLevel4.
+   *
+   * @param orgLevel4 the {@linkplain User#getOrgLevel1() orgLevel4} of the {@linkplain User Users} to be retrieved
+   * @return the retrieved {@linkplain User Users}
+   * @throws InvalidArgumentException if the orgLevel4 parameter is NULL
+   */
+  List<User> getUsersWithOrgLevel4(String orgLevel4) throws InvalidArgumentException;
+
+  /**
    * Updates an existing {@linkplain User}.
    *
    * <p>If a {@linkplain User} with the specified {@linkplain User#getId() id} exists in the
