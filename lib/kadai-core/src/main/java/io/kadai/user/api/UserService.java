@@ -23,6 +23,7 @@ import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
 import io.kadai.user.api.models.User;
+
 import java.util.List;
 import java.util.Set;
 
@@ -94,6 +95,19 @@ public interface UserService {
   List<User> getUsers(Set<String> ids) throws InvalidArgumentException;
 
   /**
+   * Gets multiple {@linkplain User Users} with specific orgLevel for a specific level.
+   *
+   * <p>If level parameter is out of bounds, the returned list will be empty.
+   *
+   * @param orgLevel the orgLevel of the {@linkplain User Users} to be retrieved
+   * @param level the level of the OrgLevel, valid from 1-4
+   *
+   * @return the retrieved {@linkplain User Users}
+   * @throws InvalidArgumentException if the orgLevel parameter is NULL
+   */
+  List<User> getUsersWithOrgLevel(String orgLevel, int level) throws InvalidArgumentException;
+
+  /**
    * Gets multiple {@linkplain User Users} with given orgLevel1.
    *
    * @param orgLevel1 the {@linkplain User#getOrgLevel1() orgLevel1} of the {@linkplain User Users}
@@ -101,7 +115,9 @@ public interface UserService {
    * @return the retrieved {@linkplain User Users}
    * @throws InvalidArgumentException if the orgLevel1 parameter is NULL
    */
-  List<User> getUsersWithOrgLevel1(String orgLevel1) throws InvalidArgumentException;
+  default List<User> getUsersWithOrgLevel1(String orgLevel1) throws InvalidArgumentException {
+    return getUsersWithOrgLevel(orgLevel1, 1);
+  }
 
   /**
    * Gets multiple {@linkplain User Users} with given orgLevel2.
@@ -111,7 +127,9 @@ public interface UserService {
    * @return the retrieved {@linkplain User Users}
    * @throws InvalidArgumentException if the orgLevel2 parameter is NULL
    */
-  List<User> getUsersWithOrgLevel2(String orgLevel2) throws InvalidArgumentException;
+  default List<User> getUsersWithOrgLevel2(String orgLevel2) throws InvalidArgumentException {
+    return getUsersWithOrgLevel(orgLevel2, 2);
+  }
 
   /**
    * Gets multiple {@linkplain User Users} with given orgLevel3.
@@ -121,7 +139,9 @@ public interface UserService {
    * @return the retrieved {@linkplain User Users}
    * @throws InvalidArgumentException if the orgLevel3 parameter is NULL
    */
-  List<User> getUsersWithOrgLevel3(String orgLevel3) throws InvalidArgumentException;
+  default List<User> getUsersWithOrgLevel3(String orgLevel3) throws InvalidArgumentException {
+    return getUsersWithOrgLevel(orgLevel3, 3);
+  }
 
   /**
    * Gets multiple {@linkplain User Users} with given orgLevel4.
@@ -131,7 +151,9 @@ public interface UserService {
    * @return the retrieved {@linkplain User Users}
    * @throws InvalidArgumentException if the orgLevel4 parameter is NULL
    */
-  List<User> getUsersWithOrgLevel4(String orgLevel4) throws InvalidArgumentException;
+  default List<User> getUsersWithOrgLevel4(String orgLevel4) throws InvalidArgumentException {
+    return getUsersWithOrgLevel(orgLevel4, 4);
+  }
 
   /**
    * Updates an existing {@linkplain User}.

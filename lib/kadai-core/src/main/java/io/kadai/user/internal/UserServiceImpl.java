@@ -112,23 +112,32 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public List<User> getUsersWithOrgLevel1(String orgLevel) throws InvalidArgumentException {
-    return getUserWithOrgLevel(orgLevel, 1, userMapper::findByOrgLevel1);
-  }
+  public List<User> getUsersWithOrgLevel(String orgLevel, int level) throws InvalidArgumentException {
+    if (orgLevel == null) {
+      throw new InvalidArgumentException(
+          String.format("OrgLevel%d can't be used as NULL-Parameter.", level));
+    }
 
-  @Override
-  public List<User> getUsersWithOrgLevel2(String orgLevel) throws InvalidArgumentException {
-    return getUserWithOrgLevel(orgLevel, 2, userMapper::findByOrgLevel2);
-  }
+    Function<String, List<UserImpl>> findByOrgLevel;
+    if (level == 1) {
+      findByOrgLevel = userMapper::findByOrgLevel1;
+    } else if (level == 2) {
+      findByOrgLevel = userMapper::findByOrgLevel2;
+    } else if (level == 3) {
+      findByOrgLevel = userMapper::findByOrgLevel3;
+    } else if (level == 4) {
+      findByOrgLevel = userMapper::findByOrgLevel4;
+    } else {
+      LOGGER.warn("Unsupported level {}. Valid values range from 1 to 4.", level);
+      findByOrgLevel = ignore -> Collections.emptyList();
+    }
 
-  @Override
-  public List<User> getUsersWithOrgLevel3(String orgLevel) throws InvalidArgumentException {
-    return getUserWithOrgLevel(orgLevel, 3, userMapper::findByOrgLevel3);
-  }
+    List<UserImpl> users =
+        internalKadaiEngine.executeInDatabaseConnection(() -> findByOrgLevel.apply(orgLevel));
 
-  @Override
-  public List<User> getUsersWithOrgLevel4(String orgLevel) throws InvalidArgumentException {
-    return getUserWithOrgLevel(orgLevel, 4, userMapper::findByOrgLevel4);
+    users.forEach(user -> user.setDomains(determineDomains(user)));
+
+    return users.stream().map(User.class::cast).toList();
   }
 
   @Override
@@ -197,20 +206,6 @@ public class UserServiceImpl implements UserService {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Method deleteUser() deleted User with id '{}'.", userId);
     }
-  }
-
-  private List<User> getUserWithOrgLevel(String orgLevel, int level,
-      Function<String, List<UserImpl>> findByOrgLevel) throws InvalidArgumentException {
-    if (orgLevel == null) {
-      throw new InvalidArgumentException(
-          String.format("OrgLevel%d can't be used as NULL-Parameter.", level));
-    }
-    List<UserImpl> users =
-        internalKadaiEngine.executeInDatabaseConnection(() -> findByOrgLevel.apply(orgLevel));
-
-    users.forEach(user -> user.setDomains(determineDomains(user)));
-
-    return users.stream().map(User.class::cast).toList();
   }
 
   private Set<String> determineDomains(User user) {
