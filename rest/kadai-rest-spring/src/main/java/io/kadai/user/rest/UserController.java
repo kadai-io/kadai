@@ -113,12 +113,18 @@ public class UserController {
   /**
    * This endpoint retrieves multiple Users. If a userId can't be found in the database it will be
    * ignored. If none of the given userIds is valid, the returned list will be empty. If currentUser
-   * is set, the current User from the context will be retrieved as well
+   * is set, the current User from the context will be retrieved as well. If orgLevels are set, all
+   * Users with the respective orgLevels are retrieved. Combinations of orgLevel-params and
+   * user-params are found by intersection.
    *
    * @title Get multiple Users
    * @param request the HttpServletRequest of the request itself
    * @param userIds the ids of the requested Users
    * @param currentUser Indicates whether to fetch the current user or not as well
+   * @param orgLevel1 the orgLevel1 of the requested Users
+   * @param orgLevel2 the orgLevel2 of the requested Users
+   * @param orgLevel3 the orgLevel3 of the requested Users
+   * @param orgLevel4 the orgLevel4 of the requested Users
    * @return the requested Users
    * @throws InvalidArgumentException if the userIds are null or empty
    * @throws UserNotFoundException if the current User was not found
@@ -138,7 +144,23 @@ public class UserController {
         @Parameter(
             name = "current-user",
             description = "Whether to fetch the current user as well",
-            example = "user-1-1")
+            example = "user-1-1"),
+        @Parameter(
+            name = "orgLevel1",
+            description = "the orgLevel1 of the users to be retrieved",
+            example = "envite"),
+        @Parameter(
+            name = "orgLevel2",
+            description = "the orgLevel2 of the users to be retrieved",
+            example = "bpm"),
+        @Parameter(
+            name = "orgLevel3",
+            description = "the orgLevel3 of the users to be retrieved",
+            example = "green-bpm"),
+        @Parameter(
+            name = "orgLevel4",
+            description = "the orgLevel4 of the users to be retrieved",
+            example = "kadai"),
       },
       responses = {
         @ApiResponse(
@@ -154,7 +176,11 @@ public class UserController {
   public ResponseEntity<UserCollectionRepresentationModel> getUsers(
       HttpServletRequest request,
       @RequestParam(name = "user-id", required = false) String[] userIds,
-      @RequestParam(name = "current-user", required = false) String currentUser)
+      @RequestParam(name = "current-user", required = false) String currentUser,
+      @RequestParam(name = "orgLevel1", required = false) String orgLevel1,
+      @RequestParam(name = "orgLevel2", required = false) String orgLevel2,
+      @RequestParam(name = "orgLevel3", required = false) String orgLevel3,
+      @RequestParam(name = "orgLevel4", required = false) String orgLevel4)
       throws InvalidArgumentException, UserNotFoundException {
     Set<User> users = new HashSet<>();
 
@@ -169,6 +195,18 @@ public class UserController {
       }
       users.add(userService.getUser(this.currentUserContext.getUserid()));
     }
+
+    // Invariant: forall n in [0..orgLevelCount]: usersWOrgLevel(n) is subset of usersWOrgLevel(n+1)
+    if (orgLevel4 != null) users.addAll(userService.getUsersWithOrgLevel4(orgLevel4));
+    else if (orgLevel3 != null) users.addAll(userService.getUsersWithOrgLevel3(orgLevel3));
+    else if (orgLevel2 != null) users.addAll(userService.getUsersWithOrgLevel2(orgLevel2));
+    else if (orgLevel1 != null) users.addAll(userService.getUsersWithOrgLevel1(orgLevel1));
+
+    users.removeIf(user ->
+            !user.hasOrgLevel(User::getOrgLevel1, orgLevel1)
+                || !user.hasOrgLevel(User::getOrgLevel2, orgLevel2)
+                || !user.hasOrgLevel(User::getOrgLevel3, orgLevel3)
+                || !user.hasOrgLevel(User::getOrgLevel4, orgLevel4));
 
     return ResponseEntity.ok(userAssembler.toKadaiCollectionModel(users));
   }
