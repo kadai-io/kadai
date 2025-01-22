@@ -229,8 +229,9 @@ public interface User {
    * @return true if User has given orgLevel
    */
   default boolean hasOrgLevel(Function<User, String> getOrgLevel, String orgLevel) {
-    if (orgLevel == null)
+    if (orgLevel == null) {
       return true;
+    }
 
     String userOrgLevel = getOrgLevel.apply(this);
     return userOrgLevel != null && userOrgLevel.equals(orgLevel);

@@ -197,10 +197,15 @@ public class UserController {
     }
 
     // Invariant: forall n in [0..orgLevelCount]: usersWOrgLevel(n) is subset of usersWOrgLevel(n+1)
-    if (orgLevel4 != null) users.addAll(userService.getUsersWithOrgLevel4(orgLevel4));
-    else if (orgLevel3 != null) users.addAll(userService.getUsersWithOrgLevel3(orgLevel3));
-    else if (orgLevel2 != null) users.addAll(userService.getUsersWithOrgLevel2(orgLevel2));
-    else if (orgLevel1 != null) users.addAll(userService.getUsersWithOrgLevel1(orgLevel1));
+    if (orgLevel4 != null) {
+      users.addAll(userService.getUsersWithOrgLevel4(orgLevel4));
+    } else if (orgLevel3 != null) {
+      users.addAll(userService.getUsersWithOrgLevel3(orgLevel3));
+    } else if (orgLevel2 != null) {
+      users.addAll(userService.getUsersWithOrgLevel2(orgLevel2));
+    } else if (orgLevel1 != null) {
+      users.addAll(userService.getUsersWithOrgLevel1(orgLevel1));
+    }
 
     users.removeIf(user ->
             !user.hasOrgLevel(User::getOrgLevel1, orgLevel1)
