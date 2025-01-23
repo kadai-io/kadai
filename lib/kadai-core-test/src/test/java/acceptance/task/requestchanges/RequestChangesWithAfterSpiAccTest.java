@@ -169,6 +169,66 @@ public class RequestChangesWithAfterSpiAccTest {
     }
   }
 
+  static class TaskTransferrerWithAdditionalInformation implements AfterRequestChangesProvider {
+
+    private KadaiEngine kadaiEngine;
+
+    @Override
+    public void initialize(KadaiEngine kadaiEngine) {
+      this.kadaiEngine = kadaiEngine;
+    }
+
+    @Override
+    public Task afterRequestChanges(Task task) throws Exception {
+      return null;
+    }
+
+    @Override
+    public Task afterRequestChanges(Task task, String workbasketId, String ownerId)
+        throws Exception {
+      task = kadaiEngine.getTaskService().updateTask(task);
+      task = kadaiEngine.getTaskService().transferWithOwner(task.getId(), workbasketId, ownerId);
+      return task;
+    }
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  @WithServiceProvider(
+      serviceProviderInterface = AfterRequestChangesProvider.class,
+      serviceProviders =
+          RequestChangesWithAfterSpiAccTest.TaskTransferrerWithAdditionalInformation.class)
+  class SpiTransfersTaskWithAdditionalInformation {
+
+    @KadaiInject TaskService taskService;
+
+    @WithAccessId(user = "user-1-1")
+    @Test
+    void should_ReturnTransferredTask_When_SpiTransfersTaskWithWorkbasketId() throws Exception {
+      Task task = createTaskInReviewByUser("user-1-1").buildAndStore(taskService);
+
+      Task result =
+          taskService.requestChangesWithWorkbasketId(task.getId(), newWorkbasket.getId(), null);
+
+      assertThat(result.getWorkbasketSummary()).isEqualTo(newWorkbasket);
+      assertThat(result.getOwner()).isNull();
+    }
+
+    @WithAccessId(user = "user-1-1")
+    @Test
+    void should_ReturnTransferredTask_When_SpiTransfersTaskWithWorkbasketIdAndOwnerId()
+        throws Exception {
+      Task task = createTaskInReviewByUser("user-1-1").buildAndStore(taskService);
+
+      Task result =
+          taskService.requestChangesWithWorkbasketId(
+              task.getId(), newWorkbasket.getId(), "owner-1-2");
+
+      assertThat(result.getWorkbasketSummary()).isEqualTo(newWorkbasket);
+      assertThat(result.getOwner()).isEqualTo("owner-1-2");
+    }
+  }
+
   @Nested
   @TestInstance(Lifecycle.PER_CLASS)
   @WithServiceProvider(

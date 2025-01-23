@@ -48,13 +48,17 @@ public class AfterRequestChangesManager {
     }
   }
 
-  public Task afterRequestChanges(Task task) {
+  public Task afterRequestChanges(Task task, String workbasketId, String ownerId) {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Sending Task to AfterRequestChangesProvider service providers: {}", task);
     }
     for (AfterRequestChangesProvider serviceProvider : afterRequestChangesProviders) {
       try {
-        task = serviceProvider.afterRequestChanges(task);
+        if (workbasketId == null) {
+          task = serviceProvider.afterRequestChanges(task);
+        } else {
+          task = serviceProvider.afterRequestChanges(task, workbasketId, ownerId);
+        }
       } catch (Exception e) {
         throw new SystemException(
             String.format(
