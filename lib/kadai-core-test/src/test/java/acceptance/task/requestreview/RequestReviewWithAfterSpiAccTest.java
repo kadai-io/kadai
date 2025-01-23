@@ -170,6 +170,65 @@ public class RequestReviewWithAfterSpiAccTest {
     }
   }
 
+  static class TaskTransferrerWithAdditionalInformation implements AfterRequestReviewProvider {
+
+    private KadaiEngine kadaiEngine;
+
+    @Override
+    public void initialize(KadaiEngine kadaiEngine) {
+      this.kadaiEngine = kadaiEngine;
+    }
+
+    @Override
+    public Task afterRequestReview(Task task, String workbasketId, String ownerId)
+        throws Exception {
+      task = kadaiEngine.getTaskService().updateTask(task);
+      task = kadaiEngine.getTaskService().transferWithOwner(task.getId(), workbasketId, ownerId);
+      return task;
+    }
+
+    @Override
+    public Task afterRequestReview(Task task) throws Exception {
+      return null;
+    }
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  @WithServiceProvider(
+      serviceProviderInterface = AfterRequestReviewProvider.class,
+      serviceProviders = TaskTransferrerWithAdditionalInformation.class)
+  class SpiTransfersTaskWithAdditionalInformation {
+
+    @KadaiInject TaskService taskService;
+
+    @WithAccessId(user = "user-1-1")
+    @Test
+    void should_ReturnTransferredTask_When_SpiTransfersTaskWithWorkbasketId() throws Exception {
+      Task task = createTaskClaimedByUser("user-1-1").buildAndStore(taskService);
+
+      Task result =
+          taskService.requestReviewWithWorkbasketId(task.getId(), newWorkbasket.getId(), null);
+
+      assertThat(result.getWorkbasketSummary()).isEqualTo(newWorkbasket);
+      assertThat(result.getOwner()).isNull();
+    }
+
+    @WithAccessId(user = "user-1-1")
+    @Test
+    void should_ReturnTransferredTask_When_SpiTransfersTaskWithWorkbasketIdAndOwnerId()
+        throws Exception {
+      Task task = createTaskClaimedByUser("user-1-1").buildAndStore(taskService);
+
+      Task result =
+          taskService.requestReviewWithWorkbasketId(
+              task.getId(), newWorkbasket.getId(), "user-1-2");
+
+      assertThat(result.getWorkbasketSummary()).isEqualTo(newWorkbasket);
+      assertThat(result.getOwner()).isEqualTo("user-1-2");
+    }
+  }
+
   @Nested
   @TestInstance(Lifecycle.PER_CLASS)
   @WithServiceProvider(

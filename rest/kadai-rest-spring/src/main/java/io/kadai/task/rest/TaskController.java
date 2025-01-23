@@ -59,6 +59,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.beans.ConstructorProperties;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -266,11 +267,26 @@ public class TaskController implements TaskApi {
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_REVIEW)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<TaskRepresentationModel> requestReview(
-      @PathVariable("taskId") String taskId)
+      @PathVariable("taskId") String taskId,
+      @RequestBody(required = false) Map<String, String> body)
       throws InvalidTaskStateException,
-          TaskNotFoundException,
-          InvalidOwnerException,
-          NotAuthorizedOnWorkbasketException {
+      TaskNotFoundException,
+      InvalidOwnerException,
+      NotAuthorizedOnWorkbasketException {
+
+    String workbasketId = null;
+    String ownerId = null;
+
+    if (body != null) {
+      workbasketId = body.getOrDefault("workbasketId", null);
+      ownerId = body.getOrDefault("ownerId", null);
+    }
+
+    if (workbasketId != null) {
+      Task task = taskService.requestReviewWithWorkbasketId(taskId, workbasketId, ownerId);
+      return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
+    }
+
     Task task = taskService.requestReview(taskId);
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
   }
@@ -287,14 +303,26 @@ public class TaskController implements TaskApi {
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
   }
 
-  @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES)
-  @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<TaskRepresentationModel> requestChanges(
-      @PathVariable("taskId") String taskId)
+      @PathVariable("taskId") String taskId,
+      @RequestBody(required = false) Map<String, String> body)
       throws InvalidTaskStateException,
-          TaskNotFoundException,
-          InvalidOwnerException,
-          NotAuthorizedOnWorkbasketException {
+      TaskNotFoundException,
+      InvalidOwnerException,
+      NotAuthorizedOnWorkbasketException {
+
+    String workbasketId = null;
+    String ownerId = null;
+
+    if (body != null) {
+      workbasketId = body.getOrDefault("workbasketId", null);
+      ownerId = body.getOrDefault("ownerId", null);
+    }
+
+    if (workbasketId != null) {
+      Task task = taskService.requestChangesWithWorkbasketId(taskId, workbasketId, ownerId);
+      return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
+    }
     Task task = taskService.requestChanges(taskId);
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
   }
