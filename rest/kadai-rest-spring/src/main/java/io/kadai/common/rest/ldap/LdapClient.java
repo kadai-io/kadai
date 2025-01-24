@@ -18,6 +18,7 @@
 
 package io.kadai.common.rest.ldap;
 
+import static io.kadai.common.rest.util.LambdaExceptionUtil.rethrowFunction;
 import static java.util.function.Predicate.not;
 
 import io.kadai.KadaiConfiguration;
@@ -25,6 +26,7 @@ import io.kadai.common.api.KadaiRole;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.util.LogSanitizer;
+import io.kadai.common.internal.util.Pair;
 import io.kadai.common.rest.models.AccessIdRepresentationModel;
 import io.kadai.user.api.models.User;
 import io.kadai.user.internal.models.UserImpl;
@@ -33,11 +35,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -259,26 +260,27 @@ public class LdapClient {
         new GroupContextMapper());
   }
 
-  public Map<String, List<String>> searchAccessIdForGroupsAndPermissionsByDn(List<String> dns)
+  public List<String> searchAccessIdsForGroupsByDn(List<String> dns)
       throws InvalidNameException {
-    List<String> accessIdsOfGroupsAndPermissions = new ArrayList<>();
-    List<AccessIdRepresentationModel> permissions = new ArrayList<>();
-    List<String> accessIdsOfPermissions = new ArrayList<>();
-    for (String groupOrPermission : dns) {
-      accessIdsOfGroupsAndPermissions.add(searchAccessIdByDn(groupOrPermission).getAccessId());
-    }
-    for (String groupOrPermission : accessIdsOfGroupsAndPermissions) {
-      permissions.addAll(searchPermissionsByNameOrAccessId(groupOrPermission));
-    }
-    for (AccessIdRepresentationModel permission : permissions) {
-      accessIdsOfPermissions.add(permission.getAccessId());
-    }
-    List<String> accessIdsOfGroups = new ArrayList<>(accessIdsOfGroupsAndPermissions);
-    accessIdsOfGroups.removeAll(accessIdsOfPermissions);
-    Map<String, List<String>> map = new HashMap<>();
-    map.put("permissions", accessIdsOfPermissions);
-    map.put("groups", accessIdsOfGroups);
-    return map;
+    return searchAccessIdsForAccessIdTransByDn(dns, this::searchGroupsByNameOrAccessId);
+  }
+
+  public List<String> searchAccessIdsForPermissionsByDn(List<String> dns)
+      throws InvalidNameException {
+    return searchAccessIdsForAccessIdTransByDn(dns, this::searchPermissionsByNameOrAccessId);
+  }
+
+  private List<String> searchAccessIdsForAccessIdTransByDn(
+      List<String> dns,
+      Function<String, List<AccessIdRepresentationModel>> accessIdTrans
+  ) throws InvalidNameException {
+    return dns.stream()
+        .map(rethrowFunction(this::searchAccessIdByDn))
+        .map(AccessIdRepresentationModel::getAccessId)
+        .map(accessIdTrans)
+        .<AccessIdRepresentationModel>mapMulti(Iterable::forEach)
+        .map(AccessIdRepresentationModel::getAccessId)
+        .toList();
   }
 
   public List<AccessIdRepresentationModel> searchPermissionsByNameOrAccessId(final String name)
