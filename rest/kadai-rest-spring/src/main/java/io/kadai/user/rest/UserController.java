@@ -113,9 +113,9 @@ public class UserController {
   /**
    * This endpoint retrieves multiple Users. If a userId can't be found in the database it will be
    * ignored. If none of the given userIds is valid, the returned list will be empty. If currentUser
-   * is set, the current User from the context will be retrieved as well. If orgLevels are set, all
-   * Users with the respective orgLevels are retrieved. Combinations of orgLevel-params and
-   * user-params are found by intersection.
+   * is set, the current User from the context will be retrieved as well. If any orgLevels are set,
+   * all Users with the respective orgLevels are retrieved. Combinations of orgLevel-params and
+   * user-params are found by union.
    *
    * @title Get multiple Users
    * @param request the HttpServletRequest of the request itself
@@ -135,7 +135,9 @@ public class UserController {
           "This endpoint retrieves multiple Users. If a userId can't be found in the database it "
               + "will be ignored. If none of the given userIds is valid, the returned list will be"
               + " empty. If currentUser is set, the current User from the context will be retrieved"
-              + " as well.",
+              + " as well. If any orgLevels are set, all Users with the respective orgLevels are"
+              + " retrieved."
+              + " Combinations of orgLevel-params and user-params are found by union.",
       parameters = {
         @Parameter(
             name = "user-id",

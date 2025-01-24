@@ -203,11 +203,11 @@ class UserServiceAccTest {
             .orgLevel4(level + expectedOrgLevel + "4-differing")
             .buildAndStore(userService, "businessadmin");
       }
-     List<User> usersWithActualOrgLevels =
-         userService.getUsersWithOrgLevel(level + expectedOrgLevel + level, level);
+      List<User> usersWithActualOrgLevels =
+          userService.getUsersWithOrgLevel(level + expectedOrgLevel + level, level);
 
-     assertThat(usersWithActualOrgLevels)
-         .containsExactlyInAnyOrderElementsOf(usersWithExpectedOrgLevel);
+      assertThat(usersWithActualOrgLevels)
+          .containsExactlyInAnyOrderElementsOf(usersWithExpectedOrgLevel);
     }
 
     @ParameterizedTest
