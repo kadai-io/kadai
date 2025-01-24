@@ -196,7 +196,8 @@ public class UserController {
       users.add(userService.getUser(this.currentUserContext.getUserid()));
     }
 
-    // Invariant: forall n in [0..orgLevelCount]: usersWOrgLevel(n) is subset of usersWOrgLevel(n+1)
+    // Invariant: forall n in [1..4]: usersWOrgLevel(n+1) is subset of usersWOrgLevel(n)
+    // Aka: orgLevel forms total order over users
     if (orgLevel4 != null) {
       users.addAll(userService.getUsersWithOrgLevel4(orgLevel4));
     } else if (orgLevel3 != null) {
@@ -206,12 +207,6 @@ public class UserController {
     } else if (orgLevel1 != null) {
       users.addAll(userService.getUsersWithOrgLevel1(orgLevel1));
     }
-
-    users.removeIf(user ->
-            !user.hasOrgLevel(User::getOrgLevel1, orgLevel1)
-                || !user.hasOrgLevel(User::getOrgLevel2, orgLevel2)
-                || !user.hasOrgLevel(User::getOrgLevel3, orgLevel3)
-                || !user.hasOrgLevel(User::getOrgLevel4, orgLevel4));
 
     return ResponseEntity.ok(userAssembler.toKadaiCollectionModel(users));
   }

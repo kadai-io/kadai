@@ -112,7 +112,8 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public List<User> getUsersWithOrgLevel(String orgLevel, int level) throws InvalidArgumentException {
+  public List<User> getUsersWithOrgLevel(String orgLevel, int level)
+      throws InvalidArgumentException {
     if (orgLevel == null) {
       throw new InvalidArgumentException(
           String.format("OrgLevel%d can't be used as NULL-Parameter.", level));

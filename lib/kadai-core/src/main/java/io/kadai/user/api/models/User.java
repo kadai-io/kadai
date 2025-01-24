@@ -20,7 +20,6 @@ package io.kadai.user.api.models;
 
 import io.kadai.KadaiConfiguration;
 import java.util.Set;
-import java.util.function.Function;
 
 /** The User holds some relevant information about the KADAI users. */
 public interface User {
@@ -220,22 +219,6 @@ public interface User {
    * @param orgLevel1 the first organization level of the User
    */
   void setOrgLevel1(String orgLevel1);
-
-  /**
-   * Returns true if User has given orgLevel or orgLevel is NULL.
-   *
-   * @param getOrgLevel the getter for the Users orgLevel
-   * @param orgLevel the orgLevel to check
-   * @return true if User has given orgLevel
-   */
-  default boolean hasOrgLevel(Function<User, String> getOrgLevel, String orgLevel) {
-    if (orgLevel == null) {
-      return true;
-    }
-
-    String userOrgLevel = getOrgLevel.apply(this);
-    return userOrgLevel != null && userOrgLevel.equals(orgLevel);
-  }
 
   /**
    * Returns the data of the User.

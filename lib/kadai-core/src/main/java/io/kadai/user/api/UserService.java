@@ -23,7 +23,6 @@ import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
 import io.kadai.user.api.models.User;
-
 import java.util.List;
 import java.util.Set;
 
