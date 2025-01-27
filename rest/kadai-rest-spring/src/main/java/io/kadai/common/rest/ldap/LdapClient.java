@@ -26,7 +26,6 @@ import io.kadai.common.api.KadaiRole;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.util.LogSanitizer;
-import io.kadai.common.internal.util.Pair;
 import io.kadai.common.rest.models.AccessIdRepresentationModel;
 import io.kadai.user.api.models.User;
 import io.kadai.user.internal.models.UserImpl;
