@@ -47,6 +47,7 @@ import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
+import io.kadai.workbasket.api.exceptions.NotAuthorizedToQueryWorkbasketException;
 import io.kadai.workbasket.api.exceptions.WorkbasketAccessItemAlreadyExistException;
 import io.kadai.workbasket.api.exceptions.WorkbasketAlreadyExistException;
 import io.kadai.workbasket.api.exceptions.WorkbasketInUseException;
@@ -146,6 +147,12 @@ public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(NotAuthorizedOnWorkbasketException.class)
   public ResponseEntity<Object> handleNotAuthorizedOnWorkbasketException(
       NotAuthorizedOnWorkbasketException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.FORBIDDEN);
+  }
+
+  @ExceptionHandler(NotAuthorizedToQueryWorkbasketException.class)
+  public ResponseEntity<Object> handleNotAuthorizedOnWorkbasketException(
+      NotAuthorizedToQueryWorkbasketException ex, WebRequest req) {
     return handle(ex.getErrorCode(), ex, req, HttpStatus.FORBIDDEN);
   }
 
