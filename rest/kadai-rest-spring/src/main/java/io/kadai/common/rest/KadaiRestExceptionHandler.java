@@ -285,9 +285,9 @@ public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(BeanInstantiationException.class)
   protected ResponseEntity<Object> handleBeanInstantiationException(
       BeanInstantiationException ex, WebRequest req) {
-    return ex.getCause() instanceof InvalidArgumentException cause ?
-            handleInvalidArgumentException(cause, req) :
-            handle(null, ex, req, HttpStatus.INTERNAL_SERVER_ERROR);
+    return ex.getCause() instanceof InvalidArgumentException cause
+        ? handleInvalidArgumentException(cause, req)
+        : handle(null, ex, req, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   // This ExceptionHandler exists to convert IllegalArgumentExceptions to InvalidArgumentExceptions.
