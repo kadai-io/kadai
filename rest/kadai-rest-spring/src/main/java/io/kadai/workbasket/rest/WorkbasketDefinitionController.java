@@ -44,11 +44,6 @@ import io.kadai.workbasket.rest.models.WorkbasketAccessItemRepresentationModel;
 import io.kadai.workbasket.rest.models.WorkbasketDefinitionCollectionRepresentationModel;
 import io.kadai.workbasket.rest.models.WorkbasketDefinitionRepresentationModel;
 import io.kadai.workbasket.rest.models.WorkbasketRepresentationModel;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,7 +55,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -74,7 +68,7 @@ import org.springframework.web.multipart.MultipartFile;
 /** Controller for all {@link WorkbasketDefinitionRepresentationModel} related endpoints. */
 @RestController
 @EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
-public class WorkbasketDefinitionController {
+public class WorkbasketDefinitionController implements WorkbasketDefinitionApi {
 
   private final WorkbasketService workbasketService;
   private final WorkbasketDefinitionRepresentationModelAssembler workbasketDefinitionAssembler;
@@ -96,34 +90,6 @@ public class WorkbasketDefinitionController {
     this.mapper = mapper;
   }
 
-  /**
-   * This endpoint exports all Workbaskets with the corresponding Workbasket Access Items and
-   * Distribution Targets. We call this data structure Workbasket Definition.
-   *
-   * @title Export Workbaskets
-   * @param domain Filter the export for a specific domain.
-   * @return all workbaskets.
-   */
-  @Operation(
-      summary = "Export Workbaskets",
-      description =
-          "This endpoint exports all Workbaskets with the corresponding Workbasket Access Items "
-              + "and Distribution Targets. We call this data structure Workbasket Definition.",
-      parameters = {
-        @Parameter(name = "domain", description = "Filter the export for a specific domain.")
-      },
-      responses = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "all workbaskets.",
-            content = {
-              @Content(
-                  mediaType = MediaTypes.HAL_JSON_VALUE,
-                  schema =
-                      @Schema(
-                          implementation = WorkbasketDefinitionCollectionRepresentationModel.class))
-            })
-      })
   @GetMapping(path = RestEndpoints.URL_WORKBASKET_DEFINITIONS)
   @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<WorkbasketDefinitionCollectionRepresentationModel> exportWorkbaskets(
@@ -144,51 +110,6 @@ public class WorkbasketDefinitionController {
     return ResponseEntity.ok(pageModel);
   }
 
-  /**
-   * This endpoint imports a list of Workbasket Definitions.
-   *
-   * <p>This does not exactly match the REST norm, but we want to have an option to import all
-   * settings at once. When a logical equal (key and domain are equal) Workbasket already exists an
-   * update will be executed. Otherwise a new Workbasket will be created.
-   *
-   * @title Import Workbaskets
-   * @param file the list of Workbasket Definitions which will be imported to the current system.
-   * @return no content
-   * @throws IOException if multipart file cannot be parsed.
-   * @throws NotAuthorizedException if the user is not authorized.
-   * @throws DomainNotFoundException if domain information is incorrect.
-   * @throws WorkbasketAlreadyExistException if any Workbasket already exists when trying to create
-   *     a new one.
-   * @throws WorkbasketNotFoundException if do not exists a {@linkplain Workbasket} in the system
-   *     with the used id.
-   * @throws InvalidArgumentException if any Workbasket has invalid information or authorization
-   *     information in {@linkplain Workbasket}s' definitions is incorrect.
-   * @throws WorkbasketAccessItemAlreadyExistException if a WorkbasketAccessItem for the same
-   *     Workbasket and access id already exists.
-   * @throws ConcurrencyException if Workbasket was updated by an other user
-   * @throws NotAuthorizedOnWorkbasketException if the current user has not correct permissions
-   */
-  @Operation(
-      summary = "Import Workbaskets",
-      description =
-          "This endpoint imports a list of Workbasket Definitions.<p>This does not exactly match "
-              + "the REST norm, but we want to have an option to import all settings at once. When"
-              + " a logical equal (key and domain are equal) Workbasket already exists an update "
-              + "will be executed. Otherwise a new Workbasket will be created.",
-      requestBody =
-          @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              description =
-                  "the list of Workbasket Definitions which will be imported to the current system."
-                      + " To get an example file containing Workbasket Definitions, go to the "
-                      + "[KADAI UI](http://localhost:8080/kadai/index.html) and export the"
-                      + "Workbaskets",
-              required = true,
-              content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)),
-      responses = {
-        @ApiResponse(
-            responseCode = "204",
-            content = {@Content(schema = @Schema())})
-      })
   @PostMapping(
       path = RestEndpoints.URL_WORKBASKET_DEFINITIONS,
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

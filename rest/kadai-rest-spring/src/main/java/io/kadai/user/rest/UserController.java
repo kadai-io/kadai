@@ -30,18 +30,11 @@ import io.kadai.user.api.models.User;
 import io.kadai.user.rest.assembler.UserRepresentationModelAssembler;
 import io.kadai.user.rest.models.UserCollectionRepresentationModel;
 import io.kadai.user.rest.models.UserRepresentationModel;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.http.HttpStatus;
@@ -59,7 +52,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** Controller for all {@linkplain User} related endpoints. */
 @RestController
 @EnableHypermediaSupport(type = HypermediaType.HAL)
-public class UserController {
+public class UserController implements UserApi {
   private final UserService userService;
   private final UserRepresentationModelAssembler userAssembler;
 
@@ -75,33 +68,6 @@ public class UserController {
     this.currentUserContext = currentUserContext;
   }
 
-  /**
-   * This endpoint retrieves a User.
-   *
-   * @title Get a User
-   * @param userId the id of the requested User
-   * @return the requested User
-   * @throws UserNotFoundException if the id has not been found
-   * @throws InvalidArgumentException if the id is null or empty
-   */
-  @Operation(
-      summary = "Get a User",
-      description = "This endpoint retrieves a User.",
-      parameters = {
-        @Parameter(
-            name = "userId",
-            description = "The ID of the requested user",
-            example = "teamlead-1")
-      },
-      responses = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "The requested User",
-            content =
-                @Content(
-                    mediaType = MediaTypes.HAL_JSON_VALUE,
-                    schema = @Schema(implementation = UserRepresentationModel.class)))
-      })
   @GetMapping(RestEndpoints.URL_USERS_ID)
   @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<UserRepresentationModel> getUser(@PathVariable("userId") String userId)
@@ -110,45 +76,6 @@ public class UserController {
     return ResponseEntity.ok(userAssembler.toModel(user));
   }
 
-  /**
-   * This endpoint retrieves multiple Users. If a userId can't be found in the database it will be
-   * ignored. If none of the given userIds is valid, the returned list will be empty. If currentUser
-   * is set, the current User from the context will be retrieved as well
-   *
-   * @title Get multiple Users
-   * @param request the HttpServletRequest of the request itself
-   * @param userIds the ids of the requested Users
-   * @param currentUser Indicates whether to fetch the current user or not as well
-   * @return the requested Users
-   * @throws InvalidArgumentException if the userIds are null or empty
-   * @throws UserNotFoundException if the current User was not found
-   */
-  @Operation(
-      summary = "Get multiple Users",
-      description =
-          "This endpoint retrieves multiple Users. If a userId can't be found in the database it "
-              + "will be ignored. If none of the given userIds is valid, the returned list will be"
-              + " empty. If currentUser is set, the current User from the context will be retrieved"
-              + " as well.",
-      parameters = {
-        @Parameter(
-            name = "user-id",
-            description = "The IDs of the users to be retrieved",
-            example = "teamlead-1"),
-        @Parameter(
-            name = "current-user",
-            description = "Whether to fetch the current user as well",
-            example = "user-1-1")
-      },
-      responses = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "The requested Users",
-            content =
-                @Content(
-                    mediaType = MediaTypes.HAL_JSON_VALUE,
-                    schema = @Schema(implementation = UserCollectionRepresentationModel.class)))
-      })
   @GetMapping(RestEndpoints.URL_USERS)
   @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<UserCollectionRepresentationModel> getUsers(
@@ -173,47 +100,6 @@ public class UserController {
     return ResponseEntity.ok(userAssembler.toKadaiCollectionModel(users));
   }
 
-  /**
-   * This endpoint creates a User.
-   *
-   * @title Create a User
-   * @param repModel the User which should be created
-   * @return the inserted User
-   * @throws InvalidArgumentException if the id has not been set
-   * @throws UserAlreadyExistException if a User with id } is already existing
-   * @throws NotAuthorizedException if the current user is no admin or business-admin
-   */
-  @Operation(
-      summary = "Create a User",
-      description = "This endpoint creates a new User.",
-      requestBody =
-          @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              description = "the User which should be created",
-              required = true,
-              content =
-                  @Content(
-                      schema = @Schema(implementation = UserRepresentationModel.class),
-                      examples =
-                          @ExampleObject(
-                              value =
-                                  """
-                                      {
-                                        "userId": "user-10-2",
-                                        "groups": [],
-                                        "permissions": [],
-                                        "domains": [],
-                                        "firstName": "Hans",
-                                        "lastName": "Georg"
-                                      }"""))),
-      responses = {
-        @ApiResponse(
-            responseCode = "201",
-            description = "The inserted User",
-            content =
-                @Content(
-                    mediaType = MediaTypes.HAL_JSON_VALUE,
-                    schema = @Schema(implementation = UserRepresentationModel.class)))
-      })
   @PostMapping(RestEndpoints.URL_USERS)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<UserRepresentationModel> createUser(
@@ -225,65 +111,6 @@ public class UserController {
     return ResponseEntity.status(HttpStatus.CREATED).body(userAssembler.toModel(user));
   }
 
-  /**
-   * This endpoint updates a User.
-   *
-   * @title Update a User
-   * @param userId the id of the User to update
-   * @param repModel the User with the updated fields
-   * @return the updated User
-   * @throws InvalidArgumentException if the id has not been set
-   * @throws UserNotFoundException if a User with id is not existing in the database
-   * @throws NotAuthorizedException if the current user is no admin or business-admin
-   */
-  @Operation(
-      summary = "Update a User",
-      description = "This endpoint updates a User.",
-      parameters = {
-        @Parameter(
-            name = "userId",
-            description = "The ID of the User to update",
-            example = "teamlead-1")
-      },
-      requestBody =
-          @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              description = "the User with the updated fields",
-              required = true,
-              content =
-                  @Content(
-                      schema = @Schema(implementation = UserRepresentationModel.class),
-                      examples = {
-                        @ExampleObject(
-                            value =
-                                """
-                                    {
-                                      "userId": "teamlead-1",
-                                      "groups": [],
-                                      "permissions": [],
-                                      "domains": ["DOMAIN_A"],
-                                      "firstName": "new name",
-                                      "lastName": "Toll",
-                                      "fullName": "Toll, Titus",
-                                      "longName": "Toll, Titus - (teamlead-1)",
-                                      "email": "titus.toll@web.de",
-                                      "phone": "040-2951854",
-                                      "mobilePhone": "015637683197",
-                                      "orgLevel4": "Envite",
-                                      "orgLevel3": "BPM",
-                                      "orgLevel2": "Human Workflow",
-                                      "orgLevel1": "KADAI",
-                                      "data": "xy"
-                                    }""")
-                      })),
-      responses = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "The updated User",
-            content =
-                @Content(
-                    mediaType = MediaTypes.HAL_JSON_VALUE,
-                    schema = @Schema(implementation = UserRepresentationModel.class)))
-      })
   @PutMapping(RestEndpoints.URL_USERS_ID)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<UserRepresentationModel> updateUser(
@@ -302,31 +129,6 @@ public class UserController {
     return ResponseEntity.ok(userAssembler.toModel(user));
   }
 
-  /**
-   * This endpoint deletes a User.
-   *
-   * @title Delete a User
-   * @param userId the id of the User to delete
-   * @return no content
-   * @throws UserNotFoundException if the id has not been found
-   * @throws NotAuthorizedException if the current user is no admin or business-admin
-   * @throws InvalidArgumentException if the id is null or empty
-   */
-  @Operation(
-      summary = "Delete a User",
-      description = "This endpoint deletes a User.",
-      parameters = {
-        @Parameter(
-            name = "userId",
-            description = "The ID of the user to delete",
-            example = "user-1-1")
-      },
-      responses = {
-        @ApiResponse(
-            responseCode = "204",
-            description = "User deleted",
-            content = @Content(schema = @Schema()))
-      })
   @DeleteMapping(RestEndpoints.URL_USERS_ID)
   @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<UserRepresentationModel> deleteUser(@PathVariable("userId") String userId)
