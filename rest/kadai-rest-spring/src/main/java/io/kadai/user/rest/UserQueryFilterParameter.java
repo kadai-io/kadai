@@ -1,14 +1,13 @@
 package io.kadai.user.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.kadai.common.api.security.CurrentUserContext;
+import io.kadai.common.rest.QueryParameter;
+import io.kadai.user.api.UserQuery;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.beans.ConstructorProperties;
 import java.util.Optional;
 import org.apache.commons.lang3.ArrayUtils;
-
-import io.kadai.common.api.security.CurrentUserContext;
-import io.kadai.common.rest.QueryParameter;
-import io.kadai.user.api.UserQuery;
 
 /**
  * {@linkplain org.springdoc.core.annotations.ParameterObject @ParameterObject} for Query-Params
@@ -18,26 +17,20 @@ public class UserQueryFilterParameter implements QueryParameter<UserQuery, Void>
 
   // region id
 
-  @Schema(name = "user-id", description = "Filter by the users ids. This is an exact match.")
-  @JsonProperty("user-id")
-  private String[] userIds;
-
-  // endregion
-
-  // region current-user
-
   @Schema(name = "current-user", description = "Filter by the current user.")
   @JsonProperty("current-user")
   private final String currentUser;
 
   // endregion
 
-  // region org-level
-
+  // region current-user
   @Schema(name = "orgLevel1", description = "Filter by the org-level 1. This is an exact match.")
   @JsonProperty("orgLevel1")
   private final String[] orgLevel1;
 
+  // endregion
+
+  // region org-level
   @Schema(name = "orgLevel2", description = "Filter by the org-level 2. This is an exact match.")
   @JsonProperty("orgLevel2")
   private final String[] orgLevel2;
@@ -50,18 +43,27 @@ public class UserQueryFilterParameter implements QueryParameter<UserQuery, Void>
   @JsonProperty("orgLevel4")
   private final String[] orgLevel4;
 
+  @Schema(name = "user-id", description = "Filter by the users ids. This is an exact match.")
+  @JsonProperty("user-id")
+  private String[] userIds;
+
   // endregion
 
   @ConstructorProperties({
-      "user-id",
-      "current-user",
-      "orgLevel1",
-      "orgLevel2",
-      "orgLevel3",
-      "orgLevel4"
+    "user-id",
+    "current-user",
+    "orgLevel1",
+    "orgLevel2",
+    "orgLevel3",
+    "orgLevel4"
   })
-  public UserQueryFilterParameter(String[] userIds, String currentUser, String[] orgLevel1,
-      String[] orgLevel2, String[] orgLevel3, String[] orgLevel4) {
+  public UserQueryFilterParameter(
+      String[] userIds,
+      String currentUser,
+      String[] orgLevel1,
+      String[] orgLevel2,
+      String[] orgLevel3,
+      String[] orgLevel4) {
     this.userIds = userIds;
     this.currentUser = currentUser;
     this.orgLevel1 = orgLevel1;
@@ -71,11 +73,11 @@ public class UserQueryFilterParameter implements QueryParameter<UserQuery, Void>
   }
 
   /**
-   * Adds the id of the {@linkplain #getCurrentUser() current user} to the
-   * {@linkplain #getUserIds() userIds}
+   * Adds the id of the {@linkplain #getCurrentUser() current user} to the {@linkplain #getUserIds()
+   * userIds}.
    *
-   * @param currentUserContext the context this
-   * {@linkplain org.springdoc.core.annotations.ParameterObject @ParameterObject} is served from.
+   * @param currentUserContext the context this {@linkplain
+   *     org.springdoc.core.annotations.ParameterObject @ParameterObject} is served from.
    */
   public void addCurrentUserIdIfPresentWithContext(CurrentUserContext currentUserContext) {
     if (currentUser != null) {
