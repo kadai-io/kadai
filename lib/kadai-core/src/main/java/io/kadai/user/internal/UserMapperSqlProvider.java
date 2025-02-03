@@ -53,46 +53,6 @@ public class UserMapperSqlProvider {
         + CLOSING_SCRIPT_TAG;
   }
 
-  public static String findByOrgLevel1() {
-    return OPENING_SCRIPT_TAG
-        + "SELECT "
-        + USER_INFO_COLUMNS
-        + "FROM USER_INFO "
-        + "WHERE ORG_LEVEL_1 = #{orgLevel} "
-        + DB2_WITH_UR
-        + CLOSING_SCRIPT_TAG;
-  }
-
-  public static String findByOrgLevel2() {
-    return OPENING_SCRIPT_TAG
-        + "SELECT "
-        + USER_INFO_COLUMNS
-        + "FROM USER_INFO "
-        + "WHERE ORG_LEVEL_2 = #{orgLevel} "
-        + DB2_WITH_UR
-        + CLOSING_SCRIPT_TAG;
-  }
-
-  public static String findByOrgLevel3() {
-    return OPENING_SCRIPT_TAG
-        + "SELECT "
-        + USER_INFO_COLUMNS
-        + "FROM USER_INFO "
-        + "WHERE ORG_LEVEL_3 = #{orgLevel} "
-        + DB2_WITH_UR
-        + CLOSING_SCRIPT_TAG;
-  }
-
-  public static String findByOrgLevel4() {
-    return OPENING_SCRIPT_TAG
-        + "SELECT "
-        + USER_INFO_COLUMNS
-        + "FROM USER_INFO "
-        + "WHERE ORG_LEVEL_4 = #{orgLevel} "
-        + DB2_WITH_UR
-        + CLOSING_SCRIPT_TAG;
-  }
-
   public static String findGroupsById() {
     return OPENING_SCRIPT_TAG
         + "SELECT GROUP_ID FROM GROUP_INFO WHERE USER_ID = #{id} "

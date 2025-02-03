@@ -61,8 +61,6 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.function.ThrowingConsumer;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 /** Acceptance test which tests the functionality of the UserService. */
 @KadaiIntegrationTest
@@ -178,65 +176,6 @@ class UserServiceAccTest {
       List<User> returnedUsers = userService.getUsers(userIds);
 
       assertThat(returnedUsers).containsExactlyInAnyOrderElementsOf(users);
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {1, 2, 3, 4})
-    void should_ReturnOnlyUsersWithExactOrgLevel_When_TryingToGetUsersWithOrgLevel(int level)
-        throws Exception {
-      String expectedOrgLevel = "-some-org-level";
-      Set<User> usersWithExpectedOrgLevel = new HashSet<>();
-      for (int i = 0; i < 5; i++) {
-        usersWithExpectedOrgLevel.add(
-            randomTestUser()
-                .orgLevel1(level + expectedOrgLevel + 1)
-                .orgLevel2(level + expectedOrgLevel + 2)
-                .orgLevel3(level + expectedOrgLevel + 3)
-                .orgLevel4(level + expectedOrgLevel + 4)
-                .buildAndStore(userService, "businessadmin"));
-      }
-      for (int i = 0; i < 5; i++) {
-        randomTestUser()
-            .orgLevel1(level + expectedOrgLevel + "1-differing")
-            .orgLevel2(level + expectedOrgLevel + "2-differing")
-            .orgLevel3(level + expectedOrgLevel + "3-differing")
-            .orgLevel4(level + expectedOrgLevel + "4-differing")
-            .buildAndStore(userService, "businessadmin");
-      }
-      List<User> usersWithActualOrgLevels =
-          userService.getUsersWithOrgLevel(level + expectedOrgLevel + level, level);
-
-      assertThat(usersWithActualOrgLevels)
-          .containsExactlyInAnyOrderElementsOf(usersWithExpectedOrgLevel);
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {1, 2, 3, 4})
-    void should_ThrowInvalidArgumentException_When_OrgLevelIsNull(int level) {
-      ThrowingCallable call = () -> userService.getUsersWithOrgLevel(null, level);
-      InvalidArgumentException e = catchThrowableOfType(InvalidArgumentException.class, call);
-
-      assertThat(e).hasMessage(String.format("OrgLevel%d can't be used as NULL-Parameter.", level));
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {-1, 0, 10})
-    void should_ReturnEmptyList_When_TryingToGetUsersWithOutOfBoundsOrgLevel(int level)
-        throws Exception {
-      String expectedOrgLevel = "-some-org-level";
-      for (int i = 0; i < 5; i++) {
-        randomTestUser()
-            .orgLevel1(level + expectedOrgLevel + 1)
-            .orgLevel2(level + expectedOrgLevel + 2)
-            .orgLevel3(level + expectedOrgLevel + 3)
-            .orgLevel4(level + expectedOrgLevel + 4)
-            .buildAndStore(userService, "businessadmin");
-      }
-      List<User> usersWithActualOrgLevels =
-          userService.getUsersWithOrgLevel(level + expectedOrgLevel + level, level);
-
-      assertThat(usersWithActualOrgLevels)
-          .isEmpty();
     }
 
     @WithAccessId(user = "user-1-1")

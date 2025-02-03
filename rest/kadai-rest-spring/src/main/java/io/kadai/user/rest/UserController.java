@@ -23,6 +23,7 @@ import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.common.rest.util.QueryParamsValidator;
+import io.kadai.user.api.UserQuery;
 import io.kadai.user.api.UserService;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
@@ -37,9 +38,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
@@ -53,7 +52,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /** Controller for all {@linkplain User} related endpoints. */
@@ -112,32 +110,20 @@ public class UserController {
 
   /**
    * This endpoint retrieves multiple Users. If a userId can't be found in the database it will be
-   * ignored. If none of the given userIds is valid, the returned list will be empty. If currentUser
-   * is set, the current User from the context will be retrieved as well. If any orgLevels are set,
-   * all Users with the respective orgLevels are retrieved. Combinations of orgLevel-params and
-   * user-params are found by union.
+   * ignored. Any combination of parameters is interpreted as conjunction of those.
    *
    * @title Get multiple Users
    * @param request the HttpServletRequest of the request itself
-   * @param userIds the ids of the requested Users
-   * @param currentUser Indicates whether to fetch the current user or not as well
-   * @param orgLevel1 the orgLevel1 of the requested Users
-   * @param orgLevel2 the orgLevel2 of the requested Users
-   * @param orgLevel3 the orgLevel3 of the requested Users
-   * @param orgLevel4 the orgLevel4 of the requested Users
+   * @param filterParameter the filter parameters regarding UserQueryFilterParameter
    * @return the requested Users
    * @throws InvalidArgumentException if the userIds are null or empty
-   * @throws UserNotFoundException if the current User was not found
    */
   @Operation(
       summary = "Get multiple Users",
       description =
           "This endpoint retrieves multiple Users. If a userId can't be found in the database it "
-              + "will be ignored. If none of the given userIds is valid, the returned list will be"
-              + " empty. If currentUser is set, the current User from the context will be retrieved"
-              + " as well. If any orgLevels are set, all Users with the respective orgLevels are"
-              + " retrieved."
-              + " Combinations of orgLevel-params and user-params are found by union.",
+              + "will be ignored. "
+              + "Any combination of parameters is interpreted as conjunction of those.",
       parameters = {
         @Parameter(
             name = "user-id",
@@ -176,41 +162,19 @@ public class UserController {
   @GetMapping(RestEndpoints.URL_USERS)
   @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<UserCollectionRepresentationModel> getUsers(
-      HttpServletRequest request,
-      @RequestParam(name = "user-id", required = false) String[] userIds,
-      @RequestParam(name = "current-user", required = false) String currentUser,
-      @RequestParam(name = "orgLevel1", required = false) String orgLevel1,
-      @RequestParam(name = "orgLevel2", required = false) String orgLevel2,
-      @RequestParam(name = "orgLevel3", required = false) String orgLevel3,
-      @RequestParam(name = "orgLevel4", required = false) String orgLevel4)
-      throws InvalidArgumentException, UserNotFoundException {
-    Set<User> users = new HashSet<>();
-
-    if (userIds != null) {
-      users.addAll(userService.getUsers(new HashSet<>(List.of(userIds))));
+      HttpServletRequest request, @ParameterObject UserQueryFilterParameter filterParameter)
+      throws InvalidArgumentException {
+    if (filterParameter.getCurrentUser() != null
+        && QueryParamsValidator.hasQueryParameterValues(request, "current-user")) {
+      throw new InvalidArgumentException(
+          "It is prohibited to use the param current-user with values.");
     }
+    filterParameter.addCurrentUserIdIfPresentWithContext(currentUserContext);
 
-    if (currentUser != null) {
-      if (QueryParamsValidator.hasQueryParameterValues(request, "current-user")) {
-        throw new InvalidArgumentException(
-            "It is prohibited to use the param current-user with values.");
-      }
-      users.add(userService.getUser(this.currentUserContext.getUserid()));
-    }
+    UserQuery query = userService.createUserQuery();
+    filterParameter.apply(query);
 
-    // Invariant: forall n in [1..4]: usersWOrgLevel(n+1) is subset of usersWOrgLevel(n)
-    // Aka: orgLevel forms total order over users
-    if (orgLevel4 != null) {
-      users.addAll(userService.getUsersWithOrgLevel4(orgLevel4));
-    } else if (orgLevel3 != null) {
-      users.addAll(userService.getUsersWithOrgLevel3(orgLevel3));
-    } else if (orgLevel2 != null) {
-      users.addAll(userService.getUsersWithOrgLevel2(orgLevel2));
-    } else if (orgLevel1 != null) {
-      users.addAll(userService.getUsersWithOrgLevel1(orgLevel1));
-    }
-
-    return ResponseEntity.ok(userAssembler.toKadaiCollectionModel(users));
+    return ResponseEntity.ok(userAssembler.toKadaiCollectionModel(query.list()));
   }
 
   /**

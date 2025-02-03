@@ -27,6 +27,7 @@ import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.util.LogSanitizer;
+import io.kadai.user.api.UserQuery;
 import io.kadai.user.api.UserService;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
@@ -39,7 +40,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.ibatis.exceptions.PersistenceException;
 import org.slf4j.Logger;
@@ -112,36 +112,6 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public List<User> getUsersWithOrgLevel(String orgLevel, int level)
-      throws InvalidArgumentException {
-    if (orgLevel == null) {
-      throw new InvalidArgumentException(
-          String.format("OrgLevel%d can't be used as NULL-Parameter.", level));
-    }
-
-    Function<String, List<UserImpl>> findByOrgLevel;
-    if (level == 1) {
-      findByOrgLevel = userMapper::findByOrgLevel1;
-    } else if (level == 2) {
-      findByOrgLevel = userMapper::findByOrgLevel2;
-    } else if (level == 3) {
-      findByOrgLevel = userMapper::findByOrgLevel3;
-    } else if (level == 4) {
-      findByOrgLevel = userMapper::findByOrgLevel4;
-    } else {
-      LOGGER.warn("Unsupported level {}. Valid values range from 1 to 4.", level);
-      findByOrgLevel = ignore -> Collections.emptyList();
-    }
-
-    List<UserImpl> users =
-        internalKadaiEngine.executeInDatabaseConnection(() -> findByOrgLevel.apply(orgLevel));
-
-    users.forEach(user -> user.setDomains(determineDomains(user)));
-
-    return users.stream().map(User.class::cast).toList();
-  }
-
-  @Override
   public User createUser(User userToCreate)
       throws InvalidArgumentException, UserAlreadyExistException, NotAuthorizedException {
     internalKadaiEngine.getEngine().checkRoleMembership(KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
@@ -207,6 +177,11 @@ public class UserServiceImpl implements UserService {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Method deleteUser() deleted User with id '{}'.", userId);
     }
+  }
+
+  @Override
+  public UserQuery createUserQuery() {
+    return new UserQueryImpl(internalKadaiEngine);
   }
 
   private Set<String> determineDomains(User user) {
