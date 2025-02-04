@@ -30,8 +30,6 @@ import io.kadai.common.api.exceptions.ConnectionNotSetException;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.ErrorCode;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
-import io.kadai.common.api.exceptions.KadaiException;
-import io.kadai.common.api.exceptions.KadaiRuntimeException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.api.exceptions.UnsupportedDatabaseException;
@@ -49,6 +47,7 @@ import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
+import io.kadai.workbasket.api.exceptions.NotAuthorizedToQueryWorkbasketException;
 import io.kadai.workbasket.api.exceptions.WorkbasketAccessItemAlreadyExistException;
 import io.kadai.workbasket.api.exceptions.WorkbasketAlreadyExistException;
 import io.kadai.workbasket.api.exceptions.WorkbasketInUseException;
@@ -76,87 +75,226 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-/** This class handles KADAI exceptions. */
+/** Global handler for exceptions thrown in mapped request handlers. */
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@ControllerAdvice
+@RestControllerAdvice
 public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
 
   public static final String ERROR_KEY_QUERY_MALFORMED = "QUERY_PARAMETER_MALFORMED";
   public static final String ERROR_KEY_PAYLOAD = "PAYLOAD_TOO_LARGE";
   public static final String ERROR_KEY_UNKNOWN_ERROR = "UNKNOWN_ERROR";
-  private static final Map<String, HttpStatus> HTTP_STATUS_BY_ERROR_CODE_KEY =
-      Map.ofEntries(
-          Map.entry(MalformedServiceLevelException.ERROR_KEY, HttpStatus.BAD_REQUEST),
-          Map.entry(WrongCustomHolidayFormatException.ERROR_KEY, HttpStatus.BAD_REQUEST),
-          Map.entry(DomainNotFoundException.ERROR_KEY, HttpStatus.BAD_REQUEST),
-          Map.entry(InvalidArgumentException.ERROR_KEY, HttpStatus.BAD_REQUEST),
-          Map.entry(ERROR_KEY_QUERY_MALFORMED, HttpStatus.BAD_REQUEST),
-          Map.entry(InvalidCallbackStateException.ERROR_KEY, HttpStatus.BAD_REQUEST),
-          Map.entry(InvalidOwnerException.ERROR_KEY, HttpStatus.BAD_REQUEST),
-          Map.entry(InvalidTaskStateException.ERROR_KEY, HttpStatus.BAD_REQUEST),
-          //
-          Map.entry(NotAuthorizedException.ERROR_KEY, HttpStatus.FORBIDDEN),
-          Map.entry(NotAuthorizedOnTaskCommentException.ERROR_KEY, HttpStatus.FORBIDDEN),
-          Map.entry(NotAuthorizedOnWorkbasketException.ERROR_KEY_ID, HttpStatus.FORBIDDEN),
-          Map.entry(NotAuthorizedOnWorkbasketException.ERROR_KEY_KEY_DOMAIN, HttpStatus.FORBIDDEN),
-          //
-          Map.entry(ClassificationNotFoundException.ERROR_KEY_ID, HttpStatus.NOT_FOUND),
-          Map.entry(ClassificationNotFoundException.ERROR_KEY_KEY_DOMAIN, HttpStatus.NOT_FOUND),
-          Map.entry(TaskCommentNotFoundException.ERROR_KEY, HttpStatus.NOT_FOUND),
-          Map.entry(TaskNotFoundException.ERROR_KEY, HttpStatus.NOT_FOUND),
-          Map.entry(UserNotFoundException.ERROR_KEY, HttpStatus.NOT_FOUND),
-          Map.entry(WorkbasketNotFoundException.ERROR_KEY_ID, HttpStatus.NOT_FOUND),
-          Map.entry(WorkbasketNotFoundException.ERROR_KEY_KEY_DOMAIN, HttpStatus.NOT_FOUND),
-          Map.entry(KadaiHistoryEventNotFoundException.ERROR_KEY, HttpStatus.NOT_FOUND),
-          //
-          Map.entry(AttachmentPersistenceException.ERROR_KEY, HttpStatus.CONFLICT),
-          Map.entry(ClassificationAlreadyExistException.ERROR_KEY, HttpStatus.CONFLICT),
-          Map.entry(ConcurrencyException.ERROR_KEY, HttpStatus.CONFLICT),
-          Map.entry(TaskAlreadyExistException.ERROR_KEY, HttpStatus.CONFLICT),
-          Map.entry(UserAlreadyExistException.ERROR_KEY, HttpStatus.CONFLICT),
-          Map.entry(WorkbasketAccessItemAlreadyExistException.ERROR_KEY, HttpStatus.CONFLICT),
-          Map.entry(WorkbasketAlreadyExistException.ERROR_KEY, HttpStatus.CONFLICT),
-          Map.entry(WorkbasketMarkedForDeletionException.ERROR_KEY, HttpStatus.CONFLICT),
-          //
-          Map.entry(ERROR_KEY_PAYLOAD, HttpStatus.PAYLOAD_TOO_LARGE),
-          //
-          Map.entry(ClassificationInUseException.ERROR_KEY, HttpStatus.LOCKED),
-          Map.entry(WorkbasketInUseException.ERROR_KEY, HttpStatus.LOCKED),
-          //
-          Map.entry(AutocommitFailedException.ERROR_KEY, HttpStatus.INTERNAL_SERVER_ERROR),
-          Map.entry(ConnectionNotSetException.ERROR_KEY, HttpStatus.INTERNAL_SERVER_ERROR),
-          Map.entry(SystemException.ERROR_KEY, HttpStatus.INTERNAL_SERVER_ERROR),
-          Map.entry(UnsupportedDatabaseException.ERROR_KEY, HttpStatus.INTERNAL_SERVER_ERROR),
-          Map.entry(ERROR_KEY_UNKNOWN_ERROR, HttpStatus.INTERNAL_SERVER_ERROR));
+
+  @ExceptionHandler(MalformedServiceLevelException.class)
+  public ResponseEntity<Object> handleMalformedServiceLevelException(
+      MalformedServiceLevelException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(WrongCustomHolidayFormatException.class)
+  public ResponseEntity<Object> handleWrongCustomHolidayFormatException(
+      WrongCustomHolidayFormatException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(DomainNotFoundException.class)
+  public ResponseEntity<Object> handleDomainNotFoundException(
+      DomainNotFoundException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(InvalidArgumentException.class)
+  public ResponseEntity<Object> handleInvalidArgumentException(
+      InvalidArgumentException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(InvalidCallbackStateException.class)
+  public ResponseEntity<Object> handleInvalidCallbackStateException(
+      InvalidCallbackStateException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(InvalidOwnerException.class)
+  public ResponseEntity<Object> handleInvalidOwnerException(
+      InvalidOwnerException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(InvalidTaskStateException.class)
+  public ResponseEntity<Object> handleInvalidTaskStateException(
+      InvalidTaskStateException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(NotAuthorizedException.class)
+  public ResponseEntity<Object> handleNotAuthorizedException(
+      NotAuthorizedException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.FORBIDDEN);
+  }
+
+  @ExceptionHandler(NotAuthorizedOnTaskCommentException.class)
+  public ResponseEntity<Object> handleNotAuthorizedOnTaskCommentException(
+      NotAuthorizedOnTaskCommentException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.FORBIDDEN);
+  }
+
+  @ExceptionHandler(NotAuthorizedOnWorkbasketException.class)
+  public ResponseEntity<Object> handleNotAuthorizedOnWorkbasketException(
+      NotAuthorizedOnWorkbasketException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.FORBIDDEN);
+  }
+
+  @ExceptionHandler(NotAuthorizedToQueryWorkbasketException.class)
+  public ResponseEntity<Object> handleNotAuthorizedOnWorkbasketException(
+      NotAuthorizedToQueryWorkbasketException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.FORBIDDEN);
+  }
+
+  @ExceptionHandler(ClassificationNotFoundException.class)
+  public ResponseEntity<Object> handleClassificationNotFoundException(
+      ClassificationNotFoundException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(TaskCommentNotFoundException.class)
+  public ResponseEntity<Object> handleTaskCommentNotFoundException(
+      TaskCommentNotFoundException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(TaskNotFoundException.class)
+  public ResponseEntity<Object> handleTaskNotFoundException(
+      TaskNotFoundException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(UserNotFoundException.class)
+  public ResponseEntity<Object> handleUserNotFoundException(
+      UserNotFoundException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(WorkbasketNotFoundException.class)
+  public ResponseEntity<Object> handleWorkbasketNotFoundException(
+      WorkbasketNotFoundException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(KadaiHistoryEventNotFoundException.class)
+  public ResponseEntity<Object> handleKadaiHistoryEventNotFoundException(
+      KadaiHistoryEventNotFoundException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(AttachmentPersistenceException.class)
+  public ResponseEntity<Object> handleAttachmentPersistenceException(
+      AttachmentPersistenceException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.CONFLICT);
+  }
+
+  @ExceptionHandler(ClassificationAlreadyExistException.class)
+  public ResponseEntity<Object> handleClassificationAlreadyExistException(
+      ClassificationAlreadyExistException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.CONFLICT);
+  }
+
+  @ExceptionHandler(ConcurrencyException.class)
+  public ResponseEntity<Object> handleConcurrencyException(
+      ConcurrencyException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.CONFLICT);
+  }
+
+  @ExceptionHandler(TaskAlreadyExistException.class)
+  public ResponseEntity<Object> handleTaskAlreadyExistException(
+      TaskAlreadyExistException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.CONFLICT);
+  }
+
+  @ExceptionHandler(UserAlreadyExistException.class)
+  public ResponseEntity<Object> handleUserAlreadyExistException(
+      UserAlreadyExistException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.CONFLICT);
+  }
+
+  @ExceptionHandler(WorkbasketAccessItemAlreadyExistException.class)
+  public ResponseEntity<Object> handleWorkbasketAccessItemAlreadyExistException(
+      WorkbasketAccessItemAlreadyExistException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.CONFLICT);
+  }
+
+  @ExceptionHandler(WorkbasketAlreadyExistException.class)
+  public ResponseEntity<Object> handleWorkbasketAlreadyExistException(
+      WorkbasketAlreadyExistException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.CONFLICT);
+  }
+
+  @ExceptionHandler(WorkbasketMarkedForDeletionException.class)
+  public ResponseEntity<Object> handleWorkbasketMarkedForDeletionException(
+      WorkbasketMarkedForDeletionException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.CONFLICT);
+  }
+
+  @ExceptionHandler(ClassificationInUseException.class)
+  public ResponseEntity<Object> handleClassificationInUseException(
+      ClassificationInUseException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.LOCKED);
+  }
+
+  @ExceptionHandler(WorkbasketInUseException.class)
+  public ResponseEntity<Object> handleWorkbasketInUseException(
+      WorkbasketInUseException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.LOCKED);
+  }
+
+  @ExceptionHandler(AutocommitFailedException.class)
+  public ResponseEntity<Object> handleAutocommitFailedException(
+      AutocommitFailedException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  @ExceptionHandler(ConnectionNotSetException.class)
+  public ResponseEntity<Object> handleConnectionNotSetException(
+      ConnectionNotSetException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  @ExceptionHandler(SystemException.class)
+  public ResponseEntity<Object> handleSystemException(
+      SystemException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  @ExceptionHandler(UnsupportedDatabaseException.class)
+  public ResponseEntity<Object> handleUnsupportedDatabaseException(
+      UnsupportedDatabaseException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
 
   @Override
   protected ResponseEntity<Object> handleMaxUploadSizeExceededException(
-      MaxUploadSizeExceededException ex,
-      HttpHeaders headers,
-      HttpStatusCode status,
-      WebRequest request) {
-
-    return buildResponse(
+      @NonNull MaxUploadSizeExceededException ex,
+      @NonNull HttpHeaders headers,
+      @NonNull HttpStatusCode status,
+      @NonNull WebRequest req) {
+    return handle(
         ErrorCode.of(ERROR_KEY_PAYLOAD),
         ex,
-        request,
-        HTTP_STATUS_BY_ERROR_CODE_KEY.getOrDefault(
-            ERROR_KEY_PAYLOAD, HttpStatus.INTERNAL_SERVER_ERROR));
+        req,
+        HttpStatus.PAYLOAD_TOO_LARGE);
   }
 
   @ExceptionHandler(BeanInstantiationException.class)
   protected ResponseEntity<Object> handleBeanInstantiationException(
       BeanInstantiationException ex, WebRequest req) {
-    if (ex.getCause() instanceof InvalidArgumentException cause) {
-      return handleKadaiRuntimeException(cause, req);
-    }
-    return buildResponse(null, ex, req, HttpStatus.INTERNAL_SERVER_ERROR);
+    return ex.getCause() instanceof InvalidArgumentException cause
+        ? handleInvalidArgumentException(cause, req)
+        : handle(null, ex, req, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   // This ExceptionHandler exists to convert IllegalArgumentExceptions to InvalidArgumentExceptions.
@@ -164,37 +302,26 @@ public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(IllegalArgumentException.class)
   protected ResponseEntity<Object> handleIllegalArgumentException(
       IllegalArgumentException ex, WebRequest req) {
-    HttpStatus status =
-        HTTP_STATUS_BY_ERROR_CODE_KEY.getOrDefault(
-            InvalidArgumentException.ERROR_KEY, HttpStatus.INTERNAL_SERVER_ERROR);
-    return buildResponse(ErrorCode.of(InvalidArgumentException.ERROR_KEY), ex, req, status);
-  }
-
-  @ExceptionHandler(KadaiRuntimeException.class)
-  protected ResponseEntity<Object> handleKadaiRuntimeException(
-      KadaiRuntimeException ex, WebRequest req) {
-    HttpStatus status =
-        HTTP_STATUS_BY_ERROR_CODE_KEY.getOrDefault(
-            ex.getErrorCode().getKey(), HttpStatus.INTERNAL_SERVER_ERROR);
-    return buildResponse(ex.getErrorCode(), ex, req, status);
-  }
-
-  @ExceptionHandler(KadaiException.class)
-  protected ResponseEntity<Object> handleKadaiException(KadaiException ex, WebRequest req) {
-    HttpStatus status =
-        HTTP_STATUS_BY_ERROR_CODE_KEY.getOrDefault(
-            ex.getErrorCode().getKey(), HttpStatus.INTERNAL_SERVER_ERROR);
-    return buildResponse(ex.getErrorCode(), ex, req, status);
+    return handle(
+        ErrorCode.of(InvalidArgumentException.ERROR_KEY),
+        ex,
+        req,
+        HttpStatus.BAD_REQUEST
+    );
   }
 
   @ExceptionHandler(Exception.class)
   protected ResponseEntity<Object> handleGeneralException(Exception ex, WebRequest req) {
-    return buildResponse(
-        ErrorCode.of(ERROR_KEY_UNKNOWN_ERROR), ex, req, HttpStatus.INTERNAL_SERVER_ERROR);
+    ExceptionRepresentationModel errorData =
+        new ExceptionRepresentationModel(
+            ErrorCode.of(ERROR_KEY_UNKNOWN_ERROR), HttpStatus.INTERNAL_SERVER_ERROR, ex, req);
+    logger.error(
+        String.format("Unknown error occurred during processing of rest request: %s", errorData),
+        ex);
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorData);
   }
 
   @Override
-  @NonNull
   protected ResponseEntity<Object> handleMethodArgumentNotValid(
       MethodArgumentNotValidException ex,
       @NonNull HttpHeaders headers,
@@ -215,15 +342,23 @@ public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
                 ERROR_KEY_QUERY_MALFORMED, Map.of("malformedQueryParameters", wrongQueryParameters))
             : null;
 
-    return buildResponse(errorCode, ex, request, HttpStatus.BAD_REQUEST);
+    return handle(errorCode, ex, request, HttpStatus.BAD_REQUEST);
   }
 
-  private ResponseEntity<Object> buildResponse(
+  private ResponseEntity<Object> handle(
       ErrorCode errorCode, Throwable ex, WebRequest req, HttpStatus status) {
-    ExceptionRepresentationModel errorData =
+    final ExceptionRepresentationModel errorData =
         new ExceptionRepresentationModel(errorCode, status, ex, req);
-    logger.error(
-        String.format("Error occurred during processing of rest request: %s", errorData), ex);
+
+    switch (status.series()) {
+      case CLIENT_ERROR -> logger.warn(
+          String.format("Exception thrown during processing of rest request: %s", errorData));
+      case SERVER_ERROR -> logger.error(
+          String.format("Error occurred during processing of rest request: %s", errorData), ex);
+      default -> logger.warn(
+          String.format("Something occurred during processing of rest request: %s", errorData));
+    }
+
     return ResponseEntity.status(status).body(errorData);
   }
 
