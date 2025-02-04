@@ -4,8 +4,8 @@ KADAI - The open source task management library
 [![Contributors](https://img.shields.io/github/contributors/kadai-io/kadai.svg)](https://github.com/kadai-io/kadai/graphs/contributors)
 [![Styling](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://prettier.io/)
 [![CI](https://github.com/kadai-io/kadai/workflows/CI/badge.svg)](https://github.com/kadai-io/kadai/actions?query=workflow%3ACI)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Kadai_kadai&metric=alert_status)](https://sonarcloud.io/dashboard?id=Kadai_kadai)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.kadai/kadai-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.kadai/kadai-core)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=kadai-io_kadai&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=kadai-io_kadai)
+[![Maven Central](https://img.shields.io/maven-central/v/io.kadai/kadai-core.svg)](https://central.sonatype.com/artifact/io.kadai/kadai-core)
 [![License](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 KADAI is a task management component open source library. It can be embedded into your application
