@@ -184,7 +184,7 @@ public class UserServiceImpl implements UserService {
     return new UserQueryImpl(internalKadaiEngine);
   }
 
-  private Set<String> determineDomains(User user) {
+  Set<String> determineDomains(User user) {
     Set<String> accessIds = new HashSet<>(user.getGroups());
     accessIds.addAll(user.getPermissions());
     accessIds.add(user.getId());

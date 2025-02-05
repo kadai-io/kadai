@@ -6,6 +6,7 @@ import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.user.api.UserQuery;
 import io.kadai.user.api.UserQueryColumnName;
 import io.kadai.user.api.models.User;
+import io.kadai.user.internal.models.UserImpl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -69,16 +70,34 @@ public class UserQueryImpl implements UserQuery {
 
   @Override
   public List<User> list() {
+    UserServiceImpl userService = (UserServiceImpl) kadaiEngine.getEngine().getUserService();
     return kadaiEngine.executeInDatabaseConnection(
-        () -> kadaiEngine.getSqlSession().selectList(LINK_TO_USER_MAPPER, this));
+        () ->
+            kadaiEngine.getSqlSession().<UserImpl>selectList(LINK_TO_USER_MAPPER, this).stream()
+                .map(
+                    user -> {
+                      user.setDomains(userService.determineDomains(user));
+                      return (User) user;
+                    })
+                .toList());
   }
 
   @Override
   public List<User> list(int offset, int limit) {
     try {
+      UserServiceImpl userService = (UserServiceImpl) kadaiEngine.getEngine().getUserService();
       kadaiEngine.openConnection();
       RowBounds rowBounds = new RowBounds(offset, limit);
-      return kadaiEngine.getSqlSession().selectList(LINK_TO_USER_MAPPER, this, rowBounds);
+      return kadaiEngine
+          .getSqlSession()
+          .<UserImpl>selectList(LINK_TO_USER_MAPPER, this, rowBounds)
+          .stream()
+          .map(
+              user -> {
+                user.setDomains(userService.determineDomains(user));
+                return (User) user;
+              })
+          .toList();
     } catch (PersistenceException e) {
       if (e.getMessage().contains("ERRORCODE=-4470")) {
         KadaiRuntimeException ex =
@@ -109,8 +128,11 @@ public class UserQueryImpl implements UserQuery {
   @Override
   public User single() {
     try {
+      UserServiceImpl userService = (UserServiceImpl) kadaiEngine.getEngine().getUserService();
       kadaiEngine.openConnection();
-      return kadaiEngine.getSqlSession().selectOne(LINK_TO_USER_MAPPER, this);
+      UserImpl user = kadaiEngine.getSqlSession().selectOne(LINK_TO_USER_MAPPER, this);
+      user.setDomains(userService.determineDomains(user));
+      return user;
     } finally {
       kadaiEngine.returnConnection();
     }
