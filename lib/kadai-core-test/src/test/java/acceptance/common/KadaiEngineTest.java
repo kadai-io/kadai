@@ -32,7 +32,7 @@ class KadaiEngineTest {
 
   @ParameterizedTest
   @EnumSource(ConnectionManagementMode.class)
-  void should_CreateKadaiEngine_When_GivenConnectionManagementModeIsActive(
+  void should_CreateKadaiEngine_For_ConnectionManagementMode(
       ConnectionManagementMode connectionManagementMode) throws Exception {
 
     String schemaName = TestContainerExtension.determineSchemaName();
