@@ -124,32 +124,6 @@ public class UserController {
           "This endpoint retrieves multiple Users. If a userId can't be found in the database it "
               + "will be ignored. "
               + "Any combination of parameters is interpreted as conjunction of those.",
-      parameters = {
-        @Parameter(
-            name = "user-id",
-            description = "The IDs of the users to be retrieved",
-            example = "teamlead-1"),
-        @Parameter(
-            name = "current-user",
-            description = "Whether to fetch the current user as well",
-            example = "user-1-1"),
-        @Parameter(
-            name = "orgLevel1",
-            description = "the orgLevel1 of the users to be retrieved",
-            example = "envite"),
-        @Parameter(
-            name = "orgLevel2",
-            description = "the orgLevel2 of the users to be retrieved",
-            example = "bpm"),
-        @Parameter(
-            name = "orgLevel3",
-            description = "the orgLevel3 of the users to be retrieved",
-            example = "green-bpm"),
-        @Parameter(
-            name = "orgLevel4",
-            description = "the orgLevel4 of the users to be retrieved",
-            example = "kadai"),
-      },
       responses = {
         @ApiResponse(
             responseCode = "200",
