@@ -1,7 +1,7 @@
-package io.kadai.common.rest.util;
+package io.kadai.common.internal.util;
 
-import static io.kadai.common.rest.util.LambdaExceptionUtil.rethrowConsumer;
-import static io.kadai.common.rest.util.LambdaExceptionUtil.rethrowFunction;
+import static io.kadai.common.internal.util.LambdaExceptionUtil.rethrowConsumer;
+import static io.kadai.common.internal.util.LambdaExceptionUtil.rethrowFunction;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 

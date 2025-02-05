@@ -1,4 +1,4 @@
-package io.kadai.common.rest.util;
+package io.kadai.common.internal.util;
 
 import java.util.function.Consumer;
 import java.util.function.Function;

@@ -18,7 +18,7 @@
 
 package io.kadai.common.rest.ldap;
 
-import static io.kadai.common.rest.util.LambdaExceptionUtil.rethrowFunction;
+import static io.kadai.common.internal.util.LambdaExceptionUtil.rethrowFunction;
 import static java.util.function.Predicate.not;
 
 import io.kadai.KadaiConfiguration;
