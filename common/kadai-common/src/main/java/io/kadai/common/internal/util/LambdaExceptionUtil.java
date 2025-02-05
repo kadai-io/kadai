@@ -5,6 +5,8 @@ import java.util.function.Function;
 
 public final class LambdaExceptionUtil {
 
+  private LambdaExceptionUtil() {}
+
   @FunctionalInterface
   public interface ConsumerWithExceptions<T, E extends Exception> {
     void accept(T t) throws E;
