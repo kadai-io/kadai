@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
-import io.kadai.testapi.KadaiIntegrationTest;
 import io.kadai.testapi.builder.UserBuilder;
 import io.kadai.testapi.extensions.TestContainerExtension;
 import io.kadai.user.api.models.User;
@@ -13,7 +12,6 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-@KadaiIntegrationTest
 public class KadaiEngineAutocommitModeTest {
 
   private KadaiEngine thisKadaiEngine;

@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
-import io.kadai.testapi.KadaiIntegrationTest;
 import io.kadai.testapi.builder.UserBuilder;
 import io.kadai.testapi.extensions.TestContainerExtension;
 import io.kadai.user.api.exceptions.UserNotFoundException;
@@ -18,7 +17,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-@KadaiIntegrationTest
 public class KadaiEngineExplicitModeTest {
 
   private KadaiEngine thisKadaiEngine;
