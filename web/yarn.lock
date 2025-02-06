@@ -5,9 +5,9 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"@ali-hm/angular-tree-component@npm:19.1.0":
-  version: 19.1.0
-  resolution: "@ali-hm/angular-tree-component@npm:19.1.0"
+"@ali-hm/angular-tree-component@npm:19.1.2":
+  version: 19.1.2
+  resolution: "@ali-hm/angular-tree-component@npm:19.1.2"
   dependencies:
     mobx: "npm:~4.14.1"
     tslib: "npm:^2.5.0"
@@ -15,7 +15,7 @@ __metadata:
     "@angular/common": ">=19.1"
     "@angular/core": ">=19.1"
     mobx: ~4.14.1
-  checksum: 10c0/62caa832de60c90cd1c9f191ef6695a81b0b28983a0076c3edbffd7ec4aea7f97d26821a6fd159f385b6b1b92727476a4052b704f49153097beae7a019b6f310
+  checksum: 10c0/76da6b7d572430b6307a12f29d865c2e93a615dedc1f173095c3488265ba2e56474be57e9434aea71946e3ab943f04ef5b6a2f020ac1bf6aadcf3e29a30d74d5
   languageName: node
   linkType: hard
 
@@ -68,16 +68,6 @@ __metadata:
     puppeteer:
       built: true
   checksum: 10c0/2f2925ca69e448a076990e4f1415a702d500bc373e5571693298c3cda31e09648f7eb0ab04aa650d2f615fc29a3ea52e2cc9b6d2decb73430dbc1be188563794
-  languageName: node
-  linkType: hard
-
-"@angular-devkit/architect@npm:0.1901.5":
-  version: 0.1901.5
-  resolution: "@angular-devkit/architect@npm:0.1901.5"
-  dependencies:
-    "@angular-devkit/core": "npm:19.1.5"
-    rxjs: "npm:7.8.1"
-  checksum: 10c0/7f9cedb6948c8f8fcd119deb072137477e3345941bd66c4cd6d361a1bf0b60e157b34ee2c36e6e8f145110ee4b5295c1fcadd1aab11c86fd4925da33e36ab34a
   languageName: node
   linkType: hard
 
@@ -360,25 +350,6 @@ __metadata:
     chokidar:
       optional: true
   checksum: 10c0/f35477d774f7e9e9a611d1e8efc7224164f0567ec01eb3ee06ce52e4384a8e5604bba2a47ac4030cbcd6ec4a948d04998f89b23ee9a01bbb61e180848a4e904f
-  languageName: node
-  linkType: hard
-
-"@angular-devkit/core@npm:19.1.5":
-  version: 19.1.5
-  resolution: "@angular-devkit/core@npm:19.1.5"
-  dependencies:
-    ajv: "npm:8.17.1"
-    ajv-formats: "npm:3.0.1"
-    jsonc-parser: "npm:3.3.1"
-    picomatch: "npm:4.0.2"
-    rxjs: "npm:7.8.1"
-    source-map: "npm:0.7.4"
-  peerDependencies:
-    chokidar: ^4.0.0
-  peerDependenciesMeta:
-    chokidar:
-      optional: true
-  checksum: 10c0/5ed2f73f85e7c1936f8dce9e109ea2d95d76258a2e298371723ea0b2b6b9c6077f02c7b1fdea734c4416037a7eb771dc13809fdf5201b601bcbf1be967104db1
   languageName: node
   linkType: hard
 
@@ -10766,7 +10737,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "kadai@workspace:."
   dependencies:
-    "@ali-hm/angular-tree-component": "npm:19.1.0"
+    "@ali-hm/angular-tree-component": "npm:19.1.2"
     "@angular-builders/custom-webpack": "npm:19.0.0"
     "@angular-devkit/build-angular": "npm:19.1.6"
     "@angular/animations": "npm:19.1.4"
