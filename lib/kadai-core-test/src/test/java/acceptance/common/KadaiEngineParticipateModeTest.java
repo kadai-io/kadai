@@ -8,15 +8,12 @@ import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
 import io.kadai.testapi.KadaiEngineProxy;
 import io.kadai.testapi.extensions.TestContainerExtension;
-import java.sql.Connection;
 import javax.sql.DataSource;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class KadaiEngineExplicitModeTest {
+public class KadaiEngineParticipateModeTest {
 
-  private Connection thisConnection;
   private KadaiEngineProxy thisKadaiEngineProxy;
   private KadaiEngineProxy thatKadaiEngineProxy;
 
@@ -30,37 +27,11 @@ public class KadaiEngineExplicitModeTest {
             .build();
     thisKadaiEngineProxy =
         new KadaiEngineProxy(
-            KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.EXPLICIT));
+            KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.PARTICIPATE));
     thisKadaiEngineProxy.getSqlSession().getConfiguration().addMapper(TestUserMapper.class);
-    thisConnection = dataSource.getConnection();
-    thisKadaiEngineProxy.getEngine().getEngine().setConnection(thisConnection);
 
     thatKadaiEngineProxy = new KadaiEngineProxy(KadaiEngine.buildKadaiEngine(kadaiConfiguration));
     thatKadaiEngineProxy.getSqlSession().getConfiguration().addMapper(TestUserMapper.class);
-  }
-
-  @AfterEach
-  void cleanConnections() {
-    thisKadaiEngineProxy.getEngine().getEngine().closeConnection();
-  }
-
-  @Test
-  void should_RetrieveCreated_When_Committed() throws Exception {
-    TestUserMapper thisMapper =
-        thisKadaiEngineProxy.getSqlSession().getMapper(TestUserMapper.class);
-    TestUserMapper thatMapper =
-        thatKadaiEngineProxy.getSqlSession().getMapper(TestUserMapper.class);
-    TestUser expected = new TestUser("user-1-1", "Max", "Mustermann", "Long name of user-1-1");
-
-    thisKadaiEngineProxy.getEngine().executeInDatabaseConnection(() -> thisMapper.insert(expected));
-    thisConnection.commit();
-
-    TestUser actual =
-        thatKadaiEngineProxy
-            .getEngine()
-            .executeInDatabaseConnection(() -> thatMapper.findById(expected.getId()));
-
-    assertThat(actual).isEqualTo(expected);
   }
 
   @Test

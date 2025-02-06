@@ -2,20 +2,20 @@ package acceptance.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import acceptance.common.TestUserMapper.TestUser;
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
-import io.kadai.testapi.builder.UserBuilder;
+import io.kadai.testapi.KadaiEngineProxy;
 import io.kadai.testapi.extensions.TestContainerExtension;
-import io.kadai.user.api.models.User;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class KadaiEngineAutocommitModeTest {
 
-  private KadaiEngine thisKadaiEngine;
-  private KadaiEngine thatKadaiEngine;
+  private KadaiEngineProxy thisKadaiEngineProxy;
+  private KadaiEngineProxy thatKadaiEngineProxy;
 
   @BeforeEach
   public void setupKadaiEngines() throws Exception {
@@ -25,22 +25,29 @@ public class KadaiEngineAutocommitModeTest {
         new KadaiConfiguration.Builder(dataSource, false, schemaName, false)
             .initKadaiProperties()
             .build();
-    this.thisKadaiEngine =
-        KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
-    this.thatKadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
+    thisKadaiEngineProxy =
+        new KadaiEngineProxy(
+            KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT));
+    thisKadaiEngineProxy.getSqlSession().getConfiguration().addMapper(TestUserMapper.class);
+
+    thatKadaiEngineProxy = new KadaiEngineProxy(KadaiEngine.buildKadaiEngine(kadaiConfiguration));
+    thatKadaiEngineProxy.getSqlSession().getConfiguration().addMapper(TestUserMapper.class);
   }
 
   @Test
-  void should_RetrieveCreated() throws Exception {
-    User expected =
-        UserBuilder.newUser()
-            .id("user-1-1")
-            .firstName("Max")
-            .lastName("Mustermann")
-            .longName("Long name of user-1-1")
-            .buildAndStore(thisKadaiEngine.getUserService());
+  void should_RetrieveCreated_When_NotManuallyCommited() {
+    TestUserMapper thisMapper =
+        thisKadaiEngineProxy.getSqlSession().getMapper(TestUserMapper.class);
+    TestUserMapper thatMapper =
+        thatKadaiEngineProxy.getSqlSession().getMapper(TestUserMapper.class);
+    TestUser expected = new TestUser("user-1-1", "Max", "Mustermann", "Long name of user-1-1");
 
-    User actual = thatKadaiEngine.getUserService().getUser(expected.getId());
+    thisKadaiEngineProxy.getEngine().executeInDatabaseConnection(() -> thisMapper.insert(expected));
+
+    TestUser actual =
+        thatKadaiEngineProxy
+            .getEngine()
+            .executeInDatabaseConnection(() -> thatMapper.findById(expected.getId()));
 
     assertThat(actual).isEqualTo(expected);
   }
