@@ -332,8 +332,8 @@ jobs:
 
   release_artifacts:
     runs-on: ubuntu-22.04
-    name: Release artifacts to OSS Sonatype
-    if: github.repository == 'kadai-io/kadai' && startsWith(github.ref, 'refs/tags/v') && github.head_ref == ''
+    name: Release artifacts to Sonatype-Central
+    if: github.repository == 'kadai-io/kadai' && ( startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' ) && github.head_ref == ''
     needs: [ test_frontend, test_e2e, test_backend ]
     # as documented in the gpg manual (https://www.gnupg.org/documentation/manuals/gnupg/Invoking-GPG_002dAGENT.html)
     # we should execute this command before interacting with gpg (otherwise gpg won't work)
@@ -376,9 +376,9 @@ jobs:
           GPG_KEY: ${{ secrets.GPG_KEY }}
       - name: Change versions to match tag
         run: ci/change_version.sh -m .
-      - name: Release artifacts to OSS Sonatype
+      - name: Release artifacts to Sonatype-Central
         run: |
-          ./mvnw -B deploy -P $([[ "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo "release") \
+          ./mvnw -B deploy -P $([[ "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo "release" || echo "snapshot") \
           --settings ci/mvnsettings.xml -DskipTests -Dcheckstyle.skip -Djacoco.skip \
           -pl :kadai-parent,\
           :kadai-common-parent,:kadai-common-logging,:kadai-common,:kadai-common-security,\
