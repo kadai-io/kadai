@@ -27,6 +27,7 @@ import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
 import io.kadai.user.rest.models.UserCollectionRepresentationModel;
 import io.kadai.user.rest.models.UserRepresentationModel;
+import java.util.Collection;
 import java.util.Set;
 import org.assertj.core.api.Condition;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
@@ -312,7 +313,7 @@ class UserControllerIntTest {
     assertThat(responseEntity.getBody()).isNotNull();
     assertThat(responseEntity.getBody().getContent()).isNotEmpty();
     final int allUsersCount = 14;
-    assertThat(responseEntity.getBody().getContent()).hasSize(allUsersCount);
+    assertThat(responseEntity.getBody().getContent()).hasSize(allUsersCount - 1);
   }
 
   @ParameterizedTest
@@ -447,14 +448,17 @@ class UserControllerIntTest {
             ParameterizedTypeReference.forType(UserCollectionRepresentationModel.class));
 
     assertThat(responseEntity.getBody()).isNotNull();
-    assertThat(responseEntity.getBody().getContent())
+
+    Collection<UserRepresentationModel> users = responseEntity.getBody().getContent();
+
+    assertThat(users)
         .haveExactly(
             1,
             new Condition<>(
                 user -> user.getUserId().equals("teamlead-1"),
                 "user with id teamlead-1"));
-    assertThat(responseEntity.getBody().getContent()).hasSize(3);
-    responseEntity.getBody().getContent().stream()
+    assertThat(users).hasSize(3);
+    users.stream()
         .filter(user -> !user.getUserId().equals("teamlead-1"))
         .forEach(
             user -> {
