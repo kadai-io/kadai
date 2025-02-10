@@ -331,7 +331,9 @@ class LdapClientTest {
     )).thenReturn(new AccessIdRepresentationModel("uid", "user-1-1"));
 
     final List<AccessIdRepresentationModel> expectedPermissionAccessIds =
-        List.of(new AccessIdRepresentationModel("cn", "Developers:Permission"));
+        List.of(
+            new AccessIdRepresentationModel(
+                "permission", "Kadai:CallCenter:AB:AB/A:CallCenter-vip"));
 
     when(ldapTemplate.search(
         anyString(),
@@ -341,8 +343,11 @@ class LdapClientTest {
         any(LdapClient.PermissionContextMapper.class)
     )).thenReturn(expectedPermissionAccessIds);
 
-    final List<String> actualPermissionAccessIds = cut.searchAccessIdsForPermissionsByDn(
-        List.of("uid=user-1-1,cn=Developers:Permission,cn=groups,o=kadaitest"));
+    final List<String> actualPermissionAccessIds =
+        cut.searchAccessIdsForPermissionsByDn(
+            List.of(
+                "uid=user-1-1,permission=Kadai:CallCenter:AB:AB/A:CallCenter-vip,"
+                    + "cn=Developers:Permission,cn=groups,o=kadaitest"));
 
     assertThat(actualPermissionAccessIds).containsExactlyInAnyOrderElementsOf(
         expectedPermissionAccessIds.stream()
