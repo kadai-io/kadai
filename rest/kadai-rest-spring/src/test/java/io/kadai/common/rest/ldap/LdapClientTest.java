@@ -247,12 +247,9 @@ class LdapClientTest {
 
   @Test
   void testLdap_checkForMissingConfigurations() {
-    // 17 optional config fields: minSearchForLength, maxNumberOfReturnedAccessIds,
-    // userPhoneAttribute, userMobilePhoneAttribute, userEmailAttribute, userOrglevel1Attribute,
-    // userOrglevel2Attribute, userOrglevel3Attribute, userOrglevel4Attribute, groupsOfUser,
-    // groupsOfUserName, groupOfUserType, groupIdAttribute, permissionIdAttribute,
-    // permissionsOfUser, permissionsOfUserType, permissionsOfUserName
-    assertThat(cut.checkForMissingConfigurations()).hasSize(LdapSettings.values().length - 17);
+    final int optionalCount = 22;
+    assertThat(cut.checkForMissingConfigurations())
+        .hasSize(LdapSettings.values().length - optionalCount);
   }
 
   @Test
