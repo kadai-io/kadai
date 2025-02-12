@@ -41,12 +41,6 @@ import io.kadai.common.rest.QuerySortBy;
 import io.kadai.common.rest.QuerySortParameter;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.common.rest.util.QueryParamsValidator;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import java.beans.ConstructorProperties;
 import java.util.List;
@@ -70,7 +64,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** Controller for all {@link Classification} related endpoints. */
 @RestController
 @EnableHypermediaSupport(type = HypermediaType.HAL)
-public class ClassificationController {
+public class ClassificationController implements ClassificationApi {
 
   private final ClassificationService classificationService;
   private final ClassificationRepresentationModelAssembler modelAssembler;
@@ -86,31 +80,6 @@ public class ClassificationController {
     this.summaryModelAssembler = summaryModelAssembler;
   }
 
-  /**
-   * This endpoint retrieves a list of existing Classifications. Filters can be applied.
-   *
-   * @title Get a list of all Classifications
-   * @param request the HTTP request
-   * @param filterParameter the filter parameters
-   * @param sortParameter the sort parameters
-   * @param pagingParameter the paging parameters
-   * @return the classifications with the given filter, sort and paging options.
-   */
-  @Operation(
-      summary = "Get a list of all Classifications",
-      description =
-          "This endpoint retrieves a list of existing Classifications. Filters can be applied.",
-      responses = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "the classifications with the given filter, sort and paging options.",
-            content = {
-              @Content(
-                  mediaType = MediaTypes.HAL_JSON_VALUE,
-                  schema =
-                      @Schema(implementation = ClassificationSummaryPagedRepresentationModel.class))
-            })
-      })
   @GetMapping(path = RestEndpoints.URL_CLASSIFICATIONS)
   @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<ClassificationSummaryPagedRepresentationModel> getClassifications(
@@ -136,34 +105,6 @@ public class ClassificationController {
             classificationSummaries, pagingParameter.getPageMetadata()));
   }
 
-  /**
-   * This endpoint retrieves a single Classification.
-   *
-   * @param classificationId the Id of the requested Classification.
-   * @return the requested classification
-   * @throws ClassificationNotFoundException if the requested classification is not found.
-   * @title Get a single Classification
-   */
-  @Operation(
-      summary = "Get a single Classification",
-      description = "This endpoint retrieves a single Classification.",
-      parameters = {
-        @Parameter(
-            name = "classificationId",
-            description = "the Id of the requested Classification.",
-            example = "CLI:100000000000000000000000000000000009",
-            required = true)
-      },
-      responses = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "the requested classification",
-            content = {
-              @Content(
-                  mediaType = MediaTypes.HAL_JSON_VALUE,
-                  schema = @Schema(implementation = ClassificationRepresentationModel.class))
-            })
-      })
   @GetMapping(path = RestEndpoints.URL_CLASSIFICATIONS_ID, produces = MediaTypes.HAL_JSON_VALUE)
   @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<ClassificationRepresentationModel> getClassification(
@@ -173,51 +114,6 @@ public class ClassificationController {
     return ResponseEntity.ok(modelAssembler.toModel(classification));
   }
 
-  /**
-   * This endpoint creates a new Classification.
-   *
-   * @title Create a new Classification
-   * @param repModel the Classification which should be created.
-   * @return The inserted Classification
-   * @throws NotAuthorizedException if the current user is not allowed to create a Classification.
-   * @throws ClassificationAlreadyExistException if the new Classification already exists. This
-   *     means that a Classification with the requested key and domain already exist.
-   * @throws DomainNotFoundException if the domain within the new Classification does not exist.
-   * @throws InvalidArgumentException if the new Classification does not contain all relevant
-   *     information.
-   * @throws MalformedServiceLevelException if the {@code serviceLevel} property does not comply *
-   *     with the ISO 8601 specification
-   */
-  @Operation(
-      summary = "Create a new Classification",
-      description = "This endpoint creates a new Classification.",
-      requestBody =
-          @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              description = "the Classification which should be created.",
-              content =
-                  @Content(
-                      schema = @Schema(implementation = ClassificationRepresentationModel.class),
-                      examples =
-                          @ExampleObject(
-                              value =
-                                  """
-                                      {
-                                        "key" : "Key0815casdgdgh",
-                                        "domain" : "DOMAIN_B",
-                                        "priority" : 0,
-                                        "serviceLevel" : "P1D",
-                                        "type" : "TASK"
-                                      }"""))),
-      responses = {
-        @ApiResponse(
-            responseCode = "201",
-            description = "The inserted Classification",
-            content = {
-              @Content(
-                  mediaType = MediaTypes.HAL_JSON_VALUE,
-                  schema = @Schema(implementation = ClassificationRepresentationModel.class))
-            })
-      })
   @PostMapping(path = RestEndpoints.URL_CLASSIFICATIONS)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<ClassificationRepresentationModel> createClassification(
@@ -233,77 +129,6 @@ public class ClassificationController {
     return ResponseEntity.status(HttpStatus.CREATED).body(modelAssembler.toModel(classification));
   }
 
-  /**
-   * This endpoint updates a Classification.
-   *
-   * @title Update a Classification
-   * @param classificationId the Id of the Classification which should be updated.
-   * @param resource the new Classification for the requested id.
-   * @return the updated Classification
-   * @throws NotAuthorizedException if the current user is not authorized to update a Classification
-   * @throws ClassificationNotFoundException if the requested Classification is not found
-   * @throws ConcurrencyException if the requested Classification Id has been modified in the
-   *     meantime by a different process.
-   * @throws InvalidArgumentException if the Id in the path and in the request body does not match
-   * @throws MalformedServiceLevelException if the {@code serviceLevel} property does not comply *
-   *     with the ISO 8601 specification
-   */
-  @Operation(
-      summary = "Update a Classification",
-      description = "This endpoint updates a Classification.",
-      parameters = {
-        @Parameter(
-            name = "classificationId",
-            description = "the Id of the Classification which should be updated.",
-            example = "CLI:100000000000000000000000000000000009",
-            required = true)
-      },
-      requestBody =
-          @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              description = "the new Classification for the requested id.",
-              content =
-                  @Content(
-                      schema = @Schema(implementation = ClassificationRepresentationModel.class),
-                      examples =
-                          @ExampleObject(
-                              value =
-                                  """
-                                      {
-                                        "classificationId" : \
-                                      "CLI:100000000000000000000000000000000009",
-                                        "key" : "L140101",
-                                        "applicationEntryPoint" : "",
-                                        "category" : "EXTERNAL",
-                                        "domain" : "DOMAIN_A",
-                                        "name" : "new name",
-                                        "parentId" : "",
-                                        "parentKey" : "",
-                                        "priority" : 2,
-                                        "serviceLevel" : "P2D",
-                                        "type" : "TASK",
-                                        "custom1" : "VNR",
-                                        "custom2" : "",
-                                        "custom3" : "",
-                                        "custom4" : "",
-                                        "custom5" : "",
-                                        "custom6" : "",
-                                        "custom7" : "",
-                                        "custom8" : "",
-                                        "isValidInDomain" : true,
-                                        "created" : "2018-02-01T12:00:00.000Z",
-                                        "modified" : "2018-02-01T12:00:00.000Z",
-                                        "description" : "Zustimmungserklärung"
-                                      }"""))),
-      responses = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "the updated Classification",
-            content = {
-              @Content(
-                  mediaType = MediaTypes.HAL_JSON_VALUE,
-                  schema = @Schema(implementation = ClassificationRepresentationModel.class))
-            })
-      })
   @PutMapping(path = RestEndpoints.URL_CLASSIFICATIONS_ID)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<ClassificationRepresentationModel> updateClassification(
@@ -327,32 +152,6 @@ public class ClassificationController {
     return ResponseEntity.ok(modelAssembler.toModel(classification));
   }
 
-  /**
-   * This endpoint deletes a requested Classification if possible.
-   *
-   * @title Delete a Classification
-   * @param classificationId the requested Classification Id which should be deleted
-   * @return no content
-   * @throws ClassificationNotFoundException if the requested Classification could not be found
-   * @throws ClassificationInUseException if there are tasks existing referring to the requested
-   *     Classification
-   * @throws NotAuthorizedException if the user is not authorized to delete a Classification
-   */
-  @Operation(
-      summary = "Delete a Classification",
-      description = "This endpoint deletes a requested Classification if possible.",
-      parameters = {
-        @Parameter(
-            name = "classificationId",
-            description = "the requested Classification Id which should be deleted",
-            example = "CLI:100000000000000000000000000000000010",
-            required = true)
-      },
-      responses = {
-        @ApiResponse(
-            responseCode = "204",
-            content = {@Content(schema = @Schema())})
-      })
   @DeleteMapping(path = RestEndpoints.URL_CLASSIFICATIONS_ID)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<ClassificationRepresentationModel> deleteClassification(

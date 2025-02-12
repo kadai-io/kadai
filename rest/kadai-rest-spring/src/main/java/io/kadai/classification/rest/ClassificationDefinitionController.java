@@ -67,7 +67,7 @@ import org.springframework.web.multipart.MultipartFile;
 /** Controller for Importing / Exporting classifications. */
 @RestController
 @EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
-public class ClassificationDefinitionController {
+public class ClassificationDefinitionController implements ClassificationDefinitionApi {
 
   private final ObjectMapper mapper;
   private final ClassificationService classificationService;
@@ -119,25 +119,6 @@ public class ClassificationDefinitionController {
     return ResponseEntity.ok(collectionModel);
   }
 
-  @Operation(
-      summary = "Import Classifications",
-      description =
-          "This endpoint imports all Classifications. Existing Classifications will not be removed."
-              + " Existing Classifications with the same key/domain will be overridden.",
-      requestBody =
-          @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              description =
-                  "the file containing the Classifications which should be imported. To get an "
-                      + "example file containing the Classificatioins, go to the "
-                      + "[KADAI UI](http://localhost:8080/kadai/index.html) and export the "
-                      + "Classifications",
-              required = true,
-              content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)),
-      responses = {
-        @ApiResponse(
-            responseCode = "204",
-            content = {@Content(schema = @Schema())})
-      })
   @PostMapping(
       path = RestEndpoints.URL_CLASSIFICATION_DEFINITIONS,
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

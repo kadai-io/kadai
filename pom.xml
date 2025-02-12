@@ -84,8 +84,8 @@
         <version.junit.bom>5.11.4</version.junit.bom>
 
         <!-- test dependencies -->
-        <version.archunit>1.3.0</version.archunit>
-        <version.equalsverifier>3.18.1</version.equalsverifier>
+        <version.archunit>1.4.0</version.archunit>
+        <version.equalsverifier>3.19</version.equalsverifier>
         <version.assertj>3.27.3</version.assertj>
         <version.openpojo>0.9.1</version.openpojo>
         <version.jacoco>0.8.12</version.jacoco>
