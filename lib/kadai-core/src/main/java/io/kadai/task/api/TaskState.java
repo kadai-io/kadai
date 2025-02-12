@@ -31,6 +31,7 @@ public enum TaskState {
   TERMINATED;
 
   public static final TaskState[] END_STATES = {COMPLETED, CANCELLED, TERMINATED};
+  public static final TaskState[] FINAL_STATES = {TERMINATED};
 
   public boolean in(TaskState... states) {
     return Arrays.asList(states).contains(this);
@@ -38,5 +39,9 @@ public enum TaskState {
 
   public boolean isEndState() {
     return in(END_STATES);
+  }
+
+  public boolean isFinalState() {
+    return in(FINAL_STATES);
   }
 }
