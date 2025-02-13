@@ -41,7 +41,7 @@
     "chart.js": "4.4.7",
     "core-js": "3.40.0",
     "file-saver": "2.0.5",
-    "globals": "^15.14.0",
+    "globals": "^15.15.0",
     "lodash": "4.17.21",
     "ng2-charts": "8.0.0",
     "ngx-bootstrap": "19.0.2",
