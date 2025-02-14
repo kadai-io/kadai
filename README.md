@@ -67,35 +67,45 @@ important since is meant to be a standalone component.
 All Tasks are placed in a Workbasket to control and direct the handling of the Tasks.
 
 ```mermaid
-    stateDiagram-v2
-        [*] --> READY: create()
-        READY --> CLAIMED: claim()
-        READY --> COMPLETED: forceComplete()
-        READY --> CANCELLED: cancel()
-        READY --> TERMINATED: terminate()
-        
-        CLAIMED --> READY_FOR_REVIEW: requestReview()
-        CLAIMED --> READY: transfer() | cancelClaim()
-        CLAIMED --> COMPLETED: complete()
-        CLAIMED --> CANCELLED: cancel()
-        CLAIMED --> TERMINATED: terminate()
-        
-        READY_FOR_REVIEW --> IN_REVIEW: claim()
-        READY_FOR_REVIEW --> COMPLETED: forceComplete()
-        READY_FOR_REVIEW --> CANCELLED: cancel()
-        READY_FOR_REVIEW --> TERMINATED: terminate()
-        
-        IN_REVIEW --> READY_FOR_REVIEW: transfer() | cancelClaim()
-        IN_REVIEW --> COMPLETED: forceComplete()
-        IN_REVIEW --> CANCELLED: cancel()
-        IN_REVIEW --> TERMINATED: terminate()
-        
-        COMPLETED --> CLAIMED: reopen()
-        COMPLETED --> [*]
-        CANCELLED --> CLAIMED: reopen()
-        CANCELLED --> [*]
-        TERMINATED --> [*]
-        
+---
+config:
+  look: neo
+  theme: neo
+---
+stateDiagram-v2
+    [*] --> READY: create()
+    READY --> CLAIMED: claim()
+    READY --> nonFinalEndStates: forceComplete() | cancel()
+    READY --> finalEndStates: terminate()
+
+    CLAIMED --> READY_FOR_REVIEW: requestReview()
+    CLAIMED --> READY: transfer() | cancelClaim()
+    CLAIMED --> nonFinalEndStates: complete() | cancel()
+    CLAIMED --> finalEndStates: terminate()
+
+    READY_FOR_REVIEW --> IN_REVIEW: claim()
+    READY_FOR_REVIEW --> nonFinalEndStates: forceComplete() | cancel()
+    READY_FOR_REVIEW --> finalEndStates: terminate()
+
+    IN_REVIEW --> READY_FOR_REVIEW: transfer() | cancelClaim()
+    IN_REVIEW --> nonFinalEndStates: forceComplete() | cancel()
+    IN_REVIEW --> finalEndStates: terminate()
+
+    nonFinalEndStates --> CLAIMED: reopen()
+    nonFinalEndStates --> [*]
+    finalEndStates --> [*]
+    
+    nonFinalEndStates: Non-final endstates
+    state nonFinalEndStates {
+        COMPLETED
+        CANCELLED
+    }
+
+    finalEndStates: Final endstates
+    state finalEndStates {
+        TERMINATED
+    }
+
 ```
 
 ## WORKBASKETS
