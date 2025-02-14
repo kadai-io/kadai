@@ -32,6 +32,7 @@ import io.kadai.user.internal.models.UserImpl;
 import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -277,7 +278,7 @@ public class LdapClient {
         .map(rethrowFunction(this::searchAccessIdByDn))
         .map(AccessIdRepresentationModel::getAccessId)
         .map(accessIdTrans)
-        .<AccessIdRepresentationModel>mapMulti(Iterable::forEach)
+        .flatMap(Collection::stream)
         .map(AccessIdRepresentationModel::getAccessId)
         .toList();
   }
