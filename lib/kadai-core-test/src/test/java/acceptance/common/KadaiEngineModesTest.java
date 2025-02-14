@@ -84,7 +84,7 @@ public class KadaiEngineModesTest {
       TestUser expected =
           new TestUser("teamlead-42", "Max", "Mustermann", "Long name of teamlead-42");
 
-      final RuntimeException expectedException = new RuntimeException();
+      final IllegalStateException expectedException = new IllegalStateException();
 
       ThrowingCallable call =
           () ->
@@ -97,7 +97,7 @@ public class KadaiEngineModesTest {
                     throw expectedException;
                   });
 
-      assertThatExceptionOfType(RuntimeException.class)
+      assertThatExceptionOfType(IllegalStateException.class)
           .isThrownBy(call)
           .isSameAs(expectedException);
 
