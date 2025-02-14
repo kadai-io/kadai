@@ -1,6 +1,7 @@
 package acceptance.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import acceptance.common.TestUserMapper.TestUser;
 import io.kadai.KadaiConfiguration;
@@ -10,12 +11,15 @@ import io.kadai.testapi.KadaiEngineProxy;
 import io.kadai.testapi.extensions.TestContainerExtension;
 import java.sql.Connection;
 import javax.sql.DataSource;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 public class KadaiEngineModesTest {
 
@@ -25,13 +29,14 @@ public class KadaiEngineModesTest {
 
     private KadaiEngineProxy thisKadaiEngineProxy;
     private KadaiEngineProxy thatKadaiEngineProxy;
+    private TransactionTemplate transactionTemplate;
 
     @BeforeEach
     public void setupKadaiEngines() throws Exception {
       String schemaName = TestContainerExtension.determineSchemaName();
       DataSource dataSource = TestContainerExtension.DATA_SOURCE;
       KadaiConfiguration kadaiConfiguration =
-          new KadaiConfiguration.Builder(dataSource, false, schemaName, false)
+          new KadaiConfiguration.Builder(dataSource, true, schemaName, false)
               .initKadaiProperties()
               .build();
       thisKadaiEngineProxy =
@@ -39,22 +44,62 @@ public class KadaiEngineModesTest {
               KadaiEngine.buildKadaiEngine(
                   kadaiConfiguration, ConnectionManagementMode.PARTICIPATE));
       thisKadaiEngineProxy.getSqlSession().getConfiguration().addMapper(TestUserMapper.class);
+      transactionTemplate = new TransactionTemplate(new DataSourceTransactionManager(dataSource));
 
       thatKadaiEngineProxy = new KadaiEngineProxy(KadaiEngine.buildKadaiEngine(kadaiConfiguration));
       thatKadaiEngineProxy.getSqlSession().getConfiguration().addMapper(TestUserMapper.class);
     }
 
     @Test
-    void should_NotRetrieveCreated_When_NotCommitted() {
+    void should_RetrieveCreated_When_ParticipatingTransactionSucceeded() {
       TestUserMapper thisMapper =
           thisKadaiEngineProxy.getSqlSession().getMapper(TestUserMapper.class);
       TestUserMapper thatMapper =
           thatKadaiEngineProxy.getSqlSession().getMapper(TestUserMapper.class);
-      TestUser expected = new TestUser("user-1-1", "Max", "Mustermann", "Long name of user-1-1");
+      TestUser expected =
+          new TestUser("teamlead-42", "Max", "Mustermann", "Long name of teamlead-42");
 
-      thisKadaiEngineProxy
-          .getEngine()
-          .executeInDatabaseConnection(() -> thisMapper.insert(expected));
+      transactionTemplate.execute(
+          status -> {
+            thisKadaiEngineProxy
+                .getEngine()
+                .executeInDatabaseConnection(() -> thisMapper.insert(expected));
+            return new Object();
+          });
+
+      TestUser actual =
+          thatKadaiEngineProxy
+              .getEngine()
+              .executeInDatabaseConnection(() -> thatMapper.findById(expected.getId()));
+
+      assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void should_NotRetrieveCreated_When_ParticipatingTransactionFailed() {
+      TestUserMapper thisMapper =
+          thisKadaiEngineProxy.getSqlSession().getMapper(TestUserMapper.class);
+      TestUserMapper thatMapper =
+          thatKadaiEngineProxy.getSqlSession().getMapper(TestUserMapper.class);
+      TestUser expected =
+          new TestUser("teamlead-42", "Max", "Mustermann", "Long name of teamlead-42");
+
+      final RuntimeException expectedException = new RuntimeException();
+
+      ThrowingCallable call =
+          () ->
+              transactionTemplate.execute(
+                  status -> {
+                    status.setRollbackOnly();
+                    thisKadaiEngineProxy
+                        .getEngine()
+                        .executeInDatabaseConnection(() -> thisMapper.insert(expected));
+                    throw expectedException;
+                  });
+
+      assertThatExceptionOfType(RuntimeException.class)
+          .isThrownBy(call)
+          .isSameAs(expectedException);
 
       TestUser actual =
           thatKadaiEngineProxy
@@ -96,7 +141,8 @@ public class KadaiEngineModesTest {
           thisKadaiEngineProxy.getSqlSession().getMapper(TestUserMapper.class);
       TestUserMapper thatMapper =
           thatKadaiEngineProxy.getSqlSession().getMapper(TestUserMapper.class);
-      TestUser expected = new TestUser("user-1-1", "Max", "Mustermann", "Long name of user-1-1");
+      TestUser expected =
+          new TestUser("teamlead-42", "Max", "Mustermann", "Long name of teamlead-42");
 
       thisKadaiEngineProxy
           .getEngine()
@@ -149,7 +195,8 @@ public class KadaiEngineModesTest {
           thisKadaiEngineProxy.getSqlSession().getMapper(TestUserMapper.class);
       TestUserMapper thatMapper =
           thatKadaiEngineProxy.getSqlSession().getMapper(TestUserMapper.class);
-      TestUser expected = new TestUser("user-1-1", "Max", "Mustermann", "Long name of user-1-1");
+      TestUser expected =
+          new TestUser("teamlead-42", "Max", "Mustermann", "Long name of teamlead-42");
 
       thisKadaiEngineProxy
           .getEngine()
@@ -170,7 +217,8 @@ public class KadaiEngineModesTest {
           thisKadaiEngineProxy.getSqlSession().getMapper(TestUserMapper.class);
       TestUserMapper thatMapper =
           thatKadaiEngineProxy.getSqlSession().getMapper(TestUserMapper.class);
-      TestUser expected = new TestUser("user-1-1", "Max", "Mustermann", "Long name of user-1-1");
+      TestUser expected =
+          new TestUser("teamlead-42", "Max", "Mustermann", "Long name of teamlead-42");
 
       thisKadaiEngineProxy
           .getEngine()
