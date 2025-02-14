@@ -105,21 +105,6 @@ stateDiagram-v2
     state finalEndStates {
         TERMINATED
     }
-    classdef style_READY fill:#2c3e50,stroke:#ecf0f1,stroke-width:2px
-    classdef style_CLAIMED fill:#16a085,stroke:#ecf0f1,stroke-width:2px
-    classdef style_READY_FOR_REVIEW fill:#f39c12,stroke:#ecf0f1,stroke-width:2px
-    classdef style_IN_REVIEW fill:#e67e22,stroke:#ecf0f1,stroke-width:2px
-    classdef style_COMPLETED fill:#27ae60,stroke:#ecf0f1,stroke-width:2px
-    classdef style_CANCELLED fill:#e74c3c,stroke:#ecf0f1,stroke-width:2px
-    classdef style_TERMINATED fill:#9b59b6,stroke:#ecf0f1,stroke-width:2px
-
-    class READY style_READY
-    class CLAIMED style_CLAIMED
-    class READY_FOR_REVIEW style_READY_FOR_REVIEW
-    class IN_REVIEW style_IN_REVIEW
-    class COMPLETED style_COMPLETED
-    class CANCELLED style_CANCELLED
-    class TERMINATED style_TERMINATED
 ```
 
 ## WORKBASKETS
