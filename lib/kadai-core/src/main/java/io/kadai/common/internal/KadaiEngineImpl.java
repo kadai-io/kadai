@@ -69,6 +69,7 @@ import io.kadai.task.internal.TaskQueryMapper;
 import io.kadai.task.internal.TaskServiceImpl;
 import io.kadai.user.api.UserService;
 import io.kadai.user.internal.UserMapper;
+import io.kadai.user.internal.UserQueryMapper;
 import io.kadai.user.internal.UserServiceImpl;
 import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.internal.DistributionTargetMapper;
@@ -450,6 +451,7 @@ public class KadaiEngineImpl implements KadaiEngine {
     configuration.addMapper(AttachmentMapper.class);
     configuration.addMapper(JobMapper.class);
     configuration.addMapper(UserMapper.class);
+    configuration.addMapper(UserQueryMapper.class);
     configuration.addMapper(ConfigurationMapper.class);
 
     SqlSessionFactory localSessionFactory = new SqlSessionFactoryBuilder().build(configuration);

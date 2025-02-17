@@ -129,4 +129,11 @@ public interface UserService {
    */
   void deleteUser(String id)
       throws UserNotFoundException, InvalidArgumentException, NotAuthorizedException;
+
+  /**
+   * Creates an empty {@linkplain UserQuery}.
+   *
+   * @return a {@linkplain UserQuery}
+   */
+  UserQuery createUserQuery();
 }
