@@ -32,8 +32,10 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Map;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -534,6 +536,7 @@ public interface TaskApi {
    * This endpoint request a review on the specified Task.
    *
    * @param taskId taskId the id of the relevant Task
+   * @param body the body of the request, that can contain the workbasketId and the ownerId
    * @return the Task after a review has been requested
    * @throws InvalidTaskStateException if the state of the Task with taskId is not CLAIMED
    * @throws TaskNotFoundException if the Task with taskId wasn't found
@@ -552,6 +555,22 @@ public interface TaskApi {
             required = true,
             example = "TKI:000000000000000000000000000000000032")
       },
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              required = false,
+              description = "Optional JSON body with workbasketId and ownerId",
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
+                      schema =
+                          @Schema(
+                              example =
+                                  """
+        {
+          "workbasketId": "WBI:000000000000000000000000000000000001",
+          "ownerId": "user-1-1"
+        }
+      """))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -584,7 +603,9 @@ public interface TaskApi {
       })
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_REVIEW)
   @Transactional(rollbackFor = Exception.class)
-  ResponseEntity<TaskRepresentationModel> requestReview(@PathVariable("taskId") String taskId)
+  ResponseEntity<TaskRepresentationModel> requestReview(
+      @PathVariable("taskId") String taskId,
+      @RequestBody(required = false) Map<String, String> body)
       throws InvalidTaskStateException,
           TaskNotFoundException,
           InvalidOwnerException,
@@ -654,6 +675,7 @@ public interface TaskApi {
    * This endpoint request changes on the specified Task.
    *
    * @param taskId the id of the relevant Task
+   * @param body the body of the request, that can contain the workbasketId and the ownerId
    * @return the Task after changes have been requested
    * @throws InvalidTaskStateException if the state of the Task with taskId is not IN_REVIEW
    * @throws TaskNotFoundException if the Task with taskId wasn't found
@@ -672,6 +694,22 @@ public interface TaskApi {
             required = true,
             example = "TKI:000000000000000000000000000000000136")
       },
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              required = false,
+              description = "Optional JSON body with workbasketId and ownerId",
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
+                      schema =
+                          @Schema(
+                              example =
+                                  """
+        {
+          "workbasketId": "WBI:000000000000000000000000000000000001",
+          "ownerId": "user-1-1"
+        }
+      """))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -704,7 +742,9 @@ public interface TaskApi {
       })
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES)
   @Transactional(rollbackFor = Exception.class)
-  ResponseEntity<TaskRepresentationModel> requestChanges(@PathVariable("taskId") String taskId)
+  ResponseEntity<TaskRepresentationModel> requestChanges(
+      @PathVariable("taskId") String taskId,
+      @RequestBody(required = false) Map<String, String> body)
       throws InvalidTaskStateException,
           TaskNotFoundException,
           InvalidOwnerException,

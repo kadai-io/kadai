@@ -368,7 +368,19 @@ public class TaskServiceImpl implements TaskService {
           TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException {
-    return requestReview(taskId, false);
+    return requestReview(taskId, null, null, false);
+  }
+
+  @Override
+  public Task requestReviewWithWorkbasketId(String taskId, String workbasketId, String ownerId)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
+    if ((workbasketId == null || workbasketId.isEmpty())) {
+      throw new InvalidArgumentException("WorkbasketId must not be null or empty");
+    }
+    return requestReview(taskId, workbasketId, ownerId, false);
   }
 
   @Override
@@ -377,7 +389,7 @@ public class TaskServiceImpl implements TaskService {
           TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException {
-    return requestReview(taskId, true);
+    return requestReview(taskId, null, null, true);
   }
 
   @Override
@@ -386,7 +398,19 @@ public class TaskServiceImpl implements TaskService {
           TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException {
-    return requestChanges(taskId, false);
+    return requestChanges(taskId, null, null, false);
+  }
+
+  @Override
+  public Task requestChangesWithWorkbasketId(String taskId, String workbasketId, String ownerId)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
+    if ((workbasketId == null || workbasketId.isEmpty())) {
+      throw new InvalidArgumentException("WorkbasketId must not be null or empty");
+    }
+    return requestChanges(taskId, workbasketId, ownerId, false);
   }
 
   @Override
@@ -395,7 +419,7 @@ public class TaskServiceImpl implements TaskService {
           TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException {
-    return requestChanges(taskId, true);
+    return requestChanges(taskId, null, null, true);
   }
 
   @Override
@@ -450,8 +474,8 @@ public class TaskServiceImpl implements TaskService {
         workbasket = workbasketService.getWorkbasket(task.getWorkbasketKey(), task.getDomain());
       } else {
         RoutingTarget routingTarget = calculateWorkbasketDuringTaskCreation(task);
-        String owner = routingTarget.getOwner() == null
-            ? task.getOwner() : routingTarget.getOwner();
+        String owner =
+            routingTarget.getOwner() == null ? task.getOwner() : routingTarget.getOwner();
         workbasket = workbasketService.getWorkbasket(routingTarget.getWorkbasketId());
         task.setOwner(owner);
       }
@@ -1573,7 +1597,7 @@ public class TaskServiceImpl implements TaskService {
     return task;
   }
 
-  private Task requestReview(String taskId, boolean force)
+  private Task requestReview(String taskId, String workbasketId, String ownerId, boolean force)
       throws TaskNotFoundException,
           InvalidTaskStateException,
           InvalidOwnerException,
@@ -1600,7 +1624,7 @@ public class TaskServiceImpl implements TaskService {
       }
 
       task.setState(TaskState.READY_FOR_REVIEW);
-      task.setOwner(null);
+      task.setOwner(ownerId);
       task.setModified(Instant.now());
 
       taskMapper.requestReview(task);
@@ -1619,14 +1643,14 @@ public class TaskServiceImpl implements TaskService {
                 changeDetails));
       }
 
-      task = (TaskImpl) afterRequestReviewManager.afterRequestReview(task);
+      task = (TaskImpl) afterRequestReviewManager.afterRequestReview(task, workbasketId, ownerId);
     } finally {
       kadaiEngine.returnConnection();
     }
     return task;
   }
 
-  private Task requestChanges(String taskId, boolean force)
+  private Task requestChanges(String taskId, String workbasketId, String ownerId, boolean force)
       throws InvalidTaskStateException,
           TaskNotFoundException,
           InvalidOwnerException,
@@ -1652,7 +1676,7 @@ public class TaskServiceImpl implements TaskService {
       }
 
       task.setState(TaskState.READY);
-      task.setOwner(null);
+      task.setOwner(ownerId);
       task.setModified(Instant.now());
 
       taskMapper.requestChanges(task);
@@ -1670,7 +1694,7 @@ public class TaskServiceImpl implements TaskService {
                 userId,
                 changeDetails));
       }
-      task = (TaskImpl) afterRequestChangesManager.afterRequestChanges(task);
+      task = (TaskImpl) afterRequestChangesManager.afterRequestChanges(task, workbasketId, ownerId);
     } finally {
       kadaiEngine.returnConnection();
     }
@@ -2109,11 +2133,14 @@ public class TaskServiceImpl implements TaskService {
       }
       routingTarget = new RoutingTarget(workbasketId);
     } else {
-      routingTarget = kadaiEngine.getTaskRoutingManager()
-          .determineRoutingTarget(task).orElseThrow(
-              () -> new InvalidArgumentException(
-                  "Cannot create a Task in an empty RoutingTarget")
-          );
+      routingTarget =
+          kadaiEngine
+              .getTaskRoutingManager()
+              .determineRoutingTarget(task)
+              .orElseThrow(
+                  () ->
+                      new InvalidArgumentException(
+                          "Cannot create a Task in an empty RoutingTarget"));
     }
     return routingTarget;
   }

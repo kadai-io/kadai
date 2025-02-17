@@ -50,6 +50,7 @@ import java.net.URLEncoder;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -1134,7 +1135,7 @@ class TaskControllerIntTest {
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
-      assertThat(response.getBody().getContent()).hasSize(22);
+      assertThat(response.getBody().getContent()).hasSize(23);
     }
 
     @Test
@@ -2174,6 +2175,119 @@ class TaskControllerIntTest {
 
   @Nested
   @TestInstance(Lifecycle.PER_CLASS)
+  class RequestChangesWithWorkbasketIdOnTasks {
+    @Test
+    void should_RequestChangesOnATask_With_WorkbasketId() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000136");
+      HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("user-1-1"));
+
+      // retrieve task from Rest Api
+      ResponseEntity<TaskRepresentationModel> getTaskResponse =
+          TEMPLATE.exchange(url, HttpMethod.GET, auth, TASK_MODEL_TYPE);
+      assertThat(getTaskResponse.getBody()).isNotNull();
+      TaskRepresentationModel repModel = getTaskResponse.getBody();
+      assertThat(repModel.getState()).isEqualTo(TaskState.IN_REVIEW);
+      assertThat(repModel.getOwner()).isEqualTo("user-1-1");
+
+      // Prepare body for request review
+      Map<String, String> requestBody = new HashMap<>();
+      requestBody.put("workbasketId", "WBI:100000000000000000000000000000000007");
+
+      HttpEntity<Map<String, String>> requestEntity =
+          new HttpEntity<>(requestBody, RestHelper.generateHeadersForUser("user-1-1"));
+
+      // request review
+      String url2 =
+          restHelper.toUrl(
+              RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES,
+              "TKI:000000000000000000000000000000000136");
+      ResponseEntity<TaskRepresentationModel> requestedChangesResponse =
+          TEMPLATE.exchange(url2, HttpMethod.POST, requestEntity, TASK_MODEL_TYPE);
+
+      assertThat(requestedChangesResponse.getBody()).isNotNull();
+      assertThat(requestedChangesResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+      repModel = requestedChangesResponse.getBody();
+      assertThat(repModel.getOwner()).isNull();
+      assertThat(repModel.getState()).isEqualTo(TaskState.READY);
+      assertThat(repModel.getWorkbasketSummary().getWorkbasketId())
+          .isEqualTo("WBI:100000000000000000000000000000000007");
+    }
+
+    @Test
+    void should_RequestChangesOnATask_With_WorkbasketIdAndOwnerId() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000236");
+      HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
+
+      // retrieve task from Rest Api
+      ResponseEntity<TaskRepresentationModel> getTaskResponse =
+          TEMPLATE.exchange(url, HttpMethod.GET, auth, TASK_MODEL_TYPE);
+      assertThat(getTaskResponse.getBody()).isNotNull();
+      TaskRepresentationModel repModel = getTaskResponse.getBody();
+      assertThat(repModel.getState()).isEqualTo(TaskState.IN_REVIEW);
+      assertThat(repModel.getOwner()).isEqualTo("admin");
+
+      // Prepare body for request review
+      Map<String, String> requestBody = new HashMap<>();
+      requestBody.put("workbasketId", "WBI:100000000000000000000000000000000008");
+      requestBody.put("ownerId", "user-1-2");
+
+      HttpEntity<Map<String, String>> requestEntity =
+          new HttpEntity<>(requestBody, RestHelper.generateHeadersForUser("admin"));
+
+      // request review
+      String url2 =
+          restHelper.toUrl(
+              RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES,
+              "TKI:000000000000000000000000000000000236");
+      ResponseEntity<TaskRepresentationModel> requestedChangesResponse =
+          TEMPLATE.exchange(url2, HttpMethod.POST, requestEntity, TASK_MODEL_TYPE);
+
+      assertThat(requestedChangesResponse.getBody()).isNotNull();
+      assertThat(requestedChangesResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+      repModel = requestedChangesResponse.getBody();
+      assertThat(repModel.getOwner()).isEqualTo("user-1-2");
+      assertThat(repModel.getState()).isEqualTo(TaskState.READY);
+      assertThat(repModel.getWorkbasketSummary().getWorkbasketId())
+          .isEqualTo("WBI:100000000000000000000000000000000008");
+    }
+
+    @Test
+    void should_ThrowException_When_RequestChangesOnATask_With_EmptyWorkbasketId() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000136");
+      HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("user-1-1"));
+
+      // retrieve task from Rest Api
+      ResponseEntity<TaskRepresentationModel> getTaskResponse =
+          TEMPLATE.exchange(url, HttpMethod.GET, auth, TASK_MODEL_TYPE);
+      assertThat(getTaskResponse.getBody()).isNotNull();
+
+      // Prepare body for request review
+      Map<String, String> requestBody = new HashMap<>();
+      requestBody.put("workbasketId", "");
+      requestBody.put("ownerId", null);
+
+      HttpEntity<Map<String, String>> requestEntity =
+          new HttpEntity<>(requestBody, RestHelper.generateHeadersForUser("user-1-1"));
+
+      // request review
+      String url2 =
+          restHelper.toUrl(
+              RestEndpoints.URL_TASKS_ID_REQUEST_REVIEW,
+              "TKI:000000000000000000000000000000000136");
+      ThrowingCallable requestChangesResponse =
+          () -> TEMPLATE.exchange(url2, HttpMethod.POST, requestEntity, TASK_MODEL_TYPE);
+
+      assertThatThrownBy(requestChangesResponse)
+          .isInstanceOf(HttpStatusCodeException.class)
+          .hasMessageContaining("WorkbasketId must not be null or empty");
+    }
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
   class RequestReviewOnTasks {
 
     @Test
@@ -2232,6 +2346,115 @@ class TaskControllerIntTest {
       repModel = requestReviewResponse.getBody();
       assertThat(repModel.getOwner()).isNull();
       assertThat(repModel.getState()).isEqualTo(TaskState.READY_FOR_REVIEW);
+    }
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  class RequestReviewWithWorkbasketIdOnTasks {
+    @Test
+    void should_RequestReviewOnATask_With_WorkbasketId() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000035");
+      HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("user-1-1"));
+
+      // retrieve task from Rest Api
+      ResponseEntity<TaskRepresentationModel> getTaskResponse =
+          TEMPLATE.exchange(url, HttpMethod.GET, auth, TASK_MODEL_TYPE);
+      assertThat(getTaskResponse.getBody()).isNotNull();
+      TaskRepresentationModel repModel = getTaskResponse.getBody();
+      assertThat(repModel.getState()).isEqualTo(TaskState.CLAIMED);
+      assertThat(repModel.getOwner()).isEqualTo("user-1-1");
+
+      // Prepare body for request review
+      Map<String, String> requestBody = new HashMap<>();
+      requestBody.put("workbasketId", "TestWorkbasketId");
+
+      HttpEntity<Map<String, String>> requestEntity =
+          new HttpEntity<>(requestBody, RestHelper.generateHeadersForUser("user-1-1"));
+
+      // request review
+      String url2 =
+          restHelper.toUrl(
+              RestEndpoints.URL_TASKS_ID_REQUEST_REVIEW,
+              "TKI:000000000000000000000000000000000035");
+      ResponseEntity<TaskRepresentationModel> requestReviewResponse =
+          TEMPLATE.exchange(url2, HttpMethod.POST, requestEntity, TASK_MODEL_TYPE);
+
+      assertThat(requestReviewResponse.getBody()).isNotNull();
+      assertThat(requestReviewResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+      repModel = requestReviewResponse.getBody();
+      assertThat(repModel.getOwner()).isNull();
+      assertThat(repModel.getState()).isEqualTo(TaskState.READY_FOR_REVIEW);
+    }
+
+    @Test
+    void should_RequestReviewOnATask_With_WorkbasketIdAndOwner() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000100");
+      HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("user-1-2"));
+
+      // retrieve task from Rest Api
+      ResponseEntity<TaskRepresentationModel> getTaskResponse =
+          TEMPLATE.exchange(url, HttpMethod.GET, auth, TASK_MODEL_TYPE);
+      assertThat(getTaskResponse.getBody()).isNotNull();
+      TaskRepresentationModel repModel = getTaskResponse.getBody();
+      assertThat(repModel.getState()).isEqualTo(TaskState.CLAIMED);
+      assertThat(repModel.getOwner()).isEqualTo("user-1-2");
+
+      // Prepare body for request review
+      Map<String, String> requestBody = new HashMap<>();
+      requestBody.put("workbasketId", "TestWorkbasketId");
+      requestBody.put("ownerId", "user-1-1");
+
+      HttpEntity<Map<String, String>> requestEntity =
+          new HttpEntity<>(requestBody, RestHelper.generateHeadersForUser("user-1-2"));
+
+      // request review
+      String url2 =
+          restHelper.toUrl(
+              RestEndpoints.URL_TASKS_ID_REQUEST_REVIEW,
+              "TKI:000000000000000000000000000000000100");
+      ResponseEntity<TaskRepresentationModel> requestReviewResponse =
+          TEMPLATE.exchange(url2, HttpMethod.POST, requestEntity, TASK_MODEL_TYPE);
+
+      assertThat(requestReviewResponse.getBody()).isNotNull();
+      assertThat(requestReviewResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+      repModel = requestReviewResponse.getBody();
+      assertThat(repModel.getState()).isEqualTo(TaskState.READY_FOR_REVIEW);
+      assertThat(repModel.getOwner()).isEqualTo("user-1-1");
+    }
+
+    @Test
+    void should_ThrowException_When_RequestReviewOnATask_With_EmptyWorkbasketId() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000035");
+      HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("user-1-1"));
+
+      // retrieve task from Rest Api
+      ResponseEntity<TaskRepresentationModel> getTaskResponse =
+          TEMPLATE.exchange(url, HttpMethod.GET, auth, TASK_MODEL_TYPE);
+      assertThat(getTaskResponse.getBody()).isNotNull();
+
+      // Prepare body for request review
+      Map<String, String> requestBody = new HashMap<>();
+      requestBody.put("workbasketId", "");
+      requestBody.put("ownerId", null);
+
+      HttpEntity<Map<String, String>> requestEntity =
+          new HttpEntity<>(requestBody, RestHelper.generateHeadersForUser("user-1-1"));
+
+      // request review
+      String url2 =
+          restHelper.toUrl(
+              RestEndpoints.URL_TASKS_ID_REQUEST_REVIEW,
+              "TKI:000000000000000000000000000000000035");
+      ThrowingCallable requestReviewResponse =
+          () -> TEMPLATE.exchange(url2, HttpMethod.POST, requestEntity, TASK_MODEL_TYPE);
+
+      assertThatThrownBy(requestReviewResponse)
+          .isInstanceOf(HttpStatusCodeException.class)
+          .hasMessageContaining("WorkbasketId must not be null or empty");
     }
   }
 
