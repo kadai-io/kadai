@@ -1,5 +1,5 @@
 
-<img src="./docs/images/logo-small.png" height="21">ADAI - The open source task management library
+<img src="./docs/images/logo-small.png" height="21"> KADAI - The open source task management library
 =================================================
 
 [![Contributors](https://img.shields.io/github/contributors/kadai-io/kadai.svg)](https://github.com/kadai-io/kadai/graphs/contributors)
