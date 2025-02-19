@@ -143,7 +143,7 @@ your own small integration project as a wrapper and starting point for your cust
 We currently provide examples how to run KADAI as a Spring Boot Application or as a an Enterprise Application on Wildfly
 Application Server.
 
-If you are only interested in how KADAI looks and feel, you can try our Demo Environment instead.
+If you are only interested in how KADAI looks and feel, you can try our [Demo Environment](#demo) instead.
 
 ## Requirements
 
