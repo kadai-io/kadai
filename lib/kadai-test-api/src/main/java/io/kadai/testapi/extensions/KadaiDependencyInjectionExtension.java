@@ -31,6 +31,9 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 import org.junit.platform.commons.JUnitException;
 
+/**
+ * JUnit-Extension for injecting Kadai components via {@linkplain KadaiInject @KadaiInject}.
+ */
 public class KadaiDependencyInjectionExtension
     implements ParameterResolver, TestInstancePostProcessor {
 
