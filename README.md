@@ -1,13 +1,16 @@
 
-<img src="./docs/images/logo-small.png" height="21"> KADAI - The open source task management library
+<img src="./docs/images/logo-small.png" height="21.5"> KADAI - The open source task management library
 =================================================
 
-[![Contributors](https://img.shields.io/github/contributors/kadai-io/kadai.svg)](https://github.com/kadai-io/kadai/graphs/contributors)
-[![Styling](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://prettier.io/)
 [![CI](https://github.com/kadai-io/kadai/workflows/CI/badge.svg)](https://github.com/kadai-io/kadai/actions?query=workflow%3ACI)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=kadai-io_kadai&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=kadai-io_kadai)
-[![Maven Central](https://img.shields.io/maven-central/v/io.kadai/kadai-core.svg)](https://central.sonatype.com/artifact/io.kadai/kadai-core)
 [![License](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
+[![Contributors](https://img.shields.io/github/contributors/kadai-io/kadai.svg)](https://github.com/kadai-io/kadai/graphs/contributors)
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=kadai-io_kadai&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=kadai-io_kadai)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=kadai-io_kadai&metric=coverage)](https://sonarcloud.io/summary/new_code?id=kadai-io_kadai)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=kadai-io_kadai&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=kadai-io_kadai)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=kadai-io_kadai&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=kadai-io_kadai)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=kadai-io_kadai&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=kadai-io_kadai)
 
 ![](docs/images/kadai-cli-light.gif#gh-light-mode-only)
 ![](docs/images/kadai-cli-dark.gif#gh-dark-mode-only)
@@ -16,6 +19,7 @@ KADAI is a task management component open source library. It can be embedded int
 or be operated standalone if appropriate. Beside the basic task management functionalities,
 KADAI adds workbaskets and classifications to control and monitor a large amount of Tasks within
 a larger organization.
+
 
 * Web Site: http://kadai.io/
 * Demo Environment: https://kadai-io.azurewebsites.net/kadai
@@ -29,7 +33,7 @@ _We're not aware of all installations of our Open Source project. However, we lo
 * _discussing possible use cases with you,_
 * _aligning the roadmap to your needs!_
 
-📨 _Please [contact](#contact) us if you need consulting support._
+📨 _Feel free to [contact](#contact) us if you need consulting support._
 
 ---
 
@@ -41,7 +45,7 @@ _We're not aware of all installations of our Open Source project. However, we lo
     * [Classification](#classification)
     * [Routing](#routing)
     * [Prioritization](#prioritization)
-* [Components](#components)
+* 🧫 [Components](#components)
     * [KADAI Lib](#Kadai-lib)
     * [KADAI REST API](#Kadai-rest-api)
     * [KADAI workplace](#Kadai-workplace)
@@ -52,8 +56,9 @@ _We're not aware of all installations of our Open Source project. However, we lo
     * [Wrapper Application](#wrapper-application)
         * [Spring Boot Example](#spring-boot-example)
         * [EJB Example](#ejb-example)
-* [Customize Behaviour](#customize-behaviour)
+* ⚙️ [Customize Behaviour](#customize-behaviour)
 * 📚 [Releases](#releases)
+* 🖼️ [Demo](#demo)
 * 📨 [Contact](#contact)
 
 # ✨Overview
@@ -105,7 +110,7 @@ Tasks at any time. This ensures that the most important Tasks are always address
 
 ![Prioritization](docs/images/prio.png)
 
-# Components
+# 🧫Components
 
 ![Components](docs/images/components.png)
 
@@ -166,7 +171,7 @@ We use a Wildfly Application Server in this example.
 
 See `lib/kadai-cdi`.
 
-# Customize Behaviour
+# ⚙️Customize Behaviour
 
 KADAI allows to customize and modify it’s behaviour through the use of dedicated Service
 Provider Interfaces (SPI). Each SPI defines an interface that can be implemented by custom code.
@@ -204,10 +209,17 @@ Currently, KADAI provides the following SPIs:
 * [`io.kadai.spi.user.api.RefreshUserPostprocessor`](https://github.com/kadai-io/kadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/user/api/RefreshUserPostprocessor.java)
 
 # 📚Releases
+[![Maven Central](https://img.shields.io/maven-central/v/io.kadai/kadai-core.svg)](https://central.sonatype.com/artifact/io.kadai/kadai-core)
+[![Maven Central Snapshots](https://img.shields.io/badge/maven--central--snapshots-v9.2.1--SNAPSHOT-blue?link=https%3A%2F%2Fcentral.sonatype.com%2Fservice%2Frest%2Frepository%2Fbrowse%2Fmaven-snapshots%2Fio%2Fkadai%2F)](https://central.sonatype.com/service/rest/repository/browse/maven-snapshots/io/kadai/)
 
 The list of [releases](https://github.com/kadai-io/kadai/releases) contains a detailed changelog.
 
 We use [Semantic Versioning](https://semver.org/).
+
+# 🖼️Demo
+![Static Badge](https://img.shields.io/badge/demo-azure-blue?link=https%3A%2F%2Fkadai-io.azurewebsites.net%2Fkadai&&logo=angular&logoColor=white)
+
+Our focus is mainly directed to the backend, but we maintain a demo frontend in Angular, check it out by clicking on the badge!
 
 # 📨Contact
 
