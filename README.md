@@ -217,7 +217,7 @@ The list of [releases](https://github.com/kadai-io/kadai/releases) contains a de
 We use [Semantic Versioning](https://semver.org/).
 
 # 🖼️Demo
-![Static Badge](https://img.shields.io/badge/demo-azure-blue?link=https%3A%2F%2Fkadai-io.azurewebsites.net%2Fkadai&&logo=angular&logoColor=white)
+[![Static Badge](https://img.shields.io/badge/demo-azure-blue?link=https%3A%2F%2Fkadai-io.azurewebsites.net%2Fkadai&&logo=angular&logoColor=white)](https://kadai-io.azurewebsites.net/kadai/)
 
 Our focus is mainly directed to the backend, but we maintain a demo frontend in Angular, check it out by clicking on the badge!
 
