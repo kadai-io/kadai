@@ -8,11 +8,7 @@ KADAI - The open source task management library
 [![Maven Central](https://img.shields.io/maven-central/v/io.kadai/kadai-core.svg)](https://central.sonatype.com/artifact/io.kadai/kadai-core)
 [![License](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./docs/images/kadai-cli-dark.gif">
-  <source media="(prefers-color-scheme: light)" srcset="./docs/images/kadai-cli-light.gif">
-</picture>
-
+![GitHub-Mark-Light](docs/images/kadai-cli-light.gif#gh-light-mode-only)![GitHub-Mark-Dark](docs/images/kadai-cli-dark.gif#gh-dark-mode-only)
 
 KADAI is a task management component open source library. It can be embedded into your application
 or be operated standalone if appropriate. Beside the basic task management functionalities,
