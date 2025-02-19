@@ -9,8 +9,8 @@ KADAI - The open source task management library
 [![License](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/kadai-cli-dark.gif">
-  <source media="(prefers-color-scheme: light)" srcset="docs/images/kadai-cli-light.gif">
+  <source media="(prefers-color-scheme: dark)" srcset="./docs/images/kadai-cli-dark.gif">
+  <source media="(prefers-color-scheme: light)" srcset="./docs/images/kadai-cli-light.gif">
 </picture>
 
 
