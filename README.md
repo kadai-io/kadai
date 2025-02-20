@@ -108,8 +108,6 @@ Workbaskets, or to redistribute them between Workbaskets.
 Dynamic prioritization functions allow you to control the processing sequence of
 Tasks at any time. This ensures that the most important Tasks are always addressed first.
 
-![Prioritization](docs/images/prio.png)
-
 # 🧫Components
 
 <p align="center">
