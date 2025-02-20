@@ -169,7 +169,7 @@ _* other versions of the named databases should work also, but haven't been test
 
 ### Spring Boot Example
 
-[![Static Badge](https://img.shields.io/badge/demo-spring_boot-green?logo=spring&logoColor=white)](https://github.com/kadai-io/kadai/tree/master/rest/kadai-rest-spring-example-boot)
+[![Static Badge](https://img.shields.io/badge/example-spring_boot-green?logo=spring&logoColor=white)](https://github.com/kadai-io/kadai/tree/master/rest/kadai-rest-spring-example-boot)
 
 We use the h2 database in this example.
 
@@ -177,7 +177,7 @@ See `rest/kadai-rest-spring-example-boot` and it dependencies
 
 ### EJB Example
 
-[![Static Badge](https://img.shields.io/badge/demo-EJB-green?logoColor=white)](https://github.com/kadai-io/kadai/tree/master/rest/kadai-rest-spring-example-boot)
+[![Static Badge](https://img.shields.io/badge/example-EJB-green?logoColor=white)](https://github.com/kadai-io/kadai/tree/master/lib/kadai-cdi)
 
 We use a Wildfly Application Server in this example.
 
