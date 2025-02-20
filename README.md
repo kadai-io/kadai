@@ -100,20 +100,17 @@ of the Tasks.
 
 ## Routing
 
-It offers various routing and distribution functions to assign incoming Tasks to the correct
+Kadai offers various routing and distribution functions to assign incoming Tasks to the correct
 Workbaskets, or to redistribute them between Workbaskets.
-
-![Routing](docs/images/routing.png)
 
 ## Prioritization
 
-The dynamic prioritization functions in allow you to control the processing sequence of
+Dynamic prioritization functions allow you to control the processing sequence of
 Tasks at any time. This ensures that the most important Tasks are always addressed first.
 
 ![Prioritization](docs/images/prio.png)
 
 # 🧫Components
-
 
 <p align="center">
   <img src="./docs/images/components.svg" />
