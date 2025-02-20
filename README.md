@@ -86,7 +86,9 @@ Workbaskets indicate the responsibility for a Task. The concepts of Workbaskets 
 differentiate between the permissions or the skills required to complete a Tasks and the
 determination who should complete the Tasks. This can diverge a lot in a larger organization.
 
-![Workbaskets](docs/images/workbaskets.svg)
+<p align="center">
+  <img src="./docs/images/workbaskets.svg" />
+</p>
 
 ## CLASSIFICATIONS
 
