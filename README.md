@@ -83,8 +83,8 @@ Workbaskets are the main structure to distribute the Tasks to the available user
 personal, group/team and topic Workbaskets.
 
 Workbaskets indicate the responsibility for a Task. The concepts of Workbaskets allow to
-differentiate between the permissions or the skills required to complete a Tasks and the
-determination who should complete the Tasks. This can diverge a lot in a larger organization.
+differentiate between the permissions or the skills required to complete specific Tasks and the
+determination who should complete certain Tasks. This can diverge a lot in a larger organization.
 
 <p align="center">
   <img src="./docs/images/workbaskets.svg" />
@@ -114,7 +114,10 @@ Tasks at any time. This ensures that the most important Tasks are always address
 
 # 🧫Components
 
-![Components](docs/images/components.png)
+
+<p align="center">
+  <img src="./docs/images/components.svg" />
+</p>
 
 It splits up into five components:
 
