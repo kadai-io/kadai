@@ -149,7 +149,13 @@ If you are only interested in how KADAI looks and feel, you can try our [Demo En
 
 ## Requirements
 
+[![Java](https://img.shields.io/badge/Java-17+-%23ED8B00.svg?logo=openjdk&logoColor=white)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
+
 Runtime Environment at least Java 17
+
+[![H2](https://img.shields.io/badge/H2-003B28?style=flat&logo=h2&logoColor=white)](https://www.h2database.com/html/main.html)
+[![Postgres](https://img.shields.io/badge/Postgres-%23316192.svg?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![DB2](https://img.shields.io/badge/IBM-DB2-008000?logo=IBMDB2&logoColor=fff)](https://www.ibm.com/db2)
 
 Supported Databases:
 
@@ -163,17 +169,23 @@ _* other versions of the named databases should work also, but haven't been test
 
 ### Spring Boot Example
 
+[![Static Badge](https://img.shields.io/badge/demo-spring_boot-green?logo=spring&logoColor=white)](https://github.com/kadai-io/kadai/tree/master/rest/kadai-rest-spring-example-boot)
+
 We use the h2 database in this example.
 
 See `rest/kadai-rest-spring-example-boot` and it dependencies
 
 ### EJB Example
 
+[![Static Badge](https://img.shields.io/badge/demo-EJB-green?logoColor=white)](https://github.com/kadai-io/kadai/tree/master/rest/kadai-rest-spring-example-boot)
+
 We use a Wildfly Application Server in this example.
 
 See `lib/kadai-cdi`.
 
 # ⚙️Customize Behaviour
+
+[![Oracle](https://custom-icon-badges.demolab.com/badge/SPI-F80000?logo=oracle&logoColor=fff)](https://docs.oracle.com/javase/tutorial/sound/SPI-intro.html)
 
 KADAI allows to customize and modify it’s behaviour through the use of dedicated Service
 Provider Interfaces (SPI). Each SPI defines an interface that can be implemented by custom code.
