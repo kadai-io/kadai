@@ -111,7 +111,7 @@ Dynamic prioritization functions allow you to control the processing sequence of
 Tasks at any time. This ensures that the most important Tasks are always addressed first.
 
 <p align="center">
-  <img src="./docs/images/routing.svg" />
+  <img src="docs/images/prioritizing.svg" />
 </p>
 
 # 🧫Components
