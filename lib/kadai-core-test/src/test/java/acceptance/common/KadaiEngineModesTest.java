@@ -7,6 +7,7 @@ import acceptance.common.TestUserMapper.TestUser;
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
+import io.kadai.common.internal.SpringKadaiEngine;
 import io.kadai.testapi.KadaiEngineProxy;
 import io.kadai.testapi.extensions.TestContainerExtension;
 import java.sql.Connection;
@@ -41,7 +42,7 @@ public class KadaiEngineModesTest {
               .build();
       thisKadaiEngineProxy =
           new KadaiEngineProxy(
-              KadaiEngine.buildKadaiEngine(
+              SpringKadaiEngine.buildKadaiEngine(
                   kadaiConfiguration, ConnectionManagementMode.PARTICIPATE));
       thisKadaiEngineProxy.getSqlSession().getConfiguration().addMapper(TestUserMapper.class);
       transactionTemplate = new TransactionTemplate(new DataSourceTransactionManager(dataSource));
