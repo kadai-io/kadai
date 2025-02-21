@@ -179,7 +179,7 @@ See `rest/kadai-rest-spring-example-boot` and it dependencies
 
 ### EJB Example
 
-[![Static Badge](https://img.shields.io/badge/example-EJB-green?logoColor=white)](https://github.com/kadai-io/kadai/tree/master/lib/kadai-cdi)
+[![Static Badge](https://img.shields.io/badge/example-EJB-green?logoColor=white)](https://github.com/kadai-io/kadai/tree/master/lib/kadai-cdi-example)
 
 We use a Wildfly Application Server in this example.
 
