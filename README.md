@@ -1,6 +1,8 @@
 
-<img src="./docs/images/logo-small.png" height="21.5"> KADAI - The open source task management library
+<img src="./docs/images/logo.svg" height="21"> KADAI - The open source task management library
 =================================================
+
+[//]: # (TODO: Text Schatten weg bei anderen Abbildungen & Darkmode logo handling)
 
 [![CI](https://github.com/kadai-io/kadai/workflows/CI/badge.svg)](https://github.com/kadai-io/kadai/actions?query=workflow%3ACI)
 [![License](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
@@ -134,10 +136,6 @@ It splits up into five components:
     * Angular based web application to monitor the status of the entire Task pool
     * Provides views and statistics about the conformance with defined services levels
     * Shows the workload of your organization and the individual teams
-
-## Demo App Components Diagram
-
-![Demo App Components](docs/images/componets_demo_app.png)
 
 # 🚀Getting Started
 
