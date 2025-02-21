@@ -2,8 +2,6 @@
 <img src="./docs/images/logo.svg" height="21"> KADAI - The open source task management library
 =================================================
 
-[//]: # (TODO: Text Schatten weg bei anderen Abbildungen & Darkmode logo handling)
-
 [![CI](https://github.com/kadai-io/kadai/workflows/CI/badge.svg)](https://github.com/kadai-io/kadai/actions?query=workflow%3ACI)
 [![License](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 [![Contributors](https://img.shields.io/github/contributors/kadai-io/kadai.svg)](https://github.com/kadai-io/kadai/graphs/contributors)
