@@ -680,19 +680,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/platform-browser@npm:19.1.6":
-  version: 19.1.6
-  resolution: "@angular/platform-browser@npm:19.1.6"
+"@angular/platform-browser@npm:19.1.7":
+  version: 19.1.7
+  resolution: "@angular/platform-browser@npm:19.1.7"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/animations": 19.1.6
-    "@angular/common": 19.1.6
-    "@angular/core": 19.1.6
+    "@angular/animations": 19.1.7
+    "@angular/common": 19.1.7
+    "@angular/core": 19.1.7
   peerDependenciesMeta:
     "@angular/animations":
       optional: true
-  checksum: 10c0/e1be06cdfeb9b172549630a9e3f3d24928aa622a0cdd4864f913f56dea40b94d79c66b6a7eea5bc5fa6339ef3f44201f337f58a63500c9deff84c98d33d5d24b
+  checksum: 10c0/89a14615849ec8604d9b78001323840ae59c0533c79828d55a1d7addcb23a1ea0b9e46c32dc46b5daaaf853b297ce1c6d86fb67e1be5fbb7defba42daddbe67a
   languageName: node
   linkType: hard
 
@@ -10759,7 +10759,7 @@ __metadata:
     "@angular/core": "npm:19.1.6"
     "@angular/forms": "npm:19.1.7"
     "@angular/material": "npm:19.1.4"
-    "@angular/platform-browser": "npm:19.1.6"
+    "@angular/platform-browser": "npm:19.1.7"
     "@angular/platform-browser-dynamic": "npm:19.1.7"
     "@angular/router": "npm:19.1.7"
     "@ngneat/hot-toast": "npm:7.0.0"
