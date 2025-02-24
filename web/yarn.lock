@@ -10291,9 +10291,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-preset-angular@npm:14.5.1":
-  version: 14.5.1
-  resolution: "jest-preset-angular@npm:14.5.1"
+"jest-preset-angular@npm:14.5.2":
+  version: 14.5.2
+  resolution: "jest-preset-angular@npm:14.5.2"
   dependencies:
     bs-logger: "npm:^0.2.6"
     esbuild: "npm:>=0.15.13"
@@ -10315,7 +10315,7 @@ __metadata:
   peerDependenciesMeta:
     jsdom:
       optional: true
-  checksum: 10c0/0ad99d3430aeec2be3b043963e173d075cc014102a521b97076f6b7e7a065199af1988488380ba70cce126634298ef72cecb1bdeb1146ea8e5dc6509d52c9f9e
+  checksum: 10c0/20e0d402bb66c52c7c5d06d256c53a255a952416d933b994736e59582bb72cb39bc67d673352672b3c602b963519bea7375bad299e9e0330f5df7a8508c82cb0
   languageName: node
   linkType: hard
 
@@ -10786,7 +10786,7 @@ __metadata:
     file-saver: "npm:2.0.5"
     globals: "npm:^16.0.0"
     jest: "npm:29.7.0"
-    jest-preset-angular: "npm:14.5.1"
+    jest-preset-angular: "npm:14.5.2"
     lodash: "npm:4.17.21"
     ng2-charts: "npm:8.0.0"
     ngx-bootstrap: "npm:19.0.2"
