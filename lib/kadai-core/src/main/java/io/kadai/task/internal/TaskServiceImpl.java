@@ -242,6 +242,7 @@ public class TaskServiceImpl implements TaskService {
     task.setState(TaskState.CLAIMED);
     task.setCompleted(null);
     task.setRead(false);
+    task.setReopened(true);
     if (!task.isManualPriorityActive()) {
       priorityServiceManager.calculatePriorityOfTask(task).ifPresent(task::setPriority);
     }
@@ -2019,6 +2020,7 @@ public class TaskServiceImpl implements TaskService {
     task.setModified(now);
     task.setRead(false);
     task.setTransferred(false);
+    task.setReopened(false);
 
     String creator = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
     if (kadaiEngine.getEngine().getConfiguration().isSecurityEnabled() && creator == null) {

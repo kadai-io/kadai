@@ -195,7 +195,7 @@ class TaskControllerIntTest {
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
-      assertThat(response.getBody().getContent()).hasSize(62);
+      assertThat(response.getBody().getContent()).hasSize(63);
     }
 
     @Test
@@ -860,7 +860,7 @@ class TaskControllerIntTest {
       assertThat(response.getBody()).isNotNull();
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
-      assertThat(response.getBody().getContent()).hasSize(90);
+      assertThat(response.getBody().getContent()).hasSize(91);
     }
 
     @Test
@@ -1179,7 +1179,7 @@ class TaskControllerIntTest {
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
-      assertThat(response.getBody().getContent()).hasSize(93);
+      assertThat(response.getBody().getContent()).hasSize(94);
     }
 
     @Test
@@ -1352,7 +1352,7 @@ class TaskControllerIntTest {
           TEMPLATE.exchange(url, HttpMethod.GET, auth, TASK_SUMMARY_PAGE_MODEL_TYPE);
 
       assertThat(response.getBody()).isNotNull();
-      assertThat((response.getBody()).getContent()).hasSize(62);
+      assertThat((response.getBody()).getContent()).hasSize(63);
 
       String url2 =
           restHelper.toUrl(RestEndpoints.URL_TASKS)
@@ -1440,7 +1440,7 @@ class TaskControllerIntTest {
               "TKI:000000000000000000000000000000000025",
               "TKI:000000000000000000000000000000000026",
               "TKI:000000000000000000000000000000000027")
-          .hasSize(55);
+          .hasSize(56);
     }
 
     @Test
@@ -1467,7 +1467,7 @@ class TaskControllerIntTest {
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
-      assertThat(response.getBody().getContent()).hasSize(86);
+      assertThat(response.getBody().getContent()).hasSize(87);
     }
 
     @Test
@@ -1532,6 +1532,38 @@ class TaskControllerIntTest {
           TEMPLATE.exchange(url, HttpMethod.GET, auth, TASK_SUMMARY_PAGE_MODEL_TYPE);
 
       assertThat(response.getBody()).isNotNull();
+      assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
+      assertThat(response.getBody().getContent()).hasSize(1);
+    }
+
+    @Test
+    void should_ReturnFilteredTasks_When_GettingTasksByIsReopenedFalse() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS) + "?is-reopened=false";
+      HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
+
+      ResponseEntity<TaskSummaryPagedRepresentationModel> response =
+          TEMPLATE.exchange(url, HttpMethod.GET, auth, TASK_SUMMARY_PAGE_MODEL_TYPE);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getContent())
+          .allSatisfy(task -> assertThat(task.isReopened()).isFalse());
+      assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
+      assertThat(response.getBody().getContent()).hasSize(62);
+    }
+
+    @Test
+    void should_ReturnFilteredTasks_When_GettingTasksByIsReopenedTrue() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS) + "?is-reopened=true";
+      HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
+
+      ResponseEntity<TaskSummaryPagedRepresentationModel> response =
+          TEMPLATE.exchange(url, HttpMethod.GET, auth, TASK_SUMMARY_PAGE_MODEL_TYPE);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getContent())
+          .allSatisfy(task -> assertThat(task.isReopened()).isTrue());
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
       assertThat(response.getBody().getContent()).hasSize(1);
     }

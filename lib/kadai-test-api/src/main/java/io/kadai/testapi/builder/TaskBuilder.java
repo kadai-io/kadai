@@ -184,6 +184,18 @@ public class TaskBuilder implements SummaryEntityBuilder<TaskSummary, Task, Task
     return this;
   }
 
+  public TaskBuilder reopened(Boolean reopened) {
+    if (reopened != null) {
+      testTask.setReopenedIgnoreFreeze(reopened);
+      if (reopened) {
+        testTask.freezeReopened();
+      }
+    } else {
+      testTask.unfreezeReopened();
+    }
+    return this;
+  }
+
   public TaskBuilder numberOfComments(Integer numberOfComments) {
     testTask.setNumberOfComments(numberOfComments);
     return this;

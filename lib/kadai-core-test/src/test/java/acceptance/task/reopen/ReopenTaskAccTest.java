@@ -370,6 +370,26 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
 
   @Test
   @WithAccessId(user = "user-1-2")
+  void should_SetReopenedTrue_When_ReopenSuccessful() throws Exception {
+    Task task =
+        TaskBuilder.newTask()
+            .classificationSummary(defaultClassificationSummary)
+            .workbasketSummary(defaultWorkbasketSummary)
+            .primaryObjRef(defaultObjectReference)
+            .state(TaskState.COMPLETED)
+            .reopened(false)
+            .buildAndStore(taskService);
+
+    Task reopenedTask = taskService.reopen(task.getId());
+
+    assertThat(reopenedTask)
+        .isNotNull()
+        .extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
+    assertThat(reopenedTask.isReopened()).isTrue();
+  }
+
+  @Test
+  @WithAccessId(user = "user-1-2")
   void should_RecalculatePriority_When_ReopenSuccessful() throws Exception {
     final int previousPriority = DummyPriorityServiceProvider.SPI_PRIORITY + 1;
     Task task =

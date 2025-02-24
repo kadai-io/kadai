@@ -2576,6 +2576,49 @@ class TaskQueryImplAccTest {
 
     @Nested
     @TestInstance(Lifecycle.PER_CLASS)
+    class Reopened {
+
+      WorkbasketSummary wb;
+      TaskSummary taskSummary1;
+      TaskSummary taskSummary2;
+
+      @WithAccessId(user = "user-1-1")
+      @BeforeAll
+      void setup() throws Exception {
+        wb = createWorkbasketWithPermission();
+        taskSummary1 = taskInWorkbasket(wb).reopened(true).buildAndStoreAsSummary(taskService);
+        taskSummary2 = taskInWorkbasket(wb).reopened(false).buildAndStoreAsSummary(taskService);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
+      void should_ApplyFilter_When_QueryingForReopenedEqualsTrue() {
+        List<TaskSummary> list =
+            taskService
+                .createTaskQuery()
+                .workbasketIdIn(wb.getId())
+                .reopenedEquals(true)
+                .list();
+
+        assertThat(list).containsExactly(taskSummary1);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
+      void should_ApplyFilter_When_QueryingForReopenedEqualsFalse() {
+        List<TaskSummary> list =
+            taskService
+                .createTaskQuery()
+                .workbasketIdIn(wb.getId())
+                .reopenedEquals(false)
+                .list();
+
+        assertThat(list).containsExactly(taskSummary2);
+      }
+    }
+
+    @Nested
+    @TestInstance(Lifecycle.PER_CLASS)
     class AttachmentClassificationId {
 
       WorkbasketSummary wb;
