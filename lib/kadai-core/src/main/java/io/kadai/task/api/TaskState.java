@@ -44,7 +44,8 @@ public enum TaskState {
 
   public boolean isFinalState() {
     return in(FINAL_STATES);
-    
+  }
+
   public boolean isClaimedState() {
     return in(CLAIMED_STATES);
   }
