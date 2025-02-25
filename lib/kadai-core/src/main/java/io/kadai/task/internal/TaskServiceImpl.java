@@ -1064,10 +1064,7 @@ public class TaskServiceImpl implements TaskService {
         throw new InvalidTaskStateException(
             taskId,
             state,
-            TaskState.READY,
-            TaskState.CLAIMED,
-            TaskState.READY_FOR_REVIEW,
-            TaskState.IN_REVIEW);
+            EnumUtil.allValuesExceptFor(TaskState.END_STATES));
       }
 
       terminateCancelCommonActions(cancelledTask, TaskState.CANCELLED);
@@ -1246,10 +1243,7 @@ public class TaskServiceImpl implements TaskService {
         throw new InvalidTaskStateException(
             taskId,
             state,
-            TaskState.READY,
-            TaskState.CLAIMED,
-            TaskState.READY_FOR_REVIEW,
-            TaskState.IN_REVIEW);
+            EnumUtil.allValuesExceptFor(TaskState.END_STATES));
       }
 
       terminateCancelCommonActions(terminatedTask, TaskState.TERMINATED);
@@ -1384,8 +1378,7 @@ public class TaskServiceImpl implements TaskService {
   }
 
   private static boolean taskIsNotClaimed(TaskSummary task) {
-    return task.getClaimed() == null
-        || task.getState() != TaskState.CLAIMED && task.getState() != TaskState.IN_REVIEW;
+    return task.getClaimed() == null || !task.getState().isClaimedState();
   }
 
   BulkLog addExceptionsForNonExistingTasksToBulkLog(
@@ -1612,13 +1605,10 @@ public class TaskServiceImpl implements TaskService {
 
       final TaskImpl oldTask = duplicateTaskExactly(task);
 
-      if (force && task.getState().isEndState()) {
-        throw new InvalidTaskStateException(
-            task.getId(), task.getState(), EnumUtil.allValuesExceptFor(TaskState.END_STATES));
-      }
-      if (!force && taskIsNotClaimed(task)) {
-        throw new InvalidTaskStateException(
-            task.getId(), task.getState(), TaskState.CLAIMED, TaskState.IN_REVIEW);
+      final TaskState[] allowedStates =
+          force ? EnumUtil.allValuesExceptFor(TaskState.END_STATES) : TaskState.CLAIMED_STATES;
+      if (task.getState().isEndState() || (!force && taskIsNotClaimed(task))) {
+        throw new InvalidTaskStateException(task.getId(), task.getState(), allowedStates);
       }
       if (!force && !task.getOwner().equals(userId)) {
         throw new InvalidOwnerException(userId, task.getId());
@@ -1712,7 +1702,7 @@ public class TaskServiceImpl implements TaskService {
 
     String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
     if (!forced
-        && (state == TaskState.CLAIMED || state == TaskState.IN_REVIEW)
+        && state.isClaimedState()
         && !task.getOwner().equals(userId)) {
       throw new InvalidOwnerException(userId, task.getId());
     }
@@ -1728,7 +1718,7 @@ public class TaskServiceImpl implements TaskService {
       throws InvalidOwnerException, InvalidTaskStateException, NotAuthorizedOnWorkbasketException {
     if (taskIsNotClaimed(task)) {
       throw new InvalidTaskStateException(
-          task.getId(), task.getState(), TaskState.CLAIMED, TaskState.IN_REVIEW);
+          task.getId(), task.getState(), TaskState.CLAIMED_STATES);
     } else if (!kadaiEngine
             .getEngine()
             .getCurrentUserContext()
@@ -1769,7 +1759,7 @@ public class TaskServiceImpl implements TaskService {
         throw new InvalidTaskStateException(
             taskId, state, EnumUtil.allValuesExceptFor(TaskState.END_STATES));
       }
-      if ((state == TaskState.CLAIMED || state == TaskState.IN_REVIEW)
+      if (state.isClaimedState()
           && !forceUnclaim
           && !userId.equals(task.getOwner())) {
         throw new InvalidOwnerException(userId, taskId);

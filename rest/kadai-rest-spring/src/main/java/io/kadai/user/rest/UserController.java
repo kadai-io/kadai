@@ -23,6 +23,7 @@ import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.common.rest.util.QueryParamsValidator;
+import io.kadai.user.api.UserQuery;
 import io.kadai.user.api.UserService;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
@@ -31,9 +32,7 @@ import io.kadai.user.rest.assembler.UserRepresentationModelAssembler;
 import io.kadai.user.rest.models.UserCollectionRepresentationModel;
 import io.kadai.user.rest.models.UserRepresentationModel;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
@@ -46,7 +45,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /** Controller for all {@linkplain User} related endpoints. */
@@ -79,25 +77,19 @@ public class UserController implements UserApi {
   @GetMapping(RestEndpoints.URL_USERS)
   @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<UserCollectionRepresentationModel> getUsers(
-      HttpServletRequest request,
-      @RequestParam(name = "user-id", required = false) String[] userIds,
-      @RequestParam(name = "current-user", required = false) String currentUser)
-      throws InvalidArgumentException, UserNotFoundException {
-    Set<User> users = new HashSet<>();
-
-    if (userIds != null) {
-      users.addAll(userService.getUsers(new HashSet<>(List.of(userIds))));
+      HttpServletRequest request, @ParameterObject UserQueryFilterParameter filterParameter)
+      throws InvalidArgumentException {
+    if (filterParameter.getCurrentUser() != null
+        && QueryParamsValidator.hasQueryParameterValues(request, "current-user")) {
+      throw new InvalidArgumentException(
+          "It is prohibited to use the param current-user with values.");
     }
+    filterParameter.addCurrentUserIdIfPresentWithContext(currentUserContext);
 
-    if (currentUser != null) {
-      if (QueryParamsValidator.hasQueryParameterValues(request, "current-user")) {
-        throw new InvalidArgumentException(
-            "It is prohibited to use the param current-user with values.");
-      }
-      users.add(userService.getUser(this.currentUserContext.getUserid()));
-    }
+    UserQuery query = userService.createUserQuery();
+    filterParameter.apply(query);
 
-    return ResponseEntity.ok(userAssembler.toKadaiCollectionModel(users));
+    return ResponseEntity.ok(userAssembler.toKadaiCollectionModel(query.list()));
   }
 
   @PostMapping(RestEndpoints.URL_USERS)

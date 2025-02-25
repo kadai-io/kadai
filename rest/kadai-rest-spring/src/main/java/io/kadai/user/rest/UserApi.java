@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +24,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 public interface UserApi {
 
@@ -69,34 +69,20 @@ public interface UserApi {
 
   /**
    * This endpoint retrieves multiple Users. If a userId can't be found in the database it will be
-   * ignored. If none of the given userIds is valid, the returned list will be empty. If currentUser
-   * is set, the current User from the context will be retrieved as well
+   * ignored. Any combination of parameters is interpreted as conjunction of those.
    *
    * @title Get multiple Users
    * @param request the HttpServletRequest of the request itself
-   * @param userIds the ids of the requested Users
-   * @param currentUser Indicates whether to fetch the current user or not as well
+   * @param filterParameter the filter parameters regarding UserQueryFilterParameter
    * @return the requested Users
    * @throws InvalidArgumentException if the userIds are null or empty
-   * @throws UserNotFoundException if the current User was not found
    */
   @Operation(
       summary = "Get multiple Users",
       description =
-          "This endpoint retrieves multiple Users. If a userId can't be found in the database it "
-              + "will be ignored. If none of the given userIds is valid, the returned list will be"
-              + " empty. If currentUser is set, the current User from the context will be retrieved"
-              + " as well.",
-      parameters = {
-        @Parameter(
-            name = "user-id",
-            description = "The IDs of the users to be retrieved",
-            example = "teamlead-1"),
-        @Parameter(
-            name = "current-user",
-            description = "Whether to fetch the current user as well",
-            example = "user-1-1")
-      },
+          "This endpoint retrieves multiple Users. If a userId can't be found in the database it"
+              + " will be ignored. Any combination of parameters is interpreted as conjunction of "
+              + "those.",
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -106,10 +92,6 @@ public interface UserApi {
                     mediaType = MediaTypes.HAL_JSON_VALUE,
                     schema = @Schema(implementation = UserCollectionRepresentationModel.class))),
         @ApiResponse(
-            responseCode = "404",
-            description = "USER_NOT_FOUND",
-            content = {@Content(schema = @Schema(implementation = UserNotFoundException.class))}),
-        @ApiResponse(
             responseCode = "400",
             description = "INVALID_ARGUMENT",
             content = {@Content(schema = @Schema(implementation = InvalidArgumentException.class))})
@@ -117,10 +99,8 @@ public interface UserApi {
   @GetMapping(RestEndpoints.URL_USERS)
   @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<UserCollectionRepresentationModel> getUsers(
-      HttpServletRequest request,
-      @RequestParam(name = "user-id", required = false) String[] userIds,
-      @RequestParam(name = "current-user", required = false) String currentUser)
-      throws InvalidArgumentException, UserNotFoundException;
+      HttpServletRequest request, @ParameterObject UserQueryFilterParameter filterParameter)
+      throws InvalidArgumentException;
 
   /**
    * This endpoint creates a User.

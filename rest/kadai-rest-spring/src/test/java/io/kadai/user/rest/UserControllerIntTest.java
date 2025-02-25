@@ -27,15 +27,21 @@ import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
 import io.kadai.user.rest.models.UserCollectionRepresentationModel;
 import io.kadai.user.rest.models.UserRepresentationModel;
+import java.util.Collection;
 import java.util.Set;
+import org.assertj.core.api.Condition;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.MethodMode;
 import org.springframework.web.client.HttpStatusCodeException;
 
 /** Tests the endpoints of the UserController. */
@@ -200,9 +206,277 @@ class UserControllerIntTest {
         .containsExactlyInAnyOrder("Max", "Simone");
   }
 
+  @ParameterizedTest
+  @CsvSource({"KADAI,1", "Human Workflow,2", "BPM,3", "Envite,4"})
+  void should_ReturnExistingUsers_For_OrgLevel_When_OrgLevelExists(String orgLevel, int level) {
+    String url = restHelper.toUrl(RestEndpoints.URL_USERS)
+        + String.format("?orgLevel%d=%s", level, orgLevel);
+    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
+
+    ResponseEntity<UserCollectionRepresentationModel> responseEntity =
+        TEMPLATE.exchange(
+            url,
+            HttpMethod.GET,
+            auth,
+            ParameterizedTypeReference.forType(UserCollectionRepresentationModel.class));
+
+    assertThat(responseEntity.getBody()).isNotNull();
+    assertThat(responseEntity.getBody().getContent()).isNotEmpty();
+    responseEntity.getBody().getContent().forEach(user -> {
+      if (level == 1) {
+        assertThat(user.getOrgLevel1()).isEqualTo(orgLevel);
+      } else if (level == 2) {
+        assertThat(user.getOrgLevel2()).isEqualTo(orgLevel);
+      } else if (level == 3) {
+        assertThat(user.getOrgLevel3()).isEqualTo(orgLevel);
+      } else if (level == 4) {
+        assertThat(user.getOrgLevel4()).isEqualTo(orgLevel);
+      }
+    });
+  }
+
+  @ParameterizedTest
+  @CsvSource({"Non-Existent,1", "Non-Existent,2", "Non-Existent,3", "Non-Existent,4"})
+  void should_ReturnEmptyList_For_OrgLevel_When_OrgLevelNotExists(String orgLevel, int level) {
+    String url = restHelper.toUrl(RestEndpoints.URL_USERS)
+        + String.format("?orgLevel%d=%s", level, orgLevel);
+    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
+
+    ResponseEntity<UserCollectionRepresentationModel> responseEntity =
+        TEMPLATE.exchange(
+            url,
+            HttpMethod.GET,
+            auth,
+            ParameterizedTypeReference.forType(UserCollectionRepresentationModel.class));
+
+    assertThat(responseEntity.getBody()).isNotNull();
+    assertThat(responseEntity.getBody().getContent()).isEmpty();
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+      "KADAI,Non-existent,1",
+      "Human Workflow,Non-existent,2",
+      "BPM,Non-existent,3",
+      "Envite,Non-existent,4"
+  })
+  void should_ReturnUnion_For_DifferentOrgLevelsWithSameLevel(
+      String orgLevel1, String orgLevel2, int level) {
+    String url = restHelper.toUrl(RestEndpoints.URL_USERS)
+        + String.format("?orgLevel%d=%s", level, orgLevel1)
+        + String.format("&orgLevel%d=%s", level, orgLevel2);
+    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
+
+    ResponseEntity<UserCollectionRepresentationModel> responseEntity =
+        TEMPLATE.exchange(
+            url,
+            HttpMethod.GET,
+            auth,
+            ParameterizedTypeReference.forType(UserCollectionRepresentationModel.class));
+
+    assertThat(responseEntity.getBody()).isNotNull();
+    assertThat(responseEntity.getBody().getContent()).isNotEmpty();
+    responseEntity.getBody().getContent().forEach(user -> {
+      if (level == 1) {
+        assertThat(user.getOrgLevel1()).isEqualTo(orgLevel1);
+      } else if (level == 2) {
+        assertThat(user.getOrgLevel2()).isEqualTo(orgLevel1);
+      } else if (level == 3) {
+        assertThat(user.getOrgLevel3()).isEqualTo(orgLevel1);
+      } else if (level == 4) {
+        assertThat(user.getOrgLevel4()).isEqualTo(orgLevel1);
+      }
+    });
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+      "KADAI,1,Human Workflow,2",
+      "Human Workflow,2,BPM,3",
+      "BPM,3,Envite,4",
+      "Envite,4,KADAI,1"
+  })
+  void should_ReturnIntersection_For_DifferentOrgLevelsWithDifferentLevels(
+      String orgLevel1, int level1, String orgLevel2, int level2) {
+    String url = restHelper.toUrl(RestEndpoints.URL_USERS)
+        + String.format("?orgLevel%d=%s", level1, orgLevel1)
+        + String.format("&orgLevel%d=%s", level2, orgLevel2);
+    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
+
+    ResponseEntity<UserCollectionRepresentationModel> responseEntity =
+        TEMPLATE.exchange(
+            url,
+            HttpMethod.GET,
+            auth,
+            ParameterizedTypeReference.forType(UserCollectionRepresentationModel.class));
+
+    assertThat(responseEntity.getBody()).isNotNull();
+    assertThat(responseEntity.getBody().getContent()).isNotEmpty();
+    final int allUsersCount = 14;
+    assertThat(responseEntity.getBody().getContent()).hasSize(allUsersCount - 1);
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+      "KADAI,1,Non-existent,2",
+      "Human Workflow,2,Non-existent,3",
+      "BPM,3,Non-existent,4",
+      "Envite,4,Non-existent,1"
+  })
+  void should_ReturnEmptyList_For_ContradictoryOrgLevels(
+      String orgLevel1, int level1, String orgLevel2, int level2) {
+    String url = restHelper.toUrl(RestEndpoints.URL_USERS)
+        + String.format("?orgLevel%d=%s", level1, orgLevel1)
+        + String.format("&orgLevel%d=%s", level2, orgLevel2);
+    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
+
+    ResponseEntity<UserCollectionRepresentationModel> responseEntity =
+        TEMPLATE.exchange(
+            url,
+            HttpMethod.GET,
+            auth,
+            ParameterizedTypeReference.forType(UserCollectionRepresentationModel.class));
+
+    assertThat(responseEntity.getBody()).isNotNull();
+    assertThat(responseEntity.getBody().getContent()).isEmpty();
+  }
+
+  @ParameterizedTest
+  @CsvSource({"KADAI,1", "Human Workflow,2", "BPM,3", "Envite,4"})
+  void should_ReturnIntersection_When_OrgLevelAndUserIdsAreGiven(String orgLevel, int level) {
+    String url =
+        restHelper.toUrl(RestEndpoints.URL_USERS)
+            + String.format("?orgLevel%d=%s", level, orgLevel)
+            + "&user-id=user-1-1"
+            + "&user-id=user-2-1";
+    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
+
+    ResponseEntity<UserCollectionRepresentationModel> responseEntity =
+        TEMPLATE.exchange(
+            url,
+            HttpMethod.GET,
+            auth,
+            ParameterizedTypeReference.forType(UserCollectionRepresentationModel.class));
+
+    assertThat(responseEntity.getBody()).isNotNull();
+    assertThat(responseEntity.getBody().getContent())
+        .haveExactly(
+            1,
+            new Condition<>(
+                user -> user.getUserId().equals("user-1-1"),
+                "user with id user-1-1"))
+        .haveExactly(
+            1,
+            new Condition<>(
+                user -> user.getUserId().equals("user-2-1"),
+                "user with id user-2-1"));
+    responseEntity.getBody().getContent().stream()
+        .filter(user -> !user.getUserId().equals("user-1-1"))
+        .filter(user -> !user.getUserId().equals("user-2-1"))
+        .forEach(
+            user -> {
+              if (level == 1) {
+                assertThat(user.getOrgLevel1()).isEqualTo(orgLevel);
+              } else if (level == 2) {
+                assertThat(user.getOrgLevel2()).isEqualTo(orgLevel);
+              } else if (level == 3) {
+                assertThat(user.getOrgLevel3()).isEqualTo(orgLevel);
+              } else if (level == 4) {
+                assertThat(user.getOrgLevel4()).isEqualTo(orgLevel);
+              }
+            });
+  }
+
+  @ParameterizedTest
+  @CsvSource({"KADAI,1", "Human Workflow,2", "BPM,3", "Envite,4"})
+  void should_ReturnIntersection_When_OrgLevelAndCurrentUserAreGiven(
+      String orgLevel, int level) {
+    String url =
+        restHelper.toUrl(RestEndpoints.URL_USERS)
+            + String.format("?orgLevel%d=%s", level, orgLevel)
+            + "&current-user";
+    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
+
+    ResponseEntity<UserCollectionRepresentationModel> responseEntity =
+        TEMPLATE.exchange(
+            url,
+            HttpMethod.GET,
+            auth,
+            ParameterizedTypeReference.forType(UserCollectionRepresentationModel.class));
+
+    assertThat(responseEntity.getBody()).isNotNull();
+    assertThat(responseEntity.getBody().getContent())
+        .haveExactly(
+            1,
+            new Condition<>(
+                user -> user.getUserId().equals("teamlead-1"),
+                "user with id teamlead-1"));
+    responseEntity.getBody().getContent().stream()
+        .filter(user -> !user.getUserId().equals("teamlead-1"))
+        .forEach(
+            user -> {
+              if (level == 1) {
+                assertThat(user.getOrgLevel1()).isEqualTo(orgLevel);
+              } else if (level == 2) {
+                assertThat(user.getOrgLevel2()).isEqualTo(orgLevel);
+              } else if (level == 3) {
+                assertThat(user.getOrgLevel3()).isEqualTo(orgLevel);
+              } else if (level == 4) {
+                assertThat(user.getOrgLevel4()).isEqualTo(orgLevel);
+              }
+            });
+  }
+
+  @ParameterizedTest
+  @CsvSource({"KADAI,1", "Human Workflow,2", "BPM,3", "Envite,4"})
+  void should_ReturnIntersection_When_OrgLevelAndUserIdsAndCurrentUserAreGiven(
+      String orgLevel, int level) {
+    String url =
+        restHelper.toUrl(RestEndpoints.URL_USERS)
+            + String.format("?orgLevel%d=%s", level, orgLevel)
+            + "&current-user"
+            + "&user-id=user-1-1"
+            + "&user-id=user-2-1"
+            + "&user-id=teamlead-1";
+    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
+
+    ResponseEntity<UserCollectionRepresentationModel> responseEntity =
+        TEMPLATE.exchange(
+            url,
+            HttpMethod.GET,
+            auth,
+            ParameterizedTypeReference.forType(UserCollectionRepresentationModel.class));
+
+    assertThat(responseEntity.getBody()).isNotNull();
+
+    Collection<UserRepresentationModel> users = responseEntity.getBody().getContent();
+
+    assertThat(users)
+        .haveExactly(
+            1,
+            new Condition<>(
+                user -> user.getUserId().equals("teamlead-1"),
+                "user with id teamlead-1"));
+    assertThat(users).hasSize(3);
+    users.stream()
+        .filter(user -> !user.getUserId().equals("teamlead-1"))
+        .forEach(
+            user -> {
+              if (level == 1) {
+                assertThat(user.getOrgLevel1()).isEqualTo(orgLevel);
+              } else if (level == 2) {
+                assertThat(user.getOrgLevel2()).isEqualTo(orgLevel);
+              } else if (level == 3) {
+                assertThat(user.getOrgLevel3()).isEqualTo(orgLevel);
+              } else if (level == 4) {
+                assertThat(user.getOrgLevel4()).isEqualTo(orgLevel);
+              }
+            });
+  }
+
   @Test
-  void should_CreateValidUser_When_CallingCreateEndpointWithAllAttributesExceptDomains()
-      throws Exception {
+  @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
+  void should_CreateValidUser_When_CallingCreateEndpointWithAllAttributesExceptDomains() {
     UserRepresentationModel newUser = new UserRepresentationModel();
     newUser.setUserId("12345");
     newUser.setGroups(Set.of("group1", "group2"));
@@ -245,8 +519,8 @@ class UserControllerIntTest {
   }
 
   @Test
-  void should_CreateValidUser_When_CallingCreateEndpointWithoutGroupsPermissionsDomains()
-      throws Exception {
+  @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
+  void should_CreateValidUser_When_CallingCreateEndpointWithoutGroupsPermissionsDomains() {
     UserRepresentationModel newUser = new UserRepresentationModel();
     newUser.setUserId("123456");
     newUser.setFirstName("Hans");
@@ -281,6 +555,7 @@ class UserControllerIntTest {
   }
 
   @Test
+  @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
   void should_UpdateExistingUser_When_CallingUpdateEndpoint() {
     String url = restHelper.toUrl(RestEndpoints.URL_USERS_ID, "teamlead-1");
     HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
@@ -309,6 +584,7 @@ class UserControllerIntTest {
   }
 
   @Test
+  @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
   void should_DeleteExistingUser_When_CallingDeleteEndpoint() {
     String url = restHelper.toUrl(RestEndpoints.URL_USERS_ID, "user-1-3");
     HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));

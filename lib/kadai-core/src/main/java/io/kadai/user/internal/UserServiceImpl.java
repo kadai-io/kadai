@@ -27,6 +27,7 @@ import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.util.LogSanitizer;
+import io.kadai.user.api.UserQuery;
 import io.kadai.user.api.UserService;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
@@ -178,7 +179,12 @@ public class UserServiceImpl implements UserService {
     }
   }
 
-  private Set<String> determineDomains(User user) {
+  @Override
+  public UserQuery createUserQuery() {
+    return new UserQueryImpl(internalKadaiEngine);
+  }
+
+  Set<String> determineDomains(User user) {
     Set<String> accessIds = new HashSet<>(user.getGroups());
     accessIds.addAll(user.getPermissions());
     accessIds.add(user.getId());
