@@ -287,12 +287,16 @@ public class JaasExtension implements InvocationInterceptor, TestTemplateInvocat
     List<WithAccessId> accessIds =
         AnnotationSupport.findRepeatableAnnotations(context.getElement(), WithAccessId.class);
     Store store = getMethodLevelStore(context);
-    return accessIds.stream()
-        .map(
-            a -> {
-              store.put(ACCESS_IDS_STORE_KEY, a);
-              return new JaasExtensionInvocationContext(a);
-            });
+
+    // Partial and only temporary workaround for kadai-io/kadai/#555
+    if (accessIds.size() > 1) {
+      return accessIds.stream()
+          .peek(a -> store.put(ACCESS_IDS_STORE_KEY, a))
+          .map(JaasExtensionInvocationContext::new);
+    } else {
+      accessIds.forEach(a -> store.put(ACCESS_IDS_STORE_KEY, a));
+      return Stream.empty();
+    }
   }
 
   private ExtensionContext getParentMethodExtensionContent(ExtensionContext extensionContext) {
