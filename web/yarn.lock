@@ -612,29 +612,29 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/compiler@npm:19.1.6":
-  version: 19.1.6
-  resolution: "@angular/compiler@npm:19.1.6"
+"@angular/compiler@npm:19.2.0":
+  version: 19.2.0
+  resolution: "@angular/compiler@npm:19.2.0"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/core": 19.1.6
+    "@angular/core": 19.2.0
   peerDependenciesMeta:
     "@angular/core":
       optional: true
-  checksum: 10c0/d8ab5bc884e56b35444fd34c9c1f93e31a501ea0d25f22eabec7229b61fa3007a79328163f847d037aef68cf5914cf038911279902108f8bd0c80b26e1f463ee
+  checksum: 10c0/10d0f09c60091ddade634196728912bb9ebd4d9e7ac31c84917d6048ac991483f829c68796529b51e98ce9fdd90792bda45092830c96ce7245e74c02f6730202
   languageName: node
   linkType: hard
 
-"@angular/core@npm:19.1.6":
-  version: 19.1.6
-  resolution: "@angular/core@npm:19.1.6"
+"@angular/core@npm:19.2.0":
+  version: 19.2.0
+  resolution: "@angular/core@npm:19.2.0"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
     rxjs: ^6.5.3 || ^7.4.0
     zone.js: ~0.15.0
-  checksum: 10c0/ec8d114b0086a31b0eb1c3fe1d6e52dcc228a183e9f678ceae2ecf67d06fc746d9e4336f3e400702bd664a352835cfc317a1f849427e9dc8b0ad8e1622299ea4
+  checksum: 10c0/340a18f4af97b50daa3564b510c7cdafe0b9371aae323f27922258f689989997502450ce676626b62c7b5902f6fcaa832f21fee7c56f9f99ec533c3803a8a2a9
   languageName: node
   linkType: hard
 
@@ -11367,9 +11367,9 @@ __metadata:
     "@angular/cdk": "npm:19.2.1"
     "@angular/cli": "npm:19.2.0"
     "@angular/common": "npm:19.1.7"
-    "@angular/compiler": "npm:19.1.6"
+    "@angular/compiler": "npm:19.2.0"
     "@angular/compiler-cli": "npm:19.2.0"
-    "@angular/core": "npm:19.1.6"
+    "@angular/core": "npm:19.2.0"
     "@angular/forms": "npm:19.2.0"
     "@angular/material": "npm:19.2.1"
     "@angular/platform-browser": "npm:19.2.0"
