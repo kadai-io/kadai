@@ -58,6 +58,7 @@ import io.kadai.spi.task.internal.BeforeRequestChangesManager;
 import io.kadai.spi.task.internal.BeforeRequestReviewManager;
 import io.kadai.spi.task.internal.CreateTaskPreprocessorManager;
 import io.kadai.spi.task.internal.ReviewRequiredManager;
+import io.kadai.spi.task.internal.TaskDistributionManager;
 import io.kadai.spi.task.internal.TaskEndstatePreprocessorManager;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.internal.AttachmentMapper;
@@ -110,6 +111,7 @@ public class KadaiEngineImpl implements KadaiEngine {
   private static final SessionStack SESSION_STACK = new SessionStack();
   protected final KadaiConfiguration kadaiConfiguration;
   private final TaskRoutingManager taskRoutingManager;
+  private final TaskDistributionManager taskDistributionManager;
   private final CreateTaskPreprocessorManager createTaskPreprocessorManager;
   private final PriorityServiceManager priorityServiceManager;
   private final ReviewRequiredManager reviewRequiredManager;
@@ -199,6 +201,7 @@ public class KadaiEngineImpl implements KadaiEngine {
     priorityServiceManager = new PriorityServiceManager(this);
     historyEventManager = new HistoryEventManager(this);
     taskRoutingManager = new TaskRoutingManager(this);
+    taskDistributionManager = new TaskDistributionManager(this);
     reviewRequiredManager = new ReviewRequiredManager(this);
     beforeRequestReviewManager = new BeforeRequestReviewManager(this);
     afterRequestReviewManager = new AfterRequestReviewManager(this);
@@ -609,6 +612,11 @@ public class KadaiEngineImpl implements KadaiEngine {
     @Override
     public TaskRoutingManager getTaskRoutingManager() {
       return taskRoutingManager;
+    }
+
+    @Override
+    public TaskDistributionManager getTaskDistributionManager() {
+      return taskDistributionManager;
     }
 
     @Override

@@ -130,6 +130,7 @@ public class TaskServiceImpl implements TaskService {
   private final ClassificationService classificationService;
   private final TaskMapper taskMapper;
   private final TaskTransferrer taskTransferrer;
+  private final TaskDistributor taskDistributor;
   private final TaskCommentServiceImpl taskCommentService;
   private final ServiceLevelHandler serviceLevelHandler;
   private final AttachmentHandler attachmentHandler;
@@ -171,6 +172,7 @@ public class TaskServiceImpl implements TaskService {
     this.afterRequestChangesManager = kadaiEngine.getAfterRequestChangesManager();
     this.taskEndstatePreprocessorManager = kadaiEngine.getTaskEndstatePreprocessorManager();
     this.taskTransferrer = new TaskTransferrer(kadaiEngine, taskMapper, this);
+    this.taskDistributor = new TaskDistributor(kadaiEngine, this);
     this.taskCommentService =
         new TaskCommentServiceImpl(kadaiEngine, taskCommentMapper, userMapper, taskMapper, this);
     this.serviceLevelHandler =
@@ -828,6 +830,111 @@ public class TaskServiceImpl implements TaskService {
           NotAuthorizedOnWorkbasketException {
     return taskTransferrer.transferWithOwner(
         taskIds, destinationWorkbasketKey, destinationWorkbasketDomain, owner, setTransferFlag);
+  }
+
+  @Override
+  public BulkOperationResults<String, KadaiException> distribute(
+      String sourceWorkbasketId,
+      List<String> taskIds,
+      List<String> destinationWorkbasketIds,
+      String distributionStrategyName,
+      Map<String, Object> additionalInformation)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException,
+          InvalidTaskStateException {
+    return taskDistributor.distribute(
+        sourceWorkbasketId,
+        taskIds,
+        destinationWorkbasketIds,
+        distributionStrategyName,
+        additionalInformation);
+  }
+
+  @Override
+  public BulkOperationResults<String, KadaiException> distribute(
+      String sourceWorkbasketId,
+      List<String> destinationWorkbasketIds,
+      String distributionStrategyName,
+      Map<String, Object> additionalInformation)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException,
+          InvalidTaskStateException {
+    return taskDistributor.distribute(
+        sourceWorkbasketId,
+        destinationWorkbasketIds,
+        distributionStrategyName,
+        additionalInformation);
+  }
+
+  @Override
+  public BulkOperationResults<String, KadaiException> distribute(String sourceWorkbasketId)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException,
+          InvalidTaskStateException {
+    return taskDistributor.distribute(sourceWorkbasketId);
+  }
+
+  @Override
+  public BulkOperationResults<String, KadaiException> distribute(
+      String sourceWorkbasketId, List<String> taskIds)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException,
+          InvalidTaskStateException {
+    return taskDistributor.distribute(sourceWorkbasketId, taskIds);
+  }
+
+  @Override
+  public BulkOperationResults<String, KadaiException> distributeWithStrategy(
+      String sourceWorkbasketId,
+      String distributionStrategyName,
+      Map<String, Object> additionalInformation)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException, TaskNotFoundException {
+    return taskDistributor.distributeWithStrategy(
+        sourceWorkbasketId, distributionStrategyName, additionalInformation);
+  }
+
+  @Override
+  public BulkOperationResults<String, KadaiException> distributeWithStrategy(
+      String sourceWorkbasketId,
+      List<String> taskIds,
+      String distributionStrategyName,
+      Map<String, Object> additionalInformation)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException, TaskNotFoundException {
+    return taskDistributor.distributeWithStrategy(
+        sourceWorkbasketId, taskIds, distributionStrategyName, additionalInformation);
+  }
+
+  @Override
+  public BulkOperationResults<String, KadaiException> distributeWithDestinations(
+      String sourceWorkbasketId, List<String> destinationWorkbasketIds)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException {
+    return taskDistributor.distributeWithDestinations(sourceWorkbasketId, destinationWorkbasketIds);
+  }
+
+  @Override
+  public BulkOperationResults<String, KadaiException> distributeWithDestinations(
+      String sourceWorkbasketId, List<String> taskIds, List<String> destinationWorkbasketIds)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException {
+    return taskDistributor.distributeWithDestinations(
+        sourceWorkbasketId, taskIds, destinationWorkbasketIds);
   }
 
   @Override
