@@ -111,6 +111,7 @@ CREATE TABLE TASK
     POR_VALUE                  VARCHAR(128) NOT NULL,
     IS_READ                    BOOLEAN      NOT NULL,
     IS_TRANSFERRED             BOOLEAN      NOT NULL,
+    IS_REOPENED                BOOLEAN      NOT NULL,
     CALLBACK_INFO              TEXT NULL,
     CALLBACK_STATE             VARCHAR(30) NULL,
     CUSTOM_ATTRIBUTES          TEXT NULL,

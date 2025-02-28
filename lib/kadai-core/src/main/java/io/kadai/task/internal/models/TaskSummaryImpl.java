@@ -67,6 +67,7 @@ public class TaskSummaryImpl implements TaskSummary {
   protected ObjectReference primaryObjRef;
   protected boolean isRead;
   protected boolean isTransferred;
+  protected boolean isReopened;
   // All objects have to be serializable
   protected List<AttachmentSummary> attachmentSummaries = new ArrayList<>();
   protected List<ObjectReference> secondaryObjectReferences = new ArrayList<>();
@@ -122,6 +123,7 @@ public class TaskSummaryImpl implements TaskSummary {
     primaryObjRef = copyFrom.primaryObjRef;
     isRead = copyFrom.isRead;
     isTransferred = copyFrom.isTransferred;
+    isReopened = copyFrom.isReopened;
     attachmentSummaries = new ArrayList<>(copyFrom.attachmentSummaries);
     secondaryObjectReferences =
         copyFrom.secondaryObjectReferences.stream()
@@ -433,6 +435,15 @@ public class TaskSummaryImpl implements TaskSummary {
 
   public void setTransferred(boolean isTransferred) {
     this.isTransferred = isTransferred;
+  }
+
+  @Override
+  public boolean isReopened() {
+    return isReopened;
+  }
+
+  public void setReopened(boolean reopened) {
+    isReopened = reopened;
   }
 
   @Deprecated
@@ -840,6 +851,7 @@ public class TaskSummaryImpl implements TaskSummary {
         primaryObjRef,
         isRead,
         isTransferred,
+        isReopened,
         groupByCount,
         attachmentSummaries,
         secondaryObjectReferences,
@@ -885,6 +897,7 @@ public class TaskSummaryImpl implements TaskSummary {
         && manualPriority == other.manualPriority
         && isRead == other.isRead
         && isTransferred == other.isTransferred
+        && isReopened == other.isReopened
         && numberOfComments == other.numberOfComments
         && Objects.equals(id, other.id)
         && Objects.equals(externalId, other.externalId)
@@ -990,6 +1003,8 @@ public class TaskSummaryImpl implements TaskSummary {
         + isRead
         + ", isTransferred="
         + isTransferred
+        + ", isReopened="
+        + isReopened
         + ", groupByCount="
         + groupByCount
         + ", attachmentSummaries="
