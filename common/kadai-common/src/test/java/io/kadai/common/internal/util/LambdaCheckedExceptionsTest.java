@@ -42,7 +42,7 @@ public class LambdaCheckedExceptionsTest {
 
       final ThrowingCallable call =
           () ->
-              CheckedConsumer.wrap(
+              CheckedConsumer.rethrowing(
                       o -> {
                         throw expected;
                       })
@@ -71,7 +71,7 @@ public class LambdaCheckedExceptionsTest {
 
       final ThrowingCallable call =
           () ->
-              CheckedConsumer.wrap(
+              CheckedConsumer.rethrowing(
                       o -> {
                         throw expected;
                       })
@@ -82,7 +82,7 @@ public class LambdaCheckedExceptionsTest {
 
     @Test
     void should_NotThrowException_WhenConsumerThrowsNoException() {
-      final ThrowingCallable call = () -> CheckedConsumer.wrap(o -> {}).accept(new Object());
+      final ThrowingCallable call = () -> CheckedConsumer.rethrowing(o -> {}).accept(new Object());
 
       assertThatNoException().isThrownBy(call);
     }
@@ -109,7 +109,7 @@ public class LambdaCheckedExceptionsTest {
 
       final ThrowingCallable call =
           () ->
-              CheckedFunction.wrap(
+              CheckedFunction.rethrowing(
                       o -> {
                         throw expected;
                       })
@@ -138,7 +138,7 @@ public class LambdaCheckedExceptionsTest {
 
       final ThrowingCallable call =
           () ->
-              CheckedFunction.wrap(
+              CheckedFunction.rethrowing(
                       o -> {
                         throw expected;
                       })
@@ -149,7 +149,7 @@ public class LambdaCheckedExceptionsTest {
 
     @Test
     void should_NotThrowException_WhenFunctionThrowsNoException() {
-      final ThrowingCallable call = () -> CheckedFunction.wrap(o -> o).apply(new Object());
+      final ThrowingCallable call = () -> CheckedFunction.rethrowing(o -> o).apply(new Object());
 
       assertThatNoException().isThrownBy(call);
     }
@@ -176,7 +176,7 @@ public class LambdaCheckedExceptionsTest {
 
       final ThrowingCallable call =
           () ->
-              CheckedRunnable.wrap(
+              CheckedRunnable.rethrowing(
                       () -> {
                         throw expected;
                       })
@@ -205,7 +205,7 @@ public class LambdaCheckedExceptionsTest {
 
       final ThrowingCallable call =
           () ->
-              CheckedRunnable.wrap(
+              CheckedRunnable.rethrowing(
                       () -> {
                         throw expected;
                       })
@@ -216,7 +216,7 @@ public class LambdaCheckedExceptionsTest {
 
     @Test
     void should_NotThrowException_WhenRunnableThrowsNoException() {
-      final ThrowingCallable call = () -> CheckedRunnable.wrap(Object::new).run();
+      final ThrowingCallable call = () -> CheckedRunnable.rethrowing(Object::new).run();
 
       assertThatNoException().isThrownBy(call);
     }
@@ -243,7 +243,7 @@ public class LambdaCheckedExceptionsTest {
 
       final ThrowingCallable call =
           () ->
-              CheckedSupplier.wrap(
+              CheckedSupplier.rethrowing(
                       () -> {
                         throw expected;
                       })
@@ -272,7 +272,7 @@ public class LambdaCheckedExceptionsTest {
 
       final ThrowingCallable call =
           () ->
-              CheckedSupplier.wrap(
+              CheckedSupplier.rethrowing(
                       () -> {
                         throw expected;
                       })
@@ -283,7 +283,7 @@ public class LambdaCheckedExceptionsTest {
 
     @Test
     void should_NotThrowException_WhenSupplierThrowsNoException() {
-      final ThrowingCallable call = () -> CheckedSupplier.wrap(Object::new).get();
+      final ThrowingCallable call = () -> CheckedSupplier.rethrowing(Object::new).get();
 
       assertThatNoException().isThrownBy(call);
     }
