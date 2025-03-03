@@ -77,7 +77,8 @@ class WorkbasketBuilderTest {
             .buildAndStore(workbasketService, "businessadmin");
 
     Workbasket receivedWorkbasket =
-        kadaiEngine.runAsAdmin(rethrowing(() -> workbasketService.getWorkbasket(workbasket.getId())));
+        kadaiEngine.runAsAdmin(
+            rethrowing(() -> workbasketService.getWorkbasket(workbasket.getId())));
     assertThat(receivedWorkbasket).isEqualTo(workbasket);
   }
 

@@ -83,7 +83,8 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
                 "Using WorkbasketKey and Domain",
                 "TKI:000000000000000000000000000000000004",
                 "WBI:100000000000000000000000000000000001",
-                rethrowing((String taskId) -> taskService.transfer(taskId, "USER-1-1", "DOMAIN_A"))));
+                rethrowing(
+                    (String taskId) -> taskService.transfer(taskId, "USER-1-1", "DOMAIN_A"))));
 
     ThrowingConsumer<Quadruple<String, String, String, Consumer<String>>> test =
         q -> {
