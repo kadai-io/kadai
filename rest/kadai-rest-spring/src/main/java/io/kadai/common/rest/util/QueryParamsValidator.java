@@ -20,8 +20,10 @@ package io.kadai.common.rest.util;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -104,5 +106,28 @@ public class QueryParamsValidator {
             && request.getQueryString().contains(queryParameter + "=");
 
     return hasQueryParameterProhibitedValues || hasQueryParameterEmptyValues;
+  }
+
+  public static boolean isRelaxedQueryFlagTrue(HttpServletRequest request, String queryFlag) {
+    String queryString = request.getQueryString();
+    if (queryString == null || queryString.isEmpty()) {
+      return false;
+    }
+
+    Map<String, String[]> queryParametersMap = request.getParameterMap();
+    if (queryParametersMap.isEmpty()) {
+      return false;
+    }
+
+    String[] arrValues = queryParametersMap.get(queryFlag);
+    List<String> values = arrValues == null ? new ArrayList<>() : Arrays.asList(arrValues);
+
+    if (values.stream().anyMatch(v -> v.equalsIgnoreCase("false"))) {
+      return false;
+    }
+
+    return queryString.contains(queryFlag + "=")
+        || queryString.startsWith(queryFlag)
+        || queryString.contains("&" + queryFlag);
   }
 }
