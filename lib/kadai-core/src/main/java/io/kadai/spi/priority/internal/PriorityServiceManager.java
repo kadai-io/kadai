@@ -18,9 +18,8 @@
 
 package io.kadai.spi.priority.internal;
 
-import static io.kadai.common.internal.util.CheckedFunction.wrap;
-
 import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.internal.util.CheckedFunction;
 import io.kadai.common.internal.util.LogSanitizer;
 import io.kadai.common.internal.util.SpiLoader;
 import io.kadai.spi.priority.api.PriorityServiceProvider;
@@ -67,7 +66,7 @@ public class PriorityServiceManager {
 
     Set<OptionalInt> priorities =
         priorityServiceProviders.stream()
-            .map(wrap(provider -> provider.calculatePriority(task)))
+            .map(CheckedFunction.wrapping(provider -> provider.calculatePriority(task)))
             .filter(OptionalInt::isPresent)
             .collect(Collectors.toSet());
 

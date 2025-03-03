@@ -18,7 +18,6 @@
 
 package io.kadai.common.test.security;
 
-import static io.kadai.common.internal.util.CheckedFunction.wrapExceptFor;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
 
 import io.kadai.common.api.exceptions.SystemException;
@@ -100,7 +99,15 @@ public class JaasExtension implements InvocationInterceptor, TestTemplateInvocat
     subject.getPrincipals().addAll(getPrincipals(withAccessId));
 
     Function<Invocation<T>, T> proceedInvocation =
-        wrapExceptFor(Invocation::proceed, TestAbortedException.class);
+        f -> {
+          try {
+            return f.proceed();
+          } catch (TestAbortedException e) {
+            throw e;
+          } catch (Throwable e) {
+            throw new SystemException("Caught exception", e);
+          }
+        };
     PrivilegedAction<T> performInvocation = () -> proceedInvocation.apply(invocation);
     return Subject.doAs(subject, performInvocation);
   }

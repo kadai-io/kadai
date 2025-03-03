@@ -18,7 +18,7 @@
 
 package acceptance.task.requestchanges;
 
-import static io.kadai.common.internal.util.CheckedSupplier.wrap;
+import static io.kadai.common.internal.util.CheckedSupplier.rethrowing;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestClassification;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestWorkbasket;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
@@ -314,11 +314,10 @@ public class RequestChangesWithBeforeSpiAccTest {
       ThrowingCallable call =
           () ->
               transactionProvider.executeInTransaction(
-                  wrap(() -> taskService.requestChanges(task.getId())));
+                  rethrowing(() -> taskService.requestChanges(task.getId())));
 
       assertThatThrownBy(call)
           .isInstanceOf(SystemException.class)
-          .cause() // unwrap the "wrap" within "call"
           .hasMessage("service provider '%s' threw an exception", ExceptionThrower.class.getName())
           .cause() // unwrap the "wrap" from the service provider manager
           .hasMessage("I AM THE EXCEPTION THROWER (*_*)");

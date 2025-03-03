@@ -76,7 +76,8 @@ public class KadaiInitializationExtension
 
   public static final String STORE_KADAI_ENTITY_MAP = "kadaiEntityMap";
 
-  private static Map<Class<?>, Object> extractEnclosingTestInstances(Object instance) {
+  private static Map<Class<?>, Object> extractEnclosingTestInstances(Object instance)
+      throws IllegalAccessException {
     HashMap<Class<?>, Object> instanceByClass = new HashMap<>();
     while (instance != null) {
       instanceByClass.put(instance.getClass(), instance);

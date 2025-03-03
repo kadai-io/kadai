@@ -18,7 +18,7 @@
 
 package io.kadai.testapi.builder;
 
-import static io.kadai.common.internal.util.CheckedSupplier.wrap;
+import static io.kadai.common.internal.util.CheckedSupplier.rethrowing;
 import static io.kadai.testapi.builder.WorkbasketBuilder.newWorkbasket;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -77,7 +77,7 @@ class WorkbasketBuilderTest {
             .buildAndStore(workbasketService, "businessadmin");
 
     Workbasket receivedWorkbasket =
-        kadaiEngine.runAsAdmin(wrap(() -> workbasketService.getWorkbasket(workbasket.getId())));
+        kadaiEngine.runAsAdmin(rethrowing(() -> workbasketService.getWorkbasket(workbasket.getId())));
     assertThat(receivedWorkbasket).isEqualTo(workbasket);
   }
 
