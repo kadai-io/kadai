@@ -944,6 +944,286 @@ public interface TaskService {
           NotAuthorizedOnWorkbasketException;
 
   /**
+   * Distributes {@linkplain Task} instances from a source {@linkplain Workbasket} to one or more
+   * destination {@linkplain Workbasket}s based on a custom distribution strategy specified by its
+   * name.
+   *
+   * <p>This operation distributes only the specified tasks from the source workbasket. Unlike other
+   * distribution methods that process all tasks in the workbasket by default, this method requires
+   * an explicit list of task IDs to determine which tasks should be distributed.
+   *
+   * @param sourceWorkbasketId The {@linkplain Workbasket#getId() Id} of the source workbasket
+   *     containing the tasks to be distributed.
+   * @param taskIds A list of task IDs to be distributed. All tasks must belong to the source
+   *     workbasket.
+   * @param destinationWorkbasketIds A list of {@linkplain Workbasket#getId() Ids} of the
+   *     destination workbaskets where tasks will be distributed.
+   * @param distributionStrategyName The simple name of the custom distribution strategy class to be
+   *     applied. The strategy must be registered in the SPI and should match the {@code
+   *     getSimpleName()} of the corresponding provider class. If {@code null}, the default strategy
+   *     is applied.
+   * @param additionalInformation A map containing additional context-specific information for the
+   *     distribution strategy. This parameter may be {@code null}.
+   * @return BulkResult with {@linkplain Task#getId() ids} and Error for each failed operation.
+   * @throws InvalidArgumentException If any input data is invalid or incompatible with the
+   *     specified strategy.
+   * @throws WorkbasketNotFoundException If the source or any destination workbasket cannot be
+   *     found.
+   * @throws NotAuthorizedOnWorkbasketException If the user is not authorized to access or modify
+   *     the specified workbaskets.
+   * @throws InvalidTaskStateException If any {@linkplain Task} is in an {@linkplain
+   *     TaskState#END_STATES EndState}.
+   * @throws TaskNotFoundException If any {@linkplain Task} in the list cannot be found.
+   */
+  BulkOperationResults<String, KadaiException> distribute(
+      String sourceWorkbasketId,
+      List<String> taskIds,
+      List<String> destinationWorkbasketIds,
+      String distributionStrategyName,
+      Map<String, Object> additionalInformation)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException,
+          InvalidTaskStateException;
+
+  /**
+   * Distributes {@linkplain Task} instances from a source {@linkplain Workbasket} to one or more
+   * destination {@linkplain Workbasket}s based on a custom distribution strategy. *
+   *
+   * <p>This operation distributes all tasks from the specified source workbasket. It does not *
+   * require an explicit list of task IDs, as all tasks contained in the workbasket will be *
+   * considered by default.
+   *
+   * @param sourceWorkbasketId The {@linkplain Workbasket#getId() Id} of the source workbasket
+   *     containing the tasks to be distributed.
+   * @param destinationWorkbasketIds A list of {@linkplain Workbasket#getId() Ids} of the
+   *     destination workbaskets where tasks will be distributed.
+   * @param distributionStrategyName The simple name of the custom distribution strategy class to be
+   *     applied. The strategy must be registered in the SPI and should match the {@code
+   *     getSimpleName()} of the corresponding provider class. If {@code null}, the default strategy
+   *     is applied.
+   * @param additionalInformation A map containing additional context-specific information for the
+   *     distribution strategy. This parameter may be {@code null}.
+   * @return BulkResult with {@linkplain Task#getId() ids} and Error for each failed operation.
+   * @throws InvalidArgumentException If any input data is invalid or incompatible with the
+   *     specified strategy.
+   * @throws WorkbasketNotFoundException If the source or any destination workbasket cannot be
+   *     found.
+   * @throws NotAuthorizedOnWorkbasketException If the user is not authorized to access or modify
+   *     the specified workbaskets.
+   * @throws InvalidTaskStateException If any {@linkplain Task} is in an {@linkplain
+   *     TaskState#END_STATES EndState}.
+   * @throws TaskNotFoundException If any {@linkplain Task} cannot be found.
+   */
+  BulkOperationResults<String, KadaiException> distribute(
+      String sourceWorkbasketId,
+      List<String> destinationWorkbasketIds,
+      String distributionStrategyName,
+      Map<String, Object> additionalInformation)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException,
+          InvalidTaskStateException;
+
+  /**
+   * Distributes {@linkplain Task} instances from a source {@linkplain Workbasket} using the default
+   * distribution strategy.
+   *
+   * <p>This operation distributes all tasks from the specified source workbasket. It does not *
+   * require an explicit list of task IDs, as all tasks contained in the workbasket will be *
+   * considered by default.
+   *
+   * @param sourceWorkbasketId The {@linkplain Workbasket#getId() Id} of the source workbasket
+   *     containing the tasks to be distributed.
+   * @return BulkResult with {@linkplain Task#getId() ids} and Error for each failed operation.
+   * @throws InvalidArgumentException If the input data is invalid.
+   * @throws WorkbasketNotFoundException If the source or any destination workbasket cannot be
+   *     found.
+   * @throws NotAuthorizedOnWorkbasketException If the user is not authorized to access or modify
+   *     the source workbasket.
+   * @throws InvalidTaskStateException If any {@linkplain Task} is in an {@linkplain
+   *     TaskState#END_STATES EndState}.
+   * @throws TaskNotFoundException If any {@linkplain Task} in the source workbasket cannot be
+   *     found.
+   */
+  BulkOperationResults<String, KadaiException> distribute(String sourceWorkbasketId)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException,
+          InvalidTaskStateException;
+
+  /**
+   * Distributes a list of {@linkplain Task} instances from a source {@linkplain Workbasket} using
+   * the default distribution strategy.
+   *
+   * <p>This operation distributes only the specified tasks from the source workbasket. Unlike other
+   * distribution methods that process all tasks in the workbasket by default, this method requires
+   * an explicit list of task IDs to determine which tasks should be distributed.
+   *
+   * @param sourceWorkbasketId The {@linkplain Workbasket#getId() Id} of the source workbasket
+   *     containing the tasks to be distributed.
+   * @param taskIds A list of task IDs to be distributed.
+   * @return BulkResult with {@linkplain Task#getId() ids} and Error for each failed operation.
+   * @throws InvalidArgumentException If the input data is invalid.
+   * @throws WorkbasketNotFoundException If the source or any destination workbasket cannot be
+   *     found.
+   * @throws NotAuthorizedOnWorkbasketException If the user is not authorized to access or modify
+   *     the source workbasket.
+   * @throws InvalidTaskStateException If any {@linkplain Task} is in an {@linkplain
+   *     TaskState#END_STATES EndState}.
+   * @throws TaskNotFoundException If any {@linkplain Task} in the list cannot be found.
+   */
+  BulkOperationResults<String, KadaiException> distribute(
+      String sourceWorkbasketId, List<String> taskIds)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException,
+          InvalidTaskStateException;
+
+  /**
+   * Distributes {@linkplain Task} instances from a source {@linkplain Workbasket} using a custom
+   * distribution strategy.
+   *
+   * <p>This operation distributes all tasks from the specified source workbasket. It does not
+   * require an explicit list of task IDs, as all tasks contained in the workbasket will be
+   * considered by default.
+   *
+   * @param sourceWorkbasketId The {@linkplain Workbasket#getId() Id} of the source workbasket
+   *     containing the tasks to be distributed.
+   * @param distributionStrategyName The simple name of the custom distribution strategy class to be
+   *     applied. The strategy must be registered in the SPI and should match the {@code
+   *     getSimpleName()} of the corresponding provider class. If {@code null}, the default strategy
+   *     is applied.
+   * @param additionalInformation A map containing additional context-specific information for the
+   *     distribution strategy. This parameter may be {@code null}.
+   * @return BulkResult with {@linkplain Task#getId() ids} and Error for each failed operation.
+   * @throws InvalidArgumentException If the specified strategy is invalid or incompatible with the
+   *     input data.
+   * @throws WorkbasketNotFoundException If the source or any destination workbasket cannot be
+   *     found.
+   * @throws NotAuthorizedOnWorkbasketException If the user is not authorized to access or modify
+   *     the source workbasket.
+   * @throws InvalidTaskStateException If any {@linkplain Task} is in an {@linkplain
+   *     TaskState#END_STATES EndState}.
+   * @throws TaskNotFoundException If any {@linkplain Task} in the source workbasket cannot be
+   *     found.
+   */
+  BulkOperationResults<String, KadaiException> distributeWithStrategy(
+      String sourceWorkbasketId,
+      String distributionStrategyName,
+      Map<String, Object> additionalInformation)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException,
+          InvalidTaskStateException;
+
+  /**
+   * Distributes a list of {@linkplain Task} instances from a source {@linkplain Workbasket} using a
+   * custom distribution strategy.
+   *
+   * <p>This operation distributes only the specified tasks from the source workbasket. Unlike other
+   * distribution methods that process all tasks in the workbasket by default, this method requires
+   * an explicit list of task IDs to determine which tasks should be distributed.
+   *
+   * @param sourceWorkbasketId The {@linkplain Workbasket#getId() Id} of the source workbasket
+   *     containing the tasks to be distributed.
+   * @param taskIds A list of task IDs to be distributed.
+   * @param distributionStrategyName The simple name of the custom distribution strategy class to be
+   *     applied. The strategy must be registered in the SPI and should match the {@code
+   *     getSimpleName()} of the corresponding provider class. If {@code null}, the default strategy
+   *     is applied.
+   * @param additionalInformation A map containing additional context-specific information for the
+   *     distribution strategy. This parameter may be {@code null}.
+   * @return BulkResult with {@linkplain Task#getId() ids} and Error for each failed operation.
+   * @throws InvalidArgumentException If the specified strategy is invalid or incompatible with the
+   *     input data.
+   * @throws WorkbasketNotFoundException If the source or any destination workbasket cannot be
+   *     found.
+   * @throws NotAuthorizedOnWorkbasketException If the user is not authorized to access or modify
+   *     the source workbasket.
+   * @throws InvalidTaskStateException If any {@linkplain Task} is in an {@linkplain
+   *     TaskState#END_STATES EndState}.
+   * @throws TaskNotFoundException If any {@linkplain Task} in the list cannot be found.
+   */
+  BulkOperationResults<String, KadaiException> distributeWithStrategy(
+      String sourceWorkbasketId,
+      List<String> taskIds,
+      String distributionStrategyName,
+      Map<String, Object> additionalInformation)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException,
+          InvalidTaskStateException;
+
+  /**
+   * Distributes {@linkplain Task} instances from a source {@linkplain Workbasket} to specified
+   * destination {@linkplain Workbasket}s using the default strategy.
+   *
+   * <p>This operation distributes all tasks from the specified source workbasket. It does not
+   * require an explicit list of task IDs, as all tasks contained in the workbasket will be
+   * considered by default.
+   *
+   * @param sourceWorkbasketId The {@linkplain Workbasket#getId() Id} of the source workbasket
+   *     containing the tasks to be distributed.
+   * @param destinationWorkbasketIds A list of {@linkplain Workbasket#getId() Ids} of the
+   *     destination workbaskets where tasks will be distributed.
+   * @return BulkResult with {@linkplain Task#getId() ids} and Error for each failed operation.
+   * @throws InvalidArgumentException If the input data is invalid.
+   * @throws WorkbasketNotFoundException If the source or any destination workbasket cannot be
+   *     found.
+   * @throws NotAuthorizedOnWorkbasketException If the user is not authorized to access or modify
+   *     the specified workbaskets.
+   * @throws InvalidTaskStateException If any {@linkplain Task} is in an {@linkplain
+   *     TaskState#END_STATES EndState}.
+   * @throws TaskNotFoundException If any {@linkplain Task} in the source workbasket cannot be
+   *     found.
+   */
+  BulkOperationResults<String, KadaiException> distributeWithDestinations(
+      String sourceWorkbasketId, List<String> destinationWorkbasketIds)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException,
+          InvalidTaskStateException;
+
+  /**
+   * Distributes a list of {@linkplain Task} instances from a source {@linkplain Workbasket} to
+   * specified destination {@linkplain Workbasket}s using the default strategy.
+   *
+   * <p>This operation distributes only the specified tasks from the source workbasket. Unlike other
+   * distribution methods that process all tasks in the workbasket by default, this method requires
+   * an explicit list of task IDs to determine which tasks should be distributed.
+   *
+   * @param sourceWorkbasketId The {@linkplain Workbasket#getId() Id} of the source workbasket
+   *     containing the tasks to be distributed.
+   * @param taskIds A list of task IDs to be distributed.
+   * @param destinationWorkbasketIds A list of {@linkplain Workbasket#getId() Ids} of the
+   *     destination workbaskets where tasks will be distributed.
+   * @return BulkResult with {@linkplain Task#getId() ids} and Error for each failed operation.
+   * @throws InvalidArgumentException If the input data is invalid.
+   * @throws WorkbasketNotFoundException If the source or any destination workbasket cannot be
+   *     found.
+   * @throws NotAuthorizedOnWorkbasketException If the user is not authorized to access or modify
+   *     the specified workbaskets.
+   * @throws InvalidTaskStateException If any {@linkplain Task} is in an {@linkplain
+   *     TaskState#END_STATES EndState}.
+   * @throws TaskNotFoundException If any {@linkplain Task} in the list cannot be found.
+   */
+  BulkOperationResults<String, KadaiException> distributeWithDestinations(
+      String sourceWorkbasketId, List<String> taskIds, List<String> destinationWorkbasketIds)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException,
+          InvalidTaskStateException;
+
+  /**
    * Update a {@linkplain Task}.
    *
    * @param task the {@linkplain Task} to be updated
