@@ -79,12 +79,10 @@ public class UserController implements UserApi {
   public ResponseEntity<UserCollectionRepresentationModel> getUsers(
       HttpServletRequest request, @ParameterObject UserQueryFilterParameter filterParameter)
       throws InvalidArgumentException {
-    if (filterParameter.getCurrentUser() != null
-        && QueryParamsValidator.hasQueryParameterValues(request, "current-user")) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param current-user with values.");
+
+    if (QueryParamsValidator.isRelaxedQueryFlagTrue(request, "current-user")) {
+      filterParameter.addCurrentUserIdIfPresentWithContext(currentUserContext);
     }
-    filterParameter.addCurrentUserIdIfPresentWithContext(currentUserContext);
 
     UserQuery query = userService.createUserQuery();
     filterParameter.apply(query);

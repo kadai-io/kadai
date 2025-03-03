@@ -1,6 +1,6 @@
 package io.kadai.common.rest.util;
 
-import static io.kadai.common.rest.util.QueryParamsValidator.*;
+import static io.kadai.common.rest.util.QueryParamsValidator.isRelaxedQueryFlagTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 

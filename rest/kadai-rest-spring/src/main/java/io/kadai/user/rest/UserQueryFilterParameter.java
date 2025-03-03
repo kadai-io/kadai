@@ -80,8 +80,8 @@ public class UserQueryFilterParameter implements QueryParameter<UserQuery, Void>
    *     org.springdoc.core.annotations.ParameterObject @ParameterObject} is served from.
    */
   public void addCurrentUserIdIfPresentWithContext(CurrentUserContext currentUserContext) {
-    if (currentUser != null) {
-      final String currentUserId = currentUserContext.getUserid();
+    final String currentUserId = currentUserContext.getUserid();
+    if (currentUserId != null) {
       this.userIds = ArrayUtils.add(this.userIds, currentUserId);
     }
   }
