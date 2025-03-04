@@ -20,11 +20,7 @@ package io.kadai.common.rest.util;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -54,80 +50,5 @@ public class QueryParamsValidator {
     if (!providedParams.isEmpty()) {
       throw new IllegalArgumentException("Unknown request parameters found: " + providedParams);
     }
-  }
-
-  public static boolean hasQueryParameterValues(HttpServletRequest request, String queryParameter) {
-
-    Map<String, String[]> queryParametersMap = request.getParameterMap();
-
-    if (queryParametersMap.isEmpty()) {
-      return false;
-    }
-
-    String[] queryParameterValues = queryParametersMap.get(queryParameter);
-
-    if (queryParameterValues == null) {
-      return false;
-    }
-
-    boolean hasQueryParameterNotEmptyValues =
-        Arrays.stream(queryParameterValues).anyMatch(value -> !value.isBlank());
-
-    /* Workaround to manage the case "query-param=".
-    It should be safe enough to use because we have checked all other possibilities before. */
-    boolean hasQueryParameterEmptyValues = request.getQueryString().contains(queryParameter + "=");
-
-    return hasQueryParameterNotEmptyValues || hasQueryParameterEmptyValues;
-  }
-
-  public static boolean hasQueryParameterValuesOrIsNotTrue(
-      HttpServletRequest request, String queryParameter) {
-
-    Map<String, String[]> queryParametersMap = request.getParameterMap();
-
-    if (queryParametersMap.isEmpty()) {
-      return false;
-    }
-
-    String[] queryParameterValues = queryParametersMap.get(queryParameter);
-
-    if (queryParameterValues == null) {
-      return false;
-    }
-
-    boolean hasQueryParameterProhibitedValues =
-        Arrays.stream(queryParameterValues)
-            .anyMatch(value -> !value.isBlank() && !Boolean.parseBoolean(value));
-
-    /* Workaround to manage the case "query-param=".
-    It should be safe enough to use because we have checked all other possibilities before. */
-    boolean hasQueryParameterEmptyValues =
-        Arrays.stream(queryParameterValues).allMatch(String::isBlank)
-            && request.getQueryString().contains(queryParameter + "=");
-
-    return hasQueryParameterProhibitedValues || hasQueryParameterEmptyValues;
-  }
-
-  public static boolean isRelaxedQueryFlagTrue(HttpServletRequest request, String queryFlag) {
-    String queryString = request.getQueryString();
-    if (queryString == null || queryString.isEmpty()) {
-      return false;
-    }
-
-    Map<String, String[]> queryParametersMap = request.getParameterMap();
-    if (queryParametersMap.isEmpty()) {
-      return false;
-    }
-
-    String[] arrValues = queryParametersMap.get(queryFlag);
-    List<String> values = arrValues == null ? new ArrayList<>() : Arrays.asList(arrValues);
-
-    if (values.stream().anyMatch(v -> v.equalsIgnoreCase("false"))) {
-      return false;
-    }
-
-    return queryString.contains(queryFlag + "=")
-        || queryString.startsWith(queryFlag)
-        || queryString.contains("&" + queryFlag);
   }
 }

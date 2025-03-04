@@ -80,9 +80,7 @@ public class UserController implements UserApi {
       HttpServletRequest request, @ParameterObject UserQueryFilterParameter filterParameter)
       throws InvalidArgumentException {
 
-    if (QueryParamsValidator.isRelaxedQueryFlagTrue(request, "current-user")) {
-      filterParameter.addCurrentUserIdIfPresentWithContext(currentUserContext);
-    }
+    filterParameter.addCurrentUserIdIfPresentWithContext(currentUserContext);
 
     UserQuery query = userService.createUserQuery();
     filterParameter.apply(query);

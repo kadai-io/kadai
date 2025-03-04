@@ -32,9 +32,7 @@ import io.kadai.task.api.models.ObjectReference;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.beans.ConstructorProperties;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -792,7 +790,7 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
   // endregion
   // region owner
   @JsonProperty("owner")
-  private String[] ownerIn;
+  private final String[] ownerIn;
 
   @Schema(
       name = "owner-not",
@@ -2678,7 +2676,8 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
         .map(this::wrapElementsInLikeStatement)
         .ifPresent(query::parentBusinessProcessIdNotLike);
 
-    Optional.ofNullable(ownerIn).ifPresent(query::ownerIn);
+    final String[] ownerInWithNull = addNullToOwnerInIfOwnerNullSet();
+    Optional.ofNullable(ownerInWithNull).ifPresent(query::ownerIn);
     Optional.ofNullable(ownerNotIn).ifPresent(query::ownerNotIn);
     Optional.ofNullable(ownerLike)
         .map(this::wrapElementsInLikeStatement)
@@ -3020,7 +3019,11 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
     }
   }
 
-  public void addNullToOwnerIn() {
-    this.ownerIn = this.ownerIn == null ? new String[] {null} : ArrayUtils.add(this.ownerIn, null);
+  private String[] addNullToOwnerInIfOwnerNullSet() {
+    if (ownerNull == null || ownerNull.equalsIgnoreCase("false")) {
+      return ownerIn;
+    }
+
+    return this.ownerIn == null ? new String[] {null} : ArrayUtils.add(this.ownerIn, null);
   }
 }
