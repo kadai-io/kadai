@@ -159,9 +159,8 @@ public class TaskController implements TaskApi {
         QuerySortParameter.class,
         QueryPagingParameter.class);
 
-    if (QueryParamsValidator.hasQueryParameterValuesOrIsNotTrue(request, "owner-is-null")) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param owner-is-null with values.");
+    if (QueryParamsValidator.isRelaxedQueryFlagTrue(request, "owner-is-null")) {
+      filterParameter.addNullToOwnerIn();
     }
 
     TaskQuery query = taskService.createTaskQuery();

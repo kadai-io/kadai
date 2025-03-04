@@ -68,6 +68,8 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -1227,27 +1229,40 @@ class TaskControllerIntTest {
       assertThat((response.getBody()).getContent()).hasSize(expectedSize);
     }
 
-    @TestFactory
-    Stream<DynamicTest> should_ThrowException_When_OwnerIsNullParamNotStrict() {
-      List<Pair<String, String>> list =
-          List.of(
-              Pair.of("When owner-is-null=", "?owner-is-null="),
-              Pair.of("When owner-is-null=owner-is-null", "?owner-is-null=owner-is-null"),
-              Pair.of(
-                  "When owner-is-null=anyValue1,anyValue2", "?owner-is-null=anyValue1,anyValue2"));
-      ThrowingConsumer<Pair<String, String>> testOwnerIsNull =
-          t -> {
-            String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + t.getRight();
-            HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
+    @ParameterizedTest
+    @EmptySource
+    @ValueSource(strings = {"=foo", "=bar", "=baz", "="})
+    void should_TreatOwnerIsNullTrue_For_Value(String value) {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?owner-is-null" + value;
+      HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
 
-            assertThatThrownBy(
-                    () ->
-                        TEMPLATE.exchange(url, HttpMethod.GET, auth, TASK_SUMMARY_PAGE_MODEL_TYPE))
-                .isInstanceOf(HttpStatusCodeException.class)
-                .hasMessageContaining(
-                    "It is prohibited to use the param owner-is-null with values.");
-          };
-      return DynamicTest.stream(list.iterator(), Pair::getLeft, testOwnerIsNull);
+      ResponseEntity<TaskSummaryCollectionRepresentationModel> response =
+          TEMPLATE.exchange(
+              url,
+              HttpMethod.GET,
+              auth,
+              ParameterizedTypeReference.forType(TaskSummaryCollectionRepresentationModel.class));
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getContent()).hasSize(65);
+      assertThat(response.getBody().getContent()).allSatisfy(
+          task -> assertThat(task).extracting("owner").isNull()
+      );
+    }
+
+    @Test
+    void should_IgnoreOwnerIsNullParam_When_ValueIsFalse() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?owner-is-null=false";
+      HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
+
+      ResponseEntity<TaskSummaryCollectionRepresentationModel> response =
+          TEMPLATE.exchange(
+              url,
+              HttpMethod.GET,
+              auth,
+              ParameterizedTypeReference.forType(TaskSummaryCollectionRepresentationModel.class));
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getContent()).hasSize(93);
     }
 
     @Test

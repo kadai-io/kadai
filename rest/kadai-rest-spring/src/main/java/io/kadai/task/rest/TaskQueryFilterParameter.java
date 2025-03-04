@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import org.apache.commons.lang3.ArrayUtils;
 
 public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void> {
 
@@ -791,7 +792,7 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
   // endregion
   // region owner
   @JsonProperty("owner")
-  private final String[] ownerIn;
+  private String[] ownerIn;
 
   @Schema(
       name = "owner-not",
@@ -2677,8 +2678,7 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
         .map(this::wrapElementsInLikeStatement)
         .ifPresent(query::parentBusinessProcessIdNotLike);
 
-    String[] ownerInIncludingNull = addNullToOwnerIn();
-    Optional.ofNullable(ownerInIncludingNull).ifPresent(query::ownerIn);
+    Optional.ofNullable(ownerIn).ifPresent(query::ownerIn);
     Optional.ofNullable(ownerNotIn).ifPresent(query::ownerNotIn);
     Optional.ofNullable(ownerLike)
         .map(this::wrapElementsInLikeStatement)
@@ -3020,15 +3020,7 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
     }
   }
 
-  private String[] addNullToOwnerIn() {
-    if (this.ownerNull == null) {
-      return this.ownerIn;
-    }
-    if (this.ownerIn == null) {
-      return new String[] {null};
-    }
-    List<String> ownerInAsList = new ArrayList<>(Arrays.asList(this.ownerIn));
-    ownerInAsList.add(null);
-    return ownerInAsList.toArray(new String[ownerInAsList.size()]);
+  public void addNullToOwnerIn() {
+    this.ownerIn = this.ownerIn == null ? new String[] {null} : ArrayUtils.add(this.ownerIn, null);
   }
 }
