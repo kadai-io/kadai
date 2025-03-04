@@ -18,15 +18,12 @@
 
 package io.kadai.spi.history.internal;
 
-import io.kadai.common.api.KadaiEngine;
-import io.kadai.common.internal.util.CheckedConsumer;
-import io.kadai.common.internal.util.LogSanitizer;
-import io.kadai.common.internal.util.SpiLoader;
-import io.kadai.spi.history.api.KadaiHistory;
-import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
-import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
-import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
+import io.kadai.spi.history.api.KadaiEventConsumer;
+import io.kadai.spi.history.api.events.KadaiEvent;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,59 +31,22 @@ import org.slf4j.LoggerFactory;
 public final class HistoryEventManager {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(HistoryEventManager.class);
-  private final List<KadaiHistory> kadaiHistories;
 
-  public HistoryEventManager(KadaiEngine kadaiEngine) {
-    kadaiHistories = SpiLoader.load(KadaiHistory.class);
-    for (KadaiHistory history : kadaiHistories) {
-      history.initialize(kadaiEngine);
-      LOGGER.info("Registered history provider: {}", history.getClass().getName());
-    }
-    if (kadaiHistories.isEmpty()) {
-      LOGGER.info("No KadaiHistory provider found. Running without History.");
-    }
-  }
+  private final Map<Class<? extends KadaiEvent>, List<KadaiEventConsumer<? extends KadaiEvent>>>
+      consumers = new HashMap<>();
+
+  public void forward(KadaiEvent event) {}
 
   public boolean isEnabled() {
-    return !kadaiHistories.isEmpty();
+    return consumers.values().stream().allMatch(List::isEmpty);
   }
 
-  public void createEvent(TaskHistoryEvent event) {
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug(
-          "Sending {} to history service providers: {}", event.getClass().getSimpleName(), event);
-    }
-    kadaiHistories.forEach(CheckedConsumer.wrap(historyProvider -> historyProvider.create(event)));
-  }
-
-  public void createEvent(WorkbasketHistoryEvent event) {
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug(
-          "Sending {} to history service providers: {}",
-          event.getClass().getSimpleName(),
-          LogSanitizer.stripLineBreakingChars(event));
-    }
-    kadaiHistories.forEach(CheckedConsumer.wrap(historyProvider -> historyProvider.create(event)));
-  }
-
-  public void createEvent(ClassificationHistoryEvent event) {
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug(
-          "Sending {} to history service providers: {}", event.getClass().getSimpleName(), event);
-    }
-
-    kadaiHistories.forEach(CheckedConsumer.wrap(historyProvider -> historyProvider.create(event)));
-  }
-
-  public void deleteEvents(List<String> taskIds) {
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug(
-          "Sending taskIds to history service providers: {}",
-          taskIds.stream().map(LogSanitizer::stripLineBreakingChars).toList());
-    }
-
-    kadaiHistories.forEach(
-        CheckedConsumer.wrap(
-            historyProvider -> historyProvider.deleteHistoryEventsByTaskIds(taskIds)));
+  @SuppressWarnings("unchecked") // Valid cast per construction of 'consumers'
+  private <T extends KadaiEvent> List<KadaiEventConsumer<T>> getConsumers(Class<T> clazz) {
+    return consumers
+        .getOrDefault(clazz, new ArrayList<>())
+        .stream()
+        .map(consumer -> (KadaiEventConsumer<T>) consumer)
+        .toList();
   }
 }
