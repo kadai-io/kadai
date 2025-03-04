@@ -70,4 +70,9 @@ public class WorkbasketAccessItemBuilder
           NotAuthorizedException {
     return workbasketService.createWorkbasketAccessItem(testWorkbasketAccessItem);
   }
+
+  @Override
+  public WorkbasketAccessItem build() {
+    return testWorkbasketAccessItem.copy();
+  }
 }

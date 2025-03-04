@@ -25,7 +25,7 @@ import io.kadai.task.internal.models.AttachmentImpl;
 import java.time.Instant;
 import java.util.Map;
 
-public class TaskAttachmentBuilder {
+public class TaskAttachmentBuilder implements Builder<Attachment> {
 
   private final AttachmentImpl attachment = new AttachmentImpl();
 
@@ -68,6 +68,7 @@ public class TaskAttachmentBuilder {
     return this;
   }
 
+  @Override
   public Attachment build() {
     AttachmentImpl a = attachment.copy();
     a.setTaskId(attachment.getTaskId());

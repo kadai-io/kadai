@@ -77,4 +77,9 @@ public class TaskCommentBuilder implements EntityBuilder<TaskComment, TaskServic
       testTaskComment.setId(null);
     }
   }
+
+  @Override
+  public TaskComment build() {
+    return testTaskComment.copy();
+  }
 }
