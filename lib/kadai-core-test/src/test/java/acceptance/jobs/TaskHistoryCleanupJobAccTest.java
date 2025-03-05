@@ -24,7 +24,7 @@ import io.kadai.KadaiConfiguration.Builder;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.internal.util.IdGenerator;
 import io.kadai.common.internal.util.Pair;
-import io.kadai.simplehistory.jobs.HistoryCleanupJob;
+import io.kadai.simplehistory.jobs.TaskHistoryCleanupJob;
 import io.kadai.spi.history.api.KadaiHistory;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
@@ -53,7 +53,7 @@ import org.junit.jupiter.api.function.ThrowingConsumer;
     serviceProviderInterface = KadaiHistory.class,
     serviceProviders = SimpleHistoryServiceImpl.class)
 @KadaiIntegrationTest
-class HistoryCleanupJobAccTest {
+class TaskHistoryCleanupJobAccTest {
 
   @KadaiInject KadaiEngine kadaiEngine;
 
@@ -98,7 +98,7 @@ class HistoryCleanupJobAccTest {
             "sameParentId");
     historyService.create(eventToBeCleaned2);
 
-    HistoryCleanupJob job = new HistoryCleanupJob(kadaiEngine, null, null);
+    TaskHistoryCleanupJob job = new TaskHistoryCleanupJob(kadaiEngine, null, null);
     job.run();
 
     assertThat(historyService.createTaskHistoryQuery().count()).isEqualTo(2);
@@ -124,7 +124,7 @@ class HistoryCleanupJobAccTest {
 
   @Nested
   @TestInstance(Lifecycle.PER_CLASS)
-  class SimpleHistoryCleanupJobAllCompletedSameParentBusinessIsTrue
+  class SimpleTaskHistoryCleanupJobAllCompletedSameParentBusinessIsTrue
       implements KadaiConfigurationModifier {
     @KadaiInject KadaiEngine kadaiEngine;
     SimpleHistoryServiceImpl historyService;
@@ -200,7 +200,7 @@ class HistoryCleanupJobAccTest {
               Instant.now().minus(20, ChronoUnit.DAYS),
               "sameParentId");
       historyService.create(eventToBeCleaned6);
-      HistoryCleanupJob job = new HistoryCleanupJob(kadaiEngine, null, null);
+      TaskHistoryCleanupJob job = new TaskHistoryCleanupJob(kadaiEngine, null, null);
       job.run();
 
       assertThat(historyService.createTaskHistoryQuery().count()).isZero();
@@ -238,7 +238,7 @@ class HistoryCleanupJobAccTest {
               "sameParentId");
       historyService.create(eventToBeCleaned3);
 
-      HistoryCleanupJob job = new HistoryCleanupJob(kadaiEngine, null, null);
+      TaskHistoryCleanupJob job = new TaskHistoryCleanupJob(kadaiEngine, null, null);
       job.run();
 
       assertThat(historyService.createTaskHistoryQuery().count()).isEqualTo(3);
@@ -286,7 +286,7 @@ class HistoryCleanupJobAccTest {
               "sameParentId");
       historyService.create(eventToBeCleaned4);
 
-      HistoryCleanupJob job = new HistoryCleanupJob(kadaiEngine, null, null);
+      TaskHistoryCleanupJob job = new TaskHistoryCleanupJob(kadaiEngine, null, null);
       job.run();
 
       assertThat(historyService.createTaskHistoryQuery().count()).isEqualTo(4);
@@ -324,7 +324,7 @@ class HistoryCleanupJobAccTest {
               "toBeIgnored3");
       historyService.create(toBeIgnored3);
 
-      HistoryCleanupJob job = new HistoryCleanupJob(kadaiEngine, null, null);
+      TaskHistoryCleanupJob job = new TaskHistoryCleanupJob(kadaiEngine, null, null);
       job.run();
 
       assertThat(historyService.createTaskHistoryQuery().count()).isEqualTo(3);
@@ -338,7 +338,7 @@ class HistoryCleanupJobAccTest {
       String taskId1 = "taskId1";
       String taskId2 = "taskId2";
 
-      HistoryCleanupJob job = new HistoryCleanupJob(kadaiEngine, null, null);
+      TaskHistoryCleanupJob job = new TaskHistoryCleanupJob(kadaiEngine, null, null);
 
       ThrowingConsumer<String> test =
           parentBusinessId -> {
@@ -377,7 +377,7 @@ class HistoryCleanupJobAccTest {
 
   @Nested
   @TestInstance(Lifecycle.PER_CLASS)
-  class SimpleHistoryCleanupJobAllCompletedSameParentBusinessIsFalse
+  class SimpleTaskHistoryCleanupJobAllCompletedSameParentBusinessIsFalse
       implements KadaiConfigurationModifier {
     @KadaiInject KadaiEngine kadaiEngine;
     SimpleHistoryServiceImpl historyService;
@@ -451,7 +451,7 @@ class HistoryCleanupJobAccTest {
               Instant.now().minus(20, ChronoUnit.DAYS),
               "someParentId3");
       historyService.create(eventToBeCleaned6);
-      HistoryCleanupJob job = new HistoryCleanupJob(kadaiEngine, null, null);
+      TaskHistoryCleanupJob job = new TaskHistoryCleanupJob(kadaiEngine, null, null);
       job.run();
 
       assertThat(historyService.createTaskHistoryQuery().count()).isEqualTo(2);

@@ -33,6 +33,7 @@ import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.jobs.AbstractKadaiJob;
 import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import io.kadai.common.internal.util.CollectionUtil;
+import io.kadai.simplehistory.task.internal.TaskHistoryServiceImpl;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
 import java.time.Duration;
@@ -45,22 +46,22 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HistoryCleanupJob extends AbstractKadaiJob {
+public class TaskHistoryCleanupJob extends AbstractKadaiJob {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(HistoryCleanupJob.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(TaskHistoryCleanupJob.class);
   private final boolean allCompletedSameParentBusiness =
       kadaiEngineImpl.getConfiguration().isSimpleHistoryCleanupJobAllCompletedSameParentBusiness();
   private final Duration minimumAge =
       kadaiEngineImpl.getConfiguration().getSimpleHistoryCleanupJobMinimumAge();
   private final int batchSize =
       kadaiEngineImpl.getConfiguration().getSimpleHistoryCleanupJobBatchSize();
-  private SimpleHistoryServiceImpl simpleHistoryService = null;
+  private TaskHistoryServiceImpl taskHistoryService = null;
 
-  public HistoryCleanupJob(
+  public TaskHistoryCleanupJob(
       KadaiEngine kadaiEngine, KadaiTransactionProvider txProvider, ScheduledJob scheduledJob) {
     super(kadaiEngine, txProvider, scheduledJob, true);
-    simpleHistoryService = new SimpleHistoryServiceImpl();
-    simpleHistoryService.initialize(kadaiEngine);
+    taskHistoryService = new TaskHistoryServiceImpl();
+    taskHistoryService.initialize(kadaiEngine);
   }
 
   public static Duration getLockExpirationPeriod(KadaiConfiguration kadaiConfiguration) {
@@ -73,7 +74,7 @@ public class HistoryCleanupJob extends AbstractKadaiJob {
     LOGGER.info("Running job to delete all history events created before ({})", createdBefore);
     try {
       List<TaskHistoryEvent> historyEventCandidatesToClean =
-          simpleHistoryService
+          taskHistoryService
               .createTaskHistoryQuery()
               .createdWithin(new TimeInterval(null, createdBefore))
               .eventTypeIn(
@@ -104,7 +105,7 @@ public class HistoryCleanupJob extends AbstractKadaiJob {
                   .toArray(String[]::new);
 
           historyEventCandidatesToClean.addAll(
-              simpleHistoryService
+              taskHistoryService
                   .createTaskHistoryQuery()
                   .parentBusinessProcessIdIn(parentBusinessProcessIds)
                   .eventTypeIn(TaskHistoryEventType.CREATED.getName())
@@ -134,7 +135,7 @@ public class HistoryCleanupJob extends AbstractKadaiJob {
 
   @Override
   protected String getType() {
-    return HistoryCleanupJob.class.getName();
+    return TaskHistoryCleanupJob.class.getName();
   }
 
   private List<String> filterSameParentBusinessHistoryEventsQualifiedToClean(
@@ -190,12 +191,12 @@ public class HistoryCleanupJob extends AbstractKadaiJob {
       throws InvalidArgumentException, NotAuthorizedException {
     int deletedTasksCount =
         (int)
-            simpleHistoryService
+            taskHistoryService
                 .createTaskHistoryQuery()
                 .taskIdIn(taskIdsToDeleteHistoryEventsFor.toArray(new String[0]))
                 .count();
 
-    simpleHistoryService.deleteHistoryEventsByTaskIds(taskIdsToDeleteHistoryEventsFor);
+    taskHistoryService.deleteTaskHistoryEventsByTaskIds(taskIdsToDeleteHistoryEventsFor);
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("{} events deleted.", deletedTasksCount);
