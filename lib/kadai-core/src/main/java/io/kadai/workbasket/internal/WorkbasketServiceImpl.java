@@ -19,6 +19,7 @@
 package io.kadai.workbasket.internal;
 
 import static io.kadai.common.api.SharedConstants.MASTER_DOMAIN;
+import static java.util.stream.Collectors.toList;
 
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.BulkOperationResults;
@@ -534,30 +535,28 @@ public class WorkbasketServiceImpl implements WorkbasketService {
       // this is necessary to verify that the requested workbasket exists.
       getWorkbasket(workbasketId);
 
-      List<WorkbasketAccessItemImpl> originalAccessItems = new ArrayList<>();
+      final List<WorkbasketAccessItemImpl> originalAccessItems =
+          kadaiEngine.getEngine().isHistoryEnabled()
+              ? workbasketAccessMapper.findByWorkbasketId(workbasketId)
+              : new ArrayList<>();
 
-      if (eventPublisher.isEnabled()) {
-        originalAccessItems = workbasketAccessMapper.findByWorkbasketId(workbasketId);
-      }
       // delete all current ones
       workbasketAccessMapper.deleteAllAccessItemsForWorkbasketId(workbasketId);
       accessItems.forEach(workbasketAccessMapper::insert);
 
-      if (eventPublisher.isEnabled()) {
-
-        String details =
-            ObjectAttributeChangeDetector.determineChangesInAttributes(
-                originalAccessItems, new ArrayList<>(accessItems));
-
-        Workbasket workbasket = workbasketMapper.findById(workbasketId);
-
-        eventPublisher.createEvent(
-            new WorkbasketAccessItemsUpdatedEvent(
+      eventPublisher.publishing(
+          () -> {
+            String details =
+                ObjectAttributeChangeDetector.determineChangesInAttributes(
+                    originalAccessItems, new ArrayList<>(accessItems));
+            Workbasket workbasket = workbasketMapper.findById(workbasketId);
+            return new WorkbasketAccessItemsUpdatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                 workbasket,
                 kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
-                details));
-      }
+                details);
+          });
+
     } finally {
       kadaiEngine.returnConnection();
     }
@@ -647,11 +646,10 @@ public class WorkbasketServiceImpl implements WorkbasketService {
       // check existence of source workbasket
       WorkbasketImpl sourceWorkbasket = (WorkbasketImpl) getWorkbasket(sourceWorkbasketId);
 
-      List<String> originalTargetWorkbasketIds = new ArrayList<>();
-
-      if (eventPublisher.isEnabled()) {
-        originalTargetWorkbasketIds = distributionTargetMapper.findBySourceId(sourceWorkbasketId);
-      }
+      final List<String> originalTargetWorkbasketIds =
+          kadaiEngine.getEngine().isHistoryEnabled()
+              ? distributionTargetMapper.findBySourceId(sourceWorkbasketId)
+              : new ArrayList<>();
 
       distributionTargetMapper.deleteAllDistributionTargetsBySourceId(sourceWorkbasketId);
 
@@ -672,18 +670,19 @@ public class WorkbasketServiceImpl implements WorkbasketService {
           }
         }
 
-        if (eventPublisher.isEnabled() && !targetWorkbasketIds.isEmpty()) {
+        if (!targetWorkbasketIds.isEmpty()) {
+          eventPublisher.publishing(
+              () -> {
+                String details =
+                    ObjectAttributeChangeDetector.determineChangesInAttributes(
+                        originalTargetWorkbasketIds, targetWorkbasketIds);
 
-          String details =
-              ObjectAttributeChangeDetector.determineChangesInAttributes(
-                  originalTargetWorkbasketIds, targetWorkbasketIds);
-
-          eventPublisher.createEvent(
-              new WorkbasketDistributionTargetsUpdatedEvent(
-                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
-                  sourceWorkbasket,
-                  kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
-                  details));
+                return new WorkbasketDistributionTargetsUpdatedEvent(
+                    IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
+                    sourceWorkbasket,
+                    kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                    details);
+              });
         }
       }
 
@@ -965,30 +964,32 @@ public class WorkbasketServiceImpl implements WorkbasketService {
         accessId = accessId.toLowerCase();
       }
 
-      List<WorkbasketAccessItemImpl> workbasketAccessItems = new ArrayList<>();
-      if (eventPublisher.isEnabled()) {
-        workbasketAccessItems = workbasketAccessMapper.findByAccessId(accessId);
-      }
+      final List<WorkbasketAccessItemImpl> workbasketAccessItems =
+          kadaiEngine.getEngine().isHistoryEnabled()
+              ? workbasketAccessMapper.findByAccessId(accessId)
+              : new ArrayList<>();
+
       workbasketAccessMapper.deleteAccessItemsForAccessId(accessId);
 
-      if (eventPublisher.isEnabled()) {
+      eventPublisher.publishingAll(
+          () ->
+              workbasketAccessItems.stream()
+                  .map(
+                      accessItem -> {
+                        String details =
+                            ObjectAttributeChangeDetector.determineChangesInAttributes(
+                                accessItem, new WorkbasketAccessItemImpl());
+                        Workbasket workbasket =
+                            workbasketMapper.findById(accessItem.getWorkbasketId());
+                        return new WorkbasketAccessItemDeletedEvent(
+                            IdGenerator.generateWithPrefix(
+                                IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
+                            workbasket,
+                            kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                            details);
+                      })
+                  .collect(toList()));
 
-        for (WorkbasketAccessItemImpl workbasketAccessItem : workbasketAccessItems) {
-
-          String details =
-              ObjectAttributeChangeDetector.determineChangesInAttributes(
-                  workbasketAccessItem, new WorkbasketAccessItemImpl());
-
-          Workbasket workbasket = workbasketMapper.findById(workbasketAccessItem.getWorkbasketId());
-
-          eventPublisher.createEvent(
-              new WorkbasketAccessItemDeletedEvent(
-                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
-                  workbasket,
-                  kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
-                  details));
-        }
-      }
     } finally {
       kadaiEngine.returnConnection();
     }
@@ -1169,15 +1170,14 @@ public class WorkbasketServiceImpl implements WorkbasketService {
       WorkbasketImpl workbasket = workbasketMapper.findById(workbasketId);
       workbasket.setMarkedForDeletion(true);
       workbasketMapper.update(workbasket);
-      if (eventPublisher.isEnabled()) {
 
-        eventPublisher.createEvent(
-            new WorkbasketMarkedForDeletionEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
-                workbasket,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
-                null));
-      }
+      eventPublisher.publishing(
+          () ->
+              new WorkbasketMarkedForDeletionEvent(
+                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
+                  workbasket,
+                  kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                  null));
     } finally {
       kadaiEngine.returnConnection();
     }
