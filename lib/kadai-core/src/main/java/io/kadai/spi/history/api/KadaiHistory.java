@@ -18,7 +18,7 @@
 
 package io.kadai.spi.history.api;
 
-import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.api.KadaiInitializable;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
@@ -27,14 +27,7 @@ import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import java.util.List;
 
 /** Interface for KADAI History Service Provider. */
-public interface KadaiHistory {
-
-  /**
-   * Initialize KadaiHistory service.
-   *
-   * @param kadaiEngine {@linkplain KadaiEngine} The Kadai engine for needed initialization.
-   */
-  void initialize(KadaiEngine kadaiEngine);
+public interface KadaiHistory extends KadaiInitializable {
 
   /**
    * Create a new {@linkplain TaskHistoryEvent}.
