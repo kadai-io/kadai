@@ -16,15 +16,15 @@
  *
  */
 
-package io.kadai.simplehistory.impl;
+package io.kadai.simplehistory.task.internal;
 
 import static io.kadai.common.api.BaseQuery.toLowerCopy;
 
 import io.kadai.common.api.TimeInterval;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.InternalKadaiEngine;
-import io.kadai.simplehistory.impl.task.TaskHistoryQuery;
-import io.kadai.simplehistory.impl.task.TaskHistoryQueryColumnName;
+import io.kadai.simplehistory.task.api.TaskHistoryQuery;
+import io.kadai.simplehistory.task.api.TaskHistoryQueryColumnName;
 import io.kadai.spi.history.api.events.task.TaskHistoryCustomField;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import java.util.ArrayList;

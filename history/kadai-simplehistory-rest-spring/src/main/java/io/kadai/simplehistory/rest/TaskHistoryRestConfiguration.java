@@ -18,7 +18,7 @@
 
 package io.kadai.simplehistory.rest;
 
-import io.kadai.simplehistory.impl.SimpleHistoryServiceImpl;
+import io.kadai.simplehistory.SimpleHistoryServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

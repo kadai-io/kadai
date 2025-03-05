@@ -16,7 +16,7 @@
  *
  */
 
-package io.kadai.simplehistory.impl.jobs;
+package io.kadai.simplehistory.jobs;
 
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.groupingBy;
@@ -33,7 +33,7 @@ import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.jobs.AbstractKadaiJob;
 import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import io.kadai.common.internal.util.CollectionUtil;
-import io.kadai.simplehistory.impl.SimpleHistoryServiceImpl;
+import io.kadai.simplehistory.SimpleHistoryServiceImpl;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
 import java.time.Duration;

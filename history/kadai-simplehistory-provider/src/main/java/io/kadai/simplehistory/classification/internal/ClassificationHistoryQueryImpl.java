@@ -16,7 +16,7 @@
  *
  */
 
-package io.kadai.simplehistory.impl;
+package io.kadai.simplehistory.classification.internal;
 
 import static io.kadai.common.api.BaseQuery.toLowerCopy;
 
@@ -25,8 +25,8 @@ import io.kadai.common.api.TimeInterval;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.InternalKadaiEngine;
-import io.kadai.simplehistory.impl.classification.ClassificationHistoryQuery;
-import io.kadai.simplehistory.impl.classification.ClassificationHistoryQueryColumnName;
+import io.kadai.simplehistory.classification.api.ClassificationHistoryQuery;
+import io.kadai.simplehistory.classification.api.ClassificationHistoryQueryColumnName;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
 import java.util.ArrayList;
 import java.util.List;

@@ -16,41 +16,34 @@
  *
  */
 
-package io.kadai.simplehistory.impl.task;
+package io.kadai.simplehistory.workbasket.api;
 
 import io.kadai.common.api.QueryColumnName;
+import io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryQueryMapper;
 
-/** Enum containing the column names for {@link TaskHistoryQueryMapper#queryHistoryColumnValues}. */
-public enum TaskHistoryQueryColumnName implements QueryColumnName {
+/** Enum containing the column names for {@link WorkbasketHistoryQueryMapper}. */
+public enum WorkbasketHistoryQueryColumnName implements QueryColumnName {
   ID("id"),
-  BUSINESS_PROCESS_ID("business_process_id"),
-  PARENT_BUSINESS_PROCESS_ID("parent_business_process_id"),
-  TASK_ID("task_id"),
+  WORKBASKET_ID("workbasket_id"),
   EVENT_TYPE("event_type"),
   CREATED("created"),
-  USER_ID("t.user_id"),
-  USER_LONG_NAME("u.long_name"),
+  USER_ID("user_id"),
   DOMAIN("domain"),
-  WORKBASKET_KEY("workbasket_key"),
-  POR_COMPANY("por_company"),
-  POR_SYSTEM("por_system"),
-  POR_INSTANCE("por_instance"),
-  POR_TYPE("por_type"),
-  POR_VALUE("por_value"),
-  TASK_OWNER_LONG_NAME("o.long_name"),
-  TASK_CLASSIFICATION_KEY("task_classification_key"),
-  TASK_CLASSIFICATION_CATEGORY("task_classification_category"),
-  ATTACHMENT_CLASSIFICATION_KEY("attachment_classification_key"),
-  OLD_VALUE("old_value"),
-  NEW_VALUE("new_value"),
+  KEY("key"),
+  TYPE("type"),
+  OWNER("owner"),
   CUSTOM_1("custom_1"),
   CUSTOM_2("custom_2"),
   CUSTOM_3("custom_3"),
-  CUSTOM_4("custom_4");
+  CUSTOM_4("custom_4"),
+  ORGLEVEL_1("orgLevel_1"),
+  ORGLEVEL_2("orgLevel_2"),
+  ORGLEVEL_3("orgLevel_3"),
+  ORGLEVEL_4("orgLevel_4");
 
   private String name;
 
-  TaskHistoryQueryColumnName(String name) {
+  WorkbasketHistoryQueryColumnName(String name) {
     this.name = name;
   }
 

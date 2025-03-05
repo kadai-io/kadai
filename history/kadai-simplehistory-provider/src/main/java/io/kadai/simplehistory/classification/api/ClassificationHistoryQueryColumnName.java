@@ -16,9 +16,10 @@
  *
  */
 
-package io.kadai.simplehistory.impl.classification;
+package io.kadai.simplehistory.classification.api;
 
 import io.kadai.common.api.QueryColumnName;
+import io.kadai.simplehistory.classification.internal.ClassificationHistoryQueryMapper;
 
 /** Enum containing the column names for {@link ClassificationHistoryQueryMapper}. */
 public enum ClassificationHistoryQueryColumnName implements QueryColumnName {

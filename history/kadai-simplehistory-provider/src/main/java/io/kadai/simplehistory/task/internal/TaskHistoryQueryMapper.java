@@ -16,9 +16,8 @@
  *
  */
 
-package io.kadai.simplehistory.impl.task;
+package io.kadai.simplehistory.task.internal;
 
-import io.kadai.simplehistory.impl.TaskHistoryQueryImpl;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import java.util.List;
 import org.apache.ibatis.annotations.Result;

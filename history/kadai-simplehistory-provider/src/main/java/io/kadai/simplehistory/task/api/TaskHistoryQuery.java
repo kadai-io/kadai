@@ -16,7 +16,7 @@
  *
  */
 
-package io.kadai.simplehistory.impl.task;
+package io.kadai.simplehistory.task.api;
 
 import io.kadai.common.api.BaseQuery;
 import io.kadai.common.api.TimeInterval;

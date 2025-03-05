@@ -16,7 +16,7 @@
  *
  */
 
-package io.kadai.simplehistory.impl.classification;
+package io.kadai.simplehistory.classification.api;
 
 import io.kadai.classification.api.ClassificationCustomField;
 import io.kadai.common.api.BaseQuery;

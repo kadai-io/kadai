@@ -16,7 +16,7 @@
  *
  */
 
-package io.kadai.simplehistory.impl;
+package io.kadai.simplehistory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 import io.kadai.common.api.TimeInterval;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.util.IdGenerator;
+import io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryQueryImpl;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEventType;
 import java.time.Instant;

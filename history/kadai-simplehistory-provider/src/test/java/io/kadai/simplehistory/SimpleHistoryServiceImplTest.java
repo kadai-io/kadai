@@ -16,7 +16,7 @@
  *
  */
 
-package io.kadai.simplehistory.impl;
+package io.kadai.simplehistory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,10 +28,10 @@ import acceptance.AbstractAccTest;
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.internal.InternalKadaiEngine;
-import io.kadai.simplehistory.impl.task.TaskHistoryEventMapper;
-import io.kadai.simplehistory.impl.task.TaskHistoryQueryMapper;
-import io.kadai.simplehistory.impl.workbasket.WorkbasketHistoryEventMapper;
-import io.kadai.simplehistory.impl.workbasket.WorkbasketHistoryQueryMapper;
+import io.kadai.simplehistory.task.internal.TaskHistoryEventMapper;
+import io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper;
+import io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryEventMapper;
+import io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryQueryMapper;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEventType;

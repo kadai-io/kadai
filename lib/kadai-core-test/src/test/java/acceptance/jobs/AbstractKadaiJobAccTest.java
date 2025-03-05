@@ -32,7 +32,7 @@ import io.kadai.common.internal.jobs.AbstractKadaiJob;
 import io.kadai.common.internal.jobs.JobRunner;
 import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import io.kadai.common.internal.util.Pair;
-import io.kadai.simplehistory.impl.jobs.HistoryCleanupJob;
+import io.kadai.simplehistory.jobs.HistoryCleanupJob;
 import io.kadai.task.internal.jobs.TaskCleanupJob;
 import io.kadai.task.internal.jobs.TaskRefreshJob;
 import io.kadai.testapi.KadaiConfigurationModifier;

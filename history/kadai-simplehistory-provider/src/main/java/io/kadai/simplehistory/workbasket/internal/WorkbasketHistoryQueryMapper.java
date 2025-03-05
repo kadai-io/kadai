@@ -16,9 +16,8 @@
  *
  */
 
-package io.kadai.simplehistory.impl.workbasket;
+package io.kadai.simplehistory.workbasket.internal;
 
-import io.kadai.simplehistory.impl.WorkbasketHistoryQueryImpl;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import java.util.List;
 import org.apache.ibatis.annotations.Result;

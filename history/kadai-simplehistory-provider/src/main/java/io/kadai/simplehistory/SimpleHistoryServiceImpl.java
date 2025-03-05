@@ -16,7 +16,7 @@
  *
  */
 
-package io.kadai.simplehistory.impl;
+package io.kadai.simplehistory;
 
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiRole;
@@ -25,15 +25,18 @@ import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.KadaiEngineImpl;
-import io.kadai.simplehistory.impl.classification.ClassificationHistoryEventMapper;
-import io.kadai.simplehistory.impl.classification.ClassificationHistoryQuery;
-import io.kadai.simplehistory.impl.classification.ClassificationHistoryQueryMapper;
-import io.kadai.simplehistory.impl.task.TaskHistoryEventMapper;
-import io.kadai.simplehistory.impl.task.TaskHistoryQuery;
-import io.kadai.simplehistory.impl.task.TaskHistoryQueryMapper;
-import io.kadai.simplehistory.impl.workbasket.WorkbasketHistoryEventMapper;
-import io.kadai.simplehistory.impl.workbasket.WorkbasketHistoryQuery;
-import io.kadai.simplehistory.impl.workbasket.WorkbasketHistoryQueryMapper;
+import io.kadai.simplehistory.classification.internal.ClassificationHistoryEventMapper;
+import io.kadai.simplehistory.classification.api.ClassificationHistoryQuery;
+import io.kadai.simplehistory.classification.internal.ClassificationHistoryQueryImpl;
+import io.kadai.simplehistory.classification.internal.ClassificationHistoryQueryMapper;
+import io.kadai.simplehistory.task.internal.TaskHistoryEventMapper;
+import io.kadai.simplehistory.task.api.TaskHistoryQuery;
+import io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper;
+import io.kadai.simplehistory.task.internal.TaskHistoryQueryImpl;
+import io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryEventMapper;
+import io.kadai.simplehistory.workbasket.api.WorkbasketHistoryQuery;
+import io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryQueryImpl;
+import io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryQueryMapper;
 import io.kadai.spi.history.api.KadaiHistory;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;

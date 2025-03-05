@@ -18,6 +18,8 @@
 
 package io.kadai.spi.history.internal;
 
+import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.internal.util.SpiLoader;
 import io.kadai.spi.history.api.KadaiEventConsumer;
 import io.kadai.spi.history.api.events.KadaiEvent;
 import java.util.ArrayList;
@@ -27,26 +29,41 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Creates and deletes events and emits them to the registered history service providers. */
 public final class HistoryEventManager {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(HistoryEventManager.class);
 
+  private final boolean enabled;
   private final Map<Class<? extends KadaiEvent>, List<KadaiEventConsumer<? extends KadaiEvent>>>
-      consumers = new HashMap<>();
+      consumers;
 
-  public void forward(KadaiEvent event) {}
+  @SuppressWarnings("rawtypes")
+  public HistoryEventManager(KadaiEngine kadaiEngine) {
+    List<KadaiEventConsumer> loadedConsumers = SpiLoader.load(KadaiEventConsumer.class);
+    this.enabled = !loadedConsumers.isEmpty();
+    loadedConsumers.forEach(consumer -> consumer.initialize(kadaiEngine));
 
-  public boolean isEnabled() {
-    return consumers.values().stream().allMatch(List::isEmpty);
+    // TODO: Construct map
+    //  Achtung mit SimplePublisher - dort bspw. T = TaskHistoryEvent, obwohl Aufruf mit spezifischerem
+    //  Dann finden wir hier mglw. nicht alle Consumer
+    this.consumers = new HashMap<>();
   }
 
-  @SuppressWarnings("unchecked") // Valid cast per construction of 'consumers'
+  @SuppressWarnings("unchecked") // Safe cast by definition of 'Object::getClass'
+  public <T extends KadaiEvent> void forward(T event) {
+    getConsumers((Class<T>) event.getClass()).forEach(consumer -> consumer.consume(event));
+  }
+
+  @SuppressWarnings("unchecked") // Safe cast by construction of 'consumers'
   private <T extends KadaiEvent> List<KadaiEventConsumer<T>> getConsumers(Class<T> clazz) {
     return consumers
         .getOrDefault(clazz, new ArrayList<>())
         .stream()
         .map(consumer -> (KadaiEventConsumer<T>) consumer)
         .toList();
+  }
+
+  public boolean isEnabled() {
+    return enabled;
   }
 }

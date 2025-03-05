@@ -16,7 +16,7 @@
  *
  */
 
-package io.kadai.simplehistory.impl.classification;
+package io.kadai.simplehistory.classification.internal;
 
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
 import org.apache.ibatis.annotations.Insert;

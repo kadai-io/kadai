@@ -16,7 +16,7 @@
  *
  */
 
-package io.kadai.simplehistory.impl.workbasket;
+package io.kadai.simplehistory.workbasket.api;
 
 import io.kadai.common.api.BaseQuery;
 import io.kadai.common.api.TimeInterval;

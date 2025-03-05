@@ -16,9 +16,8 @@
  *
  */
 
-package io.kadai.simplehistory.impl.classification;
+package io.kadai.simplehistory.classification.internal;
 
-import io.kadai.simplehistory.impl.ClassificationHistoryQueryImpl;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
 import java.util.List;
 import org.apache.ibatis.annotations.Result;

@@ -1,7 +1,7 @@
 package io.kadai.simplehistory.rest;
 
 import io.kadai.common.rest.QueryPagingParameter;
-import io.kadai.simplehistory.impl.task.TaskHistoryQuery;
+import io.kadai.simplehistory.task.api.TaskHistoryQuery;
 import io.kadai.simplehistory.rest.TaskHistoryEventController.TaskHistoryQuerySortParameter;
 import io.kadai.simplehistory.rest.models.TaskHistoryEventPagedRepresentationModel;
 import io.kadai.simplehistory.rest.models.TaskHistoryEventRepresentationModel;
