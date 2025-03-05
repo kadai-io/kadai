@@ -46,7 +46,12 @@ import java.sql.Connection;
 import java.util.List;
 import javax.sql.DataSource;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.ClassOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestClassOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -94,10 +99,13 @@ class KadaiTransactionIntTest {
 
   @BeforeAll
   static void setUp(@LocalServerPort int port) {
-    restClient = RestClient.builder()
-            .defaultStatusHandler(HttpStatusCode::is5xxServerError, (request, response) -> {
-              System.err.println("Server error occurred: " + response.getStatusCode());
-            })
+    restClient =
+        RestClient.builder()
+            .defaultStatusHandler(
+                HttpStatusCode::is5xxServerError,
+                (request, response) -> {
+                  System.err.println("Server error occurred: " + response.getStatusCode());
+                })
             .build();
     baseUrl = "http://localhost:" + port;
   }
@@ -113,11 +121,7 @@ class KadaiTransactionIntTest {
 
   @Test
   void testKadaiSchema() {
-    String response = restClient
-            .get()
-            .uri(baseUrl + "/schema")
-            .retrieve()
-            .body(String.class);
+    String response = restClient.get().uri(baseUrl + "/schema").retrieve().body(String.class);
     assertThat(response).isEqualTo("KADAI");
   }
 
@@ -125,11 +129,7 @@ class KadaiTransactionIntTest {
   void testTransaction() {
     assertQuantities(0, 0);
 
-    String response = restClient
-            .get()
-            .uri(baseUrl + "/transaction")
-            .retrieve()
-            .body(String.class);
+    String response = restClient.get().uri(baseUrl + "/transaction").retrieve().body(String.class);
     System.err.println("response: " + response);
     assertThat(response).containsSequence("workbaskets: 1");
 
@@ -140,13 +140,16 @@ class KadaiTransactionIntTest {
   void testTransactionRollback() {
     assertQuantities(0, 0);
 
-    String response = restClient
+    String response =
+        restClient
             .get()
             .uri(baseUrl + "/transaction?rollback={rollback}", "true")
             .retrieve()
-            .onStatus(HttpStatusCode::is5xxServerError, (request, resp) -> {
-              System.err.println("Server error occurred: " + resp);
-            })
+            .onStatus(
+                HttpStatusCode::is5xxServerError,
+                (request, resp) -> {
+                  System.err.println("Server error occurred: " + resp);
+                })
             .body(String.class);
 
     System.err.println("result: " + response);
