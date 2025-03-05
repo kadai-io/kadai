@@ -6,7 +6,7 @@ import io.kadai.simplehistory.rest.TaskHistoryEventController.TaskHistoryQuerySo
 import io.kadai.simplehistory.rest.models.TaskHistoryEventPagedRepresentationModel;
 import io.kadai.simplehistory.rest.models.TaskHistoryEventRepresentationModel;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
-import io.kadai.spi.history.api.exceptions.KadaiHistoryEventNotFoundException;
+import io.kadai.spi.history.api.exceptions.TaskHistoryEventNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -64,7 +64,7 @@ public interface TaskHistoryEventApi {
    * @title Get a single Task History Event
    * @param historyEventId the Id of the requested Task History Event.
    * @return the requested Task History Event
-   * @throws KadaiHistoryEventNotFoundException If a Task History Event can't be found by the
+   * @throws TaskHistoryEventNotFoundException If a Task History Event can't be found by the
    *     provided historyEventId
    */
   @Operation(
@@ -90,12 +90,12 @@ public interface TaskHistoryEventApi {
             responseCode = "404",
             description = "HISTORY_EVENT_NOT_FOUND",
             content = {
-              @Content(schema = @Schema(implementation = KadaiHistoryEventNotFoundException.class))
+              @Content(schema = @Schema(implementation = TaskHistoryEventNotFoundException.class))
             }),
       })
   @GetMapping(path = HistoryRestEndpoints.URL_HISTORY_EVENTS_ID)
   @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<TaskHistoryEventRepresentationModel> getTaskHistoryEvent(
       @PathVariable("historyEventId") String historyEventId)
-      throws KadaiHistoryEventNotFoundException;
+      throws TaskHistoryEventNotFoundException;
 }

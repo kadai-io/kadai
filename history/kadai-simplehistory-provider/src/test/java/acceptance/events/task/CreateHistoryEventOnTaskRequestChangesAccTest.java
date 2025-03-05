@@ -23,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import acceptance.AbstractAccTest;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
-import io.kadai.simplehistory.SimpleHistoryServiceImpl;
 import io.kadai.simplehistory.task.internal.TaskHistoryQueryImpl;
 import io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;

@@ -20,21 +20,21 @@ package io.kadai.spi.history.api.exceptions;
 
 import io.kadai.common.api.exceptions.ErrorCode;
 import io.kadai.common.api.exceptions.KadaiException;
-import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
+import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import java.util.Map;
 
 /**
- * This exception is thrown when the {@linkplain TaskHistoryEvent} with the specified {@linkplain
- * TaskHistoryEvent#getId() id} was not found.
+ * This exception is thrown when the {@linkplain WorkbasketHistoryEvent} with the specified {@linkplain
+ * WorkbasketHistoryEvent#getId() id} was not found.
  */
-public class KadaiHistoryEventNotFoundException extends KadaiException {
+public class WorkbasketHistoryEventNotFoundException extends KadaiException {
 
-  public static final String ERROR_KEY = "HISTORY_EVENT_NOT_FOUND";
+  public static final String ERROR_KEY = "WORKBASKET_HISTORY_EVENT_NOT_FOUND";
   private final String historyEventId;
 
-  public KadaiHistoryEventNotFoundException(String historyEventId) {
+  public WorkbasketHistoryEventNotFoundException(String historyEventId) {
     super(
-        String.format("TaskHistoryEvent with id '%s' was not found", historyEventId),
+        String.format("WorkbasketHistoryEvent with id '%s' was not found", historyEventId),
         ErrorCode.of(ERROR_KEY, Map.of("historyEventId", ensureNullIsHandled(historyEventId))));
     this.historyEventId = historyEventId;
   }

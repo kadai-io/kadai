@@ -25,7 +25,6 @@ import acceptance.AbstractAccTest;
 import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.TimeInterval;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
-import io.kadai.simplehistory.SimpleHistoryServiceImpl;
 import io.kadai.simplehistory.workbasket.api.WorkbasketHistoryQuery;
 import io.kadai.simplehistory.workbasket.api.WorkbasketHistoryQueryColumnName;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;

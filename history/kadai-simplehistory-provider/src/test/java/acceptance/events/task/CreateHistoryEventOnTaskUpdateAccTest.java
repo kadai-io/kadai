@@ -24,7 +24,6 @@ import acceptance.AbstractAccTest;
 import io.kadai.common.api.TimeInterval;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
-import io.kadai.simplehistory.SimpleHistoryServiceImpl;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
 import io.kadai.task.api.TaskService;

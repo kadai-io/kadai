@@ -26,7 +26,6 @@ import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.models.Classification;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
-import io.kadai.simplehistory.SimpleHistoryServiceImpl;
 import io.kadai.simplehistory.classification.internal.ClassificationHistoryEventMapper;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEventType;

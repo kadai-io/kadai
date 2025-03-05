@@ -25,7 +25,6 @@ import acceptance.AbstractAccTest;
 import io.kadai.classification.api.ClassificationCustomField;
 import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.TimeInterval;
-import io.kadai.simplehistory.SimpleHistoryServiceImpl;
 import io.kadai.simplehistory.classification.api.ClassificationHistoryQuery;
 import io.kadai.simplehistory.classification.api.ClassificationHistoryQueryColumnName;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;

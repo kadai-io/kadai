@@ -25,14 +25,13 @@ import io.kadai.common.rest.QueryPagingParameter;
 import io.kadai.common.rest.QuerySortBy;
 import io.kadai.common.rest.QuerySortParameter;
 import io.kadai.common.rest.util.QueryParamsValidator;
-import io.kadai.simplehistory.SimpleHistoryServiceImpl;
 import io.kadai.simplehistory.task.api.TaskHistoryQuery;
 import io.kadai.simplehistory.rest.assembler.TaskHistoryEventRepresentationModelAssembler;
 import io.kadai.simplehistory.rest.models.TaskHistoryEventPagedRepresentationModel;
 import io.kadai.simplehistory.rest.models.TaskHistoryEventRepresentationModel;
 import io.kadai.spi.history.api.events.task.TaskHistoryCustomField;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
-import io.kadai.spi.history.api.exceptions.KadaiHistoryEventNotFoundException;
+import io.kadai.spi.history.api.exceptions.TaskHistoryEventNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.beans.ConstructorProperties;
 import java.util.List;
@@ -96,7 +95,7 @@ public class TaskHistoryEventController implements TaskHistoryEventApi {
   @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<TaskHistoryEventRepresentationModel> getTaskHistoryEvent(
       @PathVariable("historyEventId") String historyEventId)
-      throws KadaiHistoryEventNotFoundException {
+      throws TaskHistoryEventNotFoundException {
     TaskHistoryEvent resultEvent = simpleHistoryService.getTaskHistoryEvent(historyEventId);
 
     TaskHistoryEventRepresentationModel taskEventResource = assembler.toModel(resultEvent);

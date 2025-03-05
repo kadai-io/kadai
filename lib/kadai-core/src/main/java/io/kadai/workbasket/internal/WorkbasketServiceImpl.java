@@ -32,6 +32,7 @@ import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.util.IdGenerator;
 import io.kadai.common.internal.util.LogSanitizer;
 import io.kadai.common.internal.util.ObjectAttributeChangeDetector;
+import io.kadai.spi.history.api.KadaiEventPublisher;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketAccessItemCreatedEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketAccessItemDeletedEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketAccessItemUpdatedEvent;
@@ -41,9 +42,11 @@ import io.kadai.spi.history.api.events.workbasket.WorkbasketDeletedEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketDistributionTargetAddedEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketDistributionTargetRemovedEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketDistributionTargetsUpdatedEvent;
+import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketMarkedForDeletionEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketUpdatedEvent;
 import io.kadai.spi.history.internal.HistoryEventManager;
+import io.kadai.spi.history.internal.SimpleKadaiEventPublisherImpl;
 import io.kadai.task.api.TaskState;
 import io.kadai.workbasket.api.WorkbasketAccessItemQuery;
 import io.kadai.workbasket.api.WorkbasketPermission;
@@ -83,7 +86,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
   private final WorkbasketMapper workbasketMapper;
   private final DistributionTargetMapper distributionTargetMapper;
   private final WorkbasketAccessMapper workbasketAccessMapper;
-  private final HistoryEventManager historyEventManager;
+  private final KadaiEventPublisher<WorkbasketHistoryEvent> eventPublisher;
 
   public WorkbasketServiceImpl(
       InternalKadaiEngine kadaiEngine,
@@ -95,7 +98,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
     this.workbasketMapper = workbasketMapper;
     this.distributionTargetMapper = distributionTargetMapper;
     this.workbasketAccessMapper = workbasketAccessMapper;
-    this.historyEventManager = historyEventManager;
+    this.eventPublisher = new SimpleKadaiEventPublisherImpl<>(historyEventManager);
   }
 
   @Override
@@ -176,18 +179,19 @@ public class WorkbasketServiceImpl implements WorkbasketService {
 
       workbasketMapper.insert(workbasket);
 
-      if (historyEventManager.isEnabled()) {
-        String details =
-            ObjectAttributeChangeDetector.determineChangesInAttributes(
-                newWorkbasket("", MASTER_DOMAIN), newWorkbasket);
+      eventPublisher.publishing(
+          () -> {
+            String details =
+                ObjectAttributeChangeDetector.determineChangesInAttributes(
+                    newWorkbasket("", MASTER_DOMAIN), newWorkbasket);
 
-        historyEventManager.createEvent(
-            new WorkbasketCreatedEvent(
+            return new WorkbasketCreatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                 newWorkbasket,
                 kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
-                details));
-      }
+                details);
+          });
+
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Method createWorkbasket() created Workbasket '{}'", workbasket);
       }
@@ -236,18 +240,18 @@ public class WorkbasketServiceImpl implements WorkbasketService {
         workbasketMapper.update(workbasketImplToUpdate);
       }
 
-      if (historyEventManager.isEnabled()) {
-        String details =
-            ObjectAttributeChangeDetector.determineChangesInAttributes(
-                oldWorkbasket, workbasketToUpdate);
+      eventPublisher.publishing(
+          () -> {
+            String details =
+                ObjectAttributeChangeDetector.determineChangesInAttributes(
+                    oldWorkbasket, workbasketToUpdate);
 
-        historyEventManager.createEvent(
-            new WorkbasketUpdatedEvent(
+            return new WorkbasketUpdatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                 workbasketToUpdate,
                 kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
-                details));
-      }
+                details);
+          });
 
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug(
@@ -302,19 +306,19 @@ public class WorkbasketServiceImpl implements WorkbasketService {
       try {
         workbasketAccessMapper.insert(accessItem);
 
-        if (historyEventManager.isEnabled()) {
+        eventPublisher.publishing(
+            () -> {
+              String details =
+                  ObjectAttributeChangeDetector.determineChangesInAttributes(
+                      newWorkbasketAccessItem("", ""), accessItem);
 
-          String details =
-              ObjectAttributeChangeDetector.determineChangesInAttributes(
-                  newWorkbasketAccessItem("", ""), accessItem);
-
-          historyEventManager.createEvent(
-              new WorkbasketAccessItemCreatedEvent(
+              return new WorkbasketAccessItemCreatedEvent(
                   IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                   wb,
                   kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
-                  details));
-        }
+                  details);
+            });
+
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug(
               "Method createWorkbasketAccessItem() created workbaskteAccessItem {}", accessItem);
@@ -363,20 +367,20 @@ public class WorkbasketServiceImpl implements WorkbasketService {
 
       workbasketAccessMapper.update(accessItem);
 
-      if (historyEventManager.isEnabled()) {
+      eventPublisher.publishing(
+          () -> {
+            String details =
+                ObjectAttributeChangeDetector.determineChangesInAttributes(
+                    originalItem, accessItem);
 
-        String details =
-            ObjectAttributeChangeDetector.determineChangesInAttributes(originalItem, accessItem);
+            Workbasket workbasket = workbasketMapper.findById(accessItem.getWorkbasketId());
 
-        Workbasket workbasket = workbasketMapper.findById(accessItem.getWorkbasketId());
-
-        historyEventManager.createEvent(
-            new WorkbasketAccessItemUpdatedEvent(
+            return new WorkbasketAccessItemUpdatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                 workbasket,
                 kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
-                details));
-      }
+                details);
+          });
 
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug(
@@ -394,26 +398,27 @@ public class WorkbasketServiceImpl implements WorkbasketService {
     try {
       kadaiEngine.openConnection();
 
-      WorkbasketAccessItem accessItem = null;
-
-      if (historyEventManager.isEnabled()) {
-        accessItem = workbasketAccessMapper.findById(accessItemId);
-      }
+      final Optional<WorkbasketAccessItem> accessItem =
+          Optional.ofNullable(
+              kadaiEngine.getEngine().isHistoryEnabled()
+                  ? workbasketAccessMapper.findById(accessItemId)
+                  : null);
 
       workbasketAccessMapper.delete(accessItemId);
 
-      if (historyEventManager.isEnabled() && accessItem != null) {
-
-        String details =
-            ObjectAttributeChangeDetector.determineChangesInAttributes(
-                accessItem, newWorkbasketAccessItem("", ""));
-        Workbasket workbasket = workbasketMapper.findById(accessItem.getWorkbasketId());
-        historyEventManager.createEvent(
-            new WorkbasketAccessItemDeletedEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
-                workbasket,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
-                details));
+      if (accessItem.isPresent()) {
+        eventPublisher.publishing(
+            () -> {
+              String details =
+                  ObjectAttributeChangeDetector.determineChangesInAttributes(
+                      accessItem, newWorkbasketAccessItem("", ""));
+              Workbasket workbasket = workbasketMapper.findById(accessItem.get().getWorkbasketId());
+              return new WorkbasketAccessItemDeletedEvent(
+                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
+                  workbasket,
+                  kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                  details);
+            });
       }
 
       if (LOGGER.isDebugEnabled()) {
@@ -531,14 +536,14 @@ public class WorkbasketServiceImpl implements WorkbasketService {
 
       List<WorkbasketAccessItemImpl> originalAccessItems = new ArrayList<>();
 
-      if (historyEventManager.isEnabled()) {
+      if (eventPublisher.isEnabled()) {
         originalAccessItems = workbasketAccessMapper.findByWorkbasketId(workbasketId);
       }
       // delete all current ones
       workbasketAccessMapper.deleteAllAccessItemsForWorkbasketId(workbasketId);
       accessItems.forEach(workbasketAccessMapper::insert);
 
-      if (historyEventManager.isEnabled()) {
+      if (eventPublisher.isEnabled()) {
 
         String details =
             ObjectAttributeChangeDetector.determineChangesInAttributes(
@@ -546,7 +551,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
 
         Workbasket workbasket = workbasketMapper.findById(workbasketId);
 
-        historyEventManager.createEvent(
+        eventPublisher.createEvent(
             new WorkbasketAccessItemsUpdatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                 workbasket,
@@ -644,7 +649,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
 
       List<String> originalTargetWorkbasketIds = new ArrayList<>();
 
-      if (historyEventManager.isEnabled()) {
+      if (eventPublisher.isEnabled()) {
         originalTargetWorkbasketIds = distributionTargetMapper.findBySourceId(sourceWorkbasketId);
       }
 
@@ -667,13 +672,13 @@ public class WorkbasketServiceImpl implements WorkbasketService {
           }
         }
 
-        if (historyEventManager.isEnabled() && !targetWorkbasketIds.isEmpty()) {
+        if (eventPublisher.isEnabled() && !targetWorkbasketIds.isEmpty()) {
 
           String details =
               ObjectAttributeChangeDetector.determineChangesInAttributes(
                   originalTargetWorkbasketIds, targetWorkbasketIds);
 
-          historyEventManager.createEvent(
+          eventPublisher.createEvent(
               new WorkbasketDistributionTargetsUpdatedEvent(
                   IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                   sourceWorkbasket,
@@ -719,18 +724,18 @@ public class WorkbasketServiceImpl implements WorkbasketService {
       } else {
         distributionTargetMapper.insert(sourceWorkbasketId, targetWorkbasketId);
 
-        if (historyEventManager.isEnabled()) {
+        eventPublisher.publishing(
+            () -> {
+              String details =
+                  "{\"changes\":{\"newValue\":\"" + targetWorkbasketId + "\",\"oldValue\":\"\"}}";
 
-          String details =
-              "{\"changes\":{\"newValue\":\"" + targetWorkbasketId + "\",\"oldValue\":\"\"}}";
-
-          historyEventManager.createEvent(
-              new WorkbasketDistributionTargetAddedEvent(
+              return new WorkbasketDistributionTargetAddedEvent(
                   IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                   sourceWorkbasket,
                   kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
-                  details));
-        }
+                  details);
+            });
+
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug(
               "addDistributionTarget inserted distribution target sourceId = {}, targetId = {}",
@@ -762,23 +767,24 @@ public class WorkbasketServiceImpl implements WorkbasketService {
       if (numberOfDistTargets > 0) {
         distributionTargetMapper.delete(sourceWorkbasketId, targetWorkbasketId);
 
-        if (historyEventManager.isEnabled()) {
+        eventPublisher.tryPublishing(
+            () ->
+                Optional.ofNullable(workbasketMapper.findById(sourceWorkbasketId))
+                    .map(
+                        workbasket -> {
+                          String details =
+                              "{\"changes\":{\"newValue\":\"\",\"oldValue\":\""
+                                  + targetWorkbasketId
+                                  + "\"}}";
 
-          Workbasket workbasket = workbasketMapper.findById(sourceWorkbasketId);
+                          return new WorkbasketDistributionTargetRemovedEvent(
+                              IdGenerator.generateWithPrefix(
+                                  IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
+                              workbasket,
+                              kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                              details);
+                        }));
 
-          if (workbasket != null) {
-
-            String details =
-                "{\"changes\":{\"newValue\":\"\",\"oldValue\":\"" + targetWorkbasketId + "\"}}";
-
-            historyEventManager.createEvent(
-                new WorkbasketDistributionTargetRemovedEvent(
-                    IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
-                    workbasket,
-                    kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
-                    details));
-          }
-        }
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug(
               "removeDistributionTarget deleted distribution target sourceId = {}, targetId = {}",
@@ -853,19 +859,19 @@ public class WorkbasketServiceImpl implements WorkbasketService {
         workbasketMapper.delete(workbasketId);
         deleteReferencesToWorkbasket(workbasketId);
 
-        if (historyEventManager.isEnabled()) {
+        eventPublisher.publishing(
+            () -> {
+              String details =
+                  ObjectAttributeChangeDetector.determineChangesInAttributes(
+                      workbasketToDelete, newWorkbasket("", MASTER_DOMAIN));
 
-          String details =
-              ObjectAttributeChangeDetector.determineChangesInAttributes(
-                  workbasketToDelete, newWorkbasket("", MASTER_DOMAIN));
-
-          historyEventManager.createEvent(
-              new WorkbasketDeletedEvent(
+              return new WorkbasketDeletedEvent(
                   IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                   workbasketToDelete,
                   kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
-                  details));
-        }
+                  details);
+            });
+
       } else {
         markWorkbasketForDeletion(workbasketId);
       }
@@ -960,12 +966,12 @@ public class WorkbasketServiceImpl implements WorkbasketService {
       }
 
       List<WorkbasketAccessItemImpl> workbasketAccessItems = new ArrayList<>();
-      if (historyEventManager.isEnabled()) {
+      if (eventPublisher.isEnabled()) {
         workbasketAccessItems = workbasketAccessMapper.findByAccessId(accessId);
       }
       workbasketAccessMapper.deleteAccessItemsForAccessId(accessId);
 
-      if (historyEventManager.isEnabled()) {
+      if (eventPublisher.isEnabled()) {
 
         for (WorkbasketAccessItemImpl workbasketAccessItem : workbasketAccessItems) {
 
@@ -975,7 +981,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
 
           Workbasket workbasket = workbasketMapper.findById(workbasketAccessItem.getWorkbasketId());
 
-          historyEventManager.createEvent(
+          eventPublisher.createEvent(
               new WorkbasketAccessItemDeletedEvent(
                   IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                   workbasket,
@@ -1163,9 +1169,9 @@ public class WorkbasketServiceImpl implements WorkbasketService {
       WorkbasketImpl workbasket = workbasketMapper.findById(workbasketId);
       workbasket.setMarkedForDeletion(true);
       workbasketMapper.update(workbasket);
-      if (historyEventManager.isEnabled()) {
+      if (eventPublisher.isEnabled()) {
 
-        historyEventManager.createEvent(
+        eventPublisher.createEvent(
             new WorkbasketMarkedForDeletionEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                 workbasket,

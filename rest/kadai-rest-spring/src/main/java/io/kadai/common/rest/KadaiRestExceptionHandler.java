@@ -35,7 +35,7 @@ import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.api.exceptions.UnsupportedDatabaseException;
 import io.kadai.common.api.exceptions.WrongCustomHolidayFormatException;
 import io.kadai.common.rest.models.ExceptionRepresentationModel;
-import io.kadai.spi.history.api.exceptions.KadaiHistoryEventNotFoundException;
+import io.kadai.spi.history.api.exceptions.TaskHistoryEventNotFoundException;
 import io.kadai.task.api.exceptions.AttachmentPersistenceException;
 import io.kadai.task.api.exceptions.InvalidCallbackStateException;
 import io.kadai.task.api.exceptions.InvalidOwnerException;
@@ -186,9 +186,9 @@ public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
     return handle(ex.getErrorCode(), ex, req, HttpStatus.NOT_FOUND);
   }
 
-  @ExceptionHandler(KadaiHistoryEventNotFoundException.class)
+  @ExceptionHandler(TaskHistoryEventNotFoundException.class)
   public ResponseEntity<Object> handleKadaiHistoryEventNotFoundException(
-      KadaiHistoryEventNotFoundException ex, WebRequest req) {
+      TaskHistoryEventNotFoundException ex, WebRequest req) {
     return handle(ex.getErrorCode(), ex, req, HttpStatus.NOT_FOUND);
   }
 

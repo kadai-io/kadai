@@ -1,0 +1,3 @@
+io.kadai.simplehistory.task.internal.TaskHistoryServiceImpl
+io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryServiceImpl
+io.kadai.simplehistory.classification.internal.ClassificationHistoryServiceImpl

@@ -26,7 +26,6 @@ import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.common.internal.util.IdGenerator;
 import io.kadai.common.test.config.DataSourceGenerator;
 import io.kadai.sampledata.SampleDataGenerator;
-import io.kadai.simplehistory.SimpleHistoryServiceImpl;
 import io.kadai.simplehistory.classification.internal.ClassificationHistoryEventMapper;
 import io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper;
 import io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryEventMapper;

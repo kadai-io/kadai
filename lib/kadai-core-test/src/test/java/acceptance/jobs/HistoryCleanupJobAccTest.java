@@ -24,7 +24,6 @@ import io.kadai.KadaiConfiguration.Builder;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.internal.util.IdGenerator;
 import io.kadai.common.internal.util.Pair;
-import io.kadai.simplehistory.SimpleHistoryServiceImpl;
 import io.kadai.simplehistory.jobs.HistoryCleanupJob;
 import io.kadai.spi.history.api.KadaiHistory;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
