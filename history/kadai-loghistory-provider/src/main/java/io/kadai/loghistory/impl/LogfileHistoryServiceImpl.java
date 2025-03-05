@@ -23,15 +23,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.exceptions.SystemException;
-import io.kadai.spi.history.api.KadaiHistory;
-import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
-import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
-import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
-import java.util.List;
+import io.kadai.spi.history.api.KadaiEventConsumer;
+import io.kadai.spi.history.api.events.KadaiEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LogfileHistoryServiceImpl implements KadaiHistory {
+public class LogfileHistoryServiceImpl implements KadaiEventConsumer<KadaiEvent> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LogfileHistoryServiceImpl.class);
   private ObjectMapper objectMapper;
@@ -57,8 +54,7 @@ public class LogfileHistoryServiceImpl implements KadaiHistory {
   }
 
   @Override
-  public void create(TaskHistoryEvent event) {
-
+  public void consume(KadaiEvent event) {
     try {
       if (historyLogger.isInfoEnabled()) {
         historyLogger.info(objectMapper.writeValueAsString(event));
@@ -66,34 +62,5 @@ public class LogfileHistoryServiceImpl implements KadaiHistory {
     } catch (JsonProcessingException e) {
       throw new SystemException("Caught exception while serializing history event to JSON ", e);
     }
-  }
-
-  @Override
-  public void create(WorkbasketHistoryEvent event) {
-
-    try {
-      if (historyLogger.isInfoEnabled()) {
-        historyLogger.info(objectMapper.writeValueAsString(event));
-      }
-    } catch (JsonProcessingException e) {
-      throw new SystemException("Caught exception while serializing history event to JSON ", e);
-    }
-  }
-
-  @Override
-  public void create(ClassificationHistoryEvent event) {
-
-    try {
-      if (historyLogger.isInfoEnabled()) {
-        historyLogger.info(objectMapper.writeValueAsString(event));
-      }
-    } catch (JsonProcessingException e) {
-      throw new SystemException("Caught exception while serializing history event to JSON ", e);
-    }
-  }
-
-  @Override
-  public void deleteHistoryEventsByTaskIds(List<String> taskIds) {
-    throw new UnsupportedOperationException("HistoryLogger is not supposed to delete events");
   }
 }
