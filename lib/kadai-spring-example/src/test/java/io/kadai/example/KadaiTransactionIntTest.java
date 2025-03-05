@@ -46,6 +46,7 @@ import java.sql.Connection;
 import java.util.List;
 import javax.sql.DataSource;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.ClassOrderer;
 import org.junit.jupiter.api.Order;
@@ -55,11 +56,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.client.RestClient;
 
 /** Test for internal transaction management. */
 @ExtendWith(SpringExtension.class)
@@ -80,6 +84,9 @@ class KadaiTransactionIntTest {
   @Autowired private JdbcTemplate jdbcTemplate;
   @Autowired private KadaiEngine kadaiEngine;
 
+  private static RestClient restClient;
+  private static String baseUrl;
+
   private static ObjectReference createDefaultObjRef() {
     ObjectReferenceImpl objRef = new ObjectReferenceImpl();
     objRef.setCompany("company");
@@ -88,6 +95,19 @@ class KadaiTransactionIntTest {
     objRef.setType("type");
     objRef.setValue("value");
     return objRef;
+  }
+
+  @BeforeAll
+  static void setUp(@LocalServerPort int port) {
+    restClient =
+        RestClient.builder()
+            .defaultStatusHandler(
+                HttpStatusCode::is5xxServerError,
+                (request, response) -> {
+                  System.err.println("Server error occurred: " + response.getStatusCode());
+                })
+            .build();
+    baseUrl = "http://localhost:" + port;
   }
 
   @BeforeEach
@@ -101,17 +121,17 @@ class KadaiTransactionIntTest {
 
   @Test
   void testKadaiSchema() {
-    ResponseEntity<String> responseEntity = restTemplate.getForEntity("/schema", String.class);
-    assertThat(responseEntity.getBody()).isEqualTo("KADAI");
+    String response = restClient.get().uri(baseUrl + "/schema").retrieve().body(String.class);
+    assertThat(response).isEqualTo("KADAI");
   }
 
   @Test
   void testTransaction() {
     assertQuantities(0, 0);
 
-    ResponseEntity<String> responseEntity = restTemplate.getForEntity("/transaction", String.class);
-    System.err.println("response: " + responseEntity.getBody());
-    assertThat(responseEntity.getBody()).containsSequence("workbaskets: 1");
+    String response = restClient.get().uri(baseUrl + "/transaction").retrieve().body(String.class);
+    System.err.println("response: " + response);
+    assertThat(response).containsSequence("workbaskets: 1");
 
     assertQuantities(1, 0);
   }
@@ -120,11 +140,21 @@ class KadaiTransactionIntTest {
   void testTransactionRollback() {
     assertQuantities(0, 0);
 
-    ResponseEntity<String> responseEntity =
-        restTemplate.getForEntity("/transaction?rollback={rollback}", String.class, "true");
-    System.err.println("result: " + responseEntity.getBody());
-    assertThat(responseEntity.getBody()).containsSequence(INTERNAL_SERVER_ERROR_MESSAGE);
-    assertThat(responseEntity.getBody()).containsSequence(INTERNAL_SERVER_ERROR_STATUS);
+    String response =
+        restClient
+            .get()
+            .uri(baseUrl + "/transaction?rollback={rollback}", "true")
+            .retrieve()
+            .onStatus(
+                HttpStatusCode::is5xxServerError,
+                (request, resp) -> {
+                  System.err.println("Server error occurred: " + resp);
+                })
+            .body(String.class);
+
+    System.err.println("result: " + response);
+    assertThat(response).containsSequence(INTERNAL_SERVER_ERROR_MESSAGE);
+    assertThat(response).containsSequence(INTERNAL_SERVER_ERROR_STATUS);
 
     assertQuantities(0, 0);
   }

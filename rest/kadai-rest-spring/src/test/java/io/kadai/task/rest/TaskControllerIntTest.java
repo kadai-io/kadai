@@ -18,6 +18,7 @@
 
 package io.kadai.task.rest;
 
+import static io.kadai.rest.test.RestHelper.CLIENT;
 import static io.kadai.rest.test.RestHelper.TEMPLATE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -104,11 +105,14 @@ class TaskControllerIntTest {
   @Test
   void should_UpdateTaskOwnerOfReadyForReviewTask() {
     final String url = restHelper.toUrl("/api/v1/tasks/TKI:000000000000000000000000000000000104");
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("user-1-2"));
 
-    // retrieve task from Rest Api
     ResponseEntity<TaskRepresentationModel> responseGet =
-        TEMPLATE.exchange(url, HttpMethod.GET, auth, TASK_MODEL_TYPE);
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
+            .retrieve()
+            .toEntity(TASK_MODEL_TYPE);
 
     assertThat(responseGet.getBody()).isNotNull();
     TaskRepresentationModel theTaskRepresentationModel = responseGet.getBody();
@@ -117,11 +121,15 @@ class TaskControllerIntTest {
 
     // set Owner and update Task
     theTaskRepresentationModel.setOwner("dummyUser");
-    HttpEntity<TaskRepresentationModel> auth2 =
-        new HttpEntity<>(theTaskRepresentationModel, RestHelper.generateHeadersForUser("user-1-2"));
 
     ResponseEntity<TaskRepresentationModel> responseUpdate =
-        TEMPLATE.exchange(url, HttpMethod.PUT, auth2, TASK_MODEL_TYPE);
+        CLIENT
+            .put()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
+            .body(theTaskRepresentationModel)
+            .retrieve()
+            .toEntity(TASK_MODEL_TYPE);
 
     assertThat(responseUpdate.getBody()).isNotNull();
     TaskRepresentationModel theUpdatedTaskRepresentationModel = responseUpdate.getBody();
@@ -193,10 +201,14 @@ class TaskControllerIntTest {
     @Test
     void should_GetAllTasks() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS);
-      HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          TEMPLATE.exchange(url, HttpMethod.GET, auth, TASK_SUMMARY_PAGE_MODEL_TYPE);
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -208,10 +220,14 @@ class TaskControllerIntTest {
       String url =
           restHelper.toUrl(RestEndpoints.URL_TASKS)
               + "?workbasket-id=WBI:100000000000000000000000000000000001";
-      HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          TEMPLATE.exchange(url, HttpMethod.GET, auth, TASK_SUMMARY_PAGE_MODEL_TYPE);
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -233,10 +249,14 @@ class TaskControllerIntTest {
                       + "&planned=&planned=%s"
                       + "&sort-by=PLANNED",
                   firstInstant, secondInstant, thirdInstant, fourthInstant);
-      HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          TEMPLATE.exchange(url, HttpMethod.GET, auth, TASK_SUMMARY_PAGE_MODEL_TYPE);
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
