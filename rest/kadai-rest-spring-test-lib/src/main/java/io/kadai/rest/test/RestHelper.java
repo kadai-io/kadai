@@ -35,6 +35,7 @@ import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -43,6 +44,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class RestHelper {
 
   public static final RestTemplate TEMPLATE = getRestTemplate();
+  public static final RestClient CLIENT = getRestClient();
 
   private Environment environment;
   private int port;
@@ -90,6 +92,28 @@ public class RestHelper {
     // important to add first to ensure priority
     template.getMessageConverters().add(0, converter);
     return template;
+  }
+
+  private static RestClient getRestClient() {
+    ObjectMapper mapper =
+        new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+            .registerModule(new Jackson2HalModule())
+            .registerModule(new ParameterNamesModule())
+            .registerModule(new Jdk8Module())
+            .registerModule(new JavaTimeModule());
+    MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+    converter.setSupportedMediaTypes(Collections.singletonList(MediaTypes.HAL_JSON));
+    converter.setObjectMapper(mapper);
+
+    // Create RestClient with custom message converter
+    return RestClient.builder()
+        .messageConverters(
+            converters -> {
+              converters.add(converter);
+            })
+        .build();
   }
 
   public String toUrl(String relativeUrl, Object... uriVariables) {
