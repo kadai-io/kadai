@@ -18,7 +18,7 @@
 
 package io.kadai.user.internal;
 
-import static io.kadai.common.internal.util.CheckedSupplier.wrap;
+import static io.kadai.common.internal.util.CheckedSupplier.wrapping;
 
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.BaseQuery.SortDirection;
@@ -196,7 +196,7 @@ public class UserServiceImpl implements UserService {
           internalKadaiEngine
               .getEngine()
               .runAsAdmin(
-                  wrap(
+                  wrapping(
                       () ->
                           workbasketService
                               .createWorkbasketQuery()

@@ -33,7 +33,7 @@ import static com.tngtech.archunit.library.GeneralCodingRules.USE_JAVA_UTIL_LOGG
 import static com.tngtech.archunit.library.GeneralCodingRules.USE_JODATIME;
 import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 import static com.tngtech.archunit.library.freeze.FreezingArchRule.freeze;
-import static io.kadai.common.internal.util.CheckedFunction.wrap;
+import static io.kadai.common.internal.util.CheckedFunction.rethrowing;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toCollection;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -223,9 +223,9 @@ class ArchitectureTest {
     };
   }
 
-  private static ArchCondition<JavaClass> notUseCurrentTimestampSqlFunction() {
+  private static ArchCondition<JavaClass> notUseCurrentTimestampSqlFunction() throws Exception {
     Function<JavaMethod, List<String>> getSqlStringsFromMethod =
-        wrap(
+        rethrowing(
             method -> {
               List<String> values = new ArrayList<>();
 
@@ -255,16 +255,16 @@ class ArchitectureTest {
                   AnnotationSupport.findRepeatableAnnotations(
                       method.reflect(), DeleteProvider.class);
               selectProviders.stream()
-                  .map(wrap(a -> executeStaticProviderMethod(a.type(), a.method())))
+                  .map(rethrowing(a -> executeStaticProviderMethod(a.type(), a.method())))
                   .forEach(values::add);
               updateProviders.stream()
-                  .map(wrap(a -> executeStaticProviderMethod(a.type(), a.method())))
+                  .map(rethrowing(a -> executeStaticProviderMethod(a.type(), a.method())))
                   .forEach(values::add);
               insertProviders.stream()
-                  .map(wrap(a -> executeStaticProviderMethod(a.type(), a.method())))
+                  .map(rethrowing(a -> executeStaticProviderMethod(a.type(), a.method())))
                   .forEach(values::add);
               deleteProviders.stream()
-                  .map(wrap(a -> executeStaticProviderMethod(a.type(), a.method())))
+                  .map(rethrowing(a -> executeStaticProviderMethod(a.type(), a.method())))
                   .forEach(values::add);
               return values;
             });
@@ -335,7 +335,7 @@ class ArchitectureTest {
   }
 
   @Test
-  void mapperClassesShouldNotUseCurrentTimestampSqlFunction() {
+  void mapperClassesShouldNotUseCurrentTimestampSqlFunction() throws Exception {
     classes()
         .that()
         .haveSimpleNameEndingWith("Mapper")
