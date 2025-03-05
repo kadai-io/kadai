@@ -24,6 +24,7 @@ import acceptance.AbstractAccTest;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
+import io.kadai.simplehistory.classification.api.ClassificationHistoryService;
 import io.kadai.simplehistory.classification.internal.ClassificationHistoryEventMapper;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEventType;
@@ -34,7 +35,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(JaasExtension.class)
 class CreateHistoryEventOnClassificationDeletionAccTest extends AbstractAccTest {
 
-  private final SimpleHistoryServiceImpl historyService = getHistoryService();
+  private final ClassificationHistoryService historyService =
+      AbstractAccTest.classificationHistoryService;
   private final ClassificationService classificationService =
       kadaiEngine.getClassificationService();
   private final ClassificationHistoryEventMapper classificationHistoryEventMapper =

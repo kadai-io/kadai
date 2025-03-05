@@ -27,6 +27,7 @@ import io.kadai.common.api.TimeInterval;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.simplehistory.workbasket.api.WorkbasketHistoryQuery;
 import io.kadai.simplehistory.workbasket.api.WorkbasketHistoryQueryColumnName;
+import io.kadai.simplehistory.workbasket.api.WorkbasketHistoryService;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEventType;
 import io.kadai.workbasket.api.WorkbasketCustomField;
@@ -38,7 +39,7 @@ import org.junit.jupiter.api.Test;
 
 class QueryWorkbasketHistoryAccTest extends AbstractAccTest {
 
-  private final SimpleHistoryServiceImpl historyService = getHistoryService();
+  private final WorkbasketHistoryService historyService = AbstractAccTest.workbasketHistoryService;
 
   @Test
   void should_ConfirmEquality_When_UsingListValuesAscendingAndDescending() {
@@ -127,8 +128,7 @@ class QueryWorkbasketHistoryAccTest extends AbstractAccTest {
 
   @Test
   void should_ThrowException_When_SingleMethodRetrievesMoreThanOneEventFromDatabase() {
-    WorkbasketHistoryQuery query =
-        getHistoryService().createWorkbasketHistoryQuery().userIdIn("peter");
+    WorkbasketHistoryQuery query = historyService.createWorkbasketHistoryQuery().userIdIn("peter");
 
     assertThatThrownBy(query::single).isInstanceOf(TooManyResultsException.class);
   }

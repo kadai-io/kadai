@@ -27,6 +27,7 @@ import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.TimeInterval;
 import io.kadai.simplehistory.classification.api.ClassificationHistoryQuery;
 import io.kadai.simplehistory.classification.api.ClassificationHistoryQueryColumnName;
+import io.kadai.simplehistory.classification.api.ClassificationHistoryService;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEventType;
 import java.time.Instant;
@@ -38,7 +39,8 @@ import org.junit.jupiter.api.Test;
 /** Test for Classification History queries. */
 class QueryClassificationHistoryAccTest extends AbstractAccTest {
 
-  private final SimpleHistoryServiceImpl historyService = getHistoryService();
+  private final ClassificationHistoryService historyService =
+      AbstractAccTest.classificationHistoryService;
 
   @Test
   void should_ConfirmEquality_When_UsingListValuesAscendingAndDescending() {
@@ -129,8 +131,7 @@ class QueryClassificationHistoryAccTest extends AbstractAccTest {
   @Test
   void should_ThrowException_When_SingleMethodRetrievesMoreThanOneEventFromDatabase() {
 
-    ClassificationHistoryQuery query =
-        getHistoryService().createClassificationHistoryQuery().userIdIn("peter");
+    ClassificationHistoryQuery query = historyService.createClassificationHistoryQuery().userIdIn("peter");
 
     assertThatThrownBy(query::single).isInstanceOf(TooManyResultsException.class);
   }

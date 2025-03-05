@@ -24,6 +24,7 @@ import acceptance.AbstractAccTest;
 import io.kadai.common.internal.util.Pair;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
+import io.kadai.simplehistory.task.api.TaskHistoryService;
 import io.kadai.simplehistory.task.internal.TaskHistoryQueryImpl;
 import io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
@@ -45,7 +46,7 @@ import org.junit.jupiter.api.function.ThrowingConsumer;
 class CreateHistoryEventOnTaskClaimAccTest extends AbstractAccTest {
 
   private final TaskService taskService = kadaiEngine.getTaskService();
-  private final SimpleHistoryServiceImpl historyService = getHistoryService();
+  private final TaskHistoryService historyService = AbstractAccTest.taskHistoryService;
 
   @WithAccessId(user = "admin")
   @TestFactory

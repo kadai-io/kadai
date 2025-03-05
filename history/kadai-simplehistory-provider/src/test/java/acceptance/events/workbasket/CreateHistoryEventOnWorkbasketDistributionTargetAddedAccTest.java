@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import acceptance.AbstractAccTest;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
+import io.kadai.simplehistory.workbasket.api.WorkbasketHistoryService;
 import io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryEventMapper;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEventType;
@@ -35,7 +36,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 class CreateHistoryEventOnWorkbasketDistributionTargetAddedAccTest extends AbstractAccTest {
 
   private final WorkbasketService workbasketService = kadaiEngine.getWorkbasketService();
-  private final SimpleHistoryServiceImpl historyService = getHistoryService();
+  private final WorkbasketHistoryService historyService = AbstractAccTest.workbasketHistoryService;
   private final WorkbasketHistoryEventMapper workbasketHistoryEventMapper =
       getWorkbasketHistoryEventMapper();
 

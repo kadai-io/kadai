@@ -25,6 +25,7 @@ import acceptance.AbstractAccTest;
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
+import io.kadai.simplehistory.task.api.TaskHistoryService;
 import io.kadai.simplehistory.task.internal.TaskHistoryQueryImpl;
 import io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
@@ -38,6 +39,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(JaasExtension.class)
 class DeleteHistoryEventsOnTaskDeletionAccTest extends AbstractAccTest {
+
+  private final TaskHistoryService historyService = AbstractAccTest.taskHistoryService;
 
   @Test
   @WithAccessId(user = "admin")

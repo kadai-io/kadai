@@ -27,8 +27,11 @@ import io.kadai.common.internal.util.IdGenerator;
 import io.kadai.common.test.config.DataSourceGenerator;
 import io.kadai.sampledata.SampleDataGenerator;
 import io.kadai.simplehistory.classification.internal.ClassificationHistoryEventMapper;
+import io.kadai.simplehistory.classification.internal.ClassificationHistoryServiceImpl;
 import io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper;
+import io.kadai.simplehistory.task.internal.TaskHistoryServiceImpl;
 import io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryEventMapper;
+import io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryServiceImpl;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import io.kadai.task.api.TaskService;
@@ -46,7 +49,9 @@ public abstract class AbstractAccTest {
 
   protected static KadaiConfiguration kadaiConfiguration;
   protected static KadaiEngine kadaiEngine;
-  protected static SimpleHistoryServiceImpl historyService;
+  protected static TaskHistoryServiceImpl taskHistoryService;
+  protected static WorkbasketHistoryServiceImpl workbasketHistoryService;
+  protected static ClassificationHistoryServiceImpl classificationHistoryService;
 
   protected static TaskService taskService;
 
@@ -122,12 +127,15 @@ public abstract class AbstractAccTest {
     kadaiEngine =
         KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
     taskService = kadaiEngine.getTaskService();
-    historyService = new SimpleHistoryServiceImpl();
-    historyService.initialize(kadaiEngine);
-  }
 
-  protected static SimpleHistoryServiceImpl getHistoryService() {
-    return historyService;
+    taskHistoryService = new TaskHistoryServiceImpl();
+    taskHistoryService.initialize(kadaiEngine);
+
+    workbasketHistoryService = new WorkbasketHistoryServiceImpl();
+    workbasketHistoryService.initialize(kadaiEngine);
+
+    classificationHistoryService = new ClassificationHistoryServiceImpl();
+    classificationHistoryService.initialize(kadaiEngine);
   }
 
   protected static WorkbasketHistoryEventMapper getWorkbasketHistoryEventMapper() {

@@ -16,7 +16,7 @@
  *
  */
 
-package io.kadai.simplehistory;
+package io.kadai.simplehistory.classification;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;

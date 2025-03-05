@@ -22,12 +22,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import acceptance.AbstractAccTest;
 import io.kadai.KadaiConfiguration;
+import io.kadai.simplehistory.task.api.TaskHistoryService;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
 import java.sql.SQLException;
 import org.junit.jupiter.api.Test;
 
 class GetTaskHistoryEventAccTest extends AbstractAccTest {
+
+  private final TaskHistoryService historyService = AbstractAccTest.taskHistoryService;
 
   @Test
   void should_ReturnSpecificTaskHistoryEventWithDetails_For_HistoryEventId() throws Exception {
@@ -42,7 +45,7 @@ class GetTaskHistoryEventAccTest extends AbstractAccTest {
             + "\"oldValue\":\"owner1\"}]}";
 
     TaskHistoryEvent taskHistoryEvent =
-        getHistoryService().getTaskHistoryEvent("THI:000000000000000000000000000000000000");
+        historyService.getTaskHistoryEvent("THI:000000000000000000000000000000000000");
     assertThat(taskHistoryEvent.getBusinessProcessId()).isEqualTo("BPI:01");
     assertThat(taskHistoryEvent.getUserId()).isEqualTo("user-1-1");
     assertThat(taskHistoryEvent.getEventType()).isEqualTo(TaskHistoryEventType.UPDATED.getName());
@@ -55,7 +58,7 @@ class GetTaskHistoryEventAccTest extends AbstractAccTest {
     createKadaiEngineWithNewConfig(true);
 
     TaskHistoryEvent taskHistoryEvent =
-        getHistoryService().getTaskHistoryEvent("THI:000000000000000000000000000000000000");
+        historyService.getTaskHistoryEvent("THI:000000000000000000000000000000000000");
     assertThat(taskHistoryEvent.getUserId()).isEqualTo("user-1-1");
 
     String userLongName =
@@ -71,7 +74,7 @@ class GetTaskHistoryEventAccTest extends AbstractAccTest {
     createKadaiEngineWithNewConfig(false);
 
     TaskHistoryEvent taskHistoryEvent =
-        getHistoryService().getTaskHistoryEvent("THI:000000000000000000000000000000000000");
+        historyService.getTaskHistoryEvent("THI:000000000000000000000000000000000000");
 
     assertThat(taskHistoryEvent.getUserId()).isEqualTo("user-1-1");
 
