@@ -103,4 +103,9 @@ public class ClassificationHistoryServiceImpl
           "KADAI engine of Session Manager could not be retrieved. Aborting Startup");
     }
   }
+
+  @Override
+  public Class<ClassificationHistoryEvent> reify() {
+    return ClassificationHistoryEvent.class;
+  }
 }

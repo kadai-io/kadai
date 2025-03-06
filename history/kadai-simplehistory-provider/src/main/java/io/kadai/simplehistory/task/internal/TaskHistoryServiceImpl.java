@@ -127,4 +127,9 @@ public class TaskHistoryServiceImpl
           "KADAI engine of Session Manager could not be retrieved. Aborting Startup");
     }
   }
+
+  @Override
+  public Class<TaskHistoryEvent> reify() {
+    return TaskHistoryEvent.class;
+  }
 }

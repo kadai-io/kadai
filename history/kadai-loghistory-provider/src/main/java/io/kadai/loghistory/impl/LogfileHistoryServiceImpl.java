@@ -63,4 +63,9 @@ public class LogfileHistoryServiceImpl implements KadaiEventConsumer<KadaiEvent>
       throw new SystemException("Caught exception while serializing history event to JSON ", e);
     }
   }
+
+  @Override
+  public Class<KadaiEvent> reify() {
+    return KadaiEvent.class;
+  }
 }

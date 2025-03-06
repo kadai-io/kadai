@@ -101,4 +101,9 @@ public class WorkbasketHistoryServiceImpl
           "KADAI engine of Session Manager could not be retrieved. Aborting Startup");
     }
   }
+
+  @Override
+  public Class<WorkbasketHistoryEvent> reify() {
+    return WorkbasketHistoryEvent.class;
+  }
 }
