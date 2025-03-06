@@ -71,13 +71,13 @@ public class ReflectionUtil {
     return c.isPrimitive() ? (Class<T>) PRIMITIVES_TO_WRAPPERS.get(c) : c;
   }
 
-  public static Object getEnclosingInstance(Object instance) {
+  public static Object getEnclosingInstance(Object instance) throws IllegalAccessException {
     return Arrays.stream(instance.getClass().getDeclaredFields())
         .filter(Field::isSynthetic)
         .filter(f -> f.getName().startsWith("this"))
         .findFirst()
         .map(
-            CheckedFunction.wrap(
+            CheckedFunction.rethrowing(
                 field -> {
                   field.setAccessible(true);
                   return field.get(instance);

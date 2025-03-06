@@ -18,7 +18,7 @@
 
 package io.kadai.user.jobs;
 
-import static io.kadai.common.internal.util.CheckedFunction.wrap;
+import static io.kadai.common.internal.util.CheckedFunction.rethrowing;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.kadai.common.api.KadaiEngine;
@@ -161,7 +161,7 @@ class UserInfoRefreshJobIntTest {
       users.add(rs.getString("USER_ID"));
     }
 
-    List<User> userList = users.stream().map(wrap(userService::getUser)).toList();
+    List<User> userList = users.stream().map(rethrowing(userService::getUser)).toList();
     return new ArrayList<>(userList);
   }
 
