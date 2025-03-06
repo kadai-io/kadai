@@ -81,7 +81,7 @@ public class ClassificationServiceImpl implements ClassificationService {
     this.priorityServiceManager = priorityServiceManager;
     this.classificationMapper = classificationMapper;
     this.taskMapper = taskMapper;
-    this.eventPublisher = new SimpleKadaiEventPublisherImpl<>(kadaiEngine.getHistoryEventManager());
+    this.eventPublisher = new SimpleKadaiEventPublisherImpl<>(kadaiEngine.getKadaiEventBroker());
   }
 
   private static void validateServiceLevel(Classification classification)

@@ -46,7 +46,7 @@ import io.kadai.spi.history.api.events.workbasket.WorkbasketDistributionTargetsU
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketMarkedForDeletionEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketUpdatedEvent;
-import io.kadai.spi.history.internal.HistoryEventManager;
+import io.kadai.spi.history.internal.KadaiEventBroker;
 import io.kadai.spi.history.internal.SimpleKadaiEventPublisherImpl;
 import io.kadai.task.api.TaskState;
 import io.kadai.workbasket.api.WorkbasketAccessItemQuery;
@@ -91,7 +91,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
 
   public WorkbasketServiceImpl(
       InternalKadaiEngine kadaiEngine,
-      HistoryEventManager historyEventManager,
+      KadaiEventBroker kadaiEventBroker,
       WorkbasketMapper workbasketMapper,
       DistributionTargetMapper distributionTargetMapper,
       WorkbasketAccessMapper workbasketAccessMapper) {
@@ -99,7 +99,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
     this.workbasketMapper = workbasketMapper;
     this.distributionTargetMapper = distributionTargetMapper;
     this.workbasketAccessMapper = workbasketAccessMapper;
-    this.eventPublisher = new SimpleKadaiEventPublisherImpl<>(historyEventManager);
+    this.eventPublisher = new SimpleKadaiEventPublisherImpl<>(kadaiEventBroker);
   }
 
   @Override

@@ -164,7 +164,7 @@ public class TaskServiceImpl implements TaskService {
     this.objectReferenceMapper = objectReferenceMapper;
     this.userMapper = userMapper;
     this.classificationService = kadaiEngine.getEngine().getClassificationService();
-    this.eventPublisher = new SimpleKadaiEventPublisherImpl<>(kadaiEngine.getHistoryEventManager());
+    this.eventPublisher = new SimpleKadaiEventPublisherImpl<>(kadaiEngine.getKadaiEventBroker());
     this.createTaskPreprocessorManager = kadaiEngine.getCreateTaskPreprocessorManager();
     this.priorityServiceManager = kadaiEngine.getPriorityServiceManager();
     this.reviewRequiredManager = kadaiEngine.getReviewRequiredManager();

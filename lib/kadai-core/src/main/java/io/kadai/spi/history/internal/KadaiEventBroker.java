@@ -29,16 +29,16 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class HistoryEventManager {
+public final class KadaiEventBroker {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(HistoryEventManager.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(KadaiEventBroker.class);
 
   private final boolean enabled;
   private final Map<Class<? extends KadaiEvent>, List<KadaiEventConsumer<? extends KadaiEvent>>>
       consumers;
 
   @SuppressWarnings("rawtypes")
-  public HistoryEventManager(KadaiEngine kadaiEngine) {
+  public KadaiEventBroker(KadaiEngine kadaiEngine) {
     List<KadaiEventConsumer> loadedConsumers = SpiLoader.load(KadaiEventConsumer.class);
     this.enabled = !loadedConsumers.isEmpty();
     loadedConsumers.forEach(consumer -> consumer.initialize(kadaiEngine));

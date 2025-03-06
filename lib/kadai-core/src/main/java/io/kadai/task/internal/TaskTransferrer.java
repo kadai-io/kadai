@@ -28,7 +28,7 @@ import io.kadai.common.internal.util.EnumUtil;
 import io.kadai.common.internal.util.IdGenerator;
 import io.kadai.common.internal.util.ObjectAttributeChangeDetector;
 import io.kadai.spi.history.api.events.task.TaskTransferredEvent;
-import io.kadai.spi.history.internal.HistoryEventManager;
+import io.kadai.spi.history.internal.KadaiEventBroker;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
@@ -60,7 +60,7 @@ final class TaskTransferrer {
   private final WorkbasketService workbasketService;
   private final TaskServiceImpl taskService;
   private final TaskMapper taskMapper;
-  private final HistoryEventManager historyEventManager;
+  private final KadaiEventBroker kadaiEventBroker;
 
   TaskTransferrer(
       InternalKadaiEngine kadaiEngine, TaskMapper taskMapper, TaskServiceImpl taskService) {
@@ -68,7 +68,7 @@ final class TaskTransferrer {
     this.taskService = taskService;
     this.taskMapper = taskMapper;
     this.workbasketService = kadaiEngine.getEngine().getWorkbasketService();
-    this.historyEventManager = kadaiEngine.getHistoryEventManager();
+    this.kadaiEventBroker = kadaiEngine.getHistoryEventManager();
   }
 
   Task transfer(String taskId, String destinationWorkbasketId, boolean setTransferFlag)
@@ -194,7 +194,7 @@ final class TaskTransferrer {
 
       applyTransferValuesForTask(task, destinationWorkbasket, owner, setTransferFlag);
       taskMapper.update(task);
-      if (historyEventManager.isEnabled()) {
+      if (kadaiEventBroker.isEnabled()) {
         createTransferredEvent(
             oldTask, task, originWorkbasket.getId(), destinationWorkbasket.getId());
       }
@@ -343,7 +343,7 @@ final class TaskTransferrer {
                 .collect(Collectors.toSet()),
             updateObject);
 
-        if (historyEventManager.isEnabled()) {
+        if (kadaiEventBroker.isEnabled()) {
           taskSummaries.forEach(
               oldSummary -> {
                 TaskSummaryImpl newSummary = (TaskSummaryImpl) oldSummary.copy();
@@ -380,7 +380,7 @@ final class TaskTransferrer {
       String originWorkbasketId,
       String destinationWorkbasketId) {
     String details = ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, newTask);
-    historyEventManager.createEvent(
+    kadaiEventBroker.createEvent(
         new TaskTransferredEvent(
             IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
             newTask,

@@ -8,34 +8,34 @@ import java.util.function.Supplier;
 
 public class SimpleKadaiEventPublisherImpl<T extends KadaiEvent> implements KadaiEventPublisher<T> {
 
-  private final HistoryEventManager historyEventManager;
+  private final KadaiEventBroker kadaiEventBroker;
 
-  public SimpleKadaiEventPublisherImpl(HistoryEventManager historyEventManager) {
-    this.historyEventManager = historyEventManager;
+  public SimpleKadaiEventPublisherImpl(KadaiEventBroker kadaiEventBroker) {
+    this.kadaiEventBroker = kadaiEventBroker;
   }
 
   @Override
   public void publish(T event) {
-    historyEventManager.forward(event);
+    kadaiEventBroker.forward(event);
   }
 
   @Override
   public void publishing(Supplier<T> supplyEvent) {
-    if (historyEventManager.isEnabled()) {
-      historyEventManager.forward(supplyEvent.get());
+    if (kadaiEventBroker.isEnabled()) {
+      kadaiEventBroker.forward(supplyEvent.get());
     }
   }
 
   @Override
   public void tryPublishing(Supplier<Optional<T>> trySupplyEvent) {
-    if (historyEventManager.isEnabled()) {
+    if (kadaiEventBroker.isEnabled()) {
       trySupplyEvent.get().ifPresent(this::publish);
     }
   }
 
   @Override
   public void publishingAll(Supplier<Collection<T>> supplyEvents) {
-    if (historyEventManager.isEnabled()) {
+    if (kadaiEventBroker.isEnabled()) {
       supplyEvents.get().forEach(this::publish);
     }
   }

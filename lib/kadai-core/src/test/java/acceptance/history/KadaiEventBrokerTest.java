@@ -23,11 +23,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import acceptance.AbstractAccTest;
 import org.junit.jupiter.api.Test;
 
-/** Acceptance test for HistoryEventManager class. */
-class HistoryEventManagerTest extends AbstractAccTest {
+/** Acceptance test for KadaiEventBroker class. */
+class KadaiEventBrokerTest extends AbstractAccTest {
 
   @Test
-  void testHistoryEventManagerIsNotEnabled() {
+  void testKadaiEventBrokerIsNotEnabled() {
     assertThat(kadaiEngine.isHistoryEnabled()).isFalse();
   }
 }
