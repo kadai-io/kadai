@@ -18,12 +18,18 @@
 
 package io.kadai.spi.history.internal;
 
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.internal.util.SpiLoader;
 import io.kadai.spi.history.api.KadaiEventConsumer;
 import io.kadai.spi.history.api.events.KadaiEvent;
+import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -37,16 +43,26 @@ public final class KadaiEventBroker {
   private final Map<Class<? extends KadaiEvent>, List<KadaiEventConsumer<? extends KadaiEvent>>>
       consumers;
 
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings({
+    "rawtypes", // loading generic SPIs is only possible raw
+    "unchecked" // grouping results in a raw Map, unchecked assignment safe for `Reifiable::reify`
+  })
   public KadaiEventBroker(KadaiEngine kadaiEngine) {
-    List<KadaiEventConsumer> loadedConsumers = SpiLoader.load(KadaiEventConsumer.class);
-    this.enabled = !loadedConsumers.isEmpty();
-    loadedConsumers.forEach(consumer -> consumer.initialize(kadaiEngine));
-
-    // TODO: Construct map
-    //  Achtung mit SimplePublisher - dort bspw. T = TaskHistoryEvent, obwohl Aufruf mit spezifischerem
-    //  Dann finden wir hier mglw. nicht alle Consumer
-    this.consumers = new HashMap<>();
+    final List<KadaiEventConsumer> rawConsumers = SpiLoader.load(KadaiEventConsumer.class);
+    this.enabled = !rawConsumers.isEmpty();
+    rawConsumers.forEach(consumer -> consumer.initialize(kadaiEngine));
+    this.consumers =
+        rawConsumers.stream().collect(groupingBy(KadaiEventConsumer::reify)).entrySet().stream()
+            .map(
+                e ->
+                    new SimpleEntry<
+                        Class<? extends KadaiEvent>,
+                        List<KadaiEventConsumer<? extends KadaiEvent>>>(
+                        (Class<? extends KadaiEvent>) e.getKey(),
+                        e.getValue().stream()
+                            .map(c -> (KadaiEventConsumer<? extends KadaiEvent>) c)
+                            .collect(toList())))
+            .collect(toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
   }
 
   @SuppressWarnings("unchecked") // Safe cast by definition of 'Object::getClass'
@@ -54,16 +70,27 @@ public final class KadaiEventBroker {
     getConsumers((Class<T>) event.getClass()).forEach(consumer -> consumer.consume(event));
   }
 
-  @SuppressWarnings("unchecked") // Safe cast by construction of 'consumers'
-  private <T extends KadaiEvent> List<KadaiEventConsumer<T>> getConsumers(Class<T> clazz) {
-    return consumers
-        .getOrDefault(clazz, new ArrayList<>())
-        .stream()
-        .map(consumer -> (KadaiEventConsumer<T>) consumer)
-        .toList();
-  }
-
   public boolean isEnabled() {
     return enabled;
+  }
+
+  // TODO: Although not inherently expensive, one should consider caching this
+  @SuppressWarnings({
+    "unchecked", // Safe cast by construction of 'consumers'
+    "ResultOfMethodCallIgnored"
+  })
+  public <T extends KadaiEvent> List<KadaiEventConsumer<? super T>> getConsumers(
+      Class<T> mostSpecificClazz) {
+    final List<KadaiEventConsumer<? super T>> eligibleConsumers = new ArrayList<>();
+    Class<? super T> clazz = mostSpecificClazz;
+    do {
+      consumers.getOrDefault(clazz, new ArrayList<>()).stream()
+          .map(consumer -> (KadaiEventConsumer<? super T>) consumer)
+          .collect(collectingAndThen(toList(), eligibleConsumers::addAll));
+
+      clazz = clazz.getSuperclass();
+    } while (clazz != KadaiEvent.class.getSuperclass());
+
+    return eligibleConsumers;
   }
 }
