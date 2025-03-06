@@ -1,4 +1,4 @@
-package io.kadai.common.internal.util;
+package io.kadai.common.api;
 
 public interface Reifiable<T> {
 

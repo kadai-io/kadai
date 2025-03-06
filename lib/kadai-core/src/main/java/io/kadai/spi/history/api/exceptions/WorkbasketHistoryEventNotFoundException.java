@@ -24,8 +24,8 @@ import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import java.util.Map;
 
 /**
- * This exception is thrown when the {@linkplain WorkbasketHistoryEvent} with the specified {@linkplain
- * WorkbasketHistoryEvent#getId() id} was not found.
+ * This exception is thrown when the {@linkplain WorkbasketHistoryEvent} with the specified
+ * {@linkplain WorkbasketHistoryEvent#getId() id} was not found.
  */
 public class WorkbasketHistoryEventNotFoundException extends KadaiException {
 

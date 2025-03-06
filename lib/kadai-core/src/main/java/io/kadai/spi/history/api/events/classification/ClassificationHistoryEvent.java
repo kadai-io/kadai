@@ -22,7 +22,6 @@ import io.kadai.classification.api.ClassificationCustomField;
 import io.kadai.classification.api.models.ClassificationSummary;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.spi.history.api.events.KadaiEvent;
-
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;

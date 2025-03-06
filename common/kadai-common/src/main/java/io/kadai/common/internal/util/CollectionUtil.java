@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CollectionUtil {
 
@@ -43,5 +44,9 @@ public class CollectionUtil {
     return inputCollection.stream()
         .collect(Collectors.groupingBy(s -> counter.getAndIncrement() / size))
         .values();
+  }
+
+  public static <T> List<T> add(List<T> a, List<T> b) {
+    return Stream.concat(a.stream(), b.stream()).toList();
   }
 }

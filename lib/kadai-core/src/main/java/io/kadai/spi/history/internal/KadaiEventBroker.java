@@ -18,18 +18,19 @@
 
 package io.kadai.spi.history.internal;
 
-import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.internal.util.CollectionUtil;
 import io.kadai.common.internal.util.SpiLoader;
 import io.kadai.spi.history.api.KadaiEventConsumer;
 import io.kadai.spi.history.api.events.KadaiEvent;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -38,14 +39,13 @@ import org.slf4j.LoggerFactory;
 public final class KadaiEventBroker {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(KadaiEventBroker.class);
-
-  private final boolean enabled;
   private final Map<Class<? extends KadaiEvent>, List<KadaiEventConsumer<? extends KadaiEvent>>>
       consumers;
+  private boolean enabled;
 
   @SuppressWarnings({
     "rawtypes", // loading generic SPIs is only possible raw
-    "unchecked" // grouping results in a raw Map, unchecked assignment safe for `Reifiable::reify`
+    "unchecked" // Safe cast by specification of 'Reifiable::reify'
   })
   public KadaiEventBroker(KadaiEngine kadaiEngine) {
     final List<KadaiEventConsumer> rawConsumers = SpiLoader.load(KadaiEventConsumer.class);
@@ -81,16 +81,31 @@ public final class KadaiEventBroker {
   })
   public <T extends KadaiEvent> List<KadaiEventConsumer<? super T>> getConsumers(
       Class<T> mostSpecificClazz) {
-    final List<KadaiEventConsumer<? super T>> eligibleConsumers = new ArrayList<>();
+    final List<KadaiEventConsumer<? super T>> eligible = new ArrayList<>();
     Class<? super T> clazz = mostSpecificClazz;
     do {
       consumers.getOrDefault(clazz, new ArrayList<>()).stream()
           .map(consumer -> (KadaiEventConsumer<? super T>) consumer)
-          .collect(collectingAndThen(toList(), eligibleConsumers::addAll));
+          .forEach(eligible::add);
 
       clazz = clazz.getSuperclass();
     } while (clazz != KadaiEvent.class.getSuperclass());
 
-    return eligibleConsumers;
+    return eligible;
+  }
+
+  public <T extends KadaiEvent> void subscribes(KadaiEventConsumer<T> consumer) {
+    consumers.merge(consumer.reify(), new ArrayList<>(List.of(consumer)), CollectionUtil::add);
+    enabled = true;
+  }
+
+  public <T extends KadaiEvent> void unsubscribes(KadaiEventConsumer<T> consumer) {
+    final Class<T> eventKey = consumer.reify();
+    if (consumers.containsKey(eventKey)) {
+      consumers.get(eventKey).remove(consumer);
+      if (consumers.values().stream().allMatch(Collection::isEmpty)) {
+        enabled = false;
+      }
+    }
   }
 }

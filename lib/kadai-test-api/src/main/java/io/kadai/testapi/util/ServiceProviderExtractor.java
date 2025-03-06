@@ -20,7 +20,7 @@ package io.kadai.testapi.util;
 
 import static org.junit.platform.commons.support.AnnotationSupport.findRepeatableAnnotations;
 
-import io.kadai.spi.history.api.KadaiHistory;
+import io.kadai.spi.history.api.KadaiEventConsumer;
 import io.kadai.spi.priority.api.PriorityServiceProvider;
 import io.kadai.spi.routing.api.TaskRoutingProvider;
 import io.kadai.spi.task.api.AfterRequestChangesProvider;
@@ -46,7 +46,7 @@ public class ServiceProviderExtractor {
 
   private static final Set<Class<?>> KADAI_SERVICE_PROVIDER_INTERFACES =
       Set.of(
-          KadaiHistory.class,
+          KadaiEventConsumer.class,
           PriorityServiceProvider.class,
           TaskRoutingProvider.class,
           TaskDistributionProvider.class,

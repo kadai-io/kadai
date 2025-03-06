@@ -77,7 +77,7 @@ class LogfileHistoryServiceImplTest {
     eventToBeLogged.setTaskClassificationCategory("someTaskClassificationCategory");
     eventToBeLogged.setDetails("someDetails");
 
-    logfileHistoryServiceImpl.create(eventToBeLogged);
+    logfileHistoryServiceImpl.consume(eventToBeLogged);
 
     String logMessage = logger.getLoggingEvents().get(0).getMessage();
 
@@ -99,7 +99,7 @@ class LogfileHistoryServiceImplTest {
     eventToBeLogged.setKey("someWorkbasketKey");
     eventToBeLogged.setDetails("someDetails");
 
-    logfileHistoryServiceImpl.create(eventToBeLogged);
+    logfileHistoryServiceImpl.consume(eventToBeLogged);
 
     String logMessage = logger.getLoggingEvents().get(0).getMessage();
 
@@ -122,7 +122,7 @@ class LogfileHistoryServiceImplTest {
     eventToBeLogged.setKey("someClassificationKey");
     eventToBeLogged.setDetails("someDetails");
 
-    logfileHistoryServiceImpl.create(eventToBeLogged);
+    logfileHistoryServiceImpl.consume(eventToBeLogged);
 
     String logMessage = logger.getLoggingEvents().get(0).getMessage();
 

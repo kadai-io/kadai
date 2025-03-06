@@ -27,8 +27,14 @@ public class WorkbasketHistoryServiceImpl
     if (event.getCreated() == null) {
       event.setCreatedNow();
     }
-    kadaiEngine.executeInDatabaseConnection(() -> eventMapper.insert(event));
-    return event;
+    try {
+      kadaiEngine.openConnection();
+      eventMapper.insert(event);
+
+      return event;
+    } finally {
+      kadaiEngine.returnConnection();
+    }
   }
 
   @Override

@@ -131,7 +131,8 @@ class QueryClassificationHistoryAccTest extends AbstractAccTest {
   @Test
   void should_ThrowException_When_SingleMethodRetrievesMoreThanOneEventFromDatabase() {
 
-    ClassificationHistoryQuery query = historyService.createClassificationHistoryQuery().userIdIn("peter");
+    ClassificationHistoryQuery query =
+        historyService.createClassificationHistoryQuery().userIdIn("peter");
 
     assertThatThrownBy(query::single).isInstanceOf(TooManyResultsException.class);
   }

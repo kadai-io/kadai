@@ -35,12 +35,12 @@ import org.apache.ibatis.session.RowBounds;
 public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
 
   private static final String LINK_TO_MAPPER =
-      "io.kadai.simplehistory.impl.workbasket.WorkbasketHistoryQueryMapper.queryHistoryEvents";
+      "io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryQueryMapper.queryHistoryEvents";
   private static final String LINK_TO_VALUE_MAPPER =
-      "io.kadai.simplehistory.impl.workbasket."
+      "io.kadai.simplehistory.workbasket.internal."
           + "WorkbasketHistoryQueryMapper.queryHistoryColumnValues";
   private static final String LINK_TO_COUNTER =
-      "io.kadai.simplehistory.impl.workbasket.WorkbasketHistoryQueryMapper.countHistoryEvents";
+      "io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryQueryMapper.countHistoryEvents";
 
   private final InternalKadaiEngine internalKadaiEngine;
   private final List<String> orderColumns;

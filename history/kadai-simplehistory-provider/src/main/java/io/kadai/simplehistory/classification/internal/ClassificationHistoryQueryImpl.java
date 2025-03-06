@@ -35,7 +35,7 @@ import org.apache.ibatis.session.RowBounds;
 public class ClassificationHistoryQueryImpl implements ClassificationHistoryQuery {
 
   private static final String CLASSIFICATION_PACKAGE_PATH =
-      "io.kadai.simplehistory.impl.classification.";
+      "io.kadai.simplehistory.classification.internal.";
   private static final String LINK_TO_MAPPER =
       CLASSIFICATION_PACKAGE_PATH + "ClassificationHistoryQueryMapper.queryHistoryEvents";
   private static final String LINK_TO_VALUE_MAPPER =

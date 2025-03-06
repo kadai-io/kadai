@@ -399,7 +399,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
     try {
       kadaiEngine.openConnection();
 
-      final Optional<WorkbasketAccessItem> accessItem =
+      final Optional<WorkbasketAccessItem> accessItemOpt =
           Optional.ofNullable(
               kadaiEngine.getEngine().isHistoryEnabled()
                   ? workbasketAccessMapper.findById(accessItemId)
@@ -407,20 +407,22 @@ public class WorkbasketServiceImpl implements WorkbasketService {
 
       workbasketAccessMapper.delete(accessItemId);
 
-      if (accessItem.isPresent()) {
-        eventPublisher.publishing(
-            () -> {
-              String details =
-                  ObjectAttributeChangeDetector.determineChangesInAttributes(
-                      accessItem, newWorkbasketAccessItem("", ""));
-              Workbasket workbasket = workbasketMapper.findById(accessItem.get().getWorkbasketId());
-              return new WorkbasketAccessItemDeletedEvent(
-                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
-                  workbasket,
-                  kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
-                  details);
-            });
-      }
+      accessItemOpt.ifPresent(
+          accessItem ->
+              eventPublisher.publishing(
+                  () -> {
+                    String details =
+                        ObjectAttributeChangeDetector.determineChangesInAttributes(
+                            accessItem, newWorkbasketAccessItem("", ""));
+                    Workbasket workbasket =
+                        workbasketMapper.findById(accessItem.getWorkbasketId());
+                    return new WorkbasketAccessItemDeletedEvent(
+                        IdGenerator.generateWithPrefix(
+                            IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
+                        workbasket,
+                        kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                        details);
+                  }));
 
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug(

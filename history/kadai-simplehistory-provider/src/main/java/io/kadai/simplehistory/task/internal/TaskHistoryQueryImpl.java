@@ -35,11 +35,11 @@ import org.apache.ibatis.session.RowBounds;
 public class TaskHistoryQueryImpl implements TaskHistoryQuery {
 
   private static final String LINK_TO_MAPPER =
-      "io.kadai.simplehistory.impl.task.TaskHistoryQueryMapper.queryHistoryEvents";
+      "io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper.queryHistoryEvents";
   private static final String LINK_TO_VALUE_MAPPER =
-      "io.kadai.simplehistory.impl.task.TaskHistoryQueryMapper.queryHistoryColumnValues";
+      "io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper.queryHistoryColumnValues";
   private static final String LINK_TO_COUNTER =
-      "io.kadai.simplehistory.impl.task.TaskHistoryQueryMapper.countHistoryEvents";
+      "io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper.countHistoryEvents";
 
   private final InternalKadaiEngine internalKadaiEngine;
   private final List<String> orderBy;

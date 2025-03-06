@@ -24,8 +24,8 @@ import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent
 import java.util.Map;
 
 /**
- * This exception is thrown when the {@linkplain ClassificationHistoryEvent} with the specified {@linkplain
- * ClassificationHistoryEvent#getId() id} was not found.
+ * This exception is thrown when the {@linkplain ClassificationHistoryEvent} with the specified
+ * {@linkplain ClassificationHistoryEvent#getId() id} was not found.
  */
 public class ClassificationHistoryEventNotFoundException extends KadaiException {
 
