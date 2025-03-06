@@ -29,11 +29,11 @@ import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.KadaiRuntimeException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.InternalKadaiEngine;
+import io.kadai.common.internal.PaginationInterceptor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.ibatis.exceptions.PersistenceException;
-import org.apache.ibatis.session.RowBounds;
 
 /** Implementation of ClassificationQuery interface. */
 public class ClassificationQueryImpl implements ClassificationQuery {
@@ -343,8 +343,10 @@ public class ClassificationQueryImpl implements ClassificationQuery {
     List<ClassificationSummary> result = new ArrayList<>();
     try {
       kadaiEngine.openConnection();
-      RowBounds rowBounds = new RowBounds(offset, limit);
-      result = kadaiEngine.getSqlSession().selectList(LINK_TO_SUMMARYMAPPER, this, rowBounds);
+
+      PaginationInterceptor.setPagination(offset, limit);
+
+      result = kadaiEngine.getSqlSession().selectList(LINK_TO_SUMMARYMAPPER, this);
       return result;
     } catch (PersistenceException e) {
       if (e.getMessage().contains("ERRORCODE=-4470")) {

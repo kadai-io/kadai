@@ -20,6 +20,7 @@ package io.kadai.task.internal;
 
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.InternalKadaiEngine;
+import io.kadai.common.internal.PaginationInterceptor;
 import io.kadai.task.api.ObjectReferenceQuery;
 import io.kadai.task.api.ObjectReferenceQueryColumnName;
 import io.kadai.task.api.models.ObjectReference;
@@ -27,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.ibatis.exceptions.PersistenceException;
-import org.apache.ibatis.session.RowBounds;
 
 /** Implementation of ObjectReferenceQuery interface. */
 public class ObjectReferenceQueryImpl implements ObjectReferenceQuery {
@@ -93,8 +93,10 @@ public class ObjectReferenceQueryImpl implements ObjectReferenceQuery {
     List<ObjectReference> result;
     try {
       kadaiEngine.openConnection();
-      RowBounds rowBounds = new RowBounds(offset, limit);
-      result = kadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this, rowBounds);
+
+      PaginationInterceptor.setPagination(offset, limit);
+
+      result = kadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this);
       return result;
     } catch (PersistenceException e) {
       if (e.getMessage().contains("ERRORCODE=-4470")) {

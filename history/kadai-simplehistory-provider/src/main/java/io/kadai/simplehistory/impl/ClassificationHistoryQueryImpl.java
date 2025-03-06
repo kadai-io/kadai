@@ -25,12 +25,12 @@ import io.kadai.common.api.TimeInterval;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.InternalKadaiEngine;
+import io.kadai.common.internal.PaginationInterceptor;
 import io.kadai.simplehistory.impl.classification.ClassificationHistoryQuery;
 import io.kadai.simplehistory.impl.classification.ClassificationHistoryQueryColumnName;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.ibatis.session.RowBounds;
 
 public class ClassificationHistoryQueryImpl implements ClassificationHistoryQuery {
 
@@ -409,8 +409,9 @@ public class ClassificationHistoryQueryImpl implements ClassificationHistoryQuer
       case 6 -> addOrderCriteria("CUSTOM_6", sortDirection);
       case 7 -> addOrderCriteria("CUSTOM_7", sortDirection);
       case 8 -> addOrderCriteria("CUSTOM_8", sortDirection);
-      default -> throw new InvalidArgumentException(
-          "Custom number has to be between 1 and 8, but this is: " + num);
+      default ->
+          throw new InvalidArgumentException(
+              "Custom number has to be between 1 and 8, but this is: " + num);
     };
   }
 
@@ -431,8 +432,10 @@ public class ClassificationHistoryQueryImpl implements ClassificationHistoryQuer
     List<ClassificationHistoryEvent> result = new ArrayList<>();
     try {
       internalKadaiEngine.openConnection();
-      RowBounds rowBounds = new RowBounds(offset, limit);
-      result = internalKadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this, rowBounds);
+
+      PaginationInterceptor.setPagination(offset, limit);
+
+      result = internalKadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this);
       return result;
     } finally {
       internalKadaiEngine.returnConnection();

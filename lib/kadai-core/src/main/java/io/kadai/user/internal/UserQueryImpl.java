@@ -3,6 +3,7 @@ package io.kadai.user.internal;
 import io.kadai.common.api.exceptions.KadaiRuntimeException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.InternalKadaiEngine;
+import io.kadai.common.internal.PaginationInterceptor;
 import io.kadai.user.api.UserQuery;
 import io.kadai.user.api.UserQueryColumnName;
 import io.kadai.user.api.models.User;
@@ -11,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.ibatis.exceptions.PersistenceException;
-import org.apache.ibatis.session.RowBounds;
 
 public class UserQueryImpl implements UserQuery {
 
@@ -87,11 +87,10 @@ public class UserQueryImpl implements UserQuery {
     try {
       UserServiceImpl userService = (UserServiceImpl) kadaiEngine.getEngine().getUserService();
       kadaiEngine.openConnection();
-      RowBounds rowBounds = new RowBounds(offset, limit);
-      return kadaiEngine
-          .getSqlSession()
-          .<UserImpl>selectList(LINK_TO_USER_MAPPER, this, rowBounds)
-          .stream()
+
+      PaginationInterceptor.setPagination(offset, limit);
+
+      return kadaiEngine.getSqlSession().<UserImpl>selectList(LINK_TO_USER_MAPPER, this).stream()
           .map(
               user -> {
                 user.setDomains(userService.determineDomains(user));

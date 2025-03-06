@@ -24,13 +24,13 @@ import io.kadai.common.api.TimeInterval;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.InternalKadaiEngine;
+import io.kadai.common.internal.PaginationInterceptor;
 import io.kadai.simplehistory.impl.workbasket.WorkbasketHistoryQuery;
 import io.kadai.simplehistory.impl.workbasket.WorkbasketHistoryQueryColumnName;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import io.kadai.workbasket.api.WorkbasketCustomField;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.ibatis.session.RowBounds;
 
 public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
 
@@ -487,8 +487,10 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
   public List<WorkbasketHistoryEvent> list(int offset, int limit) {
     try {
       internalKadaiEngine.openConnection();
-      RowBounds rowBounds = new RowBounds(offset, limit);
-      return internalKadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this, rowBounds);
+
+      PaginationInterceptor.setPagination(offset, limit);
+
+      return internalKadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this);
     } finally {
       internalKadaiEngine.returnConnection();
     }

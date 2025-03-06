@@ -457,6 +457,8 @@ public class KadaiEngineImpl implements KadaiEngine {
     configuration.addMapper(UserQueryMapper.class);
     configuration.addMapper(ConfigurationMapper.class);
 
+    configuration.addInterceptor(new PaginationInterceptor());
+
     SqlSessionFactory localSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
     return SqlSessionManager.newInstance(localSessionFactory);
   }
