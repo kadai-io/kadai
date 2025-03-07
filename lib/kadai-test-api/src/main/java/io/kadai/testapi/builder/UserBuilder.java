@@ -116,4 +116,9 @@ public class UserBuilder implements EntityBuilder<User, UserService> {
       throws UserAlreadyExistException, InvalidArgumentException, NotAuthorizedException {
     return userService.createUser(testUser);
   }
+
+  @Override
+  public User build() {
+    return testUser.copy();
+  }
 }

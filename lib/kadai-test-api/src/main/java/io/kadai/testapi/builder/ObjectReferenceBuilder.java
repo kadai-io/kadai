@@ -21,7 +21,7 @@ package io.kadai.testapi.builder;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.internal.models.ObjectReferenceImpl;
 
-public class ObjectReferenceBuilder {
+public class ObjectReferenceBuilder implements Builder<ObjectReference> {
 
   private final ObjectReferenceImpl objectReference = new ObjectReferenceImpl();
 
@@ -56,6 +56,7 @@ public class ObjectReferenceBuilder {
     return this;
   }
 
+  @Override
   public ObjectReference build() {
     return objectReference.copy();
   }
