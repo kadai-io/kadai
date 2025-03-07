@@ -39,6 +39,9 @@ import org.slf4j.LoggerFactory;
 public final class KadaiEventBroker {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(KadaiEventBroker.class);
+
+  // As per construction this is a dependent map:
+  // forall (k: Class<T>, v : List<KadaiEventConsumer<T'>>) in consumers: T == T'
   private final Map<Class<? extends KadaiEvent>, List<KadaiEventConsumer<? extends KadaiEvent>>>
       consumers;
   private final KadaiEngine kadaiEngine;
@@ -74,6 +77,13 @@ public final class KadaiEventBroker {
     }
   }
 
+  /**
+   * Forwards an {@linkplain KadaiEvent event} to all {@linkplain #getConsumers(Class) eligible}
+   * {@linkplain KadaiEventConsumer consumers}.
+   *
+   * @param <T> the type of the event to forward
+   * @param event the event to forward
+   */
   @SuppressWarnings("unchecked") // Safe cast by definition of 'Object::getClass'
   public <T extends KadaiEvent> void forward(T event) {
     getConsumers((Class<T>) event.getClass())
@@ -85,10 +95,23 @@ public final class KadaiEventBroker {
             });
   }
 
+  /**
+   * Returns true if at least one {@linkplain KadaiEventConsumer consumer} is registered.
+   *
+   * @return true if at least one consumer is registered, false otherwise
+   */
   public boolean isEnabled() {
     return enabled;
   }
 
+  /**
+   * Returns all registered {@linkplain KadaiEventConsumer consumers} that can consume {@linkplain
+   * KadaiEvent events} for the given class.
+   *
+   * @param mostSpecificClazz the class of the event of the most specific consumers to return
+   * @param <T> the type of event of the most specific consumers to return
+   * @return the list of all consumers who can consume events of the given class
+   */
   // TODO: Although not inherently expensive, one should consider caching this
   @SuppressWarnings({
     "unchecked", // Safe cast by construction of 'consumers'
@@ -108,14 +131,26 @@ public final class KadaiEventBroker {
     return eligible;
   }
 
+  /**
+   * Registers the given {@linkplain KadaiEventConsumer consumer} and {@linkplain
+   * KadaiEventConsumer#initialize(KadaiEngine) initializes} it.
+   *
+   * @param <T> the type of event the given consumer subscribes to
+   * @param consumer the consumer to register and initialize
+   */
   public <T extends KadaiEvent> void subscribes(KadaiEventConsumer<T> consumer) {
-    consumers.merge(consumer.reify(), new ArrayList<>(List.of(consumer)), CollectionUtil::add);
-    LOGGER.info(
-        "Subscribed KadaiEvent-Consumer: {}", consumer.getClass().getName());
+    consumers.merge(consumer.reify(), new ArrayList<>(List.of(consumer)), CollectionUtil::append);
+    LOGGER.info("Subscribed KadaiEvent-Consumer: {}", consumer.getClass().getName());
     consumer.initialize(kadaiEngine);
     enabled = true;
   }
 
+  /**
+   * Removes the given {@linkplain KadaiEventConsumer consumer}.
+   *
+   * @param <T> the type of event the given consumer will have had subscribed to
+   * @param consumer the consumer to remove
+   */
   public <T extends KadaiEvent> void unsubscribes(KadaiEventConsumer<T> consumer) {
     final Class<T> eventKey = consumer.reify();
     if (consumers.containsKey(eventKey)) {

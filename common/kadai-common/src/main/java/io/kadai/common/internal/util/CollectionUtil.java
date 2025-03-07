@@ -46,7 +46,15 @@ public class CollectionUtil {
         .values();
   }
 
-  public static <T> List<T> add(List<T> a, List<T> b) {
+  /**
+   * Appends a list to another.
+   *
+   * @param a the list to be appended to
+   * @param b the list to append
+   * @param <T> the type of elements in this list
+   * @return the appended list
+   */
+  public static <T> List<T> append(List<T> a, List<T> b) {
     return Stream.concat(a.stream(), b.stream()).toList();
   }
 }

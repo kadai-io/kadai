@@ -23,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import acceptance.AbstractAccTest;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
-import io.kadai.simplehistory.task.api.TaskHistoryService;
 import io.kadai.simplehistory.task.internal.TaskHistoryQueryImpl;
 import io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
@@ -39,7 +38,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 class CreateHistoryEventOnTaskCompletionAccTest extends AbstractAccTest {
 
   private final TaskService taskService = kadaiEngine.getTaskService();
-  private final TaskHistoryService historyService = AbstractAccTest.taskHistoryService;
 
   @WithAccessId(user = "admin")
   @Test
@@ -51,7 +49,7 @@ class CreateHistoryEventOnTaskCompletionAccTest extends AbstractAccTest {
 
     List<TaskHistoryEvent> events =
         taskHistoryQueryMapper.queryHistoryEvents(
-            (TaskHistoryQueryImpl) historyService.createTaskHistoryQuery().taskIdIn(taskId));
+            (TaskHistoryQueryImpl) taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
 
     assertThat(events).isEmpty();
 
@@ -61,7 +59,7 @@ class CreateHistoryEventOnTaskCompletionAccTest extends AbstractAccTest {
 
     events =
         taskHistoryQueryMapper.queryHistoryEvents(
-            (TaskHistoryQueryImpl) historyService.createTaskHistoryQuery().taskIdIn(taskId));
+            (TaskHistoryQueryImpl) taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
 
     String eventType = events.get(0).getEventType();
 

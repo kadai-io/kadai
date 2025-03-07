@@ -24,7 +24,6 @@ import acceptance.AbstractAccTest;
 import io.kadai.common.api.TimeInterval;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
-import io.kadai.simplehistory.task.api.TaskHistoryService;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
 import io.kadai.task.api.TaskService;
@@ -38,7 +37,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 class CreateHistoryEventOnTaskUpdateAccTest extends AbstractAccTest {
 
   private final TaskService taskService = kadaiEngine.getTaskService();
-  private final TaskHistoryService historyService = AbstractAccTest.taskHistoryService;
 
   @Test
   @WithAccessId(user = "admin")
@@ -50,7 +48,7 @@ class CreateHistoryEventOnTaskUpdateAccTest extends AbstractAccTest {
     task.setName("someUpdatedName");
     taskService.updateTask(task);
     List<TaskHistoryEvent> events =
-        historyService
+        taskHistoryService
             .createTaskHistoryQuery()
             .taskIdIn(taskId)
             .createdWithin(new TimeInterval(before, null))

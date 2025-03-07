@@ -28,15 +28,14 @@ import io.kadai.spi.history.api.events.KadaiEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LogfileHistoryServiceImpl implements KadaiEventConsumer<KadaiEvent> {
+public class KadaiEventLogger implements KadaiEventConsumer<KadaiEvent> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(LogfileHistoryServiceImpl.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(KadaiEventLogger.class);
   private ObjectMapper objectMapper;
   private Logger historyLogger;
 
   @Override
   public void initialize(KadaiEngine kadaiEngine) {
-
     objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     String historyLoggerName = kadaiEngine.getConfiguration().getLogHistoryLoggerName();

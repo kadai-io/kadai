@@ -32,17 +32,11 @@ import io.kadai.spi.history.api.events.task.TaskCreatedEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.internal.KadaiEventBroker;
 import java.util.List;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 /** Acceptance test for KadaiEventBroker class. */
 class KadaiEventBrokerTest extends AbstractAccTest {
-
-  @AfterEach
-  void setUp() throws Exception {
-    resetDb(false);
-  }
 
   @Test
   void testKadaiEventBrokerIsNotEnabled() {

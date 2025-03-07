@@ -38,12 +38,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-class LogfileHistoryServiceImplTest {
+class KadaiEventLoggerTest {
 
   static KadaiEngine kadaiEngineMock;
   private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-  private final LogfileHistoryServiceImpl logfileHistoryServiceImpl =
-      new LogfileHistoryServiceImpl();
+  private final KadaiEventLogger kadaiEventLogger =
+      new KadaiEventLogger();
   private final TestLogger logger = TestLoggerFactory.getTestLogger("AUDIT");
 
   @BeforeAll
@@ -62,7 +62,7 @@ class LogfileHistoryServiceImplTest {
   @Test
   void should_LogTaskEventAsJson_When_CreateIsCalled() throws Exception {
 
-    logfileHistoryServiceImpl.initialize(kadaiEngineMock);
+    kadaiEventLogger.initialize(kadaiEngineMock);
     TaskHistoryEvent eventToBeLogged = new TaskHistoryEvent();
     eventToBeLogged.setId("someId");
     eventToBeLogged.setUserId("someUser");
@@ -77,7 +77,7 @@ class LogfileHistoryServiceImplTest {
     eventToBeLogged.setTaskClassificationCategory("someTaskClassificationCategory");
     eventToBeLogged.setDetails("someDetails");
 
-    logfileHistoryServiceImpl.consume(eventToBeLogged);
+    kadaiEventLogger.consume(eventToBeLogged);
 
     String logMessage = logger.getLoggingEvents().get(0).getMessage();
 
@@ -89,7 +89,7 @@ class LogfileHistoryServiceImplTest {
 
   @Test
   void should_LogWorkbasketEventAsJson_When_CreateIsCalled() throws Exception {
-    logfileHistoryServiceImpl.initialize(kadaiEngineMock);
+    kadaiEventLogger.initialize(kadaiEngineMock);
     WorkbasketHistoryEvent eventToBeLogged = new WorkbasketHistoryEvent();
     eventToBeLogged.setId("someId");
     eventToBeLogged.setUserId("someUser");
@@ -99,7 +99,7 @@ class LogfileHistoryServiceImplTest {
     eventToBeLogged.setKey("someWorkbasketKey");
     eventToBeLogged.setDetails("someDetails");
 
-    logfileHistoryServiceImpl.consume(eventToBeLogged);
+    kadaiEventLogger.consume(eventToBeLogged);
 
     String logMessage = logger.getLoggingEvents().get(0).getMessage();
 
@@ -112,7 +112,7 @@ class LogfileHistoryServiceImplTest {
   @Test
   void should_LogClassificationEventAsJson_When_CreateIsCalled() throws Exception {
 
-    logfileHistoryServiceImpl.initialize(kadaiEngineMock);
+    kadaiEventLogger.initialize(kadaiEngineMock);
     ClassificationHistoryEvent eventToBeLogged = new ClassificationHistoryEvent();
     eventToBeLogged.setId("someId");
     eventToBeLogged.setUserId("someUser");
@@ -122,7 +122,7 @@ class LogfileHistoryServiceImplTest {
     eventToBeLogged.setKey("someClassificationKey");
     eventToBeLogged.setDetails("someDetails");
 
-    logfileHistoryServiceImpl.consume(eventToBeLogged);
+    kadaiEventLogger.consume(eventToBeLogged);
 
     String logMessage = logger.getLoggingEvents().get(0).getMessage();
 

@@ -5,6 +5,8 @@ import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.spi.history.api.KadaiEventConsumer;
 import io.kadai.spi.history.api.events.task.TaskDeletedEvent;
+import java.util.Collection;
+import java.util.List;
 
 public class TaskDeletedHistoryEventConsumerOnCascadeDeleteEvents
     implements KadaiEventConsumer<TaskDeletedEvent> {
@@ -15,10 +17,25 @@ public class TaskDeletedHistoryEventConsumerOnCascadeDeleteEvents
   @Override
   public void consume(TaskDeletedEvent event) {
     if (kadaiEngine.getConfiguration().isDeleteHistoryEventsOnTaskDeletionEnabled()) {
+      final String taskEventId = event.getTaskId();
       try {
-        taskHistoryService.deleteTaskHistoryEventsByTaskId(event.getTaskId());
+        taskHistoryService.deleteTaskHistoryEventsByTaskId(taskEventId);
       } catch (NotAuthorizedException e) {
-        throw new SystemException("Caught exception while trying to delete TaskHistoryEvents:", e);
+        throw new SystemException(
+            "Caught exception while trying to delete TaskHistoryEvents: " + taskEventId, e);
+      }
+    }
+  }
+
+  @Override
+  public void consumeAll(Collection<TaskDeletedEvent> events) {
+    if (kadaiEngine.getConfiguration().isDeleteHistoryEventsOnTaskDeletionEnabled()) {
+      final List<String> taskEventIds = events.stream().map(TaskDeletedEvent::getTaskId).toList();
+      try {
+        taskHistoryService.deleteTaskHistoryEventsByTaskIds(taskEventIds);
+      } catch (NotAuthorizedException e) {
+        throw new SystemException(
+            "Caught exception while trying to delete TaskHistoryEvents: " + taskEventIds, e);
       }
     }
   }
