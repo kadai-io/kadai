@@ -47,10 +47,9 @@ class KadaiConfigurationTest extends AbstractAccTest {
     resetDb("SOMECUSTOMSCHEMANAME");
     long count = taskHistoryService.createTaskHistoryQuery().workbasketKeyIn("wbKey1").count();
     assertThat(count).isZero();
-    taskHistoryService
-        .consume(
-            AbstractAccTest.createTaskHistoryEvent(
-                "wbKey1", "taskId1", "type1", "Some comment", "wbKey2", "someUserId"));
+    taskHistoryService.createTaskHistoryEvent(
+        AbstractAccTest.createTaskHistoryEvent(
+            "wbKey1", "taskId1", "type1", "Some comment", "wbKey2", "someUserId"));
     count = taskHistoryService.createTaskHistoryQuery().workbasketKeyIn("wbKey1").count();
     assertThat(count).isOne();
   }

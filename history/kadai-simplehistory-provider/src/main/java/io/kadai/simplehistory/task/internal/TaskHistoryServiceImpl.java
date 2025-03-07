@@ -1,6 +1,7 @@
 package io.kadai.simplehistory.task.internal;
 
 import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.api.KadaiInitializable;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
@@ -9,7 +10,6 @@ import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.simplehistory.task.api.TaskHistoryQuery;
 import io.kadai.simplehistory.task.api.TaskHistoryService;
-import io.kadai.spi.history.api.KadaiEventConsumer;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.exceptions.TaskHistoryEventNotFoundException;
 import io.kadai.user.api.models.User;
@@ -20,8 +20,7 @@ import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TaskHistoryServiceImpl
-    implements TaskHistoryService, KadaiEventConsumer<TaskHistoryEvent> {
+public class TaskHistoryServiceImpl implements TaskHistoryService, KadaiInitializable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(TaskHistoryServiceImpl.class);
 
@@ -86,11 +85,6 @@ public class TaskHistoryServiceImpl
   }
 
   @Override
-  public void consume(TaskHistoryEvent event) {
-    createTaskHistoryEvent(event);
-  }
-
-  @Override
   public void initialize(KadaiEngine kadaiEngine) {
     LOGGER.info(
         "Task history service implementation initialized with schemaName: {} ",
@@ -132,10 +126,5 @@ public class TaskHistoryServiceImpl
       throw new SystemException(
           "KADAI engine of Session Manager could not be retrieved. Aborting Startup");
     }
-  }
-
-  @Override
-  public Class<TaskHistoryEvent> reify() {
-    return TaskHistoryEvent.class;
   }
 }

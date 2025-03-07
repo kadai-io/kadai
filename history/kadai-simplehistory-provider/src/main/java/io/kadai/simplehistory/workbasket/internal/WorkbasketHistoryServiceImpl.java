@@ -1,12 +1,12 @@
 package io.kadai.simplehistory.workbasket.internal;
 
 import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.api.KadaiInitializable;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.simplehistory.workbasket.api.WorkbasketHistoryQuery;
 import io.kadai.simplehistory.workbasket.api.WorkbasketHistoryService;
-import io.kadai.spi.history.api.KadaiEventConsumer;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import io.kadai.spi.history.api.exceptions.WorkbasketHistoryEventNotFoundException;
 import java.lang.reflect.Field;
@@ -14,8 +14,7 @@ import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WorkbasketHistoryServiceImpl
-    implements WorkbasketHistoryService, KadaiEventConsumer<WorkbasketHistoryEvent> {
+public class WorkbasketHistoryServiceImpl implements WorkbasketHistoryService, KadaiInitializable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(WorkbasketHistoryServiceImpl.class);
 
@@ -61,11 +60,6 @@ public class WorkbasketHistoryServiceImpl
   }
 
   @Override
-  public void consume(WorkbasketHistoryEvent event) {
-    createWorkbasketHistoryEvent(event);
-  }
-
-  @Override
   public void initialize(KadaiEngine kadaiEngine) {
     LOGGER.info(
         "Workbasket history service implementation initialized with schemaName: {} ",
@@ -106,10 +100,5 @@ public class WorkbasketHistoryServiceImpl
       throw new SystemException(
           "KADAI engine of Session Manager could not be retrieved. Aborting Startup");
     }
-  }
-
-  @Override
-  public Class<WorkbasketHistoryEvent> reify() {
-    return WorkbasketHistoryEvent.class;
   }
 }

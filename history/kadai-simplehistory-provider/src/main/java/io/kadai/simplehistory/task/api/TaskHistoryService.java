@@ -4,6 +4,7 @@ import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.exceptions.TaskHistoryEventNotFoundException;
+import java.util.Collections;
 import java.util.List;
 
 public interface TaskHistoryService {
@@ -24,6 +25,11 @@ public interface TaskHistoryService {
 
   void deleteTaskHistoryEventsByTaskIds(List<String> taskIds)
       throws NotAuthorizedException, InvalidArgumentException;
+
+  default void deleteTaskHistoryEventsByTaskId(String taskId)
+      throws NotAuthorizedException, InvalidArgumentException {
+    deleteTaskHistoryEventsByTaskIds(Collections.singletonList(taskId));
+  }
 
   // endregion
 

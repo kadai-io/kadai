@@ -69,7 +69,7 @@ class TaskHistoryServiceImplTest {
         AbstractAccTest.createTaskHistoryEvent(
             "wbKey1", "taskId1", "type1", "wbKey2", "someUserId", "someDetails");
 
-    cutSpy.consume(expectedWb);
+    cutSpy.createTaskHistoryEvent(expectedWb);
     verify(taskHistoryEventMapperMock, times(1)).insert(expectedWb);
     assertThat(expectedWb.getCreated()).isNotNull();
   }

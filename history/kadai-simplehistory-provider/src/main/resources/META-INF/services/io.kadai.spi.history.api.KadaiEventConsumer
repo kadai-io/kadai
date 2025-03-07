@@ -1,3 +1,4 @@
-io.kadai.simplehistory.task.internal.TaskHistoryServiceImpl
-io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryServiceImpl
-io.kadai.simplehistory.classification.internal.ClassificationHistoryServiceImpl
+io.kadai.simplehistory.task.internal.TaskHistoryEventPersister
+io.kadai.simplehistory.task.internal.TaskDeletedHistoryEventConsumerOnCascadeDeleteEvents
+io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryEventPersister
+io.kadai.simplehistory.classification.internal.ClassificationHistoryEventPersister

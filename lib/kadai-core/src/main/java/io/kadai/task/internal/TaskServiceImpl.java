@@ -1008,14 +1008,6 @@ public class TaskServiceImpl implements TaskService {
         objectReferenceMapper.deleteMultipleByTaskIds(taskIds);
         taskMapper.deleteMultiple(taskIds);
 
-        if (kadaiEngine.getEngine().isHistoryEnabled()
-            && kadaiEngine
-                .getEngine()
-                .getConfiguration()
-                .isDeleteHistoryEventsOnTaskDeletionEnabled()) {
-          historyEventManager.deleteEvents(taskIds);
-        }
-
         final List<String> eventTaskIds = taskIds;
         eventPublisher.publishingAll(
             () ->
@@ -1896,14 +1888,6 @@ public class TaskServiceImpl implements TaskService {
       attachmentMapper.deleteMultipleByTaskIds(Collections.singletonList(taskId));
       objectReferenceMapper.deleteMultipleByTaskIds(Collections.singletonList(taskId));
       taskMapper.delete(taskId);
-
-      if (kadaiEngine.getEngine().isHistoryEnabled()
-          && kadaiEngine
-              .getEngine()
-              .getConfiguration()
-              .isDeleteHistoryEventsOnTaskDeletionEnabled()) {
-        historyEventManager.deleteEvents(Collections.singletonList(taskId));
-      }
 
       eventPublisher.publishing(() ->
           new TaskDeletedEvent(

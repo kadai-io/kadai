@@ -1,12 +1,12 @@
 package io.kadai.simplehistory.classification.internal;
 
 import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.api.KadaiInitializable;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.simplehistory.classification.api.ClassificationHistoryQuery;
 import io.kadai.simplehistory.classification.api.ClassificationHistoryService;
-import io.kadai.spi.history.api.KadaiEventConsumer;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
 import io.kadai.spi.history.api.exceptions.ClassificationHistoryEventNotFoundException;
 import java.lang.reflect.Field;
@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ClassificationHistoryServiceImpl
-    implements ClassificationHistoryService, KadaiEventConsumer<ClassificationHistoryEvent> {
+    implements ClassificationHistoryService, KadaiInitializable {
 
   private static final Logger LOGGER =
       LoggerFactory.getLogger(ClassificationHistoryServiceImpl.class);
@@ -54,11 +54,6 @@ public class ClassificationHistoryServiceImpl
   @Override
   public ClassificationHistoryQuery createClassificationHistoryQuery() {
     return new ClassificationHistoryQueryImpl(kadaiEngine);
-  }
-
-  @Override
-  public void consume(ClassificationHistoryEvent event) {
-    createClassificationHistoryEvent(event);
   }
 
   @Override
@@ -102,10 +97,5 @@ public class ClassificationHistoryServiceImpl
       throw new SystemException(
           "KADAI engine of Session Manager could not be retrieved. Aborting Startup");
     }
-  }
-
-  @Override
-  public Class<ClassificationHistoryEvent> reify() {
-    return ClassificationHistoryEvent.class;
   }
 }

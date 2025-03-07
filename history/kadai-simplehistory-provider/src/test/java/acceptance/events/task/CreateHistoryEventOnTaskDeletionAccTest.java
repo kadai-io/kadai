@@ -25,6 +25,7 @@ import io.kadai.classification.api.models.ClassificationSummary;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
+import io.kadai.simplehistory.task.internal.TaskHistoryEventPersister;
 import io.kadai.simplehistory.task.internal.TaskHistoryServiceImpl;
 import io.kadai.spi.history.api.KadaiEventConsumer;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
@@ -47,7 +48,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @KadaiIntegrationTest
 @WithServiceProvider(
     serviceProviderInterface = KadaiEventConsumer.class,
-    serviceProviders = TaskHistoryServiceImpl.class)
+    serviceProviders = TaskHistoryEventPersister.class)
 @ExtendWith(JaasExtension.class)
 class CreateHistoryEventOnTaskDeletionAccTest {
   @KadaiInject KadaiEngine kadaiEngine;

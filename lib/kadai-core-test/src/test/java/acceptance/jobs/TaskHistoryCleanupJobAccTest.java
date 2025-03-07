@@ -88,7 +88,7 @@ class TaskHistoryCleanupJobAccTest {
             "someDetails",
             Instant.now().minus(20, ChronoUnit.DAYS),
             "sameParentId");
-    historyService.consume(eventToBeCleaned);
+    historyService.createTaskHistoryEvent(eventToBeCleaned);
     TaskHistoryEvent eventToBeCleaned2 =
         createTaskHistoryEvent(
             "taskId1",
@@ -97,7 +97,7 @@ class TaskHistoryCleanupJobAccTest {
             "someDetails",
             Instant.now().minus(5, ChronoUnit.DAYS),
             "sameParentId");
-    historyService.consume(eventToBeCleaned2);
+    historyService.createTaskHistoryEvent(eventToBeCleaned2);
 
     TaskHistoryCleanupJob job = new TaskHistoryCleanupJob(kadaiEngine, null, null);
     job.run();
@@ -155,7 +155,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(20, ChronoUnit.DAYS),
               "sameParentId");
-      historyService.consume(eventToBeCleaned);
+      historyService.createTaskHistoryEvent(eventToBeCleaned);
       TaskHistoryEvent eventToBeCleaned2 =
           createTaskHistoryEvent(
               "taskId1",
@@ -164,7 +164,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(20, ChronoUnit.DAYS),
               "sameParentId");
-      historyService.consume(eventToBeCleaned2);
+      historyService.createTaskHistoryEvent(eventToBeCleaned2);
       TaskHistoryEvent eventToBeCleaned3 =
           createTaskHistoryEvent(
               "taskId2",
@@ -173,7 +173,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(20, ChronoUnit.DAYS),
               "sameParentId");
-      historyService.consume(eventToBeCleaned3);
+      historyService.createTaskHistoryEvent(eventToBeCleaned3);
       TaskHistoryEvent eventToBeCleaned4 =
           createTaskHistoryEvent(
               "taskId2",
@@ -182,7 +182,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(20, ChronoUnit.DAYS),
               "sameParentId");
-      historyService.consume(eventToBeCleaned4);
+      historyService.createTaskHistoryEvent(eventToBeCleaned4);
       TaskHistoryEvent eventToBeCleaned5 =
           createTaskHistoryEvent(
               "taskId3",
@@ -191,7 +191,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(20, ChronoUnit.DAYS),
               "sameParentId");
-      historyService.consume(eventToBeCleaned5);
+      historyService.createTaskHistoryEvent(eventToBeCleaned5);
       TaskHistoryEvent eventToBeCleaned6 =
           createTaskHistoryEvent(
               "taskId3",
@@ -200,7 +200,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(20, ChronoUnit.DAYS),
               "sameParentId");
-      historyService.consume(eventToBeCleaned6);
+      historyService.createTaskHistoryEvent(eventToBeCleaned6);
       TaskHistoryCleanupJob job = new TaskHistoryCleanupJob(kadaiEngine, null, null);
       job.run();
 
@@ -219,7 +219,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(20, ChronoUnit.DAYS),
               "sameParentId");
-      historyService.consume(eventToBeCleaned);
+      historyService.createTaskHistoryEvent(eventToBeCleaned);
       TaskHistoryEvent eventToBeCleaned2 =
           createTaskHistoryEvent(
               "taskId1",
@@ -228,7 +228,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(20, ChronoUnit.DAYS),
               "sameParentId");
-      historyService.consume(eventToBeCleaned2);
+      historyService.createTaskHistoryEvent(eventToBeCleaned2);
       TaskHistoryEvent eventToBeCleaned3 =
           createTaskHistoryEvent(
               "taskId2",
@@ -237,7 +237,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(1, ChronoUnit.DAYS),
               "sameParentId");
-      historyService.consume(eventToBeCleaned3);
+      historyService.createTaskHistoryEvent(eventToBeCleaned3);
 
       TaskHistoryCleanupJob job = new TaskHistoryCleanupJob(kadaiEngine, null, null);
       job.run();
@@ -258,7 +258,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(20, ChronoUnit.DAYS),
               "sameParentId");
-      historyService.consume(eventToBeCleaned);
+      historyService.createTaskHistoryEvent(eventToBeCleaned);
       TaskHistoryEvent eventToBeCleaned2 =
           createTaskHistoryEvent(
               "taskId1",
@@ -267,7 +267,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(20, ChronoUnit.DAYS),
               "sameParentId");
-      historyService.consume(eventToBeCleaned2);
+      historyService.createTaskHistoryEvent(eventToBeCleaned2);
       TaskHistoryEvent eventToBeCleaned3 =
           createTaskHistoryEvent(
               "taskId2",
@@ -276,7 +276,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(3, ChronoUnit.DAYS),
               "sameParentId");
-      historyService.consume(eventToBeCleaned3);
+      historyService.createTaskHistoryEvent(eventToBeCleaned3);
       TaskHistoryEvent eventToBeCleaned4 =
           createTaskHistoryEvent(
               "taskId2",
@@ -285,7 +285,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(5, ChronoUnit.DAYS),
               "sameParentId");
-      historyService.consume(eventToBeCleaned4);
+      historyService.createTaskHistoryEvent(eventToBeCleaned4);
 
       TaskHistoryCleanupJob job = new TaskHistoryCleanupJob(kadaiEngine, null, null);
       job.run();
@@ -305,7 +305,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(20, ChronoUnit.DAYS),
               "toBeIgnored1");
-      historyService.consume(toBeIgnored1);
+      historyService.createTaskHistoryEvent(toBeIgnored1);
       TaskHistoryEvent toBeIgnored2 =
           createTaskHistoryEvent(
               "taskId2",
@@ -314,7 +314,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(20, ChronoUnit.DAYS),
               "toBeIgnored2");
-      historyService.consume(toBeIgnored2);
+      historyService.createTaskHistoryEvent(toBeIgnored2);
       TaskHistoryEvent toBeIgnored3 =
           createTaskHistoryEvent(
               "taskId3",
@@ -323,7 +323,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(20, ChronoUnit.DAYS),
               "toBeIgnored3");
-      historyService.consume(toBeIgnored3);
+      historyService.createTaskHistoryEvent(toBeIgnored3);
 
       TaskHistoryCleanupJob job = new TaskHistoryCleanupJob(kadaiEngine, null, null);
       job.run();
@@ -361,7 +361,7 @@ class TaskHistoryCleanupJobAccTest {
             historyService.deleteTaskHistoryEventsByTaskIds(List.of(taskId1, taskId2));
             events.forEach(x -> x.setCreated(Instant.now().minus(20, ChronoUnit.DAYS)));
             events.forEach(x -> x.setParentBusinessProcessId(parentBusinessId));
-            events.forEach(x -> historyService.consume(x));
+            events.forEach(x -> historyService.createTaskHistoryEvent(x));
 
             job.run();
             List<TaskHistoryEvent> eventsAfterCleanup =
@@ -406,7 +406,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(20, ChronoUnit.DAYS),
               "someParentId1");
-      historyService.consume(eventToBeCleaned);
+      historyService.createTaskHistoryEvent(eventToBeCleaned);
       TaskHistoryEvent eventToBeCleaned2 =
           createTaskHistoryEvent(
               "taskId1",
@@ -415,7 +415,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(20, ChronoUnit.DAYS),
               "someParentId1");
-      historyService.consume(eventToBeCleaned2);
+      historyService.createTaskHistoryEvent(eventToBeCleaned2);
       TaskHistoryEvent eventToBeCleaned3 =
           createTaskHistoryEvent(
               "taskId2",
@@ -424,7 +424,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(20, ChronoUnit.DAYS),
               "someParentId2");
-      historyService.consume(eventToBeCleaned3);
+      historyService.createTaskHistoryEvent(eventToBeCleaned3);
       TaskHistoryEvent eventToBeCleaned4 =
           createTaskHistoryEvent(
               "taskId2",
@@ -433,7 +433,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(5, ChronoUnit.DAYS),
               "someParentId2");
-      historyService.consume(eventToBeCleaned4);
+      historyService.createTaskHistoryEvent(eventToBeCleaned4);
       TaskHistoryEvent eventToBeCleaned5 =
           createTaskHistoryEvent(
               "taskId3",
@@ -442,7 +442,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(20, ChronoUnit.DAYS),
               "someParentId3");
-      historyService.consume(eventToBeCleaned5);
+      historyService.createTaskHistoryEvent(eventToBeCleaned5);
       TaskHistoryEvent eventToBeCleaned6 =
           createTaskHistoryEvent(
               "taskId3",
@@ -451,7 +451,7 @@ class TaskHistoryCleanupJobAccTest {
               "someDetails",
               Instant.now().minus(20, ChronoUnit.DAYS),
               "someParentId3");
-      historyService.consume(eventToBeCleaned6);
+      historyService.createTaskHistoryEvent(eventToBeCleaned6);
       TaskHistoryCleanupJob job = new TaskHistoryCleanupJob(kadaiEngine, null, null);
       job.run();
 

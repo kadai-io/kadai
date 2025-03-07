@@ -69,7 +69,7 @@ class WorkbasketHistoryServiceImplTest {
         AbstractAccTest.createWorkbasketHistoryEvent(
             "wbKey1", WorkbasketHistoryEventType.CREATED.getName(), "someUserId", "someDetails");
 
-    cutSpy.consume(expectedEvent);
+    cutSpy.createWorkbasketHistoryEvent(expectedEvent);
     verify(workbasketHistoryEventMapperMock, times(1)).insert(expectedEvent);
     assertThat(expectedEvent.getCreated()).isNotNull();
   }
