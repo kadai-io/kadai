@@ -16,9 +16,17 @@
  *
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Select, Store } from '@ngxs/store';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import {
+  FormArray,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
 import { Observable, Subject } from 'rxjs';
 import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
 import { WorkbasketAccessItems } from 'app/shared/models/workbasket-access-items';
@@ -36,22 +44,75 @@ import { AccessItemsCustomisation, CustomField, getCustomFields } from '../../..
 import { customFieldCount } from '../../../shared/models/workbasket-access-items';
 import {
   GetAccessItems,
-  GetPermissionsByAccessId,
   GetGroupsByAccessId,
+  GetPermissionsByAccessId,
   RemoveAccessItemsPermissions
 } from '../../../shared/store/access-items-management-store/access-items-management.actions';
 import { AccessItemsManagementSelector } from '../../../shared/store/access-items-management-store/access-items-management.selector';
 import { MatDialog } from '@angular/material/dialog';
 import { WorkbasketAccessItemQueryFilterParameter } from '../../../shared/models/workbasket-access-item-query-filter-parameter';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { TypeAheadComponent } from '../../../shared/components/type-ahead/type-ahead.component';
+import { AsyncPipe, NgFor, NgIf } from '@angular/common';
+import { SvgIconComponent } from 'angular-svg-icon';
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import {
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable
+} from '@angular/material/table';
+import { SortComponent } from '../../../shared/components/sort/sort.component';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'kadai-administration-access-items-management',
   templateUrl: './access-items-management.component.html',
   styleUrls: ['./access-items-management.component.scss'],
-  standalone: false
+  imports: [
+    TypeAheadComponent,
+    NgIf,
+    SvgIconComponent,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCellDef,
+    MatHeaderCell,
+    MatCellDef,
+    MatCell,
+    MatHeaderRowDef,
+    MatHeaderRow,
+    MatRowDef,
+    MatRow,
+    FormsModule,
+    ReactiveFormsModule,
+    NgFor,
+    SortComponent,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatTooltip,
+    MatCheckbox,
+    MatButton,
+    MatIcon,
+    AsyncPipe
+  ]
 })
 export class AccessItemsManagementComponent implements OnInit {
+  dialog = inject(MatDialog);
   accessIdPrevious: string;
   accessIdName: string;
   accessItemsForm: FormGroup;
@@ -66,22 +127,25 @@ export class AccessItemsManagementComponent implements OnInit {
   };
   accessItems: WorkbasketAccessItems[];
   isGroup: boolean = false;
-
   @Select(EngineConfigurationSelectors.accessItemsCustomisation)
   accessItemsCustomization$: Observable<AccessItemsCustomisation>;
   @Select(AccessItemsManagementSelector.groups) groups$: Observable<AccessId[]>;
   customFields$: Observable<CustomField[]>;
   @Select(AccessItemsManagementSelector.permissions) permissions$: Observable<AccessId[]>;
   destroy$ = new Subject<void>();
+  private formBuilder = inject(FormBuilder);
+  private formsValidatorService = inject(FormsValidatorService);
+  private notificationService = inject(NotificationService);
+  private store = inject(Store);
+  private requestInProgressService = inject(RequestInProgressService);
 
-  constructor(
-    private formBuilder: FormBuilder,
-    private formsValidatorService: FormsValidatorService,
-    private notificationService: NotificationService,
-    private store: Store,
-    private requestInProgressService: RequestInProgressService,
-    public dialog: MatDialog
-  ) {}
+  get accessItemsGroups(): FormArray {
+    return this.accessItemsForm ? (this.accessItemsForm.get('accessItemsGroups') as FormArray) : null;
+  }
+
+  get accessItemsPermissions(): FormArray {
+    return this.accessItemsForm ? (this.accessItemsForm.get('accessItemsPermissions') as FormArray) : null;
+  }
 
   ngOnInit() {
     this.groups$.pipe(takeUntil(this.destroy$)).subscribe((groups) => {
@@ -236,14 +300,6 @@ export class AccessItemsManagementComponent implements OnInit {
           });
       }
     );
-  }
-
-  get accessItemsGroups(): FormArray {
-    return this.accessItemsForm ? (this.accessItemsForm.get('accessItemsGroups') as FormArray) : null;
-  }
-
-  get accessItemsPermissions(): FormArray {
-    return this.accessItemsForm ? (this.accessItemsForm.get('accessItemsPermissions') as FormArray) : null;
   }
 
   isFieldValid(field: string, index: number): boolean {

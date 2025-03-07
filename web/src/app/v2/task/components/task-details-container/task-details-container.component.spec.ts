@@ -26,7 +26,7 @@ describe.skip('TaskDetailsContainerComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TaskDetailsContainerComponent]
+      imports: [TaskDetailsContainerComponent]
     }).compileComponents();
   });
 

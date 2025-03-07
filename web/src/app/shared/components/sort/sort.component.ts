@@ -18,12 +18,18 @@
 
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Direction, Sorting } from 'app/shared/models/sorting';
+import { MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatIcon } from '@angular/material/icon';
+import { NgFor, NgIf } from '@angular/common';
+import { MapValuesPipe } from '../../pipes/map-values.pipe';
 
 @Component({
   selector: 'kadai-shared-sort',
   templateUrl: './sort.component.html',
   styleUrls: ['./sort.component.scss'],
-  standalone: false
+  imports: [MatButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, NgIf, NgFor, MapValuesPipe]
 })
 export class SortComponent<T> implements OnInit {
   @Input() sortingFields: Map<T, string>;

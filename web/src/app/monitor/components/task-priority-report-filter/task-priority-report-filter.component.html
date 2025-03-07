@@ -27,7 +27,7 @@
 
     <!-- CONTENT -->
     <div *ngFor="let key of keys">
-      <mat-checkbox (change)="emitFilter($event.checked, key)">{{key}}</mat-checkbox>
+      <mat-checkbox (change)="emitFilter($event.checked, key)">{{ key }}</mat-checkbox>
     </div>
 
     <div *ngIf="!filtersAreSpecified"> There are not filters specified.</div>

@@ -16,19 +16,12 @@
  *
  */
 
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
-import { MonitorComponent } from './components/monitor/monitor.component';
-import { TaskReportComponent } from './components/task-report/task-report.component';
-import { WorkbasketReportComponent } from './components/workbasket-report/workbasket-report.component';
-import { ClassificationReportComponent } from './components/classification-report/classification-report.component';
-import { TimestampReportComponent } from './components/timestamp-report/timestamp-report.component';
-import { TaskPriorityReportComponent } from './components/task-priority-report/task-priority-report.component';
+import { Routes } from '@angular/router';
 
-const routes: Routes = [
+export const routes: Routes = [
   {
     path: '',
-    component: MonitorComponent,
+    loadComponent: () => import('./components/monitor/monitor.component').then((m) => m.MonitorComponent),
     children: [
       {
         path: '',
@@ -37,23 +30,31 @@ const routes: Routes = [
       },
       {
         path: 'tasks-priority',
-        component: TaskPriorityReportComponent
+        loadComponent: () =>
+          import('./components/task-priority-report/task-priority-report.component').then(
+            (m) => m.TaskPriorityReportComponent
+          )
       },
       {
         path: 'tasks-status',
-        component: TaskReportComponent
+        loadComponent: () => import('./components/task-report/task-report.component').then((m) => m.TaskReportComponent)
       },
       {
         path: 'workbaskets',
-        component: WorkbasketReportComponent
+        loadComponent: () =>
+          import('./components/workbasket-report/workbasket-report.component').then((m) => m.WorkbasketReportComponent)
       },
       {
         path: 'classifications',
-        component: ClassificationReportComponent
+        loadComponent: () =>
+          import('./components/classification-report/classification-report.component').then(
+            (m) => m.ClassificationReportComponent
+          )
       },
       {
         path: 'timestamp',
-        component: TimestampReportComponent
+        loadComponent: () =>
+          import('./components/timestamp-report/timestamp-report.component').then((m) => m.TimestampReportComponent)
       }
     ]
   },
@@ -67,9 +68,3 @@ const routes: Routes = [
     redirectTo: ''
   }
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
-})
-export class MonitorRoutingModule {}

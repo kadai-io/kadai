@@ -17,9 +17,11 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Subject, Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ImportExportService {
   public importingFinished = new Subject<boolean>();
 

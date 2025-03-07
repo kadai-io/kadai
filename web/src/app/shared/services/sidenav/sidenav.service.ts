@@ -23,8 +23,8 @@ import { MatSidenav } from '@angular/material/sidenav';
   providedIn: 'root'
 })
 export class SidenavService {
-  private sidenav: MatSidenav;
   state: boolean = false;
+  private sidenav: MatSidenav;
 
   public setSidenav(sidenav: MatSidenav) {
     this.sidenav = sidenav;

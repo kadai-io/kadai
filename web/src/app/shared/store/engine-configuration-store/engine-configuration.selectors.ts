@@ -17,15 +17,15 @@
  */
 
 import {
-  WorkbasketsCustomisation,
-  ClassificationsCustomisation,
   AccessItemsCustomisation,
-  TasksCustomisation,
   ClassificationCategoryImages,
-  GlobalCustomisation
+  ClassificationsCustomisation,
+  GlobalCustomisation,
+  TasksCustomisation,
+  WorkbasketsCustomisation
 } from 'app/shared/models/customisation';
 import { Selector } from '@ngxs/store';
-import { EngineConfigurationStateModel, EngineConfigurationState } from './engine-configuration.state';
+import { EngineConfigurationState, EngineConfigurationStateModel } from './engine-configuration.state';
 
 export class EngineConfigurationSelectors {
   @Selector([EngineConfigurationState])

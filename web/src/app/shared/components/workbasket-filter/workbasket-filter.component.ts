@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { ALL_TYPES, WorkbasketType } from '../../models/workbasket-type';
 import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-filter-parameter';
 import { Select, Store } from '@ngxs/store';
@@ -24,33 +24,51 @@ import { ClearWorkbasketFilter, SetWorkbasketFilter } from '../../store/filter-s
 import { FilterSelectors } from '../../store/filter-store/filter.selectors';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { NgFor, NgIf } from '@angular/common';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { IconTypeComponent } from '../../../administration/components/type-icon/icon-type.component';
+import { MapValuesPipe } from '../../pipes/map-values.pipe';
 
 @Component({
   selector: 'kadai-shared-workbasket-filter',
   templateUrl: './workbasket-filter.component.html',
   styleUrls: ['./workbasket-filter.component.scss'],
-  standalone: false
+  imports: [
+    NgIf,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    FormsModule,
+    MatTooltip,
+    MatButton,
+    MatIcon,
+    MatMenuTrigger,
+    IconTypeComponent,
+    MatMenu,
+    NgFor,
+    MatMenuItem,
+    MapValuesPipe
+  ]
 })
 export class WorkbasketFilterComponent implements OnInit, OnDestroy {
   allTypes: Map<WorkbasketType, string> = ALL_TYPES;
-
   @Input() component: string;
   @Input() isExpanded: boolean;
-
   @Select(FilterSelectors.getAvailableDistributionTargetsFilter)
   availableDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter>;
-
   @Select(FilterSelectors.getSelectedDistributionTargetsFilter)
   selectedDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter>;
-
   @Select(FilterSelectors.getWorkbasketListFilter)
   workbasketListFilter$: Observable<WorkbasketQueryFilterParameter>;
-
   destroy$ = new Subject<void>();
-
   filter: WorkbasketQueryFilterParameter;
-
-  constructor(private store: Store) {}
+  private store = inject(Store);
 
   ngOnInit(): void {
     if (this.component === 'availableDistributionTargets') {

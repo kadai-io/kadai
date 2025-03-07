@@ -19,10 +19,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { KadaiDate } from '../util/kadai.date';
 
-@Pipe({
-  name: 'dateTimeZone',
-  standalone: false
-})
+@Pipe({ name: 'dateTimeZone' })
 export class DateTimeZonePipe implements PipeTransform {
   private datesMap = new Map<string, string>();
 

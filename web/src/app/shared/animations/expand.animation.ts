@@ -16,7 +16,7 @@
  *
  */
 
-import { trigger, style, transition, animate, keyframes, state } from '@angular/animations';
+import { animate, keyframes, state, style, transition, trigger } from '@angular/animations';
 
 export const expandDown = trigger('toggleDown', [
   state('true', style({ opacity: '1', display: 'initial' })),
@@ -72,8 +72,22 @@ export const expandRight = trigger('toggleRight', [
 
 export const expandTop = trigger('toggleTop', [
   state('in', style({ transform: 'translateY(0)', overflow: 'hidden' })),
-  transition('void => *', [style({ transform: 'translateY(100%)', overflow: 'hidden' }), animate(100)]),
-  transition('* => void', [animate(100, style({ transform: 'translateY(100%)', overflow: 'hidden' }))])
+  transition('void => *', [
+    style({
+      transform: 'translateY(100%)',
+      overflow: 'hidden'
+    }),
+    animate(100)
+  ]),
+  transition('* => void', [
+    animate(
+      100,
+      style({
+        transform: 'translateY(100%)',
+        overflow: 'hidden'
+      })
+    )
+  ])
 ]);
 
 export const opacity = trigger('toggleOpacity', [
