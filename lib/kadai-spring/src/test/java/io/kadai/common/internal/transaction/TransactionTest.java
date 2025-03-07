@@ -34,12 +34,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.client.RestClient;
 
 /** TODO. */
 @ExtendWith(SpringExtension.class)
@@ -52,10 +52,11 @@ class TransactionTest {
 
   @Autowired TaskService taskService;
   @LocalServerPort int port;
-  @Autowired private TestRestTemplate restTemplate;
+  private static RestClient restClient;
 
   @BeforeEach
   void init() throws Exception {
+    restClient = RestClient.create();
     Class.forName("org.h2.Driver");
     try (Connection conn = getConnection()) {
       try (Statement statement = conn.createStatement()) {
@@ -67,7 +68,7 @@ class TransactionTest {
 
   @Test
   void testCommit() throws Exception {
-    restTemplate.getForEntity("http://127.0.0.1:" + port + "/test", String.class);
+    restClient.get().uri("http://127.0.0.1:" + port + "/test").retrieve().toEntity(String.class);
 
     int resultCount = 0;
     try (Connection conn = getConnection()) {
@@ -85,7 +86,7 @@ class TransactionTest {
 
   @Test
   void testRollback() throws Exception {
-    restTemplate.postForEntity("http://127.0.0.1:" + port + "/test", null, String.class);
+    restClient.post().uri("http://127.0.0.1:" + port + "/test").retrieve().body(String.class);
 
     int resultCount = 0;
     try (Connection conn = getConnection()) {
