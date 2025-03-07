@@ -5,8 +5,12 @@ import io.kadai.spi.history.api.events.KadaiEvent;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Supplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SimpleKadaiEventPublisherImpl<T extends KadaiEvent> implements KadaiEventPublisher<T> {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(SimpleKadaiEventPublisherImpl.class);
 
   private final KadaiEventBroker kadaiEventBroker;
 
@@ -17,12 +21,13 @@ public class SimpleKadaiEventPublisherImpl<T extends KadaiEvent> implements Kada
   @Override
   public void publish(T event) {
     kadaiEventBroker.forward(event);
+    LOGGER.info("Published event {}", event);
   }
 
   @Override
   public void publishing(Supplier<T> supplyEvent) {
     if (kadaiEventBroker.isEnabled()) {
-      kadaiEventBroker.forward(supplyEvent.get());
+      publish(supplyEvent.get());
     }
   }
 

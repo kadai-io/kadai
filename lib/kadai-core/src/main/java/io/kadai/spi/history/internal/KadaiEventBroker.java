@@ -50,7 +50,11 @@ public final class KadaiEventBroker {
   public KadaiEventBroker(KadaiEngine kadaiEngine) {
     final List<KadaiEventConsumer> rawConsumers = SpiLoader.load(KadaiEventConsumer.class);
     this.enabled = !rawConsumers.isEmpty();
-    rawConsumers.forEach(consumer -> consumer.initialize(kadaiEngine));
+    rawConsumers.forEach(
+        consumer -> {
+          consumer.initialize(kadaiEngine);
+          LOGGER.info("Registered provided KadaiEvent-Consumer: {}", consumer.getClass().getName());
+        });
     this.consumers =
         rawConsumers.stream().collect(groupingBy(KadaiEventConsumer::reify)).entrySet().stream()
             .map(
@@ -63,11 +67,20 @@ public final class KadaiEventBroker {
                             .map(c -> (KadaiEventConsumer<? extends KadaiEvent>) c)
                             .collect(toList())))
             .collect(toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
+    if (consumers.isEmpty()) {
+      LOGGER.info("No provided KadaiEvent-Consumers found. Running without History.");
+    }
   }
 
   @SuppressWarnings("unchecked") // Safe cast by definition of 'Object::getClass'
   public <T extends KadaiEvent> void forward(T event) {
-    getConsumers((Class<T>) event.getClass()).forEach(consumer -> consumer.consume(event));
+    getConsumers((Class<T>) event.getClass())
+        .forEach(
+            consumer -> {
+              consumer.consume(event);
+              LOGGER.info(
+                  "Forwarded event {} to consumer {}", event, consumer.getClass().getName());
+            });
   }
 
   public boolean isEnabled() {
@@ -77,7 +90,6 @@ public final class KadaiEventBroker {
   // TODO: Although not inherently expensive, one should consider caching this
   @SuppressWarnings({
     "unchecked", // Safe cast by construction of 'consumers'
-    "ResultOfMethodCallIgnored"
   })
   public <T extends KadaiEvent> List<KadaiEventConsumer<? super T>> getConsumers(
       Class<T> mostSpecificClazz) {
@@ -96,6 +108,8 @@ public final class KadaiEventBroker {
 
   public <T extends KadaiEvent> void subscribes(KadaiEventConsumer<T> consumer) {
     consumers.merge(consumer.reify(), new ArrayList<>(List.of(consumer)), CollectionUtil::add);
+    LOGGER.info(
+        "Registered newly subscribed KadaiEvent-Consumer: {}", consumer.getClass().getName());
     enabled = true;
   }
 
@@ -103,6 +117,7 @@ public final class KadaiEventBroker {
     final Class<T> eventKey = consumer.reify();
     if (consumers.containsKey(eventKey)) {
       consumers.get(eventKey).remove(consumer);
+      LOGGER.info("Unsubscribed KadaiEvent-Consumer: {}", consumer.getClass().getName());
       if (consumers.values().stream().allMatch(Collection::isEmpty)) {
         enabled = false;
       }
