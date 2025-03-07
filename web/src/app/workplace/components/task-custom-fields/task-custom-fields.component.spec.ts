@@ -17,8 +17,8 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
 import { TaskCustomFieldsComponent } from './task-custom-fields.component';
+import { provideHttpClient } from '@angular/common/http';
 
 // TODO: test pending to test. Failing random
 xdescribe('TaskCustomFieldsComponent', () => {
@@ -27,8 +27,8 @@ xdescribe('TaskCustomFieldsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [FormsModule],
-      declarations: [TaskCustomFieldsComponent]
+      imports: [TaskCustomFieldsComponent],
+      providers: [provideHttpClient()]
     }).compileComponents();
   }));
 

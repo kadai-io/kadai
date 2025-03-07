@@ -17,7 +17,7 @@
  */
 
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { environment } from 'environments/environment';
 import { AccessId } from 'app/shared/models/access-id';
 import { Observable, of } from 'rxjs';
@@ -32,10 +32,8 @@ import { asUrlQueryString } from '../../util/query-parameters-v2';
   providedIn: 'root'
 })
 export class AccessIdsService {
-  constructor(
-    private httpClient: HttpClient,
-    private startupService: StartupService
-  ) {}
+  private httpClient = inject(HttpClient);
+  private startupService = inject(StartupService);
 
   get url(): string {
     return this.startupService.getKadaiRestUrl() + '/v1/access-ids';

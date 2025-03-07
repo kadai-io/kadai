@@ -38,6 +38,7 @@ input[type='checkbox'][disabled]:checked + label {
   background-color: $light-grey;
   cursor: not-allowed;
 }
+
 input[type='checkbox'][disabled]:not(:checked) + label {
   background-color: $light-grey;
   cursor: not-allowed;

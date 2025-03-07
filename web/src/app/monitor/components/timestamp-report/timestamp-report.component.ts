@@ -16,26 +16,24 @@
  *
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ReportData } from '../../models/report-data';
 import { MonitorService } from '../../services/monitor.service';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { CommonModule } from '@angular/common';
 import { ReportTableComponent } from '../report-table/report-table.component';
+import { DatePipe, NgIf } from '@angular/common';
 
 @Component({
   selector: 'kadai-monitor-timestamp-report',
   templateUrl: './timestamp-report.component.html',
   styleUrls: ['./timestamp-report.component.scss'],
-  imports: [ReportTableComponent, CommonModule]
+  imports: [ReportTableComponent, DatePipe, NgIf],
+  providers: [MonitorService]
 })
 export class TimestampReportComponent implements OnInit {
   reportData: ReportData;
-
-  constructor(
-    private restConnectorService: MonitorService,
-    private requestInProgressService: RequestInProgressService
-  ) {}
+  private restConnectorService = inject(MonitorService);
+  private requestInProgressService = inject(RequestInProgressService);
 
   ngOnInit() {
     this.requestInProgressService.setRequestInProgress(true);

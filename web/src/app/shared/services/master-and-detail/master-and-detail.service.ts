@@ -17,9 +17,11 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class MasterAndDetailService {
   public showDetail = new BehaviorSubject<boolean>(false);
 

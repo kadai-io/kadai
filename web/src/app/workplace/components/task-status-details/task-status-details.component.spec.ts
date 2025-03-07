@@ -19,13 +19,13 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { TaskStatusDetailsComponent } from './task-status-details.component';
 
-xdescribe('TaskStatusDetailsComponent', () => {
+describe('TaskStatusDetailsComponent', () => {
   let component: TaskStatusDetailsComponent;
   let fixture: ComponentFixture<TaskStatusDetailsComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [TaskStatusDetailsComponent]
+      imports: [TaskStatusDetailsComponent]
     }).compileComponents();
   }));
 

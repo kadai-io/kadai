@@ -24,14 +24,16 @@
     <div class="task-processing__action-buttons">
 
       <!-- TRANSFER TASK -->
-      <button [matMenuTriggerFor]="menu" class="task-processing__button--secondary" mat-stroked-button
+      <button [matMenuTriggerFor]="menu" class="task-processing__button--secondary"
+              mat-stroked-button
               matTooltip="Transfer Task to another Workbasket">
         Transfer Task
         <mat-icon class="task-processing__icon--aquamarine">transfer_within_a_station</mat-icon>
       </button>
       <mat-menu #menu="matMenu">
-        <button (click)="transferTask(workbasket)" *ngFor="let workbasket of workbaskets" mat-menu-item>
-          {{workbasket.name}}
+        <button (click)="transferTask(workbasket)" *ngFor="let workbasket of workbaskets"
+                mat-menu-item>
+          {{ workbasket.name }}
         </button>
       </mat-menu>
 
@@ -51,7 +53,7 @@
 
     </div>
 
-    <h4 class="task-processing__task-name">{{task?.name}}</h4>
+    <h4 class="task-processing__task-name">{{ task?.name }}</h4>
 
   </div>
 

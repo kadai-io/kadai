@@ -17,12 +17,14 @@
  */
 
 import { Component, Input } from '@angular/core';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'kadai-shared-progress-spinner',
   templateUrl: './progress-spinner.component.html',
   styleUrls: ['./progress-spinner.component.scss'],
-  standalone: false
+  imports: [MatProgressSpinner, NgIf]
 })
 export class ProgressSpinnerComponent {
   @Input()

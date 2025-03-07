@@ -60,7 +60,15 @@ describe('ClassificationTreeService', () => {
             key: 'KEY3',
             parentId: 'ID1',
             parentKey: 'KEY1',
-            children: [{ classificationId: 'ID2', key: 'KEY2', parentId: 'ID3', parentKey: 'KEY3', children: [] }]
+            children: [
+              {
+                classificationId: 'ID2',
+                key: 'KEY2',
+                parentId: 'ID3',
+                parentKey: 'KEY3',
+                children: []
+              }
+            ]
           }
         ]
       },

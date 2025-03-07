@@ -16,7 +16,7 @@
  *
  */
 
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'environments/environment';
 import { UserInfo } from 'app/shared/models/user-info';
@@ -24,11 +24,12 @@ import { Version } from 'app/shared/models/version';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KadaiEngineService {
   currentUserInfo: UserInfo;
-
-  constructor(private httpClient: HttpClient) {}
+  private httpClient = inject(HttpClient);
 
   // GET
   getUserInformation(): Promise<any> {

@@ -17,7 +17,7 @@
  */
 
 import { Selector } from '@ngxs/store';
-import { ClassificationStateModel, ClassificationState } from './classification.state';
+import { ClassificationState, ClassificationStateModel } from './classification.state';
 import { Classification } from '../../models/classification';
 
 export class ClassificationSelectors {

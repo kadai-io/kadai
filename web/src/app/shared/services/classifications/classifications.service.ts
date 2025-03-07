@@ -16,7 +16,7 @@
  *
  */
 
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -34,11 +34,9 @@ import { QueryPagingParameter } from '../../models/query-paging-parameter';
   providedIn: 'root'
 })
 export class ClassificationsService {
-  constructor(
-    private httpClient: HttpClient,
-    private domainService: DomainService,
-    private startupService: StartupService
-  ) {}
+  private httpClient = inject(HttpClient);
+  private domainService = inject(DomainService);
+  private startupService = inject(StartupService);
 
   get url(): string {
     return this.startupService.getKadaiRestUrl() + '/v1/classifications';

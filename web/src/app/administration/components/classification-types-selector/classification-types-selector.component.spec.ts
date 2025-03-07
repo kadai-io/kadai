@@ -19,15 +19,12 @@
 import { ClassificationTypesSelectorComponent } from './classification-types-selector.component';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
-import { NgxsModule, Store } from '@ngxs/store';
+import { provideStore, Store } from '@ngxs/store';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
 import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { classificationStateMock } from '../../../shared/store/mock-data/mock-store';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { By } from '@angular/platform-browser';
 
 const classificationServiceSpy = jest.fn();
@@ -42,9 +39,9 @@ describe('ClassificationTypesSelectorComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [NgxsModule.forRoot([ClassificationState]), MatFormFieldModule, MatSelectModule, NoopAnimationsModule],
-      declarations: [ClassificationTypesSelectorComponent],
+      imports: [ClassificationTypesSelectorComponent],
       providers: [
+        provideStore([ClassificationState]),
         {
           provide: ClassificationsService,
           useValue: classificationServiceSpy

@@ -20,6 +20,7 @@ import { DatePipe } from '@angular/common';
 
 export class KadaiDate {
   public static dateFormat = 'yyyy-MM-ddTHH:mm:ss.sss';
+
   public static getDate(): string {
     const dateLocale = 'en-US';
     const datePipe = new DatePipe(dateLocale);

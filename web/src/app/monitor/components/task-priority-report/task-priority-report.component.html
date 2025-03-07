@@ -20,7 +20,8 @@
 
   <!-- HEADER -->
   <div class="task-priority-report__header">
-    <h4 class="task-priority-report__headline"> {{reportData?.meta.name}} ({{reportData?.meta.date | date: 'medium'
+    <h4 class="task-priority-report__headline"> {{ reportData?.meta.name }} ({{
+        reportData?.meta.date | date: 'medium'
       }}) </h4>
     <kadai-monitor-task-priority-report-filter
       (applyFilter)="applyFilter($event)"></kadai-monitor-task-priority-report-filter>
@@ -28,14 +29,17 @@
 
   <mat-divider class="task-priority-report__divider"></mat-divider>
 
-  <div *ngIf="reportData?.rows.length == 0"> Could not find any tasks which fulfill the current filter criteria.</div>
+  <div *ngIf="reportData?.rows.length == 0"> Could not find any tasks which fulfill the current
+    filter criteria.
+  </div>
 
   <div class="task-priority-report__workbaskets">
-    <div *ngFor="let row of reportData?.rows; let i = index" class="task-priority-report__workbasket">
+    <div *ngFor="let row of reportData?.rows; let i = index"
+         class="task-priority-report__workbasket">
 
       <!-- WORKBASKET NAME -->
       <div class="task-priority-report__workbasket-headline">
-        <h6> {{row.desc[0]}} </h6>
+        <h6> {{ row.desc[0] }} </h6>
       </div>
 
       <!-- CHART -->
@@ -52,7 +56,7 @@
            'task-priority-report__row--high': element.priority == nameHighPriority,
            'task-priority-report__row--medium': element.priority == nameMediumPriority,
            'task-priority-report__row--low': element.priority == nameLowPriority}" mat-cell>
-              {{element.priority}}
+              {{ element.priority }}
             </td>
           </ng-container>
 
@@ -63,7 +67,7 @@
            'task-priority-report__row--high': element.priority == nameHighPriority,
            'task-priority-report__row--medium': element.priority == nameMediumPriority,
            'task-priority-report__row--low': element.priority == nameLowPriority}" mat-cell>
-              {{element.number}}
+              {{ element.number }}
             </td>
           </ng-container>
 
