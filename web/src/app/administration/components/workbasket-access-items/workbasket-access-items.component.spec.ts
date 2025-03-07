@@ -18,26 +18,11 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { WorkbasketAccessItemsComponent } from './workbasket-access-items.component';
-import { Component, DebugElement, Input } from '@angular/core';
-import { Actions, NgxsModule, ofActionDispatched, Store } from '@ngxs/store';
-import { Observable, of } from 'rxjs';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { TypeAheadComponent } from '../../../shared/components/type-ahead/type-ahead.component';
-import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
+import { DebugElement } from '@angular/core';
+import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
+import { Observable } from 'rxjs';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
-import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
-import { DomainService } from '../../../shared/services/domain/domain.service';
-import { RouterTestingModule } from '@angular/router/testing';
-import { SelectedRouteService } from '../../../shared/services/selected-route/selected-route';
-import { StartupService } from '../../../shared/services/startup/startup.service';
-import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
-import { WindowRefService } from '../../../shared/services/window/window.service';
 import {
   engineConfigurationMock,
   selectedWorkbasketMock,
@@ -47,41 +32,8 @@ import {
   GetWorkbasketAccessItems,
   UpdateWorkbasketAccessItems
 } from '../../../shared/store/workbasket-store/workbasket.actions';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { MatSelectModule } from '@angular/material/select';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-
-@Component({ selector: 'kadai-shared-spinner', template: '' })
-class SpinnerStub {
-  @Input() isRunning: boolean;
-  @Input() positionClass: string;
-}
-
-const requestInProgressServiceSpy: Partial<RequestInProgressService> = {
-  setRequestInProgress: jest.fn()
-};
-
-const showDialogFn = jest.fn().mockReturnValue(true);
-const notificationServiceSpy: Partial<NotificationService> = {
-  showSuccess: showDialogFn
-};
-
-const validateFormInformationFn = jest.fn().mockImplementation((): Promise<any> => Promise.resolve(true));
-const formValidatorServiceSpy: Partial<FormsValidatorService> = {
-  isFieldValid: jest.fn().mockReturnValue(true),
-  validateInputOverflow: jest.fn(),
-  validateFormInformation: validateFormInformationFn,
-  get inputOverflowObservable(): Observable<Map<string, boolean>> {
-    return of(new Map<string, boolean>());
-  }
-};
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 
 describe('WorkbasketAccessItemsComponent', () => {
   let fixture: ComponentFixture<WorkbasketAccessItemsComponent>;
@@ -92,47 +44,8 @@ describe('WorkbasketAccessItemsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
-        FormsModule,
-        ReactiveFormsModule,
-        TypeaheadModule.forRoot(),
-        NgxsModule.forRoot([WorkbasketState, EngineConfigurationState]),
-        RouterTestingModule.withRoutes([]),
-        NoopAnimationsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatAutocompleteModule,
-        MatProgressBarModule,
-        MatCheckboxModule,
-        MatIconModule,
-        MatTooltipModule
-      ],
-      declarations: [WorkbasketAccessItemsComponent, TypeAheadComponent],
-      providers: [
-        SpinnerStub,
-        {
-          provide: RequestInProgressService,
-          useValue: requestInProgressServiceSpy
-        },
-        {
-          provide: FormsValidatorService,
-          useValue: formValidatorServiceSpy
-        },
-        {
-          provide: NotificationService,
-          useValue: notificationServiceSpy
-        },
-        ClassificationCategoriesService,
-        WorkbasketService,
-        DomainService,
-        SelectedRouteService,
-        StartupService,
-        KadaiEngineService,
-        WindowRefService,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-      ]
+      imports: [WorkbasketAccessItemsComponent],
+      providers: [provideStore([WorkbasketState, EngineConfigurationState]), provideRouter([]), provideHttpClient()]
     }).compileComponents();
 
     fixture = TestBed.createComponent(WorkbasketAccessItemsComponent);

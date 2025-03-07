@@ -16,13 +16,29 @@
  *
  */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Routes } from '@angular/router';
+import { TaskContainerComponent } from './components/task-container/task-container.component';
+import { TaskDetailsContainerComponent } from './components/task-details-container/task-details-container.component';
 
-import { HistoryRoutingModule } from './history-routing.module';
-
-@NgModule({
-  declarations: [],
-  imports: [CommonModule, HistoryRoutingModule]
-})
-export class HistoryModule {}
+// TODO FIXME why not used?
+export const routes: Routes = [
+  {
+    path: 'tasks',
+    component: TaskContainerComponent,
+    children: [
+      {
+        path: 'taskdetail/:id',
+        component: TaskDetailsContainerComponent
+      }
+    ]
+  },
+  {
+    path: '',
+    redirectTo: 'tasks',
+    pathMatch: 'full'
+  },
+  {
+    path: '**',
+    redirectTo: 'tasks'
+  }
+];

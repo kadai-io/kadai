@@ -19,17 +19,18 @@
 import {
   Component,
   EventEmitter,
+  inject,
   Input,
+  OnChanges,
+  OnDestroy,
   OnInit,
   Output,
-  ViewChild,
   SimpleChanges,
-  OnChanges,
-  OnDestroy
+  ViewChild
 } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
-import { NgForm } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Select } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
@@ -38,44 +39,69 @@ import { Classification } from '../../../shared/models/classification';
 import { TasksCustomisation } from '../../../shared/models/customisation';
 import { takeUntil } from 'rxjs/operators';
 import { AccessId } from '../../../shared/models/access-id';
+import { AsyncPipe, NgFor, NgIf } from '@angular/common';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatTooltip } from '@angular/material/tooltip';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { FieldErrorDisplayComponent } from '../../../shared/components/field-error-display/field-error-display.component';
+import { TypeAheadComponent } from '../../../shared/components/type-ahead/type-ahead.component';
+import { MatNativeDateModule, MatOption } from '@angular/material/core';
+import {
+  MatDatepicker,
+  MatDatepickerInput,
+  MatDatepickerModule,
+  MatDatepickerToggle
+} from '@angular/material/datepicker';
 
 @Component({
   selector: 'kadai-task-information',
   templateUrl: './task-information.component.html',
   styleUrls: ['./task-information.component.scss'],
-  standalone: false
+  imports: [
+    NgIf,
+    FormsModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatSelect,
+    NgFor,
+    MatOption,
+    MatTooltip,
+    MatDatepickerInput,
+    MatDatepickerToggle,
+    MatSuffix,
+    MatDatepicker,
+    CdkTextareaAutosize,
+    AsyncPipe,
+    FieldErrorDisplayComponent,
+    TypeAheadComponent,
+    MatDatepickerModule,
+    MatNativeDateModule
+  ]
 })
 export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
   @Input()
   task: Task;
-
   @Output() taskChange: EventEmitter<Task> = new EventEmitter<Task>();
-
   @Input()
   saveToggleTriggered: boolean;
-
   @Output() formValid: EventEmitter<boolean> = new EventEmitter<boolean>();
-
   @ViewChild('TaskForm')
   taskForm: NgForm;
-
   toggleValidationMap = new Map<string, boolean>();
   requestInProgress = false;
   classifications: Classification[];
   isClassificationEmpty: boolean;
   isOwnerValid: boolean = true;
-
   readonly lengthError = 'You have reached the maximum length';
   inputOverflowMap = new Map<string, boolean>();
   validateInputOverflow: Function;
-
   @Select(EngineConfigurationSelectors.tasksCustomisation) tasksCustomisation$: Observable<TasksCustomisation>;
+  private classificationService = inject(ClassificationsService);
+  private formsValidatorService = inject(FormsValidatorService);
   private destroy$ = new Subject<void>();
-
-  constructor(
-    private classificationService: ClassificationsService,
-    private formsValidatorService: FormsValidatorService
-  ) {}
 
   ngOnInit() {
     this.getClassificationByDomain();
@@ -116,6 +142,17 @@ export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
     this.isClassificationEmpty = false;
   }
 
+  onSelectedOwner(owner: AccessId) {
+    if (owner?.accessId) {
+      this.task.owner = owner.accessId;
+    }
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   private validate() {
     this.isClassificationEmpty = typeof this.task.classificationSummary === 'undefined';
     this.formsValidatorService.formSubmitAttempt = true;
@@ -136,16 +173,5 @@ export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
         this.classifications = classificationPagingList.classifications;
         this.requestInProgress = false;
       });
-  }
-
-  onSelectedOwner(owner: AccessId) {
-    if (owner?.accessId) {
-      this.task.owner = owner.accessId;
-    }
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

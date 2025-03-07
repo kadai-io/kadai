@@ -18,7 +18,6 @@ import './commands';
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
-
 import { mount } from 'cypress/angular';
 
 // Augment the Cypress namespace to include type definitions for

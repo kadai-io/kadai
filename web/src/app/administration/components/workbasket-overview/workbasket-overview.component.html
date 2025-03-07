@@ -20,7 +20,7 @@
 
   <div #workbasketList class="workbasket-overview__list">
     <kadai-administration-workbasket-list
-        [expanded]="expanded"></kadai-administration-workbasket-list>
+      [expanded]="expanded"></kadai-administration-workbasket-list>
   </div>
 
   <div class="vertical-right-divider">
@@ -34,7 +34,7 @@
 
   <div *ngIf="showDetail; else showEmptyPage" class="workbasket-overview__details">
     <kadai-administration-workbasket-details
-        [expanded]="expanded"></kadai-administration-workbasket-details>
+      [expanded]="expanded"></kadai-administration-workbasket-details>
   </div>
 
   <ng-template #showEmptyPage>

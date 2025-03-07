@@ -16,17 +16,17 @@
  *
  */
 
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class SelectedRouteService {
   public selectedRouteTriggered = new Subject<string>();
-
+  private router = inject(Router);
   private detailRoutes: Array<string> = ['workplace', 'administration', 'monitor', 'history', 'settings'];
-
-  constructor(private router: Router) {}
 
   selectRoute(value: NavigationEnd): void {
     this.selectedRouteTriggered.next(this.getRoute(value));

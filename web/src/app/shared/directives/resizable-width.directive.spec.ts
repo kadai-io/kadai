@@ -16,14 +16,14 @@
  *
  */
 
-import { Component, DebugElement, ElementRef, Renderer2 } from '@angular/core';
+import { Component, DebugElement, runInInjectionContext } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ResizableWidthDirective } from './resizable-width.directive';
 
 @Component({
-  template: ` <div kadaiResizableWidth></div>`,
-  standalone: false
+  imports: [ResizableWidthDirective],
+  template: ` <div kadaiResizableWidth></div>`
 })
 class TestComponent {}
 
@@ -34,7 +34,7 @@ describe('ResizableDirective', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [TestComponent, ResizableWidthDirective]
+      imports: [TestComponent]
     });
     fixture = TestBed.createComponent(TestComponent);
     fixture.detectChanges();
@@ -44,9 +44,10 @@ describe('ResizableDirective', () => {
   });
 
   it('should create an instance', () => {
-    const renderer = fixture.componentRef.injector.get<Renderer2>(Renderer2 as any);
-    const directive = new ResizableWidthDirective(renderer, new ElementRef(inputElement));
-
+    let directive: ResizableWidthDirective;
+    runInInjectionContext(fixture.componentRef.injector, () => {
+      directive = new ResizableWidthDirective();
+    });
     expect(directive).toBeTruthy();
   });
 
