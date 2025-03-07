@@ -34,6 +34,8 @@ import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -87,9 +89,28 @@ class UserControllerIntTest {
         .containsExactlyInAnyOrder("Max", "Elena");
   }
 
+  @ParameterizedTest
+  @EmptySource
+  @ValueSource(strings = {"=foo", "=bar", "=baz", "="})
+  void should_TreatCurrentUserTrue_For_Value(String value) {
+    String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?current-user" + value;
+    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
+
+    ResponseEntity<UserCollectionRepresentationModel> response =
+        TEMPLATE.exchange(
+            url,
+            HttpMethod.GET,
+            auth,
+            ParameterizedTypeReference.forType(UserCollectionRepresentationModel.class));
+
+    assertThat(response.getBody()).isNotNull();
+    assertThat(response.getBody().getContent()).hasSize(1);
+    assertThat(response.getBody().getContent()).extracting("userId").containsExactly("teamlead-1");
+  }
+
   @Test
-  void should_ReturnCurrentUser() {
-    String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?current-user";
+  void should_IgnoreCurrentUserParam_When_ValueIsFalse() {
+    String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?current-user=false";
     HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<UserCollectionRepresentationModel> response =
@@ -99,46 +120,7 @@ class UserControllerIntTest {
             auth,
             ParameterizedTypeReference.forType(UserCollectionRepresentationModel.class));
     assertThat(response.getBody()).isNotNull();
-    assertThat(response.getBody().getContent()).hasSize(1);
-    assertThat(response.getBody().getContent()).extracting("userId").containsExactly("teamlead-1");
-  }
-
-  @Test
-  void should_ReturnExceptionCurrentUserWithBadValue() {
-    String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?current-user=asd";
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
-
-    ThrowingCallable httpCall =
-        () ->
-            TEMPLATE.exchange(
-                url,
-                HttpMethod.GET,
-                auth,
-                ParameterizedTypeReference.forType(UserCollectionRepresentationModel.class));
-    assertThatThrownBy(httpCall)
-        .isInstanceOf(HttpStatusCodeException.class)
-        .extracting(HttpStatusCodeException.class::cast)
-        .extracting(HttpStatusCodeException::getStatusCode)
-        .isEqualTo(HttpStatus.BAD_REQUEST);
-  }
-
-  @Test
-  void should_ReturnExceptionCurrentUserWithEmptyValue() {
-    String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?current-user=";
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
-
-    ThrowingCallable httpCall =
-        () ->
-            TEMPLATE.exchange(
-                url,
-                HttpMethod.GET,
-                auth,
-                ParameterizedTypeReference.forType(UserCollectionRepresentationModel.class));
-    assertThatThrownBy(httpCall)
-        .isInstanceOf(HttpStatusCodeException.class)
-        .extracting(HttpStatusCodeException.class::cast)
-        .extracting(HttpStatusCodeException::getStatusCode)
-        .isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThat(response.getBody().getContent()).hasSize(14);
   }
 
   @Test
