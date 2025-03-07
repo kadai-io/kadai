@@ -41,6 +41,7 @@ public final class KadaiEventBroker {
   private static final Logger LOGGER = LoggerFactory.getLogger(KadaiEventBroker.class);
   private final Map<Class<? extends KadaiEvent>, List<KadaiEventConsumer<? extends KadaiEvent>>>
       consumers;
+  private final KadaiEngine kadaiEngine;
   private boolean enabled;
 
   @SuppressWarnings({
@@ -48,6 +49,7 @@ public final class KadaiEventBroker {
     "unchecked" // Safe cast by specification of 'Reifiable::reify'
   })
   public KadaiEventBroker(KadaiEngine kadaiEngine) {
+    this.kadaiEngine = kadaiEngine;
     final List<KadaiEventConsumer> rawConsumers = SpiLoader.load(KadaiEventConsumer.class);
     this.enabled = !rawConsumers.isEmpty();
     rawConsumers.forEach(
@@ -109,7 +111,8 @@ public final class KadaiEventBroker {
   public <T extends KadaiEvent> void subscribes(KadaiEventConsumer<T> consumer) {
     consumers.merge(consumer.reify(), new ArrayList<>(List.of(consumer)), CollectionUtil::add);
     LOGGER.info(
-        "Registered newly subscribed KadaiEvent-Consumer: {}", consumer.getClass().getName());
+        "Subscribed KadaiEvent-Consumer: {}", consumer.getClass().getName());
+    consumer.initialize(kadaiEngine);
     enabled = true;
   }
 
