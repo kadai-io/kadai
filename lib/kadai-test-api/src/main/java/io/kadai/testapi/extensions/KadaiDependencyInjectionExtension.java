@@ -32,7 +32,22 @@ import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 import org.junit.platform.commons.JUnitException;
 
 /**
- * JUnit-Extension for injecting Kadai components via {@linkplain KadaiInject @KadaiInject}.
+ * JUnit-Extension for injecting Kadai components via {@linkplain KadaiInject @KadaiInject} or
+ * supplying them as parameter to test-functions.
+ *
+ * <p>Usage may look like:
+ * <pre>
+ *   {@code
+ *     @ExtendWith(KadaiDependencyInjectionExtension.class)
+ *     class MyTestClass {
+ *
+ *       @KadaiInject KadaiEngine kadaiEngine;
+ *
+ *       @Test
+ *       void myTest(TaskService taskService) {}
+ *     }
+ *   }
+ *  * </pre>
  */
 public class KadaiDependencyInjectionExtension
     implements ParameterResolver, TestInstancePostProcessor {

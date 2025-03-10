@@ -24,25 +24,26 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation allowing to declare the cleansing of the KadaiContext in
- * {@linkplain org.junit.jupiter.api.Nested @Nested} Test-Classes.
+ * Annotation allowing to declare the cleansing of the KadaiContext in {@linkplain
+ * org.junit.jupiter.api.Nested @Nested} Test-Classes.
  *
- * <p>It makes the annotated class reuse the surrounding classes'
- * {@linkplain javax.sql.DataSource DataSource} but generates a new schema.
+ * <p>It makes the annotated class reuse the surrounding classes' {@linkplain javax.sql.DataSource
+ * DataSource} while generating a new {@linkplain io.kadai.common.api.KadaiEngine KadaiEngine} and
+ * schema.
  *
  * <p>Usage may look like:
- * <pre>
- *   {@code
- *     @ExtendWith(KadaiInitializationExtension.class)
- *     class MyTestClass {
  *
- *       @Nested
- *       @CleanKadaiContext
- *       @TestInstance(Lifecycle.PER_CLASS)
- *       class MyNestedTestClass {}
- *     }
- *   }
- * </pre>
+ * <pre>{@code
+ * @ExtendWith(KadaiInitializationExtension.class)
+ * class MyTestClass {
+ *
+ *   @Nested
+ *   @CleanKadaiContext
+ *   @TestInstance(Lifecycle.PER_CLASS)
+ *   class MyNestedTestClass {}
+ * }
+ *
+ * }</pre>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
