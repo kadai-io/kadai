@@ -1,43 +1,27 @@
-/*
- * Copyright [2024] [envite consulting GmbH]
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *        http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- *
- *
- */
-
 package io.kadai.user.rest.assembler;
 
 import io.kadai.common.rest.assembler.CollectionRepresentationModelAssembler;
-import io.kadai.user.api.models.User;
-import io.kadai.user.internal.models.UserImpl;
-import io.kadai.user.rest.models.UserCollectionRepresentationModel;
-import io.kadai.user.rest.models.UserRepresentationModel;
+import io.kadai.common.rest.assembler.PagedRepresentationModelAssembler;
+import io.kadai.common.rest.models.PageMetadata;
+import io.kadai.user.api.models.UserSummary;
+import io.kadai.user.internal.models.UserSummaryImpl;
+import io.kadai.user.rest.models.UserSummaryCollectionRepresentationModel;
+import io.kadai.user.rest.models.UserSummaryPagedRepresentationModel;
+import io.kadai.user.rest.models.UserSummaryRepresentationModel;
+import java.util.Collection;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
-/**
- * The assembler transforms a {@link User} to its resource counterpart {@linkplain
- * UserRepresentationModel} and vice versa.
- */
 @Component
-public class UserRepresentationModelAssembler
-    implements CollectionRepresentationModelAssembler<
-    User, UserRepresentationModel, UserCollectionRepresentationModel> {
+public class UserSummaryRepresentationModelAssembler
+    implements PagedRepresentationModelAssembler<
+            UserSummary, UserSummaryRepresentationModel, UserSummaryPagedRepresentationModel>,
+        CollectionRepresentationModelAssembler<
+            UserSummary, UserSummaryRepresentationModel, UserSummaryCollectionRepresentationModel> {
 
   @Override
-  public UserRepresentationModel toModel(User entity) {
-    UserRepresentationModel repModel = new UserRepresentationModel();
+  public UserSummaryRepresentationModel toModel(UserSummary entity) {
+    UserSummaryRepresentationModel repModel = new UserSummaryRepresentationModel();
     repModel.setUserId(entity.getId());
     repModel.setGroups(entity.getGroups());
     repModel.setPermissions(entity.getPermissions());
@@ -58,8 +42,8 @@ public class UserRepresentationModelAssembler
     return repModel;
   }
 
-  public User toEntityModel(UserRepresentationModel repModel) {
-    UserImpl user = new UserImpl();
+  public UserSummary toEntityModel(UserSummaryRepresentationModel repModel) {
+    UserSummaryImpl user = new UserSummaryImpl();
     user.setId(repModel.getUserId());
     user.setGroups(repModel.getGroups());
     user.setPermissions(repModel.getPermissions());
@@ -81,8 +65,14 @@ public class UserRepresentationModelAssembler
   }
 
   @Override
-  public UserCollectionRepresentationModel buildCollectionEntity(
-      List<UserRepresentationModel> content) {
-    return new UserCollectionRepresentationModel(content);
+  public UserSummaryCollectionRepresentationModel buildCollectionEntity(
+      List<UserSummaryRepresentationModel> content) {
+    return new UserSummaryCollectionRepresentationModel(content);
+  }
+
+  @Override
+  public UserSummaryPagedRepresentationModel buildPageableEntity(
+      Collection<UserSummaryRepresentationModel> content, PageMetadata pageMetadata) {
+    return new UserSummaryPagedRepresentationModel(content, pageMetadata);
   }
 }
