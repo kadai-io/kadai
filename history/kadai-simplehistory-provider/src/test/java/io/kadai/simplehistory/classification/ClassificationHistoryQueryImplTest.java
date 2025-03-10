@@ -43,9 +43,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ClassificationHistoryQueryImplTest {
 
   private ClassificationHistoryQueryImpl historyQueryImpl;
-
   @Mock private InternalKadaiEngine internalKadaiEngineMock;
-
   @Mock private SqlSession sqlSessionMock;
 
   @BeforeEach

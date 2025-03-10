@@ -45,10 +45,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class WorkbasketHistoryQueryImplTest {
 
   @Mock private InternalKadaiEngine internalKadaiEngineMock;
-
-  private WorkbasketHistoryQueryImpl historyQueryImpl;
-
   @Mock private SqlSession sqlSessionMock;
+  private WorkbasketHistoryQueryImpl historyQueryImpl;
 
   @BeforeEach
   void setup() {

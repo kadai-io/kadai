@@ -25,18 +25,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import acceptance.AbstractAccTest;
-import io.kadai.KadaiConfiguration;
-import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryEventMapper;
-import io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryQueryMapper;
 import io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryServiceImpl;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEventType;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -49,18 +45,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class WorkbasketHistoryServiceImplTest {
 
   @InjectMocks @Spy private WorkbasketHistoryServiceImpl cutSpy;
-
   @Mock private WorkbasketHistoryEventMapper workbasketHistoryEventMapperMock;
-
-  @Mock private WorkbasketHistoryQueryMapper workbasketHistoryQueryMapperMock;
-  @Mock private KadaiConfiguration kadaiConfiguration;
-
-  @Mock private KadaiEngine kadaiEngine;
-
   @Mock private InternalKadaiEngine internalKadaiEngine;
-
-  @Mock private SqlSessionManager sqlSessionManagerMock;
-
   @Mock private SqlSession sqlSessionMock;
 
   @Test

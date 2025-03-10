@@ -25,18 +25,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import acceptance.AbstractAccTest;
-import io.kadai.KadaiConfiguration;
-import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.simplehistory.classification.internal.ClassificationHistoryEventMapper;
-import io.kadai.simplehistory.classification.internal.ClassificationHistoryQueryMapper;
 import io.kadai.simplehistory.classification.internal.ClassificationHistoryServiceImpl;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEventType;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

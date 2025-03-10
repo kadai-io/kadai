@@ -97,7 +97,8 @@ public abstract class AbstractAccTest {
   public static WorkbasketHistoryEvent createWorkbasketHistoryEvent(
       String workbasketKey, String type, String userid, String details) {
     WorkbasketHistoryEvent historyEvent = new WorkbasketHistoryEvent();
-    historyEvent.setId(IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT));
+    historyEvent.setId(
+        IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT));
     historyEvent.setUserId(userid);
     historyEvent.setDetails(details);
     historyEvent.setKey(workbasketKey);
@@ -108,7 +109,8 @@ public abstract class AbstractAccTest {
   public static ClassificationHistoryEvent createClassificationHistoryEvent(
       String workbasketKey, String type, String userid, String details) {
     ClassificationHistoryEvent historyEvent = new ClassificationHistoryEvent();
-    historyEvent.setId(IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT));
+    historyEvent.setId(
+        IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT));
     historyEvent.setUserId(userid);
     historyEvent.setDetails(details);
     historyEvent.setKey(workbasketKey);
@@ -181,11 +183,6 @@ public abstract class AbstractAccTest {
     }
   }
 
-  @BeforeAll
-  static void setupTest() throws Exception {
-    resetDb(null);
-  }
-
   protected TaskHistoryQueryMapper getHistoryQueryMapper()
       throws NoSuchFieldException, IllegalAccessException {
 
@@ -214,5 +211,10 @@ public abstract class AbstractAccTest {
     objectRef.setType(type);
     objectRef.setValue(value);
     return objectRef;
+  }
+
+  @BeforeAll
+  static void setupTest() throws Exception {
+    resetDb(null);
   }
 }

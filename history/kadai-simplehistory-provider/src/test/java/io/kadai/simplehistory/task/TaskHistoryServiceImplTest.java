@@ -29,13 +29,11 @@ import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.simplehistory.task.internal.TaskHistoryEventMapper;
-import io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper;
 import io.kadai.simplehistory.task.internal.TaskHistoryServiceImpl;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -48,19 +46,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class TaskHistoryServiceImplTest {
 
   @InjectMocks @Spy private TaskHistoryServiceImpl cutSpy;
-
   @Mock private TaskHistoryEventMapper taskHistoryEventMapperMock;
-
-  @Mock private TaskHistoryQueryMapper taskHistoryQueryMapperMock;
-
   @Mock private KadaiConfiguration kadaiConfiguration;
-
   @Mock private KadaiEngine kadaiEngine;
-
   @Mock private InternalKadaiEngine internalKadaiEngine;
-
-  @Mock private SqlSessionManager sqlSessionManagerMock;
-
   @Mock private SqlSession sqlSessionMock;
 
   @Test
