@@ -18,7 +18,7 @@
 
 package acceptance.user;
 
-import static io.kadai.common.internal.util.CheckedSupplier.wrap;
+import static io.kadai.common.internal.util.CheckedSupplier.rethrowing;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestWorkbasket;
 import static io.kadai.testapi.DefaultTestEntities.randomTestUser;
 import static io.kadai.testapi.builder.UserBuilder.newUser;
@@ -1092,7 +1092,7 @@ class UserServiceAccTest {
       // then permission gets revoked
 
       wai.setPermission(WorkbasketPermission.OPEN, false);
-      kadaiEngine.runAsAdmin(wrap(() -> workbasketService.updateWorkbasketAccessItem(wai)));
+      kadaiEngine.runAsAdmin(rethrowing(() -> workbasketService.updateWorkbasketAccessItem(wai)));
 
       userInDatabase = userService.getUser(user.getId());
 

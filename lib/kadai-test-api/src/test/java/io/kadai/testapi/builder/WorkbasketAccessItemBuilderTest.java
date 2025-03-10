@@ -18,7 +18,7 @@
 
 package io.kadai.testapi.builder;
 
-import static io.kadai.common.internal.util.CheckedSupplier.wrap;
+import static io.kadai.common.internal.util.CheckedSupplier.rethrowing;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestWorkbasket;
 import static io.kadai.testapi.builder.WorkbasketAccessItemBuilder.newWorkbasketAccessItem;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -75,7 +75,7 @@ class WorkbasketAccessItemBuilderTest {
 
     List<WorkbasketAccessItem> workbasketAccessItems =
         kadaiEngine.runAsAdmin(
-            wrap(() -> workbasketService.getWorkbasketAccessItems(workbasket.getId())));
+            rethrowing(() -> workbasketService.getWorkbasketAccessItems(workbasket.getId())));
 
     assertThat(workbasketAccessItems).containsExactly(workbasketAccessItem);
   }
