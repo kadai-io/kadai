@@ -18,6 +18,24 @@ public interface UserQuery extends BaseQuery<User, UserQueryColumnName> {
   UserQuery idIn(String... ids);
 
   /**
+   * Sort the query result by first name.
+   *
+   * @param sortDirection Determines whether the result is sorted in ascending or descending order.
+   *     If sortDirection is null, the result is sorted in ascending order
+   * @return the query
+   */
+  UserQuery orderByFirstName(SortDirection sortDirection);
+
+  /**
+   * Sort the query result by last name.
+   *
+   * @param sortDirection Determines whether the result is sorted in ascending or descending order.
+   *     If sortDirection is null, the result is sorted in ascending order
+   * @return the query
+   */
+  UserQuery orderByLastName(SortDirection sortDirection);
+
+  /**
    * Selects only {@linkplain User Users} which have a {@linkplain
    * User#getOrgLevel1() orgLevel1} equal to any of the passed values.
    *
@@ -25,6 +43,15 @@ public interface UserQuery extends BaseQuery<User, UserQueryColumnName> {
    * @return this query
    */
   UserQuery orgLevel1In(String... orgLevel1s);
+
+  /**
+   * Sort the query result by organization level 1.
+   *
+   * @param sortDirection Determines whether the result is sorted in ascending or descending order.
+   *     If sortDirection is null, the result is sorted in ascending order
+   * @return the query
+   */
+  UserQuery orderByOrgLevel1(SortDirection sortDirection);
 
   /**
    * Selects only {@linkplain User Users} which have a {@linkplain
@@ -36,6 +63,15 @@ public interface UserQuery extends BaseQuery<User, UserQueryColumnName> {
   UserQuery orgLevel2In(String... orgLevel2s);
 
   /**
+   * Sort the query result by organization level 2.
+   *
+   * @param sortDirection Determines whether the result is sorted in ascending or descending order.
+   *     If sortDirection is null, the result is sorted in ascending order
+   * @return the query
+   */
+  UserQuery orderByOrgLevel2(SortDirection sortDirection);
+
+  /**
    * Selects only {@linkplain User Users} which have a {@linkplain
    * User#getOrgLevel3() orgLevel3} equal to any of the passed values.
    *
@@ -45,6 +81,15 @@ public interface UserQuery extends BaseQuery<User, UserQueryColumnName> {
   UserQuery orgLevel3In(String... orgLevel3s);
 
   /**
+   * Sort the query result by organization level 3.
+   *
+   * @param sortDirection Determines whether the result is sorted in ascending or descending order.
+   *     If sortDirection is null, the result is sorted in ascending order
+   * @return the query
+   */
+  UserQuery orderByOrgLevel3(SortDirection sortDirection);
+
+  /**
    * Selects only {@linkplain User Users} which have a {@linkplain
    * User#getOrgLevel4() orgLevel4} equal to any of the passed values.
    *
@@ -52,4 +97,13 @@ public interface UserQuery extends BaseQuery<User, UserQueryColumnName> {
    * @return this query
    */
   UserQuery orgLevel4In(String... orgLevel4s);
+
+  /**
+   * Sort the query result by organization level 4.
+   *
+   * @param sortDirection Determines whether the result is sorted in ascending or descending order.
+   *     If sortDirection is null, the result is sorted in ascending order
+   * @return the query
+   */
+  UserQuery orderByOrgLevel4(SortDirection sortDirection);
 }

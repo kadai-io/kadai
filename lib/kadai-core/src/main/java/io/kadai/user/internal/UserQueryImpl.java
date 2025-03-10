@@ -45,9 +45,24 @@ public class UserQueryImpl implements UserQuery {
   }
 
   @Override
+  public UserQuery orderByFirstName(SortDirection sortDirection) {
+    return addOrderCriteria("FIRST_NAME", sortDirection);
+  }
+
+  @Override
+  public UserQuery orderByLastName(SortDirection sortDirection) {
+    return addOrderCriteria("LAST_NAME", sortDirection);
+  }
+
+  @Override
   public UserQuery orgLevel1In(String... orgLevel1s) {
     this.orgLevel1In = orgLevel1s;
     return this;
+  }
+
+  @Override
+  public UserQuery orderByOrgLevel1(SortDirection sortDirection) {
+    return addOrderCriteria("ORG_LEVEL_1", sortDirection);
   }
 
   @Override
@@ -57,15 +72,30 @@ public class UserQueryImpl implements UserQuery {
   }
 
   @Override
+  public UserQuery orderByOrgLevel2(SortDirection sortDirection) {
+    return addOrderCriteria("ORG_LEVEL_2", sortDirection);
+  }
+
+  @Override
   public UserQuery orgLevel3In(String... orgLevel3s) {
     this.orgLevel3In = orgLevel3s;
     return this;
   }
 
   @Override
+  public UserQuery orderByOrgLevel3(SortDirection sortDirection) {
+    return addOrderCriteria("ORG_LEVEL_3", sortDirection);
+  }
+
+  @Override
   public UserQuery orgLevel4In(String... orgLevel4s) {
     this.orgLevel4In = orgLevel4s;
     return this;
+  }
+
+  @Override
+  public UserQuery orderByOrgLevel4(SortDirection sortDirection) {
+    return addOrderCriteria("ORG_LEVEL_4", sortDirection);
   }
 
   @Override
