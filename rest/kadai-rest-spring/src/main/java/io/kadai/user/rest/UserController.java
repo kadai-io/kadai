@@ -22,6 +22,7 @@ import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.security.CurrentUserContext;
+import io.kadai.common.rest.QueryPagingParameter;
 import io.kadai.common.rest.QuerySortBy;
 import io.kadai.common.rest.QuerySortParameter;
 import io.kadai.common.rest.RestEndpoints;
@@ -32,9 +33,8 @@ import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
 import io.kadai.user.api.models.User;
 import io.kadai.user.rest.assembler.UserRepresentationModelAssembler;
-import io.kadai.user.rest.models.UserCollectionRepresentationModel;
+import io.kadai.user.rest.models.UserPagedRepresentationModel;
 import io.kadai.user.rest.models.UserRepresentationModel;
-import io.kadai.workbasket.rest.WorkbasketController.WorkbasketQuerySortParameter;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.beans.ConstructorProperties;
@@ -84,11 +84,19 @@ public class UserController implements UserApi {
 
   @GetMapping(RestEndpoints.URL_USERS)
   @Transactional(readOnly = true, rollbackFor = Exception.class)
-  public ResponseEntity<UserCollectionRepresentationModel> getUsers(
+  public ResponseEntity<UserPagedRepresentationModel> getUsers(
       HttpServletRequest request,
       @ParameterObject UserQueryFilterParameter filterParameter,
-      @ParameterObject UserQuerySortParameter sortParameter)
+      @ParameterObject UserQuerySortParameter sortParameter,
+      @ParameterObject QueryPagingParameter <User, UserQuery> pagingParameter)
       throws InvalidArgumentException {
+
+    QueryParamsValidator.validateParams(
+        request,
+        UserQueryFilterParameter.class,
+        QuerySortParameter.class,
+        QueryPagingParameter.class);
+
     if (filterParameter.getCurrentUser() != null
         && QueryParamsValidator.hasQueryParameterValues(request, "current-user")) {
       throw new InvalidArgumentException(
@@ -100,7 +108,13 @@ public class UserController implements UserApi {
     filterParameter.apply(query);
     sortParameter.apply(query);
 
-    return ResponseEntity.ok(userAssembler.toKadaiCollectionModel(query.list()));
+    List<User> users = pagingParameter.apply(query);
+
+    UserPagedRepresentationModel pagedModels =
+        userAssembler.toPagedModel(
+            users, pagingParameter.getPageMetadata());
+
+    return ResponseEntity.ok(pagedModels);
   }
 
   @PostMapping(RestEndpoints.URL_USERS)

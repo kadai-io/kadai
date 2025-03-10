@@ -50,8 +50,6 @@ public class UserQuerySqlProvider {
         + "<if test='orgLevel4In != null'>AND ORG_LEVEL_4 IN"
         + "(<foreach item='item' collection='orgLevel4In' separator=',' >#{item}</foreach>)</if> "
         + CLOSING_WHERE_TAG
-        + "<if test='!orderBy.isEmpty()'>ORDER BY "
-        + "<foreach item='item' collection='orderBy' separator=',' >${item}</foreach></if> "
         + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
