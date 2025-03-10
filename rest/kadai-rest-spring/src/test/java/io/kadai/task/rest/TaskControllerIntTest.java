@@ -84,14 +84,9 @@ import org.testcontainers.shaded.com.google.common.collect.Lists;
 @KadaiSpringBootTest
 class TaskControllerIntTest {
 
-  private static final Class<TaskSummaryPagedRepresentationModel> TASK_SUMMARY_PAGE_MODEL_TYPE =
-      TaskSummaryPagedRepresentationModel.class;
-  private static final Class<TaskSummaryCollectionRepresentationModel>
-      TASK_SUMMARY_COLLECTION_MODEL_TYPE = TaskSummaryCollectionRepresentationModel.class;
   private static final ParameterizedTypeReference<Map<String, Object>>
       BULK_RESULT_TASKS_MODEL_TYPE = new ParameterizedTypeReference<>() {};
-  private static final Class<TaskRepresentationModel> TASK_MODEL_TYPE =
-      TaskRepresentationModel.class;
+
   private final RestHelper restHelper;
   @Autowired KadaiConfiguration kadaiConfiguration;
 
@@ -110,7 +105,7 @@ class TaskControllerIntTest {
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
             .retrieve()
-            .toEntity(TASK_MODEL_TYPE);
+            .toEntity(TaskRepresentationModel.class);
 
     assertThat(responseGet.getBody()).isNotNull();
     TaskRepresentationModel theTaskRepresentationModel = responseGet.getBody();
@@ -127,7 +122,7 @@ class TaskControllerIntTest {
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
             .body(theTaskRepresentationModel)
             .retrieve()
-            .toEntity(TASK_MODEL_TYPE);
+            .toEntity(TaskRepresentationModel.class);
 
     assertThat(responseUpdate.getBody()).isNotNull();
     TaskRepresentationModel theUpdatedTaskRepresentationModel = responseUpdate.getBody();
@@ -206,7 +201,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -225,7 +220,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -254,7 +249,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -271,7 +266,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       TaskRepresentationModel repModel = response.getBody();
       assertThat(repModel).isNotNull();
@@ -303,7 +298,7 @@ class TaskControllerIntTest {
                     .headers(
                         headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                     .retrieve()
-                    .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                    .toEntity(TaskSummaryPagedRepresentationModel.class);
 
             assertThat(response.getBody()).isNotNull();
             assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -331,7 +326,7 @@ class TaskControllerIntTest {
                     .headers(
                         headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                     .retrieve()
-                    .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                    .toEntity(TaskSummaryPagedRepresentationModel.class);
 
             assertThat(response.getBody()).isNotNull();
             assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -359,7 +354,7 @@ class TaskControllerIntTest {
                     .headers(
                         headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                     .retrieve()
-                    .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                    .toEntity(TaskSummaryPagedRepresentationModel.class);
 
             assertThat(response.getBody()).isNotNull();
             assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -387,7 +382,7 @@ class TaskControllerIntTest {
                     .headers(
                         headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                     .retrieve()
-                    .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                    .toEntity(TaskSummaryPagedRepresentationModel.class);
 
             assertThat(response.getBody()).isNotNull();
             assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -415,7 +410,7 @@ class TaskControllerIntTest {
                     .headers(
                         headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                     .retrieve()
-                    .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                    .toEntity(TaskSummaryPagedRepresentationModel.class);
 
             assertThat(response.getBody()).isNotNull();
             assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -448,7 +443,7 @@ class TaskControllerIntTest {
                             headers ->
                                 headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                         .retrieve()
-                        .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                        .toEntity(TaskSummaryPagedRepresentationModel.class);
 
             assertThatThrownBy(httpCall)
                 .isInstanceOf(HttpStatusCodeException.class)
@@ -487,7 +482,7 @@ class TaskControllerIntTest {
                             headers ->
                                 headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                         .retrieve()
-                        .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                        .toEntity(TaskSummaryPagedRepresentationModel.class);
 
             assertThatThrownBy(httpCall)
                 .isInstanceOf(HttpStatusCodeException.class)
@@ -524,7 +519,7 @@ class TaskControllerIntTest {
                     .headers(
                         headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                     .retrieve()
-                    .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                    .toEntity(TaskSummaryPagedRepresentationModel.class);
 
             assertThat(response.getBody()).isNotNull();
             assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -554,7 +549,7 @@ class TaskControllerIntTest {
                     .headers(
                         headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                     .retrieve()
-                    .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                    .toEntity(TaskSummaryPagedRepresentationModel.class);
 
             assertThat(response.getBody()).isNotNull();
             assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -584,7 +579,7 @@ class TaskControllerIntTest {
                     .headers(
                         headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                     .retrieve()
-                    .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                    .toEntity(TaskSummaryPagedRepresentationModel.class);
 
             assertThat(response.getBody()).isNotNull();
             assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -612,7 +607,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -634,7 +629,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -660,7 +655,7 @@ class TaskControllerIntTest {
                   .headers(
                       headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                   .retrieve()
-                  .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                  .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThatThrownBy(httpCall)
           .isInstanceOf(HttpStatusCodeException.class)
@@ -690,7 +685,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -713,7 +708,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -736,7 +731,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -759,7 +754,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -783,7 +778,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -809,7 +804,7 @@ class TaskControllerIntTest {
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
                   .retrieve()
-                  .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                  .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThatThrownBy(httpCall)
           .isInstanceOf(HttpStatusCodeException.class)
@@ -836,7 +831,7 @@ class TaskControllerIntTest {
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
                   .retrieve()
-                  .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                  .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThatThrownBy(httpCall)
           .isInstanceOf(HttpStatusCodeException.class)
@@ -863,7 +858,7 @@ class TaskControllerIntTest {
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
                   .retrieve()
-                  .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                  .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThatThrownBy(httpCall)
           .isInstanceOf(HttpStatusCodeException.class)
@@ -890,7 +885,7 @@ class TaskControllerIntTest {
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
                   .retrieve()
-                  .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                  .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThatThrownBy(httpCall)
           .isInstanceOf(HttpStatusCodeException.class)
@@ -914,7 +909,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
       assertThat(response.getBody()).isNotNull();
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -936,7 +931,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
       assertThat(response.getBody()).isNotNull();
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -955,7 +950,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
       assertThat(response.getBody()).isNotNull();
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -974,7 +969,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
       assertThat(response.getBody()).isNotNull();
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -994,7 +989,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
       assertThat(response.getBody()).isNotNull();
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -1013,7 +1008,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
       assertThat(response.getBody()).isNotNull();
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -1032,7 +1027,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
       assertThat(response.getBody()).isNotNull();
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -1051,7 +1046,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
       assertThat(response.getBody()).isNotNull();
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -1072,7 +1067,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -1103,7 +1098,7 @@ class TaskControllerIntTest {
                                 headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                         .body(taskRepresentationModel)
                         .retrieve()
-                        .toEntity(TASK_MODEL_TYPE);
+                        .toEntity(TaskRepresentationModel.class);
             assertThatThrownBy(httpCall)
                 .isInstanceOf(HttpStatusCodeException.class)
                 .hasMessageContaining("Format of custom attributes is not valid")
@@ -1131,7 +1126,7 @@ class TaskControllerIntTest {
                   .headers(
                       headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                   .retrieve()
-                  .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                  .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThatThrownBy(httpCall)
           .isInstanceOf(HttpStatusCodeException.class)
@@ -1156,7 +1151,7 @@ class TaskControllerIntTest {
                   .headers(
                       headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                   .retrieve()
-                  .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                  .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThatThrownBy(httpCall)
           .isInstanceOf(HttpStatusCodeException.class)
@@ -1196,7 +1191,7 @@ class TaskControllerIntTest {
                   .headers(
                       headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                   .retrieve()
-                  .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                  .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThatThrownBy(httpCall)
           .isInstanceOf(HttpStatusCodeException.class)
@@ -1215,7 +1210,7 @@ class TaskControllerIntTest {
                   .headers(
                       headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                   .retrieve()
-                  .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                  .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThatThrownBy(httpCall2)
           .isInstanceOf(HttpStatusCodeException.class)
@@ -1242,7 +1237,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -1264,7 +1259,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -1289,7 +1284,7 @@ class TaskControllerIntTest {
                   .headers(
                       headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                   .retrieve()
-                  .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                  .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThatThrownBy(httpCall)
           .isInstanceOf(HttpStatusCodeException.class)
@@ -1309,7 +1304,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -1328,7 +1323,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -1345,7 +1340,7 @@ class TaskControllerIntTest {
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
                   .retrieve()
-                  .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+                  .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThatThrownBy(httpCall)
           .isInstanceOf(HttpStatusCodeException.class)
@@ -1363,7 +1358,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -1381,7 +1376,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -1410,7 +1405,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -1437,7 +1432,7 @@ class TaskControllerIntTest {
                                 headers ->
                                     headers.addAll(RestHelper.generateHeadersForUser("admin")))
                             .retrieve()
-                            .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE))
+                            .toEntity(TaskSummaryPagedRepresentationModel.class))
                 .isInstanceOf(HttpStatusCodeException.class)
                 .hasMessageContaining(
                     "It is prohibited to use the param owner-is-null with values.");
@@ -1459,7 +1454,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getContent()).hasSize(5);
@@ -1492,7 +1487,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -1512,7 +1507,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -1541,7 +1536,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -1564,7 +1559,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getContent()).hasSize(62);
@@ -1578,7 +1573,7 @@ class TaskControllerIntTest {
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getContent()).hasSize(5);
@@ -1607,7 +1602,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat(response.getBody().getContent())
@@ -1633,7 +1628,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat(response.getBody().getContent())
@@ -1657,7 +1652,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat(response.getBody().getContent())
@@ -1683,7 +1678,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       TaskRepresentationModel repModel = response.getBody();
       assertThat(repModel).isNotNull();
@@ -1699,7 +1694,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -1718,7 +1713,7 @@ class TaskControllerIntTest {
                       .headers(
                           headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
                       .retrieve()
-                      .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE))
+                      .toEntity(TaskSummaryPagedRepresentationModel.class))
           .isInstanceOf(HttpStatusCodeException.class)
           .hasMessageContaining(
               "provided value of the property 'without-attachment' must be 'true'");
@@ -1734,7 +1729,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       TaskRepresentationModel repModel = response.getBody();
       assertThat(repModel).isNotNull();
@@ -1750,7 +1745,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -1766,7 +1761,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -1783,7 +1778,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_PAGE_MODEL_TYPE);
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -1800,7 +1795,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat(response.getBody().getPriority())
@@ -1818,7 +1813,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(response.getBody())
           .isNotNull()
@@ -1842,7 +1837,7 @@ class TaskControllerIntTest {
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .body(taskRepresentationModel)
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
       assertThat(responseCreate.getBody()).isNotNull();
 
@@ -1877,7 +1872,7 @@ class TaskControllerIntTest {
                       headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                   .body(taskRepresentationModel)
                   .retrieve()
-                  .toEntity(TASK_MODEL_TYPE);
+                  .toEntity(TaskRepresentationModel.class);
 
       assertThatThrownBy(httpCall)
           .extracting(HttpStatusCodeException.class::cast)
@@ -1903,7 +1898,7 @@ class TaskControllerIntTest {
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .body(taskRepresentationModel)
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
       assertThat(responseCreate.getBody()).isNotNull();
       String taskIdOfCreatedTask = responseCreate.getBody().getTaskId();
@@ -1932,7 +1927,7 @@ class TaskControllerIntTest {
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .body(taskRepresentationModel)
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
       assertThat(responseCreate.getBody()).isNotNull();
       assertThat(responseCreate.getBody().getPriority())
@@ -1963,7 +1958,7 @@ class TaskControllerIntTest {
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .body(taskRepresentationModel)
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
       assertThat(responseCreate.getBody()).isNotNull();
       // The classification of taskRepresentationModel with the key "L11010" has priority=1
@@ -2001,7 +1996,7 @@ class TaskControllerIntTest {
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
                   .body(taskRepresentationModel)
                   .retrieve()
-                  .toEntity(TASK_MODEL_TYPE);
+                  .toEntity(TaskRepresentationModel.class);
 
       assertThatThrownBy(httpCall).isInstanceOf(HttpStatusCodeException.class);
     }
@@ -2019,7 +2014,7 @@ class TaskControllerIntTest {
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .body(taskRepresentationModel)
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(responseCreate.getBody().getWorkbasketSummary().getWorkbasketId())
           .isEqualTo(IntegrationTestTaskRouter.DEFAULT_ROUTING_TARGET);
@@ -2095,7 +2090,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       final TaskRepresentationModel originalTask = responseGet.getBody();
       Instant expectedReceived = Instant.parse("2019-09-13T08:44:17.588Z");
@@ -2107,7 +2102,7 @@ class TaskControllerIntTest {
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .body(originalTask)
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       TaskRepresentationModel updatedTask = responseUpdate.getBody();
       assertThat(updatedTask).isNotNull();
@@ -2124,7 +2119,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       final TaskRepresentationModel originalTask = responseGet.getBody();
       assertThat(originalTask).isNotNull();
@@ -2135,7 +2130,7 @@ class TaskControllerIntTest {
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .body(originalTask)
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       TaskRepresentationModel updatedTask = responseUpdate.getBody();
       assertThat(updatedTask).isNotNull();
@@ -2152,7 +2147,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       final TaskRepresentationModel originalTask = responseGet.getBody();
       assertThat(originalTask).isNotNull();
@@ -2170,7 +2165,7 @@ class TaskControllerIntTest {
                       headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                   .body(originalTask)
                   .retrieve()
-                  .toEntity(TASK_MODEL_TYPE);
+                  .toEntity(TaskRepresentationModel.class);
 
       assertThatThrownBy(httpCall)
           .extracting(HttpStatusCodeException.class::cast)
@@ -2193,7 +2188,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(responseGet.getBody()).isNotNull();
       assertThat(responseGet.getBody().getState()).isEqualTo(TaskState.COMPLETED);
 
@@ -2203,7 +2198,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(responseDelete.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
@@ -2214,7 +2209,7 @@ class TaskControllerIntTest {
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
                   .retrieve()
-                  .toEntity(TASK_MODEL_TYPE);
+                  .toEntity(TaskRepresentationModel.class);
 
       assertThatThrownBy(httpCall)
           .isInstanceOf(HttpStatusCodeException.class)
@@ -2238,7 +2233,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(responseGet.getBody()).isNotNull();
       assertThat(responseGet.getBody().getState()).isEqualTo(TaskState.CLAIMED);
 
@@ -2248,7 +2243,7 @@ class TaskControllerIntTest {
               .uri(urlForce)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(responseDelete.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
@@ -2259,7 +2254,7 @@ class TaskControllerIntTest {
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
                   .retrieve()
-                  .toEntity(TASK_MODEL_TYPE);
+                  .toEntity(TaskRepresentationModel.class);
 
       assertThatThrownBy(httpCall)
           .isInstanceOf(HttpStatusCodeException.class)
@@ -2285,7 +2280,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_SUMMARY_COLLECTION_MODEL_TYPE);
+              .toEntity(TaskSummaryCollectionRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -2308,7 +2303,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(responseGet.getBody()).isNotNull();
       TaskRepresentationModel taskRepresentationModel = responseGet.getBody();
@@ -2324,7 +2319,7 @@ class TaskControllerIntTest {
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .body(taskRepresentationModel)
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(responseUpdate.getBody()).isNotNull();
       TaskRepresentationModel theUpdatedTaskRepresentationModel = responseUpdate.getBody();
@@ -2343,7 +2338,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(responseGet.getBody()).isNotNull();
       TaskRepresentationModel taskRepresentationModel = responseGet.getBody();
@@ -2361,7 +2356,7 @@ class TaskControllerIntTest {
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
                   .body(taskRepresentationModel)
                   .retrieve()
-                  .toEntity(TASK_MODEL_TYPE);
+                  .toEntity(TaskRepresentationModel.class);
 
       assertThatThrownBy(httpCall)
           .isInstanceOf(HttpStatusCodeException.class)
@@ -2392,7 +2387,7 @@ class TaskControllerIntTest {
                     .body(
                         new TransferTaskRepresentationModel(pair.getLeft(), pair.getRight(), null))
                     .retrieve()
-                    .toEntity(TASK_MODEL_TYPE);
+                    .toEntity(TaskRepresentationModel.class);
 
             assertThat(response.getBody()).isNotNull();
             assertThat(response.getBody().getWorkbasketSummary().getWorkbasketId())
@@ -2417,7 +2412,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
       assertThat(response.getBody().getWorkbasketSummary().getWorkbasketId())
@@ -2681,7 +2676,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel repModel = getTaskResponse.getBody();
       assertThat(repModel.getState()).isEqualTo(TaskState.IN_REVIEW);
@@ -2698,7 +2693,7 @@ class TaskControllerIntTest {
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(requestedChangesResponse.getBody()).isNotNull();
       assertThat(requestedChangesResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -2719,7 +2714,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel repModel = getTaskResponse.getBody();
       assertThat(repModel.getState()).isEqualTo(TaskState.CLAIMED);
@@ -2736,7 +2731,7 @@ class TaskControllerIntTest {
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(requestedChangesResponse.getBody()).isNotNull();
       assertThat(requestedChangesResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -2761,7 +2756,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel repModel = getTaskResponse.getBody();
       assertThat(repModel.getState()).isEqualTo(TaskState.IN_REVIEW);
@@ -2783,7 +2778,7 @@ class TaskControllerIntTest {
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .body(requestBody)
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(requestedChangesResponse.getBody()).isNotNull();
       assertThat(requestedChangesResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -2806,7 +2801,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel repModel = getTaskResponse.getBody();
       assertThat(repModel.getState()).isEqualTo(TaskState.IN_REVIEW);
@@ -2829,7 +2824,7 @@ class TaskControllerIntTest {
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .body(requestBody)
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(requestedChangesResponse.getBody()).isNotNull();
       assertThat(requestedChangesResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -2852,7 +2847,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
 
       // Prepare body for request review
@@ -2873,7 +2868,7 @@ class TaskControllerIntTest {
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
                   .body(requestBody)
                   .retrieve()
-                  .toEntity(TASK_MODEL_TYPE);
+                  .toEntity(TaskRepresentationModel.class);
 
       assertThatThrownBy(requestChangesResponse)
           .isInstanceOf(HttpStatusCodeException.class)
@@ -2897,7 +2892,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel repModel = getTaskResponse.getBody();
       assertThat(repModel.getState()).isEqualTo(TaskState.CLAIMED);
@@ -2914,7 +2909,7 @@ class TaskControllerIntTest {
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(requestReviewResponse.getBody()).isNotNull();
       assertThat(requestReviewResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -2935,7 +2930,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel repModel = getTaskResponse.getBody();
       assertThat(repModel.getState()).isEqualTo(TaskState.CLAIMED);
@@ -2952,7 +2947,7 @@ class TaskControllerIntTest {
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(requestReviewResponse.getBody()).isNotNull();
       assertThat(requestReviewResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -2977,7 +2972,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel repModel = getTaskResponse.getBody();
       assertThat(repModel.getState()).isEqualTo(TaskState.CLAIMED);
@@ -2999,7 +2994,7 @@ class TaskControllerIntTest {
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .body(requestBody)
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(requestReviewResponse.getBody()).isNotNull();
       assertThat(requestReviewResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -3020,7 +3015,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel repModel = getTaskResponse.getBody();
       assertThat(repModel.getState()).isEqualTo(TaskState.CLAIMED);
@@ -3043,7 +3038,7 @@ class TaskControllerIntTest {
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .body(requestBody)
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(requestReviewResponse.getBody()).isNotNull();
       assertThat(requestReviewResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -3064,7 +3059,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
 
       // Prepare body for request review
@@ -3085,7 +3080,7 @@ class TaskControllerIntTest {
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
                   .body(requestBody)
                   .retrieve()
-                  .toEntity(TASK_MODEL_TYPE);
+                  .toEntity(TaskRepresentationModel.class);
 
       assertThatThrownBy(requestReviewResponse)
           .isInstanceOf(HttpStatusCodeException.class)
@@ -3108,7 +3103,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel repModel = getTaskResponse.getBody();
       assertThat(repModel.getState()).isEqualTo(TaskState.CLAIMED);
@@ -3124,7 +3119,7 @@ class TaskControllerIntTest {
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(completeResponse.getBody()).isNotNull();
       assertThat(completeResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -3145,7 +3140,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel repModel = getTaskResponse.getBody();
       assertThat(repModel.getState()).isEqualTo(TaskState.CLAIMED);
@@ -3162,7 +3157,7 @@ class TaskControllerIntTest {
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(forceCompleteResponse.getBody()).isNotNull();
       assertThat(forceCompleteResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -3188,7 +3183,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(responseGet.getBody()).isNotNull();
       TaskRepresentationModel taskRepresentationModel = responseGet.getBody();
@@ -3204,7 +3199,7 @@ class TaskControllerIntTest {
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(cancelResponse.getBody()).isNotNull();
       assertThat(cancelResponse.getBody().getState()).isEqualTo(TaskState.CANCELLED);
@@ -3226,7 +3221,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(responseGet.getBody()).isNotNull();
       TaskRepresentationModel taskRepresentationModel = responseGet.getBody();
@@ -3242,7 +3237,7 @@ class TaskControllerIntTest {
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(terminateResponse.getBody()).isNotNull();
       assertThat(terminateResponse.getBody().getState()).isEqualTo(TaskState.TERMINATED);
@@ -3265,7 +3260,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel readyTaskRepresentationModel = getTaskResponse.getBody();
       assertThat(readyTaskRepresentationModel.getState()).isEqualTo(TaskState.READY);
@@ -3281,7 +3276,7 @@ class TaskControllerIntTest {
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(claimResponse.getBody()).isNotNull();
       assertThat(claimResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -3302,7 +3297,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel readyTaskRepresentationModel = getTaskResponse.getBody();
       assertThat(readyTaskRepresentationModel.getState()).isEqualTo(TaskState.CLAIMED);
@@ -3318,7 +3313,7 @@ class TaskControllerIntTest {
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(claimResponse.getBody()).isNotNull();
       assertThat(claimResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -3336,7 +3331,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
 
@@ -3347,7 +3342,7 @@ class TaskControllerIntTest {
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(responseGetTask).isNotNull();
       assertThat(responseGetTask.getBody().getOwner()).isEqualTo("admin");
     }
@@ -3368,7 +3363,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel taskRepresentationModel = getTaskResponse.getBody();
       assertThat(taskRepresentationModel.getState()).isEqualTo(TaskState.CLAIMED);
@@ -3384,7 +3379,7 @@ class TaskControllerIntTest {
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(cancelClaimResponse.getBody()).isNotNull();
       assertThat(cancelClaimResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -3406,7 +3401,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel taskRepresentationModel = getTaskResponse.getBody();
       assertThat(taskRepresentationModel.getState()).isEqualTo(TaskState.CLAIMED);
@@ -3423,7 +3418,7 @@ class TaskControllerIntTest {
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(cancelClaimResponse.getBody()).isNotNull();
       assertThat(cancelClaimResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -3447,7 +3442,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel taskRepresentationModel = getTaskResponse.getBody();
       assertThat(taskRepresentationModel.getState()).isEqualTo(TaskState.CLAIMED);
@@ -3464,7 +3459,7 @@ class TaskControllerIntTest {
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(cancelClaimResponse.getBody()).isNotNull();
       assertThat(cancelClaimResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -3488,7 +3483,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel taskRepresentationModel = getTaskResponse.getBody();
       assertThat(taskRepresentationModel.getState()).isEqualTo(TaskState.CLAIMED);
@@ -3504,7 +3499,7 @@ class TaskControllerIntTest {
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(cancelClaimResponse.getBody()).isNotNull();
       assertThat(cancelClaimResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -3525,7 +3520,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(responseGet.getBody()).isNotNull();
       TaskRepresentationModel taskRepresentationModel = responseGet.getBody();
@@ -3543,7 +3538,7 @@ class TaskControllerIntTest {
                   .uri(url2)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
                   .retrieve()
-                  .toEntity(TASK_MODEL_TYPE);
+                  .toEntity(TaskRepresentationModel.class);
 
       assertThatThrownBy(httpCall)
           .extracting(HttpStatusCodeException.class::cast)
@@ -3567,7 +3562,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel taskRepresentationModel = getTaskResponse.getBody();
       assertThat(taskRepresentationModel.isRead()).isFalse();
@@ -3583,7 +3578,7 @@ class TaskControllerIntTest {
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .body(new IsReadRepresentationModel(true))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(setReadResponse.getBody()).isNotNull();
       assertThat(setReadResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -3603,7 +3598,7 @@ class TaskControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel taskRepresentationModel = getTaskResponse.getBody();
       assertThat(taskRepresentationModel.isRead()).isTrue();
@@ -3619,7 +3614,7 @@ class TaskControllerIntTest {
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
               .body(new IsReadRepresentationModel(false))
               .retrieve()
-              .toEntity(TASK_MODEL_TYPE);
+              .toEntity(TaskRepresentationModel.class);
 
       assertThat(setUnreadResponse.getBody()).isNotNull();
       assertThat(setUnreadResponse.getStatusCode()).isEqualTo(HttpStatus.OK);

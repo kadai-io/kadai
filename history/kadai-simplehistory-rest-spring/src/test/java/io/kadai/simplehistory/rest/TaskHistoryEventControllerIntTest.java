@@ -48,13 +48,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 @KadaiSpringBootTest
 class TaskHistoryEventControllerIntTest {
 
-  private static final Class<TaskHistoryEventPagedRepresentationModel>
-      TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE =
-          TaskHistoryEventPagedRepresentationModel.class;
-
-  private static final Class<TaskHistoryEventRepresentationModel>
-      TASK_HISTORY_EVENT_REPRESENTATION_MODEL_TYPE = TaskHistoryEventRepresentationModel.class;
-
   private final RestHelper restHelper;
 
   @Autowired
@@ -72,7 +65,7 @@ class TaskHistoryEventControllerIntTest {
             .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS))
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE);
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getContent()).hasSize(45);
   }
@@ -85,7 +78,7 @@ class TaskHistoryEventControllerIntTest {
             .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS))
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE);
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getLink(IanaLinkRelations.SELF))
         .isPresent()
@@ -104,7 +97,7 @@ class TaskHistoryEventControllerIntTest {
             .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE);
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getLink(IanaLinkRelations.SELF))
         .isPresent()
@@ -123,7 +116,7 @@ class TaskHistoryEventControllerIntTest {
             .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE);
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getContent())
         .extracting(TaskHistoryEventRepresentationModel::getBusinessProcessId)
@@ -139,7 +132,7 @@ class TaskHistoryEventControllerIntTest {
             .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE);
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getContent())
         .extracting(TaskHistoryEventRepresentationModel::getTaskHistoryId)
@@ -159,7 +152,7 @@ class TaskHistoryEventControllerIntTest {
                         HistoryRestEndpoints.URL_HISTORY_EVENTS + "?created=" + currentTime))
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                 .retrieve()
-                .toEntity(TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE);
+                .toEntity(TaskHistoryEventPagedRepresentationModel.class);
     assertThatThrownBy(httpCall)
         .isInstanceOf(HttpStatusCodeException.class)
         .hasMessageContaining(currentTime)
@@ -179,7 +172,7 @@ class TaskHistoryEventControllerIntTest {
                     HistoryRestEndpoints.URL_HISTORY_EVENTS + "?created=" + now + "&created="))
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE);
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getLink(IanaLinkRelations.SELF)).isNotNull();
     assertThat(response.getBody().getContent()).hasSize(23);
@@ -200,7 +193,7 @@ class TaskHistoryEventControllerIntTest {
             .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE);
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getContent())
@@ -256,7 +249,7 @@ class TaskHistoryEventControllerIntTest {
             .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS_ID, id))
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE);
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getLink(IanaLinkRelations.SELF))
         .isPresent()
@@ -277,7 +270,7 @@ class TaskHistoryEventControllerIntTest {
                     "THI:000000000000000000000000000000000000"))
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(TASK_HISTORY_EVENT_REPRESENTATION_MODEL_TYPE);
+            .toEntity(TaskHistoryEventRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getDetails()).isNotNull();
@@ -298,7 +291,7 @@ class TaskHistoryEventControllerIntTest {
                         + "&sort-by=TASK_ID&order=DESCENDING&page-size=5&page=2")
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                 .retrieve()
-                .toEntity(TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE);
+                .toEntity(TaskHistoryEventPagedRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
         .isInstanceOf(HttpStatusCodeException.class)

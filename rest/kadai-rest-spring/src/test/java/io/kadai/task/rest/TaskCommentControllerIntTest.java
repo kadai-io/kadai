@@ -42,11 +42,6 @@ import org.springframework.web.client.HttpStatusCodeException;
 @KadaiSpringBootTest
 class TaskCommentControllerIntTest {
 
-  private static final Class<TaskCommentCollectionRepresentationModel>
-      TASK_COMMENT_PAGE_MODEL_TYPE = TaskCommentCollectionRepresentationModel.class;
-  private static final Class<TaskCommentRepresentationModel> TASK_COMMENT_TYPE =
-      TaskCommentRepresentationModel.class;
-
   private final RestHelper restHelper;
 
   @Autowired
@@ -66,7 +61,7 @@ class TaskCommentControllerIntTest {
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
             .retrieve()
-            .toEntity(TASK_COMMENT_TYPE);
+            .toEntity(TaskCommentRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
   }
@@ -82,7 +77,7 @@ class TaskCommentControllerIntTest {
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
                 .retrieve()
-                .toEntity(TASK_COMMENT_TYPE);
+                .toEntity(TaskCommentRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
         .extracting(HttpStatusCodeException.class::cast)
@@ -103,7 +98,7 @@ class TaskCommentControllerIntTest {
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
                 .retrieve()
-                .toEntity(TASK_COMMENT_PAGE_MODEL_TYPE);
+                .toEntity(TaskCommentCollectionRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
         .extracting(HttpStatusCodeException.class::cast)
@@ -127,7 +122,7 @@ class TaskCommentControllerIntTest {
                 .uri(url1)
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
                 .retrieve()
-                .toEntity(TASK_COMMENT_PAGE_MODEL_TYPE);
+                .toEntity(TaskCommentCollectionRepresentationModel.class);
     assertThat(getTaskCommentsSortedByModifiedOrderedByDescendingResponse.getBody()).isNotNull();
     assertThat(getTaskCommentsSortedByModifiedOrderedByDescendingResponse.getBody().getContent())
         .hasSize(3)
@@ -142,7 +137,7 @@ class TaskCommentControllerIntTest {
                 .uri(url2)
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
                 .retrieve()
-                .toEntity(TASK_COMMENT_PAGE_MODEL_TYPE);
+                .toEntity(TaskCommentCollectionRepresentationModel.class);
     assertThat(getTaskCommentsSortedByModifiedOrderedByAscendingResponse.getBody()).isNotNull();
     assertThat(getTaskCommentsSortedByModifiedOrderedByAscendingResponse.getBody().getContent())
         .hasSize(3)
@@ -157,7 +152,7 @@ class TaskCommentControllerIntTest {
                 .uri(url3)
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
                 .retrieve()
-                .toEntity(TASK_COMMENT_PAGE_MODEL_TYPE);
+                .toEntity(TaskCommentCollectionRepresentationModel.class);
     assertThat(getTaskCommentsSortedByCreatedOrderedByDescendingResponse.getBody()).isNotNull();
     assertThat(getTaskCommentsSortedByCreatedOrderedByDescendingResponse.getBody().getContent())
         .hasSize(3)
@@ -172,7 +167,7 @@ class TaskCommentControllerIntTest {
                 .uri(url4)
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
                 .retrieve()
-                .toEntity(TASK_COMMENT_PAGE_MODEL_TYPE);
+                .toEntity(TaskCommentCollectionRepresentationModel.class);
     assertThat(getTaskCommentsSortedByCreatedOrderedByAscendingResponse.getBody()).isNotNull();
     assertThat(getTaskCommentsSortedByCreatedOrderedByAscendingResponse.getBody().getContent())
         .hasSize(3)
@@ -193,7 +188,7 @@ class TaskCommentControllerIntTest {
                 .uri(url + "?sort-by=invalidSortParam")
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
                 .retrieve()
-                .toEntity(TASK_COMMENT_PAGE_MODEL_TYPE);
+                .toEntity(TaskCommentCollectionRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
         .extracting(HttpStatusCodeException.class::cast)
@@ -214,7 +209,7 @@ class TaskCommentControllerIntTest {
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
                 .retrieve()
-                .toEntity(TASK_COMMENT_TYPE);
+                .toEntity(TaskCommentRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
         .extracting(HttpStatusCodeException.class::cast)
@@ -239,7 +234,7 @@ class TaskCommentControllerIntTest {
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
             .body(taskCommentRepresentationModelToCreate)
             .retrieve()
-            .toEntity(TASK_COMMENT_TYPE);
+            .toEntity(TaskCommentRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getTaskCommentId()).isNotNull();
@@ -270,7 +265,7 @@ class TaskCommentControllerIntTest {
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-b-1")))
                 .body(taskCommentRepresentationModelToCreate)
                 .retrieve()
-                .toEntity(TASK_COMMENT_TYPE);
+                .toEntity(TaskCommentRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
         .extracting(HttpStatusCodeException.class::cast)
@@ -294,7 +289,7 @@ class TaskCommentControllerIntTest {
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
                 .body(taskCommentRepresentationModelToCreate)
                 .retrieve()
-                .toEntity(TASK_COMMENT_TYPE);
+                .toEntity(TaskCommentRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
         .extracting(HttpStatusCodeException.class::cast)
@@ -316,7 +311,7 @@ class TaskCommentControllerIntTest {
             .uri(url)
             .headers(httpHeaders -> httpHeaders.addAll(headers))
             .retrieve()
-            .toEntity(TASK_COMMENT_TYPE);
+            .toEntity(TaskCommentRepresentationModel.class);
     TaskCommentRepresentationModel taskCommentToUpdate = getTaskCommentResponse.getBody();
     assertThat(taskCommentToUpdate).isNotNull();
     assertThat(taskCommentToUpdate.getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -332,7 +327,7 @@ class TaskCommentControllerIntTest {
             .headers(httpHeaders -> httpHeaders.addAll(headers))
             .body(taskCommentToUpdate)
             .retrieve()
-            .toEntity(TASK_COMMENT_TYPE);
+            .toEntity(TaskCommentRepresentationModel.class);
 
     assertThat(responseUpdate.getBody()).isNotNull();
     assertThat(responseUpdate.getBody().getTextField()).isEqualTo("updated text in textfield");
@@ -350,7 +345,7 @@ class TaskCommentControllerIntTest {
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
             .retrieve()
-            .toEntity(TASK_COMMENT_TYPE);
+            .toEntity(TaskCommentRepresentationModel.class);
     TaskCommentRepresentationModel taskCommentToUpdate = getTaskCommentResponse.getBody();
     assertThat(taskCommentToUpdate).isNotNull();
     assertThat(taskCommentToUpdate.getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -367,7 +362,7 @@ class TaskCommentControllerIntTest {
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
                 .body(taskCommentToUpdate)
                 .retrieve()
-                .toEntity(TASK_COMMENT_TYPE);
+                .toEntity(TaskCommentRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
         .extracting(HttpStatusCodeException.class::cast)
@@ -387,7 +382,7 @@ class TaskCommentControllerIntTest {
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
             .retrieve()
-            .toEntity(TASK_COMMENT_TYPE);
+            .toEntity(TaskCommentRepresentationModel.class);
     TaskCommentRepresentationModel taskComment = getTaskCommentResponse.getBody();
     assertThat(taskComment).isNotNull();
     assertThat(taskComment.getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -404,7 +399,7 @@ class TaskCommentControllerIntTest {
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
                 .body(taskComment)
                 .retrieve()
-                .toEntity(TASK_COMMENT_TYPE);
+                .toEntity(TaskCommentRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
         .extracting(HttpStatusCodeException.class::cast)
@@ -424,7 +419,7 @@ class TaskCommentControllerIntTest {
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
             .retrieve()
-            .toEntity(TASK_COMMENT_TYPE);
+            .toEntity(TaskCommentRepresentationModel.class);
     assertThat(getTaskCommentResponse.getBody()).isNotNull();
     assertThat(getTaskCommentResponse.getBody().getLink(IanaLinkRelations.SELF)).isNotNull();
     assertThat(getTaskCommentResponse.getBody().getCreator()).isEqualTo("user-1-1");
@@ -443,7 +438,7 @@ class TaskCommentControllerIntTest {
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
                 .body(taskCommentRepresentationModelToUpdate)
                 .retrieve()
-                .toEntity(TASK_COMMENT_TYPE);
+                .toEntity(TaskCommentRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
         .extracting(HttpStatusCodeException.class::cast)
@@ -465,7 +460,7 @@ class TaskCommentControllerIntTest {
             .uri(url)
             .headers(httpHeaders -> httpHeaders.addAll(headers))
             .retrieve()
-            .toEntity(TASK_COMMENT_TYPE);
+            .toEntity(TaskCommentRepresentationModel.class);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
@@ -476,7 +471,7 @@ class TaskCommentControllerIntTest {
                 .uri(url)
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
                 .retrieve()
-                .toEntity(TASK_COMMENT_TYPE);
+                .toEntity(TaskCommentRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
         .isInstanceOf(HttpStatusCodeException.class)
@@ -501,7 +496,7 @@ class TaskCommentControllerIntTest {
                 .uri(url)
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
                 .retrieve()
-                .toEntity(TASK_COMMENT_PAGE_MODEL_TYPE);
+                .toEntity(TaskCommentCollectionRepresentationModel.class);
 
     assertThat(getTaskCommentsBeforeDeleteionResponse.getBody()).isNotNull();
     assertThat(getTaskCommentsBeforeDeleteionResponse.getBody().getContent()).hasSize(2);
@@ -516,7 +511,7 @@ class TaskCommentControllerIntTest {
                 .uri(url2)
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
                 .retrieve()
-                .toEntity(TASK_COMMENT_TYPE);
+                .toEntity(TaskCommentRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
         .isInstanceOf(HttpStatusCodeException.class)
@@ -538,7 +533,7 @@ class TaskCommentControllerIntTest {
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
               .retrieve()
-              .toEntity(TASK_COMMENT_TYPE);
+              .toEntity(TaskCommentRepresentationModel.class);
         };
 
     assertThatThrownBy(httpCall)

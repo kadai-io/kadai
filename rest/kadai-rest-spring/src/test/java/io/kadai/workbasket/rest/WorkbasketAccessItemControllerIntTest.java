@@ -47,10 +47,6 @@ import org.springframework.web.client.HttpStatusCodeException;
 @KadaiSpringBootTest
 class WorkbasketAccessItemControllerIntTest {
 
-  private static final Class<WorkbasketAccessItemPagedRepresentationModel>
-      WORKBASKET_ACCESS_ITEM_PAGED_REPRESENTATION_MODEL_TYPE =
-          WorkbasketAccessItemPagedRepresentationModel.class;
-
   private final RestHelper restHelper;
 
   @Autowired
@@ -68,7 +64,7 @@ class WorkbasketAccessItemControllerIntTest {
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(WORKBASKET_ACCESS_ITEM_PAGED_REPRESENTATION_MODEL_TYPE);
+            .toEntity(WorkbasketAccessItemPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getLink(IanaLinkRelations.SELF)).isNotNull();
   }
@@ -85,7 +81,7 @@ class WorkbasketAccessItemControllerIntTest {
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(WORKBASKET_ACCESS_ITEM_PAGED_REPRESENTATION_MODEL_TYPE);
+            .toEntity(WorkbasketAccessItemPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getLink(IanaLinkRelations.SELF))
         .isNotEmpty()
@@ -107,7 +103,7 @@ class WorkbasketAccessItemControllerIntTest {
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(WORKBASKET_ACCESS_ITEM_PAGED_REPRESENTATION_MODEL_TYPE);
+            .toEntity(WorkbasketAccessItemPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getContent()).hasSize(1);
     assertThat(response.getBody().getContent().iterator().next().getAccessId())
@@ -138,7 +134,7 @@ class WorkbasketAccessItemControllerIntTest {
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(WORKBASKET_ACCESS_ITEM_PAGED_REPRESENTATION_MODEL_TYPE);
+            .toEntity(WorkbasketAccessItemPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getContent()).isEmpty();
     assertThat(response.getBody().getPageMetadata().getSize()).isEqualTo(9);
@@ -179,7 +175,7 @@ class WorkbasketAccessItemControllerIntTest {
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                 .retrieve()
-                .toEntity(WORKBASKET_ACCESS_ITEM_PAGED_REPRESENTATION_MODEL_TYPE);
+                .toEntity(WorkbasketAccessItemPagedRepresentationModel.class);
     assertThatThrownBy(httpCall)
         .isInstanceOf(HttpStatusCodeException.class)
         .hasMessageContaining(
