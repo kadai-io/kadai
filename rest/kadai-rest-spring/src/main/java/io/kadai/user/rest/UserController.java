@@ -18,9 +18,13 @@
 
 package io.kadai.user.rest;
 
+import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.security.CurrentUserContext;
+import io.kadai.common.rest.QueryPagingParameter;
+import io.kadai.common.rest.QuerySortBy;
+import io.kadai.common.rest.QuerySortParameter;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.common.rest.util.QueryParamsValidator;
 import io.kadai.user.api.UserQuery;
@@ -29,9 +33,13 @@ import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
 import io.kadai.user.api.models.User;
 import io.kadai.user.rest.assembler.UserRepresentationModelAssembler;
-import io.kadai.user.rest.models.UserCollectionRepresentationModel;
+import io.kadai.user.rest.models.UserPagedRepresentationModel;
 import io.kadai.user.rest.models.UserRepresentationModel;
+
 import jakarta.servlet.http.HttpServletRequest;
+import java.beans.ConstructorProperties;
+import java.util.List;
+import java.util.function.BiConsumer;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
@@ -76,9 +84,19 @@ public class UserController implements UserApi {
 
   @GetMapping(RestEndpoints.URL_USERS)
   @Transactional(readOnly = true, rollbackFor = Exception.class)
-  public ResponseEntity<UserCollectionRepresentationModel> getUsers(
-      HttpServletRequest request, @ParameterObject UserQueryFilterParameter filterParameter)
+  public ResponseEntity<UserPagedRepresentationModel> getUsers(
+      HttpServletRequest request,
+      @ParameterObject UserQueryFilterParameter filterParameter,
+      @ParameterObject UserQuerySortParameter sortParameter,
+      @ParameterObject QueryPagingParameter <User, UserQuery> pagingParameter)
       throws InvalidArgumentException {
+
+    QueryParamsValidator.validateParams(
+        request,
+        UserQueryFilterParameter.class,
+        QuerySortParameter.class,
+        QueryPagingParameter.class);
+
     if (filterParameter.getCurrentUser() != null
         && QueryParamsValidator.hasQueryParameterValues(request, "current-user")) {
       throw new InvalidArgumentException(
@@ -88,8 +106,15 @@ public class UserController implements UserApi {
 
     UserQuery query = userService.createUserQuery();
     filterParameter.apply(query);
+    sortParameter.apply(query);
 
-    return ResponseEntity.ok(userAssembler.toKadaiCollectionModel(query.list()));
+    List<User> users = pagingParameter.apply(query);
+
+    UserPagedRepresentationModel pagedModels =
+        userAssembler.toPagedModel(
+            users, pagingParameter.getPageMetadata());
+
+    return ResponseEntity.ok(pagedModels);
   }
 
   @PostMapping(RestEndpoints.URL_USERS)
@@ -128,5 +153,43 @@ public class UserController implements UserApi {
     userService.deleteUser(userId);
 
     return ResponseEntity.noContent().build();
+  }
+
+  public enum UserQuerySortBy implements QuerySortBy<UserQuery> {
+    FIRST_NAME(UserQuery::orderByFirstName),
+    LAST_NAME(UserQuery::orderByLastName),
+    ORG_LEVEL_1(UserQuery::orderByOrgLevel1),
+    ORG_LEVEL_2(UserQuery::orderByOrgLevel2),
+    ORG_LEVEL_3(UserQuery::orderByOrgLevel3),
+    ORG_LEVEL_4(UserQuery::orderByOrgLevel4);
+
+    private final BiConsumer<UserQuery, SortDirection> consumer;
+
+    UserQuerySortBy(BiConsumer<UserQuery, SortDirection> consumer) {
+      this.consumer = consumer;
+    }
+
+    @Override
+    public void applySortByForQuery(UserQuery query, SortDirection sortDirection) {
+      consumer.accept(query, sortDirection);
+    }
+  }
+
+  // Unfortunately this class is necessary, since spring can not inject the generic 'sort-by'
+  // parameter from the super class.
+  public static class UserQuerySortParameter
+      extends QuerySortParameter<UserQuery, UserQuerySortBy> {
+
+    @ConstructorProperties({"sort-by", "order"})
+    public UserQuerySortParameter(List<UserQuerySortBy> sortBy, List<SortDirection> order)
+        throws InvalidArgumentException {
+      super(sortBy, order);
+    }
+
+    // this getter is necessary for the documentation!
+    @Override
+    public List<UserQuerySortBy> getSortBy() {
+      return super.getSortBy();
+    }
   }
 }

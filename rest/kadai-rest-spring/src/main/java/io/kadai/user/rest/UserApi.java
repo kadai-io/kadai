@@ -2,10 +2,15 @@ package io.kadai.user.rest;
 
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
+import io.kadai.common.rest.QueryPagingParameter;
 import io.kadai.common.rest.RestEndpoints;
+import io.kadai.user.api.UserQuery;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
+import io.kadai.user.api.models.User;
+import io.kadai.user.rest.UserController.UserQuerySortParameter;
 import io.kadai.user.rest.models.UserCollectionRepresentationModel;
+import io.kadai.user.rest.models.UserPagedRepresentationModel;
 import io.kadai.user.rest.models.UserRepresentationModel;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -71,11 +76,13 @@ public interface UserApi {
    * This endpoint retrieves multiple Users. If a userId can't be found in the database it will be
    * ignored. Any combination of parameters is interpreted as conjunction of those.
    *
-   * @title Get multiple Users
-   * @param request the HttpServletRequest of the request itself
+   * @param request         the HttpServletRequest of the request itself
    * @param filterParameter the filter parameters regarding UserQueryFilterParameter
+   * @param sortParameter   the sort parameters regarding UserQuerySortParameter
+   * @param pagingParameter the paging parameters
    * @return the requested Users
    * @throws InvalidArgumentException if the userIds are null or empty
+   * @title Get multiple Users
    */
   @Operation(
       summary = "Get multiple Users",
@@ -98,8 +105,11 @@ public interface UserApi {
       })
   @GetMapping(RestEndpoints.URL_USERS)
   @Transactional(readOnly = true, rollbackFor = Exception.class)
-  ResponseEntity<UserCollectionRepresentationModel> getUsers(
-      HttpServletRequest request, @ParameterObject UserQueryFilterParameter filterParameter)
+  ResponseEntity<UserPagedRepresentationModel> getUsers(
+      HttpServletRequest request,
+      @ParameterObject UserQueryFilterParameter filterParameter,
+      @ParameterObject UserQuerySortParameter sortParameter,
+      @ParameterObject QueryPagingParameter<User, UserQuery> pagingParameter)
       throws InvalidArgumentException;
 
   /**

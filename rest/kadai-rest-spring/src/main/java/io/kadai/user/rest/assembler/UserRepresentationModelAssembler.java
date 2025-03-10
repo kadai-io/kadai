@@ -19,10 +19,15 @@
 package io.kadai.user.rest.assembler;
 
 import io.kadai.common.rest.assembler.CollectionRepresentationModelAssembler;
+import io.kadai.common.rest.assembler.PagedRepresentationModelAssembler;
+import io.kadai.common.rest.models.PageMetadata;
 import io.kadai.user.api.models.User;
 import io.kadai.user.internal.models.UserImpl;
 import io.kadai.user.rest.models.UserCollectionRepresentationModel;
+import io.kadai.user.rest.models.UserPagedRepresentationModel;
 import io.kadai.user.rest.models.UserRepresentationModel;
+
+import java.util.Collection;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +37,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class UserRepresentationModelAssembler
-    implements CollectionRepresentationModelAssembler<
+    implements PagedRepresentationModelAssembler<User, UserRepresentationModel, UserPagedRepresentationModel>,
+    CollectionRepresentationModelAssembler<
         User, UserRepresentationModel, UserCollectionRepresentationModel> {
 
   @Override
@@ -84,5 +90,11 @@ public class UserRepresentationModelAssembler
   public UserCollectionRepresentationModel buildCollectionEntity(
       List<UserRepresentationModel> content) {
     return new UserCollectionRepresentationModel(content);
+  }
+
+  @Override
+  public UserPagedRepresentationModel buildPageableEntity(
+      Collection<UserRepresentationModel> content, PageMetadata pageMetadata) {
+    return new UserPagedRepresentationModel(content, pageMetadata);
   }
 }
