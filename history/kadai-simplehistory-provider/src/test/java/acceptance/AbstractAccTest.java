@@ -32,6 +32,7 @@ import io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper;
 import io.kadai.simplehistory.task.internal.TaskHistoryServiceImpl;
 import io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryEventMapper;
 import io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryServiceImpl;
+import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import io.kadai.task.api.TaskService;
@@ -96,7 +97,18 @@ public abstract class AbstractAccTest {
   public static WorkbasketHistoryEvent createWorkbasketHistoryEvent(
       String workbasketKey, String type, String userid, String details) {
     WorkbasketHistoryEvent historyEvent = new WorkbasketHistoryEvent();
-    historyEvent.setId(IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT));
+    historyEvent.setId(IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT));
+    historyEvent.setUserId(userid);
+    historyEvent.setDetails(details);
+    historyEvent.setKey(workbasketKey);
+    historyEvent.setEventType(type);
+    return historyEvent;
+  }
+
+  public static ClassificationHistoryEvent createClassificationHistoryEvent(
+      String workbasketKey, String type, String userid, String details) {
+    ClassificationHistoryEvent historyEvent = new ClassificationHistoryEvent();
+    historyEvent.setId(IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT));
     historyEvent.setUserId(userid);
     historyEvent.setDetails(details);
     historyEvent.setKey(workbasketKey);

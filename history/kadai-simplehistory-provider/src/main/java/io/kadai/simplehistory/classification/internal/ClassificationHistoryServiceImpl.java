@@ -29,7 +29,12 @@ public class ClassificationHistoryServiceImpl
     if (event.getCreated() == null) {
       event.setCreatedNow();
     }
-    kadaiEngine.executeInDatabaseConnection(() -> eventMapper.insert(event));
+    try {
+      kadaiEngine.openConnection();
+      eventMapper.insert(event);
+    } finally {
+      kadaiEngine.returnConnection();
+    }
     return event;
   }
 
