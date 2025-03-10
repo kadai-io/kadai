@@ -24,9 +24,8 @@ import acceptance.AbstractAccTest;
 import io.kadai.common.internal.util.Pair;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
-import io.kadai.simplehistory.impl.SimpleHistoryServiceImpl;
-import io.kadai.simplehistory.impl.TaskHistoryQueryImpl;
-import io.kadai.simplehistory.impl.task.TaskHistoryQueryMapper;
+import io.kadai.simplehistory.task.internal.TaskHistoryQueryImpl;
+import io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
 import io.kadai.task.api.TaskService;
@@ -46,7 +45,6 @@ import org.junit.jupiter.api.function.ThrowingConsumer;
 class CreateHistoryEventOnTaskClaimAccTest extends AbstractAccTest {
 
   private final TaskService taskService = kadaiEngine.getTaskService();
-  private final SimpleHistoryServiceImpl historyService = getHistoryService();
 
   @WithAccessId(user = "admin")
   @TestFactory
@@ -69,7 +67,7 @@ class CreateHistoryEventOnTaskClaimAccTest extends AbstractAccTest {
           List<TaskHistoryEvent> events =
               taskHistoryQueryMapper.queryHistoryEvents(
                   (TaskHistoryQueryImpl)
-                      historyService.createTaskHistoryQuery().taskIdIn(pair.getRight()));
+                      taskHistoryService.createTaskHistoryQuery().taskIdIn(pair.getRight()));
 
           assertThat(events).isEmpty();
 
@@ -81,13 +79,13 @@ class CreateHistoryEventOnTaskClaimAccTest extends AbstractAccTest {
           events =
               taskHistoryQueryMapper.queryHistoryEvents(
                   (TaskHistoryQueryImpl)
-                      historyService.createTaskHistoryQuery().taskIdIn(pair.getRight()));
+                      taskHistoryService.createTaskHistoryQuery().taskIdIn(pair.getRight()));
 
           TaskHistoryEvent event = events.get(0);
 
           assertThat(event.getEventType()).isEqualTo(TaskHistoryEventType.CLAIMED.getName());
 
-          event = historyService.getTaskHistoryEvent(event.getId());
+          event = taskHistoryService.getTaskHistoryEvent(event.getId());
 
           assertThat(event.getDetails()).isNotNull();
 
