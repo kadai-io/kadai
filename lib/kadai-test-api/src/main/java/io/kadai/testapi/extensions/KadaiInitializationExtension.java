@@ -71,6 +71,10 @@ import org.junit.platform.commons.JUnitException;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+/**
+ * JUnit-Extension for initializing and modifying the {@link KadaiConfiguration} in integration
+ * tests.
+ */
 public class KadaiInitializationExtension
     implements TestInstancePostProcessor, TestInstancePreDestroyCallback {
 
