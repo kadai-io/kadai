@@ -28,6 +28,7 @@ import io.kadai.common.api.exceptions.KadaiRuntimeException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.InternalKadaiEngine;
+import io.kadai.common.internal.PaginationInterceptor;
 import io.kadai.workbasket.api.WorkbasketCustomField;
 import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.WorkbasketQuery;
@@ -38,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.ibatis.exceptions.PersistenceException;
-import org.apache.ibatis.session.RowBounds;
 
 /** WorkbasketQuery for generating dynamic SQL. */
 public class WorkbasketQueryImpl implements WorkbasketQuery {
@@ -426,9 +426,12 @@ public class WorkbasketQueryImpl implements WorkbasketQuery {
     List<WorkbasketSummary> workbaskets = new ArrayList<>();
     try {
       kadaiEngine.openConnection();
-      RowBounds rowBounds = new RowBounds(offset, limit);
+
+      PaginationInterceptor.setPagination(offset, limit);
       handleCallerRolesAndAccessIds();
-      workbaskets = kadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this, rowBounds);
+
+      workbaskets = kadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this);
+
       return workbaskets;
     } catch (PersistenceException e) {
       if (e.getMessage().contains("ERRORCODE=-4470")) {

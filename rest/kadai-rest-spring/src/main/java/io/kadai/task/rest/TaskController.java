@@ -271,9 +271,9 @@ public class TaskController implements TaskApi {
       @PathVariable("taskId") String taskId,
       @RequestBody(required = false) Map<String, String> body)
       throws InvalidTaskStateException,
-      TaskNotFoundException,
-      InvalidOwnerException,
-      NotAuthorizedOnWorkbasketException {
+          TaskNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
 
     String workbasketId = null;
     String ownerId = null;
@@ -308,9 +308,9 @@ public class TaskController implements TaskApi {
       @PathVariable("taskId") String taskId,
       @RequestBody(required = false) Map<String, String> body)
       throws InvalidTaskStateException,
-      TaskNotFoundException,
-      InvalidOwnerException,
-      NotAuthorizedOnWorkbasketException {
+          TaskNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
 
     String workbasketId = null;
     String ownerId = null;
