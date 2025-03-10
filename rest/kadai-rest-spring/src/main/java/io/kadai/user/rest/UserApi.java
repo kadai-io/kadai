@@ -5,6 +5,7 @@ import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
+import io.kadai.user.rest.UserController.UserQuerySortParameter;
 import io.kadai.user.rest.models.UserCollectionRepresentationModel;
 import io.kadai.user.rest.models.UserRepresentationModel;
 import io.swagger.v3.oas.annotations.Operation;
@@ -74,6 +75,7 @@ public interface UserApi {
    * @title Get multiple Users
    * @param request the HttpServletRequest of the request itself
    * @param filterParameter the filter parameters regarding UserQueryFilterParameter
+   * @param sortParameter the sort parameters regarding UserQuerySortParameter
    * @return the requested Users
    * @throws InvalidArgumentException if the userIds are null or empty
    */
@@ -99,7 +101,9 @@ public interface UserApi {
   @GetMapping(RestEndpoints.URL_USERS)
   @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<UserCollectionRepresentationModel> getUsers(
-      HttpServletRequest request, @ParameterObject UserQueryFilterParameter filterParameter)
+      HttpServletRequest request,
+      @ParameterObject UserQueryFilterParameter filterParameter,
+      @ParameterObject UserQuerySortParameter sortParameter)
       throws InvalidArgumentException;
 
   /**
