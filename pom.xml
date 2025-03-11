@@ -122,6 +122,7 @@
     <modules>
         <module>common</module>
         <module>lib</module>
+        <module>history</module>
         <module>rest</module>
         <module>ci/kadai-sonar-test-coverage</module>
         <module>routing</module>
