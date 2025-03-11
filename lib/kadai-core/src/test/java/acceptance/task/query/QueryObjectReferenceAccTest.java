@@ -23,10 +23,20 @@ import static io.kadai.task.api.ObjectReferenceQueryColumnName.SYSTEM;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import acceptance.AbstractAccTest;
+import acceptance.ParameterizedQuerySqlCaptureInterceptor;
+import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.task.api.TaskQuery;
 import io.kadai.task.api.models.ObjectReference;
+import java.lang.reflect.Field;
 import java.util.List;
+import org.apache.ibatis.session.SqlSessionManager;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /** Acceptance test for all "get classification" scenarios. */
 class QueryObjectReferenceAccTest extends AbstractAccTest {
@@ -101,5 +111,36 @@ class QueryObjectReferenceAccTest extends AbstractAccTest {
         taskQuery.createObjectReferenceQuery().valueIn("Value1", "Value3").list();
 
     assertThat(objectReferenceList).hasSize(2);
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  class PhyiscalPagination {
+    @BeforeAll
+    void setup() throws Exception {
+      Field sessionManagerField = KadaiEngineImpl.class.getDeclaredField("sessionManager");
+      sessionManagerField.setAccessible(true);
+      SqlSessionManager sessionManager = (SqlSessionManager) sessionManagerField.get(kadaiEngine);
+      sessionManager
+          .getConfiguration()
+          .addInterceptor(new ParameterizedQuerySqlCaptureInterceptor());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"0,10", "5,10", "0,0", "2,4"})
+    void should_UseNativeSql_For_QueryPagination(int offset, int limit) {
+      ParameterizedQuerySqlCaptureInterceptor.resetCapturedSql();
+      kadaiEngine
+          .getTaskService()
+          .createTaskQuery()
+          .createObjectReferenceQuery()
+          .list(offset, limit);
+      final String sql = ParameterizedQuerySqlCaptureInterceptor.getCapturedSql();
+      final String physicalPattern1 = String.format("LIMIT %d OFFSET %d", limit, offset);
+      final String physicalPattern2 =
+          String.format("OFFSET %d ROWS FETCH FIRST %d ROWS ONLY", limit, offset);
+
+      assertThat(sql).containsAnyOf(physicalPattern1, physicalPattern2);
+    }
   }
 }

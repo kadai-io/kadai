@@ -26,17 +26,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import acceptance.AbstractAccTest;
+import acceptance.ParameterizedQuerySqlCaptureInterceptor;
 import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
+import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
 import io.kadai.workbasket.api.WorkbasketAccessItemQuery;
 import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.models.WorkbasketAccessItem;
+import java.lang.reflect.Field;
 import java.util.List;
+import org.apache.ibatis.session.SqlSessionManager;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /** Acceptance test for all "query access items for workbaskets" scenarios. */
 @ExtendWith(JaasExtension.class)
@@ -202,5 +212,34 @@ class QueryWorkbasketAccessItemsAccTest extends AbstractAccTest {
         .hasSizeGreaterThan(2)
         .extracting(WorkbasketAccessItem::getId)
         .isSortedAccordingTo(CASE_INSENSITIVE_ORDER);
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  class PhyiscalPagination {
+    @BeforeAll
+    void setup() throws Exception {
+      Field sessionManagerField = KadaiEngineImpl.class.getDeclaredField("sessionManager");
+      sessionManagerField.setAccessible(true);
+      SqlSessionManager sessionManager = (SqlSessionManager) sessionManagerField.get(kadaiEngine);
+      sessionManager
+          .getConfiguration()
+          .addInterceptor(new ParameterizedQuerySqlCaptureInterceptor());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"0,10", "5,10", "0,0", "2,4"})
+    @WithAccessId(user = "businessadmin")
+    void should_UseNativeSql_For_QueryPagination(int offset, int limit)
+        throws NotAuthorizedException {
+      ParameterizedQuerySqlCaptureInterceptor.resetCapturedSql();
+      kadaiEngine.getWorkbasketService().createWorkbasketAccessItemQuery().list(offset, limit);
+      final String sql = ParameterizedQuerySqlCaptureInterceptor.getCapturedSql();
+      final String physicalPattern1 = String.format("LIMIT %d OFFSET %d", limit, offset);
+      final String physicalPattern2 =
+          String.format("OFFSET %d ROWS FETCH FIRST %d ROWS ONLY", limit, offset);
+
+      assertThat(sql).containsAnyOf(physicalPattern1, physicalPattern2);
+    }
   }
 }

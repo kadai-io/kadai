@@ -21,14 +21,12 @@ package acceptance.workbasket.query;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import acceptance.AbstractAccTest;
-
+import acceptance.ParameterizedQuerySqlCaptureInterceptor;
 import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
 import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
-
-import acceptance.ParameterizedQuerySqlCaptureInterceptor;
 import java.lang.reflect.Field;
 import java.util.List;
 import org.apache.ibatis.session.SqlSessionManager;

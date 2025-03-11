@@ -26,6 +26,7 @@ import acceptance.AbstractAccTest;
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.TimeInterval;
+import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
 import io.kadai.simplehistory.impl.task.TaskHistoryQuery;
@@ -34,13 +35,23 @@ import io.kadai.spi.history.api.events.task.TaskHistoryCustomField;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
 import io.kadai.task.api.models.TaskSummary;
+
+import acceptance.ParameterizedQuerySqlCaptureInterceptor;
+import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import org.apache.ibatis.exceptions.TooManyResultsException;
+import org.apache.ibatis.session.SqlSessionManager;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /** Test for Task History queries. */
 @ExtendWith(JaasExtension.class)
@@ -557,5 +568,32 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
             .addAdditionalUserInfo(addAdditionalUserInfo)
             .build();
     initKadaiEngine(configuration);
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  class PhyiscalPagination {
+    @BeforeAll
+    void setup() throws Exception {
+      Field sessionManagerField = KadaiEngineImpl.class.getDeclaredField("sessionManager");
+      sessionManagerField.setAccessible(true);
+      SqlSessionManager sessionManager = (SqlSessionManager) sessionManagerField.get(kadaiEngine);
+      sessionManager
+          .getConfiguration()
+          .addInterceptor(new ParameterizedQuerySqlCaptureInterceptor());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"0,10", "5,10", "0,0", "2,4"})
+    void should_UseNativeSql_For_QueryPagination(int offset, int limit) {
+      ParameterizedQuerySqlCaptureInterceptor.resetCapturedSql();
+      historyService.createTaskHistoryQuery().list(offset, limit);
+      final String sql = ParameterizedQuerySqlCaptureInterceptor.getCapturedSql();
+      final String physicalPattern1 = String.format("LIMIT %d OFFSET %d", limit, offset);
+      final String physicalPattern2 =
+          String.format("OFFSET %d ROWS FETCH FIRST %d ROWS ONLY", limit, offset);
+
+      assertThat(sql).containsAnyOf(physicalPattern1, physicalPattern2);
+    }
   }
 }

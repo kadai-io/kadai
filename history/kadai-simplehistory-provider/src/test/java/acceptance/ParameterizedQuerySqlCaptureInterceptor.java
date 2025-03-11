@@ -8,6 +8,12 @@ import org.apache.ibatis.plugin.Intercepts;
 import org.apache.ibatis.plugin.Invocation;
 import org.apache.ibatis.plugin.Signature;
 
+/**
+ * This class is a duplicate of the ParameterizedQuerySqlCaptureInterceptor found in another
+ * package. Due to current constraints, this duplication was necessary, but any modifications to
+ * this class should also be reflected in the other version to maintain consistency. Ideally, this
+ * duplication should be refactored in the future to avoid redundancy.
+ */
 @Intercepts({
   @Signature(
       type = StatementHandler.class,

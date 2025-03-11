@@ -22,6 +22,7 @@ import static io.kadai.common.api.BaseQuery.SortDirection.DESCENDING;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import acceptance.AbstractAccTest;
+import acceptance.ParameterizedQuerySqlCaptureInterceptor;
 import io.kadai.common.api.KeyDomain;
 import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.common.test.security.JaasExtension;
@@ -29,8 +30,6 @@ import io.kadai.common.test.security.WithAccessId;
 import io.kadai.task.api.TaskQuery;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.models.TaskSummary;
-
-import acceptance.ParameterizedQuerySqlCaptureInterceptor;
 import java.lang.reflect.Field;
 import java.util.List;
 import org.apache.ibatis.session.SqlSessionManager;
@@ -227,6 +226,7 @@ class QueryTasksWithPaginationAccTest extends AbstractAccTest {
       @ParameterizedTest
       @CsvSource({"0,10", "5,10", "0,0", "2,4"})
       void should_UseNativeSql_For_QueryPagination(int offset, int limit) {
+        ParameterizedQuerySqlCaptureInterceptor.resetCapturedSql();
         taskService.createTaskQuery().list(offset, limit);
         final String sql = ParameterizedQuerySqlCaptureInterceptor.getCapturedSql();
         final String physicalPattern1 = String.format("LIMIT %d OFFSET %d", limit, offset);
