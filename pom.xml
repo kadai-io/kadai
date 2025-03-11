@@ -68,9 +68,6 @@
         <version.spring.boot>3.4.3</version.spring.boot>
         <version.spring.mybatis>3.0.4</version.spring.mybatis>
 
-        <!-- wildfly dependencies -->
-        <version.wildfly>31.0.1.Final</version.wildfly>
-
         <!-- camunda dependencies -->
         <version.camunda.dmn>7.22.0</version.camunda.dmn>
 
@@ -78,7 +75,6 @@
         <version.jakartaee-api>10.0.0</version.jakartaee-api>
         <version.jakarta.servlet>6.1.0</version.jakarta.servlet>
         <version.arquillian>1.9.3.Final</version.arquillian>
-        <version.arquillian.managed.wildfly>5.0.1.Final</version.arquillian.managed.wildfly>
         <version.shrinkwrap>3.3.4</version.shrinkwrap>
         <version.arquillian.jakarta>10.0.0.Final</version.arquillian.jakarta>
         <version.junit.bom>5.12.0</version.junit.bom>
@@ -126,11 +122,6 @@
     <modules>
         <module>common</module>
         <module>lib</module>
-        <!--
-          History is an optional module but used in kadai-rest-spring-example-wildfly
-          because of that it must be build before the rest module
-        -->
-        <module>history</module>
         <module>rest</module>
         <module>ci/kadai-sonar-test-coverage</module>
         <module>routing</module>

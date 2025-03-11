@@ -140,8 +140,7 @@ It splits up into five components:
 As KADAI is meant to be integrated in the development environment and process of your organisation, you have to create
 your own small integration project as a wrapper and starting point for your customisations.
 
-We currently provide examples how to run KADAI as a Spring Boot Application or as a an Enterprise Application on Wildfly
-Application Server.
+We currently provide examples how to run KADAI as a Spring Boot Application.
 
 If you are only interested in how KADAI looks and feel, you can try our [Demo Environment](#demo) instead.
 
@@ -163,23 +162,13 @@ Supported Databases:
 
 _* other versions of the named databases should work also, but haven't been tested_
 
-## Wrapper Application
-
-### Spring Boot Example
+## Spring Boot Example
 
 [![Static Badge](https://img.shields.io/badge/example-spring_boot-green?logo=spring&logoColor=white)](https://github.com/kadai-io/kadai/tree/master/rest/kadai-rest-spring-example-boot)
 
 We use the h2 database in this example.
 
 See `rest/kadai-rest-spring-example-boot` and it dependencies
-
-### EJB Example
-
-[![Static Badge](https://img.shields.io/badge/example-EJB-green?logoColor=white)](https://github.com/kadai-io/kadai/tree/master/lib/kadai-cdi-example)
-
-We use a Wildfly Application Server in this example.
-
-See `lib/kadai-cdi`.
 
 # ⚙️Customize Behaviour
 
