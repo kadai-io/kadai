@@ -21,7 +21,6 @@ package io.kadai.testapi.builder;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
-import io.kadai.testapi.builder.EntityBuilder.SummaryEntityBuilder;
 import io.kadai.workbasket.api.WorkbasketCustomField;
 import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.WorkbasketType;
@@ -143,5 +142,10 @@ public class WorkbasketBuilder
     } finally {
       testWorkbasket.setId(null);
     }
+  }
+
+  @Override
+  public Workbasket build() {
+    return testWorkbasket.copy(testWorkbasket.getKey());
   }
 }
