@@ -1,7 +1,6 @@
 package io.kadai.user.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.internal.util.LogSanitizer;
