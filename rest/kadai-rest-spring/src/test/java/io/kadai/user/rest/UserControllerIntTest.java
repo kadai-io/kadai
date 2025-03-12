@@ -87,15 +87,11 @@ class UserControllerIntTest {
         .containsExactlyInAnyOrder("Max", "Elena");
   }
 
-  @Test
-  void should_ReturnCurrentUser() {
-    String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?current-user";
   @ParameterizedTest
   @EmptySource
-  @ValueSource(strings = {"=foo", "=bar", "=baz", "="})
+  @ValueSource(strings = {"=true", "=TRUE", "="})
   void should_TreatCurrentUserTrue_For_Value(String value) {
     String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?current-user" + value;
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<UserCollectionRepresentationModel> response =
         CLIENT
@@ -104,51 +100,16 @@ class UserControllerIntTest {
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
             .toEntity(UserCollectionRepresentationModel.class);
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(UserCollectionRepresentationModel.class));
-
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getContent()).hasSize(1);
     assertThat(response.getBody().getContent()).extracting("userId").containsExactly("teamlead-1");
   }
 
-  @Test
-  void should_ReturnExceptionCurrentUserWithBadValue() {
-    String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?current-user=asd";
+  @ParameterizedTest
+  @ValueSource(strings = {"foo", "bar", "false"})
+  void should_ReturnException_For_CurrentUserWithBadValue(String badValue) {
+    String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?current-user=" + badValue;
 
-    ThrowingCallable httpCall =
-        () ->
-            CLIENT
-                .get()
-                .uri(url)
-                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
-                .retrieve()
-                .toEntity(UserCollectionRepresentationModel.class);
-    assertThatThrownBy(httpCall)
-        .isInstanceOf(HttpStatusCodeException.class)
-        .extracting(HttpStatusCodeException.class::cast)
-        .extracting(HttpStatusCodeException::getStatusCode)
-        .isEqualTo(HttpStatus.BAD_REQUEST);
-  }
-
-  @Test
-  void should_ReturnExceptionCurrentUserWithEmptyValue() {
-    String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?current-user=";
-  void should_IgnoreCurrentUserParam_When_ValueIsFalse() {
-    String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?current-user=false";
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
-
-    ResponseEntity<UserCollectionRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(UserCollectionRepresentationModel.class));
-    assertThat(response.getBody()).isNotNull();
-    assertThat(response.getBody().getContent()).hasSize(14);
     ThrowingCallable httpCall =
         () ->
             CLIENT

@@ -23,6 +23,7 @@ import io.kadai.common.api.IntInterval;
 import io.kadai.common.api.KeyDomain;
 import io.kadai.common.api.TimeInterval;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.internal.util.LogSanitizer;
 import io.kadai.common.rest.QueryParameter;
 import io.kadai.task.api.CallbackState;
 import io.kadai.task.api.TaskQuery;
@@ -3019,11 +3020,26 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
     }
   }
 
-  private String[] addNullToOwnerInIfOwnerNullSet() {
-    if (ownerNull == null || ownerNull.equalsIgnoreCase("false")) {
+  /**
+   * Returns {@linkplain #getOwnerIn() owner-in} and adds NULL to it if {@linkplain #getOwnerNull()
+   * owner-is-null} is true.
+   *
+   * @return {@linkplain #getOwnerIn() owner-in} and adds NULL to it if {@linkplain #getOwnerNull()
+   *     owner-is-null} is true
+   * @throws InvalidArgumentException if {@linkplain #getOwnerNull() owner-is-null} has any
+   *     non-blank value other than 'true'
+   */
+  private String[] addNullToOwnerInIfOwnerNullSet() throws InvalidArgumentException {
+    if (ownerNull == null) {
       return ownerIn;
     }
-
-    return this.ownerIn == null ? new String[] {null} : ArrayUtils.add(this.ownerIn, null);
+    if (ownerNull.isBlank() || ownerNull.equalsIgnoreCase("true")) {
+      return this.ownerIn == null ? new String[] {null} : ArrayUtils.add(this.ownerIn, null);
+    } else {
+      throw new InvalidArgumentException(
+          String.format(
+              "owner-is-null parameter with value '%s' is invalid.",
+              LogSanitizer.stripLineBreakingChars(ownerNull)));
+    }
   }
 }
