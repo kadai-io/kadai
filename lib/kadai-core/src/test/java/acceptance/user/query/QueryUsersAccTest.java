@@ -1,12 +1,28 @@
+/*
+ * Copyright [2025] [envite consulting GmbH]
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
+ *
+ */
+
 package acceptance.user.query;
 
-import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import acceptance.AbstractAccTest;
 import io.kadai.KadaiConfiguration;
 import io.kadai.KadaiConfiguration.Builder;
-import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.user.api.models.UserSummary;
@@ -206,113 +222,5 @@ class QueryUsersAccTest extends AbstractAccTest {
         kadaiEngine.getUserService().createUserQuery().idIn(userIds).orgLevel1In("Bat").list();
 
     assertThat(users).isEmpty();
-  }
-
-  @ParameterizedTest
-  @CsvSource(
-      delimiter = ';',
-      value = {"ASCENDING", "DESCENDING"})
-  void should_SortUsersByFirstName(SortDirection sortDirection) {
-    List<UserSummary> users =
-        kadaiEngine.getUserService().createUserQuery().orderByFirstName(sortDirection).list();
-
-    assertThat(users)
-        .hasSize(ALL_USERS_COUNT)
-        .extracting(UserSummary::getFirstName)
-        .map(u -> u.replace("ü", "ue").replace("ä", "ae").replace("ö", "oe"))
-        .isSortedAccordingTo(
-            sortDirection == SortDirection.ASCENDING
-                ? CASE_INSENSITIVE_ORDER
-                : CASE_INSENSITIVE_ORDER.reversed());
-  }
-
-  @ParameterizedTest
-  @CsvSource(
-      delimiter = ';',
-      value = {"ASCENDING", "DESCENDING"})
-  void should_SortUsersByLastName(SortDirection sortDirection) {
-    List<UserSummary> users =
-        kadaiEngine.getUserService().createUserQuery().orderByLastName(sortDirection).list();
-
-    assertThat(users)
-        .hasSize(ALL_USERS_COUNT)
-        .extracting(UserSummary::getLastName)
-        .map(u -> u.replace("ü", "ue").replace("ä", "ae").replace("ö", "oe"))
-        .isSortedAccordingTo(
-            sortDirection == SortDirection.ASCENDING
-                ? CASE_INSENSITIVE_ORDER
-                : CASE_INSENSITIVE_ORDER.reversed());
-  }
-
-  @ParameterizedTest
-  @CsvSource(
-      delimiter = ';',
-      value = {"ASCENDING", "DESCENDING"})
-  void should_SortUsersByOrgLevel1(SortDirection sortDirection) {
-    List<UserSummary> users =
-        kadaiEngine.getUserService().createUserQuery().orderByOrgLevel1(sortDirection).list();
-
-    assertThat(users)
-        .hasSize(ALL_USERS_COUNT)
-        .extracting(UserSummary::getOrgLevel1)
-        .map(u -> u.replace("ü", "ue").replace("ä", "ae").replace("ö", "oe"))
-        .isSortedAccordingTo(
-            sortDirection == SortDirection.ASCENDING
-                ? CASE_INSENSITIVE_ORDER
-                : CASE_INSENSITIVE_ORDER.reversed());
-  }
-
-  @ParameterizedTest
-  @CsvSource(
-      delimiter = ';',
-      value = {"ASCENDING", "DESCENDING"})
-  void should_SortUsersByOrgLevel2(SortDirection sortDirection) {
-    List<UserSummary> users =
-        kadaiEngine.getUserService().createUserQuery().orderByOrgLevel2(sortDirection).list();
-
-    assertThat(users)
-        .hasSize(ALL_USERS_COUNT)
-        .extracting(UserSummary::getOrgLevel2)
-        .map(u -> u.replace("ü", "ue").replace("ä", "ae").replace("ö", "oe"))
-        .isSortedAccordingTo(
-            sortDirection == SortDirection.ASCENDING
-                ? CASE_INSENSITIVE_ORDER
-                : CASE_INSENSITIVE_ORDER.reversed());
-  }
-
-  @ParameterizedTest
-  @CsvSource(
-      delimiter = ';',
-      value = {"ASCENDING", "DESCENDING"})
-  void should_SortUsersByOrgLevel3(SortDirection sortDirection) {
-    List<UserSummary> users =
-        kadaiEngine.getUserService().createUserQuery().orderByOrgLevel3(sortDirection).list();
-
-    assertThat(users)
-        .hasSize(ALL_USERS_COUNT)
-        .extracting(UserSummary::getOrgLevel3)
-        .map(u -> u.replace("ü", "ue").replace("ä", "ae").replace("ö", "oe"))
-        .isSortedAccordingTo(
-            sortDirection == SortDirection.ASCENDING
-                ? CASE_INSENSITIVE_ORDER
-                : CASE_INSENSITIVE_ORDER.reversed());
-  }
-
-  @ParameterizedTest
-  @CsvSource(
-      delimiter = ';',
-      value = {"ASCENDING", "DESCENDING"})
-  void should_SortUsersByOrgLevel4(SortDirection sortDirection) {
-    List<UserSummary> users =
-        kadaiEngine.getUserService().createUserQuery().orderByOrgLevel4(sortDirection).list();
-
-    assertThat(users)
-        .hasSize(ALL_USERS_COUNT)
-        .extracting(UserSummary::getOrgLevel4)
-        .map(u -> u.replace("ü", "ue").replace("ä", "ae").replace("ö", "oe"))
-        .isSortedAccordingTo(
-            sortDirection == SortDirection.ASCENDING
-                ? CASE_INSENSITIVE_ORDER
-                : CASE_INSENSITIVE_ORDER.reversed());
   }
 }

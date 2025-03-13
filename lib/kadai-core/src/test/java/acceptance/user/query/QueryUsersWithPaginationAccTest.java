@@ -75,27 +75,20 @@ class QueryUsersWithPaginationAccTest extends AbstractAccTest {
     UserService userService = kadaiEngine.getUserService();
 
     // Getting full page
-    int pageNumber = 2;
-    int pageSize = 4;
-    List<UserSummary> results = userService.createUserQuery().listPage(pageNumber, pageSize);
+    List<UserSummary> results = userService.createUserQuery().listPage(2, 4);
     assertThat(results).hasSize(4);
 
     // Getting full page
-    pageNumber = 4;
-    pageSize = 1;
-    results = userService.createUserQuery().listPage(pageNumber, pageSize);
+    results = userService.createUserQuery().listPage(4, 1);
     assertThat(results).hasSize(1);
 
     // Getting last results on 1 big page
-    pageNumber = 1;
-    pageSize = 100;
-    results = userService.createUserQuery().listPage(pageNumber, pageSize);
+    results = userService.createUserQuery().listPage(1, 100);
     assertThat(results).hasSize(ALL_USERS_COUNT);
 
     // Getting last results on multiple pages
-    pageNumber = (ALL_USERS_COUNT - ALL_USERS_COUNT % 5) / 5 + 1;
-    pageSize = 5;
-    results = userService.createUserQuery().listPage(pageNumber, pageSize);
+    results =
+        userService.createUserQuery().listPage((ALL_USERS_COUNT - ALL_USERS_COUNT % 5) / 5 + 1, 5);
     assertThat(results).hasSize(ALL_USERS_COUNT % 5);
   }
 
@@ -104,21 +97,15 @@ class QueryUsersWithPaginationAccTest extends AbstractAccTest {
     UserService userService = kadaiEngine.getUserService();
 
     // 0 limit/size = 0 results
-    int pageNumber = 2;
-    int pageSize = 0;
-    List<UserSummary> results = userService.createUserQuery().listPage(pageNumber, pageSize);
+    List<UserSummary> results = userService.createUserQuery().listPage(2, 0);
     assertThat(results).isEmpty();
 
     // Negative size will be 0 = 0 results
-    pageNumber = 2;
-    pageSize = -1;
-    results = userService.createUserQuery().listPage(pageNumber, pageSize);
+    results = userService.createUserQuery().listPage(2, -1);
     assertThat(results).isEmpty();
 
     // Negative page = first page
-    pageNumber = -1;
-    pageSize = 10;
-    results = userService.createUserQuery().listPage(pageNumber, pageSize);
+    results = userService.createUserQuery().listPage(-1, 10);
     assertThat(results).hasSize(10);
   }
 
