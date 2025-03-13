@@ -28,7 +28,6 @@ import io.kadai.user.api.exceptions.UserNotFoundException;
 import io.kadai.user.api.models.UserSummary;
 import io.kadai.user.rest.UserController.UserQuerySortParameter;
 import io.kadai.user.rest.models.UserRepresentationModel;
-import io.kadai.user.rest.models.UserSummaryCollectionRepresentationModel;
 import io.kadai.user.rest.models.UserSummaryPagedRepresentationModel;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -116,7 +115,7 @@ public interface UserApi {
                 @Content(
                     mediaType = MediaTypes.HAL_JSON_VALUE,
                     schema =
-                        @Schema(implementation = UserSummaryCollectionRepresentationModel.class))),
+                        @Schema(implementation = UserSummaryPagedRepresentationModel.class))),
         @ApiResponse(
             responseCode = "400",
             description = "INVALID_ARGUMENT",
