@@ -36,6 +36,11 @@ public class UserImpl extends UserSummaryImpl implements User {
   }
 
   @Override
+  public int hashCode() {
+    return super.hashCode();
+  }
+
+  @Override
   public UserSummary asSummary() {
     UserSummaryImpl result = new UserSummaryImpl();
     result.setId(this.getId());
