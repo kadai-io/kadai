@@ -1,23 +1,18 @@
 package io.kadai.user.rest.assembler;
 
-import io.kadai.common.rest.assembler.CollectionRepresentationModelAssembler;
 import io.kadai.common.rest.assembler.PagedRepresentationModelAssembler;
 import io.kadai.common.rest.models.PageMetadata;
 import io.kadai.user.api.models.UserSummary;
 import io.kadai.user.internal.models.UserSummaryImpl;
-import io.kadai.user.rest.models.UserSummaryCollectionRepresentationModel;
 import io.kadai.user.rest.models.UserSummaryPagedRepresentationModel;
 import io.kadai.user.rest.models.UserSummaryRepresentationModel;
 import java.util.Collection;
-import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserSummaryRepresentationModelAssembler
     implements PagedRepresentationModelAssembler<
-            UserSummary, UserSummaryRepresentationModel, UserSummaryPagedRepresentationModel>,
-        CollectionRepresentationModelAssembler<
-            UserSummary, UserSummaryRepresentationModel, UserSummaryCollectionRepresentationModel> {
+        UserSummary, UserSummaryRepresentationModel, UserSummaryPagedRepresentationModel> {
 
   @Override
   public UserSummaryRepresentationModel toModel(UserSummary entity) {
@@ -62,12 +57,6 @@ public class UserSummaryRepresentationModelAssembler
     user.setDomains(repModel.getDomains());
 
     return user;
-  }
-
-  @Override
-  public UserSummaryCollectionRepresentationModel buildCollectionEntity(
-      List<UserSummaryRepresentationModel> content) {
-    return new UserSummaryCollectionRepresentationModel(content);
   }
 
   @Override

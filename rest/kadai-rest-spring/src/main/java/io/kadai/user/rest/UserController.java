@@ -37,8 +37,6 @@ import io.kadai.user.rest.assembler.UserRepresentationModelAssembler;
 import io.kadai.user.rest.assembler.UserSummaryRepresentationModelAssembler;
 import io.kadai.user.rest.models.UserRepresentationModel;
 import io.kadai.user.rest.models.UserSummaryPagedRepresentationModel;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import java.beans.ConstructorProperties;
 import java.util.List;
@@ -192,18 +190,6 @@ public class UserController implements UserApi {
     }
 
     // this getter is necessary for the documentation!
-    @Parameter(
-        description = "Sorting criteria for users",
-        schema =
-        @Schema(
-            allowableValues = {
-                "FIRST_NAME",
-                "LAST_NAME",
-                "ORG_LEVEL_1",
-                "ORG_LEVEL_2",
-                "ORG_LEVEL_3",
-                "ORG_LEVEL_4"
-            }))
     @Override
     public List<UserQuerySortBy> getSortBy() {
       return super.getSortBy();

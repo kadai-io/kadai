@@ -28,6 +28,8 @@ import io.kadai.user.api.models.UserSummary;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /** Acceptance test for all "query users with pagination" scenarios. */
 @ExtendWith(JaasExtension.class)
@@ -53,87 +55,33 @@ class QueryUsersWithPaginationAccTest extends AbstractAccTest {
     assertThat(results).hasSize(4);
   }
 
-  @Test
-  void testListOffsetAndLimitOutOfBounds() {
+  @ParameterizedTest
+  @CsvSource({"-1, -3, 0", "1, -3, 0", "-1, 3, 3"})
+  void testListOffsetAndLimitOutOfBounds(int offset, int limit, int expectedSize) {
     UserService userService = kadaiEngine.getUserService();
 
-    // both will be 0, working
-    List<UserSummary> results = userService.createUserQuery().list(-1, -3);
-    assertThat(results).isEmpty();
-
-    // limit will be 0
-    results = userService.createUserQuery().list(1, -3);
-    assertThat(results).isEmpty();
-
-    // offset will be 0
-    results = userService.createUserQuery().list(-1, 3);
-    assertThat(results).hasSize(3);
+    List<UserSummary> results = userService.createUserQuery().list(offset, limit);
+    assertThat(results).hasSize(expectedSize);
   }
 
-  @Test
-  void testPaginationWithPages() {
+  @ParameterizedTest
+  @CsvSource({"2, 4, 4", "4, 1, 1", "1, 100, 18", "4, 5, 3", "2, 0, 0", "2, -1, 0", "-1, 10, 10"})
+  void testPaginationWithPages(int pageNumber, int pageSize, int expectedSize) {
     UserService userService = kadaiEngine.getUserService();
 
-    // Getting full page
-    int pageNumber = 2;
-    int pageSize = 4;
     List<UserSummary> results = userService.createUserQuery().listPage(pageNumber, pageSize);
-    assertThat(results).hasSize(4);
-
-    // Getting full page
-    pageNumber = 4;
-    pageSize = 1;
-    results = userService.createUserQuery().listPage(pageNumber, pageSize);
-    assertThat(results).hasSize(1);
-
-    // Getting last results on 1 big page
-    pageNumber = 1;
-    pageSize = 100;
-    results = userService.createUserQuery().listPage(pageNumber, pageSize);
-    assertThat(results).hasSize(ALL_USERS_COUNT);
-
-    // Getting last results on multiple pages
-    pageNumber = (ALL_USERS_COUNT - ALL_USERS_COUNT % 5) / 5 + 1;
-    pageSize = 5;
-    results = userService.createUserQuery().listPage(pageNumber, pageSize);
-    assertThat(results).hasSize(ALL_USERS_COUNT % 5);
+    assertThat(results).hasSize(expectedSize);
   }
 
-  @Test
-  void testPaginationNullAndNegativeLimitsIgnoring() {
-    UserService userService = kadaiEngine.getUserService();
-
-    // 0 limit/size = 0 results
-    int pageNumber = 2;
-    int pageSize = 0;
-    List<UserSummary> results = userService.createUserQuery().listPage(pageNumber, pageSize);
-    assertThat(results).isEmpty();
-
-    // Negative size will be 0 = 0 results
-    pageNumber = 2;
-    pageSize = -1;
-    results = userService.createUserQuery().listPage(pageNumber, pageSize);
-    assertThat(results).isEmpty();
-
-    // Negative page = first page
-    pageNumber = -1;
-    pageSize = 10;
-    results = userService.createUserQuery().listPage(pageNumber, pageSize);
-    assertThat(results).hasSize(10);
-  }
-
-  @Test
-  void testGetFirstPageOfUserQueryWithSorting() {
+  @ParameterizedTest
+  @CsvSource({"ASCENDING, Alice, Elena", "DESCENDING, Wiebke, Simone"})
+  void testGetFirstPageOfUserQueryWithSorting(
+      SortDirection sortDirection, String firstName, String fourthName) {
     UserService userService = kadaiEngine.getUserService();
     List<UserSummary> results =
-        userService.createUserQuery().orderByFirstName(SortDirection.ASCENDING).list(0, 5);
+        userService.createUserQuery().orderByFirstName(sortDirection).list(0, 5);
     assertThat(results).hasSize(5);
-    assertThat(results.get(0).getFirstName()).isEqualTo("Alice");
-    assertThat(results.get(4).getFirstName()).isEqualTo("Elena");
-
-    results = userService.createUserQuery().orderByFirstName(SortDirection.DESCENDING).list(0, 5);
-    assertThat(results).hasSize(5);
-    assertThat(results.get(0).getFirstName()).isEqualTo("Wiebke");
-    assertThat(results.get(4).getFirstName()).isEqualTo("Simone");
+    assertThat(results.get(0).getFirstName()).isEqualTo(firstName);
+    assertThat(results.get(4).getFirstName()).isEqualTo(fourthName);
   }
 }

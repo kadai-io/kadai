@@ -28,7 +28,7 @@ import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
 import io.kadai.user.rest.models.UserCollectionRepresentationModel;
 import io.kadai.user.rest.models.UserRepresentationModel;
-import io.kadai.user.rest.models.UserSummaryCollectionRepresentationModel;
+import io.kadai.user.rest.models.UserSummaryPagedRepresentationModel;
 import io.kadai.user.rest.models.UserSummaryRepresentationModel;
 import java.util.Collection;
 import java.util.Map;
@@ -217,13 +217,13 @@ class UserControllerIntTest {
         restHelper.toUrl(RestEndpoints.URL_USERS)
             + String.format("?orgLevel%d=%s", level, orgLevel);
 
-    ResponseEntity<UserSummaryCollectionRepresentationModel> responseEntity =
+    ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
         CLIENT
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(UserSummaryCollectionRepresentationModel.class);
+            .toEntity(UserSummaryPagedRepresentationModel.class);
 
     assertThat(responseEntity.getBody()).isNotNull();
     assertThat(responseEntity.getBody().getContent()).isNotEmpty();
@@ -251,13 +251,13 @@ class UserControllerIntTest {
         restHelper.toUrl(RestEndpoints.URL_USERS)
             + String.format("?orgLevel%d=%s", level, orgLevel);
 
-    ResponseEntity<UserSummaryCollectionRepresentationModel> responseEntity =
+    ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
         CLIENT
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(UserSummaryCollectionRepresentationModel.class);
+            .toEntity(UserSummaryPagedRepresentationModel.class);
 
     assertThat(responseEntity.getBody()).isNotNull();
     assertThat(responseEntity.getBody().getContent()).isEmpty();
@@ -277,13 +277,13 @@ class UserControllerIntTest {
             + String.format("?orgLevel%d=%s", level, orgLevel1)
             + String.format("&orgLevel%d=%s", level, orgLevel2);
 
-    ResponseEntity<UserSummaryCollectionRepresentationModel> responseEntity =
+    ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
         CLIENT
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(UserSummaryCollectionRepresentationModel.class);
+            .toEntity(UserSummaryPagedRepresentationModel.class);
 
     assertThat(responseEntity.getBody()).isNotNull();
     assertThat(responseEntity.getBody().getContent()).isNotEmpty();
@@ -318,13 +318,13 @@ class UserControllerIntTest {
             + String.format("?orgLevel%d=%s", level1, orgLevel1)
             + String.format("&orgLevel%d=%s", level2, orgLevel2);
 
-    ResponseEntity<UserSummaryCollectionRepresentationModel> responseEntity =
+    ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
         CLIENT
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(UserSummaryCollectionRepresentationModel.class);
+            .toEntity(UserSummaryPagedRepresentationModel.class);
 
     assertThat(responseEntity.getBody()).isNotNull();
     assertThat(responseEntity.getBody().getContent()).isNotEmpty();
@@ -346,13 +346,13 @@ class UserControllerIntTest {
             + String.format("?orgLevel%d=%s", level1, orgLevel1)
             + String.format("&orgLevel%d=%s", level2, orgLevel2);
 
-    ResponseEntity<UserSummaryCollectionRepresentationModel> responseEntity =
+    ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
         CLIENT
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(UserSummaryCollectionRepresentationModel.class);
+            .toEntity(UserSummaryPagedRepresentationModel.class);
 
     assertThat(responseEntity.getBody()).isNotNull();
     assertThat(responseEntity.getBody().getContent()).isEmpty();
@@ -367,13 +367,13 @@ class UserControllerIntTest {
             + "&user-id=user-1-1"
             + "&user-id=user-2-1";
 
-    ResponseEntity<UserSummaryCollectionRepresentationModel> responseEntity =
+    ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
         CLIENT
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(UserSummaryCollectionRepresentationModel.class);
+            .toEntity(UserSummaryPagedRepresentationModel.class);
 
     assertThat(responseEntity.getBody()).isNotNull();
     assertThat(responseEntity.getBody().getContent())
@@ -408,13 +408,13 @@ class UserControllerIntTest {
             + String.format("?orgLevel%d=%s", level, orgLevel)
             + "&current-user";
 
-    ResponseEntity<UserSummaryCollectionRepresentationModel> responseEntity =
+    ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
         CLIENT
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(UserSummaryCollectionRepresentationModel.class);
+            .toEntity(UserSummaryPagedRepresentationModel.class);
 
     assertThat(responseEntity.getBody()).isNotNull();
     assertThat(responseEntity.getBody().getContent())
@@ -450,13 +450,13 @@ class UserControllerIntTest {
             + "&user-id=user-2-1"
             + "&user-id=teamlead-1";
 
-    ResponseEntity<UserSummaryCollectionRepresentationModel> responseEntity =
+    ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
         CLIENT
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(UserSummaryCollectionRepresentationModel.class);
+            .toEntity(UserSummaryPagedRepresentationModel.class);
 
     assertThat(responseEntity.getBody()).isNotNull();
 
@@ -466,8 +466,8 @@ class UserControllerIntTest {
         .haveExactly(
             1,
             new Condition<>(
-                user -> user.getUserId().equals("teamlead-1"), "user with id teamlead-1"));
-    assertThat(users).hasSize(3);
+                user -> user.getUserId().equals("teamlead-1"), "user with id teamlead-1"))
+        .hasSize(3);
     users.stream()
         .filter(user -> !user.getUserId().equals("teamlead-1"))
         .forEach(
@@ -506,13 +506,13 @@ class UserControllerIntTest {
             + String.format(
                 "?sort-by=%s&order=%s&page=%d&page-size=%d", sortBy, order, page, pageSize);
 
-    ResponseEntity<UserSummaryCollectionRepresentationModel> responseEntity =
+    ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
         CLIENT
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(UserSummaryCollectionRepresentationModel.class);
+            .toEntity(UserSummaryPagedRepresentationModel.class);
 
     assertThat(responseEntity.getBody()).isNotNull();
     assertThat(responseEntity.getBody().getContent()).isNotEmpty();

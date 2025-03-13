@@ -20,18 +20,22 @@ package io.kadai.user.rest.assembler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.kadai.common.rest.models.PageMetadata;
 import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.user.api.UserService;
 import io.kadai.user.api.models.UserSummary;
 import io.kadai.user.internal.models.UserSummaryImpl;
+import io.kadai.user.rest.models.UserSummaryPagedRepresentationModel;
 import io.kadai.user.rest.models.UserSummaryRepresentationModel;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /** Test for {@linkplain UserSummaryRepresentationModelAssembler}. */
 @KadaiSpringBootTest
-public class UserSummaryRepresentationModelAssemblerTest {
+class UserSummaryRepresentationModelAssemblerTest {
   private final UserSummaryRepresentationModelAssembler assembler;
   private final UserService userService;
 
@@ -139,5 +143,28 @@ public class UserSummaryRepresentationModelAssemblerTest {
         .hasNoNullFieldsOrProperties()
         .isNotSameAs(userAfterConversion)
         .isEqualTo(userAfterConversion);
+  }
+
+  @Test
+  void should_ReturnPagedRepresentationModel_When_BuildingPageableEntity() {
+    UserSummaryRepresentationModel user1 = new UserSummaryRepresentationModel();
+    user1.setUserId("user-1");
+    user1.setFirstName("John");
+    user1.setLastName("Doe");
+
+    UserSummaryRepresentationModel user2 = new UserSummaryRepresentationModel();
+    user2.setUserId("user-2");
+    user2.setFirstName("Jane");
+    user2.setLastName("Doe");
+
+    Collection<UserSummaryRepresentationModel> content = List.of(user1, user2);
+    PageMetadata pageMetadata = new PageMetadata(2, 1, 2, 1);
+
+    UserSummaryPagedRepresentationModel pagedModel =
+        assembler.buildPageableEntity(content, pageMetadata);
+
+    assertThat(pagedModel).isNotNull();
+    assertThat(pagedModel.getContent()).containsExactlyInAnyOrder(user1, user2);
+    assertThat(pagedModel.getPageMetadata()).isEqualTo(pageMetadata);
   }
 }
