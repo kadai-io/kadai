@@ -466,8 +466,8 @@ class UserControllerIntTest {
         .haveExactly(
             1,
             new Condition<>(
-                user -> user.getUserId().equals("teamlead-1"), "user with id teamlead-1"));
-    assertThat(users).hasSize(3);
+                user -> user.getUserId().equals("teamlead-1"), "user with id teamlead-1"))
+        .hasSize(3);
     users.stream()
         .filter(user -> !user.getUserId().equals("teamlead-1"))
         .forEach(
