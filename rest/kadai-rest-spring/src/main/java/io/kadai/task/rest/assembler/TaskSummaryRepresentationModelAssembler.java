@@ -100,6 +100,7 @@ public class TaskSummaryRepresentationModelAssembler
             .toList());
     repModel.setRead(taskSummary.isRead());
     repModel.setTransferred(taskSummary.isTransferred());
+    repModel.setReopened(taskSummary.isReopened());
     repModel.setGroupByCount(taskSummary.getGroupByCount());
     repModel.setAttachmentSummaries(
         taskSummary.getAttachmentSummaries().stream().map(attachmentAssembler::toModel).toList());
@@ -166,6 +167,7 @@ public class TaskSummaryRepresentationModelAssembler
             .toList());
     taskSummary.setRead(repModel.isRead());
     taskSummary.setTransferred(repModel.isTransferred());
+    taskSummary.setReopened(repModel.isReopened());
     taskSummary.setGroupByCount(repModel.getGroupByCount());
     taskSummary.setAttachmentSummaries(
         repModel.getAttachmentSummaries().stream()

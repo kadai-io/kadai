@@ -295,6 +295,13 @@ public interface TaskSummary {
   boolean isManualPriorityActive();
 
   /**
+   * Returns whether the {@linkplain Task} has been previously reopened.
+   *
+   * @return true, if Tasks has been reopened before
+   */
+  boolean isReopened();
+
+  /**
    * Returns the count of the comments of the {@linkplain Task}.
    *
    * @return numberOfComments
