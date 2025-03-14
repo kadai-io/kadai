@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserRepresentationModelAssembler
     implements CollectionRepresentationModelAssembler<
-        User, UserRepresentationModel, UserCollectionRepresentationModel> {
+    User, UserRepresentationModel, UserCollectionRepresentationModel> {
 
   @Override
   public UserRepresentationModel toModel(User entity) {
