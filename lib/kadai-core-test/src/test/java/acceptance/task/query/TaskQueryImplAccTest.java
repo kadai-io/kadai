@@ -35,7 +35,6 @@ import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.api.security.UserPrincipal;
 import io.kadai.common.internal.InternalKadaiEngine;
-import io.kadai.common.internal.util.CheckedConsumer;
 import io.kadai.common.internal.util.Pair;
 import io.kadai.common.test.util.ParallelThreadHelper;
 import io.kadai.task.api.CallbackState;
@@ -199,8 +198,8 @@ class TaskQueryImplAccTest {
         subject.getPrincipals().add(new UserPrincipal(accessIds.remove(0)));
 
         Consumer<TaskService> consumer =
-            CheckedConsumer.wrap(
-                taskService -> internalKadaiEngine.executeInDatabaseConnection(
+            taskService ->
+                internalKadaiEngine.executeInDatabaseConnection(
                     () -> {
                       List<TaskSummary> results =
                           taskService
@@ -217,7 +216,7 @@ class TaskQueryImplAccTest {
                           throw new SystemException(e.getMessage());
                         }
                       }
-                    }));
+                    });
 
         PrivilegedAction<Void> action =
             () -> {
