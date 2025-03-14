@@ -256,8 +256,6 @@ jobs:
           - kadai-common-test
           - kadai-core
           - kadai-core-test
-          - kadai-cdi
-          - kadai-cdi-example
           - kadai-test-api
           - kadai-spring
           - kadai-spring-example
@@ -290,8 +288,6 @@ jobs:
             database: POSTGRES
           - module: kadai-rest-spring-example-boot
             database: DB2
-          - module: kadai-rest-spring-example-wildfly
-            database: POSTGRES
     steps:
       - name: Git checkout
         uses: actions/checkout@v4
@@ -314,7 +310,6 @@ jobs:
       - name: Change versions to match tag
         run: |
           ci/change_version.sh -m .
-          ci/update_kadai_dependency_for_wildfly.sh
       - name: Test
         run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip
         env:
@@ -383,7 +378,7 @@ jobs:
           -pl :kadai-parent,\
           :kadai-common-parent,:kadai-common-logging,:kadai-common,:kadai-common-security,\
           :kadai-common-data,:kadai-common-test,\
-          :kadai-lib-parent,:kadai-core,:kadai-cdi,:kadai-spring,\
+          :kadai-lib-parent,:kadai-core,:kadai-spring,\
           :kadai-rest-parent,:kadai-web,:kadai-rest-spring,\
           :kadai-history-parent,:kadai-simplehistory-provider,:kadai-simplehistory-rest-spring,:kadai-loghistory-provider,\
           :kadai-routing-parent,:kadai-spi-routing-dmn-router,:kadai-routing-rest
@@ -414,8 +409,6 @@ jobs:
       - name: Update version to next snapshot and push back
         run: |
           ci/change_version.sh -i -m .
-          ci/update_kadai_dependency_for_wildfly.sh -i
-          ci/commitPoms.sh rest/kadai-rest-spring-example-wildfly/src/test/java/io/kadai/example/wildfly/AbstractAccTest.java
         env:
           GH_EMAIL: ${{ secrets.GH_EMAIL }}
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
@@ -455,7 +448,7 @@ jobs:
       - name: Build kadai-web
         run: ./mvnw -B install -pl :kadai-web
       - name: Generate Javadoc
-        run: ./mvnw -B clean javadoc:jar -pl :kadai-core,:kadai-cdi,:kadai-spring
+        run: ./mvnw -B clean javadoc:jar -pl :kadai-core,:kadai-spring
       - name: Build Example Application
         run: ./mvnw -B install -P history.plugin -pl :kadai-rest-spring-example-boot -DskipTests -Dcheckstyle.skip -Dmaven.javadoc.skip -Djacoco.skip
       - name: Verify Example Application contains documentation

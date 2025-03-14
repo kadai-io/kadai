@@ -18,9 +18,7 @@
 
     <modules>
         <module>kadai-core</module>
-        <module>kadai-cdi</module>
         <module>kadai-spring</module>
-        <module>kadai-cdi-example</module>
         <module>kadai-spring-example</module>
         <module>kadai-test-api</module>
         <module>kadai-core-test</module>
