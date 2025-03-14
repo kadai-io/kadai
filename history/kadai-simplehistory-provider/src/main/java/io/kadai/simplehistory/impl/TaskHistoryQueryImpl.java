@@ -23,13 +23,13 @@ import static io.kadai.common.api.BaseQuery.toLowerCopy;
 import io.kadai.common.api.TimeInterval;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.InternalKadaiEngine;
+import io.kadai.common.internal.PaginationInterceptor;
 import io.kadai.simplehistory.impl.task.TaskHistoryQuery;
 import io.kadai.simplehistory.impl.task.TaskHistoryQueryColumnName;
 import io.kadai.spi.history.api.events.task.TaskHistoryCustomField;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.ibatis.session.RowBounds;
 
 /** Implementation for generating dynamic sql. */
 public class TaskHistoryQueryImpl implements TaskHistoryQuery {
@@ -653,8 +653,10 @@ public class TaskHistoryQueryImpl implements TaskHistoryQuery {
   public List<TaskHistoryEvent> list(int offset, int limit) {
     try {
       internalKadaiEngine.openConnection();
-      RowBounds rowBounds = new RowBounds(offset, limit);
-      return internalKadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this, rowBounds);
+
+      PaginationInterceptor.setPagination(offset, limit);
+
+      return internalKadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this);
     } finally {
       internalKadaiEngine.returnConnection();
     }

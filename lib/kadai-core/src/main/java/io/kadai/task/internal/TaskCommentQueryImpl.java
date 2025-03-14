@@ -23,6 +23,7 @@ import static io.kadai.common.api.BaseQuery.toLowerCopy;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.api.TimeInterval;
 import io.kadai.common.internal.InternalKadaiEngine;
+import io.kadai.common.internal.PaginationInterceptor;
 import io.kadai.task.api.TaskCommentQuery;
 import io.kadai.task.api.TaskCommentQueryColumnName;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
@@ -33,7 +34,6 @@ import io.kadai.workbasket.internal.WorkbasketQueryImpl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.ibatis.session.RowBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -187,9 +187,13 @@ public class TaskCommentQueryImpl implements TaskCommentQuery {
   public List<TaskComment> list(int offset, int limit) {
     checkTaskPermission();
     setupAccessIds();
-    RowBounds rowBounds = new RowBounds(offset, limit);
+
+    int safeLimit = Math.max(0, limit);
+    int safeOffset = Math.max(0, offset);
+    PaginationInterceptor.setPagination(safeOffset, safeLimit);
+
     return kadaiEngine.executeInDatabaseConnection(
-        () -> kadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this, rowBounds));
+        () -> kadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this));
   }
 
   @Override
