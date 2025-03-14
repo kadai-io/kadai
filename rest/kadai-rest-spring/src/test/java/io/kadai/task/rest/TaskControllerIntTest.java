@@ -68,6 +68,8 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -1412,32 +1414,44 @@ class TaskControllerIntTest {
       assertThat((response.getBody()).getContent()).hasSize(expectedSize);
     }
 
-    @TestFactory
-    Stream<DynamicTest> should_ThrowException_When_OwnerIsNullParamNotStrict() {
-      List<Pair<String, String>> list =
-          List.of(
-              Pair.of("When owner-is-null=", "?owner-is-null="),
-              Pair.of("When owner-is-null=owner-is-null", "?owner-is-null=owner-is-null"),
-              Pair.of(
-                  "When owner-is-null=anyValue1,anyValue2", "?owner-is-null=anyValue1,anyValue2"));
-      ThrowingConsumer<Pair<String, String>> testOwnerIsNull =
-          t -> {
-            String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + t.getRight();
-            assertThatThrownBy(
-                    () ->
-                        CLIENT
-                            .get()
-                            .uri(url)
-                            .headers(
-                                headers ->
-                                    headers.addAll(RestHelper.generateHeadersForUser("admin")))
-                            .retrieve()
-                            .toEntity(TaskSummaryPagedRepresentationModel.class))
-                .isInstanceOf(HttpStatusCodeException.class)
-                .hasMessageContaining(
-                    "It is prohibited to use the param owner-is-null with values.");
-          };
-      return DynamicTest.stream(list.iterator(), Pair::getLeft, testOwnerIsNull);
+    @ParameterizedTest
+    @EmptySource
+    @ValueSource(strings = {"=true", "=TRUE", "="})
+    void should_TreatOwnerIsNullTrue_For_Value(String value) {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?owner-is-null" + value;
+      ResponseEntity<TaskSummaryCollectionRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(TaskSummaryCollectionRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getContent()).hasSize(65);
+      assertThat(response.getBody().getContent())
+          .allSatisfy(task -> assertThat(task).extracting("owner").isNull());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"foo", "bar", "false"})
+    void should_ReturnException_For_OwnerIsNullWithBadValue(String badValue) {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?owner-is-null=" + badValue;
+
+      ThrowingCallable httpCall =
+          () ->
+              CLIENT
+                  .get()
+                  .uri(url)
+                  .headers(
+                      headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                  .retrieve()
+                  .toEntity(TaskSummaryCollectionRepresentationModel.class);
+      assertThatThrownBy(httpCall)
+          .isInstanceOf(HttpStatusCodeException.class)
+          .extracting(HttpStatusCodeException.class::cast)
+          .extracting(HttpStatusCodeException::getStatusCode)
+          .isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
