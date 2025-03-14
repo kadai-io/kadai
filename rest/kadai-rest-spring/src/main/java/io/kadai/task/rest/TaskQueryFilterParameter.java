@@ -30,6 +30,7 @@ import io.kadai.task.api.TaskQuery;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.api.WildcardSearchField;
 import io.kadai.task.api.models.ObjectReference;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.beans.ConstructorProperties;
 import java.time.Instant;
@@ -817,11 +818,12 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
   @JsonProperty("owner-not-like")
   private final String[] ownerNotLike;
 
-  @Schema(
+  @Parameter(
       name = "owner-is-null",
       description =
-          "Filter by tasks that have no owner. The parameter should exactly be \"owner-is-null\" "
-              + "without being followed by \"=...\"")
+          "Filter by tasks that have no owner. Either use it as a Query-Flag without any value, "
+              + "with the empty value \"\" or with the value \"true\".",
+      allowEmptyValue = true)
   @JsonProperty("owner-is-null")
   private final String ownerNull;
 

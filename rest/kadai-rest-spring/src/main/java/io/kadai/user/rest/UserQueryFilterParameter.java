@@ -6,6 +6,7 @@ import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.internal.util.LogSanitizer;
 import io.kadai.common.rest.QueryParameter;
 import io.kadai.user.api.UserQuery;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.beans.ConstructorProperties;
 import java.util.Optional;
@@ -19,7 +20,12 @@ public class UserQueryFilterParameter implements QueryParameter<UserQuery, Void>
 
   // region id
 
-  @Schema(name = "current-user", description = "Filter by the current user.")
+  @Parameter(
+      name = "current-user",
+      description =
+          "Filter by the current user. Either use it as a Query-Flag without any value, "
+              + "with the empty value \"\" or with the value \"true\".",
+      allowEmptyValue = true)
   @JsonProperty("current-user")
   private final String currentUser;
 
