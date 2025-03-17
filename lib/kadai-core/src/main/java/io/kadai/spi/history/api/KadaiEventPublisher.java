@@ -49,7 +49,7 @@ public interface KadaiEventPublisher<T extends KadaiEvent> {
   /**
    * Publishes multiple events given as {@link Supplier}.
    *
-   * <p>Does hot provide any guarantee on order.
+   * <p>Does not provide any guarantee on order.
    *
    * @param supplyEvents the supplier supplying the events to publish
    */

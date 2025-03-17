@@ -8,6 +8,11 @@ import io.kadai.spi.history.api.events.task.TaskDeletedEvent;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * A {@link KadaiEventConsumer} that deletes all {@linkplain
+ * io.kadai.spi.history.api.events.task.TaskHistoryEvent TaskHistoryEvents} associated with the
+ * {@linkplain io.kadai.task.api.models.Task Task} related to the consumed {@link TaskDeletedEvent}.
+ */
 public class TaskDeletedHistoryEventConsumerOnCascadeDeleteEvents
     implements KadaiEventConsumer<TaskDeletedEvent> {
 
