@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import acceptance.AbstractAccTest;
+import acceptance.ParameterizedQuerySqlCaptureInterceptor;
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.TimeInterval;
@@ -35,8 +36,6 @@ import io.kadai.spi.history.api.events.task.TaskHistoryCustomField;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
 import io.kadai.task.api.models.TaskSummary;
-
-import acceptance.ParameterizedQuerySqlCaptureInterceptor;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -591,7 +590,7 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
       final String sql = ParameterizedQuerySqlCaptureInterceptor.getCapturedSql();
       final String physicalPattern1 = String.format("LIMIT %d OFFSET %d", limit, offset);
       final String physicalPattern2 =
-          String.format("OFFSET %d ROWS FETCH FIRST %d ROWS ONLY", limit, offset);
+          String.format("OFFSET %d ROWS FETCH FIRST %d ROWS ONLY", offset, limit);
 
       assertThat(sql).containsAnyOf(physicalPattern1, physicalPattern2);
     }

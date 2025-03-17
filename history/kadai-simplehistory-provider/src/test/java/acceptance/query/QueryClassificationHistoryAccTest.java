@@ -540,7 +540,7 @@ class QueryClassificationHistoryAccTest extends AbstractAccTest {
       final String sql = ParameterizedQuerySqlCaptureInterceptor.getCapturedSql();
       final String physicalPattern1 = String.format("LIMIT %d OFFSET %d", limit, offset);
       final String physicalPattern2 =
-          String.format("OFFSET %d ROWS FETCH FIRST %d ROWS ONLY", limit, offset);
+          String.format("OFFSET %d ROWS FETCH FIRST %d ROWS ONLY", offset, limit);
 
       assertThat(sql).containsAnyOf(physicalPattern1, physicalPattern2);
     }
