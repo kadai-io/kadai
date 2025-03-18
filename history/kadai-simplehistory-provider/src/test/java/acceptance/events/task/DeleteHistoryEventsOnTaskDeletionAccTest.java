@@ -25,8 +25,8 @@ import acceptance.AbstractAccTest;
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
-import io.kadai.simplehistory.impl.TaskHistoryQueryImpl;
-import io.kadai.simplehistory.impl.task.TaskHistoryQueryMapper;
+import io.kadai.simplehistory.task.internal.TaskHistoryQueryImpl;
+import io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
@@ -50,7 +50,7 @@ class DeleteHistoryEventsOnTaskDeletionAccTest extends AbstractAccTest {
 
     List<TaskHistoryEvent> listEvents =
         taskHistoryQueryMapper.queryHistoryEvents(
-            (TaskHistoryQueryImpl) historyService.createTaskHistoryQuery().taskIdIn(taskid));
+            (TaskHistoryQueryImpl) taskHistoryService.createTaskHistoryQuery().taskIdIn(taskid));
     assertThat(listEvents).hasSize(2);
 
     taskService.deleteTask(taskid);
@@ -65,7 +65,7 @@ class DeleteHistoryEventsOnTaskDeletionAccTest extends AbstractAccTest {
 
     listEvents =
         taskHistoryQueryMapper.queryHistoryEvents(
-            (TaskHistoryQueryImpl) historyService.createTaskHistoryQuery().taskIdIn(taskid));
+            (TaskHistoryQueryImpl) taskHistoryService.createTaskHistoryQuery().taskIdIn(taskid));
     assertThat(listEvents).hasSize(1);
     assertThat(listEvents.get(0).getEventType()).isEqualTo(TaskHistoryEventType.DELETED.getName());
   }
@@ -85,7 +85,7 @@ class DeleteHistoryEventsOnTaskDeletionAccTest extends AbstractAccTest {
     List<TaskHistoryEvent> listEvents =
         taskHistoryQueryMapper.queryHistoryEvents(
             (TaskHistoryQueryImpl)
-                historyService.createTaskHistoryQuery().taskIdIn(taskId_1, taskId_2));
+                taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId_1, taskId_2));
     assertThat(listEvents).hasSize(3);
 
     taskService.deleteTasks(List.of(taskId_1, taskId_2));
@@ -106,7 +106,7 @@ class DeleteHistoryEventsOnTaskDeletionAccTest extends AbstractAccTest {
     listEvents =
         taskHistoryQueryMapper.queryHistoryEvents(
             (TaskHistoryQueryImpl)
-                historyService.createTaskHistoryQuery().taskIdIn(taskId_1, taskId_2));
+                taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId_1, taskId_2));
     assertThat(listEvents).hasSize(2);
     assertThat(listEvents.get(0).getEventType()).isEqualTo(TaskHistoryEventType.DELETED.getName());
     assertThat(listEvents.get(1).getEventType()).isEqualTo(TaskHistoryEventType.DELETED.getName());
@@ -125,7 +125,7 @@ class DeleteHistoryEventsOnTaskDeletionAccTest extends AbstractAccTest {
 
     List<TaskHistoryEvent> listEvents =
         taskHistoryQueryMapper.queryHistoryEvents(
-            (TaskHistoryQueryImpl) historyService.createTaskHistoryQuery().taskIdIn(taskId));
+            (TaskHistoryQueryImpl) taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
     assertThat(listEvents).hasSize(2);
 
     taskService.deleteTask(taskId);
@@ -140,7 +140,7 @@ class DeleteHistoryEventsOnTaskDeletionAccTest extends AbstractAccTest {
 
     listEvents =
         taskHistoryQueryMapper.queryHistoryEvents(
-            (TaskHistoryQueryImpl) historyService.createTaskHistoryQuery().taskIdIn(taskId));
+            (TaskHistoryQueryImpl) taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
     assertThat(listEvents).hasSize(3);
   }
 
@@ -158,7 +158,7 @@ class DeleteHistoryEventsOnTaskDeletionAccTest extends AbstractAccTest {
     List<TaskHistoryEvent> listEvents =
         taskHistoryQueryMapper.queryHistoryEvents(
             (TaskHistoryQueryImpl)
-                historyService.createTaskHistoryQuery().taskIdIn(taskId_1, taskId_2));
+                taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId_1, taskId_2));
     assertThat(listEvents).hasSize(2);
 
     taskService.deleteTasks(List.of(taskId_1, taskId_2));
@@ -173,7 +173,7 @@ class DeleteHistoryEventsOnTaskDeletionAccTest extends AbstractAccTest {
     listEvents =
         taskHistoryQueryMapper.queryHistoryEvents(
             (TaskHistoryQueryImpl)
-                historyService.createTaskHistoryQuery().taskIdIn(taskId_1, taskId_2));
+                taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId_1, taskId_2));
     assertThat(listEvents).hasSize(4);
   }
 

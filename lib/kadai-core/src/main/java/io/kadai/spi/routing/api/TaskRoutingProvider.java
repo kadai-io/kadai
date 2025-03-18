@@ -18,7 +18,7 @@
 
 package io.kadai.spi.routing.api;
 
-import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.api.KadaiInitializable;
 import io.kadai.task.api.models.Task;
 import io.kadai.workbasket.api.models.Workbasket;
 import java.util.Optional;
@@ -28,18 +28,7 @@ import java.util.Optional;
  * that has no {@linkplain Workbasket} on {@linkplain io.kadai.task.api.TaskService#createTask(Task)
  * creation}.
  */
-public interface TaskRoutingProvider {
-
-  /**
-   * Provide the active {@linkplain KadaiEngine} which is initialized for this KADAI installation.
-   *
-   * <p>This method is called during KADAI startup and allows the service provider to store the
-   * active {@linkplain KadaiEngine} for later usage.
-   *
-   * @param kadaiEngine the active {@linkplain KadaiEngine} which is initialized for this
-   *     installation
-   */
-  void initialize(KadaiEngine kadaiEngine);
+public interface TaskRoutingProvider extends KadaiInitializable {
 
   /**
    * Determine the {@linkplain Workbasket#getId() id} of the {@linkplain Workbasket} for a given
