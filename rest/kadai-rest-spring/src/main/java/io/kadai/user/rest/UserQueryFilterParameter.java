@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.rest.QueryParameter;
 import io.kadai.user.api.UserQuery;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.beans.ConstructorProperties;
 import java.util.Optional;
 import org.apache.commons.lang3.ArrayUtils;
@@ -17,33 +17,33 @@ public class UserQueryFilterParameter implements QueryParameter<UserQuery, Void>
 
   // region id
 
-  @Schema(name = "current-user", description = "Filter by the current user.")
+  @Parameter(name = "current-user", description = "Filter by the current user.")
   @JsonProperty("current-user")
   private final String currentUser;
 
   // endregion
 
   // region current-user
-  @Schema(name = "orgLevel1", description = "Filter by the org-level 1. This is an exact match.")
+  @Parameter(name = "orgLevel1", description = "Filter by the org-level 1. This is an exact match.")
   @JsonProperty("orgLevel1")
   private final String[] orgLevel1;
 
   // endregion
 
   // region org-level
-  @Schema(name = "orgLevel2", description = "Filter by the org-level 2. This is an exact match.")
+  @Parameter(name = "orgLevel2", description = "Filter by the org-level 2. This is an exact match.")
   @JsonProperty("orgLevel2")
   private final String[] orgLevel2;
 
-  @Schema(name = "orgLevel3", description = "Filter by the org-level 3. This is an exact match.")
+  @Parameter(name = "orgLevel3", description = "Filter by the org-level 3. This is an exact match.")
   @JsonProperty("orgLevel3")
   private final String[] orgLevel3;
 
-  @Schema(name = "orgLevel4", description = "Filter by the org-level 4. This is an exact match.")
+  @Parameter(name = "orgLevel4", description = "Filter by the org-level 4. This is an exact match.")
   @JsonProperty("orgLevel4")
   private final String[] orgLevel4;
 
-  @Schema(name = "user-id", description = "Filter by the users ids. This is an exact match.")
+  @Parameter(name = "user-id", description = "Filter by the users ids. This is an exact match.")
   @JsonProperty("user-id")
   private String[] userIds;
 

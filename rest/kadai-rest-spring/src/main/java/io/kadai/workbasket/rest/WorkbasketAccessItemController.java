@@ -139,11 +139,5 @@ public class WorkbasketAccessItemController implements WorkbasketAccessItemApi {
         throws InvalidArgumentException {
       super(sortBy, order);
     }
-
-    // this getter is necessary for the documentation!
-    @Override
-    public List<WorkbasketAccessItemSortBy> getSortBy() {
-      return super.getSortBy();
-    }
   }
 }

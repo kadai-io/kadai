@@ -23,7 +23,6 @@ import io.kadai.common.api.BaseQuery;
 import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 public class QuerySortParameter<Q extends BaseQuery<?, ?>, S extends QuerySortBy<Q>>
@@ -38,7 +37,7 @@ public class QuerySortParameter<Q extends BaseQuery<?, ?>, S extends QuerySortBy
   @JsonProperty("sort-by")
   private final List<S> sortBy;
 
-  @Schema(
+  @Parameter(
       name = "order",
       description =
           "The order direction for each sort value. This value requires the use of 'sort-by'. The"
@@ -48,8 +47,6 @@ public class QuerySortParameter<Q extends BaseQuery<?, ?>, S extends QuerySortBy
   @JsonProperty("order")
   private final List<SortDirection> order;
 
-  // this is only necessary because spring-auto-rest-docs can't resolve Enum[] data types.
-  // See https://github.com/ScaCap/spring-auto-restdocs/issues/423
   public QuerySortParameter(List<S> sortBy, List<SortDirection> order)
       throws InvalidArgumentException {
     this.sortBy = sortBy;
