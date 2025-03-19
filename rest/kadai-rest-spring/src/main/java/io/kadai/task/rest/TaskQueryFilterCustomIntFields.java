@@ -18,7 +18,6 @@
 
 package io.kadai.task.rest;
 
-import static io.kadai.common.internal.util.CheckedConsumer.wrap;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kadai.common.api.IntInterval;
@@ -955,15 +954,15 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
             triplet -> {
               TaskCustomIntField customField = triplet.getLeft();
               Optional.ofNullable(triplet.getMiddle().getFirst())
-                  .ifPresent(wrap(l -> query.customIntAttributeIn(customField, l)));
+                  .ifPresent(l -> query.customIntAttributeIn(customField, l));
               Optional.ofNullable(triplet.getMiddle().getSecond())
-                  .ifPresent(wrap(l -> query.customIntAttributeNotIn(customField, l)));
+                  .ifPresent(l -> query.customIntAttributeNotIn(customField, l));
               Optional.ofNullable(triplet.getMiddle().getThird())
                   .map(this::extractIntIntervals)
-                  .ifPresent(wrap(l -> query.customIntAttributeWithin(customField, l)));
+                  .ifPresent(l -> query.customIntAttributeWithin(customField, l));
               Optional.ofNullable(triplet.getMiddle().getFourth())
                   .map(this::extractIntIntervals)
-                  .ifPresent(wrap(l -> query.customIntAttributeNotWithin(customField, l)));
+                  .ifPresent(l -> query.customIntAttributeNotWithin(customField, l));
               Integer from = triplet.getRight().getFirst();
               Integer to = triplet.getRight().getThird();
               if (from != null || to != null) {

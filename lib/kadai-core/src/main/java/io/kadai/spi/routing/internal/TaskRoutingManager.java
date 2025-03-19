@@ -69,7 +69,7 @@ public final class TaskRoutingManager {
       Set<String> workbasketIds =
           taskRoutingProviders.stream()
               .map(
-                  CheckedFunction.wrap(
+                  CheckedFunction.wrapping(
                       taskRoutingProvider -> taskRoutingProvider.determineWorkbasketId(task)))
               .filter(Objects::nonNull)
               .collect(Collectors.toSet());
@@ -105,7 +105,7 @@ public final class TaskRoutingManager {
       Set<RoutingTarget> routingTargets =
           taskRoutingProviders.stream()
               .map(
-                  CheckedFunction.wrap(
+                  CheckedFunction.wrapping(
                       taskRoutingProvider -> taskRoutingProvider.determineRoutingTarget(task)))
               .filter(Optional::isPresent)
               .map(Optional::get)
