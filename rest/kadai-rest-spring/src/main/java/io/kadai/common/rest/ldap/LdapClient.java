@@ -887,6 +887,11 @@ public class LdapClient {
         .filter(not(LdapSettings.KADAI_LDAP_PERMISSIONS_OF_USER_NAME::equals))
         .filter(not(LdapSettings.KADAI_LDAP_PERMISSIONS_OF_USER_TYPE::equals))
         .filter(not(LdapSettings.KADAI_LDAP_PERMISSION_ID_ATTRIBUTE::equals))
+        .filter(not(LdapSettings.KADAI_LDAP_PERMISSION_SEARCH_BASE::equals))
+        .filter(not(LdapSettings.KADAI_LDAP_PERMISSION_SEARCH_FILTER_NAME::equals))
+        .filter(not(LdapSettings.KADAI_LDAP_PERMISSION_SEARCH_FILTER_VALUE::equals))
+        .filter(not(LdapSettings.KADAI_LDAP_PERMISSION_NAME_ATTRIBUTE::equals))
+        .filter(not(LdapSettings.KADAI_LDAP_USER_PERMISSIONS_ATTRIBUTE::equals))
         .filter(not(LdapSettings.KADAI_LDAP_GROUP_ID_ATTRIBUTE::equals))
         .filter(p -> p.getValueFromEnv(env) == null)
         .toList();

@@ -18,7 +18,6 @@
 
 package io.kadai.task.internal;
 
-import static io.kadai.common.internal.util.CheckedFunction.wrap;
 import static java.util.function.Predicate.not;
 
 import io.kadai.classification.api.ClassificationService;
@@ -34,6 +33,8 @@ import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.util.CheckedConsumer;
+import io.kadai.common.internal.util.CheckedFunction;
+import io.kadai.common.internal.util.CheckedSupplier;
 import io.kadai.common.internal.util.CollectionUtil;
 import io.kadai.common.internal.util.EnumUtil;
 import io.kadai.common.internal.util.IdGenerator;
@@ -130,6 +131,7 @@ public class TaskServiceImpl implements TaskService {
   private final ClassificationService classificationService;
   private final TaskMapper taskMapper;
   private final TaskTransferrer taskTransferrer;
+  private final TaskDistributor taskDistributor;
   private final TaskCommentServiceImpl taskCommentService;
   private final ServiceLevelHandler serviceLevelHandler;
   private final AttachmentHandler attachmentHandler;
@@ -171,6 +173,7 @@ public class TaskServiceImpl implements TaskService {
     this.afterRequestChangesManager = kadaiEngine.getAfterRequestChangesManager();
     this.taskEndstatePreprocessorManager = kadaiEngine.getTaskEndstatePreprocessorManager();
     this.taskTransferrer = new TaskTransferrer(kadaiEngine, taskMapper, this);
+    this.taskDistributor = new TaskDistributor(kadaiEngine, this);
     this.taskCommentService =
         new TaskCommentServiceImpl(kadaiEngine, taskCommentMapper, userMapper, taskMapper, this);
     this.serviceLevelHandler =
@@ -351,7 +354,19 @@ public class TaskServiceImpl implements TaskService {
           TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException {
-    return requestReview(taskId, false);
+    return requestReview(taskId, null, null, false);
+  }
+
+  @Override
+  public Task requestReviewWithWorkbasketId(String taskId, String workbasketId, String ownerId)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
+    if ((workbasketId == null || workbasketId.isEmpty())) {
+      throw new InvalidArgumentException("WorkbasketId must not be null or empty");
+    }
+    return requestReview(taskId, workbasketId, ownerId, false);
   }
 
   @Override
@@ -360,7 +375,7 @@ public class TaskServiceImpl implements TaskService {
           TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException {
-    return requestReview(taskId, true);
+    return requestReview(taskId, null, null, true);
   }
 
   @Override
@@ -369,7 +384,19 @@ public class TaskServiceImpl implements TaskService {
           TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException {
-    return requestChanges(taskId, false);
+    return requestChanges(taskId, null, null, false);
+  }
+
+  @Override
+  public Task requestChangesWithWorkbasketId(String taskId, String workbasketId, String ownerId)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
+    if ((workbasketId == null || workbasketId.isEmpty())) {
+      throw new InvalidArgumentException("WorkbasketId must not be null or empty");
+    }
+    return requestChanges(taskId, workbasketId, ownerId, false);
   }
 
   @Override
@@ -378,7 +405,7 @@ public class TaskServiceImpl implements TaskService {
           TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException {
-    return requestChanges(taskId, true);
+    return requestChanges(taskId, null, null, true);
   }
 
   @Override
@@ -433,8 +460,8 @@ public class TaskServiceImpl implements TaskService {
         workbasket = workbasketService.getWorkbasket(task.getWorkbasketKey(), task.getDomain());
       } else {
         RoutingTarget routingTarget = calculateWorkbasketDuringTaskCreation(task);
-        String owner = routingTarget.getOwner() == null
-            ? task.getOwner() : routingTarget.getOwner();
+        String owner =
+            routingTarget.getOwner() == null ? task.getOwner() : routingTarget.getOwner();
         workbasket = workbasketService.getWorkbasket(routingTarget.getWorkbasketId());
         task.setOwner(owner);
       }
@@ -807,6 +834,111 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
+  public BulkOperationResults<String, KadaiException> distribute(
+      String sourceWorkbasketId,
+      List<String> taskIds,
+      List<String> destinationWorkbasketIds,
+      String distributionStrategyName,
+      Map<String, Object> additionalInformation)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException,
+          InvalidTaskStateException {
+    return taskDistributor.distribute(
+        sourceWorkbasketId,
+        taskIds,
+        destinationWorkbasketIds,
+        distributionStrategyName,
+        additionalInformation);
+  }
+
+  @Override
+  public BulkOperationResults<String, KadaiException> distribute(
+      String sourceWorkbasketId,
+      List<String> destinationWorkbasketIds,
+      String distributionStrategyName,
+      Map<String, Object> additionalInformation)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException,
+          InvalidTaskStateException {
+    return taskDistributor.distribute(
+        sourceWorkbasketId,
+        destinationWorkbasketIds,
+        distributionStrategyName,
+        additionalInformation);
+  }
+
+  @Override
+  public BulkOperationResults<String, KadaiException> distribute(String sourceWorkbasketId)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException,
+          InvalidTaskStateException {
+    return taskDistributor.distribute(sourceWorkbasketId);
+  }
+
+  @Override
+  public BulkOperationResults<String, KadaiException> distribute(
+      String sourceWorkbasketId, List<String> taskIds)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException,
+          InvalidTaskStateException {
+    return taskDistributor.distribute(sourceWorkbasketId, taskIds);
+  }
+
+  @Override
+  public BulkOperationResults<String, KadaiException> distributeWithStrategy(
+      String sourceWorkbasketId,
+      String distributionStrategyName,
+      Map<String, Object> additionalInformation)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException, TaskNotFoundException {
+    return taskDistributor.distributeWithStrategy(
+        sourceWorkbasketId, distributionStrategyName, additionalInformation);
+  }
+
+  @Override
+  public BulkOperationResults<String, KadaiException> distributeWithStrategy(
+      String sourceWorkbasketId,
+      List<String> taskIds,
+      String distributionStrategyName,
+      Map<String, Object> additionalInformation)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException, TaskNotFoundException {
+    return taskDistributor.distributeWithStrategy(
+        sourceWorkbasketId, taskIds, distributionStrategyName, additionalInformation);
+  }
+
+  @Override
+  public BulkOperationResults<String, KadaiException> distributeWithDestinations(
+      String sourceWorkbasketId, List<String> destinationWorkbasketIds)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException {
+    return taskDistributor.distributeWithDestinations(sourceWorkbasketId, destinationWorkbasketIds);
+  }
+
+  @Override
+  public BulkOperationResults<String, KadaiException> distributeWithDestinations(
+      String sourceWorkbasketId, List<String> taskIds, List<String> destinationWorkbasketIds)
+      throws InvalidArgumentException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException {
+    return taskDistributor.distributeWithDestinations(
+        sourceWorkbasketId, taskIds, destinationWorkbasketIds);
+  }
+
+  @Override
   public void deleteTask(String taskId)
       throws TaskNotFoundException,
           NotAuthorizedException,
@@ -832,10 +964,12 @@ public class TaskServiceImpl implements TaskService {
     ((TaskQueryImpl) taskQuery).selectAndClaimEquals(true);
     try {
       return kadaiEngine.executeInDatabaseConnection(
-          () ->
-              Optional.ofNullable(taskQuery.single())
-                  .map(TaskSummary::getId)
-                  .map(wrap(this::claim)));
+          CheckedSupplier.rethrowing(
+              () ->
+                  Optional.ofNullable(taskQuery.single())
+                      .map(TaskSummary::getId)
+                      .map(CheckedFunction.rethrowing(this::claim))
+          ));
     } catch (IllegalArgumentException e) {
       throw e;
     } catch (Exception e) {
@@ -961,10 +1095,7 @@ public class TaskServiceImpl implements TaskService {
         throw new InvalidTaskStateException(
             taskId,
             state,
-            TaskState.READY,
-            TaskState.CLAIMED,
-            TaskState.READY_FOR_REVIEW,
-            TaskState.IN_REVIEW);
+            EnumUtil.allValuesExceptFor(TaskState.END_STATES));
       }
 
       terminateCancelCommonActions(cancelledTask, TaskState.CANCELLED);
@@ -1143,10 +1274,7 @@ public class TaskServiceImpl implements TaskService {
         throw new InvalidTaskStateException(
             taskId,
             state,
-            TaskState.READY,
-            TaskState.CLAIMED,
-            TaskState.READY_FOR_REVIEW,
-            TaskState.IN_REVIEW);
+            EnumUtil.allValuesExceptFor(TaskState.END_STATES));
       }
 
       terminateCancelCommonActions(terminatedTask, TaskState.TERMINATED);
@@ -1281,8 +1409,7 @@ public class TaskServiceImpl implements TaskService {
   }
 
   private static boolean taskIsNotClaimed(TaskSummary task) {
-    return task.getClaimed() == null
-        || task.getState() != TaskState.CLAIMED && task.getState() != TaskState.IN_REVIEW;
+    return task.getClaimed() == null || !task.getState().isClaimedState();
   }
 
   BulkLog addExceptionsForNonExistingTasksToBulkLog(
@@ -1495,7 +1622,7 @@ public class TaskServiceImpl implements TaskService {
     return task;
   }
 
-  private Task requestReview(String taskId, boolean force)
+  private Task requestReview(String taskId, String workbasketId, String ownerId, boolean force)
       throws TaskNotFoundException,
           InvalidTaskStateException,
           InvalidOwnerException,
@@ -1509,20 +1636,17 @@ public class TaskServiceImpl implements TaskService {
 
       final TaskImpl oldTask = duplicateTaskExactly(task);
 
-      if (force && task.getState().isEndState()) {
-        throw new InvalidTaskStateException(
-            task.getId(), task.getState(), EnumUtil.allValuesExceptFor(TaskState.END_STATES));
-      }
-      if (!force && taskIsNotClaimed(task)) {
-        throw new InvalidTaskStateException(
-            task.getId(), task.getState(), TaskState.CLAIMED, TaskState.IN_REVIEW);
+      final TaskState[] allowedStates =
+          force ? EnumUtil.allValuesExceptFor(TaskState.END_STATES) : TaskState.CLAIMED_STATES;
+      if (task.getState().isEndState() || (!force && taskIsNotClaimed(task))) {
+        throw new InvalidTaskStateException(task.getId(), task.getState(), allowedStates);
       }
       if (!force && !task.getOwner().equals(userId)) {
         throw new InvalidOwnerException(userId, task.getId());
       }
 
       task.setState(TaskState.READY_FOR_REVIEW);
-      task.setOwner(null);
+      task.setOwner(ownerId);
       task.setModified(Instant.now());
 
       taskMapper.requestReview(task);
@@ -1541,14 +1665,14 @@ public class TaskServiceImpl implements TaskService {
                 changeDetails));
       }
 
-      task = (TaskImpl) afterRequestReviewManager.afterRequestReview(task);
+      task = (TaskImpl) afterRequestReviewManager.afterRequestReview(task, workbasketId, ownerId);
     } finally {
       kadaiEngine.returnConnection();
     }
     return task;
   }
 
-  private Task requestChanges(String taskId, boolean force)
+  private Task requestChanges(String taskId, String workbasketId, String ownerId, boolean force)
       throws InvalidTaskStateException,
           TaskNotFoundException,
           InvalidOwnerException,
@@ -1574,7 +1698,7 @@ public class TaskServiceImpl implements TaskService {
       }
 
       task.setState(TaskState.READY);
-      task.setOwner(null);
+      task.setOwner(ownerId);
       task.setModified(Instant.now());
 
       taskMapper.requestChanges(task);
@@ -1592,7 +1716,7 @@ public class TaskServiceImpl implements TaskService {
                 userId,
                 changeDetails));
       }
-      task = (TaskImpl) afterRequestChangesManager.afterRequestChanges(task);
+      task = (TaskImpl) afterRequestChangesManager.afterRequestChanges(task, workbasketId, ownerId);
     } finally {
       kadaiEngine.returnConnection();
     }
@@ -1609,7 +1733,7 @@ public class TaskServiceImpl implements TaskService {
 
     String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
     if (!forced
-        && (state == TaskState.CLAIMED || state == TaskState.IN_REVIEW)
+        && state.isClaimedState()
         && !task.getOwner().equals(userId)) {
       throw new InvalidOwnerException(userId, task.getId());
     }
@@ -1625,7 +1749,7 @@ public class TaskServiceImpl implements TaskService {
       throws InvalidOwnerException, InvalidTaskStateException, NotAuthorizedOnWorkbasketException {
     if (taskIsNotClaimed(task)) {
       throw new InvalidTaskStateException(
-          task.getId(), task.getState(), TaskState.CLAIMED, TaskState.IN_REVIEW);
+          task.getId(), task.getState(), TaskState.CLAIMED_STATES);
     } else if (!kadaiEngine
             .getEngine()
             .getCurrentUserContext()
@@ -1666,7 +1790,7 @@ public class TaskServiceImpl implements TaskService {
         throw new InvalidTaskStateException(
             taskId, state, EnumUtil.allValuesExceptFor(TaskState.END_STATES));
       }
-      if ((state == TaskState.CLAIMED || state == TaskState.IN_REVIEW)
+      if (state.isClaimedState()
           && !forceUnclaim
           && !userId.equals(task.getOwner())) {
         throw new InvalidOwnerException(userId, taskId);
@@ -2031,11 +2155,14 @@ public class TaskServiceImpl implements TaskService {
       }
       routingTarget = new RoutingTarget(workbasketId);
     } else {
-      routingTarget = kadaiEngine.getTaskRoutingManager()
-          .determineRoutingTarget(task).orElseThrow(
-              () -> new InvalidArgumentException(
-                  "Cannot create a Task in an empty RoutingTarget")
-          );
+      routingTarget =
+          kadaiEngine
+              .getTaskRoutingManager()
+              .determineRoutingTarget(task)
+              .orElseThrow(
+                  () ->
+                      new InvalidArgumentException(
+                          "Cannot create a Task in an empty RoutingTarget"));
     }
     return routingTarget;
   }

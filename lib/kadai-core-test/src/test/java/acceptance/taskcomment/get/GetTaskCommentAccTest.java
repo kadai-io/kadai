@@ -18,7 +18,7 @@
 
 package acceptance.taskcomment.get;
 
-import static io.kadai.common.internal.util.CheckedConsumer.wrap;
+import static io.kadai.common.internal.util.CheckedConsumer.rethrowing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
@@ -250,7 +250,7 @@ class GetTaskCommentAccTest {
       List<TaskComment> taskComments = taskService.getTaskComments(task1.getId());
 
       taskComments.forEach(
-          wrap(
+          rethrowing(
               taskComment -> {
                 String creatorFullName =
                     userService.getUser(taskComment.getCreator()).getFullName();
