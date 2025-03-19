@@ -18,7 +18,7 @@
 
 package io.kadai.common.rest.ldap;
 
-import static io.kadai.common.internal.util.LambdaExceptionUtil.rethrowFunction;
+import static io.kadai.common.internal.util.CheckedFunction.rethrowing;
 import static java.util.function.Predicate.not;
 
 import io.kadai.KadaiConfiguration;
@@ -275,7 +275,7 @@ public class LdapClient {
       Function<String, List<AccessIdRepresentationModel>> accessIdTrans
   ) throws InvalidNameException {
     return dns.stream()
-        .map(rethrowFunction(this::searchAccessIdByDn))
+        .map(rethrowing(this::searchAccessIdByDn))
         .map(AccessIdRepresentationModel::getAccessId)
         .map(accessIdTrans)
         .flatMap(Collection::stream)
