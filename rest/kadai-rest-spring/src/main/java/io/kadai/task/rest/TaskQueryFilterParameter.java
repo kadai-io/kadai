@@ -396,7 +396,9 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
 
   // endregion
   // region creator
-  @Parameter(name = "creator", description = "Filter by creator of the Task. This is an exact match.")
+  @Parameter(
+      name = "creator",
+      description = "Filter by creator of the Task. This is an exact match.")
   @JsonProperty("creator")
   private final String[] creatorIn;
 
@@ -3042,8 +3044,5 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
               "owner-is-null parameter with value '%s' is invalid.",
               LogSanitizer.stripLineBreakingChars(ownerNull)));
     }
-    List<String> ownerInAsList = new ArrayList<>(Arrays.asList(this.ownerIn));
-    ownerInAsList.add(null);
-    return ownerInAsList.toArray(new String[ownerInAsList.size()]);
   }
 }
