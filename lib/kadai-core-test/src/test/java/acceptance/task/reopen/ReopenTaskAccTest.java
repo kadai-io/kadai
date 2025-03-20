@@ -34,6 +34,7 @@ import io.kadai.testapi.security.WithAccessId;
 import io.kadai.user.api.UserService;
 import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.WorkbasketService;
+import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
 import java.security.Principal;
 import java.security.PrivilegedExceptionAction;
@@ -46,7 +47,11 @@ import java.util.stream.Stream;
 import javax.security.auth.Subject;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -114,6 +119,19 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
         .firstName("Maximiliane")
         .lastName("Musterfrau")
         .longName("Long name of user-1-3")
+        .buildAndStore(userService);
+
+    WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
+        .workbasketId(defaultWorkbasketSummary.getId())
+        .accessId("user-1-4")
+        .permission(WorkbasketPermission.READ)
+        .permission(WorkbasketPermission.READTASKS)
+        .buildAndStore(workbasketService);
+    UserBuilder.newUser()
+        .id("user-1-4")
+        .firstName("Maximiliane")
+        .lastName("Musterfrau")
+        .longName("Long name of user-1-4")
         .buildAndStore(userService);
   }
 
@@ -427,6 +445,32 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
     Task retrievedTask = taskService.getTask(task.getId());
 
     assertThat(retrievedTask).isNotNull();
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  class PermissionsTest {
+
+    private Task task;
+
+    @BeforeEach
+    @WithAccessId(user = "user-1-2")
+    void setUp() throws Exception {
+      task = TaskBuilder.newTask()
+          .classificationSummary(defaultClassificationSummary)
+          .workbasketSummary(defaultWorkbasketSummary)
+          .primaryObjRef(defaultObjectReference)
+          .state(TaskState.COMPLETED)
+          .buildAndStore(taskService);
+    }
+
+    @Test
+    @WithAccessId(user = "user-1-4")
+    void should_ThrowNotAuthorizedOnWorkbasketException_When_UserNotHasEditTasksPerm() {
+      ThrowingCallable call = () -> taskService.reopen(task.getId());
+
+      assertThatExceptionOfType(NotAuthorizedOnWorkbasketException.class).isThrownBy(call);
+    }
   }
 
   static class DummyPriorityServiceProvider implements PriorityServiceProvider {

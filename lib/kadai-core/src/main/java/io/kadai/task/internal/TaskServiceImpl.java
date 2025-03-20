@@ -859,7 +859,15 @@ public class TaskServiceImpl implements TaskService {
     TaskImpl task;
     try {
       kadaiEngine.openConnection();
+      String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
       task = (TaskImpl) getTask(taskId);
+      if (!checkEditTasksPerm(task)) {
+        throw new NotAuthorizedOnWorkbasketException(
+            userId,
+            task.getWorkbasketSummary().getId(),
+            WorkbasketPermission.EDITTASKS);
+      }
+
       final TaskImpl oldTask = duplicateTaskExactly(task);
 
       final TaskState[] nonFinalEndStates = Arrays
@@ -879,7 +887,6 @@ public class TaskServiceImpl implements TaskService {
         throw new ReopenTaskWithCallbackException(oldTask.getId());
       }
 
-      String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
       String userLongName = null;
       if (kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo()) {
         User user = userMapper.findById(userId);

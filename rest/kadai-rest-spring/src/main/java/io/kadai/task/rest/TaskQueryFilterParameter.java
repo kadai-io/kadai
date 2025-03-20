@@ -29,6 +29,7 @@ import io.kadai.task.api.TaskQuery;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.api.WildcardSearchField;
 import io.kadai.task.api.models.ObjectReference;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.beans.ConstructorProperties;
 import java.time.Instant;
@@ -1147,7 +1148,7 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
 
   // endregion
   // region reopened
-  @Schema(
+  @Parameter(
       name = "is-reopened",
       description = "Filter by the is reopened flag of the Task. This is an exact match.")
   @JsonProperty("is-reopened")
