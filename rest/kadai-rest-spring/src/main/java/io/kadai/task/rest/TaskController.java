@@ -267,9 +267,9 @@ public class TaskController implements TaskApi {
       @PathVariable("taskId") String taskId,
       @RequestBody(required = false) Map<String, String> body)
       throws InvalidTaskStateException,
-      TaskNotFoundException,
-      InvalidOwnerException,
-      NotAuthorizedOnWorkbasketException {
+          TaskNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
 
     String workbasketId = null;
     String ownerId = null;
@@ -304,9 +304,9 @@ public class TaskController implements TaskApi {
       @PathVariable("taskId") String taskId,
       @RequestBody(required = false) Map<String, String> body)
       throws InvalidTaskStateException,
-      TaskNotFoundException,
-      InvalidOwnerException,
-      NotAuthorizedOnWorkbasketException {
+          TaskNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
 
     String workbasketId = null;
     String ownerId = null;
@@ -698,12 +698,6 @@ public class TaskController implements TaskApi {
     public TaskQuerySortParameter(List<TaskQuerySortBy> sortBy, List<SortDirection> order)
         throws InvalidArgumentException {
       super(sortBy, order);
-    }
-
-    // this getter is necessary for the documentation!
-    @Override
-    public List<TaskQuerySortBy> getSortBy() {
-      return super.getSortBy();
     }
   }
 
