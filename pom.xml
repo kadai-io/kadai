@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.kadai</groupId>
     <artifactId>kadai-parent</artifactId>
-    <version>9.2.1-SNAPSHOT</version>
+    <version>9.3.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -44,7 +44,7 @@
         <version.json>20250107</version.json>
 
         <!-- build dependencies -->
-        <version.checkstyle>10.21.3</version.checkstyle>
+        <version.checkstyle>10.21.4</version.checkstyle>
         <version.google-java-format>1.25.2</version.google-java-format>
         <version.maven.checkstyle>3.6.0</version.maven.checkstyle>
         <version.maven.jar>3.4.2</version.maven.jar>
@@ -79,23 +79,23 @@
         <version.jakarta.servlet>6.1.0</version.jakarta.servlet>
         <version.arquillian>1.9.3.Final</version.arquillian>
         <version.arquillian.managed.wildfly>5.0.1.Final</version.arquillian.managed.wildfly>
-        <version.shrinkwrap>3.3.3</version.shrinkwrap>
+        <version.shrinkwrap>3.3.4</version.shrinkwrap>
         <version.arquillian.jakarta>10.0.0.Final</version.arquillian.jakarta>
-        <version.junit.bom>5.12.0</version.junit.bom>
+        <version.junit.bom>5.12.1</version.junit.bom>
 
         <!-- test dependencies -->
         <version.archunit>1.4.0</version.archunit>
-        <version.equalsverifier>3.19.1</version.equalsverifier>
+        <version.equalsverifier>3.19.2</version.equalsverifier>
         <version.assertj>3.27.3</version.assertj>
         <version.openpojo>0.9.1</version.openpojo>
         <version.jacoco>0.8.12</version.jacoco>
         <version.slf4j-test>3.0.1</version.slf4j-test>
-        <version.testcontainers>1.20.5</version.testcontainers>
+        <version.testcontainers>1.20.6</version.testcontainers>
         <version.spring-openapi>2.8.5</version.spring-openapi>
 
         <!-- AspectJ dependencies -->
         <version.aspectj-maven-plugin>1.15.0</version.aspectj-maven-plugin>
-        <version.aspectj>1.9.22.1</version.aspectj>
+        <version.aspectj>1.9.23</version.aspectj>
 
         <!-- Excel to DMN converter dependencies -->
         <version.docx4j>11.5.2</version.docx4j>

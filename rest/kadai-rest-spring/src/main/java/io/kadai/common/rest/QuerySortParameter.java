@@ -22,13 +22,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kadai.common.api.BaseQuery;
 import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 public class QuerySortParameter<Q extends BaseQuery<?, ?>, S extends QuerySortBy<Q>>
     implements QueryParameter<Q, Void> {
 
-  @Schema(
+
+  @Parameter(
       name = "sort-by",
       description =
           "Sort the result by a given field. Multiple sort values can be declared. When the "

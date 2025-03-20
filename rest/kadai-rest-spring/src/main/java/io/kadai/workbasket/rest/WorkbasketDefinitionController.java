@@ -18,7 +18,7 @@
 
 package io.kadai.workbasket.rest;
 
-import static io.kadai.common.internal.util.CheckedFunction.wrap;
+import static io.kadai.common.internal.util.CheckedFunction.wrapping;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -102,7 +102,7 @@ public class WorkbasketDefinitionController implements WorkbasketDefinitionApi {
     WorkbasketDefinitionCollectionRepresentationModel pageModel =
         workbasketSummaryList.stream()
             .map(WorkbasketSummary::getId)
-            .map(wrap(workbasketService::getWorkbasket))
+            .map(wrapping(workbasketService::getWorkbasket))
             .collect(
                 Collectors.collectingAndThen(
                     Collectors.toList(), workbasketDefinitionAssembler::toKadaiCollectionModel));

@@ -34,7 +34,6 @@ import io.kadai.task.api.models.Attachment;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.api.models.TaskSummary;
-import io.kadai.testapi.builder.EntityBuilder.SummaryEntityBuilder;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import io.kadai.workbasket.api.exceptions.WorkbasketNotFoundException;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
@@ -273,5 +272,10 @@ public class TaskBuilder implements SummaryEntityBuilder<TaskSummary, Task, Task
       testTask.setId(null);
       testTask.setExternalId(null);
     }
+  }
+
+  @Override
+  public Task build() {
+    return testTask.copy();
   }
 }
