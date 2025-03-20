@@ -378,7 +378,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/build@npm:19.2.3, @angular/build@npm:^19.2.3":
+"@angular/build@npm:19.2.3":
   version: 19.2.3
   resolution: "@angular/build@npm:19.2.3"
   dependencies:
@@ -448,7 +448,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/build@npm:19.2.4":
+"@angular/build@npm:19.2.4, @angular/build@npm:^19.2.4":
   version: 19.2.4
   resolution: "@angular/build@npm:19.2.4"
   dependencies:
@@ -9972,7 +9972,7 @@ __metadata:
     "@angular-builders/custom-webpack": "npm:19.0.0"
     "@angular-devkit/build-angular": "npm:19.2.4"
     "@angular/animations": "npm:19.2.2"
-    "@angular/build": "npm:^19.2.3"
+    "@angular/build": "npm:^19.2.4"
     "@angular/cdk": "npm:19.2.3"
     "@angular/cli": "npm:19.2.4"
     "@angular/common": "npm:19.2.2"
