@@ -22,7 +22,6 @@ import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.rest.RestEndpoints;
-import io.kadai.common.rest.util.QueryParamsValidator;
 import io.kadai.user.api.UserQuery;
 import io.kadai.user.api.UserService;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
@@ -79,11 +78,7 @@ public class UserController implements UserApi {
   public ResponseEntity<UserCollectionRepresentationModel> getUsers(
       HttpServletRequest request, @ParameterObject UserQueryFilterParameter filterParameter)
       throws InvalidArgumentException {
-    if (filterParameter.getCurrentUser() != null
-        && QueryParamsValidator.hasQueryParameterValues(request, "current-user")) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param current-user with values.");
-    }
+
     filterParameter.addCurrentUserIdIfPresentWithContext(currentUserContext);
 
     UserQuery query = userService.createUserQuery();

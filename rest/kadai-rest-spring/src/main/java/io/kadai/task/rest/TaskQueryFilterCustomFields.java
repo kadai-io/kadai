@@ -18,7 +18,6 @@
 
 package io.kadai.task.rest;
 
-import static io.kadai.common.internal.util.CheckedConsumer.wrap;
 import static io.kadai.common.internal.util.Quadruple.of;
 import static io.kadai.task.api.TaskCustomField.CUSTOM_1;
 import static io.kadai.task.api.TaskCustomField.CUSTOM_10;
@@ -1024,15 +1023,15 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
         .forEach(
             pair -> {
               Optional.ofNullable(pair.getRight().getFirst())
-                  .ifPresent(wrap(l -> query.customAttributeIn(pair.getLeft(), l)));
+                  .ifPresent(l -> query.customAttributeIn(pair.getLeft(), l));
               Optional.ofNullable(pair.getRight().getSecond())
-                  .ifPresent(wrap(l -> query.customAttributeNotIn(pair.getLeft(), l)));
+                  .ifPresent(l -> query.customAttributeNotIn(pair.getLeft(), l));
               Optional.ofNullable(pair.getRight().getThird())
                   .map(this::wrapElementsInLikeStatement)
-                  .ifPresent(wrap(l -> query.customAttributeLike(pair.getLeft(), l)));
+                  .ifPresent(l -> query.customAttributeLike(pair.getLeft(), l));
               Optional.ofNullable(pair.getRight().getFourth())
                   .map(this::wrapElementsInLikeStatement)
-                  .ifPresent(wrap(l -> query.customAttributeNotLike(pair.getLeft(), l)));
+                  .ifPresent(l -> query.customAttributeNotLike(pair.getLeft(), l));
             });
     return null;
   }

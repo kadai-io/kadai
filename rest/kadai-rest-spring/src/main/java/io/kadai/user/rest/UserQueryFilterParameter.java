@@ -1,7 +1,9 @@
 package io.kadai.user.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.security.CurrentUserContext;
+import io.kadai.common.internal.util.LogSanitizer;
 import io.kadai.common.rest.QueryParameter;
 import io.kadai.user.api.UserQuery;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,7 +19,12 @@ public class UserQueryFilterParameter implements QueryParameter<UserQuery, Void>
 
   // region id
 
-  @Parameter(name = "current-user", description = "Filter by the current user.")
+  @Parameter(
+      name = "current-user",
+      description =
+          "Filter by the current user. Either use it as a Query-Flag without any value, "
+              + "with the empty value \"\" or with the value \"true\".",
+      allowEmptyValue = true)
   @JsonProperty("current-user")
   private final String currentUser;
 
@@ -78,11 +85,24 @@ public class UserQueryFilterParameter implements QueryParameter<UserQuery, Void>
    *
    * @param currentUserContext the context this {@linkplain
    *     org.springdoc.core.annotations.ParameterObject @ParameterObject} is served from.
+   * @throws InvalidArgumentException if {@linkplain #getCurrentUser() current-user} has any
+   *     non-blank value other than 'true'
    */
-  public void addCurrentUserIdIfPresentWithContext(CurrentUserContext currentUserContext) {
-    if (currentUser != null) {
+  public void addCurrentUserIdIfPresentWithContext(CurrentUserContext currentUserContext)
+      throws InvalidArgumentException {
+    if (currentUser == null) {
+      return;
+    }
+    if (currentUser.isBlank() || currentUser.equalsIgnoreCase("true")) {
       final String currentUserId = currentUserContext.getUserid();
-      this.userIds = ArrayUtils.add(this.userIds, currentUserId);
+      if (currentUserId != null) {
+        this.userIds = ArrayUtils.add(this.userIds, currentUserId);
+      }
+    } else {
+      throw new InvalidArgumentException(
+          String.format(
+              "current-user parameter '%s' with value is invalid.",
+              LogSanitizer.stripLineBreakingChars(currentUser)));
     }
   }
 

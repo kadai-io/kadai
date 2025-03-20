@@ -19,7 +19,6 @@
 package io.kadai.classification.rest;
 
 import static io.kadai.common.api.SharedConstants.MASTER_DOMAIN;
-import static io.kadai.common.internal.util.CheckedConsumer.wrap;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kadai.classification.api.ClassificationCustomField;
@@ -274,7 +273,7 @@ public class ClassificationQueryFilterParameter
             pair ->
                 Optional.ofNullable(pair.getRight())
                     .map(this::wrapElementsInLikeStatement)
-                    .ifPresent(wrap(l -> query.customAttributeLike(pair.getLeft(), l))));
+                    .ifPresent(l -> query.customAttributeLike(pair.getLeft(), l)));
     return null;
   }
 }

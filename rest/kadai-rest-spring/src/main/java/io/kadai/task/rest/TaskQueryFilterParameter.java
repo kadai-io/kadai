@@ -23,6 +23,7 @@ import io.kadai.common.api.IntInterval;
 import io.kadai.common.api.KeyDomain;
 import io.kadai.common.api.TimeInterval;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.internal.util.LogSanitizer;
 import io.kadai.common.rest.QueryParameter;
 import io.kadai.task.api.CallbackState;
 import io.kadai.task.api.TaskQuery;
@@ -32,10 +33,9 @@ import io.kadai.task.api.models.ObjectReference;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.beans.ConstructorProperties;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
+import org.apache.commons.lang3.ArrayUtils;
 
 public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void> {
 
@@ -396,9 +396,7 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
 
   // endregion
   // region creator
-  @Parameter(
-      name = "creator",
-      description = "Filter by creator of the Task. This is an exact match.")
+  @Parameter(name = "creator", description = "Filter by creator of the Task. This is an exact match.")
   @JsonProperty("creator")
   private final String[] creatorIn;
 
@@ -822,8 +820,9 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
   @Parameter(
       name = "owner-is-null",
       description =
-          "Filter by tasks that have no owner. The parameter should exactly be \"owner-is-null\" "
-              + "without being followed by \"=...\"")
+          "Filter by tasks that have no owner. Either use it as a Query-Flag without any value, "
+              + "with the empty value \"\" or with the value \"true\".",
+      allowEmptyValue = true)
   @JsonProperty("owner-is-null")
   private final String ownerNull;
 
@@ -2679,8 +2678,8 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
         .map(this::wrapElementsInLikeStatement)
         .ifPresent(query::parentBusinessProcessIdNotLike);
 
-    String[] ownerInIncludingNull = addNullToOwnerIn();
-    Optional.ofNullable(ownerInIncludingNull).ifPresent(query::ownerIn);
+    final String[] ownerInWithNull = addNullToOwnerInIfOwnerNullSet();
+    Optional.ofNullable(ownerInWithNull).ifPresent(query::ownerIn);
     Optional.ofNullable(ownerNotIn).ifPresent(query::ownerNotIn);
     Optional.ofNullable(ownerLike)
         .map(this::wrapElementsInLikeStatement)
@@ -3022,12 +3021,26 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
     }
   }
 
-  private String[] addNullToOwnerIn() {
-    if (this.ownerNull == null) {
-      return this.ownerIn;
+  /**
+   * Returns {@linkplain #getOwnerIn() owner-in} and adds NULL to it if {@linkplain #getOwnerNull()
+   * owner-is-null} is true.
+   *
+   * @return {@linkplain #getOwnerIn() owner-in} and adds NULL to it if {@linkplain #getOwnerNull()
+   *     owner-is-null} is true
+   * @throws InvalidArgumentException if {@linkplain #getOwnerNull() owner-is-null} has any
+   *     non-blank value other than 'true'
+   */
+  private String[] addNullToOwnerInIfOwnerNullSet() throws InvalidArgumentException {
+    if (ownerNull == null) {
+      return ownerIn;
     }
-    if (this.ownerIn == null) {
-      return new String[] {null};
+    if (ownerNull.isBlank() || ownerNull.equalsIgnoreCase("true")) {
+      return this.ownerIn == null ? new String[] {null} : ArrayUtils.add(this.ownerIn, null);
+    } else {
+      throw new InvalidArgumentException(
+          String.format(
+              "owner-is-null parameter with value '%s' is invalid.",
+              LogSanitizer.stripLineBreakingChars(ownerNull)));
     }
     List<String> ownerInAsList = new ArrayList<>(Arrays.asList(this.ownerIn));
     ownerInAsList.add(null);

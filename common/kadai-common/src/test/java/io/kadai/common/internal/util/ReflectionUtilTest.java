@@ -52,7 +52,7 @@ class ReflectionUtilTest {
   }
 
   @Test
-  void should_ReturnNull_For_TopLevelClass() {
+  void should_ReturnNull_For_TopLevelClass() throws Exception {
     TopLevelTestClass topLevelTestClass = new TopLevelTestClass();
 
     Object enclosingInstance = ReflectionUtil.getEnclosingInstance(topLevelTestClass);
@@ -61,7 +61,7 @@ class ReflectionUtilTest {
   }
 
   @Test
-  void should_ReturnTopLevelInstance_For_NestedInstance() {
+  void should_ReturnTopLevelInstance_For_NestedInstance() throws Exception {
     TopLevelTestClass topLevelTestClass = new TopLevelTestClass();
     FirstNestedClass firstNestedClass = topLevelTestClass.new FirstNestedClass();
 
@@ -71,7 +71,7 @@ class ReflectionUtilTest {
   }
 
   @Test
-  void should_ReturnNestedInstance_For_NestedNestedInstance() {
+  void should_ReturnNestedInstance_For_NestedNestedInstance() throws Exception {
     TopLevelTestClass topLevelTestClass = new TopLevelTestClass();
     FirstNestedClass firstNestedClass = topLevelTestClass.new FirstNestedClass();
     SecondNestedClass secondNestedClass = firstNestedClass.new SecondNestedClass();
