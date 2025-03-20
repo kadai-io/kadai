@@ -451,7 +451,7 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
   @TestInstance(Lifecycle.PER_CLASS)
   class PermissionsTest {
 
-    private Task task;
+    Task task;
 
     @BeforeEach
     @WithAccessId(user = "user-1-2")
