@@ -25,7 +25,7 @@ import io.kadai.classification.api.ClassificationCustomField;
 import io.kadai.classification.api.ClassificationQuery;
 import io.kadai.common.internal.util.Pair;
 import io.kadai.common.rest.QueryParameter;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.beans.ConstructorProperties;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -33,13 +33,13 @@ import java.util.stream.Stream;
 public class ClassificationQueryFilterParameter
     implements QueryParameter<ClassificationQuery, Void> {
 
-  @Schema(
+  @Parameter(
       name = "name",
       description = "Filter by the name of the Classification. This is an exact match.")
   @JsonProperty("name")
   private final String[] name;
 
-  @Schema(
+  @Parameter(
       name = "name-like",
       description =
           "Filter by the name of the Classification. This results in a substring search. (% is "
@@ -48,31 +48,31 @@ public class ClassificationQueryFilterParameter
   @JsonProperty("name-like")
   private final String[] nameLike;
 
-  @Schema(
+  @Parameter(
       name = "key",
       description = "Filter by the key of the Classification. This is an exact match.")
   @JsonProperty("key")
   private final String[] key;
 
-  @Schema(
+  @Parameter(
       name = "category",
       description = "Filter by the category of the Classification. This is an exact match.")
   @JsonProperty("category")
   private final String[] category;
 
-  @Schema(
+  @Parameter(
       name = "domain",
       description = "Filter by the domain of the Classification. This is an exact match.")
   @JsonProperty("domain")
   private final String[] domain;
 
-  @Schema(
+  @Parameter(
       name = "type",
       description = "Filter by the type of the Classification. This is an exact match.")
   @JsonProperty("type")
   private final String[] type;
 
-  @Schema(
+  @Parameter(
       name = "custom-1-like",
       description =
           "Filter by the value of the field custom1. This results in a substring search.. (% is "
@@ -81,7 +81,7 @@ public class ClassificationQueryFilterParameter
   @JsonProperty("custom-1-like")
   private final String[] custom1Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-2-like",
       description =
           "Filter by the value of the field custom2. This results in a substring search.. (% is "
@@ -90,7 +90,7 @@ public class ClassificationQueryFilterParameter
   @JsonProperty("custom-2-like")
   private final String[] custom2Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-3-like",
       description =
           "Filter by the value of the field custom3. This results in a substring search.. (% is "
@@ -99,7 +99,7 @@ public class ClassificationQueryFilterParameter
   @JsonProperty("custom-3-like")
   private final String[] custom3Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-4-like",
       description =
           "Filter by the value of the field custom4. This results in a substring search.. (% is "
@@ -108,7 +108,7 @@ public class ClassificationQueryFilterParameter
   @JsonProperty("custom-4-like")
   private final String[] custom4Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-5-like",
       description =
           "Filter by the value of the field custom5. This results in a substring search.. (% is "
@@ -117,7 +117,7 @@ public class ClassificationQueryFilterParameter
   @JsonProperty("custom-5-like")
   private final String[] custom5Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-6-like",
       description =
           "Filter by the value of the field custom6. This results in a substring search.. (% is "
@@ -126,7 +126,7 @@ public class ClassificationQueryFilterParameter
   @JsonProperty("custom-6-like")
   private final String[] custom6Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-7-like",
       description =
           "Filter by the value of the field custom7. This results in a substring search.. (% is "
@@ -135,7 +135,7 @@ public class ClassificationQueryFilterParameter
   @JsonProperty("custom-7-like")
   private final String[] custom7Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-8-like",
       description =
           "Filter by the value of the field custom8. This results in a substring search.. (% is "

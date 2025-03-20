@@ -201,11 +201,5 @@ public class TaskCommentController implements TaskCommentApi {
         throws InvalidArgumentException {
       super(sortBy, order);
     }
-
-    // this getter is necessary for the documentation!
-    @Override
-    public List<TaskCommentQuerySortBy> getSortBy() {
-      return super.getSortBy();
-    }
   }
 }

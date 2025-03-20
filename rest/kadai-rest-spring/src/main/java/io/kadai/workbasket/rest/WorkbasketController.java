@@ -337,11 +337,5 @@ public class WorkbasketController implements WorkbasketApi {
         throws InvalidArgumentException {
       super(sortBy, order);
     }
-
-    // this getter is necessary for the documentation!
-    @Override
-    public List<WorkbasketQuerySortBy> getSortBy() {
-      return super.getSortBy();
-    }
   }
 }
