@@ -3779,5 +3779,39 @@ class TaskControllerIntTest {
           .extracting(HttpStatusCodeException::getStatusCode)
           .isEqualTo(HttpStatus.BAD_REQUEST);
     }
+
+    @Test
+    void should_FailReopeningTaskRespondingWith403_ForTaskWithInsufficientPermissions() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000070");
+
+      // retrieve task from Rest Api
+      ResponseEntity<TaskRepresentationModel> getTaskResponse = CLIENT
+          .get()
+          .uri(url)
+          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+          .retrieve()
+          .toEntity(TaskRepresentationModel.class);
+      assertThat(getTaskResponse.getBody()).isNotNull();
+      TaskRepresentationModel readyTaskRepresentationModel = getTaskResponse.getBody();
+      assertThat(readyTaskRepresentationModel.getState()).isEqualTo(TaskState.COMPLETED);
+
+      // reopen
+      String url2 =
+          restHelper.toUrl(
+              RestEndpoints.URL_TASKS_ID_REOPEN, "TKI:000000000000000000000000000000000070");
+
+      ThrowingCallable call = () -> CLIENT
+          .post()
+          .uri(url2)
+          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+          .retrieve()
+          .toEntity(TaskRepresentationModel.class);
+
+      assertThatThrownBy(call)
+          .extracting(HttpStatusCodeException.class::cast)
+          .extracting(HttpStatusCodeException::getStatusCode)
+          .isEqualTo(HttpStatus.FORBIDDEN);
+    }
   }
 }
