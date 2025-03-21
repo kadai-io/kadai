@@ -23,6 +23,7 @@ import static io.kadai.common.api.BaseQuery.toLowerCopy;
 import io.kadai.common.api.exceptions.KadaiRuntimeException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.InternalKadaiEngine;
+import io.kadai.common.internal.PaginationInterceptor;
 import io.kadai.workbasket.api.AccessItemQueryColumnName;
 import io.kadai.workbasket.api.WorkbasketAccessItemQuery;
 import io.kadai.workbasket.api.models.WorkbasketAccessItem;
@@ -31,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.ibatis.exceptions.PersistenceException;
-import org.apache.ibatis.session.RowBounds;
 
 /** WorkbasketAccessItemQueryImpl for generating dynamic SQL. */
 public class WorkbasketAccessItemQueryImpl implements WorkbasketAccessItemQuery {
@@ -127,9 +127,11 @@ public class WorkbasketAccessItemQueryImpl implements WorkbasketAccessItemQuery 
     List<WorkbasketAccessItem> result = new ArrayList<>();
     try {
       kadaiEngine.openConnection();
-      RowBounds rowBounds = new RowBounds(offset, limit);
+
+      PaginationInterceptor.setPagination(offset, limit);
+
       List<WorkbasketAccessItemImpl> foundAccessItms =
-          kadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this, rowBounds);
+          kadaiEngine.getSqlSession().selectList(LINK_TO_MAPPER, this);
       result.addAll(foundAccessItms);
       return result;
     } catch (PersistenceException e) {
