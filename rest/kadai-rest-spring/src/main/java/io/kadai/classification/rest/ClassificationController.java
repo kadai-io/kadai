@@ -203,11 +203,5 @@ public class ClassificationController implements ClassificationApi {
         throws InvalidArgumentException {
       super(sortBy, order);
     }
-
-    // this getter is necessary for the documentation!
-    @Override
-    public List<ClassificationQuerySortBy> getSortBy() {
-      return super.getSortBy();
-    }
   }
 }

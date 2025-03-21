@@ -18,8 +18,6 @@
 
 package io.kadai.monitor.rest;
 
-import static io.kadai.common.internal.util.CheckedConsumer.wrap;
-
 import io.kadai.common.internal.util.Pair;
 import io.kadai.common.rest.QueryParameter;
 import io.kadai.monitor.api.reports.TimeIntervalReportBuilder;
@@ -251,7 +249,7 @@ public class TimeIntervalReportFilterParameter extends ReportFilterParameter
         .forEach(
             pair ->
                 Optional.ofNullable(pair.getRight())
-                    .ifPresent(wrap(l -> builder.customAttributeIn(pair.getLeft(), l))));
+                    .ifPresent(l -> builder.customAttributeIn(pair.getLeft(), l)));
     Stream.of(
             Pair.of(TaskCustomField.CUSTOM_1, custom1Like),
             Pair.of(TaskCustomField.CUSTOM_2, custom2Like),
@@ -273,7 +271,7 @@ public class TimeIntervalReportFilterParameter extends ReportFilterParameter
             pair ->
                 Optional.ofNullable(pair.getRight())
                     .map(this::wrapElementsInLikeStatement)
-                    .ifPresent(wrap(l -> builder.customAttributeLike(pair.getLeft(), l))));
+                    .ifPresent(l -> builder.customAttributeLike(pair.getLeft(), l)));
 
     Stream.of(
             Pair.of(TaskCustomField.CUSTOM_1, custom1NotIn),
@@ -295,7 +293,7 @@ public class TimeIntervalReportFilterParameter extends ReportFilterParameter
         .forEach(
             pair ->
                 Optional.ofNullable(pair.getRight())
-                    .ifPresent(wrap(l -> builder.customAttributeNotIn(pair.getLeft(), l))));
+                    .ifPresent(l -> builder.customAttributeNotIn(pair.getLeft(), l)));
     return null;
   }
 

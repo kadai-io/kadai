@@ -18,7 +18,7 @@
 
 package io.kadai.testapi.builder;
 
-import static io.kadai.common.internal.util.CheckedSupplier.wrap;
+import static io.kadai.common.internal.util.CheckedSupplier.rethrowing;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestObjectReference;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestWorkbasket;
 import static io.kadai.testapi.builder.ClassificationBuilder.newClassification;
@@ -113,7 +113,7 @@ class TaskBuilderTest {
             .primaryObjRef(defaultTestObjectReference().build())
             .buildAndStore(taskService, "user-1-1");
 
-    Task receivedTask = kadaiEngine.runAsAdmin(wrap(() -> taskService.getTask(task.getId())));
+    Task receivedTask = kadaiEngine.runAsAdmin(rethrowing(() -> taskService.getTask(task.getId())));
     assertThat(receivedTask).isEqualTo(task);
     assertThat(receivedTask.getCreator()).isEqualTo("user-1-1");
   }
