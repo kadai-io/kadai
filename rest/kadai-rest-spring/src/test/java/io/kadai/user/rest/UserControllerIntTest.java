@@ -19,6 +19,7 @@
 package io.kadai.user.rest;
 
 import static io.kadai.rest.test.RestHelper.CLIENT;
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -27,8 +28,13 @@ import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
 import io.kadai.user.rest.models.UserCollectionRepresentationModel;
 import io.kadai.user.rest.models.UserRepresentationModel;
+import io.kadai.user.rest.models.UserSummaryPagedRepresentationModel;
+import io.kadai.user.rest.models.UserSummaryRepresentationModel;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import org.assertj.core.api.Condition;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
@@ -197,13 +203,13 @@ class UserControllerIntTest {
         restHelper.toUrl(RestEndpoints.URL_USERS)
             + String.format("?orgLevel%d=%s", level, orgLevel);
 
-    ResponseEntity<UserCollectionRepresentationModel> responseEntity =
+    ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
         CLIENT
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(UserCollectionRepresentationModel.class);
+            .toEntity(UserSummaryPagedRepresentationModel.class);
 
     assertThat(responseEntity.getBody()).isNotNull();
     assertThat(responseEntity.getBody().getContent()).isNotEmpty();
@@ -231,13 +237,13 @@ class UserControllerIntTest {
         restHelper.toUrl(RestEndpoints.URL_USERS)
             + String.format("?orgLevel%d=%s", level, orgLevel);
 
-    ResponseEntity<UserCollectionRepresentationModel> responseEntity =
+    ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
         CLIENT
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(UserCollectionRepresentationModel.class);
+            .toEntity(UserSummaryPagedRepresentationModel.class);
 
     assertThat(responseEntity.getBody()).isNotNull();
     assertThat(responseEntity.getBody().getContent()).isEmpty();
@@ -257,13 +263,13 @@ class UserControllerIntTest {
             + String.format("?orgLevel%d=%s", level, orgLevel1)
             + String.format("&orgLevel%d=%s", level, orgLevel2);
 
-    ResponseEntity<UserCollectionRepresentationModel> responseEntity =
+    ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
         CLIENT
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(UserCollectionRepresentationModel.class);
+            .toEntity(UserSummaryPagedRepresentationModel.class);
 
     assertThat(responseEntity.getBody()).isNotNull();
     assertThat(responseEntity.getBody().getContent()).isNotEmpty();
@@ -298,13 +304,13 @@ class UserControllerIntTest {
             + String.format("?orgLevel%d=%s", level1, orgLevel1)
             + String.format("&orgLevel%d=%s", level2, orgLevel2);
 
-    ResponseEntity<UserCollectionRepresentationModel> responseEntity =
+    ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
         CLIENT
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(UserCollectionRepresentationModel.class);
+            .toEntity(UserSummaryPagedRepresentationModel.class);
 
     assertThat(responseEntity.getBody()).isNotNull();
     assertThat(responseEntity.getBody().getContent()).isNotEmpty();
@@ -326,13 +332,13 @@ class UserControllerIntTest {
             + String.format("?orgLevel%d=%s", level1, orgLevel1)
             + String.format("&orgLevel%d=%s", level2, orgLevel2);
 
-    ResponseEntity<UserCollectionRepresentationModel> responseEntity =
+    ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
         CLIENT
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(UserCollectionRepresentationModel.class);
+            .toEntity(UserSummaryPagedRepresentationModel.class);
 
     assertThat(responseEntity.getBody()).isNotNull();
     assertThat(responseEntity.getBody().getContent()).isEmpty();
@@ -347,13 +353,13 @@ class UserControllerIntTest {
             + "&user-id=user-1-1"
             + "&user-id=user-2-1";
 
-    ResponseEntity<UserCollectionRepresentationModel> responseEntity =
+    ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
         CLIENT
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(UserCollectionRepresentationModel.class);
+            .toEntity(UserSummaryPagedRepresentationModel.class);
 
     assertThat(responseEntity.getBody()).isNotNull();
     assertThat(responseEntity.getBody().getContent())
@@ -388,13 +394,13 @@ class UserControllerIntTest {
             + String.format("?orgLevel%d=%s", level, orgLevel)
             + "&current-user";
 
-    ResponseEntity<UserCollectionRepresentationModel> responseEntity =
+    ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
         CLIENT
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(UserCollectionRepresentationModel.class);
+            .toEntity(UserSummaryPagedRepresentationModel.class);
 
     assertThat(responseEntity.getBody()).isNotNull();
     assertThat(responseEntity.getBody().getContent())
@@ -430,24 +436,24 @@ class UserControllerIntTest {
             + "&user-id=user-2-1"
             + "&user-id=teamlead-1";
 
-    ResponseEntity<UserCollectionRepresentationModel> responseEntity =
+    ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
         CLIENT
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
             .retrieve()
-            .toEntity(UserCollectionRepresentationModel.class);
+            .toEntity(UserSummaryPagedRepresentationModel.class);
 
     assertThat(responseEntity.getBody()).isNotNull();
 
-    Collection<UserRepresentationModel> users = responseEntity.getBody().getContent();
+    Collection<UserSummaryRepresentationModel> users = responseEntity.getBody().getContent();
 
     assertThat(users)
         .haveExactly(
             1,
             new Condition<>(
-                user -> user.getUserId().equals("teamlead-1"), "user with id teamlead-1"));
-    assertThat(users).hasSize(3);
+                user -> user.getUserId().equals("teamlead-1"), "user with id teamlead-1"))
+        .hasSize(3);
     users.stream()
         .filter(user -> !user.getUserId().equals("teamlead-1"))
         .forEach(
@@ -462,6 +468,90 @@ class UserControllerIntTest {
                 assertThat(user.getOrgLevel4()).isEqualTo(orgLevel);
               }
             });
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "FIRST_NAME,ASCENDING,0,5,5",
+    "FIRST_NAME,DESCENDING,5,4,2",
+    "LAST_NAME,ASCENDING,1,5,5",
+    "LAST_NAME,DESCENDING,1,6,6",
+    "ORG_LEVEL_1,ASCENDING,1,20,18",
+    "ORG_LEVEL_1,DESCENDING,1,6,6",
+    "ORG_LEVEL_2,ASCENDING,2,3,3",
+    "ORG_LEVEL_2,DESCENDING,2,10,8",
+    "ORG_LEVEL_3,ASCENDING,3,2,2",
+    "ORG_LEVEL_3,DESCENDING,3,7,4",
+    "ORG_LEVEL_4,ASCENDING,1,100,18",
+    "ORG_LEVEL_4,DESCENDING,1,5,5"
+  })
+  void should_ReturnSortedAndPaginatedUsers(
+      String sortBy, String order, int page, int pageSize, int size) {
+    String url =
+        restHelper.toUrl(RestEndpoints.URL_USERS)
+            + String.format(
+                "?sort-by=%s&order=%s&page=%d&page-size=%d", sortBy, order, page, pageSize);
+
+    ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(UserSummaryPagedRepresentationModel.class);
+
+    assertThat(responseEntity.getBody()).isNotNull();
+    assertThat(responseEntity.getBody().getContent()).isNotEmpty();
+
+    Collection<UserSummaryRepresentationModel> users = responseEntity.getBody().getContent();
+
+    Function<UserSummaryRepresentationModel, String> sortByFunction =
+        getUserRepresentationModelStringFunction(sortBy);
+
+    assertThat(users)
+        .hasSize(size)
+        .extracting(sortByFunction)
+        .map(u -> u.replace("ü", "ue").replace("ä", "ae").replace("ö", "oe"))
+        .isSortedAccordingTo(
+            Objects.equals(order, "ASCENDING")
+                ? CASE_INSENSITIVE_ORDER
+                : CASE_INSENSITIVE_ORDER.reversed());
+  }
+
+  private static Function<UserSummaryRepresentationModel, String>
+      getUserRepresentationModelStringFunction(String sortBy) {
+    Map<String, Function<UserSummaryRepresentationModel, String>> sortByMap =
+        Map.of(
+            "FIRST_NAME", UserSummaryRepresentationModel::getFirstName,
+            "LAST_NAME", UserSummaryRepresentationModel::getLastName,
+            "ORG_LEVEL_1", UserSummaryRepresentationModel::getOrgLevel1,
+            "ORG_LEVEL_2", UserSummaryRepresentationModel::getOrgLevel2,
+            "ORG_LEVEL_3", UserSummaryRepresentationModel::getOrgLevel3,
+            "ORG_LEVEL_4", UserSummaryRepresentationModel::getOrgLevel4);
+
+    return sortByMap.get(sortBy);
+  }
+
+  @Test
+  void should_ReturnBadRequest_When_InvalidSortByParameter() {
+    String url =
+        restHelper.toUrl(RestEndpoints.URL_USERS)
+            + "?sort-by=INVALID&order=ASCENDING&page=0&page-size=5";
+
+    ThrowingCallable httpCall =
+        () ->
+            CLIENT
+                .get()
+                .uri(url)
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                .retrieve()
+                .toEntity(UserSummaryRepresentationModel.class);
+
+    assertThatThrownBy(httpCall)
+        .isInstanceOf(HttpStatusCodeException.class)
+        .extracting(HttpStatusCodeException.class::cast)
+        .extracting(HttpStatusCodeException::getStatusCode)
+        .isEqualTo(HttpStatus.BAD_REQUEST);
   }
 
   @Test
