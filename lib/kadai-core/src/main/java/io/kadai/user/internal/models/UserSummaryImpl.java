@@ -41,7 +41,6 @@ public class UserSummaryImpl implements UserSummary {
   protected String orgLevel3;
   protected String orgLevel2;
   protected String orgLevel1;
-  protected String data;
   protected Set<String> domains = Collections.emptySet();
 
   public UserSummaryImpl() {}
@@ -61,7 +60,6 @@ public class UserSummaryImpl implements UserSummary {
     this.orgLevel3 = copyFrom.orgLevel3;
     this.orgLevel2 = copyFrom.orgLevel2;
     this.orgLevel1 = copyFrom.orgLevel1;
-    this.data = copyFrom.data;
     this.domains = copyFrom.domains;
   }
 
@@ -192,15 +190,6 @@ public class UserSummaryImpl implements UserSummary {
   }
 
   @Override
-  public String getData() {
-    return data;
-  }
-
-  public void setData(String data) {
-    this.data = data;
-  }
-
-  @Override
   public Set<String> getDomains() {
     return domains;
   }
@@ -231,7 +220,6 @@ public class UserSummaryImpl implements UserSummary {
         orgLevel3,
         orgLevel2,
         orgLevel1,
-        data,
         domains);
   }
 
@@ -261,7 +249,6 @@ public class UserSummaryImpl implements UserSummary {
         && Objects.equals(orgLevel3, other.orgLevel3)
         && Objects.equals(orgLevel2, other.orgLevel2)
         && Objects.equals(orgLevel1, other.orgLevel1)
-        && Objects.equals(data, other.data)
         && Objects.equals(domains, other.domains);
   }
 
@@ -295,8 +282,6 @@ public class UserSummaryImpl implements UserSummary {
         + orgLevel2
         + ", orgLevel1="
         + orgLevel1
-        + ", data="
-        + data
         + ", domains="
         + domains
         + "]";

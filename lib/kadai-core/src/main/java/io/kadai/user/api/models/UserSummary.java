@@ -125,13 +125,6 @@ public interface UserSummary {
   String getOrgLevel1();
 
   /**
-   * Returns the data of the {@linkplain User}.
-   *
-   * @return data
-   */
-  String getData();
-
-  /**
    * Returns the domains of the {@linkplain User}.
    *
    * <p>The domains are derived from the {@linkplain io.kadai.workbasket.api.WorkbasketPermission

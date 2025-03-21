@@ -56,12 +56,6 @@ public class UserSummaryRepresentationModel
   @Schema(name = "orgLevel1", description = "The first organisation level of the User.")
   protected String orgLevel1;
 
-  @Schema(
-      name = "data",
-      description =
-          "The data of the User. This field is used for additional information about the User.")
-  protected String data;
-
   public String getUserId() {
     return userId;
   }
@@ -174,14 +168,6 @@ public class UserSummaryRepresentationModel
     this.orgLevel1 = orgLevel1;
   }
 
-  public String getData() {
-    return data;
-  }
-
-  public void setData(String data) {
-    this.data = data;
-  }
-
   public Set<String> getDomains() {
     return domains;
   }
@@ -208,8 +194,7 @@ public class UserSummaryRepresentationModel
         orgLevel4,
         orgLevel3,
         orgLevel2,
-        orgLevel1,
-        data);
+        orgLevel1);
   }
 
   @Override
@@ -237,7 +222,6 @@ public class UserSummaryRepresentationModel
         && Objects.equals(orgLevel4, other.orgLevel4)
         && Objects.equals(orgLevel3, other.orgLevel3)
         && Objects.equals(orgLevel2, other.orgLevel2)
-        && Objects.equals(orgLevel1, other.orgLevel1)
-        && Objects.equals(data, other.data);
+        && Objects.equals(orgLevel1, other.orgLevel1);
   }
 }

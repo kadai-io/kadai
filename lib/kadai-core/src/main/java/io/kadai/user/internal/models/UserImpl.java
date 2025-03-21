@@ -24,10 +24,13 @@ import java.util.Objects;
 
 public class UserImpl extends UserSummaryImpl implements User {
 
+  protected String data;
+
   public UserImpl() {}
 
   protected UserImpl(UserImpl copyFrom) {
     super(copyFrom);
+    this.data = copyFrom.data;
   }
 
   @Override
@@ -36,8 +39,33 @@ public class UserImpl extends UserSummaryImpl implements User {
   }
 
   @Override
+  public String getData() {
+    return data;
+  }
+
+  public void setData(String data) {
+    this.data = data;
+  }
+
+  @Override
   public int hashCode() {
-    return super.hashCode();
+    return Objects.hash(
+        id,
+        groups,
+        permissions,
+        firstName,
+        lastName,
+        fullName,
+        longName,
+        email,
+        phone,
+        mobilePhone,
+        orgLevel4,
+        orgLevel3,
+        orgLevel2,
+        orgLevel1,
+        data,
+        domains);
   }
 
   @Override
@@ -55,7 +83,6 @@ public class UserImpl extends UserSummaryImpl implements User {
     result.setOrgLevel2(this.getOrgLevel2());
     result.setOrgLevel3(this.getOrgLevel3());
     result.setOrgLevel4(this.getOrgLevel4());
-    result.setData(this.getData());
     result.setDomains(this.getDomains());
     return result;
   }

@@ -64,7 +64,6 @@ class UserSummaryRepresentationModelAssemblerTest {
     assertThat(entity.getOrgLevel3()).isEqualTo(repModel.getOrgLevel3());
     assertThat(entity.getOrgLevel2()).isEqualTo(repModel.getOrgLevel2());
     assertThat(entity.getOrgLevel1()).isEqualTo(repModel.getOrgLevel1());
-    assertThat(entity.getData()).isEqualTo(repModel.getData());
     assertThat(entity.getDomains()).isEqualTo(repModel.getDomains());
   }
 
@@ -85,7 +84,6 @@ class UserSummaryRepresentationModelAssemblerTest {
     userSummary.setOrgLevel3("BPM");
     userSummary.setOrgLevel2("Human Workflow");
     userSummary.setOrgLevel1("KADAI");
-    userSummary.setData("xy");
     userSummary.setDomains(Set.of("DOMAIN_A", "DOMAIN_B"));
 
     UserSummaryRepresentationModel repModel = assembler.toModel(userSummary);
@@ -109,7 +107,6 @@ class UserSummaryRepresentationModelAssemblerTest {
     repModel.setOrgLevel3("BPM");
     repModel.setOrgLevel2("Human Workflow");
     repModel.setOrgLevel1("KADAI");
-    repModel.setData("xy");
     repModel.setDomains(Set.of("DOMAIN_A", "DOMAIN_B"));
 
     UserSummary userSummary = assembler.toEntityModel(repModel);
@@ -133,7 +130,6 @@ class UserSummaryRepresentationModelAssemblerTest {
     userSummary.setOrgLevel3("BPM");
     userSummary.setOrgLevel2("Human Workflow");
     userSummary.setOrgLevel1("KADAI");
-    userSummary.setData("xy");
     userSummary.setDomains(Set.of("DOMAIN_A", "DOMAIN_B"));
 
     UserSummaryRepresentationModel repModel = assembler.toModel(userSummary);

@@ -122,6 +122,13 @@ public interface User extends UserSummary {
   void setOrgLevel1(String orgLevel1);
 
   /**
+   * Returns the data of the {@linkplain User}.
+   *
+   * @return data
+   */
+  String getData();
+
+  /**
    * Sets the data of the User.
    *
    * @param data the data of the User
