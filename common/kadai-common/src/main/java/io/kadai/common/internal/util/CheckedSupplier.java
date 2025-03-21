@@ -22,17 +22,36 @@ import io.kadai.common.api.exceptions.SystemException;
 import java.util.function.Supplier;
 
 @FunctionalInterface
-public interface CheckedSupplier<T, E extends Throwable> {
+public interface CheckedSupplier<T, E extends Exception> {
 
-  static <T> Supplier<T> wrap(CheckedSupplier<T, Throwable> checkedSupplier) {
+  static <T> Supplier<T> wrapping(CheckedSupplier<T, ? extends Exception> supplier)
+      throws SystemException {
     return () -> {
       try {
-        return checkedSupplier.get();
-      } catch (Throwable e) {
+        return supplier.get();
+      } catch (Exception e) {
         throw new SystemException("Caught exception", e);
       }
     };
   }
 
+  static <T, E extends Exception> Supplier<T> rethrowing(CheckedSupplier<T, E> supplier) throws E {
+    return () -> {
+      try {
+        return supplier.get();
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (Exception exception) {
+        throwActual(exception);
+        return null;
+      }
+    };
+  }
+
   T get() throws E;
+
+  @SuppressWarnings("unchecked")
+  private static <E extends Exception> void throwActual(Exception exception) throws E {
+    throw (E) exception;
+  }
 }

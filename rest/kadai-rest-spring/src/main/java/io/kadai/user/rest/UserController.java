@@ -101,11 +101,6 @@ public class UserController implements UserApi {
         QuerySortParameter.class,
         QueryPagingParameter.class);
 
-    if (filterParameter.getCurrentUser() != null
-        && QueryParamsValidator.hasQueryParameterValues(request, "current-user")) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param current-user with values.");
-    }
     filterParameter.addCurrentUserIdIfPresentWithContext(currentUserContext);
 
     UserQuery query = userService.createUserQuery();

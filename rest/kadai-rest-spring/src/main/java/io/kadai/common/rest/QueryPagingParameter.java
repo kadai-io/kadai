@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kadai.common.api.BaseQuery;
 import io.kadai.common.rest.models.PageMetadata;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.constraints.Min;
 import java.beans.ConstructorProperties;
 import java.util.List;
@@ -30,14 +30,14 @@ import java.util.List;
 public class QueryPagingParameter<T, Q extends BaseQuery<T, ?>>
     implements QueryParameter<Q, List<T>> {
 
-  @Schema(
+  @Parameter(
       name = "page",
       description = "Request a specific page. Requires the definition of the 'page-size'.")
   @JsonProperty("page")
   @Min(1)
   private final Integer page;
 
-  @Schema(
+  @Parameter(
       name = "page-size",
       description = "Defines the size for each page. This requires a specific requested 'page'.")
   @JsonProperty("page-size")

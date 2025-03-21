@@ -40,6 +40,8 @@ import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -91,9 +93,11 @@ class UserControllerIntTest {
         .containsExactlyInAnyOrder("Max", "Elena");
   }
 
-  @Test
-  void should_ReturnCurrentUser() {
-    String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?current-user";
+  @ParameterizedTest
+  @EmptySource
+  @ValueSource(strings = {"=true", "=TRUE", "="})
+  void should_TreatCurrentUserTrue_For_Value(String value) {
+    String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?current-user" + value;
 
     ResponseEntity<UserCollectionRepresentationModel> response =
         CLIENT
@@ -107,28 +111,10 @@ class UserControllerIntTest {
     assertThat(response.getBody().getContent()).extracting("userId").containsExactly("teamlead-1");
   }
 
-  @Test
-  void should_ReturnExceptionCurrentUserWithBadValue() {
-    String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?current-user=asd";
-
-    ThrowingCallable httpCall =
-        () ->
-            CLIENT
-                .get()
-                .uri(url)
-                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
-                .retrieve()
-                .toEntity(UserCollectionRepresentationModel.class);
-    assertThatThrownBy(httpCall)
-        .isInstanceOf(HttpStatusCodeException.class)
-        .extracting(HttpStatusCodeException.class::cast)
-        .extracting(HttpStatusCodeException::getStatusCode)
-        .isEqualTo(HttpStatus.BAD_REQUEST);
-  }
-
-  @Test
-  void should_ReturnExceptionCurrentUserWithEmptyValue() {
-    String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?current-user=";
+  @ParameterizedTest
+  @ValueSource(strings = {"foo", "bar", "false"})
+  void should_ReturnException_For_CurrentUserWithBadValue(String badValue) {
+    String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?current-user=" + badValue;
 
     ThrowingCallable httpCall =
         () ->
