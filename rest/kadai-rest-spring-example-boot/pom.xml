@@ -169,25 +169,6 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>copy-kadai-cdi-docs</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>
-                                ${project.build.outputDirectory}/static/docs/java/kadai-cdi
-                            </outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>
-                                        ../../lib/kadai-cdi/target/reports/apidocs
-                                    </directory>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>copy-kadai-spring-docs</id>
                         <phase>prepare-package</phase>
                         <goals>

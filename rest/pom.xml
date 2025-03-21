@@ -21,7 +21,6 @@
         <module>../web</module>
         <module>kadai-rest-spring-example-common</module>
         <module>kadai-rest-spring-example-boot</module>
-        <module>kadai-rest-spring-example-wildfly</module>
         <module>kadai-rest-spring-test-lib</module>
     </modules>
 

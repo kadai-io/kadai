@@ -51,11 +51,6 @@
         </dependency>
         <dependency>
             <groupId>io.kadai</groupId>
-            <artifactId>kadai-cdi</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.kadai</groupId>
             <artifactId>kadai-spring</artifactId>
             <version>${project.version}</version>
         </dependency>
