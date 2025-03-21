@@ -41,6 +41,7 @@ import io.kadai.task.api.exceptions.InvalidCallbackStateException;
 import io.kadai.task.api.exceptions.InvalidOwnerException;
 import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.NotAuthorizedOnTaskCommentException;
+import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
@@ -117,6 +118,12 @@ public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(InvalidCallbackStateException.class)
   public ResponseEntity<Object> handleInvalidCallbackStateException(
       InvalidCallbackStateException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(ReopenTaskWithCallbackException.class)
+  public ResponseEntity<Object> handleInvalidCallbackStateException(
+      ReopenTaskWithCallbackException ex, WebRequest req) {
     return handle(ex.getErrorCode(), ex, req, HttpStatus.BAD_REQUEST);
   }
 

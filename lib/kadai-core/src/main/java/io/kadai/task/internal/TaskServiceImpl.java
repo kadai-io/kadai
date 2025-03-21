@@ -46,6 +46,7 @@ import io.kadai.spi.history.api.events.task.TaskClaimedEvent;
 import io.kadai.spi.history.api.events.task.TaskCompletedEvent;
 import io.kadai.spi.history.api.events.task.TaskCreatedEvent;
 import io.kadai.spi.history.api.events.task.TaskDeletedEvent;
+import io.kadai.spi.history.api.events.task.TaskReopenedEvent;
 import io.kadai.spi.history.api.events.task.TaskRequestChangesEvent;
 import io.kadai.spi.history.api.events.task.TaskRequestReviewEvent;
 import io.kadai.spi.history.api.events.task.TaskTerminatedEvent;
@@ -72,6 +73,7 @@ import io.kadai.task.api.exceptions.InvalidOwnerException;
 import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.NotAuthorizedOnTaskCommentException;
 import io.kadai.task.api.exceptions.ObjectReferencePersistenceException;
+import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
@@ -101,6 +103,7 @@ import io.kadai.workbasket.internal.models.WorkbasketSummaryImpl;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -230,6 +233,21 @@ public class TaskServiceImpl implements TaskService {
       task.setState(TaskState.READY_FOR_REVIEW);
     } else {
       task.setState(TaskState.READY);
+    }
+  }
+
+  private void reopenActionsOnTask(
+      TaskSummaryImpl task, String userId, String userLongName, Instant now) {
+    task.setOwner(userId);
+    task.setOwnerLongName(userLongName);
+    task.setModified(now);
+    task.setClaimed(now);
+    task.setState(TaskState.CLAIMED);
+    task.setCompleted(null);
+    task.setRead(false);
+    task.setReopened(true);
+    if (!task.isManualPriorityActive()) {
+      priorityServiceManager.calculatePriorityOfTask(task).ifPresent(task::setPriority);
     }
   }
 
@@ -831,6 +849,74 @@ public class TaskServiceImpl implements TaskService {
           NotAuthorizedOnWorkbasketException {
     return taskTransferrer.transferWithOwner(
         taskIds, destinationWorkbasketKey, destinationWorkbasketDomain, owner, setTransferFlag);
+  }
+
+  @Override
+  public Task reopen(String taskId)
+      throws TaskNotFoundException,
+      NotAuthorizedOnWorkbasketException,
+      InvalidTaskStateException,
+      ReopenTaskWithCallbackException {
+    TaskImpl task;
+    try {
+      kadaiEngine.openConnection();
+      String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+      task = (TaskImpl) getTask(taskId);
+      if (!checkEditTasksPerm(task)) {
+        throw new NotAuthorizedOnWorkbasketException(
+            userId,
+            task.getWorkbasketSummary().getId(),
+            WorkbasketPermission.EDITTASKS);
+      }
+
+      final TaskImpl oldTask = duplicateTaskExactly(task);
+
+      final TaskState[] nonFinalEndStates = Arrays
+          .stream(TaskState.END_STATES)
+          .filter(not(TaskState::isFinalState))
+          .toArray(TaskState[]::new);
+
+      if (!task.getState().in(nonFinalEndStates)) {
+        throw new InvalidTaskStateException(
+            oldTask.getId(),
+            oldTask.getState(),
+            nonFinalEndStates
+        );
+      }
+
+      if (oldTask.getCallbackState() != null && oldTask.getCallbackState() != CallbackState.NONE) {
+        throw new ReopenTaskWithCallbackException(oldTask.getId());
+      }
+
+      String userLongName = null;
+      if (kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo()) {
+        User user = userMapper.findById(userId);
+        if (user != null) {
+          userLongName = user.getLongName();
+        }
+      }
+
+      reopenActionsOnTask(task, userId, userLongName, Instant.now());
+      taskMapper.update(task);
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Task '{}' reopened by user '{}'.", task.getId(), userId);
+      }
+
+      if (historyEventManager.isEnabled()) {
+        String changeDetails =
+            ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task);
+        historyEventManager.createEvent(
+            new TaskReopenedEvent(
+                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                task,
+                userId,
+                changeDetails));
+      }
+    } finally {
+      kadaiEngine.returnConnection();
+    }
+
+    return task;
   }
 
   @Override
@@ -2041,6 +2127,7 @@ public class TaskServiceImpl implements TaskService {
     task.setModified(now);
     task.setRead(false);
     task.setTransferred(false);
+    task.setReopened(false);
 
     String creator = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
     if (kadaiEngine.getEngine().getConfiguration().isSecurityEnabled() && creator == null) {

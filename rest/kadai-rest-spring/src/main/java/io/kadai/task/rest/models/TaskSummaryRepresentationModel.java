@@ -144,6 +144,9 @@ public class TaskSummaryRepresentationModel
   @Schema(name = "isTransferred", description = "Indicator if the task has been transferred.")
   protected boolean isTransferred;
 
+  @Schema(name = "isReopened", description = "Indicator if the task has been reopened.")
+  protected boolean isReopened;
+
   @Schema(
       name = "groupByCount",
       description = "Number of Tasks that are grouped together with this Task during a groupBy.")
@@ -445,6 +448,14 @@ public class TaskSummaryRepresentationModel
 
   public void setTransferred(boolean isTransferred) {
     this.isTransferred = isTransferred;
+  }
+
+  public boolean isReopened() {
+    return isReopened;
+  }
+
+  public void setReopened(boolean reopened) {
+    isReopened = reopened;
   }
 
   public List<AttachmentSummaryRepresentationModel> getAttachmentSummaries() {

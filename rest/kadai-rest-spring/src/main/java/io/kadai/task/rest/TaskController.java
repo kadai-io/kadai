@@ -40,6 +40,7 @@ import io.kadai.task.api.exceptions.InvalidCallbackStateException;
 import io.kadai.task.api.exceptions.InvalidOwnerException;
 import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.ObjectReferencePersistenceException;
+import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.Task;
@@ -430,6 +431,17 @@ public class TaskController implements TaskApi {
         bulkOperationResultsRepresentationModelAssembler.toModel(result);
 
     return ResponseEntity.ok(repModel);
+  }
+
+  @PostMapping(path = RestEndpoints.URL_TASKS_ID_REOPEN)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<TaskRepresentationModel> reopenTask(@PathVariable("taskId") String taskId)
+      throws TaskNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          InvalidTaskStateException,
+          ReopenTaskWithCallbackException {
+    final Task task = taskService.reopen(taskId);
+    return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
   }
 
   @PostMapping(path = RestEndpoints.URL_DISTRIBUTE)

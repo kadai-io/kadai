@@ -1149,6 +1149,14 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
   private final Boolean isTransferred;
 
   // endregion
+  // region reopened
+  @Parameter(
+      name = "is-reopened",
+      description = "Filter by the is reopened flag of the Task. This is an exact match.")
+  @JsonProperty("is-reopened")
+  private final Boolean isReopened;
+
+  // endregion
   // region attachmentClassificationId
   @Parameter(
       name = "attachment-classification-id",
@@ -1497,6 +1505,7 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
     "sor-value-like",
     "is-read",
     "is-transferred",
+    "is-reopened",
     "attachment-classification-id",
     "attachment-classification-id-not",
     "attachment-classification-key",
@@ -1655,6 +1664,7 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
       String[] sorValueLike,
       Boolean isRead,
       Boolean isTransferred,
+      Boolean isReopened,
       String[] attachmentClassificationIdIn,
       String[] attachmentClassificationIdNotIn,
       String[] attachmentClassificationKeyIn,
@@ -1812,6 +1822,7 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
     this.sorValueLike = sorValueLike;
     this.isRead = isRead;
     this.isTransferred = isTransferred;
+    this.isReopened = isReopened;
     this.attachmentClassificationIdIn = attachmentClassificationIdIn;
     this.attachmentClassificationIdNotIn = attachmentClassificationIdNotIn;
     this.attachmentClassificationKeyIn = attachmentClassificationKeyIn;
@@ -2360,6 +2371,10 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
     return isTransferred;
   }
 
+  public Boolean getReopened() {
+    return isReopened;
+  }
+
   public String[] getAttachmentClassificationIdIn() {
     return attachmentClassificationIdIn;
   }
@@ -2766,6 +2781,8 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
     Optional.ofNullable(isRead).ifPresent(query::readEquals);
 
     Optional.ofNullable(isTransferred).ifPresent(query::transferredEquals);
+
+    Optional.ofNullable(isReopened).ifPresent(query::reopenedEquals);
 
     Optional.ofNullable(hasComments).ifPresent(query::hasComments);
 
