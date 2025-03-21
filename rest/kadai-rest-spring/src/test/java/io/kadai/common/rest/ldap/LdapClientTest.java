@@ -41,7 +41,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.naming.InvalidNameException;
@@ -291,7 +290,7 @@ class LdapClientTest {
     assertThat(actualGroupAccessIds).containsExactlyInAnyOrderElementsOf(
         expectedGroupAccessIds.stream()
             .map(AccessIdRepresentationModel::getAccessId)
-            .collect(Collectors.toList()));
+            .toList());
   }
 
   @Test
@@ -349,7 +348,7 @@ class LdapClientTest {
     assertThat(actualPermissionAccessIds).containsExactlyInAnyOrderElementsOf(
         expectedPermissionAccessIds.stream()
             .map(AccessIdRepresentationModel::getAccessId)
-            .collect(Collectors.toList()));
+            .toList());
   }
 
   @Test
