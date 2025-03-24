@@ -26,9 +26,8 @@ import io.kadai.common.internal.util.Quadruple;
 import io.kadai.common.internal.util.Triplet;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
-import io.kadai.simplehistory.impl.SimpleHistoryServiceImpl;
-import io.kadai.simplehistory.impl.TaskHistoryQueryImpl;
-import io.kadai.simplehistory.impl.task.TaskHistoryQueryMapper;
+import io.kadai.simplehistory.task.internal.TaskHistoryQueryImpl;
+import io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
 import io.kadai.task.api.TaskService;
@@ -50,7 +49,6 @@ import org.junit.jupiter.api.function.ThrowingConsumer;
 class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
 
   private final TaskService taskService = kadaiEngine.getTaskService();
-  private final SimpleHistoryServiceImpl historyService = getHistoryService();
 
   @WithAccessId(user = "admin")
   @TestFactory
@@ -95,7 +93,8 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
 
           List<TaskHistoryEvent> events =
               taskHistoryQueryMapper.queryHistoryEvents(
-                  (TaskHistoryQueryImpl) historyService.createTaskHistoryQuery().taskIdIn(taskId));
+                  (TaskHistoryQueryImpl)
+                      taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
 
           assertThat(events).isEmpty();
 
@@ -103,7 +102,8 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
 
           events =
               taskHistoryQueryMapper.queryHistoryEvents(
-                  (TaskHistoryQueryImpl) historyService.createTaskHistoryQuery().taskIdIn(taskId));
+                  (TaskHistoryQueryImpl)
+                      taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
 
           assertThat(events).hasSize(1);
           String sourceWorkbasketId = q.getThird();
@@ -171,7 +171,7 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
           List<TaskHistoryEvent> events =
               taskHistoryQueryMapper.queryHistoryEvents(
                   (TaskHistoryQueryImpl)
-                      historyService
+                      taskHistoryService
                           .createTaskHistoryQuery()
                           .taskIdIn(taskIds.keySet().toArray(new String[0])));
 
@@ -182,7 +182,7 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
           events =
               taskHistoryQueryMapper.queryHistoryEvents(
                   (TaskHistoryQueryImpl)
-                      historyService
+                      taskHistoryService
                           .createTaskHistoryQuery()
                           .taskIdIn(taskIds.keySet().toArray(new String[0])));
 
@@ -248,7 +248,8 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
 
           List<TaskHistoryEvent> events =
               taskHistoryQueryMapper.queryHistoryEvents(
-                  (TaskHistoryQueryImpl) historyService.createTaskHistoryQuery().taskIdIn(taskId));
+                  (TaskHistoryQueryImpl)
+                      taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
 
           assertThat(events).isEmpty();
 
@@ -256,7 +257,8 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
 
           events =
               taskHistoryQueryMapper.queryHistoryEvents(
-                  (TaskHistoryQueryImpl) historyService.createTaskHistoryQuery().taskIdIn(taskId));
+                  (TaskHistoryQueryImpl)
+                      taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
 
           assertThat(events).hasSize(1);
           String sourceWorkbasketId = q.getThird();
@@ -323,7 +325,7 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
           List<TaskHistoryEvent> events =
               taskHistoryQueryMapper.queryHistoryEvents(
                   (TaskHistoryQueryImpl)
-                      historyService
+                      taskHistoryService
                           .createTaskHistoryQuery()
                           .taskIdIn(taskIds.keySet().toArray(new String[0])));
 
@@ -334,7 +336,7 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
           events =
               taskHistoryQueryMapper.queryHistoryEvents(
                   (TaskHistoryQueryImpl)
-                      historyService
+                      taskHistoryService
                           .createTaskHistoryQuery()
                           .taskIdIn(taskIds.keySet().toArray(new String[0])));
 
@@ -357,7 +359,7 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
   private void assertTransferHistoryEvent(
       String eventId, String expectedOldValue, String expectedNewValue, String expectedUser)
       throws Exception {
-    TaskHistoryEvent event = historyService.getTaskHistoryEvent(eventId);
+    TaskHistoryEvent event = taskHistoryService.getTaskHistoryEvent(eventId);
     assertThat(event.getDetails()).isNotNull();
     JSONArray changes = new JSONObject(event.getDetails()).getJSONArray("changes");
     assertThat(changes.length()).isPositive();

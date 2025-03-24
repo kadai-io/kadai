@@ -28,8 +28,8 @@ import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.TimeInterval;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
-import io.kadai.simplehistory.impl.task.TaskHistoryQuery;
-import io.kadai.simplehistory.impl.task.TaskHistoryQueryColumnName;
+import io.kadai.simplehistory.task.api.TaskHistoryQuery;
+import io.kadai.simplehistory.task.api.TaskHistoryQueryColumnName;
 import io.kadai.spi.history.api.events.task.TaskHistoryCustomField;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
@@ -49,18 +49,18 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
   @Test
   void should_ConfirmEquality_When_UsingListValuesAscendingAndDescending() {
     List<String> defaultList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.CREATED, null);
     List<String> ascendingList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.CREATED, SortDirection.ASCENDING);
 
     assertThat(ascendingList).hasSize(13).isEqualTo(defaultList);
 
     List<String> descendingList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.CREATED, SortDirection.DESCENDING);
     Collections.reverse(ascendingList);
@@ -71,7 +71,7 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
   @Test
   void should_ReturnHistoryEvents_For_ComplexQuery() {
     TaskHistoryQuery query =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .businessProcessIdLike("just some string", "BPI:%")
             .domainLike("%A")
@@ -91,8 +91,8 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
   @Test
   void should_ConfirmQueryListOffset_When_ProvidingOffsetAndLimit() {
     List<TaskHistoryEvent> offsetAndLimitResult =
-        getHistoryService().createTaskHistoryQuery().list(1, 2);
-    List<TaskHistoryEvent> regularResult = getHistoryService().createTaskHistoryQuery().list();
+        taskHistoryService.createTaskHistoryQuery().list(1, 2);
+    List<TaskHistoryEvent> regularResult = taskHistoryService.createTaskHistoryQuery().list();
 
     assertThat(offsetAndLimitResult).hasSize(2);
     assertThat(offsetAndLimitResult.get(0))
@@ -102,17 +102,17 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
 
   @Test
   void should_ReturnEmptyList_When_ProvidingWrongConstraints() {
-    List<TaskHistoryEvent> result = getHistoryService().createTaskHistoryQuery().list(1, 1000);
+    List<TaskHistoryEvent> result = taskHistoryService.createTaskHistoryQuery().list(1, 1000);
     assertThat(result).hasSize(13);
 
-    result = getHistoryService().createTaskHistoryQuery().list(100, 1000);
+    result = taskHistoryService.createTaskHistoryQuery().list(100, 1000);
     assertThat(result).isEmpty();
   }
 
   @Test
   void should_ReturnSingleHistoryEvent_When_UsingSingleMethod() {
     TaskHistoryEvent single =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .userIdIn("peter")
             .taskIdIn("TKI:000000000000000000000000000000000036")
@@ -121,7 +121,7 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
     assertThat(single.getEventType()).isEqualTo(TaskHistoryEventType.CREATED.getName());
 
     single =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .eventTypeIn(TaskHistoryEventType.CREATED.getName(), "xy")
             .idIn("THI:000000000000000000000000000000000003")
@@ -132,28 +132,28 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
   @Test
   void should_ThrowException_When_SingleMethodRetrievesMoreThanOneEventFromDatabase() {
 
-    TaskHistoryQuery query = getHistoryService().createTaskHistoryQuery().userIdIn("peter");
+    TaskHistoryQuery query = taskHistoryService.createTaskHistoryQuery().userIdIn("peter");
 
     assertThatThrownBy(query::single).isInstanceOf(TooManyResultsException.class);
   }
 
   @Test
   void should_ReturnCountOfEvents_When_UsingCountMethod() {
-    long count = getHistoryService().createTaskHistoryQuery().userIdIn("peter").count();
+    long count = taskHistoryService.createTaskHistoryQuery().userIdIn("peter").count();
     assertThat(count).isEqualTo(6);
 
-    count = getHistoryService().createTaskHistoryQuery().count();
+    count = taskHistoryService.createTaskHistoryQuery().count();
     assertThat(count).isEqualTo(14);
 
     count =
-        getHistoryService().createTaskHistoryQuery().userIdIn("klaus", "arnold", "benni").count();
+        taskHistoryService.createTaskHistoryQuery().userIdIn("klaus", "arnold", "benni").count();
     assertThat(count).isZero();
   }
 
   @Test
   void should_SortQueryByIdAsc_When_Requested() {
     List<TaskHistoryEvent> events =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .orderByTaskHistoryEventId(SortDirection.ASCENDING)
             .list();
@@ -166,7 +166,7 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
   @Test
   void should_SortQueryByIdDesc_When_Requested() {
     List<TaskHistoryEvent> events =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .orderByTaskHistoryEventId(SortDirection.DESCENDING)
             .list();
@@ -179,284 +179,282 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
   @Test
   void should_ReturnHistoryEvents_For_DifferentInAttributes() {
     List<TaskHistoryEvent> returnValues =
-        getHistoryService().createTaskHistoryQuery().businessProcessIdIn("BPI:01", "BPI:02").list();
+        taskHistoryService.createTaskHistoryQuery().businessProcessIdIn("BPI:01", "BPI:02").list();
     assertThat(returnValues).hasSize(7);
 
     returnValues =
-        getHistoryService().createTaskHistoryQuery().parentBusinessProcessIdIn("BPI:01").list();
+        taskHistoryService.createTaskHistoryQuery().parentBusinessProcessIdIn("BPI:01").list();
     assertThat(returnValues).hasSize(7);
 
     returnValues =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .taskIdIn("TKI:000000000000000000000000000000000000")
             .list();
     assertThat(returnValues).hasSize(3);
 
     returnValues =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .eventTypeIn(TaskHistoryEventType.CREATED.getName())
             .list();
     assertThat(returnValues).hasSize(13);
 
     TimeInterval timeInterval = new TimeInterval(Instant.now().minusSeconds(10), Instant.now());
-    returnValues = getHistoryService().createTaskHistoryQuery().createdWithin(timeInterval).list();
+    returnValues = taskHistoryService.createTaskHistoryQuery().createdWithin(timeInterval).list();
     assertThat(returnValues).isEmpty();
 
-    returnValues = getHistoryService().createTaskHistoryQuery().userIdIn("admin").list();
+    returnValues = taskHistoryService.createTaskHistoryQuery().userIdIn("admin").list();
     assertThat(returnValues).hasSize(6);
 
-    returnValues = getHistoryService().createTaskHistoryQuery().domainIn("DOMAIN_A").list();
+    returnValues = taskHistoryService.createTaskHistoryQuery().domainIn("DOMAIN_A").list();
     assertThat(returnValues).hasSize(13);
 
     returnValues =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .workbasketKeyIn("WBI:100000000000000000000000000000000001")
             .list();
     assertThat(returnValues).hasSize(7);
 
-    returnValues = getHistoryService().createTaskHistoryQuery().porCompanyIn("00").list();
+    returnValues = taskHistoryService.createTaskHistoryQuery().porCompanyIn("00").list();
     assertThat(returnValues).hasSize(7);
 
-    returnValues = getHistoryService().createTaskHistoryQuery().porSystemIn("PASystem").list();
+    returnValues = taskHistoryService.createTaskHistoryQuery().porSystemIn("PASystem").list();
     assertThat(returnValues).hasSize(7);
 
-    returnValues = getHistoryService().createTaskHistoryQuery().porInstanceIn("22").list();
+    returnValues = taskHistoryService.createTaskHistoryQuery().porInstanceIn("22").list();
     assertThat(returnValues).hasSize(7);
 
-    returnValues = getHistoryService().createTaskHistoryQuery().porTypeIn("VN").list();
+    returnValues = taskHistoryService.createTaskHistoryQuery().porTypeIn("VN").list();
     assertThat(returnValues).isEmpty();
 
-    returnValues = getHistoryService().createTaskHistoryQuery().porValueIn("11223344").list();
+    returnValues = taskHistoryService.createTaskHistoryQuery().porValueIn("11223344").list();
     assertThat(returnValues).hasSize(7);
 
     returnValues =
-        getHistoryService().createTaskHistoryQuery().taskClassificationKeyIn("L140101").list();
+        taskHistoryService.createTaskHistoryQuery().taskClassificationKeyIn("L140101").list();
     assertThat(returnValues).hasSize(8);
 
     returnValues =
-        getHistoryService().createTaskHistoryQuery().taskClassificationCategoryIn("TASK").list();
+        taskHistoryService.createTaskHistoryQuery().taskClassificationCategoryIn("TASK").list();
     assertThat(returnValues).hasSize(8);
 
     returnValues =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .attachmentClassificationKeyIn("DOCTYPE_DEFAULT")
             .list();
     assertThat(returnValues).hasSize(7);
 
     returnValues =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .customAttributeIn(TaskHistoryCustomField.CUSTOM_1, "custom1")
             .list();
     assertThat(returnValues).hasSize(14);
 
     returnValues =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .customAttributeIn(TaskHistoryCustomField.CUSTOM_2, "custom2")
             .list();
     assertThat(returnValues).hasSize(1);
 
     returnValues =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .customAttributeIn(TaskHistoryCustomField.CUSTOM_3, "custom3")
             .list();
     assertThat(returnValues).hasSize(8);
 
     returnValues =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .customAttributeIn(TaskHistoryCustomField.CUSTOM_4, "custom4")
             .list();
     assertThat(returnValues).hasSize(1);
 
-    returnValues = getHistoryService().createTaskHistoryQuery().oldValueIn("old_val").list();
+    returnValues = taskHistoryService.createTaskHistoryQuery().oldValueIn("old_val").list();
     assertThat(returnValues).hasSize(1);
 
-    returnValues = getHistoryService().createTaskHistoryQuery().newValueIn("new_val").list();
+    returnValues = taskHistoryService.createTaskHistoryQuery().newValueIn("new_val").list();
     assertThat(returnValues).hasSize(1);
 
-    returnValues = getHistoryService().createTaskHistoryQuery().oldValueLike("old%").list();
+    returnValues = taskHistoryService.createTaskHistoryQuery().oldValueLike("old%").list();
     assertThat(returnValues).hasSize(1);
 
-    returnValues = getHistoryService().createTaskHistoryQuery().newValueLike("new_%").list();
+    returnValues = taskHistoryService.createTaskHistoryQuery().newValueLike("new_%").list();
     assertThat(returnValues).hasSize(7);
   }
 
   @Test
   void should_ReturnHistoryEvents_For_DifferentLikeAttributes() {
     List<TaskHistoryEvent> returnValues =
-        getHistoryService().createTaskHistoryQuery().businessProcessIdLike("BPI:0%").list();
+        taskHistoryService.createTaskHistoryQuery().businessProcessIdLike("BPI:0%").list();
     assertThat(returnValues).hasSize(14);
 
     returnValues =
-        getHistoryService().createTaskHistoryQuery().parentBusinessProcessIdLike("BPI:01%").list();
+        taskHistoryService.createTaskHistoryQuery().parentBusinessProcessIdLike("BPI:01%").list();
     assertThat(returnValues).hasSize(7);
 
     returnValues =
-        getHistoryService().createTaskHistoryQuery().taskIdLike("TKI:000000000000000%").list();
+        taskHistoryService.createTaskHistoryQuery().taskIdLike("TKI:000000000000000%").list();
     assertThat(returnValues).hasSize(14);
 
-    returnValues = getHistoryService().createTaskHistoryQuery().oldValueLike("old%").list();
+    returnValues = taskHistoryService.createTaskHistoryQuery().oldValueLike("old%").list();
     assertThat(returnValues).hasSize(1);
 
-    returnValues = getHistoryService().createTaskHistoryQuery().newValueLike("new_%").list();
+    returnValues = taskHistoryService.createTaskHistoryQuery().newValueLike("new_%").list();
     assertThat(returnValues).hasSize(7);
   }
 
   @Test
   void should_ReturnHistoryEvents_When_ProvidingListValues() {
     List<String> returnedList =
-        getHistoryService()
-            .createTaskHistoryQuery()
-            .listValues(TaskHistoryQueryColumnName.ID, null);
+        taskHistoryService.createTaskHistoryQuery().listValues(TaskHistoryQueryColumnName.ID, null);
     assertThat(returnedList).hasSize(14);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.BUSINESS_PROCESS_ID, null);
     assertThat(returnedList).hasSize(3);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.PARENT_BUSINESS_PROCESS_ID, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.TASK_ID, null);
     assertThat(returnedList).hasSize(7);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.EVENT_TYPE, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.CREATED, null);
     assertThat(returnedList).hasSize(13);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.USER_ID, null);
     assertThat(returnedList).hasSize(4);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.USER_LONG_NAME, null);
     assertThat(returnedList).hasSize(3);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.DOMAIN, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.WORKBASKET_KEY, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.POR_COMPANY, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.POR_SYSTEM, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.POR_INSTANCE, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.POR_TYPE, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.POR_VALUE, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.TASK_OWNER_LONG_NAME, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.TASK_CLASSIFICATION_KEY, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.TASK_CLASSIFICATION_CATEGORY, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.ATTACHMENT_CLASSIFICATION_KEY, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.OLD_VALUE, null);
     assertThat(returnedList).hasSize(3);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.NEW_VALUE, null);
     assertThat(returnedList).hasSize(3);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.CUSTOM_1, null);
     assertThat(returnedList).hasSize(1);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.CUSTOM_2, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.CUSTOM_3, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.CUSTOM_4, null);
     assertThat(returnedList).hasSize(2);
@@ -467,7 +465,7 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
   void should_SetUserLongNameOfTask_When_PropertyEnabled() throws Exception {
     createKadaiEngineWithNewConfig(true);
     List<TaskHistoryEvent> taskHistoryEvents =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .idIn("THI:000000000000000000000000000000000013")
             .list();
@@ -485,7 +483,7 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
   void should_SetTaskOwnerLongNameOfTaskHistoryEvent_When_PropertyEnabled() throws Exception {
     createKadaiEngineWithNewConfig(true);
     List<TaskHistoryEvent> taskHistoryEvents =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .idIn("THI:000000000000000000000000000000000013")
             .list();
@@ -510,7 +508,7 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
   void should_NotSetUserLongNameOfTaskHistoryEvent_When_PropertyDisabled() throws Exception {
     createKadaiEngineWithNewConfig(false);
     List<TaskHistoryEvent> taskHistoryEvents =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .idIn("THI:000000000000000000000000000000000013")
             .list();
@@ -524,7 +522,7 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
   void should_NotSetTaskOwnerLongNameOfTaskHistoryEvent_When_PropertyDisabled() throws Exception {
     createKadaiEngineWithNewConfig(false);
     List<TaskHistoryEvent> taskHistoryEvents =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .idIn("THI:000000000000000000000000000000000013")
             .list();
@@ -541,7 +539,7 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
       throws Exception {
     createKadaiEngineWithNewConfig(true);
     List<TaskHistoryEvent> taskHistoryEvents =
-        getHistoryService()
+        taskHistoryService
             .createTaskHistoryQuery()
             .idIn("THI:000000000000000000000000000000000001")
             .list();
