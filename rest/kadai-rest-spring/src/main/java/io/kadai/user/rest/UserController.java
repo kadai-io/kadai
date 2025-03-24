@@ -183,11 +183,5 @@ public class UserController implements UserApi {
         throws InvalidArgumentException {
       super(sortBy, order);
     }
-
-    // this getter is necessary for the documentation!
-    @Override
-    public List<UserQuerySortBy> getSortBy() {
-      return super.getSortBy();
-    }
   }
 }

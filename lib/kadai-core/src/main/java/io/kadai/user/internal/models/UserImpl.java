@@ -43,6 +43,7 @@ public class UserImpl extends UserSummaryImpl implements User {
     return data;
   }
 
+  @Override
   public void setData(String data) {
     this.data = data;
   }
