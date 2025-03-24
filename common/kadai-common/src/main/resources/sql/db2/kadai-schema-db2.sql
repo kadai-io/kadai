@@ -108,6 +108,7 @@ CREATE TABLE TASK
     POR_VALUE                  VARCHAR(128) NOT NULL,
     IS_READ                    SMALLINT     NOT NULL,
     IS_TRANSFERRED             SMALLINT     NOT NULL,
+    IS_REOPENED                SMALLINT     NOT NULL,
     CALLBACK_INFO              CLOB NULL,
     CALLBACK_STATE             VARCHAR(30) NULL,
     CUSTOM_ATTRIBUTES          CLOB NULL,

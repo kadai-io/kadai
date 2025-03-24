@@ -31,6 +31,7 @@ public enum TaskState {
   TERMINATED;
 
   public static final TaskState[] END_STATES = {COMPLETED, CANCELLED, TERMINATED};
+  public static final TaskState[] FINAL_STATES = {TERMINATED};
   public static final TaskState[] CLAIMED_STATES = {CLAIMED, IN_REVIEW};
 
   public boolean in(TaskState... states) {
@@ -39,6 +40,10 @@ public enum TaskState {
 
   public boolean isEndState() {
     return in(END_STATES);
+  }
+
+  public boolean isFinalState() {
+    return in(FINAL_STATES);
   }
 
   public boolean isClaimedState() {
