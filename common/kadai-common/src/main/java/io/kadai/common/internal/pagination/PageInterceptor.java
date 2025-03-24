@@ -83,8 +83,6 @@ public class PageInterceptor implements Interceptor {
             oldBoundSql.getParameterObject());
     oldBoundSql.getAdditionalParameters().forEach(newBoundSql::setAdditionalParameter);
 
-    System.out.println(newBoundSql.getSql());
-
     final Executor executor = (Executor) invocation.getTarget();
     final CacheKey cacheKey =
         args.length > 4 && args[4] != null
