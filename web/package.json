@@ -60,7 +60,7 @@
     "@ngxs/devtools-plugin": "19.0.0",
     "@types/jest": "29.5.14",
     "@types/lodash": "4.17.16",
-    "@types/node": "22.13.10",
+    "@types/node": "22.13.11",
     "@typescript-eslint/eslint-plugin": "8.27.0",
     "@typescript-eslint/eslint-plugin-tslint": "7.0.2",
     "@typescript-eslint/parser": "8.27.0",
