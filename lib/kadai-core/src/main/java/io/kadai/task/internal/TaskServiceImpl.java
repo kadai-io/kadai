@@ -18,7 +18,6 @@
 
 package io.kadai.task.internal;
 
-import static io.kadai.common.internal.util.CheckedFunction.wrap;
 import static java.util.function.Predicate.not;
 
 import io.kadai.classification.api.ClassificationService;
@@ -34,6 +33,8 @@ import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.util.CheckedConsumer;
+import io.kadai.common.internal.util.CheckedFunction;
+import io.kadai.common.internal.util.CheckedSupplier;
 import io.kadai.common.internal.util.CollectionUtil;
 import io.kadai.common.internal.util.EnumUtil;
 import io.kadai.common.internal.util.IdGenerator;
@@ -966,10 +967,12 @@ public class TaskServiceImpl implements TaskService {
     ((TaskQueryImpl) taskQuery).selectAndClaimEquals(true);
     try {
       return kadaiEngine.executeInDatabaseConnection(
-          () ->
-              Optional.ofNullable(taskQuery.single())
-                  .map(TaskSummary::getId)
-                  .map(wrap(this::claim)));
+          CheckedSupplier.rethrowing(
+              () ->
+                  Optional.ofNullable(taskQuery.single())
+                      .map(TaskSummary::getId)
+                      .map(CheckedFunction.rethrowing(this::claim))
+          ));
     } catch (IllegalArgumentException e) {
       throw e;
     } catch (Exception e) {

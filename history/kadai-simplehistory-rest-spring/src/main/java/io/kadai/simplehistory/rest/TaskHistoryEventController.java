@@ -150,11 +150,5 @@ public class TaskHistoryEventController implements TaskHistoryEventApi {
         throws InvalidArgumentException {
       super(sortBy, order);
     }
-
-    // this getter is necessary for the documentation!
-    @Override
-    public List<TaskHistoryQuerySortBy> getSortBy() {
-      return super.getSortBy();
-    }
   }
 }

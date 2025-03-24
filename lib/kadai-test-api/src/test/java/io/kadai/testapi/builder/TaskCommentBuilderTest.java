@@ -18,7 +18,7 @@
 
 package io.kadai.testapi.builder;
 
-import static io.kadai.common.internal.util.CheckedSupplier.wrap;
+import static io.kadai.common.internal.util.CheckedSupplier.rethrowing;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestObjectReference;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestWorkbasket;
 import static io.kadai.testapi.builder.ClassificationBuilder.newClassification;
@@ -99,7 +99,7 @@ class TaskCommentBuilderTest {
         newTaskComment().taskId(task.getId()).buildAndStore(taskService, "user-1-1");
 
     TaskComment receivedTaskComment =
-        kadaiEngine.runAsAdmin(wrap(() -> taskService.getTaskComment(taskComment.getId())));
+        kadaiEngine.runAsAdmin(rethrowing(() -> taskService.getTaskComment(taskComment.getId())));
     assertThat(receivedTaskComment).isEqualTo(taskComment);
     assertThat(receivedTaskComment.getCreator()).isEqualTo("user-1-1");
   }

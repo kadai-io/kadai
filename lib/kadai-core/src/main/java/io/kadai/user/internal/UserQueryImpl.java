@@ -1,3 +1,21 @@
+/*
+ * Copyright [2025] [envite consulting GmbH]
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
+ *
+ */
+
 package io.kadai.user.internal;
 
 import io.kadai.common.api.exceptions.KadaiRuntimeException;
@@ -5,7 +23,7 @@ import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.user.api.UserQuery;
 import io.kadai.user.api.UserQueryColumnName;
-import io.kadai.user.api.models.User;
+import io.kadai.user.api.models.UserSummary;
 import io.kadai.user.internal.models.UserImpl;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,9 +63,24 @@ public class UserQueryImpl implements UserQuery {
   }
 
   @Override
+  public UserQuery orderByFirstName(SortDirection sortDirection) {
+    return addOrderCriteria("FIRST_NAME", sortDirection);
+  }
+
+  @Override
+  public UserQuery orderByLastName(SortDirection sortDirection) {
+    return addOrderCriteria("LASTNAME", sortDirection);
+  }
+
+  @Override
   public UserQuery orgLevel1In(String... orgLevel1s) {
     this.orgLevel1In = orgLevel1s;
     return this;
+  }
+
+  @Override
+  public UserQuery orderByOrgLevel1(SortDirection sortDirection) {
+    return addOrderCriteria("ORG_LEVEL_1", sortDirection);
   }
 
   @Override
@@ -57,9 +90,19 @@ public class UserQueryImpl implements UserQuery {
   }
 
   @Override
+  public UserQuery orderByOrgLevel2(SortDirection sortDirection) {
+    return addOrderCriteria("ORG_LEVEL_2", sortDirection);
+  }
+
+  @Override
   public UserQuery orgLevel3In(String... orgLevel3s) {
     this.orgLevel3In = orgLevel3s;
     return this;
+  }
+
+  @Override
+  public UserQuery orderByOrgLevel3(SortDirection sortDirection) {
+    return addOrderCriteria("ORG_LEVEL_3", sortDirection);
   }
 
   @Override
@@ -69,7 +112,12 @@ public class UserQueryImpl implements UserQuery {
   }
 
   @Override
-  public List<User> list() {
+  public UserQuery orderByOrgLevel4(SortDirection sortDirection) {
+    return addOrderCriteria("ORG_LEVEL_4", sortDirection);
+  }
+
+  @Override
+  public List<UserSummary> list() {
     UserServiceImpl userService = (UserServiceImpl) kadaiEngine.getEngine().getUserService();
     return kadaiEngine.executeInDatabaseConnection(
         () ->
@@ -77,13 +125,13 @@ public class UserQueryImpl implements UserQuery {
                 .map(
                     user -> {
                       user.setDomains(userService.determineDomains(user));
-                      return (User) user;
+                      return (UserSummary) user;
                     })
                 .toList());
   }
 
   @Override
-  public List<User> list(int offset, int limit) {
+  public List<UserSummary> list(int offset, int limit) {
     try {
       UserServiceImpl userService = (UserServiceImpl) kadaiEngine.getEngine().getUserService();
       kadaiEngine.openConnection();
@@ -95,7 +143,7 @@ public class UserQueryImpl implements UserQuery {
           .map(
               user -> {
                 user.setDomains(userService.determineDomains(user));
-                return (User) user;
+                return (UserSummary) user;
               })
           .toList();
     } catch (PersistenceException e) {
@@ -126,7 +174,7 @@ public class UserQueryImpl implements UserQuery {
   }
 
   @Override
-  public User single() {
+  public UserSummary single() {
     try {
       UserServiceImpl userService = (UserServiceImpl) kadaiEngine.getEngine().getUserService();
       kadaiEngine.openConnection();
