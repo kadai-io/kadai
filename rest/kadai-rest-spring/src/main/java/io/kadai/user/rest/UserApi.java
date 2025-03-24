@@ -1,12 +1,34 @@
+/*
+ * Copyright [2025] [envite consulting GmbH]
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
+ *
+ */
+
 package io.kadai.user.rest;
 
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
+import io.kadai.common.rest.QueryPagingParameter;
 import io.kadai.common.rest.RestEndpoints;
+import io.kadai.user.api.UserQuery;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
-import io.kadai.user.rest.models.UserCollectionRepresentationModel;
+import io.kadai.user.api.models.UserSummary;
+import io.kadai.user.rest.UserController.UserQuerySortParameter;
 import io.kadai.user.rest.models.UserRepresentationModel;
+import io.kadai.user.rest.models.UserSummaryPagedRepresentationModel;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -71,11 +93,13 @@ public interface UserApi {
    * This endpoint retrieves multiple Users. If a userId can't be found in the database it will be
    * ignored. Any combination of parameters is interpreted as conjunction of those.
    *
-   * @title Get multiple Users
    * @param request the HttpServletRequest of the request itself
    * @param filterParameter the filter parameters regarding UserQueryFilterParameter
+   * @param sortParameter the sort parameters regarding UserQuerySortParameter
+   * @param pagingParameter the paging parameters
    * @return the requested Users
    * @throws InvalidArgumentException if the userIds are null or empty
+   * @title Get multiple Users
    */
   @Operation(
       summary = "Get multiple Users",
@@ -90,7 +114,8 @@ public interface UserApi {
             content =
                 @Content(
                     mediaType = MediaTypes.HAL_JSON_VALUE,
-                    schema = @Schema(implementation = UserCollectionRepresentationModel.class))),
+                    schema =
+                        @Schema(implementation = UserSummaryPagedRepresentationModel.class))),
         @ApiResponse(
             responseCode = "400",
             description = "INVALID_ARGUMENT",
@@ -98,8 +123,11 @@ public interface UserApi {
       })
   @GetMapping(RestEndpoints.URL_USERS)
   @Transactional(readOnly = true, rollbackFor = Exception.class)
-  ResponseEntity<UserCollectionRepresentationModel> getUsers(
-      HttpServletRequest request, @ParameterObject UserQueryFilterParameter filterParameter)
+  ResponseEntity<UserSummaryPagedRepresentationModel> getUsers(
+      HttpServletRequest request,
+      @ParameterObject UserQueryFilterParameter filterParameter,
+      @ParameterObject UserQuerySortParameter sortParameter,
+      @ParameterObject QueryPagingParameter<UserSummary, UserQuery> pagingParameter)
       throws InvalidArgumentException;
 
   /**
