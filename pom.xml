@@ -56,7 +56,7 @@
         <version.maven.surefire>3.5.2</version.maven.surefire>
         <version.maven.clean>3.2.0</version.maven.clean>
         <version.maven.dependency>3.8.1</version.maven.dependency>
-        <version.maven.sonar>5.0.0.4389</version.maven.sonar>
+        <version.maven.sonar>5.1.0.4751</version.maven.sonar>
 
         <!-- release dependencies -->
         <version.maven.gpg>3.2.7</version.maven.gpg>
@@ -65,7 +65,7 @@
         <!-- spring dependencies -->
         <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
         <version.spring.plugin.core>3.0.0</version.spring.plugin.core>
-        <version.spring.boot>3.4.3</version.spring.boot>
+        <version.spring.boot>3.4.4</version.spring.boot>
         <version.spring.mybatis>3.0.4</version.spring.mybatis>
 
         <!-- camunda dependencies -->
@@ -81,6 +81,7 @@
         <version.testcontainers>1.20.6</version.testcontainers>
         <version.spring-openapi>2.8.5</version.spring-openapi>
         <version.jakarta.servlet>6.1.0</version.jakarta.servlet>
+        <version.spring-openapi>2.8.6</version.spring-openapi>
 
         <!-- AspectJ dependencies -->
         <version.aspectj-maven-plugin>1.15.0</version.aspectj-maven-plugin>

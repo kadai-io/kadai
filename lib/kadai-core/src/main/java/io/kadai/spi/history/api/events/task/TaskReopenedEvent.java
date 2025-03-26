@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,27 +18,14 @@
 
 package io.kadai.spi.history.api.events.task;
 
-public enum TaskHistoryEventType {
-  CREATED("CREATED"),
-  UPDATED("UPDATED"),
-  CLAIMED("CLAIMED"),
-  CLAIM_CANCELLED("CLAIM_CANCELLED"),
-  REQUESTED_REVIEW("REQUESTED_REVIEW"),
-  CHANGES_REQUESTED("CHANGES_REQUESTED"),
-  COMPLETED("COMPLETED"),
-  CANCELLED("CANCELLED"),
-  TERMINATED("TERMINATED"),
-  TRANSFERRED("TRANSFERRED"),
-  DELETED("DELETED"),
-  REOPENED("REOPENED");
+import io.kadai.task.api.models.Task;
 
-  private String name;
+/** Event fired if a task is reopened. */
+public class TaskReopenedEvent extends TaskHistoryEvent {
 
-  TaskHistoryEventType(String name) {
-    this.name = name;
-  }
-
-  public String getName() {
-    return name;
+  public TaskReopenedEvent(String id, Task task, String userId, String details) {
+    super(id, task, userId, details);
+    eventType = (TaskHistoryEventType.REOPENED.getName());
+    created = task.getClaimed();
   }
 }

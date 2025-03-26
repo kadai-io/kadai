@@ -208,6 +208,7 @@ class CreateTaskAccTest {
     assertThat(createdTask.getPriority()).isEqualTo(defaultClassificationSummary.getPriority());
     assertThat(createdTask.isRead()).isFalse();
     assertThat(createdTask.isTransferred()).isFalse();
+    assertThat(createdTask.isReopened()).isFalse();
   }
 
   @WithAccessId(user = "user-1-2")

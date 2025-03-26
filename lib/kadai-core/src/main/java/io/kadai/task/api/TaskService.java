@@ -33,6 +33,7 @@ import io.kadai.task.api.exceptions.InvalidOwnerException;
 import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.NotAuthorizedOnTaskCommentException;
 import io.kadai.task.api.exceptions.ObjectReferencePersistenceException;
+import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
@@ -1354,6 +1355,24 @@ public interface TaskService {
    */
   BulkOperationResults<String, KadaiException> setPlannedPropertyOfTasks(
       Instant planned, List<String> taskIds);
+
+  /**
+   * Reopens the {@linkplain Task} with the given {@linkplain Task#getId() id}.
+   *
+   * @param taskId The {@linkplain Task#getId() id} of the {@linkplain Task} to reopen
+   * @return the reopened {@linkplain Task}
+   * @throws TaskNotFoundException if the {@linkplain Task} isn't found in the database by its
+   *     {@linkplain Task#getId() id}
+   * @throws NotAuthorizedOnWorkbasketException If the current user doesn't have correct permission
+   * @throws InvalidTaskStateException If the {@linkplain Task#getState() state} of the referenced
+   *     {@linkplain Task} isn't one of the non-final end states
+   * @throws ReopenTaskWithCallbackException if the {@linkplain Task} has a callback registered
+   */
+  Task reopen(String taskId)
+      throws TaskNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          InvalidTaskStateException,
+          ReopenTaskWithCallbackException;
 
   // endregion
 
