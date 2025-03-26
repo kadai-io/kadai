@@ -71,10 +71,6 @@
         <!-- camunda dependencies -->
         <version.camunda.dmn>7.22.0</version.camunda.dmn>
 
-        <!-- java ee dependencies -->
-        <version.jakarta.servlet>6.1.0</version.jakarta.servlet>
-        <version.junit.bom>5.12.1</version.junit.bom>
-
         <!-- test dependencies -->
         <version.archunit>1.4.0</version.archunit>
         <version.equalsverifier>3.19.2</version.equalsverifier>
@@ -84,6 +80,7 @@
         <version.slf4j-test>3.0.1</version.slf4j-test>
         <version.testcontainers>1.20.6</version.testcontainers>
         <version.spring-openapi>2.8.5</version.spring-openapi>
+        <version.jakarta.servlet>6.1.0</version.jakarta.servlet>
 
         <!-- AspectJ dependencies -->
         <version.aspectj-maven-plugin>1.15.0</version.aspectj-maven-plugin>
