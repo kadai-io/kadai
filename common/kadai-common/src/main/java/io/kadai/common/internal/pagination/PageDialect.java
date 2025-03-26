@@ -24,10 +24,10 @@ import org.apache.ibatis.session.RowBounds;
 public interface PageDialect {
 
   /**
-   * Returns true if given SQL-String is already natively paginated for this dialect.
+   * Returns true if given SQL-String is natively paginated for this dialect.
    *
    * @param sql String to determine pagination for
-   * @return true if given SQL is already natively paginated for this dialect, false otherwise
+   * @return true if given SQL is natively paginated for this dialect, false otherwise
    */
   boolean isPaginated(String sql);
 

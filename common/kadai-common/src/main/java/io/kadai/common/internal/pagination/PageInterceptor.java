@@ -32,7 +32,7 @@ import org.apache.ibatis.session.RowBounds;
 
 /**
  * MyBatis-Interceptor transforming logical pagination with {@link RowBounds} to physical pagination
- * by rewriting the internal {@linkplain BoundSql#getSql()}.
+ * by rewriting the internal {@linkplain BoundSql#getSql() BoundSql}.
  */
 @Intercepts({
   @Signature(
