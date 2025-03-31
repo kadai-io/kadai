@@ -6,7 +6,6 @@ import io.kadai.classification.api.exceptions.ClassificationInUseException;
 import io.kadai.classification.api.exceptions.ClassificationNotFoundException;
 import io.kadai.classification.api.exceptions.MalformedServiceLevelException;
 import io.kadai.classification.api.models.ClassificationSummary;
-import io.kadai.classification.rest.ClassificationController.ClassificationQuerySortParameter;
 import io.kadai.classification.rest.models.ClassificationRepresentationModel;
 import io.kadai.classification.rest.models.ClassificationSummaryPagedRepresentationModel;
 import io.kadai.common.api.exceptions.ConcurrencyException;

@@ -18,12 +18,10 @@
 
 package io.kadai.task.rest;
 
-import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.QueryPagingParameter;
-import io.kadai.common.rest.QuerySortBy;
 import io.kadai.common.rest.QuerySortParameter;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.common.rest.util.QueryParamsValidator;
@@ -38,9 +36,7 @@ import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import jakarta.servlet.http.HttpServletRequest;
-import java.beans.ConstructorProperties;
 import java.util.List;
-import java.util.function.BiConsumer;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
@@ -174,32 +170,5 @@ public class TaskCommentController implements TaskCommentApi {
 
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(taskCommentRepresentationModelAssembler.toModel(createdTaskComment));
-  }
-
-  public enum TaskCommentQuerySortBy implements QuerySortBy<TaskCommentQuery> {
-    CREATED(TaskCommentQuery::orderByCreated),
-    MODIFIED(TaskCommentQuery::orderByModified);
-
-    private final BiConsumer<TaskCommentQuery, SortDirection> consumer;
-
-    TaskCommentQuerySortBy(BiConsumer<TaskCommentQuery, SortDirection> consumer) {
-      this.consumer = consumer;
-    }
-
-    @Override
-    public void applySortByForQuery(TaskCommentQuery query, SortDirection sortDirection) {
-      consumer.accept(query, sortDirection);
-    }
-  }
-
-  public static class TaskCommentQuerySortParameter
-      extends QuerySortParameter<TaskCommentQuery, TaskCommentQuerySortBy> {
-
-    @ConstructorProperties({"sort-by", "order"})
-    public TaskCommentQuerySortParameter(
-        List<TaskCommentQuerySortBy> sortBy, List<SortDirection> order)
-        throws InvalidArgumentException {
-      super(sortBy, order);
-    }
   }
 }

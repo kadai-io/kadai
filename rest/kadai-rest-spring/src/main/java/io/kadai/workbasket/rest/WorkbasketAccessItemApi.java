@@ -6,7 +6,6 @@ import io.kadai.common.rest.QueryPagingParameter;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.workbasket.api.WorkbasketAccessItemQuery;
 import io.kadai.workbasket.api.models.WorkbasketAccessItem;
-import io.kadai.workbasket.rest.WorkbasketAccessItemController.WorkbasketAccessItemQuerySortParameter;
 import io.kadai.workbasket.rest.models.WorkbasketAccessItemPagedRepresentationModel;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

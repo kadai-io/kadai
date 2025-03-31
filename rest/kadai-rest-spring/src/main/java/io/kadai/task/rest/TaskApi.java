@@ -16,7 +16,6 @@ import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskSummary;
-import io.kadai.task.rest.TaskController.TaskQuerySortParameter;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;

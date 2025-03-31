@@ -13,7 +13,6 @@ import io.kadai.workbasket.api.exceptions.WorkbasketAlreadyExistException;
 import io.kadai.workbasket.api.exceptions.WorkbasketInUseException;
 import io.kadai.workbasket.api.exceptions.WorkbasketNotFoundException;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
-import io.kadai.workbasket.rest.WorkbasketController.WorkbasketQuerySortParameter;
 import io.kadai.workbasket.rest.models.DistributionTargetsCollectionRepresentationModel;
 import io.kadai.workbasket.rest.models.WorkbasketAccessItemCollectionRepresentationModel;
 import io.kadai.workbasket.rest.models.WorkbasketRepresentationModel;
