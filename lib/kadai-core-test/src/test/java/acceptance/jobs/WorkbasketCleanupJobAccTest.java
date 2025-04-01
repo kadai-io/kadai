@@ -23,6 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.models.ClassificationSummary;
 import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.api.exceptions.KadaiException;
+import io.kadai.common.internal.util.CheckedConsumer;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.api.models.ObjectReference;
@@ -75,17 +77,19 @@ class WorkbasketCleanupJobAccTest {
 
   @WithAccessId(user = "admin")
   @AfterEach
-  void after() throws Exception {
+  void after() throws KadaiException {
     List<TaskSummary> taskSummaryList = taskService.createTaskQuery().list();
-    for (TaskSummary taskSummary : taskSummaryList) {
-      taskService.deleteTask(taskSummary.getId());
-    }
+
+    taskSummaryList.stream()
+        .map(TaskSummary::getId)
+        .forEach(CheckedConsumer.rethrowing(taskService::deleteTask));
 
     List<WorkbasketSummary> workbasketSummaryList =
         workbasketService.createWorkbasketQuery().list();
-    for (WorkbasketSummary workbasketSummary : workbasketSummaryList) {
-      workbasketService.deleteWorkbasket(workbasketSummary.getId());
-    }
+
+    workbasketSummaryList.stream()
+        .map(WorkbasketSummary::getId)
+        .forEach(CheckedConsumer.rethrowing(workbasketService::deleteWorkbasket));
   }
 
   @WithAccessId(user = "admin")
