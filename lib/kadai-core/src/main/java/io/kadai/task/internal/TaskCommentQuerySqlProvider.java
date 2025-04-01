@@ -29,6 +29,12 @@ import static io.kadai.common.internal.util.SqlProviderUtil.whereLike;
 import static io.kadai.common.internal.util.SqlProviderUtil.whereNotIn;
 import static io.kadai.common.internal.util.SqlProviderUtil.whereNotInInterval;
 import static io.kadai.common.internal.util.SqlProviderUtil.whereNotLike;
+import static io.kadai.task.api.TaskCommentQueryColumnName.CREATED;
+import static io.kadai.task.api.TaskCommentQueryColumnName.ID;
+import static io.kadai.task.api.TaskCommentQueryColumnName.TASK_ID;
+import static io.kadai.task.api.TaskCommentQueryColumnName.CREATOR;
+import static io.kadai.task.api.TaskCommentQueryColumnName.MODIFIED;
+import static io.kadai.task.api.TaskCommentQueryColumnName.TEXT_FIELD;
 
 import io.kadai.task.api.TaskCommentQueryColumnName;
 import java.util.Arrays;
@@ -101,21 +107,21 @@ public class TaskCommentQuerySqlProvider {
 
   private static String commonTaskCommentWhereStatement() {
     StringBuilder sb = new StringBuilder();
-    whereIn("idIn", "tc.ID", sb);
-    whereNotIn("idNotIn", "tc.ID", sb);
-    whereLike("idLike", "tc.ID", sb);
-    whereNotLike("idNotLike", "tc.ID", sb);
-    whereIn("taskIdIn", "tc.TASK_ID", sb);
-    whereLike("textFieldLike", "tc.TEXT_FIELD", sb);
-    whereNotLike("textFieldNotLike", "tc.TEXT_FIELD", sb);
-    whereIn("creatorIn", "tc.CREATOR", sb);
-    whereNotIn("creatorNotIn", "tc.CREATOR", sb);
-    whereLike("creatorLike", "tc.CREATOR", sb);
-    whereNotLike("creatorNotLike", "tc.CREATOR", sb);
-    whereInInterval("createdIn", "tc.CREATED", sb);
-    whereNotInInterval("createdNotIn", "tc.CREATED", sb);
-    whereInInterval("modifiedIn", "tc.MODIFIED", sb);
-    whereNotInInterval("modifiedNotIn", "tc.MODIFIED", sb);
+    whereIn("idIn", ID.toString(), sb);
+    whereNotIn("idNotIn", ID.toString(), sb);
+    whereLike("idLike", ID.toString(), sb);
+    whereNotLike("idNotLike", ID.toString(), sb);
+    whereIn("taskIdIn", TASK_ID.toString(), sb);
+    whereLike("textFieldLike", TEXT_FIELD.toString(), sb);
+    whereNotLike("textFieldNotLike", TEXT_FIELD.toString(), sb);
+    whereIn("creatorIn", CREATOR.toString(), sb);
+    whereNotIn("creatorNotIn", CREATOR.toString(), sb);
+    whereLike("creatorLike", CREATOR.toString(), sb);
+    whereNotLike("creatorNotLike", CREATOR.toString(), sb);
+    whereInInterval("createdIn", CREATED.toString(), sb);
+    whereNotInInterval("createdNotIn", CREATED.toString(), sb);
+    whereInInterval("modifiedIn", MODIFIED.toString(), sb);
+    whereNotInInterval("modifiedNotIn", MODIFIED.toString(), sb);
     return sb.toString();
   }
 

@@ -24,6 +24,12 @@ import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_SCRIPT_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_WHERE_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.whereIn;
+import static io.kadai.task.api.ObjectReferenceQueryColumnName.COMPANY;
+import static io.kadai.task.api.ObjectReferenceQueryColumnName.COMPANY;
+import static io.kadai.task.api.ObjectReferenceQueryColumnName.COMPANY;
+import static io.kadai.task.api.ObjectReferenceQueryColumnName.COMPANY;
+
+
 
 public class ObjectReferenceQuerySqlProvider {
 

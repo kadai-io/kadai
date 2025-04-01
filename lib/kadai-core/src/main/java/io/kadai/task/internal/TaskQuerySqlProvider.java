@@ -528,7 +528,7 @@ public class TaskQuerySqlProvider {
 
   private static StringBuilder commonTaskWhereStatement() {
     StringBuilder sb = new StringBuilder();
-    commonWhereClauses("attachmentChannel", "a.CHANNEL", sb);
+    commonWhereClauses("attachmentChannel", TaskQueryColumnName.A_CHANNEL.toString(), sb);
     commonWhereClauses("attachmentClassificationKey", "a.CLASSIFICATION_KEY", sb);
     commonWhereClauses("attachmentClassificationName", "ac.NAME", sb);
     commonWhereClauses("attachmentReference", "a.REF_VALUE", sb);
