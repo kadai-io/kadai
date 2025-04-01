@@ -3269,14 +3269,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ngneat/overview@npm:6.1.1":
-  version: 6.1.1
-  resolution: "@ngneat/overview@npm:6.1.1"
+"@ngneat/overview@npm:6.1.2":
+  version: 6.1.2
+  resolution: "@ngneat/overview@npm:6.1.2"
   dependencies:
     tslib: "npm:^2.0.0"
   peerDependencies:
     "@angular/core": ">=17"
-  checksum: 10c0/9aabbeae6cfdadfb7adfbc6b9d19aeffbeb951f132501ebf10d8dbb051919ed2b1a8af3c1057dbc230efa3234d7ae80b69544b819fb17ca4e6efaf1fea83f4a9
+  checksum: 10c0/e82321928d82318308cf4b48c2663bf661b234012ae48f0c7f178fc119c8a15dcd295765a21cbe40d334b2a9c3f32624e1539e1e8e068856be6058fbfc7e3867
   languageName: node
   linkType: hard
 
@@ -9986,7 +9986,7 @@ __metadata:
     "@angular/platform-browser-dynamic": "npm:19.2.4"
     "@angular/router": "npm:19.2.4"
     "@ngneat/hot-toast": "npm:7.0.0"
-    "@ngneat/overview": "npm:6.1.1"
+    "@ngneat/overview": "npm:6.1.2"
     "@ngxs/devtools-plugin": "npm:19.0.0"
     "@ngxs/router-plugin": "npm:19.0.0"
     "@ngxs/store": "npm:19.0.0"
