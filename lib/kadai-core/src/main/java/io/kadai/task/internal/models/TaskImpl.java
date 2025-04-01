@@ -128,12 +128,6 @@ public class TaskImpl extends TaskSummaryImpl implements Task {
     this.callbackInfo = callbackInfo;
   }
 
-  @Deprecated
-  @Override
-  public void setCustomAttribute(TaskCustomField customField, String value) {
-    setCustomField(customField, value);
-  }
-
   @Override
   public void setCustomField(TaskCustomField customField, String value) {
     switch (customField) {

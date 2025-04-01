@@ -168,12 +168,6 @@ public class ClassificationSummaryImpl implements ClassificationSummary {
     this.priority = priority;
   }
 
-  @Deprecated
-  @Override
-  public String getCustomAttribute(ClassificationCustomField customField) {
-    return getCustomField(customField);
-  }
-
   @Override
   public String getCustomField(ClassificationCustomField customField) {
     switch (customField) {

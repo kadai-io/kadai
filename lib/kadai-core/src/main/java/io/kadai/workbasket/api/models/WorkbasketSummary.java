@@ -80,17 +80,6 @@ public interface WorkbasketSummary {
    * Returns the value of the specified {@linkplain WorkbasketCustomField} of the {@linkplain
    * Workbasket}.
    *
-   * @param customField identifies which {@linkplain WorkbasketCustomField} is requested
-   * @return the value for the given {@linkplain WorkbasketCustomField}
-   * @deprecated Use {@linkplain #getCustomField(WorkbasketCustomField)} instead
-   */
-  @Deprecated
-  String getCustomAttribute(WorkbasketCustomField customField);
-
-  /**
-   * Returns the value of the specified {@linkplain WorkbasketCustomField} of the {@linkplain
-   * Workbasket}.
-   *
    * @param customField identifies which the value of the specified {@linkplain
    *     WorkbasketCustomField} of the {@linkplain Workbasket} is requested
    * @return the value for the given the value of the specified {@linkplain WorkbasketCustomField}

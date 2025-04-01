@@ -142,19 +142,6 @@ public interface Classification extends ClassificationSummary {
   void setServiceLevel(String serviceLevel);
 
   /**
-   * Sets the value for the specified {@linkplain ClassificationCustomField
-   * ClassificationCustomField}.
-   *
-   * @param customField the {@linkplain ClassificationCustomField ClassificationCustomField}
-   *     identifies which custom attribute is to be set
-   * @param value the value of the {@linkplain ClassificationCustomField ClassificationCustomField}
-   *     to be set
-   * @deprecated Use {@linkplain #setCustomField(ClassificationCustomField, String)} instead
-   */
-  @Deprecated
-  void setCustomAttribute(ClassificationCustomField customField, String value);
-
-  /**
    * Sets the value for {@linkplain ClassificationCustomField}.
    *
    * @param customField identifies which {@linkplain ClassificationCustomField} is to be set
