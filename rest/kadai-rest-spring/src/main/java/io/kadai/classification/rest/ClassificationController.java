@@ -18,7 +18,6 @@
 
 package io.kadai.classification.rest;
 
-import io.kadai.classification.api.ClassificationCustomField;
 import io.kadai.classification.api.ClassificationQuery;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.exceptions.ClassificationAlreadyExistException;
@@ -31,20 +30,16 @@ import io.kadai.classification.rest.assembler.ClassificationRepresentationModelA
 import io.kadai.classification.rest.assembler.ClassificationSummaryRepresentationModelAssembler;
 import io.kadai.classification.rest.models.ClassificationRepresentationModel;
 import io.kadai.classification.rest.models.ClassificationSummaryPagedRepresentationModel;
-import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.QueryPagingParameter;
-import io.kadai.common.rest.QuerySortBy;
 import io.kadai.common.rest.QuerySortParameter;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.common.rest.util.QueryParamsValidator;
 import jakarta.servlet.http.HttpServletRequest;
-import java.beans.ConstructorProperties;
 import java.util.List;
-import java.util.function.BiConsumer;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
@@ -159,49 +154,5 @@ public class ClassificationController implements ClassificationApi {
       throws ClassificationNotFoundException, ClassificationInUseException, NotAuthorizedException {
     classificationService.deleteClassification(classificationId);
     return ResponseEntity.noContent().build();
-  }
-
-  enum ClassificationQuerySortBy implements QuerySortBy<ClassificationQuery> {
-    APPLICATION_ENTRY_POINT(ClassificationQuery::orderByApplicationEntryPoint),
-    DOMAIN(ClassificationQuery::orderByDomain),
-    KEY(ClassificationQuery::orderByKey),
-    CATEGORY(ClassificationQuery::orderByCategory),
-    CUSTOM_1((q, sort) -> q.orderByCustomAttribute(ClassificationCustomField.CUSTOM_1, sort)),
-    CUSTOM_2((q, sort) -> q.orderByCustomAttribute(ClassificationCustomField.CUSTOM_2, sort)),
-    CUSTOM_3((q, sort) -> q.orderByCustomAttribute(ClassificationCustomField.CUSTOM_3, sort)),
-    CUSTOM_4((q, sort) -> q.orderByCustomAttribute(ClassificationCustomField.CUSTOM_4, sort)),
-    CUSTOM_5((q, sort) -> q.orderByCustomAttribute(ClassificationCustomField.CUSTOM_5, sort)),
-    CUSTOM_6((q, sort) -> q.orderByCustomAttribute(ClassificationCustomField.CUSTOM_6, sort)),
-    CUSTOM_7((q, sort) -> q.orderByCustomAttribute(ClassificationCustomField.CUSTOM_7, sort)),
-    CUSTOM_8((q, sort) -> q.orderByCustomAttribute(ClassificationCustomField.CUSTOM_8, sort)),
-    NAME(ClassificationQuery::orderByName),
-    PARENT_ID(ClassificationQuery::orderByParentId),
-    PARENT_KEY(ClassificationQuery::orderByParentKey),
-    PRIORITY(ClassificationQuery::orderByPriority),
-    SERVICE_LEVEL(ClassificationQuery::orderByServiceLevel);
-
-    private final BiConsumer<ClassificationQuery, SortDirection> consumer;
-
-    ClassificationQuerySortBy(BiConsumer<ClassificationQuery, SortDirection> consumer) {
-      this.consumer = consumer;
-    }
-
-    @Override
-    public void applySortByForQuery(ClassificationQuery query, SortDirection sortDirection) {
-      consumer.accept(query, sortDirection);
-    }
-  }
-
-  // Unfortunately this class is necessary, since spring can not inject the generic 'sort-by'
-  // parameter from the super class.
-  public static class ClassificationQuerySortParameter
-      extends QuerySortParameter<ClassificationQuery, ClassificationQuerySortBy> {
-
-    @ConstructorProperties({"sort-by", "order"})
-    public ClassificationQuerySortParameter(
-        List<ClassificationQuerySortBy> sortBy, List<SortDirection> order)
-        throws InvalidArgumentException {
-      super(sortBy, order);
-    }
   }
 }

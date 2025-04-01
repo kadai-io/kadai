@@ -26,7 +26,6 @@ import io.kadai.user.api.UserQuery;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
 import io.kadai.user.api.models.UserSummary;
-import io.kadai.user.rest.UserController.UserQuerySortParameter;
 import io.kadai.user.rest.models.UserRepresentationModel;
 import io.kadai.user.rest.models.UserSummaryPagedRepresentationModel;
 import io.swagger.v3.oas.annotations.Operation;

@@ -18,17 +18,14 @@
 
 package io.kadai.workbasket.rest;
 
-import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.QueryPagingParameter;
-import io.kadai.common.rest.QuerySortBy;
 import io.kadai.common.rest.QuerySortParameter;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.common.rest.util.QueryParamsValidator;
-import io.kadai.workbasket.api.WorkbasketCustomField;
 import io.kadai.workbasket.api.WorkbasketQuery;
 import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
@@ -47,9 +44,7 @@ import io.kadai.workbasket.rest.models.WorkbasketAccessItemCollectionRepresentat
 import io.kadai.workbasket.rest.models.WorkbasketRepresentationModel;
 import io.kadai.workbasket.rest.models.WorkbasketSummaryPagedRepresentationModel;
 import jakarta.servlet.http.HttpServletRequest;
-import java.beans.ConstructorProperties;
 import java.util.List;
-import java.util.function.BiConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.annotations.ParameterObject;
@@ -292,50 +287,5 @@ public class WorkbasketController implements WorkbasketApi {
     }
 
     return ResponseEntity.noContent().build();
-  }
-
-  public enum WorkbasketQuerySortBy implements QuerySortBy<WorkbasketQuery> {
-    NAME(WorkbasketQuery::orderByName),
-    KEY(WorkbasketQuery::orderByKey),
-    OWNER(WorkbasketQuery::orderByOwner),
-    TYPE(WorkbasketQuery::orderByType),
-    DESCRIPTION(WorkbasketQuery::orderByDescription),
-    CUSTOM_1((query, sort) -> query.orderByCustomAttribute(WorkbasketCustomField.CUSTOM_1, sort)),
-    CUSTOM_2((query, sort) -> query.orderByCustomAttribute(WorkbasketCustomField.CUSTOM_2, sort)),
-    CUSTOM_3((query, sort) -> query.orderByCustomAttribute(WorkbasketCustomField.CUSTOM_3, sort)),
-    CUSTOM_4((query, sort) -> query.orderByCustomAttribute(WorkbasketCustomField.CUSTOM_4, sort)),
-    CUSTOM_5((query, sort) -> query.orderByCustomAttribute(WorkbasketCustomField.CUSTOM_5, sort)),
-    CUSTOM_6((query, sort) -> query.orderByCustomAttribute(WorkbasketCustomField.CUSTOM_6, sort)),
-    CUSTOM_7((query, sort) -> query.orderByCustomAttribute(WorkbasketCustomField.CUSTOM_7, sort)),
-    CUSTOM_8((query, sort) -> query.orderByCustomAttribute(WorkbasketCustomField.CUSTOM_8, sort)),
-    DOMAIN(WorkbasketQuery::orderByDomain),
-    ORG_LEVEL_1(WorkbasketQuery::orderByOrgLevel1),
-    ORG_LEVEL_2(WorkbasketQuery::orderByOrgLevel2),
-    ORG_LEVEL_3(WorkbasketQuery::orderByOrgLevel3),
-    ORG_LEVEL_4(WorkbasketQuery::orderByOrgLevel4);
-
-    private final BiConsumer<WorkbasketQuery, SortDirection> consumer;
-
-    WorkbasketQuerySortBy(BiConsumer<WorkbasketQuery, SortDirection> consumer) {
-      this.consumer = consumer;
-    }
-
-    @Override
-    public void applySortByForQuery(WorkbasketQuery query, SortDirection sortDirection) {
-      consumer.accept(query, sortDirection);
-    }
-  }
-
-  // Unfortunately this class is necessary, since spring can not inject the generic 'sort-by'
-  // parameter from the super class.
-  public static class WorkbasketQuerySortParameter
-      extends QuerySortParameter<WorkbasketQuery, WorkbasketQuerySortBy> {
-
-    @ConstructorProperties({"sort-by", "order"})
-    public WorkbasketQuerySortParameter(
-        List<WorkbasketQuerySortBy> sortBy, List<SortDirection> order)
-        throws InvalidArgumentException {
-      super(sortBy, order);
-    }
   }
 }
