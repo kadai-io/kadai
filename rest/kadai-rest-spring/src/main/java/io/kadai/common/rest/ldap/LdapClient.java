@@ -716,11 +716,7 @@ public class LdapClient {
   }
 
   public String getGroupsOfUserName() {
-    String groupsOfUser = LdapSettings.KADAI_LDAP_GROUPS_OF_USER_NAME.getValueFromEnv(env);
-    if (groupsOfUser == null || groupsOfUser.isEmpty()) {
-      groupsOfUser = LdapSettings.KADAI_LDAP_GROUPS_OF_USER.getValueFromEnv(env);
-    }
-    return groupsOfUser;
+    return LdapSettings.KADAI_LDAP_GROUPS_OF_USER_NAME.getValueFromEnv(env);
   }
 
   public String getGroupsOfUserType() {
@@ -728,12 +724,7 @@ public class LdapClient {
   }
 
   public String getPermissionsOfUserName() {
-    String permissionsOfUser =
-        LdapSettings.KADAI_LDAP_PERMISSIONS_OF_USER_NAME.getValueFromEnv(env);
-    if (permissionsOfUser == null || permissionsOfUser.isEmpty()) {
-      permissionsOfUser = LdapSettings.KADAI_LDAP_PERMISSIONS_OF_USER.getValueFromEnv(env);
-    }
-    return permissionsOfUser;
+    return LdapSettings.KADAI_LDAP_PERMISSIONS_OF_USER_NAME.getValueFromEnv(env);
   }
 
   public String getPermissionsOfUserType() {
@@ -878,10 +869,8 @@ public class LdapClient {
         .filter(not(LdapSettings.KADAI_LDAP_USER_ORG_LEVEL_2_ATTRIBUTE::equals))
         .filter(not(LdapSettings.KADAI_LDAP_USER_ORG_LEVEL_3_ATTRIBUTE::equals))
         .filter(not(LdapSettings.KADAI_LDAP_USER_ORG_LEVEL_4_ATTRIBUTE::equals))
-        .filter(not(LdapSettings.KADAI_LDAP_GROUPS_OF_USER::equals))
         .filter(not(LdapSettings.KADAI_LDAP_GROUPS_OF_USER_NAME::equals))
         .filter(not(LdapSettings.KADAI_LDAP_GROUPS_OF_USER_TYPE::equals))
-        .filter(not(LdapSettings.KADAI_LDAP_PERMISSIONS_OF_USER::equals))
         .filter(not(LdapSettings.KADAI_LDAP_PERMISSIONS_OF_USER_NAME::equals))
         .filter(not(LdapSettings.KADAI_LDAP_PERMISSIONS_OF_USER_TYPE::equals))
         .filter(not(LdapSettings.KADAI_LDAP_PERMISSION_ID_ATTRIBUTE::equals))
