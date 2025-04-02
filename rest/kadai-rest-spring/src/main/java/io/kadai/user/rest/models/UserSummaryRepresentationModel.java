@@ -202,7 +202,7 @@ public class UserSummaryRepresentationModel
     if (this == obj) {
       return true;
     }
-    if (!(obj instanceof UserRepresentationModel other)) {
+    if (!(obj instanceof UserSummaryRepresentationModel other)) {
       return false;
     }
     if (!super.equals(obj)) {
