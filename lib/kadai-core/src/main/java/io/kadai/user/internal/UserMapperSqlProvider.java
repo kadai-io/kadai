@@ -62,7 +62,9 @@ public class UserMapperSqlProvider {
         + "SELECT "
         + USER_INFO_COLUMNS
         + "FROM USER_INFO "
-        + "WHERE USER_ID = #{id} "
+        + "WHERE "
+        + USER_ID
+        + " = #{id} "
         + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
@@ -72,21 +74,27 @@ public class UserMapperSqlProvider {
         + "SELECT "
         + USER_INFO_COLUMNS
         + "FROM USER_INFO "
-        + "WHERE USER_ID IN (<foreach item='id' collection='ids' separator=',' >#{id}</foreach>) "
+        + "WHERE "
+        + USER_ID
+        + " IN (<foreach item='id' collection='ids' separator=',' >#{id}</foreach>) "
         + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
 
   public static String findGroupsById() {
     return OPENING_SCRIPT_TAG
-        + "SELECT GROUP_ID FROM GROUP_INFO WHERE USER_ID = #{id} "
+        + "SELECT GROUP_ID FROM GROUP_INFO WHERE "
+        + USER_ID
+        + " = #{id} "
         + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
 
   public static String findPermissionsById() {
     return OPENING_SCRIPT_TAG
-        + "SELECT PERMISSION_ID FROM PERMISSION_INFO WHERE USER_ID = #{id} "
+        + "SELECT PERMISSION_ID FROM PERMISSION_INFO WHERE "
+        + USER_ID
+        + " = #{id} "
         + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
@@ -97,7 +105,9 @@ public class UserMapperSqlProvider {
 
   public static String insertGroups() {
     return OPENING_SCRIPT_TAG
-        + "INSERT INTO GROUP_INFO (USER_ID, GROUP_ID) VALUES "
+        + "INSERT INTO GROUP_INFO ("
+        + USER_ID
+        + ", GROUP_ID) VALUES "
         + "<foreach item='group' collection='groups' open='(' separator='),(' close=')'>"
         + "#{id}, #{group}"
         + "</foreach> "
@@ -106,7 +116,9 @@ public class UserMapperSqlProvider {
 
   public static String insertPermissions() {
     return OPENING_SCRIPT_TAG
-        + "INSERT INTO PERMISSION_INFO (USER_ID, PERMISSION_ID) VALUES "
+        + "INSERT INTO PERMISSION_INFO ("
+        + USER_ID
+        + ", PERMISSION_ID) VALUES "
         + "<foreach item='permission' collection='permissions' "
         + "open='(' separator='),(' close=')'>"
         + "#{id}, #{permission}"
@@ -147,14 +159,14 @@ public class UserMapperSqlProvider {
   }
 
   public static String delete() {
-    return "DELETE FROM USER_INFO WHERE USER_ID = #{id} ";
+    return "DELETE FROM USER_INFO WHERE " + USER_ID + " = #{id} ";
   }
 
   public static String deleteGroups() {
-    return "DELETE FROM GROUP_INFO WHERE USER_ID = #{id} ";
+    return "DELETE FROM GROUP_INFO WHERE " + USER_ID + " = #{id} ";
   }
 
   public static String deletePermissions() {
-    return "DELETE FROM PERMISSION_INFO WHERE USER_ID = #{id} ";
+    return "DELETE FROM PERMISSION_INFO WHERE " + USER_ID + " = #{id} ";
   }
 }
