@@ -296,6 +296,7 @@ public class TaskController implements TaskApi {
   }
 
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES)
+  @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<TaskRepresentationModel> requestChanges(
       @PathVariable("taskId") String taskId,
       @RequestBody(required = false) Map<String, String> body)
