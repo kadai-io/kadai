@@ -21,7 +21,7 @@ package io.kadai.common.rest.ldap;
 import org.springframework.core.env.Environment;
 
 /**
- * Required settings to run ldap.
+ * All possible settings for LDAP.
  */
 enum LdapSettings {
   KADAI_LDAP_USER_SEARCH_BASE("kadai.ldap.userSearchBase"),

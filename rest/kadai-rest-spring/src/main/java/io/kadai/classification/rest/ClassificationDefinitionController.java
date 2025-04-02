@@ -18,7 +18,7 @@
 
 package io.kadai.classification.rest;
 
-import static io.kadai.common.internal.util.CheckedFunction.wrap;
+import static io.kadai.common.internal.util.CheckedFunction.wrapping;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kadai.classification.api.ClassificationCustomField;
@@ -38,11 +38,6 @@ import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.RestEndpoints;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -53,7 +48,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -67,7 +61,7 @@ import org.springframework.web.multipart.MultipartFile;
 /** Controller for Importing / Exporting classifications. */
 @RestController
 @EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
-public class ClassificationDefinitionController {
+public class ClassificationDefinitionController implements ClassificationDefinitionApi {
 
   private final ObjectMapper mapper;
   private final ClassificationService classificationService;
@@ -83,22 +77,6 @@ public class ClassificationDefinitionController {
     this.assembler = assembler;
   }
 
-  @Operation(
-      summary = "Export Classifications",
-      description = "This endpoint exports all configured Classifications.",
-      parameters = {@Parameter(name = "domain", description = "Filter the export by domain")},
-      responses = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "the configured Classifications.",
-            content =
-                @Content(
-                    mediaType = MediaTypes.HAL_JSON_VALUE,
-                    schema =
-                        @Schema(
-                            implementation =
-                                ClassificationDefinitionCollectionRepresentationModel.class)))
-      })
   @GetMapping(path = RestEndpoints.URL_CLASSIFICATION_DEFINITIONS)
   @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<ClassificationDefinitionCollectionRepresentationModel>
@@ -111,7 +89,7 @@ public class ClassificationDefinitionController {
     ClassificationDefinitionCollectionRepresentationModel collectionModel =
         summaries.stream()
             .map(ClassificationSummary::getId)
-            .map(wrap(classificationService::getClassification))
+            .map(wrapping(classificationService::getClassification))
             .collect(
                 Collectors.collectingAndThen(
                     Collectors.toList(), assembler::toKadaiCollectionModel));
@@ -119,25 +97,6 @@ public class ClassificationDefinitionController {
     return ResponseEntity.ok(collectionModel);
   }
 
-  @Operation(
-      summary = "Import Classifications",
-      description =
-          "This endpoint imports all Classifications. Existing Classifications will not be removed."
-              + " Existing Classifications with the same key/domain will be overridden.",
-      requestBody =
-          @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              description =
-                  "the file containing the Classifications which should be imported. To get an "
-                      + "example file containing the Classificatioins, go to the "
-                      + "[KADAI UI](http://localhost:8080/kadai/index.html) and export the "
-                      + "Classifications",
-              required = true,
-              content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)),
-      responses = {
-        @ApiResponse(
-            responseCode = "204",
-            content = {@Content(schema = @Schema())})
-      })
   @PostMapping(
       path = RestEndpoints.URL_CLASSIFICATION_DEFINITIONS,
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

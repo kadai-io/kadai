@@ -56,6 +56,7 @@ public enum TaskQueryColumnName implements QueryColumnName {
   POR_VALUE("t.por_value"),
   IS_READ("t.is_read"),
   IS_TRANSFERRED("t.is_transferred"),
+  IS_REOPENED("t.is_reopened"),
   CUSTOM_1("t.custom_1"),
   CUSTOM_2("t.custom_2"),
   CUSTOM_3("t.custom_3"),

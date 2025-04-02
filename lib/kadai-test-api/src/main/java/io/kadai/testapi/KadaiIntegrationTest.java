@@ -30,6 +30,39 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+/**
+ * Meta annotation for Kadai integration tests.
+ *
+ * <p>This annotation enables the following JUnit-Extensions:
+ *
+ * <ul>
+ *   <li>{@link JaasExtension}
+ *   <li>{@link TestContainerExtension}
+ *   <li>{@link KadaiInitializationExtension}
+ *   <li>{@link KadaiDependencyInjectionExtension}
+ * </ul>
+ *
+ * <p>Usage may look like:
+ * <pre>
+ *   {@code
+ *     @KadaiIntegrationTest
+ *     class MyTestClass implements KadaiEngineConfigurationModifier {
+ *       @KadaiInject InternalKadaiEngine internalKadaiEngine;
+ *
+ *       @Override
+ *       public KadaiConfiguration.Builder modify(KadaiConfiguration.Builder builder) {
+ *         return builder.foo();
+ *       }
+ *
+ *       @Test
+ *       @WithAccessId(user = "bar")
+ *       void myTest() {
+ *         internalKadaiEngine.baz(...);
+ *       }
+ *     }
+ *   }
+ * </pre>
+ */
 @ExtendWith({
   // ORDER IS IMPORTANT!
   JaasExtension.class,

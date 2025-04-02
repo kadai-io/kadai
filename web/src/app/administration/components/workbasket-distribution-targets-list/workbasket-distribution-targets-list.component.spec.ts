@@ -30,7 +30,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Side } from '../../models/workbasket-distribution-enums';
 import { NgxsModule, Store } from '@ngxs/store';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
-import { animationFrameScheduler, EMPTY, of } from 'rxjs';
+import { EMPTY, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -158,10 +158,9 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
     // On the first cycle we render the items.
     fixture.detectChanges();
     flush();
-    // Flush the initial fake scroll event.
-    animationFrameScheduler.flush();
-    flush();
+
     fixture.detectChanges();
+    flush();
 
     const distributionTargetList = debugElement.nativeElement.getElementsByClassName(
       'workbasket-distribution-targets__workbaskets-item'

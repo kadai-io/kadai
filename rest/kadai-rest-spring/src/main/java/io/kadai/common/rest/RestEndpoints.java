@@ -77,10 +77,13 @@ public final class RestEndpoints {
   public static final String URL_TASKS_ID_COMPLETE_FORCE = API_V1 + "tasks/{taskId}/complete/force";
   public static final String URL_TASKS_ID_CANCEL = API_V1 + "tasks/{taskId}/cancel";
   public static final String URL_TASKS_ID_TERMINATE = API_V1 + "tasks/{taskId}/terminate";
+  public static final String URL_TASKS_ID_REOPEN = API_V1 + "tasks/{taskId}/reopen";
   public static final String URL_TASKS_ID_TRANSFER_WORKBASKET_ID =
       API_V1 + "tasks/{taskId}/transfer/{workbasketId}";
   public static final String URL_TRANSFER_WORKBASKET_ID = API_V1 + "tasks/transfer/{workbasketId}";
   public static final String URL_TASKS_ID_SET_READ = API_V1 + "tasks/{taskId}/set-read";
+  public static final String URL_DISTRIBUTE =
+      API_V1 + "tasks/distribute/{workbasketId}";
 
   // task comment endpoints
   public static final String URL_TASK_COMMENTS = API_V1 + "tasks/{taskId}/comments";

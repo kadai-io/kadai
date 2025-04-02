@@ -86,7 +86,7 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4.2.0
+        uses: actions/setup-node@v4.3.0
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache web dependencies
@@ -138,7 +138,7 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4.2.0
+        uses: actions/setup-node@v4.3.0
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache web dependencies
@@ -187,7 +187,7 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4.2.0
+        uses: actions/setup-node@v4.3.0
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache web dependencies
@@ -256,8 +256,6 @@ jobs:
           - kadai-common-test
           - kadai-core
           - kadai-core-test
-          - kadai-cdi
-          - kadai-cdi-example
           - kadai-test-api
           - kadai-spring
           - kadai-spring-example
@@ -290,8 +288,6 @@ jobs:
             database: POSTGRES
           - module: kadai-rest-spring-example-boot
             database: DB2
-          - module: kadai-rest-spring-example-wildfly
-            database: POSTGRES
     steps:
       - name: Git checkout
         uses: actions/checkout@v4
@@ -314,7 +310,6 @@ jobs:
       - name: Change versions to match tag
         run: |
           ci/change_version.sh -m .
-          ci/update_kadai_dependency_for_wildfly.sh
       - name: Test
         run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip
         env:
@@ -332,8 +327,8 @@ jobs:
 
   release_artifacts:
     runs-on: ubuntu-22.04
-    name: Release artifacts to OSS Sonatype
-    if: github.repository == 'kadai-io/kadai' && startsWith(github.ref, 'refs/tags/v') && github.head_ref == ''
+    name: Release artifacts to Sonatype-Central
+    if: github.repository == 'kadai-io/kadai' && ( startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' ) && github.head_ref == ''
     needs: [ test_frontend, test_e2e, test_backend ]
     # as documented in the gpg manual (https://www.gnupg.org/documentation/manuals/gnupg/Invoking-GPG_002dAGENT.html)
     # we should execute this command before interacting with gpg (otherwise gpg won't work)
@@ -376,14 +371,14 @@ jobs:
           GPG_KEY: ${{ secrets.GPG_KEY }}
       - name: Change versions to match tag
         run: ci/change_version.sh -m .
-      - name: Release artifacts to OSS Sonatype
+      - name: Release artifacts to Sonatype-Central
         run: |
-          ./mvnw -B deploy -P $([[ "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo "release") \
+          ./mvnw -B deploy -P $([[ "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo "release" || echo "snapshot") \
           --settings ci/mvnsettings.xml -DskipTests -Dcheckstyle.skip -Djacoco.skip \
           -pl :kadai-parent,\
           :kadai-common-parent,:kadai-common-logging,:kadai-common,:kadai-common-security,\
           :kadai-common-data,:kadai-common-test,\
-          :kadai-lib-parent,:kadai-core,:kadai-cdi,:kadai-spring,\
+          :kadai-lib-parent,:kadai-core,:kadai-spring,\
           :kadai-rest-parent,:kadai-web,:kadai-rest-spring,\
           :kadai-history-parent,:kadai-simplehistory-provider,:kadai-simplehistory-rest-spring,:kadai-loghistory-provider,\
           :kadai-routing-parent,:kadai-spi-routing-dmn-router,:kadai-routing-rest
@@ -414,8 +409,6 @@ jobs:
       - name: Update version to next snapshot and push back
         run: |
           ci/change_version.sh -i -m .
-          ci/update_kadai_dependency_for_wildfly.sh -i
-          ci/commitPoms.sh rest/kadai-rest-spring-example-wildfly/src/test/java/io/kadai/example/wildfly/AbstractAccTest.java
         env:
           GH_EMAIL: ${{ secrets.GH_EMAIL }}
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
@@ -455,7 +448,7 @@ jobs:
       - name: Build kadai-web
         run: ./mvnw -B install -pl :kadai-web
       - name: Generate Javadoc
-        run: ./mvnw -B clean javadoc:jar -pl :kadai-core,:kadai-cdi,:kadai-spring
+        run: ./mvnw -B clean javadoc:jar -pl :kadai-core,:kadai-spring
       - name: Build Example Application
         run: ./mvnw -B install -P history.plugin -pl :kadai-rest-spring-example-boot -DskipTests -Dcheckstyle.skip -Dmaven.javadoc.skip -Djacoco.skip
       - name: Verify Example Application contains documentation
