@@ -18,8 +18,6 @@
 
 package io.kadai.common.rest.ldap;
 
-import static java.util.function.Predicate.not;
-
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
