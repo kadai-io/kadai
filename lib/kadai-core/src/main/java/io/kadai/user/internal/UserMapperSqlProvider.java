@@ -21,6 +21,19 @@ package io.kadai.user.internal;
 import static io.kadai.common.internal.util.SqlProviderUtil.CLOSING_SCRIPT_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_SCRIPT_TAG;
+import static io.kadai.user.api.UserQueryColumnName.DATA;
+import static io.kadai.user.api.UserQueryColumnName.E_MAIL;
+import static io.kadai.user.api.UserQueryColumnName.FIRST_NAME;
+import static io.kadai.user.api.UserQueryColumnName.FULL_NAME;
+import static io.kadai.user.api.UserQueryColumnName.LASTNAME;
+import static io.kadai.user.api.UserQueryColumnName.LONG_NAME;
+import static io.kadai.user.api.UserQueryColumnName.MOBILE_PHONE;
+import static io.kadai.user.api.UserQueryColumnName.ORG_LEVEL_1;
+import static io.kadai.user.api.UserQueryColumnName.ORG_LEVEL_2;
+import static io.kadai.user.api.UserQueryColumnName.ORG_LEVEL_3;
+import static io.kadai.user.api.UserQueryColumnName.ORG_LEVEL_4;
+import static io.kadai.user.api.UserQueryColumnName.PHONE;
+import static io.kadai.user.api.UserQueryColumnName.USER_ID;
 
 import io.kadai.user.api.UserQueryColumnName;
 import java.util.Arrays;
@@ -104,32 +117,32 @@ public class UserMapperSqlProvider {
   public static String update() {
     return "UPDATE USER_INFO "
         + "SET "
-        + UserQueryColumnName.FIRST_NAME
+        + FIRST_NAME
         + " = #{firstName}, "
-        + UserQueryColumnName.LASTNAME
+        + LASTNAME
         + " = #{lastName}, "
-        + UserQueryColumnName.FULL_NAME
+        + FULL_NAME
         + " = #{fullName}, "
-        + UserQueryColumnName.LONG_NAME
+        + LONG_NAME
         + " = #{longName}, "
-        + UserQueryColumnName.E_MAIL
+        + E_MAIL
         + " = #{email}, "
-        + UserQueryColumnName.PHONE
+        + PHONE
         + " = #{phone}, "
-        + UserQueryColumnName.MOBILE_PHONE
+        + MOBILE_PHONE
         + " = #{mobilePhone}, "
-        + UserQueryColumnName.ORG_LEVEL_4
+        + ORG_LEVEL_4
         + " = #{orgLevel4}, "
-        + UserQueryColumnName.ORG_LEVEL_3
+        + ORG_LEVEL_3
         + " = #{orgLevel3}, "
-        + UserQueryColumnName.ORG_LEVEL_2
+        + ORG_LEVEL_2
         + " = #{orgLevel2}, "
-        + UserQueryColumnName.ORG_LEVEL_1
+        + ORG_LEVEL_1
         + " = #{orgLevel1}, "
-        + UserQueryColumnName.DATA
+        + DATA
         + " = #{data} "
         + "WHERE "
-        + UserQueryColumnName.USER_ID
+        + USER_ID
         + " = #{id} ";
   }
 
