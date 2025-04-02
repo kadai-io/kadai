@@ -295,6 +295,7 @@ public class TaskController implements TaskApi {
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
   }
 
+  @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES)
   public ResponseEntity<TaskRepresentationModel> requestChanges(
       @PathVariable("taskId") String taskId,
       @RequestBody(required = false) Map<String, String> body)
