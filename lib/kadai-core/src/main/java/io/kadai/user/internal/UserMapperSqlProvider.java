@@ -31,12 +31,13 @@ public class UserMapperSqlProvider {
 
   private static final String USER_INFO_COLUMNS =
       Arrays.stream(UserQueryColumnName.values())
-          .filter(
-              column ->
-                  !EnumSet.of(UserQueryColumnName.GROUPS, UserQueryColumnName.PERMISSIONS)
-                      .contains(column))
-          .map(UserQueryColumnName::toString)
-          .collect(Collectors.joining(", "));
+              .filter(
+                  column ->
+                      !EnumSet.of(UserQueryColumnName.GROUPS, UserQueryColumnName.PERMISSIONS)
+                          .contains(column))
+              .map(UserQueryColumnName::toString)
+              .collect(Collectors.joining(", "))
+          + " ";
   private static final String USER_INFO_VALUES =
       "#{id}, #{firstName}, #{lastName}, #{fullName}, #{longName}, #{email}, #{phone}, "
           + "#{mobilePhone}, #{orgLevel4}, #{orgLevel3}, #{orgLevel2}, #{orgLevel1}, #{data} ";
