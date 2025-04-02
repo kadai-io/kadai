@@ -22,11 +22,21 @@ import static io.kadai.common.internal.util.SqlProviderUtil.CLOSING_SCRIPT_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_SCRIPT_TAG;
 
+import io.kadai.user.api.UserQueryColumnName;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.stream.Collectors;
+
 public class UserMapperSqlProvider {
 
   private static final String USER_INFO_COLUMNS =
-      "USER_ID, FIRST_NAME, LASTNAME, FULL_NAME, LONG_NAME, E_MAIL, PHONE, MOBILE_PHONE, "
-          + "ORG_LEVEL_4, ORG_LEVEL_3, ORG_LEVEL_2, ORG_LEVEL_1, DATA ";
+      Arrays.stream(UserQueryColumnName.values())
+          .filter(
+              column ->
+                  !EnumSet.of(UserQueryColumnName.GROUPS, UserQueryColumnName.PERMISSIONS)
+                      .contains(column))
+          .map(UserQueryColumnName::toString)
+          .collect(Collectors.joining(", "));
   private static final String USER_INFO_VALUES =
       "#{id}, #{firstName}, #{lastName}, #{fullName}, #{longName}, #{email}, #{phone}, "
           + "#{mobilePhone}, #{orgLevel4}, #{orgLevel3}, #{orgLevel2}, #{orgLevel1}, #{data} ";
@@ -92,12 +102,34 @@ public class UserMapperSqlProvider {
 
   public static String update() {
     return "UPDATE USER_INFO "
-        + "SET FIRST_NAME = #{firstName}, "
-        + "LASTNAME = #{lastName}, FULL_NAME = #{fullName}, LONG_NAME = #{longName}, "
-        + "E_MAIL = #{email}, PHONE = #{phone}, MOBILE_PHONE = #{mobilePhone}, "
-        + "ORG_LEVEL_4 = #{orgLevel4}, ORG_LEVEL_3 = #{orgLevel3}, "
-        + "ORG_LEVEL_2 = #{orgLevel2}, ORG_LEVEL_1 = #{orgLevel1}, DATA = #{data} "
-        + "WHERE USER_ID = #{id} ";
+        + "SET "
+        + UserQueryColumnName.FIRST_NAME
+        + " = #{firstName}, "
+        + UserQueryColumnName.LASTNAME
+        + " = #{lastName}, "
+        + UserQueryColumnName.FULL_NAME
+        + " = #{fullName}, "
+        + UserQueryColumnName.LONG_NAME
+        + " = #{longName}, "
+        + UserQueryColumnName.E_MAIL
+        + " = #{email}, "
+        + UserQueryColumnName.PHONE
+        + " = #{phone}, "
+        + UserQueryColumnName.MOBILE_PHONE
+        + " = #{mobilePhone}, "
+        + UserQueryColumnName.ORG_LEVEL_4
+        + " = #{orgLevel4}, "
+        + UserQueryColumnName.ORG_LEVEL_3
+        + " = #{orgLevel3}, "
+        + UserQueryColumnName.ORG_LEVEL_2
+        + " = #{orgLevel2}, "
+        + UserQueryColumnName.ORG_LEVEL_1
+        + " = #{orgLevel1}, "
+        + UserQueryColumnName.DATA
+        + " = #{data} "
+        + "WHERE "
+        + UserQueryColumnName.USER_ID
+        + " = #{id} ";
   }
 
   public static String delete() {

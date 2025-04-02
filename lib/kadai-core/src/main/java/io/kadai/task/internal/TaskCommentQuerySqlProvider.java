@@ -30,10 +30,10 @@ import static io.kadai.common.internal.util.SqlProviderUtil.whereNotIn;
 import static io.kadai.common.internal.util.SqlProviderUtil.whereNotInInterval;
 import static io.kadai.common.internal.util.SqlProviderUtil.whereNotLike;
 import static io.kadai.task.api.TaskCommentQueryColumnName.CREATED;
-import static io.kadai.task.api.TaskCommentQueryColumnName.ID;
-import static io.kadai.task.api.TaskCommentQueryColumnName.TASK_ID;
 import static io.kadai.task.api.TaskCommentQueryColumnName.CREATOR;
+import static io.kadai.task.api.TaskCommentQueryColumnName.ID;
 import static io.kadai.task.api.TaskCommentQueryColumnName.MODIFIED;
+import static io.kadai.task.api.TaskCommentQueryColumnName.TASK_ID;
 import static io.kadai.task.api.TaskCommentQueryColumnName.TEXT_FIELD;
 
 import io.kadai.task.api.TaskCommentQueryColumnName;
