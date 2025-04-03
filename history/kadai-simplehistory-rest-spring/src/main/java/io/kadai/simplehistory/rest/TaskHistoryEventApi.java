@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -50,7 +49,6 @@ public interface TaskHistoryEventApi {
             })
       })
   @GetMapping(path = HistoryRestEndpoints.URL_HISTORY_EVENTS, produces = MediaTypes.HAL_JSON_VALUE)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<TaskHistoryEventPagedRepresentationModel> getTaskHistoryEvents(
       HttpServletRequest request,
       @ParameterObject TaskHistoryQueryFilterParameter filterParameter,
@@ -93,7 +91,6 @@ public interface TaskHistoryEventApi {
             }),
       })
   @GetMapping(path = HistoryRestEndpoints.URL_HISTORY_EVENTS_ID)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<TaskHistoryEventRepresentationModel> getTaskHistoryEvent(
       @PathVariable("historyEventId") String historyEventId)
       throws KadaiHistoryEventNotFoundException;

@@ -36,6 +36,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -88,6 +89,7 @@ public class WorkbasketAccessItemController implements WorkbasketAccessItemApi {
   }
 
   @DeleteMapping(path = RestEndpoints.URL_WORKBASKET_ACCESS_ITEMS)
+  @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<Void> removeWorkbasketAccessItems(
       @RequestParam("access-id") String accessId)
       throws NotAuthorizedException, InvalidArgumentException {

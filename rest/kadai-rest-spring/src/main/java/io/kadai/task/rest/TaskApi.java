@@ -207,7 +207,6 @@ public interface TaskApi {
             })
       })
   @GetMapping(path = RestEndpoints.URL_TASKS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<TaskSummaryPagedRepresentationModel> getTasks(
       HttpServletRequest request,
       @ParameterObject TaskQueryFilterParameter filterParameter,
@@ -218,7 +217,6 @@ public interface TaskApi {
       @ParameterObject QueryPagingParameter<TaskSummary, TaskQuery> pagingParameter);
 
   @GetMapping(path = RestEndpoints.URL_TASKS_ID)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<TaskRepresentationModel> getTask(@PathVariable("taskId") String taskId)
       throws TaskNotFoundException, NotAuthorizedOnWorkbasketException;
 
@@ -1847,7 +1845,7 @@ public interface TaskApi {
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
       })
   @DeleteMapping(path = RestEndpoints.URL_TASKS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
+  @Transactional(rollbackFor = Exception.class)
   ResponseEntity<TaskSummaryCollectionRepresentationModel> deleteTasks(
       @ParameterObject TaskQueryFilterParameter filterParameter,
       @ParameterObject TaskQueryFilterCustomFields filterCustomFields,

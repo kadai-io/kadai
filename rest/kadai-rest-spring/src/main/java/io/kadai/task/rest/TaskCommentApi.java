@@ -91,7 +91,6 @@ public interface TaskCommentApi {
             })
       })
   @GetMapping(path = RestEndpoints.URL_TASK_COMMENT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<TaskCommentRepresentationModel> getTaskComment(
       @PathVariable("taskCommentId") String taskCommentId)
       throws TaskNotFoundException,
@@ -133,7 +132,6 @@ public interface TaskCommentApi {
                         @Schema(implementation = TaskCommentCollectionRepresentationModel.class)))
       })
   @GetMapping(path = RestEndpoints.URL_TASK_COMMENTS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<TaskCommentCollectionRepresentationModel> getTaskComments(
       @PathVariable("taskId") String taskId,
       HttpServletRequest request,

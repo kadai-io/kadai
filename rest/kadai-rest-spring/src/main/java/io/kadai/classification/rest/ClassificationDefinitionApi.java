@@ -43,7 +43,6 @@ public interface ClassificationDefinitionApi {
                                 ClassificationDefinitionCollectionRepresentationModel.class)))
       })
   @GetMapping(path = RestEndpoints.URL_CLASSIFICATION_DEFINITIONS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<ClassificationDefinitionCollectionRepresentationModel> exportClassifications(
       @RequestParam(value = "domain", required = false) String[] domain);
 
