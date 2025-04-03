@@ -76,7 +76,7 @@
         <version.equalsverifier>3.19.2</version.equalsverifier>
         <version.assertj>3.27.3</version.assertj>
         <version.openpojo>0.9.1</version.openpojo>
-        <version.jacoco>0.8.12</version.jacoco>
+        <version.jacoco>0.8.13</version.jacoco>
         <version.slf4j-test>3.0.1</version.slf4j-test>
         <version.testcontainers>1.20.6</version.testcontainers>
         <version.spring-openapi>2.8.5</version.spring-openapi>
