@@ -28,7 +28,7 @@
     "@angular/cdk": "19.2.8",
     "@angular/common": "19.2.5",
     "@angular/core": "19.2.5",
-    "@angular/forms": "19.2.4",
+    "@angular/forms": "19.2.5",
     "@angular/material": "19.2.8",
     "@angular/platform-browser": "19.2.5",
     "@angular/platform-browser-dynamic": "19.2.5",
