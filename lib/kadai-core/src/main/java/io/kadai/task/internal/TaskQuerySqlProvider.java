@@ -31,6 +31,47 @@ import static io.kadai.common.internal.util.SqlProviderUtil.whereLike;
 import static io.kadai.common.internal.util.SqlProviderUtil.whereNotIn;
 import static io.kadai.common.internal.util.SqlProviderUtil.whereNotInInterval;
 import static io.kadai.common.internal.util.SqlProviderUtil.whereNotLike;
+import static io.kadai.task.api.TaskQueryColumnName.A_CHANNEL;
+import static io.kadai.task.api.TaskQueryColumnName.A_CLASSIFICATION_ID;
+import static io.kadai.task.api.TaskQueryColumnName.A_CLASSIFICATION_KEY;
+import static io.kadai.task.api.TaskQueryColumnName.A_CLASSIFICATION_NAME;
+import static io.kadai.task.api.TaskQueryColumnName.A_REF_VALUE;
+import static io.kadai.task.api.TaskQueryColumnName.BUSINESS_PROCESS_ID;
+import static io.kadai.task.api.TaskQueryColumnName.CLAIMED;
+import static io.kadai.task.api.TaskQueryColumnName.CLASSIFICATION_CATEGORY;
+import static io.kadai.task.api.TaskQueryColumnName.CLASSIFICATION_ID;
+import static io.kadai.task.api.TaskQueryColumnName.CLASSIFICATION_KEY;
+import static io.kadai.task.api.TaskQueryColumnName.CLASSIFICATION_NAME;
+import static io.kadai.task.api.TaskQueryColumnName.COMPLETED;
+import static io.kadai.task.api.TaskQueryColumnName.CREATED;
+import static io.kadai.task.api.TaskQueryColumnName.CREATOR;
+import static io.kadai.task.api.TaskQueryColumnName.DESCRIPTION;
+import static io.kadai.task.api.TaskQueryColumnName.DOMAIN;
+import static io.kadai.task.api.TaskQueryColumnName.DUE;
+import static io.kadai.task.api.TaskQueryColumnName.EXTERNAL_ID;
+import static io.kadai.task.api.TaskQueryColumnName.ID;
+import static io.kadai.task.api.TaskQueryColumnName.MODIFIED;
+import static io.kadai.task.api.TaskQueryColumnName.NAME;
+import static io.kadai.task.api.TaskQueryColumnName.NOTE;
+import static io.kadai.task.api.TaskQueryColumnName.OWNER;
+import static io.kadai.task.api.TaskQueryColumnName.OWNER_LONG_NAME;
+import static io.kadai.task.api.TaskQueryColumnName.O_COMPANY;
+import static io.kadai.task.api.TaskQueryColumnName.O_SYSTEM;
+import static io.kadai.task.api.TaskQueryColumnName.O_SYSTEM_INSTANCE;
+import static io.kadai.task.api.TaskQueryColumnName.O_TYPE;
+import static io.kadai.task.api.TaskQueryColumnName.O_VALUE;
+import static io.kadai.task.api.TaskQueryColumnName.PARENT_BUSINESS_PROCESS_ID;
+import static io.kadai.task.api.TaskQueryColumnName.PLANNED;
+import static io.kadai.task.api.TaskQueryColumnName.POR_COMPANY;
+import static io.kadai.task.api.TaskQueryColumnName.POR_INSTANCE;
+import static io.kadai.task.api.TaskQueryColumnName.POR_SYSTEM;
+import static io.kadai.task.api.TaskQueryColumnName.POR_TYPE;
+import static io.kadai.task.api.TaskQueryColumnName.POR_VALUE;
+import static io.kadai.task.api.TaskQueryColumnName.PRIORITY;
+import static io.kadai.task.api.TaskQueryColumnName.RECEIVED;
+import static io.kadai.task.api.TaskQueryColumnName.STATE;
+import static io.kadai.task.api.TaskQueryColumnName.WORKBASKET_ID;
+import static io.kadai.task.api.TaskQueryColumnName.WORKBASKET_KEY;
 
 import io.kadai.task.api.TaskQueryColumnName;
 import java.util.Arrays;
@@ -47,13 +88,20 @@ public class TaskQuerySqlProvider {
         + commonSelectFields()
         + "<if test='groupBySor != null'>, o.VALUE as SOR_VALUE </if>"
         + "<if test=\"addAttachmentColumnsToSelectClauseForOrdering\">"
-        + ", a.CLASSIFICATION_ID as ACLASSIFICATION_ID, "
-        + "a.CLASSIFICATION_KEY as ACLASSIFICATION_KEY, a.CHANNEL as ACHANNEL, "
-        + "a.REF_VALUE as AREF_VALUE, a.RECEIVED as ARECEIVED"
+        + ", "
+        + A_CLASSIFICATION_ID
+        + " as ACLASSIFICATION_ID, "
+        + A_CLASSIFICATION_KEY
+        + " as ACLASSIFICATION_KEY, "
+        + A_CHANNEL
+        + " as ACHANNEL, "
+        + A_REF_VALUE
+        + " as AREF_VALUE, a.RECEIVED as ARECEIVED"
         + "</if>"
         + "<if test=\"addClassificationNameToSelectClauseForOrdering\">, c.NAME as CNAME </if>"
         + "<if test=\"addAttachmentClassificationNameToSelectClauseForOrdering\">, "
-        + "ac.NAME as ACNAME </if>"
+        + A_CLASSIFICATION_NAME
+        + " as ACNAME </if>"
         + "<if test=\"addWorkbasketNameToSelectClauseForOrdering\">, w.NAME as WNAME </if>"
         + "<if test=\"joinWithUserInfo\">, u.LONG_NAME</if>"
         + groupByPorIfActive()
@@ -80,7 +128,9 @@ public class TaskQuerySqlProvider {
         + OPENING_WHERE_TAG
         + checkForAuthorization()
         + commonTaskWhereStatement()
-        + "<if test='selectAndClaim == true'> AND t.STATE = 'READY' </if>"
+        + "<if test='selectAndClaim == true'> AND "
+        + STATE
+        + " = 'READY' </if>"
         + CLOSING_WHERE_TAG
         + closeOuterClauseForGroupByPor()
         + closeOuterClauseForGroupBySor()
@@ -114,12 +164,19 @@ public class TaskQuerySqlProvider {
         + "SELECT <if test=\"useDistinctKeyword\">DISTINCT</if> "
         + commonSelectFields()
         + "<if test=\"addAttachmentColumnsToSelectClauseForOrdering\">"
-        + ", a.CLASSIFICATION_ID, a.CLASSIFICATION_KEY, a.CHANNEL, a.REF_VALUE, a.RECEIVED"
+        + ", "
+        + attachementColumnSelectFields()
         + "</if>"
-        + "<if test=\"addClassificationNameToSelectClauseForOrdering\">, c.NAME </if>"
-        + "<if test=\"addAttachmentClassificationNameToSelectClauseForOrdering\">, ac.NAME </if>"
+        + "<if test=\"addClassificationNameToSelectClauseForOrdering\">, "
+        + CLASSIFICATION_NAME
+        + " </if>"
+        + "<if test=\"addAttachmentClassificationNameToSelectClauseForOrdering\">, "
+        + A_CLASSIFICATION_NAME
+        + " </if>"
         + "<if test=\"addWorkbasketNameToSelectClauseForOrdering\">, w.NAME </if>"
-        + "<if test=\"joinWithUserInfo\">, u.LONG_NAME </if>"
+        + "<if test=\"joinWithUserInfo\">, "
+        + OWNER_LONG_NAME
+        + " </if>"
         + "FROM TASK t "
         + "<if test=\"joinWithAttachments\">"
         + "LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID "
@@ -179,8 +236,11 @@ public class TaskQuerySqlProvider {
     return OPENING_SCRIPT_TAG
         + "SELECT COUNT( <if test=\"useDistinctKeyword\">DISTINCT</if> t.ID) "
         + "<if test=\"groupByPor or groupBySor != null\"> "
-        + "FROM (SELECT t.ID, t.POR_VALUE "
-        + "</if> "
+        + "FROM (SELECT "
+        + ID
+        + ", "
+        + POR_VALUE
+        + " </if> "
         + "<if test=\"groupBySor != null\"> "
         + ", o.VALUE as SOR_VALUE "
         + "</if> "
@@ -216,7 +276,10 @@ public class TaskQuerySqlProvider {
     return OPENING_SCRIPT_TAG
         + "WITH X (ID, WORKBASKET_ID) AS ("
         + "SELECT <if test=\"useDistinctKeyword\">DISTINCT</if> "
-        + "t.ID, t.WORKBASKET_ID FROM TASK t "
+        + ID
+        + ", "
+        + WORKBASKET_ID
+        + " FROM TASK t "
         + "<if test=\"joinWithAttachments\">"
         + "LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID "
         + "</if>"
@@ -258,7 +321,9 @@ public class TaskQuerySqlProvider {
   public static String queryTaskColumnValues() {
     return OPENING_SCRIPT_TAG
         + "SELECT DISTINCT ${columnName} "
-        + "<if test=\"joinWithUserInfo\">, u.LONG_NAME </if>"
+        + "<if test=\"joinWithUserInfo\">, "
+        + OWNER_LONG_NAME
+        + " </if>"
         + "FROM TASK t "
         + "<if test=\"joinWithAttachments\">"
         + "LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID "
@@ -283,34 +348,44 @@ public class TaskQuerySqlProvider {
         + "ORDER BY <foreach item='item' collection='orderByInner' separator=',' >"
         + "<choose>"
         + "<when test=\"item.contains('TCLASSIFICATION_KEY ASC')\">"
-        + "t.CLASSIFICATION_KEY ASC"
+        + CLASSIFICATION_KEY
+        + " ASC"
         + "</when>"
         + "<when test=\"item.contains('TCLASSIFICATION_KEY DESC')\">"
-        + "t.CLASSIFICATION_KEY DESC"
+        + CLASSIFICATION_KEY
+        + " DESC"
         + "</when>"
         + "<when test=\"item.contains('ACLASSIFICATION_KEY ASC')\">"
-        + "a.CLASSIFICATION_KEY ASC"
+        + A_CLASSIFICATION_KEY
+        + " ASC"
         + "</when>"
         + "<when test=\"item.contains('ACLASSIFICATION_KEY DESC')\">"
-        + "a.CLASSIFICATION_KEY DESC"
+        + A_CLASSIFICATION_KEY
+        + " DESC"
         + "</when>"
         + "<when test=\"item.contains('ACLASSIFICATION_ID ASC')\">"
-        + "a.CLASSIFICATION_ID ASC"
+        + A_CLASSIFICATION_ID
+        + " ASC"
         + "</when>"
         + "<when test=\"item.contains('ACLASSIFICATION_ID DESC')\">"
-        + "a.CLASSIFICATION_ID DESC"
+        + A_CLASSIFICATION_ID
+        + " DESC"
         + "</when>"
         + "<when test=\"item.contains('CLASSIFICATION_NAME DESC')\">"
-        + "c.NAME DESC"
+        + CLASSIFICATION_NAME
+        + " DESC"
         + "</when>"
         + "<when test=\"item.contains('CLASSIFICATION_NAME ASC')\">"
-        + "c.NAME ASC"
+        + CLASSIFICATION_NAME
+        + " ASC"
         + "</when>"
         + "<when test=\"item.contains('A_CLASSIFICATION_NAME DESC')\">"
-        + "ac.NAME DESC"
+        + A_CLASSIFICATION_NAME
+        + " DESC"
         + "</when>"
         + "<when test=\"item.contains('A_CLASSIFICATION_NAME ASC')\">"
-        + "ac.NAME ASC"
+        + A_CLASSIFICATION_NAME
+        + " ASC"
         + "</when>"
         + "<otherwise>${item}</otherwise>"
         + "</choose>"
@@ -328,19 +403,13 @@ public class TaskQuerySqlProvider {
         .collect(Collectors.joining(", "));
   }
 
-
   private static String db2selectFields() {
     // needs to be the same order as the commonSelectFields (TaskQueryColumnValue)
-    return "ID, EXTERNAL_ID, CREATED, CLAIMED, COMPLETED, MODIFIED, PLANNED, RECEIVED, DUE, NAME, "
-        + "CREATOR, DESCRIPTION, NOTE, PRIORITY, MANUAL_PRIORITY, STATE, CLASSIFICATION_CATEGORY, "
-        + "TCLASSIFICATION_KEY, CLASSIFICATION_ID, "
-        + "WORKBASKET_ID, WORKBASKET_KEY, DOMAIN, "
-        + "BUSINESS_PROCESS_ID, PARENT_BUSINESS_PROCESS_ID, OWNER, POR_COMPANY, POR_SYSTEM, "
-        + "POR_INSTANCE, POR_TYPE, POR_VALUE, IS_READ, IS_TRANSFERRED, IS_REOPENED, CUSTOM_1,"
-        + " CUSTOM_2, CUSTOM_3, CUSTOM_4, CUSTOM_5, CUSTOM_6, CUSTOM_7, CUSTOM_8, CUSTOM_9, "
-        + "CUSTOM_10, CUSTOM_11, CUSTOM_12, CUSTOM_13, CUSTOM_14, CUSTOM_15, CUSTOM_16, "
-        + "CUSTOM_INT_1, CUSTOM_INT_2, CUSTOM_INT_3,  CUSTOM_INT_4,  CUSTOM_INT_5, "
-        + "CUSTOM_INT_6, CUSTOM_INT_7, CUSTOM_INT_8, NUMBER_OF_COMMENTS"
+    return Arrays.stream(TaskQueryColumnName.values())
+            .map(TaskQueryColumnName::toString)
+            .filter(column -> column.startsWith("t"))
+            .map(t -> t.replace("t.", ""))
+            .collect(Collectors.joining(", "))
         + "<if test=\"addClassificationNameToSelectClauseForOrdering\">, CNAME</if>"
         + "<if test=\"addAttachmentClassificationNameToSelectClauseForOrdering\">, ACNAME</if>"
         + "<if test=\"addAttachmentColumnsToSelectClauseForOrdering\">"
@@ -350,8 +419,17 @@ public class TaskQuerySqlProvider {
         + "<if test=\"joinWithUserInfo\">, ULONG_NAME </if>";
   }
 
+  private static String attachementColumnSelectFields() {
+    return Arrays.stream(TaskQueryColumnName.values())
+        .filter(TaskQueryColumnName::isAttachmentColumn)
+        .map(TaskQueryColumnName::toString)
+        .collect(Collectors.joining(", "));
+  }
+
   private static String checkForAuthorization() {
-    return "<if test='accessIdIn != null'> AND t.WORKBASKET_ID IN ("
+    return "<if test='accessIdIn != null'> AND "
+        + WORKBASKET_ID
+        + " IN ("
         + "SELECT WID "
         + "FROM ("
         + "<choose>"
@@ -409,7 +487,9 @@ public class TaskQuerySqlProvider {
     return "<if test=\"groupByPor\"> "
         + ") t LEFT JOIN"
         + " (SELECT POR_VALUE as PVALUE, COUNT(POR_VALUE) AS R_COUNT "
-        + "FROM (SELECT DISTINCT t.id , POR_VALUE "
+        + "FROM (SELECT DISTINCT "
+        + ID
+        + " , POR_VALUE "
         + "FROM TASK t"
         + "<if test=\"joinWithAttachments\">"
         + "LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID "
@@ -443,7 +523,11 @@ public class TaskQuerySqlProvider {
   private static String closeOuterClauseForGroupBySor() {
     return "<if test='groupBySor != null'> "
         + ") t LEFT JOIN"
-        + " (SELECT o.VALUE, COUNT(o.VALUE) AS R_COUNT "
+        + " (SELECT "
+        + O_VALUE
+        + ", COUNT("
+        + O_VALUE
+        + ") AS R_COUNT "
         + "FROM TASK t "
         + "LEFT JOIN OBJECT_REFERENCE o on t.ID=o.TASK_ID "
         + "<if test=\"joinWithAttachments\">"
@@ -477,19 +561,23 @@ public class TaskQuerySqlProvider {
         + "<if test='item.company != null'>t.POR_COMPANY = #{item.company} </if>"
         + "<if test='item.system != null'> "
         + "<if test='item.company != null'>AND</if> "
-        + "t.POR_SYSTEM = #{item.system} </if>"
+        + POR_SYSTEM
+        + " = #{item.system} </if>"
         + "<if test='item.systemInstance != null'> "
         + "<if test='item.company != null or item.system != null'>AND</if> "
-        + "t.POR_INSTANCE = #{item.systemInstance} </if>"
+        + POR_INSTANCE
+        + " = #{item.systemInstance} </if>"
         + "<if test='item.type != null'> "
         + "<if test='item.company != null or item.system != null or item.systemInstance != null'>"
         + "AND</if> "
-        + "t.POR_TYPE = #{item.type} </if>"
+        + POR_TYPE
+        + " = #{item.type} </if>"
         + "<if test='item.value != null'> "
         + "<if test='item.company != null or item.system != null "
         + "or item.systemInstance != null or item.type != null'>"
         + "AND</if> "
-        + "t.POR_VALUE = #{item.value} "
+        + POR_VALUE
+        + " = #{item.value} "
         + "</if>"
         + "</foreach>)"
         + "</if>";
@@ -498,22 +586,28 @@ public class TaskQuerySqlProvider {
   private static String commonTaskSecondaryObjectReferencesWhereStatement() {
     return "<if test='secondaryObjectReferences != null'>"
         + "AND (<foreach item='item' collection='secondaryObjectReferences' separator=' OR '> "
-        + "<if test='item.company != null'>o.COMPANY = #{item.company} </if>"
+        + "<if test='item.company != null'>"
+        + O_COMPANY
+        + " = #{item.company} </if>"
         + "<if test='item.system != null'> "
         + "<if test='item.company != null'>AND</if> "
-        + "o.SYSTEM = #{item.system} </if>"
+        + O_SYSTEM
+        + " = #{item.system} </if>"
         + "<if test='item.systemInstance != null'> "
         + "<if test='item.company != null or item.system != null'>AND</if> "
-        + "o.SYSTEM_INSTANCE = #{item.systemInstance} </if>"
+        + O_SYSTEM_INSTANCE
+        + " = #{item.systemInstance} </if>"
         + "<if test='item.type != null'> "
         + "<if test='item.company != null or item.system != null or item.systemInstance != null'>"
         + "AND</if> "
-        + "o.TYPE = #{item.type} </if>"
+        + O_TYPE
+        + " = #{item.type} </if>"
         + "<if test='item.value != null'> "
         + "<if test='item.company != null or item.system != null "
         + "or item.systemInstance != null or item.type != null'>"
         + "AND</if> "
-        + "o.VALUE = #{item.value} "
+        + O_VALUE
+        + " = #{item.value} "
         + "</if>"
         + "</foreach>)"
         + "</if>";
@@ -528,80 +622,80 @@ public class TaskQuerySqlProvider {
 
   private static StringBuilder commonTaskWhereStatement() {
     StringBuilder sb = new StringBuilder();
-    commonWhereClauses("attachmentChannel", TaskQueryColumnName.A_CHANNEL.toString(), sb);
-    commonWhereClauses("attachmentClassificationKey", "a.CLASSIFICATION_KEY", sb);
-    commonWhereClauses("attachmentClassificationName", "ac.NAME", sb);
-    commonWhereClauses("attachmentReference", "a.REF_VALUE", sb);
-    commonWhereClauses("businessProcessId", "t.BUSINESS_PROCESS_ID", sb);
-    commonWhereClauses("classificationCategory", "CLASSIFICATION_CATEGORY", sb);
-    commonWhereClauses("classificationKey", "t.CLASSIFICATION_KEY", sb);
+    commonWhereClauses("attachmentChannel", A_CHANNEL.toString(), sb);
+    commonWhereClauses("attachmentClassificationKey", A_CLASSIFICATION_KEY.toString(), sb);
+    commonWhereClauses("attachmentClassificationName", A_CLASSIFICATION_NAME.toString(), sb);
+    commonWhereClauses("attachmentReference", A_REF_VALUE.toString(), sb);
+    commonWhereClauses("businessProcessId", BUSINESS_PROCESS_ID.toString(), sb);
+    commonWhereClauses("classificationCategory", CLASSIFICATION_CATEGORY.toString(), sb);
+    commonWhereClauses("classificationKey", CLASSIFICATION_KEY.toString(), sb);
     commonWhereClauses("classificationParentKey", "c.PARENT_KEY", sb);
-    commonWhereClauses("classificationName", "c.NAME", sb);
-    commonWhereClauses("creator", "t.CREATOR", sb);
-    commonWhereClauses("name", "t.NAME", sb);
-    commonWhereClauses("owner", "t.OWNER", sb);
-    commonWhereClauses("parentBusinessProcessId", "t.PARENT_BUSINESS_PROCESS_ID", sb);
-    commonWhereClauses("porCompany", "t.POR_COMPANY", sb);
-    commonWhereClauses("porSystem", "t.POR_SYSTEM", sb);
-    commonWhereClauses("porSystemInstance", "t.POR_INSTANCE", sb);
-    commonWhereClauses("porType", "t.POR_TYPE", sb);
-    commonWhereClauses("porValue", "t.POR_VALUE", sb);
+    commonWhereClauses("classificationName", CLASSIFICATION_NAME.toString(), sb);
+    commonWhereClauses("creator", CREATOR.toString(), sb);
+    commonWhereClauses("name", NAME.toString(), sb);
+    commonWhereClauses("owner", OWNER.toString(), sb);
+    commonWhereClauses("parentBusinessProcessId", PARENT_BUSINESS_PROCESS_ID.toString(), sb);
+    commonWhereClauses("porCompany", POR_COMPANY.toString(), sb);
+    commonWhereClauses("porSystem", POR_SYSTEM.toString(), sb);
+    commonWhereClauses("porSystemInstance", POR_INSTANCE.toString(), sb);
+    commonWhereClauses("porType", POR_TYPE.toString(), sb);
+    commonWhereClauses("porValue", POR_VALUE.toString(), sb);
 
-    whereIn("sorCompanyIn", "o.COMPANY", sb);
-    whereLike("sorCompanyLike", "o.COMPANY", sb);
-    whereIn("sorSystemIn", "o.SYSTEM", sb);
-    whereLike("sorSystemLike", "o.SYSTEM", sb);
-    whereIn("sorSystemInstanceIn", "o.SYSTEM_INSTANCE", sb);
-    whereLike("sorSystemInstanceLike", "o.SYSTEM_INSTANCE", sb);
-    whereIn("sorTypeIn", "o.TYPE", sb);
-    whereLike("sorTypeLike", "o.TYPE", sb);
-    whereIn("sorValueIn", "o.VALUE", sb);
-    whereLike("sorValueLike", "o.VALUE", sb);
+    whereIn("sorCompanyIn", O_COMPANY.toString(), sb);
+    whereLike("sorCompanyLike", O_COMPANY.toString(), sb);
+    whereIn("sorSystemIn", O_SYSTEM.toString(), sb);
+    whereLike("sorSystemLike", O_SYSTEM.toString(), sb);
+    whereIn("sorSystemInstanceIn", O_SYSTEM_INSTANCE.toString(), sb);
+    whereLike("sorSystemInstanceLike", O_SYSTEM_INSTANCE.toString(), sb);
+    whereIn("sorTypeIn", O_TYPE.toString(), sb);
+    whereLike("sorTypeLike", O_TYPE.toString(), sb);
+    whereIn("sorValueIn", O_VALUE.toString(), sb);
+    whereLike("sorValueLike", O_VALUE.toString(), sb);
 
-    whereIn("attachmentClassificationIdIn", "a.CLASSIFICATION_ID", sb);
-    whereNotIn("attachmentClassificationIdNotIn", "a.CLASSIFICATION_ID", sb);
+    whereIn("attachmentClassificationIdIn", A_CLASSIFICATION_ID.toString(), sb);
+    whereNotIn("attachmentClassificationIdNotIn", A_CLASSIFICATION_ID.toString(), sb);
     whereIn("callbackStateIn", "t.CALLBACK_STATE", sb);
     whereNotIn("callbackStateNotIn", "t.CALLBACK_STATE", sb);
-    whereIn("classificationIdIn", "t.CLASSIFICATION_ID", sb);
-    whereNotIn("classificationIdNotIn", "t.CLASSIFICATION_ID", sb);
-    whereIn("externalIdIn", "t.EXTERNAL_ID", sb);
-    whereNotIn("externalIdNotIn", "t.EXTERNAL_ID", sb);
-    whereIn("priority", "t.PRIORITY", sb);
-    whereNotIn("priorityNotIn", "t.PRIORITY", sb);
-    whereIn("ownerLongNameIn", "u.LONG_NAME", sb);
-    whereNotIn("ownerLongNameNotIn", "u.LONG_NAME", sb);
-    whereIn("stateIn", "t.STATE", sb);
-    whereNotIn("stateNotIn", "t.STATE", sb);
-    whereIn("taskId", "t.ID", sb);
-    whereNotIn("taskIdNotIn", "t.ID", sb);
-    whereIn("workbasketIdIn", "t.WORKBASKET_ID", sb);
-    whereNotIn("workbasketIdNotIn", "t.WORKBASKET_ID", sb);
-    whereLike("descriptionLike", "t.DESCRIPTION", sb);
-    whereNotLike("descriptionNotLike", "t.DESCRIPTION", sb);
-    whereLike("noteLike", "t.NOTE", sb);
-    whereNotLike("noteNotLike", "t.NOTE", sb);
+    whereIn("classificationIdIn", CLASSIFICATION_ID.toString(), sb);
+    whereNotIn("classificationIdNotIn", CLASSIFICATION_ID.toString(), sb);
+    whereIn("externalIdIn", EXTERNAL_ID.toString(), sb);
+    whereNotIn("externalIdNotIn", EXTERNAL_ID.toString(), sb);
+    whereIn("priority", PRIORITY.toString(), sb);
+    whereNotIn("priorityNotIn", PRIORITY.toString(), sb);
+    whereIn("ownerLongNameIn", OWNER_LONG_NAME.toString(), sb);
+    whereNotIn("ownerLongNameNotIn", OWNER_LONG_NAME.toString(), sb);
+    whereIn("stateIn", STATE.toString(), sb);
+    whereNotIn("stateNotIn", STATE.toString(), sb);
+    whereIn("taskId", ID.toString(), sb);
+    whereNotIn("taskIdNotIn", ID.toString(), sb);
+    whereIn("workbasketIdIn", WORKBASKET_ID.toString(), sb);
+    whereNotIn("workbasketIdNotIn", WORKBASKET_ID.toString(), sb);
+    whereLike("descriptionLike", DESCRIPTION.toString(), sb);
+    whereNotLike("descriptionNotLike", DESCRIPTION.toString(), sb);
+    whereLike("noteLike", NOTE.toString(), sb);
+    whereNotLike("noteNotLike", NOTE.toString(), sb);
 
     whereInInterval("attachmentReceivedWithin", "a.RECEIVED", sb);
     whereNotInInterval("attachmentReceivedNotWithin", "a.RECEIVED", sb);
-    whereInInterval("claimedWithin", "t.CLAIMED", sb);
-    whereNotInInterval("claimedNotWithin", "t.CLAIMED", sb);
-    whereInInterval("completedWithin", "t.COMPLETED", sb);
-    whereNotInInterval("completedNotWithin", "t.COMPLETED", sb);
-    whereInInterval("createdWithin", "t.CREATED", sb);
-    whereNotInInterval("createdNotWithin", "t.CREATED", sb);
-    whereInInterval("dueWithin", "t.DUE", sb);
-    whereNotInInterval("dueNotWithin", "t.DUE", sb);
-    whereInInterval("modifiedWithin", "t.MODIFIED", sb);
-    whereNotInInterval("modifiedNotWithin", "t.MODIFIED", sb);
-    whereInInterval("plannedWithin", "t.PLANNED", sb);
-    whereNotInInterval("plannedNotWithin", "t.PLANNED", sb);
-    whereInInterval("receivedWithin", "t.RECEIVED", sb);
-    whereNotInInterval("receivedNotWithin", "t.RECEIVED", sb);
-    whereInInterval("priorityWithin", "t.PRIORITY", sb);
-    whereNotInInterval("priorityNotWithin", "t.PRIORITY", sb);
+    whereInInterval("claimedWithin", CLAIMED.toString(), sb);
+    whereNotInInterval("claimedNotWithin", CLAIMED.toString(), sb);
+    whereInInterval("completedWithin", COMPLETED.toString(), sb);
+    whereNotInInterval("completedNotWithin", COMPLETED.toString(), sb);
+    whereInInterval("createdWithin", CREATED.toString(), sb);
+    whereNotInInterval("createdNotWithin", CREATED.toString(), sb);
+    whereInInterval("dueWithin", DUE.toString(), sb);
+    whereNotInInterval("dueNotWithin", DUE.toString(), sb);
+    whereInInterval("modifiedWithin", MODIFIED.toString(), sb);
+    whereNotInInterval("modifiedNotWithin", MODIFIED.toString(), sb);
+    whereInInterval("plannedWithin", PLANNED.toString(), sb);
+    whereNotInInterval("plannedNotWithin", PLANNED.toString(), sb);
+    whereInInterval("receivedWithin", RECEIVED.toString(), sb);
+    whereNotInInterval("receivedNotWithin", RECEIVED.toString(), sb);
+    whereInInterval("priorityWithin", PRIORITY.toString(), sb);
+    whereNotInInterval("priorityNotWithin", PRIORITY.toString(), sb);
 
-    whereLike("ownerLongNameLike", "u.LONG_NAME", sb);
-    whereNotLike("ownerLongNameNotLike", "u.LONG_NAME", sb);
+    whereLike("ownerLongNameLike", OWNER_LONG_NAME.toString(), sb);
+    whereNotLike("ownerLongNameNotLike", OWNER_LONG_NAME.toString(), sb);
     whereCustomStatements("custom", "t.CUSTOM", 16, sb);
     whereCustomIntStatements("customInt", "t.CUSTOM_INT", 8, sb);
 
@@ -616,11 +710,17 @@ public class TaskQuerySqlProvider {
     sb.append("<if test='isReopened != null'>AND IS_REOPENED = #{isReopened}</if> ");
     sb.append(
         "<if test='workbasketKeyDomainIn != null'>AND (<foreach item='item'"
-            + " collection='workbasketKeyDomainIn' separator=' OR '>(t.WORKBASKET_KEY = #{item.key}"
-            + " AND t.DOMAIN = #{item.domain})</foreach>)</if> ");
+            + " collection='workbasketKeyDomainIn' separator=' OR '>("
+            + WORKBASKET_KEY
+            + "= #{item.key}"
+            + " AND "
+            + DOMAIN
+            + " = #{item.domain})</foreach>)</if> ");
     sb.append(
         "<if test='workbasketKeyDomainNotIn != null'>AND (<foreach item='item'"
-            + " collection='workbasketKeyDomainNotIn' separator=' OR '>(t.WORKBASKET_KEY !="
+            + " collection='workbasketKeyDomainNotIn' separator=' OR '>("
+            + WORKBASKET_KEY
+            + " !="
             + " #{item.key} OR t.DOMAIN != #{item.domain})</foreach>)</if> ");
     sb.append(
         "<if test='wildcardSearchValueLike != null and wildcardSearchFieldIn != null'>AND ("
