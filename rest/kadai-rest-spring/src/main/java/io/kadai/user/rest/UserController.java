@@ -75,7 +75,6 @@ public class UserController implements UserApi {
   }
 
   @GetMapping(RestEndpoints.URL_USERS_ID)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<UserRepresentationModel> getUser(@PathVariable("userId") String userId)
       throws UserNotFoundException, InvalidArgumentException {
     User user = userService.getUser(userId);
@@ -83,7 +82,6 @@ public class UserController implements UserApi {
   }
 
   @GetMapping(RestEndpoints.URL_USERS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<UserSummaryPagedRepresentationModel> getUsers(
       HttpServletRequest request,
       @ParameterObject UserQueryFilterParameter filterParameter,
@@ -141,7 +139,7 @@ public class UserController implements UserApi {
   }
 
   @DeleteMapping(RestEndpoints.URL_USERS_ID)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
+  @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<UserRepresentationModel> deleteUser(@PathVariable("userId") String userId)
       throws UserNotFoundException, NotAuthorizedException, InvalidArgumentException {
     userService.deleteUser(userId);

@@ -37,7 +37,6 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -61,7 +60,6 @@ public class TaskHistoryEventController implements TaskHistoryEventApi {
   }
 
   @GetMapping(path = HistoryRestEndpoints.URL_HISTORY_EVENTS, produces = MediaTypes.HAL_JSON_VALUE)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<TaskHistoryEventPagedRepresentationModel> getTaskHistoryEvents(
       HttpServletRequest request,
       @ParameterObject TaskHistoryQueryFilterParameter filterParameter,
@@ -87,7 +85,6 @@ public class TaskHistoryEventController implements TaskHistoryEventApi {
   }
 
   @GetMapping(path = HistoryRestEndpoints.URL_HISTORY_EVENTS_ID)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<TaskHistoryEventRepresentationModel> getTaskHistoryEvent(
       @PathVariable("historyEventId") String historyEventId)
       throws KadaiHistoryEventNotFoundException {

@@ -94,7 +94,6 @@ public class WorkbasketController implements WorkbasketApi {
   }
 
   @GetMapping(path = RestEndpoints.URL_WORKBASKET)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<WorkbasketSummaryPagedRepresentationModel> getWorkbaskets(
       HttpServletRequest request,
       @ParameterObject WorkbasketQueryFilterParameter filterParameter,
@@ -120,7 +119,6 @@ public class WorkbasketController implements WorkbasketApi {
   }
 
   @GetMapping(path = RestEndpoints.URL_WORKBASKET_ID, produces = MediaTypes.HAL_JSON_VALUE)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<WorkbasketRepresentationModel> getWorkbasket(
       @PathVariable("workbasketId") String workbasketId)
       throws WorkbasketNotFoundException, NotAuthorizedOnWorkbasketException {
@@ -199,7 +197,6 @@ public class WorkbasketController implements WorkbasketApi {
   @GetMapping(
       path = RestEndpoints.URL_WORKBASKET_ID_ACCESS_ITEMS,
       produces = MediaTypes.HAL_JSON_VALUE)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<WorkbasketAccessItemCollectionRepresentationModel> getWorkbasketAccessItems(
       @PathVariable("workbasketId") String workbasketId)
       throws WorkbasketNotFoundException,
@@ -243,7 +240,6 @@ public class WorkbasketController implements WorkbasketApi {
   @GetMapping(
       path = RestEndpoints.URL_WORKBASKET_ID_DISTRIBUTION,
       produces = MediaTypes.HAL_JSON_VALUE)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<DistributionTargetsCollectionRepresentationModel> getDistributionTargets(
       @PathVariable("workbasketId") String workbasketId)
       throws WorkbasketNotFoundException, NotAuthorizedOnWorkbasketException {

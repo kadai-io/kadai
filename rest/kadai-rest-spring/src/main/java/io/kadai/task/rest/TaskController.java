@@ -137,7 +137,6 @@ public class TaskController implements TaskApi {
   // region READ
 
   @GetMapping(path = RestEndpoints.URL_TASKS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<TaskSummaryPagedRepresentationModel> getTasks(
       HttpServletRequest request,
       @ParameterObject TaskQueryFilterParameter filterParameter,
@@ -172,7 +171,6 @@ public class TaskController implements TaskApi {
   }
 
   @GetMapping(path = RestEndpoints.URL_TASKS_ID)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<TaskRepresentationModel> getTask(@PathVariable("taskId") String taskId)
       throws TaskNotFoundException, NotAuthorizedOnWorkbasketException {
     Task task = taskService.getTask(taskId);
@@ -544,7 +542,7 @@ public class TaskController implements TaskApi {
   }
 
   @DeleteMapping(path = RestEndpoints.URL_TASKS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
+  @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<TaskSummaryCollectionRepresentationModel> deleteTasks(
       @ParameterObject TaskQueryFilterParameter filterParameter,
       @ParameterObject TaskQueryFilterCustomFields filterCustomFields,

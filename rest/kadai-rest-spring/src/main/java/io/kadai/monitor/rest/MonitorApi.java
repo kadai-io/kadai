@@ -19,7 +19,6 @@ import java.util.List;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -76,14 +75,12 @@ public interface MonitorApi {
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
       })
   @GetMapping(path = RestEndpoints.URL_MONITOR_WORKBASKET_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<ReportRepresentationModel> computeWorkbasketReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
       throws NotAuthorizedException, InvalidArgumentException;
 
   @GetMapping(path = RestEndpoints.URL_MONITOR_WORKBASKET_PRIORITY_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<ReportRepresentationModel> computePriorityWorkbasketReport(
       @ParameterObject PriorityReportFilterParameter filterParameter,
       @RequestParam(name = "workbasket-type", required = false) WorkbasketType[] workbasketTypes,
@@ -135,7 +132,6 @@ public interface MonitorApi {
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
       })
   @GetMapping(path = RestEndpoints.URL_MONITOR_CLASSIFICATION_CATEGORY_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<ReportRepresentationModel> computeClassificationCategoryReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
@@ -185,7 +181,6 @@ public interface MonitorApi {
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
       })
   @GetMapping(path = RestEndpoints.URL_MONITOR_CLASSIFICATION_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<ReportRepresentationModel> computeClassificationReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
@@ -237,7 +232,6 @@ public interface MonitorApi {
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
       })
   @GetMapping(path = RestEndpoints.URL_MONITOR_DETAILED_CLASSIFICATION_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<ReportRepresentationModel> computeDetailedClassificationReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
@@ -294,7 +288,6 @@ public interface MonitorApi {
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
       })
   @GetMapping(path = RestEndpoints.URL_MONITOR_TASK_CUSTOM_FIELD_VALUE_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<ReportRepresentationModel> computeTaskCustomFieldValueReport(
       @RequestParam(name = "custom-field") TaskCustomField customField,
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
@@ -353,7 +346,6 @@ public interface MonitorApi {
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
       })
   @GetMapping(path = RestEndpoints.URL_MONITOR_TASK_STATUS_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<ReportRepresentationModel> computeTaskStatusReport(
       @RequestParam(name = "domain", required = false) List<String> domains,
       @RequestParam(name = "state", required = false) List<TaskState> states,
@@ -407,7 +399,6 @@ public interface MonitorApi {
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
       })
   @GetMapping(path = RestEndpoints.URL_MONITOR_TIMESTAMP_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<ReportRepresentationModel> computeTimestampReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp[] timestamps)

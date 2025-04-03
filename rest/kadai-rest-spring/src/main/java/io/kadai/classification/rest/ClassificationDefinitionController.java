@@ -78,7 +78,6 @@ public class ClassificationDefinitionController implements ClassificationDefinit
   }
 
   @GetMapping(path = RestEndpoints.URL_CLASSIFICATION_DEFINITIONS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<ClassificationDefinitionCollectionRepresentationModel>
       exportClassifications(@RequestParam(value = "domain", required = false) String[] domain) {
     ClassificationQuery query = classificationService.createClassificationQuery();

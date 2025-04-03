@@ -60,13 +60,11 @@ public class KadaiEngineController implements KadaiEngineApi {
   }
 
   @GetMapping(path = RestEndpoints.URL_DOMAIN)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<List<String>> getDomains() {
     return ResponseEntity.ok(kadaiConfiguration.getDomains());
   }
 
   @GetMapping(path = RestEndpoints.URL_CLASSIFICATION_CATEGORIES)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<List<String>> getClassificationCategories(
       @RequestParam(value = "type", required = false) String type) {
     if (type != null) {
@@ -76,19 +74,16 @@ public class KadaiEngineController implements KadaiEngineApi {
   }
 
   @GetMapping(path = RestEndpoints.URL_CLASSIFICATION_TYPES)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<List<String>> getClassificationTypes() {
     return ResponseEntity.ok(kadaiConfiguration.getClassificationTypes());
   }
 
   @GetMapping(path = RestEndpoints.URL_CLASSIFICATION_CATEGORIES_BY_TYPES)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<Map<String, List<String>>> getClassificationCategoriesByTypeMap() {
     return ResponseEntity.ok(kadaiConfiguration.getClassificationCategoriesByType());
   }
 
   @GetMapping(path = RestEndpoints.URL_CURRENT_USER)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<KadaiUserInfoRepresentationModel> getCurrentUserInfo() {
     KadaiUserInfoRepresentationModel resource = new KadaiUserInfoRepresentationModel();
     resource.setUserId(currentUserContext.getUserid());
@@ -100,13 +95,11 @@ public class KadaiEngineController implements KadaiEngineApi {
   }
 
   @GetMapping(path = RestEndpoints.URL_HISTORY_ENABLED)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<Boolean> getIsHistoryProviderEnabled() {
     return ResponseEntity.ok(kadaiEngine.isHistoryEnabled());
   }
 
   @GetMapping(path = RestEndpoints.URL_CUSTOM_ATTRIBUTES)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<CustomAttributesRepresentationModel> getCustomAttributes() {
     Map<String, Object> allCustomAttributes = configurationService.getAllCustomAttributes();
     return ResponseEntity.ok(new CustomAttributesRepresentationModel(allCustomAttributes));
@@ -121,7 +114,6 @@ public class KadaiEngineController implements KadaiEngineApi {
   }
 
   @GetMapping(path = RestEndpoints.URL_VERSION)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<VersionRepresentationModel> currentVersion() {
     VersionRepresentationModel resource = new VersionRepresentationModel();
     resource.setVersion(KadaiConfiguration.class.getPackage().getImplementationVersion());

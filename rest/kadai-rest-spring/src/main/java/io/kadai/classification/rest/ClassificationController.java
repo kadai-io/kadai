@@ -76,7 +76,6 @@ public class ClassificationController implements ClassificationApi {
   }
 
   @GetMapping(path = RestEndpoints.URL_CLASSIFICATIONS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<ClassificationSummaryPagedRepresentationModel> getClassifications(
       HttpServletRequest request,
       @ParameterObject final ClassificationQueryFilterParameter filterParameter,
@@ -101,7 +100,6 @@ public class ClassificationController implements ClassificationApi {
   }
 
   @GetMapping(path = RestEndpoints.URL_CLASSIFICATIONS_ID, produces = MediaTypes.HAL_JSON_VALUE)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<ClassificationRepresentationModel> getClassification(
       @PathVariable("classificationId") String classificationId)
       throws ClassificationNotFoundException {
