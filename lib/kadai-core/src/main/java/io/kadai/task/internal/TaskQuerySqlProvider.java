@@ -410,6 +410,7 @@ public class TaskQuerySqlProvider {
             .filter(column -> column.startsWith("t"))
             .map(t -> t.replace("t.", ""))
             .collect(Collectors.joining(", "))
+            .replace("classification_key", "TCLASSIFICATION_KEY")
         + "<if test=\"addClassificationNameToSelectClauseForOrdering\">, CNAME</if>"
         + "<if test=\"addAttachmentClassificationNameToSelectClauseForOrdering\">, ACNAME</if>"
         + "<if test=\"addAttachmentColumnsToSelectClauseForOrdering\">"
