@@ -25,6 +25,8 @@ import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_SCRIPT_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_WHERE_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.whereIn;
 
+
+
 public class ObjectReferenceQuerySqlProvider {
 
   private ObjectReferenceQuerySqlProvider() {}

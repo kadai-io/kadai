@@ -21,12 +21,36 @@ package io.kadai.user.internal;
 import static io.kadai.common.internal.util.SqlProviderUtil.CLOSING_SCRIPT_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_SCRIPT_TAG;
+import static io.kadai.user.api.UserQueryColumnName.DATA;
+import static io.kadai.user.api.UserQueryColumnName.E_MAIL;
+import static io.kadai.user.api.UserQueryColumnName.FIRST_NAME;
+import static io.kadai.user.api.UserQueryColumnName.FULL_NAME;
+import static io.kadai.user.api.UserQueryColumnName.LASTNAME;
+import static io.kadai.user.api.UserQueryColumnName.LONG_NAME;
+import static io.kadai.user.api.UserQueryColumnName.MOBILE_PHONE;
+import static io.kadai.user.api.UserQueryColumnName.ORG_LEVEL_1;
+import static io.kadai.user.api.UserQueryColumnName.ORG_LEVEL_2;
+import static io.kadai.user.api.UserQueryColumnName.ORG_LEVEL_3;
+import static io.kadai.user.api.UserQueryColumnName.ORG_LEVEL_4;
+import static io.kadai.user.api.UserQueryColumnName.PHONE;
+import static io.kadai.user.api.UserQueryColumnName.USER_ID;
+
+import io.kadai.user.api.UserQueryColumnName;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.stream.Collectors;
 
 public class UserMapperSqlProvider {
 
   private static final String USER_INFO_COLUMNS =
-      "USER_ID, FIRST_NAME, LASTNAME, FULL_NAME, LONG_NAME, E_MAIL, PHONE, MOBILE_PHONE, "
-          + "ORG_LEVEL_4, ORG_LEVEL_3, ORG_LEVEL_2, ORG_LEVEL_1, DATA ";
+      Arrays.stream(UserQueryColumnName.values())
+              .filter(
+                  column ->
+                      !EnumSet.of(UserQueryColumnName.GROUPS, UserQueryColumnName.PERMISSIONS)
+                          .contains(column))
+              .map(UserQueryColumnName::toString)
+              .collect(Collectors.joining(", "))
+          + " ";
   private static final String USER_INFO_VALUES =
       "#{id}, #{firstName}, #{lastName}, #{fullName}, #{longName}, #{email}, #{phone}, "
           + "#{mobilePhone}, #{orgLevel4}, #{orgLevel3}, #{orgLevel2}, #{orgLevel1}, #{data} ";
@@ -38,7 +62,9 @@ public class UserMapperSqlProvider {
         + "SELECT "
         + USER_INFO_COLUMNS
         + "FROM USER_INFO "
-        + "WHERE USER_ID = #{id} "
+        + "WHERE "
+        + USER_ID
+        + " = #{id} "
         + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
@@ -48,21 +74,27 @@ public class UserMapperSqlProvider {
         + "SELECT "
         + USER_INFO_COLUMNS
         + "FROM USER_INFO "
-        + "WHERE USER_ID IN (<foreach item='id' collection='ids' separator=',' >#{id}</foreach>) "
+        + "WHERE "
+        + USER_ID
+        + " IN (<foreach item='id' collection='ids' separator=',' >#{id}</foreach>) "
         + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
 
   public static String findGroupsById() {
     return OPENING_SCRIPT_TAG
-        + "SELECT GROUP_ID FROM GROUP_INFO WHERE USER_ID = #{id} "
+        + "SELECT GROUP_ID FROM GROUP_INFO WHERE "
+        + USER_ID
+        + " = #{id} "
         + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
 
   public static String findPermissionsById() {
     return OPENING_SCRIPT_TAG
-        + "SELECT PERMISSION_ID FROM PERMISSION_INFO WHERE USER_ID = #{id} "
+        + "SELECT PERMISSION_ID FROM PERMISSION_INFO WHERE "
+        + USER_ID
+        + " = #{id} "
         + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
@@ -73,7 +105,9 @@ public class UserMapperSqlProvider {
 
   public static String insertGroups() {
     return OPENING_SCRIPT_TAG
-        + "INSERT INTO GROUP_INFO (USER_ID, GROUP_ID) VALUES "
+        + "INSERT INTO GROUP_INFO ("
+        + USER_ID
+        + ", GROUP_ID) VALUES "
         + "<foreach item='group' collection='groups' open='(' separator='),(' close=')'>"
         + "#{id}, #{group}"
         + "</foreach> "
@@ -82,7 +116,9 @@ public class UserMapperSqlProvider {
 
   public static String insertPermissions() {
     return OPENING_SCRIPT_TAG
-        + "INSERT INTO PERMISSION_INFO (USER_ID, PERMISSION_ID) VALUES "
+        + "INSERT INTO PERMISSION_INFO ("
+        + USER_ID
+        + ", PERMISSION_ID) VALUES "
         + "<foreach item='permission' collection='permissions' "
         + "open='(' separator='),(' close=')'>"
         + "#{id}, #{permission}"
@@ -92,23 +128,45 @@ public class UserMapperSqlProvider {
 
   public static String update() {
     return "UPDATE USER_INFO "
-        + "SET FIRST_NAME = #{firstName}, "
-        + "LASTNAME = #{lastName}, FULL_NAME = #{fullName}, LONG_NAME = #{longName}, "
-        + "E_MAIL = #{email}, PHONE = #{phone}, MOBILE_PHONE = #{mobilePhone}, "
-        + "ORG_LEVEL_4 = #{orgLevel4}, ORG_LEVEL_3 = #{orgLevel3}, "
-        + "ORG_LEVEL_2 = #{orgLevel2}, ORG_LEVEL_1 = #{orgLevel1}, DATA = #{data} "
-        + "WHERE USER_ID = #{id} ";
+        + "SET "
+        + FIRST_NAME
+        + " = #{firstName}, "
+        + LASTNAME
+        + " = #{lastName}, "
+        + FULL_NAME
+        + " = #{fullName}, "
+        + LONG_NAME
+        + " = #{longName}, "
+        + E_MAIL
+        + " = #{email}, "
+        + PHONE
+        + " = #{phone}, "
+        + MOBILE_PHONE
+        + " = #{mobilePhone}, "
+        + ORG_LEVEL_4
+        + " = #{orgLevel4}, "
+        + ORG_LEVEL_3
+        + " = #{orgLevel3}, "
+        + ORG_LEVEL_2
+        + " = #{orgLevel2}, "
+        + ORG_LEVEL_1
+        + " = #{orgLevel1}, "
+        + DATA
+        + " = #{data} "
+        + "WHERE "
+        + USER_ID
+        + " = #{id} ";
   }
 
   public static String delete() {
-    return "DELETE FROM USER_INFO WHERE USER_ID = #{id} ";
+    return "DELETE FROM USER_INFO WHERE " + USER_ID + " = #{id} ";
   }
 
   public static String deleteGroups() {
-    return "DELETE FROM GROUP_INFO WHERE USER_ID = #{id} ";
+    return "DELETE FROM GROUP_INFO WHERE " + USER_ID + " = #{id} ";
   }
 
   public static String deletePermissions() {
-    return "DELETE FROM PERMISSION_INFO WHERE USER_ID = #{id} ";
+    return "DELETE FROM PERMISSION_INFO WHERE " + USER_ID + " = #{id} ";
   }
 }
