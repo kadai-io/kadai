@@ -166,6 +166,7 @@ public class TaskQuerySqlProvider {
         + "<if test=\"addAttachmentColumnsToSelectClauseForOrdering\">"
         + ", "
         + attachementColumnSelectFields()
+        + ", a.RECEIVED"
         + "</if>"
         + "<if test=\"addClassificationNameToSelectClauseForOrdering\">, "
         + CLASSIFICATION_NAME
@@ -410,7 +411,7 @@ public class TaskQuerySqlProvider {
             .filter(column -> column.startsWith("t"))
             .map(t -> t.replace("t.", ""))
             .collect(Collectors.joining(", "))
-            .replace("classification_key", "TCLASSIFICATION_KEY")
+            .replace("classification_key", "tclassification_key")
         + "<if test=\"addClassificationNameToSelectClauseForOrdering\">, CNAME</if>"
         + "<if test=\"addAttachmentClassificationNameToSelectClauseForOrdering\">, ACNAME</if>"
         + "<if test=\"addAttachmentColumnsToSelectClauseForOrdering\">"
@@ -422,8 +423,8 @@ public class TaskQuerySqlProvider {
 
   private static String attachementColumnSelectFields() {
     return Arrays.stream(TaskQueryColumnName.values())
-        .filter(TaskQueryColumnName::isAttachmentColumn)
         .map(TaskQueryColumnName::toString)
+        .filter(column -> column.startsWith("a."))
         .collect(Collectors.joining(", "));
   }
 
