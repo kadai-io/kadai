@@ -20,12 +20,14 @@
 
   <!-- BUTTONS -->
   <div class="settings__buttons">
-    <button (click)="onSave()" class="settings__button--primary" mat-button matTooltip="Save settings">
+    <button (click)="onSave()" class="settings__button--primary" mat-button
+            matTooltip="Save settings">
       Save
       <mat-icon class="md-20">save</mat-icon>
     </button>
 
-    <button (click)="onReset()" class="settings__button--secondary" mat-stroked-button matTooltip="Revert changes">
+    <button (click)="onReset()" class="settings__button--secondary" mat-stroked-button
+            matTooltip="Revert changes">
       Undo changes
       <mat-icon class="settings__icon md-20">restore</mat-icon>
     </button>
@@ -33,14 +35,14 @@
 
   <div class="settings__content">
     <div *ngFor="let group of settings.schema">
-      <h4 class="settings__domain-name"> {{group.displayName}} </h4>
+      <h4 class="settings__domain-name"> {{ group.displayName }} </h4>
       <div *ngFor="let member of group.members">
 
         <!-- STRING -->
         <div *ngIf="member.type == settingTypes.Text" class="settings__grid">
-          <div class="settings__text"> {{member.displayName}}</div>
+          <div class="settings__text"> {{ member.displayName }}</div>
           <mat-form-field appearance="outline" class="settings__grid--two-columns">
-            <mat-label class="{{member.key}}">{{member.displayName}}</mat-label>
+            <mat-label class="{{member.key}}">{{ member.displayName }}</mat-label>
             <input [(ngModel)]="settings[member.key]" matInput maxlength="{{member.max}}"
                    minlength="{{member.min}}"
                    placeholder="{{member.displayName}}"
@@ -50,7 +52,7 @@
 
         <!-- INTERVAL -->
         <div *ngIf="member.type == settingTypes.Interval" class="settings__grid">
-          <div class="settings__text">{{member.displayName}}</div>
+          <div class="settings__text">{{ member.displayName }}</div>
 
           <mat-form-field appearance="outline">
             <mat-label class="{{member.key}}">Lower boundary</mat-label>
@@ -71,7 +73,7 @@
         <!-- COLOR -->
         <div *ngIf="member.type == settingTypes.Color"
              class="settings__grid settings__color">
-          <div class="settings__text">{{member.displayName}}</div>
+          <div class="settings__text">{{ member.displayName }}</div>
           <input (change)="onColorChange(member.key)" class="settings__colors--input"
                  id="{{member.key}}" matInput
                  type="color" value="{{settings[member.key]}}">
@@ -79,10 +81,10 @@
 
         <!-- JSON -->
         <div *ngIf="member.type == settingTypes.Json" class="settings__grid">
-          <div class="settings__text">{{member.displayName}}</div>
+          <div class="settings__text">{{ member.displayName }}</div>
           <mat-form-field appearance="outline" class="settings__grid--two-columns">
             <mat-label class="{{member.key}}">
-              {{member.displayName}}
+              {{ member.displayName }}
             </mat-label>
             <textarea [(ngModel)]="settings[member.key]" cdkAutosizeMaxRows="10"
                       cdkAutosizeMinRows="1"

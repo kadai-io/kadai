@@ -28,6 +28,7 @@ import { Observable } from 'rxjs';
 })
 export class TaskDetailsComponent implements OnInit {
   @Select(TaskSelector.selectedTask) selectedTask$: Observable<Task | null>;
+
   constructor() {}
 
   ngOnInit(): void {}

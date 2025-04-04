@@ -16,7 +16,7 @@
  *
  */
 
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { WorkbasketDefinition } from 'app/shared/models/workbasket-definition';
 import { KadaiDate } from 'app/shared/util/kadai.date';
@@ -25,12 +25,12 @@ import { take } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { StartupService } from '../../shared/services/startup/startup.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class WorkbasketDefinitionService {
-  constructor(
-    private httpClient: HttpClient,
-    private startupService: StartupService
-  ) {}
+  private httpClient = inject(HttpClient);
+  private startupService = inject(StartupService);
 
   get url(): string {
     return this.startupService.getKadaiRestUrl() + '/v1/workbasket-definitions';

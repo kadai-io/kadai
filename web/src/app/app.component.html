@@ -32,15 +32,14 @@
         </button>
       </div>
     </div>
-    <kadai-shared-user-information
-      class="sidenav__drawer-user-info"></kadai-shared-user-information>
-    <kadai-sidenav-list></kadai-sidenav-list>
+    <kadai-shared-user-information class="sidenav__drawer-user-info"/>
+    <kadai-sidenav-list/>
     <div class="sidenav__drawer-version">
-      <p> KADAI version: {{version}} </p>
+      <p> KADAI version: {{ version }} </p>
     </div>
   </mat-sidenav>
   <mat-sidenav-content>
-    <kadai-shared-nav-bar></kadai-shared-nav-bar>
+    <kadai-shared-nav-bar/>
     <div (window:resize)="onResize()">
       <div class="kadai-main">
         <div class="kadai-main__progress-bar">

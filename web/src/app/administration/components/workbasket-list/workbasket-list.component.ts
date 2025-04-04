@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 
 import { WorkbasketSummaryRepresentation } from 'app/shared/models/workbasket-summary-representation';
@@ -35,18 +35,33 @@ import {
 } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
 import { Workbasket } from '../../../shared/models/workbasket';
-import { MatSelectionList } from '@angular/material/list';
+import { MatListOption, MatSelectionList } from '@angular/material/list';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { WorkbasketQueryFilterParameter } from '../../../shared/models/workbasket-query-filter-parameter';
 import { QueryPagingParameter } from '../../../shared/models/query-paging-parameter';
 import { FilterSelectors } from '../../../shared/store/filter-store/filter.selectors';
+import { WorkbasketListToolbarComponent } from '../workbasket-list-toolbar/workbasket-list-toolbar.component';
+import { AsyncPipe, NgFor, NgIf } from '@angular/common';
+import { IconTypeComponent } from '../type-icon/icon-type.component';
+import { MatDivider } from '@angular/material/divider';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 
 @Component({
   selector: 'kadai-administration-workbasket-list',
   templateUrl: './workbasket-list.component.html',
   styleUrls: ['./workbasket-list.component.scss'],
-  standalone: false
+  imports: [
+    WorkbasketListToolbarComponent,
+    NgIf,
+    MatSelectionList,
+    NgFor,
+    MatListOption,
+    IconTypeComponent,
+    MatDivider,
+    PaginationComponent,
+    AsyncPipe
+  ]
 })
 export class WorkbasketListComponent implements OnInit, OnDestroy {
   selectedId = '';
@@ -63,9 +78,7 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   };
   requestInProgress: boolean;
   requestInProgressLocal = false;
-
   resetPagingSubject = new Subject<null>();
-
   @Input() expanded: boolean;
   @Select(WorkbasketSelectors.workbasketsSummary)
   workbasketsSummary$: Observable<WorkbasketSummary[]>;
@@ -77,18 +90,17 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   getWorkbasketListFilter$: Observable<WorkbasketQueryFilterParameter>;
   destroy$ = new Subject<void>();
   @ViewChild('workbasket') workbasketList: MatSelectionList;
+  private store = inject(Store);
+  private workbasketService = inject(WorkbasketService);
+  private orientationService = inject(OrientationService);
+  private importExportService = inject(ImportExportService);
+  private domainService = inject(DomainService);
+  private requestInProgressService = inject(RequestInProgressService);
+  private ngxsActions$ = inject(Actions);
   @ViewChild('wbToolbar', { static: true })
   private toolbarElement: ElementRef;
 
-  constructor(
-    private store: Store,
-    private workbasketService: WorkbasketService,
-    private orientationService: OrientationService,
-    private importExportService: ImportExportService,
-    private domainService: DomainService,
-    private requestInProgressService: RequestInProgressService,
-    private ngxsActions$: Actions
-  ) {
+  constructor() {
     this.ngxsActions$.pipe(ofActionDispatched(GetWorkbasketsSummary), takeUntil(this.destroy$)).subscribe(() => {
       this.requestInProgressService.setRequestInProgress(true);
       this.requestInProgressLocal = true;

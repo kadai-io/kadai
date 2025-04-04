@@ -16,37 +16,31 @@
  *
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { MetaInfoData } from '../../models/meta-info-data';
-import { CommonModule } from '@angular/common';
-import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import { WorkbasketReportDueDateComponent } from '../workbasket-report-due-date/workbasket-report-due-date.component';
 import { WorkbasketReportPlannedDateComponent } from '../workbasket-report-planned-date/workbasket-report-planned-date.component';
-
-enum WorkbasketReports {
-  DUE_DATE,
-  PLANNED_DATE
-}
+import { DatePipe, NgIf } from '@angular/common';
 
 @Component({
   selector: 'kadai-monitor-workbasket-report',
   templateUrl: './workbasket-report.component.html',
   styleUrls: ['./workbasket-report.component.scss'],
-  imports: [CommonModule, MatTabGroup, MatTab, WorkbasketReportDueDateComponent, WorkbasketReportPlannedDateComponent]
+  imports: [MatTabGroup, MatTab, WorkbasketReportDueDateComponent, WorkbasketReportPlannedDateComponent, NgIf, DatePipe]
 })
-export class WorkbasketReportComponent implements OnInit {
+export class WorkbasketReportComponent {
   metaInformation: MetaInfoData;
-  selectedComponent: WorkbasketReports;
-
-  ngOnInit() {}
+  selectedComponent: number;
 
   getMetaInformation(metaInformation: MetaInfoData) {
     this.metaInformation = metaInformation;
   }
 
-  selectComponent(component) {
+  selectComponent(component: number) {
     this.selectedComponent = component;
   }
+
   getTitle(): string {
     return this.selectedComponent
       ? 'Tasks grouped by Workbasket, querying by planned date'

@@ -21,7 +21,9 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { ObjectReference } from '../models/object-reference';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class WorkplaceService {
   private workbasketSelected = new BehaviorSubject<Workbasket>(undefined);
   private objectReferenceSelected = new BehaviorSubject<ObjectReference>(undefined);
