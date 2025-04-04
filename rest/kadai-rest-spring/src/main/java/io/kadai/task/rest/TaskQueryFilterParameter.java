@@ -2854,85 +2854,67 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
   }
 
   private void validateFilterParameters() throws InvalidArgumentException {
-    if (plannedWithin != null && (plannedFrom != null || plannedUntil != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'planned' in combination "
-              + "with the params 'planned-from'  and / or 'planned-until'");
-    }
+    validateCombination(
+        plannedWithin, plannedFrom, plannedUntil, "planned", "planned-from", "planned-until");
+    validateCombination(
+        plannedNotWithin,
+        plannedFromNot,
+        plannedUntilNot,
+        "planned-not-in",
+        "planned-not-in-from",
+        "planned-not-in-until");
+    validateCombination(
+        receivedWithin, receivedFrom, receivedUntil, "received", "received-from", "received-until");
+    validateCombination(
+        receivedNotIn,
+        receivedFromNot,
+        receivedUntilNot,
+        "received-not-in",
+        "received-not-in-from",
+        "received-not-in-until");
+    validateCombination(dueWithin, dueFrom, dueUntil, "due", "due-from", "due-until");
+    validateCombination(
+        dueNotWithin, dueFromNot, dueUntilNot, "due-not-in", "due-not-in-from", "due-not-in-until");
+    validateCombination(
+        createdWithin, createdFrom, createdUntil, "created", "created-from", "created-until");
+    validateCombination(
+        createdNotWithin,
+        createdFromNot,
+        createdUntilNot,
+        "created-not-in",
+        "created-not-in-from",
+        "created-not-in-until");
+    validateCombination(
+        completedWithin,
+        completedFrom,
+        completedUntil,
+        "completed",
+        "completed-from",
+        "completed-until");
+    validateCombination(
+        completedNotWithin,
+        completedFromNot,
+        completedUntilNot,
+        "completed-not-in",
+        "completed-not-in-from",
+        "completed-not-in-until");
+    validateCombination(
+        priorityWithin,
+        priorityFrom,
+        priorityUntil,
+        "priority-within",
+        "priority-from",
+        "priority-until");
+    validateCombination(
+        priorityNotWithin,
+        priorityNotFrom,
+        priorityNotUntil,
+        "priority-not-within",
+        "priority-not-from",
+        "priority-not-until");
 
-    if (plannedNotWithin != null && (plannedFromNot != null || plannedUntilNot != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'planned-not-in' in combination "
-              + "with the params 'planned-not-in-from'  and / or 'planned-not-in-until'");
-    }
-
-    if (receivedWithin != null && (receivedFrom != null || receivedUntil != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'received' in combination "
-              + "with the params 'received-from'  and / or 'received-until'");
-    }
-
-    if (receivedNotIn != null && (receivedFromNot != null || receivedUntilNot != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'received-not-in' in combination "
-              + "with the params 'received-not-in-from'  and / or 'received-not-in-until'");
-    }
-
-    if (dueWithin != null && (dueFrom != null || dueUntil != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'due' in combination with the params "
-              + "'due-from'  and / or 'due-until'");
-    }
-
-    if (dueNotWithin != null && (dueFromNot != null || dueUntilNot != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'due-not-in' in combination with the params "
-              + "'due-not-in-from'  and / or 'due-not-in-until'");
-    }
-
-    if (createdWithin != null && (createdFrom != null || createdUntil != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'created' in combination with the params "
-              + "'created-from'  and / or 'created-until'");
-    }
-    if (createdNotWithin != null && (createdFromNot != null || createdUntilNot != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'created-not-in' in combination with the params "
-              + "'created-not-in-from'  and / or 'created-not-in-until'");
-    }
-
-    if (completedWithin != null && (completedFrom != null || completedUntil != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'completed' in combination with the params "
-              + "'completed-from'  and / or 'completed-until'");
-    }
-    if (completedNotWithin != null && (completedFromNot != null || completedUntilNot != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'completed-not-in' in combination with the params "
-              + "'completed-not-in-from'  and / or 'completed-not-in-until'");
-    }
-
-    if (priorityWithin != null && (priorityFrom != null || priorityUntil != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'priority-within' in combination with the params "
-              + "'priority-from'  and / or 'priority-until'");
-    }
-
-    if (priorityNotWithin != null && (priorityNotFrom != null || priorityNotUntil != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'priority-not-within' in combination with the params "
-              + "'priority-not-from'  and / or 'priority-not-until'");
-    }
-
-    if (priorityWithin != null && priorityWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'priority-within' is not dividable by 2");
-    }
-
-    if (priorityNotWithin != null && priorityNotWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'priority-not-within' is not dividable by 2");
-    }
+    validateDividableByTwo(priorityWithin, "priority-within");
+    validateDividableByTwo(priorityNotWithin, "priority-not-within");
 
     if (wildcardSearchFieldIn == null ^ wildcardSearchValue == null) {
       throw new InvalidArgumentException(
@@ -2954,89 +2936,54 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
           "'domain' can only be used together with 'workbasket-key' or 'workbasket-key-not'.");
     }
 
-    if (plannedWithin != null && plannedWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'planned' is not dividable by 2");
-    }
-
-    if (receivedWithin != null && receivedWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'received' is not dividable by 2");
-    }
-
-    if (dueWithin != null && dueWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'due' is not dividable by 2");
-    }
-
-    if (modifiedWithin != null && modifiedWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'modified' is not dividable by 2");
-    }
-
-    if (createdWithin != null && createdWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'created' is not dividable by 2");
-    }
-
-    if (completedWithin != null && completedWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'completed' is not dividable by 2");
-    }
-
-    if (claimedWithin != null && claimedWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'claimed' is not dividable by 2");
-    }
-
-    if (attachmentReceivedWithin != null && attachmentReceivedWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'attachmentReceived' is not dividable by 2");
-    }
-
-    if (plannedNotWithin != null && plannedNotWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'planned-not-in' is not dividable by 2");
-    }
-
-    if (receivedNotIn != null && receivedNotIn.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'received-not-in' is not dividable by 2");
-    }
-
-    if (dueNotWithin != null && dueNotWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'due-not-in' is not dividable by 2");
-    }
-
-    if (modifiedNotWithin != null && modifiedNotWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'modified-not-in' is not dividable by 2");
-    }
-
-    if (createdNotWithin != null && createdNotWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'created-not-in' is not dividable by 2");
-    }
-
-    if (completedNotWithin != null && completedNotWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'completed-not-in' is not dividable by 2");
-    }
-
-    if (claimedNotWithin != null && claimedNotWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'claimed-not-in' is not dividable by 2");
-    }
-
-    if (attachmentReceivedNotWithin != null && attachmentReceivedNotWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'attachment-not-received' is not dividable by 2");
-    }
+    validateDividableByTwo(plannedWithin, "planned");
+    validateDividableByTwo(receivedWithin, "received");
+    validateDividableByTwo(dueWithin, "due");
+    validateDividableByTwo(modifiedWithin, "modified");
+    validateDividableByTwo(createdWithin, "created");
+    validateDividableByTwo(completedWithin, "completed");
+    validateDividableByTwo(claimedWithin, "claimed");
+    validateDividableByTwo(attachmentReceivedWithin, "attachmentReceived");
+    validateDividableByTwo(plannedNotWithin, "planned-not-in");
+    validateDividableByTwo(receivedNotIn, "received-not-in");
+    validateDividableByTwo(dueNotWithin, "due-not-in");
+    validateDividableByTwo(modifiedNotWithin, "modified-not-in");
+    validateDividableByTwo(createdNotWithin, "created-not-in");
+    validateDividableByTwo(completedNotWithin, "completed-not-in");
+    validateDividableByTwo(claimedNotWithin, "claimed-not-in");
+    validateDividableByTwo(attachmentReceivedNotWithin, "attachment-not-received");
 
     if (withoutAttachment != null && !withoutAttachment) {
       throw new InvalidArgumentException(
           "provided value of the property 'without-attachment' must be 'true'");
+    }
+  }
+
+  private void validateCombination(
+      Object within,
+      Object from,
+      Object until,
+      String withinName,
+      String fromName,
+      String untilName)
+      throws InvalidArgumentException {
+    if (within != null && (from != null || until != null)) {
+      throw new InvalidArgumentException(
+          "It is prohibited to use the param '"
+              + withinName
+              + "' in combination with the params '"
+              + fromName
+              + "' and / or '"
+              + untilName
+              + "'");
+    }
+  }
+
+  private void validateDividableByTwo(Object[] array, String paramName)
+      throws InvalidArgumentException {
+    if (array != null && array.length % 2 != 0) {
+      throw new InvalidArgumentException(
+          "provided length of the property '" + paramName + "' is not dividable by 2");
     }
   }
 
