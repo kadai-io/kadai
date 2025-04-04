@@ -312,16 +312,6 @@ public interface TaskSummary {
    * Returns the value of the specified {@linkplain TaskCustomField} of the {@linkplain Task}.
    *
    * @param customField identifies which {@linkplain TaskCustomField} is requested
-   * @return the value for the given customField
-   * @deprecated Use {@linkplain #getCustomField(TaskCustomField)} instead
-   */
-  @Deprecated
-  String getCustomAttribute(TaskCustomField customField);
-
-  /**
-   * Returns the value of the specified {@linkplain TaskCustomField} of the {@linkplain Task}.
-   *
-   * @param customField identifies which {@linkplain TaskCustomField} is requested
    * @return the value for the given {@linkplain TaskCustomField}
    */
   String getCustomField(TaskCustomField customField);
