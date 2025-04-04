@@ -1566,7 +1566,10 @@ class TaskControllerIntTest {
 
     @Test
     void testGetLastPageSortedByDueWithHiddenTasksRemovedFromResult() {
-      String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?sort-by=DUE&order=DESCENDING";
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS)
+              + "?sort-by=DUE&sort-by=TASK_ID&"
+              + "order=DESCENDING&order=ASCENDING";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
           CLIENT
               .get()
@@ -1580,7 +1583,9 @@ class TaskControllerIntTest {
 
       String url2 =
           restHelper.toUrl(RestEndpoints.URL_TASKS)
-              + "?sort-by=DUE&order=DESCENDING&page-size=5&page=5";
+              + "?sort-by=DUE&sort-by=TASK_ID&"
+              + "order=DESCENDING&order=ASCENDING&"
+              + "page-size=5&page=5";
       response =
           CLIENT
               .get()
@@ -1597,7 +1602,10 @@ class TaskControllerIntTest {
           .isEqualTo("TKI:000000000000000000000000000000000071");
       assertThat(response.getBody().getLink(IanaLinkRelations.SELF)).isNotNull();
       assertThat(response.getBody().getRequiredLink(IanaLinkRelations.SELF).getHref())
-          .endsWith("/api/v1/tasks?sort-by=DUE&order=DESCENDING&page-size=5&page=5");
+          .endsWith("/api/v1/tasks?"
+              + "sort-by=DUE&sort-by=TASK_ID&"
+              + "order=DESCENDING&order=ASCENDING&"
+              + "page-size=5&page=5");
       assertThat(response.getBody().getLink(IanaLinkRelations.FIRST)).isNotNull();
       assertThat(response.getBody().getLink(IanaLinkRelations.LAST)).isNotNull();
       assertThat(response.getBody().getLink(IanaLinkRelations.PREV)).isNotNull();
@@ -1608,8 +1616,10 @@ class TaskControllerIntTest {
       String url =
           restHelper.toUrl(RestEndpoints.URL_TASKS)
               + "?por-company=00&por-system=PASystem&por-instance=00&"
-              + "por-type=VNR&por-value=22334455&sort-by=POR_TYPE&"
-              + "order=ASCENDING&page-size=5&page=2";
+              + "por-type=VNR&por-value=22334455&"
+              + "sort-by=POR_TYPE&sort-by=TASK_ID&"
+              + "order=ASCENDING&order=ASCENDING&"
+              + "page-size=5&page=2";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
           CLIENT
               .get()
@@ -1626,7 +1636,9 @@ class TaskControllerIntTest {
       assertThat(response.getBody().getRequiredLink(IanaLinkRelations.SELF).getHref())
           .endsWith(
               "/api/v1/tasks?por-company=00&por-system=PASystem&por-instance=00&"
-                  + "por-type=VNR&por-value=22334455&sort-by=POR_TYPE&order=ASCENDING&"
+                  + "por-type=VNR&por-value=22334455&"
+                  + "sort-by=POR_TYPE&sort-by=TASK_ID&"
+                  + "order=ASCENDING&order=ASCENDING&"
                   + "page-size=5&page=2");
       assertThat(response.getBody().getLink(IanaLinkRelations.FIRST)).isNotNull();
       assertThat(response.getBody().getLink(IanaLinkRelations.LAST)).isNotNull();
@@ -1785,7 +1797,7 @@ class TaskControllerIntTest {
     @Test
     void should_ReturnFilteredTasks_When_GettingTasksBySecondaryObjectReferenceValueAndCompany() {
       String url =
-          restHelper.toUrl(RestEndpoints.URL_TASKS) + "?sor-value=Value2&&sor-company=Company1";
+          restHelper.toUrl(RestEndpoints.URL_TASKS) + "?sor-value=Value2&sor-company=Company1";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
           CLIENT
               .get()
