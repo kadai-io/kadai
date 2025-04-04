@@ -32,8 +32,9 @@ import {
   GetWorkbasketAccessItems,
   UpdateWorkbasketAccessItems
 } from '../../../shared/store/workbasket-store/workbasket.actions';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('WorkbasketAccessItemsComponent', () => {
   let fixture: ComponentFixture<WorkbasketAccessItemsComponent>;
@@ -45,7 +46,12 @@ describe('WorkbasketAccessItemsComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [WorkbasketAccessItemsComponent],
-      providers: [provideStore([WorkbasketState, EngineConfigurationState]), provideRouter([]), provideHttpClient()]
+      providers: [
+        provideStore([WorkbasketState, EngineConfigurationState]),
+        provideRouter([]),
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(WorkbasketAccessItemsComponent);

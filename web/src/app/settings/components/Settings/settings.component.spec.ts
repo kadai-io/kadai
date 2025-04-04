@@ -25,7 +25,8 @@ import { SettingsState } from '../../../shared/store/settings-store/settings.sta
 import { SettingsComponent } from './settings.component';
 import { settingsStateMock } from '../../../shared/store/mock-data/mock-store';
 import { SetSettings } from '../../../shared/store/settings-store/settings.actions';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 const notificationServiceSpy: Partial<NotificationService> = {
   showError: jest.fn(),
@@ -49,7 +50,8 @@ describe('SettingsComponent', () => {
           provide: NotificationService,
           useValue: notificationServiceSpy
         },
-        provideHttpClient()
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 
