@@ -528,7 +528,9 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
   @JsonProperty("state-not")
   private final TaskState[] stateNotIn;
 
-  /** Filter by the has comments flag of the Task. This is an exact match. */
+  @Parameter(
+      name = "has-comments",
+      description = "Filter by the has-comments flag of the Task. This is an exact match.")
   @JsonProperty("has-comments")
   private final Boolean hasComments;
 
