@@ -32,6 +32,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery, Void> {
+
+  private static final TaskQueryFilterCustomIntFieldsValidation VALIDATOR = new TaskQueryFilterCustomIntFieldsValidation();
+
   @Parameter(
       name = "custom-int-1",
       description =
@@ -653,7 +656,7 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
     this.customInt8To = customInt8To;
     this.customInt8ToNot = customInt8ToNot;
 
-    new TaskQueryFilterCustomIntFieldsValidation().validate(this);
+    VALIDATOR.validate(this);
   }
 
   public Integer[] getCustomInt1In() {

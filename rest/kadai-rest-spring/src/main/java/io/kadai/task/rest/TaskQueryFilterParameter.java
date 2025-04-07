@@ -39,6 +39,8 @@ import org.apache.commons.lang3.ArrayUtils;
 
 public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void> {
 
+  private static final TaskQueryFilterParameterValidation VALIDATOR = new TaskQueryFilterParameterValidation();
+
   // region id
   @Parameter(name = "task-id", description = "Filter by task id. This is an exact match.")
   @JsonProperty("task-id")
@@ -1849,7 +1851,7 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
     this.wildcardSearchFieldIn = wildcardSearchFieldIn;
     this.wildcardSearchValue = wildcardSearchValue;
 
-    new TaskQueryFilterParameterValidation().validate(this);
+    VALIDATOR.validate(this);
   }
 
   public String[] getTaskIdIn() {
