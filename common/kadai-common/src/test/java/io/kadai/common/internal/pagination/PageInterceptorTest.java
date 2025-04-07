@@ -69,7 +69,7 @@ class PageInterceptorTest {
 
   @NullSource
   @ParameterizedTest
-  @MethodSource("irrelevantRowBoundsProvider")
+  @MethodSource("defaultRowBoundsSource")
   public void should_Proceed_When_RowBoundsIsIrrelevant(RowBounds rowBounds) throws Throwable {
     Object[] args = {mappedStatement, new Object(), rowBounds, resultHandler};
 
@@ -92,6 +92,75 @@ class PageInterceptorTest {
       DB db, String expectedSql) throws Throwable {
     Object parameter = new Object();
     RowBounds rowBounds = new RowBounds(7, 42);
+    Object[] args = {mappedStatement, parameter, rowBounds, resultHandler};
+
+    Invocation invocation = mock(Invocation.class);
+    when(invocation.getArgs()).thenReturn(args);
+
+    Executor executor = mock(Executor.class);
+    when(invocation.getTarget()).thenReturn(executor);
+
+    Configuration configuration = mock(Configuration.class);
+    when(mappedStatement.getConfiguration()).thenReturn(configuration);
+    when(configuration.getDatabaseId()).thenReturn(db.dbProductId);
+
+    BoundSql boundSql = mock(BoundSql.class);
+    when(mappedStatement.getBoundSql(any())).thenReturn(boundSql);
+    when(boundSql.getSql()).thenReturn("SELECT * FROM FOO");
+    List<ParameterMapping> parameterMappings = Collections.emptyList();
+    when(boundSql.getParameterMappings()).thenReturn(parameterMappings);
+    when(boundSql.getAdditionalParameters()).thenReturn(Collections.emptyMap());
+    Object parameterObject = new Object();
+    when(boundSql.getParameterObject()).thenReturn(parameterObject);
+
+    pageInterceptor.intercept(invocation);
+
+    BoundSql expected =
+        new BoundSql(configuration, expectedSql, parameterMappings, parameterObject);
+
+    ArgumentCaptor<MappedStatement> mappedStatementCaptor =
+        ArgumentCaptor.forClass(MappedStatement.class);
+    ArgumentCaptor<Object> parameterCaptor = ArgumentCaptor.forClass(Object.class);
+    ArgumentCaptor<RowBounds> rowBoundsCaptor = ArgumentCaptor.forClass(RowBounds.class);
+    ArgumentCaptor<ResultHandler> resultHandlerCaptor =
+        ArgumentCaptor.forClass(ResultHandler.class);
+    ArgumentCaptor<CacheKey> cacheKeyCaptor = ArgumentCaptor.forClass(CacheKey.class);
+    ArgumentCaptor<BoundSql> boundSqlCaptor = ArgumentCaptor.forClass(BoundSql.class);
+
+    verify(executor)
+        .query(
+            mappedStatementCaptor.capture(),
+            parameterCaptor.capture(),
+            rowBoundsCaptor.capture(),
+            resultHandlerCaptor.capture(),
+            cacheKeyCaptor.capture(),
+            boundSqlCaptor.capture());
+
+    assertThat(mappedStatementCaptor.getValue()).isEqualTo(mappedStatement);
+    assertThat(parameterCaptor.getValue()).isEqualTo(parameter);
+    assertThat(rowBoundsCaptor.getValue()).isEqualTo(RowBounds.DEFAULT);
+    assertThat(resultHandlerCaptor.getValue()).isEqualTo(resultHandler);
+    assertThat(cacheKeyCaptor.getValue()).isNull();
+    assertThat(boundSqlCaptor.getValue()).usingRecursiveComparison().isEqualTo(expected);
+  }
+
+  @SuppressWarnings("rawtypes")
+  @ParameterizedTest
+  @CsvSource({
+      "H2, SELECT * FROM FOO LIMIT 42 OFFSET 0, -1, 42",
+      "H2, SELECT * FROM FOO LIMIT 0 OFFSET 42, 42, -1",
+      "H2, SELECT * FROM FOO LIMIT 0 OFFSET 0, -2, -1",
+      "DB2, SELECT * FROM FOO OFFSET 0 ROWS FETCH FIRST 42 ROWS ONLY, -1, 42",
+      "DB2, SELECT * FROM FOO OFFSET 42 ROWS FETCH FIRST 0 ROWS ONLY, 42, -1",
+      "DB2, SELECT * FROM FOO OFFSET 0 ROWS FETCH FIRST 0 ROWS ONLY, -2, -1",
+      "POSTGRES, SELECT * FROM FOO LIMIT 42 OFFSET 0, -1, 42",
+      "POSTGRES, SELECT * FROM FOO LIMIT 0 OFFSET 42, 42, -1",
+      "POSTGRES, SELECT * FROM FOO LIMIT 0 OFFSET 0, -2, -1",
+  })
+  public void should_RewriteSqlWithZeroBound_When_SqlIsNotNativelyPaginatedAndNegativeRowBounds(
+      DB db, String expectedSql, int offset, int limit) throws Throwable {
+    Object parameter = new Object();
+    RowBounds rowBounds = new RowBounds(offset, limit);
     Object[] args = {mappedStatement, parameter, rowBounds, resultHandler};
 
     Invocation invocation = mock(Invocation.class);
@@ -170,10 +239,7 @@ class PageInterceptorTest {
     verify(invocation).proceed();
   }
 
-  private static Stream<Arguments> irrelevantRowBoundsProvider() {
-    return Stream.of(
-        Arguments.of(RowBounds.DEFAULT),
-        Arguments.of(new RowBounds(0, -1)),
-        Arguments.of(new RowBounds(-1, 0)));
+  private static Stream<Arguments> defaultRowBoundsSource() {
+    return Stream.of(Arguments.of(RowBounds.DEFAULT));
   }
 }

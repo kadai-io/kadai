@@ -18,6 +18,8 @@
 
 package io.kadai.common.internal.pagination;
 
+import static java.lang.Math.max;
+
 import org.apache.ibatis.session.RowBounds;
 
 public class Db2PageDialect implements PageDialect {
@@ -34,6 +36,6 @@ public class Db2PageDialect implements PageDialect {
   public String transform(String sql, RowBounds rowBounds) {
     return String.format(
         "%s OFFSET %d ROWS FETCH FIRST %d ROWS ONLY",
-        sql, rowBounds.getOffset(), rowBounds.getLimit());
+        sql, max(0, rowBounds.getOffset()), max(0, rowBounds.getLimit()));
   }
 }

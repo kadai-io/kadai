@@ -18,6 +18,8 @@
 
 package io.kadai.common.internal.pagination;
 
+import static java.lang.Math.max;
+
 import org.apache.ibatis.session.RowBounds;
 
 public class H2PageDialect implements PageDialect {
@@ -30,6 +32,7 @@ public class H2PageDialect implements PageDialect {
 
   @Override
   public String transform(String sql, RowBounds rowBounds) {
-    return String.format("%s LIMIT %d OFFSET %d", sql, rowBounds.getLimit(), rowBounds.getOffset());
+    return String.format(
+        "%s LIMIT %d OFFSET %d", sql, max(0, rowBounds.getLimit()), max(0, rowBounds.getOffset()));
   }
 }

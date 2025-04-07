@@ -58,10 +58,7 @@ public class PageInterceptor implements Interceptor {
   public Object intercept(Invocation invocation) throws Throwable {
     final Object[] args = invocation.getArgs();
     final RowBounds rowBounds = (RowBounds) args[2];
-    if (rowBounds == null
-        || rowBounds == RowBounds.DEFAULT
-        || rowBounds.getOffset() < 0
-        || rowBounds.getLimit() < 0) {
+    if (rowBounds == null || rowBounds == RowBounds.DEFAULT) {
       return invocation.proceed();
     }
 
