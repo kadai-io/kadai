@@ -53,9 +53,7 @@ _We're not aware of all installations of our Open Source project. However, we lo
     * [KADAI monitor](#Kadai-monitor)
 * 🚀 [Getting Started](#getting-started)
     * [Requirements](#requirements)
-    * [Wrapper Application](#wrapper-application)
-        * [Spring Boot Example](#spring-boot-example)
-        * [EJB Example](#ejb-example)
+    * [Spring Boot Example](#spring-boot-example)
 * ⚙️ [Customize Behaviour](#customize-behaviour)
 * 📚 [Releases](#releases)
 * 🖼️ [Demo](#demo)
@@ -101,8 +99,6 @@ stateDiagram-v2
     IN_REVIEW --> finalEndStates: terminate()
 
     nonFinalEndStates --> CLAIMED: reopen()
-    nonFinalEndStates --> [*]
-    finalEndStates --> [*]
     
     nonFinalEndStates: Non-final endstates
     state nonFinalEndStates {
