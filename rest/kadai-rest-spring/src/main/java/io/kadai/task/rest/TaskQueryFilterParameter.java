@@ -39,7 +39,8 @@ import org.apache.commons.lang3.ArrayUtils;
 
 public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void> {
 
-  private static final TaskQueryFilterParameterValidation VALIDATOR = new TaskQueryFilterParameterValidation();
+  private static final TaskQueryFilterParameterValidation VALIDATOR =
+      new TaskQueryFilterParameterValidation();
 
   // region id
   @Parameter(name = "task-id", description = "Filter by task id. This is an exact match.")

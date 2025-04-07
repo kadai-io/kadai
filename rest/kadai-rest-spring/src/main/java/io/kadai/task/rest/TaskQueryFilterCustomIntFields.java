@@ -33,7 +33,8 @@ import java.util.stream.Stream;
 
 public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery, Void> {
 
-  private static final TaskQueryFilterCustomIntFieldsValidation VALIDATOR = new TaskQueryFilterCustomIntFieldsValidation();
+  private static final TaskQueryFilterCustomIntFieldsValidation VALIDATOR =
+      new TaskQueryFilterCustomIntFieldsValidation();
 
   @Parameter(
       name = "custom-int-1",
