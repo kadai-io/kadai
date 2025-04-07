@@ -54,19 +54,19 @@ public enum DB {
   public final String dbProductId;
   public final String detectionScript;
   public final String schemaScript;
-  public final PageDialect dialect;
+  public final PageDialect pageDialect;
 
   DB(
       String dbProductName,
       String dbProductId,
       String detectionScript,
       String schemaScript,
-      PageDialect dialect) {
+      PageDialect pageDialect) {
     this.dbProductName = dbProductName;
     this.dbProductId = dbProductId;
     this.detectionScript = detectionScript;
     this.schemaScript = schemaScript;
-    this.dialect = dialect;
+    this.pageDialect = pageDialect;
   }
 
   public static DB getDB(String dbProductId) {

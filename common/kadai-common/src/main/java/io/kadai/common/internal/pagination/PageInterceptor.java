@@ -66,7 +66,7 @@ public class PageInterceptor implements Interceptor {
     final Object parameter = args[1];
     final BoundSql oldBoundSql = ms.getBoundSql(parameter);
     final String oldSql = oldBoundSql.getSql();
-    final PageDialect pageDialect = DB.getDB(ms.getConfiguration().getDatabaseId()).dialect;
+    final PageDialect pageDialect = DB.getDB(ms.getConfiguration().getDatabaseId()).pageDialect;
 
     if (pageDialect.isPaginated(oldSql)) {
       return invocation.proceed();
