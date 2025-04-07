@@ -39,6 +39,9 @@ import org.apache.commons.lang3.ArrayUtils;
 
 public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void> {
 
+  private final TaskQueryFilterParameterValidation validation =
+      new TaskQueryFilterParameterValidation();
+
   // region id
   @Parameter(name = "task-id", description = "Filter by task id. This is an exact match.")
   @JsonProperty("task-id")
@@ -1849,7 +1852,7 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
     this.wildcardSearchFieldIn = wildcardSearchFieldIn;
     this.wildcardSearchValue = wildcardSearchValue;
 
-    validateFilterParameters();
+    validation.validate(this);
   }
 
   public String[] getTaskIdIn() {
@@ -2851,140 +2854,6 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
     }
 
     return null;
-  }
-
-  private void validateFilterParameters() throws InvalidArgumentException {
-    validateCombination(
-        plannedWithin, plannedFrom, plannedUntil, "planned", "planned-from", "planned-until");
-    validateCombination(
-        plannedNotWithin,
-        plannedFromNot,
-        plannedUntilNot,
-        "planned-not-in",
-        "planned-not-in-from",
-        "planned-not-in-until");
-    validateCombination(
-        receivedWithin, receivedFrom, receivedUntil, "received", "received-from", "received-until");
-    validateCombination(
-        receivedNotIn,
-        receivedFromNot,
-        receivedUntilNot,
-        "received-not-in",
-        "received-not-in-from",
-        "received-not-in-until");
-    validateCombination(dueWithin, dueFrom, dueUntil, "due", "due-from", "due-until");
-    validateCombination(
-        dueNotWithin, dueFromNot, dueUntilNot, "due-not-in", "due-not-in-from", "due-not-in-until");
-    validateCombination(
-        createdWithin, createdFrom, createdUntil, "created", "created-from", "created-until");
-    validateCombination(
-        createdNotWithin,
-        createdFromNot,
-        createdUntilNot,
-        "created-not-in",
-        "created-not-in-from",
-        "created-not-in-until");
-    validateCombination(
-        completedWithin,
-        completedFrom,
-        completedUntil,
-        "completed",
-        "completed-from",
-        "completed-until");
-    validateCombination(
-        completedNotWithin,
-        completedFromNot,
-        completedUntilNot,
-        "completed-not-in",
-        "completed-not-in-from",
-        "completed-not-in-until");
-    validateCombination(
-        priorityWithin,
-        priorityFrom,
-        priorityUntil,
-        "priority-within",
-        "priority-from",
-        "priority-until");
-    validateCombination(
-        priorityNotWithin,
-        priorityNotFrom,
-        priorityNotUntil,
-        "priority-not-within",
-        "priority-not-from",
-        "priority-not-until");
-
-    validateDividableByTwo(priorityWithin, "priority-within");
-    validateDividableByTwo(priorityNotWithin, "priority-not-within");
-
-    if (wildcardSearchFieldIn == null ^ wildcardSearchValue == null) {
-      throw new InvalidArgumentException(
-          "The params 'wildcard-search-field' and 'wildcard-search-value' must be used together");
-    }
-
-    if (workbasketKeyIn != null && domain == null) {
-      throw new InvalidArgumentException(
-          "'workbasket-key' can only be used together with 'domain'.");
-    }
-
-    if (workbasketKeyNotIn != null && domain == null) {
-      throw new InvalidArgumentException(
-          "'workbasket-key-not' can only be used together with 'domain'.");
-    }
-
-    if (workbasketKeyIn == null && workbasketKeyNotIn == null && domain != null) {
-      throw new InvalidArgumentException(
-          "'domain' can only be used together with 'workbasket-key' or 'workbasket-key-not'.");
-    }
-
-    validateDividableByTwo(plannedWithin, "planned");
-    validateDividableByTwo(receivedWithin, "received");
-    validateDividableByTwo(dueWithin, "due");
-    validateDividableByTwo(modifiedWithin, "modified");
-    validateDividableByTwo(createdWithin, "created");
-    validateDividableByTwo(completedWithin, "completed");
-    validateDividableByTwo(claimedWithin, "claimed");
-    validateDividableByTwo(attachmentReceivedWithin, "attachmentReceived");
-    validateDividableByTwo(plannedNotWithin, "planned-not-in");
-    validateDividableByTwo(receivedNotIn, "received-not-in");
-    validateDividableByTwo(dueNotWithin, "due-not-in");
-    validateDividableByTwo(modifiedNotWithin, "modified-not-in");
-    validateDividableByTwo(createdNotWithin, "created-not-in");
-    validateDividableByTwo(completedNotWithin, "completed-not-in");
-    validateDividableByTwo(claimedNotWithin, "claimed-not-in");
-    validateDividableByTwo(attachmentReceivedNotWithin, "attachment-not-received");
-
-    if (withoutAttachment != null && !withoutAttachment) {
-      throw new InvalidArgumentException(
-          "provided value of the property 'without-attachment' must be 'true'");
-    }
-  }
-
-  private void validateCombination(
-      Object within,
-      Object from,
-      Object until,
-      String withinName,
-      String fromName,
-      String untilName)
-      throws InvalidArgumentException {
-    if (within != null && (from != null || until != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param '"
-              + withinName
-              + "' in combination with the params '"
-              + fromName
-              + "' and / or '"
-              + untilName
-              + "'");
-    }
-  }
-
-  private void validateDividableByTwo(Object[] array, String paramName)
-      throws InvalidArgumentException {
-    if (array != null && array.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property '" + paramName + "' is not dividable by 2");
-    }
   }
 
   /**
