@@ -29,22 +29,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular-builders/common@npm:3.0.0":
-  version: 3.0.0
-  resolution: "@angular-builders/common@npm:3.0.0"
+"@angular-builders/common@npm:3.0.1":
+  version: 3.0.1
+  resolution: "@angular-builders/common@npm:3.0.1"
   dependencies:
     "@angular-devkit/core": "npm:^19.0.0"
     ts-node: "npm:^10.0.0"
     tsconfig-paths: "npm:^4.1.0"
-  checksum: 10c0/e51d4acd00fcb0bb423c6e9c9d129bc673a32e12e789146f2d2bd62fde411e17c4d379e97aca3f1f53704548b7ffa2293c4423f21d67c409831370c69dcf0819
+  checksum: 10c0/dae5305d7b56093e4cb13332358c54239d1d32437ed8d92f34e03915bdd95b68a319c9dca227ebd471d15658b9a774bdfb16baefe2f6cc0f2ed32a0cbf39b4c4
   languageName: node
   linkType: hard
 
-"@angular-builders/custom-webpack@npm:19.0.0":
-  version: 19.0.0
-  resolution: "@angular-builders/custom-webpack@npm:19.0.0"
+"@angular-builders/custom-webpack@npm:19.0.1":
+  version: 19.0.1
+  resolution: "@angular-builders/custom-webpack@npm:19.0.1"
   dependencies:
-    "@angular-builders/common": "npm:3.0.0"
+    "@angular-builders/common": "npm:3.0.1"
     "@angular-devkit/architect": "npm:>=0.1900.0 < 0.2000.0"
     "@angular-devkit/build-angular": "npm:^19.0.0"
     "@angular-devkit/core": "npm:^19.0.0"
@@ -52,7 +52,7 @@ __metadata:
     webpack-merge: "npm:^6.0.0"
   peerDependencies:
     "@angular/compiler-cli": ^19.0.0
-  checksum: 10c0/2d0f3f3da5c02c0c74e554562448ec96e1c1807b8237f9528546c9196b5fc86e41025c74f4c90356f27023b580539e32207be00ed4ad81347beebe70bef53714
+  checksum: 10c0/d11d489e057db217209d4aa983589bd360aa8ac37de794f0cec0aac45f9506435ec6a2da05c1d56b67f492997411f8751198ff6e1f7e06107246df07939a351f
   languageName: node
   linkType: hard
 
@@ -10016,7 +10016,7 @@ __metadata:
   resolution: "kadai@workspace:."
   dependencies:
     "@ali-hm/angular-tree-component": "npm:19.2.5"
-    "@angular-builders/custom-webpack": "npm:19.0.0"
+    "@angular-builders/custom-webpack": "npm:19.0.1"
     "@angular-devkit/build-angular": "npm:19.2.6"
     "@angular/animations": "npm:19.2.5"
     "@angular/build": "npm:^19.2.6"
