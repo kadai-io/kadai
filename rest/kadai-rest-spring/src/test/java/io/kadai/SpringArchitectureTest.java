@@ -31,7 +31,6 @@ import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
 import io.kadai.common.rest.QueryParameter;
-
 import java.lang.reflect.Modifier;
 import java.util.Optional;
 import java.util.stream.Stream;
