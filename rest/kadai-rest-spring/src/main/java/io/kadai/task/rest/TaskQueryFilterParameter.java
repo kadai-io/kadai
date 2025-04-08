@@ -2089,6 +2089,10 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
   // endregion
   // region comments
 
+  public Boolean getHasComments() {
+    return hasComments;
+  }
+
   public TaskState[] getStateNotIn() {
     return stateNotIn;
   }
