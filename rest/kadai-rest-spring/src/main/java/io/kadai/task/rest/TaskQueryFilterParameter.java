@@ -528,7 +528,9 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
   @JsonProperty("state-not")
   private final TaskState[] stateNotIn;
 
-  /** Filter by the has comments flag of the Task. This is an exact match. */
+  @Parameter(
+      name = "has-comments",
+      description = "Filter by the has-comments flag of the Task. This is an exact match.")
   @JsonProperty("has-comments")
   private final Boolean hasComments;
 
@@ -1138,7 +1140,7 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
       name = "is-read",
       description = "Filter by the is read flag of the Task. This is an exact match.")
   @JsonProperty("is-read")
-  private final Boolean isRead;
+  private final Boolean read;
 
   // endregion
   // region transferred
@@ -1146,7 +1148,7 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
       name = "is-transferred",
       description = "Filter by the is transferred flag of the Task. This is an exact match.")
   @JsonProperty("is-transferred")
-  private final Boolean isTransferred;
+  private final Boolean transferred;
 
   // endregion
   // region reopened
@@ -1154,7 +1156,7 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
       name = "is-reopened",
       description = "Filter by the is reopened flag of the Task. This is an exact match.")
   @JsonProperty("is-reopened")
-  private final Boolean isReopened;
+  private final Boolean reopened;
 
   // endregion
   // region attachmentClassificationId
@@ -1662,9 +1664,9 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
       String[] sorTypeLike,
       String[] sorValueIn,
       String[] sorValueLike,
-      Boolean isRead,
-      Boolean isTransferred,
-      Boolean isReopened,
+      Boolean read,
+      Boolean transferred,
+      Boolean reopened,
       String[] attachmentClassificationIdIn,
       String[] attachmentClassificationIdNotIn,
       String[] attachmentClassificationKeyIn,
@@ -1820,9 +1822,9 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
     this.sorTypeLike = sorTypeLike;
     this.sorValueIn = sorValueIn;
     this.sorValueLike = sorValueLike;
-    this.isRead = isRead;
-    this.isTransferred = isTransferred;
-    this.isReopened = isReopened;
+    this.read = read;
+    this.transferred = transferred;
+    this.reopened = reopened;
     this.attachmentClassificationIdIn = attachmentClassificationIdIn;
     this.attachmentClassificationIdNotIn = attachmentClassificationIdNotIn;
     this.attachmentClassificationKeyIn = attachmentClassificationKeyIn;
@@ -2086,6 +2088,10 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
 
   // endregion
   // region comments
+
+  public Boolean getHasComments() {
+    return hasComments;
+  }
 
   public TaskState[] getStateNotIn() {
     return stateNotIn;
@@ -2364,15 +2370,15 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
   }
 
   public Boolean getRead() {
-    return isRead;
+    return read;
   }
 
   public Boolean getTransferred() {
-    return isTransferred;
+    return transferred;
   }
 
   public Boolean getReopened() {
-    return isReopened;
+    return reopened;
   }
 
   public String[] getAttachmentClassificationIdIn() {
@@ -2778,11 +2784,11 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
         .map(this::wrapElementsInLikeStatement)
         .ifPresent(query::sorValueLike);
 
-    Optional.ofNullable(isRead).ifPresent(query::readEquals);
+    Optional.ofNullable(read).ifPresent(query::readEquals);
 
-    Optional.ofNullable(isTransferred).ifPresent(query::transferredEquals);
+    Optional.ofNullable(transferred).ifPresent(query::transferredEquals);
 
-    Optional.ofNullable(isReopened).ifPresent(query::reopenedEquals);
+    Optional.ofNullable(reopened).ifPresent(query::reopenedEquals);
 
     Optional.ofNullable(hasComments).ifPresent(query::hasComments);
 
