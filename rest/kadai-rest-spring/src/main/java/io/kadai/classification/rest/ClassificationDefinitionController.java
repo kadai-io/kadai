@@ -18,6 +18,7 @@
 
 package io.kadai.classification.rest;
 
+import static io.kadai.common.internal.util.CheckedConsumer.rethrowing;
 import static io.kadai.common.internal.util.CheckedFunction.wrapping;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,14 +40,13 @@ import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.RestEndpoints;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.MediaType;
@@ -136,50 +136,73 @@ public class ClassificationDefinitionController implements ClassificationDefinit
   private void checkForDuplicates(
       Collection<ClassificationDefinitionRepresentationModel> definitionList)
       throws ClassificationAlreadyExistException {
-    List<String> identifiers = new ArrayList<>();
-    for (ClassificationDefinitionRepresentationModel definition : definitionList) {
-      ClassificationRepresentationModel classification = definition.getClassification();
-      String identifier = classification.getKey() + "|" + classification.getDomain();
-      if (identifiers.contains(identifier)) {
-        throw new ClassificationAlreadyExistException(
-            definition.getClassification().getKey(), definition.getClassification().getDomain());
-      }
-      identifiers.add(identifier);
-    }
+    Set<String> seen = new HashSet<>();
+    definitionList.stream()
+        .map(ClassificationDefinitionRepresentationModel::getClassification)
+        .forEach(
+            rethrowing(
+                cl -> {
+                  String key = cl.getKey();
+                  String domain = cl.getDomain();
+                  if (!seen.add(key + "|" + domain)) {
+                    throw new ClassificationAlreadyExistException(key, domain);
+                  }
+                }));
   }
 
   private Map<Classification, String> mapChildrenToParentKeys(
       Collection<ClassificationDefinitionRepresentationModel> definitionList,
       Map<String, String> systemIds) {
-    Map<Classification, String> childrenInFile = new HashMap<>();
-    Set<String> newKeysWithDomain = new HashSet<>();
-    definitionList.stream()
+    Stream<ClassificationDefinitionRepresentationModel> definitionStream = definitionList.stream();
+
+    Set<String> keysWithDomain =
+        definitionList.stream()
+            .map(
+                def -> def.getClassification().getKey() + "|" + def.getClassification().getDomain())
+            .collect(Collectors.toSet());
+
+    Map<String, String> classificationIdToKey =
+        definitionList.stream()
+            .collect(
+                Collectors.toMap(
+                    def -> def.getClassification().getClassificationId(),
+                    def -> def.getClassification().getKey()));
+
+    definitionStream
         .map(ClassificationDefinitionRepresentationModel::getClassification)
-        .forEach(cl -> newKeysWithDomain.add(cl.getKey() + "|" + cl.getDomain()));
+        .map(this::normalizeNullValues)
+        .filter(cl -> !cl.getParentId().isEmpty() && cl.getParentKey().isEmpty())
+        .forEach(cl -> cl.setParentKey(classificationIdToKey.getOrDefault(cl.getParentId(), "")));
 
-    for (ClassificationDefinitionRepresentationModel def : definitionList) {
-      ClassificationRepresentationModel cl = def.getClassification();
-      cl.setParentId(cl.getParentId() == null ? "" : cl.getParentId());
-      cl.setParentKey(cl.getParentKey() == null ? "" : cl.getParentKey());
+    return definitionList.stream()
+        .map(def -> Map.entry(def, def.getClassification()))
+        .filter(
+            defClassEntry ->
+                hasResolvableParent(defClassEntry.getValue(), keysWithDomain, systemIds))
+        .collect(
+            Collectors.toMap(
+                defClassEntry -> assembler.toEntityModel(defClassEntry.getKey()),
+                defClassEntry -> defClassEntry.getValue().getParentKey()));
+  }
 
-      if (!cl.getParentId().equals("") && cl.getParentKey().equals("")) {
-        for (ClassificationDefinitionRepresentationModel parentDef : definitionList) {
-          ClassificationRepresentationModel parent = parentDef.getClassification();
-          if (cl.getParentId().equals(parent.getClassificationId())) {
-            cl.setParentKey(parent.getKey());
-          }
-        }
-      }
-
-      String parentKeyAndDomain = cl.getParentKey() + "|" + cl.getDomain();
-      if ((!cl.getParentKey().isEmpty()
-          && !cl.getParentKey().equals("")
-          && (newKeysWithDomain.contains(parentKeyAndDomain)
-              || systemIds.containsKey(parentKeyAndDomain)))) {
-        childrenInFile.put(assembler.toEntityModel(def), cl.getParentKey());
-      }
+  ClassificationRepresentationModel normalizeNullValues(ClassificationRepresentationModel cl) {
+    if (cl.getParentKey() == null) {
+      cl.setParentKey("");
     }
-    return childrenInFile;
+    if (cl.getParentId() == null) {
+      cl.setParentId("");
+    }
+    return cl;
+  }
+
+  Boolean hasResolvableParent(
+      ClassificationRepresentationModel cl,
+      Set<String> newKeysWithDomain,
+      Map<String, String> systemIds) {
+    String parentKeyAndDomain = cl.getParentKey() + "|" + cl.getDomain();
+    return !cl.getParentKey().isEmpty()
+        && (newKeysWithDomain.contains(parentKeyAndDomain)
+            || systemIds.containsKey(parentKeyAndDomain));
   }
 
   private void insertOrUpdateClassificationsWithoutParent(
