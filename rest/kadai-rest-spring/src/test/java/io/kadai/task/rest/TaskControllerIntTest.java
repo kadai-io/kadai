@@ -47,6 +47,7 @@ import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.time.Instant;
@@ -2092,7 +2093,7 @@ class TaskControllerIntTest {
               + "\"primaryObjRef\":{\"company\":\"MyCompany1\",\"system\":\"MySystem1\","
               + "\"systemInstance\":\"MyInstance1\",\"type\":\"MyType1\",\"value\":\"00000001\"}}";
 
-      URL url = new URL(restHelper.toUrl(RestEndpoints.URL_TASKS));
+      URL url = URI.create(restHelper.toUrl(RestEndpoints.URL_TASKS)).toURL();
       HttpURLConnection con = (HttpURLConnection) url.openConnection();
       con.setRequestMethod("POST");
       con.setDoOutput(true);
@@ -2112,7 +2113,7 @@ class TaskControllerIntTest {
               + "\"primaryObjRef\":{\"company\":\"MyCompany1\",\"system\":\"MySystem1\","
               + "\"systemInstance\":\"MyInstance1\",\"type\":\"MyType1\",\"value\":\"00000001\"}}";
 
-      url = new URL(restHelper.toUrl(RestEndpoints.URL_TASKS));
+      url = URI.create(restHelper.toUrl(RestEndpoints.URL_TASKS)).toURL();
       con = (HttpURLConnection) url.openConnection();
       con.setRequestMethod("POST");
       con.setDoOutput(true);

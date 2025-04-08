@@ -58,7 +58,6 @@ import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedToQueryWorkbasketException;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
-import java.security.PrivilegedAction;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
