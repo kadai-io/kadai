@@ -200,11 +200,11 @@ public class ClassificationDefinitionController implements ClassificationDefinit
 
   Boolean hasResolvableParent(
       ClassificationRepresentationModel cl,
-      Set<String> newKeysWithDomain,
+      Set<String> keysWithDomain,
       Map<String, String> systemIds) {
     String parentKeyAndDomain = cl.getParentKey() + "|" + cl.getDomain();
     return !cl.getParentKey().isEmpty()
-        && (newKeysWithDomain.contains(parentKeyAndDomain)
+        && (keysWithDomain.contains(parentKeyAndDomain)
             || systemIds.containsKey(parentKeyAndDomain));
   }
 
