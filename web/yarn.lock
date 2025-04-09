@@ -10022,7 +10022,7 @@ __metadata:
     tslib: "npm:2.8.1"
     tslint: "npm:6.1.3"
     typescript: "npm:5.8.3"
-    webpack: "npm:5.99.2"
+    webpack: "npm:5.99.5"
     zone.js: "npm:0.15.0"
   languageName: unknown
   linkType: soft
@@ -14434,9 +14434,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:5.99.2":
-  version: 5.99.2
-  resolution: "webpack@npm:5.99.2"
+"webpack@npm:5.99.5":
+  version: 5.99.5
+  resolution: "webpack@npm:5.99.5"
   dependencies:
     "@types/eslint-scope": "npm:^3.7.7"
     "@types/estree": "npm:^1.0.6"
@@ -14466,7 +14466,7 @@ __metadata:
       optional: true
   bin:
     webpack: bin/webpack.js
-  checksum: 10c0/9ad89d986f078311f96284862f12323ff0b55ef23065506043ccccbfb06f60fc0d30423b2a41a6db982666fc7c39b80eb687b6c05319ad1cac3b6e3bbf87fde4
+  checksum: 10c0/8f5ebea5e2ae7449774d535862348ee564c100350643e4bdd0683fa07eabc058e88a07b7af7176ee4038d03e5172001daf65c16acebf90bc7ba48c08e25e6792
   languageName: node
   linkType: hard
 
