@@ -46,7 +46,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.MediaType;
@@ -153,7 +152,6 @@ public class ClassificationDefinitionController implements ClassificationDefinit
   private Map<Classification, String> mapChildrenToParentKeys(
       Collection<ClassificationDefinitionRepresentationModel> definitionList,
       Map<String, String> systemIds) {
-    Stream<ClassificationDefinitionRepresentationModel> definitionStream = definitionList.stream();
 
     Set<String> keysWithDomain =
         definitionList.stream()
@@ -163,12 +161,17 @@ public class ClassificationDefinitionController implements ClassificationDefinit
 
     Map<String, String> classificationIdToKey =
         definitionList.stream()
+            .filter(
+                def ->
+                    def.getClassification().getClassificationId() != null
+                        && def.getClassification().getKey() != null)
             .collect(
                 Collectors.toMap(
                     def -> def.getClassification().getClassificationId(),
-                    def -> def.getClassification().getKey()));
+                    def -> def.getClassification().getKey(),
+                    (existing, replacement) -> existing));
 
-    definitionStream
+    definitionList.stream()
         .map(ClassificationDefinitionRepresentationModel::getClassification)
         .map(this::normalizeNullValues)
         .filter(cl -> !cl.getParentId().isEmpty() && cl.getParentKey().isEmpty())
