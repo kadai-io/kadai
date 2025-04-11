@@ -257,6 +257,8 @@ We use [Semantic Versioning](https://semver.org/).
 
 Our focus is mainly directed to the backend, but we maintain a demo frontend in Angular, check it out by clicking on the badge!
 
+For login choose username `teamlead-1` with password `teamlead-1`.
+
 # 📨Contact
 
 If you have any questions or ideas feel free to create an [issue](https://github.com/kadai-io/kadai/issues) or contact us
