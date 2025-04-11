@@ -123,7 +123,8 @@ public class ClassificationDefinitionController implements ClassificationDefinit
   private Map<String, String> getSystemIds() {
     return classificationService.createClassificationQuery().list().stream()
         .collect(
-            Collectors.toMap(i -> i.getKey() + "|" + i.getDomain(), ClassificationSummary::getId));
+            Collectors.toMap(
+                i -> logicalId(i.getKey(), i.getDomain()), ClassificationSummary::getId));
   }
 
   private ClassificationDefinitionCollectionRepresentationModel
@@ -143,7 +144,7 @@ public class ClassificationDefinitionController implements ClassificationDefinit
                 cl -> {
                   String key = cl.getKey();
                   String domain = cl.getDomain();
-                  if (!seen.add(key + "|" + domain)) {
+                  if (!seen.add(logicalId(key, domain))) {
                     throw new ClassificationAlreadyExistException(key, domain);
                   }
                 }));
@@ -155,8 +156,7 @@ public class ClassificationDefinitionController implements ClassificationDefinit
 
     Set<String> keysWithDomain =
         definitionList.stream()
-            .map(
-                def -> def.getClassification().getKey() + "|" + def.getClassification().getDomain())
+            .map(def -> logicalId(def.getClassification()))
             .collect(Collectors.toSet());
 
     Map<String, String> classificationIdToKey =
@@ -202,7 +202,7 @@ public class ClassificationDefinitionController implements ClassificationDefinit
       ClassificationRepresentationModel cl,
       Set<String> keysWithDomain,
       Map<String, String> systemIds) {
-    String parentKeyAndDomain = cl.getParentKey() + "|" + cl.getDomain();
+    String parentKeyAndDomain = logicalId(cl);
     return !cl.getParentKey().isEmpty()
         && (keysWithDomain.contains(parentKeyAndDomain)
             || systemIds.containsKey(parentKeyAndDomain));
@@ -226,8 +226,7 @@ public class ClassificationDefinitionController implements ClassificationDefinit
 
       Classification newClassification = assembler.toEntityModel(definition);
 
-      String systemId =
-          systemIds.get(classificationRepModel.getKey() + "|" + classificationRepModel.getDomain());
+      String systemId = systemIds.get(logicalId(classificationRepModel));
       if (systemId != null) {
         updateExistingClassification(newClassification, systemId);
       } else {
@@ -307,5 +306,13 @@ public class ClassificationDefinitionController implements ClassificationDefinit
         ClassificationCustomField.CUSTOM_8,
         newClassification.getCustomField(ClassificationCustomField.CUSTOM_8));
     classificationService.updateClassification(currentClassification);
+  }
+
+  private String logicalId(ClassificationRepresentationModel classification) {
+    return logicalId(classification.getKey(), classification.getDomain());
+  }
+
+  private String logicalId(String key, String domain) {
+    return key + "|" + domain;
   }
 }
