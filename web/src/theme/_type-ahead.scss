@@ -18,10 +18,12 @@
 
 typeahead-container > ul.dropdown-menu {
   max-width: 600px;
+
   & > li.active {
     & > a {
       background-color: $blue;
     }
+
     & > a:hover {
       background-color: $blue;
     }

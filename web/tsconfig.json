@@ -24,5 +24,8 @@
       "@workbasket/*": ["app/v2/workbasket/*"]
     },
     "useDefineForClassFields": false
+  },
+  "angularCompilerOptions": {
+    "strictStandalone": true
   }
 }

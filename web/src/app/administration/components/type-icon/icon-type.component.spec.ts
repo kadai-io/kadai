@@ -16,17 +16,12 @@
  *
  */
 
-import { Component, DebugElement, Input } from '@angular/core';
+import { DebugElement } from '@angular/core';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IconTypeComponent } from './icon-type.component';
 import { WorkbasketType } from '../../../shared/models/workbasket-type';
 
-@Component({ selector: 'svg-icon', template: '' })
-class SvgIconStub {
-  @Input() src;
-  @Input() svgStyle;
-  @Input() matTooltip;
-}
+jest.mock('angular-svg-icon');
 
 describe('IconTypeComponent', () => {
   let fixture: ComponentFixture<IconTypeComponent>;
@@ -35,9 +30,8 @@ describe('IconTypeComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [],
-      declarations: [IconTypeComponent],
-      providers: [SvgIconStub]
+      imports: [IconTypeComponent],
+      declarations: []
     }).compileComponents();
 
     fixture = TestBed.createComponent(IconTypeComponent);

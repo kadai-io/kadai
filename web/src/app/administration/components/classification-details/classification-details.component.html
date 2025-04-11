@@ -25,13 +25,13 @@
     <mat-toolbar class="action-toolbar">
       <h4 class="action-toolbar__headline">
         <span
-            class="{{isCreatingNewClassification? 'action-toolbar__title-badge' : 'action-toolbar__title'}}"
-            matTooltip="{{classification.name}}&nbsp; [{{classification.type}}]">
+          class="{{isCreatingNewClassification? 'action-toolbar__title-badge' : 'action-toolbar__title'}}"
+          matTooltip="{{classification.name}}&nbsp; [{{classification.type}}]">
           {{ classification.name }}&nbsp; [{{ classification.type }}]
         </span>
         <span
-            *ngIf="isCreatingNewClassification" class="action-toolbar__badge-message"
-            matTooltip="{{badgeMessage$ | async}}">
+          *ngIf="isCreatingNewClassification" class="action-toolbar__badge-message"
+          matTooltip="{{badgeMessage$ | async}}">
           {{ badgeMessage$ | async }}
         </span>
       </h4>
@@ -165,7 +165,7 @@
                 <a (click)="validChanged()" title="Valid in Domain">
                   <mat-icon class="detailed-fields__domain-checkbox-icon">{{
                       classification.isValidInDomain ? 'check_box'
-                          : 'check_box_outline_blank'
+                        : 'check_box_outline_blank'
                     }}
                   </mat-icon>
                 </a>
@@ -203,9 +203,9 @@
                   </mat-form-field>
 
                   <kadai-shared-field-error-display
-                      [displayError]="!isFieldValid('classification.priority')"
-                      [validationTrigger]="toggleValidationMap.get('classification.priority.name')"
-                      errorMessage="* Priority is required">
+                    [displayError]="!isFieldValid('classification.priority')"
+                    [validationTrigger]="toggleValidationMap.get('classification.priority.name')"
+                    errorMessage="* Priority is required">
                   </kadai-shared-field-error-display>
                 </div>
               </div>
@@ -233,8 +233,8 @@
                 <mat-select [(value)]="classification.category" required>
                   <mat-select-trigger>
                     <svg-icon
-                        [src]="(getCategoryIcon(classification.category) | async)?.left"
-                        class="detailed-fields__category-icon">
+                      [src]="(getCategoryIcon(classification.category) | async)?.left"
+                      class="detailed-fields__category-icon">
                     </svg-icon>
                     {{ classification.category }}
                   </mat-select-trigger>

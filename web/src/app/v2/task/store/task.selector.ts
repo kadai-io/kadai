@@ -21,7 +21,9 @@ import { Selector } from '@ngxs/store';
 import { Task, TaskSummary } from '@task/models/task';
 import { TaskState, TaskStateModel } from './task.state';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class TaskSelector {
   @Selector([TaskState])
   static tasks(state: TaskStateModel): TaskSummary[] {
