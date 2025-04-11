@@ -146,16 +146,6 @@ public interface Task extends TaskSummary {
   /**
    * Sets the value for the specified {@linkplain TaskCustomField customField}.
    *
-   * @param customField identifies which {@linkplain TaskCustomField customField} is to be set
-   * @param value the value of the {@linkplain TaskCustomField customField} to be set
-   * @deprecated Use {@linkplain #setCustomField(TaskCustomField, String)} instead
-   */
-  @Deprecated
-  void setCustomAttribute(TaskCustomField customField, String value);
-
-  /**
-   * Sets the value for the specified {@linkplain TaskCustomField customField}.
-   *
    * @param customField identifies which {@linkplain TaskCustomField customField} is to be set.
    * @param value the value of the {@linkplain TaskCustomField customField} to be set
    */
