@@ -34,7 +34,7 @@
     </licenses>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -368,7 +368,7 @@
                 </dependencies>
                 <configuration>
                     <complianceLevel>${java.version}</complianceLevel>
-                    <source>17</source>
+                    <source>21</source>
                     <target>8</target>
                     <showWeaveInfo>false</showWeaveInfo>
                     <verbose>true</verbose>

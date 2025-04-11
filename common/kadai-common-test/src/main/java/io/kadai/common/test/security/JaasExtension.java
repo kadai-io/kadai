@@ -28,7 +28,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.security.Principal;
-import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -108,8 +108,8 @@ public class JaasExtension implements InvocationInterceptor, TestTemplateInvocat
             throw new SystemException("Caught exception", e);
           }
         };
-    PrivilegedAction<T> performInvocation = () -> proceedInvocation.apply(invocation);
-    return Subject.doAs(subject, performInvocation);
+    Callable<T> performInvocation = () -> proceedInvocation.apply(invocation);
+    return Subject.callAs(subject, performInvocation);
   }
 
   private static List<Principal> getPrincipals(WithAccessId withAccessId) {

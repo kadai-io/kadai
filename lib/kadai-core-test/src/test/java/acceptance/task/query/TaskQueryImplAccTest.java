@@ -58,12 +58,12 @@ import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedToQueryWorkbasketException;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
-import java.security.PrivilegedAction;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -218,12 +218,12 @@ class TaskQueryImplAccTest {
                       }
                     });
 
-        PrivilegedAction<Void> action =
+        Callable<Void> action =
             () -> {
               consumer.accept(taskService);
               return null;
             };
-        Subject.doAs(subject, action);
+        Subject.callAs(subject, action);
       };
     }
   }
