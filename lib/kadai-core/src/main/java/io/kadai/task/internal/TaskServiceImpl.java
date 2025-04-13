@@ -454,40 +454,15 @@ public class TaskServiceImpl implements TaskService {
           ObjectReferencePersistenceException,
           NotAuthorizedOnWorkbasketException {
 
-    if (createTaskPreprocessorManager.isEnabled()) {
-      taskToCreate = createTaskPreprocessorManager.processTaskBeforeCreation(taskToCreate);
-    }
-
-    TaskImpl task = (TaskImpl) taskToCreate;
+    TaskImpl task = preprocessTask(taskToCreate);
 
     try {
       kadaiEngine.openConnection();
 
-      if (task.getId() != null && !task.getId().isEmpty()) {
-        throw new InvalidArgumentException("taskId must be empty when creating a task");
-      }
-
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Task {} cannot be found, so it can be created.", task.getId());
-      }
-      Workbasket workbasket;
-
-      if (task.getWorkbasketSummary() != null && task.getWorkbasketSummary().getId() != null) {
-        workbasket = workbasketService.getWorkbasket(task.getWorkbasketSummary().getId());
-      } else if (task.getWorkbasketKey() != null) {
-        workbasket = workbasketService.getWorkbasket(task.getWorkbasketKey(), task.getDomain());
-      } else {
-        RoutingTarget routingTarget = calculateWorkbasketDuringTaskCreation(task);
-        String owner =
-            routingTarget.getOwner() == null ? task.getOwner() : routingTarget.getOwner();
-        workbasket = workbasketService.getWorkbasket(routingTarget.getWorkbasketId());
-        task.setOwner(owner);
-      }
-
+      Workbasket workbasket = resolveWorkbasket(task);
       if (workbasket.isMarkedForDeletion()) {
         throw new WorkbasketNotFoundException(workbasket.getId());
       }
-
       task.setWorkbasketSummary(workbasket.asSummary());
       task.setDomain(workbasket.getDomain());
 
@@ -496,75 +471,99 @@ public class TaskServiceImpl implements TaskService {
             task.getWorkbasketSummary().getId(), WorkbasketPermission.APPEND);
       }
 
-      // we do use the key and not the id to make sure that we use the classification from the right
-      // domain.
-      // otherwise we would have to check the classification and its domain for validity.
-      String classificationKey = task.getClassificationKey();
-      if (classificationKey == null || classificationKey.length() == 0) {
-        throw new InvalidArgumentException("classificationKey of task must not be empty");
-      }
-
-      Classification classification =
-          this.classificationService.getClassification(classificationKey, workbasket.getDomain());
+      Classification classification = getClassificationByKeyAndDomain(task, workbasket);
       task.setClassificationSummary(classification.asSummary());
+
       ObjectReferenceImpl.validate(task.getPrimaryObjRef(), "primary ObjectReference", "Task");
-      standardSettingsOnTaskCreation(task, classification);
-      setCallbackStateOnTaskCreation(task);
-      priorityServiceManager.calculatePriorityOfTask(task).ifPresent(task::setPriority);
+      applyTaskSettings(task, classification);
 
-      try {
-        this.taskMapper.insert(task);
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Method createTask() created Task '{}'.", task.getId());
-        }
-        if (historyEventManager.isEnabled()) {
+      persistTask(task);
 
-          String details =
-              ObjectAttributeChangeDetector.determineChangesInAttributes(newTask(), task);
-          historyEventManager.createEvent(
-              new TaskCreatedEvent(
-                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                  task,
-                  kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
-                  details));
-        }
-      } catch (PersistenceException e) {
-        // Error messages:
-        // Postgres: ERROR: duplicate key value violates unique constraint "uc_external_id"
-        // DB/2: ### Error updating database.  Cause:
-        // com.ibm.db2.jcc.am.SqlIntegrityConstraintViolationException: DB2 SQL Error: SQLCODE=-803,
-        // SQLSTATE=23505, SQLERRMC=2;KADAI.TASK, DRIVER=4.22.29
-        //       ### The error may involve io.kadai.mappings.TaskMapper.insert-Inline
-        //       ### The error occurred while setting parameters
-        //       ### SQL: INSERT INTO TASK(ID, EXTERNAL_ID, CREATED, CLAIMED, COMPLETED, MODIFIED,
-        // PLANNED, DUE, NAME, CREATOR, DESCRIPTION, NOTE, PRIORITY, STATE,
-        // CLASSIFICATION_CATEGORY, CLASSIFICATION_KEY, CLASSIFICATION_ID, WORKBASKET_ID,
-        // WORKBASKET_KEY, DOMAIN, BUSINESS_PROCESS_ID, PARENT_BUSINESS_PROCESS_ID, OWNER,
-        // POR_COMPANY, POR_SYSTEM, POR_INSTANCE, POR_TYPE, POR_VALUE, IS_READ, IS_TRANSFERRED,
-        // CALLBACK_INFO, CUSTOM_ATTRIBUTES, CUSTOM_1, CUSTOM_2, CUSTOM_3, CUSTOM_4, CUSTOM_5,
-        // CUSTOM_6, CUSTOM_7, CUSTOM_8, CUSTOM_9, CUSTOM_10, CUSTOM_11,  CUSTOM_12,  CUSTOM_13,
-        // CUSTOM_14,  CUSTOM_15,  CUSTOM_16 ) VALUES(?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-        // ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-        // ?,  ?)
-        //       ### Cause: com.ibm.db2.jcc.am.SqlIntegrityConstraintViolationException: DB2 SQL
-        // Error: SQLCODE=-803, SQLSTATE=23505, SQLERRMC=2;KADAI.TASK, DRIVER=4.22.29
-        // H2:   ### Error updating database.  Cause: org.h2.jdbc.JdbcSQLException: Unique index or
-        // primary key violation: "UC_EXTERNAL_ID_INDEX_2 ON KADAI.TASK(EXTERNAL_ID) ...
-        String msg = e.getMessage() != null ? e.getMessage().toLowerCase() : null;
-        if (msg != null
-            && (msg.contains("violation")
-                || msg.contains("violates")
-                || msg.contains("violated")
-                || msg.contains("verletzt"))
-            && msg.contains("external_id")) {
-          throw new TaskAlreadyExistException(task.getExternalId());
-        } else {
-          throw e;
-        }
-      }
+      createHistoryEvent(task);
+
       return task;
     } finally {
       kadaiEngine.returnConnection();
+    }
+  }
+
+  private TaskImpl preprocessTask(Task createdTask) {
+    if (createTaskPreprocessorManager.isEnabled()) {
+      createdTask = createTaskPreprocessorManager.processTaskBeforeCreation(createdTask);
+    }
+    TaskImpl task = (TaskImpl) createdTask;
+
+    if (task.getId() != null && !task.getId().isEmpty()) {
+      throw new InvalidArgumentException("taskId must be empty when creating a task");
+    }
+
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Task {} cannot be found, so it can be created.", task.getId());
+    }
+    return task;
+  }
+
+  private Workbasket resolveWorkbasket(TaskImpl task)
+          throws WorkbasketNotFoundException,
+          InvalidArgumentException,
+          NotAuthorizedOnWorkbasketException {
+
+    if (task.getWorkbasketSummary() != null && task.getWorkbasketSummary().getId() != null) {
+      return workbasketService.getWorkbasket(task.getWorkbasketSummary().getId());
+    }
+    if (task.getWorkbasketKey() != null) {
+      return workbasketService.getWorkbasket(task.getWorkbasketKey(), task.getDomain());
+    }
+
+    RoutingTarget routingTarget = calculateWorkbasketDuringTaskCreation(task);
+    String owner = routingTarget.getOwner() == null ? task.getOwner() : routingTarget.getOwner();
+    task.setOwner(owner);
+    return workbasketService.getWorkbasket(routingTarget.getWorkbasketId());
+  }
+
+  private Classification getClassificationByKeyAndDomain(TaskImpl task, Workbasket workbasket)
+          throws ClassificationNotFoundException, InvalidArgumentException {
+    // we do use the key and not the id to make sure that we use the classification from the right
+    // domain.
+    // otherwise we would have to check the classification and its domain for validity.
+    String classificationKey = task.getClassificationKey();
+    if (classificationKey == null || classificationKey.isEmpty()) {
+      throw new InvalidArgumentException("classificationKey of task must not be empty");
+    }
+
+    return this.classificationService.getClassification(classificationKey, workbasket.getDomain());
+  }
+
+  private void persistTask(TaskImpl task) throws TaskAlreadyExistException, PersistenceException {
+    try {
+      this.taskMapper.insert(task);
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Method createTask() created Task '{}'.", task.getId());
+      }
+    } catch (PersistenceException e) {
+      boolean isExternalIdViolation = Optional.ofNullable(e.getMessage())
+              .map(String::toLowerCase)
+              .filter(msg -> msg.contains("external_id"))
+              .filter(msg -> msg.contains("violation")
+                      || msg.contains("violates")
+                      || msg.contains("violated")
+                      || msg.contains("verletzt"))
+              .isPresent();
+      if (isExternalIdViolation) {
+        throw new TaskAlreadyExistException(task.getExternalId());
+      }
+      throw e;
+    }
+  }
+
+  private void createHistoryEvent(TaskImpl task) {
+    if (historyEventManager.isEnabled()) {
+      historyEventManager.createEvent(
+              new TaskCreatedEvent(
+                      IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                      task,
+                      kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                      ObjectAttributeChangeDetector.determineChangesInAttributes(newTask(), task)));
     }
   }
 
@@ -2112,7 +2111,7 @@ public class TaskServiceImpl implements TaskService {
     return Optional.empty();
   }
 
-  private void standardSettingsOnTaskCreation(TaskImpl task, Classification classification)
+  private void applyTaskSettings(TaskImpl task, Classification classification)
       throws InvalidArgumentException,
           ClassificationNotFoundException,
           AttachmentPersistenceException,
@@ -2166,6 +2165,9 @@ public class TaskServiceImpl implements TaskService {
     // the Classifications of the Attachments.
     // This is necessary to guarantee that the following calculation is correct.
     serviceLevelHandler.updatePrioPlannedDueOfTask(task, null);
+
+    setCallbackStateOnTaskCreation(task);
+    priorityServiceManager.calculatePriorityOfTask(task).ifPresent(task::setPriority);
   }
 
   private void setDefaultTaskReceivedDateFromAttachments(TaskImpl task) {
