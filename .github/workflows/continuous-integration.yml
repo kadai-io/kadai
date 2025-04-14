@@ -474,8 +474,12 @@ jobs:
   upload_to_sonar:
     runs-on: ubuntu-22.04
     name: Upload SonarQube analysis to sonarcloud
-    # not on release
-    if: startsWith(github.ref, 'refs/tags') == false
+    # neither on release nor forks nor dependabot
+    if: |
+      github.repository == 'kadai-io/kadai' &&
+      !startsWith(github.ref, 'refs/tags') &&
+      !startsWith(github.head_ref || github.ref_name, 'dependabot/') &&
+      github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request'
     needs: [ test_frontend, test_e2e, test_backend ]
     steps:
       - name: Git checkout
