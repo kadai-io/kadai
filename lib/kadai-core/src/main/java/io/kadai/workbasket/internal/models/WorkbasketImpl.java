@@ -41,12 +41,6 @@ public class WorkbasketImpl extends WorkbasketSummaryImpl implements Workbasket 
     this.key = key == null ? null : key.trim();
   }
 
-  @Deprecated
-  @Override
-  public void setCustomAttribute(WorkbasketCustomField customField, String value) {
-    setCustomField(customField, value);
-  }
-
   @Override
   public void setCustomField(WorkbasketCustomField customField, String value) {
     switch (customField) {
