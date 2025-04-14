@@ -2538,27 +2538,27 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
     Optional.ofNullable(plannedWithin)
         .map(this::extractTimeIntervals)
         .ifPresent(query::plannedWithin);
-    query.plannedWithin(new TimeInterval(plannedFrom, plannedUntil));
+    queryWithinInterval(query::plannedWithin, plannedFrom, plannedUntil);
     Optional.ofNullable(plannedNotWithin)
         .map(this::extractTimeIntervals)
         .ifPresent(query::plannedNotWithin);
-    query.plannedNotWithin(new TimeInterval(plannedFromNot, plannedUntilNot));
+    queryWithinInterval(query::plannedNotWithin, plannedFromNot, plannedUntilNot);
 
     Optional.ofNullable(dueWithin).map(this::extractTimeIntervals).ifPresent(query::dueWithin);
-    query.dueWithin(new TimeInterval(dueFrom, dueUntil));
+    queryWithinInterval(query::dueWithin, dueFrom, dueUntil);
     Optional.ofNullable(dueNotWithin)
         .map(this::extractTimeIntervals)
         .ifPresent(query::dueNotWithin);
-    query.dueNotWithin(new TimeInterval(dueFromNot, dueUntilNot));
+    queryWithinInterval(query::dueNotWithin, dueFromNot, dueUntilNot);
 
     Optional.ofNullable(completedWithin)
         .map(this::extractTimeIntervals)
         .ifPresent(query::completedWithin);
-    query.completedWithin(new TimeInterval(completedFrom, completedUntil));
+    queryWithinInterval(query::completedWithin, completedFrom, completedUntil);
     Optional.ofNullable(completedNotWithin)
         .map(this::extractTimeIntervals)
         .ifPresent(query::completedNotWithin);
-    query.completedNotWithin(new TimeInterval(completedFromNot, completedUntilNot));
+    queryWithinInterval(query::completedNotWithin, completedFromNot, completedUntilNot);
 
     Optional.ofNullable(nameIn).ifPresent(query::nameIn);
     Optional.ofNullable(nameNotIn).ifPresent(query::nameNotIn);
