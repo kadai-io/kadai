@@ -40,19 +40,18 @@ import io.kadai.common.internal.util.EnumUtil;
 import io.kadai.common.internal.util.IdGenerator;
 import io.kadai.common.internal.util.ObjectAttributeChangeDetector;
 import io.kadai.common.internal.util.Pair;
-import io.kadai.spi.history.api.KadaiEventPublisher;
 import io.kadai.spi.history.api.events.task.TaskCancelledEvent;
 import io.kadai.spi.history.api.events.task.TaskClaimCancelledEvent;
 import io.kadai.spi.history.api.events.task.TaskClaimedEvent;
 import io.kadai.spi.history.api.events.task.TaskCompletedEvent;
 import io.kadai.spi.history.api.events.task.TaskCreatedEvent;
 import io.kadai.spi.history.api.events.task.TaskDeletedEvent;
-import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
+import io.kadai.spi.history.api.events.task.TaskReopenedEvent;
 import io.kadai.spi.history.api.events.task.TaskRequestChangesEvent;
 import io.kadai.spi.history.api.events.task.TaskRequestReviewEvent;
 import io.kadai.spi.history.api.events.task.TaskTerminatedEvent;
 import io.kadai.spi.history.api.events.task.TaskUpdatedEvent;
-import io.kadai.spi.history.internal.SimpleKadaiEventPublisherImpl;
+import io.kadai.spi.history.internal.HistoryEventManager;
 import io.kadai.spi.priority.internal.PriorityServiceManager;
 import io.kadai.spi.routing.api.RoutingTarget;
 import io.kadai.spi.task.internal.AfterRequestChangesManager;
@@ -74,6 +73,7 @@ import io.kadai.task.api.exceptions.InvalidOwnerException;
 import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.NotAuthorizedOnTaskCommentException;
 import io.kadai.task.api.exceptions.ObjectReferencePersistenceException;
+import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
@@ -103,6 +103,7 @@ import io.kadai.workbasket.internal.models.WorkbasketSummaryImpl;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -141,7 +142,7 @@ public class TaskServiceImpl implements TaskService {
   private final ObjectReferenceMapper objectReferenceMapper;
   private final ObjectReferenceHandler objectReferenceHandler;
   private final UserMapper userMapper;
-  private final KadaiEventPublisher<TaskHistoryEvent> eventPublisher;
+  private final HistoryEventManager historyEventManager;
   private final CreateTaskPreprocessorManager createTaskPreprocessorManager;
   private final PriorityServiceManager priorityServiceManager;
   private final ReviewRequiredManager reviewRequiredManager;
@@ -165,7 +166,7 @@ public class TaskServiceImpl implements TaskService {
     this.objectReferenceMapper = objectReferenceMapper;
     this.userMapper = userMapper;
     this.classificationService = kadaiEngine.getEngine().getClassificationService();
-    this.eventPublisher = new SimpleKadaiEventPublisherImpl<>(kadaiEngine.getKadaiEventBroker());
+    this.historyEventManager = kadaiEngine.getHistoryEventManager();
     this.createTaskPreprocessorManager = kadaiEngine.getCreateTaskPreprocessorManager();
     this.priorityServiceManager = kadaiEngine.getPriorityServiceManager();
     this.reviewRequiredManager = kadaiEngine.getReviewRequiredManager();
@@ -232,6 +233,21 @@ public class TaskServiceImpl implements TaskService {
       task.setState(TaskState.READY_FOR_REVIEW);
     } else {
       task.setState(TaskState.READY);
+    }
+  }
+
+  private void reopenActionsOnTask(
+      TaskSummaryImpl task, String userId, String userLongName, Instant now) {
+    task.setOwner(userId);
+    task.setOwnerLongName(userLongName);
+    task.setModified(now);
+    task.setClaimed(now);
+    task.setState(TaskState.CLAIMED);
+    task.setCompleted(null);
+    task.setRead(false);
+    task.setReopened(true);
+    if (!task.isManualPriorityActive()) {
+      priorityServiceManager.calculatePriorityOfTask(task).ifPresent(task::setPriority);
     }
   }
 
@@ -438,40 +454,15 @@ public class TaskServiceImpl implements TaskService {
           ObjectReferencePersistenceException,
           NotAuthorizedOnWorkbasketException {
 
-    if (createTaskPreprocessorManager.isEnabled()) {
-      taskToCreate = createTaskPreprocessorManager.processTaskBeforeCreation(taskToCreate);
-    }
-
-    TaskImpl task = (TaskImpl) taskToCreate;
+    TaskImpl task = preprocessTaskCreation(taskToCreate);
 
     try {
       kadaiEngine.openConnection();
 
-      if (task.getId() != null && !task.getId().isEmpty()) {
-        throw new InvalidArgumentException("taskId must be empty when creating a task");
-      }
-
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Task {} cannot be found, so it can be created.", task.getId());
-      }
-      Workbasket workbasket;
-
-      if (task.getWorkbasketSummary() != null && task.getWorkbasketSummary().getId() != null) {
-        workbasket = workbasketService.getWorkbasket(task.getWorkbasketSummary().getId());
-      } else if (task.getWorkbasketKey() != null) {
-        workbasket = workbasketService.getWorkbasket(task.getWorkbasketKey(), task.getDomain());
-      } else {
-        RoutingTarget routingTarget = calculateWorkbasketDuringTaskCreation(task);
-        String owner =
-            routingTarget.getOwner() == null ? task.getOwner() : routingTarget.getOwner();
-        workbasket = workbasketService.getWorkbasket(routingTarget.getWorkbasketId());
-        task.setOwner(owner);
-      }
-
+      Workbasket workbasket = resolveWorkbasket(task);
       if (workbasket.isMarkedForDeletion()) {
         throw new WorkbasketNotFoundException(workbasket.getId());
       }
-
       task.setWorkbasketSummary(workbasket.asSummary());
       task.setDomain(workbasket.getDomain());
 
@@ -480,76 +471,103 @@ public class TaskServiceImpl implements TaskService {
             task.getWorkbasketSummary().getId(), WorkbasketPermission.APPEND);
       }
 
-      // we do use the key and not the id to make sure that we use the classification from the right
-      // domain.
-      // otherwise we would have to check the classification and its domain for validity.
-      String classificationKey = task.getClassificationKey();
-      if (classificationKey == null || classificationKey.length() == 0) {
-        throw new InvalidArgumentException("classificationKey of task must not be empty");
-      }
-
       Classification classification =
-          this.classificationService.getClassification(classificationKey, workbasket.getDomain());
+              getClassificationByKeyAndDomain(task.getClassificationKey(), workbasket.getDomain());
       task.setClassificationSummary(classification.asSummary());
+
       ObjectReferenceImpl.validate(task.getPrimaryObjRef(), "primary ObjectReference", "Task");
-      standardSettingsOnTaskCreation(task, classification);
-      setCallbackStateOnTaskCreation(task);
-      priorityServiceManager.calculatePriorityOfTask(task).ifPresent(task::setPriority);
+      applyTaskSettingsOnTaskCreation(task, classification);
 
-      try {
-        this.taskMapper.insert(task);
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Method createTask() created Task '{}'.", task.getId());
-        }
+      persistCreatedTask(task);
 
-        eventPublisher.publishing(
-            () -> {
-              String details =
-                  ObjectAttributeChangeDetector.determineChangesInAttributes(newTask(), task);
-              return new TaskCreatedEvent(
-                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                  task,
-                  kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
-                  details);
-            });
+      createTaskCreatedHistoryEvent(task);
 
-      } catch (PersistenceException e) {
-        // Error messages:
-        // Postgres: ERROR: duplicate key value violates unique constraint "uc_external_id"
-        // DB/2: ### Error updating database.  Cause:
-        // com.ibm.db2.jcc.am.SqlIntegrityConstraintViolationException: DB2 SQL Error: SQLCODE=-803,
-        // SQLSTATE=23505, SQLERRMC=2;KADAI.TASK, DRIVER=4.22.29
-        //       ### The error may involve io.kadai.mappings.TaskMapper.insert-Inline
-        //       ### The error occurred while setting parameters
-        //       ### SQL: INSERT INTO TASK(ID, EXTERNAL_ID, CREATED, CLAIMED, COMPLETED, MODIFIED,
-        // PLANNED, DUE, NAME, CREATOR, DESCRIPTION, NOTE, PRIORITY, STATE,
-        // CLASSIFICATION_CATEGORY, CLASSIFICATION_KEY, CLASSIFICATION_ID, WORKBASKET_ID,
-        // WORKBASKET_KEY, DOMAIN, BUSINESS_PROCESS_ID, PARENT_BUSINESS_PROCESS_ID, OWNER,
-        // POR_COMPANY, POR_SYSTEM, POR_INSTANCE, POR_TYPE, POR_VALUE, IS_READ, IS_TRANSFERRED,
-        // CALLBACK_INFO, CUSTOM_ATTRIBUTES, CUSTOM_1, CUSTOM_2, CUSTOM_3, CUSTOM_4, CUSTOM_5,
-        // CUSTOM_6, CUSTOM_7, CUSTOM_8, CUSTOM_9, CUSTOM_10, CUSTOM_11,  CUSTOM_12,  CUSTOM_13,
-        // CUSTOM_14,  CUSTOM_15,  CUSTOM_16 ) VALUES(?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-        // ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-        // ?,  ?)
-        //       ### Cause: com.ibm.db2.jcc.am.SqlIntegrityConstraintViolationException: DB2 SQL
-        // Error: SQLCODE=-803, SQLSTATE=23505, SQLERRMC=2;KADAI.TASK, DRIVER=4.22.29
-        // H2:   ### Error updating database.  Cause: org.h2.jdbc.JdbcSQLException: Unique index or
-        // primary key violation: "UC_EXTERNAL_ID_INDEX_2 ON KADAI.TASK(EXTERNAL_ID) ...
-        String msg = e.getMessage() != null ? e.getMessage().toLowerCase() : null;
-        if (msg != null
-            && (msg.contains("violation")
-                || msg.contains("violates")
-                || msg.contains("violated")
-                || msg.contains("verletzt"))
-            && msg.contains("external_id")) {
-          throw new TaskAlreadyExistException(task.getExternalId());
-        } else {
-          throw e;
-        }
-      }
       return task;
     } finally {
       kadaiEngine.returnConnection();
+    }
+  }
+
+  private TaskImpl preprocessTaskCreation(Task taskToCreate) {
+    if (createTaskPreprocessorManager.isEnabled()) {
+      taskToCreate = createTaskPreprocessorManager.processTaskBeforeCreation(taskToCreate);
+    }
+    TaskImpl task = (TaskImpl) taskToCreate;
+
+    if (task.getId() != null && !task.getId().isEmpty()) {
+      throw new InvalidArgumentException("taskId must be empty when creating a task");
+    }
+
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Task {} cannot be found, so it can be created.", task.getId());
+    }
+    return task;
+  }
+
+  private Workbasket resolveWorkbasket(TaskImpl task)
+          throws WorkbasketNotFoundException,
+          InvalidArgumentException,
+          NotAuthorizedOnWorkbasketException {
+
+    if (task.getWorkbasketSummary() != null && task.getWorkbasketSummary().getId() != null) {
+      return workbasketService.getWorkbasket(task.getWorkbasketSummary().getId());
+    }
+    if (task.getWorkbasketKey() != null) {
+      return workbasketService.getWorkbasket(task.getWorkbasketKey(), task.getDomain());
+    }
+
+    RoutingTarget routingTarget = calculateWorkbasketDuringTaskCreation(task);
+    String owner = routingTarget.getOwner() == null ? task.getOwner() : routingTarget.getOwner();
+    task.setOwner(owner);
+    return workbasketService.getWorkbasket(routingTarget.getWorkbasketId());
+  }
+
+  private Classification getClassificationByKeyAndDomain(String taskClassificationKey,
+                                                         String workbasketDomain)
+          throws ClassificationNotFoundException, InvalidArgumentException {
+    // we do use the key and not the id to make sure that we use the classification from the right
+    // domain.
+    // otherwise we would have to check the classification and its domain for validity.
+    if (taskClassificationKey == null || taskClassificationKey.isEmpty()) {
+      throw new InvalidArgumentException("classificationKey of task must not be empty");
+    }
+
+    return this.classificationService.getClassification(taskClassificationKey, workbasketDomain);
+  }
+
+  private void persistCreatedTask(TaskImpl task)
+          throws TaskAlreadyExistException, PersistenceException {
+    try {
+      this.taskMapper.insert(task);
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Method createTask() created Task '{}'.", task.getId());
+      }
+    } catch (PersistenceException e) {
+      boolean isExternalIdViolation = Optional.ofNullable(e.getMessage())
+              .map(String::toLowerCase)
+              .filter(msg -> msg.contains("external_id"))
+              .filter(msg -> msg.contains("violation")
+                      || msg.contains("violates")
+                      || msg.contains("violated")
+                      || msg.contains("verletzt"))
+              .isPresent();
+      if (isExternalIdViolation) {
+        throw new TaskAlreadyExistException(task.getExternalId());
+      }
+      throw e;
+    }
+  }
+
+  private void createTaskCreatedHistoryEvent(TaskImpl createdTask) {
+    if (historyEventManager.isEnabled()) {
+      String details =
+              ObjectAttributeChangeDetector.determineChangesInAttributes(newTask(), createdTask);
+      historyEventManager.createEvent(
+              new TaskCreatedEvent(
+                      IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                      createdTask,
+                      kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                      details));
     }
   }
 
@@ -771,18 +789,18 @@ public class TaskServiceImpl implements TaskService {
         LOGGER.debug("Method updateTask() updated task '{}' for user '{}'.", task.getId(), userId);
       }
 
-      eventPublisher.publishing(
-          () -> {
-            String changeDetails =
-                ObjectAttributeChangeDetector.determineChangesInAttributes(
-                    oldTaskImpl, newTaskImpl);
+      if (historyEventManager.isEnabled()) {
 
-            return new TaskUpdatedEvent(
+        String changeDetails =
+            ObjectAttributeChangeDetector.determineChangesInAttributes(oldTaskImpl, newTaskImpl);
+
+        historyEventManager.createEvent(
+            new TaskUpdatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                 task,
                 userId,
-                changeDetails);
-          });
+                changeDetails));
+      }
 
     } finally {
       kadaiEngine.returnConnection();
@@ -834,6 +852,74 @@ public class TaskServiceImpl implements TaskService {
           NotAuthorizedOnWorkbasketException {
     return taskTransferrer.transferWithOwner(
         taskIds, destinationWorkbasketKey, destinationWorkbasketDomain, owner, setTransferFlag);
+  }
+
+  @Override
+  public Task reopen(String taskId)
+      throws TaskNotFoundException,
+      NotAuthorizedOnWorkbasketException,
+      InvalidTaskStateException,
+      ReopenTaskWithCallbackException {
+    TaskImpl task;
+    try {
+      kadaiEngine.openConnection();
+      String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+      task = (TaskImpl) getTask(taskId);
+      if (!checkEditTasksPerm(task)) {
+        throw new NotAuthorizedOnWorkbasketException(
+            userId,
+            task.getWorkbasketSummary().getId(),
+            WorkbasketPermission.EDITTASKS);
+      }
+
+      final TaskImpl oldTask = duplicateTaskExactly(task);
+
+      final TaskState[] nonFinalEndStates = Arrays
+          .stream(TaskState.END_STATES)
+          .filter(not(TaskState::isFinalState))
+          .toArray(TaskState[]::new);
+
+      if (!task.getState().in(nonFinalEndStates)) {
+        throw new InvalidTaskStateException(
+            oldTask.getId(),
+            oldTask.getState(),
+            nonFinalEndStates
+        );
+      }
+
+      if (oldTask.getCallbackState() != null && oldTask.getCallbackState() != CallbackState.NONE) {
+        throw new ReopenTaskWithCallbackException(oldTask.getId());
+      }
+
+      String userLongName = null;
+      if (kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo()) {
+        User user = userMapper.findById(userId);
+        if (user != null) {
+          userLongName = user.getLongName();
+        }
+      }
+
+      reopenActionsOnTask(task, userId, userLongName, Instant.now());
+      taskMapper.update(task);
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Task '{}' reopened by user '{}'.", task.getId(), userId);
+      }
+
+      if (historyEventManager.isEnabled()) {
+        String changeDetails =
+            ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task);
+        historyEventManager.createEvent(
+            new TaskReopenedEvent(
+                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                task,
+                userId,
+                changeDetails));
+      }
+    } finally {
+      kadaiEngine.returnConnection();
+    }
+
+    return task;
   }
 
   @Override
@@ -1011,19 +1097,16 @@ public class TaskServiceImpl implements TaskService {
         objectReferenceMapper.deleteMultipleByTaskIds(taskIds);
         taskMapper.deleteMultiple(taskIds);
 
-        final List<String> eventTaskIds = taskIds;
-        eventPublisher.publishingAll(
-            () ->
-                eventTaskIds.stream()
-                    .map(
-                        taskId ->
-                            new TaskDeletedEvent(
-                                IdGenerator.generateWithPrefix(
-                                    IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                                newTask().asSummary(),
-                                taskId,
-                                kadaiEngine.getEngine().getCurrentUserContext().getUserid()))
-                    .collect(Collectors.toList()));
+        if (kadaiEngine.getEngine().isHistoryEnabled()
+            && kadaiEngine
+                .getEngine()
+                .getConfiguration()
+                .isDeleteHistoryEventsOnTaskDeletionEnabled()) {
+          historyEventManager.deleteEvents(taskIds);
+        }
+        if (historyEventManager.isEnabled()) {
+          taskIds.forEach(this::createTaskDeletedEvent);
+        }
       }
       return bulkLog;
     } finally {
@@ -1114,11 +1197,13 @@ public class TaskServiceImpl implements TaskService {
             cancelledTask.getId(),
             kadaiEngine.getEngine().getCurrentUserContext().getUserid());
       }
-      eventPublisher.publish(
-          new TaskCancelledEvent(
-              IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-              cancelledTask,
-              kadaiEngine.getEngine().getCurrentUserContext().getUserid()));
+      if (historyEventManager.isEnabled()) {
+        historyEventManager.createEvent(
+            new TaskCancelledEvent(
+                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                cancelledTask,
+                kadaiEngine.getEngine().getCurrentUserContext().getUserid()));
+      }
     } finally {
       kadaiEngine.returnConnection();
     }
@@ -1291,11 +1376,14 @@ public class TaskServiceImpl implements TaskService {
             terminatedTask.getId(),
             kadaiEngine.getEngine().getCurrentUserContext().getUserid());
       }
-      eventPublisher.publish(
-          new TaskTerminatedEvent(
-              IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-              terminatedTask,
-              kadaiEngine.getEngine().getCurrentUserContext().getUserid()));
+      if (historyEventManager.isEnabled()) {
+        historyEventManager.createEvent(
+            new TaskTerminatedEvent(
+                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                terminatedTask,
+                kadaiEngine.getEngine().getCurrentUserContext().getUserid()));
+      }
+
     } finally {
       kadaiEngine.returnConnection();
     }
@@ -1606,17 +1694,17 @@ public class TaskServiceImpl implements TaskService {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Task '{}' claimed by user '{}'.", task.getId(), userId);
       }
-      eventPublisher.publishing(
-          () -> {
-            String changeDetails =
-                ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task);
+      if (historyEventManager.isEnabled()) {
+        String changeDetails =
+            ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task);
 
-            return new TaskClaimedEvent(
+        historyEventManager.createEvent(
+            new TaskClaimedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                 task,
                 userId,
-                changeDetails);
-          });
+                changeDetails));
+      }
     } finally {
       kadaiEngine.returnConnection();
     }
@@ -1654,18 +1742,17 @@ public class TaskServiceImpl implements TaskService {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Requested review for Task '{}' by user '{}'.", task.getId(), userId);
       }
-      final TaskImpl eventTask = task;
-      eventPublisher.publishing(
-          () -> {
-            String changeDetails =
-                ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, eventTask);
+      if (historyEventManager.isEnabled()) {
+        String changeDetails =
+            ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task);
 
-            return new TaskRequestReviewEvent(
+        historyEventManager.createEvent(
+            new TaskRequestReviewEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                eventTask,
+                task,
                 userId,
-                changeDetails);
-          });
+                changeDetails));
+      }
 
       task = (TaskImpl) afterRequestReviewManager.afterRequestReview(task, workbasketId, ownerId);
     } finally {
@@ -1707,18 +1794,17 @@ public class TaskServiceImpl implements TaskService {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Requested changes for Task '{}' by user '{}'.", task.getId(), userId);
       }
-      final TaskImpl eventTask = task;
-      eventPublisher.publishing(() -> {
+      if (historyEventManager.isEnabled()) {
         String changeDetails =
-            ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, eventTask);
+            ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task);
 
-        return new TaskRequestChangesEvent(
+        historyEventManager.createEvent(
+            new TaskRequestChangesEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-            eventTask,
+                task,
                 userId,
-                changeDetails);
-      });
-
+                changeDetails));
+      }
       task = (TaskImpl) afterRequestChangesManager.afterRequestChanges(task, workbasketId, ownerId);
     } finally {
       kadaiEngine.returnConnection();
@@ -1804,17 +1890,17 @@ public class TaskServiceImpl implements TaskService {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Task '{}' unclaimed by user '{}'.", task.getId(), userId);
       }
-      eventPublisher.publishing(
-          () -> {
-            String changeDetails =
-                ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task);
+      if (historyEventManager.isEnabled()) {
+        String changeDetails =
+            ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task);
 
-            return new TaskClaimCancelledEvent(
+        historyEventManager.createEvent(
+            new TaskClaimCancelledEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                 task,
                 userId,
-                changeDetails);
-          });
+                changeDetails));
+      }
     } finally {
       kadaiEngine.returnConnection();
     }
@@ -1854,11 +1940,13 @@ public class TaskServiceImpl implements TaskService {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Task '{}' completed by user '{}'.", task.getId(), userId);
       }
-      eventPublisher.publish(
-          new TaskCompletedEvent(
-              IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-              task,
-              userId));
+      if (historyEventManager.isEnabled()) {
+        historyEventManager.createEvent(
+            new TaskCompletedEvent(
+                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                task,
+                userId));
+      }
     } finally {
       kadaiEngine.returnConnection();
     }
@@ -1892,12 +1980,17 @@ public class TaskServiceImpl implements TaskService {
       objectReferenceMapper.deleteMultipleByTaskIds(Collections.singletonList(taskId));
       taskMapper.delete(taskId);
 
-      eventPublisher.publishing(() ->
-          new TaskDeletedEvent(
-              IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-              newTask().asSummary(),
-              taskId,
-              kadaiEngine.getEngine().getCurrentUserContext().getUserid()));
+      if (kadaiEngine.getEngine().isHistoryEnabled()
+          && kadaiEngine
+              .getEngine()
+              .getConfiguration()
+              .isDeleteHistoryEventsOnTaskDeletionEnabled()) {
+        historyEventManager.deleteEvents(Collections.singletonList(taskId));
+      }
+
+      if (historyEventManager.isEnabled()) {
+        createTaskDeletedEvent(taskId);
+      }
 
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Task {} deleted.", task.getId());
@@ -2022,59 +2115,65 @@ public class TaskServiceImpl implements TaskService {
     return Optional.empty();
   }
 
-  private void standardSettingsOnTaskCreation(TaskImpl task, Classification classification)
+  private void applyTaskSettingsOnTaskCreation(TaskImpl taskToCreate, Classification classification)
       throws InvalidArgumentException,
           ClassificationNotFoundException,
           AttachmentPersistenceException,
           ObjectReferencePersistenceException {
     final Instant now = Instant.now();
-    task.setId(IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK));
-    if (task.getExternalId() == null) {
-      task.setExternalId(IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_EXT_TASK));
+    taskToCreate.setId(IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK));
+    if (taskToCreate.getExternalId() == null) {
+      taskToCreate.setExternalId(IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_EXT_TASK));
     }
-    task.setState(TaskState.READY);
-    task.setCreated(now);
-    task.setModified(now);
-    task.setRead(false);
-    task.setTransferred(false);
+    taskToCreate.setState(TaskState.READY);
+    taskToCreate.setCreated(now);
+    taskToCreate.setModified(now);
+    taskToCreate.setRead(false);
+    taskToCreate.setTransferred(false);
+    taskToCreate.setReopened(false);
 
     String creator = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
     if (kadaiEngine.getEngine().getConfiguration().isSecurityEnabled() && creator == null) {
       throw new SystemException(
           "KadaiSecurity is enabled, but the current UserId is NULL while creating a Task.");
     }
-    task.setCreator(creator);
+    taskToCreate.setCreator(creator);
 
     // if no business process id is provided, a unique id is created.
-    if (task.getBusinessProcessId() == null) {
-      task.setBusinessProcessId(
+    if (taskToCreate.getBusinessProcessId() == null) {
+      taskToCreate.setBusinessProcessId(
           IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_BUSINESS_PROCESS));
     }
     // null in case of manual tasks
-    if (task.getPlanned() == null && (classification == null || task.getDue() == null)) {
-      task.setPlanned(now);
+    if (taskToCreate.getPlanned() == null && (classification == null
+            || taskToCreate.getDue() == null)) {
+      taskToCreate.setPlanned(now);
     }
-    if (task.getName() == null && classification != null) {
-      task.setName(classification.getName());
+    if (taskToCreate.getName() == null && classification != null) {
+      taskToCreate.setName(classification.getName());
     }
-    if (task.getDescription() == null && classification != null) {
-      task.setDescription(classification.getDescription());
+    if (taskToCreate.getDescription() == null && classification != null) {
+      taskToCreate.setDescription(classification.getDescription());
     }
-    if (task.getOwner() != null
+    if (taskToCreate.getOwner() != null
         && kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo()) {
-      User user = userMapper.findById(task.getOwner());
+      User user = userMapper.findById(taskToCreate.getOwner());
       if (user != null) {
-        task.setOwnerLongName(user.getLongName());
+        taskToCreate.setOwnerLongName(user.getLongName());
       }
     }
-    setDefaultTaskReceivedDateFromAttachments(task);
+    setDefaultTaskReceivedDateFromAttachments(taskToCreate);
 
-    attachmentHandler.insertNewAttachmentsOnTaskCreation(task);
-    objectReferenceHandler.insertNewSecondaryObjectReferencesOnTaskCreation(task);
+    attachmentHandler.insertNewAttachmentsOnTaskCreation(taskToCreate);
+    objectReferenceHandler.insertNewSecondaryObjectReferencesOnTaskCreation(taskToCreate);
     // This has to be called after the AttachmentHandler because the AttachmentHandler fetches
     // the Classifications of the Attachments.
     // This is necessary to guarantee that the following calculation is correct.
-    serviceLevelHandler.updatePrioPlannedDueOfTask(task, null);
+    serviceLevelHandler.updatePrioPlannedDueOfTask(taskToCreate, null);
+
+    setCallbackStateOnTaskCreation(taskToCreate);
+    priorityServiceManager.calculatePriorityOfTask(taskToCreate)
+            .ifPresent(taskToCreate::setPriority);
   }
 
   private void setDefaultTaskReceivedDateFromAttachments(TaskImpl task) {
@@ -2136,18 +2235,9 @@ public class TaskServiceImpl implements TaskService {
       if (!updateClaimedTaskIds.isEmpty()) {
         taskMapper.updateClaimed(updateClaimedTaskIds, claimedReference);
       }
-
-      eventPublisher.publishingAll(
-          () ->
-              taskSummaryList.stream()
-                  .map(
-                      task ->
-                          new TaskCompletedEvent(
-                              IdGenerator.generateWithPrefix(
-                                  IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                              task,
-                              kadaiEngine.getEngine().getCurrentUserContext().getUserid()))
-                  .collect(Collectors.toList()));
+      if (historyEventManager.isEnabled()) {
+        createTasksCompletedEvents(taskSummaryList);
+      }
     }
   }
 
@@ -2449,6 +2539,25 @@ public class TaskServiceImpl implements TaskService {
       newClassificationSummary = newClassification.asSummary();
       newTaskImpl.setClassificationSummary(newClassificationSummary);
     }
+  }
+
+  private void createTasksCompletedEvents(List<? extends TaskSummary> taskSummaries) {
+    taskSummaries.forEach(
+        task ->
+            historyEventManager.createEvent(
+                new TaskCompletedEvent(
+                    IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                    task,
+                    kadaiEngine.getEngine().getCurrentUserContext().getUserid())));
+  }
+
+  private void createTaskDeletedEvent(String taskId) {
+    historyEventManager.createEvent(
+        new TaskDeletedEvent(
+            IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+            newTask().asSummary(),
+            taskId,
+            kadaiEngine.getEngine().getCurrentUserContext().getUserid()));
   }
 
   private TaskImpl duplicateTaskExactly(TaskImpl task) {

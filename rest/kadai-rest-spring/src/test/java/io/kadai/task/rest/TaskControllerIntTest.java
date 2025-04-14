@@ -207,7 +207,7 @@ class TaskControllerIntTest {
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
-      assertThat(response.getBody().getContent()).hasSize(62);
+      assertThat(response.getBody().getContent()).hasSize(63);
     }
 
     @Test
@@ -975,7 +975,7 @@ class TaskControllerIntTest {
       assertThat(response.getBody()).isNotNull();
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
-      assertThat(response.getBody().getContent()).hasSize(90);
+      assertThat(response.getBody().getContent()).hasSize(91);
     }
 
     @Test
@@ -995,7 +995,7 @@ class TaskControllerIntTest {
       assertThat(response.getBody()).isNotNull();
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
-      assertThat(response.getBody().getContent()).hasSize(4);
+      assertThat(response.getBody().getContent()).hasSize(5);
     }
 
     @Test
@@ -1364,7 +1364,7 @@ class TaskControllerIntTest {
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
-      assertThat(response.getBody().getContent()).hasSize(93);
+      assertThat(response.getBody().getContent()).hasSize(94);
     }
 
     @Test
@@ -1566,7 +1566,10 @@ class TaskControllerIntTest {
 
     @Test
     void testGetLastPageSortedByDueWithHiddenTasksRemovedFromResult() {
-      String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?sort-by=DUE&order=DESCENDING";
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS)
+              + "?sort-by=DUE&sort-by=TASK_ID&"
+              + "order=DESCENDING&order=ASCENDING";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
           CLIENT
               .get()
@@ -1576,11 +1579,13 @@ class TaskControllerIntTest {
               .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
-      assertThat((response.getBody()).getContent()).hasSize(62);
+      assertThat((response.getBody()).getContent()).hasSize(63);
 
       String url2 =
           restHelper.toUrl(RestEndpoints.URL_TASKS)
-              + "?sort-by=DUE&order=DESCENDING&page-size=5&page=5";
+              + "?sort-by=DUE&sort-by=TASK_ID&"
+              + "order=DESCENDING&order=ASCENDING&"
+              + "page-size=5&page=5";
       response =
           CLIENT
               .get()
@@ -1594,10 +1599,13 @@ class TaskControllerIntTest {
       assertThat(response.getBody().getRequiredLink(IanaLinkRelations.LAST).getHref())
           .contains("page=13");
       assertThat(response.getBody().getContent().iterator().next().getTaskId())
-          .isEqualTo("TKI:000000000000000000000000000000000072");
+          .isEqualTo("TKI:000000000000000000000000000000000071");
       assertThat(response.getBody().getLink(IanaLinkRelations.SELF)).isNotNull();
       assertThat(response.getBody().getRequiredLink(IanaLinkRelations.SELF).getHref())
-          .endsWith("/api/v1/tasks?sort-by=DUE&order=DESCENDING&page-size=5&page=5");
+          .endsWith("/api/v1/tasks?"
+              + "sort-by=DUE&sort-by=TASK_ID&"
+              + "order=DESCENDING&order=ASCENDING&"
+              + "page-size=5&page=5");
       assertThat(response.getBody().getLink(IanaLinkRelations.FIRST)).isNotNull();
       assertThat(response.getBody().getLink(IanaLinkRelations.LAST)).isNotNull();
       assertThat(response.getBody().getLink(IanaLinkRelations.PREV)).isNotNull();
@@ -1608,8 +1616,10 @@ class TaskControllerIntTest {
       String url =
           restHelper.toUrl(RestEndpoints.URL_TASKS)
               + "?por-company=00&por-system=PASystem&por-instance=00&"
-              + "por-type=VNR&por-value=22334455&sort-by=POR_TYPE&"
-              + "order=ASCENDING&page-size=5&page=2";
+              + "por-type=VNR&por-value=22334455&"
+              + "sort-by=POR_TYPE&sort-by=TASK_ID&"
+              + "order=ASCENDING&order=ASCENDING&"
+              + "page-size=5&page=2";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
           CLIENT
               .get()
@@ -1626,7 +1636,9 @@ class TaskControllerIntTest {
       assertThat(response.getBody().getRequiredLink(IanaLinkRelations.SELF).getHref())
           .endsWith(
               "/api/v1/tasks?por-company=00&por-system=PASystem&por-instance=00&"
-                  + "por-type=VNR&por-value=22334455&sort-by=POR_TYPE&order=ASCENDING&"
+                  + "por-type=VNR&por-value=22334455&"
+                  + "sort-by=POR_TYPE&sort-by=TASK_ID&"
+                  + "order=ASCENDING&order=ASCENDING&"
                   + "page-size=5&page=2");
       assertThat(response.getBody().getLink(IanaLinkRelations.FIRST)).isNotNull();
       assertThat(response.getBody().getLink(IanaLinkRelations.LAST)).isNotNull();
@@ -1679,7 +1691,7 @@ class TaskControllerIntTest {
               "TKI:000000000000000000000000000000000025",
               "TKI:000000000000000000000000000000000026",
               "TKI:000000000000000000000000000000000027")
-          .hasSize(55);
+          .hasSize(56);
     }
 
     @Test
@@ -1712,7 +1724,7 @@ class TaskControllerIntTest {
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
-      assertThat(response.getBody().getContent()).hasSize(86);
+      assertThat(response.getBody().getContent()).hasSize(87);
     }
 
     @Test
@@ -1785,7 +1797,7 @@ class TaskControllerIntTest {
     @Test
     void should_ReturnFilteredTasks_When_GettingTasksBySecondaryObjectReferenceValueAndCompany() {
       String url =
-          restHelper.toUrl(RestEndpoints.URL_TASKS) + "?sor-value=Value2&&sor-company=Company1";
+          restHelper.toUrl(RestEndpoints.URL_TASKS) + "?sor-value=Value2&sor-company=Company1";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
           CLIENT
               .get()
@@ -1795,6 +1807,44 @@ class TaskControllerIntTest {
               .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
+      assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
+      assertThat(response.getBody().getContent()).hasSize(1);
+    }
+
+    @Test
+    void should_ReturnFilteredTasks_When_GettingTasksByIsReopenedFalse() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS) + "?is-reopened=false";
+      ResponseEntity<TaskSummaryPagedRepresentationModel> response =
+              CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getContent())
+          .allSatisfy(task -> assertThat(task.isReopened()).isFalse());
+      assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
+      assertThat(response.getBody().getContent()).hasSize(62);
+    }
+
+    @Test
+    void should_ReturnFilteredTasks_When_GettingTasksByIsReopenedTrue() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS) + "?is-reopened=true";
+      ResponseEntity<TaskSummaryPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getContent())
+          .allSatisfy(task -> assertThat(task.isReopened()).isTrue());
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
       assertThat(response.getBody().getContent()).hasSize(1);
     }
@@ -3634,6 +3684,146 @@ class TaskControllerIntTest {
       assertThat(setUnreadResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
       TaskRepresentationModel setReadTaskRepresentationModel = setUnreadResponse.getBody();
       assertThat(setReadTaskRepresentationModel.isRead()).isFalse();
+    }
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  class ReopenTasks {
+
+    @Test
+    void should_ReopenTaskRespondingWith200() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000075");
+
+      // retrieve task from Rest Api
+      ResponseEntity<TaskRepresentationModel> getTaskResponse = CLIENT
+                  .get()
+                  .uri(url)
+                  .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
+                  .retrieve()
+                  .toEntity(TaskRepresentationModel.class);
+      assertThat(getTaskResponse.getBody()).isNotNull();
+      TaskRepresentationModel readyTaskRepresentationModel = getTaskResponse.getBody();
+      assertThat(readyTaskRepresentationModel.getState()).isEqualTo(TaskState.COMPLETED);
+
+      // reopen
+      String url2 =
+          restHelper.toUrl(
+              RestEndpoints.URL_TASKS_ID_REOPEN, "TKI:000000000000000000000000000000000075");
+      ResponseEntity<TaskRepresentationModel> reopenResponse = CLIENT
+              .post()
+              .uri(url2)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class);
+
+      assertThat(reopenResponse.getBody()).isNotNull();
+      assertThat(reopenResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+      TaskRepresentationModel reopenedTaskRepresentationModel = reopenResponse.getBody();
+      assertThat(reopenedTaskRepresentationModel.getState()).isEqualTo(TaskState.CLAIMED);
+    }
+
+    @Test
+    void should_FailReopeningTaskRespondingWith400_ForTaskWithInvalidState() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000076");
+
+      // retrieve task from Rest Api
+      ResponseEntity<TaskRepresentationModel> getTaskResponse = CLIENT
+          .get()
+          .uri(url)
+          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-2-2")))
+          .retrieve()
+          .toEntity(TaskRepresentationModel.class);
+      assertThat(getTaskResponse.getBody()).isNotNull();
+      TaskRepresentationModel readyTaskRepresentationModel = getTaskResponse.getBody();
+      assertThat(readyTaskRepresentationModel.getState()).isEqualTo(TaskState.READY);
+
+      // reopen
+      String url2 =
+          restHelper.toUrl(
+              RestEndpoints.URL_TASKS_ID_REOPEN, "TKI:000000000000000000000000000000000076");
+
+      ThrowingCallable call = () -> CLIENT
+          .post()
+          .uri(url2)
+          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-2-2")))
+          .retrieve()
+          .toEntity(TaskRepresentationModel.class);
+
+      assertThatThrownBy(call)
+          .extracting(HttpStatusCodeException.class::cast)
+          .extracting(HttpStatusCodeException::getStatusCode)
+          .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void should_FailReopeningTaskRespondingWith400_ForTaskWithCallback() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:100000000000000000000000000000000099");
+
+      // retrieve task from Rest Api
+      ResponseEntity<TaskRepresentationModel> getTaskResponse = CLIENT
+          .get()
+          .uri(url)
+          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+          .retrieve()
+          .toEntity(TaskRepresentationModel.class);
+      assertThat(getTaskResponse.getBody()).isNotNull();
+      TaskRepresentationModel readyTaskRepresentationModel = getTaskResponse.getBody();
+      assertThat(readyTaskRepresentationModel.getState()).isEqualTo(TaskState.COMPLETED);
+
+      // reopen
+      String url2 =
+          restHelper.toUrl(
+              RestEndpoints.URL_TASKS_ID_REOPEN, "TKI:100000000000000000000000000000000099");
+
+      ThrowingCallable call = () -> CLIENT
+          .post()
+          .uri(url2)
+          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+          .retrieve()
+          .toEntity(TaskRepresentationModel.class);
+
+      assertThatThrownBy(call)
+          .extracting(HttpStatusCodeException.class::cast)
+          .extracting(HttpStatusCodeException::getStatusCode)
+          .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void should_FailReopeningTaskRespondingWith403_ForTaskWithInsufficientPermissions() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000070");
+
+      // retrieve task from Rest Api
+      ResponseEntity<TaskRepresentationModel> getTaskResponse = CLIENT
+          .get()
+          .uri(url)
+          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+          .retrieve()
+          .toEntity(TaskRepresentationModel.class);
+      assertThat(getTaskResponse.getBody()).isNotNull();
+      TaskRepresentationModel readyTaskRepresentationModel = getTaskResponse.getBody();
+      assertThat(readyTaskRepresentationModel.getState()).isEqualTo(TaskState.COMPLETED);
+
+      // reopen
+      String url2 =
+          restHelper.toUrl(
+              RestEndpoints.URL_TASKS_ID_REOPEN, "TKI:000000000000000000000000000000000070");
+
+      ThrowingCallable call = () -> CLIENT
+          .post()
+          .uri(url2)
+          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+          .retrieve()
+          .toEntity(TaskRepresentationModel.class);
+
+      assertThatThrownBy(call)
+          .extracting(HttpStatusCodeException.class::cast)
+          .extracting(HttpStatusCodeException::getStatusCode)
+          .isEqualTo(HttpStatus.FORBIDDEN);
     }
   }
 }

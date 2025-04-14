@@ -26,7 +26,6 @@ import io.kadai.user.api.UserQuery;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
 import io.kadai.user.api.models.UserSummary;
-import io.kadai.user.rest.UserController.UserQuerySortParameter;
 import io.kadai.user.rest.models.UserRepresentationModel;
 import io.kadai.user.rest.models.UserSummaryPagedRepresentationModel;
 import io.swagger.v3.oas.annotations.Operation;
@@ -85,7 +84,6 @@ public interface UserApi {
             content = {@Content(schema = @Schema(implementation = InvalidArgumentException.class))})
       })
   @GetMapping(RestEndpoints.URL_USERS_ID)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<UserRepresentationModel> getUser(@PathVariable("userId") String userId)
       throws UserNotFoundException, InvalidArgumentException;
 
@@ -122,7 +120,6 @@ public interface UserApi {
             content = {@Content(schema = @Schema(implementation = InvalidArgumentException.class))})
       })
   @GetMapping(RestEndpoints.URL_USERS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<UserSummaryPagedRepresentationModel> getUsers(
       HttpServletRequest request,
       @ParameterObject UserQueryFilterParameter filterParameter,
@@ -311,7 +308,7 @@ public interface UserApi {
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
       })
   @DeleteMapping(RestEndpoints.URL_USERS_ID)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
+  @Transactional(rollbackFor = Exception.class)
   ResponseEntity<UserRepresentationModel> deleteUser(@PathVariable("userId") String userId)
       throws UserNotFoundException, NotAuthorizedException, InvalidArgumentException;
 }

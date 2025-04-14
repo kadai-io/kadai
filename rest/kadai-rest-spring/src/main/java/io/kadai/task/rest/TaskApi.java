@@ -12,10 +12,10 @@ import io.kadai.task.api.exceptions.InvalidCallbackStateException;
 import io.kadai.task.api.exceptions.InvalidOwnerException;
 import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.ObjectReferencePersistenceException;
+import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskSummary;
-import io.kadai.task.rest.TaskController.TaskQuerySortParameter;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
@@ -207,7 +207,6 @@ public interface TaskApi {
             })
       })
   @GetMapping(path = RestEndpoints.URL_TASKS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<TaskSummaryPagedRepresentationModel> getTasks(
       HttpServletRequest request,
       @ParameterObject TaskQueryFilterParameter filterParameter,
@@ -218,7 +217,6 @@ public interface TaskApi {
       @ParameterObject QueryPagingParameter<TaskSummary, TaskQuery> pagingParameter);
 
   @GetMapping(path = RestEndpoints.URL_TASKS_ID)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<TaskRepresentationModel> getTask(@PathVariable("taskId") String taskId)
       throws TaskNotFoundException, NotAuthorizedOnWorkbasketException;
 
@@ -1225,6 +1223,69 @@ public interface TaskApi {
       throws NotAuthorizedOnWorkbasketException, WorkbasketNotFoundException;
 
   /**
+   * This endpoint reopens the requested Task.
+   *
+   * @title Reopen a Task
+   * @param taskId the id of the Task which should be reopened
+   * @return the reopened Task
+   * @throws TaskNotFoundException if the requested Task does not exist
+   * @throws NotAuthorizedOnWorkbasketException if the current user is not authorized
+   * @throws InvalidTaskStateException if the Task is not in a non-final end-state
+   * @throws ReopenTaskWithCallbackException if the Task has a callback attached
+   */
+  @Operation(
+      summary = "Reopen a Task",
+      description = "This endpoint reopens a Task if it is a non-final end-state",
+      parameters = {
+        @Parameter(
+            name = "taskId",
+            required = true,
+            description = "the Id of the Task which should be reopened",
+            example = "TKI:000000000000000000000000000000000003")
+      },
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "the reopened Task",
+            content = {
+              @Content(
+                  mediaType = MediaTypes.HAL_JSON_VALUE,
+                  schema = @Schema(implementation = TaskRepresentationModel.class))
+            }),
+        @ApiResponse(
+            responseCode = "400",
+            description = "TASK_INVALID_STATE, REOPEN_TASK_WITH_CALLBACK",
+            content = {
+              @Content(
+                  schema =
+                      @Schema(
+                          anyOf = {
+                            InvalidTaskStateException.class,
+                            ReopenTaskWithCallbackException.class
+                          }))
+            }),
+        @ApiResponse(
+            responseCode = "403",
+            description =
+                "NOT_AUTHORIZED_ON_WORKBASKET_WITH_ID, "
+                    + "NOT_AUTHORIZED_ON_WORKBASKET_WITH_KEY_AND_DOMAIN",
+            content = {
+              @Content(schema = @Schema(implementation = NotAuthorizedOnWorkbasketException.class))
+            }),
+        @ApiResponse(
+            responseCode = "404",
+            description = "TASK_NOT_FOUND",
+            content = {@Content(schema = @Schema(implementation = TaskNotFoundException.class))})
+      })
+  @PostMapping(path = RestEndpoints.URL_TASKS_ID_REOPEN)
+  @Transactional(rollbackFor = Exception.class)
+  ResponseEntity<TaskRepresentationModel> reopenTask(@PathVariable("taskId") String taskId)
+      throws TaskNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          InvalidTaskStateException,
+          ReopenTaskWithCallbackException;
+
+  /**
    * Distributes tasks to one or more destination workbaskets based on the provided distribution
    * strategy and additional information. The tasks to be distributed are passed in the request
    * body.
@@ -1784,7 +1845,7 @@ public interface TaskApi {
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
       })
   @DeleteMapping(path = RestEndpoints.URL_TASKS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
+  @Transactional(rollbackFor = Exception.class)
   ResponseEntity<TaskSummaryCollectionRepresentationModel> deleteTasks(
       @ParameterObject TaskQueryFilterParameter filterParameter,
       @ParameterObject TaskQueryFilterCustomFields filterCustomFields,

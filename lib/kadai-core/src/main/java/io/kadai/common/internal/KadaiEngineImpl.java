@@ -40,6 +40,7 @@ import io.kadai.common.internal.configuration.DB;
 import io.kadai.common.internal.configuration.DbSchemaCreator;
 import io.kadai.common.internal.jobs.JobScheduler;
 import io.kadai.common.internal.jobs.RealClock;
+import io.kadai.common.internal.pagination.PageInterceptor;
 import io.kadai.common.internal.persistence.InstantTypeHandler;
 import io.kadai.common.internal.persistence.MapTypeHandler;
 import io.kadai.common.internal.security.CurrentUserContextImpl;
@@ -456,6 +457,8 @@ public class KadaiEngineImpl implements KadaiEngine {
     configuration.addMapper(UserMapper.class);
     configuration.addMapper(UserQueryMapper.class);
     configuration.addMapper(ConfigurationMapper.class);
+
+    configuration.addInterceptor(new PageInterceptor());
 
     SqlSessionFactory localSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
     return SqlSessionManager.newInstance(localSessionFactory);

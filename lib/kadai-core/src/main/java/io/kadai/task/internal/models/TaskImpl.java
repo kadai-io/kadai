@@ -311,6 +311,7 @@ public class TaskImpl extends TaskSummaryImpl implements Task {
     taskSummary.setState(state);
     taskSummary.setNumberOfComments(numberOfComments);
     taskSummary.setTransferred(isTransferred);
+    taskSummary.setReopened(isReopened);
     taskSummary.setWorkbasketSummary(workbasketSummary);
     return taskSummary;
   }
@@ -440,6 +441,8 @@ public class TaskImpl extends TaskSummaryImpl implements Task {
         + isRead
         + ", isTransferred="
         + isTransferred
+        + ", isReopened="
+        + isReopened
         + ", attachmentSummaries="
         + attachmentSummaries
         + ", custom1="

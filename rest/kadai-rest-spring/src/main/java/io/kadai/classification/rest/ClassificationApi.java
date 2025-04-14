@@ -6,7 +6,6 @@ import io.kadai.classification.api.exceptions.ClassificationInUseException;
 import io.kadai.classification.api.exceptions.ClassificationNotFoundException;
 import io.kadai.classification.api.exceptions.MalformedServiceLevelException;
 import io.kadai.classification.api.models.ClassificationSummary;
-import io.kadai.classification.rest.ClassificationController.ClassificationQuerySortParameter;
 import io.kadai.classification.rest.models.ClassificationRepresentationModel;
 import io.kadai.classification.rest.models.ClassificationSummaryPagedRepresentationModel;
 import io.kadai.common.api.exceptions.ConcurrencyException;
@@ -61,7 +60,6 @@ public interface ClassificationApi {
             })
       })
   @GetMapping(path = RestEndpoints.URL_CLASSIFICATIONS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<ClassificationSummaryPagedRepresentationModel> getClassifications(
       HttpServletRequest request,
       @ParameterObject final ClassificationQueryFilterParameter filterParameter,
@@ -104,7 +102,6 @@ public interface ClassificationApi {
             })
       })
   @GetMapping(path = RestEndpoints.URL_CLASSIFICATIONS_ID, produces = MediaTypes.HAL_JSON_VALUE)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<ClassificationRepresentationModel> getClassification(
       @PathVariable("classificationId") String classificationId)
       throws ClassificationNotFoundException;

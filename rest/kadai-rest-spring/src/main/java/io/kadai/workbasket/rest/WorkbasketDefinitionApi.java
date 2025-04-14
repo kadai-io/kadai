@@ -57,7 +57,6 @@ public interface WorkbasketDefinitionApi {
             })
       })
   @GetMapping(path = RestEndpoints.URL_WORKBASKET_DEFINITIONS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<WorkbasketDefinitionCollectionRepresentationModel> exportWorkbaskets(
       @RequestParam(value = "domain", required = false) String[] domain);
 

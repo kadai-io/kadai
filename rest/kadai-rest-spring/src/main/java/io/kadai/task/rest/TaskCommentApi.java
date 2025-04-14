@@ -10,7 +10,6 @@ import io.kadai.task.api.exceptions.NotAuthorizedOnTaskCommentException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskComment;
-import io.kadai.task.rest.TaskCommentController.TaskCommentQuerySortParameter;
 import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
@@ -92,7 +91,6 @@ public interface TaskCommentApi {
             })
       })
   @GetMapping(path = RestEndpoints.URL_TASK_COMMENT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<TaskCommentRepresentationModel> getTaskComment(
       @PathVariable("taskCommentId") String taskCommentId)
       throws TaskNotFoundException,
@@ -134,7 +132,6 @@ public interface TaskCommentApi {
                         @Schema(implementation = TaskCommentCollectionRepresentationModel.class)))
       })
   @GetMapping(path = RestEndpoints.URL_TASK_COMMENTS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<TaskCommentCollectionRepresentationModel> getTaskComments(
       @PathVariable("taskId") String taskId,
       HttpServletRequest request,

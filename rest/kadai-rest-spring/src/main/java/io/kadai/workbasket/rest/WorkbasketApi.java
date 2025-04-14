@@ -13,7 +13,6 @@ import io.kadai.workbasket.api.exceptions.WorkbasketAlreadyExistException;
 import io.kadai.workbasket.api.exceptions.WorkbasketInUseException;
 import io.kadai.workbasket.api.exceptions.WorkbasketNotFoundException;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
-import io.kadai.workbasket.rest.WorkbasketController.WorkbasketQuerySortParameter;
 import io.kadai.workbasket.rest.models.DistributionTargetsCollectionRepresentationModel;
 import io.kadai.workbasket.rest.models.WorkbasketAccessItemCollectionRepresentationModel;
 import io.kadai.workbasket.rest.models.WorkbasketRepresentationModel;
@@ -67,7 +66,6 @@ public interface WorkbasketApi {
             })
       })
   @GetMapping(path = RestEndpoints.URL_WORKBASKET)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<WorkbasketSummaryPagedRepresentationModel> getWorkbaskets(
       HttpServletRequest request,
       @ParameterObject WorkbasketQueryFilterParameter filterParameter,
@@ -119,7 +117,6 @@ public interface WorkbasketApi {
             })
       })
   @GetMapping(path = RestEndpoints.URL_WORKBASKET_ID, produces = MediaTypes.HAL_JSON_VALUE)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<WorkbasketRepresentationModel> getWorkbasket(
       @PathVariable("workbasketId") String workbasketId)
       throws WorkbasketNotFoundException, NotAuthorizedOnWorkbasketException;
@@ -449,7 +446,6 @@ public interface WorkbasketApi {
   @GetMapping(
       path = RestEndpoints.URL_WORKBASKET_ID_ACCESS_ITEMS,
       produces = MediaTypes.HAL_JSON_VALUE)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<WorkbasketAccessItemCollectionRepresentationModel> getWorkbasketAccessItems(
       @PathVariable("workbasketId") String workbasketId)
       throws WorkbasketNotFoundException,
@@ -630,7 +626,6 @@ public interface WorkbasketApi {
   @GetMapping(
       path = RestEndpoints.URL_WORKBASKET_ID_DISTRIBUTION,
       produces = MediaTypes.HAL_JSON_VALUE)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<DistributionTargetsCollectionRepresentationModel> getDistributionTargets(
       @PathVariable("workbasketId") String workbasketId)
       throws WorkbasketNotFoundException, NotAuthorizedOnWorkbasketException;

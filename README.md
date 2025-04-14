@@ -2,7 +2,7 @@
 <img src="./docs/images/logo.svg" height="21"> KADAI - The open source task management library
 =================================================
 
-[![CI](https://github.com/kadai-io/kadai/workflows/CI/badge.svg)](https://github.com/kadai-io/kadai/actions?query=workflow%3ACI)
+[![CI](https://github.com/kadai-io/kadai/actions/workflows/continuous-integration.yml/badge.svg)](https://github.com/kadai-io/kadai/actions/workflows/continuous-integration.yml)
 [![License](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 [![Contributors](https://img.shields.io/github/contributors/kadai-io/kadai.svg)](https://github.com/kadai-io/kadai/graphs/contributors)
 
@@ -53,9 +53,7 @@ _We're not aware of all installations of our Open Source project. However, we lo
     * [KADAI monitor](#Kadai-monitor)
 * 🚀 [Getting Started](#getting-started)
     * [Requirements](#requirements)
-    * [Wrapper Application](#wrapper-application)
-        * [Spring Boot Example](#spring-boot-example)
-        * [EJB Example](#ejb-example)
+    * [Spring Boot Example](#spring-boot-example)
 * ⚙️ [Customize Behaviour](#customize-behaviour)
 * 📚 [Releases](#releases)
 * 🖼️ [Demo](#demo)
@@ -75,7 +73,44 @@ important since is meant to be a standalone component.
 
 All Tasks are placed in a Workbasket to control and direct the handling of the Tasks.
 
-![Tasklifecycle](docs/images/tasklifecycle.png)
+```mermaid
+---
+config:
+  look: neo
+  theme: neo
+---
+stateDiagram-v2
+    [*] --> READY: create()
+    READY --> CLAIMED: claim()
+    READY --> nonFinalEndStates: forceComplete() | cancel()
+    READY --> finalEndStates: terminate()
+
+    CLAIMED --> READY_FOR_REVIEW: requestReview()
+    CLAIMED --> READY: transfer() | cancelClaim()
+    CLAIMED --> nonFinalEndStates: complete() | cancel()
+    CLAIMED --> finalEndStates: terminate()
+
+    READY_FOR_REVIEW --> IN_REVIEW: claim()
+    READY_FOR_REVIEW --> nonFinalEndStates: forceComplete() | cancel()
+    READY_FOR_REVIEW --> finalEndStates: terminate()
+
+    IN_REVIEW --> READY_FOR_REVIEW: transfer() | cancelClaim()
+    IN_REVIEW --> nonFinalEndStates: forceComplete() | cancel()
+    IN_REVIEW --> finalEndStates: terminate()
+
+    nonFinalEndStates --> CLAIMED: reopen()
+    
+    nonFinalEndStates: Non-final endstates
+    state nonFinalEndStates {
+        COMPLETED
+        CANCELLED
+    }
+
+    finalEndStates: Final endstates
+    state finalEndStates {
+        TERMINATED
+    }
+```
 
 ## WORKBASKETS
 
@@ -140,8 +175,7 @@ It splits up into five components:
 As KADAI is meant to be integrated in the development environment and process of your organisation, you have to create
 your own small integration project as a wrapper and starting point for your customisations.
 
-We currently provide examples how to run KADAI as a Spring Boot Application or as a an Enterprise Application on Wildfly
-Application Server.
+We currently provide examples how to run KADAI as a Spring Boot Application.
 
 If you are only interested in how KADAI looks and feel, you can try our [Demo Environment](#demo) instead.
 
@@ -163,23 +197,13 @@ Supported Databases:
 
 _* other versions of the named databases should work also, but haven't been tested_
 
-## Wrapper Application
-
-### Spring Boot Example
+## Spring Boot Example
 
 [![Static Badge](https://img.shields.io/badge/example-spring_boot-green?logo=spring&logoColor=white)](https://github.com/kadai-io/kadai/tree/master/rest/kadai-rest-spring-example-boot)
 
 We use the h2 database in this example.
 
 See `rest/kadai-rest-spring-example-boot` and it dependencies
-
-### EJB Example
-
-[![Static Badge](https://img.shields.io/badge/example-EJB-green?logoColor=white)](https://github.com/kadai-io/kadai/tree/master/lib/kadai-cdi-example)
-
-We use a Wildfly Application Server in this example.
-
-See `lib/kadai-cdi`.
 
 # ⚙️Customize Behaviour
 
@@ -232,6 +256,8 @@ We use [Semantic Versioning](https://semver.org/).
 [![Static Badge](https://img.shields.io/badge/demo-azure-blue?link=https%3A%2F%2Fkadai-io.azurewebsites.net%2Fkadai&&logo=angular&logoColor=white)](https://kadai-io.azurewebsites.net/kadai/)
 
 Our focus is mainly directed to the backend, but we maintain a demo frontend in Angular, check it out by clicking on the badge!
+
+For login choose username `teamlead-1` with password `teamlead-1`.
 
 # 📨Contact
 

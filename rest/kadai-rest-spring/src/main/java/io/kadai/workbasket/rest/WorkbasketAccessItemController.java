@@ -18,11 +18,9 @@
 
 package io.kadai.workbasket.rest;
 
-import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.QueryPagingParameter;
-import io.kadai.common.rest.QuerySortBy;
 import io.kadai.common.rest.QuerySortParameter;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.common.rest.ldap.LdapClient;
@@ -33,13 +31,12 @@ import io.kadai.workbasket.api.models.WorkbasketAccessItem;
 import io.kadai.workbasket.rest.assembler.WorkbasketAccessItemRepresentationModelAssembler;
 import io.kadai.workbasket.rest.models.WorkbasketAccessItemPagedRepresentationModel;
 import jakarta.servlet.http.HttpServletRequest;
-import java.beans.ConstructorProperties;
 import java.util.List;
-import java.util.function.BiConsumer;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -92,6 +89,7 @@ public class WorkbasketAccessItemController implements WorkbasketAccessItemApi {
   }
 
   @DeleteMapping(path = RestEndpoints.URL_WORKBASKET_ACCESS_ITEMS)
+  @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<Void> removeWorkbasketAccessItems(
       @RequestParam("access-id") String accessId)
       throws NotAuthorizedException, InvalidArgumentException {
@@ -110,34 +108,5 @@ public class WorkbasketAccessItemController implements WorkbasketAccessItemApi {
     }
 
     return ResponseEntity.noContent().build();
-  }
-
-  public enum WorkbasketAccessItemSortBy implements QuerySortBy<WorkbasketAccessItemQuery> {
-    WORKBASKET_KEY(WorkbasketAccessItemQuery::orderByWorkbasketKey),
-    ACCESS_ID(WorkbasketAccessItemQuery::orderByAccessId);
-
-    private final BiConsumer<WorkbasketAccessItemQuery, SortDirection> consumer;
-
-    WorkbasketAccessItemSortBy(BiConsumer<WorkbasketAccessItemQuery, SortDirection> consumer) {
-      this.consumer = consumer;
-    }
-
-    @Override
-    public void applySortByForQuery(WorkbasketAccessItemQuery query, SortDirection sortDirection) {
-      consumer.accept(query, sortDirection);
-    }
-  }
-
-  // Unfortunately this class is necessary, since spring can not inject the generic 'sort-by'
-  // parameter from the super class.
-  public static class WorkbasketAccessItemQuerySortParameter
-      extends QuerySortParameter<WorkbasketAccessItemQuery, WorkbasketAccessItemSortBy> {
-
-    @ConstructorProperties({"sort-by", "order"})
-    public WorkbasketAccessItemQuerySortParameter(
-        List<WorkbasketAccessItemSortBy> sortBy, List<SortDirection> order)
-        throws InvalidArgumentException {
-      super(sortBy, order);
-    }
   }
 }
