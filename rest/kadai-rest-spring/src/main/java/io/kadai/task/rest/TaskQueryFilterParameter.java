@@ -2861,13 +2861,15 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
     }
   }
 
-  private static void queryWithinInterval(Function<TimeInterval, TaskQuery> queryFunction, Instant from, Instant until) {
+  private static void queryWithinInterval(Function<TimeInterval, TaskQuery> queryFunction,
+      Instant from, Instant until) {
     if (from != null || until != null) {
       queryFunction.apply(new TimeInterval(from, until));
     }
   }
 
-  private static void queryWithinInterval(Function<IntInterval, TaskQuery> queryFunction, Integer from, Integer until) {
+  private static void queryWithinInterval(Function<IntInterval, TaskQuery> queryFunction,
+      Integer from, Integer until) {
     if (from != null || until != null) {
       queryFunction.apply(new IntInterval(from, until));
     }
