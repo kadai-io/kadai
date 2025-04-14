@@ -26,7 +26,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import java.io.IOException;
-import java.security.AccessController;
 import java.util.Optional;
 import javax.security.auth.Subject;
 import org.slf4j.Logger;
@@ -76,7 +75,6 @@ public class SpringSecurityToJaasFilter extends GenericFilterBean {
    *
    * @return the Subject to run.
    */
-  @SuppressWarnings("removal")
   protected Optional<Subject> obtainSubject() {
     Optional<Authentication> authentication = getCurrentAuthentication();
     if (logger.isDebugEnabled()) {
@@ -85,8 +83,8 @@ public class SpringSecurityToJaasFilter extends GenericFilterBean {
     if (authentication.isEmpty() || !authentication.get().isAuthenticated()) {
       return Optional.empty();
     }
-    // TODO replace with Subject.current() when migrating to newer Version than 17
-    return Optional.ofNullable(Subject.getSubject(AccessController.getContext()));
+
+    return Optional.ofNullable(Subject.current());
   }
 
   Optional<Authentication> getCurrentAuthentication() {

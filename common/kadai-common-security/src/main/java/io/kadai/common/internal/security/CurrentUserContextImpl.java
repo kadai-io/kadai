@@ -23,7 +23,6 @@ import static java.util.function.Predicate.not;
 import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.api.security.GroupPrincipal;
 import java.lang.reflect.Method;
-import java.security.AccessController;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,10 +65,8 @@ public class CurrentUserContextImpl implements CurrentUserContext {
   }
 
   @Override
-  @SuppressWarnings("removal")
   public List<String> getGroupIds() {
-    // TODO replace with Subject.current() when migrating to newer Version than 17
-    Subject subject = Subject.getSubject(AccessController.getContext());
+    Subject subject = Subject.current();
     LOGGER.trace("Subject of caller: {}", subject);
     if (subject != null) {
       Set<GroupPrincipal> groups = subject.getPrincipals(GroupPrincipal.class);
@@ -144,10 +141,8 @@ public class CurrentUserContextImpl implements CurrentUserContext {
     return null;
   }
 
-  @SuppressWarnings("removal")
   private String getUserIdFromJaasSubject() {
-    // TODO replace with Subject.current() when migrating to newer Version than 17
-    Subject subject = Subject.getSubject(AccessController.getContext());
+    Subject subject = Subject.current();
     LOGGER.trace("Subject of caller: {}", subject);
     if (subject != null) {
       Set<Principal> principals = subject.getPrincipals();

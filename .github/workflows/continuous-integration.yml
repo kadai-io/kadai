@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  JAVA_VERSION: 17
+  JAVA_VERSION: 21
   NODE_VERSION: 22.7.0
 
   ARTIFACTS_CYPRESS_TESTS_NAME: cypress-tests

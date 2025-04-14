@@ -55,11 +55,11 @@ import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
 import java.security.Principal;
-import java.security.PrivilegedExceptionAction;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.OptionalInt;
+import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import javax.security.auth.Subject;
@@ -309,8 +309,8 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
     Subject subject = new Subject();
     Principal thatPrincipal = new UserPrincipal("user-1-3");
     subject.getPrincipals().add(thatPrincipal);
-    PrivilegedExceptionAction<Task> reopenAction = () -> taskService.reopen(task.getId());
-    Task reopenedTask = Subject.doAs(subject, reopenAction);
+    Callable<Task> reopenAction = () -> taskService.reopen(task.getId());
+    Task reopenedTask = Subject.callAs(subject, reopenAction);
 
     assertThat(reopenedTask)
         .isNotNull()
