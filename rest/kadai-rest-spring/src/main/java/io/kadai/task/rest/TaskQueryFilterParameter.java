@@ -35,6 +35,7 @@ import java.beans.ConstructorProperties;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.function.Function;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void> {
@@ -2505,28 +2506,20 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
     Optional.ofNullable(receivedWithin)
         .map(this::extractTimeIntervals)
         .ifPresent(query::receivedWithin);
-    if (receivedFrom != null || receivedUntil != null) {
-      query.receivedWithin(new TimeInterval(receivedFrom, receivedUntil));
-    }
+    queryWithinInterval(query::receivedWithin, receivedFrom, receivedUntil);
     Optional.ofNullable(receivedNotIn)
         .map(this::extractTimeIntervals)
         .ifPresent(query::receivedNotWithin);
-    if (receivedFromNot != null || receivedUntilNot != null) {
-      query.receivedNotWithin(new TimeInterval(receivedFromNot, receivedUntilNot));
-    }
+    queryWithinInterval(query::receivedNotWithin, receivedFromNot, receivedUntilNot);
 
     Optional.ofNullable(createdWithin)
         .map(this::extractTimeIntervals)
         .ifPresent(query::createdWithin);
-    if (createdFrom != null || createdUntil != null) {
-      query.createdWithin(new TimeInterval(createdFrom, createdUntil));
-    }
+    queryWithinInterval(query::createdWithin, createdFrom, createdUntil);
     Optional.ofNullable(createdNotWithin)
         .map(this::extractTimeIntervals)
         .ifPresent(query::createdNotWithin);
-    if (createdFromNot != null || createdUntilNot != null) {
-      query.createdNotWithin(new TimeInterval(createdFromNot, createdUntilNot));
-    }
+    queryWithinInterval(query::createdNotWithin, createdFromNot, createdUntilNot);
 
     Optional.ofNullable(claimedWithin)
         .map(this::extractTimeIntervals)
@@ -2545,39 +2538,27 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
     Optional.ofNullable(plannedWithin)
         .map(this::extractTimeIntervals)
         .ifPresent(query::plannedWithin);
-    if (plannedFrom != null || plannedUntil != null) {
-      query.plannedWithin(new TimeInterval(plannedFrom, plannedUntil));
-    }
+    queryWithinInterval(query::plannedWithin, plannedFrom, plannedUntil);
     Optional.ofNullable(plannedNotWithin)
         .map(this::extractTimeIntervals)
         .ifPresent(query::plannedNotWithin);
-    if (plannedFromNot != null || plannedUntilNot != null) {
-      query.plannedNotWithin(new TimeInterval(plannedFromNot, plannedUntilNot));
-    }
+    queryWithinInterval(query::plannedNotWithin, plannedFromNot, plannedUntilNot);
 
     Optional.ofNullable(dueWithin).map(this::extractTimeIntervals).ifPresent(query::dueWithin);
-    if (dueFrom != null || dueUntil != null) {
-      query.dueWithin(new TimeInterval(dueFrom, dueUntil));
-    }
+    queryWithinInterval(query::dueWithin, dueFrom, dueUntil);
     Optional.ofNullable(dueNotWithin)
         .map(this::extractTimeIntervals)
         .ifPresent(query::dueNotWithin);
-    if (dueFromNot != null || dueUntilNot != null) {
-      query.dueNotWithin(new TimeInterval(dueFromNot, dueUntilNot));
-    }
+    queryWithinInterval(query::dueNotWithin, dueFromNot, dueUntilNot);
 
     Optional.ofNullable(completedWithin)
         .map(this::extractTimeIntervals)
         .ifPresent(query::completedWithin);
-    if (completedFrom != null || completedUntil != null) {
-      query.completedWithin(new TimeInterval(completedFrom, completedUntil));
-    }
+    queryWithinInterval(query::completedWithin, completedFrom, completedUntil);
     Optional.ofNullable(completedNotWithin)
         .map(this::extractTimeIntervals)
         .ifPresent(query::completedNotWithin);
-    if (completedFromNot != null || completedUntilNot != null) {
-      query.completedNotWithin(new TimeInterval(completedFromNot, completedUntilNot));
-    }
+    queryWithinInterval(query::completedNotWithin, completedFromNot, completedUntilNot);
 
     Optional.ofNullable(nameIn).ifPresent(query::nameIn);
     Optional.ofNullable(nameNotIn).ifPresent(query::nameNotIn);
@@ -2613,16 +2594,11 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
     Optional.ofNullable(priorityWithin)
         .map(this::extractIntIntervals)
         .ifPresent(query::priorityWithin);
-    if (priorityFrom != null || priorityUntil != null) {
-      query.priorityWithin(new IntInterval(priorityFrom, priorityUntil));
-    }
-
+    queryWithinInterval(query::priorityWithin, priorityFrom, priorityUntil);
     Optional.ofNullable(priorityNotWithin)
         .map(this::extractIntIntervals)
         .ifPresent(query::priorityNotWithin);
-    if (priorityNotFrom != null || priorityNotUntil != null) {
-      query.priorityNotWithin(new IntInterval(priorityNotFrom, priorityNotUntil));
-    }
+    queryWithinInterval(query::priorityNotWithin, priorityNotFrom, priorityNotUntil);
 
     Optional.ofNullable(stateIn).ifPresent(query::stateIn);
     Optional.ofNullable(stateNotIn).ifPresent(query::stateNotIn);
@@ -2882,6 +2858,20 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
           String.format(
               "owner-is-null parameter with value '%s' is invalid.",
               LogSanitizer.stripLineBreakingChars(ownerNull)));
+    }
+  }
+
+  private static void queryWithinInterval(Function<TimeInterval, TaskQuery> queryFunction,
+      Instant from, Instant until) {
+    if (from != null || until != null) {
+      queryFunction.apply(new TimeInterval(from, until));
+    }
+  }
+
+  private static void queryWithinInterval(Function<IntInterval, TaskQuery> queryFunction,
+      Integer from, Integer until) {
+    if (from != null || until != null) {
+      queryFunction.apply(new IntInterval(from, until));
     }
   }
 }
