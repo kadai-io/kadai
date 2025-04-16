@@ -16,13 +16,16 @@
  *
  */
 
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 
-const routes: Routes = [];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
-})
-export class MonitorRoutingModule {}
+export const routes: Routes = [
+  {
+    path: '',
+    loadComponent: () =>
+      import('./task-history-query/task-history-query.component').then((m) => m.TaskHistoryQueryComponent)
+  },
+  {
+    path: '**',
+    redirectTo: ''
+  }
+];

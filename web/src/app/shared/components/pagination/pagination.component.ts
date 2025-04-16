@@ -31,12 +31,29 @@ import { Page } from 'app/shared/models/page';
 import { MatPaginator } from '@angular/material/paginator';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { NgClass, NgFor, NgIf } from '@angular/common';
+import { MatFormField } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import { MatOption } from '@angular/material/core';
 
 @Component({
   selector: 'kadai-shared-pagination',
   templateUrl: './pagination.component.html',
   styleUrls: ['./pagination.component.scss'],
-  standalone: false
+  imports: [
+    MatPaginator,
+    NgClass,
+    NgIf,
+    MatFormField,
+    MatInput,
+    FormsModule,
+    MatAutocompleteTrigger,
+    MatAutocomplete,
+    NgFor,
+    MatOption
+  ]
 })
 export class PaginationComponent implements OnInit, OnChanges {
   @Input() page: Page;

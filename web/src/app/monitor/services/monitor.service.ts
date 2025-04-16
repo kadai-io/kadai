@@ -16,7 +16,7 @@
  *
  */
 
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'environments/environment';
 import { Observable } from 'rxjs';
@@ -27,9 +27,11 @@ import { TaskState } from '../../shared/models/task-state';
 
 const monitorUrl = '/v1/monitor';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class MonitorService {
-  constructor(private httpClient: HttpClient) {}
+  private httpClient = inject(HttpClient);
 
   getTaskStatusReport(): Observable<ReportData> {
     const queryParams = {

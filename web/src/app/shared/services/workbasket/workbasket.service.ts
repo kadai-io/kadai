@@ -17,7 +17,7 @@
  */
 
 import { Observable, Subject, throwError as observableThrowError } from 'rxjs';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'environments/environment';
 import { Workbasket } from 'app/shared/models/workbasket';
@@ -41,12 +41,9 @@ export class WorkbasketService {
   public workBasketSelected = new Subject<string>();
   public workBasketSaved = new Subject<number>();
   public workbasketActionToolbarExpanded = new Subject<boolean>();
+  private httpClient = inject(HttpClient);
+  private domainService = inject(DomainService);
   private workbasketSummaryRef: Observable<WorkbasketSummaryRepresentation> = new Observable();
-
-  constructor(
-    private httpClient: HttpClient,
-    private domainService: DomainService
-  ) {}
 
   // #region "REST calls"
   // GET

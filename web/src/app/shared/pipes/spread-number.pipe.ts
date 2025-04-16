@@ -18,10 +18,7 @@
 
 import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({
-  name: 'spreadNumber',
-  standalone: false
-})
+@Pipe({ name: 'spreadNumber' })
 export class SpreadNumberPipe implements PipeTransform {
   transform(maxPageNumber: number, currentIndex: number, maxArrayElements: number): number[] {
     const returnArray = [];

@@ -19,16 +19,16 @@
 <div *ngIf="reportData" class="row">
   <div class="col-xs-12 col-md-7 col-md-offset-2">
     <div style="position: relative; width:100vw">
-      <canvas 
-            baseChart
-            [type]="lineChartType" 
-            [datasets]="lineChartData"
-            [labels]="lineChartLabels"
-            [legend]="lineChartLegend" 
-            [options]="lineChartOptions" 
-            >
-          </canvas>
+      <canvas
+        [datasets]="lineChartData"
+        [labels]="lineChartLabels"
+        [legend]="lineChartLegend"
+        [options]="lineChartOptions"
+        [type]="lineChartType"
+        baseChart
+      >
+      </canvas>
     </div>
   </div>
 </div>
-<kadai-monitor-report-table [reportData]="reportData"></kadai-monitor-report-table>
+<kadai-monitor-report-table [reportData]="reportData"/>

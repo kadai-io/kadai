@@ -16,7 +16,7 @@
  *
  */
 
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Settings } from '../models/settings';
 import { environment } from '../../../environments/environment';
@@ -28,7 +28,7 @@ import { SettingsRepresentation } from '../models/settings-representation';
   providedIn: 'root'
 })
 export class SettingsService {
-  constructor(private httpClient: HttpClient) {}
+  private httpClient = inject(HttpClient);
 
   // GET
   getSettings(): Observable<Settings> {

@@ -16,11 +16,11 @@
  *
  */
 
-import { inject, NgModule } from '@angular/core';
-import { Router, RouterModule, Routes, UrlTree } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router, Routes, UrlTree } from '@angular/router';
 
 import { UserRoles } from './shared/roles/user.roles';
-import { NoAccessComponent } from './shared/components/no-access/no-access.component';
+
 import { KadaiEngineService } from './shared/services/kadai-engine/kadai-engine.service';
 import { MonitorRoles } from './shared/roles/monitor.roles';
 import { Observable, of } from 'rxjs';
@@ -38,14 +38,15 @@ const businessAdminGuard = (): boolean | UrlTree => {
   return router.parseUrl('/kadai/workplace');
 };
 
-const appRoutes: Routes = [
+export const appRoutes: Routes = [
   {
     path: 'kadai',
     children: [
       {
         canActivate: [businessAdminGuard],
         path: 'administration',
-        loadChildren: () => import('./administration/administration.module').then((m) => m.AdministrationModule)
+        loadChildren: () =>
+          import('./administration/administration.routes').then((administration) => administration.routes)
       },
       {
         canActivate: [
@@ -61,7 +62,7 @@ const appRoutes: Routes = [
           }
         ],
         path: 'monitor',
-        loadChildren: () => import('./monitor/monitor.module').then((m) => m.MonitorModule)
+        loadChildren: () => import('./monitor/monitor.routes').then((monitor) => monitor.routes)
       },
       {
         canActivate: [
@@ -77,7 +78,7 @@ const appRoutes: Routes = [
           }
         ],
         path: 'workplace',
-        loadChildren: () => import('./workplace/workplace.module').then((m) => m.WorkplaceModule)
+        loadChildren: () => import('./workplace/workplace.routes').then((workplace) => workplace.routes)
       },
       {
         canActivate: [
@@ -99,11 +100,12 @@ const appRoutes: Routes = [
           }
         ],
         path: 'history',
-        loadChildren: () => import('./history/history.module').then((m) => m.HistoryModule)
+        loadChildren: () => import('./history/history.routes').then((history) => history.routes)
       },
       {
         path: 'no-role',
-        component: NoAccessComponent
+        loadComponent: () =>
+          import('./shared/components/no-access/no-access.component').then((m) => m.NoAccessComponent)
       },
       {
         path: 'administration',
@@ -112,7 +114,7 @@ const appRoutes: Routes = [
       {
         canActivate: [businessAdminGuard],
         path: 'settings',
-        loadChildren: () => import('./settings/settings.module').then((m) => m.SettingsModule)
+        loadChildren: () => import('./settings/settings.routes').then((settings) => settings.routes)
       },
       {
         canActivate: [businessAdminGuard],
@@ -123,7 +125,7 @@ const appRoutes: Routes = [
   },
   {
     path: 'no-role',
-    component: NoAccessComponent
+    loadComponent: () => import('./shared/components/no-access/no-access.component').then((m) => m.NoAccessComponent)
   },
   {
     canActivate: [businessAdminGuard],
@@ -131,9 +133,3 @@ const appRoutes: Routes = [
     redirectTo: 'kadai/administration/workbaskets'
   }
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(appRoutes, { useHash: true })],
-  exports: [RouterModule]
-})
-export class AppRoutingModule {}

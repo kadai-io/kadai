@@ -24,5 +24,6 @@ export class RetrieveSettings {
 
 export class SetSettings {
   static readonly type = '[Settings] Modify settings according to user input';
+
   constructor(public settings: Settings) {}
 }

@@ -16,13 +16,11 @@
  *
  */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Routes } from '@angular/router';
 
-import { MonitorRoutingModule } from './monitor-routing.module';
-
-@NgModule({
-  declarations: [],
-  imports: [CommonModule, MonitorRoutingModule]
-})
-export class MonitorModule {}
+export const routes: Routes = [
+  {
+    path: '',
+    loadComponent: () => import('./components/Settings/settings.component').then((m) => m.SettingsComponent)
+  }
+];

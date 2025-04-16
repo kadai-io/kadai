@@ -21,6 +21,7 @@ import {
   AfterViewInit,
   ChangeDetectorRef,
   Component,
+  inject,
   Input,
   OnChanges,
   OnInit,
@@ -30,8 +31,8 @@ import {
 import { isEqual } from 'lodash';
 import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
 import { expandDown } from 'app/shared/animations/expand.animation';
-import { MatSelectionList } from '@angular/material/list';
-import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
+import { MatListOption, MatSelectionList } from '@angular/material/list';
+import { CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { Side } from '../../models/workbasket-distribution-enums';
 import { Select, Store } from '@ngxs/store';
 import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
@@ -45,13 +46,37 @@ import { Observable, Subject } from 'rxjs';
 import { WorkbasketQueryFilterParameter } from '../../../shared/models/workbasket-query-filter-parameter';
 import { FilterSelectors } from '../../../shared/store/filter-store/filter.selectors';
 import { WorkbasketDistributionTarget } from '../../../shared/models/workbasket-distribution-target';
+import { MatToolbar } from '@angular/material/toolbar';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
+import { NgIf } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { WorkbasketFilterComponent } from '../../../shared/components/workbasket-filter/workbasket-filter.component';
+import { IconTypeComponent } from '../type-icon/icon-type.component';
+import { MatDivider } from '@angular/material/divider';
+import { OrderBy } from '../../../shared/pipes/order-by.pipe';
 
 @Component({
   selector: 'kadai-administration-workbasket-distribution-targets-list',
   templateUrl: './workbasket-distribution-targets-list.component.html',
   styleUrls: ['./workbasket-distribution-targets-list.component.scss'],
   animations: [expandDown],
-  standalone: false
+  imports: [
+    MatToolbar,
+    MatTooltip,
+    MatButton,
+    NgIf,
+    MatIcon,
+    WorkbasketFilterComponent,
+    MatSelectionList,
+    CdkVirtualScrollViewport,
+    CdkFixedSizeVirtualScroll,
+    CdkVirtualForOf,
+    MatListOption,
+    IconTypeComponent,
+    MatDivider,
+    OrderBy
+  ]
 })
 export class WorkbasketDistributionTargetsListComponent
   implements AfterContentChecked, OnChanges, OnInit, AfterViewInit
@@ -61,35 +86,25 @@ export class WorkbasketDistributionTargetsListComponent
   allSelected;
   @Input() component;
   @Input() transferDistributionTargetObservable: Observable<Side>;
-
   @Select(WorkbasketSelectors.workbasketDistributionTargets)
   workbasketDistributionTargets$: Observable<WorkbasketSummary[]>;
-
   @Select(WorkbasketSelectors.availableDistributionTargets)
   availableDistributionTargets$: Observable<WorkbasketSummary[]>;
-
   @Select(FilterSelectors.getAvailableDistributionTargetsFilter)
   availableDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter>;
-
   @Select(FilterSelectors.getSelectedDistributionTargetsFilter)
   selectedDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter>;
-
   toolbarState = false;
-
   distributionTargets: WorkbasketDistributionTarget[];
   distributionTargetsClone: WorkbasketDistributionTarget[];
-
   @ViewChild('workbasket') distributionTargetsList: MatSelectionList;
   @ViewChild('scroller') workbasketList: CdkVirtualScrollViewport;
   requestInProgress: number;
+  private changeDetector = inject(ChangeDetectorRef);
+  private store = inject(Store);
   private destroy$ = new Subject<void>();
   private filter: WorkbasketQueryFilterParameter;
   private allSelectedDiff = 0;
-
-  constructor(
-    private changeDetector: ChangeDetectorRef,
-    private store: Store
-  ) {}
 
   ngOnInit(): void {
     this.requestInProgress = 2;

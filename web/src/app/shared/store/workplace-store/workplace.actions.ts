@@ -18,6 +18,7 @@
 
 export class SetFilterExpansion {
   static readonly type = '[Task list toolbar] Expand or collapse the Task filter';
+
   constructor(public isExpanded?: boolean) {}
 }
 

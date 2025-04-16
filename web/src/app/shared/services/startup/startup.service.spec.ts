@@ -16,13 +16,11 @@
  *
  */
 
-import { TestBed, inject, getTestBed } from '@angular/core/testing';
+import { getTestBed, inject, TestBed } from '@angular/core/testing';
 
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { StartupService } from './startup.service';
-import { KadaiEngineService } from '../kadai-engine/kadai-engine.service';
-import { WindowRefService } from '../window/window.service';
 import { environment } from '../../../../environments/environment';
 
 describe('StartupService', () => {
@@ -39,13 +37,7 @@ describe('StartupService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        StartupService,
-        KadaiEngineService,
-        WindowRefService,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-      ]
+      providers: [provideHttpClient(), provideHttpClientTesting()]
     });
   });
 

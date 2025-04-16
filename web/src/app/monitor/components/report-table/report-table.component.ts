@@ -19,7 +19,7 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { ReportData } from 'app/monitor/models/report-data';
 import { ReportRow } from '../../models/report-row';
-import { NgIf, NgFor, NgClass } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { MatButton } from '@angular/material/button';
 
 @Component({

@@ -20,7 +20,9 @@ import { Injectable } from '@angular/core';
 import { Orientation } from 'app/shared/models/orientation';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class OrientationService {
   private lock = false;
   private currentOrientation = Orientation.landscape;
