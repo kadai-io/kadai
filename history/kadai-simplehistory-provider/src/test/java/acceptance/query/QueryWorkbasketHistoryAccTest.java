@@ -26,9 +26,9 @@ import acceptance.ParameterizedQuerySqlCaptureInterceptor;
 import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.TimeInterval;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.simplehistory.workbasket.api.WorkbasketHistoryQuery;
 import io.kadai.simplehistory.workbasket.api.WorkbasketHistoryQueryColumnName;
-import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEventType;
 import io.kadai.workbasket.api.WorkbasketCustomField;
@@ -568,7 +568,7 @@ class QueryWorkbasketHistoryAccTest extends AbstractAccTest {
     @CsvSource({"0,10", "5,10", "0,0", "2,4"})
     void should_UseNativeSql_For_QueryPagination(int offset, int limit) {
       ParameterizedQuerySqlCaptureInterceptor.resetCapturedSql();
-      historyService.createWorkbasketHistoryQuery().list(offset, limit);
+      workbasketHistoryService.createWorkbasketHistoryQuery().list(offset, limit);
       final String sql = ParameterizedQuerySqlCaptureInterceptor.getCapturedSql();
       final String physicalPattern1 = String.format("LIMIT %d OFFSET %d", limit, offset);
       final String physicalPattern2 =

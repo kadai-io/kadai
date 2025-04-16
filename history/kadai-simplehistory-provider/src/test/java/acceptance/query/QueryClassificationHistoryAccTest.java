@@ -26,9 +26,9 @@ import acceptance.ParameterizedQuerySqlCaptureInterceptor;
 import io.kadai.classification.api.ClassificationCustomField;
 import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.TimeInterval;
+import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.simplehistory.classification.api.ClassificationHistoryQuery;
 import io.kadai.simplehistory.classification.api.ClassificationHistoryQueryColumnName;
-import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEventType;
 import java.lang.reflect.Field;
@@ -583,7 +583,7 @@ class QueryClassificationHistoryAccTest extends AbstractAccTest {
     @CsvSource({"0,10", "5,10", "0,0", "2,4"})
     void should_UseNativeSql_For_QueryPagination(int offset, int limit) {
       ParameterizedQuerySqlCaptureInterceptor.resetCapturedSql();
-      historyService.createClassificationHistoryQuery().list(offset, limit);
+      classificationHistoryService.createClassificationHistoryQuery().list(offset, limit);
       final String sql = ParameterizedQuerySqlCaptureInterceptor.getCapturedSql();
       final String physicalPattern1 = String.format("LIMIT %d OFFSET %d", limit, offset);
       final String physicalPattern2 =

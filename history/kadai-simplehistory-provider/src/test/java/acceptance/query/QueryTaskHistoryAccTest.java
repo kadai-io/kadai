@@ -584,7 +584,7 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
     @CsvSource({"0,10", "5,10", "0,0", "2,4"})
     void should_UseNativeSql_For_QueryPagination(int offset, int limit) {
       ParameterizedQuerySqlCaptureInterceptor.resetCapturedSql();
-      historyService.createTaskHistoryQuery().list(offset, limit);
+      taskHistoryService.createTaskHistoryQuery().list(offset, limit);
       final String sql = ParameterizedQuerySqlCaptureInterceptor.getCapturedSql();
       final String physicalPattern1 = String.format("LIMIT %d OFFSET %d", limit, offset);
       final String physicalPattern2 =
