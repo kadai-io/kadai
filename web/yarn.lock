@@ -604,15 +604,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/core@npm:19.2.6":
-  version: 19.2.6
-  resolution: "@angular/core@npm:19.2.6"
+"@angular/core@npm:19.2.7":
+  version: 19.2.7
+  resolution: "@angular/core@npm:19.2.7"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
     rxjs: ^6.5.3 || ^7.4.0
     zone.js: ~0.15.0
-  checksum: 10c0/fecb8ae068644352574f45b5c6f5e11d9da5f74d50853b1ebe30cf4c0f6b7bbfdb874fbf02832301e10f28ae9f07ea2402596b46c1e159bebd56c742484fb536
+  checksum: 10c0/cfecac8eb0f01089dc069ee3991f8cd654ffcd6a1b4d4babe1b9088ac643c41f8dc23a84914a904af5e783f60021c3e3925ebd302c805d44ace489b341bc21ab
   languageName: node
   linkType: hard
 
@@ -10015,7 +10015,7 @@ __metadata:
     "@angular/common": "npm:19.2.6"
     "@angular/compiler": "npm:19.2.7"
     "@angular/compiler-cli": "npm:19.2.7"
-    "@angular/core": "npm:19.2.6"
+    "@angular/core": "npm:19.2.7"
     "@angular/forms": "npm:19.2.6"
     "@angular/material": "npm:19.2.9"
     "@angular/platform-browser": "npm:19.2.6"
