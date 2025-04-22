@@ -20,6 +20,10 @@ package io.kadai.classification.rest;
 
 import static io.kadai.common.internal.util.CheckedConsumer.rethrowing;
 import static io.kadai.common.internal.util.CheckedFunction.wrapping;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kadai.classification.api.ClassificationCustomField;
@@ -34,6 +38,7 @@ import io.kadai.classification.rest.assembler.ClassificationDefinitionCollection
 import io.kadai.classification.rest.assembler.ClassificationDefinitionRepresentationModelAssembler;
 import io.kadai.classification.rest.models.ClassificationDefinitionRepresentationModel;
 import io.kadai.classification.rest.models.ClassificationRepresentationModel;
+import io.kadai.classification.rest.models.ClassificationSummaryRepresentationModel;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
@@ -45,7 +50,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.MediaType;
@@ -88,9 +92,7 @@ public class ClassificationDefinitionController implements ClassificationDefinit
         summaries.stream()
             .map(ClassificationSummary::getId)
             .map(wrapping(classificationService::getClassification))
-            .collect(
-                Collectors.collectingAndThen(
-                    Collectors.toList(), assembler::toKadaiCollectionModel));
+            .collect(collectingAndThen(toList(), assembler::toKadaiCollectionModel));
 
     return ResponseEntity.ok(collectionModel);
   }
@@ -122,9 +124,7 @@ public class ClassificationDefinitionController implements ClassificationDefinit
 
   private Map<String, String> getSystemIds() {
     return classificationService.createClassificationQuery().list().stream()
-        .collect(
-            Collectors.toMap(
-                i -> logicalId(i.getKey(), i.getDomain()), ClassificationSummary::getId));
+        .collect(toMap(i -> logicalId(i.getKey(), i.getDomain()), ClassificationSummary::getId));
   }
 
   private ClassificationDefinitionCollectionRepresentationModel
@@ -156,19 +156,20 @@ public class ClassificationDefinitionController implements ClassificationDefinit
 
     Set<String> keysWithDomain =
         definitionList.stream()
-            .map(def -> logicalId(def.getClassification()))
-            .collect(Collectors.toSet());
+            .map(ClassificationDefinitionRepresentationModel::getClassification)
+            .map(this::logicalId)
+            .collect(toSet());
 
     Map<String, String> classificationIdToKey =
         definitionList.stream()
+            .map(ClassificationDefinitionRepresentationModel::getClassification)
             .filter(
-                def ->
-                    def.getClassification().getClassificationId() != null
-                        && def.getClassification().getKey() != null)
+                classification ->
+                    classification.getClassificationId() != null && classification.getKey() != null)
             .collect(
-                Collectors.toMap(
-                    def -> def.getClassification().getClassificationId(),
-                    def -> def.getClassification().getKey(),
+                toMap(
+                    ClassificationSummaryRepresentationModel::getClassificationId,
+                    ClassificationSummaryRepresentationModel::getKey,
                     (existing, replacement) -> existing));
 
     definitionList.stream()
@@ -183,7 +184,7 @@ public class ClassificationDefinitionController implements ClassificationDefinit
             defClassEntry ->
                 hasResolvableParent(defClassEntry.getValue(), keysWithDomain, systemIds))
         .collect(
-            Collectors.toMap(
+            toMap(
                 defClassEntry -> assembler.toEntityModel(defClassEntry.getKey()),
                 defClassEntry -> defClassEntry.getValue().getParentKey()));
   }
