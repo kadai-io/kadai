@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.ibatis.annotations.CacheNamespace;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Options;
@@ -40,6 +41,7 @@ import org.apache.ibatis.annotations.Update;
 
 /** This class is the mybatis mapping of task. */
 @SuppressWarnings("checkstyle:LineLength")
+@CacheNamespace
 public interface TaskMapper {
 
   @Select(

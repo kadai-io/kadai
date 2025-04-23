@@ -21,10 +21,11 @@ package io.kadai.workbasket.internal.models;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.models.WorkbasketAccessItem;
+import java.io.Serializable;
 import java.util.Objects;
 
 /** WorkbasketAccessItemImpl Entity. */
-public class WorkbasketAccessItemImpl implements WorkbasketAccessItem {
+public class WorkbasketAccessItemImpl implements WorkbasketAccessItem, Serializable {
 
   private String id;
   private String workbasketId;

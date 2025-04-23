@@ -19,12 +19,13 @@
 package io.kadai.user.internal.models;
 
 import io.kadai.user.api.models.UserSummary;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
 /** This entity contains the most important information about a user. */
-public class UserSummaryImpl implements UserSummary {
+public class UserSummaryImpl implements UserSummary, Serializable {
 
   protected String id;
 
@@ -194,13 +195,13 @@ public class UserSummaryImpl implements UserSummary {
     return domains;
   }
 
+  public void setDomains(Set<String> domains) {
+    this.domains = domains;
+  }
+
   @Override
   public UserSummary copy() {
     return new UserSummaryImpl(this);
-  }
-
-  public void setDomains(Set<String> domains) {
-    this.domains = domains;
   }
 
   @Override

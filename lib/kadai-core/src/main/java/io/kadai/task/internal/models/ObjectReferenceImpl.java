@@ -20,10 +20,12 @@ package io.kadai.task.internal.models;
 
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.task.api.models.ObjectReference;
+import java.io.Serializable;
 import java.util.Objects;
 
 /** ObjectReference entity. */
-public class ObjectReferenceImpl implements ObjectReference {
+public class ObjectReferenceImpl implements ObjectReference, Serializable {
+
   private String id;
   private String taskId;
   private String company;
