@@ -367,15 +367,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/animations@npm:19.2.7":
-  version: 19.2.7
-  resolution: "@angular/animations@npm:19.2.7"
+"@angular/animations@npm:19.2.8":
+  version: 19.2.8
+  resolution: "@angular/animations@npm:19.2.8"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/common": 19.2.7
-    "@angular/core": 19.2.7
-  checksum: 10c0/c0da9602bdcef48d6a9d6b32326be0a26967a400e24bf29debaa6c57a6bbbd7c227f1ee9e855df530fe78cc67c7d8f5964a3a5759f71633a2dcd6f70a73cdd64
+    "@angular/common": 19.2.8
+    "@angular/core": 19.2.8
+  checksum: 10c0/8b277abe21e9794adfa04288110acdf70b71e93b0be3d66e3d273e0e143bb8d580abece229cc30cdac9f4a665249f0100a0aefcf9a5faa19e1655b67469ed126
   languageName: node
   linkType: hard
 
@@ -10022,7 +10022,7 @@ __metadata:
     "@ali-hm/angular-tree-component": "npm:19.2.5"
     "@angular-builders/custom-webpack": "npm:19.0.1"
     "@angular-devkit/build-angular": "npm:19.2.9"
-    "@angular/animations": "npm:19.2.7"
+    "@angular/animations": "npm:19.2.8"
     "@angular/build": "npm:^19.2.9"
     "@angular/cdk": "npm:19.2.10"
     "@angular/cli": "npm:19.2.9"
