@@ -134,12 +134,6 @@ public class WorkbasketSummaryImpl implements WorkbasketSummary {
     this.type = type;
   }
 
-  @Deprecated
-  @Override
-  public String getCustomAttribute(WorkbasketCustomField customField) {
-    return getCustomField(customField);
-  }
-
   @Override
   public String getCustomField(WorkbasketCustomField customField) {
     switch (customField) {

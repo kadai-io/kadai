@@ -446,12 +446,6 @@ public class TaskSummaryImpl implements TaskSummary {
     isReopened = reopened;
   }
 
-  @Deprecated
-  @Override
-  public String getCustomAttribute(TaskCustomField customField) {
-    return getCustomField(customField);
-  }
-
   @Override
   public String getCustomField(TaskCustomField customField) {
 

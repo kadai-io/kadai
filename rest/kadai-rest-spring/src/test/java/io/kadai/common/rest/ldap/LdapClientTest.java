@@ -249,9 +249,7 @@ class LdapClientTest {
 
   @Test
   void testLdap_checkForMissingConfigurations() {
-    final int optionalCount = 22;
-    assertThat(cut.checkForMissingConfigurations())
-        .hasSize(LdapSettings.values().length - optionalCount);
+    assertThat(cut.checkForMissingConfigurations()).hasSize(LdapSettings.REQUIRED_SETTINGS.length);
   }
 
   @Test
@@ -384,7 +382,7 @@ class LdapClientTest {
               {"kadai.ldap.baseDn", "o=KadaiTest"},
               {"kadai.ldap.userSearchBase", "ou=people"},
               {"kadai.ldap.userSearchFilterName", "objectclass"},
-              {"kadai.ldap.groupsOfUser", "memberUid"},
+              {"kadai.ldap.groupsOfUser.name", "memberUid"},
               {"kadai.ldap.groupNameAttribute", "cn"},
               {"kadai.ldap.userPermissionsAttribute", "permission"},
               {"kadai.ldap.groupSearchFilterValue", "groupOfUniqueNames"},
@@ -403,7 +401,7 @@ class LdapClientTest {
               {"kadai.ldap.userOrglevel2Attribute", "orgLevel2"},
               {"kadai.ldap.userOrglevel3Attribute", "orgLevel3"},
               {"kadai.ldap.userOrglevel4Attribute", "orgLevel4"},
-              {"kadai.ldap.permissionsOfUser", "memberUid"},
+              {"kadai.ldap.permissionsOfUser.name", "memberUid"},
               {"kadai.ldap.permissionNameAttribute", "permission"},
               {"kadai.ldap.permissionSearchFilterValue", "groupOfUniqueNames"},
               {"kadai.ldap.permissionSearchFilterName", "objectclass"},

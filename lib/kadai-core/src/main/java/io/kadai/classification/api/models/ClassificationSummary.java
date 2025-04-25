@@ -106,19 +106,6 @@ public interface ClassificationSummary {
 
   /**
    * Returns the value of the specified {@linkplain ClassificationCustomField
-   * ClassificationCustomField} of the Classification.
-   *
-   * @param customField identifies which {@linkplain ClassificationCustomField
-   *     ClassificationCustomField} is requested
-   * @return the value for the given {@linkplain ClassificationCustomField
-   *     ClassificationCustomField}
-   * @deprecated Use {@linkplain #getCustomField(ClassificationCustomField)} instead
-   */
-  @Deprecated
-  String getCustomAttribute(ClassificationCustomField customField);
-
-  /**
-   * Returns the value of the specified {@linkplain ClassificationCustomField
    * ClassificationCustomField} of the classification.
    *
    * @param customField identifies which {@linkplain ClassificationCustomField

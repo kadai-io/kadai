@@ -47,16 +47,6 @@ public interface Workbasket extends WorkbasketSummary {
   void setType(WorkbasketType type);
 
   /**
-   * Sets the value of the specified {@linkplain WorkbasketCustomField}.
-   *
-   * @param customField identifies which {@linkplain WorkbasketCustomField} is to be set
-   * @param value the value of the {@linkplain WorkbasketCustomField} to be set
-   * @deprecated Use {@linkplain #setCustomField(WorkbasketCustomField, String)} instead
-   */
-  @Deprecated
-  void setCustomAttribute(WorkbasketCustomField customField, String value);
-
-  /**
    * Sets the value for the specified {@linkplain WorkbasketCustomField}.
    *
    * @param customField identifies which {@linkplain WorkbasketCustomField} is to be set.
