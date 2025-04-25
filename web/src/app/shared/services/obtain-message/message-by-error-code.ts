@@ -29,7 +29,6 @@ export const messageByErrorCode = {
       'Cannot be saved because there has been a modification while editing. Please reload to get the current version.',
     DOMAIN_NOT_FOUND: 'Domain {domain} cannot be found',
     NOT_AUTHORIZED: 'Current user {currentUserId} is not authorized. User must be member of role(s) {roles}.',
-    SPINNER_TIMEOUT: 'Request time exceeded. Please make sure you have internet connection.',
     HISTORY_EVENT_NOT_FOUND: 'History Event with id {historyEventId} cannot be found',
     PAYLOAD_TOO_LARGE: 'Maximum upload size was exceeded',
     CLASSIFICATION_SERVICE_LEVEL_MALFORMED:
