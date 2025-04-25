@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CustomAttribute } from 'app/workplace/models/task';
 import { NgFor, NgIf } from '@angular/common';
 import { MatDivider } from '@angular/material/divider';
@@ -33,11 +33,9 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./task-attribute-value.component.scss'],
   imports: [NgIf, MatDivider, NgFor, MatButton, MatTooltip, MatIcon, MatFormField, MatInput, FormsModule]
 })
-export class TaskAttributeValueComponent implements OnInit {
+export class TaskAttributeValueComponent {
   @Input() callbackInfo = false;
   @Input() attributes: CustomAttribute[] = [];
-
-  ngOnInit() {}
 
   addAttribute(): void {
     this.attributes.push({ key: '', value: '' });
