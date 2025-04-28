@@ -325,6 +325,47 @@ jobs:
         if: failure()
         uses: andymckay/cancel-action@0.5
 
+  add-copyright:
+    runs-on: ubuntu-22.04
+    if: github.repository == 'kadai-io/kadai' && github.ref == 'refs/heads/master' && github.head_ref == ''
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Add Copyright Headers
+        run: |
+          YEAR=$(date +%Y)
+          LAST_YEAR=$((YEAR - 1))
+          for file in $(find . -type f \( -name '*.java' -o -name '*.ts' \)); do
+            if grep -q "Copyright \[$LAST_YEAR\] \[envite consulting GmbH\]" "$file"; then
+              echo "Updating copyright year in $file"
+              sed -i "s/Copyright \[$LAST_YEAR\] \[envite consulting GmbH\]/Copyright [$YEAR] [envite consulting GmbH]/" "$file"
+            elif ! grep -q -e "Copyright" -e "License" "$file"; then
+              echo "Adding copyright to $file"
+              cat LICENSE_HEADER.txt "$file" > temp_file
+              mv temp_file "$file"
+            fi
+          done
+          
+          for file in $(find . -type f -name '*.html'); do
+            if grep -q "Copyright \[$LAST_YEAR\] \[envite consulting GmbH\]" "$file"; then
+              echo "Updating copyright year in $file"
+              sed -i "s/Copyright \[$LAST_YEAR\] \[envite consulting GmbH\]/Copyright [$YEAR] [envite consulting GmbH]/" "$file"
+            elif ! grep -q -e "Copyright" -e "License" "$file"; then
+              echo "Adding copyright to $file"
+              cat LICENSE_HEADER_HTML.txt "$file" > temp_file
+              mv temp_file "$file"
+            fi
+          done
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Add/update copyright headers" || echo "No changes to commit"
+          git push
+
   release_artifacts:
     runs-on: ubuntu-22.04
     name: Release artifacts to Sonatype-Central
