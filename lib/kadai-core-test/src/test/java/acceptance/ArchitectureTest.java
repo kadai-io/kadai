@@ -80,7 +80,6 @@ import org.apache.ibatis.annotations.SelectProvider;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -427,7 +426,8 @@ class ArchitectureTest {
   }
 
   @Test
-  @Disabled("this has way too many false positives during regular development without refactoring")
+  // @Disabled("this has way too many false positives during regular development without refactoring")
+  // Is that actually still the case? We'll see!
   void packagesShouldBeFreeOfCyclicDependencies() {
     // Frozen, so it can be improved over time:
     // https://www.archunit.org/userguide/html/000_Index.html#_freezing_arch_rules
@@ -435,7 +435,8 @@ class ArchitectureTest {
   }
 
   @Test
-  @Disabled("this has way too many false positives during regular development without refactoring")
+  // @Disabled("this has way too many false positives during regular development without refactoring")
+  // Is that actually still the case? We'll see!
   void classesShouldBeFreeOfCyclicDependencies() {
     SliceAssignment everySingleClass =
         new SliceAssignment() {
@@ -477,9 +478,7 @@ class ArchitectureTest {
   // region Structure
 
   @Test
-  @Disabled("Test is failing for an unknown reason")
   void moduleMonitorShouldOnlyDependOn() {
-    // FIXME fails for some unknown reason...
     moduleShouldOnlyDependOn("monitor", List.of("common", "classification", "task", "workbasket"));
   }
 
@@ -490,7 +489,6 @@ class ArchitectureTest {
 
   @Test
   void moduleSpiShouldOnlyDependOn() {
-    // FIXME should not depend on task, classification and workbasket
     moduleShouldOnlyDependOn("spi", List.of("common", "task", "classification", "workbasket"));
   }
 
@@ -502,17 +500,6 @@ class ArchitectureTest {
         p -> assertThat(importedClasses.containPackage(p)).isTrue();
 
     return DynamicTest.stream(KADAI_ROOT_PACKAGES.stream(), descriptionProvider, testProvider);
-  }
-
-  @Test
-  @Disabled("Needs to be replaced")
-  void allClassesAreInsideApiOrInternal() {
-    classes()
-        .that()
-        .resideOutsideOfPackages("acceptance..", "testapi..", "..test..")
-        .should()
-        .resideInAnyPackage("..api..", "..internal..")
-        .check(importedClasses);
   }
 
   @TestFactory
