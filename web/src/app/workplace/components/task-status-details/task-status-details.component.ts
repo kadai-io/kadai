@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { DatePipe, NgIf } from '@angular/common';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
@@ -29,9 +29,7 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./task-status-details.component.scss'],
   imports: [NgIf, MatFormField, MatLabel, MatInput, FormsModule, DatePipe]
 })
-export class TaskStatusDetailsComponent implements OnInit {
+export class TaskStatusDetailsComponent {
   @Input() task: Task;
   @Output() taskChange: EventEmitter<Task> = new EventEmitter<Task>();
-
-  ngOnInit() {}
 }
