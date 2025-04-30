@@ -20,11 +20,14 @@ package acceptance.jobs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import acceptance.AbstractAccTest;
+import io.kadai.KadaiConfiguration;
+import io.kadai.KadaiConfiguration.Builder;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
 import io.kadai.common.api.ScheduledJob;
 import io.kadai.common.api.exceptions.SystemException;
+import io.kadai.common.internal.InternalKadaiEngine;
+import io.kadai.common.internal.JobMapper;
 import io.kadai.common.internal.JobServiceImpl;
 import io.kadai.common.internal.jobs.JobRunner;
 import io.kadai.common.internal.jobs.PlainJavaTransactionProvider;
@@ -33,6 +36,9 @@ import io.kadai.common.test.config.DataSourceGenerator;
 import io.kadai.common.test.util.ParallelThreadHelper;
 import io.kadai.task.internal.jobs.TaskCleanupJob;
 import io.kadai.task.internal.jobs.TaskUpdatePriorityJob;
+import io.kadai.testapi.KadaiConfigurationModifier;
+import io.kadai.testapi.KadaiInject;
+import io.kadai.testapi.KadaiIntegrationTest;
 import io.kadai.workbasket.internal.jobs.WorkbasketCleanupJob;
 import java.sql.SQLException;
 import java.time.Duration;
@@ -47,19 +53,28 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 
-@Disabled
-class JobRunnerAccTest extends AbstractAccTest {
+@KadaiIntegrationTest
+class JobRunnerAccTest implements KadaiConfigurationModifier {
 
   private static final Duration TASK_CLEANUP_JOB_LOCK_EXPIRATION_PERIOD = Duration.ofMinutes(4);
   private static final Duration WORKBASKET_CLEANUP_JOB_LOCK_EXPIRATION_PERIOD =
       Duration.ofMinutes(3);
   private static final Duration TASK_UPDATE_PRIORITY_LOCK_EXPIRATION_PERIOD = Duration.ofMinutes(1);
-  private final JobServiceImpl jobService = (JobServiceImpl) kadaiEngine.getJobService();
+
+  @KadaiInject InternalKadaiEngine internalKadaiEngine;
+  @KadaiInject KadaiConfiguration kadaiConfiguration;
+  @KadaiInject JobServiceImpl jobService;
+
+  @Override
+  public Builder modify(Builder builder) {
+    return builder
+        .taskCleanupJobLockExpirationPeriod(TASK_CLEANUP_JOB_LOCK_EXPIRATION_PERIOD)
+        .workbasketCleanupJobLockExpirationPeriod(WORKBASKET_CLEANUP_JOB_LOCK_EXPIRATION_PERIOD)
+        .taskUpdatePriorityJobLockExpirationPeriod(TASK_UPDATE_PRIORITY_LOCK_EXPIRATION_PERIOD);
+  }
 
   @Test
   void should_onlyExecuteJobOnce_When_MultipleThreadsTryToRunJobsAtTheSameTime() throws Exception {
-    resetDb(true); // for some reason clearing the job table is not enough..
-
     assertThat(jobService.findJobsToRun()).isEmpty();
     ScheduledJob job =
         createJob(Instant.now().minus(5, ChronoUnit.MINUTES), TaskCleanupJob.class.getName());
@@ -86,12 +101,16 @@ class JobRunnerAccTest extends AbstractAccTest {
     // runEvery is set to P1D Therefore we need to check which jobs run tomorrow.
     // Just to be sure the jobs are found we will look for any job scheduled in the next 2 days.
     List<ScheduledJob> jobsToRun =
-        getJobMapper(kadaiEngine).findJobsToRun(Instant.now().plus(2, ChronoUnit.DAYS));
+        internalKadaiEngine
+            .getSqlSession()
+            .getMapper(JobMapper.class)
+            .findJobsToRun(Instant.now().plus(2, ChronoUnit.DAYS));
 
     assertThat(jobsToRun).hasSize(1).doesNotContain(job);
   }
 
   @TestFactory
+  @Disabled("Currently cannot get it to work due to problems dirtying the data context")
   Stream<DynamicTest> should_setTheLockExpirationDateCorrectly_When_CreatingJobs() {
     List<Pair<String, Duration>> list =
         List.of(
@@ -103,7 +122,6 @@ class JobRunnerAccTest extends AbstractAccTest {
                 WORKBASKET_CLEANUP_JOB_LOCK_EXPIRATION_PERIOD));
     ThrowingConsumer<Pair<String, Duration>> testSettingLockExpirationDate =
         p -> {
-          resetDb(true);
           assertThat(jobService.findJobsToRun()).isEmpty();
           createJob(Instant.now().minus(5, ChronoUnit.MINUTES), p.getLeft());
           ParallelThreadHelper.runInThread(
@@ -126,7 +144,10 @@ class JobRunnerAccTest extends AbstractAccTest {
               },
               1);
           List<ScheduledJob> resultJobs =
-              getJobMapper(kadaiEngine).findJobsToRun(Instant.now().plus(2, ChronoUnit.DAYS));
+              internalKadaiEngine
+                  .getSqlSession()
+                  .getMapper(JobMapper.class)
+                  .findJobsToRun(Instant.now().plus(2, ChronoUnit.DAYS));
           assertThat(resultJobs).hasSize(1);
           assertThat(resultJobs.get(0).getType()).isEqualTo(p.getLeft());
           assertThat(resultJobs.get(0).getLockExpires())
