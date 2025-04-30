@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe, NgFor, NgIf } from '@angular/common';
@@ -30,7 +30,7 @@ import { SvgIconComponent } from 'angular-svg-icon';
   styleUrls: ['./task-list.component.scss'],
   imports: [NgIf, MatSelectionList, NgFor, MatListOption, MatDivider, SvgIconComponent, DatePipe]
 })
-export class TaskListComponent implements OnInit {
+export class TaskListComponent {
   @Input()
   tasks: Task[];
   @Input()
@@ -39,8 +39,6 @@ export class TaskListComponent implements OnInit {
   selectedIdChange = new EventEmitter<string>();
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-
-  ngOnInit() {}
 
   selectTask(taskId: string) {
     this.selectedId = taskId;

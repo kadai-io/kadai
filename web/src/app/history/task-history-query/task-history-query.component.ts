@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, ViewChild } from '@angular/core';
 import { Direction, Sorting, TaskHistoryQuerySortParameter } from 'app/shared/models/sorting';
 import { TaskHistoryEventData } from '../../shared/models/task-history-event';
 import { TaskHistoryQueryService } from '../services/task-history-query/task-history-query.service';
@@ -63,7 +63,7 @@ import { DatePipe } from '@angular/common';
     DatePipe
   ]
 })
-export class TaskHistoryQueryComponent implements OnInit {
+export class TaskHistoryQueryComponent {
   data: TaskHistoryEventData[] = [];
   displayedColumns: Pair<string, TaskHistoryQuerySortParameter>[] = [
     {
@@ -115,8 +115,6 @@ export class TaskHistoryQueryComponent implements OnInit {
   @ViewChild(PaginationComponent) pagination: PaginationComponent;
   private taskHistoryQueryService = inject(TaskHistoryQueryService);
   private requestInProgressService = inject(RequestInProgressService);
-
-  ngOnInit() {}
 
   ngAfterViewInit() {
     const sortChange$ = this.sort.sortChange.pipe(

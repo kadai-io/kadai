@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { highlight } from 'app/shared/animations/validation.animation';
 import { NgIf } from '@angular/common';
 
@@ -27,7 +27,7 @@ import { NgIf } from '@angular/common';
   styleUrls: ['./field-error-display.component.scss'],
   imports: [NgIf]
 })
-export class FieldErrorDisplayComponent implements OnInit {
+export class FieldErrorDisplayComponent {
   @Input()
   displayError: boolean;
 
@@ -36,6 +36,4 @@ export class FieldErrorDisplayComponent implements OnInit {
 
   @Input()
   validationTrigger: boolean;
-
-  ngOnInit() {}
 }
