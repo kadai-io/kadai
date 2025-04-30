@@ -45,7 +45,7 @@ class PriorityServiceAccTest {
 
   @KadaiInject InternalKadaiEngine internalKadaiEngine;
   @KadaiInject ClassificationService classificationService;
-  private Classification classification;
+  Classification classification;
 
   @BeforeEach
   @WithAccessId(user = "businessadmin")
