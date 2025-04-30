@@ -111,8 +111,6 @@ class JobRunnerAccTest extends AbstractAccTest {
     List<ScheduledJob> resultJobs =
         getJobMapper(kadaiEngine).findJobsToRun(Instant.now().plus(2, ChronoUnit.DAYS));
 
-    System.out.println(resultJobs.get(0).getLockedBy());
-
     assertThat(resultJobs).hasSize(1);
     assertThat(resultJobs.get(0).getType()).isEqualTo(jobTypeName);
     assertThat(resultJobs.get(0).getLockExpires())
