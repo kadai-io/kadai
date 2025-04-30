@@ -44,7 +44,7 @@
         <version.json>20250107</version.json>
 
         <!-- build dependencies -->
-        <version.checkstyle>10.23.0</version.checkstyle>
+        <version.checkstyle>10.23.1</version.checkstyle>
         <version.google-java-format>1.26.0</version.google-java-format>
         <version.maven.checkstyle>3.6.0</version.maven.checkstyle>
         <version.maven.jar>3.4.2</version.maven.jar>
@@ -65,7 +65,7 @@
         <!-- spring dependencies -->
         <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
         <version.spring.plugin.core>3.0.0</version.spring.plugin.core>
-        <version.spring.boot>3.4.4</version.spring.boot>
+        <version.spring.boot>3.4.5</version.spring.boot>
         <version.spring.mybatis>3.0.4</version.spring.mybatis>
 
         <!-- camunda dependencies -->
@@ -78,7 +78,7 @@
         <version.openpojo>0.9.1</version.openpojo>
         <version.jacoco>0.8.13</version.jacoco>
         <version.slf4j-test>3.0.1</version.slf4j-test>
-        <version.testcontainers>1.20.6</version.testcontainers>
+        <version.testcontainers>1.21.0</version.testcontainers>
         <version.spring-openapi>2.8.5</version.spring-openapi>
         <version.jakarta.servlet>6.1.0</version.jakarta.servlet>
         <version.spring-openapi>2.8.6</version.spring-openapi>

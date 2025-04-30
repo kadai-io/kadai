@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright [2024] [envite consulting GmbH]
+  ~ Copyright [2025] [envite consulting GmbH]
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
   -->
 
 <mat-dialog-content class="mat-typography">
-  <h4> {{message}} </h4>
+  <h4> {{ message }} </h4>
 </mat-dialog-content>
 <mat-dialog-actions style="justify-content: flex-end">
   <button mat-dialog-close mat-stroked-button> Cancel</button>
-  <button *ngIf="isDataSpecified" [mat-dialog-close]="callback" color="primary" mat-raised-button> Delete</button>
+  <button *ngIf="isDataSpecified" [mat-dialog-close]="callback" color="primary" mat-raised-button>
+    Delete
+  </button>
 </mat-dialog-actions>

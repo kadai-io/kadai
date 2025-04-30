@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright [2024] [envite consulting GmbH]
+  ~ Copyright [2025] [envite consulting GmbH]
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -22,13 +22,15 @@
       <ng-container *ngFor="let header of reportData.meta.rowDesc; let i = index">
         <div *ngIf="i <= currentExpHeaders"
              [ngClass]="{'table-cell--border-right': currentExpHeaders === i}"
-             class="table-cell table-cell--bold table-cell--justify">{{header}}
+             class="table-cell table-cell--bold table-cell--justify">{{ header }}
         </div>
       </ng-container>
       <div *ngFor="let header of reportData.meta.header"
-           class="table-cell table-cell--bold">{{header}}
+           class="table-cell table-cell--bold">{{ header }}
       </div>
-      <div class="table-cell table-cell--bold table-cell--border-left">{{reportData.meta.sumRowDesc}}</div>
+      <div
+        class="table-cell table-cell--bold table-cell--border-left">{{ reportData.meta.sumRowDesc }}
+      </div>
     </div>
   </div>
   <div class="table-body">
@@ -42,21 +44,27 @@
                          'table-cell--bold': row.depth === 0 && currentExpHeaders > 0,
                          'table-cell--clickable': reportData.meta.rowDesc.length - 1 > row.depth}"
                class="table-cell table-cell--justify">
-                        <span *ngIf="reportData.meta.rowDesc.length - 1 > row.depth && idx === row.depth"
-                              class="material-icons md-18">{{ canRowCollapse(i) ? "expand_more" : "expand_less"}}</span>
-            {{header}}
+                        <span
+                          *ngIf="reportData.meta.rowDesc.length - 1 > row.depth && idx === row.depth"
+                          class="material-icons md-18">{{
+                            canRowCollapse(i) ? "expand_more" : "expand_less"
+                          }}</span>
+            {{ header }}
           </div>
         </ng-container>
         <div *ngFor="let val of row.cells"
-             [ngClass]="{'table-cell--bold': row.depth === 0 && currentExpHeaders > 0}" class="table-cell">
-          {{val}}
+             [ngClass]="{'table-cell--bold': row.depth === 0 && currentExpHeaders > 0}"
+             class="table-cell">
+          {{ val }}
         </div>
         <div class="table-cell table-cell--bold table-cell--border-left">
-          {{row.total}}
+          {{ row.total }}
         </div>
       </div>
     </ng-container>
-    <button (click)="showMoreRows()" color="accent" [disabled]="!hasMoreRows()" mat-flat-button>Show more rows</button>
+    <button (click)="showMoreRows()" [disabled]="!hasMoreRows()" color="accent" mat-flat-button>Show
+      more rows
+    </button>
   </div>
   <div class="table-footer">
     <ng-container *ngFor="let row of reportData.sumRow; let i = index">
@@ -68,16 +76,19 @@
                [ngClass]="{'table-cell--border-right': currentExpHeaders === idx,
                          'table-cell--clickable': reportData.meta.rowDesc.length - 1 > row.depth}"
                class="table-cell table-cell--bold table-cell--justify">
-                        <span *ngIf="reportData.meta.rowDesc.length - 1 > row.depth && idx === row.depth"
-                              class="material-icons md-18">{{ canRowCollapse(i, true) ? "expand_more" : "expand_less"}}</span>
-            {{header}}
+                        <span
+                          *ngIf="reportData.meta.rowDesc.length - 1 > row.depth && idx === row.depth"
+                          class="material-icons md-18">{{
+                            canRowCollapse(i, true) ? "expand_more" : "expand_less"
+                          }}</span>
+            {{ header }}
           </div>
         </ng-container>
         <div *ngFor="let val of row.cells" class="table-cell table-cell--bold">
-          {{val}}
+          {{ val }}
         </div>
         <div class="table-cell table-cell--bold table-cell--border-left">
-          {{row.total}}
+          {{ row.total }}
         </div>
       </div>
     </ng-container>

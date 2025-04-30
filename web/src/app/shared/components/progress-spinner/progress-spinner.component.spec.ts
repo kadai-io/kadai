@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ProgressSpinnerComponent } from './progress-spinner.component';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 describe('ProgressSpinnerComponent', () => {
   let component: ProgressSpinnerComponent;
@@ -26,8 +25,7 @@ describe('ProgressSpinnerComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ProgressSpinnerComponent],
-      imports: [MatProgressSpinnerModule]
+      imports: [ProgressSpinnerComponent]
     }).compileComponents();
   }));
 

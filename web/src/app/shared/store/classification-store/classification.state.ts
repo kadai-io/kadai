@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -43,20 +43,20 @@ import { Classification } from '../../models/classification';
 import { ClassificationSummary } from '../../models/classification-summary';
 import { ClassificationQueryFilterParameter } from '../../models/classification-query-filter-parameter';
 import { ClassificationQuerySortParameter, Direction, Sorting } from '../../models/sorting';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 
 class InitializeStore {
   static readonly type = '[ClassificationState] Initializing state';
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 @State<ClassificationStateModel>({ name: 'classification' })
 export class ClassificationState implements NgxsAfterBootstrap {
-  constructor(
-    private categoryService: ClassificationCategoriesService,
-    private classificationsService: ClassificationsService,
-    private domainService: DomainService
-  ) {}
+  private categoryService = inject(ClassificationCategoriesService);
+  private classificationsService = inject(ClassificationsService);
+  private domainService = inject(DomainService);
 
   @Action(InitializeStore)
   initializeStore(ctx: StateContext<ClassificationStateModel>): Observable<any> {
@@ -187,7 +187,17 @@ export class ClassificationState implements NgxsAfterBootstrap {
     // the classification is restored to a new classification
     const category = state.classificationTypes[state.selectedClassificationType][0];
     const { type, created, modified, domain, parentId, parentKey } = state.selectedClassification;
-    ctx.patchState({ selectedClassification: { type, created, category, modified, domain, parentId, parentKey } });
+    ctx.patchState({
+      selectedClassification: {
+        type,
+        created,
+        category,
+        modified,
+        domain,
+        parentId,
+        parentKey
+      }
+    });
 
     return of(null);
   }

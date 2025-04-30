@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,27 +16,28 @@
  *
  */
 
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Store, Select } from '@ngxs/store';
+import { Select, Store } from '@ngxs/store';
 import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
 import { SetSelectedClassificationType } from 'app/shared/store/classification-store/classification.actions';
-import { Location } from '@angular/common';
+import { AsyncPipe, Location, NgFor } from '@angular/common';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatOption } from '@angular/material/core';
 
 @Component({
   selector: 'kadai-administration-classification-types-selector',
   templateUrl: './classification-types-selector.component.html',
   styleUrls: ['./classification-types-selector.component.scss'],
-  standalone: false
+  imports: [MatFormField, MatLabel, MatSelect, MatTooltip, NgFor, MatOption, AsyncPipe]
 })
 export class ClassificationTypesSelectorComponent {
   @Select(ClassificationSelectors.selectedClassificationType) classificationTypeSelected$: Observable<string>;
   @Select(ClassificationSelectors.classificationTypes) classificationTypes$: Observable<string[]>;
-
-  constructor(
-    private store: Store,
-    private location: Location
-  ) {}
+  private store = inject(Store);
+  private location = inject(Location);
 
   select(value: string): void {
     this.store.dispatch(new SetSelectedClassificationType(value));

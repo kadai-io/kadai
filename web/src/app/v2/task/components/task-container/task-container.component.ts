@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,16 +16,19 @@
  *
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { TaskFacadeService } from '@task/services/task-facade.service';
+import { RouterOutlet } from '@angular/router';
+import { TaskListComponent } from '@task/components/task-list/task-list.component';
 
 @Component({
   selector: 'kadai-task-container',
   templateUrl: './task-container.component.html',
+  imports: [RouterOutlet, TaskListComponent],
   styleUrls: ['./task-container.component.scss']
 })
 export class TaskContainerComponent implements OnInit {
-  constructor(private taskFacade: TaskFacadeService) {}
+  private taskFacade = inject(TaskFacadeService);
 
   ngOnInit(): void {
     this.taskFacade.getTasks();

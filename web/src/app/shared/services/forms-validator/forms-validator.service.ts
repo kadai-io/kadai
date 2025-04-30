@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,26 +17,26 @@
  */
 
 import { FormArray, NgForm, NgModel } from '@angular/forms';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { AccessIdsService } from 'app/shared/services/access-ids/access-ids.service';
 import { NotificationService } from '../notifications/notification.service';
 import { Observable, Subject, Subscription, timer } from 'rxjs';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class FormsValidatorService {
-  get inputOverflowObservable(): Observable<Map<string, boolean>> {
-    return this.inputOverflow.asObservable();
-  }
   formSubmitAttempt = false;
+  private notificationsService = inject(NotificationService);
+  private accessIdsService = inject(AccessIdsService);
   private workbasketOwner = 'workbasket.owner';
   private inputOverflowInternalMap = new Map<string, boolean>();
   private inputOverflow = new Subject<Map<string, boolean>>();
   private overflowErrorSubscriptionMap = new Map<string, Subscription>();
 
-  constructor(
-    private notificationsService: NotificationService,
-    private accessIdsService: AccessIdsService
-  ) {}
+  get inputOverflowObservable(): Observable<Map<string, boolean>> {
+    return this.inputOverflow.asObservable();
+  }
 
   async validateFormInformation(form: NgForm, toggleValidationMap: Map<any, boolean>): Promise<any> {
     let validSync = true;

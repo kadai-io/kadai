@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Select, Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 
@@ -25,13 +25,13 @@ import { highlight } from 'app/shared/animations/validation.animation';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 
 import { DomainService } from 'app/shared/services/domain/domain.service';
-import { NgForm } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
 import { ImportExportService } from 'app/administration/services/import-export.service';
 import { map, take, takeUntil } from 'rxjs/operators';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
-import { Location } from '@angular/common';
+import { AsyncPipe, Location, NgFor, NgIf } from '@angular/common';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { ClassificationCategoryImages, CustomField, getCustomFields } from '../../../shared/models/customisation';
 import { Classification } from '../../../shared/models/classification';
@@ -48,13 +48,48 @@ import {
 } from '../../../shared/store/classification-store/classification.actions';
 import { Pair } from '../../../shared/models/pair';
 import { trimForm } from '../../../shared/util/form-trimmer';
+import { MatToolbar } from '@angular/material/toolbar';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatDivider } from '@angular/material/divider';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { FieldErrorDisplayComponent } from '../../../shared/components/field-error-display/field-error-display.component';
+import { MatSelect, MatSelectTrigger } from '@angular/material/select';
+import { SvgIconComponent } from 'angular-svg-icon';
+import { MatOption } from '@angular/material/core';
 
 @Component({
   selector: 'kadai-administration-classification-details',
   templateUrl: './classification-details.component.html',
   animations: [highlight],
   styleUrls: ['./classification-details.component.scss'],
-  standalone: false
+  imports: [
+    NgIf,
+    MatToolbar,
+    MatTooltip,
+    MatButton,
+    MatIcon,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuItem,
+    FormsModule,
+    MatDivider,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    CdkTextareaAutosize,
+    FieldErrorDisplayComponent,
+    MatSelect,
+    MatSelectTrigger,
+    SvgIconComponent,
+    NgFor,
+    MatOption,
+    AsyncPipe
+  ]
 })
 export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   classification: Classification;
@@ -63,27 +98,22 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   @Select(ClassificationSelectors.selectedClassificationType) selectedClassificationType$: Observable<string>;
   @Select(ClassificationSelectors.selectedClassification) selectedClassification$: Observable<Classification>;
   @Select(ClassificationSelectors.getBadgeMessage) badgeMessage$: Observable<string>;
-
   customFields$: Observable<CustomField[]>;
   isCreatingNewClassification: boolean = false;
   readonly lengthError = 'You have reached the maximum length for this field';
   inputOverflowMap = new Map<string, boolean>();
   validateInputOverflow: Function;
   requestInProgress: boolean;
-
   @ViewChild('ClassificationForm') classificationForm: NgForm;
   toggleValidationMap = new Map<string, boolean>();
   destroy$ = new Subject<void>();
-
-  constructor(
-    private location: Location,
-    private requestInProgressService: RequestInProgressService,
-    private domainService: DomainService,
-    private formsValidatorService: FormsValidatorService,
-    private notificationsService: NotificationService,
-    private importExportService: ImportExportService,
-    private store: Store
-  ) {}
+  private location = inject(Location);
+  private requestInProgressService = inject(RequestInProgressService);
+  private domainService = inject(DomainService);
+  private formsValidatorService = inject(FormsValidatorService);
+  private notificationsService = inject(NotificationService);
+  private importExportService = inject(ImportExportService);
+  private store = inject(Store);
 
   ngOnInit() {
     this.customFields$ = this.store.select(EngineConfigurationSelectors.classificationsCustomisation).pipe(

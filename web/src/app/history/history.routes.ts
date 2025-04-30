@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
  *
  */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Routes } from '@angular/router';
 
-import { HistoryRoutingModule } from './history-routing.module';
-
-@NgModule({
-  declarations: [],
-  imports: [CommonModule, HistoryRoutingModule]
-})
-export class HistoryModule {}
+export const routes: Routes = [
+  {
+    path: '',
+    loadComponent: () =>
+      import('./task-history-query/task-history-query.component').then((m) => m.TaskHistoryQueryComponent)
+  },
+  {
+    path: '**',
+    redirectTo: ''
+  }
+];

@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright [2024] [envite consulting GmbH]
+  ~ Copyright [2025] [envite consulting GmbH]
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 <div *ngIf="reportData" class="panel panel-default">
   <div class="panel-heading">
-    <h4>{{reportData.meta.name}} ({{reportData.meta.date | date: 'medium' }})</h4>
+    <h4>{{ reportData.meta.name }} ({{ reportData.meta.date | date: 'medium' }})</h4>
   </div>
   <div class="panel-body blub">
     <kadai-monitor-report-table [reportData]="reportData"></kadai-monitor-report-table>

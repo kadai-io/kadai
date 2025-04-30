@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 import { HttpClient } from '@angular/common/http';
 
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { environment } from 'environments/environment';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -33,9 +33,11 @@ export interface CategoriesResponse {
   [key: string]: string[];
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ClassificationCategoriesService {
-  constructor(private httpClient: HttpClient) {}
+  private httpClient = inject(HttpClient);
 
   // TODO: convert to Map (maybe via ES6)
   getClassificationCategoriesByType(): Observable<CategoriesResponse> {
@@ -51,9 +53,17 @@ export class ClassificationCategoriesService {
             customisation[lang].classifications.categories.all = asteriskIcon;
           } else {
             if (customisation[lang]?.classifications) {
-              customisation[lang].classifications.categories = { missing: missingIcon, all: asteriskIcon };
+              customisation[lang].classifications.categories = {
+                missing: missingIcon,
+                all: asteriskIcon
+              };
             } else {
-              customisation[lang].classifications = { categories: { missing: missingIcon, all: asteriskIcon } };
+              customisation[lang].classifications = {
+                categories: {
+                  missing: missingIcon,
+                  all: asteriskIcon
+                }
+              };
             }
           }
         });

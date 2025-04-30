@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,21 +16,20 @@
  *
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TaskFacadeService } from '@task/services/task-facade.service';
-import { debounceTime } from 'rxjs';
+import { TaskDetailsComponent } from '@task/components/task-details/task-details.component';
 
 @Component({
   selector: 'kadai-task-details-container',
   templateUrl: './task-details-container.component.html',
+  imports: [TaskDetailsComponent],
   styleUrls: ['./task-details-container.component.scss']
 })
 export class TaskDetailsContainerComponent implements OnInit {
-  constructor(
-    private route: ActivatedRoute,
-    private taskFacade: TaskFacadeService
-  ) {}
+  private route = inject(ActivatedRoute);
+  private taskFacade = inject(TaskFacadeService);
 
   ngOnInit(): void {
     //TODO add takeuntil destroy, can use https://github.com/ngneat/until-destroy

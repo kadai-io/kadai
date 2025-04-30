@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ import { WorkbasketType } from '../../models/workbasket-type';
 import { KadaiDate } from '../../util/kadai.date';
 import { DomainService } from '../../services/domain/domain.service';
 import { ClearWorkbasketFilter } from '../filter-store/filter.actions';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { WorkbasketQueryPagingParameter } from '../../models/workbasket-query-paging-parameter';
 import { Side } from '../../../administration/models/workbasket-distribution-enums';
 import { cloneDeep } from 'lodash';
@@ -65,17 +65,17 @@ class InitializeStore {
   static readonly type = '[Workbasket] Initializing state';
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 @State<WorkbasketStateModel>({ name: 'workbasket' })
 export class WorkbasketState implements NgxsAfterBootstrap {
-  constructor(
-    private workbasketService: WorkbasketService,
-    private location: Location,
-    private notificationService: NotificationService,
-    private domainService: DomainService,
-    private route: ActivatedRoute,
-    private requestInProgressService: RequestInProgressService
-  ) {}
+  private workbasketService = inject(WorkbasketService);
+  private location = inject(Location);
+  private notificationService = inject(NotificationService);
+  private domainService = inject(DomainService);
+  private route = inject(ActivatedRoute);
+  private requestInProgressService = inject(RequestInProgressService);
 
   @Action(InitializeStore)
   initializeStore(ctx: StateContext<WorkbasketStateModel>): Observable<any> {

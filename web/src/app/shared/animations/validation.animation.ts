@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { trigger, style, transition, animate, keyframes } from '@angular/animations';
+import { animate, keyframes, style, transition, trigger } from '@angular/animations';
 
 export const highlight = trigger('validation', [
   transition(

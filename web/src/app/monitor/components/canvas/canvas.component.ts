@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  */
 
 import { AfterViewInit, Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { Chart, DoughnutController, ArcElement, Tooltip, Legend, Title } from 'chart.js';
+import { ArcElement, Chart, DoughnutController, Legend, Title, Tooltip } from 'chart.js';
 import { ReportRow } from '../../models/report-row';
 import { Select } from '@ngxs/store';
 import { SettingsSelectors } from '../../../shared/store/settings-store/settings.selectors';
@@ -40,6 +40,10 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   destroy$ = new Subject<void>();
 
   @Select(SettingsSelectors.getSettings) settings$: Observable<Settings>;
+
+  constructor() {
+    Chart.register(DoughnutController, ArcElement, Tooltip, Legend, Title);
+  }
 
   ngOnInit() {
     this.settings$.pipe(takeUntil(this.destroy$)).subscribe((settings) => {
@@ -103,9 +107,5 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     document.getElementById(this.id).outerHTML = ''; // destroy HTML element
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  constructor() {
-    Chart.register(DoughnutController, ArcElement, Tooltip, Legend, Title);
   }
 }

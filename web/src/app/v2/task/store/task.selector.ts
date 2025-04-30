@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ import { Selector } from '@ngxs/store';
 import { Task, TaskSummary } from '@task/models/task';
 import { TaskState, TaskStateModel } from './task.state';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class TaskSelector {
   @Selector([TaskState])
   static tasks(state: TaskStateModel): TaskSummary[] {

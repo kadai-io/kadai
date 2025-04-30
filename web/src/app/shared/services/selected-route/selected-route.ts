@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@
  *
  */
 
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class SelectedRouteService {
   public selectedRouteTriggered = new Subject<string>();
-
+  private router = inject(Router);
   private detailRoutes: Array<string> = ['workplace', 'administration', 'monitor', 'history', 'settings'];
-
-  constructor(private router: Router) {}
 
   selectRoute(value: NavigationEnd): void {
     this.selectedRouteTriggered.next(this.getRoute(value));

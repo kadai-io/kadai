@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  */
 
 import { Selector } from '@ngxs/store';
-import { ClassificationStateModel, ClassificationState } from './classification.state';
+import { ClassificationState, ClassificationStateModel } from './classification.state';
 import { Classification } from '../../models/classification';
 
 export class ClassificationSelectors {

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,60 +18,27 @@
 
 import { ComponentFixture, fakeAsync, flush, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { WorkbasketInformationComponent } from './workbasket-information.component';
-import { Component, DebugElement, Input } from '@angular/core';
-import { Actions, NgxsModule, ofActionDispatched, Store } from '@ngxs/store';
+import { DebugElement } from '@angular/core';
+import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { EMPTY, Observable, of } from 'rxjs';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { WorkbasketType } from '../../../shared/models/workbasket-type';
-import { MapValuesPipe } from '../../../shared/pipes/map-values.pipe';
-import { RemoveNoneTypePipe } from '../../../shared/pipes/remove-empty-type.pipe';
 import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { MatDialogModule } from '@angular/material/dialog';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
-import { DomainService } from '../../../shared/services/domain/domain.service';
-import { RouterTestingModule } from '@angular/router/testing';
-import { SelectedRouteService } from '../../../shared/services/selected-route/selected-route';
-import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
 import { ACTION } from '../../../shared/models/action';
-import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
-import { TypeAheadComponent } from '../../../shared/components/type-ahead/type-ahead.component';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MarkWorkbasketForDeletion, UpdateWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
 import {
   engineConfigurationMock,
   selectedWorkbasketMock,
   workbasketReadStateMock
 } from '../../../shared/store/mock-data/mock-store';
-import { StartupService } from '../../../shared/services/startup/startup.service';
-import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
-import { WindowRefService } from '../../../shared/services/window/window.service';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatInputModule } from '@angular/material/input';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { By } from '@angular/platform-browser';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 
-@Component({ selector: 'kadai-shared-field-error-display', template: '' })
-class FieldErrorDisplayStub {
-  @Input() displayError: boolean;
-  @Input() errorMessage: string;
-  @Input() validationTrigger: boolean;
-}
-
-@Component({ selector: 'kadai-administration-icon-type', template: '' })
-class IconTypeStub {
-  @Input() type: WorkbasketType;
-  @Input() text: string;
-}
+jest.mock('angular-svg-icon');
 
 const workbasketServiceMock: Partial<WorkbasketService> = {
   triggerWorkBasketSaved: jest.fn(),
@@ -83,19 +50,13 @@ const workbasketServiceMock: Partial<WorkbasketService> = {
   getWorkBasketsDistributionTargets: jest.fn().mockReturnValue(EMPTY)
 };
 
-const validateFormInformationFn = jest.fn().mockImplementation((): Promise<any> => Promise.resolve(true));
 const formValidatorServiceMock: Partial<FormsValidatorService> = {
   isFieldValid: jest.fn().mockReturnValue(true),
   validateInputOverflow: jest.fn(),
-  validateFormInformation: validateFormInformationFn,
+  validateFormInformation: jest.fn().mockImplementation((): Promise<any> => Promise.resolve(true)),
   get inputOverflowObservable(): Observable<Map<string, boolean>> {
     return of(new Map<string, boolean>());
   }
-};
-
-const notificationServiceMock: Partial<NotificationService> = {
-  showDialog: jest.fn(),
-  showSuccess: jest.fn()
 };
 
 describe('WorkbasketInformationComponent', () => {
@@ -107,37 +68,13 @@ describe('WorkbasketInformationComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
-        FormsModule,
-        MatDialogModule,
-        NgxsModule.forRoot([EngineConfigurationState, WorkbasketState]),
-        TypeaheadModule.forRoot(),
-        ReactiveFormsModule,
-        RouterTestingModule.withRoutes([]),
-        NoopAnimationsModule,
-        MatProgressBarModule,
-        MatDividerModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatAutocompleteModule,
-        MatTooltipModule
-      ],
-      declarations: [WorkbasketInformationComponent, TypeAheadComponent, MapValuesPipe, RemoveNoneTypePipe],
+      imports: [WorkbasketInformationComponent],
       providers: [
-        FieldErrorDisplayStub,
-        IconTypeStub,
+        provideStore([EngineConfigurationState, WorkbasketState]),
+        provideRouter([]),
         { provide: WorkbasketService, useValue: workbasketServiceMock },
         { provide: FormsValidatorService, useValue: formValidatorServiceMock },
-        { provide: NotificationService, useValue: notificationServiceMock },
-        RequestInProgressService,
-        DomainService,
-        SelectedRouteService,
-        ClassificationCategoriesService,
-        StartupService,
-        KadaiEngineService,
-        WindowRefService,
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(),
         provideHttpClientTesting()
       ]
     }).compileComponents();

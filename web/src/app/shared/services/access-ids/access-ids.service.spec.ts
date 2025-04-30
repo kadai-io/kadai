@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,15 +19,12 @@
 import { inject, TestBed } from '@angular/core/testing';
 
 import { AccessIdsService } from './access-ids.service';
-import { StartupService } from '../startup/startup.service';
-import { KadaiEngineService } from '../kadai-engine/kadai-engine.service';
-import { WindowRefService } from '../window/window.service';
 import { provideHttpClient } from '@angular/common/http';
 
 describe('ValidateAccessItemsService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [AccessIdsService, StartupService, KadaiEngineService, WindowRefService, provideHttpClient()]
+      providers: [AccessIdsService, provideHttpClient()]
     });
   });
 

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogPopUpComponent } from '../../components/popup/dialog-pop-up.component';
 import { HotToastService } from '@ngneat/hot-toast';
@@ -27,11 +27,9 @@ import { messageTypes } from '../obtain-message/message-types';
   providedIn: 'root'
 })
 export class NotificationService {
-  constructor(
-    private popup: MatDialog,
-    private toastService: HotToastService,
-    private obtainMessageService: ObtainMessageService
-  ) {}
+  private popup = inject(MatDialog);
+  private toastService = inject(HotToastService);
+  private obtainMessageService = inject(ObtainMessageService);
 
   generateToastId(errorKey: string, messageVariables: object): string {
     let id = errorKey;

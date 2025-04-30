@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import { DatePipe } from '@angular/common';
 
 export class KadaiDate {
   public static dateFormat = 'yyyy-MM-ddTHH:mm:ss.sss';
+
   public static getDate(): string {
     const dateLocale = 'en-US';
     const datePipe = new DatePipe(dateLocale);

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 import { Task } from '@task/models/task';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Sorting, TaskQuerySortParameter } from 'app/shared/models/sorting';
 import { StartupService } from 'app/shared/services/startup/startup.service'; /* @TODO Legacy */
 import { asUrlQueryString } from 'app/shared/util/query-parameters-v2'; /* @TODO Legacy */
@@ -31,10 +31,8 @@ import { PagedTaskSummary } from '@task/models/paged-task';
   providedIn: 'root'
 })
 export class TaskService {
-  constructor(
-    private httpClient: HttpClient,
-    private startupService: StartupService
-  ) {}
+  private httpClient = inject(HttpClient);
+  private startupService = inject(StartupService);
 
   get url(): string {
     return this.startupService.getKadaiRestUrl() + '/v1/tasks';

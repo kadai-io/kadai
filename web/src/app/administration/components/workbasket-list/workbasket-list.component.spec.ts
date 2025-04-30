@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,87 +18,32 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { WorkbasketListComponent } from './workbasket-list.component';
-import { Component, DebugElement, EventEmitter, Input, Output } from '@angular/core';
-import { Actions, NgxsModule, ofActionDispatched, Store } from '@ngxs/store';
+import { DebugElement } from '@angular/core';
+import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { Observable, of } from 'rxjs';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
-import { MatDialogModule } from '@angular/material/dialog';
-import { OrientationService } from '../../../shared/services/orientation/orientation.service';
-import { ImportExportService } from '../../services/import-export.service';
 import { DeselectWorkbasket, SelectWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
-import { WorkbasketSummary } from '../../../shared/models/workbasket-summary';
 import { Direction, Sorting, WorkbasketQuerySortParameter } from '../../../shared/models/sorting';
-import { WorkbasketType } from '../../../shared/models/workbasket-type';
-import { Page } from '../../../shared/models/page';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatSelectModule } from '@angular/material/select';
-import { FormsModule } from '@angular/forms';
-import { MatListModule } from '@angular/material/list';
 import { DomainService } from '../../../shared/services/domain/domain.service';
-import { RouterTestingModule } from '@angular/router/testing';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { selectedWorkbasketMock } from '../../../shared/store/mock-data/mock-store';
 import { WorkbasketQueryFilterParameter } from '../../../shared/models/workbasket-query-filter-parameter';
+import { FilterState } from '../../../shared/store/filter-store/filter.state';
+import { provideRouter } from '@angular/router';
 
-const workbasketSavedTriggeredFn = jest.fn().mockReturnValue(of(1));
-const workbasketSummaryFn = jest.fn().mockReturnValue(of({}));
-const getWorkbasketFn = jest.fn().mockReturnValue(of(selectedWorkbasketMock));
-const getWorkbasketActionToolbarExpansionFn = jest.fn().mockReturnValue(of(false));
 const workbasketServiceMock: Partial<WorkbasketService> = {
-  workbasketSavedTriggered: workbasketSavedTriggeredFn,
-  getWorkBasketsSummary: workbasketSummaryFn,
-  getWorkBasket: getWorkbasketFn,
-  getWorkbasketActionToolbarExpansion: getWorkbasketActionToolbarExpansionFn,
+  workbasketSavedTriggered: jest.fn().mockReturnValue(of(1)),
+  getWorkBasketsSummary: jest.fn().mockReturnValue(of({})),
+  getWorkBasket: jest.fn().mockReturnValue(of(selectedWorkbasketMock)),
+  getWorkbasketActionToolbarExpansion: jest.fn().mockReturnValue(of(false)),
   getWorkBasketAccessItems: jest.fn().mockReturnValue(of({})),
   getWorkBasketsDistributionTargets: jest.fn().mockReturnValue(of({}))
-};
-
-const getOrientationFn = jest.fn().mockReturnValue(of('landscape'));
-const orientationServiceMock: Partial<OrientationService> = {
-  getOrientation: getOrientationFn,
-  calculateNumberItemsList: jest.fn().mockReturnValue(1920)
-};
-
-const importExportServiceMock: Partial<ImportExportService> = {
-  getImportingFinished: jest.fn().mockReturnValue(of(true))
 };
 
 const domainServiceSpy: Partial<DomainService> = {
   getSelectedDomainValue: jest.fn().mockReturnValue(of()),
   getSelectedDomain: jest.fn().mockReturnValue(of())
 };
-
-const requestInProgressServiceSpy: Partial<RequestInProgressService> = {
-  setRequestInProgress: jest.fn().mockReturnValue(of()),
-  getRequestInProgress: jest.fn().mockReturnValue(of(false))
-};
-
-@Component({ selector: 'kadai-administration-workbasket-list-toolbar', template: '' })
-class WorkbasketListToolbarStub {
-  @Input() workbaskets: Array<WorkbasketSummary>;
-  @Input() workbasketDefaultSortBy: string;
-  @Input() workbasketListExpanded: boolean;
-  @Output() performSorting = new EventEmitter<Sorting<WorkbasketQuerySortParameter>>();
-}
-
-@Component({ selector: 'kadai-administration-icon-type', template: '' })
-class IconTypeStub {
-  @Input() type: WorkbasketType;
-  @Input() selected = false;
-}
-
-@Component({ selector: 'kadai-shared-pagination', template: '' })
-class PaginationStub {
-  @Input() page: Page;
-  @Input() type: String;
-  @Input() expanded: boolean;
-  @Output() changePage = new EventEmitter<number>();
-  @Input() numberOfItems: number;
-}
-
-@Component({ selector: 'svg-icon', template: '' })
-class SvgIconStub {}
 
 describe('WorkbasketListComponent', () => {
   let fixture: ComponentFixture<WorkbasketListComponent>;
@@ -109,35 +54,18 @@ describe('WorkbasketListComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
-        NgxsModule.forRoot([WorkbasketState]),
-        RouterTestingModule,
-        MatDialogModule,
-        FormsModule,
-        MatProgressBarModule,
-        MatSelectModule,
-        MatListModule
-      ],
-      declarations: [WorkbasketListComponent],
+      imports: [WorkbasketListComponent],
       providers: [
-        WorkbasketListToolbarStub,
-        IconTypeStub,
-        PaginationStub,
-        SvgIconStub,
+        provideStore([WorkbasketState, FilterState]),
+        provideRouter([]),
         {
           provide: WorkbasketService,
           useValue: workbasketServiceMock
         },
         {
-          provide: OrientationService,
-          useValue: orientationServiceMock
-        },
-        { provide: ImportExportService, useValue: importExportServiceMock },
-        {
           provide: DomainService,
           useValue: domainServiceSpy
-        },
-        { provide: RequestInProgressService, useValue: requestInProgressServiceSpy }
+        }
       ]
     }).compileComponents();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, OnInit, Output } from '@angular/core';
 import { ReportData } from '../../models/report-data';
 import { ChartData } from '../../models/chart-data';
 import { MonitorService } from '../../services/monitor.service';
@@ -25,21 +25,19 @@ import { RequestInProgressService } from '../../../shared/services/request-in-pr
 import { ChartConfiguration } from 'chart.js';
 import { NgIf } from '@angular/common';
 import { ReportTableComponent } from '../report-table/report-table.component';
-import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { BaseChartDirective } from 'ng2-charts';
 
 @Component({
   selector: 'kadai-monitor-workbasket-report-planned-date',
   templateUrl: './workbasket-report-planned-date.component.html',
   styleUrls: ['./workbasket-report-planned-date.component.scss'],
   imports: [NgIf, ReportTableComponent, BaseChartDirective],
-  providers: [provideCharts(withDefaultRegisterables())]
+  providers: [MonitorService]
 })
 export class WorkbasketReportPlannedDateComponent implements OnInit {
   @Output()
   metaInformation = new EventEmitter<MetaInfoData>();
-
   reportData: ReportData;
-
   lineChartLabels: Array<any>;
   lineChartLegend = true;
   lineChartType = 'line';
@@ -53,10 +51,8 @@ export class WorkbasketReportPlannedDateComponent implements OnInit {
       }
     }
   };
-  constructor(
-    private restConnectorService: MonitorService,
-    private requestInProgressService: RequestInProgressService
-  ) {}
+  private restConnectorService = inject(MonitorService);
+  private requestInProgressService = inject(RequestInProgressService);
 
   ngOnInit() {
     this.requestInProgressService.setRequestInProgress(true);

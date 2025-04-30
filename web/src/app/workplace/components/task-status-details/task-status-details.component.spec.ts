@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { TaskStatusDetailsComponent } from './task-status-details.component';
 
-xdescribe('TaskStatusDetailsComponent', () => {
+describe('TaskStatusDetailsComponent', () => {
   let component: TaskStatusDetailsComponent;
   let fixture: ComponentFixture<TaskStatusDetailsComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [TaskStatusDetailsComponent]
+      imports: [TaskStatusDetailsComponent]
     }).compileComponents();
   }));
 

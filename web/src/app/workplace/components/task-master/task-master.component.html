@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright [2024] [envite consulting GmbH]
+  ~ Copyright [2025] [envite consulting GmbH]
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -18,12 +18,15 @@
 
 <div class="footer-space-pagination-list">
   <div #wbToolbar>
-    <kadai-task-list-toolbar (performFilter)="performFilter()" (performSorting)="performSorting($event)"
-                             (selectSearchType)="selectSearchType($event)" [taskDefaultSortBy]="taskDefaultSortBy">
+    <kadai-task-list-toolbar (performFilter)="performFilter()"
+                             (performSorting)="performSorting($event)"
+                             (selectSearchType)="selectSearchType($event)"
+                             [taskDefaultSortBy]="taskDefaultSortBy">
     </kadai-task-list-toolbar>
   </div>
-  <kadai-task-list *ngIf="!requestInProgress" [(selectedId)]="selectedId" [tasks]="tasks"></kadai-task-list>
+  <kadai-task-list *ngIf="!requestInProgress" [(selectedId)]="selectedId"
+                   [tasks]="tasks"></kadai-task-list>
 </div>
 <kadai-shared-pagination (changePage)="changePage($event)" *ngIf="tasks && tasks.length > 0"
                          [numberOfItems]="tasks.length"
-                         [page]="tasksPageInformation" [type]="type"></kadai-shared-pagination>
+                         [page]="tasksPageInformation" [type]="type"/>

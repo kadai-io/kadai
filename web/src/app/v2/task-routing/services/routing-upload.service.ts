@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { StartupService } from 'app/shared/services/startup/startup.service';
 
@@ -24,10 +24,8 @@ import { StartupService } from 'app/shared/services/startup/startup.service';
   providedIn: 'root'
 })
 export class RoutingUploadService {
-  constructor(
-    private httpClient: HttpClient,
-    private startupService: StartupService
-  ) {}
+  private httpClient = inject(HttpClient);
+  private startupService = inject(StartupService);
 
   get url(): string {
     return this.startupService.getKadaiRestUrl() + '/v1/routing-rules/default';

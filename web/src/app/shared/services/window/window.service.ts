@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -28,7 +28,9 @@ function getWindow(): any {
   return window;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class WindowRefService {
   get nativeWindow(): IWindowService {
     return getWindow();

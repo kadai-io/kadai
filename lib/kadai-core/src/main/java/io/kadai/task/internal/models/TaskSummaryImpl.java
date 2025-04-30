@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -444,12 +444,6 @@ public class TaskSummaryImpl implements TaskSummary {
 
   public void setReopened(boolean reopened) {
     isReopened = reopened;
-  }
-
-  @Deprecated
-  @Override
-  public String getCustomAttribute(TaskCustomField customField) {
-    return getCustomField(customField);
   }
 
   @Override

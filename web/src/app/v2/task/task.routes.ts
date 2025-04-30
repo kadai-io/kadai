@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
  *
  */
 
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { TaskContainerComponent } from './components/task-container/task-container.component';
 import { TaskDetailsContainerComponent } from './components/task-details-container/task-details-container.component';
 
-const routes: Routes = [
+// TODO FIXME why not used?
+export const routes: Routes = [
   {
     path: 'tasks',
     component: TaskContainerComponent,
@@ -42,9 +42,3 @@ const routes: Routes = [
     redirectTo: 'tasks'
   }
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
-})
-export class TaskRoutingModule {}

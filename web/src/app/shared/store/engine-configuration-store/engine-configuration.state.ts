@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,19 +17,22 @@
  */
 
 import { Customisation } from 'app/shared/models/customisation';
-import { State, NgxsOnInit, StateContext, Action } from '@ngxs/store';
+import { Action, NgxsOnInit, State, StateContext } from '@ngxs/store';
 import { ClassificationCategoriesService } from 'app/shared/services/classification-categories/classification-categories.service';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 
 class InitializeStore {
   static readonly type = '[EngineConfigurationState] Initializing state';
 }
-@Injectable()
+
+@Injectable({
+  providedIn: 'root'
+})
 @State<EngineConfigurationStateModel>({ name: 'engineConfiguration' })
 export class EngineConfigurationState implements NgxsOnInit {
-  constructor(private categoryService: ClassificationCategoriesService) {}
+  private categoryService = inject(ClassificationCategoriesService);
 
   @Action(InitializeStore)
   initializeStore(ctx: StateContext<EngineConfigurationStateModel>): Observable<any> {

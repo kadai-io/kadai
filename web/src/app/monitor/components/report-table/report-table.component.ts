@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { ReportData } from 'app/monitor/models/report-data';
 import { ReportRow } from '../../models/report-row';
-import { NgIf, NgFor, NgClass } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { MatButton } from '@angular/material/button';
 
 @Component({

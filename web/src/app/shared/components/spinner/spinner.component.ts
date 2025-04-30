@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
  *
  */
 
-import { Component, EventEmitter, Input, OnDestroy, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnDestroy, Output, ViewChild } from '@angular/core';
 import { NotificationService } from '../../services/notifications/notification.service';
+import { NgClass, NgIf } from '@angular/common';
 
 declare let $: any;
 
@@ -25,29 +26,24 @@ declare let $: any;
   selector: 'kadai-shared-spinner',
   templateUrl: './spinner.component.html',
   styleUrls: ['./spinner.component.scss'],
-  standalone: false
+  imports: [NgClass, NgIf]
 })
 export class SpinnerComponent implements OnDestroy {
   showSpinner: boolean;
   @Input()
   delay = 0;
-
   @Input()
   isModal = false;
-
   @Input()
   positionClass: string;
-
   @Output()
   spinnerIsRunning = new EventEmitter<boolean>();
-
+  private notificationService = inject(NotificationService);
   private currentTimeout: any;
   private requestTimeout: any;
   private maxRequestTimeout = 10000;
   @ViewChild('spinnerModal', { static: true })
   private modal;
-
-  constructor(private notificationService: NotificationService) {}
 
   set isDelayedRunning(value: boolean) {
     this.showSpinner = value;

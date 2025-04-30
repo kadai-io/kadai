@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,24 +19,14 @@
 import { TestBed } from '@angular/core/testing';
 
 import { RoutingUploadService } from './routing-upload.service';
-import { StartupService } from 'app/shared/services/startup/startup.service';
-import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
-import { WindowRefService } from 'app/shared/services/window/window.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
 
 describe('RoutingUploadService', () => {
   let service: RoutingUploadService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        StartupService,
-        KadaiEngineService,
-        WindowRefService,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-      ]
+      providers: [provideHttpClient()]
     });
     service = TestBed.inject(RoutingUploadService);
   });

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,25 +16,25 @@
  *
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Select } from '@ngxs/store';
 import { TaskSummary } from '@task/models/task';
 import { TaskFacadeService } from '@task/services/task-facade.service';
 import { TaskSelector } from '@task/store/task.selector';
 import { Observable } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'kadai-task-list',
   templateUrl: './task-list.component.html',
+  imports: [AsyncPipe],
   styleUrls: ['./task-list.component.scss']
 })
 export class TaskListComponent implements OnInit {
   @Select(TaskSelector.tasks)
   tasks$: Observable<TaskSummary[]>;
-
   @Select(TaskSelector.selectedTask) selectedTask$: Observable<Task | null>;
-
-  constructor(private taskFacade: TaskFacadeService) {}
+  private taskFacade = inject(TaskFacadeService);
 
   ngOnInit(): void {}
 

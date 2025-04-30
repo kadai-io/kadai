@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,21 +19,14 @@
 import { DebugElement } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Actions, NgxsModule, ofActionDispatched, Store } from '@ngxs/store';
-import { FormsModule } from '@angular/forms';
+import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { SettingsState } from '../../../shared/store/settings-store/settings.state';
 import { SettingsComponent } from './settings.component';
 import { settingsStateMock } from '../../../shared/store/mock-data/mock-store';
 import { SetSettings } from '../../../shared/store/settings-store/settings.actions';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 const notificationServiceSpy: Partial<NotificationService> = {
   showError: jest.fn(),
@@ -50,18 +43,9 @@ describe('SettingsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
-        NgxsModule.forRoot([SettingsState]),
-        FormsModule,
-        MatIconModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatTooltipModule,
-        NoopAnimationsModule
-      ],
-      declarations: [SettingsComponent],
+      imports: [SettingsComponent],
       providers: [
-        RequestInProgressService,
+        provideStore([SettingsState]),
         {
           provide: NotificationService,
           useValue: notificationServiceSpy

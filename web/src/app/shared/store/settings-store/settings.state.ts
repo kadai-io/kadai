@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,20 +17,20 @@
  */
 
 import { Action, NgxsAfterBootstrap, State, StateContext } from '@ngxs/store';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { RetrieveSettings, SetSettings } from './settings.actions';
 import { Settings } from '../../../settings/models/settings';
 import { SettingsService } from '../../../settings/services/settings-service';
 import { take } from 'rxjs/operators';
 import { NotificationService } from '../../services/notifications/notification.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 @State<SettingsStateModel>({ name: 'settings' })
 export class SettingsState implements NgxsAfterBootstrap {
-  constructor(
-    private settingsService: SettingsService,
-    private notificationService: NotificationService
-  ) {}
+  private settingsService = inject(SettingsService);
+  private notificationService = inject(NotificationService);
 
   @Action(RetrieveSettings)
   initializeStore(ctx: StateContext<SettingsStateModel>) {

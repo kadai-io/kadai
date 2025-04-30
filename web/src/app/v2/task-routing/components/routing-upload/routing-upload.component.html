@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright [2024] [envite consulting GmbH]
+  ~ Copyright [2025] [envite consulting GmbH]
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -23,12 +23,13 @@
        kadaiDragAndDrop>
     <svg class="routing-upload__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"
          xmlns="http://www.w3.org/2000/svg">
-      <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-            stroke-linecap="round" stroke-linejoin="round"
-            stroke-width="2"></path>
+      <path
+        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+        stroke-linecap="round" stroke-linejoin="round"
+        stroke-width="2"></path>
     </svg>
     <span *ngIf="!file?.name" class="routing-upload__description">Click to choose file or drag and drop here</span>
-    <span *ngIf="file?.name" class="routing-upload__description">{{file?.name}}</span>
+    <span *ngIf="file?.name" class="routing-upload__description">{{ file?.name }}</span>
   </div>
   <input #input (change)="onFileChanged($event)"
          accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

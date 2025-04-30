@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright [2024] [envite consulting GmbH]
+  ~ Copyright [2025] [envite consulting GmbH]
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@
 
   <!-- WORKBASKET LIST -->
   <div
-      *ngIf="((workbasketsSummary$ | async) && (workbasketsSummary$ | async)?.length > 0) else empty_workbaskets"
-      class="workbasket-list__list-items">
+    *ngIf="((workbasketsSummary$ | async) && (workbasketsSummary$ | async)?.length > 0) else empty_workbaskets"
+    class="workbasket-list__list-items">
     <mat-selection-list #workbasket [multiple]="false" hideSingleSelectionIndicator="true">
       <mat-list-option (click)="selectWorkbasket(workbasket.workbasketId)"
                        *ngFor="let workbasket of (workbasketsSummary$ | async);"
@@ -59,9 +59,9 @@
 
             <div *ngIf="workbasket.markedForDeletion" class="workbasket-list__list-item--marked">
               <span
-                  class="material-icons md-20 {{workbasket.workbasketId === selectedId ? 'white': 'red' }} "
-                  data-toggle="tooltip"
-                  title="Marked for deletion">error</span>
+                class="material-icons md-20 {{workbasket.workbasketId === selectedId ? 'white': 'red' }} "
+                data-toggle="tooltip"
+                title="Marked for deletion">error</span>
             </div>
 
           </div>
@@ -84,11 +84,9 @@
 
 <!-- PAGINATION -->
 
-<kadai-shared-pagination
-    (changePage)="changePage($event)"
-    [expanded]="expanded"
-    [numberOfItems]="(workbasketsSummary$ | async)?.length"
-    [page]="(workbasketsSummaryRepresentation$ | async) ? (workbasketsSummaryRepresentation$ | async)?.page : (workbasketsSummaryRepresentation$ | async)"
-    [resetPaging]="resetPagingSubject.asObservable()"
-    [type]="type">
-</kadai-shared-pagination>
+<kadai-shared-pagination (changePage)="changePage($event)"
+                         [expanded]="expanded"
+                         [numberOfItems]="(workbasketsSummary$ | async)?.length"
+                         [page]="(workbasketsSummaryRepresentation$ | async) ? (workbasketsSummaryRepresentation$ | async)?.page : (workbasketsSummaryRepresentation$ | async)"
+                         [resetPaging]="resetPagingSubject.asObservable()"
+                         [type]="type"/>

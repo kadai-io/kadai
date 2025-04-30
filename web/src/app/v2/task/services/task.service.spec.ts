@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,12 +19,13 @@
 import { TestBed } from '@angular/core/testing';
 
 import { TaskService } from './task.service';
+import { provideHttpClient } from '@angular/common/http';
 
-describe.skip('TaskService', () => {
+describe('TaskService', () => {
   let service: TaskService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({ providers: [provideHttpClient()] });
     service = TestBed.inject(TaskService);
   });
 

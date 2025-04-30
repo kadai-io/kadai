@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -45,16 +45,6 @@ public interface Workbasket extends WorkbasketSummary {
    * @param type the type of the Workbasket
    */
   void setType(WorkbasketType type);
-
-  /**
-   * Sets the value of the specified {@linkplain WorkbasketCustomField}.
-   *
-   * @param customField identifies which {@linkplain WorkbasketCustomField} is to be set
-   * @param value the value of the {@linkplain WorkbasketCustomField} to be set
-   * @deprecated Use {@linkplain #setCustomField(WorkbasketCustomField, String)} instead
-   */
-  @Deprecated
-  void setCustomAttribute(WorkbasketCustomField customField, String value);
 
   /**
    * Sets the value for the specified {@linkplain WorkbasketCustomField}.

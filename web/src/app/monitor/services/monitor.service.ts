@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'environments/environment';
 import { Observable } from 'rxjs';
@@ -27,9 +27,11 @@ import { TaskState } from '../../shared/models/task-state';
 
 const monitorUrl = '/v1/monitor';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class MonitorService {
-  constructor(private httpClient: HttpClient) {}
+  private httpClient = inject(HttpClient);
 
   getTaskStatusReport(): Observable<ReportData> {
     const queryParams = {
