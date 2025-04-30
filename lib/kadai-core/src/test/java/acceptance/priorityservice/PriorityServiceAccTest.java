@@ -18,94 +18,55 @@
 
 package acceptance.priorityservice;
 
+import static io.kadai.testapi.DefaultTestEntities.defaultTestClassification;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import acceptance.AbstractAccTest;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.models.Classification;
 import io.kadai.common.api.ScheduledJob;
-import io.kadai.common.internal.util.Pair;
-import io.kadai.common.test.security.JaasExtension;
-import io.kadai.common.test.security.WithAccessId;
-import io.kadai.task.api.TaskCustomField;
-import io.kadai.task.api.models.ObjectReference;
-import io.kadai.task.api.models.Task;
-import java.sql.Date;
+import io.kadai.common.internal.InternalKadaiEngine;
+import io.kadai.common.internal.JobMapper;
+import io.kadai.spi.priority.api.PriorityServiceProvider;
+import io.kadai.testapi.KadaiInject;
+import io.kadai.testapi.KadaiIntegrationTest;
+import io.kadai.testapi.WithServiceProvider;
+import io.kadai.testapi.security.WithAccessId;
 import java.time.Instant;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.function.ThrowingConsumer;
 
 /** Acceptance test for all priority computation scenarios. */
-@Disabled("Until we enable the use of Test-SPI's in only specific tests")
-@ExtendWith(JaasExtension.class)
-class PriorityServiceAccTest extends AbstractAccTest {
+@KadaiIntegrationTest
+@WithServiceProvider(
+    serviceProviderInterface = PriorityServiceProvider.class,
+    serviceProviders = TestPriorityServiceProvider.class)
+class PriorityServiceAccTest {
 
-  @WithAccessId(user = "user-1-1")
-  @TestFactory
-  Stream<DynamicTest> should_SetThePriorityAccordingToTestProvider_When_CreatingTask() {
-    List<Pair<String, Integer>> testCases = List.of(Pair.of("false", 1), Pair.of("true", 10));
+  @KadaiInject InternalKadaiEngine internalKadaiEngine;
+  @KadaiInject ClassificationService classificationService;
+  private Classification classification;
 
-    ThrowingConsumer<Pair<String, Integer>> test =
-        x -> {
-          Task task = taskService.newTask("USER-1-1", "DOMAIN_A");
-          task.setCustomField(TaskCustomField.CUSTOM_6, x.getLeft());
-          task.setClassificationKey("T2100");
-          ObjectReference objectReference =
-              createObjectReference("COMPANY_A", "SYSTEM_A", "INSTANCE_A", "VNR", "1234567");
-          task.setPrimaryObjRef(objectReference);
-
-          Task createdTask = taskService.createTask(task);
-          assertThat(createdTask.getPriority()).isEqualTo(x.getRight());
-        };
-
-    return DynamicTest.stream(testCases.iterator(), x -> "entry in custom6: " + x.getLeft(), test);
+  @BeforeEach
+  @WithAccessId(user = "businessadmin")
+  void setup() throws Exception {
+    classification = defaultTestClassification().buildAndStore(classificationService);
   }
 
-  @WithAccessId(user = "user-1-1")
-  @TestFactory
-  Stream<DynamicTest> should_SetThePriorityAccordingToTestProvider_When_UpdatingTask()
-      throws Exception {
-    List<Pair<String, Integer>> testCases = List.of(Pair.of("false", 1), Pair.of("true", 10));
-    Task task = taskService.getTask("TKI:000000000000000000000000000000000000");
-    int daysSinceCreated =
-        Math.toIntExact(
-            TimeUnit.DAYS.convert(
-                Date.from(Instant.now()).getTime() - Date.from(task.getCreated()).getTime(),
-                TimeUnit.MILLISECONDS));
-
-    ThrowingConsumer<Pair<String, Integer>> test =
-        x -> {
-          task.setCustomField(TaskCustomField.CUSTOM_6, x.getLeft());
-
-          Task updatedTask = taskService.updateTask(task);
-          assertThat(updatedTask.getPriority()).isEqualTo(daysSinceCreated * x.getRight());
-        };
-
-    return DynamicTest.stream(testCases.iterator(), x -> "entry in custom6: " + x.getLeft(), test);
-  }
-
-  @WithAccessId(user = "admin")
   @Test
+  @WithAccessId(user = "businessadmin")
   void should_NotCreateClassificationChangedJob_When_PriorityProviderExisting() throws Exception {
-    ClassificationService classificationService = kadaiEngine.getClassificationService();
-    Classification classification =
-        classificationService.getClassification("CLI:000000000000000000000000000000000001");
     classification.setPriority(10);
-
     classificationService.updateClassification(classification);
-    List<ScheduledJob> jobsToRun = getJobMapper(kadaiEngine).findJobsToRun(Instant.now());
+
+    List<ScheduledJob> jobsToRun =
+        internalKadaiEngine.getSqlSession().getMapper(JobMapper.class).findJobsToRun(Instant.now());
     assertThat(jobsToRun).isEmpty();
 
     classification.setServiceLevel("P4D");
     classificationService.updateClassification(classification);
-    jobsToRun = getJobMapper(kadaiEngine).findJobsToRun(Instant.now());
+    jobsToRun =
+        internalKadaiEngine.getSqlSession().getMapper(JobMapper.class).findJobsToRun(Instant.now());
     assertThat(jobsToRun).isEmpty();
   }
 }
