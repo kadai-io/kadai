@@ -18,28 +18,14 @@
 
 package io.kadai.spi.history.api.events.task;
 
-public enum TaskHistoryEventType {
-  CREATED("CREATED"),
-  UPDATED("UPDATED"),
-  CLAIMED("CLAIMED"),
-  CLAIMED_REVIEW("CLAIMED_REVIEW"),
-  CLAIM_CANCELLED("CLAIM_CANCELLED"),
-  REQUESTED_REVIEW("REQUESTED_REVIEW"),
-  CHANGES_REQUESTED("CHANGES_REQUESTED"),
-  COMPLETED("COMPLETED"),
-  CANCELLED("CANCELLED"),
-  TERMINATED("TERMINATED"),
-  TRANSFERRED("TRANSFERRED"),
-  DELETED("DELETED"),
-  REOPENED("REOPENED");
+import io.kadai.task.api.models.Task;
 
-  private String name;
+/** Event fired if a task is claimed for a review. */
+public class TaskClaimedReviewEvent extends TaskHistoryEvent {
 
-  TaskHistoryEventType(String name) {
-    this.name = name;
-  }
-
-  public String getName() {
-    return name;
+  public TaskClaimedReviewEvent(String id, Task task, String userId, String details) {
+    super(id, task, userId, details);
+    eventType = (TaskHistoryEventType.CLAIMED_REVIEW.getName());
+    created = task.getClaimed();
   }
 }
