@@ -31,7 +31,6 @@ import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.exceptions.ClassificationNotFoundException;
 import io.kadai.classification.api.models.Classification;
 import io.kadai.classification.api.models.ClassificationSummary;
-import io.kadai.classification.internal.models.ClassificationImpl;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.api.WorkingTimeCalculator;
