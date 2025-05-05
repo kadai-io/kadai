@@ -366,7 +366,7 @@ jobs:
         run: |
           ci/change_version.sh -m .
       - name: Test
-        run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip -Dmaven.compiler.compilerArgs="--module-path=${{ runner.env.JAVA_HOME }}/lib/modules"
+        run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip -Dmaven.compiler.failOnWarning=false
         env:
           DB: ${{ matrix.database }}
       - name: Cancel workflow
