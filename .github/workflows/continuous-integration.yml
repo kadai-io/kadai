@@ -244,7 +244,7 @@ jobs:
 
   test_backend_17:
     runs-on: ubuntu-22.04
-    name: Test ${{ matrix.module }} on ${{ matrix.database }} (Java ${{ env.JAVA_VERSION }})
+    name: Test ${{ matrix.module }} with JDK 17 ${{ env.JAVA_VERSION }} on ${{ matrix.database }}
     needs: [ compile_backend ]
     strategy:
       matrix:
@@ -327,7 +327,7 @@ jobs:
 
   test_backend_21:
     runs-on: ubuntu-22.04
-    name: Test ${{ matrix.module }} on ${{ matrix.database }} (Java 21)
+    name: Test ${{ matrix.module }} with JRE 21 on ${{ matrix.database }}
     needs: [ compile_backend ]
     strategy:
       matrix:
@@ -351,6 +351,7 @@ jobs:
         with:
           distribution: adopt
           java-version: 21
+          java-package: jre
       - name: Cache maven dependencies
         uses: actions/cache@v4
         with:
