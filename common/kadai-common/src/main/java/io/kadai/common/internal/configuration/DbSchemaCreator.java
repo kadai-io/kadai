@@ -29,7 +29,6 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
 import javax.sql.DataSource;
 import org.apache.ibatis.jdbc.RuntimeSqlException;
 import org.apache.ibatis.jdbc.ScriptRunner;
@@ -98,13 +97,7 @@ public class DbSchemaCreator {
         LOGGER.debug("{}", connection.getMetaData());
       }
 
-      String query =
-          "select VERSION from KADAI_SCHEMA_VERSION where "
-              + "VERSION = (select max(VERSION) from KADAI_SCHEMA_VERSION) ";
-
-      Map<String, Object> queryResult = runner.selectOne(query);
-
-      ComparableVersion actualVersion = ComparableVersion.of((String) queryResult.get("VERSION"));
+      ComparableVersion actualVersion = getActualMaxVersion(runner);
       ComparableVersion minVersion = ComparableVersion.of(expectedMinVersion);
 
       if (actualVersion.compareTo(minVersion) < 0) {
@@ -129,12 +122,26 @@ public class DbSchemaCreator {
     }
   }
 
+  public ComparableVersion getActualMaxVersion(SqlRunner runner) throws SQLException {
+    String query = "select VERSION from KADAI_SCHEMA_VERSION";
+    return runner.selectAll(query).stream()
+        .map(res -> (String) res.get("VERSION"))
+        .map(ComparableVersion::of)
+        .max(ComparableVersion::compareTo)
+        .orElseThrow(
+            () -> new IllegalStateException("There exists no version in KADAI_SCHEMA_VERSION"));
+  }
+
   public DataSource getDataSource() {
     return dataSource;
   }
 
   public void setDataSource(DataSource dataSource) {
     this.dataSource = dataSource;
+  }
+
+  public String getSchemaName() {
+    return schemaName;
   }
 
   private ScriptRunner getScriptRunnerInstance(Connection connection) {
