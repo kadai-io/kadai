@@ -61,7 +61,7 @@
     "@types/node": "22.15.11",
     "@typescript-eslint/eslint-plugin": "8.32.0",
     "@typescript-eslint/eslint-plugin-tslint": "7.0.2",
-    "@typescript-eslint/parser": "8.31.1",
+    "@typescript-eslint/parser": "8.32.0",
     "compression-webpack-plugin": "11.1.0",
     "cypress": "14.3.2",
     "cypress-intellij-reporter": "0.0.7",
