@@ -18,7 +18,14 @@
 
 package io.kadai.task.internal;
 
+import static io.kadai.task.api.TaskState.CANCELLED;
+import static io.kadai.task.api.TaskState.CLAIMED;
+import static io.kadai.task.api.TaskState.CLAIMED_STATES;
+import static io.kadai.task.api.TaskState.END_STATES;
+import static io.kadai.task.api.TaskState.IN_REVIEW;
+import static io.kadai.task.api.TaskState.READY;
 import static io.kadai.task.api.TaskState.READY_FOR_REVIEW;
+import static io.kadai.task.api.TaskState.TERMINATED;
 import static java.util.function.Predicate.not;
 
 import io.kadai.classification.api.ClassificationService;
@@ -709,9 +716,7 @@ public class TaskServiceImpl implements TaskService {
       final TaskImpl oldTask = duplicateTaskExactly(task);
 
       final TaskState[] nonFinalEndStates =
-          Arrays.stream(TaskState.END_STATES)
-              .filter(not(TaskState::isFinalState))
-              .toArray(TaskState[]::new);
+          Arrays.stream(END_STATES).filter(not(TaskState::isFinalState)).toArray(TaskState[]::new);
 
       if (!task.getState().in(nonFinalEndStates)) {
         throw new InvalidTaskStateException(oldTask.getId(), oldTask.getState(), nonFinalEndStates);
@@ -1012,11 +1017,10 @@ public class TaskServiceImpl implements TaskService {
       cancelledTask = (TaskImpl) getTask(taskId);
       TaskState state = cancelledTask.getState();
       if (state.isEndState()) {
-        throw new InvalidTaskStateException(
-            taskId, state, EnumUtil.allValuesExceptFor(TaskState.END_STATES));
+        throw new InvalidTaskStateException(taskId, state, EnumUtil.allValuesExceptFor(END_STATES));
       }
 
-      terminateCancelCommonActions(cancelledTask, TaskState.CANCELLED);
+      terminateCancelCommonActions(cancelledTask, CANCELLED);
       cancelledTask =
           (TaskImpl) taskEndstatePreprocessorManager.processTaskBeforeEndstate(cancelledTask);
       taskMapper.update(cancelledTask);
@@ -1189,11 +1193,10 @@ public class TaskServiceImpl implements TaskService {
       terminatedTask = (TaskImpl) getTask(taskId);
       TaskState state = terminatedTask.getState();
       if (state.isEndState()) {
-        throw new InvalidTaskStateException(
-            taskId, state, EnumUtil.allValuesExceptFor(TaskState.END_STATES));
+        throw new InvalidTaskStateException(taskId, state, EnumUtil.allValuesExceptFor(END_STATES));
       }
 
-      terminateCancelCommonActions(terminatedTask, TaskState.TERMINATED);
+      terminateCancelCommonActions(terminatedTask, TERMINATED);
       terminatedTask =
           (TaskImpl) taskEndstatePreprocessorManager.processTaskBeforeEndstate(terminatedTask);
       taskMapper.update(terminatedTask);
@@ -1220,10 +1223,7 @@ public class TaskServiceImpl implements TaskService {
   public List<String> findTasksIdsAffectedByClassificationChange(String classificationId) {
     // tasks directly affected
     List<TaskSummary> tasksAffectedDirectly =
-        createTaskQuery()
-            .classificationIdIn(classificationId)
-            .stateIn(TaskState.READY, TaskState.CLAIMED)
-            .list();
+        createTaskQuery().classificationIdIn(classificationId).stateIn(READY, CLAIMED).list();
 
     // tasks indirectly affected via attachments
     List<Pair<String, Instant>> affectedPairs =
@@ -1375,10 +1375,10 @@ public class TaskServiceImpl implements TaskService {
     task.setModified(now);
     task.setClaimed(now);
     task.setRead(true);
-    if (Set.of(READY_FOR_REVIEW, TaskState.IN_REVIEW).contains(task.getState())) {
-      task.setState(TaskState.IN_REVIEW);
+    if (Set.of(READY_FOR_REVIEW, IN_REVIEW).contains(task.getState())) {
+      task.setState(IN_REVIEW);
     } else {
-      task.setState(TaskState.CLAIMED);
+      task.setState(CLAIMED);
     }
   }
 
@@ -1391,10 +1391,10 @@ public class TaskServiceImpl implements TaskService {
     task.setModified(now);
     task.setClaimed(null);
     task.setRead(true);
-    if (task.getState() == TaskState.IN_REVIEW) {
+    if (task.getState() == IN_REVIEW) {
       task.setState(READY_FOR_REVIEW);
     } else {
-      task.setState(TaskState.READY);
+      task.setState(READY);
     }
   }
 
@@ -1404,7 +1404,7 @@ public class TaskServiceImpl implements TaskService {
     task.setOwnerLongName(userLongName);
     task.setModified(now);
     task.setClaimed(now);
-    task.setState(TaskState.CLAIMED);
+    task.setState(CLAIMED);
     task.setCompleted(null);
     task.setRead(false);
     task.setReopened(true);
@@ -1422,11 +1422,9 @@ public class TaskServiceImpl implements TaskService {
 
   private static void checkIfTaskIsTerminatedOrCancelled(TaskSummary task)
       throws InvalidTaskStateException {
-    if (task.getState().in(TaskState.CANCELLED, TaskState.TERMINATED)) {
+    if (task.getState().in(CANCELLED, TERMINATED)) {
       throw new InvalidTaskStateException(
-          task.getId(),
-          task.getState(),
-          EnumUtil.allValuesExceptFor(TaskState.CANCELLED, TaskState.TERMINATED));
+          task.getId(), task.getState(), EnumUtil.allValuesExceptFor(CANCELLED, TERMINATED));
     }
   }
 
@@ -1537,14 +1535,11 @@ public class TaskServiceImpl implements TaskService {
     BulkLog bulkLog = new BulkLog();
 
     for (MinimalTaskSummary taskSummary : minimalTaskSummaries) {
-      if (!taskSummary.getTaskState().in(TaskState.READY, READY_FOR_REVIEW)) {
+      if (!taskSummary.getTaskState().in(READY, READY_FOR_REVIEW)) {
         bulkLog.addError(
             taskSummary.getTaskId(),
             new InvalidTaskStateException(
-                taskSummary.getTaskId(),
-                taskSummary.getTaskState(),
-                TaskState.READY,
-                READY_FOR_REVIEW));
+                taskSummary.getTaskId(), taskSummary.getTaskState(), READY, READY_FOR_REVIEW));
       } else {
         filteredTasks.add(taskSummary.getTaskId());
       }
@@ -1705,7 +1700,7 @@ public class TaskServiceImpl implements TaskService {
         String changeDetails =
             ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task);
 
-        if (Set.of(READY_FOR_REVIEW, TaskState.IN_REVIEW).contains(task.getState())) {
+        if (Set.of(READY_FOR_REVIEW, IN_REVIEW).contains(task.getState())) {
           historyEventManager.createEvent(
               new TaskClaimedReviewEvent(
                   IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
@@ -1742,7 +1737,7 @@ public class TaskServiceImpl implements TaskService {
       final TaskImpl oldTask = duplicateTaskExactly(task);
 
       final TaskState[] allowedStates =
-          force ? EnumUtil.allValuesExceptFor(TaskState.END_STATES) : TaskState.CLAIMED_STATES;
+          force ? EnumUtil.allValuesExceptFor(END_STATES) : CLAIMED_STATES;
       if (task.getState().isEndState() || (!force && taskIsNotClaimed(task))) {
         throw new InvalidTaskStateException(task.getId(), task.getState(), allowedStates);
       }
@@ -1793,16 +1788,16 @@ public class TaskServiceImpl implements TaskService {
 
       if (force && task.getState().isEndState()) {
         throw new InvalidTaskStateException(
-            task.getId(), task.getState(), EnumUtil.allValuesExceptFor(TaskState.END_STATES));
+            task.getId(), task.getState(), EnumUtil.allValuesExceptFor(END_STATES));
       }
-      if (!force && task.getState() != TaskState.IN_REVIEW) {
-        throw new InvalidTaskStateException(task.getId(), task.getState(), TaskState.IN_REVIEW);
+      if (!force && task.getState() != IN_REVIEW) {
+        throw new InvalidTaskStateException(task.getId(), task.getState(), IN_REVIEW);
       }
       if (!force && !task.getOwner().equals(userId)) {
         throw new InvalidOwnerException(userId, task.getId());
       }
 
-      task.setState(TaskState.READY);
+      task.setState(READY);
       task.setOwner(ownerId);
       task.setModified(Instant.now());
 
@@ -1833,7 +1828,7 @@ public class TaskServiceImpl implements TaskService {
     TaskState state = task.getState();
     if (state.isEndState()) {
       throw new InvalidTaskStateException(
-          task.getId(), task.getState(), EnumUtil.allValuesExceptFor(TaskState.END_STATES));
+          task.getId(), task.getState(), EnumUtil.allValuesExceptFor(END_STATES));
     }
 
     String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
@@ -1851,7 +1846,7 @@ public class TaskServiceImpl implements TaskService {
   private void checkPreconditionsForCompleteTask(TaskSummary task)
       throws InvalidOwnerException, InvalidTaskStateException, NotAuthorizedOnWorkbasketException {
     if (taskIsNotClaimed(task)) {
-      throw new InvalidTaskStateException(task.getId(), task.getState(), TaskState.CLAIMED_STATES);
+      throw new InvalidTaskStateException(task.getId(), task.getState(), CLAIMED_STATES);
     } else if (!kadaiEngine
             .getEngine()
             .getCurrentUserContext()
@@ -1889,8 +1884,7 @@ public class TaskServiceImpl implements TaskService {
             WorkbasketPermission.EDITTASKS);
       }
       if (state.isEndState()) {
-        throw new InvalidTaskStateException(
-            taskId, state, EnumUtil.allValuesExceptFor(TaskState.END_STATES));
+        throw new InvalidTaskStateException(taskId, state, EnumUtil.allValuesExceptFor(END_STATES));
       }
       if (state.isClaimedState() && !forceUnclaim && !userId.equals(task.getOwner())) {
         throw new InvalidOwnerException(userId, taskId);
@@ -1977,9 +1971,9 @@ public class TaskServiceImpl implements TaskService {
       task = (TaskImpl) getTask(taskId);
 
       if (!task.getState().isEndState() && !forceDelete) {
-        throw new InvalidTaskStateException(taskId, task.getState(), TaskState.END_STATES);
+        throw new InvalidTaskStateException(taskId, task.getState(), END_STATES);
       }
-      if (!task.getState().in(TaskState.TERMINATED, TaskState.CANCELLED)
+      if (!task.getState().in(TERMINATED, CANCELLED)
           && CallbackState.CALLBACK_PROCESSING_REQUIRED.equals(task.getCallbackState())) {
         throw new InvalidCallbackStateException(
             taskId,
@@ -2031,11 +2025,10 @@ public class TaskServiceImpl implements TaskService {
       } else if (!foundSummary.getTaskState().isEndState()) {
         bulkLog.addError(
             currentTaskId,
-            new InvalidTaskStateException(
-                currentTaskId, foundSummary.getTaskState(), TaskState.END_STATES));
+            new InvalidTaskStateException(currentTaskId, foundSummary.getTaskState(), END_STATES));
         taskIdIterator.remove();
       } else {
-        if (!foundSummary.getTaskState().in(TaskState.CANCELLED, TaskState.TERMINATED)
+        if (!foundSummary.getTaskState().in(CANCELLED, TERMINATED)
             && CallbackState.CALLBACK_PROCESSING_REQUIRED.equals(foundSummary.getCallbackState())) {
           bulkLog.addError(
               currentTaskId,
@@ -2088,14 +2081,14 @@ public class TaskServiceImpl implements TaskService {
         if (!currentTaskState.isEndState()) {
           return Optional.of(
               new InvalidTaskStateException(
-                  foundSummary.getTaskId(), foundSummary.getTaskState(), TaskState.END_STATES));
+                  foundSummary.getTaskId(), foundSummary.getTaskState(), END_STATES));
         }
         break;
       case CLAIMED:
-        if (!currentTaskState.equals(TaskState.CLAIMED)) {
+        if (!currentTaskState.equals(CLAIMED)) {
           return Optional.of(
               new InvalidTaskStateException(
-                  foundSummary.getTaskId(), foundSummary.getTaskState(), TaskState.CLAIMED));
+                  foundSummary.getTaskId(), foundSummary.getTaskState(), CLAIMED));
         }
         if (!currentTaskCallbackState.equals(CallbackState.CALLBACK_PROCESSING_REQUIRED)) {
           return Optional.of(
@@ -2136,7 +2129,7 @@ public class TaskServiceImpl implements TaskService {
     if (taskToCreate.getExternalId() == null) {
       taskToCreate.setExternalId(IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_EXT_TASK));
     }
-    taskToCreate.setState(TaskState.READY);
+    taskToCreate.setState(READY);
     taskToCreate.setCreated(now);
     taskToCreate.setModified(now);
     taskToCreate.setRead(false);
@@ -2525,9 +2518,9 @@ public class TaskServiceImpl implements TaskService {
 
     // owner can only be changed if task is either in state ready or ready_for_review
     boolean isOwnerChanged = !Objects.equals(newTaskImpl1.getOwner(), oldTaskImpl.getOwner());
-    if (isOwnerChanged && !oldTaskImpl.getState().in(TaskState.READY, READY_FOR_REVIEW)) {
+    if (isOwnerChanged && !oldTaskImpl.getState().in(READY, READY_FOR_REVIEW)) {
       throw new InvalidTaskStateException(
-          oldTaskImpl.getId(), oldTaskImpl.getState(), TaskState.READY, READY_FOR_REVIEW);
+          oldTaskImpl.getId(), oldTaskImpl.getState(), READY, READY_FOR_REVIEW);
     }
     if (isOwnerChanged && kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo()) {
       User user = userMapper.findById(newTaskImpl.getOwner());
