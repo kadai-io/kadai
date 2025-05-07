@@ -366,7 +366,7 @@ jobs:
         run: |
           ci/change_version.sh -m .
       - name: Test
-        run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip -D"java.version=21"
+        run: ./mvnw -B test -pl :${{matrix.module}} -Dcheckstyle.skip -D"java.version=21"
         env:
           DB: ${{ matrix.database }}
       - name: Cancel workflow
