@@ -45,7 +45,7 @@
 
         <!-- build dependencies -->
         <version.checkstyle>10.23.1</version.checkstyle>
-        <version.google-java-format>1.26.0</version.google-java-format>
+        <version.google-java-format>1.27.0</version.google-java-format>
         <version.maven.checkstyle>3.6.0</version.maven.checkstyle>
         <version.maven.jar>3.4.2</version.maven.jar>
         <version.maven.war>3.4.0</version.maven.war>
@@ -73,7 +73,7 @@
 
         <!-- test dependencies -->
         <version.archunit>1.4.0</version.archunit>
-        <version.equalsverifier>3.19.3</version.equalsverifier>
+        <version.equalsverifier>4.0</version.equalsverifier>
         <version.assertj>3.27.3</version.assertj>
         <version.openpojo>0.9.1</version.openpojo>
         <version.jacoco>0.8.13</version.jacoco>
@@ -81,14 +81,14 @@
         <version.testcontainers>1.21.0</version.testcontainers>
         <version.spring-openapi>2.8.5</version.spring-openapi>
         <version.jakarta.servlet>6.1.0</version.jakarta.servlet>
-        <version.spring-openapi>2.8.6</version.spring-openapi>
+        <version.spring-openapi>2.8.8</version.spring-openapi>
 
         <!-- AspectJ dependencies -->
         <version.aspectj-maven-plugin>1.15.0</version.aspectj-maven-plugin>
         <version.aspectj>1.9.24</version.aspectj>
 
         <!-- Excel to DMN converter dependencies -->
-        <version.docx4j>11.5.2</version.docx4j>
+        <version.docx4j>11.5.3</version.docx4j>
         <version.jakarta.xml.bind-api>4.0.2</version.jakarta.xml.bind-api>
         <version.jaxb-core>4.0.5</version.jaxb-core>
         <version.jaxb-impl>4.0.5</version.jaxb-impl>
