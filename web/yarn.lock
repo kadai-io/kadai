@@ -572,9 +572,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/compiler-cli@npm:19.2.9":
-  version: 19.2.9
-  resolution: "@angular/compiler-cli@npm:19.2.9"
+"@angular/compiler-cli@npm:19.2.10":
+  version: 19.2.10
+  resolution: "@angular/compiler-cli@npm:19.2.10"
   dependencies:
     "@babel/core": "npm:7.26.9"
     "@jridgewell/sourcemap-codec": "npm:^1.4.14"
@@ -585,13 +585,13 @@ __metadata:
     tslib: "npm:^2.3.0"
     yargs: "npm:^17.2.1"
   peerDependencies:
-    "@angular/compiler": 19.2.9
+    "@angular/compiler": 19.2.10
     typescript: ">=5.5 <5.9"
   bin:
     ng-xi18n: bundles/src/bin/ng_xi18n.js
     ngc: bundles/src/bin/ngc.js
     ngcc: bundles/ngcc/index.js
-  checksum: 10c0/2edd9bad1fe6dda2c1b214ac1942695c6e2818c0d2d8f296153ebb5f94fc5b477627002892e73e5b384e059953c19263504964c5850c4f7626f6106239e1c612
+  checksum: 10c0/bae26644668e05c82fd3d2eb2f3bd936116318cf76113282ec43b9bb5fc2802a2dab86c85194ac061a849b925fa7d8f6f0f76dc3c9ac4ba2e0558cea7bfc5bd7
   languageName: node
   linkType: hard
 
@@ -10812,7 +10812,7 @@ __metadata:
     "@angular/cli": "npm:19.2.10"
     "@angular/common": "npm:19.2.9"
     "@angular/compiler": "npm:19.2.10"
-    "@angular/compiler-cli": "npm:19.2.9"
+    "@angular/compiler-cli": "npm:19.2.10"
     "@angular/core": "npm:19.2.10"
     "@angular/forms": "npm:19.2.9"
     "@angular/material": "npm:19.2.14"
