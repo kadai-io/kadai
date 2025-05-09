@@ -28,15 +28,12 @@ import com.openpojo.validation.rule.impl.NoPublicFieldsRule;
 import com.openpojo.validation.rule.impl.NoStaticExceptFinalRule;
 import com.openpojo.validation.rule.impl.SetterMustExistRule;
 import com.openpojo.validation.test.Tester;
-import com.openpojo.validation.test.impl.GetterTester;
-import com.openpojo.validation.test.impl.SetterTester;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import java.util.List;
 import java.util.stream.Stream;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
@@ -98,17 +95,6 @@ class PojoTest {
                 DynamicTest.dynamicTest(
                     "Check Setter for " + cl.getSimpleName(),
                     () -> validateWithRules(cl, new SetterMustExistRule())));
-  }
-
-  @TestFactory
-  @Disabled("because of the truncation of all Instant member variables")
-  Stream<DynamicTest> validateGetAndSet() {
-    return POJO_CLASSES.stream()
-        .map(
-            cl ->
-                DynamicTest.dynamicTest(
-                    "Test set & get " + cl.getSimpleName(),
-                    () -> validateWithTester(cl, new GetterTester(), new SetterTester())));
   }
 
   @TestFactory
