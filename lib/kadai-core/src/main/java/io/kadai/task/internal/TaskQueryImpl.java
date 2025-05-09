@@ -2021,17 +2021,22 @@ public class TaskQueryImpl implements TaskQuery {
   }
 
   public List<TaskSummary> list() {
-    return kadaiEngine.executeInDatabaseConnection(
-        () -> {
-          checkForIllegalParamCombinations();
-          checkOpenReadAndReadTasksPermissionForSpecifiedWorkbaskets();
-          setupJoinAndOrderParameters();
-          setupAccessIds();
-          List<TaskSummaryImpl> tasks =
-              kadaiEngine.getSqlSession().selectList(getLinkToMapperScript(), this);
+    try {
+      kadaiEngine.openConnection();
+      checkForIllegalParamCombinations();
+      checkOpenReadAndReadTasksPermissionForSpecifiedWorkbaskets();
+      setupJoinAndOrderParameters();
+      setupAccessIds();
+      List<TaskSummaryImpl> tasks =
+          kadaiEngine.getSqlSession().selectList(getLinkToMapperScript(), this);
 
-          return taskService.augmentTaskSummariesByContainedSummariesWithPartitioning(tasks);
-        });
+      // Stores read data in (transactional) cache to avoid modification (below) before caching
+      kadaiEngine.getSqlSession().commit();
+
+      return taskService.augmentTaskSummariesByContainedSummariesWithPartitioning(tasks);
+    } finally {
+      kadaiEngine.returnConnection();
+    }
   }
 
   @Override
