@@ -177,7 +177,7 @@ public class TaskQuerySqlProvider {
   @SuppressWarnings("unused")
   public static String countQueryTasks() {
     return OPENING_SCRIPT_TAG
-        + "SELECT COUNT( <if test=\"useDistinctKeyword\">DISTINCT</if> t.ID) "
+        + "SELECT COUNT(*) "
         + "<if test=\"groupByPor or groupBySor != null\"> "
         + "FROM (SELECT t.ID, t.POR_VALUE "
         + "</if> "
