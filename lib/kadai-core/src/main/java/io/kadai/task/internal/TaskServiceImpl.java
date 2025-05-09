@@ -475,7 +475,7 @@ public class TaskServiceImpl implements TaskService {
       }
 
       Classification classification =
-              getClassificationByKeyAndDomain(task.getClassificationKey(), workbasket.getDomain());
+          getClassificationByKeyAndDomain(task.getClassificationKey(), workbasket.getDomain());
       task.setClassificationSummary(classification.asSummary());
 
       ObjectReferenceImpl.validate(task.getPrimaryObjRef(), "primary ObjectReference", "Task");
@@ -508,7 +508,7 @@ public class TaskServiceImpl implements TaskService {
   }
 
   private Workbasket resolveWorkbasket(TaskImpl task)
-          throws WorkbasketNotFoundException,
+      throws WorkbasketNotFoundException,
           InvalidArgumentException,
           NotAuthorizedOnWorkbasketException {
 
@@ -525,9 +525,9 @@ public class TaskServiceImpl implements TaskService {
     return workbasketService.getWorkbasket(routingTarget.getWorkbasketId());
   }
 
-  private Classification getClassificationByKeyAndDomain(String taskClassificationKey,
-                                                         String workbasketDomain)
-          throws ClassificationNotFoundException, InvalidArgumentException {
+  private Classification getClassificationByKeyAndDomain(
+      String taskClassificationKey, String workbasketDomain)
+      throws ClassificationNotFoundException, InvalidArgumentException {
     // we do use the key and not the id to make sure that we use the classification from the right
     // domain.
     // otherwise we would have to check the classification and its domain for validity.
@@ -539,20 +539,34 @@ public class TaskServiceImpl implements TaskService {
   }
 
   private void persistCreatedTask(TaskImpl task)
-          throws TaskAlreadyExistException, PersistenceException {
+      throws TaskAlreadyExistException, PersistenceException {
     try {
       this.taskMapper.insert(task);
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Method createTask() created Task '{}'.", task.getId());
       }
     } catch (PersistenceException e) {
-      boolean isExternalIdViolation = Optional.ofNullable(e.getMessage())
+      // Error messages:
+      // Postgres: Cause: org.postgresql.util.PSQLException:
+      //                  ERROR: duplicate key value violates unique constraint "uc_external_id"
+      // DB/2:     Cause: com.ibm.db2.jcc.am.SqlIntegrityConstraintViolationException:
+      //                  DB2 SQL Error: SQLCODE=-803, SQLSTATE=23505, SQLERRMC=2;KADAI.TASK,
+      //                  DRIVER=4.22.29
+      // H2:       Cause: org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException: Unique index or
+      //                  primary key violation: "UC_EXTERNAL_ID_INDEX_2 ON KADAI.TASK(EXTERNAL_ID)
+      boolean isExternalIdViolation =
+          Optional.ofNullable(e.getMessage())
               .map(String::toLowerCase)
-              .filter(msg -> msg.contains("external_id"))
-              .filter(msg -> msg.contains("violation")
-                      || msg.contains("violates")
-                      || msg.contains("violated")
-                      || msg.contains("verletzt"))
+              .filter(
+                  msg ->
+                      (msg.contains("org.postgresql.util.psqlexception")
+                              && msg.contains("uc_external_id"))
+                          || (msg.contains(
+                                  "com.ibm.db2.jcc.am.sqlintegrityconstraintviolationexception")
+                              && msg.contains("sqlcode=-803"))
+                          || (msg.contains(
+                                  "org.h2.jdbc.jdbcsqlintegrityconstraintviolationexception")
+                              && msg.contains("uc_external_id_index")))
               .isPresent();
       if (isExternalIdViolation) {
         throw new TaskAlreadyExistException(task.getExternalId());
@@ -854,9 +868,9 @@ public class TaskServiceImpl implements TaskService {
   @Override
   public Task reopen(String taskId)
       throws TaskNotFoundException,
-      NotAuthorizedOnWorkbasketException,
-      InvalidTaskStateException,
-      ReopenTaskWithCallbackException {
+          NotAuthorizedOnWorkbasketException,
+          InvalidTaskStateException,
+          ReopenTaskWithCallbackException {
     TaskImpl task;
     try {
       kadaiEngine.openConnection();
@@ -864,24 +878,18 @@ public class TaskServiceImpl implements TaskService {
       task = (TaskImpl) getTask(taskId);
       if (!checkEditTasksPerm(task)) {
         throw new NotAuthorizedOnWorkbasketException(
-            userId,
-            task.getWorkbasketSummary().getId(),
-            WorkbasketPermission.EDITTASKS);
+            userId, task.getWorkbasketSummary().getId(), WorkbasketPermission.EDITTASKS);
       }
 
       final TaskImpl oldTask = duplicateTaskExactly(task);
 
-      final TaskState[] nonFinalEndStates = Arrays
-          .stream(TaskState.END_STATES)
-          .filter(not(TaskState::isFinalState))
-          .toArray(TaskState[]::new);
+      final TaskState[] nonFinalEndStates =
+          Arrays.stream(TaskState.END_STATES)
+              .filter(not(TaskState::isFinalState))
+              .toArray(TaskState[]::new);
 
       if (!task.getState().in(nonFinalEndStates)) {
-        throw new InvalidTaskStateException(
-            oldTask.getId(),
-            oldTask.getState(),
-            nonFinalEndStates
-        );
+        throw new InvalidTaskStateException(oldTask.getId(), oldTask.getState(), nonFinalEndStates);
       }
 
       if (oldTask.getCallbackState() != null && oldTask.getCallbackState() != CallbackState.NONE) {
@@ -982,7 +990,8 @@ public class TaskServiceImpl implements TaskService {
       Map<String, Object> additionalInformation)
       throws InvalidArgumentException,
           WorkbasketNotFoundException,
-          NotAuthorizedOnWorkbasketException, TaskNotFoundException {
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException {
     return taskDistributor.distributeWithStrategy(
         sourceWorkbasketId, distributionStrategyName, additionalInformation);
   }
@@ -995,7 +1004,8 @@ public class TaskServiceImpl implements TaskService {
       Map<String, Object> additionalInformation)
       throws InvalidArgumentException,
           WorkbasketNotFoundException,
-          NotAuthorizedOnWorkbasketException, TaskNotFoundException {
+          NotAuthorizedOnWorkbasketException,
+          TaskNotFoundException {
     return taskDistributor.distributeWithStrategy(
         sourceWorkbasketId, taskIds, distributionStrategyName, additionalInformation);
   }
@@ -1051,8 +1061,7 @@ public class TaskServiceImpl implements TaskService {
               () ->
                   Optional.ofNullable(taskQuery.single())
                       .map(TaskSummary::getId)
-                      .map(CheckedFunction.rethrowing(this::claim))
-          ));
+                      .map(CheckedFunction.rethrowing(this::claim))));
     } catch (IllegalArgumentException e) {
       throw e;
     } catch (Exception e) {
@@ -1179,9 +1188,7 @@ public class TaskServiceImpl implements TaskService {
       TaskState state = cancelledTask.getState();
       if (state.isEndState()) {
         throw new InvalidTaskStateException(
-            taskId,
-            state,
-            EnumUtil.allValuesExceptFor(TaskState.END_STATES));
+            taskId, state, EnumUtil.allValuesExceptFor(TaskState.END_STATES));
       }
 
       terminateCancelCommonActions(cancelledTask, TaskState.CANCELLED);
@@ -1358,9 +1365,7 @@ public class TaskServiceImpl implements TaskService {
       TaskState state = terminatedTask.getState();
       if (state.isEndState()) {
         throw new InvalidTaskStateException(
-            taskId,
-            state,
-            EnumUtil.allValuesExceptFor(TaskState.END_STATES));
+            taskId, state, EnumUtil.allValuesExceptFor(TaskState.END_STATES));
       }
 
       terminateCancelCommonActions(terminatedTask, TaskState.TERMINATED);
@@ -1811,9 +1816,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
-    if (!forced
-        && state.isClaimedState()
-        && !task.getOwner().equals(userId)) {
+    if (!forced && state.isClaimedState() && !task.getOwner().equals(userId)) {
       throw new InvalidOwnerException(userId, task.getId());
     }
     if (!checkEditTasksPerm(task)) {
@@ -1827,8 +1830,7 @@ public class TaskServiceImpl implements TaskService {
   private void checkPreconditionsForCompleteTask(TaskSummary task)
       throws InvalidOwnerException, InvalidTaskStateException, NotAuthorizedOnWorkbasketException {
     if (taskIsNotClaimed(task)) {
-      throw new InvalidTaskStateException(
-          task.getId(), task.getState(), TaskState.CLAIMED_STATES);
+      throw new InvalidTaskStateException(task.getId(), task.getState(), TaskState.CLAIMED_STATES);
     } else if (!kadaiEngine
             .getEngine()
             .getCurrentUserContext()
@@ -1869,9 +1871,7 @@ public class TaskServiceImpl implements TaskService {
         throw new InvalidTaskStateException(
             taskId, state, EnumUtil.allValuesExceptFor(TaskState.END_STATES));
       }
-      if (state.isClaimedState()
-          && !forceUnclaim
-          && !userId.equals(task.getOwner())) {
+      if (state.isClaimedState() && !forceUnclaim && !userId.equals(task.getOwner())) {
         throw new InvalidOwnerException(userId, taskId);
       }
       Instant now = Instant.now();
@@ -2129,8 +2129,8 @@ public class TaskServiceImpl implements TaskService {
           IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_BUSINESS_PROCESS));
     }
     // null in case of manual tasks
-    if (taskToCreate.getPlanned() == null && (classification == null
-            || taskToCreate.getDue() == null)) {
+    if (taskToCreate.getPlanned() == null
+        && (classification == null || taskToCreate.getDue() == null)) {
       taskToCreate.setPlanned(now);
     }
     if (taskToCreate.getName() == null && classification != null) {
@@ -2156,8 +2156,9 @@ public class TaskServiceImpl implements TaskService {
     serviceLevelHandler.updatePrioPlannedDueOfTask(taskToCreate, null);
 
     setCallbackStateOnTaskCreation(taskToCreate);
-    priorityServiceManager.calculatePriorityOfTask(taskToCreate)
-            .ifPresent(taskToCreate::setPriority);
+    priorityServiceManager
+        .calculatePriorityOfTask(taskToCreate)
+        .ifPresent(taskToCreate::setPriority);
   }
 
   private void setDefaultTaskReceivedDateFromAttachments(TaskImpl task) {

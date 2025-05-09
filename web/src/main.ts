@@ -44,7 +44,6 @@ import localeDe from '@angular/common/locales/de';
 import { provideRouter, withHashLocation } from '@angular/router';
 import { tap } from 'rxjs/operators';
 import { provideHotToastConfig } from '@ngneat/hot-toast';
-import { TaskState } from '@task/store/task.state';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { EngineConfigurationState } from './app/shared/store/engine-configuration-store/engine-configuration.state';
 import { ClassificationState } from './app/shared/store/classification-store/classification.state';
@@ -118,8 +117,7 @@ bootstrapApplication(AppComponent, {
         AccessItemsManagementState,
         FilterState,
         WorkplaceState,
-        SettingsState,
-        TaskState
+        SettingsState
       ],
       { developmentMode: !environment.production }
     ),

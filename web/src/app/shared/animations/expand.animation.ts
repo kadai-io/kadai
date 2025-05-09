@@ -69,36 +69,3 @@ export const expandRight = trigger('toggleRight', [
     )
   )
 ]);
-
-export const expandTop = trigger('toggleTop', [
-  state('in', style({ transform: 'translateY(0)', overflow: 'hidden' })),
-  transition('void => *', [
-    style({
-      transform: 'translateY(100%)',
-      overflow: 'hidden'
-    }),
-    animate(100)
-  ]),
-  transition('* => void', [
-    animate(
-      100,
-      style({
-        transform: 'translateY(100%)',
-        overflow: 'hidden'
-      })
-    )
-  ])
-]);
-
-export const opacity = trigger('toggleOpacity', [
-  state('*', style({ opacity: '1' })),
-  state('void', style({ opacity: '0' })),
-  transition(
-    'void => *',
-    animate('300ms ease-in', keyframes([style({ opacity: 0 }), style({ opacity: 0.5 }), style({ opacity: 1 })]))
-  ),
-  transition(
-    '* => void',
-    animate('300ms ease-out', keyframes([style({ opacity: 1 }), style({ opacity: 0.5 }), style({ opacity: 0 })]))
-  )
-]);
