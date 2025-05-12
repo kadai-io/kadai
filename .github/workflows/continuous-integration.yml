@@ -332,15 +332,11 @@ jobs:
     strategy:
       matrix:
         module:
-          - kadai-common-security
-          - kadai-core
           - kadai-core-test
-          - kadai-spring
           - kadai-routing-rest
-          - kadai-rest-spring
           - kadai-rest-spring-example-boot
-          - kadai-simplehistory-provider
           - kadai-simplehistory-rest-spring
+          - kadai-rest-spring-example-common
         database:
           - DB2
     steps:
