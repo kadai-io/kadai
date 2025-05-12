@@ -22,10 +22,11 @@ import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.workbasket.api.WorkbasketCustomField;
 import io.kadai.workbasket.api.WorkbasketType;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
+import java.io.Serializable;
 import java.util.Objects;
 
 /** This entity contains the most important information about a workbasket. */
-public class WorkbasketSummaryImpl implements WorkbasketSummary {
+public class WorkbasketSummaryImpl implements WorkbasketSummary, Serializable {
 
   protected String id;
   protected String key;

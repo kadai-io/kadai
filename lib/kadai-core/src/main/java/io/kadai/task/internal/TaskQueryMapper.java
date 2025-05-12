@@ -20,10 +20,12 @@ package io.kadai.task.internal;
 
 import io.kadai.task.internal.models.TaskSummaryImpl;
 import java.util.List;
+import org.apache.ibatis.annotations.CacheNamespaceRef;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.SelectProvider;
 
 /** This class provides a mapper for all task queries. */
+@CacheNamespaceRef(TaskMapper.class)
 public interface TaskQueryMapper {
 
   @SelectProvider(type = TaskQuerySqlProvider.class, method = "queryTaskSummaries")

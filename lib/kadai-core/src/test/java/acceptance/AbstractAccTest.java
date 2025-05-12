@@ -108,14 +108,18 @@ public abstract class AbstractAccTest {
     sampleDataGenerator.generateTestData();
   }
 
-  protected JobMapper getJobMapper(KadaiEngine kadaiEngine)
+  protected SqlSessionManager getSessionManager(KadaiEngine kadaiEngine)
       throws NoSuchFieldException, IllegalAccessException {
 
     Field sessionManagerField = KadaiEngineImpl.class.getDeclaredField("sessionManager");
     sessionManagerField.setAccessible(true);
-    SqlSessionManager sqlSessionManager = (SqlSessionManager) sessionManagerField.get(kadaiEngine);
 
-    return sqlSessionManager.getMapper(JobMapper.class);
+    return (SqlSessionManager) sessionManagerField.get(kadaiEngine);
+  }
+
+  protected JobMapper getJobMapper(KadaiEngine kadaiEngine)
+      throws NoSuchFieldException, IllegalAccessException {
+    return getSessionManager(kadaiEngine).getMapper(JobMapper.class);
   }
 
   protected ObjectReferenceImpl createObjectReference(

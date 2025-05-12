@@ -29,6 +29,7 @@ import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.TaskSummary;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
 import io.kadai.workbasket.internal.models.WorkbasketSummaryImpl;
+import java.io.Serializable;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /** Entity which contains the most important information about a Task. */
-public class TaskSummaryImpl implements TaskSummary {
+public class TaskSummaryImpl implements TaskSummary, Serializable {
 
   protected String id;
   protected String externalId;
