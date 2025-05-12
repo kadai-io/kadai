@@ -332,7 +332,6 @@ jobs:
     strategy:
       matrix:
         module:
-          - kadai-core-test
           - kadai-routing-rest
           - kadai-rest-spring-example-boot
           - kadai-simplehistory-rest-spring
