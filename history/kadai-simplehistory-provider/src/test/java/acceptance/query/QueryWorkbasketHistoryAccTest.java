@@ -18,6 +18,7 @@
 
 package acceptance.query;
 
+import static io.kadai.simplehistory.impl.workbasket.WorkbasketHistoryQueryColumnName.ORG_LEVEL_1;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -509,25 +510,25 @@ class QueryWorkbasketHistoryAccTest extends AbstractAccTest {
     returnedList =
         historyService
             .createWorkbasketHistoryQuery()
-            .listValues(WorkbasketHistoryQueryColumnName.ORGLEVEL_1, null);
+            .listValues(ORG_LEVEL_1, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
         historyService
             .createWorkbasketHistoryQuery()
-            .listValues(WorkbasketHistoryQueryColumnName.ORGLEVEL_2, null);
+            .listValues(WorkbasketHistoryQueryColumnName.ORG_LEVEL_2, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
         historyService
             .createWorkbasketHistoryQuery()
-            .listValues(WorkbasketHistoryQueryColumnName.ORGLEVEL_3, null);
+            .listValues(WorkbasketHistoryQueryColumnName.ORG_LEVEL_3, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
         historyService
             .createWorkbasketHistoryQuery()
-            .listValues(WorkbasketHistoryQueryColumnName.ORGLEVEL_4, null);
+            .listValues(WorkbasketHistoryQueryColumnName.ORG_LEVEL_4, null);
     assertThat(returnedList).hasSize(2);
   }
 
