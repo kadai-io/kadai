@@ -69,7 +69,7 @@ public class UserQueryImpl implements UserQuery {
 
   @Override
   public UserQuery orderByLastName(SortDirection sortDirection) {
-    return addOrderCriteria("LASTNAME", sortDirection);
+    return addOrderCriteria("LAST_NAME", sortDirection);
   }
 
   @Override
