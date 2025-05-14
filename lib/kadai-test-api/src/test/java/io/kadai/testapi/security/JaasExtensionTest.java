@@ -35,7 +35,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicContainer;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Nested;
@@ -229,15 +228,6 @@ class JaasExtensionTest {
     assertThat(CURRENT_USER_CONTEXT.getUserid()).isEqualTo("testtemplate");
   }
 
-  @WithAccessId(user = "testtemplate")
-  @TestTemplate
-  @Disabled("Disabled because of kadai-io/kadai/#555 and it's temporary partial fix which now "
-      + "does not provide a TestTemplateInvocationContext anymore when exactly one @WithAccessId "
-      + "is provided, while still setting the CURRENT_USER_CONTEXT.")
-  void should_SetJaasSubject_When_AnnotationExists_On_TestTemplate() {
-    assertThat(CURRENT_USER_CONTEXT.getUserid()).isEqualTo("testtemplate");
-  }
-
   @WithAccessId(user = "testtemplate1")
   @WithAccessId(user = "testtemplate2")
   @WithAccessId(user = "testtemplate3")
@@ -245,17 +235,6 @@ class JaasExtensionTest {
   void should_SetMultipleJaasSubjects_When_MultipleAnnotationsExist_On_TestTemplate(
       WithAccessId accessId) {
     assertThat(CURRENT_USER_CONTEXT.getUserid()).isEqualTo(accessId.user());
-  }
-
-  @WithAccessId(user = "testtemplate1", groups = "abc", permissions = "perm")
-  @TestTemplate
-  @Disabled("Disabled because of kadai-io/kadai/#555 and it's temporary partial fix which now "
-      + "does not provide a TestTemplateInvocationContext anymore when exactly one @WithAccessId "
-      + "is provided, while still setting the CURRENT_USER_CONTEXT.")
-  void should_InjectCorrectAccessId_When_AnnotationExists_On_TestTemplate(WithAccessId accessId) {
-    assertThat(accessId.user()).isEqualTo("testtemplate1");
-    assertThat(accessId.groups()).containsExactly("abc");
-    assertThat(accessId.permissions()).containsExactly("perm");
   }
 
   // endregion
