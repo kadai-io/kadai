@@ -76,6 +76,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@angular-devkit/architect@npm:0.1902.12":
+  version: 0.1902.12
+  resolution: "@angular-devkit/architect@npm:0.1902.12"
+  dependencies:
+    "@angular-devkit/core": "npm:19.2.12"
+    rxjs: "npm:7.8.1"
+  checksum: 10c0/1868af2fa76fcda4bcee68dedab11ae7a1d4eb9549aa17beb91417df4304b541afc6f3b746813416725b78ee7b81830f2924c21d01e8e8fa7f1f1e85a5ec6785
+  languageName: node
+  linkType: hard
+
 "@angular-devkit/build-angular@npm:19.2.11":
   version: 19.2.11
   resolution: "@angular-devkit/build-angular@npm:19.2.11"
@@ -354,6 +364,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@angular-devkit/core@npm:19.2.12":
+  version: 19.2.12
+  resolution: "@angular-devkit/core@npm:19.2.12"
+  dependencies:
+    ajv: "npm:8.17.1"
+    ajv-formats: "npm:3.0.1"
+    jsonc-parser: "npm:3.3.1"
+    picomatch: "npm:4.0.2"
+    rxjs: "npm:7.8.1"
+    source-map: "npm:0.7.4"
+  peerDependencies:
+    chokidar: ^4.0.0
+  peerDependenciesMeta:
+    chokidar:
+      optional: true
+  checksum: 10c0/2ccddd016decbbfe30acb96a97e565fca3825276eedc3add5d4062cc80f25a8eb4ca27d266114abc5aed45a5e1b9a3853a7dbd397e65bc8f089ccac75b2aa1ff
+  languageName: node
+  linkType: hard
+
 "@angular-devkit/schematics@npm:19.2.11":
   version: 19.2.11
   resolution: "@angular-devkit/schematics@npm:19.2.11"
@@ -449,7 +478,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/build@npm:19.2.11, @angular/build@npm:^19.2.11":
+"@angular/build@npm:19.2.11":
   version: 19.2.11
   resolution: "@angular/build@npm:19.2.11"
   dependencies:
@@ -516,6 +545,76 @@ __metadata:
     tailwindcss:
       optional: true
   checksum: 10c0/72d246378853eba0f37d6234d9f09e2dc0c9df167f7d7a2804e9bf5fd7607fc34500fdb98bcb4802f0eca8cd15490298c25fa46ad68368c98872a8d33c893a9e
+  languageName: node
+  linkType: hard
+
+"@angular/build@npm:^19.2.12":
+  version: 19.2.12
+  resolution: "@angular/build@npm:19.2.12"
+  dependencies:
+    "@ampproject/remapping": "npm:2.3.0"
+    "@angular-devkit/architect": "npm:0.1902.12"
+    "@babel/core": "npm:7.26.10"
+    "@babel/helper-annotate-as-pure": "npm:7.25.9"
+    "@babel/helper-split-export-declaration": "npm:7.24.7"
+    "@babel/plugin-syntax-import-attributes": "npm:7.26.0"
+    "@inquirer/confirm": "npm:5.1.6"
+    "@vitejs/plugin-basic-ssl": "npm:1.2.0"
+    beasties: "npm:0.3.2"
+    browserslist: "npm:^4.23.0"
+    esbuild: "npm:0.25.4"
+    fast-glob: "npm:3.3.3"
+    https-proxy-agent: "npm:7.0.6"
+    istanbul-lib-instrument: "npm:6.0.3"
+    listr2: "npm:8.2.5"
+    lmdb: "npm:3.2.6"
+    magic-string: "npm:0.30.17"
+    mrmime: "npm:2.0.1"
+    parse5-html-rewriting-stream: "npm:7.0.0"
+    picomatch: "npm:4.0.2"
+    piscina: "npm:4.8.0"
+    rollup: "npm:4.34.8"
+    sass: "npm:1.85.0"
+    semver: "npm:7.7.1"
+    source-map-support: "npm:0.5.21"
+    vite: "npm:6.2.7"
+    watchpack: "npm:2.4.2"
+  peerDependencies:
+    "@angular/compiler": ^19.0.0 || ^19.2.0-next.0
+    "@angular/compiler-cli": ^19.0.0 || ^19.2.0-next.0
+    "@angular/localize": ^19.0.0 || ^19.2.0-next.0
+    "@angular/platform-server": ^19.0.0 || ^19.2.0-next.0
+    "@angular/service-worker": ^19.0.0 || ^19.2.0-next.0
+    "@angular/ssr": ^19.2.12
+    karma: ^6.4.0
+    less: ^4.2.0
+    ng-packagr: ^19.0.0 || ^19.2.0-next.0
+    postcss: ^8.4.0
+    tailwindcss: ^2.0.0 || ^3.0.0 || ^4.0.0
+    typescript: ">=5.5 <5.9"
+  dependenciesMeta:
+    lmdb:
+      optional: true
+  peerDependenciesMeta:
+    "@angular/localize":
+      optional: true
+    "@angular/platform-server":
+      optional: true
+    "@angular/service-worker":
+      optional: true
+    "@angular/ssr":
+      optional: true
+    karma:
+      optional: true
+    less:
+      optional: true
+    ng-packagr:
+      optional: true
+    postcss:
+      optional: true
+    tailwindcss:
+      optional: true
+  checksum: 10c0/cb44b78dec4d0b4d7c9f9ee7f90580d3d9f7f2b3ad44f272efdd6636838cd1e59d22241da72bac37383029d46fa884d7b07a8a63cb8d7aaa60e1c68fec7d9dd9
   languageName: node
   linkType: hard
 
@@ -10807,7 +10906,7 @@ __metadata:
     "@angular-builders/custom-webpack": "npm:19.0.1"
     "@angular-devkit/build-angular": "npm:19.2.11"
     "@angular/animations": "npm:19.2.10"
-    "@angular/build": "npm:^19.2.11"
+    "@angular/build": "npm:^19.2.12"
     "@angular/cdk": "npm:19.2.15"
     "@angular/cli": "npm:19.2.11"
     "@angular/common": "npm:19.2.10"
