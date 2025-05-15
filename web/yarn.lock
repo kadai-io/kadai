@@ -66,16 +66,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular-devkit/architect@npm:0.1902.11":
-  version: 0.1902.11
-  resolution: "@angular-devkit/architect@npm:0.1902.11"
-  dependencies:
-    "@angular-devkit/core": "npm:19.2.11"
-    rxjs: "npm:7.8.1"
-  checksum: 10c0/a3c9027139ec1378a3ed488f648eb4ef430f2fa0c0460efd59f3d9ff480266f740cfbc748c337787730238102cd9fa470f1ac7c3c6ca9d996db416d2450849c5
-  languageName: node
-  linkType: hard
-
 "@angular-devkit/architect@npm:0.1902.12":
   version: 0.1902.12
   resolution: "@angular-devkit/architect@npm:0.1902.12"
@@ -345,25 +335,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular-devkit/core@npm:19.2.11":
-  version: 19.2.11
-  resolution: "@angular-devkit/core@npm:19.2.11"
-  dependencies:
-    ajv: "npm:8.17.1"
-    ajv-formats: "npm:3.0.1"
-    jsonc-parser: "npm:3.3.1"
-    picomatch: "npm:4.0.2"
-    rxjs: "npm:7.8.1"
-    source-map: "npm:0.7.4"
-  peerDependencies:
-    chokidar: ^4.0.0
-  peerDependenciesMeta:
-    chokidar:
-      optional: true
-  checksum: 10c0/472de1fd90f4d08094123026491c0676ba71266cd902e7403bd8bfa30fb0ecb7e469fc25c509a778eb56d363f6d5d2030c7ec86250a89437a1af6425528bf9f0
-  languageName: node
-  linkType: hard
-
 "@angular-devkit/core@npm:19.2.12":
   version: 19.2.12
   resolution: "@angular-devkit/core@npm:19.2.12"
@@ -548,9 +519,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/cdk@npm:19.2.15":
-  version: 19.2.15
-  resolution: "@angular/cdk@npm:19.2.15"
+"@angular/cdk@npm:19.2.16":
+  version: 19.2.16
+  resolution: "@angular/cdk@npm:19.2.16"
   dependencies:
     parse5: "npm:^7.1.2"
     tslib: "npm:^2.3.0"
@@ -558,7 +529,7 @@ __metadata:
     "@angular/common": ^19.0.0 || ^20.0.0
     "@angular/core": ^19.0.0 || ^20.0.0
     rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/dc83ed195722aede48b732933434df7fac4ba7acf0034a6fe26cc0b5872d9f634b47d20c431920921dd7cb02e126a52157aff0678a53aa877fcd308f2164c889
+  checksum: 10c0/11645ef945765ba138704efdb7d71f1a45afaa8f444d2ad004ae72f218dbbae8dff3d439d6e9eb5a2f44fe06ad45bd32654cc0f9914cf6687d089f3a64202cc6
   languageName: node
   linkType: hard
 
@@ -10837,7 +10808,7 @@ __metadata:
     "@angular-devkit/build-angular": "npm:19.2.12"
     "@angular/animations": "npm:19.2.10"
     "@angular/build": "npm:^19.2.12"
-    "@angular/cdk": "npm:19.2.15"
+    "@angular/cdk": "npm:19.2.16"
     "@angular/cli": "npm:19.2.12"
     "@angular/common": "npm:19.2.10"
     "@angular/compiler": "npm:19.2.10"
