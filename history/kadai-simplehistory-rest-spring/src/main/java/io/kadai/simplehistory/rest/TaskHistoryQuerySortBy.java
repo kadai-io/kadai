@@ -20,7 +20,7 @@ package io.kadai.simplehistory.rest;
 
 import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.rest.QuerySortBy;
-import io.kadai.simplehistory.impl.task.TaskHistoryQuery;
+import io.kadai.simplehistory.task.api.TaskHistoryQuery;
 import io.kadai.spi.history.api.events.task.TaskHistoryCustomField;
 import java.util.function.BiConsumer;
 

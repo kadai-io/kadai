@@ -25,8 +25,9 @@ import io.kadai.classification.api.models.ClassificationSummary;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
-import io.kadai.simplehistory.impl.SimpleHistoryServiceImpl;
-import io.kadai.spi.history.api.KadaiHistory;
+import io.kadai.simplehistory.task.internal.TaskHistoryEventPersister;
+import io.kadai.simplehistory.task.internal.TaskHistoryServiceImpl;
+import io.kadai.spi.history.api.KadaiEventConsumer;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
 import io.kadai.task.api.TaskService;
@@ -46,8 +47,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @KadaiIntegrationTest
 @WithServiceProvider(
-    serviceProviderInterface = KadaiHistory.class,
-    serviceProviders = SimpleHistoryServiceImpl.class)
+    serviceProviderInterface = KadaiEventConsumer.class,
+    serviceProviders = TaskHistoryEventPersister.class)
 @ExtendWith(JaasExtension.class)
 class CreateHistoryEventOnTaskDeletionAccTest {
   @KadaiInject KadaiEngine kadaiEngine;
@@ -60,7 +61,7 @@ class CreateHistoryEventOnTaskDeletionAccTest {
   Task task2;
   Task task3;
   Task task4;
-  SimpleHistoryServiceImpl historyService;
+  TaskHistoryServiceImpl historyService;
 
   @WithAccessId(user = "admin")
   @BeforeAll
@@ -77,7 +78,7 @@ class CreateHistoryEventOnTaskDeletionAccTest {
     task3 = createTask().state(TaskState.COMPLETED).buildAndStore(taskService);
     task4 = createTask().state(TaskState.COMPLETED).buildAndStore(taskService);
 
-    historyService = new SimpleHistoryServiceImpl();
+    historyService = new TaskHistoryServiceImpl();
     historyService.initialize(kadaiEngine);
   }
 
@@ -85,7 +86,7 @@ class CreateHistoryEventOnTaskDeletionAccTest {
   @Test
   void should_CreateDeleteHistoryEvent_When_TaskIsDeleted() throws Exception {
 
-    historyService.deleteHistoryEventsByTaskIds(List.of(task4.getId()));
+    historyService.deleteTaskHistoryEventsByTaskIds(List.of(task4.getId()));
 
     taskService.deleteTask(task4.getId());
 
@@ -98,7 +99,7 @@ class CreateHistoryEventOnTaskDeletionAccTest {
   @WithAccessId(user = "admin")
   @Test
   void should_CreateDeleteHistoryEvent_When_TaskIsForceDeleted() throws Exception {
-    historyService.deleteHistoryEventsByTaskIds(List.of(task1.getId()));
+    historyService.deleteTaskHistoryEventsByTaskIds(List.of(task1.getId()));
 
     taskService.forceDeleteTask(task1.getId());
 
@@ -112,7 +113,7 @@ class CreateHistoryEventOnTaskDeletionAccTest {
   @Test
   void should_CreateDeleteHistoryEvents_When_MultipleTasksAreDeleted() throws Exception {
     List<String> taskIds = List.of(task2.getId(), task3.getId());
-    historyService.deleteHistoryEventsByTaskIds(taskIds);
+    historyService.deleteTaskHistoryEventsByTaskIds(taskIds);
 
     taskService.deleteTasks(taskIds);
 
