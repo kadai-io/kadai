@@ -40,7 +40,7 @@ public interface UserQueryMapper {
       column = "USER_ID",
       many = @Many(select = "io.kadai.user.internal.UserMapper.findPermissionsById"))
   @Result(property = "firstName", column = "FIRST_NAME")
-  @Result(property = "lastName", column = "LASTNAME")
+  @Result(property = "lastName", column = "LAST_NAME")
   @Result(property = "fullName", column = "FULL_NAME")
   @Result(property = "longName", column = "LONG_NAME")
   @Result(property = "email", column = "E_MAIL")

@@ -31,8 +31,8 @@ public interface WorkbasketHistoryEventMapper {
   @Insert(
       "<script>INSERT INTO WORKBASKET_HISTORY_EVENT (ID,WORKBASKET_ID,"
           + " EVENT_TYPE, CREATED, USER_ID, DOMAIN, KEY, TYPE, OWNER, "
-          + " CUSTOM_1, CUSTOM_2, CUSTOM_3, CUSTOM_4, ORGLEVEL_1,"
-          + " ORGLEVEL_2, ORGLEVEL_3, ORGLEVEL_4, DETAILS)"
+          + " CUSTOM_1, CUSTOM_2, CUSTOM_3, CUSTOM_4, ORG_LEVEL_1,"
+          + " ORG_LEVEL_2, ORG_LEVEL_3, ORG_LEVEL_4, DETAILS)"
           + " VALUES ( #{historyEvent.id}, #{historyEvent.workbasketId},"
           + " #{historyEvent.eventType}, #{historyEvent.created}, #{historyEvent.userId},"
           + " #{historyEvent.domain}, #{historyEvent.key}, "
@@ -46,7 +46,7 @@ public interface WorkbasketHistoryEventMapper {
   @Select(
       "<script>"
           + "SELECT ID, WORKBASKET_ID, EVENT_TYPE, CREATED, USER_ID, DOMAIN, KEY, TYPE, OWNER,  "
-          + "CUSTOM_1, CUSTOM_2, CUSTOM_3, CUSTOM_4, ORGLEVEL_1, ORGLEVEL_2, ORGLEVEL_3, ORGLEVEL_4, DETAILS "
+          + "CUSTOM_1, CUSTOM_2, CUSTOM_3, CUSTOM_4, ORG_LEVEL_1, ORG_LEVEL_2, ORG_LEVEL_3, ORG_LEVEL_4, DETAILS "
           + "FROM WORKBASKET_HISTORY_EVENT WHERE ID = #{id} "
           + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
@@ -63,10 +63,10 @@ public interface WorkbasketHistoryEventMapper {
   @Result(property = "custom2", column = "CUSTOM_2")
   @Result(property = "custom3", column = "CUSTOM_3")
   @Result(property = "custom4", column = "CUSTOM_4")
-  @Result(property = "orgLevel1", column = "ORGLEVEL_1")
-  @Result(property = "orgLevel2", column = "ORGLEVEL_2")
-  @Result(property = "orgLevel3", column = "ORGLEVEL_3")
-  @Result(property = "orgLevel4", column = "ORGLEVEL_4")
+  @Result(property = "orgLevel1", column = "ORG_LEVEL_1")
+  @Result(property = "orgLevel2", column = "ORG_LEVEL_2")
+  @Result(property = "orgLevel3", column = "ORG_LEVEL_3")
+  @Result(property = "orgLevel4", column = "ORG_LEVEL_4")
   @Result(property = "details", column = "DETAILS")
   WorkbasketHistoryEvent findById(@Param("id") String id);
 }
