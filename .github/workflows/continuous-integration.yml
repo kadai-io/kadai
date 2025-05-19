@@ -357,6 +357,17 @@ jobs:
               mv temp_file "$file"
             fi
           done
+          
+          for file in $(find . -type f -name '*.scss'); do
+            if grep -q "Copyright \[$LAST_YEAR\] \[envite consulting GmbH\]" "$file"; then
+              echo "Updating copyright year in $file"
+              sed -i "s/Copyright \[$LAST_YEAR\] \[envite consulting GmbH\]/Copyright [$YEAR] [envite consulting GmbH]/" "$file"
+            elif ! grep -q -e "Copyright" -e "License" "$file"; then
+              echo "Adding copyright to $file"
+              cat LICENSE_HEADER_SCSS.txt "$file" > temp_file
+              mv temp_file "$file"
+            fi
+          done
 
       - name: Commit and push changes
         run: |
