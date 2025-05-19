@@ -327,7 +327,7 @@ jobs:
 
   add-copyright:
     runs-on: ubuntu-22.04
-    if: github.repository != 'kadai-io/kadai'
+    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
