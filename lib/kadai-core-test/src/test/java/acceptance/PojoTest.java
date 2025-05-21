@@ -27,7 +27,6 @@ import com.openpojo.validation.rule.impl.GetterMustExistRule;
 import com.openpojo.validation.rule.impl.NoPublicFieldsRule;
 import com.openpojo.validation.rule.impl.NoStaticExceptFinalRule;
 import com.openpojo.validation.rule.impl.SetterMustExistRule;
-import com.openpojo.validation.test.Tester;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import java.util.List;
@@ -119,10 +118,6 @@ class PojoTest {
 
   private void validateWithRules(Class<?> cl, Rule... rules) {
     ValidatorBuilder.create().with(rules).build().validate(PojoClassFactory.getPojoClass(cl));
-  }
-
-  private void validateWithTester(Class<?> cl, Tester... testers) {
-    ValidatorBuilder.create().with(testers).build().validate(PojoClassFactory.getPojoClass(cl));
   }
 
   private void verifyHashAndEquals(Class<?> cl) {
