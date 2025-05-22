@@ -595,12 +595,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/compiler@npm:19.2.11":
-  version: 19.2.11
-  resolution: "@angular/compiler@npm:19.2.11"
+"@angular/compiler@npm:19.2.12":
+  version: 19.2.12
+  resolution: "@angular/compiler@npm:19.2.12"
   dependencies:
     tslib: "npm:^2.3.0"
-  checksum: 10c0/90bb5bf83a64738fbdf1f277fb96a035956e4b2345f3e8cc2ec416ba1af8a248c7a83371f5e05408c30861935f5a8f901208111a5c9e7ceaedcf51f863c300cd
+  checksum: 10c0/76d6730341674154df14f9bf4c8787fdfdabd3b54f9acd079758beb324a84379933879f352cc58f9fbf91664a7c920ce402f834ef16a1da6515603d1552dd27c
   languageName: node
   linkType: hard
 
@@ -10643,7 +10643,7 @@ __metadata:
     "@angular/cdk": "npm:19.2.17"
     "@angular/cli": "npm:19.2.13"
     "@angular/common": "npm:19.2.11"
-    "@angular/compiler": "npm:19.2.11"
+    "@angular/compiler": "npm:19.2.12"
     "@angular/compiler-cli": "npm:19.2.12"
     "@angular/core": "npm:19.2.12"
     "@angular/forms": "npm:19.2.11"
