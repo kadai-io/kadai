@@ -34,7 +34,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -140,7 +139,6 @@ class TaskHistoryEventControllerIntTest {
   }
 
   @Test
-  @Disabled("Jörg pls fix this")
   void should_ReturnBadStatusErrorCode_When_CreatedQueryParameterIsWrongFormatted() {
     String currentTime = "wrong format";
     ThrowingCallable httpCall =
