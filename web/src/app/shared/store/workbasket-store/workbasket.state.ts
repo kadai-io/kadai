@@ -60,6 +60,8 @@ import { inject, Injectable } from '@angular/core';
 import { WorkbasketQueryPagingParameter } from '../../models/workbasket-query-paging-parameter';
 import { Side } from '../../../administration/models/workbasket-distribution-enums';
 import { cloneDeep } from 'lodash';
+import { catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 
 class InitializeStore {
   static readonly type = '[Workbasket] Initializing state';
@@ -386,34 +388,38 @@ export class WorkbasketState implements NgxsAfterBootstrap {
       )
       .pipe(
         take(1),
-        tap({
-          next: (updatedWorkbasketsDistributionTargets) => {
-            ctx.patchState({
-              workbasketDistributionTargets: updatedWorkbasketsDistributionTargets
-            });
-            const workbasketId = ctx.getState().selectedWorkbasket?.workbasketId;
-
-            if (typeof workbasketId !== 'undefined') {
-              this.workbasketService.getWorkBasket(workbasketId).subscribe((selectedWorkbasket) => {
+        tap((updatedWorkbasketsDistributionTargets) => {
+          ctx.patchState({
+            workbasketDistributionTargets: updatedWorkbasketsDistributionTargets
+          });
+        }),
+        concatMap(() => {
+          const workbasketId = ctx.getState().selectedWorkbasket?.workbasketId;
+          if (typeof workbasketId !== 'undefined') {
+            return this.workbasketService.getWorkBasket(workbasketId).pipe(
+              tap((selectedWorkbasket) => {
                 ctx.patchState({
                   selectedWorkbasket,
                   action: ACTION.READ
                 });
                 ctx.dispatch(new ClearWorkbasketFilter('selectedDistributionTargets'));
                 ctx.dispatch(new ClearWorkbasketFilter('availableDistributionTargets'));
-              });
-            }
-            this.requestInProgressService.setRequestInProgress(false);
-            this.notificationService.showSuccess('WORKBASKET_DISTRIBUTION_TARGET_SAVE', {
-              workbasketName: ctx.getState().selectedWorkbasket.name
-            });
-            ctx.dispatch(new FetchAvailableDistributionTargets(true));
-            ctx.dispatch(new FetchWorkbasketDistributionTargets(true));
-            return of(null);
-          },
-          error: () => {
-            this.requestInProgressService.setRequestInProgress(false);
+              })
+            );
           }
+          return of(null);
+        }),
+        tap(() => {
+          this.requestInProgressService.setRequestInProgress(false);
+          this.notificationService.showSuccess('WORKBASKET_DISTRIBUTION_TARGET_SAVE', {
+            workbasketName: ctx.getState().selectedWorkbasket.name
+          });
+          ctx.dispatch(new FetchAvailableDistributionTargets(true));
+          ctx.dispatch(new FetchWorkbasketDistributionTargets(true));
+        }),
+        catchError((error) => {
+          this.requestInProgressService.setRequestInProgress(false);
+          return throwError(() => error);
         })
       );
   }
