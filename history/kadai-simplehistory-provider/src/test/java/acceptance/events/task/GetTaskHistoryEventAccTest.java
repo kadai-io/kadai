@@ -42,7 +42,7 @@ class GetTaskHistoryEventAccTest extends AbstractAccTest {
             + "\"oldValue\":\"owner1\"}]}";
 
     TaskHistoryEvent taskHistoryEvent =
-        getHistoryService().getTaskHistoryEvent("THI:000000000000000000000000000000000000");
+        taskHistoryService.getTaskHistoryEvent("THI:000000000000000000000000000000000000");
     assertThat(taskHistoryEvent.getBusinessProcessId()).isEqualTo("BPI:01");
     assertThat(taskHistoryEvent.getUserId()).isEqualTo("user-1-1");
     assertThat(taskHistoryEvent.getEventType()).isEqualTo(TaskHistoryEventType.UPDATED.getName());
@@ -55,7 +55,7 @@ class GetTaskHistoryEventAccTest extends AbstractAccTest {
     createKadaiEngineWithNewConfig(true);
 
     TaskHistoryEvent taskHistoryEvent =
-        getHistoryService().getTaskHistoryEvent("THI:000000000000000000000000000000000000");
+        taskHistoryService.getTaskHistoryEvent("THI:000000000000000000000000000000000000");
     assertThat(taskHistoryEvent.getUserId()).isEqualTo("user-1-1");
 
     String userLongName =
@@ -71,7 +71,7 @@ class GetTaskHistoryEventAccTest extends AbstractAccTest {
     createKadaiEngineWithNewConfig(false);
 
     TaskHistoryEvent taskHistoryEvent =
-        getHistoryService().getTaskHistoryEvent("THI:000000000000000000000000000000000000");
+        taskHistoryService.getTaskHistoryEvent("THI:000000000000000000000000000000000000");
 
     assertThat(taskHistoryEvent.getUserId()).isEqualTo("user-1-1");
 
