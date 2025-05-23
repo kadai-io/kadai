@@ -1,6 +1,6 @@
 -- sample-data is used for rest tests and for the example application
 
--- USER_INFO TABLE          (USER_ID          , FIRST_NAME , LASTNAME      , FULL_NAME          , LONG_NAME                            , E_MAIL                    , PHONE         , MOBILE_PHONE      , ORG_LEVEL_4   , ORG_LEVEL_3   , ORG_LEVEL_2        , ORG_LEVEL_1   , DATA
+-- USER_INFO TABLE          (USER_ID          , FIRST_NAME , LAST_NAME     , FULL_NAME          , LONG_NAME                            , E_MAIL                    , PHONE         , MOBILE_PHONE      , ORG_LEVEL_4   , ORG_LEVEL_3   , ORG_LEVEL_2        , ORG_LEVEL_1   , DATA
 insert into USER_INFO values('teamlead-1'     , 'Titus'    , 'Toll'        , 'Toll, Titus'      , 'Toll, Titus - (teamlead-1)'         , 'titus.toll@web.de'       , '040-2951854' , '015637683197'    , 'Envite'     , 'BPM'         , 'Human Workflow'   , 'KADAI'     , 'xy'  );
 insert into USER_INFO values('user-1-1'       , 'Max'      , 'Mustermann'  , 'Mustermann, Max'  , 'Mustermann, Max - (user-1-1)'       , 'max.mustermann@web.de'   , '040-2951854' , '015637683197'    , 'Envite'     , 'BPM'         , 'Human Workflow'   , 'KADAI'     , ''    );
 insert into USER_INFO values('user-1-2'       , 'Elena'    , 'Eifrig'      , 'Eifrig, Elena'    , 'Eifrig, Elena - (user-1-2)'         , 'elena.eifrig@web.de'     , '040-2951854' , '015637683197'    , 'Envite'     , 'BPM'         , 'Human Workflow'   , 'KADAI'     , ''    );

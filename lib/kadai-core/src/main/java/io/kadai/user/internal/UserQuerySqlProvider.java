@@ -31,7 +31,7 @@ public class UserQuerySqlProvider {
   @SuppressWarnings("unused")
   public static String queryUsers() {
     return OPENING_SCRIPT_TAG
-        + "SELECT USER_ID, FIRST_NAME, LASTNAME, FULL_NAME, LONG_NAME, E_MAIL, PHONE, "
+        + "SELECT USER_ID, FIRST_NAME, LAST_NAME, FULL_NAME, LONG_NAME, E_MAIL, PHONE, "
         + "MOBILE_PHONE, ORG_LEVEL_4, ORG_LEVEL_3, ORG_LEVEL_2, ORG_LEVEL_1, DATA "
         + "FROM USER_INFO "
         + OPENING_WHERE_TAG
