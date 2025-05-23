@@ -10686,7 +10686,7 @@ __metadata:
     tslint: "npm:6.1.3"
     typescript: "npm:5.8.3"
     webpack: "npm:5.99.9"
-    zone.js: "npm:0.15.0"
+    zone.js: "npm:0.15.1"
   languageName: unknown
   linkType: soft
 
@@ -15444,9 +15444,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zone.js@npm:0.15.0":
-  version: 0.15.0
-  resolution: "zone.js@npm:0.15.0"
-  checksum: 10c0/981b664c1978759a2854f6e6692d245d1d6334c6b20b7e2e5fa9b60eed74743b29c6a71f7472dc6d2790ab53d67e30475bcd92b9f7664e50aef8bbcd40379552
+"zone.js@npm:0.15.1":
+  version: 0.15.1
+  resolution: "zone.js@npm:0.15.1"
+  checksum: 10c0/4eca000f90dbea1c34f62e88ce56910dace8cdecbe14747b214f2af37aa511264c7bd50faf3e9b00612e95dc4567da156a9690fef1983bfcf74604a630d190ef
   languageName: node
   linkType: hard
