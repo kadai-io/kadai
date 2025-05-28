@@ -46,5 +46,5 @@ DO $$
     BEGIN
         ALTER TABLE USER_INFO RENAME COLUMN LASTNAME TO LAST_NAME;
     EXCEPTION
-        WHEN undefined_column THEN RAISE NOTICE 'Column LAST_NAME does not exist';
+        WHEN undefined_column THEN RAISE NOTICE 'Column LASTNAME does not exist';
 END $$;
