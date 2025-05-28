@@ -118,7 +118,7 @@ public interface TaskHistoryQueryMapper {
 
   @Select(
       "<script>"
-          + "SELECT COUNT(ID) "
+          + "SELECT COUNT(*) "
           + "FROM TASK_HISTORY_EVENT"
           + "<where>"
           // IN-Queries

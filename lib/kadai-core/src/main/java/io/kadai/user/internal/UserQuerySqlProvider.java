@@ -55,7 +55,7 @@ public class UserQuerySqlProvider {
   @SuppressWarnings("unused")
   public static String countQueryUsers() {
     return OPENING_SCRIPT_TAG
-        + "SELECT COUNT(USER_ID) FROM USER_INFO "
+        + "SELECT COUNT(*) FROM USER_INFO "
         + OPENING_WHERE_TAG
         + "<if test='idIn != null'>AND USER_ID IN"
         + "(<foreach item='item' collection='idIn' separator=',' >#{item}</foreach>)</if> "
