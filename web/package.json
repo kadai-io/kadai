@@ -54,7 +54,7 @@
     "@angular/build": "^20.0.0",
     "@angular/cli": "20.0.0",
     "@angular/compiler": "19.2.13",
-    "@angular/compiler-cli": "19.2.13",
+    "@angular/compiler-cli": "20.0.0",
     "@ngxs/devtools-plugin": "19.0.0",
     "@types/jest": "29.5.14",
     "@types/lodash": "4.17.17",
