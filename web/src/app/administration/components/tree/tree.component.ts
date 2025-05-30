@@ -37,7 +37,7 @@ import { filter, map, takeUntil } from 'rxjs/operators';
 import { Select, Store } from '@ngxs/store';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 
-import { Location, NgIf } from '@angular/common';
+import { Location } from '@angular/common';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import { Classification } from '../../../shared/models/classification';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
@@ -58,7 +58,7 @@ import { MatTooltip } from '@angular/material/tooltip';
   selector: 'kadai-administration-tree',
   templateUrl: './tree.component.html',
   styleUrls: ['./tree.component.scss'],
-  imports: [NgIf, TreeModule, SvgIconComponent, MatTooltip]
+  imports: [TreeModule, SvgIconComponent, MatTooltip]
 })
 export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
   treeNodes: TreeNodeModel[];

@@ -53,7 +53,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { WorkbasketAccessItemQueryFilterParameter } from '../../../shared/models/workbasket-access-item-query-filter-parameter';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { TypeAheadComponent } from '../../../shared/components/type-ahead/type-ahead.component';
-import { AsyncPipe, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { SvgIconComponent } from 'angular-svg-icon';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import {
@@ -82,7 +82,6 @@ import { MatIcon } from '@angular/material/icon';
   styleUrls: ['./access-items-management.component.scss'],
   imports: [
     TypeAheadComponent,
-    NgIf,
     SvgIconComponent,
     MatExpansionPanel,
     MatExpansionPanelHeader,
@@ -99,7 +98,6 @@ import { MatIcon } from '@angular/material/icon';
     MatRow,
     FormsModule,
     ReactiveFormsModule,
-    NgFor,
     SortComponent,
     MatFormField,
     MatLabel,

@@ -31,7 +31,7 @@ import { NotificationService } from '../../../shared/services/notifications/noti
 import { take, takeUntil } from 'rxjs/operators';
 import { trimObject } from '../../../shared/util/form-trimmer';
 import { ObjectReference } from '../../models/object-reference';
-import { NgIf } from '@angular/common';
+
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
@@ -47,7 +47,6 @@ import { TaskAttributeValueComponent } from '../task-attribute-value/task-attrib
   templateUrl: './task-details.component.html',
   styleUrls: ['./task-details.component.scss'],
   imports: [
-    NgIf,
     MatButton,
     MatTooltip,
     MatIcon,

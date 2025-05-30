@@ -41,7 +41,7 @@
               </outputDirectory>
               <resources>
                 <resource>
-                  <directory>dist</directory>
+                  <directory>dist/browser</directory>
                 </resource>
               </resources>
             </configuration>

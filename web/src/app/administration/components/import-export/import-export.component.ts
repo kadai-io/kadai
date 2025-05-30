@@ -31,7 +31,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { AsyncPipe, NgFor } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 
 /**
  * Recommendation: Turn this component into presentational component - no logic, instead events are
@@ -42,7 +42,7 @@ import { AsyncPipe, NgFor } from '@angular/common';
   selector: 'kadai-administration-import-export',
   templateUrl: './import-export.component.html',
   styleUrls: ['./import-export.component.scss'],
-  imports: [MatButton, MatTooltip, MatIcon, FormsModule, MatMenuTrigger, MatMenu, MatMenuItem, NgFor, AsyncPipe]
+  imports: [MatButton, MatTooltip, MatIcon, FormsModule, MatMenuTrigger, MatMenu, MatMenuItem, AsyncPipe]
 })
 export class ImportExportComponent implements OnInit, OnDestroy {
   @Input() currentSelection: KadaiType;

@@ -78,6 +78,6 @@ describe('TaskPriorityReportFilterComponent', () => {
     const emitSpy = jest.spyOn(component.applyFilter, 'emit');
     component.activeFilters = ['Tasks with state READY'];
     component.emitFilter(true, 'Tasks with state CLAIMED');
-    expect(emitSpy).toBeCalledWith({ state: ['READY', 'CLAIMED'] });
+    expect(emitSpy).toHaveBeenCalledWith({ state: ['READY', 'CLAIMED'] });
   });
 });

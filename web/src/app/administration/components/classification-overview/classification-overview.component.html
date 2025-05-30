@@ -1,35 +1,36 @@
 <!--
-  ~ Copyright [2025] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2025] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
 <div class="classification-overview">
 
   <kadai-administration-classification-list></kadai-administration-classification-list>
   <div class="vertical-right-divider"></div>
-  <kadai-administration-classification-details
-    *ngIf="showDetail; else showEmptyPage"></kadai-administration-classification-details>
-
-  <ng-template #showEmptyPage>
+  @if (showDetail) {
+    <kadai-administration-classification-details
+    ></kadai-administration-classification-details>
+  } @else {
     <div class="classification-overview__empty-page">
       <div class="center-block no-detail">
         <h3 class="grey select-classification">Select a classification</h3>
         <svg-icon class="img-responsive empty-icon"
-                  src="./assets/icons/classification-empty.svg"></svg-icon>
+        src="./assets/icons/classification-empty.svg"></svg-icon>
       </div>
     </div>
-  </ng-template>
+  }
+
 </div>

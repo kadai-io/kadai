@@ -22,14 +22,14 @@ import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.ser
 import { MonitorRoles } from '../../roles/monitor.roles';
 import { UserRoles } from '../../roles/user.roles';
 import { BusinessAdminRoles } from '../../roles/business-admin.roles';
-import { NgIf } from '@angular/common';
+
 import { SvgIconComponent } from 'angular-svg-icon';
 
 @Component({
   selector: 'kadai-shared-no-access',
   templateUrl: './no-access.component.html',
   styleUrls: ['./no-access.component.scss'],
-  imports: [NgIf, SvgIconComponent]
+  imports: [SvgIconComponent]
 })
 export class NoAccessComponent implements OnInit {
   router = inject(Router);
