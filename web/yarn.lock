@@ -535,17 +535,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/cdk@npm:19.2.17":
-  version: 19.2.17
-  resolution: "@angular/cdk@npm:19.2.17"
+"@angular/cdk@npm:20.0.1":
+  version: 20.0.1
+  resolution: "@angular/cdk@npm:20.0.1"
   dependencies:
     parse5: "npm:^7.1.2"
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/common": ^19.0.0 || ^20.0.0
-    "@angular/core": ^19.0.0 || ^20.0.0
+    "@angular/common": ^20.0.0 || ^21.0.0
+    "@angular/core": ^20.0.0 || ^21.0.0
     rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/1a8ad9dc0ff7700675be5fbbe22f79a9de5053ad321f911fb721fc4f9e50c09fe7c80e94465eb2690be189bd0062518d65b7b180c7b5cd9eadf2f071e138d199
+  checksum: 10c0/01de2c39222e07c9b93210f77e8830b43f57b593e152908375b9dba39352f784af5ec35ed1821ee342014e1264037af42405468654a7e7b5e34cdc180b1b3a7c
   languageName: node
   linkType: hard
 
@@ -653,19 +653,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/material@npm:19.2.17":
-  version: 19.2.17
-  resolution: "@angular/material@npm:19.2.17"
+"@angular/material@npm:20.0.1":
+  version: 20.0.1
+  resolution: "@angular/material@npm:20.0.1"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/cdk": 19.2.17
-    "@angular/common": ^19.0.0 || ^20.0.0
-    "@angular/core": ^19.0.0 || ^20.0.0
-    "@angular/forms": ^19.0.0 || ^20.0.0
-    "@angular/platform-browser": ^19.0.0 || ^20.0.0
+    "@angular/cdk": 20.0.1
+    "@angular/common": ^20.0.0 || ^21.0.0
+    "@angular/core": ^20.0.0 || ^21.0.0
+    "@angular/forms": ^20.0.0 || ^21.0.0
+    "@angular/platform-browser": ^20.0.0 || ^21.0.0
     rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/122094b35c1c664f986d5df52afd94befd821d9e834211d39a87ab69e04ea0c1091f63446a6d5caabdded8bdc011b50cb45f1e7d378980e9df7f5b08b5f92457
+  checksum: 10c0/fb1c1e32eed6eaa4a44b4b5492360c87b3d976d078216d39008bd5f3a761d56b6833450e437e8d332fa6caedb7aafec8d16becdf9c65d3194c0920b18b43b23e
   languageName: node
   linkType: hard
 
@@ -11287,14 +11287,14 @@ __metadata:
     "@angular-devkit/build-angular": "npm:20.0.0"
     "@angular/animations": "npm:20.0.0"
     "@angular/build": "npm:^20.0.0"
-    "@angular/cdk": "npm:19.2.17"
+    "@angular/cdk": "npm:20.0.1"
     "@angular/cli": "npm:20.0.0"
     "@angular/common": "npm:20.0.0"
     "@angular/compiler": "npm:20.0.0"
     "@angular/compiler-cli": "npm:20.0.0"
     "@angular/core": "npm:20.0.0"
     "@angular/forms": "npm:20.0.0"
-    "@angular/material": "npm:19.2.17"
+    "@angular/material": "npm:20.0.1"
     "@angular/platform-browser": "npm:20.0.0"
     "@angular/platform-browser-dynamic": "npm:20.0.0"
     "@angular/router": "npm:20.0.0"
