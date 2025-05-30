@@ -31,7 +31,7 @@ import { WorkbasketService } from '../../../shared/services/workbasket/workbaske
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import { NgIf } from '@angular/common';
+
 import { ImportExportComponent } from '../import-export/import-export.component';
 import { SortComponent } from '../../../shared/components/sort/sort.component';
 import { WorkbasketFilterComponent } from '../../../shared/components/workbasket-filter/workbasket-filter.component';
@@ -41,7 +41,7 @@ import { WorkbasketFilterComponent } from '../../../shared/components/workbasket
   animations: [expandDown],
   templateUrl: './workbasket-list-toolbar.component.html',
   styleUrls: ['./workbasket-list-toolbar.component.scss'],
-  imports: [MatButton, MatTooltip, MatIcon, NgIf, ImportExportComponent, SortComponent, WorkbasketFilterComponent]
+  imports: [MatButton, MatTooltip, MatIcon, ImportExportComponent, SortComponent, WorkbasketFilterComponent]
 })
 export class WorkbasketListToolbarComponent implements OnInit {
   @Input() workbasketListExpanded: boolean = true;

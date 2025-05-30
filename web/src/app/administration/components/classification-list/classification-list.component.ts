@@ -26,7 +26,7 @@ import { ImportExportService } from 'app/administration/services/import-export.s
 import { KadaiType } from 'app/shared/models/kadai-type';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
-import { AsyncPipe, Location, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe, Location } from '@angular/common';
 import { ClassificationCategoryImages } from '../../../shared/models/customisation';
 
 import {
@@ -59,11 +59,9 @@ import { KadaiTreeComponent } from '../tree/tree.component';
     MatIcon,
     ImportExportComponent,
     MatMenuTrigger,
-    NgIf,
     SvgIconComponent,
     MatMenu,
     MatMenuItem,
-    NgFor,
     MatFormField,
     MatLabel,
     MatInput,

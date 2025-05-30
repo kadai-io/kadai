@@ -21,13 +21,13 @@ import { MetaInfoData } from '../../models/meta-info-data';
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import { WorkbasketReportDueDateComponent } from '../workbasket-report-due-date/workbasket-report-due-date.component';
 import { WorkbasketReportPlannedDateComponent } from '../workbasket-report-planned-date/workbasket-report-planned-date.component';
-import { DatePipe, NgIf } from '@angular/common';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'kadai-monitor-workbasket-report',
   templateUrl: './workbasket-report.component.html',
   styleUrls: ['./workbasket-report.component.scss'],
-  imports: [MatTabGroup, MatTab, WorkbasketReportDueDateComponent, WorkbasketReportPlannedDateComponent, NgIf, DatePipe]
+  imports: [MatTabGroup, MatTab, WorkbasketReportDueDateComponent, WorkbasketReportPlannedDateComponent, DatePipe]
 })
 export class WorkbasketReportComponent {
   metaInformation: MetaInfoData;

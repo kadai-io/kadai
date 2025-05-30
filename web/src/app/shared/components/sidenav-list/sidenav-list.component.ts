@@ -25,13 +25,12 @@ import { MonitorRoles } from '../../roles/monitor.roles';
 import { UserRoles } from '../../roles/user.roles';
 import { BusinessAdminRoles } from '../../roles/business-admin.roles';
 import { MatListItem, MatNavList } from '@angular/material/list';
-import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'kadai-sidenav-list',
   templateUrl: './sidenav-list.component.html',
   styleUrls: ['./sidenav-list.component.scss'],
-  imports: [MatNavList, NgIf, MatListItem, RouterLinkActive, RouterLink]
+  imports: [MatNavList, MatListItem, RouterLinkActive, RouterLink]
 })
 export class SidenavListComponent implements OnInit {
   toggle: boolean = false;

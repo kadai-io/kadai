@@ -1,84 +1,77 @@
 <!--
-  ~ Copyright [2025] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2025] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
 <div class="task-attribute-value">
 
   <!-- ATTRIBUTE VALUE TABLE -->
-  <div *ngIf="attributes.length > 0; else noAttributes" class="task-attribute-value__table">
-
-    <!-- HEADER -->
-    <div class="task-attribute-value__row">
-      <div class="task-attribute-value__header"> Attribute</div>
-      <div class="task-attribute-value__header"> Value</div>
-    </div>
-
-    <mat-divider></mat-divider>
-
-    <!-- ENTRIES -->
-    <div *ngFor="let entry of attributes; let i = index">
-
-      <div
-        class="task-attribute-value__row {{(i % 2 === 0)? 'task-attribute-value__background-grey' : 'task-attribute-value__background-white'}}">
-
-        <!-- REMOVE BUTTON -->
-        <div class="task-attribute-value__column--button">
-          <button (click)="removeAttribute(i)" color="warn"
-                  mat-stroked-button
-                  matTooltip="Remove attribute">
-            <mat-icon class="task-attribute-value__mat-icon">clear</mat-icon>
-          </button>
-        </div>
-
-        <!-- ATTRIBUTE INPUT -->
-        <div class="task-attribute-value__column--inputs">
-          <mat-form-field appearance="outline" style="width: 100%">
-            <input [(ngModel)]="entry.key" matInput
-                   name="{{callbackInfo ? 'callback-info' : 'custom-attribute'}}-{{i}}"
-                   type="text">
-          </mat-form-field>
-        </div>
-
-        <!-- VALUE INPUT -->
-        <div class="task-attribute-value__column--inputs">
-          <mat-form-field appearance="outline" style="width: 100%">
-            <input [(ngModel)]="entry.value" matInput
-                   name="{{callbackInfo ? 'callback-info' : 'custom-attribute'}}-{{i}}-val"
-                   type="text">
-          </mat-form-field>
-        </div>
-
+  @if (attributes.length > 0) {
+    <div class="task-attribute-value__table">
+      <!-- HEADER -->
+      <div class="task-attribute-value__row">
+        <div class="task-attribute-value__header"> Attribute</div>
+        <div class="task-attribute-value__header"> Value</div>
       </div>
+      <mat-divider></mat-divider>
+      <!-- ENTRIES -->
+      @for (entry of attributes; track entry; let i = $index) {
+        <div>
+          <div
+            class="task-attribute-value__row {{(i % 2 === 0)? 'task-attribute-value__background-grey' : 'task-attribute-value__background-white'}}">
+            <!-- REMOVE BUTTON -->
+            <div class="task-attribute-value__column--button">
+              <button (click)="removeAttribute(i)" color="warn"
+                mat-stroked-button
+                matTooltip="Remove attribute">
+                <mat-icon class="task-attribute-value__mat-icon">clear</mat-icon>
+              </button>
+            </div>
+            <!-- ATTRIBUTE INPUT -->
+            <div class="task-attribute-value__column--inputs">
+              <mat-form-field appearance="outline" style="width: 100%">
+                <input [(ngModel)]="entry.key" matInput
+                  name="{{callbackInfo ? 'callback-info' : 'custom-attribute'}}-{{i}}"
+                  type="text">
+              </mat-form-field>
+            </div>
+            <!-- VALUE INPUT -->
+            <div class="task-attribute-value__column--inputs">
+              <mat-form-field appearance="outline" style="width: 100%">
+                <input [(ngModel)]="entry.value" matInput
+                  name="{{callbackInfo ? 'callback-info' : 'custom-attribute'}}-{{i}}-val"
+                  type="text">
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+      }
     </div>
-
-
-  </div>
+  } @else {
+    <div> There is currently no {{ callbackInfo ? 'callback information' : 'custom attribute' }}.
+    </div>
+  }
 
 
   <!-- NO CUSTOM ATTRIBUTE OR CALLBACK INFORMATION -->
-  <ng-template #noAttributes>
-    <div> There is currently no {{ callbackInfo ? 'callback information' : 'custom attribute' }}.
-    </div>
-  </ng-template>
 
 
   <!-- ADD BUTTON -->
   <button (click)="addAttribute()" class="task-attribute-value__button--primary"
-          mat-flat-button>
+    mat-flat-button>
     <span> Add {{ callbackInfo ? 'callback information' : 'custom attribute' }} </span>
     <mat-icon>add</mat-icon>
   </button>

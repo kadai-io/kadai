@@ -31,14 +31,14 @@ import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
-import { NgFor, NgIf } from '@angular/common';
+
 import { MatDivider } from '@angular/material/divider';
 
 @Component({
   selector: 'kadai-task-processing',
   templateUrl: './task-processing.component.html',
   styleUrls: ['./task-processing.component.scss'],
-  imports: [MatButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, NgFor, MatMenuItem, MatDivider, NgIf]
+  imports: [MatButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatDivider]
 })
 export class TaskProcessingComponent implements OnInit, OnDestroy {
   routeSubscription: Subscription;

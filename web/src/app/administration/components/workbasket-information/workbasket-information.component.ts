@@ -42,7 +42,7 @@ import { ButtonAction } from '../../models/button-action';
 import { AccessId } from '../../../shared/models/access-id';
 import { cloneDeep } from 'lodash';
 import { trimForm } from '../../../shared/util/form-trimmer';
-import { AsyncPipe, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { MatDivider } from '@angular/material/divider';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -60,7 +60,6 @@ import { RemoveNoneTypePipe } from '../../../shared/pipes/remove-empty-type.pipe
   templateUrl: './workbasket-information.component.html',
   styleUrls: ['./workbasket-information.component.scss'],
   imports: [
-    NgIf,
     FormsModule,
     MatDivider,
     MatFormField,
@@ -71,7 +70,6 @@ import { RemoveNoneTypePipe } from '../../../shared/pipes/remove-empty-type.pipe
     MatSelect,
     MatSelectTrigger,
     IconTypeComponent,
-    NgFor,
     MatOption,
     CdkTextareaAutosize,
     MatError,

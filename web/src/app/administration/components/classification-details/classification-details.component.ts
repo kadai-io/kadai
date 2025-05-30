@@ -31,7 +31,7 @@ import { ImportExportService } from 'app/administration/services/import-export.s
 import { map, take, takeUntil } from 'rxjs/operators';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
-import { AsyncPipe, Location, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe, Location } from '@angular/common';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { ClassificationCategoryImages, CustomField, getCustomFields } from '../../../shared/models/customisation';
 import { Classification } from '../../../shared/models/classification';
@@ -68,7 +68,6 @@ import { MatOption } from '@angular/material/core';
   animations: [highlight],
   styleUrls: ['./classification-details.component.scss'],
   imports: [
-    NgIf,
     MatToolbar,
     MatTooltip,
     MatButton,
@@ -86,7 +85,6 @@ import { MatOption } from '@angular/material/core';
     MatSelect,
     MatSelectTrigger,
     SvgIconComponent,
-    NgFor,
     MatOption,
     AsyncPipe
   ]
