@@ -745,17 +745,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/platform-browser-dynamic@npm:19.2.13":
-  version: 19.2.13
-  resolution: "@angular/platform-browser-dynamic@npm:19.2.13"
+"@angular/platform-browser-dynamic@npm:19.2.14":
+  version: 19.2.14
+  resolution: "@angular/platform-browser-dynamic@npm:19.2.14"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/common": 19.2.13
-    "@angular/compiler": 19.2.13
-    "@angular/core": 19.2.13
-    "@angular/platform-browser": 19.2.13
-  checksum: 10c0/44271aa2a5177bbb764a741586b6905388f85237a8a563ede94af1e2f46ed800f1a76212abdf15abd5b3c9e69753839707dd445d9ace86d45f48ca7472026c77
+    "@angular/common": 19.2.14
+    "@angular/compiler": 19.2.14
+    "@angular/core": 19.2.14
+    "@angular/platform-browser": 19.2.14
+  checksum: 10c0/f2356e90c2358bf5f7356e0caf9201c5f1cd59816917a8372e44c9e01744bb214282812ded9b1e288b3ba4692e52d04c5cfb4d9444476c59fd05c1ce51c17d36
   languageName: node
   linkType: hard
 
@@ -10770,7 +10770,7 @@ __metadata:
     "@angular/forms": "npm:19.2.13"
     "@angular/material": "npm:19.2.18"
     "@angular/platform-browser": "npm:19.2.13"
-    "@angular/platform-browser-dynamic": "npm:19.2.13"
+    "@angular/platform-browser-dynamic": "npm:19.2.14"
     "@angular/router": "npm:19.2.13"
     "@ngneat/hot-toast": "npm:7.0.0"
     "@ngneat/overview": "npm:6.1.2"
