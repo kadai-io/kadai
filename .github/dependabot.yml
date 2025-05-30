@@ -32,12 +32,12 @@ updates:
       timezone: Europe/Berlin
     open-pull-requests-limit: 99
     ignore:
-      - dependency-name: "@angular/*"
+      - dependency-name: "@angular*"
         update-types: ["version-update:semver-major"]
     groups:
       angular-minor-updates:
         patterns:
-          - "@angular/*"
+          - "@angular*"
         update-types:
           - "minor"
           - "patch"
