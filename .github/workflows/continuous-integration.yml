@@ -14,7 +14,7 @@ concurrency:
 
 env:
   JAVA_VERSION: 17
-  NODE_VERSION: 22.7.0
+  NODE_VERSION: 22.16.x
 
   ARTIFACTS_CYPRESS_TESTS_NAME: cypress-tests
   ARTIFACTS_CYPRESS_TESTS_PATH: web/cypress
