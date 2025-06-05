@@ -49,7 +49,7 @@ import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.jaasapi.JaasApiIntegrationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 /** Default basic configuration for kadai web example. */
 @Configuration
@@ -180,7 +180,8 @@ public class BootWebSecurityConfigurer {
                 logout
                     .invalidateHttpSession(true)
                     .clearAuthentication(true)
-                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                    .logoutRequestMatcher(
+                        PathPatternRequestMatcher.withDefaults().matcher("/logout"))
                     .logoutSuccessUrl("/login?logout")
                     .deleteCookies("JSESSIONID")
                     .permitAll());
