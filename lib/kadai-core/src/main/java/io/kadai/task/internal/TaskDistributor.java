@@ -22,6 +22,7 @@ import io.kadai.common.api.BulkOperationResults;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.internal.InternalKadaiEngine;
+import io.kadai.common.internal.util.Pair;
 import io.kadai.spi.task.api.TaskDistributionProvider;
 import io.kadai.spi.task.internal.TaskDistributionManager;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
@@ -33,6 +34,7 @@ import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import io.kadai.workbasket.api.exceptions.WorkbasketNotFoundException;
 import io.kadai.workbasket.api.models.Workbasket;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,9 +65,7 @@ public class TaskDistributor {
       List<String> destinationWorkbasketIds,
       String distributionStrategyName,
       Map<String, Object> additionalInformation)
-      throws NotAuthorizedOnWorkbasketException,
-          WorkbasketNotFoundException,
-          TaskNotFoundException {
+      throws NotAuthorizedOnWorkbasketException, WorkbasketNotFoundException {
 
     return distributeTasks(
         sourceWorkbasketId,
@@ -80,9 +80,7 @@ public class TaskDistributor {
       List<String> destinationWorkbasketIds,
       String distributionStrategyName,
       Map<String, Object> additionalInformation)
-      throws NotAuthorizedOnWorkbasketException,
-          WorkbasketNotFoundException,
-          TaskNotFoundException {
+      throws NotAuthorizedOnWorkbasketException, WorkbasketNotFoundException {
 
     return distributeTasks(
         sourceWorkbasketId,
@@ -93,18 +91,14 @@ public class TaskDistributor {
   }
 
   public BulkOperationResults<String, KadaiException> distribute(String sourceWorkbasketId)
-      throws NotAuthorizedOnWorkbasketException,
-          WorkbasketNotFoundException,
-          TaskNotFoundException {
+      throws NotAuthorizedOnWorkbasketException, WorkbasketNotFoundException {
 
     return distributeTasks(sourceWorkbasketId, null, null, null, null);
   }
 
   public BulkOperationResults<String, KadaiException> distribute(
       String sourceWorkbasketId, List<String> taskIds)
-      throws NotAuthorizedOnWorkbasketException,
-          WorkbasketNotFoundException,
-          TaskNotFoundException {
+      throws NotAuthorizedOnWorkbasketException, WorkbasketNotFoundException {
 
     return distributeTasks(sourceWorkbasketId, taskIds, null, null, null);
   }
@@ -114,9 +108,7 @@ public class TaskDistributor {
       List<String> taskIds,
       String distributionStrategyName,
       Map<String, Object> additionalInformation)
-      throws NotAuthorizedOnWorkbasketException,
-          WorkbasketNotFoundException,
-          TaskNotFoundException {
+      throws NotAuthorizedOnWorkbasketException, WorkbasketNotFoundException {
 
     return distributeTasks(
         sourceWorkbasketId, taskIds, distributionStrategyName, null, additionalInformation);
@@ -126,9 +118,7 @@ public class TaskDistributor {
       String sourceWorkbasketId,
       String distributionStrategyName,
       Map<String, Object> additionalInformation)
-      throws NotAuthorizedOnWorkbasketException,
-          WorkbasketNotFoundException,
-          TaskNotFoundException {
+      throws NotAuthorizedOnWorkbasketException, WorkbasketNotFoundException {
 
     return distributeTasks(
         sourceWorkbasketId, null, distributionStrategyName, null, additionalInformation);
@@ -136,18 +126,14 @@ public class TaskDistributor {
 
   public BulkOperationResults<String, KadaiException> distributeWithDestinations(
       String sourceWorkbasketId, List<String> destinationWorkbasketIds)
-      throws NotAuthorizedOnWorkbasketException,
-          WorkbasketNotFoundException,
-          TaskNotFoundException {
+      throws NotAuthorizedOnWorkbasketException, WorkbasketNotFoundException {
 
     return distributeTasks(sourceWorkbasketId, null, null, destinationWorkbasketIds, null);
   }
 
   public BulkOperationResults<String, KadaiException> distributeWithDestinations(
       String sourceWorkbasketId, List<String> taskIds, List<String> destinationWorkbasketIds)
-      throws NotAuthorizedOnWorkbasketException,
-          WorkbasketNotFoundException,
-          TaskNotFoundException {
+      throws NotAuthorizedOnWorkbasketException, WorkbasketNotFoundException {
 
     return distributeTasks(sourceWorkbasketId, taskIds, null, destinationWorkbasketIds, null);
   }
@@ -160,17 +146,19 @@ public class TaskDistributor {
       Map<String, Object> additionalInformation)
       throws InvalidArgumentException,
           NotAuthorizedOnWorkbasketException,
-          WorkbasketNotFoundException,
-          TaskNotFoundException {
-
-    BulkOperationResults<String, KadaiException> operationResults = new BulkOperationResults<>();
+          WorkbasketNotFoundException {
 
     try {
       kadaiEngine.openConnection();
 
       workbasketService.checkAuthorization(sourceWorkbasketId, WorkbasketPermission.DISTRIBUTE);
 
-      taskIds = resolveTaskIds(sourceWorkbasketId, taskIds);
+      BulkOperationResults<String, KadaiException> operationResults = new BulkOperationResults<>();
+      Pair<List<String>, BulkOperationResults<String, KadaiException>> result =
+          resolveTaskIds(sourceWorkbasketId, taskIds);
+      taskIds = result.getLeft();
+      operationResults.addAllErrors(result.getRight());
+
       if (taskIds.isEmpty()) {
         return operationResults;
       }
@@ -184,21 +172,42 @@ public class TaskDistributor {
 
       Map<String, Boolean> taskTransferFlags = getTaskTransferFlags(taskIds);
 
-      transferTasks(newTaskDistribution, taskTransferFlags, operationResults);
+      BulkOperationResults<String, KadaiException> operationResultsFromTransfer;
+      operationResultsFromTransfer = transferTasks(newTaskDistribution, taskTransferFlags);
+
+      operationResults.addAllErrors(operationResultsFromTransfer);
+
+      return operationResults;
     } finally {
       kadaiEngine.returnConnection();
     }
-    return operationResults;
   }
 
-  private List<String> resolveTaskIds(String sourceWorkbasketId, List<String> taskIds)
-      throws TaskNotFoundException {
+  private Pair<List<String>, BulkOperationResults<String, KadaiException>> resolveTaskIds(
+      String sourceWorkbasketId, List<String> taskIds) {
+
+    BulkOperationResults<String, KadaiException> operationResults = new BulkOperationResults<>();
+
     if (taskIds == null) {
-      return getTaskIdsFromWorkbasket(sourceWorkbasketId);
+      return Pair.of(getTaskIdsFromWorkbasket(sourceWorkbasketId), operationResults);
     } else {
       checkIfTasksInSameWorkbasket(taskIds);
-      checkIfTaskIdsExist(taskIds);
-      return taskIds;
+
+      List<String> existingTaskIds =
+          taskService.createTaskQuery().idIn(taskIds.toArray(new String[0])).list().stream()
+              .map(TaskSummary::getId)
+              .toList();
+
+      List<String> validTaskIds = new ArrayList<>();
+      for (String taskId : taskIds) {
+        if (existingTaskIds.contains(taskId)) {
+          validTaskIds.add(taskId);
+        } else {
+          operationResults.addError(taskId, new TaskNotFoundException(taskId));
+        }
+      }
+
+      return Pair.of(validTaskIds, operationResults);
     }
   }
 
@@ -217,10 +226,9 @@ public class TaskDistributor {
         .collect(Collectors.toMap(TaskSummary::getId, TaskSummary::isTransferred));
   }
 
-  private void transferTasks(
-      Map<String, List<String>> newTaskDistribution,
-      Map<String, Boolean> taskTransferFlags,
-      BulkOperationResults<String, KadaiException> operationResults) {
+  private BulkOperationResults<String, KadaiException> transferTasks(
+      Map<String, List<String>> newTaskDistribution, Map<String, Boolean> taskTransferFlags) {
+    BulkOperationResults<String, KadaiException> operationResults = new BulkOperationResults<>();
     newTaskDistribution.forEach(
         (newDestinationWorkbasketId, taskIdsForDestination) -> {
           Map<Boolean, List<String>> partitionedTaskIds =
@@ -247,6 +255,7 @@ public class TaskDistributor {
             taskIdsForDestination.forEach(taskId -> operationResults.addError(taskId, e));
           }
         });
+    return operationResults;
   }
 
   List<String> getTaskIdsFromWorkbasket(String sourceWorkbasketId) {
@@ -276,21 +285,6 @@ public class TaskDistributor {
 
     if (workbasketIds.size() > 1) {
       throw new InvalidArgumentException("Not all tasks are in the same workbasket.");
-    }
-  }
-
-  private void checkIfTaskIdsExist(List<String> taskIds)
-      throws TaskNotFoundException, InvalidArgumentException {
-
-    List<String> existingTaskIds =
-        taskService.createTaskQuery().idIn(taskIds.toArray(new String[0])).list().stream()
-            .map(TaskSummary::getId)
-            .toList();
-
-    for (String taskId : taskIds) {
-      if (!existingTaskIds.contains(taskId)) {
-        throw new TaskNotFoundException(taskId);
-      }
     }
   }
 
