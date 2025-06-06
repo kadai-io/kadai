@@ -499,13 +499,22 @@ class DistributeTaskAccTest {
 
   @WithAccessId(user = "user-1-2")
   @Test
-  void should_ThrowTaskNotFoundException_When_TaskDoesNotExist() {
+  void should_ReturnErrorInBulkResult_When_TaskDoesNotExist() throws Exception {
     String sourceWorkbasketId = workbasketSummary1.getId();
     String nonExistingTask = "NonExistingTaskId";
-    List<String> taskIds = List.of(nonExistingTask, taskSummaries.get(0).getId());
-    assertThatThrownBy(() -> taskService.distribute(sourceWorkbasketId, taskIds))
+    String existingTaskId = taskSummaries.get(0).getId();
+    List<String> taskIds = List.of(nonExistingTask, existingTaskId);
+
+    BulkOperationResults<String, KadaiException> result =
+        taskService.distribute(sourceWorkbasketId, taskIds);
+
+
+    assertThat(result.getErrorMap()).containsKey(nonExistingTask);
+    assertThat(result.getErrorMap().get(nonExistingTask))
         .isInstanceOf(TaskNotFoundException.class)
-        .hasMessageContaining(String.format("Task with id '%s' was not found.", nonExistingTask));
+        .hasMessageContaining("Task with id 'NonExistingTaskId' was not found.");
+
+    assertThat(result.getErrorMap()).doesNotContainKey(existingTaskId);
   }
 
   @WithAccessId(user = "user-1-2")
