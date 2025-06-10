@@ -91,7 +91,7 @@ public interface ClassificationQueryMapper {
       ClassificationQueryImpl classificationQuery);
 
   @Select(
-      "<script>SELECT COUNT(ID) FROM CLASSIFICATION "
+      "<script>SELECT COUNT(*) FROM CLASSIFICATION "
           + "<where>"
           + "<if test='key != null'>AND KEY IN(<foreach item='item' collection='key' separator=',' >#{item}</foreach>)</if> "
           + "<if test='idIn != null'>AND ID IN(<foreach item='item' collection='idIn' separator=',' >#{item}</foreach>)</if> "

@@ -18,6 +18,14 @@
 
 package io.kadai.task.internal;
 
+import static io.kadai.task.api.TaskState.CANCELLED;
+import static io.kadai.task.api.TaskState.CLAIMED;
+import static io.kadai.task.api.TaskState.CLAIMED_STATES;
+import static io.kadai.task.api.TaskState.END_STATES;
+import static io.kadai.task.api.TaskState.IN_REVIEW;
+import static io.kadai.task.api.TaskState.READY;
+import static io.kadai.task.api.TaskState.READY_FOR_REVIEW;
+import static io.kadai.task.api.TaskState.TERMINATED;
 import static java.util.function.Predicate.not;
 
 import io.kadai.classification.api.ClassificationService;
@@ -43,6 +51,7 @@ import io.kadai.common.internal.util.Pair;
 import io.kadai.spi.history.api.events.task.TaskCancelledEvent;
 import io.kadai.spi.history.api.events.task.TaskClaimCancelledEvent;
 import io.kadai.spi.history.api.events.task.TaskClaimedEvent;
+import io.kadai.spi.history.api.events.task.TaskClaimedReviewEvent;
 import io.kadai.spi.history.api.events.task.TaskCompletedEvent;
 import io.kadai.spi.history.api.events.task.TaskCreatedEvent;
 import io.kadai.spi.history.api.events.task.TaskDeletedEvent;
@@ -185,79 +194,6 @@ public class TaskServiceImpl implements TaskService {
     this.objectReferenceHandler = new ObjectReferenceHandler(objectReferenceMapper);
   }
 
-  private static Predicate<TaskSummaryImpl> addErrorToBulkLog(
-      CheckedConsumer<TaskSummaryImpl, KadaiException> checkedConsumer,
-      BulkOperationResults<String, KadaiException> bulkLog) {
-    return summary -> {
-      try {
-        checkedConsumer.accept(summary);
-        return true;
-      } catch (KadaiException e) {
-        bulkLog.addError(summary.getId(), e);
-        return false;
-      }
-    };
-  }
-
-  private static void terminateCancelCommonActions(TaskImpl task, TaskState targetState) {
-    Instant now = Instant.now();
-    task.setModified(now);
-    task.setCompleted(now);
-    task.setState(targetState);
-  }
-
-  private static void claimActionsOnTask(
-      TaskSummaryImpl task, String userId, String userLongName, Instant now) {
-    task.setOwner(userId);
-    task.setOwnerLongName(userLongName);
-    task.setModified(now);
-    task.setClaimed(now);
-    task.setRead(true);
-    if (Set.of(TaskState.READY_FOR_REVIEW, TaskState.IN_REVIEW).contains(task.getState())) {
-      task.setState(TaskState.IN_REVIEW);
-    } else {
-      task.setState(TaskState.CLAIMED);
-    }
-  }
-
-  private static void cancelClaimActionsOnTask(
-      TaskSummaryImpl task, Instant now, boolean keepOwner) {
-    if (!keepOwner) {
-      task.setOwner(null);
-      task.setOwnerLongName(null);
-    }
-    task.setModified(now);
-    task.setClaimed(null);
-    task.setRead(true);
-    if (task.getState() == TaskState.IN_REVIEW) {
-      task.setState(TaskState.READY_FOR_REVIEW);
-    } else {
-      task.setState(TaskState.READY);
-    }
-  }
-
-  private void reopenActionsOnTask(
-      TaskSummaryImpl task, String userId, String userLongName, Instant now) {
-    task.setOwner(userId);
-    task.setOwnerLongName(userLongName);
-    task.setModified(now);
-    task.setClaimed(now);
-    task.setState(TaskState.CLAIMED);
-    task.setCompleted(null);
-    task.setRead(false);
-    task.setReopened(true);
-    if (!task.isManualPriorityActive()) {
-      priorityServiceManager.calculatePriorityOfTask(task).ifPresent(task::setPriority);
-    }
-  }
-
-  private static void completeActionsOnTask(TaskSummaryImpl task, String userId, Instant now) {
-    task.setCompleted(now);
-    task.setModified(now);
-    task.setState(TaskState.COMPLETED);
-    task.setOwner(userId);
-  }
-
   @Override
   public List<String> updateTasks(
       ObjectReference selectionCriteria, Map<TaskCustomField, String> customFieldsToUpdate)
@@ -297,16 +233,6 @@ public class TaskServiceImpl implements TaskService {
       return changedTasks;
     } finally {
       kadaiEngine.returnConnection();
-    }
-  }
-
-  private static void checkIfTaskIsTerminatedOrCancelled(TaskSummary task)
-      throws InvalidTaskStateException {
-    if (task.getState().in(TaskState.CANCELLED, TaskState.TERMINATED)) {
-      throw new InvalidTaskStateException(
-          task.getId(),
-          task.getState(),
-          EnumUtil.allValuesExceptFor(TaskState.CANCELLED, TaskState.TERMINATED));
     }
   }
 
@@ -485,103 +411,6 @@ public class TaskServiceImpl implements TaskService {
       return task;
     } finally {
       kadaiEngine.returnConnection();
-    }
-  }
-
-  private TaskImpl preprocessTaskCreation(Task taskToCreate) {
-    if (createTaskPreprocessorManager.isEnabled()) {
-      taskToCreate = createTaskPreprocessorManager.processTaskBeforeCreation(taskToCreate);
-    }
-    TaskImpl task = (TaskImpl) taskToCreate;
-
-    if (task.getId() != null && !task.getId().isEmpty()) {
-      throw new InvalidArgumentException("taskId must be empty when creating a task");
-    }
-
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Task {} cannot be found, so it can be created.", task.getId());
-    }
-    return task;
-  }
-
-  private Workbasket resolveWorkbasket(TaskImpl task)
-      throws WorkbasketNotFoundException,
-          InvalidArgumentException,
-          NotAuthorizedOnWorkbasketException {
-
-    if (task.getWorkbasketSummary() != null && task.getWorkbasketSummary().getId() != null) {
-      return workbasketService.getWorkbasket(task.getWorkbasketSummary().getId());
-    }
-    if (task.getWorkbasketKey() != null) {
-      return workbasketService.getWorkbasket(task.getWorkbasketKey(), task.getDomain());
-    }
-
-    RoutingTarget routingTarget = calculateWorkbasketDuringTaskCreation(task);
-    String owner = routingTarget.getOwner() == null ? task.getOwner() : routingTarget.getOwner();
-    task.setOwner(owner);
-    return workbasketService.getWorkbasket(routingTarget.getWorkbasketId());
-  }
-
-  private Classification getClassificationByKeyAndDomain(
-      String taskClassificationKey, String workbasketDomain)
-      throws ClassificationNotFoundException, InvalidArgumentException {
-    // we do use the key and not the id to make sure that we use the classification from the right
-    // domain.
-    // otherwise we would have to check the classification and its domain for validity.
-    if (taskClassificationKey == null || taskClassificationKey.isEmpty()) {
-      throw new InvalidArgumentException("classificationKey of task must not be empty");
-    }
-
-    return this.classificationService.getClassification(taskClassificationKey, workbasketDomain);
-  }
-
-  private void persistCreatedTask(TaskImpl task)
-      throws TaskAlreadyExistException, PersistenceException {
-    try {
-      this.taskMapper.insert(task);
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Method createTask() created Task '{}'.", task.getId());
-      }
-    } catch (PersistenceException e) {
-      // Error messages:
-      // Postgres: Cause: org.postgresql.util.PSQLException:
-      //                  ERROR: duplicate key value violates unique constraint "uc_external_id"
-      // DB/2:     Cause: com.ibm.db2.jcc.am.SqlIntegrityConstraintViolationException:
-      //                  DB2 SQL Error: SQLCODE=-803, SQLSTATE=23505, SQLERRMC=2;KADAI.TASK,
-      //                  DRIVER=4.22.29
-      // H2:       Cause: org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException: Unique index or
-      //                  primary key violation: "UC_EXTERNAL_ID_INDEX_2 ON KADAI.TASK(EXTERNAL_ID)
-      boolean isExternalIdViolation =
-          Optional.ofNullable(e.getMessage())
-              .map(String::toLowerCase)
-              .filter(
-                  msg ->
-                      (msg.contains("org.postgresql.util.psqlexception")
-                              && msg.contains("uc_external_id"))
-                          || (msg.contains(
-                                  "com.ibm.db2.jcc.am.sqlintegrityconstraintviolationexception")
-                              && msg.contains("sqlcode=-803"))
-                          || (msg.contains(
-                                  "org.h2.jdbc.jdbcsqlintegrityconstraintviolationexception")
-                              && msg.contains("uc_external_id_index")))
-              .isPresent();
-      if (isExternalIdViolation) {
-        throw new TaskAlreadyExistException(task.getExternalId());
-      }
-      throw e;
-    }
-  }
-
-  private void createTaskCreatedHistoryEvent(TaskImpl createdTask) {
-    if (historyEventManager.isEnabled()) {
-      String details =
-          ObjectAttributeChangeDetector.determineChangesInAttributes(newTask(), createdTask);
-      historyEventManager.createEvent(
-          new TaskCreatedEvent(
-              IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-              createdTask,
-              kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
-              details));
     }
   }
 
@@ -887,9 +716,7 @@ public class TaskServiceImpl implements TaskService {
       final TaskImpl oldTask = duplicateTaskExactly(task);
 
       final TaskState[] nonFinalEndStates =
-          Arrays.stream(TaskState.END_STATES)
-              .filter(not(TaskState::isFinalState))
-              .toArray(TaskState[]::new);
+          Arrays.stream(END_STATES).filter(not(TaskState::isFinalState)).toArray(TaskState[]::new);
 
       if (!task.getState().in(nonFinalEndStates)) {
         throw new InvalidTaskStateException(oldTask.getId(), oldTask.getState(), nonFinalEndStates);
@@ -1190,11 +1017,10 @@ public class TaskServiceImpl implements TaskService {
       cancelledTask = (TaskImpl) getTask(taskId);
       TaskState state = cancelledTask.getState();
       if (state.isEndState()) {
-        throw new InvalidTaskStateException(
-            taskId, state, EnumUtil.allValuesExceptFor(TaskState.END_STATES));
+        throw new InvalidTaskStateException(taskId, state, EnumUtil.allValuesExceptFor(END_STATES));
       }
 
-      terminateCancelCommonActions(cancelledTask, TaskState.CANCELLED);
+      terminateCancelCommonActions(cancelledTask, CANCELLED);
       cancelledTask =
           (TaskImpl) taskEndstatePreprocessorManager.processTaskBeforeEndstate(cancelledTask);
       taskMapper.update(cancelledTask);
@@ -1367,11 +1193,10 @@ public class TaskServiceImpl implements TaskService {
       terminatedTask = (TaskImpl) getTask(taskId);
       TaskState state = terminatedTask.getState();
       if (state.isEndState()) {
-        throw new InvalidTaskStateException(
-            taskId, state, EnumUtil.allValuesExceptFor(TaskState.END_STATES));
+        throw new InvalidTaskStateException(taskId, state, EnumUtil.allValuesExceptFor(END_STATES));
       }
 
-      terminateCancelCommonActions(terminatedTask, TaskState.TERMINATED);
+      terminateCancelCommonActions(terminatedTask, TERMINATED);
       terminatedTask =
           (TaskImpl) taskEndstatePreprocessorManager.processTaskBeforeEndstate(terminatedTask);
       taskMapper.update(terminatedTask);
@@ -1398,10 +1223,7 @@ public class TaskServiceImpl implements TaskService {
   public List<String> findTasksIdsAffectedByClassificationChange(String classificationId) {
     // tasks directly affected
     List<TaskSummary> tasksAffectedDirectly =
-        createTaskQuery()
-            .classificationIdIn(classificationId)
-            .stateIn(TaskState.READY, TaskState.CLAIMED)
-            .list();
+        createTaskQuery().classificationIdIn(classificationId).stateIn(READY, CLAIMED).list();
 
     // tasks indirectly affected via attachments
     List<Pair<String, Instant>> affectedPairs =
@@ -1436,6 +1258,30 @@ public class TaskServiceImpl implements TaskService {
     return affectedTaskIds;
   }
 
+  public void refreshPriorityAndDueDatesOfTasksOnClassificationUpdate(
+      List<String> taskIds, boolean serviceLevelChanged, boolean priorityChanged) {
+    Pair<List<MinimalTaskSummary>, BulkLog> resultsPair = getMinimalTaskSummaries(taskIds);
+    List<MinimalTaskSummary> tasks = resultsPair.getLeft();
+    try {
+      kadaiEngine.openConnection();
+      Set<String> adminAccessIds =
+          kadaiEngine.getEngine().getConfiguration().getRoleMap().get(KadaiRole.ADMIN);
+      if (adminAccessIds.contains(kadaiEngine.getEngine().getCurrentUserContext().getUserid())) {
+        serviceLevelHandler.refreshPriorityAndDueDatesOfTasks(
+            tasks, serviceLevelChanged, priorityChanged);
+      } else {
+        kadaiEngine
+            .getEngine()
+            .runAsAdmin(
+                () ->
+                    serviceLevelHandler.refreshPriorityAndDueDatesOfTasks(
+                        tasks, serviceLevelChanged, priorityChanged));
+      }
+    } finally {
+      kadaiEngine.returnConnection();
+    }
+  }
+
   Pair<List<MinimalTaskSummary>, BulkLog> filterTasksAuthorizedForAndLogErrorsForNotAuthorized(
       List<MinimalTaskSummary> existingTasks) {
     BulkLog bulkLog = new BulkLog();
@@ -1465,30 +1311,6 @@ public class TaskServiceImpl implements TaskService {
     }
   }
 
-  public void refreshPriorityAndDueDatesOfTasksOnClassificationUpdate(
-      List<String> taskIds, boolean serviceLevelChanged, boolean priorityChanged) {
-    Pair<List<MinimalTaskSummary>, BulkLog> resultsPair = getMinimalTaskSummaries(taskIds);
-    List<MinimalTaskSummary> tasks = resultsPair.getLeft();
-    try {
-      kadaiEngine.openConnection();
-      Set<String> adminAccessIds =
-          kadaiEngine.getEngine().getConfiguration().getRoleMap().get(KadaiRole.ADMIN);
-      if (adminAccessIds.contains(kadaiEngine.getEngine().getCurrentUserContext().getUserid())) {
-        serviceLevelHandler.refreshPriorityAndDueDatesOfTasks(
-            tasks, serviceLevelChanged, priorityChanged);
-      } else {
-        kadaiEngine
-            .getEngine()
-            .runAsAdmin(
-                () ->
-                    serviceLevelHandler.refreshPriorityAndDueDatesOfTasks(
-                        tasks, serviceLevelChanged, priorityChanged));
-      }
-    } finally {
-      kadaiEngine.returnConnection();
-    }
-  }
-
   Pair<List<MinimalTaskSummary>, BulkLog> getMinimalTaskSummaries(Collection<String> argTaskIds) {
     BulkLog bulkLog = new BulkLog();
     // remove duplicates
@@ -1500,10 +1322,6 @@ public class TaskServiceImpl implements TaskService {
         filterTasksAuthorizedForAndLogErrorsForNotAuthorized(minimalTaskSummaries);
     bulkLog.addAllErrors(filteredPair.getRight());
     return Pair.of(filteredPair.getLeft(), bulkLog);
-  }
-
-  private static boolean taskIsNotClaimed(TaskSummary task) {
-    return task.getClaimed() == null || !task.getState().isClaimedState();
   }
 
   BulkLog addExceptionsForNonExistingTasksToBulkLog(
@@ -1529,20 +1347,199 @@ public class TaskServiceImpl implements TaskService {
         .collect(Collectors.toList());
   }
 
+  private static Predicate<TaskSummaryImpl> addErrorToBulkLog(
+      CheckedConsumer<TaskSummaryImpl, KadaiException> checkedConsumer,
+      BulkOperationResults<String, KadaiException> bulkLog) {
+    return summary -> {
+      try {
+        checkedConsumer.accept(summary);
+        return true;
+      } catch (KadaiException e) {
+        bulkLog.addError(summary.getId(), e);
+        return false;
+      }
+    };
+  }
+
+  private static void terminateCancelCommonActions(TaskImpl task, TaskState targetState) {
+    Instant now = Instant.now();
+    task.setModified(now);
+    task.setCompleted(now);
+    task.setState(targetState);
+  }
+
+  private static void claimActionsOnTask(
+      TaskSummaryImpl task, String userId, String userLongName, Instant now) {
+    task.setOwner(userId);
+    task.setOwnerLongName(userLongName);
+    task.setModified(now);
+    task.setClaimed(now);
+    task.setRead(true);
+    if (Set.of(READY_FOR_REVIEW, IN_REVIEW).contains(task.getState())) {
+      task.setState(IN_REVIEW);
+    } else {
+      task.setState(CLAIMED);
+    }
+  }
+
+  private static void cancelClaimActionsOnTask(
+      TaskSummaryImpl task, Instant now, boolean keepOwner) {
+    if (!keepOwner) {
+      task.setOwner(null);
+      task.setOwnerLongName(null);
+    }
+    task.setModified(now);
+    task.setClaimed(null);
+    task.setRead(true);
+    if (task.getState() == IN_REVIEW) {
+      task.setState(READY_FOR_REVIEW);
+    } else {
+      task.setState(READY);
+    }
+  }
+
+  private void reopenActionsOnTask(
+      TaskSummaryImpl task, String userId, String userLongName, Instant now) {
+    task.setOwner(userId);
+    task.setOwnerLongName(userLongName);
+    task.setModified(now);
+    task.setClaimed(now);
+    task.setState(CLAIMED);
+    task.setCompleted(null);
+    task.setRead(false);
+    task.setReopened(true);
+    if (!task.isManualPriorityActive()) {
+      priorityServiceManager.calculatePriorityOfTask(task).ifPresent(task::setPriority);
+    }
+  }
+
+  private static void completeActionsOnTask(TaskSummaryImpl task, String userId, Instant now) {
+    task.setCompleted(now);
+    task.setModified(now);
+    task.setState(TaskState.COMPLETED);
+    task.setOwner(userId);
+  }
+
+  private static void checkIfTaskIsTerminatedOrCancelled(TaskSummary task)
+      throws InvalidTaskStateException {
+    if (task.getState().in(CANCELLED, TERMINATED)) {
+      throw new InvalidTaskStateException(
+          task.getId(), task.getState(), EnumUtil.allValuesExceptFor(CANCELLED, TERMINATED));
+    }
+  }
+
+  private TaskImpl preprocessTaskCreation(Task taskToCreate) {
+    if (createTaskPreprocessorManager.isEnabled()) {
+      taskToCreate = createTaskPreprocessorManager.processTaskBeforeCreation(taskToCreate);
+    }
+    TaskImpl task = (TaskImpl) taskToCreate;
+
+    if (task.getId() != null && !task.getId().isEmpty()) {
+      throw new InvalidArgumentException("taskId must be empty when creating a task");
+    }
+
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Task {} cannot be found, so it can be created.", task.getId());
+    }
+    return task;
+  }
+
+  private Workbasket resolveWorkbasket(TaskImpl task)
+      throws WorkbasketNotFoundException,
+          InvalidArgumentException,
+          NotAuthorizedOnWorkbasketException {
+
+    if (task.getWorkbasketSummary() != null && task.getWorkbasketSummary().getId() != null) {
+      return workbasketService.getWorkbasket(task.getWorkbasketSummary().getId());
+    }
+    if (task.getWorkbasketKey() != null) {
+      return workbasketService.getWorkbasket(task.getWorkbasketKey(), task.getDomain());
+    }
+
+    RoutingTarget routingTarget = calculateWorkbasketDuringTaskCreation(task);
+    String owner = routingTarget.getOwner() == null ? task.getOwner() : routingTarget.getOwner();
+    task.setOwner(owner);
+    return workbasketService.getWorkbasket(routingTarget.getWorkbasketId());
+  }
+
+  private Classification getClassificationByKeyAndDomain(
+      String taskClassificationKey, String workbasketDomain)
+      throws ClassificationNotFoundException, InvalidArgumentException {
+    // we do use the key and not the id to make sure that we use the classification from the right
+    // domain.
+    // otherwise we would have to check the classification and its domain for validity.
+    if (taskClassificationKey == null || taskClassificationKey.isEmpty()) {
+      throw new InvalidArgumentException("classificationKey of task must not be empty");
+    }
+
+    return this.classificationService.getClassification(taskClassificationKey, workbasketDomain);
+  }
+
+  private void persistCreatedTask(TaskImpl task)
+      throws TaskAlreadyExistException, PersistenceException {
+    try {
+      this.taskMapper.insert(task);
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Method createTask() created Task '{}'.", task.getId());
+      }
+    } catch (PersistenceException e) {
+      // Error messages:
+      // Postgres: Cause: org.postgresql.util.PSQLException:
+      //                  ERROR: duplicate key value violates unique constraint "uc_external_id"
+      // DB/2:     Cause: com.ibm.db2.jcc.am.SqlIntegrityConstraintViolationException:
+      //                  DB2 SQL Error: SQLCODE=-803, SQLSTATE=23505, SQLERRMC=2;KADAI.TASK,
+      //                  DRIVER=4.22.29
+      // H2:       Cause: org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException: Unique index or
+      //                  primary key violation: "UC_EXTERNAL_ID_INDEX_2 ON KADAI.TASK(EXTERNAL_ID)
+      boolean isExternalIdViolation =
+          Optional.ofNullable(e.getMessage())
+              .map(String::toLowerCase)
+              .filter(
+                  msg ->
+                      (msg.contains("org.postgresql.util.psqlexception")
+                              && msg.contains("uc_external_id"))
+                          || (msg.contains(
+                                  "com.ibm.db2.jcc.am.sqlintegrityconstraintviolationexception")
+                              && msg.contains("sqlcode=-803"))
+                          || (msg.contains(
+                                  "org.h2.jdbc.jdbcsqlintegrityconstraintviolationexception")
+                              && msg.contains("uc_external_id_index")))
+              .isPresent();
+      if (isExternalIdViolation) {
+        throw new TaskAlreadyExistException(task.getExternalId());
+      }
+      throw e;
+    }
+  }
+
+  private void createTaskCreatedHistoryEvent(TaskImpl createdTask) {
+    if (historyEventManager.isEnabled()) {
+      String details =
+          ObjectAttributeChangeDetector.determineChangesInAttributes(newTask(), createdTask);
+      historyEventManager.createEvent(
+          new TaskCreatedEvent(
+              IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+              createdTask,
+              kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+              details));
+    }
+  }
+
+  private static boolean taskIsNotClaimed(TaskSummary task) {
+    return task.getClaimed() == null || !task.getState().isClaimedState();
+  }
+
   private Pair<List<String>, BulkLog> filterOutTasksWhichAreInInvalidState(
       Collection<MinimalTaskSummary> minimalTaskSummaries) {
     List<String> filteredTasks = new ArrayList<>(minimalTaskSummaries.size());
     BulkLog bulkLog = new BulkLog();
 
     for (MinimalTaskSummary taskSummary : minimalTaskSummaries) {
-      if (!taskSummary.getTaskState().in(TaskState.READY, TaskState.READY_FOR_REVIEW)) {
+      if (!taskSummary.getTaskState().in(READY, READY_FOR_REVIEW)) {
         bulkLog.addError(
             taskSummary.getTaskId(),
             new InvalidTaskStateException(
-                taskSummary.getTaskId(),
-                taskSummary.getTaskState(),
-                TaskState.READY,
-                TaskState.READY_FOR_REVIEW));
+                taskSummary.getTaskId(), taskSummary.getTaskState(), READY, READY_FOR_REVIEW));
       } else {
         filteredTasks.add(taskSummary.getTaskId());
       }
@@ -1703,12 +1700,21 @@ public class TaskServiceImpl implements TaskService {
         String changeDetails =
             ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task);
 
-        historyEventManager.createEvent(
-            new TaskClaimedEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                task,
-                userId,
-                changeDetails));
+        if (Set.of(READY_FOR_REVIEW, IN_REVIEW).contains(task.getState())) {
+          historyEventManager.createEvent(
+              new TaskClaimedReviewEvent(
+                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                  task,
+                  userId,
+                  changeDetails));
+        } else {
+          historyEventManager.createEvent(
+              new TaskClaimedEvent(
+                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                  task,
+                  userId,
+                  changeDetails));
+        }
       }
     } finally {
       kadaiEngine.returnConnection();
@@ -1731,7 +1737,7 @@ public class TaskServiceImpl implements TaskService {
       final TaskImpl oldTask = duplicateTaskExactly(task);
 
       final TaskState[] allowedStates =
-          force ? EnumUtil.allValuesExceptFor(TaskState.END_STATES) : TaskState.CLAIMED_STATES;
+          force ? EnumUtil.allValuesExceptFor(END_STATES) : CLAIMED_STATES;
       if (task.getState().isEndState() || (!force && taskIsNotClaimed(task))) {
         throw new InvalidTaskStateException(task.getId(), task.getState(), allowedStates);
       }
@@ -1739,7 +1745,7 @@ public class TaskServiceImpl implements TaskService {
         throw new InvalidOwnerException(userId, task.getId());
       }
 
-      task.setState(TaskState.READY_FOR_REVIEW);
+      task.setState(READY_FOR_REVIEW);
       task.setOwner(ownerId);
       task.setModified(Instant.now());
 
@@ -1782,16 +1788,16 @@ public class TaskServiceImpl implements TaskService {
 
       if (force && task.getState().isEndState()) {
         throw new InvalidTaskStateException(
-            task.getId(), task.getState(), EnumUtil.allValuesExceptFor(TaskState.END_STATES));
+            task.getId(), task.getState(), EnumUtil.allValuesExceptFor(END_STATES));
       }
-      if (!force && task.getState() != TaskState.IN_REVIEW) {
-        throw new InvalidTaskStateException(task.getId(), task.getState(), TaskState.IN_REVIEW);
+      if (!force && task.getState() != IN_REVIEW) {
+        throw new InvalidTaskStateException(task.getId(), task.getState(), IN_REVIEW);
       }
       if (!force && !task.getOwner().equals(userId)) {
         throw new InvalidOwnerException(userId, task.getId());
       }
 
-      task.setState(TaskState.READY);
+      task.setState(READY);
       task.setOwner(ownerId);
       task.setModified(Instant.now());
 
@@ -1822,7 +1828,7 @@ public class TaskServiceImpl implements TaskService {
     TaskState state = task.getState();
     if (state.isEndState()) {
       throw new InvalidTaskStateException(
-          task.getId(), task.getState(), EnumUtil.allValuesExceptFor(TaskState.END_STATES));
+          task.getId(), task.getState(), EnumUtil.allValuesExceptFor(END_STATES));
     }
 
     String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
@@ -1840,7 +1846,7 @@ public class TaskServiceImpl implements TaskService {
   private void checkPreconditionsForCompleteTask(TaskSummary task)
       throws InvalidOwnerException, InvalidTaskStateException, NotAuthorizedOnWorkbasketException {
     if (taskIsNotClaimed(task)) {
-      throw new InvalidTaskStateException(task.getId(), task.getState(), TaskState.CLAIMED_STATES);
+      throw new InvalidTaskStateException(task.getId(), task.getState(), CLAIMED_STATES);
     } else if (!kadaiEngine
             .getEngine()
             .getCurrentUserContext()
@@ -1878,8 +1884,7 @@ public class TaskServiceImpl implements TaskService {
             WorkbasketPermission.EDITTASKS);
       }
       if (state.isEndState()) {
-        throw new InvalidTaskStateException(
-            taskId, state, EnumUtil.allValuesExceptFor(TaskState.END_STATES));
+        throw new InvalidTaskStateException(taskId, state, EnumUtil.allValuesExceptFor(END_STATES));
       }
       if (state.isClaimedState() && !forceUnclaim && !userId.equals(task.getOwner())) {
         throw new InvalidOwnerException(userId, taskId);
@@ -1966,9 +1971,9 @@ public class TaskServiceImpl implements TaskService {
       task = (TaskImpl) getTask(taskId);
 
       if (!task.getState().isEndState() && !forceDelete) {
-        throw new InvalidTaskStateException(taskId, task.getState(), TaskState.END_STATES);
+        throw new InvalidTaskStateException(taskId, task.getState(), END_STATES);
       }
-      if (!task.getState().in(TaskState.TERMINATED, TaskState.CANCELLED)
+      if (!task.getState().in(TERMINATED, CANCELLED)
           && CallbackState.CALLBACK_PROCESSING_REQUIRED.equals(task.getCallbackState())) {
         throw new InvalidCallbackStateException(
             taskId,
@@ -2020,11 +2025,10 @@ public class TaskServiceImpl implements TaskService {
       } else if (!foundSummary.getTaskState().isEndState()) {
         bulkLog.addError(
             currentTaskId,
-            new InvalidTaskStateException(
-                currentTaskId, foundSummary.getTaskState(), TaskState.END_STATES));
+            new InvalidTaskStateException(currentTaskId, foundSummary.getTaskState(), END_STATES));
         taskIdIterator.remove();
       } else {
-        if (!foundSummary.getTaskState().in(TaskState.CANCELLED, TaskState.TERMINATED)
+        if (!foundSummary.getTaskState().in(CANCELLED, TERMINATED)
             && CallbackState.CALLBACK_PROCESSING_REQUIRED.equals(foundSummary.getCallbackState())) {
           bulkLog.addError(
               currentTaskId,
@@ -2077,14 +2081,14 @@ public class TaskServiceImpl implements TaskService {
         if (!currentTaskState.isEndState()) {
           return Optional.of(
               new InvalidTaskStateException(
-                  foundSummary.getTaskId(), foundSummary.getTaskState(), TaskState.END_STATES));
+                  foundSummary.getTaskId(), foundSummary.getTaskState(), END_STATES));
         }
         break;
       case CLAIMED:
-        if (!currentTaskState.equals(TaskState.CLAIMED)) {
+        if (!currentTaskState.equals(CLAIMED)) {
           return Optional.of(
               new InvalidTaskStateException(
-                  foundSummary.getTaskId(), foundSummary.getTaskState(), TaskState.CLAIMED));
+                  foundSummary.getTaskId(), foundSummary.getTaskState(), CLAIMED));
         }
         if (!currentTaskCallbackState.equals(CallbackState.CALLBACK_PROCESSING_REQUIRED)) {
           return Optional.of(
@@ -2125,7 +2129,7 @@ public class TaskServiceImpl implements TaskService {
     if (taskToCreate.getExternalId() == null) {
       taskToCreate.setExternalId(IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_EXT_TASK));
     }
-    taskToCreate.setState(TaskState.READY);
+    taskToCreate.setState(READY);
     taskToCreate.setCreated(now);
     taskToCreate.setModified(now);
     taskToCreate.setRead(false);
@@ -2514,9 +2518,9 @@ public class TaskServiceImpl implements TaskService {
 
     // owner can only be changed if task is either in state ready or ready_for_review
     boolean isOwnerChanged = !Objects.equals(newTaskImpl1.getOwner(), oldTaskImpl.getOwner());
-    if (isOwnerChanged && !oldTaskImpl.getState().in(TaskState.READY, TaskState.READY_FOR_REVIEW)) {
+    if (isOwnerChanged && !oldTaskImpl.getState().in(READY, READY_FOR_REVIEW)) {
       throw new InvalidTaskStateException(
-          oldTaskImpl.getId(), oldTaskImpl.getState(), TaskState.READY, TaskState.READY_FOR_REVIEW);
+          oldTaskImpl.getId(), oldTaskImpl.getState(), READY, READY_FOR_REVIEW);
     }
     if (isOwnerChanged && kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo()) {
       User user = userMapper.findById(newTaskImpl.getOwner());

@@ -64,7 +64,7 @@ public class TaskCommentQuerySqlProvider {
   @SuppressWarnings("unused")
   public static String countQueryTaskComments() {
     return OPENING_SCRIPT_TAG
-        + "SELECT COUNT(tc.ID) "
+        + "SELECT COUNT(*) "
         + "FROM TASK_COMMENT tc "
         + "LEFT JOIN Task t ON tc.TASK_ID = t.ID "
         + OPENING_WHERE_TAG

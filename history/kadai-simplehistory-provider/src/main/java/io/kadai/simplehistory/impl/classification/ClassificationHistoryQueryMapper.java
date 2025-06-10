@@ -110,7 +110,7 @@ public interface ClassificationHistoryQueryMapper {
 
   @Select(
       "<script>"
-          + "SELECT COUNT(ID) "
+          + "SELECT COUNT(*) "
           + "FROM CLASSIFICATION_HISTORY_EVENT"
           + "<where>"
           + "<if test='idIn != null'>AND LOWER(ID) IN (<foreach item='item' collection='idIn' separator=',' >#{item}</foreach>)</if> "

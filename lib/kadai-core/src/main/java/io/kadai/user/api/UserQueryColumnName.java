@@ -31,7 +31,7 @@ public enum UserQueryColumnName implements QueryColumnName {
   GROUPS("groups"),
   PERMISSIONS("permissions"),
   FIRST_NAME("first_name"),
-  LASTNAME("lastname"),
+  LAST_NAME("last_name"),
   FULL_NAME("full_name"),
   LONG_NAME("long_name"),
   E_MAIL("e_mail"),

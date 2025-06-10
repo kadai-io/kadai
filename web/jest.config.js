@@ -18,7 +18,7 @@ module.exports = {
       }
     ]
   },
-  transformIgnorePatterns: [`node_modules/(?!.*\\.mjs$|${esModules})`],
+  transformIgnorePatterns: [`node_modules/(?!.*\\.mjs$|@angular/common/locales|${esModules})`],
   collectCoverage: true,
   coverageReporters: ['text'],
   coverageDirectory: 'coverage/kadai-web',

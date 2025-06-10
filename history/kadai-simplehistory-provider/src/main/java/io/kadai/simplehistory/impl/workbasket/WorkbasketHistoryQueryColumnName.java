@@ -35,12 +35,12 @@ public enum WorkbasketHistoryQueryColumnName implements QueryColumnName {
   CUSTOM_2("custom_2"),
   CUSTOM_3("custom_3"),
   CUSTOM_4("custom_4"),
-  ORGLEVEL_1("orgLevel_1"),
-  ORGLEVEL_2("orgLevel_2"),
-  ORGLEVEL_3("orgLevel_3"),
-  ORGLEVEL_4("orgLevel_4");
+  ORG_LEVEL_1("org_level_1"),
+  ORG_LEVEL_2("org_level_2"),
+  ORG_LEVEL_3("org_level_3"),
+  ORG_LEVEL_4("org_level_4");
 
-  private String name;
+  private final String name;
 
   WorkbasketHistoryQueryColumnName(String name) {
     this.name = name;
