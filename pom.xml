@@ -66,7 +66,7 @@
         <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
         <version.spring.plugin.core>3.0.0</version.spring.plugin.core>
         <version.spring.boot>3.4.5</version.spring.boot>
-        <version.spring.mybatis>3.0.4</version.spring.mybatis>
+        <version.spring.mybatis>3.0.5</version.spring.mybatis>
 
         <!-- camunda dependencies -->
         <version.camunda.dmn>7.23.0</version.camunda.dmn>
