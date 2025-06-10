@@ -39,7 +39,7 @@
     "@ngxs/store": "19.0.0",
     "angular-svg-icon": "19.1.1",
     "chart.js": "4.4.9",
-    "core-js": "3.42.0",
+    "core-js": "3.43.0",
     "file-saver": "2.0.5",
     "globals": "^16.2.0",
     "lodash": "4.17.21",
