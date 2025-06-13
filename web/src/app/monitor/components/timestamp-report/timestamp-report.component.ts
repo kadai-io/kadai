@@ -21,13 +21,13 @@ import { ReportData } from '../../models/report-data';
 import { MonitorService } from '../../services/monitor.service';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { ReportTableComponent } from '../report-table/report-table.component';
-import { DatePipe, NgIf } from '@angular/common';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'kadai-monitor-timestamp-report',
   templateUrl: './timestamp-report.component.html',
   styleUrls: ['./timestamp-report.component.scss'],
-  imports: [ReportTableComponent, DatePipe, NgIf],
+  imports: [ReportTableComponent, DatePipe],
   providers: [MonitorService]
 })
 export class TimestampReportComponent implements OnInit {

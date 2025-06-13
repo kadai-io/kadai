@@ -49,7 +49,7 @@ import { WorkbasketDistributionTarget } from '../../../shared/models/workbasket-
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
-import { NgIf } from '@angular/common';
+
 import { MatIcon } from '@angular/material/icon';
 import { WorkbasketFilterComponent } from '../../../shared/components/workbasket-filter/workbasket-filter.component';
 import { IconTypeComponent } from '../type-icon/icon-type.component';
@@ -65,7 +65,6 @@ import { OrderBy } from '../../../shared/pipes/order-by.pipe';
     MatToolbar,
     MatTooltip,
     MatButton,
-    NgIf,
     MatIcon,
     WorkbasketFilterComponent,
     MatSelectionList,

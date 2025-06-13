@@ -1,20 +1,20 @@
 <!--
-  ~ Copyright [2025] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2025] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
 <form [formGroup]="accessIdForm">
   <div [ngClass]="placeHolderMessage == 'Access id'? 'type-ahead--small' : 'type-ahead--large'">
@@ -24,26 +24,29 @@
       </mat-label>
       <!-- TEXT INPUT -->
       <input [matAutocomplete]="auto"
-             [required]="isRequired"
-             class="type-ahead__input-field"
-             formControlName="accessId"
-             matInput
-             matTooltip="{{accessIdForm.controls['accessId'].value}}"
-             placeholder="{{placeHolderMessage}}"
-             type="text">
+        [required]="isRequired"
+        class="type-ahead__input-field"
+        formControlName="accessId"
+        matInput
+        matTooltip="{{accessIdForm.controls['accessId'].value}}"
+        placeholder="{{placeHolderMessage}}"
+        type="text">
       <!-- ERROR MESSAGE -->
-      <mat-error
-        *ngIf="displayError && !accessIdForm.valid"
-        [ngClass]="placeHolderMessage == 'Access id' ? 'type-ahead__error--accessId' : 'type-ahead__error--general'">
-        Access id not valid
-      </mat-error>
+      @if (displayError && !accessIdForm.valid) {
+        <mat-error
+          [ngClass]="placeHolderMessage == 'Access id' ? 'type-ahead__error--accessId' : 'type-ahead__error--general'">
+          Access id not valid
+        </mat-error>
+      }
       <!-- AUTOCOMPLETE LIST -->
       <mat-autocomplete #auto>
-        <mat-option *ngFor="let accessId of filteredAccessIds" [value]="accessId.accessId"
-                    class="type-ahead__form-options"
-                    matTooltip="{{accessId.accessId}} {{accessId.name}}">
-          <small>{{ accessId.accessId }}&nbsp;&nbsp;{{ accessId.name }}</small>
-        </mat-option>
+        @for (accessId of filteredAccessIds; track accessId) {
+          <mat-option [value]="accessId.accessId"
+            class="type-ahead__form-options"
+            matTooltip="{{accessId.accessId}} {{accessId.name}}">
+            <small>{{ accessId.accessId }}&nbsp;&nbsp;{{ accessId.name }}</small>
+          </mat-option>
+        }
       </mat-autocomplete>
     </mat-form-field>
   </div>

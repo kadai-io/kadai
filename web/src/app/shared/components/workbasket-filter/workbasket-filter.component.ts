@@ -24,7 +24,7 @@ import { ClearWorkbasketFilter, SetWorkbasketFilter } from '../../store/filter-s
 import { FilterSelectors } from '../../store/filter-store/filter.selectors';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { NgFor, NgIf } from '@angular/common';
+
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
@@ -40,7 +40,6 @@ import { MapValuesPipe } from '../../pipes/map-values.pipe';
   templateUrl: './workbasket-filter.component.html',
   styleUrls: ['./workbasket-filter.component.scss'],
   imports: [
-    NgIf,
     MatFormField,
     MatLabel,
     MatInput,
@@ -51,7 +50,6 @@ import { MapValuesPipe } from '../../pipes/map-values.pipe';
     MatMenuTrigger,
     IconTypeComponent,
     MatMenu,
-    NgFor,
     MatMenuItem,
     MapValuesPipe
   ]

@@ -39,7 +39,7 @@ import { Classification } from '../../../shared/models/classification';
 import { TasksCustomisation } from '../../../shared/models/customisation';
 import { takeUntil } from 'rxjs/operators';
 import { AccessId } from '../../../shared/models/access-id';
-import { AsyncPipe, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatSelect } from '@angular/material/select';
@@ -60,13 +60,11 @@ import {
   templateUrl: './task-information.component.html',
   styleUrls: ['./task-information.component.scss'],
   imports: [
-    NgIf,
     FormsModule,
     MatFormField,
     MatLabel,
     MatInput,
     MatSelect,
-    NgFor,
     MatOption,
     MatTooltip,
     MatDatepickerInput,

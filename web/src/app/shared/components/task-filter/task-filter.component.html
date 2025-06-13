@@ -1,20 +1,20 @@
 <!--
-  ~ Copyright [2025] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2025] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
 <div class="task-filter">
 
@@ -24,43 +24,45 @@
     <div class="task-filter__row">
       <!-- FILTER BY NAME AND OWNER -->
       <mat-form-field class="task-filter__input-field--large" matTooltip="Filter Tasks by name"
-                      style="margin-right: 16px;">
+        style="margin-right: 16px;">
         <mat-label>Filter by name</mat-label>
         <input (keyup)="updateState()" (keyup.enter)="search()" [(ngModel)]="filter['name-like'][0]"
-               matInput
-               placeholder="Name"
-               type="text">
+          matInput
+          placeholder="Name"
+          type="text">
       </mat-form-field>
 
       <!-- FILTER BY PRIORITY -->
       <mat-form-field class="task-filter__input-field--small" matTooltip="Filter Tasks by priority">
         <mat-label>Filter by priority</mat-label>
         <input (keyup.enter)="search()" (ngModelChange)="updateState()"
-               [(ngModel)]="filter.priority[0]" matInput
-               placeholder="Priority"
-               type="number">
+          [(ngModel)]="filter.priority[0]" matInput
+          placeholder="Priority"
+          type="number">
       </mat-form-field>
     </div>
 
     <div class="task-filter__row">
       <mat-form-field class="task-filter__input-field--large" matTooltip="Filter Tasks by owner"
-                      style="margin-right: 16px">
+        style="margin-right: 16px">
         <mat-label>Filter by owner</mat-label>
         <input (keyup)="updateState()" (keyup.enter)="search()"
-               [(ngModel)]="filter['owner-like'][0]" matInput
-               placeholder="Owner"
-               type="text">
+          [(ngModel)]="filter['owner-like'][0]" matInput
+          placeholder="Owner"
+          type="text">
       </mat-form-field>
 
       <!-- FILTER BY TASK STATE -->
       <mat-form-field class="task-filter__input-field--small" matTooltip="Filter Tasks by status">
         <mat-label>Filter by status</mat-label>
         <mat-select [value]="filter.state && filter.state[0] ? filter.state[0] : undefined">
-          <mat-option (click)="setStatus(state.key)" *ngFor="let state of allStates | mapValues"
-                      [value]="state.key"
-                      class="types-selector__options">
-            {{ state.value }}
-          </mat-option>
+          @for (state of allStates | mapValues; track state) {
+            <mat-option (click)="setStatus(state.key)"
+              [value]="state.key"
+              class="types-selector__options">
+              {{ state.value }}
+            </mat-option>
+          }
         </mat-select>
       </mat-form-field>
     </div>

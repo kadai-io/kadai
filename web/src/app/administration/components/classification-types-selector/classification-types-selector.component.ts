@@ -21,7 +21,7 @@ import { Observable } from 'rxjs';
 import { Select, Store } from '@ngxs/store';
 import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
 import { SetSelectedClassificationType } from 'app/shared/store/classification-store/classification.actions';
-import { AsyncPipe, Location, NgFor } from '@angular/common';
+import { AsyncPipe, Location } from '@angular/common';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -31,7 +31,7 @@ import { MatOption } from '@angular/material/core';
   selector: 'kadai-administration-classification-types-selector',
   templateUrl: './classification-types-selector.component.html',
   styleUrls: ['./classification-types-selector.component.scss'],
-  imports: [MatFormField, MatLabel, MatSelect, MatTooltip, NgFor, MatOption, AsyncPipe]
+  imports: [MatFormField, MatLabel, MatSelect, MatTooltip, MatOption, AsyncPipe]
 })
 export class ClassificationTypesSelectorComponent {
   @Select(ClassificationSelectors.selectedClassificationType) classificationTypeSelected$: Observable<string>;

@@ -34,7 +34,7 @@ import { MatIcon } from '@angular/material/icon';
 import { UserInformationComponent } from './shared/components/user-information/user-information.component';
 import { SidenavListComponent } from './shared/components/sidenav-list/sidenav-list.component';
 import { NavBarComponent } from './shared/components/nav-bar/nav-bar.component';
-import { NgIf } from '@angular/common';
+
 import { MatProgressBar } from '@angular/material/progress-bar';
 
 @Component({
@@ -50,7 +50,6 @@ import { MatProgressBar } from '@angular/material/progress-bar';
     SidenavListComponent,
     MatSidenavContent,
     NavBarComponent,
-    NgIf,
     MatProgressBar,
     RouterOutlet
   ]

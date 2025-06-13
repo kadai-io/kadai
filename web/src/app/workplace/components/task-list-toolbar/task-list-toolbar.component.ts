@@ -37,7 +37,7 @@ import { RequestInProgressService } from '../../../shared/services/request-in-pr
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
-import { AsyncPipe, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -62,7 +62,6 @@ export enum Search {
     MatTab,
     MatButton,
     MatTooltip,
-    NgIf,
     MatIcon,
     MatFormField,
     MatLabel,
@@ -70,7 +69,6 @@ export enum Search {
     FormsModule,
     MatAutocompleteTrigger,
     MatAutocomplete,
-    NgFor,
     MatOption,
     AsyncPipe,
     TaskFilterComponent,

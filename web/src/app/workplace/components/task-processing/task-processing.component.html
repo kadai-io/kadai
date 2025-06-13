@@ -1,20 +1,20 @@
 <!--
-  ~ Copyright [2025] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2025] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
 <div class="task-processing">
 
@@ -25,28 +25,30 @@
 
       <!-- TRANSFER TASK -->
       <button [matMenuTriggerFor]="menu" class="task-processing__button--secondary"
-              mat-stroked-button
-              matTooltip="Transfer Task to another Workbasket">
+        mat-stroked-button
+        matTooltip="Transfer Task to another Workbasket">
         Transfer Task
         <mat-icon class="task-processing__icon--aquamarine">transfer_within_a_station</mat-icon>
       </button>
       <mat-menu #menu="matMenu">
-        <button (click)="transferTask(workbasket)" *ngFor="let workbasket of workbaskets"
-                mat-menu-item>
-          {{ workbasket.name }}
-        </button>
+        @for (workbasket of workbaskets; track workbasket) {
+          <button (click)="transferTask(workbasket)"
+            mat-menu-item>
+            {{ workbasket.name }}
+          </button>
+        }
       </mat-menu>
 
       <!-- COMPLETE TASK -->
       <button (click)="completeTask()" class="task-processing__button--secondary"
-              mat-stroked-button matTooltip="Complete Task and return to Task list">
+        mat-stroked-button matTooltip="Complete Task and return to Task list">
         <span> Complete Task </span>
         <mat-icon class="task-processing__icon--aquamarine">check</mat-icon>
       </button>
 
       <!-- CANCEL CLAIM -->
       <button (click)="cancelClaimTask()" class="task-processing__button--secondary"
-              mat-stroked-button matTooltip="Cancel Task claim and return to Task overview">
+        mat-stroked-button matTooltip="Cancel Task claim and return to Task overview">
         <span> Cancel claim </span>
         <mat-icon class="task-processing__icon--aquamarine">clear</mat-icon>
       </button>
@@ -63,7 +65,9 @@
 
 
   <!-- CONTENT -->
-  <iframe *ngIf="link" [src]="link"></iframe>
+  @if (link) {
+    <iframe [src]="link"></iframe>
+  }
 
 </div>
 
