@@ -28,14 +28,14 @@ import {
   MatExpansionPanelHeader,
   MatExpansionPanelTitle
 } from '@angular/material/expansion';
-import { NgFor, NgIf } from '@angular/common';
+
 import { MatCheckbox } from '@angular/material/checkbox';
 
 @Component({
   selector: 'kadai-monitor-task-priority-report-filter',
   templateUrl: './task-priority-report-filter.component.html',
   styleUrls: ['./task-priority-report-filter.component.scss'],
-  imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgFor, MatCheckbox, NgIf]
+  imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatCheckbox]
 })
 export class TaskPriorityReportFilterComponent implements OnInit, OnDestroy {
   isPanelOpen = false;

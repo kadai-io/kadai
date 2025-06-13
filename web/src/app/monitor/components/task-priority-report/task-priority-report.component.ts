@@ -42,7 +42,7 @@ import {
   MatRowDef,
   MatTable
 } from '@angular/material/table';
-import { DatePipe, NgClass, NgForOf, NgIf } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 
 @Component({
   selector: 'kadai-monitor-task-priority-report',
@@ -62,9 +62,7 @@ import { DatePipe, NgClass, NgForOf, NgIf } from '@angular/common';
     MatHeaderRow,
     MatRowDef,
     MatRow,
-    NgIf,
     DatePipe,
-    NgForOf,
     NgClass
   ],
   providers: [MonitorService]

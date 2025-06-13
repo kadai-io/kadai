@@ -23,7 +23,7 @@ import { MonitorService } from '../../services/monitor.service';
 import { MetaInfoData } from '../../models/meta-info-data';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { ChartConfiguration } from 'chart.js';
-import { NgIf } from '@angular/common';
+
 import { ReportTableComponent } from '../report-table/report-table.component';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -31,7 +31,7 @@ import { BaseChartDirective } from 'ng2-charts';
   selector: 'kadai-monitor-workbasket-report-planned-date',
   templateUrl: './workbasket-report-planned-date.component.html',
   styleUrls: ['./workbasket-report-planned-date.component.scss'],
-  imports: [NgIf, ReportTableComponent, BaseChartDirective],
+  imports: [ReportTableComponent, BaseChartDirective],
   providers: [MonitorService]
 })
 export class WorkbasketReportPlannedDateComponent implements OnInit {

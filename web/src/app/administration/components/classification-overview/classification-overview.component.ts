@@ -29,7 +29,7 @@ import {
 } from '../../../shared/store/classification-store/classification.actions';
 import { Classification } from '../../../shared/models/classification';
 import { ClassificationListComponent } from '../classification-list/classification-list.component';
-import { NgIf } from '@angular/common';
+
 import { ClassificationDetailsComponent } from '../classification-details/classification-details.component';
 import { SvgIconComponent } from 'angular-svg-icon';
 
@@ -37,7 +37,7 @@ import { SvgIconComponent } from 'angular-svg-icon';
   selector: 'kadai-administration-classification-overview',
   templateUrl: './classification-overview.component.html',
   styleUrls: ['./classification-overview.component.scss'],
-  imports: [ClassificationListComponent, NgIf, ClassificationDetailsComponent, SvgIconComponent]
+  imports: [ClassificationListComponent, ClassificationDetailsComponent, SvgIconComponent]
 })
 export class ClassificationOverviewComponent implements OnInit, OnDestroy {
   showDetail = false;

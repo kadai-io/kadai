@@ -1,25 +1,25 @@
 <!--
-  ~ Copyright [2025] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2025] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
 <div class="task-list-toolbar">
 
   <mat-tab-group (click)="onTabChange($event)" [selectedIndex]="activeTab" animationDuration="0ms"
-                 mat-stretch-tabs="false">
+    mat-stretch-tabs="false">
 
     <!-- WORKBASKETS -->
     <mat-tab label="Workbaskets">
@@ -28,14 +28,18 @@
 
         <!-- BUTTON TO FURTHER FILTER OPTIONS -->
         <button (click)="setFilterExpansion()" class="task-list-toolbar__button--secondary"
-                mat-stroked-button
-                matTooltip="Display more filter options" style="min-width: 1%">
-          <mat-icon *ngIf="!(isFilterExpanded$ | async)" class="task-list-toolbar__mat-icon">
-            keyboard_arrow_down
-          </mat-icon>
-          <mat-icon *ngIf="(isFilterExpanded$ | async)" class="task-list-toolbar__mat-icon">
-            keyboard_arrow_up
-          </mat-icon>
+          mat-stroked-button
+          matTooltip="Display more filter options" style="min-width: 1%">
+          @if (!(isFilterExpanded$ | async)) {
+            <mat-icon class="task-list-toolbar__mat-icon">
+              keyboard_arrow_down
+            </mat-icon>
+          }
+          @if ((isFilterExpanded$ | async)) {
+            <mat-icon class="task-list-toolbar__mat-icon">
+              keyboard_arrow_up
+            </mat-icon>
+          }
         </button>
 
         <div class="task-list-toolbar__spacer"></div>
@@ -45,16 +49,18 @@
           <mat-form-field class="task-list-toolbar__filter--workbasket">
             <mat-label>Select Workbasket</mat-label>
             <input (ngModelChange)="filterWorkbasketNames()"
-                   [(ngModel)]="resultName"
-                   [matAutocomplete]="auto"
-                   matInput
-                   placeholder="Workbasket"
-                   type="text">
+              [(ngModel)]="resultName"
+              [matAutocomplete]="auto"
+              matInput
+              placeholder="Workbasket"
+              type="text">
             <mat-autocomplete #auto="matAutocomplete" (optionSelected)="searchBasket()">
-              <mat-option *ngFor="let workbasketName of filteredWorkbasketNames"
-                          [value]="workbasketName">
-                {{ workbasketName }}
-              </mat-option>
+              @for (workbasketName of filteredWorkbasketNames; track workbasketName) {
+                <mat-option
+                  [value]="workbasketName">
+                  {{ workbasketName }}
+                </mat-option>
+              }
             </mat-autocomplete>
           </mat-form-field>
         </div>
@@ -64,13 +70,13 @@
 
         <!-- SEARCH BUTTON -->
         <button (click)="onFilter()" class="task-list-toolbar__button--primary"
-                mat-stroked-button matTooltip="Filter Tasks" style="top: 11px">
+          mat-stroked-button matTooltip="Filter Tasks" style="top: 11px">
           <mat-icon class="task-list-toolbar__mat-icon">search</mat-icon>
         </button>
 
         <!-- CLEAR BUTTON -->
         <button (click)="onClearFilter()" class="task-list-toolbar__button--secondary"
-                mat-stroked-button matTooltip="Clear Filter" style="top: 11px;">
+          mat-stroked-button matTooltip="Clear Filter" style="top: 11px;">
           <mat-icon class="task-list-toolbar__mat-icon">clear</mat-icon>
         </button>
 
@@ -85,14 +91,18 @@
 
         <!-- BUTTON TO FURTHER FILTER OPTIONS -->
         <button (click)="setFilterExpansion()" class="task-list-toolbar__button--secondary"
-                mat-stroked-button
-                matTooltip="Display more filter options" style="min-width: 1%">
-          <mat-icon *ngIf="!(isFilterExpanded$ | async)" class="task-list-toolbar__mat-icon">
-            keyboard_arrow_down
-          </mat-icon>
-          <mat-icon *ngIf="(isFilterExpanded$ | async)" class="task-list-toolbar__mat-icon">
-            keyboard_arrow_up
-          </mat-icon>
+          mat-stroked-button
+          matTooltip="Display more filter options" style="min-width: 1%">
+          @if (!(isFilterExpanded$ | async)) {
+            <mat-icon class="task-list-toolbar__mat-icon">
+              keyboard_arrow_down
+            </mat-icon>
+          }
+          @if ((isFilterExpanded$ | async)) {
+            <mat-icon class="task-list-toolbar__mat-icon">
+              keyboard_arrow_up
+            </mat-icon>
+          }
         </button>
 
         <div class="task-list-toolbar__spacer"></div>
@@ -102,8 +112,8 @@
           <mat-form-field>
             <mat-label>Filter Tasks</mat-label>
             <input (keyup.enter)="onFilter(); searched = true;" (ngModelChange)="updateState()"
-                   [(ngModel)]="filterInput" matInput
-                   placeholder="Filter" type="text">
+              [(ngModel)]="filterInput" matInput
+              placeholder="Filter" type="text">
           </mat-form-field>
         </div>
 
@@ -111,15 +121,15 @@
 
         <!-- SEARCH BUTTON -->
         <button (click)="onFilter(); searched = true"
-                class="task-list-toolbar__button--primary"
-                mat-stroked-button matTooltip="Filter Tasks" style="top: 11px">
+          class="task-list-toolbar__button--primary"
+          mat-stroked-button matTooltip="Filter Tasks" style="top: 11px">
           <mat-icon class="task-list-toolbar__mat-icon">search</mat-icon>
         </button>
 
         <!-- CLEAR BUTTON -->
         <button (click)="onClearFilter(); searched = true;"
-                class="task-list-toolbar__button--secondary"
-                mat-stroked-button matTooltip="Clear Filter" style="top: 11px;">
+          class="task-list-toolbar__button--secondary"
+          mat-stroked-button matTooltip="Clear Filter" style="top: 11px;">
           <mat-icon class="task-list-toolbar__mat-icon">clear</mat-icon>
         </button>
 
@@ -129,29 +139,29 @@
   </mat-tab-group>
 
   <!-- FURTHER FILTER OPTIONS -->
-  <div *ngIf="(isFilterExpanded$ | async)" class="task-list-toolbar__additional-filter">
-    <kadai-shared-task-filter></kadai-shared-task-filter>
-  </div>
+  @if ((isFilterExpanded$ | async)) {
+    <div class="task-list-toolbar__additional-filter">
+      <kadai-shared-task-filter></kadai-shared-task-filter>
+    </div>
+  }
 
 
   <!-- ADDITIONAL MENU WHEN TASK LIST IS DISPLAYED -->
-  <div *ngIf="searched" class="task-list-toolbar__additional-toolbar">
-
-    <!-- ADD TASK BUTTON -->
-    <button (click)="createTask()" class="task-list-toolbar__button--primary" mat-flat-button
-            matTooltip="Add Task">
-      Add
-      <mat-icon class="md-20">add</mat-icon>
-    </button>
-
-
-    <!-- SORT TASKS BUTTON -->
-    <kadai-shared-sort
-      (performSorting)="sorting($event)" [defaultSortBy]="taskDefaultSortBy"
-      [sortingFields]="sortingFields">
-    </kadai-shared-sort>
-
-  </div>
+  @if (searched) {
+    <div class="task-list-toolbar__additional-toolbar">
+      <!-- ADD TASK BUTTON -->
+      <button (click)="createTask()" class="task-list-toolbar__button--primary" mat-flat-button
+        matTooltip="Add Task">
+        Add
+        <mat-icon class="md-20">add</mat-icon>
+      </button>
+      <!-- SORT TASKS BUTTON -->
+      <kadai-shared-sort
+        (performSorting)="sorting($event)" [defaultSortBy]="taskDefaultSortBy"
+        [sortingFields]="sortingFields">
+      </kadai-shared-sort>
+    </div>
+  }
 
 </div>
 

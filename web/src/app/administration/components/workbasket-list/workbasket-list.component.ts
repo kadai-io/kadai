@@ -42,7 +42,7 @@ import { WorkbasketQueryFilterParameter } from '../../../shared/models/workbaske
 import { QueryPagingParameter } from '../../../shared/models/query-paging-parameter';
 import { FilterSelectors } from '../../../shared/store/filter-store/filter.selectors';
 import { WorkbasketListToolbarComponent } from '../workbasket-list-toolbar/workbasket-list-toolbar.component';
-import { AsyncPipe, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { IconTypeComponent } from '../type-icon/icon-type.component';
 import { MatDivider } from '@angular/material/divider';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
@@ -53,9 +53,7 @@ import { PaginationComponent } from '../../../shared/components/pagination/pagin
   styleUrls: ['./workbasket-list.component.scss'],
   imports: [
     WorkbasketListToolbarComponent,
-    NgIf,
     MatSelectionList,
-    NgFor,
     MatListOption,
     IconTypeComponent,
     MatDivider,

@@ -25,13 +25,13 @@ import { RequestInProgressService } from 'app/shared/services/request-in-progres
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { ReportTableComponent } from '../report-table/report-table.component';
 import { BaseChartDirective } from 'ng2-charts';
-import { DatePipe, NgIf } from '@angular/common';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'kadai-monitor-task-report',
   templateUrl: './task-report.component.html',
   styleUrls: ['./task-report.component.scss'],
-  imports: [ReportTableComponent, BaseChartDirective, NgIf, DatePipe],
+  imports: [ReportTableComponent, BaseChartDirective, DatePipe],
   providers: [MonitorService]
 })
 export class TaskReportComponent implements OnInit {
