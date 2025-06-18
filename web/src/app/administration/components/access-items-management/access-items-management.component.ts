@@ -17,7 +17,7 @@
  */
 
 import { Component, inject, OnInit } from '@angular/core';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import {
   FormArray,
   FormBuilder,
@@ -125,11 +125,12 @@ export class AccessItemsManagementComponent implements OnInit {
   };
   accessItems: WorkbasketAccessItems[];
   isGroup: boolean = false;
-  @Select(EngineConfigurationSelectors.accessItemsCustomisation)
-  accessItemsCustomization$: Observable<AccessItemsCustomisation>;
-  @Select(AccessItemsManagementSelector.groups) groups$: Observable<AccessId[]>;
+  accessItemsCustomization$: Observable<AccessItemsCustomisation> = inject(Store).select(
+    EngineConfigurationSelectors.accessItemsCustomisation
+  );
+  groups$: Observable<AccessId[]> = inject(Store).select(AccessItemsManagementSelector.groups);
   customFields$: Observable<CustomField[]>;
-  @Select(AccessItemsManagementSelector.permissions) permissions$: Observable<AccessId[]>;
+  permissions$: Observable<AccessId[]> = inject(Store).select(AccessItemsManagementSelector.permissions);
   destroy$ = new Subject<void>();
   private formBuilder = inject(FormBuilder);
   private formsValidatorService = inject(FormsValidatorService);

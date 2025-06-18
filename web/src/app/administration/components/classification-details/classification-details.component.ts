@@ -17,7 +17,7 @@
  */
 
 import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 
 import { highlight } from 'app/shared/animations/validation.animation';
@@ -91,11 +91,17 @@ import { MatOption } from '@angular/material/core';
 })
 export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   classification: Classification;
-  @Select(ClassificationSelectors.selectCategories) categories$: Observable<string[]>;
-  @Select(EngineConfigurationSelectors.selectCategoryIcons) categoryIcons$: Observable<ClassificationCategoryImages>;
-  @Select(ClassificationSelectors.selectedClassificationType) selectedClassificationType$: Observable<string>;
-  @Select(ClassificationSelectors.selectedClassification) selectedClassification$: Observable<Classification>;
-  @Select(ClassificationSelectors.getBadgeMessage) badgeMessage$: Observable<string>;
+  categories$: Observable<string[]> = inject(Store).select(ClassificationSelectors.selectCategories);
+  categoryIcons$: Observable<ClassificationCategoryImages> = inject(Store).select(
+    EngineConfigurationSelectors.selectCategoryIcons
+  );
+  selectedClassificationType$: Observable<string> = inject(Store).select(
+    ClassificationSelectors.selectedClassificationType
+  );
+  selectedClassification$: Observable<Classification> = inject(Store).select(
+    ClassificationSelectors.selectedClassification
+  );
+  badgeMessage$: Observable<string> = inject(Store).select(ClassificationSelectors.getBadgeMessage);
   customFields$: Observable<CustomField[]>;
   isCreatingNewClassification: boolean = false;
   readonly lengthError = 'You have reached the maximum length for this field';

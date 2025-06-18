@@ -34,7 +34,7 @@ import { TreeNodeModel } from 'app/administration/models/tree-node';
 import { ITreeOptions, KEYS, TREE_ACTIONS, TreeComponent, TreeModule } from '@ali-hm/angular-tree-component';
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { filter, map, takeUntil } from 'rxjs/operators';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 
 import { Location } from '@angular/common';
@@ -70,10 +70,16 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
   @Input() filterText: string;
   @Input() filterIcon = '';
   @Output() switchKadaiSpinnerEmit = new EventEmitter<boolean>();
-  @Select(EngineConfigurationSelectors.selectCategoryIcons) categoryIcons$: Observable<ClassificationCategoryImages>;
-  @Select(ClassificationSelectors.selectedClassificationId) selectedClassificationId$: Observable<string>;
-  @Select(ClassificationSelectors.classifications) classifications$: Observable<Classification[]>;
-  @Select(ClassificationSelectors.selectedClassificationType) classificationTypeSelected$: Observable<string>;
+  categoryIcons$: Observable<ClassificationCategoryImages> = inject(Store).select(
+    EngineConfigurationSelectors.selectCategoryIcons
+  );
+  selectedClassificationId$: Observable<string> = inject(Store).select(
+    ClassificationSelectors.selectedClassificationId
+  );
+  classifications$: Observable<Classification[]> = inject(Store).select(ClassificationSelectors.classifications);
+  classificationTypeSelected$: Observable<string> = inject(Store).select(
+    ClassificationSelectors.selectedClassificationType
+  );
   options: ITreeOptions = {
     displayField: 'name',
     idField: 'classificationId',

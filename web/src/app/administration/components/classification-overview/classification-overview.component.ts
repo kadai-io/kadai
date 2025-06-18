@@ -19,7 +19,7 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { takeUntil } from 'rxjs/operators';
 import { ClassificationSelectors } from '../../../shared/store/classification-store/classification.selectors';
 import {
@@ -41,7 +41,9 @@ import { SvgIconComponent } from 'angular-svg-icon';
 })
 export class ClassificationOverviewComponent implements OnInit, OnDestroy {
   showDetail = false;
-  @Select(ClassificationSelectors.selectedClassification) selectedClassification$: Observable<Classification>;
+  selectedClassification$: Observable<Classification> = inject(Store).select(
+    ClassificationSelectors.selectedClassification
+  );
   routerParams: any;
   private route = inject(ActivatedRoute);
   private store = inject(Store);

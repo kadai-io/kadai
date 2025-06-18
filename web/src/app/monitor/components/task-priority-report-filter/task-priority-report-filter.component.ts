@@ -16,8 +16,8 @@
  *
  */
 
-import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
-import { Select } from '@ngxs/store';
+import { Component, EventEmitter, inject, OnDestroy, OnInit, Output } from '@angular/core';
+import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 import { SettingsSelectors } from '../../../shared/store/settings-store/settings.selectors';
 import { Settings } from '../../../settings/models/settings';
@@ -47,8 +47,7 @@ export class TaskPriorityReportFilterComponent implements OnInit, OnDestroy {
 
   @Output() applyFilter = new EventEmitter<Object>();
 
-  @Select(SettingsSelectors.getSettings)
-  settings$: Observable<Settings>;
+  settings$: Observable<Settings> = inject(Store).select(SettingsSelectors.getSettings);
 
   ngOnInit() {
     this.settings$.pipe(takeUntil(this.destroy$)).subscribe((settings) => {

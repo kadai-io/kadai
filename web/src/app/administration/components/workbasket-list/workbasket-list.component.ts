@@ -26,7 +26,7 @@ import { Direction, Sorting, WorkbasketQuerySortParameter } from 'app/shared/mod
 import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
 import { OrientationService } from 'app/shared/services/orientation/orientation.service';
 import { ImportExportService } from 'app/administration/services/import-export.service';
-import { Actions, ofActionCompleted, ofActionDispatched, Select, Store } from '@ngxs/store';
+import { Actions, ofActionCompleted, ofActionDispatched, Store } from '@ngxs/store';
 import { takeUntil } from 'rxjs/operators';
 import {
   DeselectWorkbasket,
@@ -78,14 +78,14 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   requestInProgressLocal = false;
   resetPagingSubject = new Subject<null>();
   @Input() expanded: boolean;
-  @Select(WorkbasketSelectors.workbasketsSummary)
-  workbasketsSummary$: Observable<WorkbasketSummary[]>;
-  @Select(WorkbasketSelectors.workbasketsSummaryRepresentation)
-  workbasketsSummaryRepresentation$: Observable<WorkbasketSummaryRepresentation>;
-  @Select(WorkbasketSelectors.selectedWorkbasket)
-  selectedWorkbasket$: Observable<Workbasket>;
-  @Select(FilterSelectors.getWorkbasketListFilter)
-  getWorkbasketListFilter$: Observable<WorkbasketQueryFilterParameter>;
+  workbasketsSummary$: Observable<WorkbasketSummary[]> = inject(Store).select(WorkbasketSelectors.workbasketsSummary);
+  workbasketsSummaryRepresentation$: Observable<WorkbasketSummaryRepresentation> = inject(Store).select(
+    WorkbasketSelectors.workbasketsSummaryRepresentation
+  );
+  selectedWorkbasket$: Observable<Workbasket> = inject(Store).select(WorkbasketSelectors.selectedWorkbasket);
+  getWorkbasketListFilter$: Observable<WorkbasketQueryFilterParameter> = inject(Store).select(
+    FilterSelectors.getWorkbasketListFilter
+  );
   destroy$ = new Subject<void>();
   @ViewChild('workbasket') workbasketList: MatSelectionList;
   private store = inject(Store);

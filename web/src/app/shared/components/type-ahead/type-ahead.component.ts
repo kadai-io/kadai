@@ -22,7 +22,7 @@ import { debounceTime, distinctUntilChanged, Observable, Subject } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { AccessId } from '../../models/access-id';
 import { map, take, takeUntil } from 'rxjs/operators';
-import { Select } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { WorkbasketSelectors } from '../../store/workbasket-store/workbasket.selectors';
 import { ButtonAction } from '../../../administration/models/button-action';
 import { EngineConfigurationSelectors } from '../../store/engine-configuration-store/engine-configuration.selectors';
@@ -60,10 +60,10 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
   @Input() displayError = false;
   @Output() accessIdEventEmitter = new EventEmitter<AccessId>();
   @Output() isFormValid = new EventEmitter<boolean>();
-  @Select(EngineConfigurationSelectors.globalCustomisation)
-  globalCustomisation$: Observable<GlobalCustomisation>;
-  @Select(WorkbasketSelectors.buttonAction)
-  buttonAction$: Observable<ButtonAction>;
+  globalCustomisation$: Observable<GlobalCustomisation> = inject(Store).select(
+    EngineConfigurationSelectors.globalCustomisation
+  );
+  buttonAction$: Observable<ButtonAction> = inject(Store).select(WorkbasketSelectors.buttonAction);
   name: string = '';
   lastSavedAccessId: string = '';
   filteredAccessIds: AccessId[] = [];

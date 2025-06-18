@@ -17,11 +17,11 @@
  */
 
 import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { take, takeUntil } from 'rxjs/operators';
-import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
+import { WorkbasketAndAction, WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
 
 import { CreateWorkbasket, SelectWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { Workbasket } from '../../../shared/models/workbasket';
@@ -39,8 +39,10 @@ import { SvgIconComponent } from 'angular-svg-icon';
 })
 export class WorkbasketOverviewComponent implements OnInit {
   showDetail = false;
-  @Select(WorkbasketSelectors.selectedWorkbasketAndAction) selectedWorkbasketAndAction$: Observable<any>;
-  @Select(WorkbasketSelectors.selectedWorkbasket) selectedWorkbasket$: Observable<Workbasket>;
+  selectedWorkbasketAndAction$: Observable<WorkbasketAndAction> = inject(Store).select(
+    WorkbasketSelectors.selectedWorkbasketAndAction
+  );
+  selectedWorkbasket$: Observable<Workbasket> = inject(Store).select(WorkbasketSelectors.selectedWorkbasket);
   destroy$ = new Subject<void>();
   routerParams: any;
   expanded = true;

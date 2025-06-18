@@ -21,7 +21,7 @@ import { forkJoin, Observable, Subject } from 'rxjs';
 
 import { Workbasket } from 'app/shared/models/workbasket';
 import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { filter, take, takeUntil } from 'rxjs/operators';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import {
@@ -50,10 +50,8 @@ export class WorkbasketDistributionTargetsComponent implements OnInit, OnDestroy
   sideBySide = true;
   displayingDistributionTargetsPicker = true;
   transferDistributionTargetObservable = new Subject<Side>();
-  @Select(WorkbasketSelectors.buttonAction)
-  buttonAction$: Observable<ButtonAction>;
-  @Select(WorkbasketSelectors.selectedWorkbasket)
-  selectedWorkbasket$: Observable<Workbasket>;
+  buttonAction$: Observable<ButtonAction> = inject(Store).select(WorkbasketSelectors.buttonAction);
+  selectedWorkbasket$: Observable<Workbasket> = inject(Store).select(WorkbasketSelectors.selectedWorkbasket);
   destroy$ = new Subject<void>();
   private notificationsService = inject(NotificationService);
   private store = inject(Store);

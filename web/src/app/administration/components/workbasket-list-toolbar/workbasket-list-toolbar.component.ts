@@ -21,7 +21,7 @@ import { Sorting, WORKBASKET_SORT_PARAMETER_NAMING, WorkbasketQuerySortParameter
 import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
 import { KadaiType } from 'app/shared/models/kadai-type';
 import { expandDown } from 'app/shared/animations/expand.animation';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ACTION } from '../../../shared/models/action';
@@ -52,8 +52,7 @@ export class WorkbasketListToolbarComponent implements OnInit {
   sortingFields: Map<WorkbasketQuerySortParameter, string> = WORKBASKET_SORT_PARAMETER_NAMING;
   isExpanded = false;
   showFilter = false;
-  @Select(WorkbasketSelectors.workbasketActiveAction)
-  workbasketActiveAction$: Observable<ACTION>;
+  workbasketActiveAction$: Observable<ACTION> = inject(Store).select(WorkbasketSelectors.workbasketActiveAction);
   destroy$ = new Subject<void>();
   action: ACTION;
   private store = inject(Store);
