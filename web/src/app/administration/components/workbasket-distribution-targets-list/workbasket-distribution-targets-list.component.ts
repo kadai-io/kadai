@@ -34,7 +34,7 @@ import { expandDown } from 'app/shared/animations/expand.animation';
 import { MatListOption, MatSelectionList } from '@angular/material/list';
 import { CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { Side } from '../../models/workbasket-distribution-enums';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
 import { filter, map, pairwise, take, takeUntil, throttleTime } from 'rxjs/operators';
 import {
@@ -85,14 +85,18 @@ export class WorkbasketDistributionTargetsListComponent
   allSelected;
   @Input() component;
   @Input() transferDistributionTargetObservable: Observable<Side>;
-  @Select(WorkbasketSelectors.workbasketDistributionTargets)
-  workbasketDistributionTargets$: Observable<WorkbasketSummary[]>;
-  @Select(WorkbasketSelectors.availableDistributionTargets)
-  availableDistributionTargets$: Observable<WorkbasketSummary[]>;
-  @Select(FilterSelectors.getAvailableDistributionTargetsFilter)
-  availableDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter>;
-  @Select(FilterSelectors.getSelectedDistributionTargetsFilter)
-  selectedDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter>;
+  workbasketDistributionTargets$: Observable<WorkbasketSummary[]> = inject(Store).select(
+    WorkbasketSelectors.workbasketDistributionTargets
+  );
+  availableDistributionTargets$: Observable<WorkbasketSummary[]> = inject(Store).select(
+    WorkbasketSelectors.availableDistributionTargets
+  );
+  availableDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter> = inject(Store).select(
+    FilterSelectors.getAvailableDistributionTargetsFilter
+  );
+  selectedDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter> = inject(Store).select(
+    FilterSelectors.getSelectedDistributionTargetsFilter
+  );
   toolbarState = false;
   distributionTargets: WorkbasketDistributionTarget[];
   distributionTargetsClone: WorkbasketDistributionTarget[];

@@ -29,7 +29,7 @@ import { TaskQueryFilterParameter } from '../../../shared/models/task-query-filt
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
-import { Actions, ofActionCompleted, Select, Store } from '@ngxs/store';
+import { Actions, ofActionCompleted, Store } from '@ngxs/store';
 import { ClearTaskFilter, SetTaskFilter } from '../../../shared/store/filter-store/filter.actions';
 import { WorkplaceSelectors } from '../../../shared/store/workplace-store/workplace.selectors';
 import { SetFilterExpansion } from '../../../shared/store/workplace-store/workplace.actions';
@@ -94,7 +94,7 @@ export class TaskListToolbarComponent implements OnInit {
   searchSelected: Search = Search.byWorkbasket;
   activeTab: number = 0;
   filterInput = '';
-  @Select(WorkplaceSelectors.getFilterExpansion) isFilterExpanded$: Observable<boolean>;
+  isFilterExpanded$: Observable<boolean> = inject(Store).select(WorkplaceSelectors.getFilterExpansion);
   destroy$ = new Subject<void>();
   private kadaiEngineService = inject(KadaiEngineService);
   private taskService = inject(TaskService);

@@ -31,7 +31,6 @@ import {
 import { Task } from 'app/workplace/models/task';
 import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
 import { FormsModule, NgForm } from '@angular/forms';
-import { Select } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
@@ -54,6 +53,7 @@ import {
   MatDatepickerModule,
   MatDatepickerToggle
 } from '@angular/material/datepicker';
+import { Store } from '@ngxs/store';
 
 @Component({
   selector: 'kadai-task-information',
@@ -96,7 +96,9 @@ export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
   readonly lengthError = 'You have reached the maximum length';
   inputOverflowMap = new Map<string, boolean>();
   validateInputOverflow: Function;
-  @Select(EngineConfigurationSelectors.tasksCustomisation) tasksCustomisation$: Observable<TasksCustomisation>;
+  tasksCustomisation$: Observable<TasksCustomisation> = inject(Store).select(
+    EngineConfigurationSelectors.tasksCustomisation
+  );
   private classificationService = inject(ClassificationsService);
   private formsValidatorService = inject(FormsValidatorService);
   private destroy$ = new Subject<void>();

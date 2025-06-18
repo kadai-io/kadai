@@ -31,7 +31,7 @@ import {
   ViewChildren
 } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { Actions, ofActionCompleted, Select, Store } from '@ngxs/store';
+import { Actions, ofActionCompleted, Store } from '@ngxs/store';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { Workbasket } from 'app/shared/models/workbasket';
@@ -98,13 +98,15 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
   isNewAccessItemsFromStore = false;
   isAccessItemsTabSelected = false;
   destroy$ = new Subject<void>();
-  @Select(WorkbasketSelectors.selectedWorkbasket) selectedWorkbasket$: Observable<Workbasket>;
-  @Select(EngineConfigurationSelectors.accessItemsCustomisation)
-  accessItemsCustomization$: Observable<AccessItemsCustomisation>;
-  @Select(WorkbasketSelectors.workbasketAccessItems)
-  accessItemsRepresentation$: Observable<WorkbasketAccessItemsRepresentation>;
-  @Select(WorkbasketSelectors.buttonAction) buttonAction$: Observable<ButtonAction>;
-  @Select(WorkbasketSelectors.selectedComponent) selectedComponent$: Observable<WorkbasketComponent>;
+  selectedWorkbasket$: Observable<Workbasket> = inject(Store).select(WorkbasketSelectors.selectedWorkbasket);
+  accessItemsCustomization$: Observable<AccessItemsCustomisation> = inject(Store).select(
+    EngineConfigurationSelectors.accessItemsCustomisation
+  );
+  accessItemsRepresentation$: Observable<WorkbasketAccessItemsRepresentation> = inject(Store).select(
+    WorkbasketSelectors.workbasketAccessItems
+  );
+  buttonAction$: Observable<ButtonAction> = inject(Store).select(WorkbasketSelectors.buttonAction);
+  selectedComponent$: Observable<WorkbasketComponent> = inject(Store).select(WorkbasketSelectors.selectedComponent);
   private requestInProgressService = inject(RequestInProgressService);
   private formBuilder = inject(FormBuilder);
   AccessItemsForm = this.formBuilder.group({

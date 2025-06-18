@@ -19,7 +19,7 @@
 import { Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { ALL_TYPES, WorkbasketType } from '../../models/workbasket-type';
 import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-filter-parameter';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { ClearWorkbasketFilter, SetWorkbasketFilter } from '../../store/filter-store/filter.actions';
 import { FilterSelectors } from '../../store/filter-store/filter.selectors';
 import { Observable, Subject } from 'rxjs';
@@ -58,12 +58,15 @@ export class WorkbasketFilterComponent implements OnInit, OnDestroy {
   allTypes: Map<WorkbasketType, string> = ALL_TYPES;
   @Input() component: string;
   @Input() isExpanded: boolean;
-  @Select(FilterSelectors.getAvailableDistributionTargetsFilter)
-  availableDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter>;
-  @Select(FilterSelectors.getSelectedDistributionTargetsFilter)
-  selectedDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter>;
-  @Select(FilterSelectors.getWorkbasketListFilter)
-  workbasketListFilter$: Observable<WorkbasketQueryFilterParameter>;
+  availableDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter> = inject(Store).select(
+    FilterSelectors.getAvailableDistributionTargetsFilter
+  );
+  selectedDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter> = inject(Store).select(
+    FilterSelectors.getSelectedDistributionTargetsFilter
+  );
+  workbasketListFilter$: Observable<WorkbasketQueryFilterParameter> = inject(Store).select(
+    FilterSelectors.getWorkbasketListFilter
+  );
   destroy$ = new Subject<void>();
   filter: WorkbasketQueryFilterParameter;
   private store = inject(Store);

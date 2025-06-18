@@ -20,7 +20,7 @@ import { AfterViewChecked, Component, inject, OnDestroy, OnInit } from '@angular
 import { ReportData } from '../../models/report-data';
 import { MonitorService } from '../../services/monitor.service';
 import { WorkbasketType } from '../../../shared/models/workbasket-type';
-import { Select } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 import { SettingsSelectors } from '../../../shared/store/settings-store/settings.selectors';
 import { Settings } from '../../../settings/models/settings';
@@ -80,8 +80,7 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
   colorMediumPriority: string;
   colorLowPriority: string;
   destroy$ = new Subject<void>();
-  @Select(SettingsSelectors.getSettings)
-  settings$: Observable<Settings>;
+  settings$: Observable<Settings> = inject(Store).select(SettingsSelectors.getSettings);
   private monitorService = inject(MonitorService);
   private requestInProgressService = inject(RequestInProgressService);
 

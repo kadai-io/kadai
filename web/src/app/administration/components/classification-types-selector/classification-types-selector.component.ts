@@ -18,7 +18,7 @@
 
 import { Component, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
 import { SetSelectedClassificationType } from 'app/shared/store/classification-store/classification.actions';
 import { AsyncPipe, Location } from '@angular/common';
@@ -34,8 +34,10 @@ import { MatOption } from '@angular/material/core';
   imports: [MatFormField, MatLabel, MatSelect, MatTooltip, MatOption, AsyncPipe]
 })
 export class ClassificationTypesSelectorComponent {
-  @Select(ClassificationSelectors.selectedClassificationType) classificationTypeSelected$: Observable<string>;
-  @Select(ClassificationSelectors.classificationTypes) classificationTypes$: Observable<string[]>;
+  classificationTypeSelected$: Observable<string> = inject(Store).select(
+    ClassificationSelectors.selectedClassificationType
+  );
+  classificationTypes$: Observable<string[]> = inject(Store).select(ClassificationSelectors.classificationTypes);
   private store = inject(Store);
   private location = inject(Location);
 

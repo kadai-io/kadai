@@ -19,7 +19,7 @@
 import { Component, inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { FormsModule, NgForm } from '@angular/forms';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { ACTION } from 'app/shared/models/action';
 import { customFieldCount, Workbasket } from 'app/shared/models/workbasket';
 import { KadaiDate } from 'app/shared/util/kadai.date';
@@ -93,12 +93,11 @@ export class WorkbasketInformationComponent implements OnInit, OnChanges, OnDest
   readonly lengthError = 'You have reached the maximum length for this field';
   inputOverflowMap = new Map<string, boolean>();
   validateInputOverflow: Function;
-  @Select(EngineConfigurationSelectors.workbasketsCustomisation)
-  workbasketsCustomisation$: Observable<WorkbasketsCustomisation>;
-  @Select(WorkbasketSelectors.buttonAction)
-  buttonAction$: Observable<ButtonAction>;
-  @Select(WorkbasketSelectors.selectedComponent)
-  selectedComponent$: Observable<WorkbasketComponent>;
+  workbasketsCustomisation$: Observable<WorkbasketsCustomisation> = inject(Store).select(
+    EngineConfigurationSelectors.workbasketsCustomisation
+  );
+  buttonAction$: Observable<ButtonAction> = inject(Store).select(WorkbasketSelectors.buttonAction);
+  selectedComponent$: Observable<WorkbasketComponent> = inject(Store).select(WorkbasketSelectors.selectedComponent);
   customFields$: Observable<CustomField[]>;
   destroy$ = new Subject<void>();
   private workbasketService = inject(WorkbasketService);

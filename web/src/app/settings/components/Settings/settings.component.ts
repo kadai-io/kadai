@@ -19,7 +19,7 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Settings, SettingTypes } from '../../models/settings';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { SetSettings } from '../../../shared/store/settings-store/settings.actions';
 import { SettingsSelectors } from '../../../shared/store/settings-store/settings.selectors';
@@ -47,7 +47,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   oldSettings: Settings;
   invalidMembers: string[] = [];
   destroy$ = new Subject<void>();
-  @Select(SettingsSelectors.getSettings) settings$: Observable<Settings>;
+  settings$: Observable<Settings> = inject(Store).select(SettingsSelectors.getSettings);
   private store = inject(Store);
   private notificationService = inject(NotificationService);
   private requestInProgressService = inject(RequestInProgressService);

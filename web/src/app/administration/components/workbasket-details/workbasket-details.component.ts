@@ -20,7 +20,7 @@ import { Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { Observable, of, Subject, timeout } from 'rxjs';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { ACTION } from 'app/shared/models/action';
-import { Actions, ofActionSuccessful, Select, Store } from '@ngxs/store';
+import { Actions, ofActionSuccessful, Store } from '@ngxs/store';
 import { catchError, filter, take, takeUntil } from 'rxjs/operators';
 import {
   WorkbasketAndComponentAndAction,
@@ -72,14 +72,12 @@ import { WorkbasketDistributionTargetsComponent } from '../workbasket-distributi
 export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
   workbasket: Workbasket;
   action: ACTION;
-  @Select(WorkbasketSelectors.selectedComponent)
-  selectedTab$: Observable<number>;
-  @Select(WorkbasketSelectors.badgeMessage)
-  badgeMessage$: Observable<string>;
-  @Select(WorkbasketSelectors.selectedWorkbasketAndComponentAndAction)
-  selectedWorkbasketAndComponentAndAction$: Observable<WorkbasketAndComponentAndAction>;
-  @Select(WorkbasketSelectors.selectedWorkbasket)
-  selectedWorkbasket$: Observable<Workbasket>;
+  selectedTab$: Observable<number> = inject(Store).select(WorkbasketSelectors.selectedComponent);
+  badgeMessage$: Observable<string> = inject(Store).select(WorkbasketSelectors.badgeMessage);
+  selectedWorkbasketAndComponentAndAction$: Observable<WorkbasketAndComponentAndAction> = inject(Store).select(
+    WorkbasketSelectors.selectedWorkbasketAndComponentAndAction
+  );
+  selectedWorkbasket$: Observable<Workbasket> = inject(Store).select(WorkbasketSelectors.selectedWorkbasket);
   destroy$ = new Subject<void>();
   @Input() expanded: boolean;
   private store = inject(Store);
