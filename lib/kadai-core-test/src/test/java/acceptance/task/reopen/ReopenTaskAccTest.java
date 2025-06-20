@@ -167,15 +167,13 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
 
     Task reopenedTask = taskService.reopen(task.getId());
 
-    assertThat(reopenedTask)
-        .isNotNull()
-        .extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
+    assertThat(reopenedTask).isNotNull().extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
   }
 
   @ParameterizedTest
-  @MethodSource("provideFinalStates")
+  @MethodSource("provideInvalidStates")
   @WithAccessId(user = "user-1-2")
-  void should_ThrowInvalidTaskStateException_For_FinalState(TaskState state) throws Exception {
+  void should_ThrowInvalidTaskStateException_For_InvalidStates(TaskState state) throws Exception {
     Task task =
         TaskBuilder.newTask()
             .classificationSummary(defaultClassificationSummary)
@@ -188,26 +186,8 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
 
     assertThatExceptionOfType(InvalidTaskStateException.class)
         .isThrownBy(call)
-        .extracting(InvalidTaskStateException::getTaskState).isEqualTo(state);
-  }
-
-  @ParameterizedTest
-  @MethodSource("provideNonEndStates")
-  @WithAccessId(user = "user-1-2")
-  void should_ThrowInvalidTaskStateException_For_NonEndState(TaskState state) throws Exception {
-    Task task =
-        TaskBuilder.newTask()
-            .classificationSummary(defaultClassificationSummary)
-            .workbasketSummary(defaultWorkbasketSummary)
-            .primaryObjRef(defaultObjectReference)
-            .state(state)
-            .buildAndStore(taskService);
-
-    ThrowingCallable call = () -> taskService.reopen(task.getId());
-
-    assertThatExceptionOfType(InvalidTaskStateException.class)
-        .isThrownBy(call)
-        .extracting(InvalidTaskStateException::getTaskState).isEqualTo(state);
+        .extracting(InvalidTaskStateException::getTaskState)
+        .isEqualTo(state);
   }
 
   @Test
@@ -224,9 +204,7 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
 
     Task reopenedTask = taskService.reopen(task.getId());
 
-    assertThat(reopenedTask)
-        .isNotNull()
-        .extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
+    assertThat(reopenedTask).isNotNull().extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
   }
 
   @Test
@@ -243,9 +221,7 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
 
     Task reopenedTask = taskService.reopen(task.getId());
 
-    assertThat(reopenedTask)
-        .isNotNull()
-        .extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
+    assertThat(reopenedTask).isNotNull().extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
   }
 
   @ParameterizedTest
@@ -266,7 +242,8 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
 
     assertThatExceptionOfType(ReopenTaskWithCallbackException.class)
         .isThrownBy(call)
-        .extracting(ReopenTaskWithCallbackException::getTaskId).isEqualTo(task.getId());
+        .extracting(ReopenTaskWithCallbackException::getTaskId)
+        .isEqualTo(task.getId());
   }
 
   @ParameterizedTest
@@ -290,9 +267,7 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
       reopenedTask = taskService.reopen(task.getId());
     }
 
-    assertThat(reopenedTask)
-        .isNotNull()
-        .extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
+    assertThat(reopenedTask).isNotNull().extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
   }
 
   @Test
@@ -312,11 +287,8 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
     PrivilegedExceptionAction<Task> reopenAction = () -> taskService.reopen(task.getId());
     Task reopenedTask = Subject.doAs(subject, reopenAction);
 
-    assertThat(reopenedTask)
-        .isNotNull()
-        .extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
-    assertThat(reopenedTask)
-        .extracting(TaskSummary::getOwner).isEqualTo(thatPrincipal.getName());
+    assertThat(reopenedTask).isNotNull().extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
+    assertThat(reopenedTask).extracting(TaskSummary::getOwner).isEqualTo(thatPrincipal.getName());
     assertThat(reopenedTask)
         .extracting(TaskSummary::getOwnerLongName)
         .isEqualTo("Long name of user-1-3");
@@ -337,9 +309,7 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
 
     Task reopenedTask = taskService.reopen(task.getId());
 
-    assertThat(reopenedTask)
-        .isNotNull()
-        .extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
+    assertThat(reopenedTask).isNotNull().extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
     assertThat(reopenedTask.getModified()).isAfter(then);
   }
 
@@ -358,9 +328,7 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
 
     Task reopenedTask = taskService.reopen(task.getId());
 
-    assertThat(reopenedTask)
-        .isNotNull()
-        .extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
+    assertThat(reopenedTask).isNotNull().extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
     assertThat(reopenedTask.getClaimed()).isAfter(then);
   }
 
@@ -378,9 +346,7 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
 
     Task reopenedTask = taskService.reopen(task.getId());
 
-    assertThat(reopenedTask)
-        .isNotNull()
-        .extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
+    assertThat(reopenedTask).isNotNull().extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
     assertThat(reopenedTask.getCompleted()).isNull();
   }
 
@@ -398,9 +364,7 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
 
     Task reopenedTask = taskService.reopen(task.getId());
 
-    assertThat(reopenedTask)
-        .isNotNull()
-        .extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
+    assertThat(reopenedTask).isNotNull().extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
     assertThat(reopenedTask.isRead()).isFalse();
   }
 
@@ -418,9 +382,7 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
 
     Task reopenedTask = taskService.reopen(task.getId());
 
-    assertThat(reopenedTask)
-        .isNotNull()
-        .extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
+    assertThat(reopenedTask).isNotNull().extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
     assertThat(reopenedTask.isReopened()).isTrue();
   }
 
@@ -474,12 +436,13 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
     @BeforeEach
     @WithAccessId(user = "user-1-2")
     void setUp() throws Exception {
-      task = TaskBuilder.newTask()
-          .classificationSummary(defaultClassificationSummary)
-          .workbasketSummary(defaultWorkbasketSummary)
-          .primaryObjRef(defaultObjectReference)
-          .state(TaskState.COMPLETED)
-          .buildAndStore(taskService);
+      task =
+          TaskBuilder.newTask()
+              .classificationSummary(defaultClassificationSummary)
+              .workbasketSummary(defaultWorkbasketSummary)
+              .primaryObjRef(defaultObjectReference)
+              .state(TaskState.COMPLETED)
+              .buildAndStore(taskService);
     }
 
     @Test
@@ -512,6 +475,10 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
 
   private static Stream<Arguments> provideNonEndStates() {
     return Arrays.stream(EnumUtil.allValuesExceptFor(TaskState.END_STATES)).map(Arguments::of);
+  }
+
+  private static Stream<Arguments> provideInvalidStates() {
+    return Stream.concat(provideFinalStates(), provideNonEndStates());
   }
 
   private static Stream<Arguments> provideActualCallbackStates() {
