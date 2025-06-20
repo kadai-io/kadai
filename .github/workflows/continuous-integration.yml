@@ -615,3 +615,15 @@ jobs:
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
+
+  test_migrations:
+    name: Test DB Migrations
+    runs-on: ubuntu-22.04
+    needs: [ compile_backend ]
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Run migration test script
+        run: ci/test-migrations.sh
