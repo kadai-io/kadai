@@ -1,0 +1,24 @@
+cabal-version: 3.14
+name: release-drafter-experimentation
+version: 0.1.0.0
+author: Julian Bruder
+maintainer: julian.bruder@outlook.com
+category: Development
+build-type: Simple
+
+common warnings
+  ghc-options: -Wall
+
+executable release-notes-postprocessor
+  import: warnings
+  main-is: Main.hs
+  build-depends:
+      base       >= 4.20.0 && < 4.21
+    , attoparsec >= 0.14.4 && < 0.15
+    , containers >= 0.7    && < 0.8
+    , text       >= 2.1.1  && < 2.2
+    , lens       >= 5.3.4  && < 5.4
+
+
+  hs-source-dirs: app
+  default-language: GHC2024
