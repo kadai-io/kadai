@@ -56,7 +56,7 @@ public class PriorityServiceManager {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug(
             "Skip using PriorityServiceProviders because the Task is prioritised manually: {}",
-            task);
+            LogSanitizer.stripLineBreakingChars(task));
       }
       return OptionalInt.empty();
     }
