@@ -19,6 +19,7 @@
 package io.kadai.spi.task.internal;
 
 import io.kadai.common.internal.util.CheckedConsumer;
+import io.kadai.common.internal.util.LogSanitizer;
 import io.kadai.common.internal.util.SpiLoader;
 import io.kadai.spi.task.api.CreateTaskPreprocessor;
 import io.kadai.task.api.models.Task;
@@ -44,7 +45,9 @@ public class CreateTaskPreprocessorManager {
 
   public Task processTaskBeforeCreation(Task taskToProcess) {
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Sending task to CreateTaskPreprocessor providers: {}", taskToProcess);
+      LOGGER.debug(
+          "Sending task to CreateTaskPreprocessor providers: {}",
+          LogSanitizer.stripLineBreakingChars(taskToProcess));
     }
     createTaskPreprocessors.forEach(
         CheckedConsumer.wrapping(

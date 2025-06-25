@@ -61,7 +61,9 @@ public class PriorityServiceManager {
       return OptionalInt.empty();
     }
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Sending Task to PriorityServiceProviders: {}", task);
+      LOGGER.debug(
+          "Sending Task to PriorityServiceProviders: {}",
+          LogSanitizer.stripLineBreakingChars(task));
     }
 
     Set<OptionalInt> priorities =
