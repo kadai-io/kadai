@@ -78,6 +78,12 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+          <groupId>io.kadai</groupId>
+          <artifactId>kadai-spring</artifactId>
+          <version>${project.version}</version>
+          <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>
