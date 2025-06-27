@@ -1,0 +1,104 @@
+name: Release-Note-Automation
+
+on:
+  workflow_dispatch:
+  push:
+    # branches to consider in the event; optional, defaults to all
+    branches:
+      - master
+
+  # pull_request event is required only for autolabeler
+  pull_request:
+    # Only following types are handled by the action, but one can default to all as well
+    types: [opened, reopened, synchronize]
+  # pull_request_target event is required for autolabeler to support PRs from forks
+  # pull_request_target:
+  #   types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+
+jobs:
+  update_release_draft:
+    permissions:
+      # write permission is required to create a github release
+      contents: write
+      # write permission is required for autolabeler
+      # otherwise, read permission is required at least
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      # (Optional) GitHub Enterprise requires GHE_HOST variable set
+      #- name: Set GHE_HOST
+      #  run: |
+      #    echo "GHE_HOST=${GITHUB_SERVER_URL##https:\/\/}" >> $GITHUB_ENV
+
+      # Drafts your next Release notes as Pull Requests are merged into "master"
+      - uses: release-drafter/release-drafter@v6
+        # (Optional) specify config name to use, relative to .github/. Default: release-drafter.yml
+        # with:
+        #   config-name: my-config.yml
+        #   disable-autolabeler: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  postprocess:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: update_release_draft
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Haskell
+        uses: haskell-actions/setup@v2
+        with:
+          ghc-version: "9.10.1"
+          cabal-version: "3.14.2.0"
+
+      - name: Build Release-Notes-Postprocessor
+        run: |
+          cabal update
+          cabal build exe:release-notes-postprocessor
+          cp $(cabal list-bin exe:release-notes-postprocessor) ./release-notes-postprocessor
+
+      - name: Fetch latest draft release notes
+        id: fetch_release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const releases = await github.rest.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+
+            const draft = releases.data.find(r => r.draft);
+            if (!draft) {
+              throw new Error("No draft release found.");
+            }
+
+            const fs = require('fs');
+            fs.writeFileSync('original.md', draft.body || '');
+            core.setOutput('release_id', draft.id);
+
+      - name: Run Release-Notes-Postprocessor
+        run: |
+          ./release-notes-postprocessor < original.md > processed.md
+
+      - name: Update release with processed notes
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const newBody = fs.readFileSync('processed.md', 'utf8');
+            const release_id = core.getInput('release_id') || process.env.RELEASE_ID;
+
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: Number(release_id),
+              body: newBody
+            });
+        env:
+          RELEASE_ID: ${{ steps.fetch_release.outputs.release_id }}
