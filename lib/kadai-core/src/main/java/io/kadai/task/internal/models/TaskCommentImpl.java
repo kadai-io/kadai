@@ -19,11 +19,12 @@
 package io.kadai.task.internal.models;
 
 import io.kadai.task.api.models.TaskComment;
+import java.io.Serializable;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
-public class TaskCommentImpl implements TaskComment {
+public class TaskCommentImpl implements TaskComment, Serializable {
 
   private String id;
   private String taskId;

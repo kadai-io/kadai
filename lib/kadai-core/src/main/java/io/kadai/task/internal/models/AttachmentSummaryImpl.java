@@ -22,12 +22,13 @@ import io.kadai.classification.api.models.ClassificationSummary;
 import io.kadai.classification.internal.models.ClassificationSummaryImpl;
 import io.kadai.task.api.models.AttachmentSummary;
 import io.kadai.task.api.models.ObjectReference;
+import java.io.Serializable;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 /** The most important fields of the Attachment entity. */
-public class AttachmentSummaryImpl implements AttachmentSummary {
+public class AttachmentSummaryImpl implements AttachmentSummary, Serializable {
 
   protected String id;
   protected String taskId;

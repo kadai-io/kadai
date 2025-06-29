@@ -20,12 +20,13 @@ package io.kadai.task.internal.models;
 
 import io.kadai.task.api.CallbackState;
 import io.kadai.task.api.TaskState;
+import java.io.Serializable;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 /** A convenience class to represent pairs of task id and task state. */
-public class MinimalTaskSummary {
+public class MinimalTaskSummary implements Serializable {
 
   private String taskId;
   private String externalId;

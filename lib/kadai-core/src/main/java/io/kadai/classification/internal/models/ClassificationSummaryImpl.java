@@ -21,10 +21,11 @@ package io.kadai.classification.internal.models;
 import io.kadai.classification.api.ClassificationCustomField;
 import io.kadai.classification.api.models.ClassificationSummary;
 import io.kadai.common.api.exceptions.SystemException;
+import java.io.Serializable;
 import java.util.Objects;
 
 /** Implementation for the short summaries of a classification entity. */
-public class ClassificationSummaryImpl implements ClassificationSummary {
+public class ClassificationSummaryImpl implements ClassificationSummary, Serializable {
 
   protected String id;
   protected String applicationEntryPoint;
