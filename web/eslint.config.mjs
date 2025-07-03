@@ -22,7 +22,6 @@ export default [
       },
       parserOptions: {
         project: './tsconfig.json',
-        errorOnUnknownASTType: true,
         errorOnTypeScriptSyntacticAndSemanticIssues: true
       }
     }
