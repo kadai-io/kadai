@@ -1105,10 +1105,10 @@ public class WorkbasketServiceImpl implements WorkbasketService {
     // check that required properties (database not null) are set
     validateNameAndType(workbasket);
 
-    if (workbasket.getId() == null || workbasket.getId().length() == 0) {
+    if (workbasket.getId() == null || workbasket.getId().isEmpty()) {
       throw new InvalidArgumentException("Id must not be null for " + workbasket);
     }
-    if (workbasket.getKey() == null || workbasket.getKey().length() == 0) {
+    if (workbasket.getKey() == null || workbasket.getKey().isEmpty()) {
       throw new InvalidArgumentException("Key must not be null for " + workbasket);
     }
     if (workbasket.getDomain() == null) {
@@ -1132,7 +1132,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
     if (workbasket.getName() == null) {
       throw new InvalidArgumentException("Name must not be NULL for " + workbasket);
     }
-    if (workbasket.getName().length() == 0) {
+    if (workbasket.getName().isEmpty()) {
       throw new InvalidArgumentException("Name must not be EMPTY for " + workbasket);
     }
     if (workbasket.getType() == null) {

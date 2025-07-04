@@ -125,9 +125,7 @@ public class WorkbasketDefinitionController implements WorkbasketDefinitionApi {
           NotAuthorizedOnWorkbasketException,
           NotAuthorizedException {
     WorkbasketDefinitionCollectionRepresentationModel definitions =
-        mapper.readValue(
-            file.getInputStream(),
-            new TypeReference<WorkbasketDefinitionCollectionRepresentationModel>() {});
+        mapper.readValue(file.getInputStream(), new TypeReference<>() {});
 
     // key: logical ID
     // value: system ID (in database)
