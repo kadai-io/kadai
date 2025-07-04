@@ -21,6 +21,7 @@ package io.kadai.workbasket.rest;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.api.exceptions.LogicalDuplicateInPayloadException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.QueryPagingParameter;
 import io.kadai.common.rest.QuerySortParameter;
@@ -217,7 +218,7 @@ public class WorkbasketController implements WorkbasketApi {
       @RequestBody WorkbasketAccessItemCollectionRepresentationModel workbasketAccessItemRepModels)
       throws InvalidArgumentException,
           WorkbasketNotFoundException,
-          WorkbasketAccessItemAlreadyExistException,
+          LogicalDuplicateInPayloadException,
           NotAuthorizedException,
           NotAuthorizedOnWorkbasketException {
     if (workbasketAccessItemRepModels == null) {
