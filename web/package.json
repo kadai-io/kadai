@@ -29,7 +29,7 @@
     "@angular/core": "20.0.3",
     "@angular/forms": "20.0.3",
     "@angular/material": "20.0.3",
-    "@angular/platform-browser": "20.0.3",
+    "@angular/platform-browser": "20.0.6",
     "@angular/platform-browser-dynamic": "20.0.3",
     "@angular/router": "20.0.3",
     "@ngneat/hot-toast": "7.0.0",
