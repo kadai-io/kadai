@@ -248,7 +248,7 @@ class ClassificationDefinitionControllerIntTest {
         .isInstanceOf(HttpStatusCodeException.class)
         .extracting(HttpStatusCodeException.class::cast)
         .extracting(HttpStatusCodeException::getStatusCode)
-        .isEqualTo(HttpStatus.CONFLICT);
+        .isEqualTo(HttpStatus.BAD_REQUEST);
   }
 
   @Test

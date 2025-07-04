@@ -29,6 +29,7 @@ import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.ConnectionNotSetException;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.api.exceptions.LogicalDuplicateInPayloadException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.api.exceptions.UnsupportedDatabaseException;
@@ -85,6 +86,8 @@ class ExceptionErrorKeyTest {
     assertThat(WrongCustomHolidayFormatException.ERROR_KEY)
         .isEqualTo("CUSTOM_HOLIDAY_WRONG_FORMAT");
     assertThat(InvalidArgumentException.ERROR_KEY).isEqualTo("INVALID_ARGUMENT");
+    assertThat(LogicalDuplicateInPayloadException.ERROR_KEY)
+        .isEqualTo("LOGICAL_DUPLICATE_IN_PAYLOAD");
   }
 
   @Test
