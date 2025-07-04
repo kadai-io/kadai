@@ -157,7 +157,7 @@ public interface WorkbasketDefinitionApi {
             }),
         @ApiResponse(
             responseCode = "409",
-            description = "WORKBASKET_ACCESS_ITEM_ALREADY_EXISTS, " + "ENTITY_NOT_UP_TO_DATE",
+            description = "WORKBASKET_ACCESS_ITEM_ALREADY_EXISTS, ENTITY_NOT_UP_TO_DATE",
             content = {
               @Content(
                   schema =
