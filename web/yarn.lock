@@ -71,15 +71,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/animations@npm:20.0.3":
-  version: 20.0.3
-  resolution: "@angular/animations@npm:20.0.3"
+"@angular/animations@npm:20.0.6":
+  version: 20.0.6
+  resolution: "@angular/animations@npm:20.0.6"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/common": 20.0.3
-    "@angular/core": 20.0.3
-  checksum: 10c0/86b768b98be403410197a37a2766485394e159bc36cce5df199d0ff517af487f76c45ab67ebb510b55768f6409efeaf04d2bee37ea429a9b9fdd0995dc0c35a6
+    "@angular/common": 20.0.6
+    "@angular/core": 20.0.6
+  checksum: 10c0/85b5afb6fefe5a1b9ea59421d677ba345b3e95fba2d9edb4f3f1ae7cb5c67ba04de233143d56f0c512a4f03735c70bcc193b2c08f0ad371f82b14fe386baccec
   languageName: node
   linkType: hard
 
@@ -8062,7 +8062,7 @@ __metadata:
   resolution: "kadai@workspace:."
   dependencies:
     "@ali-hm/angular-tree-component": "npm:20.0.3"
-    "@angular/animations": "npm:20.0.3"
+    "@angular/animations": "npm:20.0.6"
     "@angular/build": "npm:^20.0.0"
     "@angular/cdk": "npm:20.0.3"
     "@angular/cli": "npm:20.0.2"
