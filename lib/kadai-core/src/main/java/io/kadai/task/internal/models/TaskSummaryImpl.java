@@ -99,13 +99,13 @@ public class TaskSummaryImpl implements TaskSummary {
   public TaskSummaryImpl() {}
 
   protected TaskSummaryImpl(TaskSummaryImpl copyFrom) {
-    received = copyFrom.received;
-    created = copyFrom.created;
-    claimed = copyFrom.claimed;
-    completed = copyFrom.completed;
-    modified = copyFrom.modified;
-    planned = copyFrom.planned;
-    due = copyFrom.due;
+    received = copyFrom.received != null ? Instant.from(copyFrom.received) : null;
+    created = copyFrom.created != null ? Instant.from(copyFrom.created) : null;
+    claimed = copyFrom.claimed != null ? Instant.from(copyFrom.claimed) : null;
+    completed = copyFrom.completed != null ? Instant.from(copyFrom.completed) : null;
+    modified = copyFrom.modified != null ? Instant.from(copyFrom.modified) : null;
+    planned = copyFrom.planned != null ? Instant.from(copyFrom.planned) : null;
+    due = copyFrom.due != null ? Instant.from(copyFrom.due) : null;
     name = copyFrom.name;
     creator = copyFrom.creator;
     note = copyFrom.note;

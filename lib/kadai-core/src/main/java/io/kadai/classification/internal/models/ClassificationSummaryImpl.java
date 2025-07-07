@@ -66,6 +66,7 @@ public class ClassificationSummaryImpl implements ClassificationSummary {
     custom6 = copyFrom.custom6;
     custom7 = copyFrom.custom7;
     custom8 = copyFrom.custom8;
+    key = copyFrom.key;
   }
 
   @Override
