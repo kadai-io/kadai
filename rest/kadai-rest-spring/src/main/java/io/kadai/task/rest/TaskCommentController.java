@@ -33,10 +33,14 @@ import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskComment;
 import io.kadai.task.rest.assembler.TaskCommentRepresentationModelAssembler;
 import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
+import io.kadai.task.rest.models.TaskCommentMultipleTasksRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
@@ -168,5 +172,40 @@ public class TaskCommentController implements TaskCommentApi {
 
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(taskCommentRepresentationModelAssembler.toModel(createdTaskComment));
+  }
+
+  @PostMapping(path = RestEndpoints.URL_MULTIPLE_TASKS_COMMENT)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<Map<String, List<String>>> createTaskCommentForMultipleTasks(
+          @RequestBody TaskCommentMultipleTasksRepresentationModel
+                  taskCommentMultipleTasksRepresentationModel) {
+
+    List<String> failedTaskIds = new ArrayList<>();
+
+    for (String taskId : taskCommentMultipleTasksRepresentationModel.getTaskIds()) {
+      try {
+        TaskCommentRepresentationModel taskCommentRepresentationModel =
+                new TaskCommentRepresentationModel();
+        taskCommentRepresentationModel.setTaskId(taskId);
+        taskCommentRepresentationModel
+                .setTextField(taskCommentMultipleTasksRepresentationModel
+                .getTextField());
+
+        TaskComment taskComment = taskCommentRepresentationModelAssembler
+                .toEntityModel(taskCommentRepresentationModel);
+        taskService.createTaskComment(taskComment);
+
+      } catch (Exception e) {
+        failedTaskIds.add(taskId);
+      }
+    }
+
+    if (failedTaskIds.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.CREATED).build();
+    } else {
+      Map<String, List<String>> response = new HashMap<>();
+      response.put("failedTaskIds", failedTaskIds);
+      return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(response);
+    }
   }
 }
