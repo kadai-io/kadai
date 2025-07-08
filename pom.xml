@@ -73,7 +73,7 @@
 
         <!-- test dependencies -->
         <version.archunit>1.4.1</version.archunit>
-        <version.equalsverifier>4.0.4</version.equalsverifier>
+        <version.equalsverifier>4.0.5</version.equalsverifier>
         <version.assertj>3.27.3</version.assertj>
         <version.openpojo>0.9.1</version.openpojo>
         <version.jacoco>0.8.13</version.jacoco>
