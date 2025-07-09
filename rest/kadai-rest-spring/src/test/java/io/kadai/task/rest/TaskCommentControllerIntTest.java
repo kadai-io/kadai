@@ -592,7 +592,7 @@ class TaskCommentControllerIntTest {
                 .toEntity(TaskCommentCollectionRepresentationModel.class);
 
     assertThat(getTaskCommentsBeforeDeleteionResponse.getBody()).isNotNull();
-    assertThat(getTaskCommentsBeforeDeleteionResponse.getBody().getContent()).hasSize(2);
+    assertThat(getTaskCommentsBeforeDeleteionResponse.getBody().getContent()).hasSize(3);
 
     String url2 =
         restHelper.toUrl(
