@@ -310,7 +310,7 @@ class TaskCommentControllerIntTest {
     ));
     request.setTextField("newly created task comment for multiple tasks");
 
-    String url = restHelper.toUrl(RestEndpoints.URL_MULTIPLE_TASKS_COMMENT);
+    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
 
     ResponseEntity<Void> response = CLIENT
             .post()
@@ -334,7 +334,7 @@ class TaskCommentControllerIntTest {
     ));
     commentModel.setTextField("Kommentar mit teilweise nicht sichtbarer Task");
 
-    String url = restHelper.toUrl(RestEndpoints.URL_MULTIPLE_TASKS_COMMENT);
+    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
 
     ResponseEntity<Map> response =
             CLIENT
@@ -369,7 +369,7 @@ class TaskCommentControllerIntTest {
             "TKI:000000000000000000000000000000000004"));
     commentModel.setTextField("Kommentar für ungültige Task-ID");
 
-    String url = restHelper.toUrl(RestEndpoints.URL_MULTIPLE_TASKS_COMMENT);
+    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
 
     ResponseEntity<Map> response =
             CLIENT

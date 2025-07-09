@@ -467,7 +467,7 @@ public interface TaskCommentApi {
             )
         }
     )
-  @PostMapping(path = RestEndpoints.URL_MULTIPLE_TASKS_COMMENT)
+  @PostMapping(path = RestEndpoints.URL_TASKS_COMMENT)
   @Transactional(rollbackFor = Exception.class)
   ResponseEntity<Map<String, List<String>>> createTaskCommentForMultipleTasks(
         @RequestBody TaskCommentMultipleTasksRepresentationModel

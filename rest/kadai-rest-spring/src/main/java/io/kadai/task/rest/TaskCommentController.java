@@ -174,7 +174,7 @@ public class TaskCommentController implements TaskCommentApi {
         .body(taskCommentRepresentationModelAssembler.toModel(createdTaskComment));
   }
 
-  @PostMapping(path = RestEndpoints.URL_MULTIPLE_TASKS_COMMENT)
+  @PostMapping(path = RestEndpoints.URL_TASKS_COMMENT)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<Map<String, List<String>>> createTaskCommentForMultipleTasks(
           @RequestBody TaskCommentMultipleTasksRepresentationModel
