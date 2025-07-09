@@ -52,6 +52,7 @@ public class ClassificationSummaryImpl implements ClassificationSummary {
     applicationEntryPoint = copyFrom.applicationEntryPoint;
     category = copyFrom.category;
     domain = copyFrom.domain;
+    key = copyFrom.key;
     name = copyFrom.name;
     parentId = copyFrom.parentId;
     parentKey = copyFrom.parentKey;
@@ -66,7 +67,6 @@ public class ClassificationSummaryImpl implements ClassificationSummary {
     custom6 = copyFrom.custom6;
     custom7 = copyFrom.custom7;
     custom8 = copyFrom.custom8;
-    key = copyFrom.key;
   }
 
   @Override

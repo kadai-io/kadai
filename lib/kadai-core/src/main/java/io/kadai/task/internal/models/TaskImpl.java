@@ -55,6 +55,7 @@ public class TaskImpl extends TaskSummaryImpl implements Task {
             .stream()
             .map(Attachment::copy)
             .collect(Collectors.toList());
+    this.groupByCount = copyFrom.groupByCount;
   }
 
   public Map<String, String> getCustomAttributes() {
