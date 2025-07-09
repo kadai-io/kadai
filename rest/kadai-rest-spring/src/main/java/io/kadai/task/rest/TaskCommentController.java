@@ -33,8 +33,8 @@ import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskComment;
 import io.kadai.task.rest.assembler.TaskCommentRepresentationModelAssembler;
 import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
-import io.kadai.task.rest.models.TaskCommentMultipleTasksRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
+import io.kadai.task.rest.models.TasksCommentBatchRepresentationModel;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -177,18 +177,18 @@ public class TaskCommentController implements TaskCommentApi {
   @PostMapping(path = RestEndpoints.URL_TASKS_COMMENT)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<Map<String, List<String>>> createTaskCommentForMultipleTasks(
-          @RequestBody TaskCommentMultipleTasksRepresentationModel
-                  taskCommentMultipleTasksRepresentationModel) {
+          @RequestBody TasksCommentBatchRepresentationModel
+                  tasksCommentBatchRepresentationModel) {
 
     List<String> failedTaskIds = new ArrayList<>();
 
-    for (String taskId : taskCommentMultipleTasksRepresentationModel.getTaskIds()) {
+    for (String taskId : tasksCommentBatchRepresentationModel.getTaskIds()) {
       try {
         TaskCommentRepresentationModel taskCommentRepresentationModel =
                 new TaskCommentRepresentationModel();
         taskCommentRepresentationModel.setTaskId(taskId);
         taskCommentRepresentationModel
-                .setTextField(taskCommentMultipleTasksRepresentationModel
+                .setTextField(tasksCommentBatchRepresentationModel
                         .getTextField());
 
         TaskComment taskComment = taskCommentRepresentationModelAssembler

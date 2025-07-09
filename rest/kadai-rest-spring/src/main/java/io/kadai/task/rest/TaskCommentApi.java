@@ -29,8 +29,8 @@ import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskComment;
 import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
-import io.kadai.task.rest.models.TaskCommentMultipleTasksRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
+import io.kadai.task.rest.models.TasksCommentBatchRepresentationModel;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -415,7 +415,7 @@ public interface TaskCommentApi {
    * This endpoint creates the same Task Comment for multiple Tasks.
    *
    * @title Create a Task Comment for multiple Tasks
-   * @param taskCommentMultipleTasksRepresentationModel contains the Task IDs and comment text
+   * @param tasksCommentBatchRepresentationModel contains the Task IDs and comment text
    * @return HTTP 201 if all comments were created, or HTTP 207 with list of failed Task IDs
    *
    */
@@ -428,7 +428,7 @@ public interface TaskCommentApi {
                 description = "The comment text and list of Task IDs",
                 content = @Content(
                         schema = @Schema(implementation =
-                                TaskCommentMultipleTasksRepresentationModel.class),
+                                TasksCommentBatchRepresentationModel.class),
                         examples = @ExampleObject(
                                 value = """
             {
@@ -470,6 +470,6 @@ public interface TaskCommentApi {
   @PostMapping(path = RestEndpoints.URL_TASKS_COMMENT)
   @Transactional(rollbackFor = Exception.class)
   ResponseEntity<Map<String, List<String>>> createTaskCommentForMultipleTasks(
-        @RequestBody TaskCommentMultipleTasksRepresentationModel
-                taskCommentMultipleTasksRepresentationModel);
+        @RequestBody TasksCommentBatchRepresentationModel
+                tasksCommentBatchRepresentationModel);
 }

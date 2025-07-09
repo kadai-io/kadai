@@ -26,8 +26,8 @@ import io.kadai.common.rest.RestEndpoints;
 import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
 import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
-import io.kadai.task.rest.models.TaskCommentMultipleTasksRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
+import io.kadai.task.rest.models.TasksCommentBatchRepresentationModel;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
@@ -302,8 +302,8 @@ class TaskCommentControllerIntTest {
 
   @Test
   void should_CreateTaskCommentForMultipleTasks_When_TasksAreVisible() {
-    TaskCommentMultipleTasksRepresentationModel request =
-            new TaskCommentMultipleTasksRepresentationModel();
+    TasksCommentBatchRepresentationModel request =
+            new TasksCommentBatchRepresentationModel();
     request.setTaskIds(List.of(
             "TKI:000000000000000000000000000000000001",
             "TKI:000000000000000000000000000000000004"
@@ -325,8 +325,8 @@ class TaskCommentControllerIntTest {
 
   @Test
   void should_FailToCreateTaskCommentsForMultipleTasks_When_TaskIsNotVisible() {
-    TaskCommentMultipleTasksRepresentationModel
-            commentModel = new TaskCommentMultipleTasksRepresentationModel();
+    TasksCommentBatchRepresentationModel
+            commentModel = new TasksCommentBatchRepresentationModel();
     commentModel.setTaskIds(List.of(
             "TKI:000000000000000000000000000000000041",
             "TKI:000000000000000000000000000000000042",
@@ -361,8 +361,8 @@ class TaskCommentControllerIntTest {
 
   @Test
   void should_FailToCreateTaskCommentsForMultipleTasks_When_TaskIdIsNonExisting() {
-    TaskCommentMultipleTasksRepresentationModel
-            commentModel = new TaskCommentMultipleTasksRepresentationModel();
+    TasksCommentBatchRepresentationModel
+            commentModel = new TasksCommentBatchRepresentationModel();
     commentModel.setTaskIds(List.of(
             "TKI:000000000000000000000000000000000999",
             "TKI:000000000000000000000000000000000001",

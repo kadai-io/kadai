@@ -26,8 +26,8 @@ import org.springframework.hateoas.RepresentationModel;
  * EntityModel class for adding a comment to multiple tasks.
  */
 @Schema(description = "EntityModel class for adding a comment to multiple tasks.")
-public class TaskCommentMultipleTasksRepresentationModel
-        extends RepresentationModel<TaskCommentMultipleTasksRepresentationModel> {
+public class TasksCommentBatchRepresentationModel
+        extends RepresentationModel<TasksCommentBatchRepresentationModel> {
   @Schema(name = "taskIds",
           description = "List of Task IDs. The comment will be added to each task in this list.")
     private List<String> taskIds;
