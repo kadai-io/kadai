@@ -36,8 +36,8 @@ public class WorkbasketImpl extends WorkbasketSummaryImpl implements Workbasket 
 
   private WorkbasketImpl(WorkbasketImpl copyFrom, String key) {
     super(copyFrom);
-    created = copyFrom.created;
-    modified = copyFrom.modified;
+    this.created = copyFrom.created != null ? Instant.from(copyFrom.created) : null;
+    this.modified = copyFrom.modified != null ? Instant.from(copyFrom.modified) : null;
     this.key = key == null ? null : key.trim();
   }
 

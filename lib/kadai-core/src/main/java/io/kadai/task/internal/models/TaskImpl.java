@@ -48,11 +48,14 @@ public class TaskImpl extends TaskSummaryImpl implements Task {
 
   private TaskImpl(TaskImpl copyFrom) {
     super(copyFrom);
-    customAttributes = new HashMap<>(copyFrom.customAttributes);
-    callbackInfo = new HashMap<>(copyFrom.callbackInfo);
-    callbackState = copyFrom.callbackState;
-    attachments = copyFrom.attachments.stream().map(Attachment::copy).collect(Collectors.toList());
-    groupByCount = copyFrom.groupByCount;
+    this.customAttributes = new HashMap<>(copyFrom.customAttributes);
+    this.callbackInfo = new HashMap<>(copyFrom.callbackInfo);
+    this.callbackState = copyFrom.callbackState;
+    this.attachments = copyFrom.attachments
+            .stream()
+            .map(Attachment::copy)
+            .collect(Collectors.toList());
+    this.groupByCount = copyFrom.groupByCount;
   }
 
   public Map<String, String> getCustomAttributes() {

@@ -52,6 +52,7 @@ public class ClassificationSummaryImpl implements ClassificationSummary {
     applicationEntryPoint = copyFrom.applicationEntryPoint;
     category = copyFrom.category;
     domain = copyFrom.domain;
+    key = copyFrom.key;
     name = copyFrom.name;
     parentId = copyFrom.parentId;
     parentKey = copyFrom.parentKey;
