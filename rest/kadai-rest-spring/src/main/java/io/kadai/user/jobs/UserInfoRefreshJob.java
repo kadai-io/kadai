@@ -29,11 +29,10 @@ import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import io.kadai.common.rest.ldap.LdapClient;
 import io.kadai.common.rest.util.ApplicationContextProvider;
 import io.kadai.spi.user.internal.RefreshUserPostprocessorManager;
-import io.kadai.task.internal.jobs.helper.SqlConnectionRunner;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
 import io.kadai.user.api.models.User;
-import java.sql.PreparedStatement;
+import io.kadai.user.internal.UserServiceImpl;
 import java.time.Duration;
 import java.util.List;
 import org.slf4j.Logger;
@@ -43,7 +42,6 @@ import org.slf4j.LoggerFactory;
 public class UserInfoRefreshJob extends AbstractKadaiJob {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UserInfoRefreshJob.class);
-  private final SqlConnectionRunner sqlConnectionRunner;
   private final RefreshUserPostprocessorManager refreshUserPostprocessorManager;
 
   public UserInfoRefreshJob(KadaiEngine kadaiEngine) {
@@ -55,7 +53,6 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
     super(kadaiEngine, txProvider, scheduledJob, true);
     runEvery = kadaiEngine.getConfiguration().getUserRefreshJobRunEvery();
     firstRun = kadaiEngine.getConfiguration().getUserRefreshJobFirstRun();
-    sqlConnectionRunner = new SqlConnectionRunner(kadaiEngine);
     refreshUserPostprocessorManager = new RefreshUserPostprocessorManager();
   }
 
@@ -91,24 +88,17 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
     }
   }
 
-  private void clearExistingUsersAndGroupsAndPermissions() {
+  private void clearExistingUsersAndGroupsAndPermissions() throws NotAuthorizedException {
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Trying to delete all users, groups and permissions");
+    }
 
-    sqlConnectionRunner.runWithConnection(
-        connection -> {
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Trying to delete all users, groups and permissions");
-          }
-          String sql = "DELETE FROM USER_INFO; DELETE FROM GROUP_INFO; DELETE FROM PERMISSION_INFO";
-          PreparedStatement statement = connection.prepareStatement(sql);
-          statement.execute();
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Successfully deleted all users, groups and permissions");
-          }
+    final UserServiceImpl userServiceImpl = (UserServiceImpl) kadaiEngineImpl.getUserService();
+    userServiceImpl.deleteAllUsersGroupsPermissions();
 
-          if (!connection.getAutoCommit()) {
-            connection.commit();
-          }
-        });
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Successfully deleted all users, groups and permissions");
+    }
   }
 
   private void insertNewUsers(List<User> users) {
