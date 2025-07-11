@@ -29,6 +29,7 @@ import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskComment;
 import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
+import io.kadai.task.rest.models.TaskCommentMultipleTasksRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,8 +39,11 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Map;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -406,4 +410,66 @@ public interface TaskCommentApi {
       @PathVariable("taskId") String taskId,
       @RequestBody TaskCommentRepresentationModel taskCommentRepresentationModel)
       throws InvalidArgumentException, TaskNotFoundException, NotAuthorizedOnWorkbasketException;
+
+  /**
+   * This endpoint creates the same Task Comment for multiple Tasks.
+   *
+   * @title Create a Task Comment for multiple Tasks
+   * @param taskCommentMultipleTasksRepresentationModel contains the Task IDs and comment text
+   * @return HTTP 201 if all comments were created, or HTTP 207 with list of failed Task IDs
+   *
+   */
+  @Operation(
+        summary = "Create a Task Comment for multiple Tasks",
+        description = "Creates the same Task Comment for all provided Task IDs. "
+                + "Returns 201 if all succeeded, or 207 (Multi-Status) with failed task IDs.",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                required = true,
+                description = "The comment text and list of Task IDs",
+                content = @Content(
+                        schema = @Schema(implementation =
+                                TaskCommentMultipleTasksRepresentationModel.class),
+                        examples = @ExampleObject(
+                                value = """
+            {
+              "taskIds": [
+                "TKI:000000000000000000000000000000000001",
+                "TKI:400000000000000000000000000000000004"
+              ],
+              "textField": "This is a comment for multiple tasks"
+            }
+            """
+                        )
+                )
+        ),
+        responses = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "All Task Comments were successfully created"
+            ),
+            @ApiResponse(
+                    responseCode = "207",
+                    description = "Some Task Comments could not be created. "
+                            + "Response contains 'failedTaskIds'.",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(
+                                    type = "object",
+                                    example = """
+            {
+              "failedTaskIds": [
+                "TKI:400000000000000000000000000000000004"
+              ]
+            }
+            """
+                            )
+                    )
+            )
+        }
+    )
+  @PostMapping(path = RestEndpoints.URL_MULTIPLE_TASKS_COMMENT)
+  @Transactional(rollbackFor = Exception.class)
+  ResponseEntity<Map<String, List<String>>> createTaskCommentForMultipleTasks(
+        @RequestBody TaskCommentMultipleTasksRepresentationModel
+                taskCommentMultipleTasksRepresentationModel);
 }
