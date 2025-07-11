@@ -95,9 +95,6 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   categoryIcons$: Observable<ClassificationCategoryImages> = inject(Store).select(
     EngineConfigurationSelectors.selectCategoryIcons
   );
-  selectedClassificationType$: Observable<string> = inject(Store).select(
-    ClassificationSelectors.selectedClassificationType
-  );
   selectedClassification$: Observable<Classification> = inject(Store).select(
     ClassificationSelectors.selectedClassification
   );
@@ -243,6 +240,9 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
             });
           });
       } catch (error) {
+        console.error(
+          `Exception while saving modified classification! [classification=${this.classification}, error=${error}`
+        );
         this.afterRequest();
       }
     }
