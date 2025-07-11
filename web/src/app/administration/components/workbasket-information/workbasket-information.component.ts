@@ -32,11 +32,11 @@ import { NotificationService } from '../../../shared/services/notifications/noti
 import { CustomField, getCustomFields, WorkbasketsCustomisation } from '../../../shared/models/customisation';
 import {
   MarkWorkbasketForDeletion,
+  OnButtonPressed,
   RemoveDistributionTarget,
   SaveNewWorkbasket,
   UpdateWorkbasket
 } from '../../../shared/store/workbasket-store/workbasket.actions';
-import { WorkbasketComponent } from '../../models/workbasket-component';
 import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
 import { ButtonAction } from '../../models/button-action';
 import { AccessId } from '../../../shared/models/access-id';
@@ -93,18 +93,17 @@ export class WorkbasketInformationComponent implements OnInit, OnChanges, OnDest
   readonly lengthError = 'You have reached the maximum length for this field';
   inputOverflowMap = new Map<string, boolean>();
   validateInputOverflow: Function;
-  workbasketsCustomisation$: Observable<WorkbasketsCustomisation> = inject(Store).select(
+  private store = inject(Store);
+  workbasketsCustomisation$: Observable<WorkbasketsCustomisation> = this.store.select(
     EngineConfigurationSelectors.workbasketsCustomisation
   );
-  buttonAction$: Observable<ButtonAction> = inject(Store).select(WorkbasketSelectors.buttonAction);
-  selectedComponent$: Observable<WorkbasketComponent> = inject(Store).select(WorkbasketSelectors.selectedComponent);
+  buttonAction$: Observable<ButtonAction> = this.store.select(WorkbasketSelectors.buttonAction);
   customFields$: Observable<CustomField[]>;
   destroy$ = new Subject<void>();
   private workbasketService = inject(WorkbasketService);
   private requestInProgressService = inject(RequestInProgressService);
   private formsValidatorService = inject(FormsValidatorService);
   private notificationService = inject(NotificationService);
-  private store = inject(Store);
 
   ngOnInit() {
     this.allTypes = new Map([
@@ -151,6 +150,7 @@ export class WorkbasketInformationComponent implements OnInit, OnChanges, OnDest
           default:
             break;
         }
+        this.store.dispatch(new OnButtonPressed(undefined));
       });
   }
 
