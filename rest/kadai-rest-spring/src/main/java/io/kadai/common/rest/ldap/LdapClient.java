@@ -109,6 +109,10 @@ public class LdapClient {
         }
       } catch (NameNotFoundException ignore) {
         // LDAP-DN doesn't exist => yields empty result for this search
+        LOGGER.debug(
+            "Looking up DN '{}' resulted in NameNotFoundException because the DN doesn't exist. "
+                + "Returning empty list.",
+            name);
       }
     } else {
       accessIds.addAll(searchUsersByNameOrAccessId(name));
