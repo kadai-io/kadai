@@ -27,11 +27,13 @@ import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
 import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
+import io.kadai.task.rest.models.TaskCommentResultModel;
 import io.kadai.task.rest.models.TasksCommentBatchRepresentationModel;
+import io.kadai.task.rest.models.TasksCommentBatchResponseModel;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -301,7 +303,7 @@ class TaskCommentControllerIntTest {
   }
 
   @Test
-  void should_CreateTaskCommentForMultipleTasks_When_TasksAreVisible() {
+  void should_CreateTaskCommentForMultipleTasks_When_TasksAreExisting() {
     TasksCommentBatchRepresentationModel request =
             new TasksCommentBatchRepresentationModel();
     request.setTaskIds(List.of(
@@ -312,82 +314,58 @@ class TaskCommentControllerIntTest {
 
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
 
-    ResponseEntity<Void> response = CLIENT
+    ResponseEntity<TasksCommentBatchResponseModel> response = CLIENT
             .post()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
             .body(request)
             .retrieve()
-            .toBodilessEntity();
+            .toEntity(TasksCommentBatchResponseModel.class);
 
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+    List<TaskCommentResultModel> results = Objects.requireNonNull(response.getBody()).getResults();
+    assertThat(results).hasSize(2);
+
+    assertThat(results)
+            .allMatch(r -> r.getErrorCode() == null,
+                    "Alle Aufgaben sollten erfolgreich kommentiert worden sein");
   }
 
   @Test
-  void should_FailToCreateTaskCommentsForMultipleTasks_When_TaskIsNotVisible() {
+  void should_FailToCreateTaskCommentsForMultipleTasks_When_SomeTasksAreNotExisting() {
     TasksCommentBatchRepresentationModel
-            commentModel = new TasksCommentBatchRepresentationModel();
-    commentModel.setTaskIds(List.of(
-            "TKI:000000000000000000000000000000000041",
-            "TKI:000000000000000000000000000000000042",
-            "TKI:000000000000000000000000000000000004"
+            request = new TasksCommentBatchRepresentationModel();
+    request.setTaskIds(List.of(
+            "TKI:000000000000000000000000000000000001", //exists
+            "TKI:200000000000000000000000000000000002"  // doesn't exist
     ));
-    commentModel.setTextField("Kommentar mit teilweise nicht sichtbarer Task");
+    request.setTextField("newly created task comment for multiple tasks");
 
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
 
-    ResponseEntity<Map> response =
+    ResponseEntity<TasksCommentBatchResponseModel> response =
             CLIENT
                 .post()
                 .uri(url)
-                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-b-1")))
-                .body(commentModel)
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+                .body(request)
                 .retrieve()
-                .toEntity(Map.class);
+                .toEntity(TasksCommentBatchResponseModel.class);
 
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.MULTI_STATUS);
-    Map<String, Object> body = response.getBody();
-    assertThat(body).isNotNull();
-    assertThat(body).containsKey("failedTaskIds");
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    List<TaskCommentResultModel> results = Objects.requireNonNull(response.getBody()).getResults();
+    assertThat(results).hasSize(2);
 
-    @SuppressWarnings("unchecked")
-    List<String> failedTaskIds = (List<String>) body.get("failedTaskIds");
+    // Success
+    assertThat(results).anyMatch(r ->
+            r.getTaskId().equals("TKI:000000000000000000000000000000000001")
+                    && r.getErrorCode() == null);
 
-    assertThat(failedTaskIds).containsExactly(
-            "TKI:000000000000000000000000000000000041",
-            "TKI:000000000000000000000000000000000042",
-            "TKI:000000000000000000000000000000000004");
-  }
-
-  @Test
-  void should_FailToCreateTaskCommentsForMultipleTasks_When_TaskIdIsNonExisting() {
-    TasksCommentBatchRepresentationModel
-            commentModel = new TasksCommentBatchRepresentationModel();
-    commentModel.setTaskIds(List.of(
-            "TKI:000000000000000000000000000000000999",
-            "TKI:000000000000000000000000000000000001",
-            "TKI:000000000000000000000000000000000004"));
-    commentModel.setTextField("Kommentar für ungültige Task-ID");
-
-    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
-
-    ResponseEntity<Map> response =
-            CLIENT
-                    .post()
-                    .uri(url)
-                    .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
-                    .body(commentModel)
-                    .retrieve()
-                    .toEntity(Map.class);
-
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.MULTI_STATUS);
-    Map<String, Object> body = response.getBody();
-    assertThat(body).isNotNull();
-    assertThat(body).containsKey("failedTaskIds");
-
-    List<String> failedTaskIds = (List<String>) body.get("failedTaskIds");
-
-    assertThat(failedTaskIds).containsExactly("TKI:000000000000000000000000000000000999");
+    // Failure
+    assertThat(results).anyMatch(r ->
+            r.getTaskId().equals("TKI:200000000000000000000000000000000002")
+                    && "TASK_NOT_FOUND".equals(r.getErrorCode()));
   }
 
   @Test
