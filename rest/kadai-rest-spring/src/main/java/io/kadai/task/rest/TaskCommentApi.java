@@ -31,6 +31,7 @@ import io.kadai.task.api.models.TaskComment;
 import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
 import io.kadai.task.rest.models.TasksCommentBatchRepresentationModel;
+import io.kadai.task.rest.models.TasksCommentBatchResponseModel;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -39,8 +40,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.Map;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -416,16 +415,17 @@ public interface TaskCommentApi {
    *
    * @title Create a Task Comment for multiple Tasks
    * @param tasksCommentBatchRepresentationModel contains the Task IDs and comment text
-   * @return HTTP 201 if all comments were created, or HTTP 207 with list of failed Task IDs
+   * @return HTTP 200 OK with a list of task results (status + optional error code)
    *
    */
   @Operation(
-        summary = "Create a Task Comment for multiple Tasks",
+        summary = "Create Task Comments for multiple Tasks",
         description = "Creates the same Task Comment for all provided Task IDs. "
-                + "Returns 201 if all succeeded, or 207 (Multi-Status) with failed task IDs.",
+                + "Always returns 200 OK; response body contains one entry per Task ID "
+                + "with HTTP status and optional error code.",
         requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                 required = true,
-                description = "The comment text and list of Task IDs",
+                description = "Payload with the list of Task IDs and the comment text",
                 content = @Content(
                         schema = @Schema(implementation =
                                 TasksCommentBatchRepresentationModel.class),
@@ -444,32 +444,39 @@ public interface TaskCommentApi {
         ),
         responses = {
             @ApiResponse(
-                    responseCode = "201",
-                    description = "All Task Comments were successfully created"
-            ),
-            @ApiResponse(
-                    responseCode = "207",
-                    description = "Some Task Comments could not be created. "
-                            + "Response contains 'failedTaskIds'.",
+                    responseCode = "200",
+                    description = "Always returns 200 OK with individual results for each Task ID",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(
-                                    type = "object",
-                                    example = """
-            {
-              "failedTaskIds": [
-                "TKI:400000000000000000000000000000000004"
-              ]
-            }
-            """
+                            schema = @Schema(implementation =
+                                    TasksCommentBatchResponseModel.class),
+                            examples = @ExampleObject(
+                                    name    = "batchResponseExample",
+                                    summary = "Example response",
+                                    value   = """
+                  {
+                    "results": [
+                      {
+                        "taskId": "TKI:000000000000000000000000000000000001",
+                        "status": 201,
+                        "errorCode": null
+                      },
+                      {
+                        "taskId": "TKI:400000000000000000000000000000000004",
+                        "status": 500,
+                        "errorCode": "TASK_NOT_FOUND"
+                      }
+                    ]
+                  }
+                  """
                             )
                     )
-            )
+                )
         }
-    )
+  )
   @PostMapping(path = RestEndpoints.URL_TASKS_COMMENT)
   @Transactional(rollbackFor = Exception.class)
-  ResponseEntity<Map<String, List<String>>> createTaskCommentForMultipleTasks(
+  ResponseEntity<TasksCommentBatchResponseModel> createTaskCommentsBatch(
         @RequestBody TasksCommentBatchRepresentationModel
                 tasksCommentBatchRepresentationModel);
 }
