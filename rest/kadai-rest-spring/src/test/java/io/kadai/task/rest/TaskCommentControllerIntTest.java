@@ -327,9 +327,7 @@ class TaskCommentControllerIntTest {
     List<TaskCommentResultModel> results = Objects.requireNonNull(response.getBody()).getResults();
     assertThat(results).hasSize(2);
 
-    assertThat(results)
-            .allMatch(r -> r.getErrorCode() == null,
-                    "Alle Aufgaben sollten erfolgreich kommentiert worden sein");
+    assertThat(results).allMatch(r -> r.getErrorCode() == null);
   }
 
   @Test
