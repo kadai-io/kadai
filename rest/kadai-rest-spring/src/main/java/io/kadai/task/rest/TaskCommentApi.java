@@ -415,14 +415,14 @@ public interface TaskCommentApi {
    *
    * @title Create a Task Comment for multiple Tasks
    * @param tasksCommentBatchRepresentationModel contains the Task IDs and comment text
-   * @return HTTP 200 OK with a list of task results (status + optional error code)
+   * @return HTTP 200 OK with a list of task results (optional error code)
    *
    */
   @Operation(
         summary = "Create Task Comments for multiple Tasks",
         description = "Creates the same Task Comment for all provided Task IDs. "
                 + "Always returns 200 OK; response body contains one entry per Task ID "
-                + "with HTTP status and optional error code.",
+                + "with optional error code.",
         requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                 required = true,
                 description = "Payload with the list of Task IDs and the comment text",
@@ -458,12 +458,10 @@ public interface TaskCommentApi {
                     "results": [
                       {
                         "taskId": "TKI:000000000000000000000000000000000001",
-                        "status": 201,
                         "errorCode": null
                       },
                       {
                         "taskId": "TKI:400000000000000000000000000000000004",
-                        "status": 500,
                         "errorCode": "TASK_NOT_FOUND"
                       }
                     ]
