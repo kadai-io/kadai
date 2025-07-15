@@ -11,7 +11,7 @@
     <parent>
         <groupId>io.kadai</groupId>
         <artifactId>kadai-routing-parent</artifactId>
-        <version>10.0.1-SNAPSHOT</version>
+        <version>10.1.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
