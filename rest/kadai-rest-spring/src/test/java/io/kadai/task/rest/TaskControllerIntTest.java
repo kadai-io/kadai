@@ -31,6 +31,8 @@ import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.rest.models.AttachmentRepresentationModel;
+import io.kadai.task.rest.models.BulkOperationResponseModel;
+import io.kadai.task.rest.models.BulkOperationResultModel;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
@@ -3279,6 +3281,38 @@ class TaskControllerIntTest {
     }
 
     @Test
+    void should_BulkCompleteTasks_PartialFailure() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_BULK_COMPLETE);
+
+      List<String> taskIds = List.of(
+              "TKI:000000000000000000000000000000000102",
+              "TKI:000000000000000000000000000000000041"
+      );
+
+      ResponseEntity<BulkOperationResponseModel> response =
+              CLIENT
+                      .patch()
+                      .uri(url)
+                      .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
+                      .body(taskIds)
+                      .retrieve()
+                      .toEntity(BulkOperationResponseModel.class);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      BulkOperationResponseModel body = response.getBody();
+      assertThat(body).isNotNull();
+
+      var failures = body.getResults();
+      assertThat(failures).hasSize(1);
+
+      BulkOperationResultModel failure = failures.get(0);
+      assertThat(failure.getTaskId())
+              .isEqualTo("TKI:000000000000000000000000000000000041");
+      assertThat(failure.getErrorCode())
+              .isEqualTo("TASK_NOT_FOUND");
+    }
+
+    @Test
     void should_ForceCompleteTask_When_CurrentUserIsNotTheOwner() {
       String url =
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000028");
@@ -3314,6 +3348,31 @@ class TaskControllerIntTest {
       repModel = forceCompleteResponse.getBody();
       assertThat(repModel.getOwner()).isEqualTo("user-1-2");
       assertThat(repModel.getState()).isEqualTo(TaskState.COMPLETED);
+    }
+
+    @Test
+    void should_BulkForceCompleteTasks_AllSuccess() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_BULK_COMPLETE_FORCE);
+
+      List<String> taskIds = List.of(
+          "TKI:000000000000000000000000000000000028",
+          "TKI:000000000000000000000000000000000026"
+      );
+
+      ResponseEntity<BulkOperationResponseModel> response =
+              CLIENT
+                  .patch()
+                  .uri(url)
+                  .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+                  .body(taskIds)
+                  .retrieve()
+                  .toEntity(BulkOperationResponseModel.class);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      BulkOperationResponseModel body = response.getBody();
+      assertThat(body).isNotNull();
+
+      assertThat(body.getResults()).isEmpty();
     }
   }
 
