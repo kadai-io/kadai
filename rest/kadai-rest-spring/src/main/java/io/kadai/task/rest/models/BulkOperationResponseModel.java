@@ -15,6 +15,8 @@ public class BulkOperationResponseModel {
           description = "The list of individual bulk operation results")
   private List<BulkOperationResultModel> failedIds;
 
+  public BulkOperationResponseModel() { }
+
   public BulkOperationResponseModel(List<BulkOperationResultModel> failedIds) {
     this.failedIds = failedIds;
   }

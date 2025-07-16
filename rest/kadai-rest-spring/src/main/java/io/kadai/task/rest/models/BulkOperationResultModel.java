@@ -13,6 +13,7 @@ public class BulkOperationResultModel {
   @Schema(description = "Error code if creation failed; null otherwise")
   private String errorCode;
 
+  public BulkOperationResultModel() { }
 
   public BulkOperationResultModel(String taskId, String errorCode) {
     this.taskId = taskId;

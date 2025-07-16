@@ -3355,7 +3355,7 @@ class TaskControllerIntTest {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_BULK_COMPLETE_FORCE);
 
       List<String> taskIds = List.of(
-          "TKI:000000000000000000000000000000000028",
+          "TKI:000000000000000000000000000000000027",
           "TKI:000000000000000000000000000000000026"
       );
 
