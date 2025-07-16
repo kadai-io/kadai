@@ -45,6 +45,7 @@ import io.kadai.task.api.models.TaskSummary;
 import io.kadai.task.rest.assembler.BulkOperationResultsRepresentationModelAssembler;
 import io.kadai.task.rest.assembler.TaskRepresentationModelAssembler;
 import io.kadai.task.rest.assembler.TaskSummaryRepresentationModelAssembler;
+import io.kadai.task.rest.models.BulkOperationResponseModel;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
@@ -70,6 +71,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -344,6 +346,20 @@ public class TaskController implements TaskApi {
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(updatedTask));
   }
 
+  @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<BulkOperationResponseModel> bulkComplete(
+          @RequestBody List<String> taskIds) {
+
+    BulkOperationResults<String, KadaiException> errors =
+            taskService.completeTasks(taskIds);
+
+    BulkOperationResponseModel response =
+            BulkOperationResponseModel.getFailures(taskIds, errors);
+
+    return ResponseEntity.ok(response);
+  }
+
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_COMPLETE_FORCE)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<TaskRepresentationModel> forceCompleteTask(
@@ -356,6 +372,20 @@ public class TaskController implements TaskApi {
     Task updatedTask = taskService.forceCompleteTask(taskId);
 
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(updatedTask));
+  }
+
+  @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE_FORCE)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<BulkOperationResponseModel> bulkForceComplete(
+          @RequestBody List<String> taskIds) {
+
+    BulkOperationResults<String, KadaiException> errors =
+            taskService.forceCompleteTasks(taskIds);
+
+    BulkOperationResponseModel response =
+            BulkOperationResponseModel.getFailures(taskIds, errors);
+
+    return ResponseEntity.ok(response);
   }
 
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_CANCEL)
