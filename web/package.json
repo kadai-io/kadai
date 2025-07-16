@@ -61,7 +61,7 @@
     "@typescript-eslint/eslint-plugin-tslint": "7.0.2",
     "@typescript-eslint/parser": "8.37.0",
     "compression-webpack-plugin": "11.1.0",
-    "cypress": "14.5.1",
+    "cypress": "14.5.2",
     "cypress-intellij-reporter": "0.0.7",
     "eslint": "9.31.0",
     "eslint-config-prettier": "10.1.5",
