@@ -1055,7 +1055,7 @@ public class TaskServiceImpl implements TaskService {
       List<String> taskIds,
       String text
   ) throws InvalidArgumentException {
-      return taskCommentService.createTaskCommentsBulk(taskIds, text);
+    return taskCommentService.createTaskCommentsBulk(taskIds, text);
   }
 
   @Override
