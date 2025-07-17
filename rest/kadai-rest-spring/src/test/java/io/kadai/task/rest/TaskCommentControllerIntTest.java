@@ -25,11 +25,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
+import io.kadai.task.rest.models.BulkOperationResponseModel;
+import io.kadai.task.rest.models.BulkOperationResultModel;
 import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
-import io.kadai.task.rest.models.TaskCommentResultModel;
 import io.kadai.task.rest.models.TasksCommentBatchRepresentationModel;
-import io.kadai.task.rest.models.TasksCommentBatchResponseModel;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
@@ -314,20 +314,19 @@ class TaskCommentControllerIntTest {
 
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
 
-    ResponseEntity<TasksCommentBatchResponseModel> response = CLIENT
+    ResponseEntity<BulkOperationResponseModel> response = CLIENT
             .post()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
             .body(request)
             .retrieve()
-            .toEntity(TasksCommentBatchResponseModel.class);
+            .toEntity(BulkOperationResponseModel.class);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-    List<TaskCommentResultModel> results = Objects.requireNonNull(response.getBody()).getResults();
-    assertThat(results).hasSize(2);
-
-    assertThat(results).allMatch(r -> r.getErrorCode() == null);
+    List<BulkOperationResultModel> result = Objects.requireNonNull(response.getBody()).getResults();
+    assertThat(result).hasSize(0);
+    assertThat(result).allMatch(r -> r.getErrorCode() == null);
   }
 
   @Test
@@ -335,34 +334,29 @@ class TaskCommentControllerIntTest {
     TasksCommentBatchRepresentationModel
             request = new TasksCommentBatchRepresentationModel();
     request.setTaskIds(List.of(
-            "TKI:000000000000000000000000000000000001", //exists
-            "TKI:200000000000000000000000000000000002"  // doesn't exist
+            "TKI:000000000000000000000000000000000002", //exists
+            "TKI:400000000000000000000000000000000004"  // doesn't exist
     ));
     request.setTextField("newly created task comment for multiple tasks");
 
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
 
-    ResponseEntity<TasksCommentBatchResponseModel> response =
+    ResponseEntity<BulkOperationResponseModel> response =
             CLIENT
                 .post()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
                 .body(request)
                 .retrieve()
-                .toEntity(TasksCommentBatchResponseModel.class);
+                .toEntity(BulkOperationResponseModel.class);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-    List<TaskCommentResultModel> results = Objects.requireNonNull(response.getBody()).getResults();
-    assertThat(results).hasSize(2);
 
-    // Success
-    assertThat(results).anyMatch(r ->
-            r.getTaskId().equals("TKI:000000000000000000000000000000000001")
-                    && r.getErrorCode() == null);
+    List<BulkOperationResultModel> result = Objects.requireNonNull(response.getBody()).getResults();
+    assertThat(result).hasSize(1);
 
-    // Failure
-    assertThat(results).anyMatch(r ->
-            r.getTaskId().equals("TKI:200000000000000000000000000000000002")
+    assertThat(result).anyMatch(r ->
+            r.getTaskId().equals("TKI:400000000000000000000000000000000004")
                     && "TASK_NOT_FOUND".equals(r.getErrorCode()));
   }
 
@@ -568,7 +562,7 @@ class TaskCommentControllerIntTest {
                 .toEntity(TaskCommentCollectionRepresentationModel.class);
 
     assertThat(getTaskCommentsBeforeDeleteionResponse.getBody()).isNotNull();
-    assertThat(getTaskCommentsBeforeDeleteionResponse.getBody().getContent()).hasSize(3);
+    assertThat(getTaskCommentsBeforeDeleteionResponse.getBody().getContent()).hasSize(2);
 
     String url2 =
         restHelper.toUrl(
