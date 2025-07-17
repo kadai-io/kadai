@@ -88,7 +88,7 @@
         <version.aspectj>1.9.24</version.aspectj>
 
         <!-- Excel to DMN converter dependencies -->
-        <version.docx4j>11.5.3</version.docx4j>
+        <version.docx4j>11.5.4</version.docx4j>
         <version.jakarta.xml.bind-api>4.0.2</version.jakarta.xml.bind-api>
         <version.jaxb-core>4.0.5</version.jaxb-core>
         <version.jaxb-impl>4.0.5</version.jaxb-impl>
