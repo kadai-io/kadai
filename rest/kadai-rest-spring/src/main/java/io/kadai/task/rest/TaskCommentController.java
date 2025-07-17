@@ -178,7 +178,8 @@ public class TaskCommentController implements TaskCommentApi {
           @RequestBody TasksCommentBatchRepresentationModel requestModel) {
 
     BulkOperationResults<String, KadaiException> errors =
-            taskService.createTaskCommentsBulk(requestModel.getTaskIds(), requestModel.getTextField());
+            taskService.createTaskCommentsBulk(requestModel.getTaskIds(),
+                    requestModel.getTextField());
 
     BulkOperationResponseModel response =
             BulkOperationResponseModel.getFailures(requestModel.getTaskIds(), errors);
