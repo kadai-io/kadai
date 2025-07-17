@@ -34,15 +34,13 @@ import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskComment;
 import io.kadai.task.rest.assembler.TaskCommentRepresentationModelAssembler;
+import io.kadai.task.rest.models.BulkOperationResponseModel;
 import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
-import io.kadai.task.rest.models.TaskCommentResultModel;
 import io.kadai.task.rest.models.TasksCommentBatchRepresentationModel;
-import io.kadai.task.rest.models.TasksCommentBatchResponseModel;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
@@ -176,34 +174,15 @@ public class TaskCommentController implements TaskCommentApi {
   }
 
   @PostMapping(path = RestEndpoints.URL_TASKS_COMMENT)
-  @Transactional(rollbackFor = Exception.class)
-  public ResponseEntity<TasksCommentBatchResponseModel> createTaskCommentsBatch(
+  public ResponseEntity<BulkOperationResponseModel> createTaskCommentsBatch(
           @RequestBody TasksCommentBatchRepresentationModel requestModel) {
 
-    BulkOperationResults<String, KadaiException> errorCollector = new BulkOperationResults<>();
+    BulkOperationResults<String, KadaiException> errors =
+            taskService.createTaskCommentsBulk(requestModel.getTaskIds(), requestModel.getTextField());
 
-    for (String taskId : requestModel.getTaskIds()) {
-      try {
-        TaskCommentRepresentationModel commentRepresentation = new TaskCommentRepresentationModel();
-        commentRepresentation.setTaskId(taskId);
-        commentRepresentation.setTextField(requestModel.getTextField());
-        TaskComment taskCommentEntity = taskCommentRepresentationModelAssembler
-                .toEntityModel(commentRepresentation);
-        taskService.createTaskComment(taskCommentEntity);
+    BulkOperationResponseModel response =
+            BulkOperationResponseModel.getFailures(requestModel.getTaskIds(), errors);
 
-      } catch (KadaiException ex) {
-        errorCollector.addError(taskId, ex);
-      }
-    }
-
-    List<TaskCommentResultModel> resultModels = requestModel.getTaskIds().stream()
-            .map(taskId -> {
-              KadaiException ex = errorCollector.getErrorForId(taskId);
-              String errorCode = (ex != null) ? ex.getErrorCode().getKey() : null;
-              return new TaskCommentResultModel(taskId, errorCode);
-            })
-            .collect(Collectors.toList());
-
-    return ResponseEntity.ok(new TasksCommentBatchResponseModel(resultModels));
+    return ResponseEntity.ok(response);
   }
 }
