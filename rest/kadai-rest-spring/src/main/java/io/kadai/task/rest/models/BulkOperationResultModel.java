@@ -21,19 +21,19 @@ package io.kadai.task.rest.models;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Response model for a single task comment creation.
+ * DTO for a single entry in a bulk operation response.
  */
-@Schema(description = "Response model for a single task comment creation")
-public class TaskCommentResultModel {
-  @Schema(description = "ID der Task")
+@Schema(description = "Result of a single bulk operation entry")
+public class BulkOperationResultModel {
+  @Schema(description = "ID of the Entity")
   private String taskId;
 
   @Schema(description = "Error code if creation failed; null otherwise")
   private String errorCode;
 
-  public TaskCommentResultModel() {}
+  public BulkOperationResultModel() { }
 
-  public TaskCommentResultModel(String taskId, String errorCode) {
+  public BulkOperationResultModel(String taskId, String errorCode) {
     this.taskId = taskId;
     this.errorCode = errorCode;
   }
