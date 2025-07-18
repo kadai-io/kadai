@@ -16,7 +16,7 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 :host {
   flex-grow: 1;
@@ -34,7 +34,7 @@
 
   &__badge-message {
     font-size: 1.1rem;
-    background-color: $transparent-grey;
+    background-color: colors.$transparent-grey;
     border-radius: 4px;
 
     display: block;
@@ -54,7 +54,7 @@
   }
 
   &__button--primary {
-    background-color: $aquamarine;
+    background-color: colors.$aquamarine;
     color: white;
     margin-right: 4px;
     min-width: 1%;
@@ -67,11 +67,11 @@
   }
 
   &__icon--aquamarine {
-    color: $aquamarine;
+    color: colors.$aquamarine;
   }
 
   &__icon--red {
-    color: $invalid;
+    color: colors.$invalid;
   }
 
   &__task-name {

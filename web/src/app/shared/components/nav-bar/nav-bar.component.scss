@@ -16,10 +16,10 @@
  *
  */
 
-@import 'variables';
+@use 'colors';
 
 .navbar {
-  background-color: $aquamarine;
+  background-color: colors.$aquamarine;
   max-height: 52px;
   overflow-x: hidden;
   padding-right: 50px;
