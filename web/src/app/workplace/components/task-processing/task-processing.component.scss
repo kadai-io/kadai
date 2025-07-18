@@ -16,7 +16,7 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 :host {
   flex-grow: 1;
@@ -59,7 +59,7 @@
   }
 
   &__icon--aquamarine {
-    color: $aquamarine;
+    color: colors.$aquamarine;
   }
 }
 

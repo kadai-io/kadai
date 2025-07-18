@@ -59,7 +59,7 @@ import { ClearWorkbasketFilter } from '../filter-store/filter.actions';
 import { inject, Injectable } from '@angular/core';
 import { WorkbasketQueryPagingParameter } from '../../models/workbasket-query-paging-parameter';
 import { Side } from '../../../administration/models/workbasket-distribution-enums';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 
 class InitializeStore {
   static readonly type = '[Workbasket] Initializing state';

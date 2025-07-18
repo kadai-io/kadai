@@ -16,6 +16,8 @@
  *
  */
 
+@use 'colors';
+
 * {
   font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
@@ -26,15 +28,15 @@
 }
 
 .no-margin {
-  margin: 0px;
+  margin: 0;
 }
 
 .content-margin {
-  margin: 0px 10px 0px 10px;
+  margin: 0 10px 0 10px;
 }
 
 .no-border-radius {
-  border-radius: 0px;
+  border-radius: 0;
 }
 
 /*
@@ -89,74 +91,74 @@
 }
 
 .blue {
-  color: $blue;
+  color: colors.$blue;
 
   & svg {
-    fill: $blue;
+    fill: colors.$blue;
   }
 }
 
 .blue-green {
-  color: $blue-green;
+  color: colors.$blue-green;
 
   & svg {
-    fill: $blue-green;
+    fill: colors.$blue-green;
   }
 }
 
 .green {
-  color: $green;
+  color: colors.$green;
 
   & svg {
-    fill: $green;
+    fill: colors.$green;
   }
 }
 
 .dark-green {
-  color: $dark-green;
+  color: colors.$dark-green;
 
   & svg {
-    fill: $dark-green;
+    fill: colors.$dark-green;
   }
 }
 
 .grey {
-  color: $grey;
+  color: colors.$grey;
 
   & svg {
-    fill: $grey;
+    fill: colors.$grey;
   }
 }
 
 .brown {
-  color: $brown;
+  color: colors.$brown;
 
   & svg {
-    fill: $brown;
+    fill: colors.$brown;
   }
 }
 
 .red {
-  color: $invalid;
+  color: colors.$invalid;
 
   & svg {
-    fill: $invalid;
+    fill: colors.$invalid;
   }
 }
 
 .green-blue {
-  color: $blue-green;
+  color: colors.$blue-green;
 
   & svg {
-    fill: $blue-green;
+    fill: colors.$blue-green;
   }
 }
 
 .aquamarine {
-  color: $aquamarine;
+  color: colors.$aquamarine;
 
   & svg {
-    fill: $aquamarine;
+    fill: colors.$aquamarine;
   }
 }
 
@@ -171,7 +173,7 @@ svg-icon {
 }
 
 .panel-default > .panel-heading .badge.warning {
-  background-color: $brown;
+  background-color: colors.$brown;
 }
 
 .badge.priority {
@@ -179,7 +181,7 @@ svg-icon {
 }
 
 div.error {
-  color: $invalid;
+  color: colors.$invalid;
 }
 
 /*
@@ -196,7 +198,7 @@ div.error {
 }
 
 .dropdown-menu.action {
-  min-width: 0px;
+  min-width: 0;
 }
 
 .footer-space-pagination-list {
@@ -222,7 +224,7 @@ div.error {
 
 .form-group.required .control-label:after {
   content: ' *';
-  color: $invalid;
+  color: colors.$invalid;
 }
 
 .user-select {
@@ -230,7 +232,7 @@ div.error {
 }
 
 .dropdown-menu-users {
-  min-width: 0px;
+  min-width: 0;
 }
 
 .no-gutter > [class*='col-'] {
@@ -315,7 +317,7 @@ span.flip {
 }
 
 .panel {
-  border-radius: 0px;
+  border-radius: 0;
 }
 
 .centered-spinner {
@@ -354,7 +356,7 @@ kadai-monitor-timestamp-report {
   & .panel {
     border: none;
     box-shadow: none;
-    margin-bottom: 0px;
+    margin-bottom: 0;
 
     & > .panel-body {
       height: calc(100vh - 155px);
@@ -372,7 +374,7 @@ kadai-task-query {
   & .panel {
     border: none;
     box-shadow: none;
-    margin-bottom: 0px;
+    margin-bottom: 0;
 
     & > .panel-body {
       height: calc(100vh - 100px);
@@ -405,12 +407,12 @@ kadai-administration-access-items-management {
 
 li.list-group-item.active:hover {
   color: #fff;
-  background-color: $green;
-  border-color: $green;
+  background-color: colors.$green;
+  border-color: colors.$green;
 }
 
 .list-group-item.active {
-  background-color: $green;
+  background-color: colors.$green;
 }
 
 li.list-group-item:hover {
@@ -472,7 +474,7 @@ li.list-group-item:hover {
 }
 
 .modal-backdrop.show {
-  background-color: $transparent-grey;
+  background-color: colors.$transparent-grey;
 }
 
 .padding-right.pull-right {
@@ -502,11 +504,11 @@ li.list-group-item:hover {
 }
 
 .background-darkgreen {
-  background-color: $dark-green;
+  background-color: colors.$dark-green;
 }
 
 .background-bluegreen {
-  background-color: $blue-green;
+  background-color: colors.$blue-green;
 }
 
 .background-white {

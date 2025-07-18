@@ -16,7 +16,7 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 .distribution-targets-list {
   &__action-buttons {
@@ -34,7 +34,7 @@
 
   &__lists {
     padding: 0 16px 16px 16px;
-    background-color: $light-grey;
+    background-color: colors.$light-grey;
 
     &--side {
       display: flex;
