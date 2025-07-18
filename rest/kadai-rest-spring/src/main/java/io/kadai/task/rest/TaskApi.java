@@ -34,6 +34,7 @@ import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskSummary;
+import io.kadai.task.rest.models.BulkOperationResponseModel;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
@@ -50,6 +51,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.Map;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.hateoas.MediaTypes;
@@ -58,6 +60,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -887,6 +890,48 @@ public interface TaskApi {
           NotAuthorizedOnWorkbasketException;
 
   /**
+   * This endpoint completes multiple Tasks.
+   *
+   * <p>Processes all provided task IDs and marks them as completed.
+   *  In case of success (no error), the task ID will not appear in the response.
+   *  The response contains only the IDs that failed, along with their error codes.</p>
+   *
+   * @param taskIds List of task IDs that are to be completed.
+   * @return The list of failed task IDs with error codes.
+   *
+   */
+
+  @Operation(
+      summary = "Bulk complete Tasks",
+      description = "This endpoint completes multiple Tasks in one call.",
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = "JSON array with the IDs of the tasks to be completed",
+          required = true,
+          content = @Content(
+              mediaType = MediaTypes.ALPS_JSON_VALUE,
+              schema = @Schema(type = "array",
+                      example = "[\"TKI:...\", \"TKI:...\"]",
+                      implementation = String.class)
+          )
+      ),
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "List of failed IDs with their error codes",
+              content = @Content(
+                  mediaType = MediaTypes.ALPS_JSON_VALUE,
+                  schema = @Schema(implementation = BulkOperationResponseModel.class)
+              )
+          )
+      }
+  )
+  @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE)
+  @Transactional(rollbackFor = Exception.class)
+  ResponseEntity<BulkOperationResponseModel> bulkComplete(
+          @RequestBody List<String> taskIds
+  );
+
+  /**
    * This endpoint force completes a Task.
    *
    * @param taskId Id of the requested Task to force complete.
@@ -946,6 +991,44 @@ public interface TaskApi {
           InvalidOwnerException,
           InvalidTaskStateException,
           NotAuthorizedOnWorkbasketException;
+
+  /**
+   * This endpoint force completes multiple Tasks.
+   *
+   * @param taskIds List of task IDs that are to be force completed.
+   * @return The list of failed task IDs with error codes.
+   *
+   */
+
+  @Operation(
+      summary = "Bulk force complete Tasks",
+      description = "This endpoint force‑completes multiple Tasks in one call.",
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = "JSON array with the IDs of the tasks to be completed",
+          required = true,
+          content = @Content(
+              mediaType = MediaTypes.ALPS_JSON_VALUE,
+              schema = @Schema(type = "array",
+                      example = "[\"TKI:...\", \"TKI:...\"]",
+                      implementation = String.class)
+          )
+      ),
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "List of failed IDs with their error codes",
+              content = @Content(
+                      mediaType = MediaTypes.ALPS_JSON_VALUE,
+                      schema = @Schema(implementation = BulkOperationResponseModel.class)
+              )
+          )
+      }
+  )
+  @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE_FORCE)
+  @Transactional(rollbackFor = Exception.class)
+  ResponseEntity<BulkOperationResponseModel> bulkForceComplete(
+          @RequestBody List<String> taskIds
+  );
 
   /**
    * This endpoint cancels a Task. Cancellation marks a Task as obsolete. The actual work the Task
