@@ -246,7 +246,7 @@ Currently, KADAI provides the following SPIs:
 
 # 📚Releases
 [![Maven Central](https://img.shields.io/maven-central/v/io.kadai/kadai-core.svg)](https://central.sonatype.com/artifact/io.kadai/kadai-core)
-[![Maven Central Snapshots](https://img.shields.io/badge/maven--central--snapshots-v10.1.1--SNAPSHOT-blue?link=https%3A%2F%2Fcentral.sonatype.com%2Fservice%2Frest%2Frepository%2Fbrowse%2Fmaven-snapshots%2Fio%2Fkadai%2F)](https://central.sonatype.com/service/rest/repository/browse/maven-snapshots/io/kadai/)
+![Maven Central Snapshots](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcentral.sonatype.com%2Frepository%2Fmaven-snapshots%2Fio%2Fkadai%2Fkadai-core%2Fmaven-metadata.xml&label=maven-central-snapshots&strategy=latestProperty)
 
 The list of [releases](https://github.com/kadai-io/kadai/releases) contains a detailed changelog.
 
