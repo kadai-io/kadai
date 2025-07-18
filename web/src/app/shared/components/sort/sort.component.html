@@ -18,7 +18,7 @@
 
 <div class="sort">
   <button [matMenuTriggerFor]="sortMenu" class="sort__button" mat-stroked-button
-    matTooltip="Modify sorting order">
+          matTooltip="Modify sorting order">
     <mat-icon class="sort__mat-icon">sort</mat-icon>
 
     <mat-menu #sortMenu="matMenu">
@@ -36,8 +36,10 @@
             <span class="sort__selected-value"> Ascending </span>
           </span>
         } @else {
-          <mat-icon> arrow_upward</mat-icon>
-          <span> Ascending </span>
+          <span>
+            <mat-icon> arrow_upward</mat-icon>
+            <span> Ascending </span>
+          </span>
         }
       </button>
 
@@ -49,8 +51,10 @@
             <span class="sort__selected-value"> Descending </span>
           </span>
         } @else {
-          <mat-icon> arrow_downward</mat-icon>
-          <span> Descending </span>
+          <span>
+            <mat-icon> arrow_downward</mat-icon>
+            <span> Descending </span>
+          </span>
         }
       </button>
     </mat-menu>
@@ -59,7 +63,7 @@
     <mat-menu #sortValue="matMenu">
       @for (sortingField of sortingFields | mapValues; track sortingField) {
         <button (click)="changeSortBy(sortingField.key)"
-          mat-menu-item>
+                mat-menu-item>
           <span class="{{sortingField.key === sort['sort-by']  ? 'sort__selected-value' : ''}}">
             {{ sortingField.value }}
           </span>

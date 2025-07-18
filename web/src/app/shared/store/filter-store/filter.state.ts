@@ -21,7 +21,7 @@ import { Observable, of } from 'rxjs';
 import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-filter-parameter';
 import { ClearTaskFilter, ClearWorkbasketFilter, SetTaskFilter, SetWorkbasketFilter } from './filter.actions';
 import { TaskQueryFilterParameter } from '../../models/task-query-filter-parameter';
-import { isEqual } from 'lodash';
+import { isEqual } from 'lodash-es';
 
 const emptyWorkbasketFilter: WorkbasketQueryFilterParameter = {
   'description-like': [],

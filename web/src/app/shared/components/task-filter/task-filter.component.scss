@@ -16,14 +16,14 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 .task-filter {
   display: flex;
   flex-direction: column;
 
   &__button--primary {
-    background: $aquamarine;
+    background: colors.$aquamarine;
     color: white;
 
     position: relative;

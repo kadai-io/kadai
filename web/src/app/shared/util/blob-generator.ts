@@ -16,7 +16,7 @@
  *
  */
 
-import { saveAs } from 'file-saver';
+import { saveAs } from 'file-saver-es';
 
 export class BlobGenerator {
   public static saveFile(object: Object, fileName: string) {

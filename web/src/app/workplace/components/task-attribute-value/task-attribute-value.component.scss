@@ -16,13 +16,13 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 .task-attribute-value {
   line-height: 1.5;
 
   &__button--primary {
-    background-color: $aquamarine;
+    background-color: colors.$aquamarine;
     color: white;
     margin-top: 16px;
   }
@@ -56,7 +56,7 @@
   }
 
   &__background-grey {
-    background-color: $light-grey;
+    background-color: colors.$light-grey;
   }
 
   &__background-white {

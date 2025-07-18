@@ -16,7 +16,7 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 .distribution-targets-list {
   &__header {
@@ -77,7 +77,7 @@
     background-color: white;
     font-size: 24px;
     font-weight: bold;
-    color: $dark-green;
+    color: colors.$dark-green;
     display: flex;
     align-items: center;
     justify-content: center;
