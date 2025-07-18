@@ -16,10 +16,10 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 .nav-bar {
-  background-color: $light-grey;
+  background-color: colors.$light-grey;
   position: relative;
   border: none;
 }

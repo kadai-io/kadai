@@ -16,7 +16,7 @@
  *
  */
 
-@import 'variables';
+@use 'colors';
 
 .navlist {
   &__admin-item {
@@ -25,19 +25,19 @@
 }
 
 .active {
-  border-left: 5px solid $aquamarine;
+  border-left: 5px solid colors.$aquamarine;
 }
 
 .active__sub {
-  border-left: 5px solid $aquamarine;
+  border-left: 5px solid colors.$aquamarine;
 }
 
 :host ::ng-deep .navlist__item.active__sub * .mdc-list-item__primary-text {
-  color: $aquamarine;
+  color: colors.$aquamarine;
 }
 
 :host ::ng-deep .navlist__item.active * .mdc-list-item__primary-text {
-  color: $aquamarine;
+  color: colors.$aquamarine;
 }
 
 :host ::ng-deep .navlist * .mdc-list-item__primary-text {

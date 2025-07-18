@@ -16,7 +16,7 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 .classification-details {
   height: calc(100vh - 100px);
@@ -66,7 +66,7 @@
     vertical-align: middle;
     line-height: 20px;
     font-size: 1rem;
-    background-color: $transparent-grey;
+    background-color: colors.$transparent-grey;
     border-radius: 4px;
 
     overflow: hidden;
@@ -80,22 +80,22 @@
   }
 
   &__dropdown {
-    border-color: $transparent-grey;
+    border-color: colors.$transparent-grey;
     border-bottom-style: solid;
     border-width: 1px;
   }
 
   &__save-button {
-    background-color: $aquamarine;
+    background-color: colors.$aquamarine;
     color: white;
   }
 
   &__aquamarine-button {
-    color: $aquamarine;
+    color: colors.$aquamarine;
   }
 
   &__red-button {
-    color: $invalid;
+    color: colors.$invalid;
   }
 
   &__mat-icon {
@@ -186,5 +186,5 @@
 }
 
 input:invalid.dirty {
-  border-color: $invalid;
+  border-color: colors.$invalid;
 }

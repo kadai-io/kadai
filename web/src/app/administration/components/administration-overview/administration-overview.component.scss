@@ -16,19 +16,19 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 .administration-overview {
   &__navbar-container {
     display: flex;
-    background-color: $light-grey;
+    background-color: colors.$light-grey;
     justify-content: space-between;
     align-items: flex-end;
   }
 
   &__navbar {
     position: relative;
-    background-color: $light-grey;
+    background-color: colors.$light-grey;
     flex-grow: 2;
   }
 

@@ -37,7 +37,7 @@ import {
   UpdateWorkbasketDistributionTargets
 } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { ButtonAction } from '../../models/button-action';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
