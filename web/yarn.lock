@@ -3411,6 +3411,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/file-saver-es@npm:2":
+  version: 2.0.3
+  resolution: "@types/file-saver-es@npm:2.0.3"
+  checksum: 10c0/b90c32f98cfa9320e14119845b6fada47d1399f96f5a32999835de271e5a74398988378ca5c7a0b7d1e6fccfb1007b913fc3173ba574070136648e08b3c945d6
+  languageName: node
+  linkType: hard
+
 "@types/istanbul-lib-coverage@npm:*, @types/istanbul-lib-coverage@npm:^2.0.1, @types/istanbul-lib-coverage@npm:^2.0.6":
   version: 2.0.6
   resolution: "@types/istanbul-lib-coverage@npm:2.0.6"
@@ -3471,7 +3478,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:4.17.20":
+"@types/lodash-es@npm:4":
+  version: 4.17.12
+  resolution: "@types/lodash-es@npm:4.17.12"
+  dependencies:
+    "@types/lodash": "npm:*"
+  checksum: 10c0/5d12d2cede07f07ab067541371ed1b838a33edb3c35cb81b73284e93c6fd0c4bbeaefee984e69294bffb53f62d7272c5d679fdba8e595ff71e11d00f2601dde0
+  languageName: node
+  linkType: hard
+
+"@types/lodash@npm:*":
   version: 4.17.20
   resolution: "@types/lodash@npm:4.17.20"
   checksum: 10c0/98cdd0faae22cbb8079a01a3bb65aa8f8c41143367486c1cbf5adc83f16c9272a2a5d2c1f541f61d0d73da543c16ee1d21cf2ef86cb93cd0cc0ac3bced6dd88f
@@ -6229,10 +6245,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"file-saver@npm:2.0.5":
+"file-saver-es@npm:2.0.5":
   version: 2.0.5
-  resolution: "file-saver@npm:2.0.5"
-  checksum: 10c0/0a361f683786c34b2574aea53744cb70d0a6feb0fa5e3af00f2fcb6c9d40d3049cc1470e38c6c75df24219f247f6fb3076f86943958f580e62ee2ffe897af8b1
+  resolution: "file-saver-es@npm:2.0.5"
+  checksum: 10c0/ba72dc6d37cdc8d2951882bf37b8e5956fa6b1d218d4f7d74615be33ee651a81bcf3f5980b0a6d9c9c8094ed92aba5f2396554df953b20b1d77e7af9e920fd3e
   languageName: node
   linkType: hard
 
@@ -8176,8 +8192,9 @@ __metadata:
     "@ngxs/devtools-plugin": "npm:20.1.0"
     "@ngxs/router-plugin": "npm:20.1.0"
     "@ngxs/store": "npm:20.1.0"
+    "@types/file-saver-es": "npm:2"
     "@types/jest": "npm:30.0.0"
-    "@types/lodash": "npm:4.17.20"
+    "@types/lodash-es": "npm:4"
     "@types/node": "npm:24.3.1"
     "@typescript-eslint/eslint-plugin": "npm:8.43.0"
     "@typescript-eslint/parser": "npm:8.43.0"
@@ -8189,12 +8206,12 @@ __metadata:
     eslint-config-prettier: "npm:10.1.8"
     eslint-plugin-import: "npm:2.32.0"
     eslint-plugin-prettier: "npm:5.5.4"
-    file-saver: "npm:2.0.5"
+    file-saver-es: "npm:2.0.5"
     globals: "npm:16.4.0"
     jest: "npm:30.1.3"
     jest-environment-jsdom: "npm:30.1.2"
     jest-preset-angular: "npm:15.0.0"
-    lodash: "npm:4.17.21"
+    lodash-es: "npm:4.17.21"
     ng2-charts: "npm:8.0.0"
     prettier: "npm:3.6.2"
     rxjs: "npm:7.8.2"
@@ -8337,7 +8354,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash-es@npm:^4.17.15":
+"lodash-es@npm:4.17.21, lodash-es@npm:^4.17.15":
   version: 4.17.21
   resolution: "lodash-es@npm:4.17.21"
   checksum: 10c0/fb407355f7e6cd523a9383e76e6b455321f0f153a6c9625e21a8827d10c54c2a2341bd2ae8d034358b60e07325e1330c14c224ff582d04612a46a4f0479ff2f2
@@ -8365,7 +8382,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:4.17.21, lodash@npm:^4.17.21":
+"lodash@npm:^4.17.21":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: 10c0/d8cbea072bb08655bb4c989da418994b073a608dffa608b09ac04b43a791b12aeae7cd7ad919aa4c925f33b48490b5cfe6c1f71d827956071dae2e7bb3a6b74c

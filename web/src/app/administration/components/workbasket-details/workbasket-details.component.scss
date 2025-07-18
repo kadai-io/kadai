@@ -16,7 +16,7 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 .workbasket-details {
   &__toolbar {
@@ -39,7 +39,7 @@
 
   &__title-badge {
     font-size: 1.1rem;
-    background-color: $transparent-grey;
+    background-color: colors.$transparent-grey;
     border-radius: 4px;
 
     display: block;
@@ -56,7 +56,7 @@
   }
 
   &__save-button {
-    background-color: $aquamarine;
+    background-color: colors.$aquamarine;
     color: white;
   }
 
@@ -65,11 +65,11 @@
   }
 
   &__button-aquamarine {
-    color: $aquamarine;
+    color: colors.$aquamarine;
   }
 
   &__button-red {
-    color: $invalid;
+    color: colors.$invalid;
   }
 
   &__mat-icon {
@@ -84,7 +84,7 @@
     padding: 6px 8px;
     background-color: #fcebea;
     border: 1px solid #f5c6cb;
-    color: $invalid;
+    color: colors.$invalid;
     border-radius: 4px;
   }
 

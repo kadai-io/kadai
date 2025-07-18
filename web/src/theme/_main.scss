@@ -16,18 +16,17 @@
  *
  */
 
-@import 'variables';
-@import 'material_styles';
-@import 'site';
-@import 'forms';
-@import 'tree';
-@import 'type-ahead';
-@import 'checkboxes';
-@import 'buttons';
-@import 'tabs';
-@import 'table';
-@import 'mixin/colors';
-@import 'progress-bar';
-@import 'shameful';
-
-@import 'bootstrap-replacement';
+@use 'variables';
+@use 'material_styles';
+@use 'site';
+@use 'forms';
+@use 'tree';
+@use 'type-ahead';
+@use 'checkboxes';
+@use 'buttons';
+@use 'tabs';
+@use 'table';
+@use 'mixin/colors';
+@use 'progress-bar';
+@use 'shameful';
+@use 'bootstrap-replacement';

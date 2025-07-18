@@ -16,7 +16,7 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 .type-ahead {
   min-height: 0;
@@ -40,7 +40,7 @@
 }
 
 .invalid {
-  color: $invalid;
+  color: colors.$invalid;
 }
 
 mat-label.type-ahead__label {

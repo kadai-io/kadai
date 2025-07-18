@@ -16,6 +16,8 @@
  *
  */
 
+@use 'colors';
+
 .table {
   width: 100%;
   display: table;
@@ -78,7 +80,7 @@
 .table-cell--separator {
   border-left: 2px solid #ddd;
   border-right: 2px solid #ddd;
-  background-color: $light-grey;
+  background-color: colors.$light-grey;
 
   &.zoom-in {
     cursor: zoom-in;
