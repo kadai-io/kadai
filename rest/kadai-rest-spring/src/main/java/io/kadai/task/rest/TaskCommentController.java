@@ -18,8 +18,10 @@
 
 package io.kadai.task.rest;
 
+import io.kadai.common.api.BulkOperationResults;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.QueryPagingParameter;
 import io.kadai.common.rest.QuerySortParameter;
@@ -32,8 +34,10 @@ import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskComment;
 import io.kadai.task.rest.assembler.TaskCommentRepresentationModelAssembler;
+import io.kadai.task.rest.models.BulkOperationResponseModel;
 import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
+import io.kadai.task.rest.models.TasksCommentBatchRepresentationModel;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -56,7 +60,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @EnableHypermediaSupport(type = HypermediaType.HAL)
 public class TaskCommentController implements TaskCommentApi {
-
   private final TaskService taskService;
   private final TaskCommentRepresentationModelAssembler taskCommentRepresentationModelAssembler;
 
@@ -168,5 +171,19 @@ public class TaskCommentController implements TaskCommentApi {
 
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(taskCommentRepresentationModelAssembler.toModel(createdTaskComment));
+  }
+
+  @PostMapping(path = RestEndpoints.URL_TASKS_COMMENT)
+  public ResponseEntity<BulkOperationResponseModel> createTaskCommentsBatch(
+          @RequestBody TasksCommentBatchRepresentationModel requestModel) {
+
+    BulkOperationResults<String, KadaiException> errors =
+            taskService.createTaskCommentsBulk(requestModel.getTaskIds(),
+                    requestModel.getTextField());
+
+    BulkOperationResponseModel response =
+            BulkOperationResponseModel.getFailures(requestModel.getTaskIds(), errors);
+
+    return ResponseEntity.ok(response);
   }
 }

@@ -1464,6 +1464,10 @@ public interface TaskService {
   TaskComment createTaskComment(TaskComment taskComment)
       throws TaskNotFoundException, InvalidArgumentException, NotAuthorizedOnWorkbasketException;
 
+  BulkOperationResults<String, KadaiException> createTaskCommentsBulk(
+          List<String> taskIds, String text)
+          throws InvalidArgumentException;
+
   // endregion
 
   // region READ

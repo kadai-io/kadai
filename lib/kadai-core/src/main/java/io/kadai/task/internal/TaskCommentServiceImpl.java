@@ -18,9 +18,11 @@
 
 package io.kadai.task.internal;
 
+import io.kadai.common.api.BulkOperationResults;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.util.IdGenerator;
@@ -138,6 +140,50 @@ class TaskCommentServiceImpl {
     }
 
     return taskCommentImplToCreate;
+  }
+
+  public BulkOperationResults<String, KadaiException> createTaskCommentsBulk(
+          List<String> taskIds,
+          String text) throws InvalidArgumentException {
+
+    List<TaskCommentImpl> comments = taskIds.stream()
+            .map(taskId -> {
+              TaskCommentImpl c = (TaskCommentImpl) newTaskComment(taskId);
+              c.setTextField(text);
+              c.setId(null);
+              return c;
+            })
+            .toList();
+
+    BulkOperationResults<String, KadaiException> errors = new BulkOperationResults<>();
+    boolean bulkSucceeded = true;
+
+    try {
+      kadaiEngine.openConnection();
+      for (TaskComment c : comments) {
+        taskService.createTaskComment(c);
+      }
+    } catch (Exception bulkEx) {
+      bulkSucceeded = false;
+    } finally {
+      kadaiEngine.returnConnection();
+    }
+    if (!bulkSucceeded) {
+      errors = new BulkOperationResults<>();
+      kadaiEngine.openConnection();
+      for (String taskId : taskIds) {
+        TaskCommentImpl taskC = (TaskCommentImpl) newTaskComment(taskId);
+        taskC.setTextField(text);
+        taskC.setId(null);
+        try {
+          taskService.createTaskComment(taskC);
+        } catch (KadaiException ex) {
+          errors.addError(taskId, ex);
+        }
+      }
+      kadaiEngine.returnConnection();
+    }
+    return errors;
   }
 
   void deleteTaskComment(String taskCommentId)
