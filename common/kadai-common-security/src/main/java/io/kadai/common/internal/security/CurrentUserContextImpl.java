@@ -22,6 +22,9 @@ import static java.util.function.Predicate.not;
 
 import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.api.security.GroupPrincipal;
+import io.kadai.common.api.security.PuppeteerPrincipal;
+import io.kadai.common.api.security.UserContext;
+import io.kadai.common.api.security.UserPrincipal;
 import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.Principal;
@@ -30,6 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.security.auth.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,8 +65,8 @@ public class CurrentUserContextImpl implements CurrentUserContext {
   }
 
   @Override
-  public String getUserid() {
-    return runningOnWebSphere ? getUserIdFromWsSubject() : getUserIdFromJaasSubject();
+  public UserContext getUserContext() {
+    return runningOnWebSphere ? getUserContextFromWsSubject() : getUserContextFromJaasSubject();
   }
 
   @Override
@@ -87,7 +91,7 @@ public class CurrentUserContextImpl implements CurrentUserContext {
   @Override
   public List<String> getAccessIds() {
     List<String> accessIds = new ArrayList<>(getGroupIds());
-    accessIds.add(getUserid());
+    accessIds.add(getUserContext().getPuppet());
     return accessIds;
   }
 
@@ -97,7 +101,7 @@ public class CurrentUserContextImpl implements CurrentUserContext {
    *
    * @return the userid of the caller. If the userid could not be obtained, null is returned.
    */
-  private String getUserIdFromWsSubject() {
+  private UserContext getUserContextFromWsSubject() {
     try {
       Class<?> wsSubjectClass = Class.forName(WSSUBJECT_CLASSNAME);
       Method getCallerSubjectMethod =
@@ -107,36 +111,40 @@ public class CurrentUserContextImpl implements CurrentUserContext {
         LOGGER.debug("Subject of caller: {}", callerSubject);
       }
       if (callerSubject != null) {
+        final String puppeteerName =
+            callerSubject.getPrincipals().stream()
+                .filter(PuppeteerPrincipal.class::isInstance)
+                .map(Principal::getName)
+                .map(this::convertAccessId)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
         Set<Object> publicCredentials = callerSubject.getPublicCredentials();
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Public credentials of caller: {}", publicCredentials);
         }
-        return publicCredentials.stream()
-            .map(
-                // we could use CheckedFunction#wrap here, but this either requires a dependency
-                // to kadai-common or an inclusion of the class CheckedFunction in this module.
-                // The first is not possible due to a cyclic dependency.
-                // The second is not desired, since this module is a very slim security module and
-                // the inclusion of CheckedFunction and its transitive dependencies would increase
-                // the module scope and introduce inconsistency.
-                credential -> {
-                  try {
-                    return credential
-                        .getClass()
-                        .getMethod(GET_UNIQUE_SECURITY_NAME_METHOD, (Class<?>[]) null)
-                        .invoke(credential, (Object[]) null);
-                  } catch (Exception e) {
-                    throw new SecurityException("Could not retrieve principal", e);
-                  }
-                })
-            .peek(
-                o ->
-                    LOGGER.debug(
-                        "Returning the unique security name of first public credential: {}", o))
-            .map(Object::toString)
-            .map(this::convertAccessId)
-            .findFirst()
-            .orElse(null);
+        final String puppetName =
+            publicCredentials.stream()
+                .map(
+                    credential -> {
+                      try {
+                        return credential
+                            .getClass()
+                            .getMethod(GET_UNIQUE_SECURITY_NAME_METHOD, (Class<?>[]) null)
+                            .invoke(credential, (Object[]) null);
+                      } catch (Exception e) {
+                        throw new SecurityException("Could not retrieve principal", e);
+                      }
+                    })
+                .peek(
+                    o ->
+                        LOGGER.debug(
+                            "Returning the unique security name of first public credential: {}", o))
+                .map(Object::toString)
+                .map(this::convertAccessId)
+                .findFirst()
+                .orElse(null);
+        return new UserContextImpl(puppetName, puppeteerName);
       }
     } catch (Exception e) {
       LOGGER.warn("Could not get user from WSSubject. Going ahead unauthorized.");
@@ -145,20 +153,34 @@ public class CurrentUserContextImpl implements CurrentUserContext {
   }
 
   @SuppressWarnings("removal")
-  private String getUserIdFromJaasSubject() {
+  private UserContext getUserContextFromJaasSubject() {
     // TODO replace with Subject.current() when migrating to newer Version than 17
     Subject subject = Subject.getSubject(AccessController.getContext());
     LOGGER.trace("Subject of caller: {}", subject);
     if (subject != null) {
-      Set<Principal> principals = subject.getPrincipals();
+      final Set<Principal> principals = subject.getPrincipals();
       LOGGER.trace("Public principals of caller: {}", principals);
-      return principals.stream()
-          .filter(not(GroupPrincipal.class::isInstance))
-          .map(Principal::getName)
-          .filter(Objects::nonNull)
-          .map(this::convertAccessId)
-          .findFirst()
-          .orElse(null);
+      final Set<Principal> puppetBox =
+          principals.stream()
+              .filter(not(GroupPrincipal.class::isInstance))
+              .collect(Collectors.toSet());
+      final String puppetName =
+          puppetBox.stream()
+              .filter(UserPrincipal.class::isInstance)
+              .map(Principal::getName)
+              .map(this::convertAccessId)
+              .filter(Objects::nonNull)
+              .findFirst()
+              .orElse(null);
+      final String puppeteerName =
+          puppetBox.stream()
+              .filter(PuppeteerPrincipal.class::isInstance)
+              .map(Principal::getName)
+              .map(this::convertAccessId)
+              .filter(Objects::nonNull)
+              .findFirst()
+              .orElse(null);
+      return new UserContextImpl(puppetName, puppeteerName);
     }
     LOGGER.trace("No userId found in subject!");
     return null;
