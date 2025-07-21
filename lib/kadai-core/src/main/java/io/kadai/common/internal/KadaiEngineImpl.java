@@ -35,6 +35,7 @@ import io.kadai.common.api.exceptions.ConnectionNotSetException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.api.security.CurrentUserContext;
+import io.kadai.common.api.security.PuppeteerPrincipal;
 import io.kadai.common.api.security.UserPrincipal;
 import io.kadai.common.internal.configuration.DB;
 import io.kadai.common.internal.configuration.DbSchemaCreator;
@@ -380,22 +381,20 @@ public class KadaiEngineImpl implements KadaiEngine {
             currentUserContext.getAccessIds(),
             rolesAsString);
       }
-      throw new NotAuthorizedException(currentUserContext.getUserid(), roles);
+      throw new NotAuthorizedException(currentUserContext.getUserContext().getPuppet(), roles);
     }
   }
 
-  public <T> T runAsAdmin(Supplier<T> supplier) {
-    if (isUserInRole(KadaiRole.ADMIN)) {
-      return supplier.get();
-    }
-
-    String adminName =
-        this.getConfiguration().getRoleMap().get(KadaiRole.ADMIN).stream()
+  @Override
+  public <T> T runAs(Supplier<T> supplier, KadaiRole puppeteer, String puppet) {
+    String puppeteerName =
+        this.getConfiguration().getRoleMap().get(puppeteer).stream()
             .findFirst()
-            .orElseThrow(() -> new SystemException("There is no admin configured"));
+            .orElseThrow(() -> new SystemException("There is no " + puppeteer + " configured"));
 
     Subject subject = new Subject();
-    subject.getPrincipals().add(new UserPrincipal(adminName));
+    subject.getPrincipals().add(new PuppeteerPrincipal(puppeteerName));
+    subject.getPrincipals().add(new UserPrincipal(puppet));
 
     return Subject.doAs(subject, (PrivilegedAction<T>) supplier::get);
   }

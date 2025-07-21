@@ -21,6 +21,7 @@ package io.kadai.common.api;
 import io.kadai.KadaiConfiguration;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
+import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.common.internal.workingtime.WorkingTimeCalculatorImpl;
@@ -231,6 +232,18 @@ public interface KadaiEngine {
    */
   void checkRoleMembership(KadaiRole... roles) throws NotAuthorizedException;
 
+  <T> T runAs(Supplier<T> supplier, KadaiRole puppeteer, String puppet);
+
+  default void runAs(Runnable runnable, KadaiRole puppeteer, String puppet) {
+    runAs(
+        () -> {
+          runnable.run();
+          return null;
+        },
+        puppeteer,
+        puppet);
+  }
+
   /**
    * Executes a given {@code Supplier} with admin privileges and thus skips further permission
    * checks. With great power comes great responsibility.
@@ -239,7 +252,13 @@ public interface KadaiEngine {
    * @param <T> defined with the return value of the {@code Supplier}
    * @return output from {@code Supplier}
    */
-  <T> T runAsAdmin(Supplier<T> supplier);
+  default <T> T runAsAdmin(Supplier<T> supplier) {
+    String adminName =
+        this.getConfiguration().getRoleMap().get(KadaiRole.ADMIN).stream()
+            .findFirst()
+            .orElseThrow(() -> new SystemException("There is no admin configured"));
+    return runAs(supplier, KadaiRole.ADMIN, adminName);
+  }
 
   /**
    * Executes a given {@code Runnable} with admin privileges and thus skips further permission
