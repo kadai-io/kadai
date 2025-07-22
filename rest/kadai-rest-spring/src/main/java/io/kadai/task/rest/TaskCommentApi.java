@@ -414,16 +414,18 @@ public interface TaskCommentApi {
    * This endpoint creates the same Task Comment for multiple Tasks.
    *
    * @title Create a Task Comment for multiple Tasks
-   * @param tasksCommentBatchRepresentationModel contains the list of Task IDs and the comment text
-   * @return bulkOperationResponseModel with
-   *     HTTP200 OK and a list of Task IDs for which the comment creation failed
-   *
+   * @param tasksCommentBatchRepresentationModel list of Task IDs and the comment text
+   * @return HTTP 200 with a {@link BulkOperationResponseModel} containing the IDs
+   *         that failed with their error codes; the list is empty if all comments were
+   *         created successfully. Otherwise, an appropriate error status (e.g. 400).
    */
   @Operation(
-        summary = "Create Task Comments for multiple Tasks",
-        description = "Creates the same Task Comment for all provided Task IDs. "
-                + "Always returns 200 OK; response body contains the task IDs with their error code"
-                + "for which comment creation failed.",
+            summary = "Create Task Comments for multiple Tasks",
+            description = "Creates the same comment for all provided task IDs."
+                    + "Returns 200 on success with a BulkOperationResponseModel listing "
+                    + "failed IDs (empty list if all succeeded). "
+                    + "Returns 400 if taskIds or text are null/empty. "
+                    + "Other 4xx/5xx codes are possible.",
         requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                 required = true,
                 description = "Payload with the list of Task IDs and the comment text",
