@@ -143,46 +143,41 @@ class TaskCommentServiceImpl {
   }
 
   public BulkOperationResults<String, KadaiException> createTaskCommentsBulk(
-          List<String> taskIds,
-          String text) throws InvalidArgumentException {
+          List<String> taskIds, String text) throws InvalidArgumentException {
 
-    List<TaskCommentImpl> comments = taskIds.stream()
-            .map(taskId -> {
-              TaskCommentImpl c = (TaskCommentImpl) newTaskComment(taskId);
-              c.setTextField(text);
-              c.setId(null);
-              return c;
-            })
-            .toList();
+    if (taskIds == null || taskIds.isEmpty()) {
+      throw new InvalidArgumentException("taskIds must not be null/empty");
+    }
+    if (text == null || text.isEmpty()) {
+      throw new InvalidArgumentException("text must not be null/empty");
+    }
 
     BulkOperationResults<String, KadaiException> errors = new BulkOperationResults<>();
-    boolean bulkSucceeded = true;
+    Instant now = Instant.now();
 
     try {
       kadaiEngine.openConnection();
-      for (TaskComment c : comments) {
-        taskService.createTaskComment(c);
-      }
-    } catch (Exception bulkEx) {
-      bulkSucceeded = false;
-    } finally {
-      kadaiEngine.returnConnection();
-    }
-    if (!bulkSucceeded) {
-      errors = new BulkOperationResults<>();
-      kadaiEngine.openConnection();
+
       for (String taskId : taskIds) {
-        TaskCommentImpl taskC = (TaskCommentImpl) newTaskComment(taskId);
-        taskC.setTextField(text);
-        taskC.setId(null);
+        TaskCommentImpl c = (TaskCommentImpl) newTaskComment(taskId);
+        c.setTextField(text);
+        c.setId(null);
+
         try {
-          taskService.createTaskComment(taskC);
+          taskService.getTask(c.getTaskId());
+          validateNoneExistingTaskCommentId(c.getId());
+          initDefaultTaskCommentValues(c);
+
+          taskCommentMapper.insert(c);
+          taskMapper.incrementNumberOfComments(c.getTaskId(), now);
         } catch (KadaiException ex) {
           errors.addError(taskId, ex);
         }
       }
+    } finally {
       kadaiEngine.returnConnection();
     }
+
     return errors;
   }
 
