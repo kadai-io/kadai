@@ -1464,6 +1464,16 @@ public interface TaskService {
   TaskComment createTaskComment(TaskComment taskComment)
       throws TaskNotFoundException, InvalidArgumentException, NotAuthorizedOnWorkbasketException;
 
+  /**
+   * Adds the given comment text to all {@linkplain Task Tasks} identified by the provided ids.
+   *
+   * @param taskIds {@linkplain Task#getId() ids} of the {@linkplain Task Tasks}
+   *        that should receive the comment.
+   * @param text the comment text to add to each task.
+   * @return the result of the operation with each {@linkplain Task#getId() id} mapped to a
+   *         {@link KadaiException} if adding the comment failed (empty if all succeeded).
+   * @throws InvalidArgumentException if {@code taskIds} or {@code text} is {@code null}.
+   */
   BulkOperationResults<String, KadaiException> createTaskCommentsBulk(
           List<String> taskIds, String text)
           throws InvalidArgumentException;
