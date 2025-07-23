@@ -21,7 +21,6 @@ package io.kadai.common.api;
 import io.kadai.KadaiConfiguration;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
-import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.common.internal.workingtime.WorkingTimeCalculatorImpl;
