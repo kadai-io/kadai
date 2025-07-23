@@ -341,7 +341,7 @@ class TaskQueryImplGroupByAccTest implements KadaiConfigurationModifier {
   private void persistPermission(WorkbasketSummary workbasketSummary) throws Exception {
     WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
         .workbasketId(workbasketSummary.getId())
-        .accessId(currentUserContext.getUserid())
+        .accessId(currentUserContext.getUserContext().getUserId())
         .permission(WorkbasketPermission.OPEN)
         .permission(WorkbasketPermission.READ)
         .permission(WorkbasketPermission.READTASKS)

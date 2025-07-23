@@ -149,7 +149,7 @@ public class CurrentUserContextImpl implements CurrentUserContext {
     } catch (Exception e) {
       LOGGER.warn("Could not get user from WSSubject. Going ahead unauthorized.");
     }
-    return null;
+    return new UserContextImpl(null);
   }
 
   @SuppressWarnings("removal")
@@ -183,7 +183,7 @@ public class CurrentUserContextImpl implements CurrentUserContext {
       return new UserContextImpl(puppetName, puppeteerName);
     }
     LOGGER.trace("No userId found in subject!");
-    return null;
+    return new UserContextImpl(null);
   }
 
   private String convertAccessId(String accessId) {

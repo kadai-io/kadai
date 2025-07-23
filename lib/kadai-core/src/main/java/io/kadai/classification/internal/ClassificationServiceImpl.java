@@ -182,7 +182,7 @@ public class ClassificationServiceImpl implements ClassificationService {
                   IdGenerator.generateWithPrefix(
                       IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
                   classification,
-                  kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getUserId(),
                   details));
         }
 
@@ -254,7 +254,7 @@ public class ClassificationServiceImpl implements ClassificationService {
             new ClassificationCreatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
                 classificationImpl,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getUserId(),
                 details));
       }
 
@@ -317,7 +317,7 @@ public class ClassificationServiceImpl implements ClassificationService {
             new ClassificationUpdatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
                 classificationImpl,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getUserId(),
                 details));
       }
       if (LOGGER.isDebugEnabled()) {
@@ -514,8 +514,7 @@ public class ClassificationServiceImpl implements ClassificationService {
   }
 
   private boolean isReferentialIntegrityConstraintViolation(PersistenceException e) {
-    return isH2OrPostgresIntegrityConstraintViolation(e)
-        || isDb2IntegrityConstraintViolation(e);
+    return isH2OrPostgresIntegrityConstraintViolation(e) || isDb2IntegrityConstraintViolation(e);
   }
 
   private boolean isDb2IntegrityConstraintViolation(PersistenceException e) {
