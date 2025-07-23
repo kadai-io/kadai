@@ -18,8 +18,6 @@
 
 package io.kadai.common.api.security;
 
-import java.util.Optional;
-
 public interface UserContext {
 
   default String getUserId() {
@@ -28,5 +26,5 @@ public interface UserContext {
 
   String getPuppet();
 
-  Optional<String> getPuppeteer();
+  String getPuppeteer();
 }
