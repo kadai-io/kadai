@@ -56,7 +56,6 @@ public class UserContextImpl implements UserContext {
     if (this == obj) {
       return true;
     }
-    ;
     if (obj == null) {
       return false;
     }
