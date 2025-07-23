@@ -19,6 +19,8 @@
 package io.kadai.common.internal.security;
 
 import io.kadai.common.api.security.UserContext;
+
+import java.util.Objects;
 import java.util.Optional;
 
 public class UserContextImpl implements UserContext {
@@ -44,5 +46,32 @@ public class UserContextImpl implements UserContext {
   @Override
   public Optional<String> getPuppeteer() {
     return Optional.ofNullable(this.puppeteer);
+  }
+
+  @Override
+  public String toString() {
+    return "UserContextImpl [puppet="
+        + puppet
+        + ", puppeteer="
+        + puppeteer
+        + "]";
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    UserContextImpl other = (UserContextImpl) obj;
+    return Objects.equals(puppet, other.puppet)
+        && Objects.equals(puppeteer, other.puppeteer);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(puppet, puppeteer);
   }
 }
