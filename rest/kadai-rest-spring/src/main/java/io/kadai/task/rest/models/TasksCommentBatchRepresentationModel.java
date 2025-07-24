@@ -18,37 +18,35 @@
 
 package io.kadai.task.rest.models;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.beans.ConstructorProperties;
 import java.util.List;
 import org.springframework.hateoas.RepresentationModel;
 
-/**
- * EntityModel class for adding a comment to multiple tasks.
- */
-@Schema(description = "EntityModel class for adding a comment to multiple tasks.")
 public class TasksCommentBatchRepresentationModel
         extends RepresentationModel<TasksCommentBatchRepresentationModel> {
-  @Schema(name = "taskIds",
-          description = "List of Task IDs. The comment will be added to each task in this list.")
-    private List<String> taskIds;
 
-  @Schema(name = "textField",
-          description = "The content of the comment.")
-  private String textField;
+  /** List of Task IDs. The comment will be added to each task in this list. */
+  @JsonProperty("taskIds")
+  private final List<String> taskIds;
+
+  /** The content of the comment. */
+  @JsonProperty("textField")
+  private final String textField;
+
+  @ConstructorProperties({"taskIds", "textField"})
+  public TasksCommentBatchRepresentationModel(
+          List<String> taskIds,
+          String textField) {
+    this.taskIds = taskIds;
+    this.textField = textField;
+  }
 
   public List<String> getTaskIds() {
     return taskIds;
   }
 
-  public void setTaskIds(List<String> taskIds) {
-    this.taskIds = taskIds;
-  }
-
   public String getTextField() {
     return textField;
-  }
-
-  public void setTextField(String textField) {
-    this.textField = textField;
   }
 }

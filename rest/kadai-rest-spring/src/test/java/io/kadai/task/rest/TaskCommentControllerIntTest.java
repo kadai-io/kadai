@@ -306,13 +306,13 @@ class TaskCommentControllerIntTest {
 
   @Test
   void should_CreateTaskCommentForMultipleTasks_When_TasksAreExisting() {
-    TasksCommentBatchRepresentationModel request =
-            new TasksCommentBatchRepresentationModel();
-    request.setTaskIds(List.of(
+    List<String> taskIds = List.of(
             "TKI:000000000000000000000000000000000001",
             "TKI:000000000000000000000000000000000004"
-    ));
-    request.setTextField("newly created task comment for multiple tasks");
+    );
+    String textField = "newly created task comment for multiple tasks";
+    TasksCommentBatchRepresentationModel request =
+            new TasksCommentBatchRepresentationModel(taskIds, textField);
 
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
 
@@ -334,24 +334,24 @@ class TaskCommentControllerIntTest {
 
   @Test
   void should_PartiallyCreateTaskComments_When_SomeTasksDoNotExist() {
-    TasksCommentBatchRepresentationModel request =
-            new TasksCommentBatchRepresentationModel();
-    request.setTaskIds(List.of(
+    List<String> taskIds = List.of(
             "TKI:000000000000000000000000000000000001",  // valid
             "TKI:400000000000000000000000000000000004"  // invalid
-    ));
-    request.setTextField("partially created task comments");
+    );
+    String textField = "partially created task comments";
+    TasksCommentBatchRepresentationModel request =
+            new TasksCommentBatchRepresentationModel(taskIds, textField);
 
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
 
     ResponseEntity<Map> response =
             CLIENT
-                .post()
-                .uri(url)
-                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
-                .body(request)
-                .retrieve()
-                .toEntity(Map.class);
+                    .post()
+                    .uri(url)
+                    .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+                    .body(request)
+                    .retrieve()
+                    .toEntity(Map.class);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -372,9 +372,10 @@ class TaskCommentControllerIntTest {
 
   @Test
   void should_FailToCreateTaskCommentsForMultipleTasks_When_TaskIdsAreEmpty() {
-    TasksCommentBatchRepresentationModel request = new TasksCommentBatchRepresentationModel();
-    request.setTaskIds(Collections.emptyList());
-    request.setTextField("newly created task comment for multiple tasks");
+    List<String> emptyTaskIds = Collections.emptyList();
+    String textField = "newly created task comment for multiple tasks";
+    TasksCommentBatchRepresentationModel request =
+            new TasksCommentBatchRepresentationModel(emptyTaskIds, textField);
 
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
 
@@ -387,19 +388,20 @@ class TaskCommentControllerIntTest {
                     .toEntity(BulkOperationResultsRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
-            .extracting(HttpStatusCodeException.class::cast)
-            .extracting(HttpStatusCodeException::getStatusCode)
+            .isInstanceOf(HttpStatusCodeException.class)
+            .extracting(ex -> ((HttpStatusCodeException) ex).getStatusCode())
             .isEqualTo(HttpStatus.BAD_REQUEST);
   }
 
   @Test
   void should_FailToCreateTaskCommentsForMultipleTasks_When_TextIsEmpty() {
-    TasksCommentBatchRepresentationModel request = new TasksCommentBatchRepresentationModel();
-    request.setTaskIds(List.of(
+    List<String> taskIds = List.of(
             "TKI:000000000000000000000000000000000001",
             "TKI:000000000000000000000000000000000004"
-    ));
-    request.setTextField("");
+    );
+    String emptyText = "";
+    TasksCommentBatchRepresentationModel request =
+            new TasksCommentBatchRepresentationModel(taskIds, emptyText);
 
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
 
@@ -412,8 +414,8 @@ class TaskCommentControllerIntTest {
                     .toEntity(BulkOperationResultsRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
-            .extracting(HttpStatusCodeException.class::cast)
-            .extracting(HttpStatusCodeException::getStatusCode)
+            .isInstanceOf(HttpStatusCodeException.class)
+            .extracting(ex -> ((HttpStatusCodeException) ex).getStatusCode())
             .isEqualTo(HttpStatus.BAD_REQUEST);
   }
 
