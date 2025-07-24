@@ -28,7 +28,7 @@ import io.kadai.task.api.exceptions.NotAuthorizedOnTaskCommentException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskComment;
-import io.kadai.task.rest.models.BulkOperationResponseModel;
+import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
 import io.kadai.task.rest.models.TasksCommentBatchRepresentationModel;
@@ -415,17 +415,17 @@ public interface TaskCommentApi {
    *
    * @title Create a Task Comment for multiple Tasks
    * @param tasksCommentBatchRepresentationModel list of Task IDs and the comment text
-   * @return HTTP 200 with a {@link BulkOperationResponseModel} containing the IDs
+   * @return HTTP 200 with a {@link BulkOperationResultsRepresentationModel} containing the IDs
    *         that failed with their error codes; the list is empty if all comments were
    *         created successfully. Otherwise, an appropriate error status (e.g. 400).
    */
   @Operation(
             summary = "Create Task Comments for multiple Tasks",
-            description = "Creates the same comment for all provided task IDs."
-                    + "Returns 200 on success with a BulkOperationResponseModel listing "
-                    + "failed IDs (empty list if all succeeded). "
-                    + "Returns 400 if taskIds or text are null/empty. "
-                    + "Other 4xx/5xx codes are possible.",
+            description = "Creates the same comment for all provided task IDs. "
+                      + "Returns 200 on success with a map of failed task IDs to their error codes "
+                      + "(empty map if all succeeded)."
+                      + "Returns 400 if taskIds or text are null/empty. "
+                      + "Other 4xx/5xx codes are possible.",
         requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                 required = true,
                 description = "Payload with the list of Task IDs and the comment text",
@@ -448,24 +448,26 @@ public interface TaskCommentApi {
         responses = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "List of Task IDs where comment creation failed",
+                    description = "Map of Task IDs to error codes where comment creation failed",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation =
-                                    BulkOperationResponseModel.class),
+                                    BulkOperationResultsRepresentationModel.class),
                             examples = @ExampleObject(
-                                    name    = "batchResponseExample",
-                                    summary = "Failed Task IDs only",
-                                    value   = """
-                  {
-                    "results": [
-                      {
-                        "taskId": "TKI:400000000000000000000000000000000004",
-                        "errorCode": "TASK_NOT_FOUND"
-                      }
-                    ]
-                  }
-                  """
+                                name    = "batchResponseExample",
+                                summary = "Failed Task IDs with error codes",
+                                value   = """
+                                        {
+                                        "tasksWithErrors": {
+                                          "TKI:400000000000000000000000000000000004": {
+                                            "key": "TASK_NOT_FOUND",
+                                            "messageVariables": {
+                                              "taskId": "TKI:400000000000000000000000000000000004"
+                                            }
+                                          }
+                                        }
+                                      }
+                                      """
                             )
                     )
                 )
@@ -473,7 +475,7 @@ public interface TaskCommentApi {
   )
   @PostMapping(path = RestEndpoints.URL_TASKS_COMMENT)
   @Transactional(rollbackFor = Exception.class)
-  ResponseEntity<BulkOperationResponseModel> createTaskCommentsBatch(
+  ResponseEntity<BulkOperationResultsRepresentationModel> createTaskCommentsBatch(
         @RequestBody TasksCommentBatchRepresentationModel
                 tasksCommentBatchRepresentationModel);
 }

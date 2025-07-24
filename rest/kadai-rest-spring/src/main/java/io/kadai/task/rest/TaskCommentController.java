@@ -34,7 +34,7 @@ import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskComment;
 import io.kadai.task.rest.assembler.TaskCommentRepresentationModelAssembler;
-import io.kadai.task.rest.models.BulkOperationResponseModel;
+import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
 import io.kadai.task.rest.models.TasksCommentBatchRepresentationModel;
@@ -174,16 +174,19 @@ public class TaskCommentController implements TaskCommentApi {
   }
 
   @PostMapping(path = RestEndpoints.URL_TASKS_COMMENT)
-  public ResponseEntity<BulkOperationResponseModel> createTaskCommentsBatch(
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<BulkOperationResultsRepresentationModel> createTaskCommentsBatch(
           @RequestBody TasksCommentBatchRepresentationModel requestModel) {
 
     BulkOperationResults<String, KadaiException> errors =
             taskService.createTaskCommentsBulk(requestModel.getTaskIds(),
                     requestModel.getTextField());
 
-    BulkOperationResponseModel response =
-            BulkOperationResponseModel.getFailures(requestModel.getTaskIds(), errors);
+    BulkOperationResultsRepresentationModel model = new BulkOperationResultsRepresentationModel();
+    errors.getErrorMap().forEach((id, ex) ->
+            model.getTasksWithErrors().put(id, ex.getErrorCode())
+    );
 
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(model);
   }
 }
