@@ -33,6 +33,7 @@ import io.kadai.task.api.exceptions.NotAuthorizedOnTaskCommentException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskComment;
+import io.kadai.task.rest.assembler.BulkOperationResultsRepresentationModelAssembler;
 import io.kadai.task.rest.assembler.TaskCommentRepresentationModelAssembler;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
@@ -62,13 +63,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class TaskCommentController implements TaskCommentApi {
   private final TaskService taskService;
   private final TaskCommentRepresentationModelAssembler taskCommentRepresentationModelAssembler;
+  private final BulkOperationResultsRepresentationModelAssembler
+          bulkOperationResultsRepresentationModelAssembler;
 
   @Autowired
   TaskCommentController(
-      TaskService taskService,
-      TaskCommentRepresentationModelAssembler taskCommentRepresentationModelAssembler) {
+          TaskService taskService,
+          TaskCommentRepresentationModelAssembler taskCommentRepresentationModelAssembler,
+          BulkOperationResultsRepresentationModelAssembler bulkOperationResultsRepModelAssembler) {
     this.taskService = taskService;
     this.taskCommentRepresentationModelAssembler = taskCommentRepresentationModelAssembler;
+    this.bulkOperationResultsRepresentationModelAssembler = bulkOperationResultsRepModelAssembler;
   }
 
   @GetMapping(path = RestEndpoints.URL_TASK_COMMENT)
@@ -176,16 +181,15 @@ public class TaskCommentController implements TaskCommentApi {
   @PostMapping(path = RestEndpoints.URL_TASKS_COMMENT)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<BulkOperationResultsRepresentationModel> createTaskCommentsBatch(
-          @RequestBody TasksCommentBatchRepresentationModel requestModel) {
+          @RequestBody TasksCommentBatchRepresentationModel requestModel)
+          throws InvalidArgumentException {
 
     BulkOperationResults<String, KadaiException> errors =
             taskService.createTaskCommentsBulk(requestModel.getTaskIds(),
                     requestModel.getTextField());
 
-    BulkOperationResultsRepresentationModel model = new BulkOperationResultsRepresentationModel();
-    errors.getErrorMap().forEach((id, ex) ->
-            model.getTasksWithErrors().put(id, ex.getErrorCode())
-    );
+    BulkOperationResultsRepresentationModel model =
+            bulkOperationResultsRepresentationModelAssembler.toModel(errors);
 
     return ResponseEntity.ok(model);
   }
