@@ -22,17 +22,19 @@ import static io.kadai.rest.test.RestHelper.CLIENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import io.kadai.common.api.exceptions.ErrorCode;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
-import io.kadai.task.rest.models.BulkOperationResponseModel;
-import io.kadai.task.rest.models.BulkOperationResultModel;
+import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
 import io.kadai.task.rest.models.TasksCommentBatchRepresentationModel;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
@@ -314,50 +316,105 @@ class TaskCommentControllerIntTest {
 
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
 
-    ResponseEntity<BulkOperationResponseModel> response = CLIENT
+    ResponseEntity<BulkOperationResultsRepresentationModel> response = CLIENT
             .post()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
             .body(request)
             .retrieve()
-            .toEntity(BulkOperationResponseModel.class);
+            .toEntity(BulkOperationResultsRepresentationModel.class);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-    List<BulkOperationResultModel> result = Objects.requireNonNull(response.getBody()).getResults();
-    assertThat(result).hasSize(0);
-    assertThat(result).allMatch(r -> r.getErrorCode() == null);
+    Map<String, ErrorCode> errors =
+            Objects.requireNonNull(response.getBody()).getTasksWithErrors();
+
+    assertThat(errors).isEmpty();
   }
 
   @Test
-  void should_FailToCreateTaskCommentsForMultipleTasks_When_SomeTasksAreNotExisting() {
-    TasksCommentBatchRepresentationModel
-            request = new TasksCommentBatchRepresentationModel();
+  void should_PartiallyCreateTaskComments_When_SomeTasksDoNotExist() {
+    TasksCommentBatchRepresentationModel request =
+            new TasksCommentBatchRepresentationModel();
     request.setTaskIds(List.of(
-            "TKI:000000000000000000000000000000000002", //exists
-            "TKI:400000000000000000000000000000000004"  // doesn't exist
+            "TKI:000000000000000000000000000000000001",  // valid
+            "TKI:400000000000000000000000000000000004"  // invalid
     ));
-    request.setTextField("newly created task comment for multiple tasks");
+    request.setTextField("partially created task comments");
 
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
 
-    ResponseEntity<BulkOperationResponseModel> response =
+    ResponseEntity<Map> response =
             CLIENT
                 .post()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
                 .body(request)
                 .retrieve()
-                .toEntity(BulkOperationResponseModel.class);
+                .toEntity(Map.class);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-    List<BulkOperationResultModel> result = Objects.requireNonNull(response.getBody()).getResults();
-    assertThat(result).hasSize(1);
+    Map<String, ?> responseBody = response.getBody();
+    assertThat(responseBody).isNotNull();
 
-    assertThat(result).anyMatch(r ->
-            r.getTaskId().equals("TKI:400000000000000000000000000000000004")
-                    && "TASK_NOT_FOUND".equals(r.getErrorCode()));
+    @SuppressWarnings("unchecked")
+    Map<String, Map<String, Object>> tasksWithErrors = (Map<String, Map<String, Object>>)
+            responseBody.get("tasksWithErrors");
+
+    assertThat(tasksWithErrors).hasSize(1);
+    assertThat(tasksWithErrors).containsKey("TKI:400000000000000000000000000000000004");
+
+    Map<String, Object> errorDetails = tasksWithErrors
+            .get("TKI:400000000000000000000000000000000004");
+    assertThat(errorDetails.get("key")).isEqualTo("TASK_NOT_FOUND");
+  }
+
+  @Test
+  void should_FailToCreateTaskCommentsForMultipleTasks_When_TaskIdsAreEmpty() {
+    TasksCommentBatchRepresentationModel request = new TasksCommentBatchRepresentationModel();
+    request.setTaskIds(Collections.emptyList());
+    request.setTextField("newly created task comment for multiple tasks");
+
+    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
+
+    ThrowingCallable httpCall = () ->
+            CLIENT.post()
+                    .uri(url)
+                    .headers(h -> h.addAll(RestHelper.generateHeadersForUser("admin")))
+                    .body(request)
+                    .retrieve()
+                    .toEntity(BulkOperationResultsRepresentationModel.class);
+
+    assertThatThrownBy(httpCall)
+            .extracting(HttpStatusCodeException.class::cast)
+            .extracting(HttpStatusCodeException::getStatusCode)
+            .isEqualTo(HttpStatus.BAD_REQUEST);
+  }
+
+  @Test
+  void should_FailToCreateTaskCommentsForMultipleTasks_When_TextIsEmpty() {
+    TasksCommentBatchRepresentationModel request = new TasksCommentBatchRepresentationModel();
+    request.setTaskIds(List.of(
+            "TKI:000000000000000000000000000000000001",
+            "TKI:000000000000000000000000000000000004"
+    ));
+    request.setTextField("");
+
+    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
+
+    ThrowingCallable httpCall = () ->
+            CLIENT.post()
+                    .uri(url)
+                    .headers(h -> h.addAll(RestHelper.generateHeadersForUser("admin")))
+                    .body(request)
+                    .retrieve()
+                    .toEntity(BulkOperationResultsRepresentationModel.class);
+
+    assertThatThrownBy(httpCall)
+            .extracting(HttpStatusCodeException.class::cast)
+            .extracting(HttpStatusCodeException::getStatusCode)
+            .isEqualTo(HttpStatus.BAD_REQUEST);
   }
 
   @Test
