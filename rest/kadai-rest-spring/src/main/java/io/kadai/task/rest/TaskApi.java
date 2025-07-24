@@ -900,7 +900,6 @@ public interface TaskApi {
    * @return The list of failed task IDs with error codes.
    *
    */
-
   @Operation(
       summary = "Bulk complete Tasks",
       description = "This endpoint completes multiple Tasks in one call.",
@@ -908,9 +907,9 @@ public interface TaskApi {
           description = "JSON array with the IDs of the tasks to be completed",
           required = true,
           content = @Content(
-              mediaType = MediaTypes.ALPS_JSON_VALUE,
-              schema = @Schema(type = "array",
-                      example = "[\"TKI:...\", \"TKI:...\"]",
+                  schema = @Schema(type = "array",
+                      example = "[TKI:000000000000000000000000000000000003,"
+                              + "TKI:000000000000000000000000000000000002]",
                       implementation = String.class)
           )
       ),
@@ -919,7 +918,6 @@ public interface TaskApi {
               responseCode = "200",
               description = "List of failed IDs with their error codes",
               content = @Content(
-                  mediaType = MediaTypes.ALPS_JSON_VALUE,
                   schema = @Schema(implementation = BulkOperationResponseModel.class)
               )
           )
@@ -999,7 +997,6 @@ public interface TaskApi {
    * @return The list of failed task IDs with error codes.
    *
    */
-
   @Operation(
       summary = "Bulk force complete Tasks",
       description = "This endpoint force‑completes multiple Tasks in one call.",
@@ -1007,9 +1004,9 @@ public interface TaskApi {
           description = "JSON array with the IDs of the tasks to be completed",
           required = true,
           content = @Content(
-              mediaType = MediaTypes.ALPS_JSON_VALUE,
               schema = @Schema(type = "array",
-                      example = "[\"TKI:...\", \"TKI:...\"]",
+                      example = "[TKI:000000000000000000000000000000000003,"
+                              + "TKI:000000000000000000000000000000000002]",
                       implementation = String.class)
           )
       ),
@@ -1018,7 +1015,6 @@ public interface TaskApi {
               responseCode = "200",
               description = "List of failed IDs with their error codes",
               content = @Content(
-                      mediaType = MediaTypes.ALPS_JSON_VALUE,
                       schema = @Schema(implementation = BulkOperationResponseModel.class)
               )
           )
