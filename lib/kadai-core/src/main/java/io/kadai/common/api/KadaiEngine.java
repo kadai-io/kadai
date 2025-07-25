@@ -231,6 +231,18 @@ public interface KadaiEngine {
    */
   void checkRoleMembership(KadaiRole... roles) throws NotAuthorizedException;
 
+  <T> T runAs(Supplier<T> supplier, String puppeteer, String puppet);
+
+  default void runAs(Runnable runnable, String puppeteer, String puppet) {
+    runAs(
+        () -> {
+          runnable.run();
+          return null;
+        },
+        puppeteer,
+        puppet);
+  }
+
   /**
    * Executes a given {@code Supplier} with admin privileges and thus skips further permission
    * checks. With great power comes great responsibility.
@@ -239,7 +251,22 @@ public interface KadaiEngine {
    * @param <T> defined with the return value of the {@code Supplier}
    * @return output from {@code Supplier}
    */
-  <T> T runAsAdmin(Supplier<T> supplier);
+  default <T> T runAsAdmin(Supplier<T> supplier) {
+    // TODO: This seems right but is causes trouble:
+    //       The returned list for KadaiRole.ADMIN probably looks like
+    //         [uid=admin,cn=users,ou=test,o=kadai, admin]
+    //       Just choosing any as (out-commented) below may yield
+    //         'uid=admin,cn=users,ou=test,o=kadai'.
+    //       Besides this violating length of DB-Column USER_ID <= 32,
+    //         it also seems wrong semantically.
+    //       How to approach?
+    //       Is the latter always in there so we can hardcode it (as done right now)?
+    //    String adminName =
+    //        this.getConfiguration().getRoleMap().get(KadaiRole.ADMIN).stream()
+    //            .findFirst()
+    //            .orElseThrow(() -> new SystemException("There is no admin configured"));
+    return runAs(supplier, "admin", "admin");
+  }
 
   /**
    * Executes a given {@code Runnable} with admin privileges and thus skips further permission
