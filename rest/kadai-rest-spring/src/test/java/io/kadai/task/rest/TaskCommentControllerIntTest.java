@@ -22,13 +22,20 @@ import static io.kadai.rest.test.RestHelper.CLIENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import io.kadai.common.api.exceptions.ErrorCode;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
+import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
+import io.kadai.task.rest.models.TasksCommentBatchRepresentationModel;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -295,6 +302,121 @@ class TaskCommentControllerIntTest {
         .extracting(HttpStatusCodeException.class::cast)
         .extracting(HttpStatusCodeException::getStatusCode)
         .isEqualTo(HttpStatus.NOT_FOUND);
+  }
+
+  @Test
+  void should_CreateTaskCommentForMultipleTasks_When_TasksAreExisting() {
+    List<String> taskIds = List.of(
+            "TKI:000000000000000000000000000000000001",
+            "TKI:000000000000000000000000000000000004"
+    );
+    String textField = "newly created task comment for multiple tasks";
+    TasksCommentBatchRepresentationModel request =
+            new TasksCommentBatchRepresentationModel(taskIds, textField);
+
+    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
+
+    ResponseEntity<BulkOperationResultsRepresentationModel> response = CLIENT
+            .post()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .body(request)
+            .retrieve()
+            .toEntity(BulkOperationResultsRepresentationModel.class);
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+    Map<String, ErrorCode> errors =
+            Objects.requireNonNull(response.getBody()).getTasksWithErrors();
+
+    assertThat(errors).isEmpty();
+  }
+
+  @Test
+  void should_PartiallyCreateTaskComments_When_SomeTasksDoNotExist() {
+    List<String> taskIds = List.of(
+            "TKI:000000000000000000000000000000000001",  // valid
+            "TKI:400000000000000000000000000000000004"  // invalid
+    );
+    String textField = "partially created task comments";
+    TasksCommentBatchRepresentationModel request =
+            new TasksCommentBatchRepresentationModel(taskIds, textField);
+
+    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
+
+    ResponseEntity<Map> response =
+            CLIENT
+                    .post()
+                    .uri(url)
+                    .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+                    .body(request)
+                    .retrieve()
+                    .toEntity(Map.class);
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+    Map<String, ?> responseBody = response.getBody();
+    assertThat(responseBody).isNotNull();
+
+    @SuppressWarnings("unchecked")
+    Map<String, Map<String, Object>> tasksWithErrors = (Map<String, Map<String, Object>>)
+            responseBody.get("tasksWithErrors");
+
+    assertThat(tasksWithErrors).hasSize(1);
+    assertThat(tasksWithErrors).containsKey("TKI:400000000000000000000000000000000004");
+
+    Map<String, Object> errorDetails = tasksWithErrors
+            .get("TKI:400000000000000000000000000000000004");
+    assertThat(errorDetails.get("key")).isEqualTo("TASK_NOT_FOUND");
+  }
+
+  @Test
+  void should_FailToCreateTaskCommentsForMultipleTasks_When_TaskIdsAreEmpty() {
+    List<String> emptyTaskIds = Collections.emptyList();
+    String textField = "newly created task comment for multiple tasks";
+    TasksCommentBatchRepresentationModel request =
+            new TasksCommentBatchRepresentationModel(emptyTaskIds, textField);
+
+    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
+
+    ThrowingCallable httpCall = () ->
+            CLIENT.post()
+                    .uri(url)
+                    .headers(h -> h.addAll(RestHelper.generateHeadersForUser("admin")))
+                    .body(request)
+                    .retrieve()
+                    .toEntity(BulkOperationResultsRepresentationModel.class);
+
+    assertThatThrownBy(httpCall)
+            .isInstanceOf(HttpStatusCodeException.class)
+            .extracting(ex -> ((HttpStatusCodeException) ex).getStatusCode())
+            .isEqualTo(HttpStatus.BAD_REQUEST);
+  }
+
+  @Test
+  void should_FailToCreateTaskCommentsForMultipleTasks_When_TextIsEmpty() {
+    List<String> taskIds = List.of(
+            "TKI:000000000000000000000000000000000001",
+            "TKI:000000000000000000000000000000000004"
+    );
+    String emptyText = "";
+    TasksCommentBatchRepresentationModel request =
+            new TasksCommentBatchRepresentationModel(taskIds, emptyText);
+
+    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
+
+    ThrowingCallable httpCall = () ->
+            CLIENT.post()
+                    .uri(url)
+                    .headers(h -> h.addAll(RestHelper.generateHeadersForUser("admin")))
+                    .body(request)
+                    .retrieve()
+                    .toEntity(BulkOperationResultsRepresentationModel.class);
+
+    assertThatThrownBy(httpCall)
+            .isInstanceOf(HttpStatusCodeException.class)
+            .extracting(ex -> ((HttpStatusCodeException) ex).getStatusCode())
+            .isEqualTo(HttpStatus.BAD_REQUEST);
   }
 
   @Test
