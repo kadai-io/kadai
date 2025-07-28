@@ -392,6 +392,31 @@ class TaskCommentControllerIntTest {
   }
 
   @Test
+  void should_FailToCreateTaskCommentsForMultipleTasks_When_TextFieldIsNull() {
+    List<String> taskIds = List.of(
+            "TKI:000000000000000000000000000000000001",
+            "TKI:000000000000000000000000000000000004"
+    );
+    TasksCommentBatchRepresentationModel request =
+            new TasksCommentBatchRepresentationModel(taskIds, null);
+
+    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
+
+    ThrowingCallable httpCall = () ->
+            CLIENT.post()
+                    .uri(url)
+                    .headers(h -> h.addAll(RestHelper.generateHeadersForUser("admin")))
+                    .body(request)
+                    .retrieve()
+                    .toEntity(BulkOperationResultsRepresentationModel.class);
+
+    assertThatThrownBy(httpCall)
+            .isInstanceOf(HttpStatusCodeException.class)
+            .extracting(ex -> ((HttpStatusCodeException) ex).getStatusCode())
+            .isEqualTo(HttpStatus.BAD_REQUEST);
+  }
+
+  @Test
   void should_FailToCreateTaskCommentsForMultipleTasks_When_TextIsEmpty() {
     List<String> taskIds = List.of(
             "TKI:000000000000000000000000000000000001",
