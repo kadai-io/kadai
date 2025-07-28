@@ -31,7 +31,6 @@ import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
 import io.kadai.task.rest.models.TasksCommentBatchRepresentationModel;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -371,11 +370,10 @@ class TaskCommentControllerIntTest {
   }
 
   @Test
-  void should_FailToCreateTaskCommentsForMultipleTasks_When_TaskIdsAreEmpty() {
-    List<String> emptyTaskIds = Collections.emptyList();
+  void should_FailToCreateTaskCommentsForMultipleTasks_When_TaskIdsAreNull() {
     String textField = "newly created task comment for multiple tasks";
     TasksCommentBatchRepresentationModel request =
-            new TasksCommentBatchRepresentationModel(emptyTaskIds, textField);
+            new TasksCommentBatchRepresentationModel(null, textField);
 
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
 

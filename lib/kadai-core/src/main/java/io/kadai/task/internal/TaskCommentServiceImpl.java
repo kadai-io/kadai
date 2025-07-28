@@ -36,8 +36,7 @@ import io.kadai.user.api.models.User;
 import io.kadai.user.internal.UserMapper;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -148,51 +147,48 @@ class TaskCommentServiceImpl {
   }
 
   public BulkOperationResults<String, KadaiException> createTaskCommentsBulk(
-          List<String> taskIds, String text) throws InvalidArgumentException {
+          Collection<String> taskIds, String text) throws InvalidArgumentException {
 
-    if (taskIds == null || taskIds.isEmpty()) {
-      throw new InvalidArgumentException("taskIds must not be null/empty");
+    if (taskIds == null) {
+      throw new InvalidArgumentException("taskIds must not be null");
     }
     if (text == null || text.isEmpty()) {
       throw new InvalidArgumentException("text must not be null/empty");
     }
 
-    BulkOperationResults<String, KadaiException> errors = new BulkOperationResults<>();
-    Instant now = Instant.now();
+    kadaiEngine.openConnection();
+    try {
+      BulkOperationResults<String, KadaiException> errors = new BulkOperationResults<>();
+      Instant now = Instant.now();
 
-    Set<String> existingTaskIds = taskMapper.findExistingTasks(taskIds, null).stream()
-            .map(MinimalTaskSummary::getTaskId)
-            .collect(Collectors.toSet());
+      Set<String> existingTaskIds = taskMapper.findExistingTasks(taskIds, null).stream()
+              .map(MinimalTaskSummary::getTaskId)
+              .collect(Collectors.toSet());
 
-    List<TaskCommentImpl> toInsert = new ArrayList<>();
-    for (String taskId : taskIds) {
-      try {
-        if (!existingTaskIds.contains(taskId)) {
-          taskService.getTask(taskId);
-          continue;
-        }
+      taskIds.stream()
+              .filter(id -> !existingTaskIds.contains(id))
+              .forEach(id -> errors.addError(
+                      id, new TaskNotFoundException("Task not found: " + id)));
 
-        TaskCommentImpl comment = (TaskCommentImpl) newTaskComment(taskId);
-        comment.setTextField(text);
-        comment.setId(null);
-        validateNoneExistingTaskCommentId(comment.getId());
-        initDefaultTaskCommentValues(comment);
-        toInsert.add(comment);
+      List<TaskCommentImpl> toInsert = existingTaskIds.stream()
+              .map(id -> {
+                TaskCommentImpl comment = (TaskCommentImpl) newTaskComment(id);
+                comment.setTextField(text);
+                comment.setId(null);
+                validateNoneExistingTaskCommentId(comment.getId());
+                initDefaultTaskCommentValues(comment);
+                return comment;
+              })
+              .toList();
 
-      } catch (KadaiException ex) {
-        errors.addError(taskId, ex);
+      for (TaskCommentImpl comment : toInsert) {
+        taskCommentMapper.insert(comment);
+        taskMapper.incrementNumberOfComments(comment.getTaskId(), now);
       }
+      return errors;
+    } finally {
+      kadaiEngine.returnConnection();
     }
-
-    Set<String> updatedTaskIds = new HashSet<>();
-    for (TaskCommentImpl comment : toInsert) {
-      taskCommentMapper.insert(comment);
-      updatedTaskIds.add(comment.getTaskId());
-    }
-    for (String taskId : updatedTaskIds) {
-      taskMapper.incrementNumberOfComments(taskId, now);
-    }
-    return errors;
   }
 
   void deleteTaskComment(String taskCommentId)
