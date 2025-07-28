@@ -31,8 +31,6 @@ import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.rest.models.AttachmentRepresentationModel;
-import io.kadai.task.rest.models.BulkOperationResponseModel;
-import io.kadai.task.rest.models.BulkOperationResultModel;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
@@ -53,6 +51,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -3289,27 +3288,26 @@ class TaskControllerIntTest {
               "TKI:000000000000000000000000000000000041"
       );
 
-      ResponseEntity<BulkOperationResponseModel> response =
+      ResponseEntity<Map> response =
               CLIENT
                       .patch()
                       .uri(url)
                       .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
                       .body(taskIds)
                       .retrieve()
-                      .toEntity(BulkOperationResponseModel.class);
+                      .toEntity(Map.class);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-      BulkOperationResponseModel body = response.getBody();
+      Map<?, ?> body = response.getBody();
       assertThat(body).isNotNull();
 
-      var failures = body.getResults();
-      assertThat(failures).hasSize(1);
+      Map<String, ?> failuresMap = (Map<String, ?>) body.get("tasksWithErrors");
+      List<String> failures = new ArrayList<>(failuresMap.keySet());
 
-      BulkOperationResultModel failure = failures.get(0);
-      assertThat(failure.getTaskId())
-              .isEqualTo("TKI:000000000000000000000000000000000041");
-      assertThat(failure.getErrorCode())
-              .isEqualTo("TASK_NOT_FOUND");
+      assertThat(failures).hasSize(1)
+              .containsExactly(
+                      "TKI:000000000000000000000000000000000041"
+      );
     }
 
     @Test
@@ -3359,20 +3357,20 @@ class TaskControllerIntTest {
           "TKI:000000000000000000000000000000000026"
       );
 
-      ResponseEntity<BulkOperationResponseModel> response =
+      ResponseEntity<BulkOperationResultsRepresentationModel> response =
               CLIENT
                   .patch()
                   .uri(url)
                   .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-1")))
                   .body(taskIds)
                   .retrieve()
-                  .toEntity(BulkOperationResponseModel.class);
+                  .toEntity(BulkOperationResultsRepresentationModel.class);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-      BulkOperationResponseModel body = response.getBody();
+      BulkOperationResultsRepresentationModel body = response.getBody();
       assertThat(body).isNotNull();
 
-      assertThat(body.getResults()).isEmpty();
+      assertThat(body.getTasksWithErrors()).isEmpty();
     }
   }
 

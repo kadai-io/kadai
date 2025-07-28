@@ -34,7 +34,6 @@ import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskSummary;
-import io.kadai.task.rest.models.BulkOperationResponseModel;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
@@ -918,14 +917,14 @@ public interface TaskApi {
               responseCode = "200",
               description = "List of failed IDs with their error codes",
               content = @Content(
-                  schema = @Schema(implementation = BulkOperationResponseModel.class)
+                  schema = @Schema(implementation = BulkOperationResultsRepresentationModel.class)
               )
           )
       }
   )
   @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE)
   @Transactional(rollbackFor = Exception.class)
-  ResponseEntity<BulkOperationResponseModel> bulkComplete(
+  ResponseEntity<BulkOperationResultsRepresentationModel> bulkComplete(
           @RequestBody List<String> taskIds
   );
 
@@ -1015,14 +1014,14 @@ public interface TaskApi {
               responseCode = "200",
               description = "List of failed IDs with their error codes",
               content = @Content(
-                      schema = @Schema(implementation = BulkOperationResponseModel.class)
+                  schema = @Schema(implementation = BulkOperationResultsRepresentationModel.class)
               )
           )
       }
   )
   @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE_FORCE)
   @Transactional(rollbackFor = Exception.class)
-  ResponseEntity<BulkOperationResponseModel> bulkForceComplete(
+  ResponseEntity<BulkOperationResultsRepresentationModel> bulkForceComplete(
           @RequestBody List<String> taskIds
   );
 
