@@ -962,7 +962,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cypress/request@npm:^3.0.8":
+"@cypress/request@npm:^3.0.9":
   version: 3.0.9
   resolution: "@cypress/request@npm:3.0.9"
   dependencies:
@@ -4747,11 +4747,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cypress@npm:14.5.2":
-  version: 14.5.2
-  resolution: "cypress@npm:14.5.2"
+"cypress@npm:14.5.3":
+  version: 14.5.3
+  resolution: "cypress@npm:14.5.3"
   dependencies:
-    "@cypress/request": "npm:^3.0.8"
+    "@cypress/request": "npm:^3.0.9"
     "@cypress/xvfb": "npm:^1.2.4"
     "@types/sinonjs__fake-timers": "npm:8.1.1"
     "@types/sizzle": "npm:^2.3.2"
@@ -4797,7 +4797,7 @@ __metadata:
     yauzl: "npm:^2.10.0"
   bin:
     cypress: bin/cypress
-  checksum: 10c0/55d1ba4773dc7d22769e6566bbdd5a78fd16dde4a4806d474de18a2713ed313db3d0734486f774fe11b3078c66d6b03703dfac05c26746ee3d704317734ebc0e
+  checksum: 10c0/64f56b00ac16696c3627546a35d6e71c9b1c74d9c780e0dcc00b05e4f954a10714ba33884d1b0b49d2296670d156fbfa2999671671133abcf8dacdf44b70315b
   languageName: node
   linkType: hard
 
@@ -7937,7 +7937,7 @@ __metadata:
     angular-svg-icon: "npm:19.1.1"
     chart.js: "npm:4.5.0"
     core-js: "npm:3.44.0"
-    cypress: "npm:14.5.2"
+    cypress: "npm:14.5.3"
     eslint: "npm:9.32.0"
     eslint-config-prettier: "npm:10.1.8"
     eslint-plugin-import: "npm:2.32.0"
