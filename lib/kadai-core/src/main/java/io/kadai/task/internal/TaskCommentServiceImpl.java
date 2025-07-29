@@ -175,7 +175,6 @@ class TaskCommentServiceImpl {
                 TaskCommentImpl comment = (TaskCommentImpl) newTaskComment(id);
                 comment.setTextField(text);
                 comment.setId(null);
-                validateNoneExistingTaskCommentId(comment.getId());
                 initDefaultTaskCommentValues(comment);
                 return comment;
               })
