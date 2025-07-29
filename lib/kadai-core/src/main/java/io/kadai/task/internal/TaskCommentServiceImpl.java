@@ -156,8 +156,8 @@ class TaskCommentServiceImpl {
       throw new InvalidArgumentException("text must not be null/empty");
     }
 
-    kadaiEngine.openConnection();
     try {
+      kadaiEngine.openConnection();
       BulkOperationResults<String, KadaiException> errors = new BulkOperationResults<>();
       Instant now = Instant.now();
 
