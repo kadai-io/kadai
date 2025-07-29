@@ -35,6 +35,7 @@ import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskSummary;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
+import io.kadai.task.rest.models.CompleteTasksRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
@@ -50,7 +51,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.List;
 import java.util.Map;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.hateoas.MediaTypes;
@@ -895,22 +895,32 @@ public interface TaskApi {
    *  In case of success (no error), the task ID will not appear in the response.
    *  The response contains only the IDs that failed, along with their error codes.</p>
    *
-   * @param taskIds List of task IDs that are to be completed.
-   * @return The list of failed task IDs with error codes.
+   * @param completeTasksRepresentationModel containing the list of task IDs
+   *                                         that are to be completed.
+   * @return BulkOperationResultsRepresentationModel containing the list of
+   *         failed task IDs with error codes.
    *
    */
   @Operation(
       summary = "Bulk complete Tasks",
       description = "This endpoint completes multiple Tasks in one call.",
       requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-          description = "JSON array with the IDs of the tasks to be completed",
+          description = "List with the IDs of the tasks to be completed",
           required = true,
-          content = @Content(
-                  schema = @Schema(type = "array",
-                      example = "[TKI:000000000000000000000000000000000003,"
-                              + "TKI:000000000000000000000000000000000002]",
-                      implementation = String.class)
-          )
+              content = @Content(
+                  schema = @Schema(implementation = CompleteTasksRepresentationModel.class),
+                  examples = @ExampleObject(
+                      value =
+                      """
+                          {
+                            "taskIds": [
+                              "TKI:000000000000000000000000000000000003",
+                              "TKI:000000000000000000000000000000000002"
+                            ]
+                          }
+                          """
+                  )
+              )
       ),
       responses = {
           @ApiResponse(
@@ -925,7 +935,7 @@ public interface TaskApi {
   @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE)
   @Transactional(rollbackFor = Exception.class)
   ResponseEntity<BulkOperationResultsRepresentationModel> bulkComplete(
-          @RequestBody List<String> taskIds
+          @RequestBody CompleteTasksRepresentationModel completeTasksRepresentationModel
   );
 
   /**
@@ -992,22 +1002,32 @@ public interface TaskApi {
   /**
    * This endpoint force completes multiple Tasks.
    *
-   * @param taskIds List of task IDs that are to be force completed.
-   * @return The list of failed task IDs with error codes.
+   * @param completeTasksRepresentationModel Containing the list of task IDs
+   *                                         that are to be completed.
+   * @return BulkOperationResultsRepresentationModel containing the list of
+   *         failed task IDs with error codes.
    *
    */
   @Operation(
       summary = "Bulk force complete Tasks",
       description = "This endpoint force‑completes multiple Tasks in one call.",
       requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-          description = "JSON array with the IDs of the tasks to be completed",
+          description = "List with the IDs of the tasks to be completed",
           required = true,
-          content = @Content(
-              schema = @Schema(type = "array",
-                      example = "[TKI:000000000000000000000000000000000003,"
-                              + "TKI:000000000000000000000000000000000002]",
-                      implementation = String.class)
-          )
+              content = @Content(
+                  schema = @Schema(implementation = CompleteTasksRepresentationModel.class),
+                  examples = @ExampleObject(
+                      value =
+                          """
+                              {
+                                "taskIds": [
+                                  "TKI:000000000000000000000000000000000003",
+                                  "TKI:000000000000000000000000000000000002"
+                                ]
+                              }
+                              """
+                  )
+              )
       ),
       responses = {
           @ApiResponse(
@@ -1022,7 +1042,7 @@ public interface TaskApi {
   @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE_FORCE)
   @Transactional(rollbackFor = Exception.class)
   ResponseEntity<BulkOperationResultsRepresentationModel> bulkForceComplete(
-          @RequestBody List<String> taskIds
+          @RequestBody CompleteTasksRepresentationModel completeTasksRepresentationModel
   );
 
   /**

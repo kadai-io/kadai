@@ -32,6 +32,7 @@ import io.kadai.rest.test.RestHelper;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.rest.models.AttachmentRepresentationModel;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
+import io.kadai.task.rest.models.CompleteTasksRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
 import io.kadai.task.rest.models.ObjectReferenceRepresentationModel;
@@ -3280,20 +3281,22 @@ class TaskControllerIntTest {
     }
 
     @Test
-    void should_BulkCompleteTasks_PartialFailure() {
+    void should_partialFailCompleteTasks_when_UserHasNoAuthorization() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_BULK_COMPLETE);
 
       List<String> taskIds = List.of(
-              "TKI:000000000000000000000000000000000102",
+              "TKI:000000000000000000000000000000000103",
               "TKI:000000000000000000000000000000000041"
       );
+
+      CompleteTasksRepresentationModel request = new CompleteTasksRepresentationModel(taskIds);
 
       ResponseEntity<Map> response =
               CLIENT
                       .patch()
                       .uri(url)
                       .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
-                      .body(taskIds)
+                      .body(request)
                       .retrieve()
                       .toEntity(Map.class);
 
@@ -3349,7 +3352,7 @@ class TaskControllerIntTest {
     }
 
     @Test
-    void should_BulkForceCompleteTasks_AllSuccess() {
+    void should_ForceCompleteAllTasks_When_CurrentUserIsNotTheOwner() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_BULK_COMPLETE_FORCE);
 
       List<String> taskIds = List.of(
@@ -3357,12 +3360,14 @@ class TaskControllerIntTest {
           "TKI:000000000000000000000000000000000026"
       );
 
+      CompleteTasksRepresentationModel request = new CompleteTasksRepresentationModel(taskIds);
+
       ResponseEntity<BulkOperationResultsRepresentationModel> response =
               CLIENT
                   .patch()
                   .uri(url)
-                  .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-1")))
-                  .body(taskIds)
+                  .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
+                  .body(request)
                   .retrieve()
                   .toEntity(BulkOperationResultsRepresentationModel.class);
 

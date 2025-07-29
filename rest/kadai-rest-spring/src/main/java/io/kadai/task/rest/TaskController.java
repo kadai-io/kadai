@@ -46,6 +46,7 @@ import io.kadai.task.rest.assembler.BulkOperationResultsRepresentationModelAssem
 import io.kadai.task.rest.assembler.TaskRepresentationModelAssembler;
 import io.kadai.task.rest.assembler.TaskSummaryRepresentationModelAssembler;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
+import io.kadai.task.rest.models.CompleteTasksRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
@@ -348,11 +349,11 @@ public class TaskController implements TaskApi {
   @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<BulkOperationResultsRepresentationModel> bulkComplete(
-         @RequestBody List<String> taskIds)
+         @RequestBody CompleteTasksRepresentationModel completeTasksRepresentationModel)
       throws InvalidArgumentException {
 
     BulkOperationResults<String, KadaiException> errors =
-            taskService.completeTasks(taskIds);
+            taskService.completeTasks(completeTasksRepresentationModel.getTaskIds());
 
     BulkOperationResultsRepresentationModel model =
            bulkOperationResultsRepresentationModelAssembler.toModel(errors);
@@ -377,11 +378,11 @@ public class TaskController implements TaskApi {
   @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE_FORCE)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<BulkOperationResultsRepresentationModel> bulkForceComplete(
-          @RequestBody List<String> taskIds)
+          @RequestBody CompleteTasksRepresentationModel completeTasksRepresentationModel)
           throws InvalidArgumentException {
 
     BulkOperationResults<String, KadaiException> errors =
-            taskService.forceCompleteTasks(taskIds);
+            taskService.forceCompleteTasks(completeTasksRepresentationModel.getTaskIds());
 
     BulkOperationResultsRepresentationModel model =
             bulkOperationResultsRepresentationModelAssembler.toModel(errors);
