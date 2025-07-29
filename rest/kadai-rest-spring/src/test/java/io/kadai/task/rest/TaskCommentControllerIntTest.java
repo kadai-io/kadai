@@ -313,7 +313,7 @@ class TaskCommentControllerIntTest {
     TasksCommentBatchRepresentationModel request =
             new TasksCommentBatchRepresentationModel(taskIds, textField);
 
-    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
+    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENTS);
 
     ResponseEntity<BulkOperationResultsRepresentationModel> response = CLIENT
             .post()
@@ -341,7 +341,7 @@ class TaskCommentControllerIntTest {
     TasksCommentBatchRepresentationModel request =
             new TasksCommentBatchRepresentationModel(taskIds, textField);
 
-    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
+    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENTS);
 
     ResponseEntity<Map> response =
             CLIENT
@@ -375,7 +375,7 @@ class TaskCommentControllerIntTest {
     TasksCommentBatchRepresentationModel request =
             new TasksCommentBatchRepresentationModel(null, textField);
 
-    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
+    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENTS);
 
     ThrowingCallable httpCall = () ->
             CLIENT.post()
@@ -400,7 +400,7 @@ class TaskCommentControllerIntTest {
     TasksCommentBatchRepresentationModel request =
             new TasksCommentBatchRepresentationModel(taskIds, null);
 
-    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
+    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENTS);
 
     ThrowingCallable httpCall = () ->
             CLIENT.post()
@@ -426,7 +426,7 @@ class TaskCommentControllerIntTest {
     TasksCommentBatchRepresentationModel request =
             new TasksCommentBatchRepresentationModel(taskIds, emptyText);
 
-    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENT);
+    String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENTS);
 
     ThrowingCallable httpCall = () ->
             CLIENT.post()

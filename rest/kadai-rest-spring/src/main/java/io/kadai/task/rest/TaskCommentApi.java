@@ -472,7 +472,7 @@ public interface TaskCommentApi {
                 )
         }
   )
-  @PostMapping(path = RestEndpoints.URL_TASKS_COMMENT)
+  @PostMapping(path = RestEndpoints.URL_TASKS_COMMENTS)
   @Transactional(rollbackFor = Exception.class)
   ResponseEntity<BulkOperationResultsRepresentationModel> createTaskCommentsBatch(
         @RequestBody TasksCommentBatchRepresentationModel
