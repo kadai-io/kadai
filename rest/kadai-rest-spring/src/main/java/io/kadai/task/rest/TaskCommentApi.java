@@ -422,8 +422,7 @@ public interface TaskCommentApi {
   @Operation(
             summary = "Create Task Comments for multiple Tasks",
             description = "Creates the same comment for all provided task IDs. "
-                      + "Returns 200 on success with a map of failed task IDs to their error codes "
-                      + "(empty map if all succeeded)."
+                      + "Returns 200 on success with a map of failed task IDs to their error codes. "
                       + "Returns 400 if taskIds or text are null/empty. "
                       + "Other 4xx/5xx codes are possible.",
         requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
