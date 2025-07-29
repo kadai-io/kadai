@@ -168,7 +168,7 @@ class TaskCommentServiceImpl {
       taskIds.stream()
               .filter(id -> !existingTaskIds.contains(id))
               .forEach(id -> errors.addError(
-                      id, new TaskNotFoundException("Task not found: " + id)));
+                      id, new TaskNotFoundException(id)));
 
       List<TaskCommentImpl> toInsert = existingTaskIds.stream()
               .map(id -> {
