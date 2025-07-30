@@ -21,13 +21,13 @@ package io.kadai.task.rest.models;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
-public class CompleteTasksRepresentationModel {
+public class TaskIdListRepresentationModel {
 
   /** The value to set the Task property taskIds. */
   @JsonProperty("taskIds")
   private final List<String> taskIds;
 
-  public CompleteTasksRepresentationModel(
+  public TaskIdListRepresentationModel(
         @JsonProperty("taskIds") List<String> taskIds) {
     this.taskIds = taskIds;
   }

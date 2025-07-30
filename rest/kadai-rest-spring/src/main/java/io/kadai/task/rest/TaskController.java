@@ -46,9 +46,9 @@ import io.kadai.task.rest.assembler.BulkOperationResultsRepresentationModelAssem
 import io.kadai.task.rest.assembler.TaskRepresentationModelAssembler;
 import io.kadai.task.rest.assembler.TaskSummaryRepresentationModelAssembler;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
-import io.kadai.task.rest.models.CompleteTasksRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
+import io.kadai.task.rest.models.TaskIdListRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryPagedRepresentationModel;
@@ -349,7 +349,7 @@ public class TaskController implements TaskApi {
   @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<BulkOperationResultsRepresentationModel> bulkComplete(
-         @RequestBody CompleteTasksRepresentationModel completeTasksRepresentationModel)
+         @RequestBody TaskIdListRepresentationModel completeTasksRepresentationModel)
       throws InvalidArgumentException {
 
     BulkOperationResults<String, KadaiException> errors =
@@ -378,7 +378,7 @@ public class TaskController implements TaskApi {
   @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE_FORCE)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<BulkOperationResultsRepresentationModel> bulkForceComplete(
-          @RequestBody CompleteTasksRepresentationModel completeTasksRepresentationModel)
+          @RequestBody TaskIdListRepresentationModel completeTasksRepresentationModel)
           throws InvalidArgumentException {
 
     BulkOperationResults<String, KadaiException> errors =

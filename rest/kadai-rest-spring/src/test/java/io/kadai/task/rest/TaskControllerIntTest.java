@@ -32,10 +32,10 @@ import io.kadai.rest.test.RestHelper;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.rest.models.AttachmentRepresentationModel;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
-import io.kadai.task.rest.models.CompleteTasksRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
 import io.kadai.task.rest.models.ObjectReferenceRepresentationModel;
+import io.kadai.task.rest.models.TaskIdListRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel.CustomAttribute;
 import io.kadai.task.rest.models.TaskSummaryCollectionRepresentationModel;
@@ -3289,7 +3289,7 @@ class TaskControllerIntTest {
               "TKI:000000000000000000000000000000000041"
       );
 
-      CompleteTasksRepresentationModel request = new CompleteTasksRepresentationModel(taskIds);
+      TaskIdListRepresentationModel request = new TaskIdListRepresentationModel(taskIds);
 
       ResponseEntity<Map> response =
               CLIENT
@@ -3360,7 +3360,7 @@ class TaskControllerIntTest {
           "TKI:000000000000000000000000000000000026"
       );
 
-      CompleteTasksRepresentationModel request = new CompleteTasksRepresentationModel(taskIds);
+      TaskIdListRepresentationModel request = new TaskIdListRepresentationModel(taskIds);
 
       ResponseEntity<BulkOperationResultsRepresentationModel> response =
               CLIENT

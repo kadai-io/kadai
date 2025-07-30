@@ -35,9 +35,9 @@ import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskSummary;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
-import io.kadai.task.rest.models.CompleteTasksRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
+import io.kadai.task.rest.models.TaskIdListRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryPagedRepresentationModel;
@@ -908,7 +908,7 @@ public interface TaskApi {
           description = "List with the IDs of the tasks to be completed",
           required = true,
               content = @Content(
-                  schema = @Schema(implementation = CompleteTasksRepresentationModel.class),
+                  schema = @Schema(implementation = TaskIdListRepresentationModel.class),
                   examples = @ExampleObject(
                       value =
                       """
@@ -935,7 +935,7 @@ public interface TaskApi {
   @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE)
   @Transactional(rollbackFor = Exception.class)
   ResponseEntity<BulkOperationResultsRepresentationModel> bulkComplete(
-          @RequestBody CompleteTasksRepresentationModel completeTasksRepresentationModel
+          @RequestBody TaskIdListRepresentationModel completeTasksRepresentationModel
   );
 
   /**
@@ -1015,7 +1015,7 @@ public interface TaskApi {
           description = "List with the IDs of the tasks to be completed",
           required = true,
               content = @Content(
-                  schema = @Schema(implementation = CompleteTasksRepresentationModel.class),
+                  schema = @Schema(implementation = TaskIdListRepresentationModel.class),
                   examples = @ExampleObject(
                       value =
                           """
@@ -1042,7 +1042,7 @@ public interface TaskApi {
   @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE_FORCE)
   @Transactional(rollbackFor = Exception.class)
   ResponseEntity<BulkOperationResultsRepresentationModel> bulkForceComplete(
-          @RequestBody CompleteTasksRepresentationModel completeTasksRepresentationModel
+          @RequestBody TaskIdListRepresentationModel completeTasksRepresentationModel
   );
 
   /**
