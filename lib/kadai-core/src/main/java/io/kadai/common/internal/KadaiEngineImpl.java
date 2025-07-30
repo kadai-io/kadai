@@ -386,10 +386,14 @@ public class KadaiEngineImpl implements KadaiEngine {
   }
 
   @Override
-  public <T> T runAs(Supplier<T> supplier, String puppeteer, String puppet) {
+  public <T> T runAs(Supplier<T> supplier, KadaiRole puppeteer, String puppet) {
     Subject subject = new Subject();
     if (puppeteer != null) {
-      subject.getPrincipals().add(new PuppeteerPrincipal(puppeteer));
+      String puppeteerAccessId =
+          this.getConfiguration().getRoleMap().get(puppeteer).stream()
+              .findFirst()
+              .orElseThrow(() -> new SystemException("There is no " + puppeteer + " configured"));
+      subject.getPrincipals().add(new PuppeteerPrincipal(puppeteerAccessId));
     }
     if (puppet != null) {
       subject.getPrincipals().add(new UserPrincipal(puppet));
