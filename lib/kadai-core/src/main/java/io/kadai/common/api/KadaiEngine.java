@@ -253,6 +253,10 @@ public interface KadaiEngine {
    * @return output from {@code Supplier}
    */
   default <T> T runAsAdmin(Supplier<T> supplier) {
+    if (isUserInRole(KadaiRole.ADMIN)) {
+      return supplier.get();
+    }
+
     String adminName =
         this.getConfiguration().getRoleMap().get(KadaiRole.ADMIN).stream()
             .findFirst()
