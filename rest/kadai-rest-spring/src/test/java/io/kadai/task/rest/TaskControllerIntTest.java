@@ -35,6 +35,7 @@ import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
 import io.kadai.task.rest.models.ObjectReferenceRepresentationModel;
+import io.kadai.task.rest.models.TaskIdListRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel.CustomAttribute;
 import io.kadai.task.rest.models.TaskSummaryCollectionRepresentationModel;
@@ -51,6 +52,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -3279,6 +3281,39 @@ class TaskControllerIntTest {
     }
 
     @Test
+    void should_partialFailCompleteTasks_when_UserHasNoAuthorization() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_BULK_COMPLETE);
+
+      List<String> taskIds = List.of(
+              "TKI:000000000000000000000000000000000103",
+              "TKI:000000000000000000000000000000000041"
+      );
+
+      TaskIdListRepresentationModel request = new TaskIdListRepresentationModel(taskIds);
+
+      ResponseEntity<Map> response =
+              CLIENT
+                      .patch()
+                      .uri(url)
+                      .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
+                      .body(request)
+                      .retrieve()
+                      .toEntity(Map.class);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      Map<?, ?> body = response.getBody();
+      assertThat(body).isNotNull();
+
+      Map<String, ?> failuresMap = (Map<String, ?>) body.get("tasksWithErrors");
+      List<String> failures = new ArrayList<>(failuresMap.keySet());
+
+      assertThat(failures).hasSize(1)
+              .containsExactly(
+                      "TKI:000000000000000000000000000000000041"
+      );
+    }
+
+    @Test
     void should_ForceCompleteTask_When_CurrentUserIsNotTheOwner() {
       String url =
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000028");
@@ -3314,6 +3349,33 @@ class TaskControllerIntTest {
       repModel = forceCompleteResponse.getBody();
       assertThat(repModel.getOwner()).isEqualTo("user-1-2");
       assertThat(repModel.getState()).isEqualTo(TaskState.COMPLETED);
+    }
+
+    @Test
+    void should_ForceCompleteAllTasks_When_CurrentUserIsNotTheOwner() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_BULK_COMPLETE_FORCE);
+
+      List<String> taskIds = List.of(
+          "TKI:000000000000000000000000000000000027",
+          "TKI:000000000000000000000000000000000026"
+      );
+
+      TaskIdListRepresentationModel request = new TaskIdListRepresentationModel(taskIds);
+
+      ResponseEntity<BulkOperationResultsRepresentationModel> response =
+              CLIENT
+                  .patch()
+                  .uri(url)
+                  .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
+                  .body(request)
+                  .retrieve()
+                  .toEntity(BulkOperationResultsRepresentationModel.class);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      BulkOperationResultsRepresentationModel body = response.getBody();
+      assertThat(body).isNotNull();
+
+      assertThat(body.getTasksWithErrors()).isEmpty();
     }
   }
 
