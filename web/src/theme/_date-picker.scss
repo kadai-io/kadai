@@ -16,21 +16,35 @@
  *
  */
 
-.theme-green .bs-datepicker-head {
-  background-color: #246972;
+.mat-mdc-datepicker {
+  --mat-datepicker-calendar-header-text-color: var(--mat-primary-default, #246972);
+  --mat-datepicker-selected-date-background-color: var(--mat-primary-default, #246972);
+  --mat-datepicker-selected-date-text-color: var(--mat-primary-on-container, white);
+  --mat-datepicker-calendar-period-button-text-color: var(--mat-primary-default, #175263);
 }
 
-.theme-green .bs-datepicker-body table td span.selected,
-.theme-green .bs-datepicker-body table td.selected span,
-.theme-green .bs-datepicker-body table td span[class*='select-']:after,
-.theme-green .bs-datepicker-body table td[class*='select-'] span:after {
-  background-color: #246972;
-}
+.theme-green {
+  .bs-datepicker-head {
+    background-color: var(--mat-datepicker-calendar-header-background-color, #246972);
+  }
 
-.theme-green .bs-datepicker-body table td.week span {
-  color: #175263;
+  .bs-datepicker-body table {
+    td {
+      &.selected span,
+      span.selected,
+      span[class*='select-']:after,
+      &[class*='select-'] span:after {
+        background-color: var(--mat-datepicker-selected-date-background-color, #246972);
+      }
+
+      &.week span {
+        color: var(--mat-datepicker-calendar-period-button-text-color, #175263);
+      }
+    }
+  }
 }
 
 .bs-datepicker-container {
-  padding: 0;
+  padding: var(--mat-datepicker-container-padding, 0);
+  border-radius: var(--mat-datepicker-container-shape, 4px);
 }

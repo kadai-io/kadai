@@ -18,16 +18,24 @@
 
 @use 'colors';
 
+.mat-mdc-autocomplete-panel {
+  --mat-autocomplete-background-color: var(--mat-surface-container-highest);
+  --mat-autocomplete-container-shape: var(--mat-shape-medium, 4px);
+}
+
 typeahead-container > ul.dropdown-menu {
-  max-width: 600px;
+  max-width: var(--mat-autocomplete-panel-max-width, 600px);
+  border-radius: var(--mat-autocomplete-container-shape, 4px);
 
   & > li.active {
     & > a {
-      background-color: colors.$blue;
+      background-color: var(--mat-primary-default, colors.$blue);
+      color: var(--mat-primary-on-container);
     }
 
     & > a:hover {
-      background-color: colors.$blue;
+      background-color: var(--mat-primary-default, colors.$blue);
+      color: var(--mat-primary-on-container);
     }
   }
 }

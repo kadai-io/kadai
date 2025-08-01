@@ -19,33 +19,40 @@
 @use 'sass:math';
 @use 'colors';
 
+.mat-mdc-progress-spinner {
+  --mdc-circular-progress-active-indicator-color: var(--mat-primary-default);
+  --mdc-circular-progress-track-color: var(--mat-primary-container);
+  --mdc-circular-progress-track-shape: var(--mat-progress-spinner-container-shape, 50%);
+}
+
 .item {
-  margin-bottom: 20px;
+  margin-bottom: var(--mat-progress-spinner-container-margin, 20px);
   position: relative;
-  width: 113px;
-  height: 113px;
-  border-radius: 50%;
-  border: 1px solid #fff;
-  background-color: #fff;
+  width: var(--mat-progress-spinner-size, 113px);
+  height: var(--mat-progress-spinner-size, 113px);
+  border-radius: var(--mat-progress-spinner-container-shape, 50%);
+  border: 1px solid var(--mat-progress-spinner-container-color, #fff);
+  background-color: var(--mat-progress-spinner-background-color, #fff);
   float: left;
-  margin-right: 20px;
+  margin-right: var(--mat-progress-spinner-container-margin, 20px);
 }
 
 .radial-inner-bg {
-  border-radius: 50%;
-  width: 100px;
-  height: 100px;
+  border-radius: var(--mat-progress-spinner-inner-container-shape, 50%);
+  width: var(--mat-progress-spinner-inner-size, 100px);
+  height: var(--mat-progress-spinner-inner-size, 100px);
   top: 5px;
   left: 5px;
-  background: #fff;
+  background: var(--mat-progress-spinner-inner-background-color, #fff);
   position: absolute;
 
   > h1 {
-    margin: 30px 0 0 5px;
+    margin: var(--mat-progress-spinner-content-margin, 30px 0 0 5px);
+    color: var(--mat-progress-spinner-content-color);
   }
 }
 
-$step: 1; // step of % for created classes
+$step: 1;
 $loops: 100;
 $increment: math.div(360, $loops);
 $half: math.round(math.div($loops, 2));

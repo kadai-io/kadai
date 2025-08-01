@@ -90,6 +90,9 @@
   }
 
   &__mat-icon {
-    margin-left: 8px;
+    --mat-icon-color: var(--mat-list-item-supporting-icon-color);
+    --mat-icon-size: var(--mat-icon-size, 24px);
+    margin: var(--mat-icon-button-spacing, 0 4px);
+    vertical-align: middle;
   }
 }

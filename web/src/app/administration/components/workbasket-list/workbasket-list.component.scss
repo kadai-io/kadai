@@ -68,14 +68,14 @@ p {
 }
 
 .mat-mdc-list-item {
-  height: 90px !important;
+  height: var(--mdc-list-item-container-height, 90px) !important;
   overflow: hidden;
 }
 
 .mdc-list-item--selected {
-  background-color: colors.$green !important;
-}
+  background-color: var(--mat-list-item-selected-state-layer-color, colors.$green) !important;
 
-.mdc-list-item--selected * .workbasket-list__list-item--info {
-  color: white;
+  .workbasket-list__list-item--info {
+    color: var(--mat-list-item-selected-state-text-color, white);
+  }
 }

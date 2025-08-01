@@ -38,14 +38,16 @@
     z-index: 11;
     flex-shrink: 1;
   }
-}
 
-::ng-deep .administration-overview__navbar-container * .mat-mdc-text-field-wrapper {
-  height: 48px;
+  &__navbar-container {
+    .mat-mdc-text-field-wrapper {
+      height: var(--mdc-filled-text-field-container-height, 48px);
+    }
+  }
 }
 
 .mat-mdc-tab-link {
-  color: #1a202c !important;
+  color: var(--mat-tab-header-active-label-text-color) !important;
 }
 
 .mdc-tab--active {

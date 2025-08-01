@@ -58,12 +58,15 @@
   &__mat-icon {
     margin-left: 8px;
   }
-}
 
-::ng-deep .task-list-toolbar * .mat-mdc-tab-labels {
-  background-color: colors.$light-grey;
-}
+  .mat-mdc-tab-labels {
+    background-color: var(--mat-tab-header-background-color, white);
+    min-height: var(--mat-tab-header-height, 48px);
+  }
 
-::ng-deep .task-list-toolbar__filter-input .mat-mdc-text-field-wrapper {
-  width: 240px;
+  &__filter-input {
+    .mat-mdc-text-field-wrapper {
+      height: var(--mdc-filled-text-field-container-height, 48px);
+    }
+  }
 }

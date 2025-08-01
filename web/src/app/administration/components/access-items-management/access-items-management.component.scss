@@ -25,9 +25,11 @@ table {
   margin-bottom: 10px;
 }
 
-::ng-deep .mat-mdc-header-cell {
-  color: black;
-  font-weight: bold;
+.access-items-management {
+  .mat-mdc-header-cell {
+    color: var(--mat-table-header-headline-color, black);
+    font-weight: var(--mat-table-header-headline-weight, bold);
+  }
 }
 
 td,
@@ -58,76 +60,27 @@ tr:first-child > td {
   overflow-y: scroll;
   height: calc(100vh - 104px);
 
-  &__group-table-cell {
-    height: 48px;
-    text-align: left;
-  }
-
-  &__permission-table-cell {
-    height: 48px;
-    text-align: left;
-  }
-
-  &__table {
-    overflow-x: auto;
-    overflow-y: hidden;
-  }
-
-  &__typeahead {
-    width: 50%;
-    margin-left: 25%;
-    margin-right: 25%;
-    margin-top: 20px;
-  }
-
-  &__icon {
-    text-align: center;
-    color: grey;
-  }
-
-  &__groups-expansion-panel {
-    width: 98%;
-    left: 1%;
-  }
-
+  &__groups-expansion-panel,
   &__permissions-expansion-panel {
-    width: 98%;
-    left: 1%;
-  }
-
-  &__authorization-expansion-panel {
-    width: 98%;
-    left: 1%;
-    margin-bottom: 5px;
-  }
-
-  &__authorization-expansion-panel-filter {
-    width: 130px;
-    margin-bottom: -31px;
-    margin-top: -10px;
-    margin-left: -35px;
-    text-align: left;
-    @media only screen and (max-width: 1600px) {
-      margin-left: -5px;
+    th {
+      text-align: left;
+      padding: var(--mat-table-header-cell-padding, 8px);
     }
   }
 
-  &__revoke-button {
-    float: right;
-    margin-right: 30px;
-    margin-bottom: 8px;
+  .mat-mdc-header-cell {
+    color: var(--mat-table-header-headline-color, black);
+    font-weight: var(--mat-table-header-headline-weight, bold);
+    padding: var(--mat-table-header-cell-padding, 8px);
   }
 }
 
-::ng-deep .access-items__groups-expansion-panel * th,
-::ng-deep .access-items__permissions-expansion-panel * th {
-  text-align: left;
-}
-
 .mat-mdc-mini-fab {
-  outline-color: none;
+  outline: none;
   border: none;
-  box-shadow: none !important;
+  box-shadow: var(--mat-fab-container-elevation-shadow, none) !important;
+  --mat-fab-container-shape: 50%;
+  --mat-mdc-button-persistent-ripple-color: currentColor;
 }
 
 .align-left {
@@ -137,4 +90,23 @@ tr:first-child > td {
 .wrap {
   max-width: 150px;
   word-wrap: break-word;
+}
+
+:host {
+  .panel {
+    border: none;
+    box-shadow: none;
+    margin-bottom: 0;
+
+    & > .panel-body {
+      height: calc(100vh - 100px);
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+    }
+
+    & > .panel-heading {
+      border-left: 1px solid #ddd;
+      border-right: 1px solid #ddd;
+    }
+  }
 }

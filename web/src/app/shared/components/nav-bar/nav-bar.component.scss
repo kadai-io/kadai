@@ -39,8 +39,7 @@
   }
 
   &__button > .mdc-icon-button {
-    // Workaround to center the icon...
-    font-size: 13px;
+    font-size: var(--mdc-icon-button-icon-size, 13px);
   }
 }
 
@@ -51,9 +50,15 @@ svg-icon.navbar__logo-icon {
 }
 
 .mat-mdc-icon-button {
+  --mat-mdc-button-persistent-ripple-color: var(--mat-icon-button-state-layer-color);
+  --mat-mdc-button-ripple-color: var(--mat-icon-button-ripple-color);
+  --mdc-icon-button-disabled-icon-color: var(--mat-icon-button-disabled-state-color);
   outline: none;
 }
 
 .mat-icon {
-  color: white;
+  color: var(--mat-icon-button-icon-color, white);
+  --mat-icon-size: var(--mat-icon-button-icon-size, 24px);
+  --mat-icon-weight: var(--mat-icon-button-icon-weight, normal);
+  vertical-align: middle;
 }

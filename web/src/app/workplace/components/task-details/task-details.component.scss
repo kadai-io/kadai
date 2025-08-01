@@ -20,6 +20,18 @@
 
 :host {
   flex-grow: 1;
+
+  .panel {
+    border: none;
+    box-shadow: none;
+    margin-bottom: 0;
+
+    & > .panel-body {
+      height: calc(100vh - 100px);
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+    }
+  }
 }
 
 .task-details {

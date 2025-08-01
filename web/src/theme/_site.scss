@@ -19,12 +19,19 @@
 @use 'colors';
 
 * {
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  font-family: var(--mat-font-family-base, Roboto, 'Helvetica Neue', sans-serif);
+}
+
+:root {
+  --mat-spacing-base: 8px;
+  --mat-shape-small: 4px;
+  --mat-shape-medium: 8px;
+  --mat-shape-large: 16px;
 }
 
 .placeholder img {
   display: inline-block;
-  border-radius: 50%;
+  border-radius: var(--mat-shape-circle, 50%);
 }
 
 .no-margin {
@@ -32,23 +39,19 @@
 }
 
 .content-margin {
-  margin: 0 10px 0 10px;
+  margin: 0 calc(var(--mat-spacing-base, 8px) * 1.25) 0 calc(var(--mat-spacing-base, 8px) * 1.25);
 }
 
 .no-border-radius {
   border-radius: 0;
 }
 
-/*
- * Base structure
- */
-/* Move down content because we have a fixed navbar that is 55px tall */
-
 .container-main {
-  margin-top: 55px;
+  margin-top: calc(var(--mat-spacing-base, 8px) * 6.875);
   overflow-y: hidden;
-  /*Min mobile view size*/
   min-width: 420px;
+  background-color: var(--mat-surface-container);
+  color: var(--mat-primary-text-color);
 }
 
 .container-scrollable {
@@ -58,20 +61,12 @@
 }
 
 .vertical-center {
-  /* Make it a flex container */
   display: -webkit-box;
   display: -moz-box;
   display: -ms-flexbox;
   display: -webkit-flex;
   display: flex;
 
-  /* In legacy web browsers such as Firefox 9
-   we need to specify the width of the flex container */
-  width: 100%;
-
-  /* Also 'margin: 0 auto' doesn't have any effect on flex items in such web browsers
-   hence the bootstrap's container won't be aligned to the center anymore.
-   Therefore, we should use the following declarations to get it centered again */
   -webkit-box-pack: center;
   -moz-box-pack: center;
   -ms-flex-pack: center;
@@ -79,9 +74,6 @@
   justify-content: center;
 }
 
-/*
-    Colors
-*/
 .white {
   color: white;
 
@@ -184,9 +176,6 @@ div.error {
   color: colors.$invalid;
 }
 
-/*
- *Remove bootstrap cols padding for master and detail component
-*/
 .no-gutter > kadai-shared-master-and-detail > [class*='col-'] {
   padding-right: 0;
   padding-left: 0;
@@ -293,7 +282,6 @@ body {
     visibility 300ms ease;
 }
 
-/* buttons and icons vertical align */
 .vertical-align {
   vertical-align: top;
 }
@@ -305,8 +293,6 @@ body {
 a > svg-icon > svg {
   vertical-align: text-top;
 }
-
-/*end buttons and icons vertical align */
 
 span.flip {
   transform: rotateX(180deg);
@@ -342,66 +328,6 @@ span.flip {
 .container {
   @media (min-width: 1200px) {
     width: 100%;
-  }
-}
-
-kadai-administration-workbasket-information,
-kadai-administration-workbasket-access-items,
-kadai-administration-workbasket-distribution-targets,
-kadai-administration-workbasket-details,
-kadai-monitor-task-report,
-kadai-monitor-workbasket-report,
-kadai-monitor-classification-report,
-kadai-monitor-timestamp-report {
-  & .panel {
-    border: none;
-    box-shadow: none;
-    margin-bottom: 0;
-
-    & > .panel-body {
-      height: calc(100vh - 155px);
-      max-height: calc(100vh - 155px);
-      overflow-y: auto;
-    }
-  }
-}
-
-kadai-task-details,
-kadai-administration-classification-details,
-kadai-administration-access-items-management,
-kadai-task,
-kadai-task-query {
-  & .panel {
-    border: none;
-    box-shadow: none;
-    margin-bottom: 0;
-
-    & > .panel-body {
-      height: calc(100vh - 100px);
-      max-height: calc(100vh - 100px);
-      overflow-y: auto;
-    }
-  }
-}
-
-kadai-task-query {
-  & .panel {
-    & > .panel-body {
-      height: calc(100vh - 105px);
-      max-height: calc(100vh - 105px);
-    }
-  }
-}
-
-kadai-monitor-task-report,
-kadai-monitor-workbasket-report,
-kadai-monitor-classification-report,
-kadai-administration-access-items-management {
-  & .panel {
-    & > .panel-heading {
-      border-left: 1px solid #ddd;
-      border-right: 1px solid #ddd;
-    }
   }
 }
 

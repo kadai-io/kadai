@@ -23,6 +23,11 @@
 
   &__form-field {
     width: 100% !important;
+
+    .mat-mdc-form-field-infix {
+      padding-top: var(--mat-form-field-container-vertical-padding, 24px);
+      padding-bottom: 0;
+    }
   }
 
   &__form-options {
@@ -37,10 +42,11 @@
     white-space: nowrap;
     padding-top: 8px;
   }
-}
 
-::ng-deep .ng-invalid.ng-touched:not(form) {
-  box-shadow: unset;
+  &__field.mat-mdc-form-field.ng-invalid.ng-touched:not(form) {
+    --mdc-filled-text-field-error-container-shape: var(--mat-shape-small);
+    border-color: var(--mat-form-field-error-color, colors.$invalid);
+  }
 }
 
 .invalid {

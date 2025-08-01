@@ -28,8 +28,8 @@
 
   &__drawer {
     position: absolute;
-    z-index: 999;
-    box-shadow: none;
+    z-index: var(--mat-sidenav-container-z-index, 999);
+    box-shadow: var(--mat-sidenav-container-elevation-shadow, none);
     width: 350px;
     background-color: colors.$dark-green;
 
@@ -42,7 +42,6 @@
     }
 
     &__container * .mdc-icon-button {
-      // Workaround to center the icon...
       font-size: 13px;
     }
 
@@ -77,22 +76,17 @@
 
 .mat-drawer-content {
   overflow: hidden !important;
+  background-color: var(--mat-sidenav-content-background-color);
 }
 
 .mat-mdc-icon-button {
   outline: none;
+  --mat-mdc-button-persistent-ripple-color: currentColor;
+  --mat-mdc-button-ripple-color: currentColor;
 }
 
 .kadai-main__progress-bar {
-  height: 8px;
-  background-color: colors.$light-grey;
+  height: var(--mdc-linear-progress-track-height, 8px);
+  background-color: var(--mat-progress-bar-background-color, colors.$light-grey);
   margin-bottom: 2px;
-}
-
-::ng-deep .mat-drawer-inner-container {
-  overflow: visible !important;
-}
-
-::ng-deep .mat-drawer {
-  overflow-y: visible !important;
 }
