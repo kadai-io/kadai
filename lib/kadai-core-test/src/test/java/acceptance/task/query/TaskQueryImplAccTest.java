@@ -119,7 +119,7 @@ class TaskQueryImplAccTest {
   private void persistPermission(WorkbasketSummary workbasketSummary) throws Exception {
     WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
         .workbasketId(workbasketSummary.getId())
-        .accessId(currentUserContext.getUserid())
+        .accessId(currentUserContext.getUserContext().getUserId())
         .permission(WorkbasketPermission.OPEN)
         .permission(WorkbasketPermission.READ)
         .permission(WorkbasketPermission.APPEND)
@@ -262,21 +262,21 @@ class TaskQueryImplAccTest {
 
       WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
           .workbasketId(wbWithoutReadTasksPerm.getId())
-          .accessId(currentUserContext.getUserid())
+          .accessId(currentUserContext.getUserContext().getUserId())
           .permission(WorkbasketPermission.OPEN)
           .permission(WorkbasketPermission.READ)
           .permission(WorkbasketPermission.APPEND)
           .buildAndStore(workbasketService, "businessadmin");
       WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
           .workbasketId(wbWithoutReadPerm.getId())
-          .accessId(currentUserContext.getUserid())
+          .accessId(currentUserContext.getUserContext().getUserId())
           .permission(WorkbasketPermission.OPEN)
           .permission(WorkbasketPermission.READTASKS)
           .permission(WorkbasketPermission.APPEND)
           .buildAndStore(workbasketService, "businessadmin");
       WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
           .workbasketId(wbWithoutOpenPerm.getId())
-          .accessId(currentUserContext.getUserid())
+          .accessId(currentUserContext.getUserContext().getUserId())
           .permission(WorkbasketPermission.READ)
           .permission(WorkbasketPermission.READTASKS)
           .permission(WorkbasketPermission.APPEND)
@@ -2593,11 +2593,7 @@ class TaskQueryImplAccTest {
       @Test
       void should_ApplyFilter_When_QueryingForReopenedEqualsTrue() {
         List<TaskSummary> list =
-            taskService
-                .createTaskQuery()
-                .workbasketIdIn(wb.getId())
-                .reopenedEquals(true)
-                .list();
+            taskService.createTaskQuery().workbasketIdIn(wb.getId()).reopenedEquals(true).list();
 
         assertThat(list).containsExactly(taskSummary1);
       }
@@ -2606,11 +2602,7 @@ class TaskQueryImplAccTest {
       @Test
       void should_ApplyFilter_When_QueryingForReopenedEqualsFalse() {
         List<TaskSummary> list =
-            taskService
-                .createTaskQuery()
-                .workbasketIdIn(wb.getId())
-                .reopenedEquals(false)
-                .list();
+            taskService.createTaskQuery().workbasketIdIn(wb.getId()).reopenedEquals(false).list();
 
         assertThat(list).containsExactly(taskSummary2);
       }

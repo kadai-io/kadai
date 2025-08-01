@@ -317,7 +317,7 @@ class CompleteTaskAccTest implements KadaiConfigurationModifier {
 
     NotAuthorizedOnWorkbasketException e =
         catchThrowableOfType(NotAuthorizedOnWorkbasketException.class, call);
-    assertThat(e.getCurrentUserId()).isEqualTo(currentUserContext.getUserid());
+    assertThat(e.getCurrentUserId()).isEqualTo(currentUserContext.getUserContext().getUserId());
     WorkbasketSummary workbasket = claimedTask.getWorkbasketSummary();
     assertThat(e.getWorkbasketId()).isEqualTo(workbasket.getId());
     assertThat(e.getRequiredPermissions())
@@ -836,7 +836,7 @@ class CompleteTaskAccTest implements KadaiConfigurationModifier {
   private void assertTaskIsComplete(Instant before, Task completedTask) {
     assertThat(completedTask).isNotNull();
     assertThat(completedTask.getState()).isEqualTo(TaskState.COMPLETED);
-    assertThat(completedTask.getOwner()).isEqualTo(currentUserContext.getUserid());
+    assertThat(completedTask.getOwner()).isEqualTo(currentUserContext.getUserContext().getUserId());
     assertThat(completedTask.getCompleted())
         .isNotNull()
         .isEqualTo(completedTask.getModified())

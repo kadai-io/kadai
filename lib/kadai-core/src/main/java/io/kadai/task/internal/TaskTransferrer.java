@@ -297,7 +297,7 @@ final class TaskTransferrer {
     } else if (!sourceWorkbasketIds.contains(taskSummary.getWorkbasketSummary().getId())) {
       error =
           new NotAuthorizedOnWorkbasketException(
-              kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+              kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getUserId(),
               taskSummary.getWorkbasketSummary().getId(),
               WorkbasketPermission.TRANSFER);
     }
@@ -386,7 +386,7 @@ final class TaskTransferrer {
             newTask,
             originWorkbasketId,
             destinationWorkbasketId,
-            kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+            kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getUserId(),
             details));
   }
 
