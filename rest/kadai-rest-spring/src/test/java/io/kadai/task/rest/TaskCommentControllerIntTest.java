@@ -361,12 +361,13 @@ class TaskCommentControllerIntTest {
     Map<String, Map<String, Object>> tasksWithErrors = (Map<String, Map<String, Object>>)
             responseBody.get("tasksWithErrors");
 
-    assertThat(tasksWithErrors).hasSize(1);
-    assertThat(tasksWithErrors).containsKey("TKI:400000000000000000000000000000000004");
+    assertThat(tasksWithErrors)
+            .hasSize(1)
+            .containsKey("TKI:400000000000000000000000000000000004");
 
     Map<String, Object> errorDetails = tasksWithErrors
             .get("TKI:400000000000000000000000000000000004");
-    assertThat(errorDetails.get("key")).isEqualTo("TASK_NOT_FOUND");
+    assertThat(errorDetails).containsEntry("key", "TASK_NOT_FOUND");
   }
 
   @Test

@@ -21,6 +21,7 @@ package io.kadai.task.rest.models;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.beans.ConstructorProperties;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.hateoas.RepresentationModel;
 
 public class TasksCommentBatchRepresentationModel
@@ -48,5 +49,26 @@ public class TasksCommentBatchRepresentationModel
 
   public String getTextField() {
     return textField;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    if (!super.equals(obj)) {
+      return false;
+    }
+    TasksCommentBatchRepresentationModel other = (TasksCommentBatchRepresentationModel) obj;
+    return Objects.equals(taskIds, other.taskIds)
+            && Objects.equals(textField, other.textField);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), taskIds, textField);
   }
 }
