@@ -18,14 +18,11 @@
 
 @use 'colors';
 
-:host {
-  flex-grow: 1;
-}
-
 .task-processing {
   height: 100%;
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
 
   &__header {
     padding: 8px 8px 0 8px;
