@@ -49,7 +49,9 @@ class TasksCommentBatchRepresentationModelTest {
     var withOtherLink = new TasksCommentBatchRepresentationModel(List.of("T1"), "comment");
     withOtherLink.add(Link.of("http://diff"));
 
-    assertThat(model).isNotEqualTo(new Object());
-    assertThat(model.equals(withOtherLink)).isFalse();
+    assertThat(model)
+            .isNotEqualTo(null)
+            .isNotEqualTo(new Object())
+            .isNotEqualTo(withOtherLink);
   }
 }
