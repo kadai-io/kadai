@@ -17,19 +17,130 @@
  */
 
 @use '@angular/material' as mat;
+@use 'sass:map';
 
-@include mat.all-component-typographies();
-@include mat.elevation-classes();
-@include mat.app-background();
+@include mat.core();
 
-@include mat.theme(
-  (
-    color: (
-      primary: mat.m2-define-palette(mat.$m2-blue-grey-palette),
-      accent: mat.m2-define-palette(mat.$m2-teal-palette, 500, 900, A100),
-      warn: mat.m2-define-palette(mat.$m2-red-palette, 600)
-    ),
-    typography: Roboto,
-    density: 0
+$custom-primary: (
+  50: #e8eaf6,
+  100: #c5cae9,
+  200: #9fa8da,
+  300: #7986cb,
+  400: #5c6bc0,
+  500: #3f51b5,
+  600: #3949ab,
+  700: #303f9f,
+  800: #283593,
+  900: #1a237e,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: white,
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white
   )
 );
+
+$custom-accent: (
+  50: #fce4ec,
+  100: #f8bbd0,
+  200: #f48fb1,
+  300: #f06292,
+  400: #ec407a,
+  500: #e91e63,
+  600: #d81b60,
+  700: #c2185b,
+  800: #ad1457,
+  900: #880e4f,
+  A100: #ff80ab,
+  A200: #ff4081,
+  A400: #f50057,
+  A700: #c51162,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: white,
+    A400: white,
+    A700: white
+  )
+);
+
+$primary: (
+  base: map.get($custom-primary, 500),
+  lighter: map.get($custom-primary, 100),
+  darker: map.get($custom-primary, 700),
+  text: map.get($custom-primary, contrast, 500),
+  lighter-text: map.get($custom-primary, contrast, 100),
+  darker-text: map.get($custom-primary, contrast, 700)
+);
+
+$accent: (
+  base: map.get($custom-accent, A200),
+  lighter: map.get($custom-accent, A100),
+  darker: map.get($custom-accent, A400),
+  text: map.get($custom-accent, contrast, A200),
+  lighter-text: map.get($custom-accent, contrast, A100),
+  darker-text: map.get($custom-accent, contrast, A400)
+);
+
+$warn: (
+  base: #f44336,
+  lighter: #ffcdd2,
+  darker: #d32f2f,
+  text: white,
+  lighter-text: rgba(black, 0.87),
+  darker-text: white
+);
+
+$theme: (
+  primary: $primary,
+  accent: $accent,
+  warn: $warn,
+  is-dark: false,
+  foreground: (
+    base: black,
+    divider: rgba(black, 0.12),
+    dividers: rgba(black, 0.12),
+    disabled: rgba(black, 0.38),
+    disabled-button: rgba(black, 0.26),
+    disabled-text: rgba(black, 0.38),
+    hint-text: rgba(black, 0.38),
+    secondary-text: rgba(black, 0.54),
+    icon: rgba(black, 0.54),
+    icons: rgba(black, 0.54),
+    text: rgba(black, 0.87),
+    slider-min: rgba(black, 0.87),
+    slider-off: rgba(black, 0.26),
+    slider-off-active: rgba(black, 0.38)
+  ),
+  background: (
+    background: white,
+    status-bar: map.get($custom-primary, 300),
+    app-bar: map.get($custom-primary, 100),
+    hover: rgba(black, 0.04),
+    card: white,
+    dialog: white,
+    disabled-button: rgba(black, 0.12),
+    raised-button: white,
+    focused-button: rgba(black, 0.12),
+    selected-button: map.get($custom-primary, 50),
+    selected-disabled-button: rgba(black, 0.12),
+    disabled-button-toggle: #eeeeee
+  )
+);
+
+@include mat.all-component-themes($theme);

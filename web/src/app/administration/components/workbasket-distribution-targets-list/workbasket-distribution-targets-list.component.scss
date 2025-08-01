@@ -93,16 +93,29 @@
   }
 
   &__mat-icon {
-    margin-left: 8px;
+    color: var(--mat-icon-color);
+    margin: var(--mat-icon-margin, 0 4px);
+    vertical-align: middle;
+  }
+
+  .cdk-virtual-scroll-content-wrapper {
+    width: 100%;
   }
 }
 
-::ng-deep .distribution-targets-list * .cdk-virtual-scroll-content-wrapper {
-  width: 100%;
-}
-
 .mat-mdc-list-item {
-  height: 90px !important;
+  --mat-list-item-container-height: var(--mat-list-three-line-container-height, 88px);
+  --mat-list-item-label-text-size: var(--mat-list-item-label-text-size, 16px);
+  --mat-list-item-supporting-text-size: var(--mat-list-item-supporting-text-size, 14px);
+  --mat-list-item-supporting-text-color: var(--mat-list-item-supporting-text-color, rgba(0, 0, 0, 0.6));
+
+  &:hover {
+    background-color: var(--mat-list-item-hover-state-layer-color);
+  }
+
+  &:focus {
+    background-color: var(--mat-list-item-focus-state-layer-color);
+  }
 }
 
 p {

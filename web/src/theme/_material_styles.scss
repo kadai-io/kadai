@@ -16,6 +16,8 @@
  *
  */
 
+@use 'colors';
+
 @font-face {
   font-family: 'Material Icons';
   font-style: normal;
@@ -30,10 +32,10 @@
 }
 
 .material-icons {
-  font-family: 'Material Icons';
+  font-family: var(--mat-font-family, 'Material Icons');
   font-weight: normal;
   font-style: normal;
-  font-size: 24px; /* Preferred icon size */
+  font-size: var(--mat-icon-size, 24px);
   display: inline-block;
   line-height: 1;
   text-transform: none;
@@ -42,57 +44,89 @@
   white-space: nowrap;
   direction: ltr;
   vertical-align: middle;
-  /* Support for all WebKit browsers. */
+
   -webkit-font-smoothing: antialiased;
-  /* Support for Safari and Chrome. */
   text-rendering: optimizeLegibility;
-
-  /* Support for Firefox. */
   -moz-osx-font-smoothing: grayscale;
-
-  /* Support for IE. */
-  font-feature-settings: 'liga';
+  -webkit-font-feature-settings: 'liga';
 }
 
-/* Rules for sizing the icon. */
-.material-icons.md-14 {
-  font-size: 15px;
+:root {
+  --mat-font-family-base:
+    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Ubuntu, 'Helvetica Neue', sans-serif;
+
+  --mat-display-large-font-size: 57px;
+  --mat-display-large-line-height: 64px;
+  --mat-display-large-font-weight: 400;
+
+  --mat-display-medium-font-size: 45px;
+  --mat-display-medium-line-height: 52px;
+  --mat-display-medium-font-weight: 400;
+
+  --mat-display-small-font-size: 36px;
+  --mat-display-small-line-height: 44px;
+  --mat-display-small-font-weight: 400;
+
+  --mat-headline-large-font-size: 32px;
+  --mat-headline-large-line-height: 40px;
+  --mat-headline-large-font-weight: 400;
+
+  --mat-headline-medium-font-size: 28px;
+  --mat-headline-medium-line-height: 36px;
+  --mat-headline-medium-font-weight: 400;
+
+  --mat-headline-small-font-size: 24px;
+  --mat-headline-small-line-height: 32px;
+  --mat-headline-small-font-weight: 400;
+
+  --mat-body-large-font-size: 16px;
+  --mat-body-large-line-height: 24px;
+  --mat-body-large-font-weight: 400;
+
+  --mat-body-medium-font-size: 14px;
+  --mat-body-medium-line-height: 20px;
+  --mat-body-medium-font-weight: 400;
+
+  --mat-body-small-font-size: 12px;
+  --mat-body-small-line-height: 16px;
+  --mat-body-small-font-weight: 400;
+
+  --mat-label-large-font-size: 14px;
+  --mat-label-large-line-height: 20px;
+  --mat-label-large-font-weight: 500;
+
+  --mat-label-medium-font-size: 12px;
+  --mat-label-medium-line-height: 16px;
+  --mat-label-medium-font-weight: 500;
+
+  --mat-label-small-font-size: 11px;
+  --mat-label-small-line-height: 16px;
+  --mat-label-small-font-weight: 500;
 }
 
-.material-icons.md-18 {
-  font-size: 18px;
+.mat-drawer-inner-container {
+  overflow: visible !important;
+  background-color: var(--mat-sidenav-container-background-color);
 }
 
-.material-icons.md-20 {
-  font-size: 20px;
+.mat-drawer {
+  overflow-y: visible !important;
+  --mat-sidenav-container-width: var(--mat-navigation-drawer-width, 350px);
+  --mat-sidenav-container-shape: var(--mat-shape-medium, 4px);
+  border-right: var(--mat-sidenav-container-divider-width, 1px) solid var(--mat-sidenav-container-divider-color);
 }
 
-.material-icons.md-24 {
-  font-size: 24px;
-}
+.navlist {
+  &__item {
+    &.active__sub,
+    &.active {
+      .mdc-list-item__primary-text {
+        color: var(--mat-sidenav-container-text-color, colors.$aquamarine);
+      }
+    }
 
-.material-icons.md-36 {
-  font-size: 36px;
-}
-
-.material-icons.md-48 {
-  font-size: 48px;
-}
-
-/* Rules for using icons as black on a light background. */
-.material-icons.md-dark {
-  color: rgba(0, 0, 0, 0.54);
-}
-
-.material-icons.md-dark.md-inactive {
-  color: rgba(0, 0, 0, 0.26);
-}
-
-/* Rules for using icons as white on a dark background. */
-.material-icons.md-light {
-  color: rgba(255, 255, 255, 1);
-}
-
-.material-icons.md-light.md-inactive {
-  color: rgba(255, 255, 255, 0.3);
+    .mdc-list-item__primary-text {
+      color: var(--mat-sidenav-container-text-color, #ddd);
+    }
+  }
 }

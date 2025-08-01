@@ -21,7 +21,7 @@
 @use 'site';
 
 tree-viewport {
-  height: calc(100vh - 225px);
+  height: calc(100vh - var(--mat-tree-container-offset, 225px));
 
   & > div {
     display: inline-block;
@@ -32,20 +32,24 @@ tree-node-expander {
   & .toggle-children {
     &:before {
       @extend .material-icons;
-      content: 'add';
+      content: var(--mat-tree-toggle-icon-content, 'add');
     }
 
-    top: 2px;
+    top: var(--mat-tree-toggle-icon-offset, 2px);
     @extend .blue;
-    background: white none;
-    color: colors.$blue-green;
-    padding-left: 3px;
+    background: var(--mat-tree-toggle-icon-background, white) none;
+    color: var(--mat-tree-toggle-icon-color, colors.$blue-green);
+    padding-left: var(--mat-tree-toggle-icon-padding, 3px);
   }
 }
 
 .toggle-children-wrapper {
   padding: 0;
-  font-size: 16px;
+  font-size: var(--mat-tree-node-font-size, 16px);
+}
+
+tree-node-expander .toggle-children-wrapper-expanded .toggle-children:before {
+  content: var(--mat-tree-toggle-expanded-icon-content, 'remove');
 }
 
 tree-node-expander .toggle-children-wrapper-expanded {
@@ -98,7 +102,6 @@ tree-node-expander .toggle-children-wrapper-expanded {
   }
 }
 
-/* START Children branch lines*/
 .node-content-wrapper::before {
   border-bottom: 1px dotted colors.$blue-green;
   border-left: 1px dotted colors.$blue-green;
@@ -131,5 +134,3 @@ tree-node:last-child > .tree-node > .tree-children::after {
 .toggle-children {
   z-index: 1;
 }
-
-/* END children branch lines */

@@ -16,15 +16,31 @@
  *
  */
 
-.btn-group > .dropdown > .btn:first-child:not(:last-child):not(.dropdown-toggle) {
-  border-bottom-right-radius: 0;
-  border-top-right-radius: 0;
+.btn-group {
+  > .dropdown > .btn,
+  > div.btn-group > .btn {
+    &:first-child:not(:last-child):not(.dropdown-toggle) {
+      border-start-end-radius: var(--mat-button-toggle-group-shape-start-end, 0);
+      border-end-end-radius: var(--mat-button-toggle-group-shape-end-end, 0);
+    }
+  }
+
+  > div.btn-group > .btn:first-child:not(:last-child):not(.dropdown-toggle) {
+    border-radius: var(--mat-button-toggle-group-shape, 0);
+  }
+
+  ul + .btn {
+    margin-inline-start: var(--mat-button-toggle-spacing, -1px);
+  }
 }
 
-.btn-group ul + .btn {
-  margin-left: -1px;
-}
-
-.btn-group > div.btn-group > .btn:first-child:not(:last-child):not(.dropdown-toggle) {
-  border-radius: 0;
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-outlined-button,
+.mat-mdc-unelevated-button {
+  --mdc-typography-button-font-family: var(--mat-font-family-base);
+  --mdc-typography-button-font-size: var(--mat-button-font-size, 14px);
+  --mdc-typography-button-line-height: var(--mat-button-line-height, 36px);
+  --mdc-typography-button-font-weight: var(--mat-button-font-weight, 500);
+  --mdc-typography-button-letter-spacing: var(--mat-button-letter-spacing, 0.0892857143em);
 }

@@ -16,6 +16,16 @@
  *
  */
 
+.workbasket-information {
+  .general__description-and-type {
+    .mat-mdc-form-field {
+      display: unset;
+      flex-direction: unset;
+      --mat-form-field-container-padding: 8px 0;
+    }
+  }
+}
+
 .workbasket-information-wrapper {
   height: calc(100vh - 213px);
   overflow-y: auto;
@@ -86,10 +96,20 @@
 
   &__form-field {
     width: 100%;
+    --mdc-filled-text-field-container-shape: 4px;
   }
 }
 
-::ng-deep .general__description-and-type > .mat-mdc-form-field {
-  display: unset;
-  flex-direction: unset;
+:host {
+  .panel {
+    border: none;
+    box-shadow: none;
+    margin-bottom: 0;
+
+    & > .panel-body {
+      height: calc(100vh - 155px);
+      max-height: calc(100vh - 155px);
+      overflow-y: auto;
+    }
+  }
 }

@@ -18,6 +18,20 @@
 
 @use 'colors';
 
+:host {
+  .panel {
+    border: none;
+    box-shadow: none;
+    margin-bottom: 0;
+
+    & > .panel-body {
+      height: calc(100vh - 100px);
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+    }
+  }
+}
+
 .classification-details {
   height: calc(100vh - 100px);
   overflow-y: auto;
@@ -99,7 +113,9 @@
   }
 
   &__mat-icon {
-    margin-left: 8px;
+    color: var(--mat-icon-color);
+    margin: var(--mat-icon-margin, 0 4px);
+    vertical-align: middle;
   }
 }
 

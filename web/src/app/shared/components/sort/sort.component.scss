@@ -20,20 +20,21 @@
 
 .sort {
   &__selected-value {
-    color: colors.$aquamarine;
+    color: var(--mat-primary-color, colors.$aquamarine);
     font-weight: bold;
   }
 
   &__button {
     outline: none;
-    color: #555;
+    color: var(--mat-menu-item-label-text-color, #555);
   }
 
   &__mat-icon {
-    margin-left: 8px;
+    margin-left: var(--mat-menu-item-trailing-icon-margin, 8px);
   }
 }
 
 .mat-mdc-menu-item {
   outline: none;
+  --mat-menu-item-hover-state-layer-color: currentColor;
 }

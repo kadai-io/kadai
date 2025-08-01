@@ -65,6 +65,9 @@
   }
 
   &__mat-icon {
-    margin-left: 8px;
+    --mat-icon-color: var(--mat-toolbar-container-text-color);
+    --mat-icon-size: var(--mat-icon-size, 24px);
+    margin: var(--mat-icon-button-spacing, 0 4px);
+    vertical-align: middle;
   }
 }

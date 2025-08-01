@@ -29,8 +29,15 @@
     min-width: 124px;
     max-width: 124px;
     line-height: 20px;
-    padding-bottom: 0% !important;
+    padding-bottom: 0 !important;
     margin-top: 5px;
+
+    .type-ahead__form-field {
+      .mat-mdc-form-field-infix {
+        padding-top: var(--mat-form-field-container-vertical-padding, 24px);
+        padding-bottom: 0;
+      }
+    }
   }
 
   &__table {
@@ -97,7 +104,7 @@
   }
 
   &__buttons-add-access {
-    color: white;
+    color: var(--mat-filled-button-label-text-color, white);
     border: none;
     background: colors.$aquamarine;
     margin: 10px 3px 0 6px;
@@ -105,7 +112,7 @@
   }
 
   &__buttons-delete-access {
-    color: red;
+    color: var(--mat-warn-color, red);
     margin: 10px 3px 0 6px;
     outline: none;
   }
@@ -142,15 +149,39 @@
   color: red;
 }
 
-::ng-deep .workbasket-access-items__typeahead .type-ahead__form-field .mat-mdc-form-field-infix {
-  padding-top: 24px;
-  padding-bottom: 0;
-}
+.access-items {
+  &__management {
+    .mat-mdc-header-cell {
+      color: var(--mat-table-header-headline-color, black);
+      font-weight: var(--mat-table-header-headline-weight, bold);
+      padding: var(--mat-table-header-cell-padding, 8px);
+    }
+  }
 
-::ng-deep .workbasket-access-items__typeahead .type-ahead__form-field .mdc-notched-outline {
-  padding-top: 16px;
+  &__groups-expansion-panel,
+  &__permissions-expansion-panel {
+    th {
+      text-align: left;
+      padding: var(--mat-table-header-cell-padding, 8px);
+      border-bottom: var(--mat-table-header-border-width, 1px) solid var(--mat-table-header-border-color);
+    }
+  }
 }
 
 table {
   border-collapse: collapse;
+}
+
+:host {
+  .panel {
+    border: none;
+    box-shadow: none;
+    margin-bottom: 0;
+
+    & > .panel-body {
+      height: calc(100vh - 155px);
+      max-height: calc(100vh - 155px);
+      overflow-y: auto;
+    }
+  }
 }

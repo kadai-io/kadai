@@ -19,16 +19,24 @@
 @use 'colors';
 
 .ng-invalid.ng-touched:not(form) {
-  border-color: colors.$invalid;
-  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  box-shadow: unset;
+  border-color: var(--mat-form-field-error-color, colors.$invalid);
+  box-shadow: var(--mat-form-field-error-box-shadow, inset 0 1px 1px rgba(0, 0, 0, 0.075));
+
+  &.mat-mdc-form-field {
+    --mdc-filled-text-field-error-active-indicator-color: var(--mat-form-field-error-color);
+    --mdc-filled-text-field-error-label-text-color: var(--mat-form-field-error-text-color);
+    --mdc-filled-text-field-error-hover-active-indicator-color: var(--mat-form-field-error-color);
+    --mdc-filled-text-field-error-focus-active-indicator-color: var(--mat-form-field-error-color);
+  }
 }
 
 .required-text {
-  padding-left: 3px;
-  color: colors.$invalid;
+  padding-left: var(--mat-form-field-required-indicator-padding, 3px);
+  color: var(--mat-form-field-error-text-color, colors.$invalid);
 }
 
 textarea {
   resize: none;
+  font-family: var(--mat-font-family-base);
 }

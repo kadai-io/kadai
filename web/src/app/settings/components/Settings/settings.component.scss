@@ -85,6 +85,8 @@
   }
 }
 
-::ng-deep .ng-invalid.ng-touched:not(form) {
-  box-shadow: unset;
+:host {
+  .settings-field.mat-mdc-form-field.ng-invalid.ng-touched:not(form) {
+    --mdc-filled-text-field-error-focus-state-layer-color: var(--mat-form-field-error-color);
+  }
 }

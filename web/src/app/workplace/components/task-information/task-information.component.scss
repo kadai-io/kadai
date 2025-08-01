@@ -33,13 +33,8 @@
     width: 50%;
   }
 
-  &__due-date-and-priority {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+  .mat-mdc-form-field {
+    margin-bottom: var(--mat-form-field-bottom-spacing, 1rem);
+    --mat-form-field-container-shape: var(--mat-shape-small, 4px);
   }
-}
-
-::ng-deep .task-information .mat-mdc-form-field {
-  margin-top: 0.7rem;
 }

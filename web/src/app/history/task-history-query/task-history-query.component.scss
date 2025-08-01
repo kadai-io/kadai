@@ -28,3 +28,17 @@
     width: 100%;
   }
 }
+
+:host {
+  .panel {
+    border: none;
+    box-shadow: none;
+    margin-bottom: 0;
+
+    & > .panel-body {
+      height: calc(100vh - 105px);
+      max-height: calc(100vh - 105px);
+      overflow-y: auto;
+    }
+  }
+}
