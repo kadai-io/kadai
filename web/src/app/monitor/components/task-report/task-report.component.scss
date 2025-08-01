@@ -16,7 +16,7 @@
  *
  */
 
-:host {
+.task-report {
   .panel {
     border: none;
     box-shadow: none;
@@ -29,8 +29,7 @@
     }
 
     & > .panel-heading {
-      border-left: 1px solid #ddd;
-      border-right: 1px solid #ddd;
+      padding: 0;
     }
   }
 }

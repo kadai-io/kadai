@@ -18,7 +18,7 @@
 
 @use 'colors';
 
-:host {
+.task-details {
   flex-grow: 1;
 
   .panel {
@@ -32,9 +32,7 @@
       overflow-y: auto;
     }
   }
-}
 
-.task-details {
   &__header {
     padding: 8px 8px 0 8px;
     height: 88px;
