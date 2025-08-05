@@ -31,6 +31,7 @@ import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
 import io.kadai.task.rest.models.TasksCommentBatchRepresentationModel;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -309,7 +310,8 @@ class TaskCommentControllerIntTest {
             "TKI:000000000000000000000000000000000001",
             "TKI:000000000000000000000000000000000004"
     );
-    String textField = "newly created task comment for multiple tasks";
+    String textField = "check for test "
+            + "should_CreateTaskCommentForMultipleTasks_When_TasksAreExisting()";
     TasksCommentBatchRepresentationModel request =
             new TasksCommentBatchRepresentationModel(taskIds, textField);
 
@@ -329,6 +331,26 @@ class TaskCommentControllerIntTest {
             Objects.requireNonNull(response.getBody()).getTasksWithErrors();
 
     assertThat(errors).isEmpty();
+
+    for (String taskId : taskIds) {
+      String commentUrl = restHelper.toUrl(RestEndpoints.URL_TASK_COMMENTS, taskId);
+
+      ResponseEntity<TaskCommentCollectionRepresentationModel> getResponse = CLIENT
+              .get()
+              .uri(commentUrl)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(TaskCommentCollectionRepresentationModel.class);
+
+      assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+      TaskCommentCollectionRepresentationModel body = getResponse.getBody();
+      assertThat(body).isNotNull();
+
+      List<TaskCommentRepresentationModel> comments = new ArrayList<>(body.getContent());
+
+      assertThat(comments)
+              .anyMatch(c -> textField.equals(c.getTextField()));
+    }
   }
 
   @Test
@@ -337,7 +359,8 @@ class TaskCommentControllerIntTest {
             "TKI:000000000000000000000000000000000001",  // valid
             "TKI:400000000000000000000000000000000004"  // invalid
     );
-    String textField = "partially created task comments";
+    String textField = "check for "
+            + "test should_PartiallyCreateTaskComments_When_SomeTasksDoNotExist()";
     TasksCommentBatchRepresentationModel request =
             new TasksCommentBatchRepresentationModel(taskIds, textField);
 
@@ -368,6 +391,25 @@ class TaskCommentControllerIntTest {
     Map<String, Object> errorDetails = tasksWithErrors
             .get("TKI:400000000000000000000000000000000004");
     assertThat(errorDetails).containsEntry("key", "TASK_NOT_FOUND");
+
+    String taskId = "TKI:000000000000000000000000000000000001";
+    String commentUrl = restHelper.toUrl(RestEndpoints.URL_TASK_COMMENTS, taskId);
+
+    ResponseEntity<TaskCommentCollectionRepresentationModel> getResponse = CLIENT
+            .get()
+            .uri(commentUrl)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(TaskCommentCollectionRepresentationModel.class);
+
+    assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+    TaskCommentCollectionRepresentationModel body = getResponse.getBody();
+    assertThat(body).isNotNull();
+
+    List<TaskCommentRepresentationModel> comments = new ArrayList<>(body.getContent());
+
+    assertThat(comments)
+            .anyMatch(c -> textField.equals(c.getTextField()));
   }
 
   @Test
