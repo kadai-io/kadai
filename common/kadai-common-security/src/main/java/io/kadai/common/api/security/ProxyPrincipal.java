@@ -21,22 +21,22 @@ package io.kadai.common.api.security;
 import java.security.Principal;
 import java.util.Objects;
 
-public class PuppeteerPrincipal implements Principal {
+public class ProxyPrincipal implements Principal {
 
-  private final String name;
+  private final String accessId;
 
-  public PuppeteerPrincipal(String name) {
-    this.name = name;
+  public ProxyPrincipal(String accessId) {
+    this.accessId = accessId;
   }
 
   @Override
   public String getName() {
-    return this.name;
+    return this.accessId;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name);
+    return Objects.hash(accessId);
   }
 
   @Override
@@ -44,15 +44,15 @@ public class PuppeteerPrincipal implements Principal {
     if (this == obj) {
       return true;
     }
-    if (!(obj instanceof PuppeteerPrincipal)) {
+    if (!(obj instanceof ProxyPrincipal)) {
       return false;
     }
-    PuppeteerPrincipal other = (PuppeteerPrincipal) obj;
-    return Objects.equals(name, other.name);
+    ProxyPrincipal other = (ProxyPrincipal) obj;
+    return Objects.equals(accessId, other.accessId);
   }
 
   @Override
   public String toString() {
-    return "PuppeteerPrincipal [name=" + name + "]";
+    return "ProxyPrincipal [name=" + accessId + "]";
   }
 }

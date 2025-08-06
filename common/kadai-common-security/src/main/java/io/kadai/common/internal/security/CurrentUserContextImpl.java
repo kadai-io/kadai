@@ -22,7 +22,7 @@ import static java.util.function.Predicate.not;
 
 import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.api.security.GroupPrincipal;
-import io.kadai.common.api.security.PuppeteerPrincipal;
+import io.kadai.common.api.security.ProxyPrincipal;
 import io.kadai.common.api.security.UserContext;
 import io.kadai.common.api.security.UserPrincipal;
 import java.lang.reflect.Method;
@@ -91,7 +91,7 @@ public class CurrentUserContextImpl implements CurrentUserContext {
   @Override
   public List<String> getAccessIds() {
     List<String> accessIds = new ArrayList<>(getGroupIds());
-    accessIds.add(getUserContext().getPuppet());
+    accessIds.add(getUserContext().getUserId());
     return accessIds;
   }
 
@@ -113,7 +113,7 @@ public class CurrentUserContextImpl implements CurrentUserContext {
       if (callerSubject != null) {
         final String puppeteerName =
             callerSubject.getPrincipals().stream()
-                .filter(PuppeteerPrincipal.class::isInstance)
+                .filter(ProxyPrincipal.class::isInstance)
                 .map(Principal::getName)
                 .map(this::convertAccessId)
                 .filter(Objects::nonNull)
@@ -174,7 +174,7 @@ public class CurrentUserContextImpl implements CurrentUserContext {
               .orElse(null);
       final String puppeteerName =
           puppetBox.stream()
-              .filter(PuppeteerPrincipal.class::isInstance)
+              .filter(ProxyPrincipal.class::isInstance)
               .map(Principal::getName)
               .map(this::convertAccessId)
               .filter(Objects::nonNull)

@@ -35,7 +35,7 @@ import io.kadai.common.api.exceptions.ConnectionNotSetException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.api.security.CurrentUserContext;
-import io.kadai.common.api.security.PuppeteerPrincipal;
+import io.kadai.common.api.security.ProxyPrincipal;
 import io.kadai.common.api.security.UserPrincipal;
 import io.kadai.common.internal.configuration.DB;
 import io.kadai.common.internal.configuration.DbSchemaCreator;
@@ -381,22 +381,22 @@ public class KadaiEngineImpl implements KadaiEngine {
             currentUserContext.getAccessIds(),
             rolesAsString);
       }
-      throw new NotAuthorizedException(currentUserContext.getUserContext().getPuppet(), roles);
+      throw new NotAuthorizedException(currentUserContext.getUserContext().getUserId(), roles);
     }
   }
 
   @Override
-  public <T> T runAs(Supplier<T> supplier, KadaiRole puppeteer, String puppet) {
+  public <T> T runAs(Supplier<T> supplier, KadaiRole proxy, String userId) {
     Subject subject = new Subject();
-    if (puppeteer != null) {
-      String puppeteerAccessId =
-          this.getConfiguration().getRoleMap().get(puppeteer).stream()
+    if (proxy != null) {
+      String proxyAccessId =
+          this.getConfiguration().getRoleMap().get(proxy).stream()
               .findFirst()
-              .orElseThrow(() -> new SystemException("There is no " + puppeteer + " configured"));
-      subject.getPrincipals().add(new PuppeteerPrincipal(puppeteerAccessId));
+              .orElseThrow(() -> new SystemException("There is no " + proxy + " configured"));
+      subject.getPrincipals().add(new ProxyPrincipal(proxyAccessId));
     }
-    if (puppet != null) {
-      subject.getPrincipals().add(new UserPrincipal(puppet));
+    if (userId != null) {
+      subject.getPrincipals().add(new UserPrincipal(userId));
     }
 
     return Subject.doAs(subject, (PrivilegedAction<T>) supplier::get);

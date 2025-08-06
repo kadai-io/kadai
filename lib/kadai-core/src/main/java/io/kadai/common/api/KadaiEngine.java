@@ -222,8 +222,7 @@ public interface KadaiEngine {
   boolean isUserInRole(KadaiRole... roles);
 
   /**
-   * Checks whether current user is member of the specified {@linkplain KadaiRole
-   * KadaiRoles}.
+   * Checks whether current user is member of the specified {@linkplain KadaiRole KadaiRoles}.
    *
    * @param roles The {@linkplain KadaiRole KadaiRoles} that are checked for membership of the
    *     current user
@@ -232,16 +231,16 @@ public interface KadaiEngine {
    */
   void checkRoleMembership(KadaiRole... roles) throws NotAuthorizedException;
 
-  <T> T runAs(Supplier<T> supplier, KadaiRole puppeteer, String puppet);
+  <T> T runAs(Supplier<T> supplier, KadaiRole proxy, String userId);
 
-  default void runAs(Runnable runnable, KadaiRole puppeteer, String puppet) {
+  default void runAs(Runnable runnable, KadaiRole proxy, String userId) {
     runAs(
         () -> {
           runnable.run();
           return null;
         },
-        puppeteer,
-        puppet);
+        proxy,
+        userId);
   }
 
   /**
@@ -264,8 +263,8 @@ public interface KadaiEngine {
     return runAs(supplier, null, adminName);
   }
 
-  default <T> T runAsAdmin(Supplier<T> supplier, String puppet) {
-    return runAs(supplier, KadaiRole.ADMIN, puppet);
+  default <T> T runAsAdmin(Supplier<T> supplier, String userId) {
+    return runAs(supplier, KadaiRole.ADMIN, userId);
   }
 
   /**
@@ -283,13 +282,13 @@ public interface KadaiEngine {
         });
   }
 
-  default void runAsAdmin(Runnable runnable, String puppet) {
+  default void runAsAdmin(Runnable runnable, String userId) {
     runAsAdmin(
         () -> {
           runnable.run();
           return null;
         },
-        puppet);
+        userId);
   }
 
   /**

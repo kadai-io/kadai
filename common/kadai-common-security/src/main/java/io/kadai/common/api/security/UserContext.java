@@ -20,7 +20,7 @@ package io.kadai.common.api.security;
 
 public interface UserContext {
 
-  String getPuppet();
+  String getUserId();
 
-  String getPuppeteer();
+  String getProxyAccessId();
 }

@@ -34,7 +34,7 @@ public interface CurrentUserContext {
    * @return String the userid. null if there is no JAAS subject.
    */
   default String getUserId() {
-    return getUserContext().getPuppet();
+    return getUserContext().getUserId();
   }
 
   /**

@@ -37,12 +37,12 @@ public class UserContextImpl implements UserContext {
   }
 
   @Override
-  public String getPuppet() {
+  public String getUserId() {
     return this.puppet;
   }
 
   @Override
-  public String getPuppeteer() {
+  public String getProxyAccessId() {
     return this.puppeteer;
   }
 
