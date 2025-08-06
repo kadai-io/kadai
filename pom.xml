@@ -65,7 +65,7 @@
         <!-- spring dependencies -->
         <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
         <version.spring.plugin.core>3.0.0</version.spring.plugin.core>
-        <version.spring.boot>3.5.3</version.spring.boot>
+        <version.spring.boot>3.5.4</version.spring.boot>
         <version.spring.mybatis>3.0.5</version.spring.mybatis>
 
         <!-- camunda dependencies -->
@@ -73,7 +73,7 @@
 
         <!-- test dependencies -->
         <version.archunit>1.4.1</version.archunit>
-        <version.equalsverifier>4.0.5</version.equalsverifier>
+        <version.equalsverifier>4.0.7</version.equalsverifier>
         <version.assertj>3.27.3</version.assertj>
         <version.openpojo>0.9.1</version.openpojo>
         <version.jacoco>0.8.13</version.jacoco>
@@ -88,7 +88,7 @@
         <version.aspectj>1.9.24</version.aspectj>
 
         <!-- Excel to DMN converter dependencies -->
-        <version.docx4j>11.5.3</version.docx4j>
+        <version.docx4j>11.5.4</version.docx4j>
         <version.jakarta.xml.bind-api>4.0.2</version.jakarta.xml.bind-api>
         <version.jaxb-core>4.0.5</version.jaxb-core>
         <version.jaxb-impl>4.0.5</version.jaxb-impl>
