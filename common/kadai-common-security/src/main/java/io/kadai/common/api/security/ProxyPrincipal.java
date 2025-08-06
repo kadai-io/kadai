@@ -55,4 +55,8 @@ public class ProxyPrincipal implements Principal {
   public String toString() {
     return "ProxyPrincipal [name=" + accessId + "]";
   }
+
+  public String getAccessId() {
+    return accessId;
+  }
 }

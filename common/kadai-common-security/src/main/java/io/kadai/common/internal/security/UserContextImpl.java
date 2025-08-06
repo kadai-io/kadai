@@ -23,32 +23,32 @@ import java.util.Objects;
 
 public class UserContextImpl implements UserContext {
 
-  private final String puppet;
-  private final String puppeteer;
+  private final String userId;
+  private final String proxyAccessId;
 
-  public UserContextImpl(String puppet, String puppeteer) {
-    this.puppet = puppet;
-    this.puppeteer = puppeteer;
+  public UserContextImpl(String userId, String proxyAccessId) {
+    this.userId = userId;
+    this.proxyAccessId = proxyAccessId;
   }
 
-  public UserContextImpl(String puppet) {
-    this.puppet = puppet;
-    this.puppeteer = null;
+  public UserContextImpl(String userId) {
+    this.userId = userId;
+    this.proxyAccessId = null;
   }
 
   @Override
   public String getUserId() {
-    return this.puppet;
+    return this.userId;
   }
 
   @Override
   public String getProxyAccessId() {
-    return this.puppeteer;
+    return this.proxyAccessId;
   }
 
   @Override
   public String toString() {
-    return "UserContextImpl [puppet=" + puppet + ", puppeteer=" + puppeteer + "]";
+    return "UserContextImpl [userId=" + userId + ", proxyAccessId=" + proxyAccessId + "]";
   }
 
   @Override
@@ -63,11 +63,12 @@ public class UserContextImpl implements UserContext {
       return false;
     }
     UserContextImpl other = (UserContextImpl) obj;
-    return Objects.equals(puppet, other.puppet) && Objects.equals(puppeteer, other.puppeteer);
+    return Objects.equals(userId, other.userId)
+        && Objects.equals(proxyAccessId, other.proxyAccessId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(puppet, puppeteer);
+    return Objects.hash(userId, proxyAccessId);
   }
 }

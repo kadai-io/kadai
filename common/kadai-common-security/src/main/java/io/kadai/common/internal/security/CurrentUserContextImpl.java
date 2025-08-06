@@ -111,7 +111,7 @@ public class CurrentUserContextImpl implements CurrentUserContext {
         LOGGER.debug("Subject of caller: {}", callerSubject);
       }
       if (callerSubject != null) {
-        final String puppeteerName =
+        final String proxyAccessId =
             callerSubject.getPrincipals().stream()
                 .filter(ProxyPrincipal.class::isInstance)
                 .map(Principal::getName)
@@ -123,7 +123,7 @@ public class CurrentUserContextImpl implements CurrentUserContext {
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Public credentials of caller: {}", publicCredentials);
         }
-        final String puppetName =
+        final String userId =
             publicCredentials.stream()
                 .map(
                     credential -> {
@@ -144,7 +144,7 @@ public class CurrentUserContextImpl implements CurrentUserContext {
                 .map(this::convertAccessId)
                 .findFirst()
                 .orElse(null);
-        return new UserContextImpl(puppetName, puppeteerName);
+        return new UserContextImpl(userId, proxyAccessId);
       }
     } catch (Exception e) {
       LOGGER.warn("Could not get user from WSSubject. Going ahead unauthorized.");
@@ -160,27 +160,27 @@ public class CurrentUserContextImpl implements CurrentUserContext {
     if (subject != null) {
       final Set<Principal> principals = subject.getPrincipals();
       LOGGER.trace("Public principals of caller: {}", principals);
-      final Set<Principal> puppetBox =
+      final Set<Principal> actorPrincipals =
           principals.stream()
               .filter(not(GroupPrincipal.class::isInstance))
               .collect(Collectors.toSet());
-      final String puppetName =
-          puppetBox.stream()
+      final String userId =
+          actorPrincipals.stream()
               .filter(UserPrincipal.class::isInstance)
               .map(Principal::getName)
               .map(this::convertAccessId)
               .filter(Objects::nonNull)
               .findFirst()
               .orElse(null);
-      final String puppeteerName =
-          puppetBox.stream()
+      final String proxyAccessId =
+          actorPrincipals.stream()
               .filter(ProxyPrincipal.class::isInstance)
               .map(Principal::getName)
               .map(this::convertAccessId)
               .filter(Objects::nonNull)
               .findFirst()
               .orElse(null);
-      return new UserContextImpl(puppetName, puppeteerName);
+      return new UserContextImpl(userId, proxyAccessId);
     }
     LOGGER.trace("No userId found in subject!");
     return new UserContextImpl(null);
