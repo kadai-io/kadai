@@ -119,7 +119,7 @@ class DeleteTaskCommentAccTest {
         catchThrowableOfType(NotAuthorizedOnTaskCommentException.class, call);
     assertThat(e.getTaskCommentId()).isEqualTo(comment1.getId());
     assertThat(e.getCurrentUserId())
-        .isEqualTo(kadaiEngine.getCurrentUserContext().getUserContext().getUserId());
+        .isEqualTo(kadaiEngine.getCurrentUserContext().getUserId());
 
     List<TaskComment> taskCommentsAfterDeletion = taskService.getTaskComments(task1.getId());
     assertThat(taskCommentsAfterDeletion).hasSize(1);

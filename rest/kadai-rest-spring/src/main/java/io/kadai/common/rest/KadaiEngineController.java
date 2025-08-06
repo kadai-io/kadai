@@ -86,7 +86,7 @@ public class KadaiEngineController implements KadaiEngineApi {
   @GetMapping(path = RestEndpoints.URL_CURRENT_USER)
   public ResponseEntity<KadaiUserInfoRepresentationModel> getCurrentUserInfo() {
     KadaiUserInfoRepresentationModel resource = new KadaiUserInfoRepresentationModel();
-    resource.setUserId(currentUserContext.getUserContext().getUserId());
+    resource.setUserId(currentUserContext.getUserId());
     resource.setGroupIds(currentUserContext.getGroupIds());
     kadaiConfiguration.getRoleMap().keySet().stream()
         .filter(kadaiEngine::isUserInRole)

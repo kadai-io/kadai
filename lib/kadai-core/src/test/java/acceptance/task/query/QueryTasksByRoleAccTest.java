@@ -61,7 +61,7 @@ class QueryTasksByRoleAccTest extends AbstractAccTest {
       List<TaskSummary> results = taskService.createTaskQuery().list();
 
       int expectedSize =
-          switch (kadaiEngine.getCurrentUserContext().getUserContext().getUserId()) {
+          switch (kadaiEngine.getCurrentUserContext().getUserId()) {
             case "admin", "taskadmin" -> 100;
             case "businessadmin", "monitor" -> 0;
             case "teamlead-1" -> 26;
@@ -71,7 +71,7 @@ class QueryTasksByRoleAccTest extends AbstractAccTest {
                 throw new SystemException(
                     String.format(
                         "Invalid User: '%s'",
-                        kadaiEngine.getCurrentUserContext().getUserContext().getUserId()));
+                        kadaiEngine.getCurrentUserContext().getUserId()));
           };
 
       assertThat(results).hasSize(expectedSize);

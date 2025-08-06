@@ -222,7 +222,7 @@ public interface KadaiEngine {
   boolean isUserInRole(KadaiRole... roles);
 
   /**
-   * Checks whether current user is member of any of the specified {@linkplain KadaiRole
+   * Checks whether current user is member of the specified {@linkplain KadaiRole
    * KadaiRoles}.
    *
    * @param roles The {@linkplain KadaiRole KadaiRoles} that are checked for membership of the

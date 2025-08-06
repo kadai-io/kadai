@@ -112,7 +112,7 @@ public class UserQueryFilterParameter implements QueryParameter<UserQuery, Void>
       return;
     }
     if (currentUser.isBlank() || currentUser.equalsIgnoreCase("true")) {
-      final String currentUserId = currentUserContext.getUserContext().getUserId();
+      final String currentUserId = currentUserContext.getUserId();
       if (currentUserId != null) {
         this.userIds = ArrayUtils.add(this.userIds, currentUserId);
       }

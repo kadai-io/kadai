@@ -152,7 +152,7 @@ class DeleteTaskAccTest {
 
     NotAuthorizedException e = catchThrowableOfType(NotAuthorizedException.class, call);
     assertThat(e.getCurrentUserId())
-        .isEqualTo(kadaiEngine.getCurrentUserContext().getUserContext().getUserId());
+        .isEqualTo(kadaiEngine.getCurrentUserContext().getUserId());
     assertThat(e.getRoles()).containsExactly(KadaiRole.ADMIN);
   }
 
@@ -177,7 +177,7 @@ class DeleteTaskAccTest {
 
     NotAuthorizedException e = catchThrowableOfType(NotAuthorizedException.class, call);
     assertThat(e.getCurrentUserId())
-        .isEqualTo(kadaiEngine.getCurrentUserContext().getUserContext().getUserId());
+        .isEqualTo(kadaiEngine.getCurrentUserContext().getUserId());
     assertThat(e.getRoles()).containsExactly(KadaiRole.ADMIN);
   }
 

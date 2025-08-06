@@ -85,7 +85,7 @@ class UpdateClassificationAccTest {
         defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
     WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
         .workbasketId(workbasketSummary.getId())
-        .accessId(currentUserContext.getUserContext().getUserId())
+        .accessId(currentUserContext.getUserId())
         .permission(WorkbasketPermission.OPEN)
         .permission(WorkbasketPermission.READ)
         .permission(WorkbasketPermission.READTASKS)
@@ -108,7 +108,7 @@ class UpdateClassificationAccTest {
         defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
     WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
         .workbasketId(workbasketSummary.getId())
-        .accessId(currentUserContext.getUserContext().getUserId())
+        .accessId(currentUserContext.getUserId())
         .permission(WorkbasketPermission.OPEN)
         .permission(WorkbasketPermission.READ)
         .permission(WorkbasketPermission.READTASKS)
@@ -151,7 +151,7 @@ class UpdateClassificationAccTest {
           defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
       WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
           .workbasketId(workbasketSummary.getId())
-          .accessId(currentUserContext.getUserContext().getUserId())
+          .accessId(currentUserContext.getUserId())
           .permission(WorkbasketPermission.OPEN)
           .permission(WorkbasketPermission.READ)
           .permission(WorkbasketPermission.READTASKS)
@@ -658,7 +658,7 @@ class UpdateClassificationAccTest {
 
       NotAuthorizedException expectedException =
           new NotAuthorizedException(
-              currentUserContext.getUserContext().getUserId(),
+              currentUserContext.getUserId(),
               KadaiRole.BUSINESS_ADMIN,
               KadaiRole.ADMIN);
       assertThatThrownBy(() -> classificationService.updateClassification(classification))
@@ -678,7 +678,7 @@ class UpdateClassificationAccTest {
 
       NotAuthorizedException expectedException =
           new NotAuthorizedException(
-              currentUserContext.getUserContext().getUserId(),
+              currentUserContext.getUserId(),
               KadaiRole.BUSINESS_ADMIN,
               KadaiRole.ADMIN);
       assertThatThrownBy(() -> classificationService.updateClassification(classification))

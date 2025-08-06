@@ -26,12 +26,16 @@ import java.util.List;
  */
 public interface CurrentUserContext {
 
+  UserContext getUserContext();
+
   /**
    * Returns the userid of the current user.
    *
    * @return String the userid. null if there is no JAAS subject.
    */
-  UserContext getUserContext();
+  default String getUserId() {
+    return getUserContext().getPuppet();
+  }
 
   /**
    * Returns all groupIds of the current user.

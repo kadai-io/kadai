@@ -515,14 +515,14 @@ class UpdateTaskAttachmentWithWorkingDaysCalculationAccTest extends AbstractAccT
 
     assertThat(createdTask.getId()).isNotNull();
     assertThat(createdTask.getCreator())
-        .isEqualTo(kadaiEngine.getCurrentUserContext().getUserContext().getUserId());
+        .isEqualTo(kadaiEngine.getCurrentUserContext().getUserId());
     createdTask
         .getAttachments()
         .forEach(at -> assertThat(createdTask.getModified()).isEqualTo(at.getModified()));
     Task readTask = taskService.getTask(createdTask.getId());
     assertThat(readTask).isNotNull();
     assertThat(createdTask.getCreator())
-        .isEqualTo(kadaiEngine.getCurrentUserContext().getUserContext().getUserId());
+        .isEqualTo(kadaiEngine.getCurrentUserContext().getUserId());
     assertThat(readTask.getAttachments()).isNotNull();
     assertThat(readTask.getAttachments()).hasSize(2);
     assertThat(readTask.getAttachments().get(1).getCreated()).isNotNull();

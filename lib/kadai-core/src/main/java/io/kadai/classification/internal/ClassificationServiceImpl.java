@@ -182,7 +182,7 @@ public class ClassificationServiceImpl implements ClassificationService {
                   IdGenerator.generateWithPrefix(
                       IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
                   classification,
-                  kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getUserId(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
                   details));
         }
 
@@ -254,7 +254,7 @@ public class ClassificationServiceImpl implements ClassificationService {
             new ClassificationCreatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
                 classificationImpl,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getUserId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
                 details));
       }
 
@@ -317,7 +317,7 @@ public class ClassificationServiceImpl implements ClassificationService {
             new ClassificationUpdatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
                 classificationImpl,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getUserId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
                 details));
       }
       if (LOGGER.isDebugEnabled()) {

@@ -119,7 +119,7 @@ class TaskQueryImplAccTest {
   private void persistPermission(WorkbasketSummary workbasketSummary) throws Exception {
     WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
         .workbasketId(workbasketSummary.getId())
-        .accessId(currentUserContext.getUserContext().getUserId())
+        .accessId(currentUserContext.getUserId())
         .permission(WorkbasketPermission.OPEN)
         .permission(WorkbasketPermission.READ)
         .permission(WorkbasketPermission.APPEND)
@@ -262,21 +262,21 @@ class TaskQueryImplAccTest {
 
       WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
           .workbasketId(wbWithoutReadTasksPerm.getId())
-          .accessId(currentUserContext.getUserContext().getUserId())
+          .accessId(currentUserContext.getUserId())
           .permission(WorkbasketPermission.OPEN)
           .permission(WorkbasketPermission.READ)
           .permission(WorkbasketPermission.APPEND)
           .buildAndStore(workbasketService, "businessadmin");
       WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
           .workbasketId(wbWithoutReadPerm.getId())
-          .accessId(currentUserContext.getUserContext().getUserId())
+          .accessId(currentUserContext.getUserId())
           .permission(WorkbasketPermission.OPEN)
           .permission(WorkbasketPermission.READTASKS)
           .permission(WorkbasketPermission.APPEND)
           .buildAndStore(workbasketService, "businessadmin");
       WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
           .workbasketId(wbWithoutOpenPerm.getId())
-          .accessId(currentUserContext.getUserContext().getUserId())
+          .accessId(currentUserContext.getUserId())
           .permission(WorkbasketPermission.READ)
           .permission(WorkbasketPermission.READTASKS)
           .permission(WorkbasketPermission.APPEND)

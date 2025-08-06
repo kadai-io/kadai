@@ -20,10 +20,6 @@ package io.kadai.common.api.security;
 
 public interface UserContext {
 
-  default String getUserId() {
-    return getPuppet();
-  }
-
   String getPuppet();
 
   String getPuppeteer();

@@ -190,7 +190,7 @@ class CreateTaskAccTest {
     Instant expectedPlanned = moveForwardToWorkingDay(createdTask.getCreated());
     assertThat(createdTask).isNotNull();
     assertThat(createdTask.getCreator())
-        .isEqualTo(kadaiEngine.getCurrentUserContext().getUserContext().getUserId());
+        .isEqualTo(kadaiEngine.getCurrentUserContext().getUserId());
     assertThat(createdTask.getOwner()).isEqualTo("user-1-2");
     assertThat(createdTask.getWorkbasketKey()).isEqualTo(defaultWorkbasketSummary.getKey());
     assertThat(createdTask.getName()).isEqualTo(defaultClassificationSummary.getName());
@@ -375,7 +375,7 @@ class CreateTaskAccTest {
     Task readTask = taskService.getTask(createdTask.getId());
     assertThat(readTask).isNotNull();
     assertThat(createdTask.getCreator())
-        .isEqualTo(kadaiEngine.getCurrentUserContext().getUserContext().getUserId());
+        .isEqualTo(kadaiEngine.getCurrentUserContext().getUserId());
     assertThat(readTask.getAttachments()).isNotNull();
     assertThat(readTask.getAttachments()).hasSize(2);
     assertThat(readTask.getAttachments().get(1).getCreated()).isNotNull();
