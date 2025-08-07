@@ -20,12 +20,14 @@ import {
   AfterViewChecked,
   AfterViewInit,
   Component,
-  ElementRef, EventEmitter,
+  ElementRef,
+  EventEmitter,
   inject,
   Input,
   OnChanges,
   OnDestroy,
-  OnInit, Output,
+  OnInit,
+  Output,
   QueryList,
   SimpleChanges,
   ViewChildren
@@ -162,11 +164,10 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
         };
         this.setAccessItemsGroups(accessItems);
 
-        this.AccessItemsForm.get('accessItemsGroups')?.statusChanges
-          .pipe(takeUntil(this.destroy$)).subscribe(() => {
-            this.accessItemsValidityChanged.emit(
-              this.AccessItemsForm.get('accessItemsGroups')?.valid ?? false
-            );
+        this.AccessItemsForm.get('accessItemsGroups')
+          ?.statusChanges.pipe(takeUntil(this.destroy$))
+          .subscribe(() => {
+            this.accessItemsValidityChanged.emit(this.AccessItemsForm.get('accessItemsGroups')?.valid ?? false);
           });
 
         this.accessItemsClone = this.cloneAccessItems();
