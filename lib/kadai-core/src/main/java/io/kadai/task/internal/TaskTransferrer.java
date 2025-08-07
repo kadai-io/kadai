@@ -387,6 +387,7 @@ final class TaskTransferrer {
             originWorkbasketId,
             destinationWorkbasketId,
             kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+            kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getProxyAccessId(),
             details));
   }
 
