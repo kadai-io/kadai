@@ -32,6 +32,7 @@ public class WorkbasketHistoryEvent {
   protected String eventType;
   protected Instant created;
   protected String userId;
+  protected String proxyAccessId;
   protected String domain;
   protected String workbasketId;
   protected String key;
@@ -75,6 +76,16 @@ public class WorkbasketHistoryEvent {
     orgLevel2 = workbasket.getOrgLevel2();
     orgLevel3 = workbasket.getOrgLevel3();
     orgLevel4 = workbasket.getOrgLevel4();
+  }
+
+  public WorkbasketHistoryEvent(
+      String id,
+      WorkbasketSummary workbasket,
+      String userId,
+      String proxyAccessId,
+      String details) {
+    this(id, workbasket, userId, details);
+    this.proxyAccessId = proxyAccessId;
   }
 
   public void setCustomAttribute(WorkbasketCustomField customField, String value) {
@@ -161,6 +172,14 @@ public class WorkbasketHistoryEvent {
 
   public void setUserId(String userId) {
     this.userId = userId;
+  }
+
+  public String getProxyAccessId() {
+    return proxyAccessId;
+  }
+
+  public void setProxyAccessId(String proxyAccessId) {
+    this.proxyAccessId = proxyAccessId;
   }
 
   public String getDomain() {
@@ -250,6 +269,7 @@ public class WorkbasketHistoryEvent {
         getEventType(),
         getCreated(),
         getUserId(),
+        getProxyAccessId(),
         getDomain(),
         getWorkbasketId(),
         getKey(),
@@ -283,6 +303,7 @@ public class WorkbasketHistoryEvent {
         && Objects.equals(getEventType(), other.getEventType())
         && Objects.equals(getCreated(), other.getCreated())
         && Objects.equals(getUserId(), other.getUserId())
+        && Objects.equals(getProxyAccessId(), other.getProxyAccessId())
         && Objects.equals(getDomain(), other.getDomain())
         && Objects.equals(getWorkbasketId(), other.getWorkbasketId())
         && Objects.equals(getKey(), other.getKey())
@@ -313,6 +334,8 @@ public class WorkbasketHistoryEvent {
         + created
         + ", userId="
         + userId
+        + ", proxyAccessId="
+        + proxyAccessId
         + ", domain="
         + domain
         + ", workbasketId="
