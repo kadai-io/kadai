@@ -109,18 +109,12 @@ public class TaskHistoryEvent {
   }
 
   public String getCustomAttribute(TaskHistoryCustomField customField) {
-    switch (customField) {
-      case CUSTOM_1:
-        return custom1;
-      case CUSTOM_2:
-        return custom2;
-      case CUSTOM_3:
-        return custom3;
-      case CUSTOM_4:
-        return custom4;
-      default:
-        throw new SystemException("Unknown customField '" + customField + "'");
-    }
+    return switch (customField) {
+      case CUSTOM_1 -> custom1;
+      case CUSTOM_2 -> custom2;
+      case CUSTOM_3 -> custom3;
+      case CUSTOM_4 -> custom4;
+    };
   }
 
   public String getBusinessProcessId() {

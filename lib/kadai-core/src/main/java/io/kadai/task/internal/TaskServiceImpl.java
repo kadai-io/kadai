@@ -2047,7 +2047,7 @@ public class TaskServiceImpl implements TaskService {
       List<MinimalTaskSummary> taskSummaries,
       Iterator<String> taskIdIterator) {
     String currentTaskId = taskIdIterator.next();
-    if (currentTaskId == null || currentTaskId.equals("")) {
+    if (currentTaskId == null || currentTaskId.isEmpty()) {
       bulkLog.addError("", new TaskNotFoundException(null));
       taskIdIterator.remove();
     } else {
@@ -2085,7 +2085,7 @@ public class TaskServiceImpl implements TaskService {
       Iterator<String> externalIdIterator,
       CallbackState desiredCallbackState) {
     String currentExternalId = externalIdIterator.next();
-    if (currentExternalId == null || currentExternalId.equals("")) {
+    if (currentExternalId == null || currentExternalId.isEmpty()) {
       bulkLog.addError("", new TaskNotFoundException(null));
       externalIdIterator.remove();
     } else {

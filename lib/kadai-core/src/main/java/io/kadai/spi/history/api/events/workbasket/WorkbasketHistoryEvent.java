@@ -120,26 +120,16 @@ public class WorkbasketHistoryEvent {
   }
 
   public String getCustomAttribute(WorkbasketCustomField customField) {
-    switch (customField) {
-      case CUSTOM_1:
-        return custom1;
-      case CUSTOM_2:
-        return custom2;
-      case CUSTOM_3:
-        return custom3;
-      case CUSTOM_4:
-        return custom4;
-      case CUSTOM_5:
-        return custom5;
-      case CUSTOM_6:
-        return custom6;
-      case CUSTOM_7:
-        return custom7;
-      case CUSTOM_8:
-        return custom8;
-      default:
-        throw new SystemException("Unknown customField '" + customField + "'");
-    }
+    return switch (customField) {
+      case CUSTOM_1 -> custom1;
+      case CUSTOM_2 -> custom2;
+      case CUSTOM_3 -> custom3;
+      case CUSTOM_4 -> custom4;
+      case CUSTOM_5 -> custom5;
+      case CUSTOM_6 -> custom6;
+      case CUSTOM_7 -> custom7;
+      case CUSTOM_8 -> custom8;
+    };
   }
 
   public String getId() {
