@@ -32,6 +32,7 @@ public class ClassificationHistoryEvent {
   protected String eventType;
   protected Instant created;
   protected String userId;
+  protected String proxyAccessId;
   protected String classificationId;
   protected String applicationEntryPoint;
   protected String category;
@@ -79,6 +80,16 @@ public class ClassificationHistoryEvent {
     custom7 = classification.getCustomField(ClassificationCustomField.CUSTOM_7);
     custom8 = classification.getCustomField(ClassificationCustomField.CUSTOM_8);
     this.details = details;
+  }
+
+  public ClassificationHistoryEvent(
+      String id,
+      ClassificationSummary classification,
+      String userId,
+      String proxyAccessId,
+      String details) {
+    this(id, classification, userId, details);
+    this.proxyAccessId = proxyAccessId;
   }
 
   public void setCustomAttribute(ClassificationCustomField customField, String value) {
@@ -165,6 +176,14 @@ public class ClassificationHistoryEvent {
 
   public void setUserId(String userId) {
     this.userId = userId;
+  }
+
+  public String getProxyAccessId() {
+    return proxyAccessId;
+  }
+
+  public void setProxyAccessId(String proxyAccessId) {
+    this.proxyAccessId = proxyAccessId;
   }
 
   public String getClassificationId() {
@@ -270,6 +289,7 @@ public class ClassificationHistoryEvent {
         getEventType(),
         getCreated(),
         getUserId(),
+        getProxyAccessId(),
         getClassificationId(),
         getApplicationEntryPoint(),
         getCategory(),
@@ -306,6 +326,7 @@ public class ClassificationHistoryEvent {
         && Objects.equals(getEventType(), other.getEventType())
         && Objects.equals(getCreated(), other.getCreated())
         && Objects.equals(getUserId(), other.getUserId())
+        && Objects.equals(getProxyAccessId(), other.getProxyAccessId())
         && Objects.equals(getClassificationId(), other.getClassificationId())
         && Objects.equals(getApplicationEntryPoint(), other.getApplicationEntryPoint())
         && Objects.equals(getCategory(), other.getCategory())
@@ -337,6 +358,8 @@ public class ClassificationHistoryEvent {
         + created
         + ", userId="
         + userId
+        + ", proxyAccessId="
+        + proxyAccessId
         + ", classificationId="
         + classificationId
         + ", applicationEntryPoint="
