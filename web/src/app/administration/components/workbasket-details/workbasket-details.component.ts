@@ -82,6 +82,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
   @Input() expanded: boolean;
   private store = inject(Store);
   private ngxsActions$ = inject(Actions);
+  hasInvalidAccessItems = false;
 
   ngOnInit() {
     this.getWorkbasketFromStore();
@@ -146,6 +147,10 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
 
   onSubmit() {
     this.store.dispatch(new OnButtonPressed(ButtonAction.SAVE));
+  }
+
+  onAccessItemsValidityChanged(isValid: boolean) {
+    this.hasInvalidAccessItems = !isValid;
   }
 
   onRestore() {
