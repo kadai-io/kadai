@@ -26,6 +26,11 @@ import java.util.List;
  */
 public interface CurrentUserContext {
 
+  /**
+   * Returns the current user context.
+   *
+   * @return current user context
+   */
   UserContext getUserContext();
 
   /**

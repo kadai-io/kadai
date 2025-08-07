@@ -18,9 +18,23 @@
 
 package io.kadai.common.api.security;
 
+/** Interface specifying a user-context within Kadai. */
 public interface UserContext {
 
+  /**
+   * Returns the id of the contexts' user.
+   *
+   * @return id of the contexts' user
+   */
   String getUserId();
 
+  /**
+   * Returns the access-id of the contexts' proxy.
+   *
+   * <p>The proxy is the user or group that is used as facade for executing actions disguised as
+   * another {@linkplain #getUserId() user}.
+   *
+   * @return id of the contexts' proxy
+   */
   String getProxyAccessId();
 }

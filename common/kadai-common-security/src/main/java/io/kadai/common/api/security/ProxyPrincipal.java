@@ -21,6 +21,7 @@ package io.kadai.common.api.security;
 import java.security.Principal;
 import java.util.Objects;
 
+/** Represents a user or group with a Kadai access-id. */
 public class ProxyPrincipal implements Principal {
 
   private final String accessId;

@@ -29,6 +29,7 @@ import io.kadai.monitor.api.MonitorService;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.models.Task;
 import io.kadai.user.api.UserService;
+import io.kadai.user.api.models.User;
 import io.kadai.workbasket.api.WorkbasketService;
 import java.sql.SQLException;
 import java.util.function.Supplier;
@@ -231,8 +232,28 @@ public interface KadaiEngine {
    */
   void checkRoleMembership(KadaiRole... roles) throws NotAuthorizedException;
 
+  /**
+   * Execute an action for a user with the privileges of another {@link KadaiRole}.
+   *
+   * <p>This can be thought of as temporarily <i>lifting</i> the user into the given role - the role
+   * therefore is acting as proxy.
+   *
+   * @param supplier the action to execute
+   * @param proxy the role to temporarily lift the user to - acting as proxy
+   * @param userId the {@linkplain User#getId() id} of the user to be lifted
+   * @return the return value of the action
+   * @param <T> the return value of the action
+   */
   <T> T runAs(Supplier<T> supplier, KadaiRole proxy, String userId);
 
+  /**
+   * This is a convenience-method for {@link #runAs(Supplier, KadaiRole, String)}.
+   *
+   * @param runnable the action to execute
+   * @param proxy the role to temporarily lift the user to - acting as proxy
+   * @param userId the {@linkplain User#getId() id} of the user to be lifted
+   * @see #runAs(Supplier, KadaiRole, String)
+   */
   default void runAs(Runnable runnable, KadaiRole proxy, String userId) {
     runAs(
         () -> {
@@ -244,12 +265,15 @@ public interface KadaiEngine {
   }
 
   /**
-   * Executes a given {@code Supplier} with admin privileges and thus skips further permission
-   * checks. With great power comes great responsibility.
+   * This is a convenience-method for {@link #runAs(Supplier, KadaiRole, String)}.
    *
-   * @param supplier will be executed with admin privileges
-   * @param <T> defined with the return value of the {@code Supplier}
-   * @return output from {@code Supplier}
+   * <p>It <b>overrides</b> the {@linkplain CurrentUserContext#getUserId() current userId} with one
+   * of an admin, leaving the <b>proxy empty</b>.
+   *
+   * @param supplier the action to execute
+   * @param <T> the return value of the action
+   * @return the return value of the action
+   * @see #runAs(Supplier, KadaiRole, String)
    */
   default <T> T runAsAdmin(Supplier<T> supplier) {
     if (isUserInRole(KadaiRole.ADMIN)) {
@@ -263,17 +287,28 @@ public interface KadaiEngine {
     return runAs(supplier, null, adminName);
   }
 
+  /**
+   * This is a convenience-method for {@link #runAs(Supplier, KadaiRole, String)}.
+   *
+   * @param supplier the action to execute
+   * @param userId the {@linkplain User#getId() id} of the user to be lifted
+   * @param <T> the return value of the action
+   * @return the return value of the action
+   * @see #runAs(Supplier, KadaiRole, String)
+   */
   default <T> T runAsAdmin(Supplier<T> supplier, String userId) {
     return runAs(supplier, KadaiRole.ADMIN, userId);
   }
 
   /**
-   * Executes a given {@code Runnable} with admin privileges and thus skips further permission
-   * checks. With great power comes great responsibility.
+   * This is a convenience-method for {@link #runAs(Supplier, KadaiRole, String)}.
    *
-   * @see #runAsAdmin(Supplier)
+   * <p>It <b>overrides</b> the {@linkplain CurrentUserContext#getUserId() current userId} with one
+   * of an admin, leaving the <b>proxy empty</b>.
+   *
+   * @param runnable the action to execute
+   * @see #runAs(Supplier, KadaiRole, String)
    */
-  @SuppressWarnings("checkstyle:JavadocMethod")
   default void runAsAdmin(Runnable runnable) {
     runAsAdmin(
         () -> {
@@ -282,6 +317,13 @@ public interface KadaiEngine {
         });
   }
 
+  /**
+   * This is a convenience-method for {@link #runAs(Runnable, KadaiRole, String)}.
+   *
+   * @param runnable the action to execute
+   * @param userId the {@linkplain User#getId() id} of the user to be lifted
+   * @see #runAs(Supplier, KadaiRole, String)
+   */
   default void runAsAdmin(Runnable runnable, String userId) {
     runAsAdmin(
         () -> {
