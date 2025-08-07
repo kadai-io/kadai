@@ -23,8 +23,9 @@ import io.kadai.task.api.models.Task;
 /** Event fired if a task is created. */
 public class TaskCreatedEvent extends TaskHistoryEvent {
 
-  public TaskCreatedEvent(String id, Task task, String userId, String details) {
-    super(id, task, userId, details);
+  public TaskCreatedEvent(
+      String id, Task task, String userId, String proxyAccessId, String details) {
+    super(id, task, userId, proxyAccessId, details);
     eventType = TaskHistoryEventType.CREATED.getName();
     created = task.getCreated();
   }

@@ -34,6 +34,7 @@ public class TaskHistoryEvent {
   protected String eventType;
   protected Instant created;
   protected String userId;
+  protected String proxyAccessId;
   protected String userLongName;
   protected String domain;
   protected String workbasketKey;
@@ -80,6 +81,12 @@ public class TaskHistoryEvent {
       porType = task.getPrimaryObjRef().getType();
       porValue = task.getPrimaryObjRef().getValue();
     }
+  }
+
+  public TaskHistoryEvent(
+      String id, TaskSummary task, String userId, String proxyAccessId, String details) {
+    this(id, task, userId, details);
+    this.proxyAccessId = proxyAccessId;
   }
 
   public void setCustomAttribute(TaskHistoryCustomField customField, String value) {
@@ -260,6 +267,14 @@ public class TaskHistoryEvent {
     this.userId = userId;
   }
 
+  public String getProxyAccessId() {
+    return proxyAccessId;
+  }
+
+  public void setProxyAccessId(String proxyAccessId) {
+    this.proxyAccessId = proxyAccessId;
+  }
+
   public String getUserLongName() {
     return userLongName;
   }
@@ -302,6 +317,7 @@ public class TaskHistoryEvent {
         getEventType(),
         getCreated(),
         getUserId(),
+        getProxyAccessId(),
         getDomain(),
         getWorkbasketKey(),
         getPorCompany(),
@@ -337,6 +353,7 @@ public class TaskHistoryEvent {
         && Objects.equals(getEventType(), other.getEventType())
         && Objects.equals(getCreated(), other.getCreated())
         && Objects.equals(getUserId(), other.getUserId())
+        && Objects.equals(getProxyAccessId(), other.getProxyAccessId())
         && Objects.equals(getDomain(), other.getDomain())
         && Objects.equals(getWorkbasketKey(), other.getWorkbasketKey())
         && Objects.equals(getPorCompany(), other.getPorCompany())
@@ -372,6 +389,8 @@ public class TaskHistoryEvent {
         + created
         + ", userId="
         + userId
+        + ", proxyAccessId="
+        + proxyAccessId
         + ", userLongName="
         + userLongName
         + ", taskOwnerLongName="
