@@ -28,8 +28,8 @@ import io.kadai.common.api.security.UserPrincipal;
 import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -90,9 +90,19 @@ public class CurrentUserContextImpl implements CurrentUserContext {
 
   @Override
   public List<String> getAccessIds() {
-    List<String> accessIds = new ArrayList<>(getGroupIds());
-    accessIds.add(getUserContext().getUserId());
-    return accessIds;
+    Set<String> accessIds = new HashSet<>(getGroupIds());
+    final String userId = getUserContext().getUserId();
+    final String proxyAccessId = getUserContext().getProxyAccessId();
+
+    if (userId != null) {
+      accessIds.add(userId);
+    }
+
+    if (proxyAccessId != null) {
+      accessIds.add(proxyAccessId);
+    }
+
+    return accessIds.stream().toList();
   }
 
   /**
