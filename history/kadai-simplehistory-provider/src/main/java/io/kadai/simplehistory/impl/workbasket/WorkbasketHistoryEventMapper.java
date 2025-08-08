@@ -30,11 +30,11 @@ public interface WorkbasketHistoryEventMapper {
 
   @Insert(
       "<script>INSERT INTO WORKBASKET_HISTORY_EVENT (ID,WORKBASKET_ID,"
-          + " EVENT_TYPE, CREATED, USER_ID, DOMAIN, KEY, TYPE, OWNER, "
+          + " EVENT_TYPE, CREATED, USER_ID, PROXY_ACCESS_ID, DOMAIN, KEY, TYPE, OWNER, "
           + " CUSTOM_1, CUSTOM_2, CUSTOM_3, CUSTOM_4, ORG_LEVEL_1,"
           + " ORG_LEVEL_2, ORG_LEVEL_3, ORG_LEVEL_4, DETAILS)"
           + " VALUES ( #{historyEvent.id}, #{historyEvent.workbasketId},"
-          + " #{historyEvent.eventType}, #{historyEvent.created}, #{historyEvent.userId},"
+          + " #{historyEvent.eventType}, #{historyEvent.created}, #{historyEvent.userId}, #{historyEvent.proxyAccessId},"
           + " #{historyEvent.domain}, #{historyEvent.key}, "
           + " #{historyEvent.type}, #{historyEvent.owner}, "
           + " #{historyEvent.custom1}, #{historyEvent.custom2}, #{historyEvent.custom3}, "
@@ -45,7 +45,7 @@ public interface WorkbasketHistoryEventMapper {
 
   @Select(
       "<script>"
-          + "SELECT ID, WORKBASKET_ID, EVENT_TYPE, CREATED, USER_ID, DOMAIN, KEY, TYPE, OWNER,  "
+          + "SELECT ID, WORKBASKET_ID, EVENT_TYPE, CREATED, USER_ID, PROXY_ACCESS_ID, DOMAIN, KEY, TYPE, OWNER,  "
           + "CUSTOM_1, CUSTOM_2, CUSTOM_3, CUSTOM_4, ORG_LEVEL_1, ORG_LEVEL_2, ORG_LEVEL_3, ORG_LEVEL_4, DETAILS "
           + "FROM WORKBASKET_HISTORY_EVENT WHERE ID = #{id} "
           + "<if test=\"_databaseId == 'db2'\">with UR </if> "
@@ -55,6 +55,7 @@ public interface WorkbasketHistoryEventMapper {
   @Result(property = "eventType", column = "EVENT_TYPE")
   @Result(property = "created", column = "CREATED")
   @Result(property = "userId", column = "USER_ID")
+  @Result(property = "proxyAccessId", column = "PROXY_ACCESS_ID")
   @Result(property = "domain", column = "DOMAIN")
   @Result(property = "key", column = "KEY")
   @Result(property = "type", column = "TYPE")
