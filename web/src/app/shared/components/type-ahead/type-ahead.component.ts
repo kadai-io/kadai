@@ -146,6 +146,7 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
           this.isFormValid.emit(false);
           this.accessIdEventEmitter.emit(this.emptyAccessId);
           this.accessIdForm.controls['accessId'].setErrors({ incorrect: true });
+          this.accessIdForm.controls['accessId'].markAsTouched();
         }
       });
   }

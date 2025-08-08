@@ -21,11 +21,13 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  EventEmitter,
   inject,
   Input,
   OnChanges,
   OnDestroy,
   OnInit,
+  Output,
   QueryList,
   SimpleChanges,
   ViewChildren
@@ -85,6 +87,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
   formsValidatorService = inject(FormsValidatorService);
   @Input() workbasket: Workbasket;
   @Input() expanded: boolean;
+  @Output() accessItemsValidityChanged = new EventEmitter<boolean>();
   @ViewChildren('htmlInputElement') inputs: QueryList<ElementRef>;
   selectedRows: number[] = [];
   workbasketClone: Workbasket;
@@ -160,6 +163,13 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
           _links: accessItemsRepresentation._links
         };
         this.setAccessItemsGroups(accessItems);
+
+        this.AccessItemsForm.get('accessItemsGroups')
+          ?.statusChanges.pipe(takeUntil(this.destroy$))
+          .subscribe(() => {
+            this.accessItemsValidityChanged.emit(this.AccessItemsForm.get('accessItemsGroups')?.valid ?? false);
+          });
+
         this.accessItemsClone = this.cloneAccessItems();
         this.accessItemsResetClone = this.cloneAccessItems();
 

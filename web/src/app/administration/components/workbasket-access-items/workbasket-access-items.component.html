@@ -91,7 +91,7 @@
                 @if ((accessItemsCustomization$ | async)?.accessId.lookupField) {
                   <td
               [ngClass]="{	'has-warning': (accessItemsClone[index].accessId !== accessItem.value.accessId),
-                							'has-error': !accessItem.value.accessId }"
+                							'has-error': !accessItem.value.accessId || accessItemsGroups.controls[index].get('accessId')?.invalid }"
                     class="workbasket-access-items__typeahead">
                     <kadai-shared-type-ahead
                       (accessIdEventEmitter)="accessItemSelected($event, index)"

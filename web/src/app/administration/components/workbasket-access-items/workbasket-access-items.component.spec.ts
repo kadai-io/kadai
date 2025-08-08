@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { WorkbasketAccessItemsComponent } from './workbasket-access-items.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
@@ -144,4 +144,23 @@ describe('WorkbasketAccessItemsComponent', () => {
     expect(onSaveSpy).toHaveBeenCalled();
     expect(actionDispatched).toBe(true);
   });
+
+  it('should emit accessItemsValidityChanged when accessItemsGroups status changes', fakeAsync(() => {
+    const emitSpy = jest.spyOn(component.accessItemsValidityChanged, 'emit');
+
+    component.ngOnInit();
+    fixture.detectChanges();
+    tick();
+
+    const control = component.AccessItemsForm.get('accessItemsGroups')?.get('0.accessId');
+    expect(control).toBeTruthy();
+
+    control?.setValue('');
+    control?.markAsTouched();
+    control?.updateValueAndValidity();
+
+    tick();
+
+    expect(emitSpy).toHaveBeenCalledWith(false);
+  }));
 });

@@ -95,4 +95,19 @@ describe('TypeAheadComponent with AccessId input', () => {
 
     expect(emitSpy).toHaveBeenCalledWith(true);
   }));
+
+  it('should mark the accessId control as touched when invalid and displayError is true', fakeAsync(() => {
+    const control = component.accessIdForm.get('accessId');
+    const markAsTouchedSpy = jest.spyOn(control!, 'markAsTouched');
+    component.displayError = true;
+
+    component.accessIdForm.get('accessId')?.setValue('invalid-user');
+    component.searchForAccessId('invalid-user');
+
+    tick(50);
+    fixture.detectChanges();
+    flush();
+
+    expect(markAsTouchedSpy).toHaveBeenCalled();
+  }));
 });
