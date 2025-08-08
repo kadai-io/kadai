@@ -64,7 +64,8 @@ class CreateHistoryEventOnWorkbasketDistributionTargetAddedAccTest extends Abstr
     String details = workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
 
     assertThat(eventType).isEqualTo(WorkbasketHistoryEventType.DISTRIBUTION_TARGET_ADDED.getName());
-
     assertThat(details).contains("\"newValue\":\"WBI:100000000000000000000000000000000001\"");
+    assertThat(events.get(0).getUserId()).isEqualTo("admin");
+    assertThat(events.get(0).getProxyAccessId()).isNull();
   }
 }

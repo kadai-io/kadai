@@ -45,6 +45,7 @@ class GetTaskHistoryEventAccTest extends AbstractAccTest {
         getHistoryService().getTaskHistoryEvent("THI:000000000000000000000000000000000000");
     assertThat(taskHistoryEvent.getBusinessProcessId()).isEqualTo("BPI:01");
     assertThat(taskHistoryEvent.getUserId()).isEqualTo("user-1-1");
+    assertThat(taskHistoryEvent.getProxyAccessId()).isNull();
     assertThat(taskHistoryEvent.getEventType()).isEqualTo(TaskHistoryEventType.UPDATED.getName());
     assertThat(taskHistoryEvent.getDetails()).isEqualTo(detailsJson);
   }
@@ -57,6 +58,7 @@ class GetTaskHistoryEventAccTest extends AbstractAccTest {
     TaskHistoryEvent taskHistoryEvent =
         getHistoryService().getTaskHistoryEvent("THI:000000000000000000000000000000000000");
     assertThat(taskHistoryEvent.getUserId()).isEqualTo("user-1-1");
+    assertThat(taskHistoryEvent.getProxyAccessId()).isNull();
 
     String userLongName =
         kadaiEngine.getUserService().getUser(taskHistoryEvent.getUserId()).getLongName();
@@ -74,6 +76,7 @@ class GetTaskHistoryEventAccTest extends AbstractAccTest {
         getHistoryService().getTaskHistoryEvent("THI:000000000000000000000000000000000000");
 
     assertThat(taskHistoryEvent.getUserId()).isEqualTo("user-1-1");
+    assertThat(taskHistoryEvent.getProxyAccessId()).isNull();
 
     assertThat(taskHistoryEvent).extracting(TaskHistoryEvent::getUserLongName).isNull();
   }

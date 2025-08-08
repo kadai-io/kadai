@@ -62,7 +62,8 @@ class CreateHistoryEventOnWorkbasketCreationAccTest extends AbstractAccTest {
     String details = workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
 
     assertThat(eventType).isEqualTo(WorkbasketHistoryEventType.CREATED.getName());
-
     assertThat(details).contains("Megabasket");
+    assertThat(events.get(0).getUserId()).isEqualTo("admin");
+    assertThat(events.get(0).getProxyAccessId()).isNull();
   }
 }

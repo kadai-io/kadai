@@ -70,10 +70,11 @@ class CreateHistoryEventOnWorkbasketDistributionTargetsSetAccTest extends Abstra
 
     assertThat(eventType)
         .isEqualTo(WorkbasketHistoryEventType.DISTRIBUTION_TARGETS_UPDATED.getName());
-
     assertThat(details)
         .contains(
             "\"newValue\":[\"WBI:100000000000000000000000000000000002\","
                 + "\"WBI:100000000000000000000000000000000003\"");
+    assertThat(events.get(0).getUserId()).isEqualTo("admin");
+    assertThat(events.get(0).getProxyAccessId()).isNull();
   }
 }

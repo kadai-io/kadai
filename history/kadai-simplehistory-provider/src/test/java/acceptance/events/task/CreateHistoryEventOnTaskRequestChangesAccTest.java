@@ -70,6 +70,8 @@ class CreateHistoryEventOnTaskRequestChangesAccTest extends AbstractAccTest {
     TaskHistoryEvent event = events.get(0);
 
     assertThat(event.getEventType()).isEqualTo(TaskHistoryEventType.CHANGES_REQUESTED.getName());
+    assertThat(event.getUserId()).isEqualTo("user-1-1");
+    assertThat(event.getProxyAccessId()).isNull();
 
     event = historyService.getTaskHistoryEvent(event.getId());
 

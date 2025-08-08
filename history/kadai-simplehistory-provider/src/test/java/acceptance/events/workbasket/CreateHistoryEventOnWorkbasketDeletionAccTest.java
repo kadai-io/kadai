@@ -60,7 +60,8 @@ class CreateHistoryEventOnWorkbasketDeletionAccTest extends AbstractAccTest {
     String details = workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
 
     assertThat(eventType).isEqualTo(WorkbasketHistoryEventType.DELETED.getName());
-
     assertThat(details).contains("\"oldValue\":\"WBI:100000000000000000000000000000000008\"");
+    assertThat(events.get(0).getUserId()).isEqualTo("admin");
+    assertThat(events.get(0).getProxyAccessId()).isNull();
   }
 }

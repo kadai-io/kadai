@@ -80,7 +80,8 @@ class CreateHistoryEventOnWorkbasketAccessItemsSetAccTest extends AbstractAccTes
     String details = workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
 
     assertThat(eventType).isEqualTo(WorkbasketHistoryEventType.ACCESS_ITEMS_UPDATED.getName());
-
     assertThat(details).contains("peter");
+    assertThat(events.get(0).getUserId()).isEqualTo("admin");
+    assertThat(events.get(0).getProxyAccessId()).isNull();
   }
 }
