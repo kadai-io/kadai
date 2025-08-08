@@ -68,6 +68,8 @@ class DeleteHistoryEventsOnTaskDeletionAccTest extends AbstractAccTest {
             (TaskHistoryQueryImpl) historyService.createTaskHistoryQuery().taskIdIn(taskid));
     assertThat(listEvents).hasSize(1);
     assertThat(listEvents.get(0).getEventType()).isEqualTo(TaskHistoryEventType.DELETED.getName());
+    assertThat(listEvents.get(0).getUserId()).isEqualTo("admin");
+    assertThat(listEvents.get(0).getProxyAccessId()).isNull();
   }
 
   @Test
@@ -109,7 +111,11 @@ class DeleteHistoryEventsOnTaskDeletionAccTest extends AbstractAccTest {
                 historyService.createTaskHistoryQuery().taskIdIn(taskId_1, taskId_2));
     assertThat(listEvents).hasSize(2);
     assertThat(listEvents.get(0).getEventType()).isEqualTo(TaskHistoryEventType.DELETED.getName());
+    assertThat(listEvents.get(0).getUserId()).isEqualTo("admin");
+    assertThat(listEvents.get(0).getProxyAccessId()).isNull();
     assertThat(listEvents.get(1).getEventType()).isEqualTo(TaskHistoryEventType.DELETED.getName());
+    assertThat(listEvents.get(1).getUserId()).isEqualTo("admin");
+    assertThat(listEvents.get(1).getProxyAccessId()).isNull();
   }
 
   @Test

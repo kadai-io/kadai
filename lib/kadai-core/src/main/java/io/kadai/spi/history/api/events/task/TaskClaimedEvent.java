@@ -23,8 +23,9 @@ import io.kadai.task.api.models.Task;
 /** Event fired if a task is claimed. */
 public class TaskClaimedEvent extends TaskHistoryEvent {
 
-  public TaskClaimedEvent(String id, Task task, String userId, String details) {
-    super(id, task, userId, details);
+  public TaskClaimedEvent(
+      String id, Task task, String userId, String proxyAccessId, String details) {
+    super(id, task, userId, proxyAccessId, details);
     eventType = (TaskHistoryEventType.CLAIMED.getName());
     created = task.getClaimed();
   }

@@ -77,6 +77,8 @@ class CreateHistoryEventOnTaskClaimAccTest extends AbstractAccTest {
     TaskHistoryEvent event = events.get(0);
 
     assertThat(event.getEventType()).isEqualTo(TaskHistoryEventType.CLAIMED.getName());
+    assertThat(event.getUserId()).isEqualTo("admin");
+    assertThat(event.getProxyAccessId()).isNull();
 
     event = historyService.getTaskHistoryEvent(event.getId());
 
@@ -142,6 +144,8 @@ class CreateHistoryEventOnTaskClaimAccTest extends AbstractAccTest {
     TaskHistoryEvent event = events.get(0);
 
     assertThat(event.getEventType()).isEqualTo(TaskHistoryEventType.CLAIMED_REVIEW.getName());
+    assertThat(event.getUserId()).isEqualTo("admin");
+    assertThat(event.getProxyAccessId()).isNull();
 
     event = historyService.getTaskHistoryEvent(event.getId());
 

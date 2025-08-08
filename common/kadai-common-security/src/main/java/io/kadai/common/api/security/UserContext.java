@@ -16,17 +16,25 @@
  *
  */
 
-package io.kadai.spi.history.api.events.task;
+package io.kadai.common.api.security;
 
-import io.kadai.task.api.models.Task;
+/** Interface specifying a user-context within Kadai. */
+public interface UserContext {
 
-/** Event fired if a task is claimed for a review. */
-public class TaskClaimedReviewEvent extends TaskHistoryEvent {
+  /**
+   * Returns the id of the contexts' user.
+   *
+   * @return id of the contexts' user
+   */
+  String getUserId();
 
-  public TaskClaimedReviewEvent(
-      String id, Task task, String userId, String proxyAccessId, String details) {
-    super(id, task, userId, proxyAccessId, details);
-    eventType = (TaskHistoryEventType.CLAIMED_REVIEW.getName());
-    created = task.getClaimed();
-  }
+  /**
+   * Returns the access-id of the contexts' proxy.
+   *
+   * <p>The proxy is the user or group that is used as facade for executing actions disguised as
+   * another {@linkplain #getUserId() user}.
+   *
+   * @return id of the contexts' proxy
+   */
+  String getProxyAccessId();
 }

@@ -77,6 +77,10 @@ class CreateHistoryEventOnWorkbasketAccessItemsDeletionAccTest extends AbstractA
     assertThat(events)
         .extracting(WorkbasketHistoryEvent::getEventType)
         .containsOnly(WorkbasketHistoryEventType.ACCESS_ITEM_DELETED.getName());
+    assertThat(events).extracting(WorkbasketHistoryEvent::getUserId).containsOnly("admin");
+    assertThat(events)
+        .extracting(WorkbasketHistoryEvent::getProxyAccessId)
+        .containsOnly((String) null);
 
     assertThat(details).contains("\"oldValue\":\"WBI:100000000000000000000000000000000001\"");
   }

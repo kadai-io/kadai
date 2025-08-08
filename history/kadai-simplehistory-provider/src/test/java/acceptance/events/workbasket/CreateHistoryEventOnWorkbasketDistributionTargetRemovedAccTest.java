@@ -66,7 +66,8 @@ class CreateHistoryEventOnWorkbasketDistributionTargetRemovedAccTest extends Abs
 
     assertThat(eventType)
         .isEqualTo(WorkbasketHistoryEventType.DISTRIBUTION_TARGET_REMOVED.getName());
-
     assertThat(details).contains("\"oldValue\":\"WBI:100000000000000000000000000000000002\"");
+    assertThat(events.get(0).getUserId()).isEqualTo("admin");
+    assertThat(events.get(0).getProxyAccessId()).isNull();
   }
 }

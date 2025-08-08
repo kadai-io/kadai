@@ -90,6 +90,8 @@ class CreateHistoryEventOnTaskCancelClaimAccTest extends AbstractAccTest {
 
           assertThat(event.getEventType())
               .isEqualTo(TaskHistoryEventType.CLAIM_CANCELLED.getName());
+          assertThat(event.getUserId()).isEqualTo("admin");
+          assertThat(event.getProxyAccessId()).isNull();
 
           event = historyService.getTaskHistoryEvent(event.getId());
 

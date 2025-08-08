@@ -67,6 +67,8 @@ class CreateHistoryEventOnTaskReopeningAccTest extends AbstractAccTest {
     String eventType = events.get(0).getEventType();
 
     assertThat(eventType).isEqualTo(TaskHistoryEventType.REOPENED.getName());
+    assertThat(events.get(0).getUserId()).isEqualTo("admin");
+    assertThat(events.get(0).getProxyAccessId()).isNull();
   }
 
   @Test

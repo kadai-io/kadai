@@ -383,6 +383,7 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
     assertThat(event.getOldValue()).isEqualTo(expectedOldValue);
     assertThat(event.getNewValue()).isEqualTo(expectedNewValue);
     assertThat(event.getUserId()).isEqualTo(expectedUser);
+    assertThat(event.getProxyAccessId()).isNull();
     assertThat(event.getEventType()).isEqualTo(TaskHistoryEventType.TRANSFERRED.getName());
   }
 }

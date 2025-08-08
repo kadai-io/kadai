@@ -80,7 +80,8 @@ class CreateHistoryEventOnClassificationsUpdateAccTest extends AbstractAccTest {
     String details = classificationHistoryEventMapper.findById(events.get(0).getId()).getDetails();
 
     assertThat(eventType).isEqualTo(WorkbasketHistoryEventType.UPDATED.getName());
-
     assertThat(details).contains("\"newValue\":\"new description\"");
+    assertThat(events.get(0).getUserId()).isEqualTo("businessadmin");
+    assertThat(events.get(0).getProxyAccessId()).isNull();
   }
 }

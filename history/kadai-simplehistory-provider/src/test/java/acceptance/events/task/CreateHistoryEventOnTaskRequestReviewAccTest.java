@@ -74,6 +74,8 @@ class CreateHistoryEventOnTaskRequestReviewAccTest extends AbstractAccTest {
     event = historyService.getTaskHistoryEvent(event.getId());
 
     assertThat(event.getDetails()).isNotNull();
+    assertThat(event.getUserId()).isEqualTo("user-1-1");
+    assertThat(event.getProxyAccessId()).isNull();
 
     JSONArray changes = new JSONObject(event.getDetails()).getJSONArray("changes");
 

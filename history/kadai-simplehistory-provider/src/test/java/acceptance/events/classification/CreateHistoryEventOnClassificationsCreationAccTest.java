@@ -65,7 +65,8 @@ class CreateHistoryEventOnClassificationsCreationAccTest extends AbstractAccTest
     String details = classificationHistoryEventMapper.findById(events.get(0).getId()).getDetails();
 
     assertThat(eventType).isEqualTo(ClassificationHistoryEventType.CREATED.getName());
-
     assertThat(details).contains("\"newValue\":\"some description\"");
+    assertThat(events.get(0).getUserId()).isEqualTo("admin");
+    assertThat(events.get(0).getProxyAccessId()).isNull();
   }
 }

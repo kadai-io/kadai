@@ -69,7 +69,8 @@ class CreateHistoryEventOnClassificationDeletionAccTest extends AbstractAccTest 
     String details = classificationHistoryEventMapper.findById(events.get(0).getId()).getDetails();
 
     assertThat(eventType).isEqualTo(ClassificationHistoryEventType.DELETED.getName());
-
     assertThat(details).contains("\"oldValue\":\"CLI:200000000000000000000000000000000015\"");
+    assertThat(events.get(0).getUserId()).isEqualTo("admin");
+    assertThat(events.get(0).getProxyAccessId()).isNull();
   }
 }

@@ -35,6 +35,7 @@ import io.kadai.common.api.exceptions.ConnectionNotSetException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.api.security.CurrentUserContext;
+import io.kadai.common.api.security.ProxyPrincipal;
 import io.kadai.common.api.security.UserPrincipal;
 import io.kadai.common.internal.configuration.DB;
 import io.kadai.common.internal.configuration.DbSchemaCreator;
@@ -380,22 +381,23 @@ public class KadaiEngineImpl implements KadaiEngine {
             currentUserContext.getAccessIds(),
             rolesAsString);
       }
-      throw new NotAuthorizedException(currentUserContext.getUserid(), roles);
+      throw new NotAuthorizedException(currentUserContext.getUserContext().getUserId(), roles);
     }
   }
 
-  public <T> T runAsAdmin(Supplier<T> supplier) {
-    if (isUserInRole(KadaiRole.ADMIN)) {
-      return supplier.get();
-    }
-
-    String adminName =
-        this.getConfiguration().getRoleMap().get(KadaiRole.ADMIN).stream()
-            .findFirst()
-            .orElseThrow(() -> new SystemException("There is no admin configured"));
-
+  @Override
+  public <T> T runAs(Supplier<T> supplier, KadaiRole proxy, String userId) {
     Subject subject = new Subject();
-    subject.getPrincipals().add(new UserPrincipal(adminName));
+    if (proxy != null) {
+      String proxyAccessId =
+          this.getConfiguration().getRoleMap().get(proxy).stream()
+              .findFirst()
+              .orElseThrow(() -> new SystemException("There is no " + proxy + " configured"));
+      subject.getPrincipals().add(new ProxyPrincipal(proxyAccessId));
+    }
+    if (userId != null) {
+      subject.getPrincipals().add(new UserPrincipal(userId));
+    }
 
     return Subject.doAs(subject, (PrivilegedAction<T>) supplier::get);
   }

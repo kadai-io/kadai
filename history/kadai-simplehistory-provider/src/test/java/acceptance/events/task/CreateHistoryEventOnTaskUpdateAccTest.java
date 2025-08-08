@@ -59,5 +59,9 @@ class CreateHistoryEventOnTaskUpdateAccTest extends AbstractAccTest {
     assertThat(events)
         .extracting(TaskHistoryEvent::getEventType)
         .containsExactly(TaskHistoryEventType.UPDATED.getName());
+    assertThat(events).extracting(TaskHistoryEvent::getUserId).containsExactly("admin");
+    assertThat(events)
+        .extracting(TaskHistoryEvent::getProxyAccessId)
+        .containsExactly((String) null);
   }
 }

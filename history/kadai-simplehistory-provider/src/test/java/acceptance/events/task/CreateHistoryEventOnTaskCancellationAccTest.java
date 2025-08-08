@@ -57,6 +57,8 @@ class CreateHistoryEventOnTaskCancellationAccTest extends AbstractAccTest {
     String eventType = listEvents.get(0).getEventType();
 
     assertThat(eventType).isEqualTo(TaskHistoryEventType.CANCELLED.getName());
+    assertThat(listEvents.get(0).getUserId()).isEqualTo("admin");
+    assertThat(listEvents.get(0).getProxyAccessId()).isNull();
   }
 
   @Test
@@ -78,5 +80,7 @@ class CreateHistoryEventOnTaskCancellationAccTest extends AbstractAccTest {
     String eventType = events.get(0).getEventType();
 
     assertThat(eventType).isEqualTo(TaskHistoryEventType.CANCELLED.getName());
+    assertThat(events.get(0).getUserId()).isEqualTo("admin");
+    assertThat(events.get(0).getProxyAccessId()).isNull();
   }
 }

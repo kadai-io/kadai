@@ -128,6 +128,7 @@ class CreateHistoryEventOnTaskDeletionAccTest {
       throws Exception {
     TaskHistoryEvent event = historyService.getTaskHistoryEvent(eventId);
     assertThat(event.getUserId()).isEqualTo(expectedUser);
+    assertThat(event.getProxyAccessId()).isNull();
     assertThat(event.getEventType()).isEqualTo(TaskHistoryEventType.DELETED.getName());
     assertThat(event.getTaskId()).isEqualTo(taskId);
   }
