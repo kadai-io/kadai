@@ -4,9 +4,11 @@ on:
   push:
     branches-ignore:
       - dependabot/**
+  pull_request:
+# Only for create-tag to avoid re-triggering CI during deployment due to updating tags poms
+  create:
     tags:
       - v[0-9]+\.[0-9]+\.[0-9]+
-  pull_request:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.repository }}-${{ github.event_name }}/${{ github.event.pull_request.number || github.ref }}
