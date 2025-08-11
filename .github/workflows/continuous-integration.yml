@@ -473,6 +473,9 @@ jobs:
           git commit -m "Updated poms to version ${GITHUB_REF##refs/tags/v}"
           git tag -f "${GITHUB_REF##refs/tags/}"
           git push --force-with-lease origin "${GITHUB_REF##refs/tags/}"
+        env:
+          GH_EMAIL: ${{ secrets.GH_EMAIL }}
+          GH_USERNAME: ${{ secrets.GH_USERNAME }}
 
       - name: Release artifacts to Sonatype-Central
         run: |
@@ -490,8 +493,6 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-          GH_EMAIL: ${{ secrets.GH_EMAIL }}
-          GH_USERNAME: ${{ secrets.GH_USERNAME }}
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
