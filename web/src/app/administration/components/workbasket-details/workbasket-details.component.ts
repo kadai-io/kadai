@@ -82,7 +82,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
   @Input() expanded: boolean;
   private store = inject(Store);
   private ngxsActions$ = inject(Actions);
-  hasInvalidAccessItems = false;
+  areAllAccessItemsValid = true;
 
   ngOnInit() {
     this.getWorkbasketFromStore();
@@ -150,7 +150,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
   }
 
   onAccessItemsValidityChanged(isValid: boolean) {
-    this.hasInvalidAccessItems = !isValid;
+    this.areAllAccessItemsValid = isValid;
   }
 
   onRestore() {

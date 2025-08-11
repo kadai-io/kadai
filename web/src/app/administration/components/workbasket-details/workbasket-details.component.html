@@ -29,10 +29,12 @@
     <span class="workbasket-details__spacer"></span>
 
     <!-- SAVE -->
-    @if (hasInvalidAccessItems) {
-      <div class="access-warning">
-        <mat-icon color="warn" class="access-warning__icon">error_outline</mat-icon>
-        <div class="access-warning__text">
+    @if (!areAllAccessItemsValid) {
+      <div class="workbasket-details__access-item-warning">
+        <mat-icon color="warn" class="workbasket-details__access-item-warning-icon">
+          error_outline
+        </mat-icon>
+        <div class="workbasket-details__access-item-warning-text">
           Invalid<br>Access ID
         </div>
       </div>

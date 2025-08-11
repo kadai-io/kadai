@@ -149,13 +149,13 @@ describe('WorkbasketDetailsComponent', () => {
       });
   });
 
-  it('should set hasInvalidAccessItems to true when isValid is false', () => {
+  it('should set areAllAccessItemsValid to false when isValid is false', () => {
     component.onAccessItemsValidityChanged(false);
-    expect(component.hasInvalidAccessItems).toBeTruthy();
+    expect(component.areAllAccessItemsValid).toBeFalsy();
   });
 
-  it('should set hasInvalidAccessItems to false when isValid is true', () => {
+  it('should set areAllAccessItemsValid to true when isValid is true', () => {
     component.onAccessItemsValidityChanged(true);
-    expect(component.hasInvalidAccessItems).toBeFalsy();
+    expect(component.areAllAccessItemsValid).toBeTruthy();
   });
 });
