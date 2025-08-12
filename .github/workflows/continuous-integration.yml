@@ -504,6 +504,7 @@ jobs:
       - name: Update version to next snapshot and push back
         run: |
           ci/change_version.sh -i -m .
+          ci/commitPoms.sh
         env:
           GH_EMAIL: ${{ secrets.GH_EMAIL }}
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
