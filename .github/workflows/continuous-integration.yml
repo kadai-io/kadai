@@ -475,7 +475,7 @@ jobs:
           git commit -m "Updated poms to version ${GITHUB_REF##refs/tags/v}"
           git tag -f "${GITHUB_REF##refs/tags/}"
           git push --force-with-lease origin "${GITHUB_REF##refs/tags/}"
-          git push origin main
+          git push origin master
         env:
           GH_EMAIL: ${{ secrets.GH_EMAIL }}
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
