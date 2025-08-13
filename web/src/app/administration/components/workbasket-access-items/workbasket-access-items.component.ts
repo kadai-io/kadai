@@ -165,8 +165,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
         this.setAccessItemsGroups(accessItems);
 
         this.AccessItemsForm.get('accessItemsGroups')
-          ?.statusChanges
-          .pipe(
+          ?.statusChanges.pipe(
             startWith(null),
             map(() => this.AccessItemsForm.get('accessItemsGroups')?.valid ?? false),
             distinctUntilChanged(),
