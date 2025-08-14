@@ -103,16 +103,8 @@ public class CurrentUserContextImpl implements CurrentUserContext {
   @Override
   public List<String> getAccessIds() {
     Set<String> accessIds = new HashSet<>(getGroupIds());
-    final String userId = getUserContext().getUserId();
-    final String proxyAccessId = getUserContext().getProxyAccessId();
-
-    if (userId != null) {
-      accessIds.add(userId);
-    }
-
-    if (proxyAccessId != null) {
-      accessIds.add(proxyAccessId);
-    }
+    accessIds.add(getUserContext().getUserId());
+    accessIds.add(getUserContext().getProxyAccessId());
 
     return accessIds.stream().toList();
   }
