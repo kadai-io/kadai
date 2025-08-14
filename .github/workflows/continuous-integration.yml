@@ -4,11 +4,9 @@ on:
   push:
     branches-ignore:
       - dependabot/**
-  pull_request:
-# Only for create-tag to avoid re-triggering CI during deployment due to updating tags poms
-  create:
     tags:
       - v[0-9]+\.[0-9]+\.[0-9]+
+  pull_request:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.repository }}-${{ github.event_name }}/${{ github.event.pull_request.number || github.ref }}
@@ -466,19 +464,8 @@ jobs:
         run: echo -n "$GPG_KEY" | base64 --decode | gpg --batch --import
         env:
           GPG_KEY: ${{ secrets.GPG_KEY }}
-      - name: Change versions to match tag and update it
-        run: |
-          git config --global user.email "$GH_EMAIL"
-          git config --global user.name "$GH_USERNAME"
-          ci/change_version.sh -m .
-          git add .
-          git commit -m "Updated poms to version ${GITHUB_REF##refs/tags/v}"
-          git tag -f "${GITHUB_REF##refs/tags/}"
-          git push --force-with-lease origin "${GITHUB_REF##refs/tags/}"
-        env:
-          GH_EMAIL: ${{ secrets.GH_EMAIL }}
-          GH_USERNAME: ${{ secrets.GH_USERNAME }}
-
+      - name: Change versions to match tag
+        run: ci/change_version.sh -m .
       - name: Release artifacts to Sonatype-Central
         run: |
           ./mvnw -B deploy -P $([[ "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo "release" || echo "snapshot") \
