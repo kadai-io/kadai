@@ -29,6 +29,16 @@
     <span class="workbasket-details__spacer"></span>
 
     <!-- SAVE -->
+    @if (!areAllAccessItemsValid) {
+      <div class="workbasket-details__access-item-warning">
+        <mat-icon color="warn" class="workbasket-details__access-item-warning-icon">
+          error_outline
+        </mat-icon>
+        <div class="workbasket-details__access-item-warning-text">
+          Invalid<br>Access ID
+        </div>
+      </div>
+    }
     <button (click)="onSubmit()" class="workbasket-details__button workbasket-details__save-button"
             mat-button matTooltip="Save changes in current workbasket">
       Save
@@ -91,7 +101,8 @@
     </mat-tab>
     <mat-tab label="Access">
       <kadai-administration-workbasket-access-items [expanded]="expanded"
-                                                    [workbasket]="workbasket">
+                                                    [workbasket]="workbasket"
+                                                    (accessItemsValidityChanged)="handleAccessItemsValidityChanged($event)">
       </kadai-administration-workbasket-access-items>
     </mat-tab>
     <mat-tab label="Distribution Targets">

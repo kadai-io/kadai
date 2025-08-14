@@ -29,13 +29,9 @@
     white-space: pre;
   }
 
-  &__input-field {
-    left: 50%;
-  }
-
   &__error--accessId {
     white-space: nowrap;
-    padding-top: 8px;
+    margin-left: -16px;
   }
 }
 
