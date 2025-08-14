@@ -149,7 +149,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
     this.store.dispatch(new OnButtonPressed(ButtonAction.SAVE));
   }
 
-  onAccessItemsValidityChanged(isValid: boolean) {
+  handleAccessItemsValidityChanged(isValid: boolean) {
     this.areAllAccessItemsValid = isValid;
   }
 
