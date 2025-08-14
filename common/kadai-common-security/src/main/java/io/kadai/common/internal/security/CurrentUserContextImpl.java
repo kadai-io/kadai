@@ -25,7 +25,6 @@ import io.kadai.common.api.security.GroupPrincipal;
 import io.kadai.common.api.security.ProxyPrincipal;
 import io.kadai.common.api.security.UserContext;
 import io.kadai.common.api.security.UserPrincipal;
-import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.Principal;
 import java.util.Collections;
@@ -40,33 +39,46 @@ import org.slf4j.LoggerFactory;
 
 public class CurrentUserContextImpl implements CurrentUserContext {
 
-  private static final String GET_UNIQUE_SECURITY_NAME_METHOD = "getUniqueSecurityName";
-  private static final String GET_CALLER_SUBJECT_METHOD = "getCallerSubject";
-  private static final String WSSUBJECT_CLASSNAME = "com.ibm.websphere.security.auth.WSSubject";
-
   private static final Logger LOGGER = LoggerFactory.getLogger(CurrentUserContextImpl.class);
   private final boolean shouldUseLowerCaseForAccessIds;
-  private boolean runningOnWebSphere;
 
   public CurrentUserContextImpl(boolean shouldUseLowerCaseForAccessIds) {
     this.shouldUseLowerCaseForAccessIds = shouldUseLowerCaseForAccessIds;
-    try {
-      Class.forName(WSSUBJECT_CLASSNAME);
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("WSSubject detected. Assuming that Kadai runs on IBM WebSphere.");
-      }
-      runningOnWebSphere = true;
-    } catch (ClassNotFoundException e) {
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("No WSSubject detected. Using JAAS subject further on.");
-      }
-      runningOnWebSphere = false;
-    }
   }
 
   @Override
+  @SuppressWarnings("removal")
   public UserContext getUserContext() {
-    return runningOnWebSphere ? getUserContextFromWsSubject() : getUserContextFromJaasSubject();
+    // TODO replace with Subject.current() when migrating to newer Version than 17
+    Subject subject = Subject.getSubject(AccessController.getContext());
+    LOGGER.trace("Subject of caller: {}", subject);
+    if (subject != null) {
+      final Set<Principal> principals = subject.getPrincipals();
+      LOGGER.trace("Public principals of caller: {}", principals);
+      final Set<Principal> actorPrincipals =
+          principals.stream()
+              .filter(not(GroupPrincipal.class::isInstance))
+              .collect(Collectors.toSet());
+      final String userId =
+          actorPrincipals.stream()
+              .filter(UserPrincipal.class::isInstance)
+              .map(Principal::getName)
+              .map(this::convertAccessId)
+              .filter(Objects::nonNull)
+              .findFirst()
+              .orElse(null);
+      final String proxyAccessId =
+          actorPrincipals.stream()
+              .filter(ProxyPrincipal.class::isInstance)
+              .map(Principal::getName)
+              .map(this::convertAccessId)
+              .filter(Objects::nonNull)
+              .findFirst()
+              .orElse(null);
+      return new UserContextImpl(userId, proxyAccessId);
+    }
+    LOGGER.trace("No userId found in subject!");
+    return new UserContextImpl(null);
   }
 
   @Override
@@ -103,97 +115,6 @@ public class CurrentUserContextImpl implements CurrentUserContext {
     }
 
     return accessIds.stream().toList();
-  }
-
-  /**
-   * Returns the unique security name of the first public credentials found in the WSSubject as
-   * userid.
-   *
-   * @return the userid of the caller. If the userid could not be obtained, null is returned.
-   */
-  private UserContext getUserContextFromWsSubject() {
-    try {
-      Class<?> wsSubjectClass = Class.forName(WSSUBJECT_CLASSNAME);
-      Method getCallerSubjectMethod =
-          wsSubjectClass.getMethod(GET_CALLER_SUBJECT_METHOD, (Class<?>[]) null);
-      Subject callerSubject = (Subject) getCallerSubjectMethod.invoke(null, (Object[]) null);
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Subject of caller: {}", callerSubject);
-      }
-      if (callerSubject != null) {
-        final String proxyAccessId =
-            callerSubject.getPrincipals().stream()
-                .filter(ProxyPrincipal.class::isInstance)
-                .map(Principal::getName)
-                .map(this::convertAccessId)
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElse(null);
-        Set<Object> publicCredentials = callerSubject.getPublicCredentials();
-        if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Public credentials of caller: {}", publicCredentials);
-        }
-        final String userId =
-            publicCredentials.stream()
-                .map(
-                    credential -> {
-                      try {
-                        return credential
-                            .getClass()
-                            .getMethod(GET_UNIQUE_SECURITY_NAME_METHOD, (Class<?>[]) null)
-                            .invoke(credential, (Object[]) null);
-                      } catch (Exception e) {
-                        throw new SecurityException("Could not retrieve principal", e);
-                      }
-                    })
-                .peek(
-                    o ->
-                        LOGGER.debug(
-                            "Returning the unique security name of first public credential: {}", o))
-                .map(Object::toString)
-                .map(this::convertAccessId)
-                .findFirst()
-                .orElse(null);
-        return new UserContextImpl(userId, proxyAccessId);
-      }
-    } catch (Exception e) {
-      LOGGER.warn("Could not get user from WSSubject. Going ahead unauthorized.");
-    }
-    return new UserContextImpl(null);
-  }
-
-  @SuppressWarnings("removal")
-  private UserContext getUserContextFromJaasSubject() {
-    // TODO replace with Subject.current() when migrating to newer Version than 17
-    Subject subject = Subject.getSubject(AccessController.getContext());
-    LOGGER.trace("Subject of caller: {}", subject);
-    if (subject != null) {
-      final Set<Principal> principals = subject.getPrincipals();
-      LOGGER.trace("Public principals of caller: {}", principals);
-      final Set<Principal> actorPrincipals =
-          principals.stream()
-              .filter(not(GroupPrincipal.class::isInstance))
-              .collect(Collectors.toSet());
-      final String userId =
-          actorPrincipals.stream()
-              .filter(UserPrincipal.class::isInstance)
-              .map(Principal::getName)
-              .map(this::convertAccessId)
-              .filter(Objects::nonNull)
-              .findFirst()
-              .orElse(null);
-      final String proxyAccessId =
-          actorPrincipals.stream()
-              .filter(ProxyPrincipal.class::isInstance)
-              .map(Principal::getName)
-              .map(this::convertAccessId)
-              .filter(Objects::nonNull)
-              .findFirst()
-              .orElse(null);
-      return new UserContextImpl(userId, proxyAccessId);
-    }
-    LOGGER.trace("No userId found in subject!");
-    return new UserContextImpl(null);
   }
 
   private String convertAccessId(String accessId) {
