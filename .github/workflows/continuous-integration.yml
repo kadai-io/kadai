@@ -5,7 +5,7 @@ on:
     branches-ignore:
       - dependabot/**
   pull_request:
-# Only for create-tag to avoid re-triggering CI during deployment due to updating tags poms
+  # Only for create-tag to avoid re-triggering CI during deployment due to updating tags poms
   create:
     tags:
       - v[0-9]+\.[0-9]+\.[0-9]+
@@ -466,11 +466,14 @@ jobs:
         run: echo -n "$GPG_KEY" | base64 --decode | gpg --batch --import
         env:
           GPG_KEY: ${{ secrets.GPG_KEY }}
-      - name: Change versions to match tag and update it
+      - name: Change versions to match tag
+        run: ci/change_version.sh -m .
+
+      - name: Update tag
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           git config --global user.email "$GH_EMAIL"
           git config --global user.name "$GH_USERNAME"
-          ci/change_version.sh -m .
           git add .
           git commit -m "Updated poms to version ${GITHUB_REF##refs/tags/v}"
           git tag -f "${GITHUB_REF##refs/tags/}"
