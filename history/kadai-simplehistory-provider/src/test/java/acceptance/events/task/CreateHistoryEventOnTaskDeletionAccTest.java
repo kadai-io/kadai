@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.models.ClassificationSummary;
 import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.internal.util.CheckedRunnable;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
 import io.kadai.simplehistory.impl.SimpleHistoryServiceImpl;
@@ -81,54 +82,65 @@ class CreateHistoryEventOnTaskDeletionAccTest {
     historyService.initialize(kadaiEngine);
   }
 
-  @WithAccessId(user = "admin")
   @Test
   void should_CreateDeleteHistoryEvent_When_TaskIsDeleted() throws Exception {
+    kadaiEngine.runAsAdmin(
+        CheckedRunnable.rethrowing(
+            () -> {
+              historyService.deleteHistoryEventsByTaskIds(List.of(task4.getId()));
 
-    historyService.deleteHistoryEventsByTaskIds(List.of(task4.getId()));
+              taskService.deleteTask(task4.getId());
 
-    taskService.deleteTask(task4.getId());
-
-    List<TaskHistoryEvent> events =
-        historyService.createTaskHistoryQuery().taskIdIn(task4.getId()).list();
-    assertThat(events).hasSize(1);
-    assertDeleteHistoryEvent(events.get(0).getId(), "admin", task4.getId());
+              List<TaskHistoryEvent> events =
+                  historyService.createTaskHistoryQuery().taskIdIn(task4.getId()).list();
+              assertThat(events).hasSize(1);
+              assertDeleteHistoryEvent(events.get(0).getId(), "teamlead-2", task4.getId());
+            }),
+        "teamlead-2");
   }
 
-  @WithAccessId(user = "admin")
   @Test
   void should_CreateDeleteHistoryEvent_When_TaskIsForceDeleted() throws Exception {
-    historyService.deleteHistoryEventsByTaskIds(List.of(task1.getId()));
+    kadaiEngine.runAsAdmin(
+        CheckedRunnable.rethrowing(
+            () -> {
+              historyService.deleteHistoryEventsByTaskIds(List.of(task1.getId()));
 
-    taskService.forceDeleteTask(task1.getId());
+              taskService.forceDeleteTask(task1.getId());
 
-    List<TaskHistoryEvent> events =
-        historyService.createTaskHistoryQuery().taskIdIn(task1.getId()).list();
-    assertThat(events).hasSize(1);
-    assertDeleteHistoryEvent(events.get(0).getId(), "admin", task1.getId());
+              List<TaskHistoryEvent> events =
+                  historyService.createTaskHistoryQuery().taskIdIn(task1.getId()).list();
+              assertThat(events).hasSize(1);
+              assertDeleteHistoryEvent(events.get(0).getId(), "user-1-2", task1.getId());
+            }),
+        "user-1-2");
   }
 
-  @WithAccessId(user = "admin")
   @Test
   void should_CreateDeleteHistoryEvents_When_MultipleTasksAreDeleted() throws Exception {
-    List<String> taskIds = List.of(task2.getId(), task3.getId());
-    historyService.deleteHistoryEventsByTaskIds(taskIds);
+    kadaiEngine.runAsAdmin(
+        CheckedRunnable.rethrowing(
+            () -> {
+              List<String> taskIds = List.of(task2.getId(), task3.getId());
+              historyService.deleteHistoryEventsByTaskIds(taskIds);
 
-    taskService.deleteTasks(taskIds);
+              taskService.deleteTasks(taskIds);
 
-    TaskHistoryEvent eventTask2 =
-        historyService.createTaskHistoryQuery().taskIdIn(task2.getId()).single();
-    TaskHistoryEvent eventTask3 =
-        historyService.createTaskHistoryQuery().taskIdIn(task3.getId()).single();
-    assertDeleteHistoryEvent(eventTask2.getId(), "admin", task2.getId());
-    assertDeleteHistoryEvent(eventTask3.getId(), "admin", task3.getId());
+              TaskHistoryEvent eventTask2 =
+                  historyService.createTaskHistoryQuery().taskIdIn(task2.getId()).single();
+              TaskHistoryEvent eventTask3 =
+                  historyService.createTaskHistoryQuery().taskIdIn(task3.getId()).single();
+              assertDeleteHistoryEvent(eventTask2.getId(), "businessadmin", task2.getId());
+              assertDeleteHistoryEvent(eventTask3.getId(), "businessadmin", task3.getId());
+            }),
+        "businessadmin");
   }
 
   private void assertDeleteHistoryEvent(String eventId, String expectedUser, String taskId)
       throws Exception {
     TaskHistoryEvent event = historyService.getTaskHistoryEvent(eventId);
     assertThat(event.getUserId()).isEqualTo(expectedUser);
-    assertThat(event.getProxyAccessId()).isNull();
+    assertThat(event.getProxyAccessId()).isEqualTo("admin");
     assertThat(event.getEventType()).isEqualTo(TaskHistoryEventType.DELETED.getName());
     assertThat(event.getTaskId()).isEqualTo(taskId);
   }
