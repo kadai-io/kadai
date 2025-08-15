@@ -1,0 +1,45 @@
+name-template: "v$NEXT_PATCH_VERSION 🌟"
+tag-template: "v$NEXT_PATCH_VERSION"
+
+categories:
+  - title: "🚀 Features"
+    labels:
+      - "feature"
+
+  - title: "🐛 Bug Fixes"
+    labels:
+      - "fix"
+
+  - title: "🛠 Maintenance"
+    labels:
+      - "chore"
+
+  - title: "🔒 Dependencies"
+    labels:
+      - "dependencies"
+
+change-template: |
+  - $TITLE @$AUTHOR (#$NUMBER)
+    $BODY
+
+no-changes-template: "- No user-facing changes in this release."
+
+template: |
+  ## 📦 Release Notes
+
+  $CHANGES
+
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...$TAG
+
+autolabeler:
+  - label: "feature"
+    branch:
+      - "/^feat[/-]/"
+
+  - label: "fix"
+    branch:
+      - "/^fix[/-]/"
+
+  - label: "chore"
+    branch:
+      - "/^chore[/-]/"
