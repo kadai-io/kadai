@@ -22,6 +22,7 @@ import static io.kadai.common.internal.util.SqlProviderUtil.CLOSING_SCRIPT_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_SCRIPT_TAG;
 
+@SuppressWarnings("unused")
 public class UserMapperSqlProvider {
 
   private static final String USER_INFO_COLUMNS =
@@ -104,11 +105,23 @@ public class UserMapperSqlProvider {
     return "DELETE FROM USER_INFO WHERE USER_ID = #{id} ";
   }
 
+  public static String deleteAll() {
+    return "DELETE FROM USER_INFO ";
+  }
+
   public static String deleteGroups() {
     return "DELETE FROM GROUP_INFO WHERE USER_ID = #{id} ";
   }
 
+  public static String deleteAllGroups() {
+    return "DELETE FROM GROUP_INFO ";
+  }
+
   public static String deletePermissions() {
     return "DELETE FROM PERMISSION_INFO WHERE USER_ID = #{id} ";
+  }
+
+  public static String deleteAllPermissions() {
+    return "DELETE FROM PERMISSION_INFO ";
   }
 }

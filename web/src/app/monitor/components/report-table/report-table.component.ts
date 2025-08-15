@@ -70,12 +70,11 @@ export class ReportTableComponent implements OnChanges {
     return typeof this.fullRowsData !== 'undefined' && this.fullRowsData[0];
   }
 
-  toggleFold(indexNumber: number, sumRow: boolean = false) {
+  toggleFold(index: number, sumRow: boolean = false) {
     let rows = sumRow ? this.reportData.sumRow : this.reportData.rows;
-    let index = indexNumber;
     const toggleRow = rows[index];
     if (toggleRow.depth < this.reportData.meta.rowDesc.length - 1) {
-      const firstChildRow = rows[(index += 1)];
+      const firstChildRow = rows[index + 1];
       firstChildRow.display = !firstChildRow.display;
 
       const endIndex = rows.findIndex((row) => row.depth <= toggleRow.depth);

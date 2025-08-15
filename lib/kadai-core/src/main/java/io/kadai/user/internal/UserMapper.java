@@ -94,9 +94,18 @@ public interface UserMapper {
   @DeleteProvider(type = UserMapperSqlProvider.class, method = "delete")
   void delete(String id);
 
+  @DeleteProvider(type = UserMapperSqlProvider.class, method = "deleteAll")
+  void deleteAll();
+
   @DeleteProvider(type = UserMapperSqlProvider.class, method = "deleteGroups")
   void deleteGroups(String id);
 
+  @DeleteProvider(type = UserMapperSqlProvider.class, method = "deleteAllGroups")
+  void deleteAllGroups();
+
   @DeleteProvider(type = UserMapperSqlProvider.class, method = "deletePermissions")
   void deletePermissions(String id);
+
+  @DeleteProvider(type = UserMapperSqlProvider.class, method = "deleteAllPermissions")
+  void deleteAllPermissions();
 }

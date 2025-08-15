@@ -35,6 +35,7 @@ import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
 import io.kadai.task.rest.models.ObjectReferenceRepresentationModel;
+import io.kadai.task.rest.models.TaskIdListRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel.CustomAttribute;
 import io.kadai.task.rest.models.TaskSummaryCollectionRepresentationModel;
@@ -51,6 +52,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -84,6 +86,7 @@ import org.testcontainers.shaded.com.google.common.collect.Lists;
 
 /** Test Task Controller. */
 @KadaiSpringBootTest
+@SuppressWarnings({"raw", "unchecked"})
 class TaskControllerIntTest {
 
   private static final ParameterizedTypeReference<Map<String, Object>>
@@ -1602,10 +1605,11 @@ class TaskControllerIntTest {
           .isEqualTo("TKI:000000000000000000000000000000000071");
       assertThat(response.getBody().getLink(IanaLinkRelations.SELF)).isNotNull();
       assertThat(response.getBody().getRequiredLink(IanaLinkRelations.SELF).getHref())
-          .endsWith("/api/v1/tasks?"
-              + "sort-by=DUE&sort-by=TASK_ID&"
-              + "order=DESCENDING&order=ASCENDING&"
-              + "page-size=5&page=5");
+          .endsWith(
+              "/api/v1/tasks?"
+                  + "sort-by=DUE&sort-by=TASK_ID&"
+                  + "order=DESCENDING&order=ASCENDING&"
+                  + "page-size=5&page=5");
       assertThat(response.getBody().getLink(IanaLinkRelations.FIRST)).isNotNull();
       assertThat(response.getBody().getLink(IanaLinkRelations.LAST)).isNotNull();
       assertThat(response.getBody().getLink(IanaLinkRelations.PREV)).isNotNull();
@@ -1813,10 +1817,9 @@ class TaskControllerIntTest {
 
     @Test
     void should_ReturnFilteredTasks_When_GettingTasksByIsReopenedFalse() {
-      String url =
-          restHelper.toUrl(RestEndpoints.URL_TASKS) + "?is-reopened=false";
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?is-reopened=false";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-              CLIENT
+          CLIENT
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1832,8 +1835,7 @@ class TaskControllerIntTest {
 
     @Test
     void should_ReturnFilteredTasks_When_GettingTasksByIsReopenedTrue() {
-      String url =
-          restHelper.toUrl(RestEndpoints.URL_TASKS) + "?is-reopened=true";
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?is-reopened=true";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
           CLIENT
               .get()
@@ -2617,6 +2619,92 @@ class TaskControllerIntTest {
     }
 
     @Test
+    void should_ReturnPartiallyFailedTaskId_When_GivenTaskIdDoesNotExist() {
+      List<String> taskIds = List.of("NonExistingIdentifier");
+      List<String> destinationWorkbasketIds = List.of("WBI:100000000000000000000000000000000006");
+
+      DistributionTasksRepresentationModel requestBody =
+          new DistributionTasksRepresentationModel(taskIds, destinationWorkbasketIds, null, null);
+
+      String url =
+          restHelper.toUrl(
+              RestEndpoints.URL_DISTRIBUTE, "WBI:100000000000000000000000000000000006");
+
+      ResponseEntity<Map<String, Object>> response =
+          CLIENT
+              .post()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .body(requestBody)
+              .retrieve()
+              .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody()).isNotNull();
+
+      Map<String, Object> result = response.getBody();
+      assertThat(result).isNotNull().containsKey("tasksWithErrors");
+
+      Map<String, Object> tasksWithErrors = (Map<String, Object>) result.get("tasksWithErrors");
+
+      assertThat(tasksWithErrors).hasSize(1).containsKey("NonExistingIdentifier");
+
+      Map<String, Object> errorDetails =
+          (Map<String, Object>) tasksWithErrors.get("NonExistingIdentifier");
+
+      assertThat(errorDetails)
+          .containsEntry("key", "TASK_NOT_FOUND")
+          .containsKey("messageVariables");
+    }
+
+    @Test
+    void should_ReturnPartiallyFailedTaskIds_When_GivenTaskIdDoesNotExist() {
+      List<String> taskIds = List.of("NonExistingIdentifier1", "NonExistingIdentifier2");
+      List<String> destinationWorkbasketIds = List.of("WBI:100000000000000000000000000000000006");
+
+      DistributionTasksRepresentationModel requestBody =
+          new DistributionTasksRepresentationModel(taskIds, destinationWorkbasketIds, null, null);
+
+      String url =
+          restHelper.toUrl(
+              RestEndpoints.URL_DISTRIBUTE, "WBI:100000000000000000000000000000000006");
+
+      ResponseEntity<Map<String, Object>> response =
+          CLIENT
+              .post()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .body(requestBody)
+              .retrieve()
+              .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody()).isNotNull();
+
+      Map<String, Object> result = response.getBody();
+      assertThat(result).isNotNull().containsKey("tasksWithErrors");
+
+      Map<String, Object> tasksWithErrors = (Map<String, Object>) result.get("tasksWithErrors");
+
+      assertThat(tasksWithErrors)
+          .hasSize(2)
+          .containsKey("NonExistingIdentifier1")
+          .containsKey("NonExistingIdentifier2");
+
+      Map<String, Object> errorDetails1 =
+          (Map<String, Object>) tasksWithErrors.get("NonExistingIdentifier2");
+      assertThat(errorDetails1)
+          .containsEntry("key", "TASK_NOT_FOUND")
+          .containsKey("messageVariables");
+
+      Map<String, Object> errorDetails2 =
+          (Map<String, Object>) tasksWithErrors.get("NonExistingIdentifier2");
+      assertThat(errorDetails2)
+          .containsEntry("key", "TASK_NOT_FOUND")
+          .containsKey("messageVariables");
+    }
+
+    @Test
     void should_ThrowException_When_InvalidDistributionStrategyProvided() {
       List<String> taskIds = List.of("TKI:000000000000000000000000000000000039");
       String invalidDistributionStrategyName = "ROUND_ROBIN";
@@ -3193,6 +3281,39 @@ class TaskControllerIntTest {
     }
 
     @Test
+    void should_partialFailCompleteTasks_when_UserHasNoAuthorization() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_BULK_COMPLETE);
+
+      List<String> taskIds = List.of(
+              "TKI:000000000000000000000000000000000103",
+              "TKI:000000000000000000000000000000000041"
+      );
+
+      TaskIdListRepresentationModel request = new TaskIdListRepresentationModel(taskIds);
+
+      ResponseEntity<Map> response =
+              CLIENT
+                      .patch()
+                      .uri(url)
+                      .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
+                      .body(request)
+                      .retrieve()
+                      .toEntity(Map.class);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      Map<?, ?> body = response.getBody();
+      assertThat(body).isNotNull();
+
+      Map<String, ?> failuresMap = (Map<String, ?>) body.get("tasksWithErrors");
+      List<String> failures = new ArrayList<>(failuresMap.keySet());
+
+      assertThat(failures).hasSize(1)
+              .containsExactly(
+                      "TKI:000000000000000000000000000000000041"
+      );
+    }
+
+    @Test
     void should_ForceCompleteTask_When_CurrentUserIsNotTheOwner() {
       String url =
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000028");
@@ -3228,6 +3349,33 @@ class TaskControllerIntTest {
       repModel = forceCompleteResponse.getBody();
       assertThat(repModel.getOwner()).isEqualTo("user-1-2");
       assertThat(repModel.getState()).isEqualTo(TaskState.COMPLETED);
+    }
+
+    @Test
+    void should_ForceCompleteAllTasks_When_CurrentUserIsNotTheOwner() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_BULK_COMPLETE_FORCE);
+
+      List<String> taskIds = List.of(
+          "TKI:000000000000000000000000000000000027",
+          "TKI:000000000000000000000000000000000026"
+      );
+
+      TaskIdListRepresentationModel request = new TaskIdListRepresentationModel(taskIds);
+
+      ResponseEntity<BulkOperationResultsRepresentationModel> response =
+              CLIENT
+                  .patch()
+                  .uri(url)
+                  .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
+                  .body(request)
+                  .retrieve()
+                  .toEntity(BulkOperationResultsRepresentationModel.class);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      BulkOperationResultsRepresentationModel body = response.getBody();
+      assertThat(body).isNotNull();
+
+      assertThat(body.getTasksWithErrors()).isEmpty();
     }
   }
 
@@ -3697,12 +3845,13 @@ class TaskControllerIntTest {
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000075");
 
       // retrieve task from Rest Api
-      ResponseEntity<TaskRepresentationModel> getTaskResponse = CLIENT
-                  .get()
-                  .uri(url)
-                  .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
-                  .retrieve()
-                  .toEntity(TaskRepresentationModel.class);
+      ResponseEntity<TaskRepresentationModel> getTaskResponse =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel readyTaskRepresentationModel = getTaskResponse.getBody();
       assertThat(readyTaskRepresentationModel.getState()).isEqualTo(TaskState.COMPLETED);
@@ -3711,7 +3860,8 @@ class TaskControllerIntTest {
       String url2 =
           restHelper.toUrl(
               RestEndpoints.URL_TASKS_ID_REOPEN, "TKI:000000000000000000000000000000000075");
-      ResponseEntity<TaskRepresentationModel> reopenResponse = CLIENT
+      ResponseEntity<TaskRepresentationModel> reopenResponse =
+          CLIENT
               .post()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -3730,12 +3880,13 @@ class TaskControllerIntTest {
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000076");
 
       // retrieve task from Rest Api
-      ResponseEntity<TaskRepresentationModel> getTaskResponse = CLIENT
-          .get()
-          .uri(url)
-          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-2-2")))
-          .retrieve()
-          .toEntity(TaskRepresentationModel.class);
+      ResponseEntity<TaskRepresentationModel> getTaskResponse =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-2-2")))
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel readyTaskRepresentationModel = getTaskResponse.getBody();
       assertThat(readyTaskRepresentationModel.getState()).isEqualTo(TaskState.READY);
@@ -3745,12 +3896,14 @@ class TaskControllerIntTest {
           restHelper.toUrl(
               RestEndpoints.URL_TASKS_ID_REOPEN, "TKI:000000000000000000000000000000000076");
 
-      ThrowingCallable call = () -> CLIENT
-          .post()
-          .uri(url2)
-          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-2-2")))
-          .retrieve()
-          .toEntity(TaskRepresentationModel.class);
+      ThrowingCallable call =
+          () ->
+              CLIENT
+                  .post()
+                  .uri(url2)
+                  .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-2-2")))
+                  .retrieve()
+                  .toEntity(TaskRepresentationModel.class);
 
       assertThatThrownBy(call)
           .extracting(HttpStatusCodeException.class::cast)
@@ -3764,12 +3917,13 @@ class TaskControllerIntTest {
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:100000000000000000000000000000000099");
 
       // retrieve task from Rest Api
-      ResponseEntity<TaskRepresentationModel> getTaskResponse = CLIENT
-          .get()
-          .uri(url)
-          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
-          .retrieve()
-          .toEntity(TaskRepresentationModel.class);
+      ResponseEntity<TaskRepresentationModel> getTaskResponse =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel readyTaskRepresentationModel = getTaskResponse.getBody();
       assertThat(readyTaskRepresentationModel.getState()).isEqualTo(TaskState.COMPLETED);
@@ -3779,12 +3933,15 @@ class TaskControllerIntTest {
           restHelper.toUrl(
               RestEndpoints.URL_TASKS_ID_REOPEN, "TKI:100000000000000000000000000000000099");
 
-      ThrowingCallable call = () -> CLIENT
-          .post()
-          .uri(url2)
-          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
-          .retrieve()
-          .toEntity(TaskRepresentationModel.class);
+      ThrowingCallable call =
+          () ->
+              CLIENT
+                  .post()
+                  .uri(url2)
+                  .headers(
+                      headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                  .retrieve()
+                  .toEntity(TaskRepresentationModel.class);
 
       assertThatThrownBy(call)
           .extracting(HttpStatusCodeException.class::cast)
@@ -3798,12 +3955,13 @@ class TaskControllerIntTest {
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000070");
 
       // retrieve task from Rest Api
-      ResponseEntity<TaskRepresentationModel> getTaskResponse = CLIENT
-          .get()
-          .uri(url)
-          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
-          .retrieve()
-          .toEntity(TaskRepresentationModel.class);
+      ResponseEntity<TaskRepresentationModel> getTaskResponse =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class);
       assertThat(getTaskResponse.getBody()).isNotNull();
       TaskRepresentationModel readyTaskRepresentationModel = getTaskResponse.getBody();
       assertThat(readyTaskRepresentationModel.getState()).isEqualTo(TaskState.COMPLETED);
@@ -3813,12 +3971,14 @@ class TaskControllerIntTest {
           restHelper.toUrl(
               RestEndpoints.URL_TASKS_ID_REOPEN, "TKI:000000000000000000000000000000000070");
 
-      ThrowingCallable call = () -> CLIENT
-          .post()
-          .uri(url2)
-          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
-          .retrieve()
-          .toEntity(TaskRepresentationModel.class);
+      ThrowingCallable call =
+          () ->
+              CLIENT
+                  .post()
+                  .uri(url2)
+                  .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+                  .retrieve()
+                  .toEntity(TaskRepresentationModel.class);
 
       assertThatThrownBy(call)
           .extracting(HttpStatusCodeException.class::cast)

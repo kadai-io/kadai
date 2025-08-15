@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.kadai</groupId>
     <artifactId>kadai-parent</artifactId>
-    <version>10.0.1-SNAPSHOT</version>
+    <version>10.2.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -44,8 +44,8 @@
         <version.json>20250517</version.json>
 
         <!-- build dependencies -->
-        <version.checkstyle>10.26.1</version.checkstyle>
-        <version.google-java-format>1.27.0</version.google-java-format>
+        <version.checkstyle>11.0.0</version.checkstyle>
+        <version.google-java-format>1.28.0</version.google-java-format>
         <version.maven.checkstyle>3.6.0</version.maven.checkstyle>
         <version.maven.jar>3.4.2</version.maven.jar>
         <version.maven.war>3.4.0</version.maven.war>
@@ -65,7 +65,7 @@
         <!-- spring dependencies -->
         <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
         <version.spring.plugin.core>3.0.0</version.spring.plugin.core>
-        <version.spring.boot>3.5.3</version.spring.boot>
+        <version.spring.boot>3.5.4</version.spring.boot>
         <version.spring.mybatis>3.0.5</version.spring.mybatis>
 
         <!-- camunda dependencies -->
@@ -73,8 +73,8 @@
 
         <!-- test dependencies -->
         <version.archunit>1.4.1</version.archunit>
-        <version.equalsverifier>4.0.4</version.equalsverifier>
-        <version.assertj>3.27.3</version.assertj>
+        <version.equalsverifier>4.0.7</version.equalsverifier>
+        <version.assertj>3.27.4</version.assertj>
         <version.openpojo>0.9.1</version.openpojo>
         <version.jacoco>0.8.13</version.jacoco>
         <version.slf4j-test>3.0.1</version.slf4j-test>
@@ -88,7 +88,7 @@
         <version.aspectj>1.9.24</version.aspectj>
 
         <!-- Excel to DMN converter dependencies -->
-        <version.docx4j>11.5.3</version.docx4j>
+        <version.docx4j>11.5.4</version.docx4j>
         <version.jakarta.xml.bind-api>4.0.2</version.jakarta.xml.bind-api>
         <version.jaxb-core>4.0.5</version.jaxb-core>
         <version.jaxb-impl>4.0.5</version.jaxb-impl>

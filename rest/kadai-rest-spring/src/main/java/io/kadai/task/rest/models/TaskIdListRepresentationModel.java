@@ -1,4 +1,4 @@
-/*!
+/*
  * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,33 +16,23 @@
  *
  */
 
-@import 'colors';
+package io.kadai.task.rest.models;
 
-.type-ahead {
-  min-height: 0;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 
-  &__form-field {
-    width: 100% !important;
+public class TaskIdListRepresentationModel {
+
+  /** The value to set the Task property taskIds. */
+  @JsonProperty("taskIds")
+  private final List<String> taskIds;
+
+  public TaskIdListRepresentationModel(
+        @JsonProperty("taskIds") List<String> taskIds) {
+    this.taskIds = taskIds;
   }
 
-  &__form-options {
-    white-space: pre;
+  public List<String> getTaskIds() {
+    return taskIds;
   }
-
-  &__error--accessId {
-    white-space: nowrap;
-    margin-left: -16px;
-  }
-}
-
-::ng-deep .ng-invalid.ng-touched:not(form) {
-  box-shadow: unset;
-}
-
-.invalid {
-  color: $invalid;
-}
-
-mat-label.type-ahead__label {
-  pointer-events: auto;
 }

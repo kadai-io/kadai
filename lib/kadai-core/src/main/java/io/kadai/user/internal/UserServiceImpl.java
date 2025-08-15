@@ -208,6 +208,16 @@ public class UserServiceImpl implements UserService {
     return Collections.emptySet();
   }
 
+  public void deleteAllUsersGroupsPermissions() throws NotAuthorizedException {
+    internalKadaiEngine.getEngine().checkRoleMembership(KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
+    internalKadaiEngine.executeInDatabaseConnection(
+        () -> {
+          userMapper.deleteAll();
+          userMapper.deleteAllGroups();
+          userMapper.deleteAllPermissions();
+        });
+  }
+
   private void insertIntoDatabase(User userToCreate) throws UserAlreadyExistException {
     try {
       internalKadaiEngine.openConnection();

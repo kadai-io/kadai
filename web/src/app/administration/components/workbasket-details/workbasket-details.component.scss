@@ -71,4 +71,27 @@
   &__mat-icon {
     margin-left: 8px;
   }
+
+  &__access-item-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    margin-right: 5px;
+    padding: 6px 8px;
+    background-color: #fcebea;
+    border: 1px solid #f5c6cb;
+    color: $invalid;
+    border-radius: 4px;
+  }
+
+  &__access-item-warning-icon {
+    font-size: 20px;
+    line-height: 1;
+    margin-top: 1px;
+  }
+
+  &__access-item-warning-text {
+    font-size: 0.7rem;
+    line-height: 1.1;
+  }
 }
