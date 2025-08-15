@@ -32,11 +32,11 @@ public interface TaskHistoryEventMapper {
 
   @Insert(
       "<script>INSERT INTO TASK_HISTORY_EVENT (ID,BUSINESS_PROCESS_ID, PARENT_BUSINESS_PROCESS_ID, TASK_ID,"
-          + " EVENT_TYPE, CREATED, USER_ID, DOMAIN, WORKBASKET_KEY, POR_COMPANY, POR_SYSTEM, POR_INSTANCE,"
+          + " EVENT_TYPE, CREATED, USER_ID, PROXY_ACCESS_ID, DOMAIN, WORKBASKET_KEY, POR_COMPANY, POR_SYSTEM, POR_INSTANCE,"
           + " POR_TYPE, POR_VALUE, TASK_CLASSIFICATION_KEY, TASK_CLASSIFICATION_CATEGORY, ATTACHMENT_CLASSIFICATION_KEY, "
           + " OLD_VALUE, NEW_VALUE, CUSTOM_1, CUSTOM_2, CUSTOM_3, CUSTOM_4, DETAILS)"
           + " VALUES ( #{historyEvent.id}, #{historyEvent.businessProcessId}, #{historyEvent.parentBusinessProcessId}, #{historyEvent.taskId},"
-          + " #{historyEvent.eventType}, #{historyEvent.created}, #{historyEvent.userId}, #{historyEvent.domain}, #{historyEvent.workbasketKey},"
+          + " #{historyEvent.eventType}, #{historyEvent.created}, #{historyEvent.userId}, #{historyEvent.proxyAccessId}, #{historyEvent.domain}, #{historyEvent.workbasketKey},"
           + " #{historyEvent.porCompany}, #{historyEvent.porSystem}, #{historyEvent.porInstance}, #{historyEvent.porType},"
           + " #{historyEvent.porValue}, #{historyEvent.taskClassificationKey}, #{historyEvent.taskClassificationCategory},"
           + " #{historyEvent.attachmentClassificationKey}, #{historyEvent.oldValue}, #{historyEvent.newValue},"
@@ -47,7 +47,7 @@ public interface TaskHistoryEventMapper {
 
   @Select(
       "<script>"
-          + "SELECT ID, BUSINESS_PROCESS_ID, PARENT_BUSINESS_PROCESS_ID, TASK_ID, EVENT_TYPE, CREATED, USER_ID, DOMAIN, WORKBASKET_KEY, "
+          + "SELECT ID, BUSINESS_PROCESS_ID, PARENT_BUSINESS_PROCESS_ID, TASK_ID, EVENT_TYPE, CREATED, USER_ID, PROXY_ACCESS_ID, DOMAIN, WORKBASKET_KEY, "
           + "POR_COMPANY, POR_SYSTEM, POR_INSTANCE, POR_TYPE, POR_VALUE, TASK_CLASSIFICATION_KEY, TASK_CLASSIFICATION_CATEGORY,"
           + "ATTACHMENT_CLASSIFICATION_KEY, OLD_VALUE, NEW_VALUE, CUSTOM_1, CUSTOM_2, CUSTOM_3, CUSTOM_4, DETAILS "
           + "FROM TASK_HISTORY_EVENT WHERE ID = #{id} "
@@ -60,6 +60,7 @@ public interface TaskHistoryEventMapper {
   @Result(property = "eventType", column = "EVENT_TYPE")
   @Result(property = "created", column = "CREATED")
   @Result(property = "userId", column = "USER_ID")
+  @Result(property = "proxyAccessId", column = "PROXY_ACCESS_ID")
   @Result(property = "domain", column = "DOMAIN")
   @Result(property = "workbasketKey", column = "WORKBASKET_KEY")
   @Result(property = "porCompany", column = "POR_COMPANY")

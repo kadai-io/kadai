@@ -82,7 +82,7 @@ class TaskCommentServiceImpl {
           NotAuthorizedOnTaskCommentException,
           NotAuthorizedOnWorkbasketException {
 
-    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
 
     TaskCommentImpl taskCommentImplToUpdate = (TaskCommentImpl) taskCommentToUpdate;
 
@@ -197,7 +197,7 @@ class TaskCommentServiceImpl {
           NotAuthorizedOnTaskCommentException,
           NotAuthorizedOnWorkbasketException {
 
-    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
 
     try {
 
@@ -300,7 +300,7 @@ class TaskCommentServiceImpl {
     taskCommentImplToCreate.setModified(now);
     taskCommentImplToCreate.setCreated(now);
 
-    String creator = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+    String creator = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
     if (kadaiEngine.getEngine().getConfiguration().isSecurityEnabled() && creator == null) {
       throw new SystemException(
           "KadaiSecurity is enabled, but the current UserId is"

@@ -23,17 +23,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import acceptance.AbstractAccTest;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.models.Classification;
-import io.kadai.common.test.security.JaasExtension;
-import io.kadai.common.test.security.WithAccessId;
+import io.kadai.common.api.KadaiRole;
+import io.kadai.common.internal.util.CheckedRunnable;
 import io.kadai.simplehistory.impl.SimpleHistoryServiceImpl;
 import io.kadai.simplehistory.impl.classification.ClassificationHistoryEventMapper;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEventType;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(JaasExtension.class)
 class CreateHistoryEventOnClassificationsCreationAccTest extends AbstractAccTest {
 
   private final SimpleHistoryServiceImpl historyService = getHistoryService();
@@ -42,30 +40,37 @@ class CreateHistoryEventOnClassificationsCreationAccTest extends AbstractAccTest
   private final ClassificationHistoryEventMapper classificationHistoryEventMapper =
       getClassificationHistoryEventMapper();
 
-  @WithAccessId(user = "admin")
   @Test
   void should_CreateClassificationCreatedHistoryEvents_When_ClassificationIsDeleted()
       throws Exception {
 
-    Classification newClassification =
-        classificationService.newClassification("somekey", "DOMAIN_A", "TASK");
-    newClassification.setDescription("some description");
-    newClassification.setServiceLevel("P1D");
-    newClassification = classificationService.createClassification(newClassification);
+    kadaiEngine.runAs(
+        CheckedRunnable.rethrowing(
+            () -> {
+              Classification newClassification =
+                  classificationService.newClassification("somekey", "DOMAIN_A", "TASK");
+              newClassification.setDescription("some description");
+              newClassification.setServiceLevel("P1D");
+              newClassification = classificationService.createClassification(newClassification);
 
-    List<ClassificationHistoryEvent> events =
-        historyService
-            .createClassificationHistoryQuery()
-            .classificationIdIn(newClassification.getId())
-            .list();
+              List<ClassificationHistoryEvent> events =
+                  historyService
+                      .createClassificationHistoryQuery()
+                      .classificationIdIn(newClassification.getId())
+                      .list();
 
-    assertThat(events).hasSize(1);
+              assertThat(events).hasSize(1);
 
-    String eventType = events.get(0).getEventType();
-    String details = classificationHistoryEventMapper.findById(events.get(0).getId()).getDetails();
+              String eventType = events.get(0).getEventType();
+              String details =
+                  classificationHistoryEventMapper.findById(events.get(0).getId()).getDetails();
 
-    assertThat(eventType).isEqualTo(ClassificationHistoryEventType.CREATED.getName());
-
-    assertThat(details).contains("\"newValue\":\"some description\"");
+              assertThat(eventType).isEqualTo(ClassificationHistoryEventType.CREATED.getName());
+              assertThat(details).contains("\"newValue\":\"some description\"");
+              assertThat(events.get(0).getUserId()).isEqualTo("user-1-2");
+              assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
+            }),
+        KadaiRole.ADMIN,
+        "user-1-2");
   }
 }
