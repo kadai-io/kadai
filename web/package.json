@@ -24,11 +24,11 @@
   "dependencies": {
     "@ali-hm/angular-tree-component": "20.1.6",
     "@angular/animations": "20.1.7",
-    "@angular/cdk": "20.1.5",
+    "@angular/cdk": "20.1.6",
     "@angular/common": "20.1.7",
     "@angular/core": "20.1.7",
     "@angular/forms": "20.1.7",
-    "@angular/material": "20.1.5",
+    "@angular/material": "20.1.6",
     "@angular/platform-browser": "20.1.7",
     "@angular/platform-browser-dynamic": "20.1.7",
     "@angular/router": "20.1.7",
