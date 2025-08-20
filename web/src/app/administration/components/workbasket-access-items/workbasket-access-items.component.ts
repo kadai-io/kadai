@@ -21,16 +21,18 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  EventEmitter,
   inject,
   Input,
   OnChanges,
   OnDestroy,
   OnInit,
+  Output,
   QueryList,
   SimpleChanges,
   ViewChildren
 } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { distinctUntilChanged, Observable, Subject } from 'rxjs';
 import { Actions, ofActionCompleted, Store } from '@ngxs/store';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -42,7 +44,7 @@ import { highlight } from 'app/shared/animations/validation.animation';
 import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
 import { AccessId } from 'app/shared/models/access-id';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
-import { filter, take, takeUntil, tap } from 'rxjs/operators';
+import { filter, map, startWith, take, takeUntil, tap } from 'rxjs/operators';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { AccessItemsCustomisation, CustomField, getCustomFields } from '../../../shared/models/customisation';
 import {
@@ -85,6 +87,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
   formsValidatorService = inject(FormsValidatorService);
   @Input() workbasket: Workbasket;
   @Input() expanded: boolean;
+  @Output() accessItemsValidityChanged = new EventEmitter<boolean>();
   @ViewChildren('htmlInputElement') inputs: QueryList<ElementRef>;
   selectedRows: number[] = [];
   workbasketClone: Workbasket;
@@ -160,6 +163,18 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
           _links: accessItemsRepresentation._links
         };
         this.setAccessItemsGroups(accessItems);
+
+        this.AccessItemsForm.get('accessItemsGroups')
+          ?.statusChanges.pipe(
+            startWith(null),
+            map(() => this.AccessItemsForm.get('accessItemsGroups')?.valid ?? false),
+            distinctUntilChanged(),
+            takeUntil(this.destroy$)
+          )
+          .subscribe((isValid) => {
+            this.accessItemsValidityChanged.emit(isValid);
+          });
+
         this.accessItemsClone = this.cloneAccessItems();
         this.accessItemsResetClone = this.cloneAccessItems();
 

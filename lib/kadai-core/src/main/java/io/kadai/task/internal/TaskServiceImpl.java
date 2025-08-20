@@ -1051,6 +1051,14 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
+  public BulkOperationResults<String, KadaiException> createTaskCommentsBulk(
+      List<String> taskIds,
+      String text
+  ) throws InvalidArgumentException {
+    return taskCommentService.createTaskCommentsBulk(taskIds, text);
+  }
+
+  @Override
   public TaskComment updateTaskComment(TaskComment taskComment)
       throws ConcurrencyException,
           TaskCommentNotFoundException,

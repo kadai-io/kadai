@@ -1,5 +1,78 @@
-KADAI
-Copyright 2024 envite consulting GmbH.
+KADAI - NOTICES
+===============
+
+This file contains notices and attributions for third-party software 
+included in this project.
+
+================================================================================
+COPYRIGHT
+================================================================================
+
+Copyright 2025 envite consulting GmbH.
+Licensed under Apache License 2.0.
+
+================================================================================
+THIRD-PARTY LICENSES
+================================================================================
+
+This project includes dependencies with multiple license options. 
+We have chosen the following licenses:
+
+- net.java.dev.jna:jna - Apache License 2.0 
+  (https://www.apache.org/licenses/LICENSE-2.0)
+
+- com.unboundid:unboundid-ldapsdk - Apache License 2.0 
+  (https://www.apache.org/licenses/LICENSE-2.0)
+
+- jakarta.annotation:jakarta.annotation-api - Eclipse Public License 2.0 
+  (https://www.eclipse.org/legal/epl-2.0/)
+
+- jakarta.servlet:jakarta.servlet-api - Eclipse Public License 2.0 
+  (https://www.eclipse.org/legal/epl-2.0/)
+
+- com.h2database:h2 - Mozilla Public License 2.0 
+  (https://www.mozilla.org/en-US/MPL/2.0/)
+
+- ch.qos.logback:logback-classic and ch.qos.logback:logback-core - 
+  GNU Lesser General Public License v2.1 
+  (https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html)
+
+================================================================================
+IBM DB2 JDBC DRIVER
+================================================================================
+
+This product includes IBM Data Server Driver for JDBC and SQLJ
+Artifact: com.ibm.db2:jcc
+Copyright IBM Corporation
+
+Licensed under IBM's International Program License Agreement (IPLA)
+License Document: i125-3301-15 (10-2021)
+Full license text available at: http://www.ibm.com/software/sla
+
+The IBM Data Server Driver for JDBC and SQLJ is used to provide database 
+connectivity to IBM DB2 databases. This driver is licensed under IBM's 
+proprietary International Program License Agreement and is subject to the 
+terms and conditions specified therein.
+
+IBM Software Policies (including backup, temporary use, and IBM approved 
+cloud environment policies) available at http://www.ibm.com/softwarepolicies 
+apply to the use of this driver.
+
+Usage of this driver is subject to:
+- Authorized use limitations as defined in the IPLA
+- Compliance with IBM's licensing verification requirements
+- Restrictions on commercial IT services, hosting, or timesharing to third parties
+- Copyright notice reproduction requirements
+- Export/import regulation compliance
+
+For complete licensing terms and conditions, refer to the International 
+Program License Agreement (IPLA) document i125-3301-15 dated October 2021.
+
+Additional information about IBM DB2 products: https://www.ibm.com/products/db2-database
+
+================================================================================
+TASKANA MODIFICATIONS
+================================================================================
 
 This product is derived from the software TASKANA.
 

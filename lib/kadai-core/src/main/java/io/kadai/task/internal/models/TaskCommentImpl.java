@@ -36,11 +36,12 @@ public class TaskCommentImpl implements TaskComment {
   public TaskCommentImpl() {}
 
   public TaskCommentImpl(TaskCommentImpl copyFrom) {
-    taskId = copyFrom.taskId;
-    textField = copyFrom.textField;
-    creator = copyFrom.creator;
-    created = copyFrom.created;
-    modified = copyFrom.modified;
+    this.taskId = copyFrom.taskId;
+    this.textField = copyFrom.textField;
+    this.creator = copyFrom.creator;
+    this.creatorFullName = copyFrom.creatorFullName;
+    this.created = copyFrom.created != null ? Instant.from(copyFrom.created) : null;
+    this.modified = copyFrom.modified != null ? Instant.from(copyFrom.modified) : null;
   }
 
   @Override

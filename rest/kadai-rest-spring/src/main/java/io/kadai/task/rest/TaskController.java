@@ -48,6 +48,7 @@ import io.kadai.task.rest.assembler.TaskSummaryRepresentationModelAssembler;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
+import io.kadai.task.rest.models.TaskIdListRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryPagedRepresentationModel;
@@ -70,6 +71,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -344,6 +346,21 @@ public class TaskController implements TaskApi {
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(updatedTask));
   }
 
+  @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<BulkOperationResultsRepresentationModel> bulkComplete(
+         @RequestBody TaskIdListRepresentationModel completeTasksRepresentationModel)
+      throws InvalidArgumentException {
+
+    BulkOperationResults<String, KadaiException> errors =
+            taskService.completeTasks(completeTasksRepresentationModel.getTaskIds());
+
+    BulkOperationResultsRepresentationModel model =
+           bulkOperationResultsRepresentationModelAssembler.toModel(errors);
+
+    return ResponseEntity.ok(model);
+  }
+
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_COMPLETE_FORCE)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<TaskRepresentationModel> forceCompleteTask(
@@ -356,6 +373,21 @@ public class TaskController implements TaskApi {
     Task updatedTask = taskService.forceCompleteTask(taskId);
 
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(updatedTask));
+  }
+
+  @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE_FORCE)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<BulkOperationResultsRepresentationModel> bulkForceComplete(
+          @RequestBody TaskIdListRepresentationModel completeTasksRepresentationModel)
+          throws InvalidArgumentException {
+
+    BulkOperationResults<String, KadaiException> errors =
+            taskService.forceCompleteTasks(completeTasksRepresentationModel.getTaskIds());
+
+    BulkOperationResultsRepresentationModel model =
+            bulkOperationResultsRepresentationModelAssembler.toModel(errors);
+
+    return ResponseEntity.ok(model);
   }
 
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_CANCEL)
