@@ -179,4 +179,6 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  protected readonly ACTION = ACTION;
 }

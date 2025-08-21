@@ -60,6 +60,10 @@
     color: white;
   }
 
+  &__save-button[disabled] {
+    opacity: 0.5;
+  }
+
   &__button-aquamarine {
     color: $aquamarine;
   }
