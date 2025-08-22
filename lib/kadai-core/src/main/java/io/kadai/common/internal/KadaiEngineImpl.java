@@ -381,7 +381,7 @@ public class KadaiEngineImpl implements KadaiEngine {
             currentUserContext.getAccessIds(),
             rolesAsString);
       }
-      throw new NotAuthorizedException(currentUserContext.getUserContext().getUserId(), roles);
+      throw new NotAuthorizedException(currentUserContext.getUserId(), roles);
     }
   }
 
