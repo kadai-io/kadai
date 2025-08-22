@@ -392,7 +392,8 @@ public class KadaiEngineImpl implements KadaiEngine {
       String proxyAccessId =
           this.getConfiguration().getRoleMap().get(proxy).stream()
               .findFirst()
-              .orElseThrow(() -> new SystemException("There is no " + proxy + " configured"));
+              .orElseThrow(
+                  () -> new SystemException(String.format("There is no %s configured", proxy)));
       subject.getPrincipals().add(new ProxyPrincipal(proxyAccessId));
     }
     if (userId != null) {
