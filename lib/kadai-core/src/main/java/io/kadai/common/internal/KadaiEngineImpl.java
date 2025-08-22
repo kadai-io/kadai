@@ -34,8 +34,8 @@ import io.kadai.common.api.exceptions.AutocommitFailedException;
 import io.kadai.common.api.exceptions.ConnectionNotSetException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
-import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.api.security.ProxyPrincipal;
+import io.kadai.common.api.security.UserContext;
 import io.kadai.common.api.security.UserPrincipal;
 import io.kadai.common.internal.configuration.DB;
 import io.kadai.common.internal.configuration.DbSchemaCreator;
@@ -44,7 +44,7 @@ import io.kadai.common.internal.jobs.RealClock;
 import io.kadai.common.internal.pagination.PageInterceptor;
 import io.kadai.common.internal.persistence.InstantTypeHandler;
 import io.kadai.common.internal.persistence.MapTypeHandler;
-import io.kadai.common.internal.security.CurrentUserContextImpl;
+import io.kadai.common.internal.security.UserContextImpl;
 import io.kadai.common.internal.workingtime.HolidaySchedule;
 import io.kadai.common.internal.workingtime.WorkingDayCalculatorImpl;
 import io.kadai.common.internal.workingtime.WorkingTimeCalculatorImpl;
@@ -126,7 +126,7 @@ public class KadaiEngineImpl implements KadaiEngine {
   private final InternalKadaiEngineImpl internalKadaiEngineImpl;
   private final WorkingTimeCalculator workingTimeCalculator;
   private final HistoryEventManager historyEventManager;
-  private final CurrentUserContext currentUserContext;
+  private final UserContext userContext;
   private final JobScheduler jobScheduler;
   protected ConnectionManagementMode mode;
   protected TransactionFactory transactionFactory;
@@ -168,8 +168,7 @@ public class KadaiEngineImpl implements KadaiEngine {
               holidaySchedule, kadaiConfiguration.getWorkingTimeScheduleTimeZone());
     }
 
-    currentUserContext =
-        new CurrentUserContextImpl(KadaiConfiguration.shouldUseLowerCaseForAccessIds());
+    userContext = UserContextImpl.current();
     if (transactionFactory == null) {
       createTransactionFactory(kadaiConfiguration.isUseManagedTransactions());
     } else {
@@ -357,7 +356,7 @@ public class KadaiEngineImpl implements KadaiEngine {
       return true;
     }
 
-    List<String> accessIds = currentUserContext.getAccessIds();
+    List<String> accessIds = userContext.getAccessIds();
     Set<String> rolesMembers = new HashSet<>();
     for (KadaiRole role : roles) {
       rolesMembers.addAll(getConfiguration().getRoleMap().get(role));
@@ -378,10 +377,10 @@ public class KadaiEngineImpl implements KadaiEngine {
         String rolesAsString = Arrays.toString(roles);
         LOGGER.debug(
             "Throwing NotAuthorizedException because accessIds {} are not member of roles {}",
-            currentUserContext.getAccessIds(),
+            userContext.getAccessIds(),
             rolesAsString);
       }
-      throw new NotAuthorizedException(currentUserContext.getUserId(), roles);
+      throw new NotAuthorizedException(userContext.getUserId(), roles);
     }
   }
 
@@ -404,8 +403,8 @@ public class KadaiEngineImpl implements KadaiEngine {
   }
 
   @Override
-  public CurrentUserContext getCurrentUserContext() {
-    return currentUserContext;
+  public UserContext getCurrentUserContext() {
+    return userContext;
   }
 
   @Override

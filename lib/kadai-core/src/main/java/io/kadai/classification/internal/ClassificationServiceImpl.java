@@ -82,24 +82,6 @@ public class ClassificationServiceImpl implements ClassificationService {
     this.historyEventManager = kadaiEngine.getHistoryEventManager();
   }
 
-  private static void validateServiceLevel(Classification classification)
-      throws MalformedServiceLevelException {
-    String serviceLevel = classification.getServiceLevel();
-    Duration duration;
-
-    try {
-      duration = Duration.parse(serviceLevel);
-    } catch (Exception e) {
-      throw new MalformedServiceLevelException(
-          serviceLevel, classification.getKey(), classification.getDomain());
-    }
-
-    if (duration.isNegative()) {
-      throw new MalformedServiceLevelException(
-          serviceLevel, classification.getKey(), classification.getDomain());
-    }
-  }
-
   @Override
   public Classification getClassification(String key, String domain)
       throws ClassificationNotFoundException {
@@ -183,11 +165,7 @@ public class ClassificationServiceImpl implements ClassificationService {
                       IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
                   classification,
                   kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                  kadaiEngine
-                      .getEngine()
-                      .getCurrentUserContext()
-                      .getUserContext()
-                      .getProxyAccessId(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                   details));
         }
 
@@ -260,7 +238,7 @@ public class ClassificationServiceImpl implements ClassificationService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
                 classificationImpl,
                 kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getProxyAccessId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 details));
       }
 
@@ -324,7 +302,7 @@ public class ClassificationServiceImpl implements ClassificationService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
                 classificationImpl,
                 kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getProxyAccessId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 details));
       }
       if (LOGGER.isDebugEnabled()) {
@@ -350,6 +328,24 @@ public class ClassificationServiceImpl implements ClassificationService {
     classification.setDomain(domain);
     classification.setType(type);
     return classification;
+  }
+
+  private static void validateServiceLevel(Classification classification)
+      throws MalformedServiceLevelException {
+    String serviceLevel = classification.getServiceLevel();
+    Duration duration;
+
+    try {
+      duration = Duration.parse(serviceLevel);
+    } catch (Exception e) {
+      throw new MalformedServiceLevelException(
+          serviceLevel, classification.getKey(), classification.getDomain());
+    }
+
+    if (duration.isNegative()) {
+      throw new MalformedServiceLevelException(
+          serviceLevel, classification.getKey(), classification.getDomain());
+    }
   }
 
   private void validateAndPopulateParentInformation(ClassificationImpl classificationImpl)

@@ -18,57 +18,106 @@
 
 package io.kadai.common.internal.security;
 
+import static java.util.function.Predicate.not;
+
+import io.kadai.common.api.security.GroupPrincipal;
+import io.kadai.common.api.security.ProxyPrincipal;
 import io.kadai.common.api.security.UserContext;
+import io.kadai.common.api.security.UserPrincipal;
+import java.security.AccessController;
+import java.security.Principal;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import javax.security.auth.Subject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UserContextImpl implements UserContext {
 
-  private final String userId;
-  private final String proxyAccessId;
+  private static final Logger LOGGER = LoggerFactory.getLogger(UserContextImpl.class);
 
-  public UserContextImpl(String userId, String proxyAccessId) {
-    this.userId = userId;
-    this.proxyAccessId = proxyAccessId;
-  }
+  private UserContextImpl() {}
 
-  public UserContextImpl(String userId) {
-    this.userId = userId;
-    this.proxyAccessId = null;
+  public static UserContext current() {
+    return new UserContextImpl();
   }
 
   @Override
+  @SuppressWarnings("removal")
   public String getUserId() {
-    return this.userId;
+    // TODO replace with Subject.current() when migrating to newer Version than 17
+    Subject subject = Subject.getSubject(AccessController.getContext());
+    LOGGER.trace("Subject of caller: {}", subject);
+    if (subject != null) {
+      final Set<Principal> principals = subject.getPrincipals();
+      LOGGER.trace("Public principals of caller: {}", principals);
+      return principals.stream()
+          .filter(not(GroupPrincipal.class::isInstance))
+          .filter(UserPrincipal.class::isInstance)
+          .map(Principal::getName)
+          .map(UserContextImpl::convertAccessId)
+          .findFirst()
+          .orElse(null);
+    }
+    LOGGER.trace("No userId found in subject!");
+    return null;
   }
 
   @Override
+  @SuppressWarnings("removal")
   public String getProxyAccessId() {
-    return this.proxyAccessId;
+    // TODO replace with Subject.current() when migrating to newer Version than 17
+    Subject subject = Subject.getSubject(AccessController.getContext());
+    LOGGER.trace("Subject of caller: {}", subject);
+    if (subject != null) {
+      final Set<Principal> principals = subject.getPrincipals();
+      LOGGER.trace("Public principals of caller: {}", principals);
+      return principals.stream()
+          .filter(not(GroupPrincipal.class::isInstance))
+          .filter(ProxyPrincipal.class::isInstance)
+          .map(Principal::getName)
+          .map(UserContextImpl::convertAccessId)
+          .findFirst()
+          .orElse(null);
+    }
+    LOGGER.trace("No proxyAccessId found in subject!");
+    return null;
   }
 
   @Override
-  public String toString() {
-    return "UserContextImpl [userId=" + userId + ", proxyAccessId=" + proxyAccessId + "]";
+  @SuppressWarnings("removal")
+  public List<String> getGroupIds() {
+    // TODO replace with Subject.current() when migrating to newer Version than 17
+    Subject subject = Subject.getSubject(AccessController.getContext());
+    LOGGER.trace("Subject of caller: {}", subject);
+    if (subject != null) {
+      Set<GroupPrincipal> groups = subject.getPrincipals(GroupPrincipal.class);
+      LOGGER.trace("Public groups of caller: {}", groups);
+      return groups.stream()
+          .map(Principal::getName)
+          .filter(Objects::nonNull)
+          .map(UserContextImpl::convertAccessId)
+          .toList();
+    }
+    LOGGER.trace("No groupIds found in subject!");
+    return Collections.emptyList();
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    UserContextImpl other = (UserContextImpl) obj;
-    return Objects.equals(userId, other.userId)
-        && Objects.equals(proxyAccessId, other.proxyAccessId);
+  public List<String> getAccessIds() {
+    Set<String> accessIds = new HashSet<>(getGroupIds());
+    accessIds.add(getUserId());
+    accessIds.add(getProxyAccessId());
+
+    return accessIds.stream().toList();
   }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(userId, proxyAccessId);
+  private static String convertAccessId(String accessId) {
+    String toReturn = accessId.toLowerCase();
+    LOGGER.trace("Found AccessId '{}'. Returning AccessId '{}' ", accessId, toReturn);
+    return toReturn;
   }
 }

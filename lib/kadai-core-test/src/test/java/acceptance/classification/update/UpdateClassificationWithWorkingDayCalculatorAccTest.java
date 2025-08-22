@@ -39,7 +39,7 @@ import io.kadai.common.api.WorkingTimeCalculator;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
-import io.kadai.common.api.security.CurrentUserContext;
+import io.kadai.common.api.security.UserContext;
 import io.kadai.common.internal.jobs.JobRunner;
 import io.kadai.common.internal.util.Pair;
 import io.kadai.task.api.TaskService;
@@ -82,7 +82,7 @@ class UpdateClassificationWithWorkingDayCalculatorAccTest implements KadaiConfig
   @KadaiInject TaskService taskService;
   @KadaiInject WorkbasketService workbasketService;
   @KadaiInject WorkingTimeCalculator workingTimeCalculator;
-  @KadaiInject CurrentUserContext currentUserContext;
+  @KadaiInject UserContext userContext;
 
   @Override
   public Builder modify(Builder builder) {
@@ -161,7 +161,7 @@ class UpdateClassificationWithWorkingDayCalculatorAccTest implements KadaiConfig
         defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
     WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
         .workbasketId(workbasketSummary.getId())
-        .accessId(currentUserContext.getUserId())
+        .accessId(userContext.getUserId())
         .permission(WorkbasketPermission.OPEN)
         .permission(WorkbasketPermission.READ)
         .permission(WorkbasketPermission.READTASKS)
@@ -184,7 +184,7 @@ class UpdateClassificationWithWorkingDayCalculatorAccTest implements KadaiConfig
         defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
     WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
         .workbasketId(workbasketSummary.getId())
-        .accessId(currentUserContext.getUserId())
+        .accessId(userContext.getUserId())
         .permission(WorkbasketPermission.OPEN)
         .permission(WorkbasketPermission.READ)
         .permission(WorkbasketPermission.READTASKS)
@@ -238,7 +238,7 @@ class UpdateClassificationWithWorkingDayCalculatorAccTest implements KadaiConfig
           defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
       WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
           .workbasketId(workbasketSummary.getId())
-          .accessId(currentUserContext.getUserId())
+          .accessId(userContext.getUserId())
           .permission(WorkbasketPermission.OPEN)
           .permission(WorkbasketPermission.READ)
           .permission(WorkbasketPermission.READTASKS)
@@ -283,7 +283,7 @@ class UpdateClassificationWithWorkingDayCalculatorAccTest implements KadaiConfig
           defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
       WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
           .workbasketId(workbasketSummary.getId())
-          .accessId(currentUserContext.getUserId())
+          .accessId(userContext.getUserId())
           .permission(WorkbasketPermission.OPEN)
           .permission(WorkbasketPermission.READ)
           .permission(WorkbasketPermission.READTASKS)
@@ -788,9 +788,7 @@ class UpdateClassificationWithWorkingDayCalculatorAccTest implements KadaiConfig
 
       NotAuthorizedException expectedException =
           new NotAuthorizedException(
-              currentUserContext.getUserId(),
-              KadaiRole.BUSINESS_ADMIN,
-              KadaiRole.ADMIN);
+              userContext.getUserId(), KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
       assertThatThrownBy(() -> classificationService.updateClassification(classification))
           .usingRecursiveComparison()
           .isEqualTo(expectedException);
@@ -808,9 +806,7 @@ class UpdateClassificationWithWorkingDayCalculatorAccTest implements KadaiConfig
 
       NotAuthorizedException expectedException =
           new NotAuthorizedException(
-              currentUserContext.getUserId(),
-              KadaiRole.BUSINESS_ADMIN,
-              KadaiRole.ADMIN);
+              userContext.getUserId(), KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
       assertThatThrownBy(() -> classificationService.updateClassification(classification))
           .usingRecursiveComparison()
           .isEqualTo(expectedException);

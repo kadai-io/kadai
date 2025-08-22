@@ -27,13 +27,13 @@ import io.kadai.common.api.ConfigurationService;
 import io.kadai.common.api.JobService;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.WorkingTimeCalculator;
-import io.kadai.common.api.security.CurrentUserContext;
+import io.kadai.common.api.security.UserContext;
 import io.kadai.common.internal.ConfigurationMapper;
 import io.kadai.common.internal.ConfigurationServiceImpl;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.JobServiceImpl;
 import io.kadai.common.internal.KadaiEngineImpl;
-import io.kadai.common.internal.security.CurrentUserContextImpl;
+import io.kadai.common.internal.security.UserContextImpl;
 import io.kadai.common.internal.workingtime.WorkingTimeCalculatorImpl;
 import io.kadai.monitor.api.MonitorService;
 import io.kadai.monitor.internal.MonitorServiceImpl;
@@ -68,8 +68,8 @@ class KadaiDependencyInjectionExtensionTest {
   @KadaiInject ConfigurationServiceImpl configurationServiceImpl;
   @KadaiInject WorkingTimeCalculator workingTimeCalculator;
   @KadaiInject WorkingTimeCalculatorImpl workingTimeCalculatorImpl;
-  @KadaiInject CurrentUserContext currentUserContext;
-  @KadaiInject CurrentUserContextImpl currentUserContextImpl;
+  @KadaiInject UserContext userContext;
+  @KadaiInject UserContextImpl currentUserContextImpl;
   @KadaiInject ConfigurationMapper configurationMapper;
   @KadaiInject UserService userService;
   @KadaiInject UserServiceImpl userServiceImpl;
@@ -229,19 +229,19 @@ class KadaiDependencyInjectionExtensionTest {
 
   @Test
   void should_InjectCurrentUserContext_When_FieldIsAnnotatedOrDeclaredAsParameter(
-      CurrentUserContext currentUserContext) {
-    assertThat(currentUserContext)
-        .isSameAs(this.currentUserContext)
+      UserContext userContext) {
+    assertThat(userContext)
+        .isSameAs(this.userContext)
         .isSameAs(this.currentUserContextImpl)
         .isNotNull();
   }
 
   @Test
   void should_InjectCurrentUserContextImpl_When_FieldIsAnnotatedOrDeclaredAsParameter(
-      CurrentUserContextImpl currentUserContextImpl) {
+      UserContextImpl currentUserContextImpl) {
     assertThat(currentUserContextImpl)
         .isSameAs(this.currentUserContextImpl)
-        .isSameAs(this.currentUserContext)
+        .isSameAs(this.userContext)
         .isNotNull();
   }
 

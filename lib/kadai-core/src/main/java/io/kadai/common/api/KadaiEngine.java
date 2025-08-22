@@ -22,7 +22,7 @@ import io.kadai.KadaiConfiguration;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
-import io.kadai.common.api.security.CurrentUserContext;
+import io.kadai.common.api.security.UserContext;
 import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.common.internal.workingtime.WorkingTimeCalculatorImpl;
 import io.kadai.monitor.api.MonitorService;
@@ -267,8 +267,8 @@ public interface KadaiEngine {
   /**
    * This is a convenience-method for {@link #runAs(Supplier, KadaiRole, String)}.
    *
-   * <p>It <b>overrides</b> the {@linkplain CurrentUserContext#getUserId() current userId} with one
-   * of an admin, leaving the <b>proxy empty</b>.
+   * <p>It <b>overrides</b> the {@linkplain UserContext#getUserId() current userId} with one of an
+   * admin, leaving the <b>proxy empty</b>.
    *
    * @param supplier the action to execute
    * @param <T> the return value of the action
@@ -303,8 +303,8 @@ public interface KadaiEngine {
   /**
    * This is a convenience-method for {@link #runAs(Supplier, KadaiRole, String)}.
    *
-   * <p>It <b>overrides</b> the {@linkplain CurrentUserContext#getUserId() current userId} with one
-   * of an admin, leaving the <b>proxy empty</b>.
+   * <p>It <b>overrides</b> the {@linkplain UserContext#getUserId() current userId} with one of an
+   * admin, leaving the <b>proxy empty</b>.
    *
    * @param runnable the action to execute
    * @see #runAs(Supplier, KadaiRole, String)
@@ -334,11 +334,11 @@ public interface KadaiEngine {
   }
 
   /**
-   * Returns the {@linkplain CurrentUserContext} of the KadaiEngine.
+   * Returns the {@linkplain UserContext} of the KadaiEngine.
    *
-   * @return {@linkplain CurrentUserContext}
+   * @return {@linkplain UserContext}
    */
-  CurrentUserContext getCurrentUserContext();
+  UserContext getCurrentUserContext();
 
   /** Clears the cache of the underlying local SQL session. */
   void clearSqlSessionCache();

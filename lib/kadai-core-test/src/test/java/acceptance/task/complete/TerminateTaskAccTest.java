@@ -28,7 +28,7 @@ import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.models.ClassificationSummary;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
-import io.kadai.common.api.security.CurrentUserContext;
+import io.kadai.common.api.security.UserContext;
 import io.kadai.common.internal.util.Triplet;
 import io.kadai.spi.task.api.TaskEndstatePreprocessor;
 import io.kadai.task.api.TaskService;
@@ -63,7 +63,7 @@ class TerminateTaskAccTest {
   @KadaiInject TaskService taskService;
   @KadaiInject ClassificationService classificationService;
   @KadaiInject WorkbasketService workbasketService;
-  @KadaiInject CurrentUserContext currentUserContext;
+  @KadaiInject UserContext userContext;
 
   ClassificationSummary defaultClassificationSummary;
   WorkbasketSummary defaultWorkbasketSummary;
@@ -132,7 +132,7 @@ class TerminateTaskAccTest {
     ThrowingCallable call = () -> taskService.terminateTask(task.getId());
 
     NotAuthorizedException e = catchThrowableOfType(NotAuthorizedException.class, call);
-    assertThat(e.getCurrentUserId()).isEqualTo(currentUserContext.getUserId());
+    assertThat(e.getCurrentUserId()).isEqualTo(userContext.getUserId());
     assertThat(e.getRoles()).containsExactlyInAnyOrder(KadaiRole.ADMIN, KadaiRole.TASK_ADMIN);
   }
 

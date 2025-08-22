@@ -22,8 +22,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-import io.kadai.common.api.security.CurrentUserContext;
-import io.kadai.common.internal.security.CurrentUserContextImpl;
+import io.kadai.common.api.security.UserContext;
+import io.kadai.common.internal.security.UserContextImpl;
 import io.kadai.common.test.security.JaasExtensionTestExtensions.ShouldThrowJunitException;
 import io.kadai.common.test.security.JaasExtensionTestExtensions.ShouldThrowParameterResolutionException;
 import java.time.DayOfWeek;
@@ -51,21 +51,15 @@ import org.junit.jupiter.params.provider.EnumSource;
 class JaasExtensionTest {
 
   private static final String INSIDE_DYNAMIC_TEST_USER = "inside_dynamic_test";
-  private static final CurrentUserContext CURRENT_USER_CONTEXT = new CurrentUserContextImpl(true);
+  private static final UserContext CURRENT_USER_CONTEXT = UserContextImpl.current();
   private static final DynamicTest NOT_NULL_DYNAMIC_TEST =
-      dynamicTest(
-          "dynamic test",
-          () -> assertThat(CURRENT_USER_CONTEXT.getUserId()).isNotNull());
+      dynamicTest("dynamic test", () -> assertThat(CURRENT_USER_CONTEXT.getUserId()).isNotNull());
   private static final DynamicTest NULL_DYNAMIC_TEST =
-      dynamicTest(
-          "dynamic test",
-          () -> assertThat(CURRENT_USER_CONTEXT.getUserId()).isNull());
+      dynamicTest("dynamic test", () -> assertThat(CURRENT_USER_CONTEXT.getUserId()).isNull());
   private static final DynamicTest DYNAMIC_TEST_USER_DYNAMIC_TEST =
       dynamicTest(
           "dynamic test",
-          () ->
-              assertThat(CURRENT_USER_CONTEXT.getUserId())
-                  .isEqualTo(INSIDE_DYNAMIC_TEST_USER));
+          () -> assertThat(CURRENT_USER_CONTEXT.getUserId()).isEqualTo(INSIDE_DYNAMIC_TEST_USER));
 
   // region JaasExtension#interceptBeforeAllMethod
 

@@ -31,7 +31,7 @@ import io.kadai.common.api.BulkOperationResults;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.KadaiException;
-import io.kadai.common.api.security.CurrentUserContext;
+import io.kadai.common.api.security.UserContext;
 import io.kadai.common.internal.util.EnumUtil;
 import io.kadai.common.internal.util.Triplet;
 import io.kadai.task.api.TaskService;
@@ -72,7 +72,7 @@ import org.junit.jupiter.api.function.ThrowingConsumer;
 class CompleteTaskAccTest implements KadaiConfigurationModifier {
 
   @KadaiInject TaskService taskService;
-  @KadaiInject CurrentUserContext currentUserContext;
+  @KadaiInject UserContext userContext;
 
   @KadaiInject UserService userService;
 
@@ -317,7 +317,7 @@ class CompleteTaskAccTest implements KadaiConfigurationModifier {
 
     NotAuthorizedOnWorkbasketException e =
         catchThrowableOfType(NotAuthorizedOnWorkbasketException.class, call);
-    assertThat(e.getCurrentUserId()).isEqualTo(currentUserContext.getUserId());
+    assertThat(e.getCurrentUserId()).isEqualTo(userContext.getUserId());
     WorkbasketSummary workbasket = claimedTask.getWorkbasketSummary();
     assertThat(e.getWorkbasketId()).isEqualTo(workbasket.getId());
     assertThat(e.getRequiredPermissions())
@@ -836,7 +836,7 @@ class CompleteTaskAccTest implements KadaiConfigurationModifier {
   private void assertTaskIsComplete(Instant before, Task completedTask) {
     assertThat(completedTask).isNotNull();
     assertThat(completedTask.getState()).isEqualTo(TaskState.COMPLETED);
-    assertThat(completedTask.getOwner()).isEqualTo(currentUserContext.getUserId());
+    assertThat(completedTask.getOwner()).isEqualTo(userContext.getUserId());
     assertThat(completedTask.getCompleted())
         .isNotNull()
         .isEqualTo(completedTask.getModified())

@@ -64,9 +64,8 @@ class KadaiSecurityAccTest extends AbstractAccTest {
   void should_TemporarilyRunAsWithProxiedAccessId(
       KadaiRole proxy, String userId, String expectedProxyAccessId) throws Exception {
     assertThat(kadaiEngine.isUserInRole(proxy)).isFalse();
-    assertThat(kadaiEngine.getCurrentUserContext().getUserContext().getProxyAccessId()).isNull();
-    assertThat(kadaiEngine.getCurrentUserContext().getUserContext().getUserId())
-        .isEqualTo("user-1-1");
+    assertThat(kadaiEngine.getCurrentUserContext().getProxyAccessId()).isNull();
+    assertThat(kadaiEngine.getCurrentUserContext().getUserId()).isEqualTo("user-1-1");
     assertThat(kadaiEngine.getCurrentUserContext().getUserId()).isEqualTo("user-1-1");
 
     new KadaiEngineProxy(kadaiEngine)
@@ -75,19 +74,17 @@ class KadaiSecurityAccTest extends AbstractAccTest {
         .runAs(
             () -> {
               assertThat(kadaiEngine.isUserInRole(proxy)).isTrue();
-              assertThat(kadaiEngine.getCurrentUserContext().getUserContext().getProxyAccessId())
+              assertThat(kadaiEngine.getCurrentUserContext().getProxyAccessId())
                   .isEqualTo(expectedProxyAccessId);
-              assertThat(kadaiEngine.getCurrentUserContext().getUserContext().getUserId())
-                  .isEqualTo(userId);
+              assertThat(kadaiEngine.getCurrentUserContext().getUserId()).isEqualTo(userId);
               assertThat(kadaiEngine.getCurrentUserContext().getUserId()).isEqualTo(userId);
             },
             proxy,
             userId);
 
     assertThat(kadaiEngine.isUserInRole(proxy)).isFalse();
-    assertThat(kadaiEngine.getCurrentUserContext().getUserContext().getProxyAccessId()).isNull();
-    assertThat(kadaiEngine.getCurrentUserContext().getUserContext().getUserId())
-        .isEqualTo("user-1-1");
+    assertThat(kadaiEngine.getCurrentUserContext().getProxyAccessId()).isNull();
+    assertThat(kadaiEngine.getCurrentUserContext().getUserId()).isEqualTo("user-1-1");
   }
 
   @ParameterizedTest
@@ -107,9 +104,8 @@ class KadaiSecurityAccTest extends AbstractAccTest {
   @WithAccessId(user = "user-1-2")
   void should_TemporarilyRunAsAdmin(String userId) throws Exception {
     assertThat(kadaiEngine.isUserInRole(KadaiRole.ADMIN)).isFalse();
-    assertThat(kadaiEngine.getCurrentUserContext().getUserContext().getProxyAccessId()).isNull();
-    assertThat(kadaiEngine.getCurrentUserContext().getUserContext().getUserId())
-        .isEqualTo("user-1-2");
+    assertThat(kadaiEngine.getCurrentUserContext().getProxyAccessId()).isNull();
+    assertThat(kadaiEngine.getCurrentUserContext().getUserId()).isEqualTo("user-1-2");
     assertThat(kadaiEngine.getCurrentUserContext().getUserId()).isEqualTo("user-1-2");
 
     new KadaiEngineProxy(kadaiEngine)
@@ -118,18 +114,16 @@ class KadaiSecurityAccTest extends AbstractAccTest {
         .runAsAdmin(
             () -> {
               assertThat(kadaiEngine.isUserInRole(KadaiRole.ADMIN)).isTrue();
-              assertThat(kadaiEngine.getCurrentUserContext().getUserContext().getProxyAccessId())
+              assertThat(kadaiEngine.getCurrentUserContext().getProxyAccessId())
                   .isEqualTo("uid=admin,cn=users,ou=test,o=kadai");
-              assertThat(kadaiEngine.getCurrentUserContext().getUserContext().getUserId())
-                  .isEqualTo(userId);
+              assertThat(kadaiEngine.getCurrentUserContext().getUserId()).isEqualTo(userId);
               assertThat(kadaiEngine.getCurrentUserContext().getUserId()).isEqualTo(userId);
             },
             userId);
 
     assertThat(kadaiEngine.isUserInRole(KadaiRole.ADMIN)).isFalse();
-    assertThat(kadaiEngine.getCurrentUserContext().getUserContext().getProxyAccessId()).isNull();
-    assertThat(kadaiEngine.getCurrentUserContext().getUserContext().getUserId())
-        .isEqualTo("user-1-2");
+    assertThat(kadaiEngine.getCurrentUserContext().getProxyAccessId()).isNull();
+    assertThat(kadaiEngine.getCurrentUserContext().getUserId()).isEqualTo("user-1-2");
   }
 
   @WithAccessId(user = "user-1-1")

@@ -20,7 +20,6 @@ package io.kadai.workbasket.internal;
 
 import static io.kadai.common.api.SharedConstants.MASTER_DOMAIN;
 
-import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.BulkOperationResults;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.api.exceptions.ConcurrencyException;
@@ -186,7 +185,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                 newWorkbasket,
                 kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getProxyAccessId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 details));
       }
       if (LOGGER.isDebugEnabled()) {
@@ -247,7 +246,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                 workbasketToUpdate,
                 kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getProxyAccessId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 details));
       }
 
@@ -266,11 +265,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
   public WorkbasketAccessItem newWorkbasketAccessItem(String workbasketId, String accessId) {
     WorkbasketAccessItemImpl accessItem = new WorkbasketAccessItemImpl();
     accessItem.setWorkbasketId(workbasketId);
-    if (KadaiConfiguration.shouldUseLowerCaseForAccessIds()) {
-      accessItem.setAccessId(accessId != null ? accessId.toLowerCase() : null);
-    } else {
-      accessItem.setAccessId(accessId);
-    }
+    accessItem.setAccessId(accessId != null ? accessId.toLowerCase() : null);
     return accessItem;
   }
 
@@ -315,11 +310,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
                   IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                   wb,
                   kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                  kadaiEngine
-                      .getEngine()
-                      .getCurrentUserContext()
-                      .getUserContext()
-                      .getProxyAccessId(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                   details));
         }
         if (LOGGER.isDebugEnabled()) {
@@ -382,7 +373,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                 workbasket,
                 kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getProxyAccessId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 details));
       }
 
@@ -421,7 +412,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                 workbasket,
                 kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getProxyAccessId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 details));
       }
 
@@ -560,7 +551,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                 workbasket,
                 kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getProxyAccessId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 details));
       }
     } finally {
@@ -688,11 +679,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
                   IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                   sourceWorkbasket,
                   kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                  kadaiEngine
-                      .getEngine()
-                      .getCurrentUserContext()
-                      .getUserContext()
-                      .getProxyAccessId(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                   details));
         }
       }
@@ -744,11 +731,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
                   IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                   sourceWorkbasket,
                   kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                  kadaiEngine
-                      .getEngine()
-                      .getCurrentUserContext()
-                      .getUserContext()
-                      .getProxyAccessId(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                   details));
         }
         if (LOGGER.isDebugEnabled()) {
@@ -796,11 +779,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
                     IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                     workbasket,
                     kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                    kadaiEngine
-                        .getEngine()
-                        .getCurrentUserContext()
-                        .getUserContext()
-                        .getProxyAccessId(),
+                    kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                     details));
           }
         }
@@ -889,11 +868,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
                   IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                   workbasketToDelete,
                   kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                  kadaiEngine
-                      .getEngine()
-                      .getCurrentUserContext()
-                      .getUserContext()
-                      .getProxyAccessId(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                   details));
         }
       } else {
@@ -985,7 +960,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
     kadaiEngine.getEngine().checkRoleMembership(KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
     try {
       kadaiEngine.openConnection();
-      if (KadaiConfiguration.shouldUseLowerCaseForAccessIds() && accessId != null) {
+      if (accessId != null) {
         accessId = accessId.toLowerCase();
       }
 
@@ -1010,11 +985,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
                   IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                   workbasket,
                   kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                  kadaiEngine
-                      .getEngine()
-                      .getCurrentUserContext()
-                      .getUserContext()
-                      .getProxyAccessId(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                   details));
         }
       }
@@ -1205,7 +1176,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                 workbasket,
                 kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getProxyAccessId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 null));
       }
     } finally {

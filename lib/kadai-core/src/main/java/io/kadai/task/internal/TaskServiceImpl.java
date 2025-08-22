@@ -642,7 +642,7 @@ public class TaskServiceImpl implements TaskService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                 task,
                 userId,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getProxyAccessId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 changeDetails));
       }
 
@@ -749,7 +749,7 @@ public class TaskServiceImpl implements TaskService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                 task,
                 userId,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getProxyAccessId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 changeDetails));
       }
     } finally {
@@ -1038,11 +1038,7 @@ public class TaskServiceImpl implements TaskService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                 cancelledTask,
                 kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                kadaiEngine
-                    .getEngine()
-                    .getCurrentUserContext()
-                    .getUserContext()
-                    .getProxyAccessId()));
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId()));
       }
     } finally {
       kadaiEngine.returnConnection();
@@ -1225,11 +1221,7 @@ public class TaskServiceImpl implements TaskService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                 terminatedTask,
                 kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                kadaiEngine
-                    .getEngine()
-                    .getCurrentUserContext()
-                    .getUserContext()
-                    .getProxyAccessId()));
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId()));
       }
 
     } finally {
@@ -1539,7 +1531,7 @@ public class TaskServiceImpl implements TaskService {
               IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
               createdTask,
               kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-              kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getProxyAccessId(),
+              kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
               details));
     }
   }
@@ -1725,11 +1717,7 @@ public class TaskServiceImpl implements TaskService {
                   IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                   task,
                   userId,
-                  kadaiEngine
-                      .getEngine()
-                      .getCurrentUserContext()
-                      .getUserContext()
-                      .getProxyAccessId(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                   changeDetails));
         } else {
           historyEventManager.createEvent(
@@ -1737,11 +1725,7 @@ public class TaskServiceImpl implements TaskService {
                   IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                   task,
                   userId,
-                  kadaiEngine
-                      .getEngine()
-                      .getCurrentUserContext()
-                      .getUserContext()
-                      .getProxyAccessId(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                   changeDetails));
         }
       }
@@ -1791,7 +1775,7 @@ public class TaskServiceImpl implements TaskService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                 task,
                 userId,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getProxyAccessId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 changeDetails));
       }
 
@@ -1844,7 +1828,7 @@ public class TaskServiceImpl implements TaskService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                 task,
                 userId,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getProxyAccessId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 changeDetails));
       }
       task = (TaskImpl) afterRequestChangesManager.afterRequestChanges(task, workbasketId, ownerId);
@@ -1935,7 +1919,7 @@ public class TaskServiceImpl implements TaskService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                 task,
                 userId,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getProxyAccessId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 changeDetails));
       }
     } finally {
@@ -1983,11 +1967,7 @@ public class TaskServiceImpl implements TaskService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                 task,
                 userId,
-                kadaiEngine
-                    .getEngine()
-                    .getCurrentUserContext()
-                    .getUserContext()
-                    .getProxyAccessId()));
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId()));
       }
     } finally {
       kadaiEngine.returnConnection();
@@ -2591,11 +2571,7 @@ public class TaskServiceImpl implements TaskService {
                     IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                     task,
                     kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                    kadaiEngine
-                        .getEngine()
-                        .getCurrentUserContext()
-                        .getUserContext()
-                        .getProxyAccessId())));
+                    kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId())));
   }
 
   private void createTaskDeletedEvent(String taskId) {
@@ -2605,7 +2581,7 @@ public class TaskServiceImpl implements TaskService {
             newTask().asSummary(),
             taskId,
             kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-            kadaiEngine.getEngine().getCurrentUserContext().getUserContext().getProxyAccessId()));
+            kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId()));
   }
 
   private TaskImpl duplicateTaskExactly(TaskImpl task) {

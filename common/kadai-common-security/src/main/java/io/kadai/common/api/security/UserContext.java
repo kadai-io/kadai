@@ -18,7 +18,9 @@
 
 package io.kadai.common.api.security;
 
-/** Interface specifying a user-context within Kadai. */
+import java.util.List;
+
+/** Provides the context information about a user. */
 public interface UserContext {
 
   /**
@@ -37,4 +39,18 @@ public interface UserContext {
    * @return id of the contexts' proxy
    */
   String getProxyAccessId();
+
+  /**
+   * Returns all groupIds of the user.
+   *
+   * @return list containing all groupIds of the current user.
+   */
+  List<String> getGroupIds();
+
+  /**
+   * Returns all accessIds of the user. This combines the userId and all groupIds of the user.
+   *
+   * @return list containing all accessIds of the user.
+   */
+  List<String> getAccessIds();
 }

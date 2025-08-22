@@ -20,7 +20,6 @@ package io.kadai.user.internal;
 
 import static io.kadai.common.internal.util.CheckedSupplier.wrapping;
 
-import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
@@ -71,15 +70,10 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public User getUser(String userId) throws UserNotFoundException, InvalidArgumentException {
-    if (userId == null || userId.equals("")) {
+    if (userId == null || userId.isEmpty()) {
       throw new InvalidArgumentException("UserId can't be used as NULL-Parameter.");
     }
-    String finalUserId;
-    if (KadaiConfiguration.shouldUseLowerCaseForAccessIds()) {
-      finalUserId = userId.toLowerCase();
-    } else {
-      finalUserId = userId;
-    }
+    String finalUserId = userId.toLowerCase();
 
     UserImpl user =
         internalKadaiEngine.executeInDatabaseConnection(() -> userMapper.findById(finalUserId));
@@ -96,12 +90,8 @@ public class UserServiceImpl implements UserService {
     if (userIds == null || userIds.isEmpty()) {
       throw new InvalidArgumentException("UserIds can't be used as NULL-Parameter.");
     }
-    Set<String> finalUserIds;
-    if (KadaiConfiguration.shouldUseLowerCaseForAccessIds()) {
-      finalUserIds = userIds.stream().map(String::toLowerCase).collect(Collectors.toSet());
-    } else {
-      finalUserIds = userIds;
-    }
+    Set<String> finalUserIds =
+        userIds.stream().map(String::toLowerCase).collect(Collectors.toSet());
 
     List<UserImpl> users =
         internalKadaiEngine.executeInDatabaseConnection(() -> userMapper.findByIds(finalUserIds));
@@ -184,6 +174,16 @@ public class UserServiceImpl implements UserService {
     return new UserQueryImpl(internalKadaiEngine);
   }
 
+  public void deleteAllUsersGroupsPermissions() throws NotAuthorizedException {
+    internalKadaiEngine.getEngine().checkRoleMembership(KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
+    internalKadaiEngine.executeInDatabaseConnection(
+        () -> {
+          userMapper.deleteAll();
+          userMapper.deleteAllGroups();
+          userMapper.deleteAllPermissions();
+        });
+  }
+
   Set<String> determineDomains(User user) {
     Set<String> accessIds = new HashSet<>(user.getGroups());
     accessIds.addAll(user.getPermissions());
@@ -206,16 +206,6 @@ public class UserServiceImpl implements UserService {
                                   WorkbasketQueryColumnName.DOMAIN, SortDirection.ASCENDING))));
     }
     return Collections.emptySet();
-  }
-
-  public void deleteAllUsersGroupsPermissions() throws NotAuthorizedException {
-    internalKadaiEngine.getEngine().checkRoleMembership(KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
-    internalKadaiEngine.executeInDatabaseConnection(
-        () -> {
-          userMapper.deleteAll();
-          userMapper.deleteAllGroups();
-          userMapper.deleteAllPermissions();
-        });
   }
 
   private void insertIntoDatabase(User userToCreate) throws UserAlreadyExistException {
@@ -252,13 +242,11 @@ public class UserServiceImpl implements UserService {
     if (user.getLongName() == null || user.getLongName().isEmpty()) {
       user.setLongName(user.getFullName() + " - (" + user.getId() + ")");
     }
-    if (KadaiConfiguration.shouldUseLowerCaseForAccessIds()) {
-      user.setId(user.getId().toLowerCase());
-      user.setGroups(
-          user.getGroups().stream().map((String::toLowerCase)).collect(Collectors.toSet()));
-      user.setPermissions(
-          user.getPermissions().stream().map((String::toLowerCase)).collect(Collectors.toSet()));
-    }
+    user.setId(user.getId().toLowerCase());
+    user.setGroups(
+        user.getGroups().stream().map((String::toLowerCase)).collect(Collectors.toSet()));
+    user.setPermissions(
+        user.getPermissions().stream().map((String::toLowerCase)).collect(Collectors.toSet()));
   }
 
   private void standardUpdateActions(User oldUser, User newUser) {
@@ -275,12 +263,10 @@ public class UserServiceImpl implements UserService {
         newUser.setLongName(newUser.getFullName() + " - (" + newUser.getId() + ")");
       }
     }
-    if (KadaiConfiguration.shouldUseLowerCaseForAccessIds()) {
-      newUser.setId(newUser.getId().toLowerCase());
-      newUser.setGroups(
-          newUser.getGroups().stream().map((String::toLowerCase)).collect(Collectors.toSet()));
-      newUser.setPermissions(
-          newUser.getPermissions().stream().map((String::toLowerCase)).collect(Collectors.toSet()));
-    }
+    newUser.setId(newUser.getId().toLowerCase());
+    newUser.setGroups(
+        newUser.getGroups().stream().map((String::toLowerCase)).collect(Collectors.toSet()));
+    newUser.setPermissions(
+        newUser.getPermissions().stream().map((String::toLowerCase)).collect(Collectors.toSet()));
   }
 }

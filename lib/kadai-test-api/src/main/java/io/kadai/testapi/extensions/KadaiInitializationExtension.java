@@ -30,7 +30,7 @@ import io.kadai.common.api.JobService;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
 import io.kadai.common.api.WorkingTimeCalculator;
-import io.kadai.common.api.security.CurrentUserContext;
+import io.kadai.common.api.security.UserContext;
 import io.kadai.common.internal.ConfigurationMapper;
 import io.kadai.common.internal.ConfigurationServiceImpl;
 import io.kadai.common.internal.InternalKadaiEngine;
@@ -38,7 +38,7 @@ import io.kadai.common.internal.JobMapper;
 import io.kadai.common.internal.JobServiceImpl;
 import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.common.internal.jobs.JobScheduler;
-import io.kadai.common.internal.security.CurrentUserContextImpl;
+import io.kadai.common.internal.security.UserContextImpl;
 import io.kadai.common.internal.util.ReflectionUtil;
 import io.kadai.common.internal.util.SpiLoader;
 import io.kadai.common.internal.workingtime.WorkingTimeCalculatorImpl;
@@ -112,7 +112,7 @@ public class KadaiInitializationExtension
     ClassificationService classificationService = kadaiEngine.getClassificationService();
     ConfigurationService configurationService = kadaiEngine.getConfigurationService();
     JobService jobService = kadaiEngine.getJobService();
-    CurrentUserContext currentUserContext = kadaiEngine.getCurrentUserContext();
+    UserContext userContext = kadaiEngine.getCurrentUserContext();
     UserService userService = kadaiEngine.getUserService();
     SqlSession sqlSession = kadaiEngineProxy.getSqlSession();
     WorkingTimeCalculator workingTimeCalculator = kadaiEngine.getWorkingTimeCalculator();
@@ -134,8 +134,8 @@ public class KadaiInitializationExtension
         Map.entry(ConfigurationServiceImpl.class, configurationService),
         Map.entry(JobService.class, jobService),
         Map.entry(JobServiceImpl.class, jobService),
-        Map.entry(CurrentUserContext.class, currentUserContext),
-        Map.entry(CurrentUserContextImpl.class, currentUserContext),
+        Map.entry(UserContext.class, userContext),
+        Map.entry(UserContextImpl.class, userContext),
         Map.entry(WorkingTimeCalculator.class, workingTimeCalculator),
         Map.entry(WorkingTimeCalculatorImpl.class, workingTimeCalculator),
         Map.entry(ConfigurationMapper.class, sqlSession.getMapper(ConfigurationMapper.class)),

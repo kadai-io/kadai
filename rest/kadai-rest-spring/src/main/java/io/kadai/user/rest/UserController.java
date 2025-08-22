@@ -20,7 +20,7 @@ package io.kadai.user.rest;
 
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
-import io.kadai.common.api.security.CurrentUserContext;
+import io.kadai.common.api.security.UserContext;
 import io.kadai.common.rest.QueryPagingParameter;
 import io.kadai.common.rest.QuerySortParameter;
 import io.kadai.common.rest.RestEndpoints;
@@ -60,18 +60,18 @@ public class UserController implements UserApi {
   private final UserRepresentationModelAssembler userAssembler;
   private final UserSummaryRepresentationModelAssembler userSummaryAssembler;
 
-  private final CurrentUserContext currentUserContext;
+  private final UserContext userContext;
 
   @Autowired
   UserController(
       UserService userService,
       UserRepresentationModelAssembler userAssembler,
       UserSummaryRepresentationModelAssembler userSummaryAssembler,
-      CurrentUserContext currentUserContext) {
+      UserContext userContext) {
     this.userService = userService;
     this.userAssembler = userAssembler;
     this.userSummaryAssembler = userSummaryAssembler;
-    this.currentUserContext = currentUserContext;
+    this.userContext = userContext;
   }
 
   @GetMapping(RestEndpoints.URL_USERS_ID)
@@ -95,7 +95,7 @@ public class UserController implements UserApi {
         QuerySortParameter.class,
         QueryPagingParameter.class);
 
-    filterParameter.addCurrentUserIdIfPresentWithContext(currentUserContext);
+    filterParameter.addCurrentUserIdIfPresentWithContext(userContext);
 
     UserQuery query = userService.createUserQuery();
     filterParameter.apply(query);
