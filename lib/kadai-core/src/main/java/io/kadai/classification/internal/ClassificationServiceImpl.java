@@ -82,24 +82,6 @@ public class ClassificationServiceImpl implements ClassificationService {
     this.historyEventManager = kadaiEngine.getHistoryEventManager();
   }
 
-  private static void validateServiceLevel(Classification classification)
-      throws MalformedServiceLevelException {
-    String serviceLevel = classification.getServiceLevel();
-    Duration duration;
-
-    try {
-      duration = Duration.parse(serviceLevel);
-    } catch (Exception e) {
-      throw new MalformedServiceLevelException(
-          serviceLevel, classification.getKey(), classification.getDomain());
-    }
-
-    if (duration.isNegative()) {
-      throw new MalformedServiceLevelException(
-          serviceLevel, classification.getKey(), classification.getDomain());
-    }
-  }
-
   @Override
   public Classification getClassification(String key, String domain)
       throws ClassificationNotFoundException {
@@ -182,7 +164,8 @@ public class ClassificationServiceImpl implements ClassificationService {
                   IdGenerator.generateWithPrefix(
                       IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
                   classification,
-                  kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                   details));
         }
 
@@ -254,7 +237,8 @@ public class ClassificationServiceImpl implements ClassificationService {
             new ClassificationCreatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
                 classificationImpl,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 details));
       }
 
@@ -317,7 +301,8 @@ public class ClassificationServiceImpl implements ClassificationService {
             new ClassificationUpdatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
                 classificationImpl,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 details));
       }
       if (LOGGER.isDebugEnabled()) {
@@ -343,6 +328,24 @@ public class ClassificationServiceImpl implements ClassificationService {
     classification.setDomain(domain);
     classification.setType(type);
     return classification;
+  }
+
+  private static void validateServiceLevel(Classification classification)
+      throws MalformedServiceLevelException {
+    String serviceLevel = classification.getServiceLevel();
+    Duration duration;
+
+    try {
+      duration = Duration.parse(serviceLevel);
+    } catch (Exception e) {
+      throw new MalformedServiceLevelException(
+          serviceLevel, classification.getKey(), classification.getDomain());
+    }
+
+    if (duration.isNegative()) {
+      throw new MalformedServiceLevelException(
+          serviceLevel, classification.getKey(), classification.getDomain());
+    }
   }
 
   private void validateAndPopulateParentInformation(ClassificationImpl classificationImpl)
@@ -514,8 +517,7 @@ public class ClassificationServiceImpl implements ClassificationService {
   }
 
   private boolean isReferentialIntegrityConstraintViolation(PersistenceException e) {
-    return isH2OrPostgresIntegrityConstraintViolation(e)
-        || isDb2IntegrityConstraintViolation(e);
+    return isH2OrPostgresIntegrityConstraintViolation(e) || isDb2IntegrityConstraintViolation(e);
   }
 
   private boolean isDb2IntegrityConstraintViolation(PersistenceException e) {

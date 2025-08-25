@@ -30,7 +30,7 @@ public interface ClassificationHistoryQueryMapper {
 
   @Select(
       "<script>"
-          + "SELECT ID, EVENT_TYPE, CREATED, USER_ID, CLASSIFICATION_ID, APPLICATION_ENTRY_POINT, CATEGORY, DOMAIN, KEY, NAME,"
+          + "SELECT ID, EVENT_TYPE, CREATED, USER_ID, PROXY_ACCESS_ID, CLASSIFICATION_ID, APPLICATION_ENTRY_POINT, CATEGORY, DOMAIN, KEY, NAME,"
           + "PARENT_ID, PARENT_KEY, PRIORITY, SERVICE_LEVEL, TYPE, CUSTOM_1, CUSTOM_2, CUSTOM_3, CUSTOM_4, CUSTOM_5, CUSTOM_6, CUSTOM_7, CUSTOM_8 "
           + "FROM CLASSIFICATION_HISTORY_EVENT"
           + "<where>"
@@ -86,6 +86,7 @@ public interface ClassificationHistoryQueryMapper {
   @Result(property = "eventType", column = "EVENT_TYPE")
   @Result(property = "created", column = "CREATED")
   @Result(property = "userId", column = "USER_ID")
+  @Result(property = "proxyAccessId", column = "PROXY_ACCESS_ID")
   @Result(property = "classificationId", column = "CLASSIFICATION_ID")
   @Result(property = "applicationEntryPoint", column = "APPLICATION_ENTRY_POINT")
   @Result(property = "category", column = "CATEGORY")

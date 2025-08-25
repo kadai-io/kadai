@@ -32,7 +32,7 @@ import io.kadai.common.api.IntInterval;
 import io.kadai.common.api.KeyDomain;
 import io.kadai.common.api.TimeInterval;
 import io.kadai.common.api.exceptions.SystemException;
-import io.kadai.common.api.security.CurrentUserContext;
+import io.kadai.common.api.security.UserContext;
 import io.kadai.common.api.security.UserPrincipal;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.util.Pair;
@@ -84,7 +84,7 @@ class TaskQueryImplAccTest {
   @KadaiInject TaskService taskService;
   @KadaiInject InternalKadaiEngine internalKadaiEngine;
   @KadaiInject WorkbasketService workbasketService;
-  @KadaiInject CurrentUserContext currentUserContext;
+  @KadaiInject UserContext userContext;
   @KadaiInject ClassificationService classificationService;
 
   ClassificationSummary defaultClassificationSummary;
@@ -119,7 +119,7 @@ class TaskQueryImplAccTest {
   private void persistPermission(WorkbasketSummary workbasketSummary) throws Exception {
     WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
         .workbasketId(workbasketSummary.getId())
-        .accessId(currentUserContext.getUserid())
+        .accessId(userContext.getUserId())
         .permission(WorkbasketPermission.OPEN)
         .permission(WorkbasketPermission.READ)
         .permission(WorkbasketPermission.APPEND)
@@ -262,21 +262,21 @@ class TaskQueryImplAccTest {
 
       WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
           .workbasketId(wbWithoutReadTasksPerm.getId())
-          .accessId(currentUserContext.getUserid())
+          .accessId(userContext.getUserId())
           .permission(WorkbasketPermission.OPEN)
           .permission(WorkbasketPermission.READ)
           .permission(WorkbasketPermission.APPEND)
           .buildAndStore(workbasketService, "businessadmin");
       WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
           .workbasketId(wbWithoutReadPerm.getId())
-          .accessId(currentUserContext.getUserid())
+          .accessId(userContext.getUserId())
           .permission(WorkbasketPermission.OPEN)
           .permission(WorkbasketPermission.READTASKS)
           .permission(WorkbasketPermission.APPEND)
           .buildAndStore(workbasketService, "businessadmin");
       WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
           .workbasketId(wbWithoutOpenPerm.getId())
-          .accessId(currentUserContext.getUserid())
+          .accessId(userContext.getUserId())
           .permission(WorkbasketPermission.READ)
           .permission(WorkbasketPermission.READTASKS)
           .permission(WorkbasketPermission.APPEND)
@@ -2593,11 +2593,7 @@ class TaskQueryImplAccTest {
       @Test
       void should_ApplyFilter_When_QueryingForReopenedEqualsTrue() {
         List<TaskSummary> list =
-            taskService
-                .createTaskQuery()
-                .workbasketIdIn(wb.getId())
-                .reopenedEquals(true)
-                .list();
+            taskService.createTaskQuery().workbasketIdIn(wb.getId()).reopenedEquals(true).list();
 
         assertThat(list).containsExactly(taskSummary1);
       }
@@ -2606,11 +2602,7 @@ class TaskQueryImplAccTest {
       @Test
       void should_ApplyFilter_When_QueryingForReopenedEqualsFalse() {
         List<TaskSummary> list =
-            taskService
-                .createTaskQuery()
-                .workbasketIdIn(wb.getId())
-                .reopenedEquals(false)
-                .list();
+            taskService.createTaskQuery().workbasketIdIn(wb.getId()).reopenedEquals(false).list();
 
         assertThat(list).containsExactly(taskSummary2);
       }

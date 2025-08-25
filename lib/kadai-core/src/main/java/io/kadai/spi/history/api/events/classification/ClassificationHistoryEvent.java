@@ -32,6 +32,7 @@ public class ClassificationHistoryEvent {
   protected String eventType;
   protected Instant created;
   protected String userId;
+  protected String proxyAccessId;
   protected String classificationId;
   protected String applicationEntryPoint;
   protected String category;
@@ -81,6 +82,16 @@ public class ClassificationHistoryEvent {
     this.details = details;
   }
 
+  public ClassificationHistoryEvent(
+      String id,
+      ClassificationSummary classification,
+      String userId,
+      String proxyAccessId,
+      String details) {
+    this(id, classification, userId, details);
+    this.proxyAccessId = proxyAccessId;
+  }
+
   public void setCustomAttribute(ClassificationCustomField customField, String value) {
     switch (customField) {
       case CUSTOM_1:
@@ -113,26 +124,16 @@ public class ClassificationHistoryEvent {
   }
 
   public String getCustomAttribute(ClassificationCustomField customField) {
-    switch (customField) {
-      case CUSTOM_1:
-        return custom1;
-      case CUSTOM_2:
-        return custom2;
-      case CUSTOM_3:
-        return custom3;
-      case CUSTOM_4:
-        return custom4;
-      case CUSTOM_5:
-        return custom5;
-      case CUSTOM_6:
-        return custom6;
-      case CUSTOM_7:
-        return custom7;
-      case CUSTOM_8:
-        return custom8;
-      default:
-        throw new SystemException("Unknown customField '" + customField + "'");
-    }
+    return switch (customField) {
+      case CUSTOM_1 -> custom1;
+      case CUSTOM_2 -> custom2;
+      case CUSTOM_3 -> custom3;
+      case CUSTOM_4 -> custom4;
+      case CUSTOM_5 -> custom5;
+      case CUSTOM_6 -> custom6;
+      case CUSTOM_7 -> custom7;
+      case CUSTOM_8 -> custom8;
+    };
   }
 
   public String getId() {
@@ -165,6 +166,14 @@ public class ClassificationHistoryEvent {
 
   public void setUserId(String userId) {
     this.userId = userId;
+  }
+
+  public String getProxyAccessId() {
+    return proxyAccessId;
+  }
+
+  public void setProxyAccessId(String proxyAccessId) {
+    this.proxyAccessId = proxyAccessId;
   }
 
   public String getClassificationId() {
@@ -270,6 +279,7 @@ public class ClassificationHistoryEvent {
         getEventType(),
         getCreated(),
         getUserId(),
+        getProxyAccessId(),
         getClassificationId(),
         getApplicationEntryPoint(),
         getCategory(),
@@ -306,6 +316,7 @@ public class ClassificationHistoryEvent {
         && Objects.equals(getEventType(), other.getEventType())
         && Objects.equals(getCreated(), other.getCreated())
         && Objects.equals(getUserId(), other.getUserId())
+        && Objects.equals(getProxyAccessId(), other.getProxyAccessId())
         && Objects.equals(getClassificationId(), other.getClassificationId())
         && Objects.equals(getApplicationEntryPoint(), other.getApplicationEntryPoint())
         && Objects.equals(getCategory(), other.getCategory())
@@ -337,6 +348,8 @@ public class ClassificationHistoryEvent {
         + created
         + ", userId="
         + userId
+        + ", proxyAccessId="
+        + proxyAccessId
         + ", classificationId="
         + classificationId
         + ", applicationEntryPoint="

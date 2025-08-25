@@ -34,7 +34,8 @@ import io.kadai.common.api.exceptions.AutocommitFailedException;
 import io.kadai.common.api.exceptions.ConnectionNotSetException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
-import io.kadai.common.api.security.CurrentUserContext;
+import io.kadai.common.api.security.ProxyPrincipal;
+import io.kadai.common.api.security.UserContext;
 import io.kadai.common.api.security.UserPrincipal;
 import io.kadai.common.internal.configuration.DB;
 import io.kadai.common.internal.configuration.DbSchemaCreator;
@@ -43,7 +44,7 @@ import io.kadai.common.internal.jobs.RealClock;
 import io.kadai.common.internal.pagination.PageInterceptor;
 import io.kadai.common.internal.persistence.InstantTypeHandler;
 import io.kadai.common.internal.persistence.MapTypeHandler;
-import io.kadai.common.internal.security.CurrentUserContextImpl;
+import io.kadai.common.internal.security.UserContextImpl;
 import io.kadai.common.internal.workingtime.HolidaySchedule;
 import io.kadai.common.internal.workingtime.WorkingDayCalculatorImpl;
 import io.kadai.common.internal.workingtime.WorkingTimeCalculatorImpl;
@@ -125,7 +126,7 @@ public class KadaiEngineImpl implements KadaiEngine {
   private final InternalKadaiEngineImpl internalKadaiEngineImpl;
   private final WorkingTimeCalculator workingTimeCalculator;
   private final HistoryEventManager historyEventManager;
-  private final CurrentUserContext currentUserContext;
+  private final UserContext userContext;
   private final JobScheduler jobScheduler;
   protected ConnectionManagementMode mode;
   protected TransactionFactory transactionFactory;
@@ -167,8 +168,7 @@ public class KadaiEngineImpl implements KadaiEngine {
               holidaySchedule, kadaiConfiguration.getWorkingTimeScheduleTimeZone());
     }
 
-    currentUserContext =
-        new CurrentUserContextImpl(KadaiConfiguration.shouldUseLowerCaseForAccessIds());
+    userContext = UserContextImpl.current();
     if (transactionFactory == null) {
       createTransactionFactory(kadaiConfiguration.isUseManagedTransactions());
     } else {
@@ -356,7 +356,7 @@ public class KadaiEngineImpl implements KadaiEngine {
       return true;
     }
 
-    List<String> accessIds = currentUserContext.getAccessIds();
+    List<String> accessIds = userContext.getAccessIds();
     Set<String> rolesMembers = new HashSet<>();
     for (KadaiRole role : roles) {
       rolesMembers.addAll(getConfiguration().getRoleMap().get(role));
@@ -377,32 +377,34 @@ public class KadaiEngineImpl implements KadaiEngine {
         String rolesAsString = Arrays.toString(roles);
         LOGGER.debug(
             "Throwing NotAuthorizedException because accessIds {} are not member of roles {}",
-            currentUserContext.getAccessIds(),
+            userContext.getAccessIds(),
             rolesAsString);
       }
-      throw new NotAuthorizedException(currentUserContext.getUserid(), roles);
+      throw new NotAuthorizedException(userContext.getUserId(), roles);
     }
   }
 
-  public <T> T runAsAdmin(Supplier<T> supplier) {
-    if (isUserInRole(KadaiRole.ADMIN)) {
-      return supplier.get();
-    }
-
-    String adminName =
-        this.getConfiguration().getRoleMap().get(KadaiRole.ADMIN).stream()
-            .findFirst()
-            .orElseThrow(() -> new SystemException("There is no admin configured"));
-
+  @Override
+  public <T> T runAs(Supplier<T> supplier, KadaiRole proxy, String userId) {
     Subject subject = new Subject();
-    subject.getPrincipals().add(new UserPrincipal(adminName));
+    if (proxy != null) {
+      String proxyAccessId =
+          this.getConfiguration().getRoleMap().get(proxy).stream()
+              .findFirst()
+              .orElseThrow(
+                  () -> new SystemException(String.format("There is no %s configured", proxy)));
+      subject.getPrincipals().add(new ProxyPrincipal(proxyAccessId));
+    }
+    if (userId != null) {
+      subject.getPrincipals().add(new UserPrincipal(userId));
+    }
 
     return Subject.doAs(subject, (PrivilegedAction<T>) supplier::get);
   }
 
   @Override
-  public CurrentUserContext getCurrentUserContext() {
-    return currentUserContext;
+  public UserContext getCurrentUserContext() {
+    return userContext;
   }
 
   @Override

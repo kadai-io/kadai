@@ -34,6 +34,7 @@ public class TaskHistoryEvent {
   protected String eventType;
   protected Instant created;
   protected String userId;
+  protected String proxyAccessId;
   protected String userLongName;
   protected String domain;
   protected String workbasketKey;
@@ -82,6 +83,12 @@ public class TaskHistoryEvent {
     }
   }
 
+  public TaskHistoryEvent(
+      String id, TaskSummary task, String userId, String proxyAccessId, String details) {
+    this(id, task, userId, details);
+    this.proxyAccessId = proxyAccessId;
+  }
+
   public void setCustomAttribute(TaskHistoryCustomField customField, String value) {
     switch (customField) {
       case CUSTOM_1:
@@ -102,18 +109,12 @@ public class TaskHistoryEvent {
   }
 
   public String getCustomAttribute(TaskHistoryCustomField customField) {
-    switch (customField) {
-      case CUSTOM_1:
-        return custom1;
-      case CUSTOM_2:
-        return custom2;
-      case CUSTOM_3:
-        return custom3;
-      case CUSTOM_4:
-        return custom4;
-      default:
-        throw new SystemException("Unknown customField '" + customField + "'");
-    }
+    return switch (customField) {
+      case CUSTOM_1 -> custom1;
+      case CUSTOM_2 -> custom2;
+      case CUSTOM_3 -> custom3;
+      case CUSTOM_4 -> custom4;
+    };
   }
 
   public String getBusinessProcessId() {
@@ -260,6 +261,14 @@ public class TaskHistoryEvent {
     this.userId = userId;
   }
 
+  public String getProxyAccessId() {
+    return proxyAccessId;
+  }
+
+  public void setProxyAccessId(String proxyAccessId) {
+    this.proxyAccessId = proxyAccessId;
+  }
+
   public String getUserLongName() {
     return userLongName;
   }
@@ -302,6 +311,7 @@ public class TaskHistoryEvent {
         getEventType(),
         getCreated(),
         getUserId(),
+        getProxyAccessId(),
         getDomain(),
         getWorkbasketKey(),
         getPorCompany(),
@@ -337,6 +347,7 @@ public class TaskHistoryEvent {
         && Objects.equals(getEventType(), other.getEventType())
         && Objects.equals(getCreated(), other.getCreated())
         && Objects.equals(getUserId(), other.getUserId())
+        && Objects.equals(getProxyAccessId(), other.getProxyAccessId())
         && Objects.equals(getDomain(), other.getDomain())
         && Objects.equals(getWorkbasketKey(), other.getWorkbasketKey())
         && Objects.equals(getPorCompany(), other.getPorCompany())
@@ -372,6 +383,8 @@ public class TaskHistoryEvent {
         + created
         + ", userId="
         + userId
+        + ", proxyAccessId="
+        + proxyAccessId
         + ", userLongName="
         + userLongName
         + ", taskOwnerLongName="
