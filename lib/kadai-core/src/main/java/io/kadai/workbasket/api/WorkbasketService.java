@@ -24,6 +24,7 @@ import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.KadaiException;
+import io.kadai.common.api.exceptions.LogicalDuplicateInPayloadException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.user.api.models.User;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
@@ -355,7 +356,7 @@ public interface WorkbasketService {
    * @throws NotAuthorizedException if the current user is not member of {@linkplain
    *     KadaiRole#BUSINESS_ADMIN} or {@linkplain KadaiRole#ADMIN}
    * @throws NotAuthorizedOnWorkbasketException This is never thrown
-   * @throws WorkbasketAccessItemAlreadyExistException if {@code wbAccessItems} contains multiple
+   * @throws LogicalDuplicateInPayloadException if {@code wbAccessItems} contains multiple
    *     {@linkplain WorkbasketAccessItem} with the same {@linkplain
    *     WorkbasketAccessItem#getAccessId() accessId}.
    * @throws WorkbasketNotFoundException if the {@linkplain Workbasket} cannot be found for the
@@ -363,7 +364,7 @@ public interface WorkbasketService {
    */
   void setWorkbasketAccessItems(String workbasketId, List<WorkbasketAccessItem> wbAccessItems)
       throws InvalidArgumentException,
-          WorkbasketAccessItemAlreadyExistException,
+          LogicalDuplicateInPayloadException,
           WorkbasketNotFoundException,
           NotAuthorizedException,
           NotAuthorizedOnWorkbasketException;

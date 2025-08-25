@@ -27,6 +27,7 @@ import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.KadaiException;
+import io.kadai.common.api.exceptions.LogicalDuplicateInPayloadException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.util.IdGenerator;
@@ -514,7 +515,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
   @Override
   public void setWorkbasketAccessItems(
       String workbasketId, List<WorkbasketAccessItem> wbAccessItems)
-      throws WorkbasketAccessItemAlreadyExistException,
+      throws LogicalDuplicateInPayloadException,
           InvalidArgumentException,
           WorkbasketNotFoundException,
           NotAuthorizedException,
@@ -1006,7 +1007,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
 
   private Set<WorkbasketAccessItemImpl> checkAccessItemsPreconditionsAndSetId(
       String workbasketId, List<WorkbasketAccessItem> wbAccessItems)
-      throws InvalidArgumentException, WorkbasketAccessItemAlreadyExistException {
+      throws InvalidArgumentException, LogicalDuplicateInPayloadException {
 
     Set<String> ids = new HashSet<>();
     Set<WorkbasketAccessItemImpl> accessItems = new HashSet<>();
@@ -1043,8 +1044,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
               IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_AUTHORIZATION));
         }
         if (ids.contains(accessId)) {
-          throw new WorkbasketAccessItemAlreadyExistException(
-              accessId, wbAccessItemImpl.getWorkbasketId());
+          throw new LogicalDuplicateInPayloadException(accessId);
         }
         ids.add(accessId);
         accessItems.add(wbAccessItemImpl);
@@ -1105,10 +1105,10 @@ public class WorkbasketServiceImpl implements WorkbasketService {
     // check that required properties (database not null) are set
     validateNameAndType(workbasket);
 
-    if (workbasket.getId() == null || workbasket.getId().length() == 0) {
+    if (workbasket.getId() == null || workbasket.getId().isEmpty()) {
       throw new InvalidArgumentException("Id must not be null for " + workbasket);
     }
-    if (workbasket.getKey() == null || workbasket.getKey().length() == 0) {
+    if (workbasket.getKey() == null || workbasket.getKey().isEmpty()) {
       throw new InvalidArgumentException("Key must not be null for " + workbasket);
     }
     if (workbasket.getDomain() == null) {
@@ -1132,7 +1132,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
     if (workbasket.getName() == null) {
       throw new InvalidArgumentException("Name must not be NULL for " + workbasket);
     }
-    if (workbasket.getName().length() == 0) {
+    if (workbasket.getName().isEmpty()) {
       throw new InvalidArgumentException("Name must not be EMPTY for " + workbasket);
     }
     if (workbasket.getType() == null) {

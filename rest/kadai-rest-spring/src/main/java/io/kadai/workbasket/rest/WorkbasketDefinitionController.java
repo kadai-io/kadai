@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.api.exceptions.LogicalDuplicateInPayloadException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.workbasket.api.WorkbasketQuery;
@@ -117,16 +118,14 @@ public class WorkbasketDefinitionController implements WorkbasketDefinitionApi {
       throws IOException,
           DomainNotFoundException,
           InvalidArgumentException,
-          WorkbasketAlreadyExistException,
+          LogicalDuplicateInPayloadException,
           WorkbasketNotFoundException,
           WorkbasketAccessItemAlreadyExistException,
           ConcurrencyException,
           NotAuthorizedOnWorkbasketException,
           NotAuthorizedException {
     WorkbasketDefinitionCollectionRepresentationModel definitions =
-        mapper.readValue(
-            file.getInputStream(),
-            new TypeReference<WorkbasketDefinitionCollectionRepresentationModel>() {});
+        mapper.readValue(file.getInputStream(), new TypeReference<>() {});
 
     // key: logical ID
     // value: system ID (in database)
@@ -152,7 +151,12 @@ public class WorkbasketDefinitionController implements WorkbasketDefinitionApi {
 
         newId = systemIds.get(logicalId(importedWb));
       } else {
-        newId = workbasketService.createWorkbasket(wbWithoutId).getId();
+        try {
+          newId = workbasketService.createWorkbasket(wbWithoutId).getId();
+        } catch (WorkbasketAlreadyExistException ignore) {
+          // Cannot exist because we previously checked and then updated
+          newId = null; // required to appease compilers non-initialized error
+        }
       }
 
       // Since we would have a n² runtime when doing a lookup and updating the access items we
@@ -213,13 +217,13 @@ public class WorkbasketDefinitionController implements WorkbasketDefinitionApi {
   }
 
   private void checkForDuplicates(Collection<WorkbasketDefinitionRepresentationModel> definitions)
-      throws WorkbasketAlreadyExistException {
+      throws LogicalDuplicateInPayloadException {
     Set<String> identifiers = new HashSet<>();
     for (WorkbasketDefinitionRepresentationModel definition : definitions) {
       String identifier = logicalId(workbasketAssembler.toEntityModel(definition.getWorkbasket()));
       if (identifiers.contains(identifier)) {
-        throw new WorkbasketAlreadyExistException(
-            definition.getWorkbasket().getKey(), definition.getWorkbasket().getDomain());
+        throw new LogicalDuplicateInPayloadException(
+            logicalId(definition.getWorkbasket().getKey(), definition.getWorkbasket().getDomain()));
       }
       identifiers.add(identifier);
     }
