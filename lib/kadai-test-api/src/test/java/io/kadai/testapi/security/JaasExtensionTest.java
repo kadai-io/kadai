@@ -51,7 +51,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 class JaasExtensionTest {
 
   private static final String INSIDE_DYNAMIC_TEST_USER = "inside_dynamic_test";
-  private static final CurrentUserContext CURRENT_USER_CONTEXT = CurrentUserContextImpl.current();
+  private static final CurrentUserContext CURRENT_USER_CONTEXT = new CurrentUserContextImpl();
   private static final DynamicTest NOT_NULL_DYNAMIC_TEST =
       dynamicTest("dynamic test", () -> assertThat(CURRENT_USER_CONTEXT.getUserId()).isNotNull());
   private static final DynamicTest NULL_DYNAMIC_TEST =

@@ -168,7 +168,7 @@ public class KadaiEngineImpl implements KadaiEngine {
               holidaySchedule, kadaiConfiguration.getWorkingTimeScheduleTimeZone());
     }
 
-    currentUserContext = CurrentUserContextImpl.current();
+    currentUserContext = new CurrentUserContextImpl();
     if (transactionFactory == null) {
       createTransactionFactory(kadaiConfiguration.isUseManagedTransactions());
     } else {

@@ -39,11 +39,7 @@ public class CurrentUserContextImpl implements CurrentUserContext {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CurrentUserContextImpl.class);
 
-  private CurrentUserContextImpl() {}
-
-  public static CurrentUserContext current() {
-    return new CurrentUserContextImpl();
-  }
+  public CurrentUserContextImpl() {}
 
   @Override
   @SuppressWarnings("removal")
