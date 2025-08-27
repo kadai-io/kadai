@@ -35,6 +35,7 @@ import io.kadai.common.api.exceptions.ConnectionNotSetException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.api.security.CurrentUserContext;
+import io.kadai.common.api.security.ProxyPrincipal;
 import io.kadai.common.api.security.UserPrincipal;
 import io.kadai.common.internal.configuration.DB;
 import io.kadai.common.internal.configuration.DbSchemaCreator;
@@ -167,8 +168,7 @@ public class KadaiEngineImpl implements KadaiEngine {
               holidaySchedule, kadaiConfiguration.getWorkingTimeScheduleTimeZone());
     }
 
-    currentUserContext =
-        new CurrentUserContextImpl(KadaiConfiguration.shouldUseLowerCaseForAccessIds());
+    currentUserContext = new CurrentUserContextImpl();
     if (transactionFactory == null) {
       createTransactionFactory(kadaiConfiguration.isUseManagedTransactions());
     } else {
@@ -380,22 +380,24 @@ public class KadaiEngineImpl implements KadaiEngine {
             currentUserContext.getAccessIds(),
             rolesAsString);
       }
-      throw new NotAuthorizedException(currentUserContext.getUserid(), roles);
+      throw new NotAuthorizedException(currentUserContext.getUserId(), roles);
     }
   }
 
-  public <T> T runAsAdmin(Supplier<T> supplier) {
-    if (isUserInRole(KadaiRole.ADMIN)) {
-      return supplier.get();
-    }
-
-    String adminName =
-        this.getConfiguration().getRoleMap().get(KadaiRole.ADMIN).stream()
-            .findFirst()
-            .orElseThrow(() -> new SystemException("There is no admin configured"));
-
+  @Override
+  public <T> T runAs(Supplier<T> supplier, KadaiRole proxy, String userId) {
     Subject subject = new Subject();
-    subject.getPrincipals().add(new UserPrincipal(adminName));
+    if (proxy != null) {
+      String proxyAccessId =
+          this.getConfiguration().getRoleMap().get(proxy).stream()
+              .findFirst()
+              .orElseThrow(
+                  () -> new SystemException(String.format("There is no %s configured", proxy)));
+      subject.getPrincipals().add(new ProxyPrincipal(proxyAccessId));
+    }
+    if (userId != null) {
+      subject.getPrincipals().add(new UserPrincipal(userId));
+    }
 
     return Subject.doAs(subject, (PrivilegedAction<T>) supplier::get);
   }

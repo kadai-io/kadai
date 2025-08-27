@@ -24,8 +24,8 @@ import java.time.Instant;
 public class WorkbasketDistributionTargetAddedEvent extends WorkbasketHistoryEvent {
 
   public WorkbasketDistributionTargetAddedEvent(
-      String id, Workbasket workbasket, String userId, String details) {
-    super(id, workbasket, userId, details);
+      String id, Workbasket workbasket, String userId, String proxyAccessId, String details) {
+    super(id, workbasket, userId, proxyAccessId, details);
     eventType = WorkbasketHistoryEventType.DISTRIBUTION_TARGET_ADDED.getName();
     created = Instant.now();
   }

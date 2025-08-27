@@ -24,8 +24,8 @@ import java.time.Instant;
 public class WorkbasketAccessItemDeletedForAccessIdEvent extends WorkbasketHistoryEvent {
 
   public WorkbasketAccessItemDeletedForAccessIdEvent(
-      String id, Workbasket workbasket, String userId) {
-    super(id, workbasket, userId, null);
+      String id, Workbasket workbasket, String userId, String proxyAccessId) {
+    super(id, workbasket, userId, proxyAccessId, null);
     eventType = WorkbasketHistoryEventType.ACCESS_ITEM_DELETED_FOR_ACCESS_ID.getName();
     created = Instant.now();
   }

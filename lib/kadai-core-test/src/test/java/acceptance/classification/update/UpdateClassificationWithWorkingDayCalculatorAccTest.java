@@ -82,7 +82,8 @@ class UpdateClassificationWithWorkingDayCalculatorAccTest implements KadaiConfig
   @KadaiInject TaskService taskService;
   @KadaiInject WorkbasketService workbasketService;
   @KadaiInject WorkingTimeCalculator workingTimeCalculator;
-  @KadaiInject CurrentUserContext currentUserContext;
+  @KadaiInject
+  CurrentUserContext currentUserContext;
 
   @Override
   public Builder modify(Builder builder) {
@@ -161,7 +162,7 @@ class UpdateClassificationWithWorkingDayCalculatorAccTest implements KadaiConfig
         defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
     WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
         .workbasketId(workbasketSummary.getId())
-        .accessId(currentUserContext.getUserid())
+        .accessId(currentUserContext.getUserId())
         .permission(WorkbasketPermission.OPEN)
         .permission(WorkbasketPermission.READ)
         .permission(WorkbasketPermission.READTASKS)
@@ -184,7 +185,7 @@ class UpdateClassificationWithWorkingDayCalculatorAccTest implements KadaiConfig
         defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
     WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
         .workbasketId(workbasketSummary.getId())
-        .accessId(currentUserContext.getUserid())
+        .accessId(currentUserContext.getUserId())
         .permission(WorkbasketPermission.OPEN)
         .permission(WorkbasketPermission.READ)
         .permission(WorkbasketPermission.READTASKS)
@@ -238,7 +239,7 @@ class UpdateClassificationWithWorkingDayCalculatorAccTest implements KadaiConfig
           defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
       WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
           .workbasketId(workbasketSummary.getId())
-          .accessId(currentUserContext.getUserid())
+          .accessId(currentUserContext.getUserId())
           .permission(WorkbasketPermission.OPEN)
           .permission(WorkbasketPermission.READ)
           .permission(WorkbasketPermission.READTASKS)
@@ -283,7 +284,7 @@ class UpdateClassificationWithWorkingDayCalculatorAccTest implements KadaiConfig
           defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
       WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
           .workbasketId(workbasketSummary.getId())
-          .accessId(currentUserContext.getUserid())
+          .accessId(currentUserContext.getUserId())
           .permission(WorkbasketPermission.OPEN)
           .permission(WorkbasketPermission.READ)
           .permission(WorkbasketPermission.READTASKS)
@@ -788,7 +789,7 @@ class UpdateClassificationWithWorkingDayCalculatorAccTest implements KadaiConfig
 
       NotAuthorizedException expectedException =
           new NotAuthorizedException(
-              currentUserContext.getUserid(), KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
+              currentUserContext.getUserId(), KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
       assertThatThrownBy(() -> classificationService.updateClassification(classification))
           .usingRecursiveComparison()
           .isEqualTo(expectedException);
@@ -806,7 +807,7 @@ class UpdateClassificationWithWorkingDayCalculatorAccTest implements KadaiConfig
 
       NotAuthorizedException expectedException =
           new NotAuthorizedException(
-              currentUserContext.getUserid(), KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
+              currentUserContext.getUserId(), KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
       assertThatThrownBy(() -> classificationService.updateClassification(classification))
           .usingRecursiveComparison()
           .isEqualTo(expectedException);

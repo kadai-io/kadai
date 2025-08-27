@@ -21,6 +21,7 @@ package acceptance.events.workbasket;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import acceptance.AbstractAccTest;
+import io.kadai.common.internal.util.CheckedRunnable;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
 import io.kadai.simplehistory.impl.SimpleHistoryServiceImpl;
@@ -40,32 +41,40 @@ class CreateHistoryEventOnWorkbasketAccessItemDeletionAccTest extends AbstractAc
   private final WorkbasketHistoryEventMapper workbasketHistoryEventMapper =
       getWorkbasketHistoryEventMapper();
 
-  @WithAccessId(user = "admin")
   @Test
   void should_CreateWorkbasketAccessItemDeletedHistoryEvent_When_AccessItemIsDeleted()
       throws Exception {
+    kadaiEngine.runAsAdmin(
+        CheckedRunnable.rethrowing(
+            () -> {
+              final String workbasketId = "WBI:100000000000000000000000000000000004";
 
-    final String workbasketId = "WBI:100000000000000000000000000000000004";
+              final String workbasketAccessItemId = "WAI:100000000000000000000000000000000001";
 
-    final String workbasketAccessItemId = "WAI:100000000000000000000000000000000001";
+              List<WorkbasketHistoryEvent> events =
+                  historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
 
-    List<WorkbasketHistoryEvent> events =
-        historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
+              assertThat(events).isEmpty();
 
-    assertThat(events).isEmpty();
+              workbasketService.deleteWorkbasketAccessItem(workbasketAccessItemId);
 
-    workbasketService.deleteWorkbasketAccessItem(workbasketAccessItemId);
+              events =
+                  historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
 
-    events = historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
+              assertThat(events).hasSize(1);
 
-    assertThat(events).hasSize(1);
+              String eventType = events.get(0).getEventType();
+              String details =
+                  workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
 
-    String eventType = events.get(0).getEventType();
-    String details = workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
-
-    assertThat(eventType).isEqualTo(WorkbasketHistoryEventType.ACCESS_ITEM_DELETED.getName());
-
-    assertThat(details).contains("\"oldValue\":\"WBI:100000000000000000000000000000000004\"");
+              assertThat(eventType)
+                  .isEqualTo(WorkbasketHistoryEventType.ACCESS_ITEM_DELETED.getName());
+              assertThat(details)
+                  .contains("\"oldValue\":\"WBI:100000000000000000000000000000000004\"");
+              assertThat(events.get(0).getUserId()).isEqualTo("user-5-1");
+              assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
+            }),
+        "user-5-1");
   }
 
   @WithAccessId(user = "admin")

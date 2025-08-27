@@ -77,7 +77,8 @@ class UpdateClassificationAccTest {
   @KadaiInject TaskService taskService;
   @KadaiInject WorkbasketService workbasketService;
   @KadaiInject WorkingTimeCalculator workingTimeCalculator;
-  @KadaiInject CurrentUserContext currentUserContext;
+  @KadaiInject
+  CurrentUserContext currentUserContext;
 
   private String createTaskWithExistingClassification(ClassificationSummary classificationSummary)
       throws Exception {
@@ -85,7 +86,7 @@ class UpdateClassificationAccTest {
         defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
     WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
         .workbasketId(workbasketSummary.getId())
-        .accessId(currentUserContext.getUserid())
+        .accessId(currentUserContext.getUserId())
         .permission(WorkbasketPermission.OPEN)
         .permission(WorkbasketPermission.READ)
         .permission(WorkbasketPermission.READTASKS)
@@ -108,7 +109,7 @@ class UpdateClassificationAccTest {
         defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
     WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
         .workbasketId(workbasketSummary.getId())
-        .accessId(currentUserContext.getUserid())
+        .accessId(currentUserContext.getUserId())
         .permission(WorkbasketPermission.OPEN)
         .permission(WorkbasketPermission.READ)
         .permission(WorkbasketPermission.READTASKS)
@@ -151,7 +152,7 @@ class UpdateClassificationAccTest {
           defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
       WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
           .workbasketId(workbasketSummary.getId())
-          .accessId(currentUserContext.getUserid())
+          .accessId(currentUserContext.getUserId())
           .permission(WorkbasketPermission.OPEN)
           .permission(WorkbasketPermission.READ)
           .permission(WorkbasketPermission.READTASKS)
@@ -658,7 +659,7 @@ class UpdateClassificationAccTest {
 
       NotAuthorizedException expectedException =
           new NotAuthorizedException(
-              currentUserContext.getUserid(), KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
+              currentUserContext.getUserId(), KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
       assertThatThrownBy(() -> classificationService.updateClassification(classification))
           .usingRecursiveComparison()
           .isEqualTo(expectedException);
@@ -676,7 +677,7 @@ class UpdateClassificationAccTest {
 
       NotAuthorizedException expectedException =
           new NotAuthorizedException(
-              currentUserContext.getUserid(), KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
+              currentUserContext.getUserId(), KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
       assertThatThrownBy(() -> classificationService.updateClassification(classification))
           .usingRecursiveComparison()
           .isEqualTo(expectedException);

@@ -21,62 +21,73 @@ package acceptance.events.task;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import acceptance.AbstractAccTest;
-import io.kadai.common.test.security.JaasExtension;
-import io.kadai.common.test.security.WithAccessId;
+import io.kadai.common.api.KadaiRole;
+import io.kadai.common.internal.util.CheckedRunnable;
 import io.kadai.simplehistory.impl.SimpleHistoryServiceImpl;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
 import io.kadai.task.api.TaskService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(JaasExtension.class)
 class CreateHistoryEventOnTaskCancellationAccTest extends AbstractAccTest {
 
   private final TaskService taskService = kadaiEngine.getTaskService();
   private final SimpleHistoryServiceImpl historyService = getHistoryService();
 
   @Test
-  @WithAccessId(user = "admin")
   void should_CreateCancelledHistoryEvent_When_CancelTaskInStateClaimed() throws Exception {
+    kadaiEngine.runAs(
+        CheckedRunnable.rethrowing(
+            () -> {
+              final String taskId = "TKI:000000000000000000000000000000000001";
 
-    final String taskId = "TKI:000000000000000000000000000000000001";
+              List<TaskHistoryEvent> listEvents =
+                  historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
-    List<TaskHistoryEvent> listEvents =
-        historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
+              assertThat(listEvents).isEmpty();
 
-    assertThat(listEvents).isEmpty();
+              taskService.cancelTask(taskId);
 
-    taskService.cancelTask(taskId);
+              listEvents = historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
-    listEvents = historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
+              assertThat(listEvents).hasSize(1);
 
-    assertThat(listEvents).hasSize(1);
+              String eventType = listEvents.get(0).getEventType();
 
-    String eventType = listEvents.get(0).getEventType();
-
-    assertThat(eventType).isEqualTo(TaskHistoryEventType.CANCELLED.getName());
+              assertThat(eventType).isEqualTo(TaskHistoryEventType.CANCELLED.getName());
+              assertThat(listEvents.get(0).getUserId()).isEqualTo("user-2-2");
+              assertThat(listEvents.get(0).getProxyAccessId()).isEqualTo("taskadmin");
+            }),
+        KadaiRole.TASK_ADMIN,
+        "user-2-2");
   }
 
   @Test
-  @WithAccessId(user = "admin")
   void should_CreateCancelledHistoryEvent_When_CancelTaskInStateReady() throws Exception {
+    kadaiEngine.runAs(
+        CheckedRunnable.rethrowing(
+            () -> {
+              final String taskId = "TKI:000000000000000000000000000000000003";
 
-    final String taskId = "TKI:000000000000000000000000000000000003";
+              List<TaskHistoryEvent> events =
+                  historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
-    List<TaskHistoryEvent> events = historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
+              assertThat(events).isEmpty();
 
-    assertThat(events).isEmpty();
+              taskService.cancelTask(taskId);
 
-    taskService.cancelTask(taskId);
+              events = historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
-    events = historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
+              assertThat(events).hasSize(1);
 
-    assertThat(events).hasSize(1);
+              String eventType = events.get(0).getEventType();
 
-    String eventType = events.get(0).getEventType();
-
-    assertThat(eventType).isEqualTo(TaskHistoryEventType.CANCELLED.getName());
+              assertThat(eventType).isEqualTo(TaskHistoryEventType.CANCELLED.getName());
+              assertThat(events.get(0).getUserId()).isEqualTo("user-1-1");
+              assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
+            }),
+        KadaiRole.ADMIN,
+        "user-1-1");
   }
 }
