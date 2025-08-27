@@ -267,8 +267,8 @@ public interface KadaiEngine {
   /**
    * This is a convenience-method for {@link #runAs(Supplier, KadaiRole, String)}.
    *
-   * <p>It <b>overrides</b> the {@linkplain CurrentUserContext#getUserId() current userId} with one of an
-   * admin, leaving the <b>proxy empty</b>.
+   * <p>It <b>overrides</b> the {@linkplain CurrentUserContext#getUserId() current userId} with one
+   * of an admin, leaving the <b>proxy empty</b>.
    *
    * @param supplier the action to execute
    * @param <T> the return value of the action
@@ -303,8 +303,8 @@ public interface KadaiEngine {
   /**
    * This is a convenience-method for {@link #runAs(Supplier, KadaiRole, String)}.
    *
-   * <p>It <b>overrides</b> the {@linkplain CurrentUserContext#getUserId() current userId} with one of an
-   * admin, leaving the <b>proxy empty</b>.
+   * <p>It <b>overrides</b> the {@linkplain CurrentUserContext#getUserId() current userId} with one
+   * of an admin, leaving the <b>proxy empty</b>.
    *
    * @param runnable the action to execute
    * @see #runAs(Supplier, KadaiRole, String)

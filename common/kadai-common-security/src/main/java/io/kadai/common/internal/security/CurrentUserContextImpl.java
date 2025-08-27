@@ -20,9 +20,9 @@ package io.kadai.common.internal.security;
 
 import static java.util.function.Predicate.not;
 
+import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.api.security.GroupPrincipal;
 import io.kadai.common.api.security.ProxyPrincipal;
-import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.api.security.UserPrincipal;
 import java.security.AccessController;
 import java.security.Principal;
