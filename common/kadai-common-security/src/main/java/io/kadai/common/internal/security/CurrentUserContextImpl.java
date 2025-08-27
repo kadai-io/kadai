@@ -22,7 +22,7 @@ import static java.util.function.Predicate.not;
 
 import io.kadai.common.api.security.GroupPrincipal;
 import io.kadai.common.api.security.ProxyPrincipal;
-import io.kadai.common.api.security.UserContext;
+import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.api.security.UserPrincipal;
 import java.security.AccessController;
 import java.security.Principal;
@@ -35,14 +35,14 @@ import javax.security.auth.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UserContextImpl implements UserContext {
+public class CurrentUserContextImpl implements CurrentUserContext {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(UserContextImpl.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CurrentUserContextImpl.class);
 
-  private UserContextImpl() {}
+  private CurrentUserContextImpl() {}
 
-  public static UserContext current() {
-    return new UserContextImpl();
+  public static CurrentUserContext current() {
+    return new CurrentUserContextImpl();
   }
 
   @Override
@@ -58,7 +58,7 @@ public class UserContextImpl implements UserContext {
           .filter(not(GroupPrincipal.class::isInstance))
           .filter(UserPrincipal.class::isInstance)
           .map(Principal::getName)
-          .map(UserContextImpl::convertAccessId)
+          .map(CurrentUserContextImpl::convertAccessId)
           .findFirst()
           .orElse(null);
     }
@@ -79,7 +79,7 @@ public class UserContextImpl implements UserContext {
           .filter(not(GroupPrincipal.class::isInstance))
           .filter(ProxyPrincipal.class::isInstance)
           .map(Principal::getName)
-          .map(UserContextImpl::convertAccessId)
+          .map(CurrentUserContextImpl::convertAccessId)
           .findFirst()
           .orElse(null);
     }
@@ -99,7 +99,7 @@ public class UserContextImpl implements UserContext {
       return groups.stream()
           .map(Principal::getName)
           .filter(Objects::nonNull)
-          .map(UserContextImpl::convertAccessId)
+          .map(CurrentUserContextImpl::convertAccessId)
           .toList();
     }
     LOGGER.trace("No groupIds found in subject!");

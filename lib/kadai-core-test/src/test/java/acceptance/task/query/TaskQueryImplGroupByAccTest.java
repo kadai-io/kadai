@@ -27,7 +27,7 @@ import io.kadai.KadaiConfiguration;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.models.ClassificationSummary;
 import io.kadai.common.api.BaseQuery.SortDirection;
-import io.kadai.common.api.security.UserContext;
+import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.TaskSummary;
@@ -53,7 +53,8 @@ import org.junit.jupiter.api.Test;
 class TaskQueryImplGroupByAccTest implements KadaiConfigurationModifier {
   @KadaiInject TaskService taskService;
   @KadaiInject WorkbasketService workbasketService;
-  @KadaiInject UserContext userContext;
+  @KadaiInject
+  CurrentUserContext currentUserContext;
   @KadaiInject ClassificationService classificationService;
   @KadaiInject UserService userService;
 
@@ -341,7 +342,7 @@ class TaskQueryImplGroupByAccTest implements KadaiConfigurationModifier {
   private void persistPermission(WorkbasketSummary workbasketSummary) throws Exception {
     WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
         .workbasketId(workbasketSummary.getId())
-        .accessId(userContext.getUserId())
+        .accessId(currentUserContext.getUserId())
         .permission(WorkbasketPermission.OPEN)
         .permission(WorkbasketPermission.READ)
         .permission(WorkbasketPermission.READTASKS)

@@ -23,7 +23,7 @@ import io.kadai.KadaiConfiguration;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.common.api.ConfigurationService;
 import io.kadai.common.api.KadaiEngine;
-import io.kadai.common.api.security.UserContext;
+import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.internal.SpringKadaiEngine;
 import io.kadai.monitor.api.MonitorService;
 import io.kadai.task.api.TaskService;
@@ -84,7 +84,7 @@ public class RestConfiguration {
   }
 
   @Bean
-  public UserContext currentUserContext(KadaiEngine kadaiEngine) {
+  public CurrentUserContext currentUserContext(KadaiEngine kadaiEngine) {
     return kadaiEngine.getCurrentUserContext();
   }
 

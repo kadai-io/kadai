@@ -20,7 +20,7 @@ package io.kadai.user.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
-import io.kadai.common.api.security.UserContext;
+import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.internal.util.LogSanitizer;
 import io.kadai.common.rest.QueryParameter;
 import io.kadai.user.api.UserQuery;
@@ -101,18 +101,18 @@ public class UserQueryFilterParameter implements QueryParameter<UserQuery, Void>
    * Adds the id of the {@linkplain #getCurrentUser() current user} to the {@linkplain #getUserIds()
    * userIds}.
    *
-   * @param userContext the context this {@linkplain
+   * @param currentUserContext the context this {@linkplain
    *     org.springdoc.core.annotations.ParameterObject @ParameterObject} is served from.
    * @throws InvalidArgumentException if {@linkplain #getCurrentUser() current-user} has any
    *     non-blank value other than 'true'
    */
-  public void addCurrentUserIdIfPresentWithContext(UserContext userContext)
+  public void addCurrentUserIdIfPresentWithContext(CurrentUserContext currentUserContext)
       throws InvalidArgumentException {
     if (currentUser == null) {
       return;
     }
     if (currentUser.isBlank() || currentUser.equalsIgnoreCase("true")) {
-      final String currentUserId = userContext.getUserId();
+      final String currentUserId = currentUserContext.getUserId();
       if (currentUserId != null) {
         this.userIds = ArrayUtils.add(this.userIds, currentUserId);
       }

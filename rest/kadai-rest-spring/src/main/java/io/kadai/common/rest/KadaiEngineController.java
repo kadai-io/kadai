@@ -21,7 +21,7 @@ package io.kadai.common.rest;
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.ConfigurationService;
 import io.kadai.common.api.KadaiEngine;
-import io.kadai.common.api.security.UserContext;
+import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.rest.models.CustomAttributesRepresentationModel;
 import io.kadai.common.rest.models.KadaiUserInfoRepresentationModel;
 import io.kadai.common.rest.models.VersionRepresentationModel;
@@ -44,18 +44,18 @@ public class KadaiEngineController implements KadaiEngineApi {
 
   private final KadaiConfiguration kadaiConfiguration;
   private final KadaiEngine kadaiEngine;
-  private final UserContext userContext;
+  private final CurrentUserContext currentUserContext;
   private final ConfigurationService configurationService;
 
   @Autowired
   KadaiEngineController(
       KadaiConfiguration kadaiConfiguration,
       KadaiEngine kadaiEngine,
-      UserContext userContext,
+      CurrentUserContext currentUserContext,
       ConfigurationService configurationService) {
     this.kadaiConfiguration = kadaiConfiguration;
     this.kadaiEngine = kadaiEngine;
-    this.userContext = userContext;
+    this.currentUserContext = currentUserContext;
     this.configurationService = configurationService;
   }
 
@@ -86,8 +86,8 @@ public class KadaiEngineController implements KadaiEngineApi {
   @GetMapping(path = RestEndpoints.URL_CURRENT_USER)
   public ResponseEntity<KadaiUserInfoRepresentationModel> getCurrentUserInfo() {
     KadaiUserInfoRepresentationModel resource = new KadaiUserInfoRepresentationModel();
-    resource.setUserId(userContext.getUserId());
-    resource.setGroupIds(userContext.getGroupIds());
+    resource.setUserId(currentUserContext.getUserId());
+    resource.setGroupIds(currentUserContext.getGroupIds());
     kadaiConfiguration.getRoleMap().keySet().stream()
         .filter(kadaiEngine::isUserInRole)
         .forEach(resource.getRoles()::add);
