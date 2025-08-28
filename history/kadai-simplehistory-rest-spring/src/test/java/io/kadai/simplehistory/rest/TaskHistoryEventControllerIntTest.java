@@ -139,6 +139,39 @@ class TaskHistoryEventControllerIntTest {
   }
 
   @Test
+  void should_SortEventsByProxyAccessId_When_SortByAndOrderQueryParametersAreDeclared() {
+    String parameters = "?sort-by=PROXY_ACCESS_ID&order=ASCENDING";
+    ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
+        CLIENT
+            .get()
+            .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
+    assertThat(response.getBody()).isNotNull();
+    assertThat(response.getBody().getContent())
+        .extracting(TaskHistoryEventRepresentationModel::getProxyAccessId)
+        .isSortedAccordingTo(CASE_INSENSITIVE_ORDER);
+  }
+
+  @Test
+  void should_ApplyProxyAccessIdFilter_When_QueryParameterIsProvided() {
+    String parameters = "?proxy-access-id=monitor";
+    ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
+        CLIENT
+            .get()
+            .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
+    assertThat(response.getBody()).isNotNull();
+    assertThat(response.getBody().getContent())
+        .extracting(TaskHistoryEventRepresentationModel::getTaskHistoryId)
+        .containsExactlyInAnyOrder(
+            "THI:000000000000000000000000000000000027", "THI:000000000000000000000000000000000026");
+  }
+
+  @Test
   void should_ReturnBadStatusErrorCode_When_CreatedQueryParameterIsWrongFormatted() {
     String currentTime = "wrong format";
     ThrowingCallable httpCall =
