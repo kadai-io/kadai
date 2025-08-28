@@ -217,6 +217,9 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
     returnValues = getHistoryService().createTaskHistoryQuery().userIdIn("admin").list();
     assertThat(returnValues).hasSize(6);
 
+    returnValues = getHistoryService().createTaskHistoryQuery().proxyAccessIdIn("admin").list();
+    assertThat(returnValues).hasSize(4);
+
     returnValues = getHistoryService().createTaskHistoryQuery().domainIn("DOMAIN_A").list();
     assertThat(returnValues).hasSize(13);
 
@@ -312,6 +315,9 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
         getHistoryService().createTaskHistoryQuery().taskIdLike("TKI:000000000000000%").list();
     assertThat(returnValues).hasSize(14);
 
+    returnValues = getHistoryService().createTaskHistoryQuery().proxyAccessIdLike("adm%").list();
+    assertThat(returnValues).hasSize(4);
+
     returnValues = getHistoryService().createTaskHistoryQuery().oldValueLike("old%").list();
     assertThat(returnValues).hasSize(1);
 
@@ -362,6 +368,12 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.USER_ID, null);
     assertThat(returnedList).hasSize(4);
+
+    returnedList =
+        getHistoryService()
+            .createTaskHistoryQuery()
+            .listValues(TaskHistoryQueryColumnName.PROXY_ACCESS_ID, null);
+    assertThat(returnedList).hasSize(2);
 
     returnedList =
         getHistoryService()
