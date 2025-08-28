@@ -70,7 +70,8 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @Parameter(
       name = "proxy-access-id-like",
       description =
-          "Filter by the proxy access id of the Task History Event. This results in a substring search.. "
+          "Filter by the proxy access id of the Task History Event. "
+              + "This results in a substring search.. "
               + "(% is appended to the beginning and end of the requested value). Further SQL "
               + "\"LIKE\" wildcard characters will be resolved correctly.")
   @JsonProperty("proxy-access-id-like")
