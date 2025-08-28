@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Objects;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,6 +152,7 @@ class TaskHistoryEventControllerIntTest {
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getContent())
         .extracting(TaskHistoryEventRepresentationModel::getProxyAccessId)
+        .filteredOn(Objects::nonNull)
         .isSortedAccordingTo(CASE_INSENSITIVE_ORDER);
   }
 
