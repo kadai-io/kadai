@@ -47,6 +47,7 @@ class TaskHistoryEventRepresentationModelAssemblerTest {
     historyEvent.setEventType("TASK_CREATED");
     historyEvent.setBusinessProcessId("BPI:01");
     historyEvent.setParentBusinessProcessId("BPI:02");
+    historyEvent.setProxyAccessId("taskadmin");
     historyEvent.setTaskId("TKI:000000000000000000000000000000000000");
     historyEvent.setTaskClassificationCategory("MANUAL");
     historyEvent.setDomain("DOMAIN_A");
@@ -82,6 +83,8 @@ class TaskHistoryEventRepresentationModelAssemblerTest {
         .isEqualTo(taskHistoryEventRepresentationModel.getBusinessProcessId());
     assertThat(historyEvent.getParentBusinessProcessId())
         .isEqualTo(taskHistoryEventRepresentationModel.getParentBusinessProcessId());
+    assertThat(historyEvent.getProxyAccessId())
+        .isEqualTo(taskHistoryEventRepresentationModel.getProxyAccessId());
     assertThat(historyEvent.getTaskId()).isEqualTo(taskHistoryEventRepresentationModel.getTaskId());
     assertThat(historyEvent.getTaskClassificationCategory())
         .isEqualTo(taskHistoryEventRepresentationModel.getTaskClassificationCategory());

@@ -27,6 +27,7 @@ public enum WorkbasketHistoryQueryColumnName implements QueryColumnName {
   EVENT_TYPE("event_type"),
   CREATED("created"),
   USER_ID("user_id"),
+  PROXY_ACCESS_ID("proxy_access_id"),
   DOMAIN("domain"),
   KEY("key"),
   TYPE("type"),

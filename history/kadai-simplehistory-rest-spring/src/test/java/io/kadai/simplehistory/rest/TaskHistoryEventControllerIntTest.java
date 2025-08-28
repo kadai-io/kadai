@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Objects;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,6 +137,40 @@ class TaskHistoryEventControllerIntTest {
     assertThat(response.getBody().getContent())
         .extracting(TaskHistoryEventRepresentationModel::getTaskHistoryId)
         .containsExactly("THI:000000000000000000000000000000000000");
+  }
+
+  @Test
+  void should_SortEventsByProxyAccessId_When_SortByAndOrderQueryParametersAreDeclared() {
+    String parameters = "?sort-by=PROXY_ACCESS_ID&order=ASCENDING";
+    ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
+        CLIENT
+            .get()
+            .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
+    assertThat(response.getBody()).isNotNull();
+    assertThat(response.getBody().getContent())
+        .extracting(TaskHistoryEventRepresentationModel::getProxyAccessId)
+        .filteredOn(Objects::nonNull)
+        .isSortedAccordingTo(CASE_INSENSITIVE_ORDER);
+  }
+
+  @Test
+  void should_ApplyProxyAccessIdFilter_When_QueryParameterIsProvided() {
+    String parameters = "?proxy-access-id=monitor";
+    ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
+        CLIENT
+            .get()
+            .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
+    assertThat(response.getBody()).isNotNull();
+    assertThat(response.getBody().getContent())
+        .extracting(TaskHistoryEventRepresentationModel::getTaskHistoryId)
+        .containsExactlyInAnyOrder(
+            "THI:000000000000000000000000000000000027", "THI:000000000000000000000000000000000026");
   }
 
   @Test

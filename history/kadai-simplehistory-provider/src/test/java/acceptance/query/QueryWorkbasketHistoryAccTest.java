@@ -182,6 +182,10 @@ class QueryWorkbasketHistoryAccTest extends AbstractAccTest {
     returnValues = historyService.createWorkbasketHistoryQuery().userIdIn("peter").list();
     assertThat(returnValues).hasSize(6);
 
+    returnValues =
+        historyService.createWorkbasketHistoryQuery().proxyAccessIdIn("taskadmin").list();
+    assertThat(returnValues).hasSize(1);
+
     returnValues = historyService.createWorkbasketHistoryQuery().domainIn("DOMAIN_A").list();
     assertThat(returnValues).hasSize(10);
 
@@ -374,6 +378,10 @@ class QueryWorkbasketHistoryAccTest extends AbstractAccTest {
     returnValues = historyService.createWorkbasketHistoryQuery().userIdLike("p%", "c%").list();
     assertThat(returnValues).hasSize(8);
 
+    returnValues =
+        historyService.createWorkbasketHistoryQuery().proxyAccessIdLike("%admin%").list();
+    assertThat(returnValues).hasSize(3);
+
     returnValues = historyService.createWorkbasketHistoryQuery().domainLike("%_A").list();
     assertThat(returnValues).hasSize(10);
 
@@ -462,6 +470,12 @@ class QueryWorkbasketHistoryAccTest extends AbstractAccTest {
     returnedList =
         historyService
             .createWorkbasketHistoryQuery()
+            .listValues(WorkbasketHistoryQueryColumnName.PROXY_ACCESS_ID, null);
+    assertThat(returnedList).hasSize(4);
+
+    returnedList =
+        historyService
+            .createWorkbasketHistoryQuery()
             .listValues(WorkbasketHistoryQueryColumnName.DOMAIN, null);
     assertThat(returnedList).hasSize(1);
 
@@ -507,10 +521,7 @@ class QueryWorkbasketHistoryAccTest extends AbstractAccTest {
             .listValues(WorkbasketHistoryQueryColumnName.CUSTOM_4, null);
     assertThat(returnedList).hasSize(2);
 
-    returnedList =
-        historyService
-            .createWorkbasketHistoryQuery()
-            .listValues(ORG_LEVEL_1, null);
+    returnedList = historyService.createWorkbasketHistoryQuery().listValues(ORG_LEVEL_1, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =

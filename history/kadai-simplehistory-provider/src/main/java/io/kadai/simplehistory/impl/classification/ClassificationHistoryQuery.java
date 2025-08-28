@@ -62,6 +62,14 @@ public interface ClassificationHistoryQuery
   ClassificationHistoryQuery userIdIn(String... userIds);
 
   /**
+   * Add your proxyAccessIds to your query.
+   *
+   * @param accessIds as String
+   * @return the query
+   */
+  ClassificationHistoryQuery proxyAccessIdIn(String... accessIds);
+
+  /**
    * Add your classificationId to your query.
    *
    * @param classificationIds as String
@@ -176,6 +184,15 @@ public interface ClassificationHistoryQuery
    * @return the query
    */
   ClassificationHistoryQuery userIdLike(String... userIds);
+
+  /**
+   * Add your proxyAccessIds to your query. It will be compared in SQL with an LIKE. If you use a
+   * wildcard like % then it will be transmitted to the database.
+   *
+   * @param proxyAccessIds as String
+   * @return the query
+   */
+  ClassificationHistoryQuery proxyAccessIdLike(String... proxyAccessIds);
 
   /**
    * Add your classificationId to your query. It will be compared in SQL with an LIKE. If you use a
