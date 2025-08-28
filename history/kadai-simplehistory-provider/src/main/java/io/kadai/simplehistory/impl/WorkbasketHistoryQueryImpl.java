@@ -54,6 +54,7 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
   private String[] eventTypeIn;
   private TimeInterval[] createdIn;
   private String[] userIdIn;
+  private String[] proxyAccessIdIn;
   private String[] domainIn;
   private String[] keyIn;
   private String[] typeIn;
@@ -70,6 +71,7 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
   private String[] workbasketIdLike;
   private String[] eventTypeLike;
   private String[] userIdLike;
+  private String[] proxyAccessIdLike;
   private String[] domainLike;
   private String[] keyLike;
   private String[] typeLike;
@@ -107,6 +109,10 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
 
   public String[] getUserIdIn() {
     return userIdIn;
+  }
+
+  public String[] getProxyAccessIdIn() {
+    return proxyAccessIdIn;
   }
 
   public String[] getDomainIn() {
@@ -167,6 +173,10 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
 
   public String[] getUserIdLike() {
     return userIdLike;
+  }
+
+  public String[] getProxyAccessIdLike() {
+    return proxyAccessIdLike;
   }
 
   public String[] getDomainLike() {
@@ -244,6 +254,12 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
   @Override
   public WorkbasketHistoryQuery userIdIn(String... userId) {
     this.userIdIn = userId;
+    return this;
+  }
+
+  @Override
+  public WorkbasketHistoryQuery proxyAccessIdIn(String... accessIds) {
+    this.proxyAccessIdIn = accessIds;
     return this;
   }
 
@@ -354,6 +370,12 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
   @Override
   public WorkbasketHistoryQuery userIdLike(String... userId) {
     this.userIdLike = toLowerCopy(userId);
+    return this;
+  }
+
+  @Override
+  public WorkbasketHistoryQuery proxyAccessIdLike(String... proxyAccessIds) {
+    this.proxyAccessIdLike = toLowerCopy(proxyAccessIds);
     return this;
   }
 
