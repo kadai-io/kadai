@@ -1963,7 +1963,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jest/environment-jsdom-abstract@npm:30.0.5, @jest/environment-jsdom-abstract@npm:^30.0.0":
+"@jest/environment-jsdom-abstract@npm:30.1.1":
+  version: 30.1.1
+  resolution: "@jest/environment-jsdom-abstract@npm:30.1.1"
+  dependencies:
+    "@jest/environment": "npm:30.1.1"
+    "@jest/fake-timers": "npm:30.1.1"
+    "@jest/types": "npm:30.0.5"
+    "@types/jsdom": "npm:^21.1.7"
+    "@types/node": "npm:*"
+    jest-mock: "npm:30.0.5"
+    jest-util: "npm:30.0.5"
+  peerDependencies:
+    canvas: ^3.0.0
+    jsdom: "*"
+  peerDependenciesMeta:
+    canvas:
+      optional: true
+  checksum: 10c0/7d91b40a0ada87587d83e037f3745c06c7c12799bddfd4157602022a665865f21ed3b2d7369ff80dcfb73af037d7b10b25acd6be6846ed85fe5788d8bc55eab7
+  languageName: node
+  linkType: hard
+
+"@jest/environment-jsdom-abstract@npm:^30.0.0":
   version: 30.0.5
   resolution: "@jest/environment-jsdom-abstract@npm:30.0.5"
   dependencies:
@@ -7548,12 +7569,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-environment-jsdom@npm:30.0.5":
-  version: 30.0.5
-  resolution: "jest-environment-jsdom@npm:30.0.5"
+"jest-environment-jsdom@npm:30.1.1":
+  version: 30.1.1
+  resolution: "jest-environment-jsdom@npm:30.1.1"
   dependencies:
-    "@jest/environment": "npm:30.0.5"
-    "@jest/environment-jsdom-abstract": "npm:30.0.5"
+    "@jest/environment": "npm:30.1.1"
+    "@jest/environment-jsdom-abstract": "npm:30.1.1"
     "@types/jsdom": "npm:^21.1.7"
     "@types/node": "npm:*"
     jsdom: "npm:^26.1.0"
@@ -7562,7 +7583,7 @@ __metadata:
   peerDependenciesMeta:
     canvas:
       optional: true
-  checksum: 10c0/bb4db51e5fac2d646e1b7bf8f56033f45c1926df34ebb64925bd61bf574dc179b9ffdf0f33c8602ee285297f12817aead09ce0568d9a758392b64111473f61be
+  checksum: 10c0/553d166c0654091b0cb64b05868f0c334a85235864dbc1ad8be1ddbbe68256dff9785c9762c1339cc579fb00762095528623023351c42f1c1c60a9cb021d5eeb
   languageName: node
   linkType: hard
 
@@ -8158,7 +8179,7 @@ __metadata:
     file-saver: "npm:2.0.5"
     globals: "npm:16.3.0"
     jest: "npm:30.1.1"
-    jest-environment-jsdom: "npm:30.0.5"
+    jest-environment-jsdom: "npm:30.1.1"
     jest-preset-angular: "npm:15.0.0"
     lodash: "npm:4.17.21"
     ng2-charts: "npm:8.0.0"
