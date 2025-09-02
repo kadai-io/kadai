@@ -81,7 +81,7 @@
         <version.testcontainers>1.21.3</version.testcontainers>
         <version.spring-openapi>2.8.5</version.spring-openapi>
         <version.jakarta.servlet>6.1.0</version.jakarta.servlet>
-        <version.spring-openapi>2.8.11</version.spring-openapi>
+        <version.spring-openapi>2.8.12</version.spring-openapi>
 
         <!-- AspectJ dependencies -->
         <version.aspectj-maven-plugin>1.15.0</version.aspectj-maven-plugin>
