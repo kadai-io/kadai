@@ -1,7 +1,6 @@
 package acceptance.common;
 
 import static io.kadai.common.internal.util.SqlProviderUtil.CLOSING_SCRIPT_TAG;
-import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_SCRIPT_TAG;
 
 import java.util.Objects;
@@ -20,7 +19,6 @@ interface TestUserMapper {
           + USER_INFO_COLUMNS
           + " FROM USER_INFO "
           + " WHERE USER_ID = #{id} "
-          + DB2_WITH_UR
           + CLOSING_SCRIPT_TAG)
   @Result(property = "id", column = "USER_ID")
   @Result(property = "firstName", column = "FIRST_NAME")
