@@ -10,7 +10,7 @@ import org.apache.ibatis.annotations.Select;
 
 interface TestUserMapper {
 
-  String USER_INFO_COLUMNS = "USER_ID, FIRST_NAME, LASTNAME, LONG_NAME";
+  String USER_INFO_COLUMNS = "USER_ID, FIRST_NAME, LAST_NAME, LONG_NAME";
   String USER_INFO_VALUES = "#{id}, #{firstName}, #{lastName}, #{longName}";
 
   @Select(
@@ -22,7 +22,7 @@ interface TestUserMapper {
           + CLOSING_SCRIPT_TAG)
   @Result(property = "id", column = "USER_ID")
   @Result(property = "firstName", column = "FIRST_NAME")
-  @Result(property = "lastName", column = "LASTNAME")
+  @Result(property = "lastName", column = "LAST_NAME")
   @Result(property = "longName", column = "LONG_NAME")
   TestUser findById(String id);
 
