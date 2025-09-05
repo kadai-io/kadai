@@ -34,6 +34,7 @@ import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.NotAuthorizedOnTaskCommentException;
 import io.kadai.task.api.exceptions.ObjectReferencePersistenceException;
 import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
+import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
@@ -41,6 +42,7 @@ import io.kadai.task.api.models.Attachment;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.api.models.TaskComment;
+import io.kadai.task.api.models.TaskPatch;
 import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import io.kadai.workbasket.api.exceptions.WorkbasketNotFoundException;
@@ -142,6 +144,8 @@ public interface TaskService {
    * @throws ObjectReferencePersistenceException if an {@linkplain ObjectReference} with the same
    *     {@linkplain ObjectReference#getId() id} was added to the {@linkplain Task} multiple times
    *     without using {@linkplain Task#addSecondaryObjectReference(ObjectReference)}
+   * @throws ServiceLevelViolationException if the {@linkplain Task#getDue() due} and {@linkplain
+   *     Task#getPlanned() planned} do not match service level
    */
   Task createTask(Task taskToCreate)
       throws WorkbasketNotFoundException,
@@ -150,7 +154,8 @@ public interface TaskService {
           InvalidArgumentException,
           AttachmentPersistenceException,
           ObjectReferencePersistenceException,
-          NotAuthorizedOnWorkbasketException;
+          NotAuthorizedOnWorkbasketException,
+          ServiceLevelViolationException;
 
   // endregion
 
@@ -1250,6 +1255,8 @@ public interface TaskService {
    * @throws InvalidTaskStateException if an attempt is made to change the {@linkplain
    *     Task#getOwner() owner} of the {@linkplain Task} that {@linkplain Task#getState() state}
    *     isn't {@linkplain TaskState#READY}
+   * @throws ServiceLevelViolationException if the {@linkplain Task#getDue() due} and {@linkplain
+   *     Task#getPlanned() planned} do not match service level
    */
   Task updateTask(Task task)
       throws InvalidArgumentException,
@@ -1259,7 +1266,8 @@ public interface TaskService {
           AttachmentPersistenceException,
           ObjectReferencePersistenceException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException;
+          InvalidTaskStateException,
+          ServiceLevelViolationException;
 
   /**
    * Updates specified {@linkplain TaskCustomField TaskCustomFields} of {@linkplain Task Tasks}
@@ -1631,4 +1639,18 @@ public interface TaskService {
    * @return a {@linkplain TaskCommentQuery}
    */
   TaskCommentQuery createTaskCommentQuery();
+
+  /**
+   * Bulk updates multiple tasks by their IDs.
+   *
+   * <p>Updates only the specified fields for each task. If the user lacks permission for a task,
+   * that task is skipped and an error is reported for it, but other tasks are still updated. The
+   * update is performed in a single database statement for all permitted tasks.
+   *
+   * @param taskIds list of task Ids to be updated
+   * @param taskPatch contains the fields and values to be updated
+   * @return the result of the operation for each task ID (success or error)
+   */
+  BulkOperationResults<String, KadaiException> bulkUpdateTasks(
+      List<String> taskIds, TaskPatch taskPatch);
 }

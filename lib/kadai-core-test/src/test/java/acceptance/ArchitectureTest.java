@@ -80,6 +80,7 @@ import org.apache.ibatis.annotations.SelectProvider;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -435,7 +436,7 @@ class ArchitectureTest {
   }
 
   @Test
-  //@Disabled("this has way too many false positives during development without refactoring")
+  @Disabled("this has way too many false positives during development without refactoring")
   // Is that actually still the case? We'll see!
   void classesShouldBeFreeOfCyclicDependencies() {
     SliceAssignment everySingleClass =

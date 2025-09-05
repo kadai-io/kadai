@@ -31,13 +31,16 @@ import io.kadai.task.api.exceptions.InvalidOwnerException;
 import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.ObjectReferencePersistenceException;
 import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
+import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskSummary;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
+import io.kadai.task.rest.models.TaskBulkUpdateRepresentationModel;
 import io.kadai.task.rest.models.TaskIdListRepresentationModel;
+import io.kadai.task.rest.models.TaskPatchRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryPagedRepresentationModel;
@@ -83,6 +86,7 @@ public interface TaskApi {
    *     without using the task-methods
    * @throws ObjectReferencePersistenceException if an ObjectReference with ID will be added
    *     multiple times without using the task-methods
+   * @throws ServiceLevelViolationException if due and planned do not match service level
    * @title Create a new Task
    */
   @Operation(
@@ -141,9 +145,15 @@ public interface TaskApi {
             }),
         @ApiResponse(
             responseCode = "400",
-            description = "INVALID_ARGUMENT",
+            description = "INVALID_ARGUMENT, SERVICE_LEVEL_VIOLATION",
             content = {
-              @Content(schema = @Schema(implementation = InvalidArgumentException.class))
+              @Content(
+                  schema =
+                      @Schema(
+                          anyOf = {
+                            InvalidArgumentException.class,
+                            ServiceLevelViolationException.class
+                          }))
             }),
         @ApiResponse(
             responseCode = "403",
@@ -189,7 +199,7 @@ public interface TaskApi {
       throws WorkbasketNotFoundException,
           ClassificationNotFoundException,
           TaskAlreadyExistException,
-          InvalidArgumentException,
+          ServiceLevelViolationException,
           AttachmentPersistenceException,
           ObjectReferencePersistenceException,
           NotAuthorizedOnWorkbasketException;
@@ -1547,6 +1557,7 @@ public interface TaskApi {
    *     with the same id.
    * @throws InvalidTaskStateException if an attempt is made to change the owner of the Task and the
    *     Task is not in state READY.
+   * @throws ServiceLevelViolationException if planned and due do not match service level
    * @title Update a Task
    */
   @Operation(
@@ -1667,14 +1678,15 @@ public interface TaskApi {
                     schema = @Schema(implementation = TaskRepresentationModel.class))),
         @ApiResponse(
             responseCode = "400",
-            description = "INVALID_ARGUMENT, TASK_INVALID_STATE",
+            description = "INVALID_ARGUMENT, TASK_INVALID_STATE, SERVICE_LEVEL_VIOLATION",
             content = {
               @Content(
                   schema =
                       @Schema(
                           anyOf = {
                             InvalidArgumentException.class,
-                            InvalidTaskStateException.class
+                            InvalidTaskStateException.class,
+                            ServiceLevelViolationException.class
                           }))
             }),
         @ApiResponse(
@@ -1726,7 +1738,157 @@ public interface TaskApi {
           NotAuthorizedOnWorkbasketException,
           AttachmentPersistenceException,
           InvalidTaskStateException,
-          ObjectReferencePersistenceException;
+          ObjectReferencePersistenceException,
+          ServiceLevelViolationException;
+
+  /**
+   * This endpoint allows bulk update of tasks. Owner and Attachments cannot be updated in bulk.
+   *
+   * @param requestModel JSON formatted request body containing the TaskIds and the fields to update
+   *     along with its values
+   * @return the taskIds and corresponding ErrorCode of tasks failed to be updated
+   */
+  @Operation(
+      summary = "Updates multiple Tasks",
+      description =
+          "This endpoint updates a list of Tasks listed in the body with the fields and values "
+              + "listed in the body, if possible. Tasks that can be updated without throwing an "
+              + "exception get updated independent of other Tasks. If the update of a Task throws "
+              + "an exception, then the Task will not get updated.",
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              description =
+                  "JSON formatted request body containing the TaskIds and fields to update along "
+                      + "with its values",
+              content =
+                  @Content(
+                      schema = @Schema(implementation = TaskPatchRepresentationModel.class),
+                      examples =
+                          @ExampleObject(
+                              value =
+                                  """
+                                  {
+                                    "taskIds": [
+                                      "TKI:000000000000000000000000000000000003",
+                                      "TKI:000000000000000000000000000000000004"
+                                    ],
+                                    "fieldsToUpdate": {
+                                      "created": "2024-01-01T10:00:00.000Z",
+                                      "claimed": "2024-01-02T11:00:00.000Z",
+                                      "completed": "2024-01-03T12:00:00.000Z",
+                                      "modified": "2024-01-04T13:00:00.000Z",
+                                      "planned": "2024-01-05T14:00:00.000Z",
+                                      "received": "2024-01-06T15:00:00.000Z",
+                                      "name": "Bulk Updated Task",
+                                      "creator": "bulk-updater",
+                                      "note": "Bulk update note",
+                                      "description": "Bulk update description",
+                                      "priority": 50,
+                                      "manualPriority": 25,
+                                      "state": "READY",
+                                      "numberOfComments": 10,
+                                      "businessProcessId": "BPI-BULK-001",
+                                      "parentBusinessProcessId": "PBPI-BULK-001",
+                                      "isRead": true,
+                                      "isTransferred": false,
+                                      "isReopened": true,
+                                      "groupByCount": 5,
+                                      "custom1": "bulk-custom1",
+                                      "custom2": "bulk-custom2",
+                                      "custom3": "bulk-custom3",
+                                      "custom4": "bulk-custom4",
+                                      "custom5": "bulk-custom5",
+                                      "custom6": "bulk-custom6",
+                                      "custom7": "bulk-custom7",
+                                      "custom8": "bulk-custom8",
+                                      "custom9": "bulk-custom9",
+                                      "custom10": "bulk-custom10",
+                                      "custom11": "bulk-custom11",
+                                      "custom12": "bulk-custom12",
+                                      "custom13": "bulk-custom13",
+                                      "custom14": "bulk-custom14",
+                                      "custom15": "bulk-custom15",
+                                      "custom16": "bulk-custom16",
+                                      "customInt1": 1001,
+                                      "customInt2": 1002,
+                                      "customInt3": 1003,
+                                      "customInt4": 1004,
+                                      "customInt5": 1005,
+                                      "customInt6": 1006,
+                                      "customInt7": 1007,
+                                      "customInt8": 1008,
+                                      "classificationSummary": {
+                                        "classificationId":
+                                        "CLI:100000000000000000000000000000000003",
+                                        "key": "L1050",
+                                        "applicationEntryPoint": "entry-point-app",
+                                        "category": "EXTERNAL",
+                                        "domain": "DOMAIN_A",
+                                        "name": "Widerruf",
+                                        "parentId": "",
+                                        "parentKey": "",
+                                        "priority": 1,
+                                        "serviceLevel": "P13D",
+                                        "type": "TASK",
+                                        "custom1": "VNR,RVNR,KOLVNR",
+                                        "custom2": "",
+                                        "custom3": "",
+                                        "custom4": "",
+                                        "custom5": "",
+                                        "custom6": "",
+                                        "custom7": "",
+                                        "custom8": ""
+                                      },
+                                      "customAttributes": [
+                                        { "key": "bulk-attr-key1", "value": "bulk-attr-value1" },
+                                        { "key": "bulk-attr-key2", "value": "bulk-attr-value2" }
+                                      ],
+                                      "callbackInfo": [
+                                        { "key": "bulk-callback-key1", "value":
+                                        "bulk-callback-value1" },
+                                        { "key": "bulk-callback-key2", "value":
+                                        "bulk-callback-value2" }
+                                      ],
+                                      "secondaryObjectReferences": [
+                                        {
+                                          "company": "SecondaryCompany0",
+                                          "system": "SecondarySystem0",
+                                          "systemInstance": "SecondaryInstance0",
+                                          "type": "SecondaryType0",
+                                          "value": "00000000"
+                                        },
+                                        {
+                                          "company": "SecondaryCompany1",
+                                          "system": "SecondarySystem1",
+                                          "systemInstance": "SecondaryInstance1",
+                                          "type": "SecondaryType1",
+                                          "value": "00000001"
+                                        }
+                                      ],
+                                      "primaryObjRef": {
+                                        "company": "MyCompany1",
+                                        "system": "MySystem1",
+                                        "systemInstance": "MyInstance1",
+                                        "type": "MyType1",
+                                        "value": "00000001"
+                                      }
+                                    }
+                                  }
+                                  """))),
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "the taskIds and corresponding ErrorCode of tasks failed to be updated",
+            content =
+                @Content(
+                    mediaType = MediaTypes.HAL_JSON_VALUE,
+                    schema =
+                        @Schema(implementation = BulkOperationResultsRepresentationModel.class)))
+      })
+  @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_UPDATE)
+  @Transactional(rollbackFor = Exception.class)
+  ResponseEntity<BulkOperationResultsRepresentationModel> bulkUpdateTasks(
+      @RequestBody TaskBulkUpdateRepresentationModel requestModel);
 
   /**
    * This endpoint sets the 'isRead' property of a Task.
