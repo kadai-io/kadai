@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,9 +18,8 @@
 
 package io.kadai.spi.priority.internal;
 
-import static io.kadai.common.internal.util.CheckedFunction.wrap;
-
 import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.internal.util.CheckedFunction;
 import io.kadai.common.internal.util.LogSanitizer;
 import io.kadai.common.internal.util.SpiLoader;
 import io.kadai.spi.priority.api.PriorityServiceProvider;
@@ -57,17 +56,19 @@ public class PriorityServiceManager {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug(
             "Skip using PriorityServiceProviders because the Task is prioritised manually: {}",
-            task);
+            LogSanitizer.stripLineBreakingChars(task));
       }
       return OptionalInt.empty();
     }
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Sending Task to PriorityServiceProviders: {}", task);
+      LOGGER.debug(
+          "Sending Task to PriorityServiceProviders: {}",
+          LogSanitizer.stripLineBreakingChars(task));
     }
 
     Set<OptionalInt> priorities =
         priorityServiceProviders.stream()
-            .map(wrap(provider -> provider.calculatePriority(task)))
+            .map(CheckedFunction.wrapping(provider -> provider.calculatePriority(task)))
             .filter(OptionalInt::isPresent)
             .collect(Collectors.toSet());
 

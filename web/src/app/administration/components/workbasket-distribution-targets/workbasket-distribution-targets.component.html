@@ -1,125 +1,128 @@
 <!--
-  ~ Copyright [2024] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2025] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
 <div class="workbasket-distribution-targets" id="wb-information">
   <mat-toolbar class="distribution-targets-list__action-toolbar">
-    <button (click)="toggleSideBySideView()"
-            *ngIf="!sideBySide"
-            class="distribution-targets-list__action-button distribution-targets-list__toggle-view-button"
-            mat-flat-button>
-      Display side-by-side
-      <mat-icon class="distribution-targets-list__button-icon">view_week</mat-icon>
-    </button>
-    <button (click)="toggleSideBySideView()"
-            *ngIf="sideBySide"
-            class="distribution-targets-list__action-button distribution-targets-list__toggle-view-button"
-            mat-flat-button>
-      Display in single-view
-      <mat-icon class="distribution-targets-list__button-icon">view_agenda</mat-icon>
-    </button>
+    @if (!sideBySide) {
+      <button (click)="toggleSideBySideView()"
+        class="distribution-targets-list__action-button distribution-targets-list__toggle-view-button"
+        mat-flat-button>
+        Display side-by-side
+        <mat-icon class="distribution-targets-list__button-icon">view_week</mat-icon>
+      </button>
+    }
+    @if (sideBySide) {
+      <button (click)="toggleSideBySideView()"
+        class="distribution-targets-list__action-button distribution-targets-list__toggle-view-button"
+        mat-flat-button>
+        Display in single-view
+        <mat-icon class="distribution-targets-list__button-icon">view_agenda</mat-icon>
+      </button>
+    }
 
     <!-- SIDE BY SIDE VIEW BUTTONS -->
-    <div *ngIf="sideBySide" class="distribution-targets-list__action-buttons">
-
-      <div class="distribution-targets-list__action-buttons--chooser"
-           style="justify-content: flex-end; margin-right: 2%">
-        <button (click)="moveDistributionTargets(sideEnum.SELECTED)"
-                class="distribution-targets-list__action-button distribution-targets-list-dialog__add-button"
-                color="accent"
-                mat-flat-button>
-          Add selected distribution targets
-          <mat-icon>add</mat-icon>
-        </button>
+    @if (sideBySide) {
+      <div class="distribution-targets-list__action-buttons">
+        <div class="distribution-targets-list__action-buttons--chooser"
+          style="justify-content: flex-end; margin-right: 2%">
+          <button (click)="moveDistributionTargets(sideEnum.SELECTED)"
+            class="distribution-targets-list__action-button distribution-targets-list-dialog__add-button"
+            color="accent"
+            mat-flat-button>
+            Add selected distribution targets
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+        <span style="flex-grow: 1"> </span>
+        <div class="distribution-targets-list__action-buttons--selected"
+          style="justify-content: flex-end;">
+          <button (click)="moveDistributionTargets(sideEnum.AVAILABLE)"
+            class="distribution-targets-list__action-button distribution-targets-list-dialog__remove-button"
+            color="warn"
+            mat-flat-button>
+            Remove selected distribution target
+            <mat-icon>remove</mat-icon>
+          </button>
+        </div>
       </div>
+    }
 
-      <span style="flex-grow: 1"> </span>
-
-      <div class="distribution-targets-list__action-buttons--selected"
-           style="justify-content: flex-end;">
+    <!-- SINGLE VIEW BUTTONS WHEN DISPLAYING SELECTED DISTRIBUTION TARGETS -->
+    @if (!displayingDistributionTargetsPicker && !sideBySide) {
+      <div
+        class="distribution-targets-list__action-buttons distribution-targets-list__action-buttons--selected">
         <button (click)="moveDistributionTargets(sideEnum.AVAILABLE)"
-                class="distribution-targets-list__action-button distribution-targets-list-dialog__remove-button"
-                color="warn"
-                mat-flat-button>
+          class="distribution-targets-list__action-button distribution-targets-list-dialog__remove-button"
+          color="warn"
+          mat-flat-button>
           Remove selected distribution target
           <mat-icon>remove</mat-icon>
         </button>
+        <span style="flex: 1 1 auto"> </span>
+        <button (click)="toggleDistributionTargetsPicker()"
+          class="distribution-targets-list__action-button distribution-targets-list-dialog__display-button"
+          mat-stroked-button>
+          Display available distribution targets
+          <mat-icon>launch</mat-icon>
+        </button>
       </div>
-
-    </div>
-
-    <!-- SINGLE VIEW BUTTONS WHEN DISPLAYING SELECTED DISTRIBUTION TARGETS -->
-    <div *ngIf="!displayingDistributionTargetsPicker && !sideBySide"
-         class="distribution-targets-list__action-buttons distribution-targets-list__action-buttons--selected">
-      <button (click)="moveDistributionTargets(sideEnum.AVAILABLE)"
-              class="distribution-targets-list__action-button distribution-targets-list-dialog__remove-button"
-              color="warn"
-              mat-flat-button>
-        Remove selected distribution target
-        <mat-icon>remove</mat-icon>
-      </button>
-
-      <span style="flex: 1 1 auto"> </span>
-
-      <button (click)="toggleDistributionTargetsPicker()"
-              class="distribution-targets-list__action-button distribution-targets-list-dialog__display-button"
-              mat-stroked-button>
-        Display available distribution targets
-        <mat-icon>launch</mat-icon>
-      </button>
-    </div>
+    }
 
     <!-- SINGLE VIEW BUTTONS WHEN CHOOSING DISTRIBUTION TARGETS -->
-    <div *ngIf="displayingDistributionTargetsPicker && !sideBySide"
-         class="distribution-targets-list__action-buttons distribution-targets-list__action-buttons--chooser">
-      <button (click)="moveDistributionTargets(sideEnum.SELECTED)"
-              class="distribution-targets-list__action-button distribution-targets-list-dialog__add-button"
-              color="accent"
-              mat-flat-button>
-        Add selected distribution targets
-        <mat-icon>add</mat-icon>
-      </button>
-
-      <span style="flex: 1 1 auto"> </span>
-
-      <button (click)="toggleDistributionTargetsPicker()" class="distribution-targets-list-dialog__check-button"
-              color="warn"
-              mat-flat-button>
-        Close selection
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
+    @if (displayingDistributionTargetsPicker && !sideBySide) {
+      <div
+        class="distribution-targets-list__action-buttons distribution-targets-list__action-buttons--chooser">
+        <button (click)="moveDistributionTargets(sideEnum.SELECTED)"
+          class="distribution-targets-list__action-button distribution-targets-list-dialog__add-button"
+          color="accent"
+          mat-flat-button>
+          Add selected distribution targets
+          <mat-icon>add</mat-icon>
+        </button>
+        <span style="flex: 1 1 auto"> </span>
+        <button (click)="toggleDistributionTargetsPicker()"
+          class="distribution-targets-list-dialog__check-button"
+          color="warn"
+          mat-flat-button>
+          Close selection
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    }
   </mat-toolbar>
 
 
-  <div [ngClass]="sideBySide ? 'distribution-targets-list__lists--side' : 'distribution-targets-list__lists--single'"
-       class="distribution-targets-list__lists">
+  <div
+    [ngClass]="sideBySide ? 'distribution-targets-list__lists--side' : 'distribution-targets-list__lists--single'"
+    class="distribution-targets-list__lists">
 
     <!-- DISTRIBUTION TABLE-->
-    <kadai-administration-workbasket-distribution-targets-list
-      *ngIf="displayingDistributionTargetsPicker"
-      [component]="'availableDistributionTargets'"
-      [ngClass]="sideBySide ? 'distribution-targets-list__lists--left-side' : ''"
-      [side]="sideEnum.AVAILABLE"
-      [transferDistributionTargetObservable]="transferDistributionTargetObservable"
-      header="Available distribution targets"
-      id="dual-list-Left"
-    >
-    </kadai-administration-workbasket-distribution-targets-list>
+    @if (displayingDistributionTargetsPicker) {
+      <kadai-administration-workbasket-distribution-targets-list
+        [component]="'availableDistributionTargets'"
+        [ngClass]="sideBySide ? 'distribution-targets-list__lists--left-side' : ''"
+        [side]="sideEnum.AVAILABLE"
+        [transferDistributionTargetObservable]="transferDistributionTargetObservable"
+        header="Available distribution targets"
+        id="dual-list-Left"
+        >
+      </kadai-administration-workbasket-distribution-targets-list>
+    }
 
     <kadai-administration-workbasket-distribution-targets-list
       [component]="'selectedDistributionTargets'"
@@ -128,7 +131,7 @@
       [transferDistributionTargetObservable]="transferDistributionTargetObservable"
       header="Selected distribution targets"
       id="dual-list-Right"
-    >
+      >
     </kadai-administration-workbasket-distribution-targets-list>
   </div>
 </div>

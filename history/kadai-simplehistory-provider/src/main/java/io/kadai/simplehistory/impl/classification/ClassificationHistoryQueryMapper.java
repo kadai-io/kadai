@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public interface ClassificationHistoryQueryMapper {
 
   @Select(
       "<script>"
-          + "SELECT COUNT(ID) "
+          + "SELECT COUNT(*) "
           + "FROM CLASSIFICATION_HISTORY_EVENT"
           + "<where>"
           + "<if test='idIn != null'>AND LOWER(ID) IN (<foreach item='item' collection='idIn' separator=',' >#{item}</foreach>)</if> "

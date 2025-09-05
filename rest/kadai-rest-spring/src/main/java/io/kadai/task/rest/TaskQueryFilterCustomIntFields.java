@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@
 
 package io.kadai.task.rest;
 
-import static io.kadai.common.internal.util.CheckedConsumer.wrap;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kadai.common.api.IntInterval;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
@@ -28,40 +26,42 @@ import io.kadai.common.internal.util.Triplet;
 import io.kadai.common.rest.QueryParameter;
 import io.kadai.task.api.TaskCustomIntField;
 import io.kadai.task.api.TaskQuery;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.beans.ConstructorProperties;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery, Void> {
-  @Schema(
+
+  private static final TaskQueryFilterCustomIntFieldsValidation VALIDATOR =
+      new TaskQueryFilterCustomIntFieldsValidation();
+
+  @Parameter(
       name = "custom-int-1",
       description =
           "Filter by the value of the field customInt1 of the Task. This is an exact match.")
   @JsonProperty("custom-int-1")
   private final Integer[] customInt1In;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-1-not",
       description = "Exclude values of the field customInt1 of the Task.")
   @JsonProperty("custom-int-1-not")
   private final Integer[] customInt1NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-1-within",
       description = "Filter by the range of value of the field customInt1 of the Task.")
   @JsonProperty("custom-int-1-within")
   private final Integer[] customInt1Within;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-1-not-within",
       description = "Exclude range of values of the field customInt1 of the Task.")
   @JsonProperty("custom-int-1-not-within")
   private final Integer[] customInt1NotWithin;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-1-from",
       description =
           "Filter by lower bound of customInt1. <p>This parameter can't be used together with "
@@ -69,13 +69,13 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
   @JsonProperty("custom-int-1-from")
   private final Integer customInt1From;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-1-from-not",
       description = "Exclude values from a lower bound of the field customInt1 of the Task.")
   @JsonProperty("custom-int-1-from-not")
   private final Integer customInt1FromNot;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-1-to",
       description =
           "Filter by upper bound of customInt1. <p>This parameter can't be used together with "
@@ -83,38 +83,38 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
   @JsonProperty("custom-int-1-to")
   private final Integer customInt1To;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-1-to-not",
       description = "Exclude values to an upper bound of the field customInt1 of the Task.")
   @JsonProperty("custom-int-1-to-not")
   private final Integer customInt1ToNot;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-2",
       description =
           "Filter by the value of the field customInt2 of the Task. This is an exact match.")
   @JsonProperty("custom-int-2")
   private final Integer[] customInt2In;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-2-not",
       description = "Exclude values of the field customInt2 of the Task.")
   @JsonProperty("custom-int-2-not")
   private final Integer[] customInt2NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-2-within",
       description = "Filter by the range of value of the field customInt2 of the Task.")
   @JsonProperty("custom-int-2-within")
   private final Integer[] customInt2Within;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-2-not-within",
       description = "Exclude range of values of the field customInt2 of the Task.")
   @JsonProperty("custom-int-2-not-within")
   private final Integer[] customInt2NotWithin;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-2-from",
       description =
           "Filter by lower bound of customInt2. <p>This parameter can't be used together with "
@@ -122,13 +122,13 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
   @JsonProperty("custom-int-2-from")
   private final Integer customInt2From;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-2-from-not",
       description = "Exclude values from a lower bound of the field customInt2 of the Task.")
   @JsonProperty("custom-int-2-from-not")
   private final Integer customInt2FromNot;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-2-to",
       description =
           "Filter by upper bound of customInt2. <p>This parameter can't be used together with "
@@ -136,38 +136,38 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
   @JsonProperty("custom-int-2-to")
   private final Integer customInt2To;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-2-to-not",
       description = "Exclude values to an upper bound of the field customInt2 of the Task.")
   @JsonProperty("custom-int-2-to-not")
   private final Integer customInt2ToNot;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-3",
       description =
           "Filter by the value of the field customInt3 of the Task. This is an exact match.")
   @JsonProperty("custom-int-3")
   private final Integer[] customInt3In;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-3-not",
       description = "Exclude values of the field customInt3 of the Task.")
   @JsonProperty("custom-int-3-not")
   private final Integer[] customInt3NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-3-within",
       description = "Filter by the range of value of the field customInt3 of the Task.")
   @JsonProperty("custom-int-3-within")
   private final Integer[] customInt3Within;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-3-not-within",
       description = "Exclude range of values of the field customInt3 of the Task.")
   @JsonProperty("custom-int-3-not-within")
   private final Integer[] customInt3NotWithin;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-3-from",
       description =
           "Filter by lower bound of customInt3. <p>This parameter can't be used together with "
@@ -175,13 +175,13 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
   @JsonProperty("custom-int-3-from")
   private final Integer customInt3From;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-3-from-not",
       description = "Exclude values from a lower bound of the field customInt3 of the Task.")
   @JsonProperty("custom-int-3-from-not")
   private final Integer customInt3FromNot;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-3-to",
       description =
           "Filter by upper bound of customInt3. <p>This parameter can't be used together with "
@@ -189,38 +189,38 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
   @JsonProperty("custom-int-3-to")
   private final Integer customInt3To;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-3-to-not",
       description = "Exclude values to an upper bound of the field customInt3 of the Task.")
   @JsonProperty("custom-int-3-to-not")
   private final Integer customInt3ToNot;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-4",
       description =
           "Filter by the value of the field customInt4 of the Task. This is an exact match.")
   @JsonProperty("custom-int-4")
   private final Integer[] customInt4In;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-4-not",
       description = "Exclude values of the field customInt4 of the Task.")
   @JsonProperty("custom-int-4-not")
   private final Integer[] customInt4NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-4-within",
       description = "Filter by the range of value of the field customInt4 of the Task.")
   @JsonProperty("custom-int-4-within")
   private final Integer[] customInt4Within;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-4-not-within",
       description = "Exclude range of values of the field customInt4 of the Task.")
   @JsonProperty("custom-int-4-not-within")
   private final Integer[] customInt4NotWithin;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-4-from",
       description =
           "Filter by lower bound of customInt4. <p>This parameter can't be used together with "
@@ -228,13 +228,13 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
   @JsonProperty("custom-int-4-from")
   private final Integer customInt4From;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-4-from-not",
       description = "Exclude values from a lower bound of the field customInt4 of the Task.")
   @JsonProperty("custom-int-4-from-not")
   private final Integer customInt4FromNot;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-4-to",
       description =
           "Filter by upper bound of customInt4. <p>This parameter can't be used together with "
@@ -242,38 +242,38 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
   @JsonProperty("custom-int-4-to")
   private final Integer customInt4To;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-4-to-not",
       description = "Exclude values to an upper bound of the field customInt4 of the Task.")
   @JsonProperty("custom-int-4-to-not")
   private final Integer customInt4ToNot;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-5",
       description =
           "Filter by the value of the field customInt5 of the Task. This is an exact match.")
   @JsonProperty("custom-int-5")
   private final Integer[] customInt5In;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-5-not",
       description = "Exclude values of the field customInt5 of the Task.")
   @JsonProperty("custom-int-5-not")
   private final Integer[] customInt5NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-5-within",
       description = "Filter by the range of value of the field customInt5 of the Task.")
   @JsonProperty("custom-int-5-within")
   private final Integer[] customInt5Within;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-5-not-within",
       description = "Exclude range of values of the field customInt5 of the Task.")
   @JsonProperty("custom-int-5-not-within")
   private final Integer[] customInt5NotWithin;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-5-from",
       description =
           "Filter by lower bound of customInt5. <p>This parameter can't be used together with "
@@ -281,13 +281,13 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
   @JsonProperty("custom-int-5-from")
   private final Integer customInt5From;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-5-from-not",
       description = "Exclude values from a lower bound of the field customInt5 of the Task.")
   @JsonProperty("custom-int-5-from-not")
   private final Integer customInt5FromNot;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-5-to",
       description =
           "Filter by upper bound of customInt5. <p>This parameter can't be used together with "
@@ -295,38 +295,38 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
   @JsonProperty("custom-int-5-to")
   private final Integer customInt5To;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-5-to-not",
       description = "Exclude values to an upper bound of the field customInt5 of the Task.")
   @JsonProperty("custom-int-5-to-not")
   private final Integer customInt5ToNot;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-6",
       description =
           "Filter by the value of the field customInt6 of the Task. This is an exact match.")
   @JsonProperty("custom-int-6")
   private final Integer[] customInt6In;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-6-not",
       description = "Exclude values of the field customInt6 of the Task.")
   @JsonProperty("custom-int-6-not")
   private final Integer[] customInt6NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-6-within",
       description = "Filter by the range of value of the field customInt6 of the Task.")
   @JsonProperty("custom-int-6-within")
   private final Integer[] customInt6Within;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-6-not-within",
       description = "Exclude range of values of the field customInt6 of the Task.")
   @JsonProperty("custom-int-6-not-within")
   private final Integer[] customInt6NotWithin;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-6-from",
       description =
           "Filter by lower bound of customInt6. <p>This parameter can't be used together with "
@@ -334,13 +334,13 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
   @JsonProperty("custom-int-6-from")
   private final Integer customInt6From;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-6-from-not",
       description = "Exclude values from a lower bound of the field customInt6 of the Task.")
   @JsonProperty("custom-int-6-from-not")
   private final Integer customInt6FromNot;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-6-to",
       description =
           "Filter by upper bound of customInt6. <p>This parameter can't be used together with "
@@ -348,38 +348,38 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
   @JsonProperty("custom-int-6-to")
   private final Integer customInt6To;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-6-to-not",
       description = "Exclude values to an upper bound of the field customInt6 of the Task.")
   @JsonProperty("custom-int-6-to-not")
   private final Integer customInt6ToNot;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-7",
       description =
           "Filter by the value of the field customInt7 of the Task. This is an exact match.")
   @JsonProperty("custom-int-7")
   private final Integer[] customInt7In;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-7-not",
       description = "Exclude values of the field customInt7 of the Task.")
   @JsonProperty("custom-int-7-not")
   private final Integer[] customInt7NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-7-within",
       description = "Filter by the range of value of the field customInt7 of the Task.")
   @JsonProperty("custom-int-7-within")
   private final Integer[] customInt7Within;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-7-not-within",
       description = "Exclude range of values of the field customInt7 of the Task.")
   @JsonProperty("custom-int-7-not-within")
   private final Integer[] customInt7NotWithin;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-7-from",
       description =
           "Filter by lower bound of customInt7. <p>This parameter can't be used together with "
@@ -387,13 +387,13 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
   @JsonProperty("custom-int-7-from")
   private final Integer customInt7From;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-7-from-not",
       description = "Exclude values from a lower bound of the field customInt7 of the Task.")
   @JsonProperty("custom-int-7-from-not")
   private final Integer customInt7FromNot;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-7-to",
       description =
           "Filter by upper bound of customInt7. <p>This parameter can't be used together with "
@@ -401,38 +401,38 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
   @JsonProperty("custom-int-7-to")
   private final Integer customInt7To;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-7-to-not",
       description = "Exclude values to an upper bound of the field customInt7 of the Task.")
   @JsonProperty("custom-int-7-to-not")
   private final Integer customInt7ToNot;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-8",
       description =
           "Filter by the value of the field customInt8 of the Task. This is an exact match.")
   @JsonProperty("custom-int-8")
   private final Integer[] customInt8In;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-8-not",
       description = "Exclude values of the field customInt8 of the Task.")
   @JsonProperty("custom-int-8-not")
   private final Integer[] customInt8NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-8-within",
       description = "Filter by the range of value of the field customInt8 of the Task.")
   @JsonProperty("custom-int-8-within")
   private final Integer[] customInt8Within;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-8-not-within",
       description = "Exclude range of values of the field customInt8 of the Task.")
   @JsonProperty("custom-int-8-not-within")
   private final Integer[] customInt8NotWithin;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-8-from",
       description =
           "Filter by lower bound of customInt8. <p>This parameter can't be used together with "
@@ -440,13 +440,13 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
   @JsonProperty("custom-int-8-from")
   private final Integer customInt8From;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-8-from-not",
       description = "Exclude values from a lower bound of the field customInt8 of the Task.")
   @JsonProperty("custom-int-8-from-not")
   private final Integer customInt8FromNot;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-8-to",
       description =
           "Filter by upper bound of customInt8. <p>This parameter can't be used together with "
@@ -454,7 +454,7 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
   @JsonProperty("custom-int-8-to")
   private final Integer customInt8To;
 
-  @Schema(
+  @Parameter(
       name = "custom-int-8-to-not",
       description = "Exclude values to an upper bound of the field customInt8 of the Task.")
   @JsonProperty("custom-int-8-to-not")
@@ -657,7 +657,7 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
     this.customInt8To = customInt8To;
     this.customInt8ToNot = customInt8ToNot;
 
-    validateFilterParameters();
+    VALIDATOR.validate(this);
   }
 
   public Integer[] getCustomInt1In() {
@@ -955,15 +955,15 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
             triplet -> {
               TaskCustomIntField customField = triplet.getLeft();
               Optional.ofNullable(triplet.getMiddle().getFirst())
-                  .ifPresent(wrap(l -> query.customIntAttributeIn(customField, l)));
+                  .ifPresent(l -> query.customIntAttributeIn(customField, l));
               Optional.ofNullable(triplet.getMiddle().getSecond())
-                  .ifPresent(wrap(l -> query.customIntAttributeNotIn(customField, l)));
+                  .ifPresent(l -> query.customIntAttributeNotIn(customField, l));
               Optional.ofNullable(triplet.getMiddle().getThird())
                   .map(this::extractIntIntervals)
-                  .ifPresent(wrap(l -> query.customIntAttributeWithin(customField, l)));
+                  .ifPresent(l -> query.customIntAttributeWithin(customField, l));
               Optional.ofNullable(triplet.getMiddle().getFourth())
                   .map(this::extractIntIntervals)
-                  .ifPresent(wrap(l -> query.customIntAttributeNotWithin(customField, l)));
+                  .ifPresent(l -> query.customIntAttributeNotWithin(customField, l));
               Integer from = triplet.getRight().getFirst();
               Integer to = triplet.getRight().getThird();
               if (from != null || to != null) {
@@ -976,292 +976,5 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
               }
             });
     return null;
-  }
-
-  private void validateFilterParameters() throws InvalidArgumentException {
-    if (customInt1Within != null && customInt1Within.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'custom-int-1-within' is not dividable by 2");
-    }
-    if (customInt1Within != null
-        && (Collections.indexOfSubList(
-                    Arrays.asList(customInt1Within), Collections.nCopies(2, (Integer) null))
-                % 2
-            == 0)) {
-      throw new InvalidArgumentException(
-          "Each interval in 'custom-int-1-within' shouldn't consist of two 'null' values");
-    }
-
-    if (customInt2Within != null && customInt2Within.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'custom-int-2-within' is not dividable by 2");
-    }
-
-    if (customInt2Within != null
-        && (Collections.indexOfSubList(
-                    Arrays.asList(customInt2Within), Collections.nCopies(2, (Integer) null))
-                % 2
-            == 0)) {
-      throw new InvalidArgumentException(
-          "Each interval in 'custom-int-2-within' shouldn't consist of two 'null' values");
-    }
-
-    if (customInt3Within != null && customInt3Within.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'custom-int-3-within' is not dividable by 2");
-    }
-
-    if (customInt3Within != null
-        && (Collections.indexOfSubList(
-                    Arrays.asList(customInt3Within), Collections.nCopies(2, (Integer) null))
-                % 2
-            == 0)) {
-      throw new InvalidArgumentException(
-          "Each interval in 'custom-int-3-within' shouldn't consist of two 'null' values");
-    }
-
-    if (customInt4Within != null && customInt4Within.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'custom-int-4-within' is not dividable by 2");
-    }
-    if (customInt4Within != null
-        && (Collections.indexOfSubList(
-                    Arrays.asList(customInt4Within), Collections.nCopies(2, (Integer) null))
-                % 2
-            == 0)) {
-      throw new InvalidArgumentException(
-          "Each interval in 'custom-int-4-within' shouldn't consist of two 'null' values");
-    }
-    if (customInt5Within != null && customInt5Within.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'custom-int-5-within' is not dividable by 2");
-    }
-    if (customInt5Within != null
-        && (Collections.indexOfSubList(
-                    Arrays.asList(customInt5Within), Collections.nCopies(2, (Integer) null))
-                % 2
-            == 0)) {
-      throw new InvalidArgumentException(
-          "Each interval in 'custom-int-5-within' shouldn't consist of two 'null' values");
-    }
-    if (customInt6Within != null && customInt6Within.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'custom-int-6-within' is not dividable by 2");
-    }
-    if (customInt6Within != null
-        && (Collections.indexOfSubList(
-                    Arrays.asList(customInt6Within), Collections.nCopies(2, (Integer) null))
-                % 2
-            == 0)) {
-      throw new InvalidArgumentException(
-          "Each interval in 'custom-int-6-within' shouldn't consist of two 'null' values");
-    }
-    if (customInt7Within != null && customInt7Within.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'custom-int-7-within' is not dividable by 2");
-    }
-    if (customInt7Within != null
-        && (Collections.indexOfSubList(
-                    Arrays.asList(customInt7Within), Collections.nCopies(2, (Integer) null))
-                % 2
-            == 0)) {
-      throw new InvalidArgumentException(
-          "Each interval in 'custom-int-7-within' shouldn't consist of two 'null' values");
-    }
-    if (customInt8Within != null && customInt8Within.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'custom-int-8-within' is not dividable by 2");
-    }
-    if (customInt8Within != null
-        && (Collections.indexOfSubList(
-                    Arrays.asList(customInt8Within), Collections.nCopies(2, (Integer) null))
-                % 2
-            == 0)) {
-      throw new InvalidArgumentException(
-          "Each interval in 'custom-int-8-within' shouldn't consist of two 'null' values");
-    }
-    if (customInt1NotWithin != null && customInt1NotWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'custom-int-1-not-within' is not dividable by 2");
-    }
-    if (customInt1NotWithin != null
-        && (Collections.indexOfSubList(
-                    Arrays.asList(customInt1NotWithin), Collections.nCopies(2, (Integer) null))
-                % 2
-            == 0)) {
-      throw new InvalidArgumentException(
-          "Each interval in 'custom-int-1-not-within' shouldn't consist of two 'null' values");
-    }
-    if (customInt2NotWithin != null && customInt2NotWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'custom-int-2-not-within' is not dividable by 2");
-    }
-    if (customInt2NotWithin != null
-        && (Collections.indexOfSubList(
-                    Arrays.asList(customInt2NotWithin), Collections.nCopies(2, (Integer) null))
-                % 2
-            == 0)) {
-      throw new InvalidArgumentException(
-          "Each interval in 'custom-int-2-not-within' shouldn't consist of two 'null' values");
-    }
-    if (customInt3NotWithin != null && customInt3NotWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'custom-int-3-not-within' is not dividable by 2");
-    }
-    if (customInt3NotWithin != null
-        && (Collections.indexOfSubList(
-                    Arrays.asList(customInt3NotWithin), Collections.nCopies(2, (Integer) null))
-                % 2
-            == 0)) {
-      throw new InvalidArgumentException(
-          "Each interval in 'custom-int-3-not-within' shouldn't consist of two 'null' values");
-    }
-    if (customInt4NotWithin != null && customInt4NotWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'custom-int-4-not-within' is not dividable by 2");
-    }
-    if (customInt4NotWithin != null
-        && (Collections.indexOfSubList(
-                    Arrays.asList(customInt4NotWithin), Collections.nCopies(2, (Integer) null))
-                % 2
-            == 0)) {
-      throw new InvalidArgumentException(
-          "Each interval in 'custom-int-4-not-within' shouldn't consist of two 'null' values");
-    }
-    if (customInt5NotWithin != null && customInt5NotWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'custom-int-5-not-within' is not dividable by 2");
-    }
-    if (customInt5NotWithin != null
-        && (Collections.indexOfSubList(
-                    Arrays.asList(customInt5NotWithin), Collections.nCopies(2, (Integer) null))
-                % 2
-            == 0)) {
-      throw new InvalidArgumentException(
-          "Each interval in 'custom-int-5-not-within' shouldn't consist of two 'null' values");
-    }
-    if (customInt6NotWithin != null && customInt6NotWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'custom-int-6-not-within' is not dividable by 2");
-    }
-    if (customInt6NotWithin != null
-        && (Collections.indexOfSubList(
-                    Arrays.asList(customInt6NotWithin), Collections.nCopies(2, (Integer) null))
-                % 2
-            == 0)) {
-      throw new InvalidArgumentException(
-          "Each interval in 'custom-int-6-not-within' shouldn't consist of two 'null' values");
-    }
-    if (customInt7NotWithin != null && customInt7NotWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'custom-int-7-not-within' is not dividable by 2");
-    }
-    if (customInt7NotWithin != null
-        && (Collections.indexOfSubList(
-                    Arrays.asList(customInt7NotWithin), Collections.nCopies(2, (Integer) null))
-                % 2
-            == 0)) {
-      throw new InvalidArgumentException(
-          "Each interval in 'custom-int-7-not-within' shouldn't consist of two 'null' values");
-    }
-    if (customInt8NotWithin != null && customInt8NotWithin.length % 2 != 0) {
-      throw new InvalidArgumentException(
-          "provided length of the property 'custom-int-8-not-within' is not dividable by 2");
-    }
-    if (customInt8NotWithin != null
-        && (Collections.indexOfSubList(
-                    Arrays.asList(customInt8NotWithin), Collections.nCopies(2, (Integer) null))
-                % 2
-            == 0)) {
-      throw new InvalidArgumentException(
-          "Each interval in 'custom-int-8-not-within' shouldn't consist of two 'null' values");
-    }
-
-    if (customInt1Within != null && (customInt1From != null || customInt1To != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'custom-int-1-within' in combination "
-              + "with the params 'custom-int-1-from'  and / or 'custom-int-1-to'");
-    }
-    if (customInt1NotWithin != null && (customInt1FromNot != null || customInt1ToNot != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'custom-int-1-not-within' in combination "
-              + "with the params 'custom-int-1-from-not'  and / or 'custom-int-1-to-not'");
-    }
-
-    if (customInt2Within != null && (customInt2From != null || customInt2To != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'custom-int-2-within' in combination "
-              + "with the params 'custom-int-2-from'  and / or 'custom-int-2-to'");
-    }
-    if (customInt2NotWithin != null && (customInt2FromNot != null || customInt2ToNot != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'custom-int-2-not-within' in combination "
-              + "with the params 'custom-int-2-from-not'  and / or 'custom-int-2-to-not'");
-    }
-
-    if (customInt3Within != null && (customInt3From != null || customInt3To != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'custom-int-3-within' in combination "
-              + "with the params 'custom-int-3-from'  and / or 'custom-int-3-to'");
-    }
-    if (customInt3NotWithin != null && (customInt3FromNot != null || customInt3ToNot != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'custom-int-3-not-within' in combination "
-              + "with the params 'custom-int-3-from-not'  and / or 'custom-int-3-to-not'");
-    }
-
-    if (customInt4Within != null && (customInt4From != null || customInt4To != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'custom-int-4-within' in combination "
-              + "with the params 'custom-int-4-from'  and / or 'custom-int-4-to'");
-    }
-    if (customInt4NotWithin != null && (customInt4FromNot != null || customInt4ToNot != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'custom-int-4-not-within' in combination "
-              + "with the params 'custom-int-4-from-not'  and / or 'custom-int-4-to-not'");
-    }
-
-    if (customInt5Within != null && (customInt5From != null || customInt5To != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'custom-int-5-within' in combination "
-              + "with the params 'custom-int-5-from'  and / or 'custom-int-5-to'");
-    }
-    if (customInt5NotWithin != null && (customInt5FromNot != null || customInt5ToNot != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'custom-int-5-not-within' in combination "
-              + "with the params 'custom-int-5-from-not'  and / or 'custom-int-5-to-not'");
-    }
-
-    if (customInt6Within != null && (customInt6From != null || customInt6To != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'custom-int-6-within' in combination "
-              + "with the params 'custom-int-6-from'  and / or 'custom-int-6-to'");
-    }
-    if (customInt6NotWithin != null && (customInt6FromNot != null || customInt6ToNot != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'custom-int-6-not-within' in combination "
-              + "with the params 'custom-int-6-from-not'  and / or 'custom-int-6-to-not'");
-    }
-
-    if (customInt7Within != null && (customInt7From != null || customInt7To != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'custom-int-7-within' in combination "
-              + "with the params 'custom-int-7-from'  and / or 'custom-int-7-to'");
-    }
-    if (customInt7NotWithin != null && (customInt7FromNot != null || customInt7ToNot != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'custom-int-7-not-within' in combination "
-              + "with the params 'custom-int-7-from-not'  and / or 'custom-int-7-to-not'");
-    }
-    if (customInt8Within != null && (customInt8From != null || customInt8To != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'custom-int-8-within' in combination "
-              + "with the params 'custom-int-8-from'  and / or 'custom-int-8-to'");
-    }
-    if (customInt8NotWithin != null && (customInt8FromNot != null || customInt8ToNot != null)) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param 'custom-int-8-not-within' in combination "
-              + "with the params 'custom-int-8-from-not'  and / or 'custom-int-8-to-not'");
-    }
   }
 }

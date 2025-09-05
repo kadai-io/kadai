@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,20 +17,10 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { SpinnerComponent } from 'app/shared/components/spinner/spinner.component';
-import { FormsModule } from '@angular/forms';
-import { Routes } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideRouter, Routes } from '@angular/router';
 import { Component } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
-import { WorkplaceService } from '../../services/workplace.service';
-import { TaskService } from '../../services/task.service';
-import { TaskAttributeValueComponent } from '../task-attribute-value/task-attribute-value.component';
-import { TaskCustomFieldsComponent } from '../task-custom-fields/task-custom-fields.component';
-import { TaskInformationComponent } from '../task-information/task-information.component';
 import { TaskDetailsComponent } from './task-details.component';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
 
 @Component({
   selector: 'kadai-dummy-detail',
@@ -40,23 +30,14 @@ class DummyDetailComponent {}
 
 const routes: Routes = [{ path: 'workplace/taskdetail/:id', component: DummyDetailComponent }];
 
-// TODO: test pending to test. Failing random
-xdescribe('TaskDetailsComponent', () => {
+describe('TaskDetailsComponent', () => {
   let component: TaskDetailsComponent;
   let fixture: ComponentFixture<TaskDetailsComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        TaskDetailsComponent,
-        SpinnerComponent,
-        TaskAttributeValueComponent,
-        TaskCustomFieldsComponent,
-        TaskInformationComponent,
-        DummyDetailComponent
-      ],
-      imports: [FormsModule, RouterTestingModule.withRoutes(routes)],
-      providers: [TaskService, WorkplaceService, RequestInProgressService, NotificationService, provideHttpClient()]
+      imports: [TaskDetailsComponent],
+      providers: [provideRouter(routes), provideHttpClient()]
     }).compileComponents();
   }));
 

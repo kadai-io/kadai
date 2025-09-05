@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -114,6 +114,7 @@ class TaskSummaryRepresentationModelAssemblerTest {
         taskSummary.getPrimaryObjRef(), repModel.getPrimaryObjRef());
     assertThat(taskSummary.isRead()).isEqualTo(repModel.isRead());
     assertThat(taskSummary.isTransferred()).isEqualTo(repModel.isTransferred());
+    assertThat(taskSummary.isReopened()).isEqualTo(repModel.isReopened());
     assertThat(taskSummary.getGroupByCount()).isEqualTo(repModel.getGroupByCount());
     assertThat(taskSummary.getCustomField(CUSTOM_1)).isEqualTo(repModel.getCustom1());
     assertThat(taskSummary.getCustomField(CUSTOM_2)).isEqualTo(repModel.getCustom2());
@@ -204,6 +205,7 @@ class TaskSummaryRepresentationModelAssemblerTest {
     task.setPrimaryObjRef(primaryObjRef);
     task.setRead(true);
     task.setTransferred(true);
+    task.setReopened(true);
     task.setGroupByCount(0);
     task.setCustom1("custom1");
     task.setCustom2("custom2");
@@ -279,6 +281,7 @@ class TaskSummaryRepresentationModelAssemblerTest {
     repModel.setOwnerLongName("ownerLongName");
     repModel.setRead(true);
     repModel.setTransferred(true);
+    repModel.setReopened(true);
     repModel.setGroupByCount(0);
     repModel.setCustom1("custom1");
     repModel.setCustom2("custom2");
@@ -379,6 +382,7 @@ class TaskSummaryRepresentationModelAssemblerTest {
     task.setPrimaryObjRef(primaryObjRef);
     task.setRead(true);
     task.setTransferred(true);
+    task.setReopened(true);
     task.setGroupByCount(0);
     task.setCustom1("custom1");
     task.setCustom2("custom2");

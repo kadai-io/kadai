@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -75,17 +75,6 @@ public interface WorkbasketSummary {
    * @return type
    */
   WorkbasketType getType();
-
-  /**
-   * Returns the value of the specified {@linkplain WorkbasketCustomField} of the {@linkplain
-   * Workbasket}.
-   *
-   * @param customField identifies which {@linkplain WorkbasketCustomField} is requested
-   * @return the value for the given {@linkplain WorkbasketCustomField}
-   * @deprecated Use {@linkplain #getCustomField(WorkbasketCustomField)} instead
-   */
-  @Deprecated
-  String getCustomAttribute(WorkbasketCustomField customField);
 
   /**
    * Returns the value of the specified {@linkplain WorkbasketCustomField} of the {@linkplain

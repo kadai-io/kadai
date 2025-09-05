@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -44,6 +45,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -247,12 +249,7 @@ class LdapClientTest {
 
   @Test
   void testLdap_checkForMissingConfigurations() {
-    // 17 optional config fields: minSearchForLength, maxNumberOfReturnedAccessIds,
-    // userPhoneAttribute, userMobilePhoneAttribute, userEmailAttribute, userOrglevel1Attribute,
-    // userOrglevel2Attribute, userOrglevel3Attribute, userOrglevel4Attribute, groupsOfUser,
-    // groupsOfUserName, groupOfUserType, groupIdAttribute, permissionIdAttribute,
-    // permissionsOfUser, permissionsOfUserType, permissionsOfUserName
-    assertThat(cut.checkForMissingConfigurations()).hasSize(LdapSettings.values().length - 17);
+    assertThat(cut.checkForMissingConfigurations()).hasSize(LdapSettings.REQUIRED_SETTINGS.length);
   }
 
   @Test
@@ -261,6 +258,119 @@ class LdapClientTest {
     assertThat(cut.nameIsDn("uid=userid,cn=users,o=KadaiTest")).isTrue();
     assertThat(cut.nameIsDn("uid=userid,cn=users,o=kadaitest")).isTrue();
     assertThat(cut.nameIsDn("uid=userid,cn=users,o=kadai")).isFalse();
+  }
+
+  @Test
+  void should_ReturnAccessIds_For_Groups_When_SearchingByDns() throws Exception {
+    setUpEnvMock();
+    cut.init();
+
+    when(ldapTemplate.lookup(
+        any(LdapName.class),
+        any(),
+        any(LdapClient.DnContextMapper.class)
+    )).thenReturn(new AccessIdRepresentationModel("uid", "user-1-1"));
+
+    final List<AccessIdRepresentationModel> expectedGroupAccessIds =
+        List.of(new AccessIdRepresentationModel("cn", "developersgroup"));
+
+    when(ldapTemplate.search(
+        anyString(),
+        anyString(),
+        anyInt(),
+        any(String[].class),
+        any(LdapClient.GroupContextMapper.class)
+    )).thenReturn(expectedGroupAccessIds);
+
+    final List<String> actualGroupAccessIds = cut.searchAccessIdsForGroupsByDn(
+        List.of("uid=user-1-1,cn=developersgroup,ou=groups,o=kadaitest"));
+
+    assertThat(actualGroupAccessIds).containsExactlyInAnyOrderElementsOf(
+        expectedGroupAccessIds.stream()
+            .map(AccessIdRepresentationModel::getAccessId)
+            .toList());
+  }
+
+  @Test
+  void should_ReturnEmptyList_For_Groups_When_SearchingByEmptyListOfDns() throws Exception {
+    setUpEnvMock();
+    cut.init();
+
+    final List<String> groupAccessIds = cut.searchAccessIdsForGroupsByDn(Collections.emptyList());
+
+    assertThat(groupAccessIds).isEmpty();
+  }
+
+  @Test
+  void should_RethrowInvalidNameException_For_Groups() throws Exception {
+    setUpEnvMock();
+    cut.init();
+
+    when(cut.searchAccessIdByDn(anyString())).thenThrow(InvalidNameException.class);
+
+    final ThrowingCallable call = () -> cut.searchAccessIdsForGroupsByDn(List.of("some-dn"));
+
+    assertThatThrownBy(call).isInstanceOf(InvalidNameException.class);
+  }
+
+  @Test
+  void should_ReturnAccessIds_For_Permissions_When_SearchingByDns() throws Exception {
+    setUpEnvMock();
+    cut.init();
+
+    when(ldapTemplate.lookup(
+        any(LdapName.class),
+        any(),
+        any(LdapClient.DnContextMapper.class)
+    )).thenReturn(new AccessIdRepresentationModel("uid", "user-1-1"));
+
+    final List<AccessIdRepresentationModel> expectedPermissionAccessIds =
+        List.of(
+            new AccessIdRepresentationModel(
+                "permission", "Kadai:CallCenter:AB:AB/A:CallCenter-vip"));
+
+    when(ldapTemplate.search(
+        anyString(),
+        anyString(),
+        anyInt(),
+        any(String[].class),
+        any(LdapClient.PermissionContextMapper.class)
+    )).thenReturn(expectedPermissionAccessIds);
+
+    final List<String> actualPermissionAccessIds =
+        cut.searchAccessIdsForPermissionsByDn(
+            List.of(
+                "uid=user-1-1,permission=Kadai:CallCenter:AB:AB/A:CallCenter-vip,"
+                    + "cn=Developers:Permission,cn=groups,o=kadaitest"));
+
+    assertThat(actualPermissionAccessIds).containsExactlyInAnyOrderElementsOf(
+        expectedPermissionAccessIds.stream()
+            .map(AccessIdRepresentationModel::getAccessId)
+            .toList());
+  }
+
+  @Test
+  void should_ReturnEmptyList_For_Permissions_When_SearchingByEmptyListOfDns() throws Exception {
+    setUpEnvMock();
+    cut.init();
+
+    final List<String> permissionAccessIds =
+        cut.searchAccessIdsForPermissionsByDn(Collections.emptyList());
+
+    assertThat(permissionAccessIds).isEmpty();
+  }
+
+  @Test
+  void should_RethrowInvalidNameException_For_Permissions() throws Exception {
+    setUpEnvMock();
+    cut.init();
+
+    when(cut.searchAccessIdByDn(anyString())).thenThrow(InvalidNameException.class);
+
+    final ThrowingCallable call =
+        () -> cut.searchAccessIdsForPermissionsByDn(List.of("some-dn"));
+
+    assertThatThrownBy(call).isInstanceOf(InvalidNameException.class);
   }
 
   private void setUpEnvMock() {
@@ -272,7 +382,7 @@ class LdapClientTest {
               {"kadai.ldap.baseDn", "o=KadaiTest"},
               {"kadai.ldap.userSearchBase", "ou=people"},
               {"kadai.ldap.userSearchFilterName", "objectclass"},
-              {"kadai.ldap.groupsOfUser", "memberUid"},
+              {"kadai.ldap.groupsOfUser.name", "memberUid"},
               {"kadai.ldap.groupNameAttribute", "cn"},
               {"kadai.ldap.userPermissionsAttribute", "permission"},
               {"kadai.ldap.groupSearchFilterValue", "groupOfUniqueNames"},
@@ -291,7 +401,7 @@ class LdapClientTest {
               {"kadai.ldap.userOrglevel2Attribute", "orgLevel2"},
               {"kadai.ldap.userOrglevel3Attribute", "orgLevel3"},
               {"kadai.ldap.userOrglevel4Attribute", "orgLevel4"},
-              {"kadai.ldap.permissionsOfUser", "memberUid"},
+              {"kadai.ldap.permissionsOfUser.name", "memberUid"},
               {"kadai.ldap.permissionNameAttribute", "permission"},
               {"kadai.ldap.permissionSearchFilterValue", "groupOfUniqueNames"},
               {"kadai.ldap.permissionSearchFilterName", "objectclass"},

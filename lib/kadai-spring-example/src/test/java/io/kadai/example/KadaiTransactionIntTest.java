@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import java.sql.Connection;
 import java.util.List;
 import javax.sql.DataSource;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.ClassOrderer;
 import org.junit.jupiter.api.Order;
@@ -54,12 +55,14 @@ import org.junit.jupiter.api.TestClassOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.client.RestClient;
 
 /** Test for internal transaction management. */
 @ExtendWith(SpringExtension.class)
@@ -75,10 +78,12 @@ class KadaiTransactionIntTest {
   private static final String INTERNAL_SERVER_ERROR_MESSAGE = "Internal Server Error";
   private static final String INTERNAL_SERVER_ERROR_STATUS = "500";
   @Autowired KadaiTransactionProvider springTransactionProvider;
-  @Autowired private TestRestTemplate restTemplate;
   @Autowired private DataSource dataSource;
   @Autowired private JdbcTemplate jdbcTemplate;
   @Autowired private KadaiEngine kadaiEngine;
+
+  private static RestClient restClient;
+  private static String baseUrl;
 
   private static ObjectReference createDefaultObjRef() {
     ObjectReferenceImpl objRef = new ObjectReferenceImpl();
@@ -88,6 +93,18 @@ class KadaiTransactionIntTest {
     objRef.setType("type");
     objRef.setValue("value");
     return objRef;
+  }
+
+  @BeforeAll
+  static void setUp(@LocalServerPort int port) {
+    restClient =
+        RestClient.builder()
+            .defaultStatusHandler(
+                HttpStatusCode::is5xxServerError,
+                (request, response) ->
+                    System.err.println("Server error occurred: " + response.getStatusCode()))
+            .build();
+    baseUrl = "http://localhost:" + port;
   }
 
   @BeforeEach
@@ -101,17 +118,16 @@ class KadaiTransactionIntTest {
 
   @Test
   void testKadaiSchema() {
-    ResponseEntity<String> responseEntity = restTemplate.getForEntity("/schema", String.class);
-    assertThat(responseEntity.getBody()).isEqualTo("KADAI");
+    String response = restClient.get().uri(baseUrl + "/schema").retrieve().body(String.class);
+    assertThat(response).isEqualTo("KADAI");
   }
 
   @Test
   void testTransaction() {
     assertQuantities(0, 0);
 
-    ResponseEntity<String> responseEntity = restTemplate.getForEntity("/transaction", String.class);
-    System.err.println("response: " + responseEntity.getBody());
-    assertThat(responseEntity.getBody()).containsSequence("workbaskets: 1");
+    String response = restClient.get().uri(baseUrl + "/transaction").retrieve().body(String.class);
+    assertThat(response).containsSequence("workbaskets: 1");
 
     assertQuantities(1, 0);
   }
@@ -120,11 +136,15 @@ class KadaiTransactionIntTest {
   void testTransactionRollback() {
     assertQuantities(0, 0);
 
-    ResponseEntity<String> responseEntity =
-        restTemplate.getForEntity("/transaction?rollback={rollback}", String.class, "true");
-    System.err.println("result: " + responseEntity.getBody());
-    assertThat(responseEntity.getBody()).containsSequence(INTERNAL_SERVER_ERROR_MESSAGE);
-    assertThat(responseEntity.getBody()).containsSequence(INTERNAL_SERVER_ERROR_STATUS);
+    String response =
+        restClient
+            .get()
+            .uri(baseUrl + "/transaction?rollback={rollback}", "true")
+            .retrieve()
+            .body(String.class);
+
+    assertThat(response).containsSequence(INTERNAL_SERVER_ERROR_MESSAGE);
+    assertThat(response).containsSequence(INTERNAL_SERVER_ERROR_STATUS);
 
     assertQuantities(0, 0);
   }
@@ -133,10 +153,10 @@ class KadaiTransactionIntTest {
   void testTransactionCombined() {
     assertQuantities(0, 0);
 
-    ResponseEntity<String> responseEntity =
-        restTemplate.getForEntity("/transaction-many", String.class);
-    System.err.println("response: " + responseEntity.getBody());
-    assertThat(responseEntity.getBody()).containsSequence("workbaskets: 3");
+    String response =
+        restClient.get().uri(baseUrl + "/transaction-many").retrieve().body(String.class);
+
+    assertThat(response).containsSequence("workbaskets: 3");
 
     assertQuantities(3, 0);
   }
@@ -145,11 +165,15 @@ class KadaiTransactionIntTest {
   void testTransactionCombinedRollback() {
     assertQuantities(0, 0);
 
-    ResponseEntity<String> responseEntity =
-        restTemplate.getForEntity("/transaction-many?rollback={rollback}", String.class, "true");
-    System.err.println("result: " + responseEntity.getBody());
-    assertThat(responseEntity.getBody()).containsSequence(INTERNAL_SERVER_ERROR_MESSAGE);
-    assertThat(responseEntity.getBody()).containsSequence(INTERNAL_SERVER_ERROR_STATUS);
+    String response =
+        restClient
+            .get()
+            .uri(baseUrl + "/transaction-many?rollback={rollback}", "true")
+            .retrieve()
+            .body(String.class);
+
+    assertThat(response).containsSequence(INTERNAL_SERVER_ERROR_MESSAGE);
+    assertThat(response).containsSequence(INTERNAL_SERVER_ERROR_STATUS);
 
     assertQuantities(0, 0);
   }
@@ -158,10 +182,10 @@ class KadaiTransactionIntTest {
   void testTransactionCustomdb() {
     assertQuantities(0, 0);
 
-    ResponseEntity<String> responseEntity = restTemplate.getForEntity("/customdb", String.class);
-    System.err.println("response: " + responseEntity.getBody());
-    assertThat(responseEntity.getBody()).containsSequence("workbaskets: 2");
-    assertThat(responseEntity.getBody()).containsSequence("tests: 2");
+    String response = restClient.get().uri(baseUrl + "/customdb").retrieve().body(String.class);
+
+    assertThat(response).containsSequence("workbaskets: 2");
+    assertThat(response).containsSequence("tests: 2");
 
     assertQuantities(2, 2);
   }
@@ -170,11 +194,15 @@ class KadaiTransactionIntTest {
   void testTransactionCustomdbRollback() {
     assertQuantities(0, 0);
 
-    ResponseEntity<String> responseEntity =
-        restTemplate.getForEntity("/customdb?rollback={rollback}", String.class, "true");
-    System.err.println("response: " + responseEntity.getBody());
-    assertThat(responseEntity.getBody()).containsSequence(INTERNAL_SERVER_ERROR_MESSAGE);
-    assertThat(responseEntity.getBody()).containsSequence(INTERNAL_SERVER_ERROR_STATUS);
+    String response =
+        restClient
+            .get()
+            .uri(baseUrl + "/customdb?rollback={rollback}", "true")
+            .retrieve()
+            .body(String.class);
+
+    assertThat(response).containsSequence(INTERNAL_SERVER_ERROR_MESSAGE);
+    assertThat(response).containsSequence(INTERNAL_SERVER_ERROR_STATUS);
 
     assertQuantities(0, 0);
   }
@@ -275,7 +303,8 @@ class KadaiTransactionIntTest {
   }
 
   private int getWorkbaskets() {
-    ResponseEntity<Integer> workbaskets = restTemplate.getForEntity("/workbaskets", Integer.class);
+    ResponseEntity<Integer> workbaskets =
+        restClient.get().uri(baseUrl + "/workbaskets").retrieve().toEntity(Integer.class);
     if (workbaskets.getStatusCode().is2xxSuccessful()) {
       return workbaskets.getBody();
     } else {
@@ -284,7 +313,8 @@ class KadaiTransactionIntTest {
   }
 
   private int getCustomdbTests() {
-    ResponseEntity<Integer> tests = restTemplate.getForEntity("/customdb-tests", Integer.class);
+    ResponseEntity<Integer> tests =
+        restClient.get().uri(baseUrl + "/customdb-tests").retrieve().toEntity(Integer.class);
     if (tests.getStatusCode().is2xxSuccessful()) {
       return tests.getBody();
     } else {

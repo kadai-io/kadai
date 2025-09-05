@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -1291,6 +1291,18 @@ public interface TaskQuery extends BaseQuery<TaskSummary, TaskQueryColumnName> {
    * @return the query
    */
   TaskQuery transferredEquals(Boolean isTransferred);
+
+  // endregion
+  // region reopened
+
+  /**
+   * Add the isReopened flag to the query.
+   *
+   * @param isReopened as Boolean. If null, it won't be integrated into the statement. It will
+   *     only be integrated into the statement if set to true or false
+   * @return the query
+   */
+  TaskQuery reopenedEquals(Boolean isReopened);
 
   // endregion
   // region attachmentClassficationId

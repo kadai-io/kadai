@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -78,6 +78,6 @@ describe('TaskPriorityReportFilterComponent', () => {
     const emitSpy = jest.spyOn(component.applyFilter, 'emit');
     component.activeFilters = ['Tasks with state READY'];
     component.emitFilter(true, 'Tasks with state CLAIMED');
-    expect(emitSpy).toBeCalledWith({ state: ['READY', 'CLAIMED'] });
+    expect(emitSpy).toHaveBeenCalledWith({ state: ['READY', 'CLAIMED'] });
   });
 });

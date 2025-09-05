@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.internal.security.CurrentUserContextImpl;
 import io.kadai.testapi.security.JaasExtensionTestExtensions.ShouldThrowJunitException;
 import io.kadai.testapi.security.JaasExtensionTestExtensions.ShouldThrowParameterResolutionException;
+import java.time.DayOfWeek;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Supplier;
@@ -43,6 +44,8 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 @ExtendWith(JaasExtension.class)
 class JaasExtensionTest {
@@ -217,9 +220,11 @@ class JaasExtensionTest {
 
   // region JaasExtension#interceptTestTemplateMethod
 
+  @ParameterizedTest
+  @EnumSource(DayOfWeek.class)
   @WithAccessId(user = "testtemplate")
-  @TestTemplate
-  void should_SetJaasSubject_When_AnnotationExists_On_TestTemplate() {
+  void should_SetSaasSubject_When_SingleAnnotationExistsOnParameterizedTest(DayOfWeek dayOfWeek) {
+    assertThat(dayOfWeek).isNotNull();
     assertThat(CURRENT_USER_CONTEXT.getUserid()).isEqualTo("testtemplate");
   }
 
@@ -230,13 +235,6 @@ class JaasExtensionTest {
   void should_SetMultipleJaasSubjects_When_MultipleAnnotationsExist_On_TestTemplate(
       WithAccessId accessId) {
     assertThat(CURRENT_USER_CONTEXT.getUserid()).isEqualTo(accessId.user());
-  }
-
-  @WithAccessId(user = "testtemplate1", groups = "abc")
-  @TestTemplate
-  void should_InjectCorrectAccessId_When_AnnotationExists_On_TestTemplate(WithAccessId accessId) {
-    assertThat(accessId.user()).isEqualTo("testtemplate1");
-    assertThat(accessId.groups()).containsExactly("abc");
   }
 
   // endregion

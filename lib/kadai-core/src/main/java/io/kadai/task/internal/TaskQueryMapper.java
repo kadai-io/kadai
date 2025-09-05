@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -61,6 +61,7 @@ public interface TaskQueryMapper {
   @Result(property = "primaryObjRefImpl.value", column = "POR_VALUE")
   @Result(property = "isRead", column = "IS_READ")
   @Result(property = "isTransferred", column = "IS_TRANSFERRED")
+  @Result(property = "isReopened", column = "IS_REOPENED")
   @Result(property = "groupByCount", column = "R_COUNT")
   @Result(property = "custom1", column = "CUSTOM_1")
   @Result(property = "custom2", column = "CUSTOM_2")
@@ -124,6 +125,7 @@ public interface TaskQueryMapper {
   @Result(property = "primaryObjRefImpl.value", column = "POR_VALUE")
   @Result(property = "isRead", column = "IS_READ")
   @Result(property = "isTransferred", column = "IS_TRANSFERRED")
+  @Result(property = "isReopened", column = "IS_REOPENED")
   @Result(property = "custom1", column = "CUSTOM_1")
   @Result(property = "custom2", column = "CUSTOM_2")
   @Result(property = "custom3", column = "CUSTOM_3")

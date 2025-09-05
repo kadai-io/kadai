@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -31,12 +31,22 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
 import org.testcontainers.utility.DockerImageName;
 
+/**
+ * Utility-Class for creating dockerized databases and obtaining their
+ * {@linkplain DataSource DataSources}.
+ */
 public class DockerContainerCreator {
 
   private DockerContainerCreator() {
     throw new IllegalStateException("Utility class");
   }
 
+  /**
+   * Creates a {@link JdbcDatabaseContainer} for a {@linkplain DB database}.
+   *
+   * @param db the database to create the container for
+   * @return the container for the database if creation was successful, nothing otherwise
+   */
   public static Optional<JdbcDatabaseContainer<?>> createDockerContainer(DB db) {
     switch (db) {
       case DB2:
@@ -84,6 +94,12 @@ public class DockerContainerCreator {
     }
   }
 
+  /**
+   * Creates a {@link DataSource} from a {@link JdbcDatabaseContainer}.
+   *
+   * @param container the container to create the data source from
+   * @return the created data source
+   */
   public static DataSource createDataSource(JdbcDatabaseContainer<?> container) {
     PooledDataSource ds =
         new PooledDataSource(

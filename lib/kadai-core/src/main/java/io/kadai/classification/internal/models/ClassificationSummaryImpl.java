@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ public class ClassificationSummaryImpl implements ClassificationSummary {
     applicationEntryPoint = copyFrom.applicationEntryPoint;
     category = copyFrom.category;
     domain = copyFrom.domain;
+    key = copyFrom.key;
     name = copyFrom.name;
     parentId = copyFrom.parentId;
     parentKey = copyFrom.parentKey;
@@ -166,12 +167,6 @@ public class ClassificationSummaryImpl implements ClassificationSummary {
 
   public void setPriority(int priority) {
     this.priority = priority;
-  }
-
-  @Deprecated
-  @Override
-  public String getCustomAttribute(ClassificationCustomField customField) {
-    return getCustomField(customField);
   }
 
   @Override

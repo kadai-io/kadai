@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import io.kadai.task.api.exceptions.InvalidCallbackStateException;
 import io.kadai.task.api.exceptions.InvalidOwnerException;
 import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.NotAuthorizedOnTaskCommentException;
+import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
@@ -102,6 +103,7 @@ class ExceptionErrorKeyTest {
     assertThat(TaskAlreadyExistException.ERROR_KEY).isEqualTo("TASK_ALREADY_EXISTS");
     assertThat(TaskCommentNotFoundException.ERROR_KEY).isEqualTo("TASK_COMMENT_NOT_FOUND");
     assertThat(TaskNotFoundException.ERROR_KEY).isEqualTo("TASK_NOT_FOUND");
+    assertThat(ReopenTaskWithCallbackException.ERROR_KEY).isEqualTo("REOPEN_TASK_WITH_CALLBACK");
   }
 
   @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -131,6 +131,7 @@ class GetTaskAccTest {
             .owner("user-1-1")
             .read(true)
             .transferred(false)
+            .reopened(false)
             .callbackInfo(callbackInfo)
             .customAttribute(TaskCustomField.CUSTOM_1, "custom1")
             .customAttribute(TaskCustomField.CUSTOM_2, "custom2")
@@ -227,6 +228,7 @@ class GetTaskAccTest {
     assertThat(readTask.getPrimaryObjRef().getValue()).isEqualTo(defaultObjectReference.getValue());
     assertThat(readTask.isRead()).isTrue();
     assertThat(readTask.isTransferred()).isFalse();
+    assertThat(readTask.isReopened()).isFalse();
     assertThat(readTask.getNumberOfComments()).isEqualTo(2);
     assertThat(readTask.getCallbackInfo()).isEqualTo(callbackInfo);
     assertThat(readTask.getCustomAttributeMap()).isEqualTo(new HashMap<String, String>());

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,18 +25,18 @@ import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.rest.QueryParameter;
 import io.kadai.simplehistory.impl.task.TaskHistoryQuery;
 import io.kadai.spi.history.api.events.task.TaskHistoryCustomField;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.beans.ConstructorProperties;
 import java.time.Instant;
 
 public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHistoryQuery, Void> {
-  @Schema(
+  @Parameter(
       name = "event-type",
       description = "Filter by the event type of the Task History Event. This is an exact match.")
   @JsonProperty("event-type")
   private final String[] eventType;
 
-  @Schema(
+  @Parameter(
       name = "event-type-like",
       description =
           "Filter by the event type of the Task History Event. This results in a substring search.."
@@ -45,13 +45,13 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("event-type-like")
   private final String[] eventTypeLike;
 
-  @Schema(
+  @Parameter(
       name = "user-id",
       description = "Filter by the user id of the Task History Event. This is an exact match.")
   @JsonProperty("user-id")
   private final String[] userId;
 
-  @Schema(
+  @Parameter(
       name = "user-id-like",
       description =
           "Filter by the user id of the Task History Event. This results in a substring search.. "
@@ -60,7 +60,7 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("user-id-like")
   private final String[] userIdLike;
 
-  @Schema(
+  @Parameter(
       name = "created",
       description =
           "Filter by a created time interval. The length of the provided values has to be even. To "
@@ -68,18 +68,18 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
               + "format is ISO-8601.")
   private final Instant[] created;
 
-  @Schema(
+  @Parameter(
       name = "domain",
       description = "Filter by the domain of the Task History Event. This is an exact match.")
   private final String[] domain;
 
-  @Schema(
+  @Parameter(
       name = "task-id",
       description = "Filter by the task id of the Task History Event. This is an exact match.")
   @JsonProperty("task-id")
   private final String[] taskId;
 
-  @Schema(
+  @Parameter(
       name = "task-id-like",
       description =
           "Filter by the task id of the Task History Event. This results in a substring search.. (%"
@@ -88,14 +88,14 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("task-id-like")
   private final String[] taskIdLike;
 
-  @Schema(
+  @Parameter(
       name = "business-process-id",
       description =
           "Filter by the business process id of the Task History Event. This is an exact match.")
   @JsonProperty("business-process-id")
   private final String[] businessProcessId;
 
-  @Schema(
+  @Parameter(
       name = "business-process-id-like",
       description =
           "Filter by the business process id of the Task History Event. This results into a "
@@ -104,7 +104,7 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("business-process-id-like")
   private final String[] businessProcessIdLike;
 
-  @Schema(
+  @Parameter(
       name = "parent-business-process-id",
       description =
           "Filter by the parent business process id of the Task History Event. This is an exact "
@@ -112,7 +112,7 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("parent-business-process-id")
   private final String[] parentBusinessProcessId;
 
-  @Schema(
+  @Parameter(
       name = "parent-business-process-id-like",
       description =
           "Filter by the parent business process id of the Task History Event. This results into a "
@@ -121,7 +121,7 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("parent-business-process-id-like")
   private final String[] parentBusinessProcessIdLike;
 
-  @Schema(
+  @Parameter(
       name = "task-classification-key",
       description =
           "Filter by the task classification key of the Task History Event. This is an exact "
@@ -129,7 +129,7 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("task-classification-key")
   private final String[] taskClassificationKey;
 
-  @Schema(
+  @Parameter(
       name = "task-classification-key-like",
       description =
           "Filter by the task classification key of the Task History Event. This results into a "
@@ -138,7 +138,7 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("task-classification-key-like")
   private final String[] taskClassificationKeyLike;
 
-  @Schema(
+  @Parameter(
       name = "task-classification-category",
       description =
           "Filter by the task classification category of the Task History Event. This is an exact "
@@ -146,7 +146,7 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("task-classification-category")
   private final String[] taskClassificationCategory;
 
-  @Schema(
+  @Parameter(
       name = "task-classification-category-like",
       description =
           "Filter by the task classification category of the Task History Event. This results into "
@@ -155,7 +155,7 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("task-classification-category-like")
   private final String[] taskClassificationCategoryLike;
 
-  @Schema(
+  @Parameter(
       name = "attachment-classification-key",
       description =
           "Filter by the attachment classification key of the Task History Event. This is an exact "
@@ -163,7 +163,7 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("attachment-classification-key")
   private final String[] attachmentClassificationKey;
 
-  @Schema(
+  @Parameter(
       name = "attachment-classification-key-like",
       description =
           "Filter by the attachment classification key of the Task History Event. This results into"
@@ -172,14 +172,14 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("attachment-classification-key-like")
   private final String[] attachmentClassificationKeyLike;
 
-  @Schema(
+  @Parameter(
       name = "workbasket-key",
       description =
           "Filter by the workbasket key of the Task History Event. This is an exact match.")
   @JsonProperty("workbasket-key")
   private final String[] workbasketKey;
 
-  @Schema(
+  @Parameter(
       name = "workbasket-key-like",
       description =
           "Filter by the workbasket key of the Task History Event. This results in a substring "
@@ -188,7 +188,7 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("workbasket-key-like")
   private final String[] workbasketKeyLike;
 
-  @Schema(
+  @Parameter(
       name = "por-company",
       description =
           "* Filter by the company of the primary object reference of the Task History Event. This "
@@ -196,7 +196,7 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("por-company")
   private final String[] porCompany;
 
-  @Schema(
+  @Parameter(
       name = "por-company-like",
       description =
           "Filter by the company of the primary object reference of the Task History Event. This "
@@ -206,7 +206,7 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("por-company-like")
   private final String[] porCompanyLike;
 
-  @Schema(
+  @Parameter(
       name = "por-system",
       description =
           "Filter by the system of the primary object reference of the Task History Event. This is "
@@ -214,7 +214,7 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("por-system")
   private final String[] porSystem;
 
-  @Schema(
+  @Parameter(
       name = "por-system-like",
       description =
           "Filter by the system of the primary object reference of the Task History Event. This "
@@ -224,7 +224,7 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("por-system-like")
   private final String[] porSystemLike;
 
-  @Schema(
+  @Parameter(
       name = "por-instance",
       description =
           "Filter by the system instance of the primary object reference of the Task History Event."
@@ -232,7 +232,7 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("por-instance")
   private final String[] porInstance;
 
-  @Schema(
+  @Parameter(
       name = "por-instance-like",
       description =
           "Filter by the system instance of the primary object reference of the Task History Event."
@@ -242,7 +242,7 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("por-instance-like")
   private final String[] porInstanceLike;
 
-  @Schema(
+  @Parameter(
       name = "por-value",
       description =
           "Filter by the value of the primary object reference of the Task History Event. This is "
@@ -250,7 +250,7 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("por-value")
   private final String[] porValue;
 
-  @Schema(
+  @Parameter(
       name = "por-value-like",
       description =
           "Filter by the value of the primary object reference of the Task History Event. This "
@@ -260,13 +260,13 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("por-value-like")
   private final String[] porValueLike;
 
-  @Schema(
+  @Parameter(
       name = "custom-1",
       description = "Filter by the value of the field custom1. This is an exact match.")
   @JsonProperty("custom-1")
   private final String[] custom1;
 
-  @Schema(
+  @Parameter(
       name = "custom-1-like",
       description =
           "Filter by the value of the field custom1. This is an exact match. This results into a "
@@ -275,13 +275,13 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("custom-1-like")
   private final String[] custom1Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-2",
       description = "Filter by the value of the field custom2. This is an exact match.")
   @JsonProperty("custom-2")
   private final String[] custom2;
 
-  @Schema(
+  @Parameter(
       name = "custom-2-like",
       description =
           "Filter by the value of the field custom2. This is an exact match. This results into a "
@@ -290,13 +290,13 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("custom-2-like")
   private final String[] custom2Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-3",
       description = "Filter by the value of the field custom3. This is an exact match.")
   @JsonProperty("custom-3")
   private final String[] custom3;
 
-  @Schema(
+  @Parameter(
       name = "custom-3-like",
       description =
           "Filter by the value of the field custom3. This is an exact match. This results into a "
@@ -305,13 +305,13 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
   @JsonProperty("custom-3-like")
   private final String[] custom3Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-4",
       description = "Filter by the value of the field custom4. This is an exact match.")
   @JsonProperty("custom-4")
   private final String[] custom4;
 
-  @Schema(
+  @Parameter(
       name = "custom-4-like",
       description =
           "Filter by the value of the field custom4. This is an exact match. This results into a "

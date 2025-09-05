@@ -1,5 +1,5 @@
 /*!
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -30,11 +30,13 @@
     align-items: center;
   }
 }
+
 kadai-administration-classification-list {
   min-width: 500px;
   max-width: 500px;
   height: 100%;
 }
+
 kadai-administration-classification-details {
   flex-grow: 1;
 }

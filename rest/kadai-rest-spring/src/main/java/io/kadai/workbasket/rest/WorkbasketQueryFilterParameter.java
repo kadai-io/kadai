@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,19 +23,19 @@ import io.kadai.common.rest.QueryParameter;
 import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.WorkbasketQuery;
 import io.kadai.workbasket.api.WorkbasketType;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.beans.ConstructorProperties;
 import java.util.Optional;
 
 public class WorkbasketQueryFilterParameter implements QueryParameter<WorkbasketQuery, Void> {
 
-  @Schema(
+  @Parameter(
       name = "name",
       description = "Filter by the name of the Workbasket. This is an exact match.")
   @JsonProperty("name")
   private final String[] name;
 
-  @Schema(
+  @Parameter(
       name = "name-like",
       description =
           "Filter by the name of the Workbasket. This results in a substring search. (% is "
@@ -44,13 +44,13 @@ public class WorkbasketQueryFilterParameter implements QueryParameter<Workbasket
   @JsonProperty("name-like")
   private final String[] nameLike;
 
-  @Schema(
+  @Parameter(
       name = "key",
       description = "Filter by the key of the Workbasket. This is an exact match.")
   @JsonProperty("key")
   private final String[] key;
 
-  @Schema(
+  @Parameter(
       name = "key-like",
       description =
           "Filter by the key of the Workbasket. This results in a substring search.. (% is "
@@ -59,13 +59,13 @@ public class WorkbasketQueryFilterParameter implements QueryParameter<Workbasket
   @JsonProperty("key-like")
   private final String[] keyLike;
 
-  @Schema(
+  @Parameter(
       name = "owner",
       description = "Filter by the owner of the Workbasket. This is an exact match.")
   @JsonProperty("owner")
   private final String[] owner;
 
-  @Schema(
+  @Parameter(
       name = "owner-like",
       description =
           "Filter by the owner of the Workbasket. This results in a substring search.. (% is "
@@ -74,7 +74,7 @@ public class WorkbasketQueryFilterParameter implements QueryParameter<Workbasket
   @JsonProperty("owner-like")
   private final String[] ownerLike;
 
-  @Schema(
+  @Parameter(
       name = "description-like",
       description =
           "Filter by the description of the Workbasket. This results in a substring search.. (% "
@@ -83,19 +83,19 @@ public class WorkbasketQueryFilterParameter implements QueryParameter<Workbasket
   @JsonProperty("description-like")
   private final String[] descriptionLike;
 
-  @Schema(
+  @Parameter(
       name = "domain",
       description = "Filter by the domain of the Workbasket. This is an exact match.")
   @JsonProperty("domain")
   private final String[] domain;
 
-  @Schema(
+  @Parameter(
       name = "type",
       description = "Filter by the type of the Workbasket. This is an exact match.")
   @JsonProperty("type")
   private final WorkbasketType[] type;
 
-  @Schema(
+  @Parameter(
       name = "required-permission",
       description = "Filter by the required permission for the Workbasket.")
   @JsonProperty("required-permission")

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
 import javax.sql.DataSource;
 import org.apache.ibatis.jdbc.RuntimeSqlException;
 import org.apache.ibatis.jdbc.ScriptRunner;
@@ -98,13 +97,7 @@ public class DbSchemaCreator {
         LOGGER.debug("{}", connection.getMetaData());
       }
 
-      String query =
-          "select VERSION from KADAI_SCHEMA_VERSION where "
-              + "VERSION = (select max(VERSION) from KADAI_SCHEMA_VERSION) ";
-
-      Map<String, Object> queryResult = runner.selectOne(query);
-
-      ComparableVersion actualVersion = ComparableVersion.of((String) queryResult.get("VERSION"));
+      ComparableVersion actualVersion = getActualMaxVersion(runner);
       ComparableVersion minVersion = ComparableVersion.of(expectedMinVersion);
 
       if (actualVersion.compareTo(minVersion) < 0) {
@@ -129,12 +122,39 @@ public class DbSchemaCreator {
     }
   }
 
+  /**
+   * Retrieves the maximum version from the KADAI_SCHEMA_VERSION table.
+   *
+   * <p>This method executes a SQL query to fetch all version entries from the
+   * KADAI_SCHEMA_VERSION table, converts them to ComparableVersion objects, and
+   * determines the maximum version. If no versions are found, an IllegalStateException
+   * is thrown.
+   *
+   * @param runner the SqlRunner instance used to execute the query
+   * @return the maximum version as a ComparableVersion object
+   * @throws SQLException if a database access error occurs
+   * @throws IllegalStateException if no version exists in the KADAI_SCHEMA_VERSION table
+   */
+  public ComparableVersion getActualMaxVersion(SqlRunner runner) throws SQLException {
+    String query = "select VERSION from KADAI_SCHEMA_VERSION";
+    return runner.selectAll(query).stream()
+        .map(res -> (String) res.get("VERSION"))
+        .map(ComparableVersion::of)
+        .max(ComparableVersion::compareTo)
+        .orElseThrow(
+            () -> new IllegalStateException("There exists no version in KADAI_SCHEMA_VERSION"));
+  }
+
   public DataSource getDataSource() {
     return dataSource;
   }
 
   public void setDataSource(DataSource dataSource) {
     this.dataSource = dataSource;
+  }
+
+  public String getSchemaName() {
+    return schemaName;
   }
 
   private ScriptRunner getScriptRunnerInstance(Connection connection) {

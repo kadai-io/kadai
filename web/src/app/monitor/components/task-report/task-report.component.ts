@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,23 +16,23 @@
  *
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ReportData } from 'app/monitor/models/report-data';
 import { MonitorService } from '../../services/monitor.service';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
-import { CommonModule } from '@angular/common';
 import { ReportTableComponent } from '../report-table/report-table.component';
-import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { BaseChartDirective } from 'ng2-charts';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'kadai-monitor-task-report',
   templateUrl: './task-report.component.html',
   styleUrls: ['./task-report.component.scss'],
-  imports: [CommonModule, ReportTableComponent, BaseChartDirective],
-  providers: [provideCharts(withDefaultRegisterables())]
+  imports: [ReportTableComponent, BaseChartDirective, DatePipe],
+  providers: [MonitorService]
 })
 export class TaskReportComponent implements OnInit {
   pieChartData: ChartData<'pie', number[], string> = { labels: [], datasets: [] };
@@ -42,12 +42,9 @@ export class TaskReportComponent implements OnInit {
     maintainAspectRatio: true
   };
   reportData: ReportData;
+  private monitorService = inject(MonitorService);
+  private requestInProgressService = inject(RequestInProgressService);
   private destroy$ = new Subject<void>();
-
-  constructor(
-    private monitorService: MonitorService,
-    private requestInProgressService: RequestInProgressService
-  ) {}
 
   ngOnInit() {
     this.requestInProgressService.setRequestInProgress(true);

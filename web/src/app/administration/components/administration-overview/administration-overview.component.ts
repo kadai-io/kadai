@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,33 +16,49 @@
  *
  */
 
-import { Component, Input, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, inject, Input, OnInit } from '@angular/core';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { takeUntil } from 'rxjs/operators';
 import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
+import { MatTabLink, MatTabNav, MatTabNavPanel } from '@angular/material/tabs';
+
+import { MatFormField } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatOption } from '@angular/material/core';
 
 @Component({
   selector: 'kadai-administration-overview',
   templateUrl: './administration-overview.component.html',
   styleUrls: ['./administration-overview.component.scss'],
-  standalone: false
+  imports: [
+    MatTabNav,
+    MatTabLink,
+    RouterLink,
+    MatFormField,
+    MatSelect,
+    MatTooltip,
+    MatOption,
+    MatTabNavPanel,
+    RouterOutlet
+  ]
 })
 export class AdministrationOverviewComponent implements OnInit {
   @Input() selectedTab = '';
   domains: Array<string> = [];
   selectedDomain: string;
-
   destroy$ = new Subject<void>();
   url$: Observable<any>;
   routingAccess = false;
+  private router = inject(Router);
+  private domainService = inject(DomainService);
+  private kadaiEngineService = inject(KadaiEngineService);
 
-  constructor(
-    private router: Router,
-    private domainService: DomainService,
-    private kadaiEngineService: KadaiEngineService
-  ) {
+  constructor() {
+    const router = this.router;
+
     router.events.pipe(takeUntil(this.destroy$)).subscribe((e) => {
       const urlPaths = this.router.url.split('/');
       if (this.router.url.includes('detail')) {

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,28 +16,27 @@
  *
  */
 
-import { Component, OnInit } from '@angular/core';
-import { Router, NavigationStart, RouterEvent } from '@angular/router';
+import { Component, inject, OnInit } from '@angular/core';
+import { NavigationStart, Router, RouterEvent, RouterOutlet } from '@angular/router';
 import { MasterAndDetailService } from 'app/shared/services/master-and-detail/master-and-detail.service';
+
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'kadai-shared-master-and-detail',
   templateUrl: './master-and-detail.component.html',
   styleUrls: ['./master-and-detail.component.scss'],
-  standalone: false
+  imports: [RouterOutlet, MatIcon]
 })
 export class MasterAndDetailComponent implements OnInit {
+  showDetail = false;
+  currentRoute = '';
+  private router = inject(Router);
+  private masterAndDetailService = inject(MasterAndDetailService);
   private classifications = 'classifications';
   private workbaskets = 'workbaskets';
   private tasks = 'tasks';
   private detailRoutes: Array<string> = ['/workbaskets/(detail', 'classifications/(detail', 'tasks/(detail'];
-
-  showDetail = false;
-  currentRoute = '';
-  constructor(
-    private router: Router,
-    private masterAndDetailService: MasterAndDetailService
-  ) {}
 
   ngOnInit(): void {
     this.showDetail = this.showDetails();

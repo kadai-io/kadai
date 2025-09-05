@@ -10,7 +10,7 @@
     <parent>
         <groupId>io.kadai</groupId>
         <artifactId>kadai-rest-parent</artifactId>
-        <version>9.2.1-SNAPSHOT</version>
+        <version>10.2.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -116,6 +116,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+            <exclusions>
+              <exclusion>
+                <groupId>com.vaadin.external.google</groupId>
+                <artifactId>android-json</artifactId>
+              </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

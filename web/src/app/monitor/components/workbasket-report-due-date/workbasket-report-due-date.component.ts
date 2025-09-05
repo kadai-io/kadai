@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,30 +16,28 @@
  *
  */
 
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, OnInit, Output } from '@angular/core';
 import { ReportData } from '../../models/report-data';
 import { ChartData } from '../../models/chart-data';
 import { MonitorService } from '../../services/monitor.service';
 import { MetaInfoData } from '../../models/meta-info-data';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { ChartConfiguration } from 'chart.js';
-import { NgIf } from '@angular/common';
-import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
+
+import { BaseChartDirective } from 'ng2-charts';
 import { ReportTableComponent } from '../report-table/report-table.component';
 
 @Component({
   selector: 'kadai-monitor-workbasket-report-due-date',
   templateUrl: './workbasket-report-due-date.component.html',
   styleUrls: ['./workbasket-report-due-date.component.scss'],
-  imports: [NgIf, BaseChartDirective, ReportTableComponent],
-  providers: [provideCharts(withDefaultRegisterables())]
+  imports: [BaseChartDirective, ReportTableComponent],
+  providers: [MonitorService]
 })
 export class WorkbasketReportDueDateComponent implements OnInit {
   @Output()
   metaInformation = new EventEmitter<MetaInfoData>();
-
   reportData: ReportData;
-
   lineChartLabels: Array<any>;
   lineChartLegend = true;
   lineChartType = 'line';
@@ -53,10 +51,8 @@ export class WorkbasketReportDueDateComponent implements OnInit {
       }
     }
   };
-  constructor(
-    private restConnectorService: MonitorService,
-    private requestInProgressService: RequestInProgressService
-  ) {}
+  private restConnectorService = inject(MonitorService);
+  private requestInProgressService = inject(RequestInProgressService);
 
   async ngOnInit() {
     this.requestInProgressService.setRequestInProgress(true);

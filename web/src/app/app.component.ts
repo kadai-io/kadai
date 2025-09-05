@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
  *
  */
 
-import { Component, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
+import { Component, HostListener, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Subject } from 'rxjs';
 import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
 import { SidenavService } from './shared/services/sidenav/sidenav.service';
@@ -27,37 +27,49 @@ import { SelectedRouteService } from './shared/services/selected-route/selected-
 import { KadaiEngineService } from './shared/services/kadai-engine/kadai-engine.service';
 import { WindowRefService } from 'app/shared/services/window/window.service';
 import { environment } from 'environments/environment';
-import { MatSidenav } from '@angular/material/sidenav';
+import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
 import { takeUntil } from 'rxjs/operators';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { UserInformationComponent } from './shared/components/user-information/user-information.component';
+import { SidenavListComponent } from './shared/components/sidenav-list/sidenav-list.component';
+import { NavBarComponent } from './shared/components/nav-bar/nav-bar.component';
+
+import { MatProgressBar } from '@angular/material/progress-bar';
 
 @Component({
   selector: 'kadai-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  standalone: false
+  imports: [
+    MatSidenavContainer,
+    MatSidenav,
+    MatIconButton,
+    MatIcon,
+    UserInformationComponent,
+    SidenavListComponent,
+    MatSidenavContent,
+    NavBarComponent,
+    MatProgressBar,
+    RouterOutlet
+  ]
 })
 export class AppComponent implements OnInit, OnDestroy {
   workbasketsRoute = true;
   selectedRoute = '';
-
   requestInProgress = false;
-
   version: string;
   toggle: boolean = false;
-
   destroy$ = new Subject<void>();
   @ViewChild('sidenav') public sidenav: MatSidenav;
-
-  constructor(
-    private router: Router,
-    private requestInProgressService: RequestInProgressService,
-    private orientationService: OrientationService,
-    private selectedRouteService: SelectedRouteService,
-    private formsValidatorService: FormsValidatorService,
-    private sidenavService: SidenavService,
-    private kadaiEngineService: KadaiEngineService,
-    private window: WindowRefService
-  ) {}
+  private router = inject(Router);
+  private requestInProgressService = inject(RequestInProgressService);
+  private orientationService = inject(OrientationService);
+  private selectedRouteService = inject(SelectedRouteService);
+  private formsValidatorService = inject(FormsValidatorService);
+  private sidenavService = inject(SidenavService);
+  private kadaiEngineService = inject(KadaiEngineService);
+  private window = inject(WindowRefService);
 
   @HostListener('window:resize', ['$event'])
   onResize() {

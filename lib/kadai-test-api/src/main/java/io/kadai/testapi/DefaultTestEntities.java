@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -31,18 +31,33 @@ import io.kadai.workbasket.api.WorkbasketType;
 import java.util.Random;
 import java.util.UUID;
 
+/**
+ * Utility-Class providing prepared
+ * {@linkplain io.kadai.testapi.builder.EntityBuilder Entity-Builders} to build default entities
+ * for tests.
+ */
 public class DefaultTestEntities {
 
   private DefaultTestEntities() {
     throw new IllegalStateException("Utility class");
   }
 
+  /**
+   * Returns the default {@link ClassificationBuilder}.
+   *
+   * @return the default {@link ClassificationBuilder}
+   */
   public static ClassificationBuilder defaultTestClassification() {
     return newClassification()
         .key(UUID.randomUUID().toString().replace("-", ""))
         .domain("DOMAIN_A");
   }
 
+  /**
+   * Returns the default {@link WorkbasketBuilder}.
+   *
+   * @return the default {@link WorkbasketBuilder}
+   */
   public static WorkbasketBuilder defaultTestWorkbasket() {
     return newWorkbasket()
         .key(UUID.randomUUID().toString())
@@ -52,6 +67,11 @@ public class DefaultTestEntities {
         .orgLevel1("company");
   }
 
+  /**
+   * Returns the default {@link ObjectReferenceBuilder}.
+   *
+   * @return the default {@link ObjectReferenceBuilder}
+   */
   public static ObjectReferenceBuilder defaultTestObjectReference() {
     return newObjectReference()
         .company("Company1")
@@ -61,6 +81,13 @@ public class DefaultTestEntities {
         .value("Value1");
   }
 
+  /**
+   * Returns a {@link UserBuilder} with random {@linkplain UserBuilder#id(String) id},
+   * {@linkplain UserBuilder#firstName(String) firstName} and
+   * {@linkplain UserBuilder#lastName(String) lastName}.
+   *
+   * @return the default {@link ClassificationBuilder}
+   */
   public static UserBuilder randomTestUser() {
     return newUser()
         .id(UUID.randomUUID().toString().replace("-", ""))

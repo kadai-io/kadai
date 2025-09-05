@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 
 package io.kadai.task.rest;
 
-import static io.kadai.common.internal.util.CheckedConsumer.wrap;
 import static io.kadai.common.internal.util.Quadruple.of;
 import static io.kadai.task.api.TaskCustomField.CUSTOM_1;
 import static io.kadai.task.api.TaskCustomField.CUSTOM_10;
@@ -41,23 +40,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kadai.common.internal.util.Pair;
 import io.kadai.common.rest.QueryParameter;
 import io.kadai.task.api.TaskQuery;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.beans.ConstructorProperties;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Void> {
-  @Schema(
+  @Parameter(
       name = "custom-1",
       description = "Filter by the value of the field custom1 of the Task. This is an exact match.")
   @JsonProperty("custom-1")
   private final String[] custom1In;
 
-  @Schema(name = "custom-1-not", description = "Exclude values of the field custom1 of the Task.")
+  @Parameter(
+      name = "custom-1-not",
+      description = "Exclude values of the field custom1 of the Task.")
   @JsonProperty("custom-1-not")
   private final String[] custom1NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-1-like",
       description =
           "Filter by the custom1 field of the Task. This results in a substring search (% is "
@@ -66,7 +67,7 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-1-like")
   private final String[] custom1Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-1-not-like",
       description =
           "Filter by what the custom1 field of the Task shouldn't be. This results in a substring"
@@ -75,20 +76,20 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-1-not-like")
   private final String[] custom1NotLike;
 
-  @Schema(
+  @Parameter(
       name = "custom-2",
       description = "Filter by the value of the field custom2 of the Task. This is an exact match.")
   @JsonProperty("custom-2")
   private final String[] custom2In;
 
-  @Schema(
+  @Parameter(
       name = "custom-2-not",
       description =
           "Filter out by values of the field custom2 of the Task. This is an exact match.")
   @JsonProperty("custom-2-not")
   private final String[] custom2NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-2-like",
       description =
           "Filter by the custom2 field of the Task. This results in a substring search (% is "
@@ -97,7 +98,7 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-2-like")
   private final String[] custom2Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-2-not-like",
       description =
           "Filter by what the custom2 field of the Task shouldn't be. This results in a substring"
@@ -106,20 +107,20 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-2-not-like")
   private final String[] custom2NotLike;
 
-  @Schema(
+  @Parameter(
       name = "custom-3",
       description = "Filter by the value of the field custom3 of the Task. This is an exact match.")
   @JsonProperty("custom-3")
   private final String[] custom3In;
 
-  @Schema(
+  @Parameter(
       name = "custom-3-not",
       description =
           "Filter out by values of the field custom3 of the Task. This is an exact match.")
   @JsonProperty("custom-3-not")
   private final String[] custom3NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-3-like",
       description =
           "Filter by the custom3 field of the Task. This results in a substring search (% is "
@@ -128,7 +129,7 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-3-like")
   private final String[] custom3Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-3-not-like",
       description =
           "Filter by what the custom3 field of the Task shouldn't be. This results in a substring"
@@ -137,20 +138,20 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-3-not-like")
   private final String[] custom3NotLike;
 
-  @Schema(
+  @Parameter(
       name = "custom-4",
       description = "Filter by the value of the field custom4 of the Task. This is an exact match.")
   @JsonProperty("custom-4")
   private final String[] custom4In;
 
-  @Schema(
+  @Parameter(
       name = "custom-4-not",
       description =
           "Filter out by values of the field custom4 of the Task. This is an exact match.")
   @JsonProperty("custom-4-not")
   private final String[] custom4NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-4-like",
       description =
           "Filter by the custom4 field of the Task. This results in a substring search (% is "
@@ -159,7 +160,7 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-4-like")
   private final String[] custom4Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-4-not-like",
       description =
           "Filter by what the custom4 field of the Task shouldn't be. This results in a substring"
@@ -168,20 +169,20 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-4-not-like")
   private final String[] custom4NotLike;
 
-  @Schema(
+  @Parameter(
       name = "custom-5",
       description = "Filter by the value of the field custom5 of the Task. This is an exact match.")
   @JsonProperty("custom-5")
   private final String[] custom5In;
 
-  @Schema(
+  @Parameter(
       name = "custom-5-not",
       description =
           "Filter out by values of the field custom5 of the Task. This is an exact match.")
   @JsonProperty("custom-5-not")
   private final String[] custom5NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-5-like",
       description =
           "Filter by the custom5 field of the Task. This results in a substring search (% is "
@@ -190,7 +191,7 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-5-like")
   private final String[] custom5Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-5-not-like",
       description =
           "Filter by what the custom5 field of the Task shouldn't be. This results in a substring"
@@ -199,20 +200,20 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-5-not-like")
   private final String[] custom5NotLike;
 
-  @Schema(
+  @Parameter(
       name = "custom-6",
       description = "Filter by the value of the field custom6 of the Task. This is an exact match.")
   @JsonProperty("custom-6")
   private final String[] custom6In;
 
-  @Schema(
+  @Parameter(
       name = "custom-6-not",
       description =
           "Filter out by values of the field custom6 of the Task. This is an exact match.")
   @JsonProperty("custom-6-not")
   private final String[] custom6NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-6-like",
       description =
           "Filter by the custom6 field of the Task. This results in a substring search (% is "
@@ -221,7 +222,7 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-6-like")
   private final String[] custom6Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-6-not-like",
       description =
           "Filter by what the custom6 field of the Task shouldn't be. This results in a substring"
@@ -230,20 +231,20 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-6-not-like")
   private final String[] custom6NotLike;
 
-  @Schema(
+  @Parameter(
       name = "custom-7",
       description = "Filter by the value of the field custom7 of the Task. This is an exact match.")
   @JsonProperty("custom-7")
   private final String[] custom7In;
 
-  @Schema(
+  @Parameter(
       name = "custom-7-not",
       description =
           "Filter out by values of the field custom7 of the Task. This is an exact match.")
   @JsonProperty("custom-7-not")
   private final String[] custom7NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-7-like",
       description =
           "Filter by the custom7 field of the Task. This results in a substring search (% is "
@@ -252,7 +253,7 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-7-like")
   private final String[] custom7Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-7-not-like",
       description =
           "Filter by what the custom7 field of the Task shouldn't be. This results in a substring"
@@ -261,20 +262,20 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-7-not-like")
   private final String[] custom7NotLike;
 
-  @Schema(
+  @Parameter(
       name = "custom-8",
       description = "Filter by the value of the field custom8 of the Task. This is an exact match.")
   @JsonProperty("custom-8")
   private final String[] custom8In;
 
-  @Schema(
+  @Parameter(
       name = "custom-8-not",
       description =
           "Filter out by values of the field custom8 of the Task. This is an exact match.")
   @JsonProperty("custom-8-not")
   private final String[] custom8NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-8-like",
       description =
           "Filter by the custom8 field of the Task. This results in a substring search (% is "
@@ -283,7 +284,7 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-8-like")
   private final String[] custom8Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-8-not-like",
       description =
           "Filter by what the custom8 field of the Task shouldn't be. This results in a substring"
@@ -292,20 +293,20 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-8-not-like")
   private final String[] custom8NotLike;
 
-  @Schema(
+  @Parameter(
       name = "custom-9",
       description = "Filter by the value of the field custom9 of the Task. This is an exact match.")
   @JsonProperty("custom-9")
   private final String[] custom9In;
 
-  @Schema(
+  @Parameter(
       name = "custom-9-not",
       description =
           "Filter out by values of the field custom9 of the Task. This is an exact match.")
   @JsonProperty("custom-9-not")
   private final String[] custom9NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-9-like",
       description =
           "Filter by the custom9 field of the Task. This results in a substring search (% is "
@@ -314,7 +315,7 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-9-like")
   private final String[] custom9Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-9-not-like",
       description =
           "Filter by what the custom9 field of the Task shouldn't be. This results in a substring"
@@ -323,21 +324,21 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-9-not-like")
   private final String[] custom9NotLike;
 
-  @Schema(
+  @Parameter(
       name = "custom-10",
       description =
           "Filter by the value of the field custom10 of the Task. This is an exact match.")
   @JsonProperty("custom-10")
   private final String[] custom10In;
 
-  @Schema(
+  @Parameter(
       name = "custom-10-not",
       description =
           "Filter out by values of the field custom10 of the Task. This is an exact match.")
   @JsonProperty("custom-10-not")
   private final String[] custom10NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-10-like",
       description =
           "Filter by the custom10 field of the Task. This results in a substring search (% is "
@@ -346,7 +347,7 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-10-like")
   private final String[] custom10Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-10-not-like",
       description =
           "Filter by what the custom10 field of the Task shouldn't be. This results in a substring"
@@ -355,21 +356,21 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-10-not-like")
   private final String[] custom10NotLike;
 
-  @Schema(
+  @Parameter(
       name = "custom-11",
       description =
           "Filter by the value of the field custom11 of the Task. This is an exact match.")
   @JsonProperty("custom-11")
   private final String[] custom11In;
 
-  @Schema(
+  @Parameter(
       name = "custom-11-not",
       description =
           "Filter out by values of the field custom11 of the Task. This is an exact match.")
   @JsonProperty("custom-11-not")
   private final String[] custom11NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-11-like",
       description =
           "Filter by the custom11 field of the Task. This results in a substring search (% is "
@@ -378,7 +379,7 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-11-like")
   private final String[] custom11Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-11-not-like",
       description =
           "Filter by what the custom11 field of the Task shouldn't be. This results in a substring"
@@ -387,21 +388,21 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-11-not-like")
   private final String[] custom11NotLike;
 
-  @Schema(
+  @Parameter(
       name = "custom-12",
       description =
           "Filter by the value of the field custom12 of the Task. This is an exact match.")
   @JsonProperty("custom-12")
   private final String[] custom12In;
 
-  @Schema(
+  @Parameter(
       name = "custom-12-not",
       description =
           "Filter out by values of the field custom12 of the Task. This is an exact match.")
   @JsonProperty("custom-12-not")
   private final String[] custom12NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-12-like",
       description =
           "Filter by the custom12 field of the Task. This results in a substring search (% is "
@@ -410,7 +411,7 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-12-like")
   private final String[] custom12Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-12-not-like",
       description =
           "Filter by what the custom12 field of the Task shouldn't be. This results in a substring"
@@ -419,21 +420,21 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-12-not-like")
   private final String[] custom12NotLike;
 
-  @Schema(
+  @Parameter(
       name = "custom-13",
       description =
           "Filter by the value of the field custom13 of the Task. This is an exact match.")
   @JsonProperty("custom-13")
   private final String[] custom13In;
 
-  @Schema(
+  @Parameter(
       name = "custom-13-not",
       description =
           "Filter out by values of the field custom13 of the Task. This is an exact match.")
   @JsonProperty("custom-13-not")
   private final String[] custom13NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-13-like",
       description =
           "Filter by the custom13 field of the Task. This results in a substring search (% is "
@@ -442,7 +443,7 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-13-like")
   private final String[] custom13Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-13-not-like",
       description =
           "Filter by what the custom13 field of the Task shouldn't be. This results in a substring"
@@ -451,21 +452,21 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-13-not-like")
   private final String[] custom13NotLike;
 
-  @Schema(
+  @Parameter(
       name = "custom-14",
       description =
           "Filter by the value of the field custom14 of the Task. This is an exact match.")
   @JsonProperty("custom-14")
   private final String[] custom14In;
 
-  @Schema(
+  @Parameter(
       name = "custom-14-not",
       description =
           "Filter out by values of the field custom14 of the Task. This is an exact match.")
   @JsonProperty("custom-14-not")
   private final String[] custom14NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-14-like",
       description =
           "Filter by the custom14 field of the Task. This results in a substring search (% is "
@@ -474,7 +475,7 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-14-like")
   private final String[] custom14Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-14-not-like",
       description =
           "Filter by what the custom14 field of the Task shouldn't be. This results in a substring"
@@ -483,21 +484,21 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-14-not-like")
   private final String[] custom14NotLike;
 
-  @Schema(
+  @Parameter(
       name = "custom-15",
       description =
           "Filter by the value of the field custom15 of the Task. This is an exact match.")
   @JsonProperty("custom-15")
   private final String[] custom15In;
 
-  @Schema(
+  @Parameter(
       name = "custom-15-not",
       description =
           "Filter out by values of the field custom15 of the Task. This is an exact match.")
   @JsonProperty("custom-15-not")
   private final String[] custom15NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-15-like",
       description =
           "Filter by the custom15 field of the Task. This results in a substring search (% is "
@@ -506,7 +507,7 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-15-like")
   private final String[] custom15Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-15-not-like",
       description =
           "Filter by what the custom15 field of the Task shouldn't be. This results in a substring"
@@ -515,21 +516,21 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-15-not-like")
   private final String[] custom15NotLike;
 
-  @Schema(
+  @Parameter(
       name = "custom-16",
       description =
           "Filter by the value of the field custom16 of the Task. This is an exact match.")
   @JsonProperty("custom-16")
   private final String[] custom16In;
 
-  @Schema(
+  @Parameter(
       name = "custom-16-not",
       description =
           "Filter out by values of the field custom16 of the Task. This is an exact match.")
   @JsonProperty("custom-16-not")
   private final String[] custom16NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-16-like",
       description =
           "Filter by the custom16 field of the Task. This results in a substring search (% is "
@@ -538,7 +539,7 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
   @JsonProperty("custom-16-like")
   private final String[] custom16Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-16-not-like",
       description =
           "Filter by what the custom16 field of the Task shouldn't be. This results in a substring"
@@ -1022,15 +1023,15 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
         .forEach(
             pair -> {
               Optional.ofNullable(pair.getRight().getFirst())
-                  .ifPresent(wrap(l -> query.customAttributeIn(pair.getLeft(), l)));
+                  .ifPresent(l -> query.customAttributeIn(pair.getLeft(), l));
               Optional.ofNullable(pair.getRight().getSecond())
-                  .ifPresent(wrap(l -> query.customAttributeNotIn(pair.getLeft(), l)));
+                  .ifPresent(l -> query.customAttributeNotIn(pair.getLeft(), l));
               Optional.ofNullable(pair.getRight().getThird())
                   .map(this::wrapElementsInLikeStatement)
-                  .ifPresent(wrap(l -> query.customAttributeLike(pair.getLeft(), l)));
+                  .ifPresent(l -> query.customAttributeLike(pair.getLeft(), l));
               Optional.ofNullable(pair.getRight().getFourth())
                   .map(this::wrapElementsInLikeStatement)
-                  .ifPresent(wrap(l -> query.customAttributeNotLike(pair.getLeft(), l)));
+                  .ifPresent(l -> query.customAttributeNotLike(pair.getLeft(), l));
             });
     return null;
   }

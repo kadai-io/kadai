@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,46 +17,25 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Component, DebugElement } from '@angular/core';
-import { Actions, NgxsModule, ofActionDispatched, Store } from '@ngxs/store';
+import { DebugElement } from '@angular/core';
+import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
 import { ClassificationOverviewComponent } from './classification-overview.component';
-import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
-import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
-import { DomainService } from '../../../shared/services/domain/domain.service';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import {
   CreateClassification,
   SelectClassification
 } from '../../../shared/store/classification-store/classification.actions';
-import { classificationStateMock } from '../../../shared/store/mock-data/mock-store';
+import { classificationStateMock, engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
+import { provideHttpClient } from '@angular/common/http';
+import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-@Component({ selector: 'kadai-administration-classification-list', template: '' })
-class ClassificationListStub {}
-
-@Component({ selector: 'kadai-administration-classification-details', template: '' })
-class ClassificationDetailsStub {}
-
-@Component({ selector: 'svg-icon', template: '' })
-class SvgIconStub {}
+jest.mock('angular-svg-icon');
 
 const routeParamsMock = { id: 'new-classification' };
-const activatedRouteMock = {
-  firstChild: {
-    params: of(routeParamsMock)
-  }
-};
-
-const classificationCategoriesServiceSpy = jest.fn();
-const classificationServiceSpy: Partial<ClassificationsService> = {
-  getClassification: jest.fn().mockReturnValue(of()),
-  getClassifications: jest.fn().mockReturnValue(of())
-};
-const domainServiceSpy: Partial<DomainService> = {
-  getSelectedDomainValue: jest.fn().mockReturnValue(of()),
-  getSelectedDomain: jest.fn().mockReturnValue(of('A'))
-};
 
 describe('ClassificationOverviewComponent', () => {
   let fixture: ComponentFixture<ClassificationOverviewComponent>;
@@ -64,27 +43,25 @@ describe('ClassificationOverviewComponent', () => {
   let component: ClassificationOverviewComponent;
   let store: Store;
   let actions$: Observable<any>;
+  let mockActivatedRoute: any;
 
   beforeEach(waitForAsync(() => {
+    mockActivatedRoute = {
+      firstChild: {
+        params: of(routeParamsMock)
+      }
+    };
+
     TestBed.configureTestingModule({
-      imports: [NgxsModule.forRoot([ClassificationState])],
-      declarations: [ClassificationOverviewComponent],
+      imports: [ClassificationOverviewComponent],
       providers: [
-        ClassificationDetailsStub,
-        ClassificationListStub,
-        SvgIconStub,
-        {
-          provide: ClassificationsService,
-          useValue: classificationServiceSpy
-        },
-        {
-          provide: ClassificationCategoriesService,
-          useValue: classificationCategoriesServiceSpy
-        },
-        { provide: DomainService, useValue: domainServiceSpy },
+        provideStore([ClassificationState, EngineConfigurationState]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideNoopAnimations(),
         {
           provide: ActivatedRoute,
-          useValue: activatedRouteMock
+          useValue: mockActivatedRoute
         }
       ]
     }).compileComponents();
@@ -96,7 +73,8 @@ describe('ClassificationOverviewComponent', () => {
     actions$ = TestBed.inject(Actions);
     store.reset({
       ...store.snapshot(),
-      classification: classificationStateMock
+      classification: classificationStateMock,
+      engineConfiguration: engineConfigurationMock
     });
     fixture.detectChanges();
   }));
@@ -124,11 +102,13 @@ describe('ClassificationOverviewComponent', () => {
     expect(debugElement.nativeElement.querySelector('kadai-administration-classification-details')).toBeFalsy();
   });
 
-  it('should set routerParams property when firstChild of route exists', () => {
-    expect(component.routerParams).toBe(routeParamsMock);
+  it('should set routerParams property when firstChild of route exists', async () => {
+    await fixture.whenStable();
+    expect(component.routerParams).toEqual(routeParamsMock);
   });
 
   it('should dispatch SelectClassification action when routerParams id exists', async () => {
+    mockActivatedRoute.firstChild.params = of(routeParamsMock);
     let isActionDispatched = false;
     actions$.pipe(ofActionDispatched(SelectClassification)).subscribe(() => (isActionDispatched = true));
     component.ngOnInit();

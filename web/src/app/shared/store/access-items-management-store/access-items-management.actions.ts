@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,21 +23,25 @@ import { QueryPagingParameter } from '../../models/query-paging-parameter';
 
 export class SelectAccessId {
   static readonly type = '[Access Items Management] Select access ID';
+
   constructor(public accessIdDefinition: AccessId) {}
 }
 
 export class GetGroupsByAccessId {
   static readonly type = '[Access Items Management] Get groups by access ID';
+
   constructor(public accessId: string) {}
 }
 
 export class GetPermissionsByAccessId {
   static readonly type = '[Access Items Management] Get permissions by access ID';
+
   constructor(public accessId: string) {}
 }
 
 export class GetAccessItems {
   static readonly type = '[Access Items Management] Get access items';
+
   constructor(
     public filterParameter?: WorkbasketAccessItemQueryFilterParameter,
     public sortParameter?: Sorting<WorkbasketAccessItemQuerySortParameter>,
@@ -47,5 +51,6 @@ export class GetAccessItems {
 
 export class RemoveAccessItemsPermissions {
   static readonly type = "[Access Items Management] Remove access items' permissions";
+
   constructor(public accessId: string) {}
 }

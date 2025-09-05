@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,22 +16,30 @@
  *
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Settings, SettingTypes } from '../../models/settings';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { SetSettings } from '../../../shared/store/settings-store/settings.actions';
 import { SettingsSelectors } from '../../../shared/store/settings-store/settings.selectors';
 import { takeUntil } from 'rxjs/operators';
 import { validateSettings } from './settings.validators';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 
 @Component({
   selector: 'kadai-administration-settings',
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss'],
-  standalone: false
+  imports: [MatButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, CdkTextareaAutosize]
 })
 export class SettingsComponent implements OnInit, OnDestroy {
   settingTypes = SettingTypes;
@@ -39,14 +47,10 @@ export class SettingsComponent implements OnInit, OnDestroy {
   oldSettings: Settings;
   invalidMembers: string[] = [];
   destroy$ = new Subject<void>();
-
-  @Select(SettingsSelectors.getSettings) settings$: Observable<Settings>;
-
-  constructor(
-    private store: Store,
-    private notificationService: NotificationService,
-    private requestInProgressService: RequestInProgressService
-  ) {}
+  settings$: Observable<Settings> = inject(Store).select(SettingsSelectors.getSettings);
+  private store = inject(Store);
+  private notificationService = inject(NotificationService);
+  private requestInProgressService = inject(RequestInProgressService);
 
   ngOnInit() {
     this.settings$.pipe(takeUntil(this.destroy$)).subscribe((settings) => {

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -177,7 +177,7 @@ public class TaskQuerySqlProvider {
   @SuppressWarnings("unused")
   public static String countQueryTasks() {
     return OPENING_SCRIPT_TAG
-        + "SELECT COUNT( <if test=\"useDistinctKeyword\">DISTINCT</if> t.ID) "
+        + "SELECT COUNT(*) "
         + "<if test=\"groupByPor or groupBySor != null\"> "
         + "FROM (SELECT t.ID, t.POR_VALUE "
         + "</if> "
@@ -336,9 +336,9 @@ public class TaskQuerySqlProvider {
         + "TCLASSIFICATION_KEY, CLASSIFICATION_ID, "
         + "WORKBASKET_ID, WORKBASKET_KEY, DOMAIN, "
         + "BUSINESS_PROCESS_ID, PARENT_BUSINESS_PROCESS_ID, OWNER, POR_COMPANY, POR_SYSTEM, "
-        + "POR_INSTANCE, POR_TYPE, POR_VALUE, IS_READ, IS_TRANSFERRED, CUSTOM_1, CUSTOM_2, "
-        + "CUSTOM_3, CUSTOM_4, CUSTOM_5, CUSTOM_6, CUSTOM_7, CUSTOM_8, CUSTOM_9, CUSTOM_10, "
-        + "CUSTOM_11, CUSTOM_12, CUSTOM_13, CUSTOM_14, CUSTOM_15, CUSTOM_16, "
+        + "POR_INSTANCE, POR_TYPE, POR_VALUE, IS_READ, IS_TRANSFERRED, IS_REOPENED, CUSTOM_1,"
+        + " CUSTOM_2, CUSTOM_3, CUSTOM_4, CUSTOM_5, CUSTOM_6, CUSTOM_7, CUSTOM_8, CUSTOM_9, "
+        + "CUSTOM_10, CUSTOM_11, CUSTOM_12, CUSTOM_13, CUSTOM_14, CUSTOM_15, CUSTOM_16, "
         + "CUSTOM_INT_1, CUSTOM_INT_2, CUSTOM_INT_3,  CUSTOM_INT_4,  CUSTOM_INT_5, "
         + "CUSTOM_INT_6, CUSTOM_INT_7, CUSTOM_INT_8, NUMBER_OF_COMMENTS"
         + "<if test=\"addClassificationNameToSelectClauseForOrdering\">, CNAME</if>"
@@ -613,6 +613,7 @@ public class TaskQuerySqlProvider {
             + "AND NUMBER_OF_COMMENTS = 0</if> ");
     sb.append("<if test='isRead != null'>AND IS_READ = #{isRead}</if> ");
     sb.append("<if test='isTransferred != null'>AND IS_TRANSFERRED = #{isTransferred}</if> ");
+    sb.append("<if test='isReopened != null'>AND IS_REOPENED = #{isReopened}</if> ");
     sb.append(
         "<if test='workbasketKeyDomainIn != null'>AND (<foreach item='item'"
             + " collection='workbasketKeyDomainIn' separator=' OR '>(t.WORKBASKET_KEY = #{item.key}"

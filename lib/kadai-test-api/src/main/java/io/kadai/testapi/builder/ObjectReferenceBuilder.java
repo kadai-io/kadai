@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package io.kadai.testapi.builder;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.internal.models.ObjectReferenceImpl;
 
-public class ObjectReferenceBuilder {
+public class ObjectReferenceBuilder implements Builder<ObjectReference> {
 
   private final ObjectReferenceImpl objectReference = new ObjectReferenceImpl();
 
@@ -56,6 +56,7 @@ public class ObjectReferenceBuilder {
     return this;
   }
 
+  @Override
   public ObjectReference build() {
     return objectReference.copy();
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -67,6 +67,7 @@ public class TaskSummaryImpl implements TaskSummary {
   protected ObjectReference primaryObjRef;
   protected boolean isRead;
   protected boolean isTransferred;
+  protected boolean isReopened;
   // All objects have to be serializable
   protected List<AttachmentSummary> attachmentSummaries = new ArrayList<>();
   protected List<ObjectReference> secondaryObjectReferences = new ArrayList<>();
@@ -98,13 +99,13 @@ public class TaskSummaryImpl implements TaskSummary {
   public TaskSummaryImpl() {}
 
   protected TaskSummaryImpl(TaskSummaryImpl copyFrom) {
-    received = copyFrom.received;
-    created = copyFrom.created;
-    claimed = copyFrom.claimed;
-    completed = copyFrom.completed;
-    modified = copyFrom.modified;
-    planned = copyFrom.planned;
-    due = copyFrom.due;
+    received = copyFrom.received != null ? Instant.from(copyFrom.received) : null;
+    created = copyFrom.created != null ? Instant.from(copyFrom.created) : null;
+    claimed = copyFrom.claimed != null ? Instant.from(copyFrom.claimed) : null;
+    completed = copyFrom.completed != null ? Instant.from(copyFrom.completed) : null;
+    modified = copyFrom.modified != null ? Instant.from(copyFrom.modified) : null;
+    planned = copyFrom.planned != null ? Instant.from(copyFrom.planned) : null;
+    due = copyFrom.due != null ? Instant.from(copyFrom.due) : null;
     name = copyFrom.name;
     creator = copyFrom.creator;
     note = copyFrom.note;
@@ -122,6 +123,7 @@ public class TaskSummaryImpl implements TaskSummary {
     primaryObjRef = copyFrom.primaryObjRef;
     isRead = copyFrom.isRead;
     isTransferred = copyFrom.isTransferred;
+    isReopened = copyFrom.isReopened;
     attachmentSummaries = new ArrayList<>(copyFrom.attachmentSummaries);
     secondaryObjectReferences =
         copyFrom.secondaryObjectReferences.stream()
@@ -435,10 +437,13 @@ public class TaskSummaryImpl implements TaskSummary {
     this.isTransferred = isTransferred;
   }
 
-  @Deprecated
   @Override
-  public String getCustomAttribute(TaskCustomField customField) {
-    return getCustomField(customField);
+  public boolean isReopened() {
+    return isReopened;
+  }
+
+  public void setReopened(boolean reopened) {
+    isReopened = reopened;
   }
 
   @Override
@@ -840,6 +845,7 @@ public class TaskSummaryImpl implements TaskSummary {
         primaryObjRef,
         isRead,
         isTransferred,
+        isReopened,
         groupByCount,
         attachmentSummaries,
         secondaryObjectReferences,
@@ -885,6 +891,7 @@ public class TaskSummaryImpl implements TaskSummary {
         && manualPriority == other.manualPriority
         && isRead == other.isRead
         && isTransferred == other.isTransferred
+        && isReopened == other.isReopened
         && numberOfComments == other.numberOfComments
         && Objects.equals(id, other.id)
         && Objects.equals(externalId, other.externalId)
@@ -990,6 +997,8 @@ public class TaskSummaryImpl implements TaskSummary {
         + isRead
         + ", isTransferred="
         + isTransferred
+        + ", isReopened="
+        + isReopened
         + ", groupByCount="
         + groupByCount
         + ", attachmentSummaries="

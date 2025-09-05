@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,40 +16,39 @@
  *
  */
 
-import { AfterViewChecked, Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewChecked, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ReportData } from '../../models/report-data';
 import { MonitorService } from '../../services/monitor.service';
 import { WorkbasketType } from '../../../shared/models/workbasket-type';
-import { Select } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 import { SettingsSelectors } from '../../../shared/store/settings-store/settings.selectors';
 import { Settings } from '../../../settings/models/settings';
 import { mergeMap, take, takeUntil } from 'rxjs/operators';
 import { SettingMembers } from '../../../settings/components/Settings/expected-members';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { CommonModule } from '@angular/common';
 import { TaskPriorityReportFilterComponent } from '../task-priority-report-filter/task-priority-report-filter.component';
 import { MatDivider } from '@angular/material/divider';
 import { CanvasComponent } from '../canvas/canvas.component';
 import {
-  MatTable,
-  MatColumnDef,
-  MatHeaderCellDef,
-  MatHeaderCell,
-  MatCellDef,
   MatCell,
-  MatHeaderRowDef,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
   MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
   MatRowDef,
-  MatRow
+  MatTable
 } from '@angular/material/table';
+import { DatePipe, NgClass } from '@angular/common';
 
 @Component({
   selector: 'kadai-monitor-task-priority-report',
   templateUrl: './task-priority-report.component.html',
   styleUrls: ['./task-priority-report.component.scss'],
   imports: [
-    CommonModule,
     TaskPriorityReportFilterComponent,
     MatDivider,
     CanvasComponent,
@@ -62,8 +61,11 @@ import {
     MatHeaderRowDef,
     MatHeaderRow,
     MatRowDef,
-    MatRow
-  ]
+    MatRow,
+    DatePipe,
+    NgClass
+  ],
+  providers: [MonitorService]
 })
 export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, OnDestroy {
   columns: string[] = ['priority', 'number'];
@@ -71,23 +73,16 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
   tableDataArray: { priority: string; number: number }[][] = [];
   colorShouldChange = true;
   priority = [];
-
   nameHighPriority: string;
   nameMediumPriority: string;
   nameLowPriority: string;
   colorHighPriority: string;
   colorMediumPriority: string;
   colorLowPriority: string;
-
   destroy$ = new Subject<void>();
-
-  @Select(SettingsSelectors.getSettings)
-  settings$: Observable<Settings>;
-
-  constructor(
-    private monitorService: MonitorService,
-    private requestInProgressService: RequestInProgressService
-  ) {}
+  settings$: Observable<Settings> = inject(Store).select(SettingsSelectors.getSettings);
+  private monitorService = inject(MonitorService);
+  private requestInProgressService = inject(RequestInProgressService);
 
   ngOnInit() {
     this.requestInProgressService.setRequestInProgress(true);

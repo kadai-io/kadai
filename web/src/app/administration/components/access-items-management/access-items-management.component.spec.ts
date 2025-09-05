@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,57 +18,18 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { AccessItemsManagementComponent } from './access-items-management.component';
-import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
-import { Actions, NgxsModule, ofActionDispatched, Store } from '@ngxs/store';
-import { Component, DebugElement, EventEmitter, Input, Output } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
+import { DebugElement } from '@angular/core';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
-import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
 import { AccessItemsManagementState } from '../../../shared/store/access-items-management-store/access-items-management.state';
 import { Observable } from 'rxjs';
 import { GetAccessItems } from '../../../shared/store/access-items-management-store/access-items-management.actions';
-import { MatDialogModule } from '@angular/material/dialog';
-import { TypeAheadComponent } from '../../../shared/components/type-ahead/type-ahead.component';
-import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Direction, Sorting, WorkbasketAccessItemQuerySortParameter } from '../../../shared/models/sorting';
-import { StartupService } from '../../../shared/services/startup/startup.service';
-import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
-import { WindowRefService } from '../../../shared/services/window/window.service';
 import { engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
-import { MatSelectModule } from '@angular/material/select';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatIconModule } from '@angular/material/icon';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatListModule } from '@angular/material/list';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatTableModule } from '@angular/material/table';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 
 jest.mock('angular-svg-icon');
-
-const isFieldValidFn = jest.fn().mockReturnValue(true);
-const formValidatorServiceSpy = jest.fn().mockImplementation(
-  (): Partial<FormsValidatorService> => ({
-    isFieldValid: isFieldValidFn
-  })
-);
-
-const showDialogFn = jest.fn().mockReturnValue(true);
-const notificationServiceSpy: Partial<NotificationService> = {
-  showDialog: showDialogFn
-};
-
-@Component({ selector: 'svg-icon', template: '' })
-class SvgIconStub {}
 
 describe('AccessItemsManagementComponent', () => {
   let fixture: ComponentFixture<AccessItemsManagementComponent>;
@@ -77,61 +38,10 @@ describe('AccessItemsManagementComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  @Component({ selector: 'kadai-shared-spinner', template: '' })
-  class KadaiSharedSpinnerStub {
-    @Input() isRunning: boolean;
-  }
-
-  @Component({ selector: 'kadai-shared-sort', template: '' })
-  class KadaiSharedSortStub {
-    @Input() sortingFields: Map<WorkbasketAccessItemQuerySortParameter, string>;
-    @Input() defaultSortBy: WorkbasketAccessItemQuerySortParameter;
-    @Output() performSorting = new EventEmitter<Sorting<WorkbasketAccessItemQuerySortParameter>>();
-  }
-
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
-        NgxsModule.forRoot([EngineConfigurationState, AccessItemsManagementState]),
-        FormsModule,
-        ReactiveFormsModule,
-        MatDialogModule,
-        TypeaheadModule.forRoot(),
-        NoopAnimationsModule,
-        MatFormFieldModule,
-        MatSelectModule,
-        MatAutocompleteModule,
-        MatInputModule,
-        MatProgressBarModule,
-        MatIconModule,
-        MatCheckboxModule,
-        MatTooltipModule,
-        MatDividerModule,
-        MatListModule,
-        MatExpansionModule,
-        MatTableModule
-      ],
-      declarations: [AccessItemsManagementComponent, TypeAheadComponent],
-      providers: [
-        {
-          provide: FormsValidatorService,
-          useValue: formValidatorServiceSpy
-        },
-        {
-          provide: NotificationService,
-          useValue: notificationServiceSpy
-        },
-        RequestInProgressService,
-        ClassificationCategoriesService,
-        StartupService,
-        KadaiEngineService,
-        WindowRefService,
-        KadaiSharedSortStub,
-        KadaiSharedSpinnerStub,
-        SvgIconStub,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-      ]
+      imports: [AccessItemsManagementComponent],
+      providers: [provideStore([EngineConfigurationState, AccessItemsManagementState]), provideHttpClient()]
     }).compileComponents();
 
     fixture = TestBed.createComponent(AccessItemsManagementComponent);

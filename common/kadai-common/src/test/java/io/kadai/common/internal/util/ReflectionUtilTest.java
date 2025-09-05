@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ class ReflectionUtilTest {
   }
 
   @Test
-  void should_ReturnNull_For_TopLevelClass() {
+  void should_ReturnNull_For_TopLevelClass() throws Exception {
     TopLevelTestClass topLevelTestClass = new TopLevelTestClass();
 
     Object enclosingInstance = ReflectionUtil.getEnclosingInstance(topLevelTestClass);
@@ -61,7 +61,7 @@ class ReflectionUtilTest {
   }
 
   @Test
-  void should_ReturnTopLevelInstance_For_NestedInstance() {
+  void should_ReturnTopLevelInstance_For_NestedInstance() throws Exception {
     TopLevelTestClass topLevelTestClass = new TopLevelTestClass();
     FirstNestedClass firstNestedClass = topLevelTestClass.new FirstNestedClass();
 
@@ -71,7 +71,7 @@ class ReflectionUtilTest {
   }
 
   @Test
-  void should_ReturnNestedInstance_For_NestedNestedInstance() {
+  void should_ReturnNestedInstance_For_NestedNestedInstance() throws Exception {
     TopLevelTestClass topLevelTestClass = new TopLevelTestClass();
     FirstNestedClass firstNestedClass = topLevelTestClass.new FirstNestedClass();
     SecondNestedClass secondNestedClass = firstNestedClass.new SecondNestedClass();

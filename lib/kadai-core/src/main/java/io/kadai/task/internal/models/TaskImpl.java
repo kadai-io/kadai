@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -48,11 +48,14 @@ public class TaskImpl extends TaskSummaryImpl implements Task {
 
   private TaskImpl(TaskImpl copyFrom) {
     super(copyFrom);
-    customAttributes = new HashMap<>(copyFrom.customAttributes);
-    callbackInfo = new HashMap<>(copyFrom.callbackInfo);
-    callbackState = copyFrom.callbackState;
-    attachments = copyFrom.attachments.stream().map(Attachment::copy).collect(Collectors.toList());
-    groupByCount = copyFrom.groupByCount;
+    this.customAttributes = new HashMap<>(copyFrom.customAttributes);
+    this.callbackInfo = new HashMap<>(copyFrom.callbackInfo);
+    this.callbackState = copyFrom.callbackState;
+    this.attachments = copyFrom.attachments
+            .stream()
+            .map(Attachment::copy)
+            .collect(Collectors.toList());
+    this.groupByCount = copyFrom.groupByCount;
   }
 
   public Map<String, String> getCustomAttributes() {
@@ -126,12 +129,6 @@ public class TaskImpl extends TaskSummaryImpl implements Task {
   @Override
   public void setCallbackInfo(Map<String, String> callbackInfo) {
     this.callbackInfo = callbackInfo;
-  }
-
-  @Deprecated
-  @Override
-  public void setCustomAttribute(TaskCustomField customField, String value) {
-    setCustomField(customField, value);
   }
 
   @Override
@@ -311,6 +308,7 @@ public class TaskImpl extends TaskSummaryImpl implements Task {
     taskSummary.setState(state);
     taskSummary.setNumberOfComments(numberOfComments);
     taskSummary.setTransferred(isTransferred);
+    taskSummary.setReopened(isReopened);
     taskSummary.setWorkbasketSummary(workbasketSummary);
     return taskSummary;
   }
@@ -440,6 +438,8 @@ public class TaskImpl extends TaskSummaryImpl implements Task {
         + isRead
         + ", isTransferred="
         + isTransferred
+        + ", isReopened="
+        + isReopened
         + ", attachmentSummaries="
         + attachmentSummaries
         + ", custom1="

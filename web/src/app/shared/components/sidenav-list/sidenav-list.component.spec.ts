@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,25 +19,10 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { SidenavListComponent } from './sidenav-list.component';
-import { SidenavService } from '../../services/sidenav/sidenav.service';
-import { BrowserModule, By } from '@angular/platform-browser';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { RouterModule } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
+import { By } from '@angular/platform-browser';
+import { provideRouter } from '@angular/router';
 import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.service';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatGridListModule } from '@angular/material/grid-list';
-import { MatListModule } from '@angular/material/list';
-import { MatIconModule } from '@angular/material/icon';
 import { EMPTY } from 'rxjs';
-import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-
-const SidenavServiceSpy: Partial<SidenavService> = {
-  toggleSidenav: jest.fn().mockReturnValue(EMPTY)
-};
 
 const KadaiEngineServiceSpy: Partial<KadaiEngineService> = {
   hasRole: jest.fn().mockReturnValue(EMPTY),
@@ -52,28 +37,8 @@ describe('SidenavListComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [SidenavListComponent],
-      imports: [
-        MatButtonModule,
-        MatSidenavModule,
-        MatCheckboxModule,
-        MatGridListModule,
-        MatListModule,
-        MatIconModule,
-        BrowserModule,
-        RouterModule,
-        RouterTestingModule
-      ],
-      providers: [
-        RequestInProgressService,
-        {
-          provide: SidenavService,
-          useValue: SidenavServiceSpy
-        },
-        { provide: KadaiEngineService, useValue: KadaiEngineServiceSpy },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-      ]
+      imports: [SidenavListComponent],
+      providers: [provideRouter([]), { provide: KadaiEngineService, useValue: KadaiEngineServiceSpy }]
     }).compileComponents();
   }));
 

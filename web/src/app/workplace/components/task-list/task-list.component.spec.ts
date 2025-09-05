@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,29 +17,17 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { RouterTestingModule } from '@angular/router/testing';
-import { Routes } from '@angular/router';
-import { ChangeDetectorRef, Component } from '@angular/core';
-import { WorkplaceService } from 'app/workplace/services/workplace.service';
+import { provideRouter, Routes } from '@angular/router';
+import { Component } from '@angular/core';
 import { TaskListComponent } from './task-list.component';
-import { DateTimeZonePipe } from '../../../shared/pipes/date-time-zone.pipe';
-import { MatSelectModule } from '@angular/material/select';
-import { MatListModule } from '@angular/material/list';
-import { MatBadgeModule } from '@angular/material/badge';
 import { provideHttpClient } from '@angular/common/http';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 @Component({
   selector: 'kadai-dummy-detail',
   template: 'dummydetail'
 })
 export class DummyDetailComponent {}
-
-@Component({
-  selector: 'svg-icon',
-  template: '<p>Mock Icon Component</p>'
-})
-export class MockSvgIconComponent {}
 
 describe('TaskListComponent', () => {
   let component: TaskListComponent;
@@ -49,9 +37,8 @@ describe('TaskListComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [FormsModule, RouterTestingModule.withRoutes(routes), MatSelectModule, MatListModule, MatBadgeModule],
-      declarations: [TaskListComponent, DateTimeZonePipe],
-      providers: [WorkplaceService, ChangeDetectorRef, DummyDetailComponent, MockSvgIconComponent, provideHttpClient()]
+      imports: [TaskListComponent],
+      providers: [provideHttpClient(), provideAngularSvgIcon(), provideRouter(routes)]
     }).compileComponents();
   }));
 

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.rest.QueryParameter;
 import io.kadai.task.api.TaskQuery;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.beans.ConstructorProperties;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -30,11 +30,11 @@ import java.util.function.Consumer;
 public class TaskQueryGroupByParameter implements QueryParameter<TaskQuery, Void> {
   // region groupBy
   @JsonProperty("group-by")
-  @Schema(name = "group-by")
+  @Parameter(name = "group-by")
   private final TaskQueryGroupBy groupByPor;
 
   @JsonProperty("group-by-sor")
-  @Schema(name = "group-by-sor")
+  @Parameter(name = "group-by-sor")
   private final String groupBySor;
 
   @ConstructorProperties({"group-by", "group-by-sor"})

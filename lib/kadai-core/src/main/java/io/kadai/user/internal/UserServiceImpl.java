@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 package io.kadai.user.internal;
 
-import static io.kadai.common.internal.util.CheckedSupplier.wrap;
+import static io.kadai.common.internal.util.CheckedSupplier.wrapping;
 
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.BaseQuery.SortDirection;
@@ -27,6 +27,7 @@ import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.util.LogSanitizer;
+import io.kadai.user.api.UserQuery;
 import io.kadai.user.api.UserService;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
@@ -178,7 +179,12 @@ public class UserServiceImpl implements UserService {
     }
   }
 
-  private Set<String> determineDomains(User user) {
+  @Override
+  public UserQuery createUserQuery() {
+    return new UserQueryImpl(internalKadaiEngine);
+  }
+
+  Set<String> determineDomains(User user) {
     Set<String> accessIds = new HashSet<>(user.getGroups());
     accessIds.addAll(user.getPermissions());
     accessIds.add(user.getId());
@@ -190,7 +196,7 @@ public class UserServiceImpl implements UserService {
           internalKadaiEngine
               .getEngine()
               .runAsAdmin(
-                  wrap(
+                  wrapping(
                       () ->
                           workbasketService
                               .createWorkbasketQuery()
@@ -200,6 +206,16 @@ public class UserServiceImpl implements UserService {
                                   WorkbasketQueryColumnName.DOMAIN, SortDirection.ASCENDING))));
     }
     return Collections.emptySet();
+  }
+
+  public void deleteAllUsersGroupsPermissions() throws NotAuthorizedException {
+    internalKadaiEngine.getEngine().checkRoleMembership(KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
+    internalKadaiEngine.executeInDatabaseConnection(
+        () -> {
+          userMapper.deleteAll();
+          userMapper.deleteAllGroups();
+          userMapper.deleteAllPermissions();
+        });
   }
 
   private void insertIntoDatabase(User userToCreate) throws UserAlreadyExistException {

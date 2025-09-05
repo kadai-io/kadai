@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -140,19 +140,6 @@ public interface Classification extends ClassificationSummary {
    *     parse() method of {@code Duration} for details
    */
   void setServiceLevel(String serviceLevel);
-
-  /**
-   * Sets the value for the specified {@linkplain ClassificationCustomField
-   * ClassificationCustomField}.
-   *
-   * @param customField the {@linkplain ClassificationCustomField ClassificationCustomField}
-   *     identifies which custom attribute is to be set
-   * @param value the value of the {@linkplain ClassificationCustomField ClassificationCustomField}
-   *     to be set
-   * @deprecated Use {@linkplain #setCustomField(ClassificationCustomField, String)} instead
-   */
-  @Deprecated
-  void setCustomAttribute(ClassificationCustomField customField, String value);
 
   /**
    * Sets the value for {@linkplain ClassificationCustomField}.

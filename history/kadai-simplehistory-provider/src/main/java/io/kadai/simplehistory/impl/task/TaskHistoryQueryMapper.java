@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -118,7 +118,7 @@ public interface TaskHistoryQueryMapper {
 
   @Select(
       "<script>"
-          + "SELECT COUNT(ID) "
+          + "SELECT COUNT(*) "
           + "FROM TASK_HISTORY_EVENT"
           + "<where>"
           // IN-Queries

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,19 +22,25 @@ import static io.kadai.common.api.BaseQuery.SortDirection.DESCENDING;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import acceptance.AbstractAccTest;
+import acceptance.ParameterizedQuerySqlCaptureInterceptor;
 import io.kadai.common.api.KeyDomain;
+import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
 import io.kadai.task.api.TaskQuery;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.models.TaskSummary;
+import java.lang.reflect.Field;
 import java.util.List;
-import org.junit.jupiter.api.Disabled;
+import org.apache.ibatis.session.SqlSessionManager;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /** Acceptance test for all "query tasks by workbasket with pagination" scenarios. */
 @ExtendWith(JaasExtension.class)
@@ -192,14 +198,41 @@ class QueryTasksWithPaginationAccTest extends AbstractAccTest {
     @Nested
     @TestInstance(Lifecycle.PER_CLASS)
     class Count {
-      @Disabled()
       @WithAccessId(user = "teamlead-1")
       @Test
       void testCountOfTaskQuery() {
         TaskService taskService = kadaiEngine.getTaskService();
         long count = taskService.createTaskQuery().count();
-        assertThat(count).isEqualTo(22L);
+        assertThat(count).isEqualTo(26L);
       }
+    }
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  class PhysicalPagination {
+
+    @BeforeAll
+    void setup() throws Exception {
+      Field sessionManagerField = KadaiEngineImpl.class.getDeclaredField("sessionManager");
+      sessionManagerField.setAccessible(true);
+      SqlSessionManager sessionManager = (SqlSessionManager) sessionManagerField.get(kadaiEngine);
+      sessionManager
+          .getConfiguration()
+          .addInterceptor(new ParameterizedQuerySqlCaptureInterceptor());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"0,10", "5,10", "0,0", "2,4"})
+    void should_UseNativeSql_For_QueryPagination(int offset, int limit) {
+      ParameterizedQuerySqlCaptureInterceptor.resetCapturedSql();
+      taskService.createTaskQuery().list(offset, limit);
+      final String sql = ParameterizedQuerySqlCaptureInterceptor.getCapturedSql();
+      final String physicalPattern1 = String.format("LIMIT %d OFFSET %d", limit, offset);
+      final String physicalPattern2 =
+          String.format("OFFSET %d ROWS FETCH FIRST %d ROWS ONLY", offset, limit);
+
+      assertThat(sql).containsAnyOf(physicalPattern1, physicalPattern2);
     }
   }
 }

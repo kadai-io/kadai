@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 package io.kadai.workbasket.rest;
 
-import static io.kadai.rest.test.RestHelper.TEMPLATE;
+import static io.kadai.rest.test.RestHelper.CLIENT;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -45,13 +45,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Links;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -288,14 +285,13 @@ class WorkbasketDefinitionControllerIntTest {
   private ResponseEntity<WorkbasketDefinitionCollectionRepresentationModel>
       executeExportRequestForDomain(String domain) {
     String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET_DEFINITIONS) + "?domain=" + domain;
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
-    return TEMPLATE.exchange(
-        url,
-        HttpMethod.GET,
-        auth,
-        ParameterizedTypeReference.forType(
-            WorkbasketDefinitionCollectionRepresentationModel.class));
+    return CLIENT
+        .get()
+        .uri(url)
+        .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+        .retrieve()
+        .toEntity(WorkbasketDefinitionCollectionRepresentationModel.class);
   }
 
   private void expectStatusWhenExecutingImportRequestOfWorkbaskets(
@@ -321,11 +317,16 @@ class WorkbasketDefinitionControllerIntTest {
     HttpHeaders headers = RestHelper.generateHeadersForUser("businessadmin");
     headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-    HttpEntity<?> requestEntity = new HttpEntity<>(body, headers);
     String serverUrl = restHelper.toUrl(RestEndpoints.URL_WORKBASKET_DEFINITIONS);
 
     ResponseEntity<Void> responseImport =
-        TEMPLATE.postForEntity(serverUrl, requestEntity, Void.class);
+        CLIENT
+            .post()
+            .uri(serverUrl)
+            .headers(httpHeaders -> httpHeaders.addAll(headers))
+            .body(body)
+            .retrieve()
+            .toEntity(Void.class);
     assertThat(responseImport.getStatusCode()).isEqualTo(expectedStatus);
   }
 }

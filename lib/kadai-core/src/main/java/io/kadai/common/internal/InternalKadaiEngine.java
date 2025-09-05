@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import io.kadai.spi.task.internal.BeforeRequestChangesManager;
 import io.kadai.spi.task.internal.BeforeRequestReviewManager;
 import io.kadai.spi.task.internal.CreateTaskPreprocessorManager;
 import io.kadai.spi.task.internal.ReviewRequiredManager;
+import io.kadai.spi.task.internal.TaskDistributionManager;
 import io.kadai.spi.task.internal.TaskEndstatePreprocessorManager;
 import java.util.function.Supplier;
 import org.apache.ibatis.session.SqlSession;
@@ -114,6 +115,13 @@ public interface InternalKadaiEngine {
    * @return the TaskRoutingProducer instance.
    */
   TaskRoutingManager getTaskRoutingManager();
+
+  /**
+   * Retrieve TaskDistributionManager.
+   *
+   * @return the TaskDistributionManager instance.
+   */
+  TaskDistributionManager getTaskDistributionManager();
 
   /**
    * Retrieve CreateTaskPreprocessorManager.

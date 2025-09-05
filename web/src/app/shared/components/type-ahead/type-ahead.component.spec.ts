@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,15 +21,8 @@ import { DebugElement } from '@angular/core';
 import { TypeAheadComponent } from './type-ahead.component';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
 import { of } from 'rxjs';
-import { NgxsModule, Store } from '@ngxs/store';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { provideStore, Store } from '@ngxs/store';
 import { EngineConfigurationState } from '../../store/engine-configuration-store/engine-configuration.state';
-import { ClassificationCategoriesService } from '../../services/classification-categories/classification-categories.service';
 import { engineConfigurationMock } from '../../store/mock-data/mock-store';
 import { provideHttpClient } from '@angular/common/http';
 
@@ -45,20 +38,10 @@ describe('TypeAheadComponent with AccessId input', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
-        NgxsModule.forRoot([EngineConfigurationState]),
-        MatFormFieldModule,
-        MatInputModule,
-        MatAutocompleteModule,
-        MatTooltipModule,
-        NoopAnimationsModule,
-        FormsModule,
-        ReactiveFormsModule
-      ],
-      declarations: [TypeAheadComponent],
+      imports: [TypeAheadComponent],
       providers: [
+        provideStore([EngineConfigurationState]),
         { provide: AccessIdsService, useValue: accessIdService },
-        ClassificationCategoriesService,
         provideHttpClient()
       ]
     }).compileComponents();
@@ -111,5 +94,20 @@ describe('TypeAheadComponent with AccessId input', () => {
     flush();
 
     expect(emitSpy).toHaveBeenCalledWith(true);
+  }));
+
+  it('should mark the accessId control as touched when invalid and displayError is true', fakeAsync(() => {
+    const control = component.accessIdForm.get('accessId');
+    const markAsTouchedSpy = jest.spyOn(control!, 'markAsTouched');
+    component.displayError = true;
+
+    component.accessIdForm.get('accessId')?.setValue('invalid-user');
+    component.searchForAccessId('invalid-user');
+
+    tick(50);
+    fixture.detectChanges();
+    flush();
+
+    expect(markAsTouchedSpy).toHaveBeenCalled();
   }));
 });

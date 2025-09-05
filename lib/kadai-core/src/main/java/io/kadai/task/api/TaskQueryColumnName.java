@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ public enum TaskQueryColumnName implements QueryColumnName {
   POR_VALUE("t.por_value"),
   IS_READ("t.is_read"),
   IS_TRANSFERRED("t.is_transferred"),
+  IS_REOPENED("t.is_reopened"),
   CUSTOM_1("t.custom_1"),
   CUSTOM_2("t.custom_2"),
   CUSTOM_3("t.custom_3"),

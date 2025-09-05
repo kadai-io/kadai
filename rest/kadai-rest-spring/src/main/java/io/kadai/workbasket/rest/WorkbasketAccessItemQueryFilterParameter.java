@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,19 +21,19 @@ package io.kadai.workbasket.rest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kadai.common.rest.QueryParameter;
 import io.kadai.workbasket.api.WorkbasketAccessItemQuery;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.beans.ConstructorProperties;
 import java.util.Optional;
 
 public class WorkbasketAccessItemQueryFilterParameter
     implements QueryParameter<WorkbasketAccessItemQuery, Void> {
-  @Schema(
+  @Parameter(
       name = "workbasket-key",
       description = "Filter by the key of the Workbasket. This is an exact match.")
   @JsonProperty("workbasket-key")
   private final String[] workbasketKey;
 
-  @Schema(
+  @Parameter(
       name = "workbasket-key-like",
       description =
           "Filter by the key of the Workbasket. This results in a substring search.. (% is appended"
@@ -42,13 +42,13 @@ public class WorkbasketAccessItemQueryFilterParameter
   @JsonProperty("workbasket-key-like")
   private final String[] workbasketKeyLike;
 
-  @Schema(
+  @Parameter(
       name = "access-id",
       description = "Filter by the name of the access id. This is an exact match.")
   @JsonProperty("access-id")
   private final String[] accessId;
 
-  @Schema(
+  @Parameter(
       name = "access-id-like",
       description =
           "Filter by the name of the access id. This results in a substring search.. (% is appended"

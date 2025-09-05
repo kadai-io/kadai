@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -101,6 +101,7 @@ public class TaskRepresentationModelAssembler
             .toList());
     repModel.setRead(task.isRead());
     repModel.setTransferred(task.isTransferred());
+    repModel.setReopened(task.isReopened());
     repModel.setGroupByCount(task.getGroupByCount());
     repModel.setAttachments(
         task.getAttachments().stream().map(attachmentAssembler::toModel).toList());
@@ -174,6 +175,7 @@ public class TaskRepresentationModelAssembler
     task.setPrimaryObjRef(objectReferenceAssembler.toEntity(repModel.getPrimaryObjRef()));
     task.setRead(repModel.isRead());
     task.setTransferred(repModel.isTransferred());
+    task.setReopened(repModel.isReopened());
     task.setGroupByCount(repModel.getGroupByCount());
     task.setCustomField(TaskCustomField.CUSTOM_1, repModel.getCustom1());
     task.setCustomField(TaskCustomField.CUSTOM_2, repModel.getCustom2());

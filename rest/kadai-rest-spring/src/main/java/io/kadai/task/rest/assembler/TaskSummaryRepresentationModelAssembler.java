@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -100,6 +100,7 @@ public class TaskSummaryRepresentationModelAssembler
             .toList());
     repModel.setRead(taskSummary.isRead());
     repModel.setTransferred(taskSummary.isTransferred());
+    repModel.setReopened(taskSummary.isReopened());
     repModel.setGroupByCount(taskSummary.getGroupByCount());
     repModel.setAttachmentSummaries(
         taskSummary.getAttachmentSummaries().stream().map(attachmentAssembler::toModel).toList());
@@ -166,6 +167,7 @@ public class TaskSummaryRepresentationModelAssembler
             .toList());
     taskSummary.setRead(repModel.isRead());
     taskSummary.setTransferred(repModel.isTransferred());
+    taskSummary.setReopened(repModel.isReopened());
     taskSummary.setGroupByCount(repModel.getGroupByCount());
     taskSummary.setAttachmentSummaries(
         repModel.getAttachmentSummaries().stream()

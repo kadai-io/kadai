@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -142,16 +142,6 @@ public interface Task extends TaskSummary {
    * @param callbackInfo a {@linkplain Map} that contains the callback information
    */
   void setCallbackInfo(Map<String, String> callbackInfo);
-
-  /**
-   * Sets the value for the specified {@linkplain TaskCustomField customField}.
-   *
-   * @param customField identifies which {@linkplain TaskCustomField customField} is to be set
-   * @param value the value of the {@linkplain TaskCustomField customField} to be set
-   * @deprecated Use {@linkplain #setCustomField(TaskCustomField, String)} instead
-   */
-  @Deprecated
-  void setCustomAttribute(TaskCustomField customField, String value);
 
   /**
    * Sets the value for the specified {@linkplain TaskCustomField customField}.

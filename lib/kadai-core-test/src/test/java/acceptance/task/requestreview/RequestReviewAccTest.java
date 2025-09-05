@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,10 +21,12 @@ package acceptance.task.requestreview;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestClassification;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestWorkbasket;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.models.ClassificationSummary;
+import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.internal.util.EnumUtil;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.TaskState;
@@ -197,6 +199,18 @@ class RequestReviewAccTest {
     assertThat(e.getWorkbasketId()).isEqualTo(defaultWorkbasketSummary.getId());
     assertThat(e.getDomain()).isNull();
     assertThat(e.getWorkbasketKey()).isNull();
+  }
+
+  @WithAccessId(user = "user-1-2")
+  @Test
+  void should_ThrowException_When_RequestReviewWithEmptyWorkbasketId() throws Exception {
+    Task task = createTaskClaimedByUser("user-1-1").buildAndStore(taskService, "user-1-1");
+    ThrowingCallable call =
+        () -> taskService.requestReviewWithWorkbasketId(task.getId(), null, null);
+
+    assertThatThrownBy(call)
+        .isInstanceOf(InvalidArgumentException.class)
+        .hasMessage("WorkbasketId must not be null or empty");
   }
 
   @WithAccessId(user = "user-1-1")

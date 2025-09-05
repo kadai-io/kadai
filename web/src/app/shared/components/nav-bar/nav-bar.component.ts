@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,19 +16,23 @@
  *
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { SelectedRouteService } from 'app/shared/services/selected-route/selected-route';
 import { Subject } from 'rxjs';
 import { expandRight } from 'app/shared/animations/expand.animation';
 import { SidenavService } from '../../services/sidenav/sidenav.service';
 import { takeUntil } from 'rxjs/operators';
+import { MatToolbar } from '@angular/material/toolbar';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { SvgIconComponent } from 'angular-svg-icon';
 
 @Component({
   selector: 'kadai-shared-nav-bar',
   templateUrl: './nav-bar.component.html',
   styleUrls: ['./nav-bar.component.scss'],
   animations: [expandRight],
-  standalone: false
+  imports: [MatToolbar, MatIconButton, MatIcon, SvgIconComponent]
 })
 export class NavBarComponent implements OnInit {
   selectedRoute = '';
@@ -39,13 +43,9 @@ export class NavBarComponent implements OnInit {
   titleSettings = 'Settings';
   toggle: boolean = false;
   title = '';
-
   destroy$ = new Subject();
-
-  constructor(
-    private selectedRouteService: SelectedRouteService,
-    private sidenavService: SidenavService
-  ) {}
+  private selectedRouteService = inject(SelectedRouteService);
+  private sidenavService = inject(SidenavService);
 
   ngOnInit() {
     this.selectedRouteService

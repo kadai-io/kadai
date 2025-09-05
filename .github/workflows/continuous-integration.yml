@@ -9,12 +9,12 @@ on:
   pull_request:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.repository }}/${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.repository }}-${{ github.event_name }}/${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 env:
   JAVA_VERSION: 17
-  NODE_VERSION: 22.7.0
+  NODE_VERSION: 22.16.x
 
   ARTIFACTS_CYPRESS_TESTS_NAME: cypress-tests
   ARTIFACTS_CYPRESS_TESTS_PATH: web/cypress
@@ -38,9 +38,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
@@ -77,16 +77,16 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
       - name: Enable Corepack
         run: corepack enable
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4.2.0
+        uses: actions/setup-node@v5.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache web dependencies
@@ -134,11 +134,11 @@ jobs:
     needs: [ compile_frontend ]
     steps:
       - name: Git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Enable Corepack
         run: corepack enable
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4.2.0
+        uses: actions/setup-node@v5.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache web dependencies
@@ -178,16 +178,16 @@ jobs:
     needs: [ compile_frontend, compile_backend ]
     steps:
       - name: Git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
       - name: Enable Corepack
         run: corepack enable
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4.2.0
+        uses: actions/setup-node@v5.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache web dependencies
@@ -209,7 +209,7 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
       - name: Download kadai artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ env.ARTIFACTS_KADAI_JARS_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
@@ -221,7 +221,7 @@ jobs:
         run: ./mvnw -B dependency:go-offline -pl :kadai-rest-spring-example-boot -am
         if: steps.maven-cache.outputs.cache-hit != 'true'
       - name: Download kadai-web dist artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ env.ARTIFACTS_KADAI_WEB_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_WEB_PATH }}
@@ -242,9 +242,9 @@ jobs:
         if: failure()
         uses: andymckay/cancel-action@0.5
 
-  test_backend:
+  test_backend_17:
     runs-on: ubuntu-22.04
-    name: Test ${{ matrix.module }} on ${{ matrix.database }}
+    name: Test ${{ matrix.module }} with JDK 17 on ${{ matrix.database }}
     needs: [ compile_backend ]
     strategy:
       matrix:
@@ -256,8 +256,6 @@ jobs:
           - kadai-common-test
           - kadai-core
           - kadai-core-test
-          - kadai-cdi
-          - kadai-cdi-example
           - kadai-test-api
           - kadai-spring
           - kadai-spring-example
@@ -290,13 +288,11 @@ jobs:
             database: POSTGRES
           - module: kadai-rest-spring-example-boot
             database: DB2
-          - module: kadai-rest-spring-example-wildfly
-            database: POSTGRES
     steps:
       - name: Git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
@@ -307,14 +303,13 @@ jobs:
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download kadai artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ env.ARTIFACTS_KADAI_JARS_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
       - name: Change versions to match tag
         run: |
           ci/change_version.sh -m .
-          ci/update_kadai_dependency_for_wildfly.sh
       - name: Test
         run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip
         env:
@@ -330,18 +325,113 @@ jobs:
         if: failure()
         uses: andymckay/cancel-action@0.5
 
+  test_backend_21:
+    runs-on: ubuntu-22.04
+    name: Test ${{ matrix.module }} with JDK 21 on ${{ matrix.database }}
+    needs: [ compile_backend ]
+    strategy:
+      matrix:
+        module:
+          - kadai-routing-rest
+          - kadai-rest-spring-example-boot
+          - kadai-simplehistory-rest-spring
+          - kadai-rest-spring-example-common
+        database:
+          - DB2
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v5
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: adopt
+          java-version: 21
+      - name: Cache maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
+      - name: Download kadai artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: ${{ env.ARTIFACTS_KADAI_JARS_NAME }}
+          path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
+      - name: Change versions to match tag
+        run: |
+          ci/change_version.sh -m .
+      - name: Test
+        run: ./mvnw -B test -pl :${{matrix.module}} -Dcheckstyle.skip -D"java.version=21"
+        env:
+          DB: ${{ matrix.database }}
+      - name: Cancel workflow
+        if: failure()
+        uses: andymckay/cancel-action@0.5
+
+  add-copyright:
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'push' && github.ref != 'refs/heads/master' && !startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Add Copyright Headers
+        run: |
+          YEAR=$(date +%Y)
+          LAST_YEAR=$((YEAR - 1))
+          for file in $(find . -type f \( -name '*.java' -o -name '*.ts' \)); do
+            if grep -q "Copyright \[$LAST_YEAR\] \[envite consulting GmbH\]" "$file"; then
+              echo "Updating copyright year in $file"
+              sed -i "s/Copyright \[$LAST_YEAR\] \[envite consulting GmbH\]/Copyright [$YEAR] [envite consulting GmbH]/" "$file"
+            elif ! grep -q -e "Copyright" -e "License" "$file"; then
+              echo "Adding copyright to $file"
+              cat LICENSE_HEADER.txt "$file" > temp_file
+              mv temp_file "$file"
+            fi
+          done
+          
+          for file in $(find . -type f -name '*.html'); do
+            if grep -q "Copyright \[$LAST_YEAR\] \[envite consulting GmbH\]" "$file"; then
+              echo "Updating copyright year in $file"
+              sed -i "s/Copyright \[$LAST_YEAR\] \[envite consulting GmbH\]/Copyright [$YEAR] [envite consulting GmbH]/" "$file"
+            elif ! grep -q -e "Copyright" -e "License" "$file"; then
+              echo "Adding copyright to $file"
+              cat LICENSE_HEADER_HTML.txt "$file" > temp_file
+              mv temp_file "$file"
+            fi
+          done
+          
+          for file in $(find . -type f -name '*.scss'); do
+            if grep -q "Copyright \[$LAST_YEAR\] \[envite consulting GmbH\]" "$file"; then
+              echo "Updating copyright year in $file"
+              sed -i "s/Copyright \[$LAST_YEAR\] \[envite consulting GmbH\]/Copyright [$YEAR] [envite consulting GmbH]/" "$file"
+            elif ! grep -q -e "Copyright" -e "License" "$file"; then
+              echo "Adding copyright to $file"
+              cat LICENSE_HEADER_SCSS.txt "$file" > temp_file
+              mv temp_file "$file"
+            fi
+          done
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Add/update copyright headers" || echo "No changes to commit"
+          git push
+
   release_artifacts:
     runs-on: ubuntu-22.04
-    name: Release artifacts to OSS Sonatype
-    if: github.repository == 'kadai-io/kadai' && startsWith(github.ref, 'refs/tags/v') && github.head_ref == ''
-    needs: [ test_frontend, test_e2e, test_backend ]
+    name: Release artifacts to Sonatype-Central
+    if: github.repository == 'kadai-io/kadai' && ( startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' ) && github.head_ref == ''
+    needs: [ test_frontend, test_e2e, test_backend_17, test_backend_21 ]
     # as documented in the gpg manual (https://www.gnupg.org/documentation/manuals/gnupg/Invoking-GPG_002dAGENT.html)
     # we should execute this command before interacting with gpg (otherwise gpg won't work)
     env:
       GPG_TTY: $(tty)
     steps:
       - name: Git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0 # necessary for push back
           # NOTE @v2 uses the token as an auth http header. Set it to
@@ -350,7 +440,7 @@ jobs:
           # source: https://github.community/t/action-does-not-trigger-another-on-push-tag-action/17148/7
           token: ${{ secrets.ADMIN_PERSONAL_ACCESS_TOKEN }}
       - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
@@ -361,12 +451,12 @@ jobs:
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download kadai artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ env.ARTIFACTS_KADAI_JARS_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
       - name: Download kadai-web dist artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ env.ARTIFACTS_KADAI_WEB_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_WEB_PATH }}
@@ -376,14 +466,14 @@ jobs:
           GPG_KEY: ${{ secrets.GPG_KEY }}
       - name: Change versions to match tag
         run: ci/change_version.sh -m .
-      - name: Release artifacts to OSS Sonatype
+      - name: Release artifacts to Sonatype-Central
         run: |
-          ./mvnw -B deploy -P $([[ "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo "release") \
+          ./mvnw -B deploy -P $([[ "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo "release" || echo "snapshot") \
           --settings ci/mvnsettings.xml -DskipTests -Dcheckstyle.skip -Djacoco.skip \
           -pl :kadai-parent,\
           :kadai-common-parent,:kadai-common-logging,:kadai-common,:kadai-common-security,\
           :kadai-common-data,:kadai-common-test,\
-          :kadai-lib-parent,:kadai-core,:kadai-cdi,:kadai-spring,\
+          :kadai-lib-parent,:kadai-core,:kadai-spring,\
           :kadai-rest-parent,:kadai-web,:kadai-rest-spring,\
           :kadai-history-parent,:kadai-simplehistory-provider,:kadai-simplehistory-rest-spring,:kadai-loghistory-provider,\
           :kadai-routing-parent,:kadai-spi-routing-dmn-router,:kadai-routing-rest
@@ -403,7 +493,7 @@ jobs:
     needs: [ release_artifacts ]
     steps:
       - name: Git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0 # necessary for push back
           # NOTE @v2 uses the token as an auth http header. Set it to
@@ -414,8 +504,7 @@ jobs:
       - name: Update version to next snapshot and push back
         run: |
           ci/change_version.sh -i -m .
-          ci/update_kadai_dependency_for_wildfly.sh -i
-          ci/commitPoms.sh rest/kadai-rest-spring-example-wildfly/src/test/java/io/kadai/example/wildfly/AbstractAccTest.java
+          ci/commitPoms.sh
         env:
           GH_EMAIL: ${{ secrets.GH_EMAIL }}
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
@@ -427,12 +516,12 @@ jobs:
     runs-on: ubuntu-22.04
     name: Deploy demo app to Microsoft Azure
     if: github.repository == 'kadai-io/kadai' && github.ref == 'refs/heads/master' && github.head_ref == ''
-    needs: [ test_frontend, test_e2e, test_backend ]
+    needs: [ test_frontend, test_e2e, test_backend_17, test_backend_21 ]
     steps:
       - name: Git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
@@ -443,19 +532,19 @@ jobs:
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download kadai artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ env.ARTIFACTS_KADAI_JARS_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
       - name: Download kadai-web dist artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ env.ARTIFACTS_KADAI_WEB_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_WEB_PATH }}
       - name: Build kadai-web
         run: ./mvnw -B install -pl :kadai-web
       - name: Generate Javadoc
-        run: ./mvnw -B clean javadoc:jar -pl :kadai-core,:kadai-cdi,:kadai-spring
+        run: ./mvnw -B clean javadoc:jar -pl :kadai-core,:kadai-spring
       - name: Build Example Application
         run: ./mvnw -B install -P history.plugin -pl :kadai-rest-spring-example-boot -DskipTests -Dcheckstyle.skip -Dmaven.javadoc.skip -Djacoco.skip
       - name: Verify Example Application contains documentation
@@ -478,19 +567,24 @@ jobs:
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
+
   upload_to_sonar:
     runs-on: ubuntu-22.04
     name: Upload SonarQube analysis to sonarcloud
-    # no pull request and not on release
-    if: github.head_ref == '' && !startsWith(github.ref, 'refs/tags')
-    needs: [ test_frontend, test_e2e, test_backend ]
+    # neither on release nor forks nor dependabot
+    if: |
+      github.repository == 'kadai-io/kadai' &&
+      !startsWith(github.ref, 'refs/tags') &&
+      !startsWith(github.head_ref || github.ref_name, 'dependabot/') &&
+      github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request'
+    needs: [ test_frontend, test_e2e, test_backend_17, test_backend_21 ]
     steps:
       - name: Git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
@@ -507,7 +601,7 @@ jobs:
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download JaCoCo reports
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           pattern: ${{ env.ARTIFACTS_JACOCO_REPORTS_NAME }}-*
           merge-multiple: true

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,20 +16,26 @@
  *
  */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CustomAttribute } from 'app/workplace/models/task';
+
+import { MatDivider } from '@angular/material/divider';
+import { MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'kadai-task-attribute-value',
   templateUrl: './task-attribute-value.component.html',
   styleUrls: ['./task-attribute-value.component.scss'],
-  standalone: false
+  imports: [MatDivider, MatButton, MatTooltip, MatIcon, MatFormField, MatInput, FormsModule]
 })
-export class TaskAttributeValueComponent implements OnInit {
+export class TaskAttributeValueComponent {
   @Input() callbackInfo = false;
   @Input() attributes: CustomAttribute[] = [];
-
-  ngOnInit() {}
 
   addAttribute(): void {
     this.attributes.push({ key: '', value: '' });

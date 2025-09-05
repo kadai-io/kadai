@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,32 +16,29 @@
  *
  */
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { ActivatedRoute, Router } from '@angular/router';
+import { DatePipe } from '@angular/common';
+import { MatListOption, MatSelectionList } from '@angular/material/list';
+import { MatDivider } from '@angular/material/divider';
+import { SvgIconComponent } from 'angular-svg-icon';
 
 @Component({
   selector: 'kadai-task-list',
   templateUrl: './task-list.component.html',
   styleUrls: ['./task-list.component.scss'],
-  standalone: false
+  imports: [MatSelectionList, MatListOption, MatDivider, SvgIconComponent, DatePipe]
 })
-export class TaskListComponent implements OnInit {
+export class TaskListComponent {
   @Input()
   tasks: Task[];
-
   @Input()
   selectedId: string;
-
   @Output()
   selectedIdChange = new EventEmitter<string>();
-
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute
-  ) {}
-
-  ngOnInit() {}
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   selectTask(taskId: string) {
     this.selectedId = taskId;

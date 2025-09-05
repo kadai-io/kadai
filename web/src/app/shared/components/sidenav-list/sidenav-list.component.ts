@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,24 +16,24 @@
  *
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.service';
 import { SidenavService } from '../../services/sidenav/sidenav.service';
 import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { MonitorRoles } from '../../roles/monitor.roles';
 import { UserRoles } from '../../roles/user.roles';
 import { BusinessAdminRoles } from '../../roles/business-admin.roles';
+import { MatListItem, MatNavList } from '@angular/material/list';
 
 @Component({
   selector: 'kadai-sidenav-list',
   templateUrl: './sidenav-list.component.html',
   styleUrls: ['./sidenav-list.component.scss'],
-  standalone: false
+  imports: [MatNavList, MatListItem, RouterLinkActive, RouterLink]
 })
 export class SidenavListComponent implements OnInit {
   toggle: boolean = false;
-
   monitorUrl = 'kadai/monitor';
   workplaceUrl = 'kadai/workplace';
   historyUrl = 'kadai/history';
@@ -43,20 +43,16 @@ export class SidenavListComponent implements OnInit {
   workbasketsUrl = 'kadai/administration/workbaskets';
   administrationsUrl = 'kadai/administration/workbaskets';
   settingsURL = 'kadai/settings';
-
   administrationAccess = false;
   monitorAccess = false;
   workplaceAccess = false;
   historyAccess = false;
   routingAccess = false;
   settingsAccess = false;
-
-  constructor(
-    private kadaiEngineService: KadaiEngineService,
-    private sidenavService: SidenavService,
-    private requestInProgressService: RequestInProgressService,
-    private router: Router
-  ) {}
+  private kadaiEngineService = inject(KadaiEngineService);
+  private sidenavService = inject(SidenavService);
+  private requestInProgressService = inject(RequestInProgressService);
+  private router = inject(Router);
 
   ngOnInit() {
     this.administrationAccess = this.kadaiEngineService.hasRole(Object.values(BusinessAdminRoles));

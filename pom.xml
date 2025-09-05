@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.kadai</groupId>
     <artifactId>kadai-parent</artifactId>
-    <version>9.2.1-SNAPSHOT</version>
+    <version>10.2.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -41,71 +41,61 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <version.mybatis>3.5.19</version.mybatis>
-        <version.json>20250107</version.json>
+        <version.json>20250517</version.json>
 
         <!-- build dependencies -->
-        <version.checkstyle>10.21.2</version.checkstyle>
-        <version.google-java-format>1.25.2</version.google-java-format>
+        <version.checkstyle>11.0.1</version.checkstyle>
+        <version.google-java-format>1.28.0</version.google-java-format>
         <version.maven.checkstyle>3.6.0</version.maven.checkstyle>
         <version.maven.jar>3.4.2</version.maven.jar>
         <version.maven.war>3.4.0</version.maven.war>
-        <version.maven.compiler>3.13.0</version.maven.compiler>
+        <version.maven.compiler>3.14.0</version.maven.compiler>
         <version.maven.source>3.3.1</version.maven.source>
-        <version.maven.javadoc>3.11.2</version.maven.javadoc>
+        <version.maven.javadoc>3.11.3</version.maven.javadoc>
         <version.maven.resources>3.3.1</version.maven.resources>
-        <version.maven.surefire>3.5.2</version.maven.surefire>
+        <version.maven.surefire>3.5.3</version.maven.surefire>
         <version.maven.clean>3.2.0</version.maven.clean>
         <version.maven.dependency>3.8.1</version.maven.dependency>
-        <version.maven.sonar>5.0.0.4389</version.maven.sonar>
+        <version.maven.sonar>5.2.0.4988</version.maven.sonar>
 
         <!-- release dependencies -->
-        <version.maven.gpg>3.2.7</version.maven.gpg>
+        <version.maven.gpg>3.2.8</version.maven.gpg>
         <version.sonatype>1.7.0</version.sonatype>
 
         <!-- spring dependencies -->
         <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
         <version.spring.plugin.core>3.0.0</version.spring.plugin.core>
-        <version.spring.boot>3.4.0</version.spring.boot>
-        <version.spring.mybatis>3.0.4</version.spring.mybatis>
-
-        <!-- wildfly dependencies -->
-        <version.wildfly>31.0.1.Final</version.wildfly>
+        <version.spring.boot>3.5.5</version.spring.boot>
+        <version.spring.mybatis>3.0.5</version.spring.mybatis>
 
         <!-- camunda dependencies -->
-        <version.camunda.dmn>7.22.0</version.camunda.dmn>
-
-        <!-- java ee dependencies -->
-        <version.jakartaee-api>10.0.0</version.jakartaee-api>
-        <version.jakarta.servlet>6.1.0</version.jakarta.servlet>
-        <version.arquillian>1.9.3.Final</version.arquillian>
-        <version.arquillian.managed.wildfly>5.0.1.Final</version.arquillian.managed.wildfly>
-        <version.shrinkwrap>3.3.3</version.shrinkwrap>
-        <version.arquillian.jakarta>10.0.0.Final</version.arquillian.jakarta>
-        <version.junit.bom>5.11.4</version.junit.bom>
+        <version.camunda.dmn>7.23.0</version.camunda.dmn>
 
         <!-- test dependencies -->
-        <version.archunit>1.3.0</version.archunit>
-        <version.equalsverifier>3.18.2</version.equalsverifier>
-        <version.assertj>3.27.3</version.assertj>
+        <version.archunit>1.4.1</version.archunit>
+        <version.equalsverifier>4.1</version.equalsverifier>
+        <version.assertj>3.27.4</version.assertj>
         <version.openpojo>0.9.1</version.openpojo>
-        <version.jacoco>0.8.12</version.jacoco>
-        <version.slf4j-test>3.0.1</version.slf4j-test>
-        <version.testcontainers>1.20.4</version.testcontainers>
-        <version.spring-openapi>2.8.4</version.spring-openapi>
+        <version.jacoco>0.8.13</version.jacoco>
+        <version.slf4j-test>3.0.3</version.slf4j-test>
+        <version.testcontainers>1.21.3</version.testcontainers>
+        <version.spring-openapi>2.8.5</version.spring-openapi>
+        <version.jakarta.servlet>6.1.0</version.jakarta.servlet>
+        <version.spring-openapi>2.8.12</version.spring-openapi>
 
         <!-- AspectJ dependencies -->
         <version.aspectj-maven-plugin>1.15.0</version.aspectj-maven-plugin>
-        <version.aspectj>1.9.22.1</version.aspectj>
+        <version.aspectj>1.9.24</version.aspectj>
 
         <!-- Excel to DMN converter dependencies -->
-        <version.docx4j>11.5.2</version.docx4j>
+        <version.docx4j>11.5.4</version.docx4j>
         <version.jakarta.xml.bind-api>4.0.2</version.jakarta.xml.bind-api>
         <version.jaxb-core>4.0.5</version.jaxb-core>
         <version.jaxb-impl>4.0.5</version.jaxb-impl>
         <version.jakarta.activation>2.1.3</version.jakarta.activation>
 
         <!-- database driver versions -->
-        <version.db2>12.1.0.0</version.db2>
+        <version.db2>12.1.2.0</version.db2>
 
         <!-- sonar settings -->
         <sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
@@ -126,10 +116,6 @@
     <modules>
         <module>common</module>
         <module>lib</module>
-        <!--
-          History is an optional module but used in kadai-rest-spring-example-wildfly
-          because of that it must be build before the rest module
-        -->
         <module>history</module>
         <module>rest</module>
         <module>ci/kadai-sonar-test-coverage</module>
@@ -181,23 +167,24 @@
                         </configuration>
                     </plugin>
                     <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>${version.sonatype}</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
-                        </configuration>
+                      <groupId>org.sonatype.central</groupId>
+                      <artifactId>central-publishing-maven-plugin</artifactId>
+                      <version>0.8.0</version>
+                      <extensions>true</extensions>
+                      <configuration>
+                          <publishingServerId>central</publishingServerId>
+                          <autoPublish>true</autoPublish>
+                          <waitUntil>published</waitUntil>
+                      </configuration>
                     </plugin>
                 </plugins>
             </build>
             <distributionManagement>
-                <snapshotRepository>
-                    <id>ossrh</id>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-                </snapshotRepository>
+              <snapshotRepository>
+                <id>central</id>
+                <name>Maven Central Snapshots Repository</name>
+                <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+              </snapshotRepository>
             </distributionManagement>
         </profile>
         <profile>
@@ -228,7 +215,7 @@
                   <plugin>
                     <groupId>org.sonatype.central</groupId>
                     <artifactId>central-publishing-maven-plugin</artifactId>
-                    <version>0.7.0</version>
+                    <version>0.8.0</version>
                     <extensions>true</extensions>
                     <configuration>
                       <publishingServerId>central</publishingServerId>
@@ -403,4 +390,18 @@
             </plugin>
         </plugins>
     </build>
+
+  <repositories>
+    <repository>
+      <name>Central Portal Snapshots</name>
+      <id>central-portal-snapshots</id>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 </project>

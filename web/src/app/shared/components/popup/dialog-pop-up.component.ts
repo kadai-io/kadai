@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,26 +16,24 @@
  *
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Component, inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent } from '@angular/material/dialog';
 import { ObtainMessageService } from '../../services/obtain-message/obtain-message.service';
 import { messageTypes } from '../../services/obtain-message/message-types';
+import { MatButton } from '@angular/material/button';
 
 @Component({
   selector: 'kadai-shared-dialog-pop-up',
   templateUrl: './dialog-pop-up.component.html',
   styleUrls: ['./dialog-pop-up.component.scss'],
-  standalone: false
+  imports: [MatDialogContent, MatDialogActions, MatButton, MatDialogClose]
 })
 export class DialogPopUpComponent implements OnInit {
   message: string;
   callback: Function;
   isDataSpecified: boolean;
-
-  constructor(
-    @Inject(MAT_DIALOG_DATA) private data: any,
-    private obtainMessageService: ObtainMessageService
-  ) {}
+  private data = inject(MAT_DIALOG_DATA);
+  private obtainMessageService = inject(ObtainMessageService);
 
   ngOnInit() {
     this.isDataSpecified = this.data?.message && this.data?.callback;

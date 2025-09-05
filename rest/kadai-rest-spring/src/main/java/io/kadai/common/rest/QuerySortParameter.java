@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,13 +22,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kadai.common.api.BaseQuery;
 import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
 
 public class QuerySortParameter<Q extends BaseQuery<?, ?>, S extends QuerySortBy<Q>>
     implements QueryParameter<Q, Void> {
 
-  @Schema(
+
+  @Parameter(
       name = "sort-by",
       description =
           "Sort the result by a given field. Multiple sort values can be declared. When the "
@@ -36,7 +37,7 @@ public class QuerySortParameter<Q extends BaseQuery<?, ?>, S extends QuerySortBy
   @JsonProperty("sort-by")
   private final List<S> sortBy;
 
-  @Schema(
+  @Parameter(
       name = "order",
       description =
           "The order direction for each sort value. This value requires the use of 'sort-by'. The"
@@ -46,8 +47,6 @@ public class QuerySortParameter<Q extends BaseQuery<?, ?>, S extends QuerySortBy
   @JsonProperty("order")
   private final List<SortDirection> order;
 
-  // this is only necessary because spring-auto-rest-docs can't resolve Enum[] data types.
-  // See https://github.com/ScaCap/spring-auto-restdocs/issues/423
   public QuerySortParameter(List<S> sortBy, List<SortDirection> order)
       throws InvalidArgumentException {
     this.sortBy = sortBy;

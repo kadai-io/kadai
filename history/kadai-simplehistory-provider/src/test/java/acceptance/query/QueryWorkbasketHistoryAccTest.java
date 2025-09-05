@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,24 +18,35 @@
 
 package acceptance.query;
 
+import static io.kadai.simplehistory.impl.workbasket.WorkbasketHistoryQueryColumnName.ORG_LEVEL_1;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import acceptance.AbstractAccTest;
+import acceptance.ParameterizedQuerySqlCaptureInterceptor;
 import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.TimeInterval;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.simplehistory.impl.SimpleHistoryServiceImpl;
 import io.kadai.simplehistory.impl.workbasket.WorkbasketHistoryQuery;
 import io.kadai.simplehistory.impl.workbasket.WorkbasketHistoryQueryColumnName;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEventType;
 import io.kadai.workbasket.api.WorkbasketCustomField;
+import java.lang.reflect.Field;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import org.apache.ibatis.exceptions.TooManyResultsException;
+import org.apache.ibatis.session.SqlSessionManager;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class QueryWorkbasketHistoryAccTest extends AbstractAccTest {
 
@@ -499,25 +510,52 @@ class QueryWorkbasketHistoryAccTest extends AbstractAccTest {
     returnedList =
         historyService
             .createWorkbasketHistoryQuery()
-            .listValues(WorkbasketHistoryQueryColumnName.ORGLEVEL_1, null);
+            .listValues(ORG_LEVEL_1, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
         historyService
             .createWorkbasketHistoryQuery()
-            .listValues(WorkbasketHistoryQueryColumnName.ORGLEVEL_2, null);
+            .listValues(WorkbasketHistoryQueryColumnName.ORG_LEVEL_2, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
         historyService
             .createWorkbasketHistoryQuery()
-            .listValues(WorkbasketHistoryQueryColumnName.ORGLEVEL_3, null);
+            .listValues(WorkbasketHistoryQueryColumnName.ORG_LEVEL_3, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
         historyService
             .createWorkbasketHistoryQuery()
-            .listValues(WorkbasketHistoryQueryColumnName.ORGLEVEL_4, null);
+            .listValues(WorkbasketHistoryQueryColumnName.ORG_LEVEL_4, null);
     assertThat(returnedList).hasSize(2);
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  class PhysicalPagination {
+    @BeforeAll
+    void setup() throws Exception {
+      Field sessionManagerField = KadaiEngineImpl.class.getDeclaredField("sessionManager");
+      sessionManagerField.setAccessible(true);
+      SqlSessionManager sessionManager = (SqlSessionManager) sessionManagerField.get(kadaiEngine);
+      sessionManager
+          .getConfiguration()
+          .addInterceptor(new ParameterizedQuerySqlCaptureInterceptor());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"0,10", "5,10", "0,0", "2,4"})
+    void should_UseNativeSql_For_QueryPagination(int offset, int limit) {
+      ParameterizedQuerySqlCaptureInterceptor.resetCapturedSql();
+      historyService.createWorkbasketHistoryQuery().list(offset, limit);
+      final String sql = ParameterizedQuerySqlCaptureInterceptor.getCapturedSql();
+      final String physicalPattern1 = String.format("LIMIT %d OFFSET %d", limit, offset);
+      final String physicalPattern2 =
+          String.format("OFFSET %d ROWS FETCH FIRST %d ROWS ONLY", offset, limit);
+
+      assertThat(sql).containsAnyOf(physicalPattern1, physicalPattern2);
+    }
   }
 }

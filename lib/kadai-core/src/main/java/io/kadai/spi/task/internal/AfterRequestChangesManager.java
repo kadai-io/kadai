@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -48,13 +48,17 @@ public class AfterRequestChangesManager {
     }
   }
 
-  public Task afterRequestChanges(Task task) {
+  public Task afterRequestChanges(Task task, String workbasketId, String ownerId) {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Sending Task to AfterRequestChangesProvider service providers: {}", task);
     }
     for (AfterRequestChangesProvider serviceProvider : afterRequestChangesProviders) {
       try {
-        task = serviceProvider.afterRequestChanges(task);
+        if (workbasketId == null) {
+          task = serviceProvider.afterRequestChanges(task);
+        } else {
+          task = serviceProvider.afterRequestChanges(task, workbasketId, ownerId);
+        }
       } catch (Exception e) {
         throw new SystemException(
             String.format(

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 package io.kadai.common.rest;
 
-import static io.kadai.rest.test.RestHelper.TEMPLATE;
+import static io.kadai.rest.test.RestHelper.CLIENT;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,9 +36,6 @@ import java.util.Map;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.web.client.HttpClientErrorException.BadRequest;
 import org.springframework.web.client.HttpStatusCodeException;
 
@@ -58,16 +55,15 @@ class GeneralExceptionHandlingTest {
   @Test
   void testDeleteNonExisitingClassificationExceptionIsLogged() {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS_ID, "non-existing-id");
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ThrowingCallable httpCall =
         () ->
-            TEMPLATE.exchange(
-                url,
-                HttpMethod.DELETE,
-                auth,
-                ParameterizedTypeReference.forType(
-                    ClassificationSummaryPagedRepresentationModel.class));
+            CLIENT
+                .delete()
+                .uri(url)
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                .retrieve()
+                .toEntity(ClassificationSummaryPagedRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
         .isInstanceOf(HttpStatusCodeException.class)
@@ -77,21 +73,18 @@ class GeneralExceptionHandlingTest {
   @Test
   void should_ThrowExpressiveError_When_AQueryParameterIsInvalid() throws Exception {
     String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET) + "?required-permission=GROU";
-    HttpEntity<String> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
 
     ThrowingCallable httpCall =
         () ->
-            TEMPLATE.exchange(
-                url,
-                HttpMethod.GET,
-                auth,
-                ParameterizedTypeReference.forType(
-                    WorkbasketSummaryPagedRepresentationModel.class));
+            CLIENT
+                .get()
+                .uri(url)
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+                .retrieve()
+                .toEntity(WorkbasketSummaryPagedRepresentationModel.class);
 
     List<String> expectedValues =
-        Arrays.stream(WorkbasketPermission.values())
-            .map(Object::toString)
-            .toList();
+        Arrays.stream(WorkbasketPermission.values()).map(Object::toString).toList();
     ErrorCode errorCode =
         ErrorCode.of(
             "QUERY_PARAMETER_MALFORMED",
@@ -112,16 +105,15 @@ class GeneralExceptionHandlingTest {
   void should_CombineErrors_When_SameQueryParameterDeclarationsAreInvalidMultipleTimes()
       throws Exception {
     String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET) + "?type=GROU&type=invalid";
-    HttpEntity<String> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
 
     ThrowingCallable httpCall =
         () ->
-            TEMPLATE.exchange(
-                url,
-                HttpMethod.GET,
-                auth,
-                ParameterizedTypeReference.forType(
-                    WorkbasketSummaryPagedRepresentationModel.class));
+            CLIENT
+                .get()
+                .uri(url)
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+                .retrieve()
+                .toEntity(WorkbasketSummaryPagedRepresentationModel.class);
 
     List<String> expectedValuesForQueryParameterType =
         Arrays.stream(WorkbasketType.values()).map(Object::toString).toList();
@@ -149,16 +141,15 @@ class GeneralExceptionHandlingTest {
   void should_FilterOutValidQueryParameters_When_OnlySomeQueryParametersDeclarationsAreInvalid()
       throws Exception {
     String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET) + "?type=GROUP&type=invalid";
-    HttpEntity<String> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
 
     ThrowingCallable httpCall =
         () ->
-            TEMPLATE.exchange(
-                url,
-                HttpMethod.GET,
-                auth,
-                ParameterizedTypeReference.forType(
-                    WorkbasketSummaryPagedRepresentationModel.class));
+            CLIENT
+                .get()
+                .uri(url)
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+                .retrieve()
+                .toEntity(WorkbasketSummaryPagedRepresentationModel.class);
 
     List<String> expectedValuesForQueryParameterType =
         Arrays.stream(WorkbasketType.values()).map(Object::toString).toList();
@@ -184,23 +175,20 @@ class GeneralExceptionHandlingTest {
   void should_CombineErrors_When_DifferentQueryParametersAreInvalid() throws Exception {
     String url =
         restHelper.toUrl(RestEndpoints.URL_WORKBASKET) + "?type=GROU&required-permission=invalid";
-    HttpEntity<String> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
 
     ThrowingCallable httpCall =
         () ->
-            TEMPLATE.exchange(
-                url,
-                HttpMethod.GET,
-                auth,
-                ParameterizedTypeReference.forType(
-                    WorkbasketSummaryPagedRepresentationModel.class));
+            CLIENT
+                .get()
+                .uri(url)
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+                .retrieve()
+                .toEntity(WorkbasketSummaryPagedRepresentationModel.class);
 
     List<String> expectedValuesForQueryParameterType =
         Arrays.stream(WorkbasketType.values()).map(Object::toString).toList();
     List<String> expectedValuesForQueryParameterRequiredPermission =
-        Arrays.stream(WorkbasketPermission.values())
-            .map(Object::toString)
-            .toList();
+        Arrays.stream(WorkbasketPermission.values()).map(Object::toString).toList();
     ErrorCode errorCode =
         ErrorCode.of(
             "QUERY_PARAMETER_MALFORMED",

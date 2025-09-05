@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 package io.kadai.workbasket.rest;
 
-import static io.kadai.rest.test.RestHelper.TEMPLATE;
+import static io.kadai.rest.test.RestHelper.CLIENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -36,11 +36,8 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -49,10 +46,6 @@ import org.springframework.web.client.HttpStatusCodeException;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 @KadaiSpringBootTest
 class WorkbasketAccessItemControllerIntTest {
-
-  private static final ParameterizedTypeReference<WorkbasketAccessItemPagedRepresentationModel>
-      WORKBASKET_ACCESS_ITEM_PAGED_REPRESENTATION_MODEL_TYPE =
-          new ParameterizedTypeReference<WorkbasketAccessItemPagedRepresentationModel>() {};
 
   private final RestHelper restHelper;
 
@@ -64,11 +57,14 @@ class WorkbasketAccessItemControllerIntTest {
   @Test
   void testGetAllWorkbasketAccessItems() {
     String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET_ACCESS_ITEMS);
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<WorkbasketAccessItemPagedRepresentationModel> response =
-        TEMPLATE.exchange(
-            url, HttpMethod.GET, auth, WORKBASKET_ACCESS_ITEM_PAGED_REPRESENTATION_MODEL_TYPE);
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(WorkbasketAccessItemPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getLink(IanaLinkRelations.SELF)).isNotNull();
   }
@@ -78,11 +74,14 @@ class WorkbasketAccessItemControllerIntTest {
     String parameters =
         "?sort-by=WORKBASKET_KEY&order=ASCENDING&page-size=9&access-id=user-1-1&page=1";
     String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET_ACCESS_ITEMS) + parameters;
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<WorkbasketAccessItemPagedRepresentationModel> response =
-        TEMPLATE.exchange(
-            url, HttpMethod.GET, auth, WORKBASKET_ACCESS_ITEM_PAGED_REPRESENTATION_MODEL_TYPE);
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(WorkbasketAccessItemPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getLink(IanaLinkRelations.SELF))
         .isNotEmpty()
@@ -97,11 +96,14 @@ class WorkbasketAccessItemControllerIntTest {
     String parameters =
         "?sort-by=WORKBASKET_KEY&order=ASCENDING&page=1&page-size=9&access-id=user-1-1";
     String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET_ACCESS_ITEMS) + parameters;
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<WorkbasketAccessItemPagedRepresentationModel> response =
-        TEMPLATE.exchange(
-            url, HttpMethod.GET, auth, WORKBASKET_ACCESS_ITEM_PAGED_REPRESENTATION_MODEL_TYPE);
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(WorkbasketAccessItemPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getContent()).hasSize(1);
     assertThat(response.getBody().getContent().iterator().next().getAccessId())
@@ -125,11 +127,14 @@ class WorkbasketAccessItemControllerIntTest {
     String parameters =
         "?sort-by=WORKBASKET_KEY&order=ASCENDING&page=1&page-size=9&access-id=user-1-1,user-1-2";
     String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET_ACCESS_ITEMS) + parameters;
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<WorkbasketAccessItemPagedRepresentationModel> response =
-        TEMPLATE.exchange(
-            url, HttpMethod.GET, auth, WORKBASKET_ACCESS_ITEM_PAGED_REPRESENTATION_MODEL_TYPE);
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(WorkbasketAccessItemPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getContent()).isEmpty();
     assertThat(response.getBody().getPageMetadata().getSize()).isEqualTo(9);
@@ -142,11 +147,14 @@ class WorkbasketAccessItemControllerIntTest {
   void should_DeleteAllAccessItemForUser_ifValidAccessIdOfUserIsSupplied() {
     String url =
         restHelper.toUrl(RestEndpoints.URL_WORKBASKET_ACCESS_ITEMS) + "?access-id=teamlead-2";
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<Void> response =
-        TEMPLATE.exchange(
-            url, HttpMethod.DELETE, auth, ParameterizedTypeReference.forType(Void.class));
+        CLIENT
+            .delete()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(Void.class);
     assertThat(response.getBody()).isNull();
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
   }
@@ -159,12 +167,15 @@ class WorkbasketAccessItemControllerIntTest {
             + "&illegalParam=illegal"
             + "&anotherIllegalParam=stillIllegal"
             + "&sort-by=WORKBASKET_KEY&order=DESCENDING&page-size=5&page=2";
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ThrowingCallable httpCall =
         () ->
-            TEMPLATE.exchange(
-                url, HttpMethod.GET, auth, WORKBASKET_ACCESS_ITEM_PAGED_REPRESENTATION_MODEL_TYPE);
+            CLIENT
+                .get()
+                .uri(url)
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                .retrieve()
+                .toEntity(WorkbasketAccessItemPagedRepresentationModel.class);
     assertThatThrownBy(httpCall)
         .isInstanceOf(HttpStatusCodeException.class)
         .hasMessageContaining(
@@ -188,13 +199,17 @@ class WorkbasketAccessItemControllerIntTest {
               restHelper.toUrl(RestEndpoints.URL_WORKBASKET_ACCESS_ITEMS)
                   + "?access-id="
                   + accessId;
-          HttpEntity<Object> auth =
-              new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
           ThrowingCallable httpCall =
               () ->
-                  TEMPLATE.exchange(
-                      url, HttpMethod.DELETE, auth, ParameterizedTypeReference.forType(Void.class));
+                  CLIENT
+                      .delete()
+                      .uri(url)
+                      .headers(
+                          headers ->
+                              headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                      .retrieve()
+                      .toEntity(Void.class);
           assertThatThrownBy(httpCall)
               .isInstanceOf(HttpStatusCodeException.class)
               .extracting(HttpStatusCodeException.class::cast)

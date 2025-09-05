@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@ import io.kadai.task.internal.TaskServiceImpl;
 import java.util.Arrays;
 import java.util.List;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -149,14 +148,13 @@ class QueryTasksListValuesAccTest extends AbstractAccTest {
       assertThat(columnValueList).hasSize(7);
     }
 
-    @Disabled()
     @WithAccessId(user = "admin")
     @Test
     void should_ReturnAllExternalIds_When_ListValuesForExternalIdsIsInvoked() {
 
       List<String> resultValues =
           TASK_SERVICE.createTaskQuery().listValues(TaskQueryColumnName.EXTERNAL_ID, DESCENDING);
-      assertThat(resultValues).hasSize(74);
+      assertThat(resultValues).hasSize(100);
     }
 
     @WithAccessId(user = "teamlead-1")

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,19 +20,19 @@ import { of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { environment } from 'app/../environments/environment';
-import { Injectable, Injector } from '@angular/core';
+import { inject, Injectable, Injector } from '@angular/core';
 import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
 import { map } from 'rxjs/operators';
 import { WindowRefService } from 'app/shared/services/window/window.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class StartupService {
-  constructor(
-    private httpClient: HttpClient,
-    private kadaiEngineService: KadaiEngineService,
-    private injector: Injector,
-    private window: WindowRefService
-  ) {}
+  private httpClient = inject(HttpClient);
+  private kadaiEngineService = inject(KadaiEngineService);
+  private injector = inject(Injector);
+  private window = inject(WindowRefService);
 
   public get router(): Router {
     return this.injector.get(Router);

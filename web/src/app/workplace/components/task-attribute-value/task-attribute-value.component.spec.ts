@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,18 +17,15 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
 import { TaskAttributeValueComponent } from './task-attribute-value.component';
 
-// TODO: test pending to test. Failing random
-xdescribe('TaskAttributeValueComponent', () => {
+describe('TaskAttributeValueComponent', () => {
   let component: TaskAttributeValueComponent;
   let fixture: ComponentFixture<TaskAttributeValueComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [FormsModule],
-      declarations: [TaskAttributeValueComponent]
+      imports: [TaskAttributeValueComponent]
     }).compileComponents();
   }));
 

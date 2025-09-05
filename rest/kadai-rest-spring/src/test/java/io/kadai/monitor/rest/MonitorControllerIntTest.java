@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 package io.kadai.monitor.rest;
 
-import static io.kadai.rest.test.RestHelper.TEMPLATE;
+import static io.kadai.rest.test.RestHelper.CLIENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -34,10 +34,7 @@ import java.nio.charset.StandardCharsets;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException.BadRequest;
 
@@ -60,14 +57,14 @@ class MonitorControllerIntTest {
         restHelper.toUrl(RestEndpoints.URL_MONITOR_TASK_STATUS_REPORT)
             + "?workbasket-id=WBI:100000000000000000000000000000000007"
             + "&state=READY&state=CLAIMED";
-    HttpEntity<String> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
 
     ResponseEntity<ReportRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(ReportRepresentationModel.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(ReportRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
     assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -81,17 +78,18 @@ class MonitorControllerIntTest {
 
   @Test
   void should_ReturnAllOpenTasksByState_When_QueryingForSpecificWbAndStateReadyAndMinimumPrio() {
-    String url = restHelper.toUrl(RestEndpoints.URL_MONITOR_TASK_STATUS_REPORT);
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
+    String url =
+        restHelper.toUrl(RestEndpoints.URL_MONITOR_TASK_STATUS_REPORT)
+            + "?workbasket-id=WBI:"
+            + "100000000000000000000000000000000007&state=READY&priority-minimum=1";
 
     ResponseEntity<ReportRepresentationModel> response =
-        TEMPLATE.exchange(
-            url
-                + "?workbasket-id=WBI:100000000000000000000000000000000007"
-                + "&state=READY&priority-minimum=1",
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(ReportRepresentationModel.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(ReportRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
     assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -110,14 +108,14 @@ class MonitorControllerIntTest {
             + "&custom-3-not-in=abbb"
             + "&custom-4=defg"
             + "&custom-5=important";
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("monitor"));
 
     ResponseEntity<ReportRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(ReportRepresentationModel.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
+            .retrieve()
+            .toEntity(ReportRepresentationModel.class);
 
     ReportRepresentationModel report = response.getBody();
 
@@ -135,14 +133,14 @@ class MonitorControllerIntTest {
             + "?workbasket-id=WBI:100000000000000000000000000000000008"
             + "&state=READY"
             + "&state=CLAIMED";
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("monitor"));
 
     ResponseEntity<ReportRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(ReportRepresentationModel.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
+            .retrieve()
+            .toEntity(ReportRepresentationModel.class);
 
     ReportRepresentationModel report = response.getBody();
     assertThat(report).isNotNull();
@@ -157,14 +155,14 @@ class MonitorControllerIntTest {
     String url =
         restHelper.toUrl(RestEndpoints.URL_MONITOR_WORKBASKET_PRIORITY_REPORT)
             + "?workbasket-type=TOPIC&workbasket-type=GROUP";
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("monitor"));
 
     ResponseEntity<ReportRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(ReportRepresentationModel.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
+            .retrieve()
+            .toEntity(ReportRepresentationModel.class);
 
     ReportRepresentationModel report = response.getBody();
 
@@ -181,14 +179,14 @@ class MonitorControllerIntTest {
             + "&state=READY&state=CLAIMED"
             + "&custom-6=074&custom-6=075"
             + "&custom-7-not-in=20";
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("monitor"));
 
     ResponseEntity<ReportRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(ReportRepresentationModel.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
+            .retrieve()
+            .toEntity(ReportRepresentationModel.class);
 
     ReportRepresentationModel report = response.getBody();
     assertThat(report).isNotNull();
@@ -208,14 +206,13 @@ class MonitorControllerIntTest {
             + URLEncoder.encode(
                 objectMapper.writeValueAsString(columnHeader), StandardCharsets.UTF_8);
 
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("monitor"));
-
     ResponseEntity<ReportRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(ReportRepresentationModel.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
+            .retrieve()
+            .toEntity(ReportRepresentationModel.class);
 
     ReportRepresentationModel report = response.getBody();
     assertThat(report).isNotNull();
@@ -228,15 +225,14 @@ class MonitorControllerIntTest {
         restHelper.toUrl(RestEndpoints.URL_MONITOR_WORKBASKET_PRIORITY_REPORT)
             + "?columnHeader=invalidJson";
 
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("monitor"));
-
     ThrowingCallable httpCall =
         () ->
-            TEMPLATE.exchange(
-                url,
-                HttpMethod.GET,
-                auth,
-                ParameterizedTypeReference.forType(ReportRepresentationModel.class));
+            CLIENT
+                .get()
+                .uri(url)
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
+                .retrieve()
+                .toEntity(ReportRepresentationModel.class);
 
     assertThatThrownBy(httpCall).isInstanceOf(BadRequest.class);
   }
@@ -244,21 +240,18 @@ class MonitorControllerIntTest {
   @Test
   void should_ComputeClassificationCategoryReport() {
     String url = restHelper.toUrl(RestEndpoints.URL_MONITOR_CLASSIFICATION_CATEGORY_REPORT);
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
 
     ResponseEntity<ReportRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(ReportRepresentationModel.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(ReportRepresentationModel.class);
 
     String[][] descArray = {{"AUTOMATIC"}, {"EXTERN"}, {"MANUAL"}};
     assertThat(response.getBody()).isNotNull();
-    assertThat(
-            response.getBody().getRows().stream()
-                .map(RowRepresentationModel::getDesc)
-                .toList())
+    assertThat(response.getBody().getRows().stream().map(RowRepresentationModel::getDesc).toList())
         .hasSize(3)
         .containsExactlyInAnyOrder(descArray);
   }
@@ -266,34 +259,31 @@ class MonitorControllerIntTest {
   @Test
   void should_ComputeClassificationReport() {
     String url = restHelper.toUrl(RestEndpoints.URL_MONITOR_CLASSIFICATION_REPORT);
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
 
     ResponseEntity<ReportRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(ReportRepresentationModel.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(ReportRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
-    assertThat(
-            response.getBody().getRows().stream()
-                .map(RowRepresentationModel::getDesc)
-                .toList())
+    assertThat(response.getBody().getRows().stream().map(RowRepresentationModel::getDesc).toList())
         .hasSize(6);
   }
 
   @Test
   void should_ComputeDetailedClassificationReport() {
     String url = restHelper.toUrl(RestEndpoints.URL_MONITOR_DETAILED_CLASSIFICATION_REPORT);
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
 
     ResponseEntity<ReportRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(ReportRepresentationModel.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(ReportRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
   }
@@ -301,14 +291,14 @@ class MonitorControllerIntTest {
   @Test
   void should_ComputeTaskStatusReport() {
     String url = restHelper.toUrl(RestEndpoints.URL_MONITOR_TASK_STATUS_REPORT);
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
 
     ResponseEntity<ReportRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(ReportRepresentationModel.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(ReportRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
   }
@@ -316,14 +306,14 @@ class MonitorControllerIntTest {
   @Test
   void should_ComputeTimestampReport() {
     String url = restHelper.toUrl(RestEndpoints.URL_MONITOR_TIMESTAMP_REPORT);
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
 
     ResponseEntity<ReportRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(ReportRepresentationModel.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(ReportRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
   }
@@ -333,22 +323,19 @@ class MonitorControllerIntTest {
     String url =
         restHelper.toUrl(
             RestEndpoints.URL_MONITOR_TASK_CUSTOM_FIELD_VALUE_REPORT + "?custom-field=CUSTOM_14");
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
 
     ResponseEntity<ReportRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(ReportRepresentationModel.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(ReportRepresentationModel.class);
 
     String[][] descArray = {{"abc"}, {"dde"}, {"ert"}};
 
     assertThat(response.getBody()).isNotNull();
-    assertThat(
-            response.getBody().getRows().stream()
-                .map(RowRepresentationModel::getDesc)
-                .toList())
+    assertThat(response.getBody().getRows().stream().map(RowRepresentationModel::getDesc).toList())
         .hasSize(3)
         .containsExactlyInAnyOrder(descArray);
   }

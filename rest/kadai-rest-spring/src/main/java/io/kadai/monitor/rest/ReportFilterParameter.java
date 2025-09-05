@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,56 +20,56 @@ package io.kadai.monitor.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kadai.task.api.TaskState;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.beans.ConstructorProperties;
 
 public class ReportFilterParameter {
-  @Schema(
+  @Parameter(
       name = "in-working-days",
       description =
           "Determine weather the report should convert the age of the Tasks into working days.")
   @JsonProperty("in-working-days")
   protected final Boolean inWorkingDays;
 
-  @Schema(
+  @Parameter(
       name = "workbasket-id",
       description = "Filter by workbasket id of the Task. This is an exact match.")
   @JsonProperty("workbasket-id")
   protected final String[] workbasketId;
 
-  @Schema(name = "state", description = "Filter by the task state. This is an exact match.")
+  @Parameter(name = "state", description = "Filter by the task state. This is an exact match.")
   @JsonProperty("state")
   protected final TaskState[] state;
 
-  @Schema(
+  @Parameter(
       name = "classification-category",
       description = "Filter by the classification category of the Task. This is an exact match.")
   @JsonProperty("classification-category")
   protected final String[] classificationCategory;
 
-  @Schema(name = "domain", description = "Filter by domain of the Task. This is an exact match.")
+  @Parameter(name = "domain", description = "Filter by domain of the Task. This is an exact match.")
   @JsonProperty("domain")
   protected final String[] domain;
 
-  @Schema(
+  @Parameter(
       name = "classification-id",
       description = "Filter by the classification id of the Task. This is an exact match.")
   @JsonProperty("classification-id")
   protected final String[] classificationId;
 
-  @Schema(
+  @Parameter(
       name = "excluded-classification-id",
       description = "Filter by the classification id of the Task. This is an exact match.")
   @JsonProperty("excluded-classification-id")
   protected final String[] excludedClassificationId;
 
-  @Schema(
+  @Parameter(
       name = "custom-1",
       description = "Filter by the value of the field custom1 of the Task. This is an exact match.")
   @JsonProperty("custom-1")
   protected final String[] custom1;
 
-  @Schema(
+  @Parameter(
       name = "custom-1-like",
       description =
           "Filter by the custom1 field of the Task. This results in a substring search (% is "
@@ -78,20 +78,20 @@ public class ReportFilterParameter {
   @JsonProperty("custom-1-like")
   protected final String[] custom1Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-1-not-in",
       description =
           "Filter out by values of the field custom1 of the Task. This is an exact match.")
   @JsonProperty("custom-1-not-in")
   protected final String[] custom1NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-2",
       description = "Filter by the value of the field custom2 of the Task. This is an exact match.")
   @JsonProperty("custom-2")
   protected final String[] custom2;
 
-  @Schema(
+  @Parameter(
       name = "custom-2-like",
       description =
           "Filter by the custom2 field of the Task. This results in a substring search (% is "
@@ -100,20 +100,20 @@ public class ReportFilterParameter {
   @JsonProperty("custom-2-like")
   protected final String[] custom2Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-2-not-in",
       description =
           "Filter out by values of the field custom2 of the Task. This is an exact match.")
   @JsonProperty("custom-2-not-in")
   protected final String[] custom2NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-3",
       description = "Filter by the value of the field custom3 of the Task. This is an exact match.")
   @JsonProperty("custom-3")
   protected final String[] custom3;
 
-  @Schema(
+  @Parameter(
       name = "custom-3-like",
       description =
           "Filter by the custom3 field of the Task. This results in a substring search (% is "
@@ -122,20 +122,20 @@ public class ReportFilterParameter {
   @JsonProperty("custom-3-like")
   protected final String[] custom3Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-3-not-in",
       description =
           "Filter out by values of the field custom3 of the Task. This is an exact match.")
   @JsonProperty("custom-3-not-in")
   protected final String[] custom3NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-4",
       description = "Filter by the value of the field custom4 of the Task. This is an exact match.")
   @JsonProperty("custom-4")
   protected final String[] custom4;
 
-  @Schema(
+  @Parameter(
       name = "custom-4-like",
       description =
           "Filter by the custom4 field of the Task. This results in a substring search (% is "
@@ -144,20 +144,20 @@ public class ReportFilterParameter {
   @JsonProperty("custom-4-like")
   protected final String[] custom4Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-4-not-in",
       description =
           "Filter out by values of the field custom4 of the Task. This is an exact match.")
   @JsonProperty("custom-4-not-in")
   protected final String[] custom4NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-5",
       description = "Filter by the value of the field custom5 of the Task. This is an exact match.")
   @JsonProperty("custom-5")
   protected final String[] custom5;
 
-  @Schema(
+  @Parameter(
       name = "custom-5-like",
       description =
           "Filter by the custom5 field of the Task. This results in a substring search (% is "
@@ -166,20 +166,20 @@ public class ReportFilterParameter {
   @JsonProperty("custom-5-like")
   protected final String[] custom5Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-5-not-in",
       description =
           "Filter out by values of the field custom5 of the Task. This is an exact match.")
   @JsonProperty("custom-5-not-in")
   protected final String[] custom5NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-6",
       description = "Filter by the value of the field custom6 of the Task. This is an exact match.")
   @JsonProperty("custom-6")
   protected final String[] custom6;
 
-  @Schema(
+  @Parameter(
       name = "custom-6-like",
       description =
           "Filter by the custom6 field of the Task. This results in a substring search (% is "
@@ -188,20 +188,20 @@ public class ReportFilterParameter {
   @JsonProperty("custom-6-like")
   protected final String[] custom6Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-6-not-in",
       description =
           "Filter out by values of the field custom6 of the Task. This is an exact match.")
   @JsonProperty("custom-6-not-in")
   protected final String[] custom6NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-7",
       description = "Filter by the value of the field custom7 of the Task. This is an exact match.")
   @JsonProperty("custom-7")
   protected final String[] custom7;
 
-  @Schema(
+  @Parameter(
       name = "custom-7-like",
       description =
           "Filter by the custom7 field of the Task. This results in a substring search (% is "
@@ -210,20 +210,20 @@ public class ReportFilterParameter {
   @JsonProperty("custom-7-like")
   protected final String[] custom7Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-7-not-in",
       description =
           "Filter out by values of the field custom7 of the Task. This is an exact match.")
   @JsonProperty("custom-7-not-in")
   protected final String[] custom7NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-8",
       description = "Filter by the value of the field custom8 of the Task. This is an exact match.")
   @JsonProperty("custom-8")
   protected final String[] custom8;
 
-  @Schema(
+  @Parameter(
       name = "custom-8-like",
       description =
           "Filter by the custom8 field of the Task. This results in a substring search (% is "
@@ -232,20 +232,20 @@ public class ReportFilterParameter {
   @JsonProperty("custom-8-like")
   protected final String[] custom8Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-8-not-in",
       description =
           "Filter out by values of the field custom8 of the Task. This is an exact match.")
   @JsonProperty("custom-8-not-in")
   protected final String[] custom8NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-9",
       description = "Filter by the value of the field custom9 of the Task. This is an exact match.")
   @JsonProperty("custom-9")
   protected final String[] custom9;
 
-  @Schema(
+  @Parameter(
       name = "custom-9-like",
       description =
           "Filter by the custom9 field of the Task. This results in a substring search (% is "
@@ -254,21 +254,21 @@ public class ReportFilterParameter {
   @JsonProperty("custom-9-like")
   protected final String[] custom9Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-9-not-in",
       description =
           "Filter out by values of the field custom9 of the Task. This is an exact match.")
   @JsonProperty("custom-9-not-in")
   protected final String[] custom9NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-10",
       description =
           "Filter by the value of the field custom10 of the Task. This is an exact match.")
   @JsonProperty("custom-10")
   protected final String[] custom10;
 
-  @Schema(
+  @Parameter(
       name = "custom-10-like",
       description =
           "Filter by the custom10 field of the Task. This results in a substring search (% is "
@@ -277,21 +277,21 @@ public class ReportFilterParameter {
   @JsonProperty("custom-10-like")
   protected final String[] custom10Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-10-not-in",
       description =
           "Filter out by values of the field custom10 of the Task. This is an exact match.")
   @JsonProperty("custom-10-not-in")
   protected final String[] custom10NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-11",
       description =
           "Filter by the value of the field custom11 of the Task. This is an exact match.")
   @JsonProperty("custom-11")
   protected final String[] custom11;
 
-  @Schema(
+  @Parameter(
       name = "custom-11-like",
       description =
           "Filter by the custom11 field of the Task. This results in a substring search (% is "
@@ -300,21 +300,21 @@ public class ReportFilterParameter {
   @JsonProperty("custom-11-like")
   protected final String[] custom11Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-11-not-in",
       description =
           "Filter out by values of the field custom11 of the Task. This is an exact match.")
   @JsonProperty("custom-11-not-in")
   protected final String[] custom11NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-12",
       description =
           "Filter by the value of the field custom12 of the Task. This is an exact match.")
   @JsonProperty("custom-12")
   protected final String[] custom12;
 
-  @Schema(
+  @Parameter(
       name = "custom-12-like",
       description =
           "Filter by the custom12 field of the Task. This results in a substring search (% is "
@@ -323,21 +323,21 @@ public class ReportFilterParameter {
   @JsonProperty("custom-12-like")
   protected final String[] custom12Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-12-not-in",
       description =
           "Filter out by values of the field custom12 of the Task. This is an exact match.")
   @JsonProperty("custom-12-not-in")
   protected final String[] custom12NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-13",
       description =
           "Filter by the value of the field custom13 of the Task. This is an exact match.")
   @JsonProperty("custom-13")
   protected final String[] custom13;
 
-  @Schema(
+  @Parameter(
       name = "custom-13-like",
       description =
           "Filter by the custom13 field of the Task. This results in a substring search (% is "
@@ -346,21 +346,21 @@ public class ReportFilterParameter {
   @JsonProperty("custom-13-like")
   protected final String[] custom13Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-13-not-in",
       description =
           "Filter out by values of the field custom13 of the Task. This is an exact match.")
   @JsonProperty("custom-13-not-in")
   protected final String[] custom13NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-14",
       description =
           "Filter by the value of the field custom14 of the Task. This is an exact match.")
   @JsonProperty("custom-14")
   protected final String[] custom14;
 
-  @Schema(
+  @Parameter(
       name = "custom-14-like",
       description =
           "Filter by the custom14 field of the Task. This results in a substring search (% is "
@@ -369,21 +369,21 @@ public class ReportFilterParameter {
   @JsonProperty("custom-14-like")
   protected final String[] custom14Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-14-not-in",
       description =
           "Filter out by values of the field custom14 of the Task. This is an exact match.")
   @JsonProperty("custom-14-not-in")
   protected final String[] custom14NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-15",
       description =
           "Filter by the value of the field custom15 of the Task. This is an exact match.")
   @JsonProperty("custom-15")
   protected final String[] custom15;
 
-  @Schema(
+  @Parameter(
       name = "custom-15-like",
       description =
           "Filter by the custom15 field of the Task. This results in a substring search (% is "
@@ -392,21 +392,21 @@ public class ReportFilterParameter {
   @JsonProperty("custom-15-like")
   protected final String[] custom15Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-15-not-in",
       description =
           "Filter out by values of the field custom15 of the Task. This is an exact match.")
   @JsonProperty("custom-15-not-in")
   protected final String[] custom15NotIn;
 
-  @Schema(
+  @Parameter(
       name = "custom-16",
       description =
           "Filter by the value of the field custom16 of the Task. This is an exact match.")
   @JsonProperty("custom-16")
   protected final String[] custom16;
 
-  @Schema(
+  @Parameter(
       name = "custom-16-like",
       description =
           "Filter by the custom16 field of the Task. This results in a substring search (% is "
@@ -415,7 +415,7 @@ public class ReportFilterParameter {
   @JsonProperty("custom-16-like")
   protected final String[] custom16Like;
 
-  @Schema(
+  @Parameter(
       name = "custom-16-not-in",
       description =
           "Filter out by values of the field custom16 of the Task. This is an exact match.")

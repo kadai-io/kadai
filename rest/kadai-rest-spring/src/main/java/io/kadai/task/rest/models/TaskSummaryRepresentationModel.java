@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -143,6 +143,9 @@ public class TaskSummaryRepresentationModel
 
   @Schema(name = "isTransferred", description = "Indicator if the task has been transferred.")
   protected boolean isTransferred;
+
+  @Schema(name = "isReopened", description = "Indicator if the task has been reopened.")
+  protected boolean isReopened;
 
   @Schema(
       name = "groupByCount",
@@ -445,6 +448,14 @@ public class TaskSummaryRepresentationModel
 
   public void setTransferred(boolean isTransferred) {
     this.isTransferred = isTransferred;
+  }
+
+  public boolean isReopened() {
+    return isReopened;
+  }
+
+  public void setReopened(boolean reopened) {
+    isReopened = reopened;
   }
 
   public List<AttachmentSummaryRepresentationModel> getAttachmentSummaries() {

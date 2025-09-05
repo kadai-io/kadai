@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,25 +21,27 @@ package io.kadai.task.rest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kadai.common.rest.QueryParameter;
 import io.kadai.task.api.TaskCommentQuery;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.beans.ConstructorProperties;
 import java.time.Instant;
 import java.util.Optional;
 
 public class TaskCommentQueryFilterParameter implements QueryParameter<TaskCommentQuery, Void> {
 
-  @Schema(name = "id", description = "Filter by the id of the TaskComment. This is an exact match.")
+  @Parameter(
+      name = "id",
+      description = "Filter by the id of the TaskComment. This is an exact match.")
   @JsonProperty("id")
   private final String[] idIn;
 
-  @Schema(
+  @Parameter(
       name = "id-not",
       description =
           "Filter by what the id of the TaskComment shouldn't be. This is an exact match.")
   @JsonProperty("id-not")
   private final String[] idNotIn;
 
-  @Schema(
+  @Parameter(
       name = "id-like",
       description =
           "Filter by the id of the TaskComment. This results in a substring search (% is appended "
@@ -48,7 +50,7 @@ public class TaskCommentQueryFilterParameter implements QueryParameter<TaskComme
   @JsonProperty("id-like")
   private final String[] idLike;
 
-  @Schema(
+  @Parameter(
       name = "id-not-like",
       description =
           "Filter by what the id of the TaskComment shouldn't be. This results in a substring "
@@ -57,26 +59,26 @@ public class TaskCommentQueryFilterParameter implements QueryParameter<TaskComme
   @JsonProperty("id-not-like")
   private final String[] idNotLike;
 
-  @Schema(
+  @Parameter(
       name = "task-id",
       description = "Filter by the task id of the TaskComment. This is an exact match.")
   @JsonProperty("task-id")
   private final String[] taskIdIn;
 
-  @Schema(
+  @Parameter(
       name = "creator",
       description = "Filter by the creator of the TaskComment. This is an exact match.")
   @JsonProperty("creator")
   private final String[] creatorIn;
 
-  @Schema(
+  @Parameter(
       name = "creator-not",
       description =
           "Filter by what the creator of the TaskComment shouldn't be. This is an exact match.")
   @JsonProperty("creator-not")
   private final String[] creatorNotIn;
 
-  @Schema(
+  @Parameter(
       name = "creator-like",
       description =
           "Filter by the creator of the TaskComment. This results in a substring search (% is "
@@ -85,7 +87,7 @@ public class TaskCommentQueryFilterParameter implements QueryParameter<TaskComme
   @JsonProperty("creator-like")
   private final String[] creatorLike;
 
-  @Schema(
+  @Parameter(
       name = "creator-not-like",
       description =
           "Filter by what the creator of the TaskComment shouldn't be. This results in a substring "
@@ -94,7 +96,7 @@ public class TaskCommentQueryFilterParameter implements QueryParameter<TaskComme
   @JsonProperty("creator-not-like")
   private final String[] creatorNotLike;
 
-  @Schema(
+  @Parameter(
       name = "textfield-like",
       description =
           "Filter by the textfield of the TaskComment. This results in a substring search (% is "
@@ -103,7 +105,7 @@ public class TaskCommentQueryFilterParameter implements QueryParameter<TaskComme
   @JsonProperty("textfield-like")
   private final String[] textfieldLike;
 
-  @Schema(
+  @Parameter(
       name = "textfield-not-like",
       description =
           "Filter by what the textfield of the TaskComment shouldn't be. This results in a "
@@ -112,7 +114,7 @@ public class TaskCommentQueryFilterParameter implements QueryParameter<TaskComme
   @JsonProperty("textfield-not-like")
   private final String[] textfieldNotLike;
 
-  @Schema(
+  @Parameter(
       name = "modified",
       description =
           "Filter by a time interval within which the TaskComment was modified. To create an open "
@@ -120,7 +122,7 @@ public class TaskCommentQueryFilterParameter implements QueryParameter<TaskComme
   @JsonProperty("modified")
   private final Instant[] modifiedWithin;
 
-  @Schema(
+  @Parameter(
       name = "modified-not",
       description =
           "Filter by a time interval within which the TaskComment wasn't modified. To create an "
@@ -128,7 +130,7 @@ public class TaskCommentQueryFilterParameter implements QueryParameter<TaskComme
   @JsonProperty("modified-not")
   private final Instant[] modifiedNotWithin;
 
-  @Schema(
+  @Parameter(
       name = "created",
       description =
           "Filter by a time interval within which the TaskComment was created. To create an open "
@@ -136,7 +138,7 @@ public class TaskCommentQueryFilterParameter implements QueryParameter<TaskComme
   @JsonProperty("created")
   private final Instant[] createdWithin;
 
-  @Schema(
+  @Parameter(
       name = "created-not",
       description =
           "Filter by a time interval within which the TaskComment wasn't created. To create an "

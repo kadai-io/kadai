@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,7 +18,12 @@
 
 package io.kadai.classification.rest;
 
-import static io.kadai.common.internal.util.CheckedFunction.wrap;
+import static io.kadai.common.internal.util.CheckedConsumer.rethrowing;
+import static io.kadai.common.internal.util.CheckedFunction.wrapping;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kadai.classification.api.ClassificationCustomField;
@@ -33,27 +38,19 @@ import io.kadai.classification.rest.assembler.ClassificationDefinitionCollection
 import io.kadai.classification.rest.assembler.ClassificationDefinitionRepresentationModelAssembler;
 import io.kadai.classification.rest.models.ClassificationDefinitionRepresentationModel;
 import io.kadai.classification.rest.models.ClassificationRepresentationModel;
+import io.kadai.classification.rest.models.ClassificationSummaryRepresentationModel;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.RestEndpoints;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -67,7 +64,7 @@ import org.springframework.web.multipart.MultipartFile;
 /** Controller for Importing / Exporting classifications. */
 @RestController
 @EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
-public class ClassificationDefinitionController {
+public class ClassificationDefinitionController implements ClassificationDefinitionApi {
 
   private final ObjectMapper mapper;
   private final ClassificationService classificationService;
@@ -83,24 +80,7 @@ public class ClassificationDefinitionController {
     this.assembler = assembler;
   }
 
-  @Operation(
-      summary = "Export Classifications",
-      description = "This endpoint exports all configured Classifications.",
-      parameters = {@Parameter(name = "domain", description = "Filter the export by domain")},
-      responses = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "the configured Classifications.",
-            content =
-                @Content(
-                    mediaType = MediaTypes.HAL_JSON_VALUE,
-                    schema =
-                        @Schema(
-                            implementation =
-                                ClassificationDefinitionCollectionRepresentationModel.class)))
-      })
   @GetMapping(path = RestEndpoints.URL_CLASSIFICATION_DEFINITIONS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<ClassificationDefinitionCollectionRepresentationModel>
       exportClassifications(@RequestParam(value = "domain", required = false) String[] domain) {
     ClassificationQuery query = classificationService.createClassificationQuery();
@@ -111,33 +91,12 @@ public class ClassificationDefinitionController {
     ClassificationDefinitionCollectionRepresentationModel collectionModel =
         summaries.stream()
             .map(ClassificationSummary::getId)
-            .map(wrap(classificationService::getClassification))
-            .collect(
-                Collectors.collectingAndThen(
-                    Collectors.toList(), assembler::toKadaiCollectionModel));
+            .map(wrapping(classificationService::getClassification))
+            .collect(collectingAndThen(toList(), assembler::toKadaiCollectionModel));
 
     return ResponseEntity.ok(collectionModel);
   }
 
-  @Operation(
-      summary = "Import Classifications",
-      description =
-          "This endpoint imports all Classifications. Existing Classifications will not be removed."
-              + " Existing Classifications with the same key/domain will be overridden.",
-      requestBody =
-          @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              description =
-                  "the file containing the Classifications which should be imported. To get an "
-                      + "example file containing the Classificatioins, go to the "
-                      + "[KADAI UI](http://localhost:8080/kadai/index.html) and export the "
-                      + "Classifications",
-              required = true,
-              content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)),
-      responses = {
-        @ApiResponse(
-            responseCode = "204",
-            content = {@Content(schema = @Schema())})
-      })
   @PostMapping(
       path = RestEndpoints.URL_CLASSIFICATION_DEFINITIONS,
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -165,8 +124,7 @@ public class ClassificationDefinitionController {
 
   private Map<String, String> getSystemIds() {
     return classificationService.createClassificationQuery().list().stream()
-        .collect(
-            Collectors.toMap(i -> i.getKey() + "|" + i.getDomain(), ClassificationSummary::getId));
+        .collect(toMap(i -> logicalId(i.getKey(), i.getDomain()), ClassificationSummary::getId));
   }
 
   private ClassificationDefinitionCollectionRepresentationModel
@@ -178,50 +136,77 @@ public class ClassificationDefinitionController {
   private void checkForDuplicates(
       Collection<ClassificationDefinitionRepresentationModel> definitionList)
       throws ClassificationAlreadyExistException {
-    List<String> identifiers = new ArrayList<>();
-    for (ClassificationDefinitionRepresentationModel definition : definitionList) {
-      ClassificationRepresentationModel classification = definition.getClassification();
-      String identifier = classification.getKey() + "|" + classification.getDomain();
-      if (identifiers.contains(identifier)) {
-        throw new ClassificationAlreadyExistException(
-            definition.getClassification().getKey(), definition.getClassification().getDomain());
-      }
-      identifiers.add(identifier);
-    }
+    Set<String> seen = new HashSet<>();
+    definitionList.stream()
+        .map(ClassificationDefinitionRepresentationModel::getClassification)
+        .forEach(
+            rethrowing(
+                cl -> {
+                  String key = cl.getKey();
+                  String domain = cl.getDomain();
+                  if (!seen.add(logicalId(key, domain))) {
+                    throw new ClassificationAlreadyExistException(key, domain);
+                  }
+                }));
   }
 
   private Map<Classification, String> mapChildrenToParentKeys(
       Collection<ClassificationDefinitionRepresentationModel> definitionList,
       Map<String, String> systemIds) {
-    Map<Classification, String> childrenInFile = new HashMap<>();
-    Set<String> newKeysWithDomain = new HashSet<>();
+
+    Set<String> keysWithDomain =
+        definitionList.stream()
+            .map(ClassificationDefinitionRepresentationModel::getClassification)
+            .map(this::logicalId)
+            .collect(toSet());
+
+    Map<String, String> classificationIdToKey =
+        definitionList.stream()
+            .map(ClassificationDefinitionRepresentationModel::getClassification)
+            .filter(
+                classification ->
+                    classification.getClassificationId() != null && classification.getKey() != null)
+            .collect(
+                toMap(
+                    ClassificationSummaryRepresentationModel::getClassificationId,
+                    ClassificationSummaryRepresentationModel::getKey,
+                    (existing, replacement) -> existing));
+
     definitionList.stream()
         .map(ClassificationDefinitionRepresentationModel::getClassification)
-        .forEach(cl -> newKeysWithDomain.add(cl.getKey() + "|" + cl.getDomain()));
+        .map(this::normalizeNullValues)
+        .filter(cl -> !cl.getParentId().isEmpty() && cl.getParentKey().isEmpty())
+        .forEach(cl -> cl.setParentKey(classificationIdToKey.getOrDefault(cl.getParentId(), "")));
 
-    for (ClassificationDefinitionRepresentationModel def : definitionList) {
-      ClassificationRepresentationModel cl = def.getClassification();
-      cl.setParentId(cl.getParentId() == null ? "" : cl.getParentId());
-      cl.setParentKey(cl.getParentKey() == null ? "" : cl.getParentKey());
+    return definitionList.stream()
+        .map(def -> Map.entry(def, def.getClassification()))
+        .filter(
+            defClassEntry ->
+                hasResolvableParent(defClassEntry.getValue(), keysWithDomain, systemIds))
+        .collect(
+            toMap(
+                defClassEntry -> assembler.toEntityModel(defClassEntry.getKey()),
+                defClassEntry -> defClassEntry.getValue().getParentKey()));
+  }
 
-      if (!cl.getParentId().equals("") && cl.getParentKey().equals("")) {
-        for (ClassificationDefinitionRepresentationModel parentDef : definitionList) {
-          ClassificationRepresentationModel parent = parentDef.getClassification();
-          if (cl.getParentId().equals(parent.getClassificationId())) {
-            cl.setParentKey(parent.getKey());
-          }
-        }
-      }
-
-      String parentKeyAndDomain = cl.getParentKey() + "|" + cl.getDomain();
-      if ((!cl.getParentKey().isEmpty()
-          && !cl.getParentKey().equals("")
-          && (newKeysWithDomain.contains(parentKeyAndDomain)
-              || systemIds.containsKey(parentKeyAndDomain)))) {
-        childrenInFile.put(assembler.toEntityModel(def), cl.getParentKey());
-      }
+  ClassificationRepresentationModel normalizeNullValues(ClassificationRepresentationModel cl) {
+    if (cl.getParentKey() == null) {
+      cl.setParentKey("");
     }
-    return childrenInFile;
+    if (cl.getParentId() == null) {
+      cl.setParentId("");
+    }
+    return cl;
+  }
+
+  Boolean hasResolvableParent(
+      ClassificationRepresentationModel cl,
+      Set<String> keysWithDomain,
+      Map<String, String> systemIds) {
+    String parentKeyAndDomain = logicalId(cl);
+    return !cl.getParentKey().isEmpty()
+        && (keysWithDomain.contains(parentKeyAndDomain)
+            || systemIds.containsKey(parentKeyAndDomain));
   }
 
   private void insertOrUpdateClassificationsWithoutParent(
@@ -242,8 +227,7 @@ public class ClassificationDefinitionController {
 
       Classification newClassification = assembler.toEntityModel(definition);
 
-      String systemId =
-          systemIds.get(classificationRepModel.getKey() + "|" + classificationRepModel.getDomain());
+      String systemId = systemIds.get(logicalId(classificationRepModel));
       if (systemId != null) {
         updateExistingClassification(newClassification, systemId);
       } else {
@@ -323,5 +307,13 @@ public class ClassificationDefinitionController {
         ClassificationCustomField.CUSTOM_8,
         newClassification.getCustomField(ClassificationCustomField.CUSTOM_8));
     classificationService.updateClassification(currentClassification);
+  }
+
+  private String logicalId(ClassificationRepresentationModel classification) {
+    return logicalId(classification.getKey(), classification.getDomain());
+  }
+
+  private String logicalId(String key, String domain) {
+    return key + "|" + domain;
   }
 }

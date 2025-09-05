@@ -12,7 +12,7 @@
     <parent>
         <groupId>io.kadai</groupId>
         <artifactId>kadai-parent</artifactId>
-        <version>9.2.1-SNAPSHOT</version>
+        <version>10.2.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -21,7 +21,6 @@
         <module>../web</module>
         <module>kadai-rest-spring-example-common</module>
         <module>kadai-rest-spring-example-boot</module>
-        <module>kadai-rest-spring-example-wildfly</module>
         <module>kadai-rest-spring-test-lib</module>
     </modules>
 

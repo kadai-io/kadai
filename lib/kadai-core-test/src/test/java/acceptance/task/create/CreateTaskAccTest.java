@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -208,6 +208,7 @@ class CreateTaskAccTest {
     assertThat(createdTask.getPriority()).isEqualTo(defaultClassificationSummary.getPriority());
     assertThat(createdTask.isRead()).isFalse();
     assertThat(createdTask.isTransferred()).isFalse();
+    assertThat(createdTask.isReopened()).isFalse();
   }
 
   @WithAccessId(user = "user-1-2")

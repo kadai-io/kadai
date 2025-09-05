@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@
 
 package io.kadai.spi.task.internal;
 
-import static io.kadai.common.internal.util.CheckedConsumer.wrap;
-
+import io.kadai.common.internal.util.CheckedConsumer;
+import io.kadai.common.internal.util.LogSanitizer;
 import io.kadai.common.internal.util.SpiLoader;
 import io.kadai.spi.task.api.CreateTaskPreprocessor;
 import io.kadai.task.api.models.Task;
@@ -45,10 +45,12 @@ public class CreateTaskPreprocessorManager {
 
   public Task processTaskBeforeCreation(Task taskToProcess) {
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Sending task to CreateTaskPreprocessor providers: {}", taskToProcess);
+      LOGGER.debug(
+          "Sending task to CreateTaskPreprocessor providers: {}",
+          LogSanitizer.stripLineBreakingChars(taskToProcess));
     }
     createTaskPreprocessors.forEach(
-        wrap(
+        CheckedConsumer.wrapping(
             createTaskPreprocessor ->
                 createTaskPreprocessor.processTaskBeforeCreation(taskToProcess)));
     return taskToProcess;

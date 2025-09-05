@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
  *
  */
 
-import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
-import { Select } from '@ngxs/store';
+import { Component, EventEmitter, inject, OnDestroy, OnInit, Output } from '@angular/core';
+import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 import { SettingsSelectors } from '../../../shared/store/settings-store/settings.selectors';
 import { Settings } from '../../../settings/models/settings';
@@ -28,14 +28,14 @@ import {
   MatExpansionPanelHeader,
   MatExpansionPanelTitle
 } from '@angular/material/expansion';
-import { NgFor, NgIf } from '@angular/common';
+
 import { MatCheckbox } from '@angular/material/checkbox';
 
 @Component({
   selector: 'kadai-monitor-task-priority-report-filter',
   templateUrl: './task-priority-report-filter.component.html',
   styleUrls: ['./task-priority-report-filter.component.scss'],
-  imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgFor, MatCheckbox, NgIf]
+  imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatCheckbox]
 })
 export class TaskPriorityReportFilterComponent implements OnInit, OnDestroy {
   isPanelOpen = false;
@@ -47,8 +47,7 @@ export class TaskPriorityReportFilterComponent implements OnInit, OnDestroy {
 
   @Output() applyFilter = new EventEmitter<Object>();
 
-  @Select(SettingsSelectors.getSettings)
-  settings$: Observable<Settings>;
+  settings$: Observable<Settings> = inject(Store).select(SettingsSelectors.getSettings);
 
   ngOnInit() {
     this.settings$.pipe(takeUntil(this.destroy$)).subscribe((settings) => {

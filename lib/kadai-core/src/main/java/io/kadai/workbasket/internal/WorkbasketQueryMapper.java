@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ public interface WorkbasketQueryMapper {
 
   @Select(
       "<script>"
-          + "SELECT DISTINCT "
+          + "SELECT "
           + "w.ID, w.KEY, w.NAME, w.DOMAIN, W.TYPE, w.DESCRIPTION, w.OWNER, w.CUSTOM_1, w.CUSTOM_2, w.CUSTOM_3, w.CUSTOM_4, w.ORG_LEVEL_1, w.ORG_LEVEL_2, w.ORG_LEVEL_3, w.ORG_LEVEL_4, w.MARKED_FOR_DELETION, w.CUSTOM_5, w.CUSTOM_6, w.CUSTOM_7, w.CUSTOM_8 from WORKBASKET w "
           + "<if test = 'joinWithAccessList'> "
           + "<choose>"
@@ -193,7 +193,7 @@ public interface WorkbasketQueryMapper {
 
   @Select(
       "<script>"
-          + "SELECT COUNT(w.ID) from WORKBASKET w "
+          + "SELECT COUNT(*) from WORKBASKET w "
           + "<if test = 'joinWithAccessList'> "
           + "<choose>"
           + "<when test=\"_databaseId == 'db2'\">"
@@ -288,7 +288,7 @@ public interface WorkbasketQueryMapper {
   Long countQueryWorkbaskets(WorkbasketQueryImpl workbasketQuery);
 
   @Select(
-      "<script>SELECT COUNT(ID) from WORKBASKET_ACCESS_LIST "
+      "<script>SELECT COUNT(*) from WORKBASKET_ACCESS_LIST "
           + "<where>"
           + "<if test='workbasketIdIn != null'>AND WORKBASKET_ID IN(<foreach item='item' collection='workbasketIdIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='accessIdIn != null'>AND ACCESS_ID IN(<foreach item='item' collection='accessIdIn' separator=',' >#{item}</foreach>) </if> "

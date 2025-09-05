@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, ReplaySubject } from 'rxjs';
 import { Router } from '@angular/router';
@@ -24,8 +24,16 @@ import { RequestInProgressService } from '../request-in-progress/request-in-prog
 import { SelectedRouteService } from '../selected-route/selected-route';
 import { StartupService } from '../startup/startup.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class DomainService {
+  private httpClient = inject(HttpClient);
+  private router = inject(Router);
+  private requestInProgressService = inject(RequestInProgressService);
+  private selectedRouteService = inject(SelectedRouteService);
+  private startupService = inject(StartupService);
+
   private domainRestValue: Array<string> = new Array<string>();
   private domainValue: Array<string> = new Array<string>();
   private domainSelectedValue: string;
@@ -33,13 +41,7 @@ export class DomainService {
   private dataObs$ = new ReplaySubject<Array<string>>(1);
   private hasMasterDomain = false;
 
-  constructor(
-    private httpClient: HttpClient,
-    private router: Router,
-    private requestInProgressService: RequestInProgressService,
-    private selectedRouteService: SelectedRouteService,
-    private startupService: StartupService
-  ) {
+  constructor() {
     this.selectedRouteService.getSelectedRoute().subscribe((value: string) => {
       if (value.indexOf('workbaskets') === 0) {
         this.hasMasterDomain = false;

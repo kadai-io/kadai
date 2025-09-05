@@ -11,7 +11,7 @@
     <parent>
         <groupId>io.kadai</groupId>
         <artifactId>kadai-rest-parent</artifactId>
-        <version>9.2.1-SNAPSHOT</version>
+        <version>10.2.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -163,25 +163,6 @@
                                 <resource>
                                     <directory>
                                         ../../lib/kadai-core/target/reports/apidocs
-                                    </directory>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-kadai-cdi-docs</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>
-                                ${project.build.outputDirectory}/static/docs/java/kadai-cdi
-                            </outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>
-                                        ../../lib/kadai-cdi/target/reports/apidocs
                                     </directory>
                                 </resource>
                             </resources>

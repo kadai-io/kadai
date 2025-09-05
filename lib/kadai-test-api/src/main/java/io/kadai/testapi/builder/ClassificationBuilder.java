@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import io.kadai.classification.api.models.ClassificationSummary;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
-import io.kadai.testapi.builder.EntityBuilder.SummaryEntityBuilder;
 import java.time.Instant;
 
 public class ClassificationBuilder
@@ -147,5 +146,10 @@ public class ClassificationBuilder
     } finally {
       testClassification.setId(null);
     }
+  }
+
+  @Override
+  public Classification build() {
+    return testClassification.copy(testClassification.getId());
   }
 }

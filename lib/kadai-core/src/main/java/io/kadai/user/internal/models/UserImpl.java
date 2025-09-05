@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,187 +19,23 @@
 package io.kadai.user.internal.models;
 
 import io.kadai.user.api.models.User;
-import java.util.Collections;
+import io.kadai.user.api.models.UserSummary;
 import java.util.Objects;
-import java.util.Set;
 
-public class UserImpl implements User {
-  private String id;
-  private Set<String> groups = Collections.emptySet();
-  private Set<String> permissions = Collections.emptySet();
-  private String firstName;
-  private String lastName;
-  private String fullName;
-  private String longName;
-  private String email;
-  private String phone;
-  private String mobilePhone;
-  private String orgLevel4;
-  private String orgLevel3;
-  private String orgLevel2;
-  private String orgLevel1;
-  private String data;
-  private Set<String> domains = Collections.emptySet();
+public class UserImpl extends UserSummaryImpl implements User {
+
+  protected String data;
 
   public UserImpl() {}
 
   protected UserImpl(UserImpl copyFrom) {
-    this.id = copyFrom.id;
-    this.groups = copyFrom.groups;
-    this.permissions = copyFrom.permissions;
-    this.firstName = copyFrom.firstName;
-    this.lastName = copyFrom.lastName;
-    this.fullName = copyFrom.fullName;
-    this.longName = copyFrom.longName;
-    this.email = copyFrom.email;
-    this.phone = copyFrom.phone;
-    this.mobilePhone = copyFrom.mobilePhone;
-    this.orgLevel4 = copyFrom.orgLevel4;
-    this.orgLevel3 = copyFrom.orgLevel3;
-    this.orgLevel2 = copyFrom.orgLevel2;
-    this.orgLevel1 = copyFrom.orgLevel1;
+    super(copyFrom);
     this.data = copyFrom.data;
-    this.domains = copyFrom.domains;
   }
 
   @Override
-  public String getId() {
-    return id;
-  }
-
-  @Override
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  @Override
-  public Set<String> getGroups() {
-    return groups;
-  }
-
-  @Override
-  public void setGroups(Set<String> groups) {
-    this.groups = groups;
-  }
-
-  @Override
-  public Set<String> getPermissions() {
-    return permissions;
-  }
-
-  @Override
-  public void setPermissions(Set<String> permissions) {
-    this.permissions = permissions;
-  }
-
-  @Override
-  public String getFirstName() {
-    return firstName;
-  }
-
-  @Override
-  public void setFirstName(String firstName) {
-    this.firstName = firstName;
-  }
-
-  @Override
-  public String getLastName() {
-    return lastName;
-  }
-
-  @Override
-  public void setLastName(String lastName) {
-    this.lastName = lastName;
-  }
-
-  @Override
-  public String getFullName() {
-    return fullName;
-  }
-
-  @Override
-  public void setFullName(String fullName) {
-    this.fullName = fullName;
-  }
-
-  @Override
-  public String getLongName() {
-    return longName;
-  }
-
-  @Override
-  public void setLongName(String longName) {
-    this.longName = longName;
-  }
-
-  @Override
-  public String getEmail() {
-    return email;
-  }
-
-  @Override
-  public void setEmail(String email) {
-    this.email = email;
-  }
-
-  @Override
-  public String getPhone() {
-    return phone;
-  }
-
-  @Override
-  public void setPhone(String phone) {
-    this.phone = phone;
-  }
-
-  @Override
-  public String getMobilePhone() {
-    return mobilePhone;
-  }
-
-  @Override
-  public void setMobilePhone(String mobilePhone) {
-    this.mobilePhone = mobilePhone;
-  }
-
-  @Override
-  public String getOrgLevel4() {
-    return orgLevel4;
-  }
-
-  @Override
-  public void setOrgLevel4(String orgLevel4) {
-    this.orgLevel4 = orgLevel4;
-  }
-
-  @Override
-  public String getOrgLevel3() {
-    return orgLevel3;
-  }
-
-  @Override
-  public void setOrgLevel3(String orgLevel3) {
-    this.orgLevel3 = orgLevel3;
-  }
-
-  @Override
-  public String getOrgLevel2() {
-    return orgLevel2;
-  }
-
-  @Override
-  public void setOrgLevel2(String orgLevel2) {
-    this.orgLevel2 = orgLevel2;
-  }
-
-  @Override
-  public String getOrgLevel1() {
-    return orgLevel1;
-  }
-
-  @Override
-  public void setOrgLevel1(String orgLevel1) {
-    this.orgLevel1 = orgLevel1;
+  public UserImpl copy() {
+    return new UserImpl(this);
   }
 
   @Override
@@ -210,20 +46,6 @@ public class UserImpl implements User {
   @Override
   public void setData(String data) {
     this.data = data;
-  }
-
-  @Override
-  public Set<String> getDomains() {
-    return domains;
-  }
-
-  public void setDomains(Set<String> domains) {
-    this.domains = domains;
-  }
-
-  @Override
-  public UserImpl copy() {
-    return new UserImpl(this);
   }
 
   @Override
@@ -245,6 +67,25 @@ public class UserImpl implements User {
         orgLevel1,
         data,
         domains);
+  }
+
+  @Override
+  public UserSummary asSummary() {
+    UserSummaryImpl result = new UserSummaryImpl();
+    result.setId(this.getId());
+    result.setFirstName(this.getFirstName());
+    result.setLastName(this.getLastName());
+    result.setFullName(this.getFullName());
+    result.setLongName(this.getLongName());
+    result.setEmail(this.getEmail());
+    result.setPhone(this.getPhone());
+    result.setMobilePhone(this.getMobilePhone());
+    result.setOrgLevel1(this.getOrgLevel1());
+    result.setOrgLevel2(this.getOrgLevel2());
+    result.setOrgLevel3(this.getOrgLevel3());
+    result.setOrgLevel4(this.getOrgLevel4());
+    result.setDomains(this.getDomains());
+    return result;
   }
 
   @Override

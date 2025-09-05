@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@
 import { Action, NgxsAfterBootstrap, State, StateContext } from '@ngxs/store';
 import {
   GetAccessItems,
-  GetPermissionsByAccessId,
   GetGroupsByAccessId,
+  GetPermissionsByAccessId,
   RemoveAccessItemsPermissions,
   SelectAccessId
 } from './access-items-management.actions';
@@ -31,20 +31,20 @@ import { AccessId } from '../../models/access-id';
 import { NotificationService } from '../../services/notifications/notification.service';
 import { WorkbasketAccessItemsRepresentation } from '../../models/workbasket-access-items-representation';
 import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 
 class InitializeStore {
   static readonly type = '[Access Items Management] Initializing state';
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 @State<AccessItemsManagementStateModel>({ name: 'accessItemsManagement' })
 export class AccessItemsManagementState implements NgxsAfterBootstrap {
-  constructor(
-    private accessIdsService: AccessIdsService,
-    private notificationService: NotificationService,
-    private requestInProgressService: RequestInProgressService
-  ) {}
+  private accessIdsService = inject(AccessIdsService);
+  private notificationService = inject(NotificationService);
+  private requestInProgressService = inject(RequestInProgressService);
 
   @Action(SelectAccessId)
   selectAccessId(ctx: StateContext<AccessItemsManagementStateModel>, action: SelectAccessId): Observable<any> {

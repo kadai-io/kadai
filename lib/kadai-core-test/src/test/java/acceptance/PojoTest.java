@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,16 +27,12 @@ import com.openpojo.validation.rule.impl.GetterMustExistRule;
 import com.openpojo.validation.rule.impl.NoPublicFieldsRule;
 import com.openpojo.validation.rule.impl.NoStaticExceptFinalRule;
 import com.openpojo.validation.rule.impl.SetterMustExistRule;
-import com.openpojo.validation.test.Tester;
-import com.openpojo.validation.test.impl.GetterTester;
-import com.openpojo.validation.test.impl.SetterTester;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import java.util.List;
 import java.util.stream.Stream;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
@@ -101,17 +97,6 @@ class PojoTest {
   }
 
   @TestFactory
-  @Disabled("because of the truncation of all Instant member variables")
-  Stream<DynamicTest> validateGetAndSet() {
-    return POJO_CLASSES.stream()
-        .map(
-            cl ->
-                DynamicTest.dynamicTest(
-                    "Test set & get " + cl.getSimpleName(),
-                    () -> validateWithTester(cl, new GetterTester(), new SetterTester())));
-  }
-
-  @TestFactory
   Stream<DynamicTest> validateNoStaticExceptFinalFields() {
     return POJO_CLASSES.stream()
         .map(
@@ -133,10 +118,6 @@ class PojoTest {
 
   private void validateWithRules(Class<?> cl, Rule... rules) {
     ValidatorBuilder.create().with(rules).build().validate(PojoClassFactory.getPojoClass(cl));
-  }
-
-  private void validateWithTester(Class<?> cl, Tester... testers) {
-    ValidatorBuilder.create().with(testers).build().validate(PojoClassFactory.getPojoClass(cl));
   }
 
   private void verifyHashAndEquals(Class<?> cl) {

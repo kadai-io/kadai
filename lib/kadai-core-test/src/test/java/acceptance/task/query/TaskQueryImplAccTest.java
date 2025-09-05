@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.api.security.UserPrincipal;
 import io.kadai.common.internal.InternalKadaiEngine;
-import io.kadai.common.internal.util.CheckedConsumer;
 import io.kadai.common.internal.util.Pair;
 import io.kadai.common.test.util.ParallelThreadHelper;
 import io.kadai.task.api.CallbackState;
@@ -199,8 +198,8 @@ class TaskQueryImplAccTest {
         subject.getPrincipals().add(new UserPrincipal(accessIds.remove(0)));
 
         Consumer<TaskService> consumer =
-            CheckedConsumer.wrap(
-                taskService -> internalKadaiEngine.executeInDatabaseConnection(
+            taskService ->
+                internalKadaiEngine.executeInDatabaseConnection(
                     () -> {
                       List<TaskSummary> results =
                           taskService
@@ -217,7 +216,7 @@ class TaskQueryImplAccTest {
                           throw new SystemException(e.getMessage());
                         }
                       }
-                    }));
+                    });
 
         PrivilegedAction<Void> action =
             () -> {
@@ -2568,6 +2567,49 @@ class TaskQueryImplAccTest {
                 .createTaskQuery()
                 .workbasketIdIn(wb.getId())
                 .transferredEquals(false)
+                .list();
+
+        assertThat(list).containsExactly(taskSummary2);
+      }
+    }
+
+    @Nested
+    @TestInstance(Lifecycle.PER_CLASS)
+    class Reopened {
+
+      WorkbasketSummary wb;
+      TaskSummary taskSummary1;
+      TaskSummary taskSummary2;
+
+      @WithAccessId(user = "user-1-1")
+      @BeforeAll
+      void setup() throws Exception {
+        wb = createWorkbasketWithPermission();
+        taskSummary1 = taskInWorkbasket(wb).reopened(true).buildAndStoreAsSummary(taskService);
+        taskSummary2 = taskInWorkbasket(wb).reopened(false).buildAndStoreAsSummary(taskService);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
+      void should_ApplyFilter_When_QueryingForReopenedEqualsTrue() {
+        List<TaskSummary> list =
+            taskService
+                .createTaskQuery()
+                .workbasketIdIn(wb.getId())
+                .reopenedEquals(true)
+                .list();
+
+        assertThat(list).containsExactly(taskSummary1);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
+      void should_ApplyFilter_When_QueryingForReopenedEqualsFalse() {
+        List<TaskSummary> list =
+            taskService
+                .createTaskQuery()
+                .workbasketIdIn(wb.getId())
+                .reopenedEquals(false)
                 .list();
 
         assertThat(list).containsExactly(taskSummary2);

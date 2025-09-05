@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -103,19 +103,6 @@ public interface ClassificationSummary {
    * @return priority
    */
   int getPriority();
-
-  /**
-   * Returns the value of the specified {@linkplain ClassificationCustomField
-   * ClassificationCustomField} of the Classification.
-   *
-   * @param customField identifies which {@linkplain ClassificationCustomField
-   *     ClassificationCustomField} is requested
-   * @return the value for the given {@linkplain ClassificationCustomField
-   *     ClassificationCustomField}
-   * @deprecated Use {@linkplain #getCustomField(ClassificationCustomField)} instead
-   */
-  @Deprecated
-  String getCustomAttribute(ClassificationCustomField customField);
 
   /**
    * Returns the value of the specified {@linkplain ClassificationCustomField

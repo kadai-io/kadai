@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 package acceptance.task.requestreview;
 
-import static io.kadai.common.internal.util.CheckedSupplier.wrap;
+import static io.kadai.common.internal.util.CheckedSupplier.rethrowing;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestClassification;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestWorkbasket;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
@@ -315,11 +315,10 @@ public class RequestReviewWithBeforeSpiAccTest {
       ThrowingCallable call =
           () ->
               transactionProvider.executeInTransaction(
-                  wrap(() -> taskService.requestReview(task.getId())));
+                  rethrowing(() -> taskService.requestReview(task.getId())));
 
       assertThatThrownBy(call)
           .isInstanceOf(SystemException.class)
-          .cause() // unwrap the "wrap" within "call"
           .hasMessage("service provider '%s' threw an exception", ExceptionThrower.class.getName())
           .cause() // unwrap the "wrap" from the service provider manager
           .hasMessage("I AM THE EXCEPTION THROWER (*_*)");

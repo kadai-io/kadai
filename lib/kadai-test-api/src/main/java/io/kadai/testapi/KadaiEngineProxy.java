@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import io.kadai.common.internal.KadaiEngineImpl;
 import java.lang.reflect.Field;
 import org.apache.ibatis.session.SqlSession;
 
-/** Utility class to enable unit tests to access mappers directly. */
+/** Proxy class to grant tests access to the {@link InternalKadaiEngine}. */
 public class KadaiEngineProxy {
 
   private final InternalKadaiEngine engine;
@@ -35,18 +35,39 @@ public class KadaiEngineProxy {
     engine = (InternalKadaiEngine) internal.get(kadaiEngine);
   }
 
+  /**
+   * Returns the underlying {@link InternalKadaiEngine}.
+   *
+   * @return the underlying internal engine
+   */
   public InternalKadaiEngine getEngine() {
     return engine;
   }
 
+  /**
+   * Returns the {@link SqlSession} used by the underlying {@link InternalKadaiEngine}.
+   *
+   * @return the session of the underlying internal engine
+   * @see InternalKadaiEngine#getSqlSession()
+   */
   public SqlSession getSqlSession() {
     return engine.getSqlSession();
   }
 
+  /**
+   * Opens a connection to the database for the underlying {@link InternalKadaiEngine}.
+   *
+   * @see InternalKadaiEngine#openConnection()
+   */
   public void openConnection() {
     engine.openConnection();
   }
 
+  /**
+   * Closes the connection to the database for the underlying {@link InternalKadaiEngine}.
+   *
+   * @see InternalKadaiEngine#returnConnection()
+   */
   public void returnConnection() {
     engine.returnConnection();
   }

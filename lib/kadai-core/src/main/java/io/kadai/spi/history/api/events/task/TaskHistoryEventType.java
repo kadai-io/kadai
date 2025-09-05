@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ public enum TaskHistoryEventType {
   CREATED("CREATED"),
   UPDATED("UPDATED"),
   CLAIMED("CLAIMED"),
+  CLAIMED_REVIEW("CLAIMED_REVIEW"),
   CLAIM_CANCELLED("CLAIM_CANCELLED"),
   REQUESTED_REVIEW("REQUESTED_REVIEW"),
   CHANGES_REQUESTED("CHANGES_REQUESTED"),
@@ -29,7 +30,8 @@ public enum TaskHistoryEventType {
   CANCELLED("CANCELLED"),
   TERMINATED("TERMINATED"),
   TRANSFERRED("TRANSFERRED"),
-  DELETED("DELETED");
+  DELETED("DELETED"),
+  REOPENED("REOPENED");
 
   private String name;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 package io.kadai.testapi.builder;
 
-import static io.kadai.common.internal.util.CheckedSupplier.wrap;
+import static io.kadai.common.internal.util.CheckedSupplier.rethrowing;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestObjectReference;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestWorkbasket;
 import static io.kadai.testapi.builder.ClassificationBuilder.newClassification;
@@ -113,7 +113,7 @@ class TaskBuilderTest {
             .primaryObjRef(defaultTestObjectReference().build())
             .buildAndStore(taskService, "user-1-1");
 
-    Task receivedTask = kadaiEngine.runAsAdmin(wrap(() -> taskService.getTask(task.getId())));
+    Task receivedTask = kadaiEngine.runAsAdmin(rethrowing(() -> taskService.getTask(task.getId())));
     assertThat(receivedTask).isEqualTo(task);
     assertThat(receivedTask.getCreator()).isEqualTo("user-1-1");
   }
@@ -150,6 +150,7 @@ class TaskBuilderTest {
             .manualPriority(7)
             .read(true)
             .transferred(true)
+            .reopened(true)
             .attachments(attachment)
             .customAttribute(TaskCustomField.CUSTOM_1, "custom1")
             .customAttribute(TaskCustomField.CUSTOM_2, "custom2")
@@ -201,6 +202,7 @@ class TaskBuilderTest {
     expectedTask.setManualPriority(7);
     expectedTask.setRead(true);
     expectedTask.setTransferred(true);
+    expectedTask.setReopened(true);
     expectedTask.setCreator("user-1-1");
     expectedTask.addAttachment(attachment);
     expectedTask.setCustomField(TaskCustomField.CUSTOM_1, "custom1");

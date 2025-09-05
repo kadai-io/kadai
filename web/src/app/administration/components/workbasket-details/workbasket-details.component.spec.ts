@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,55 +18,26 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { WorkbasketDetailsComponent } from './workbasket-details.component';
-import { Component, DebugElement, Input } from '@angular/core';
-import { Actions, NgxsModule, Store } from '@ngxs/store';
+import { DebugElement } from '@angular/core';
+import { Actions, provideStore, Store } from '@ngxs/store';
 import { Observable, of } from 'rxjs';
-import { Workbasket } from '../../../shared/models/workbasket';
 import { ACTION } from '../../../shared/models/action';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { DomainService } from '../../../shared/services/domain/domain.service';
-import { ImportExportService } from '../../services/import-export.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
-import { RouterTestingModule } from '@angular/router/testing';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { SelectedRouteService } from '../../../shared/services/selected-route/selected-route';
-import { MatDialogModule } from '@angular/material/dialog';
-import { selectedWorkbasketMock, workbasketReadStateMock } from '../../../shared/store/mock-data/mock-store';
-import { StartupService } from '../../../shared/services/startup/startup.service';
-import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
-import { WindowRefService } from '../../../shared/services/window/window.service';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import {
+  engineConfigurationMock,
+  selectedWorkbasketMock,
+  workbasketReadStateMock
+} from '../../../shared/store/mock-data/mock-store';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { CopyWorkbasket, CreateWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { take } from 'rxjs/operators';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
+import { provideRouter } from '@angular/router';
 
-@Component({ selector: 'kadai-administration-workbasket-information', template: '<div>i</div>' })
-class WorkbasketInformationStub {
-  @Input() workbasket: Workbasket;
-  @Input() action: ACTION;
-}
-
-@Component({ selector: 'kadai-administration-workbasket-access-items', template: '' })
-class WorkbasketAccessItemsStub {
-  @Input() workbasket: Workbasket;
-  @Input() action: ACTION;
-  @Input() active: string;
-  @Input() expanded: boolean;
-}
-
-@Component({ selector: 'kadai-administration-workbasket-distribution-targets', template: '' })
-class WorkbasketDistributionTargetsStub {
-  @Input() workbasket: Workbasket;
-  @Input() action: ACTION;
-  @Input() active: string;
-}
+jest.mock('angular-svg-icon');
 
 const domainServiceSpy: Partial<DomainService> = {
   getSelectedDomain: jest.fn().mockReturnValue(of('A')),
@@ -88,34 +59,15 @@ describe('WorkbasketDetailsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
-        NgxsModule.forRoot([WorkbasketState]),
-        RouterTestingModule.withRoutes([]),
-        MatDialogModule,
-        MatIconModule,
-        MatProgressBarModule,
-        MatTabsModule,
-        MatMenuModule,
-        MatToolbarModule,
-        MatTooltipModule,
-        NoopAnimationsModule
-      ],
-      declarations: [WorkbasketDetailsComponent],
+      imports: [WorkbasketDetailsComponent],
       providers: [
+        provideStore([WorkbasketState, EngineConfigurationState]),
+        provideRouter([]),
+        provideNoopAnimations(),
         {
           provide: DomainService,
           useValue: domainServiceSpy
         },
-        ImportExportService,
-        WorkbasketService,
-        RequestInProgressService,
-        SelectedRouteService,
-        StartupService,
-        KadaiEngineService,
-        WindowRefService,
-        WorkbasketAccessItemsStub,
-        WorkbasketDistributionTargetsStub,
-        WorkbasketInformationStub,
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()
       ]
@@ -128,7 +80,8 @@ describe('WorkbasketDetailsComponent', () => {
     actions$ = TestBed.inject(Actions);
     store.reset({
       ...store.snapshot(),
-      workbasket: workbasketReadStateMock
+      workbasket: workbasketReadStateMock,
+      engineConfiguration: engineConfigurationMock
     });
     fixture.detectChanges();
   }));
@@ -194,5 +147,15 @@ describe('WorkbasketDetailsComponent', () => {
           done();
         });
       });
+  });
+
+  it('should set areAllAccessItemsValid to false when isValid is false', () => {
+    component.handleAccessItemsValidityChanged(false);
+    expect(component.areAllAccessItemsValid).toBeFalsy();
+  });
+
+  it('should set areAllAccessItemsValid to true when isValid is true', () => {
+    component.handleAccessItemsValidityChanged(true);
+    expect(component.areAllAccessItemsValid).toBeTruthy();
   });
 });

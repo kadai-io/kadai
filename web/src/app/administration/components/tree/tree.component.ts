@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import {
   ElementRef,
   EventEmitter,
   HostListener,
+  inject,
   Input,
   OnDestroy,
   OnInit,
@@ -30,10 +31,10 @@ import {
 } from '@angular/core';
 import { TreeNodeModel } from 'app/administration/models/tree-node';
 
-import { ITreeOptions, KEYS, TREE_ACTIONS, TreeComponent } from '@ali-hm/angular-tree-component';
+import { ITreeOptions, KEYS, TREE_ACTIONS, TreeComponent, TreeModule } from '@ali-hm/angular-tree-component';
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { filter, map, takeUntil } from 'rxjs/operators';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 
 import { Location } from '@angular/common';
@@ -50,30 +51,35 @@ import {
 import { ClassificationTreeService } from '../../services/classification-tree.service';
 import { Pair } from '../../../shared/models/pair';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { SvgIconComponent } from 'angular-svg-icon';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
   selector: 'kadai-administration-tree',
   templateUrl: './tree.component.html',
   styleUrls: ['./tree.component.scss'],
-  standalone: false
+  imports: [TreeModule, SvgIconComponent, MatTooltip]
 })
 export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
   treeNodes: TreeNodeModel[];
   categoryIcons: ClassificationCategoryImages;
-
   emptyTreeNodes = false;
   filter: string;
   category: string;
-
   @Input() selectNodeId: string;
   @Input() filterText: string;
   @Input() filterIcon = '';
   @Output() switchKadaiSpinnerEmit = new EventEmitter<boolean>();
-  @Select(EngineConfigurationSelectors.selectCategoryIcons) categoryIcons$: Observable<ClassificationCategoryImages>;
-  @Select(ClassificationSelectors.selectedClassificationId) selectedClassificationId$: Observable<string>;
-  @Select(ClassificationSelectors.classifications) classifications$: Observable<Classification[]>;
-  @Select(ClassificationSelectors.selectedClassificationType) classificationTypeSelected$: Observable<string>;
-
+  categoryIcons$: Observable<ClassificationCategoryImages> = inject(Store).select(
+    EngineConfigurationSelectors.selectCategoryIcons
+  );
+  selectedClassificationId$: Observable<string> = inject(Store).select(
+    ClassificationSelectors.selectedClassificationId
+  );
+  classifications$: Observable<Classification[]> = inject(Store).select(ClassificationSelectors.classifications);
+  classificationTypeSelected$: Observable<string> = inject(Store).select(
+    ClassificationSelectors.selectedClassificationType
+  );
   options: ITreeOptions = {
     displayField: 'name',
     idField: 'classificationId',
@@ -89,23 +95,19 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
     allowDrag: true,
     allowDrop: true
   };
-
+  private elementRef = inject(ElementRef);
+  private classificationsService = inject(ClassificationsService);
+  private location = inject(Location);
+  private store = inject(Store);
+  private notificationsService = inject(NotificationService);
+  private classificationTreeService = inject(ClassificationTreeService);
+  private requestInProgressService = inject(RequestInProgressService);
   @ViewChild('tree', { static: true })
   private tree: TreeComponent;
 
   private filterTextOld: string;
   private filterIconOld = '';
   private destroy$ = new Subject<void>();
-
-  constructor(
-    private elementRef: ElementRef,
-    private classificationsService: ClassificationsService,
-    private location: Location,
-    private store: Store,
-    private notificationsService: NotificationService,
-    private classificationTreeService: ClassificationTreeService,
-    private requestInProgressService: RequestInProgressService
-  ) {}
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event) {

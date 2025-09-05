@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,35 +16,38 @@
  *
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { takeUntil } from 'rxjs/operators';
 import { ClassificationSelectors } from '../../../shared/store/classification-store/classification.selectors';
 import {
+  CreateClassification,
   GetClassifications,
-  SelectClassification,
-  CreateClassification
+  SelectClassification
 } from '../../../shared/store/classification-store/classification.actions';
 import { Classification } from '../../../shared/models/classification';
+import { ClassificationListComponent } from '../classification-list/classification-list.component';
+
+import { ClassificationDetailsComponent } from '../classification-details/classification-details.component';
+import { SvgIconComponent } from 'angular-svg-icon';
 
 @Component({
   selector: 'kadai-administration-classification-overview',
   templateUrl: './classification-overview.component.html',
   styleUrls: ['./classification-overview.component.scss'],
-  standalone: false
+  imports: [ClassificationListComponent, ClassificationDetailsComponent, SvgIconComponent]
 })
 export class ClassificationOverviewComponent implements OnInit, OnDestroy {
   showDetail = false;
-  @Select(ClassificationSelectors.selectedClassification) selectedClassification$: Observable<Classification>;
-  private destroy$ = new Subject<void>();
+  selectedClassification$: Observable<Classification> = inject(Store).select(
+    ClassificationSelectors.selectedClassification
+  );
   routerParams: any;
-
-  constructor(
-    private route: ActivatedRoute,
-    private store: Store
-  ) {}
+  private route = inject(ActivatedRoute);
+  private store = inject(Store);
+  private destroy$ = new Subject<void>();
 
   ngOnInit() {
     if (this.route.firstChild) {

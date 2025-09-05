@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,19 +16,17 @@
  *
  */
 
-import { Component, DebugElement, Input } from '@angular/core';
+import { DebugElement } from '@angular/core';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
 import { EMPTY, Observable, of } from 'rxjs';
 import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
 import { DomainService } from '../../../shared/services/domain/domain.service';
-import { ImportExportService } from '../../services/import-export.service';
 import { ComponentFixture, fakeAsync, flush, TestBed, tick, waitForAsync } from '@angular/core/testing';
-import { Actions, NgxsModule, ofActionDispatched, Store } from '@ngxs/store';
+import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { classificationStateMock, engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
 import { ClassificationDetailsComponent } from './classification-details.component';
-import { FormsModule } from '@angular/forms';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
@@ -39,39 +37,9 @@ import {
   SaveCreatedClassification,
   SaveModifiedClassification
 } from '../../../shared/store/classification-store/classification.actions';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatOptionModule } from '@angular/material/core';
-import { MatSelectModule } from '@angular/material/select';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatInputModule } from '@angular/material/input';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { By } from '@angular/platform-browser';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatTooltipModule } from '@angular/material/tooltip';
 
-@Component({ selector: 'kadai-shared-field-error-display', template: '' })
-class FieldErrorDisplayStub {
-  @Input() displayError;
-  @Input() validationTrigger;
-}
-
-@Component({ selector: 'svg-icon', template: '' })
-class SvgIconStub {
-  @Input() src;
-}
-
-@Component({ selector: 'input', template: '' })
-class InputStub {
-  @Input() ngModel;
-}
-
-@Component({ selector: 'textarea', template: '' })
-class TextareaStub {
-  @Input() ngModel;
-}
+jest.mock('angular-svg-icon');
 
 const classificationServiceSpy: Partial<ClassificationsService> = {
   getClassification: jest.fn().mockReturnValue(EMPTY),
@@ -90,20 +58,10 @@ const domainServiceSpy: Partial<DomainService> = {
   getSelectedDomain: jest.fn().mockReturnValue(EMPTY)
 };
 
-const importExportServiceSpy: Partial<ImportExportService> = {
-  getImportingFinished: jest.fn().mockReturnValue(of(true))
-};
-
-const requestInProgressServiceSpy: Partial<RequestInProgressService> = {
-  setRequestInProgress: jest.fn(),
-  getRequestInProgress: jest.fn().mockReturnValue(of(false))
-};
-
-const validateFormInformationFn = jest.fn().mockImplementation((): Promise<any> => Promise.resolve(true));
 const formsValidatorServiceSpy: Partial<FormsValidatorService> = {
   isFieldValid: jest.fn().mockReturnValue(true),
   validateInputOverflow: jest.fn(),
-  validateFormInformation: validateFormInformationFn,
+  validateFormInformation: jest.fn().mockImplementation((): Promise<any> => Promise.resolve(true)),
   get inputOverflowObservable(): Observable<Map<string, boolean>> {
     return of(new Map<string, boolean>());
   }
@@ -124,32 +82,12 @@ describe('ClassificationDetailsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
-        NgxsModule.forRoot([ClassificationState, EngineConfigurationState]),
-        FormsModule,
-        MatIconModule,
-        MatToolbarModule,
-        MatDividerModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatOptionModule,
-        MatSelectModule,
-        MatProgressBarModule,
-        MatMenuModule,
-        MatTooltipModule,
-        NoopAnimationsModule
-      ],
-      declarations: [ClassificationDetailsComponent],
+      imports: [ClassificationDetailsComponent],
       providers: [
-        InputStub,
-        FieldErrorDisplayStub,
-        SvgIconStub,
-        TextareaStub,
+        provideStore([ClassificationState, EngineConfigurationState]),
         { provide: ClassificationsService, useValue: classificationServiceSpy },
         { provide: ClassificationCategoriesService, useValue: classificationCategoriesServiceSpy },
         { provide: DomainService, useValue: domainServiceSpy },
-        { provide: ImportExportService, useValue: importExportServiceSpy },
-        { provide: RequestInProgressService, useValue: requestInProgressServiceSpy },
         { provide: FormsValidatorService, useValue: formsValidatorServiceSpy },
         { provide: NotificationService, useValue: notificationServiceSpy }
       ]

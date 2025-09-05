@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -31,6 +31,24 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 import org.junit.platform.commons.JUnitException;
 
+/**
+ * JUnit-Extension for injecting Kadai components via {@linkplain KadaiInject @KadaiInject} or
+ * supplying them as parameter to test-functions.
+ *
+ * <p>Usage may look like:
+ * <pre>
+ *   {@code
+ *     @ExtendWith(KadaiDependencyInjectionExtension.class)
+ *     class MyTestClass {
+ *
+ *       @KadaiInject KadaiEngine kadaiEngine;
+ *
+ *       @Test
+ *       void myTest(TaskService taskService) {}
+ *     }
+ *   }
+ *  * </pre>
+ */
 public class KadaiDependencyInjectionExtension
     implements ParameterResolver, TestInstancePostProcessor {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { TaskService } from 'app/workplace/services/task.service';
 import { Observable, Subject } from 'rxjs';
@@ -26,21 +26,24 @@ import { WorkplaceService } from 'app/workplace/services/workplace.service';
 import { OrientationService } from 'app/shared/services/orientation/orientation.service';
 import { Page } from 'app/shared/models/page';
 import { take, takeUntil } from 'rxjs/operators';
-import { Search } from '../task-list-toolbar/task-list-toolbar.component';
+import { Search, TaskListToolbarComponent } from '../task-list-toolbar/task-list-toolbar.component';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { QueryPagingParameter } from '../../../shared/models/query-paging-parameter';
 import { TaskQueryFilterParameter } from '../../../shared/models/task-query-filter-parameter';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { FilterSelectors } from '../../../shared/store/filter-store/filter.selectors';
 import { WorkplaceSelectors } from '../../../shared/store/workplace-store/workplace.selectors';
 import { CalculateNumberOfCards } from '../../../shared/store/workplace-store/workplace.actions';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 
+import { TaskListComponent } from '../task-list/task-list.component';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
+
 @Component({
   selector: 'kadai-task-master',
   templateUrl: './task-master.component.html',
   styleUrls: ['./task-master.component.scss'],
-  standalone: false
+  imports: [TaskListToolbarComponent, TaskListComponent, PaginationComponent]
 })
 export class TaskMasterComponent implements OnInit, OnDestroy {
   tasks: Task[];
@@ -58,23 +61,17 @@ export class TaskMasterComponent implements OnInit, OnDestroy {
     'page-size': 9
   };
   filterBy: TaskQueryFilterParameter = {};
-
   requestInProgress = false;
   selectedSearchType: Search = Search.byWorkbasket;
-
   destroy$ = new Subject();
-
-  @Select(FilterSelectors.getTaskFilter) filter$: Observable<TaskQueryFilterParameter>;
-  @Select(WorkplaceSelectors.getNumberOfCards) cards$: Observable<number>;
-
-  constructor(
-    private taskService: TaskService,
-    private workplaceService: WorkplaceService,
-    private notificationsService: NotificationService,
-    private orientationService: OrientationService,
-    private store: Store,
-    private requestInProgressService: RequestInProgressService
-  ) {}
+  filter$: Observable<TaskQueryFilterParameter> = inject(Store).select(FilterSelectors.getTaskFilter);
+  cards$: Observable<number> = inject(Store).select(WorkplaceSelectors.getNumberOfCards);
+  private taskService = inject(TaskService);
+  private workplaceService = inject(WorkplaceService);
+  private notificationsService = inject(NotificationService);
+  private orientationService = inject(OrientationService);
+  private store = inject(Store);
+  private requestInProgressService = inject(RequestInProgressService);
 
   ngOnInit() {
     this.cards$.pipe(takeUntil(this.destroy$)).subscribe((cards) => {

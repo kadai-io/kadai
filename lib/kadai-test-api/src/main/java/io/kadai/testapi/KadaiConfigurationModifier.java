@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,7 +20,35 @@ package io.kadai.testapi;
 
 import io.kadai.KadaiConfiguration;
 
+/**
+ * Interface specifying operations allowing to modify the {@link KadaiConfiguration} of an
+ * integration test extended with
+ * {@linkplain
+ * io.kadai.testapi.extensions.KadaiInitializationExtension @KadaiInitializationExtension}.
+ *
+ * <p>Usage may look like:
+ * <pre>
+ *   {@code
+ *     @ExtendWith(KadaiInitializationExtension.class)
+ *     class MyTestClass implements KadaiEngineConfigurationModifier {
+ *       @Override
+ *       public KadaiConfiguration.Builder modify(KadaiConfiguration.Builder builder) {
+ *         return builder.foo();
+ *       }
+ *
+ *       @Test
+ *       void myTest() {}
+ *     }
+ *   }
+ *  * </pre>
+ */
 public interface KadaiConfigurationModifier {
 
+  /**
+   * Modifies the {@link KadaiConfiguration.Builder}.
+   *
+   * @param builder the builder to modify
+   * @return the modified builder
+   */
   KadaiConfiguration.Builder modify(KadaiConfiguration.Builder builder);
 }

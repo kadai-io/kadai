@@ -1,59 +1,57 @@
 <!--
-  ~ Copyright [2024] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2025] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
 <!-- TASK LIST -->
-<div *ngIf="(tasks && tasks.length > 0); else empty_list">
-  <mat-selection-list [multiple]="false" hideSingleSelectionIndicator="true">
-    <mat-list-option (click)="selectTask(task.taskId)"
-                     *ngFor="let task of tasks"
-                     [selected]="task.taskId == selectedId"
-                     [value]="task.taskId">
-
-      <div class="task-list__task">
-
-        <!-- TASK PRIORITY -->
-        <div
-            class="task-list__task-priority-badge {{task.taskId == selectedId ? 'task-list__task-priority-badge_selected' : ''}}"
-        >
-          {{ task.priority }}
+@if ((tasks && tasks.length > 0)) {
+  <div>
+    <mat-selection-list [multiple]="false" hideSingleSelectionIndicator="true">
+      @for (task of tasks; track task) {
+        <mat-list-option (click)="selectTask(task.taskId)"
+          [selected]="task.taskId == selectedId"
+          [value]="task.taskId">
+          <div class="task-list__task">
+            <!-- TASK PRIORITY -->
+            <div
+              class="task-list__task-priority-badge {{task.taskId == selectedId ? 'task-list__task-priority-badge_selected' : ''}}"
+              >
+              {{ task.priority }}
+            </div>
+            <!-- TASK INFORMATION -->
+            <div class="task-list__task-info">
+              <p><b>{{ task.name }}</b>,&nbsp;@if (task.owner) {
+              <i>{{ task.owner }} </i>
+            }</p>
+            <p> State: {{ task.state }} </p>
+            <p> Due: {{ task.due | date: 'medium' }} </p>
+          </div>
         </div>
-
-        <!-- TASK INFORMATION -->
-        <div class="task-list__task-info">
-          <p><b>{{ task.name }}</b>,&nbsp;<i *ngIf="task.owner">{{ task.owner }} </i></p>
-          <p> State: {{ task.state }} </p>
-          <p> Due: {{ task.due | date: 'medium' }} </p>
-        </div>
-
-      </div>
-
-      <mat-divider></mat-divider>
-
-    </mat-list-option>
+        <mat-divider></mat-divider>
+      </mat-list-option>
+    }
   </mat-selection-list>
 </div>
-
-
-<!-- EMPTY TASK-LIST -->
-<ng-template #empty_list>
+} @else {
   <div class="container-no-items center-block" style="margin-top: 60px">
     <h3 class="grey">Select a Workbasket</h3>
     <svg-icon class="img-responsive empty-icon workbasket-icon"
-              src="./assets/icons/wb-empty.svg"></svg-icon>
+    src="./assets/icons/wb-empty.svg"></svg-icon>
   </div>
-</ng-template>
+}
+
+
+<!-- EMPTY TASK-LIST -->

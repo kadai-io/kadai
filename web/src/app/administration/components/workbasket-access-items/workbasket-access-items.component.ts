@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,17 +21,20 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  EventEmitter,
+  inject,
   Input,
   OnChanges,
   OnDestroy,
   OnInit,
+  Output,
   QueryList,
   SimpleChanges,
   ViewChildren
 } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
-import { Actions, ofActionCompleted, Select, Store } from '@ngxs/store';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { distinctUntilChanged, Observable, Subject } from 'rxjs';
+import { Actions, ofActionCompleted, Store } from '@ngxs/store';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { Workbasket } from 'app/shared/models/workbasket';
 import { customFieldCount, WorkbasketAccessItems } from 'app/shared/models/workbasket-access-items';
@@ -41,7 +44,7 @@ import { highlight } from 'app/shared/animations/validation.animation';
 import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
 import { AccessId } from 'app/shared/models/access-id';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
-import { filter, take, takeUntil, tap } from 'rxjs/operators';
+import { filter, map, startWith, take, takeUntil, tap } from 'rxjs/operators';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { AccessItemsCustomisation, CustomField, getCustomFields } from '../../../shared/models/customisation';
 import {
@@ -54,60 +57,67 @@ import {
 import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
 import { WorkbasketComponent } from '../../models/workbasket-component';
 import { ButtonAction } from '../../models/button-action';
+import { AsyncPipe, NgClass, NgStyle } from '@angular/common';
+import { MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { ResizableWidthDirective } from '../../../shared/directives/resizable-width.directive';
+import { TypeAheadComponent } from '../../../shared/components/type-ahead/type-ahead.component';
+import { MatInput } from '@angular/material/input';
 
 @Component({
   selector: 'kadai-administration-workbasket-access-items',
   templateUrl: './workbasket-access-items.component.html',
   animations: [highlight],
   styleUrls: ['./workbasket-access-items.component.scss'],
-  standalone: false
+  imports: [
+    NgStyle,
+    MatButton,
+    MatTooltip,
+    MatIcon,
+    ResizableWidthDirective,
+    NgClass,
+    TypeAheadComponent,
+    MatInput,
+    AsyncPipe,
+    ReactiveFormsModule
+  ]
 })
 export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit, AfterViewChecked {
+  formsValidatorService = inject(FormsValidatorService);
   @Input() workbasket: Workbasket;
-
   @Input() expanded: boolean;
-
+  @Output() accessItemsValidityChanged = new EventEmitter<boolean>();
   @ViewChildren('htmlInputElement') inputs: QueryList<ElementRef>;
-
   selectedRows: number[] = [];
   workbasketClone: Workbasket;
-
   customFields$: Observable<CustomField[]>;
   keysOfVisibleFields: string[];
-
   accessItemsRepresentation: WorkbasketAccessItemsRepresentation;
   accessItemsClone: WorkbasketAccessItems[];
   accessItemsResetClone: WorkbasketAccessItems[];
-  AccessItemsForm = this.formBuilder.group({
-    accessItemsGroups: this.formBuilder.array<FormGroup>([])
-  });
-
   toggleValidationAccessIdMap = new Map<number, boolean>();
   added = false;
   isNewAccessItemsFromStore = false;
   isAccessItemsTabSelected = false;
   destroy$ = new Subject<void>();
-
-  @Select(WorkbasketSelectors.selectedWorkbasket) selectedWorkbasket$: Observable<Workbasket>;
-
-  @Select(EngineConfigurationSelectors.accessItemsCustomisation)
-  accessItemsCustomization$: Observable<AccessItemsCustomisation>;
-
-  @Select(WorkbasketSelectors.workbasketAccessItems)
-  accessItemsRepresentation$: Observable<WorkbasketAccessItemsRepresentation>;
-
-  @Select(WorkbasketSelectors.buttonAction) buttonAction$: Observable<ButtonAction>;
-
-  @Select(WorkbasketSelectors.selectedComponent) selectedComponent$: Observable<WorkbasketComponent>;
-
-  constructor(
-    private requestInProgressService: RequestInProgressService,
-    private formBuilder: FormBuilder,
-    public formsValidatorService: FormsValidatorService,
-    private notificationsService: NotificationService,
-    private store: Store,
-    private ngxsActions$: Actions
-  ) {}
+  selectedWorkbasket$: Observable<Workbasket> = inject(Store).select(WorkbasketSelectors.selectedWorkbasket);
+  accessItemsCustomization$: Observable<AccessItemsCustomisation> = inject(Store).select(
+    EngineConfigurationSelectors.accessItemsCustomisation
+  );
+  accessItemsRepresentation$: Observable<WorkbasketAccessItemsRepresentation> = inject(Store).select(
+    WorkbasketSelectors.workbasketAccessItems
+  );
+  buttonAction$: Observable<ButtonAction> = inject(Store).select(WorkbasketSelectors.buttonAction);
+  selectedComponent$: Observable<WorkbasketComponent> = inject(Store).select(WorkbasketSelectors.selectedComponent);
+  private requestInProgressService = inject(RequestInProgressService);
+  private formBuilder = inject(FormBuilder);
+  AccessItemsForm = this.formBuilder.group({
+    accessItemsGroups: this.formBuilder.array<FormGroup>([])
+  });
+  private notificationsService = inject(NotificationService);
+  private store = inject(Store);
+  private ngxsActions$ = inject(Actions);
 
   get accessItemsGroups(): FormArray {
     return this.AccessItemsForm.get('accessItemsGroups') as FormArray;
@@ -153,6 +163,18 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
           _links: accessItemsRepresentation._links
         };
         this.setAccessItemsGroups(accessItems);
+
+        this.AccessItemsForm.get('accessItemsGroups')
+          ?.statusChanges.pipe(
+            startWith(null),
+            map(() => this.AccessItemsForm.get('accessItemsGroups')?.valid ?? false),
+            distinctUntilChanged(),
+            takeUntil(this.destroy$)
+          )
+          .subscribe((isValid) => {
+            this.accessItemsValidityChanged.emit(isValid);
+          });
+
         this.accessItemsClone = this.cloneAccessItems();
         this.accessItemsResetClone = this.cloneAccessItems();
 

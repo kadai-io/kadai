@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,49 +18,24 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { WorkbasketListToolbarComponent } from './workbasket-list-toolbar.component';
-import { Component, DebugElement, EventEmitter, Input, Output } from '@angular/core';
-import { Actions, NgxsModule, ofActionDispatched, Store } from '@ngxs/store';
+import { DebugElement } from '@angular/core';
+import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { Observable, of } from 'rxjs';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
-import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { CreateWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Direction, Sorting, WorkbasketQuerySortParameter } from '../../../shared/models/sorting';
 import { ACTION } from '../../../shared/models/action';
-import { KadaiType } from '../../../shared/models/kadai-type';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDialogModule } from '@angular/material/dialog';
-import { RouterTestingModule } from '@angular/router/testing';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
+import { FilterState } from '../../../shared/store/filter-store/filter.state';
+import { provideRouter } from '@angular/router';
 
-const getDomainFn = jest.fn().mockReturnValue(true);
+jest.mock('angular-svg-icon');
+
 const domainServiceMock: Partial<DomainService> = {
-  getDomains: getDomainFn,
+  getDomains: jest.fn().mockResolvedValue(''),
   getSelectedDomain: jest.fn().mockReturnValue(of('A'))
 };
-
-@Component({ selector: 'kadai-administration-import-export', template: '' })
-class ImportExportStub {
-  @Input() currentSelection: KadaiType;
-  @Input() parentComponent;
-}
-
-@Component({ selector: 'kadai-shared-sort', template: '' })
-class SortStub {
-  @Input() sortingFields: Map<WorkbasketQuerySortParameter, string>;
-  @Input() defaultSortBy: WorkbasketQuerySortParameter;
-  @Output() performSorting = new EventEmitter<Sorting<WorkbasketQuerySortParameter>>();
-}
-
-@Component({ selector: 'kadai-shared-workbasket-filter', template: '' })
-class FilterStub {
-  @Input() isExpanded = false;
-}
-
-const requestInProgressServiceSpy = jest.fn().mockImplementation(() => jest.fn().mockReturnValue(of()));
 
 describe('WorkbasketListToolbarComponent', () => {
   let fixture: ComponentFixture<WorkbasketListToolbarComponent>;
@@ -71,29 +46,15 @@ describe('WorkbasketListToolbarComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule,
-        NgxsModule.forRoot([WorkbasketState]),
-        NoopAnimationsModule,
-        MatIconModule,
-        MatDialogModule
-      ],
-      declarations: [WorkbasketListToolbarComponent],
+      imports: [WorkbasketListToolbarComponent],
       providers: [
-        ImportExportStub,
-        SortStub,
-        FilterStub,
+        provideRouter([]),
+        provideStore([WorkbasketState, FilterState]),
         {
           provide: DomainService,
           useValue: domainServiceMock
         },
-        {
-          provide: RequestInProgressService,
-          useValue: requestInProgressServiceSpy
-        },
-        WorkbasketService,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
+        provideHttpClient()
       ]
     }).compileComponents();
 
@@ -109,8 +70,6 @@ describe('WorkbasketListToolbarComponent', () => {
   it('should create the component', () => {
     expect(component).toBeTruthy();
   });
-
-  /* Typescript */
 
   it('should dispatch CreateWorkbasket when addWorkbasket is called', waitForAsync(() => {
     component.action = ACTION.COPY;

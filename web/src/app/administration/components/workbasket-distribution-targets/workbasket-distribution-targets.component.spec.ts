@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,39 +17,24 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Component, DebugElement, Input } from '@angular/core';
+import { DebugElement } from '@angular/core';
 import { WorkbasketDistributionTargetsComponent } from './workbasket-distribution-targets.component';
-import { WorkbasketSummary } from '../../../shared/models/workbasket-summary';
-import { MatIconModule } from '@angular/material/icon';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatButtonModule } from '@angular/material/button';
 import { Observable, of } from 'rxjs';
 import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { Actions, NgxsModule, Store } from '@ngxs/store';
+import { Actions, provideStore, Store } from '@ngxs/store';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { ActivatedRoute } from '@angular/router';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { MatDialogModule } from '@angular/material/dialog';
 import { engineConfigurationMock, workbasketReadStateMock } from '../../../shared/store/mock-data/mock-store';
 import { DomainService } from '../../../shared/services/domain/domain.service';
-import { Side } from '../../models/workbasket-distribution-enums';
+import { FilterState } from '../../../shared/store/filter-store/filter.state';
 
-const routeParamsMock = { id: 'workbasket' };
+jest.mock('angular-svg-icon');
+
 const activatedRouteMock = {
   firstChild: {
-    params: of(routeParamsMock)
+    params: of({ id: 'workbasket' })
   }
 };
-
-@Component({ selector: 'kadai-administration-workbasket-distribution-targets-list', template: '' })
-class WorkbasketDistributionTargetsListStub {
-  @Input() distributionTargets: WorkbasketSummary[];
-  @Input() side: Side;
-  @Input() header: string;
-  @Input() component: 'availableDistributionTargets';
-  @Input() allSelected;
-}
 
 const domainServiceSpy: Partial<DomainService> = {
   getSelectedDomainValue: jest.fn().mockReturnValue(of(null)),
@@ -62,13 +47,6 @@ const workbasketServiceSpy: Partial<WorkbasketService> = {
   getWorkBasketsDistributionTargets: jest.fn().mockReturnValue(of(null))
 };
 
-const notificationsServiceSpy: Partial<NotificationService> = {
-  showSuccess: jest.fn().mockReturnValue(true)
-};
-const requestInProgressServiceSpy: Partial<RequestInProgressService> = {
-  setRequestInProgress: jest.fn().mockReturnValue(of(null))
-};
-
 describe('WorkbasketDistributionTargetsComponent', () => {
   let fixture: ComponentFixture<WorkbasketDistributionTargetsComponent>;
   let debugElement: DebugElement;
@@ -78,20 +56,11 @@ describe('WorkbasketDistributionTargetsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
-        MatIconModule,
-        MatDialogModule,
-        MatToolbarModule,
-        MatButtonModule,
-        NgxsModule.forRoot([WorkbasketState])
-      ],
-      declarations: [WorkbasketDistributionTargetsComponent],
+      imports: [WorkbasketDistributionTargetsComponent],
       providers: [
-        WorkbasketDistributionTargetsListStub,
+        provideStore([WorkbasketState, FilterState]),
         { provide: WorkbasketService, useValue: workbasketServiceSpy },
-        { provide: NotificationService, useValue: notificationsServiceSpy },
         { provide: ActivatedRoute, useValue: activatedRouteMock },
-        { provide: RequestInProgressService, useValue: requestInProgressServiceSpy },
         { provide: DomainService, useValue: domainServiceSpy }
       ]
     }).compileComponents();

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,30 +16,34 @@
  *
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ALL_STATES, TaskState } from '../../models/task-state';
 import { TaskQueryFilterParameter } from '../../models/task-query-filter-parameter';
 import { Actions, ofActionCompleted, Store } from '@ngxs/store';
 import { ClearTaskFilter, SetTaskFilter } from '../../store/filter-store/filter.actions';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatSelect } from '@angular/material/select';
+
+import { MatOption } from '@angular/material/core';
+import { MapValuesPipe } from '../../pipes/map-values.pipe';
 
 @Component({
   selector: 'kadai-shared-task-filter',
   templateUrl: './task-filter.component.html',
   styleUrls: ['./task-filter.component.scss'],
-  standalone: false
+  imports: [MatFormField, MatTooltip, MatLabel, MatInput, FormsModule, MatSelect, MatOption, MapValuesPipe]
 })
 export class TaskFilterComponent implements OnInit, OnDestroy {
   filter: TaskQueryFilterParameter;
   destroy$ = new Subject<void>();
-
   allStates: Map<TaskState, string> = ALL_STATES;
-
-  constructor(
-    private store: Store,
-    private ngxsActions$: Actions
-  ) {}
+  private store = inject(Store);
+  private ngxsActions$ = inject(Actions);
 
   ngOnInit() {
     this.clear();

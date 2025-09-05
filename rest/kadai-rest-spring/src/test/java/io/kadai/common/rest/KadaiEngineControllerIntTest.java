@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 
 package io.kadai.common.rest;
 
+import static io.kadai.rest.test.RestHelper.CLIENT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.kadai.common.api.KadaiRole;
@@ -31,18 +32,13 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 
 /** Test KadaiEngineController. */
 @KadaiSpringBootTest
 class KadaiEngineControllerIntTest {
-
-  private static final RestTemplate TEMPLATE = RestHelper.TEMPLATE;
 
   private final RestHelper restHelper;
 
@@ -54,33 +50,42 @@ class KadaiEngineControllerIntTest {
   @Test
   void testDomains() {
     String url = restHelper.toUrl(RestEndpoints.URL_DOMAIN);
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<List<String>> response =
-        TEMPLATE.exchange(
-            url, HttpMethod.GET, auth, ParameterizedTypeReference.forType(List.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ParameterizedTypeReference.forType(List.class));
     assertThat(response.getBody()).contains("DOMAIN_A");
   }
 
   @Test
   void testClassificationTypes() {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATION_TYPES);
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<List<String>> response =
-        TEMPLATE.exchange(
-            url, HttpMethod.GET, auth, ParameterizedTypeReference.forType(List.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ParameterizedTypeReference.forType(List.class));
     assertThat(response.getBody()).containsExactlyInAnyOrder("TASK", "DOCUMENT");
   }
 
   @Test
   void should_ReturnAllClassifications_When_GetClassificationCategories_isCalledWithoutType() {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATION_CATEGORIES);
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<List<String>> response =
-        TEMPLATE.exchange(
-            url, HttpMethod.GET, auth, ParameterizedTypeReference.forType(List.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ParameterizedTypeReference.forType(List.class));
     assertThat(response.getBody())
         .containsExactlyInAnyOrder("EXTERNAL", "MANUAL", "AUTOMATIC", "PROCESS", "EXTERNAL");
   }
@@ -88,22 +93,28 @@ class KadaiEngineControllerIntTest {
   @Test
   void should_ReturnOnlyClassificationsForTypeTask_When_GetClassificationCategories_isCalled() {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATION_CATEGORIES) + "?type=TASK";
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<List<String>> response =
-        TEMPLATE.exchange(
-            url, HttpMethod.GET, auth, ParameterizedTypeReference.forType(List.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ParameterizedTypeReference.forType(List.class));
     assertThat(response.getBody()).containsExactly("EXTERNAL", "MANUAL", "AUTOMATIC", "PROCESS");
   }
 
   @Test
   void should_ReturnOnlyClassificationsForTypeDocument_When_GetClassificationCategories_isCalled() {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATION_CATEGORIES) + "?type=DOCUMENT";
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<List<String>> response =
-        TEMPLATE.exchange(
-            url, HttpMethod.GET, auth, ParameterizedTypeReference.forType(List.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ParameterizedTypeReference.forType(List.class));
     assertThat(response.getBody()).containsExactly("EXTERNAL");
   }
 
@@ -112,11 +123,12 @@ class KadaiEngineControllerIntTest {
     HttpHeaders headers = RestHelper.generateHeadersForUser("user-2-1");
     headers.add("userid", "user-1-1");
     ResponseEntity<KadaiUserInfoRepresentationModel> response =
-        TEMPLATE.exchange(
-            restHelper.toUrl(RestEndpoints.URL_CURRENT_USER),
-            HttpMethod.GET,
-            new HttpEntity<>(headers),
-            ParameterizedTypeReference.forType(KadaiUserInfoRepresentationModel.class));
+        CLIENT
+            .get()
+            .uri(restHelper.toUrl(RestEndpoints.URL_CURRENT_USER))
+            .headers(httpHeaders -> httpHeaders.addAll(headers))
+            .retrieve()
+            .toEntity(ParameterizedTypeReference.forType(KadaiUserInfoRepresentationModel.class));
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     KadaiUserInfoRepresentationModel currentUser = response.getBody();
@@ -129,14 +141,14 @@ class KadaiEngineControllerIntTest {
   @Test
   void testGetCurrentUserInfo() {
     String url = restHelper.toUrl(RestEndpoints.URL_CURRENT_USER);
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<KadaiUserInfoRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(KadaiUserInfoRepresentationModel.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(KadaiUserInfoRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getUserId()).isEqualTo("teamlead-1");
     assertThat(response.getBody().getGroupIds())
@@ -149,14 +161,14 @@ class KadaiEngineControllerIntTest {
   @Test
   void testGetCurrentUserInfoWithPermission() {
     String url = restHelper.toUrl(RestEndpoints.URL_CURRENT_USER);
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("user-1-2"));
 
     ResponseEntity<KadaiUserInfoRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(KadaiUserInfoRepresentationModel.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
+            .retrieve()
+            .toEntity(KadaiUserInfoRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getUserId()).isEqualTo("user-1-2");
     assertThat(response.getBody().getGroupIds())
@@ -174,14 +186,14 @@ class KadaiEngineControllerIntTest {
   @Test
   void should_ReturnCustomAttributes() {
     String url = restHelper.toUrl(RestEndpoints.URL_CUSTOM_ATTRIBUTES);
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<CustomAttributesRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(CustomAttributesRepresentationModel.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(CustomAttributesRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
   }
@@ -189,23 +201,28 @@ class KadaiEngineControllerIntTest {
   @Test
   void should_ReturnFalse_When_NoHistoryProvider() {
     String url = restHelper.toUrl(RestEndpoints.URL_HISTORY_ENABLED);
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
+
     ResponseEntity<Boolean> response =
-        TEMPLATE.exchange(
-            url, HttpMethod.GET, auth, ParameterizedTypeReference.forType(Boolean.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(Boolean.class);
     assertThat(response.getBody()).isFalse();
   }
 
   @Test
   void should_ReturnCurrentVersion() {
     String url = restHelper.toUrl(RestEndpoints.URL_VERSION);
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
+
     ResponseEntity<VersionRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(VersionRepresentationModel.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(VersionRepresentationModel.class);
     assertThat(response.getBody().getVersion()).isNull();
   }
 
@@ -228,23 +245,29 @@ class KadaiEngineControllerIntTest {
                         Map.of(
                             "filter",
                             Map.of("displayName", "Filter values", "type", "json", "min", "1"))))));
-    HttpEntity<CustomAttributesRepresentationModel> auth =
-        new HttpEntity<>(customAttributes, RestHelper.generateHeadersForUser("admin"));
+
     ResponseEntity<CustomAttributesRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.PUT,
-            auth,
-            ParameterizedTypeReference.forType(CustomAttributesRepresentationModel.class));
+        CLIENT
+            .put()
+            .uri(url)
+            .headers(httpHeaders -> httpHeaders.addAll(RestHelper.generateHeadersForUser("admin")))
+            .body(customAttributes)
+            .retrieve()
+            .toEntity(CustomAttributesRepresentationModel.class);
     assertThat(response.getBody()).isEqualTo(customAttributes);
   }
 
   @Test
   void should_GetClassificationCategoriesByType() {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATION_CATEGORIES_BY_TYPES);
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
+
     ResponseEntity<Map<String, List<String>>> response =
-        TEMPLATE.exchange(url, HttpMethod.GET, auth, ParameterizedTypeReference.forType(Map.class));
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(ParameterizedTypeReference.forType(Map.class));
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody()).hasSize(2);
     assertThat(response.getBody().get("TASK"))

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,6 +23,28 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Annotation allowing to inject Kadai components in Test-Classes.
+ *
+ * <p>This annotation requires the surrounding class to be extended with the JUnit-Extension
+ * {@linkplain
+ * io.kadai.testapi.extensions.KadaiDependencyInjectionExtension KadaiDependencyInjectionExtension}.
+ *
+ * <p>Usage may look like:
+ * <pre>
+ *   {@code
+ *     @ExtendWith(KadaiDependencyInjectionExtension.class)
+ *     class MyTestClass {
+ *       @KadaiInject InternalKadaiEngine internalKadaiEngine;
+ *
+ *       @Test
+ *       void myTest() {
+ *         internalKadaiEngine.foo(...);
+ *       }
+ *     }
+ *   }
+ * </pre>
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface KadaiInject {}

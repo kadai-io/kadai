@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@
 
 package io.kadai.spi.user.internal;
 
-import static io.kadai.common.internal.util.CheckedConsumer.wrap;
-
+import io.kadai.common.internal.util.CheckedConsumer;
 import io.kadai.common.internal.util.SpiLoader;
 import io.kadai.spi.user.api.RefreshUserPostprocessor;
 import io.kadai.user.api.models.User;
@@ -48,7 +47,7 @@ public class RefreshUserPostprocessorManager {
     LOGGER.debug("Sending user to RefreshUserPostprocessor providers: {}", userToProcess);
 
     refreshUserPostprocessors.forEach(
-        wrap(
+        CheckedConsumer.wrapping(
             refreshUserPostprocessor ->
                 refreshUserPostprocessor.processUserAfterRefresh(userToProcess)));
     return userToProcess;

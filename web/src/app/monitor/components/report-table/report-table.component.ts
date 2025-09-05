@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,14 +19,14 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { ReportData } from 'app/monitor/models/report-data';
 import { ReportRow } from '../../models/report-row';
-import { NgIf, NgFor, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { MatButton } from '@angular/material/button';
 
 @Component({
   selector: 'kadai-monitor-report-table',
   templateUrl: './report-table.component.html',
   styleUrls: ['./report-table.component.scss'],
-  imports: [NgIf, NgFor, NgClass, MatButton]
+  imports: [NgClass, MatButton]
 })
 export class ReportTableComponent implements OnChanges {
   @Input()
@@ -70,12 +70,11 @@ export class ReportTableComponent implements OnChanges {
     return typeof this.fullRowsData !== 'undefined' && this.fullRowsData[0];
   }
 
-  toggleFold(indexNumber: number, sumRow: boolean = false) {
+  toggleFold(index: number, sumRow: boolean = false) {
     let rows = sumRow ? this.reportData.sumRow : this.reportData.rows;
-    let index = indexNumber;
     const toggleRow = rows[index];
     if (toggleRow.depth < this.reportData.meta.rowDesc.length - 1) {
-      const firstChildRow = rows[(index += 1)];
+      const firstChildRow = rows[index + 1];
       firstChildRow.display = !firstChildRow.display;
 
       const endIndex = rows.findIndex((row) => row.depth <= toggleRow.depth);

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -44,11 +44,11 @@ public class ObjectReferenceImpl implements ObjectReference {
   }
 
   private ObjectReferenceImpl(ObjectReferenceImpl copyFrom) {
-    company = copyFrom.company;
-    system = copyFrom.system;
-    systemInstance = copyFrom.systemInstance;
-    type = copyFrom.type;
-    value = copyFrom.value;
+    this.company = copyFrom.company;
+    this.system = copyFrom.system;
+    this.systemInstance = copyFrom.systemInstance;
+    this.type = copyFrom.type;
+    this.value = copyFrom.value;
   }
 
   public static void validate(ObjectReference objectReference, String objRefType, String objName)

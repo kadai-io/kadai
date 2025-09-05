@@ -1,24 +1,24 @@
 <!--
-  ~ Copyright [2024] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2025] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
 <div class="sort">
   <button [matMenuTriggerFor]="sortMenu" class="sort__button" mat-stroked-button
-          matTooltip="Modify sorting order">
+    matTooltip="Modify sorting order">
     <mat-icon class="sort__mat-icon">sort</mat-icon>
 
     <mat-menu #sortMenu="matMenu">
@@ -30,41 +30,44 @@
     <mat-menu #sortDirection="matMenu">
       <!-- ASCENDING ORDER BUTTON -->
       <button (click)="changeOrder(sortDirectionEnum.ASC)" mat-menu-item>
-        <span *ngIf="sort.order === sortDirectionEnum.ASC; else coloredAsc">
-          <mat-icon class="sort__selected-value"> arrow_upward </mat-icon>
-          <span class="sort__selected-value"> Ascending </span>
-        </span>
-        <ng-template #coloredAsc>
+        @if (sort.order === sortDirectionEnum.ASC) {
+          <span>
+            <mat-icon class="sort__selected-value"> arrow_upward </mat-icon>
+            <span class="sort__selected-value"> Ascending </span>
+          </span>
+        } @else {
           <mat-icon> arrow_upward</mat-icon>
           <span> Ascending </span>
-        </ng-template>
+        }
       </button>
 
       <!-- DESCENDING ORDER BUTTON -->
       <button (click)="changeOrder(sortDirectionEnum.DESC)" mat-menu-item>
-        <span *ngIf="sort.order === sortDirectionEnum.DESC; else coloredDesc">
-          <mat-icon class="sort__selected-value"> arrow_downward </mat-icon>
-          <span class="sort__selected-value"> Descending </span>
-        </span>
-        <ng-template #coloredDesc>
+        @if (sort.order === sortDirectionEnum.DESC) {
+          <span>
+            <mat-icon class="sort__selected-value"> arrow_downward </mat-icon>
+            <span class="sort__selected-value"> Descending </span>
+          </span>
+        } @else {
           <mat-icon> arrow_downward</mat-icon>
           <span> Descending </span>
-        </ng-template>
+        }
       </button>
     </mat-menu>
 
     <!-- SORT VALUE -->
     <mat-menu #sortValue="matMenu">
-      <button (click)="changeSortBy(sortingField.key)"
-              *ngFor="let sortingField of sortingFields | mapValues"
-              mat-menu-item>
-        <span class="{{sortingField.key === sort['sort-by']  ? 'sort__selected-value' : ''}}">
-          {{ sortingField.value }}
-        </span>
-        <ng-template>
-          <span>{{ sortingField.value }}</span>
-        </ng-template>
-      </button>
+      @for (sortingField of sortingFields | mapValues; track sortingField) {
+        <button (click)="changeSortBy(sortingField.key)"
+          mat-menu-item>
+          <span class="{{sortingField.key === sort['sort-by']  ? 'sort__selected-value' : ''}}">
+            {{ sortingField.value }}
+          </span>
+          <ng-template>
+            <span>{{ sortingField.value }}</span>
+          </ng-template>
+        </button>
+      }
     </mat-menu>
   </button>
 </div>

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -129,4 +129,11 @@ public interface UserService {
    */
   void deleteUser(String id)
       throws UserNotFoundException, InvalidArgumentException, NotAuthorizedException;
+
+  /**
+   * Creates an empty {@linkplain UserQuery}.
+   *
+   * @return a {@linkplain UserQuery}
+   */
+  UserQuery createUserQuery();
 }

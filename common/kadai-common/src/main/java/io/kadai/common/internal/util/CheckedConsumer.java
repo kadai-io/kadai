@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,16 +22,36 @@ import io.kadai.common.api.exceptions.SystemException;
 import java.util.function.Consumer;
 
 @FunctionalInterface
-public interface CheckedConsumer<T, E extends Throwable> {
-  static <T> Consumer<T> wrap(CheckedConsumer<T, Throwable> checkedConsumer) {
+public interface CheckedConsumer<T, E extends Exception> {
+
+  static <T> Consumer<T> wrapping(CheckedConsumer<T, ? extends Exception> checkedConsumer)
+      throws SystemException {
     return t -> {
       try {
         checkedConsumer.accept(t);
-      } catch (Throwable e) {
+      } catch (Exception e) {
         throw new SystemException("Caught exception", e);
       }
     };
   }
 
+  static <T, E extends Exception> Consumer<T> rethrowing(CheckedConsumer<T, E> checkedConsumer)
+      throws E {
+    return t -> {
+      try {
+        checkedConsumer.accept(t);
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (Exception exception) {
+        throwActual(exception);
+      }
+    };
+  }
+
   void accept(T t) throws E;
+
+  @SuppressWarnings("unchecked")
+  private static <E extends Exception> void throwActual(Exception exception) throws E {
+    throw (E) exception;
+  }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.exceptions.ClassificationNotFoundException;
 import io.kadai.classification.api.models.Classification;
 import io.kadai.classification.api.models.ClassificationSummary;
-import io.kadai.classification.internal.models.ClassificationImpl;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.api.WorkingTimeCalculator;
@@ -79,69 +78,6 @@ class UpdateClassificationAccTest {
   @KadaiInject WorkbasketService workbasketService;
   @KadaiInject WorkingTimeCalculator workingTimeCalculator;
   @KadaiInject CurrentUserContext currentUserContext;
-
-  @WithAccessId(user = "businessadmin")
-  @Test
-  void should_SetFieldsCorrectly_When_TryingToUpdateClassification() throws Exception {
-    Classification parentClassification =
-        defaultTestClassification().buildAndStore(classificationService);
-    Classification classification =
-        defaultTestClassification().type("TASK").buildAndStore(classificationService);
-    final Instant createdBefore = classification.getCreated();
-    final Instant modifiedBefore = classification.getModified();
-
-    classification.setApplicationEntryPoint("newEntrypoint");
-    classification.setCategory("PROCESS");
-    classification.setCustomField(ClassificationCustomField.CUSTOM_1, "newCustom1");
-    classification.setCustomField(ClassificationCustomField.CUSTOM_2, "newCustom2");
-    classification.setCustomField(ClassificationCustomField.CUSTOM_3, "newCustom3");
-    classification.setCustomField(ClassificationCustomField.CUSTOM_4, "newCustom4");
-    classification.setCustomField(ClassificationCustomField.CUSTOM_5, "newCustom5");
-    classification.setCustomField(ClassificationCustomField.CUSTOM_6, "newCustom6");
-    classification.setCustomField(ClassificationCustomField.CUSTOM_7, "newCustom7");
-    classification.setCustomField(ClassificationCustomField.CUSTOM_8, "newCustom8");
-    classification.setDescription("newDescription");
-    classification.setIsValidInDomain(false);
-    classification.setName("newName");
-    classification.setParentId(parentClassification.getId());
-    classification.setParentKey(parentClassification.getKey());
-    classification.setPriority(1000);
-    classification.setServiceLevel("P3D");
-    classificationService.updateClassification(classification);
-
-    Classification updatedClassification =
-        classificationService.getClassification(classification.getKey(), "DOMAIN_A");
-    ClassificationImpl expectedClassification =
-        (ClassificationImpl)
-            defaultTestClassification()
-                .type("TASK")
-                .applicationEntryPoint("newEntrypoint")
-                .category("PROCESS")
-                .customAttribute(ClassificationCustomField.CUSTOM_1, "newCustom1")
-                .customAttribute(ClassificationCustomField.CUSTOM_2, "newCustom2")
-                .customAttribute(ClassificationCustomField.CUSTOM_3, "newCustom3")
-                .customAttribute(ClassificationCustomField.CUSTOM_4, "newCustom4")
-                .customAttribute(ClassificationCustomField.CUSTOM_5, "newCustom5")
-                .customAttribute(ClassificationCustomField.CUSTOM_6, "newCustom6")
-                .customAttribute(ClassificationCustomField.CUSTOM_7, "newCustom7")
-                .customAttribute(ClassificationCustomField.CUSTOM_8, "newCustom8")
-                .description("newDescription")
-                .isValidInDomain(false)
-                .name("newName")
-                .parentId(parentClassification.getId())
-                .parentKey(parentClassification.getKey())
-                .priority(1000)
-                .serviceLevel("P3D")
-                .created(createdBefore)
-                .modified(updatedClassification.getModified())
-                .buildAndStore(classificationService);
-    expectedClassification.setKey(updatedClassification.getKey());
-    expectedClassification.setId(updatedClassification.getId());
-
-    assertThat(expectedClassification).hasNoNullFieldsOrProperties();
-    assertThat(modifiedBefore).isBefore(classification.getModified());
-    assertThat(updatedClassification).isEqualTo(expectedClassification);
-  }
 
   private String createTaskWithExistingClassification(ClassificationSummary classificationSummary)
       throws Exception {

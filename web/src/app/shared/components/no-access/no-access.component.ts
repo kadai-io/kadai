@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,25 +16,25 @@
  *
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.service';
 import { MonitorRoles } from '../../roles/monitor.roles';
 import { UserRoles } from '../../roles/user.roles';
 import { BusinessAdminRoles } from '../../roles/business-admin.roles';
 
+import { SvgIconComponent } from 'angular-svg-icon';
+
 @Component({
   selector: 'kadai-shared-no-access',
   templateUrl: './no-access.component.html',
   styleUrls: ['./no-access.component.scss'],
-  standalone: false
+  imports: [SvgIconComponent]
 })
 export class NoAccessComponent implements OnInit {
+  router = inject(Router);
   showNoAccess = false;
-  constructor(
-    private kadaiEngineService: KadaiEngineService,
-    public router: Router
-  ) {}
+  private kadaiEngineService = inject(KadaiEngineService);
 
   ngOnInit() {
     if (this.kadaiEngineService.hasRole(Object.values(BusinessAdminRoles))) {

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 import { Task } from 'app/workplace/models/task';
 import { Observable, Subject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { TaskResource } from 'app/workplace/models/task-resource';
 import { Sorting, TaskQuerySortParameter } from 'app/shared/models/sorting';
 import { StartupService } from '../../shared/services/startup/startup.service';
@@ -27,8 +27,13 @@ import { asUrlQueryString } from '../../shared/util/query-parameters-v2';
 import { TaskQueryFilterParameter } from '../../shared/models/task-query-filter-parameter';
 import { QueryPagingParameter } from '../../shared/models/query-paging-parameter';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class TaskService {
+  private httpClient = inject(HttpClient);
+  private startupService = inject(StartupService);
+
   private taskChangedSource = new Subject<Task>();
   taskChangedStream = this.taskChangedSource.asObservable();
   private taskSelectedSource = new Subject<Task>();
@@ -36,13 +41,18 @@ export class TaskService {
   private taskDeletedSource = new Subject<Task>();
   taskDeletedStream = this.taskDeletedSource.asObservable();
 
-  constructor(
-    private httpClient: HttpClient,
-    private startupService: StartupService
-  ) {}
-
   get url(): string {
     return this.startupService.getKadaiRestUrl() + '/v1/tasks';
+  }
+
+  private static convertTasksDatesToGMT(task: Task): Task {
+    const timeAttributes = ['created', 'claimed', 'completed', 'modified', 'planned', 'due'];
+    timeAttributes.forEach((attributeName) => {
+      if (task[attributeName]) {
+        task[attributeName] = new Date(task[attributeName]).toISOString();
+      }
+    });
+    return task;
   }
 
   publishUpdatedTask(task?: Task) {
@@ -101,15 +111,5 @@ export class TaskService {
 
   createTask(task: Task): Observable<Task> {
     return this.httpClient.post<Task>(this.url, task);
-  }
-
-  private static convertTasksDatesToGMT(task: Task): Task {
-    const timeAttributes = ['created', 'claimed', 'completed', 'modified', 'planned', 'due'];
-    timeAttributes.forEach((attributeName) => {
-      if (task[attributeName]) {
-        task[attributeName] = new Date(task[attributeName]).toISOString();
-      }
-    });
-    return task;
   }
 }

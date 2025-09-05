@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -58,4 +58,29 @@ public interface AfterRequestReviewProvider {
    * @throws Exception if the service provider throws any exception
    */
   Task afterRequestReview(Task task) throws Exception;
+
+  /**
+   * Perform any action after a review has been requested on a {@linkplain Task} through {@linkplain
+   * io.kadai.task.api.TaskService#requestReview(String)} or {@linkplain
+   * io.kadai.task.api.TaskService#forceRequestReview(String)}.
+   *
+   * <p>This SPI is executed within the same transaction staple as {@linkplain
+   * io.kadai.task.api.TaskService#requestReview(String)}.
+   *
+   * <p>This SPI is executed with the same {@linkplain io.kadai.common.api.security.UserPrincipal}
+   * and {@linkplain io.kadai.common.api.security.GroupPrincipal} as in {@linkplain
+   * io.kadai.task.api.TaskService#requestReview(String)}.
+   *
+   * @param task the {@linkplain Task} after {@linkplain
+   *     io.kadai.task.api.TaskService#requestReview(String)} or {@linkplain
+   *     io.kadai.task.api.TaskService#forceRequestReview(String)} has completed
+   * @param workbasketId the workbasketId the {@linkplain Task} should be moved to
+   * @param ownerId the ownerId the {@linkplain Task} should be assigned to
+   * @return the modified {@linkplain Task}. <b>IMPORTANT:</b> persistent changes to the {@linkplain
+   *     Task} have to be managed by the service provider
+   * @throws Exception if the service provider throws any exception
+   */
+  default Task afterRequestReview(Task task, String workbasketId, String ownerId) throws Exception {
+    return afterRequestReview(task);
+  }
 }

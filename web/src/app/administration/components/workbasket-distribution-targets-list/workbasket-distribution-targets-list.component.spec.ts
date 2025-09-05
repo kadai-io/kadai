@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,49 +17,19 @@
  */
 
 import { ComponentFixture, fakeAsync, flush, TestBed, waitForAsync } from '@angular/core/testing';
-import { Component, DebugElement, Input, Pipe, PipeTransform } from '@angular/core';
+import { DebugElement } from '@angular/core';
 import { WorkbasketDistributionTargetsListComponent } from './workbasket-distribution-targets-list.component';
-import { InfiniteScrollModule } from 'ngx-infinite-scroll';
-import { WorkbasketType } from '../../../shared/models/workbasket-type';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { engineConfigurationMock, workbasketReadStateMock } from '../../../shared/store/mock-data/mock-store';
-import { MatIconModule } from '@angular/material/icon';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatListModule } from '@angular/material/list';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { Side } from '../../models/workbasket-distribution-enums';
-import { NgxsModule, Store } from '@ngxs/store';
+import { provideStore, Store } from '@ngxs/store';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
-import { animationFrameScheduler, EMPTY, of } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
-import { DomainService } from '../../../shared/services/domain/domain.service';
-import { MatDialogModule } from '@angular/material/dialog';
+import { EMPTY, of } from 'rxjs';
+import { provideHttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { ScrollingModule } from '@angular/cdk/scrolling';
+import { OrderBy } from '../../../shared/pipes/order-by.pipe';
+import { FilterState } from '../../../shared/store/filter-store/filter.state';
 
-@Component({ selector: 'kadai-shared-workbasket-filter', template: '' })
-class FilterStub {
-  @Input() component = 'availableDistributionTargetList';
-}
-
-@Component({ selector: 'kadai-shared-spinner', template: '' })
-class SpinnerStub {
-  @Input() isRunning: boolean;
-}
-
-@Component({ selector: 'kadai-administration-icon-type', template: '' })
-class IconTypeStub {
-  @Input() type: WorkbasketType;
-  @Input() text: string;
-}
-
-@Pipe({ name: 'orderBy', standalone: false })
-class OrderByMock implements PipeTransform {
-  transform(list): any {
-    return list;
-  }
-}
+jest.mock('angular-svg-icon');
 
 describe('WorkbasketDistributionTargetsListComponent', () => {
   let fixture: ComponentFixture<WorkbasketDistributionTargetsListComponent>;
@@ -67,55 +37,19 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
   let component: WorkbasketDistributionTargetsListComponent;
   let store: Store;
 
-  const routeParamsMock = { id: 'workbasket' };
   const activatedRouteMock = {
     firstChild: {
-      params: of(routeParamsMock)
+      params: of({ id: 'workbasket' })
     }
-  };
-
-  const httpSpy = jest.fn().mockImplementation(
-    (): Partial<HttpClient> => ({
-      get: jest.fn().mockReturnValue(of([])),
-      post: jest.fn().mockReturnValue(of([]))
-    })
-  );
-
-  const domainServiceSpy: Partial<DomainService> = {
-    getSelectedDomainValue: jest.fn().mockReturnValue(of(null)),
-    getSelectedDomain: jest.fn().mockReturnValue(of('A')),
-    getDomains: jest.fn().mockReturnValue(of(null))
-  };
-
-  const requestInProgressServiceSpy: Partial<RequestInProgressService> = {
-    setRequestInProgress: jest.fn().mockReturnValue(of(null))
   };
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
-        MatIconModule,
-        MatToolbarModule,
-        MatListModule,
-        MatDialogModule,
-        MatTooltipModule,
-        InfiniteScrollModule,
-        ScrollingModule,
-        NoopAnimationsModule,
-        NgxsModule.forRoot([WorkbasketState])
-      ],
-      declarations: [WorkbasketDistributionTargetsListComponent, OrderByMock],
+      imports: [WorkbasketDistributionTargetsListComponent],
       providers: [
-        FilterStub,
-        SpinnerStub,
-        IconTypeStub,
-        { provide: HttpClient, useValue: httpSpy },
-        {
-          provide: DomainService,
-          useValue: domainServiceSpy
-        },
-        { provide: ActivatedRoute, useValue: activatedRouteMock },
-        { provide: RequestInProgressService, useValue: requestInProgressServiceSpy }
+        provideStore([WorkbasketState, FilterState]),
+        provideHttpClient(),
+        { provide: ActivatedRoute, useValue: activatedRouteMock }
       ]
     }).compileComponents();
 
@@ -149,6 +83,7 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
   });
 
   it('should display filter when toolbarState is true', () => {
+    component.component = 'availableDistributionTargets';
     component.toolbarState = true;
     fixture.detectChanges();
     expect(debugElement.nativeElement.querySelector('kadai-shared-workbasket-filter')).toBeTruthy();
@@ -158,10 +93,9 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
     // On the first cycle we render the items.
     fixture.detectChanges();
     flush();
-    // Flush the initial fake scroll event.
-    animationFrameScheduler.flush();
-    flush();
+
     fixture.detectChanges();
+    flush();
 
     const distributionTargetList = debugElement.nativeElement.getElementsByClassName(
       'workbasket-distribution-targets__workbaskets-item'
@@ -170,7 +104,7 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
   }));
 
   it('should call orderBy pipe', () => {
-    const orderBySpy = jest.spyOn(OrderByMock.prototype, 'transform');
+    const orderBySpy = jest.spyOn(OrderBy.prototype, 'transform');
     fixture.detectChanges();
     expect(orderBySpy).toHaveBeenCalledWith(component.distributionTargets, ['name']);
   });

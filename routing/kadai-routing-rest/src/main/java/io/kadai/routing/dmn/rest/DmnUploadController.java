@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -145,6 +146,7 @@ public class DmnUploadController {
   @PutMapping(
       path = RoutingRestEndpoints.URL_ROUTING_RULES_DEFAULT,
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<RoutingUploadResultRepresentationModel> convertAndUpload(
       @RequestParam("excelRoutingFile") MultipartFile excelRoutingFile)
       throws IOException, NotAuthorizedException {

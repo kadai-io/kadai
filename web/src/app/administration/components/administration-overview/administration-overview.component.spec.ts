@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,15 +18,10 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { AdministrationOverviewComponent } from './administration-overview.component';
-import { MatSelectModule } from '@angular/material/select';
-import { MatTabsModule } from '@angular/material/tabs';
-import { RouterTestingModule } from '@angular/router/testing';
 import { DomainService } from '../../../shared/services/domain/domain.service';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of } from 'rxjs';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 
 const domainServiceSpy: Partial<DomainService> = {
   getDomains: jest.fn().mockReturnValue(of(['domain a', 'domain b'])),
@@ -39,14 +34,8 @@ describe('AdministrationOverviewComponent', () => {
   let fixture: ComponentFixture<AdministrationOverviewComponent>;
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [MatSelectModule, MatTabsModule, RouterTestingModule.withRoutes([]), NoopAnimationsModule],
-      declarations: [AdministrationOverviewComponent],
-      providers: [
-        { provide: DomainService, useValue: domainServiceSpy },
-        KadaiEngineService,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-      ]
+      imports: [AdministrationOverviewComponent],
+      providers: [{ provide: DomainService, useValue: domainServiceSpy }, provideHttpClient(), provideRouter([])]
     }).compileComponents();
   }));
 

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@
 
 package io.kadai.spi.task.internal;
 
-import static io.kadai.common.internal.util.CheckedConsumer.wrap;
-
+import io.kadai.common.internal.util.CheckedConsumer;
 import io.kadai.common.internal.util.SpiLoader;
 import io.kadai.spi.task.api.TaskEndstatePreprocessor;
 import io.kadai.task.api.models.Task;
@@ -49,7 +48,7 @@ public class TaskEndstatePreprocessorManager {
       LOGGER.debug("Sending task to TaskEndstatePreprocessor providers: {}", taskToProcess);
     }
     taskEndstatePreprocessors.forEach(
-        wrap(
+        CheckedConsumer.wrapping(
             taskEndstatePreprocessor ->
                 taskEndstatePreprocessor.processTaskBeforeEndstate(taskToProcess)));
     return taskToProcess;

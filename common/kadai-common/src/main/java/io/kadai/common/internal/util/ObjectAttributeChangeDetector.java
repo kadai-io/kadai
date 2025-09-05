@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 package io.kadai.common.internal.util;
 
-import static io.kadai.common.internal.util.CheckedFunction.wrap;
+import static io.kadai.common.internal.util.CheckedFunction.wrapping;
 import static java.util.function.Predicate.not;
 
 import io.kadai.common.api.exceptions.SystemException;
@@ -70,7 +70,7 @@ public class ObjectAttributeChangeDetector {
         ReflectionUtil.retrieveAllFields(objectClass).stream()
             .peek(field -> field.setAccessible(true))
             .filter(not(field -> "customAttributes".equals(field.getName())))
-            .map(wrap(field -> Triplet.of(field, field.get(oldObject), field.get(newObject))))
+            .map(wrapping(field -> Triplet.of(field, field.get(oldObject), field.get(newObject))))
             .filter(not(t -> Objects.equals(t.getMiddle(), t.getRight())))
             .map(t -> generateChangedAttribute(t.getLeft(), t.getMiddle(), t.getRight()))
             .toList();

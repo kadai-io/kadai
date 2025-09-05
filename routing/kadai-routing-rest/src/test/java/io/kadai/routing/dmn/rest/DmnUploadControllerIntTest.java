@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 package io.kadai.routing.dmn.rest;
 
-import static io.kadai.rest.test.RestHelper.TEMPLATE;
+import static io.kadai.rest.test.RestHelper.CLIENT;
 
 import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
@@ -28,9 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
@@ -45,8 +43,7 @@ class DmnUploadControllerIntTest {
   private final RestHelper restHelper;
 
   @Autowired
-  DmnUploadControllerIntTest(
-      RestHelper restHelper) {
+  DmnUploadControllerIntTest(RestHelper restHelper) {
     this.restHelper = restHelper;
   }
 
@@ -61,11 +58,16 @@ class DmnUploadControllerIntTest {
     HttpHeaders headers = RestHelper.generateHeadersForUser("admin");
     headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-    HttpEntity<Object> auth = new HttpEntity<>(body, headers);
     String url = restHelper.toUrl(RoutingRestEndpoints.URL_ROUTING_RULES_DEFAULT);
 
     ResponseEntity<RoutingUploadResultRepresentationModel> responseEntity =
-        TEMPLATE.exchange(url, HttpMethod.PUT, auth, RoutingUploadResultRepresentationModel.class);
+        CLIENT
+            .put()
+            .uri(url)
+            .headers(httpHeaders -> httpHeaders.addAll(headers))
+            .body(body)
+            .retrieve()
+            .toEntity(RoutingUploadResultRepresentationModel.class);
 
     SoftAssertions softly = new SoftAssertions();
 

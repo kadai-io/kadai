@@ -1,36 +1,38 @@
 <!--
-  ~ Copyright [2024] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2025] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h4 *ngIf="metaInformation">{{ getTitle() }} ({{ metaInformation?.date| date:'medium' }}
+    @if (metaInformation) {
+      <h4>{{ getTitle() }} ({{ metaInformation?.date| date:'medium' }}
       )</h4>
+    }
   </div>
   <mat-tab-group (selectedIndexChange)="selectComponent($event)" animationDuration="0ms"
-                 class="panel-body" mat-stretch-tabs="false">
+    class="panel-body" mat-stretch-tabs="false">
     <mat-tab label="Due Date">
       <kadai-monitor-workbasket-report-due-date
-          (metaInformation)="getMetaInformation($event)">
+        (metaInformation)="getMetaInformation($event)">
       </kadai-monitor-workbasket-report-due-date>
     </mat-tab>
     <mat-tab label="Planned Date">
       <kadai-monitor-workbasket-report-planned-date
-          (metaInformation)="getMetaInformation($event)">
+        (metaInformation)="getMetaInformation($event)">
       </kadai-monitor-workbasket-report-planned-date>
     </mat-tab>
   </mat-tab-group>

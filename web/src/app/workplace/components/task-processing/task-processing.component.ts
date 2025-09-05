@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Task } from 'app/workplace/models/task';
 import { Workbasket } from 'app/shared/models/workbasket';
@@ -27,32 +27,33 @@ import { Subscription } from 'rxjs';
 import { ClassificationsService } from 'app/shared/services/classifications/classifications.service';
 import { take } from 'rxjs/operators';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatIcon } from '@angular/material/icon';
+
+import { MatDivider } from '@angular/material/divider';
 
 @Component({
   selector: 'kadai-task-processing',
   templateUrl: './task-processing.component.html',
   styleUrls: ['./task-processing.component.scss'],
-  standalone: false
+  imports: [MatButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatDivider]
 })
 export class TaskProcessingComponent implements OnInit, OnDestroy {
   routeSubscription: Subscription;
-
   regex = /\${(.*?)}/g;
   address = 'https://bing.com';
   link: SafeResourceUrl;
-
   task: Task = null;
   workbaskets: Workbasket[];
-
-  constructor(
-    private taskService: TaskService,
-    private workbasketService: WorkbasketService,
-    private classificationService: ClassificationsService,
-    private requestInProgressService: RequestInProgressService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private sanitizer: DomSanitizer
-  ) {}
+  private taskService = inject(TaskService);
+  private workbasketService = inject(WorkbasketService);
+  private classificationService = inject(ClassificationsService);
+  private requestInProgressService = inject(RequestInProgressService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private sanitizer = inject(DomSanitizer);
 
   ngOnInit() {
     this.routeSubscription = this.route.params.subscribe((params) => {
@@ -136,6 +137,12 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
     });
   }
 
+  ngOnDestroy(): void {
+    if (this.routeSubscription) {
+      this.routeSubscription.unsubscribe();
+    }
+  }
+
   private extractUrl(url: string): string {
     const me = this;
     const extractedExpressions = url.match(this.regex);
@@ -156,11 +163,5 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
 
   private getReflectiveProperty(scope: any, property: string) {
     return Reflect.get(scope, property);
-  }
-
-  ngOnDestroy(): void {
-    if (this.routeSubscription) {
-      this.routeSubscription.unsubscribe();
-    }
   }
 }

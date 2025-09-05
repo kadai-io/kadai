@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ class TaskTestImpl extends TaskImpl {
   private boolean freezeModified = false;
   private boolean freezeRead = false;
   private boolean freezeTransferred = false;
+  private boolean freezeReopened = false;
   private boolean freezePriority = false;
 
   @Override
@@ -86,6 +87,16 @@ class TaskTestImpl extends TaskImpl {
     super.setTransferred(isTransferred);
   }
 
+  public void setReopened(boolean isReopened) {
+    if (!freezeReopened) {
+      super.setReopened(isReopened);
+    }
+  }
+
+  public void setReopenedIgnoreFreeze(boolean isReopened) {
+    super.setReopened(isReopened);
+  }
+
   @Override
   public void setPriority(int priority) {
     if (!freezePriority) {
@@ -135,6 +146,14 @@ class TaskTestImpl extends TaskImpl {
 
   public void unfreezeTransferred() {
     freezeTransferred = false;
+  }
+
+  public void freezeReopened() {
+    freezeReopened = true;
+  }
+
+  public void unfreezeReopened() {
+    freezeReopened = false;
   }
 
   public void freezePriority() {

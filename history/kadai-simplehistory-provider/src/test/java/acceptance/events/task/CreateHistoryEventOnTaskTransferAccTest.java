@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 package acceptance.events.task;
 
-import static io.kadai.common.internal.util.CheckedConsumer.wrap;
+import static io.kadai.common.internal.util.CheckedConsumer.rethrowing;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import acceptance.AbstractAccTest;
@@ -54,7 +54,8 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
 
   @WithAccessId(user = "admin")
   @TestFactory
-  Stream<DynamicTest> should_CreateTransferredHistoryEvent_When_TaskIsTransferred() {
+  Stream<DynamicTest> should_CreateTransferredHistoryEvent_When_TaskIsTransferred()
+      throws Exception {
     List<Quadruple<String, String, String, Consumer<String>>> testCases =
         List.of(
             /*
@@ -68,21 +69,22 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
                     + " or any secondary Object References",
                 "TKI:000000000000000000000000000000000003",
                 "WBI:100000000000000000000000000000000001",
-                wrap(
+                rethrowing(
                     (String taskId) ->
                         taskService.transfer(taskId, "WBI:100000000000000000000000000000000006"))),
             Quadruple.of(
                 "Using WorkbasketId; Task has Attachment and secondary Object Reference",
                 "TKI:000000000000000000000000000000000053",
                 "WBI:100000000000000000000000000000000015",
-                wrap(
+                rethrowing(
                     (String taskId) ->
                         taskService.transfer(taskId, "WBI:100000000000000000000000000000000006"))),
             Quadruple.of(
                 "Using WorkbasketKey and Domain",
                 "TKI:000000000000000000000000000000000004",
                 "WBI:100000000000000000000000000000000001",
-                wrap((String taskId) -> taskService.transfer(taskId, "USER-1-1", "DOMAIN_A"))));
+                rethrowing(
+                    (String taskId) -> taskService.transfer(taskId, "USER-1-1", "DOMAIN_A"))));
 
     ThrowingConsumer<Quadruple<String, String, String, Consumer<String>>> test =
         q -> {
@@ -117,7 +119,8 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
 
   @WithAccessId(user = "admin")
   @TestFactory
-  Stream<DynamicTest> should_CreateTransferredHistoryEvents_When_TaskBulkTransfer() {
+  Stream<DynamicTest> should_CreateTransferredHistoryEvents_When_TaskBulkTransfer()
+      throws Exception {
     List<Triplet<String, Map<String, String>, Consumer<List<String>>>> testCases =
         List.of(
             /*
@@ -138,7 +141,7 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
                     Map.entry(
                         "TKI:000000000000000000000000000000000002",
                         "WBI:100000000000000000000000000000000006")),
-                wrap(
+                rethrowing(
                     (List<String> taskIds) ->
                         taskService.transferTasks(
                             "WBI:100000000000000000000000000000000007", taskIds))),
@@ -154,7 +157,7 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
                     Map.entry(
                         "TKI:000000000000000000000000000000000055",
                         "WBI:100000000000000000000000000000000015")),
-                wrap(
+                rethrowing(
                     (List<String> taskIds) ->
                         taskService.transferTasks("USER-1-2", "DOMAIN_A", taskIds))));
 
@@ -201,7 +204,8 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
 
   @WithAccessId(user = "admin")
   @TestFactory
-  Stream<DynamicTest> should_CreateTransferredHistoryEvent_When_TaskIsTransferredWithOwner() {
+  Stream<DynamicTest> should_CreateTransferredHistoryEvent_When_TaskIsTransferredWithOwner()
+      throws Exception {
     List<Quadruple<String, String, String, Consumer<String>>> testCases =
         List.of(
             /*
@@ -215,7 +219,7 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
                     + " or any secondary Object References",
                 "TKI:000000000000000000000000000000000005",
                 "WBI:100000000000000000000000000000000001",
-                wrap(
+                rethrowing(
                     (String taskId) ->
                         taskService.transferWithOwner(
                             taskId, "WBI:100000000000000000000000000000000007", "user-1-2"))),
@@ -223,7 +227,7 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
                 "Using WorkbasketId; Task has Attachment and secondary Object Reference",
                 "TKI:000000000000000000000000000000000001",
                 "WBI:100000000000000000000000000000000006",
-                wrap(
+                rethrowing(
                     (String taskId) ->
                         taskService.transferWithOwner(
                             taskId, "WBI:100000000000000000000000000000000007", "user-1-2"))),
@@ -231,7 +235,7 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
                 "Using WorkbasketKey and Domain",
                 "TKI:000000000000000000000000000000000006",
                 "WBI:100000000000000000000000000000000001",
-                wrap(
+                rethrowing(
                     (String taskId) ->
                         taskService.transferWithOwner(
                             taskId, "USER-1-2", "DOMAIN_A", "user-1-2"))));
@@ -267,7 +271,8 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
 
   @WithAccessId(user = "admin")
   @TestFactory
-  Stream<DynamicTest> should_CreateTransferredHistoryEvents_When_TaskBulkTransferWithOwner() {
+  Stream<DynamicTest> should_CreateTransferredHistoryEvents_When_TaskBulkTransferWithOwner()
+      throws Exception {
     List<Triplet<String, Map<String, String>, Consumer<List<String>>>> testCases =
         List.of(
             /*
@@ -288,7 +293,7 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
                     Map.entry(
                         "TKI:000000000000000000000000000000000012",
                         "WBI:100000000000000000000000000000000001")),
-                wrap(
+                rethrowing(
                     (List<String> taskIds) ->
                         taskService.transferTasksWithOwner(
                             "WBI:100000000000000000000000000000000007", taskIds, "user-1-2"))),
@@ -304,7 +309,7 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
                     Map.entry(
                         "TKI:000000000000000000000000000000000015",
                         "WBI:100000000000000000000000000000000001")),
-                wrap(
+                rethrowing(
                     (List<String> taskIds) ->
                         taskService.transferTasksWithOwner(
                             "USER-1-2", "DOMAIN_A", taskIds, "user-1-2"))));

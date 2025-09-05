@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -35,14 +35,14 @@ import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /** Helps to simplify rest api testing. */
 @Component
 public class RestHelper {
 
-  public static final RestTemplate TEMPLATE = getRestTemplate();
+  public static final RestClient CLIENT = getRestClient();
 
   private Environment environment;
   private int port;
@@ -69,11 +69,11 @@ public class RestHelper {
   }
 
   /**
-   * Return a REST template which is capable of dealing with responses in HAL format.
+   * Return a REST Client which is capable of dealing with responses in HAL format.
    *
-   * @return RestTemplate
+   * @return RestClient
    */
-  private static RestTemplate getRestTemplate() {
+  private static RestClient getRestClient() {
     ObjectMapper mapper =
         new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -86,10 +86,10 @@ public class RestHelper {
     converter.setSupportedMediaTypes(Collections.singletonList(MediaTypes.HAL_JSON));
     converter.setObjectMapper(mapper);
 
-    RestTemplate template = new RestTemplate();
-    // important to add first to ensure priority
-    template.getMessageConverters().add(0, converter);
-    return template;
+    // Create RestClient with custom message converter
+    return RestClient.builder()
+        .messageConverters(converters -> converters.add(0, converter))
+        .build();
   }
 
   public String toUrl(String relativeUrl, Object... uriVariables) {

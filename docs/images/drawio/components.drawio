@@ -1,0 +1,147 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.0.9 Chrome/128.0.6613.186 Electron/32.2.5 Safari/537.36" version="26.0.9">
+  <diagram id="ABNCZyfbNFh-MfdMv4a-" name="Page-1">
+    <mxGraphModel dx="2261" dy="2125" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="18" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=none;shadow=1;" parent="1" vertex="1">
+          <mxGeometry x="-10" width="480" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="14" style="edgeStyle=none;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endArrow=none;endFill=0;strokeColor=default;strokeWidth=1;startArrow=classicThin;startFill=1;shadow=1;" parent="1" source="5" target="7" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="26" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;fontSize=18;endArrow=none;endFill=0;strokeColor=default;strokeWidth=2;shadow=1;" parent="1" source="5" target="22" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="38" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;startArrow=classicThin;startFill=1;endArrow=none;endFill=0;shadow=1;" parent="1" source="5" target="9" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="120" y="285" />
+              <mxPoint x="120" y="245" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="5" value="Java library" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6CCBB2;strokeColor=#6CCBB2;shadow=0;fontSize=15;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="160" y="250" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="13" style="edgeStyle=none;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;strokeColor=default;strokeWidth=1;endArrow=none;endFill=0;startArrow=classicThin;startFill=1;shadow=1;" parent="1" source="6" target="5" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="KADAI DB" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#6CCBB2;strokeColor=#6CCBB2;shadow=0;fontSize=15;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="175" y="340" width="110" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="15" style="edgeStyle=none;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endArrow=none;endFill=0;strokeColor=default;strokeWidth=1;startArrow=classicThin;startFill=1;shadow=1;" parent="1" source="7" target="11" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="16" style="edgeStyle=none;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endArrow=none;endFill=0;strokeColor=default;strokeWidth=1;shadow=1;" parent="1" target="12" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="230" y="140" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="390" y="140" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="17" style="edgeStyle=none;html=1;endArrow=none;endFill=0;strokeColor=default;strokeWidth=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;shadow=1;" parent="1" target="10" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="230" y="140" as="targetPoint" />
+            <mxPoint x="230" y="140" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="230" y="140" />
+              <mxPoint x="70" y="140" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="36" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;startArrow=classicThin;startFill=1;endArrow=none;endFill=0;shadow=1;" parent="1" source="7" target="9" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="120" y="195" />
+              <mxPoint x="120" y="245" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="7" value="REST Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6CCBB2;strokeColor=#6CCBB2;shadow=0;fontSize=15;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="160" y="160" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="39" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;startArrow=none;startFill=0;endArrow=classicThin;endFill=1;shadow=1;" parent="1" source="8" target="5" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="330" y="235" />
+              <mxPoint x="330" y="268" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="43" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;shadow=1;" parent="1" source="8" target="7" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="330" y="235" />
+              <mxPoint x="330" y="195" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="8" value="Custom JavaEE Client" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF636D;strokeColor=#B20000;shadow=0;fontColor=#ffffff;fontSize=15;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="380" y="200" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="9" value="Custom Spring Client" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF636D;strokeColor=#B20000;shadow=0;fontColor=#ffffff;fontSize=15;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="-60" y="210" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="10" value="KADAI Workplace" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a917;shadow=0;treeFolding=0;strokeColor=#2D7600;fontColor=#ffffff;fontSize=15;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry y="25" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="KADAI Admin" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a917;shadow=0;strokeColor=#2D7600;fontColor=#ffffff;fontSize=15;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="160" y="25" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="12" value="KADAI Monitor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a917;shadow=0;strokeColor=#2D7600;fontColor=#ffffff;fontSize=15;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="320" y="25" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="19" value="&lt;font style=&quot;font-size: 18px&quot;&gt;KADAI Web&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;shadow=0;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="-100" y="40" width="80" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="21" value="" style="shape=curlyBracket;whiteSpace=wrap;html=1;rounded=1;fontSize=18;strokeColor=default;shadow=1;" parent="1" vertex="1">
+          <mxGeometry x="-30" width="20" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="22" value="Adapter" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6CCBB2;strokeColor=#6CCBB2;shadow=0;fontSize=15;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="550" y="250" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="25" style="edgeStyle=none;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontSize=18;endArrow=classicThin;endFill=1;strokeColor=default;strokeWidth=1;startArrow=classicThin;startFill=1;shadow=1;" parent="1" source="23" target="22" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="23" value="Camunda" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF636D;strokeColor=#B20000;shadow=0;fontColor=#ffffff;fontSize=15;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="550" y="370" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="27" value="&lt;div&gt;&lt;b style=&quot;font-size: 12px&quot;&gt;Legend:&lt;/b&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeColor=default;align=left;verticalAlign=top;spacingLeft=8;shadow=0;" parent="1" vertex="1">
+          <mxGeometry x="540" y="10" width="180" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="28" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF636D;strokeColor=#B20000;shadow=0;fontColor=#ffffff;" parent="1" vertex="1">
+          <mxGeometry x="550" y="50" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="30" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6CCBB2;strokeColor=default;shadow=0;" parent="1" vertex="1">
+          <mxGeometry x="550" y="95" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="32" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a917;shadow=0;strokeColor=#2D7600;fontColor=#ffffff;" parent="1" vertex="1">
+          <mxGeometry x="550" y="140" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="40" value="Other Systems" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF636D;strokeColor=#B20000;shadow=0;fontColor=#ffffff;fontSize=15;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="710" y="370" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="lUbarc1GWSdaQqc31K7V-43" style="edgeStyle=none;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;fontSize=18;endArrow=classicThin;endFill=1;strokeColor=default;strokeWidth=1;startArrow=classicThin;startFill=1;shadow=1;entryX=1;entryY=0.429;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="40" target="22" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="779.58" y="350" as="sourcePoint" />
+            <mxPoint x="700" y="300" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="780" y="280" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lUbarc1GWSdaQqc31K7V-44" value="External&lt;br&gt;(not included in KADAI)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;shadow=0;" parent="1" vertex="1">
+          <mxGeometry x="600" y="50" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lUbarc1GWSdaQqc31K7V-45" value="Part of the Application" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;shadow=0;" parent="1" vertex="1">
+          <mxGeometry x="600" y="92.5" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lUbarc1GWSdaQqc31K7V-46" value="Included in frontend of the Application" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;shadow=0;" parent="1" vertex="1">
+          <mxGeometry x="600" y="140" width="100" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

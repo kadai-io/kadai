@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,48 +16,47 @@
  *
  */
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { Sorting, WORKBASKET_SORT_PARAMETER_NAMING, WorkbasketQuerySortParameter } from 'app/shared/models/sorting';
 import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
 import { KadaiType } from 'app/shared/models/kadai-type';
 import { expandDown } from 'app/shared/animations/expand.animation';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ACTION } from '../../../shared/models/action';
 import { CreateWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
 import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
+import { MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+
+import { ImportExportComponent } from '../import-export/import-export.component';
+import { SortComponent } from '../../../shared/components/sort/sort.component';
+import { WorkbasketFilterComponent } from '../../../shared/components/workbasket-filter/workbasket-filter.component';
 
 @Component({
   selector: 'kadai-administration-workbasket-list-toolbar',
   animations: [expandDown],
   templateUrl: './workbasket-list-toolbar.component.html',
   styleUrls: ['./workbasket-list-toolbar.component.scss'],
-  standalone: false
+  imports: [MatButton, MatTooltip, MatIcon, ImportExportComponent, SortComponent, WorkbasketFilterComponent]
 })
 export class WorkbasketListToolbarComponent implements OnInit {
   @Input() workbasketListExpanded: boolean = true;
   @Input() workbaskets: WorkbasketSummary[];
   @Input() workbasketDefaultSortBy: WorkbasketQuerySortParameter;
   @Output() performSorting = new EventEmitter<Sorting<WorkbasketQuerySortParameter>>();
-
   selectionToImport = KadaiType.WORKBASKETS;
   sortingFields: Map<WorkbasketQuerySortParameter, string> = WORKBASKET_SORT_PARAMETER_NAMING;
-
   isExpanded = false;
   showFilter = false;
-
-  @Select(WorkbasketSelectors.workbasketActiveAction)
-  workbasketActiveAction$: Observable<ACTION>;
-
+  workbasketActiveAction$: Observable<ACTION> = inject(Store).select(WorkbasketSelectors.workbasketActiveAction);
   destroy$ = new Subject<void>();
   action: ACTION;
-
-  constructor(
-    private store: Store,
-    private workbasketService: WorkbasketService
-  ) {}
+  private store = inject(Store);
+  private workbasketService = inject(WorkbasketService);
 
   ngOnInit() {
     this.workbasketActiveAction$.pipe(takeUntil(this.destroy$)).subscribe((action) => {

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RoutingUploadService } from '@task-routing/services/routing-upload.service';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import { HotToastService } from '@ngneat/hot-toast';
@@ -25,16 +25,13 @@ import { HotToastService } from '@ngneat/hot-toast';
   selector: 'kadai-routing-upload',
   templateUrl: './routing-upload.component.html',
   styleUrls: ['./routing-upload.component.scss'],
-  standalone: false
+  imports: []
 })
 export class RoutingUploadComponent implements OnInit {
   file: File | null = null;
-
-  constructor(
-    private routingUploadService: RoutingUploadService,
-    private toastService: HotToastService,
-    private notificationService: NotificationService
-  ) {}
+  private routingUploadService = inject(RoutingUploadService);
+  private toastService = inject(HotToastService);
+  private notificationService = inject(NotificationService);
 
   ngOnInit(): void {}
 

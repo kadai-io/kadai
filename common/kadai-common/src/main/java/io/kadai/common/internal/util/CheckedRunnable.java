@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,9 +21,10 @@ package io.kadai.common.internal.util;
 import io.kadai.common.api.exceptions.SystemException;
 
 @FunctionalInterface
-public interface CheckedRunnable {
+public interface CheckedRunnable<E extends Exception> {
 
-  static Runnable wrap(CheckedRunnable checkedRunnable) {
+  static Runnable wrapping(CheckedRunnable<? extends Exception> checkedRunnable)
+      throws SystemException {
     return () -> {
       try {
         checkedRunnable.run();
@@ -33,5 +34,22 @@ public interface CheckedRunnable {
     };
   }
 
-  void run() throws Exception;
+  static <E extends Exception> Runnable rethrowing(CheckedRunnable<E> checkedRunnable) throws E {
+    return () -> {
+      try {
+        checkedRunnable.run();
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (Exception exception) {
+        throwActual(exception);
+      }
+    };
+  }
+
+  void run() throws E;
+
+  @SuppressWarnings("unchecked")
+  private static <E extends Exception> void throwActual(Exception exception) throws E {
+    throw (E) exception;
+  }
 }

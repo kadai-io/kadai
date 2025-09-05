@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 package acceptance.task.requestreview;
 
-import static io.kadai.common.internal.util.CheckedSupplier.wrap;
+import static io.kadai.common.internal.util.CheckedSupplier.rethrowing;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestClassification;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestWorkbasket;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -170,6 +170,65 @@ public class RequestReviewWithAfterSpiAccTest {
     }
   }
 
+  static class TaskTransferrerWithAdditionalInformation implements AfterRequestReviewProvider {
+
+    private KadaiEngine kadaiEngine;
+
+    @Override
+    public void initialize(KadaiEngine kadaiEngine) {
+      this.kadaiEngine = kadaiEngine;
+    }
+
+    @Override
+    public Task afterRequestReview(Task task, String workbasketId, String ownerId)
+        throws Exception {
+      task = kadaiEngine.getTaskService().updateTask(task);
+      task = kadaiEngine.getTaskService().transferWithOwner(task.getId(), workbasketId, ownerId);
+      return task;
+    }
+
+    @Override
+    public Task afterRequestReview(Task task) throws Exception {
+      return null;
+    }
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  @WithServiceProvider(
+      serviceProviderInterface = AfterRequestReviewProvider.class,
+      serviceProviders = TaskTransferrerWithAdditionalInformation.class)
+  class SpiTransfersTaskWithAdditionalInformation {
+
+    @KadaiInject TaskService taskService;
+
+    @WithAccessId(user = "user-1-1")
+    @Test
+    void should_ReturnTransferredTask_When_SpiTransfersTaskWithWorkbasketId() throws Exception {
+      Task task = createTaskClaimedByUser("user-1-1").buildAndStore(taskService);
+
+      Task result =
+          taskService.requestReviewWithWorkbasketId(task.getId(), newWorkbasket.getId(), null);
+
+      assertThat(result.getWorkbasketSummary()).isEqualTo(newWorkbasket);
+      assertThat(result.getOwner()).isNull();
+    }
+
+    @WithAccessId(user = "user-1-1")
+    @Test
+    void should_ReturnTransferredTask_When_SpiTransfersTaskWithWorkbasketIdAndOwnerId()
+        throws Exception {
+      Task task = createTaskClaimedByUser("user-1-1").buildAndStore(taskService);
+
+      Task result =
+          taskService.requestReviewWithWorkbasketId(
+              task.getId(), newWorkbasket.getId(), "user-1-2");
+
+      assertThat(result.getWorkbasketSummary()).isEqualTo(newWorkbasket);
+      assertThat(result.getOwner()).isEqualTo("user-1-2");
+    }
+  }
+
   @Nested
   @TestInstance(Lifecycle.PER_CLASS)
   @WithServiceProvider(
@@ -282,11 +341,10 @@ public class RequestReviewWithAfterSpiAccTest {
       ThrowingCallable call =
           () ->
               transactionProvider.executeInTransaction(
-                  wrap(() -> taskService.requestReview(task.getId())));
+                  rethrowing(() -> taskService.requestReview(task.getId())));
 
       assertThatThrownBy(call)
           .isInstanceOf(SystemException.class)
-          .cause() // unwrap the "wrap" within "call"
           .hasMessage("service provider '%s' threw an exception", ExceptionThrower.class.getName())
           .cause() // unwrap the "wrap" from the service provider manager
           .hasMessage("I AM THE EXCEPTION THROWER (*_*)");

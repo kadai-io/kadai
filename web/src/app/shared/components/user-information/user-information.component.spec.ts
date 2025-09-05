@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,22 +17,14 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Component, DebugElement, Input } from '@angular/core';
+import { DebugElement } from '@angular/core';
 import { UserInformationComponent } from './user-information.component';
-import { BrowserModule, By } from '@angular/platform-browser';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { By } from '@angular/platform-browser';
 import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.service';
 import { KadaiEngineServiceMock } from '../../services/kadai-engine/kadai-engine.mock.service';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 jest.mock('angular-svg-icon');
-
-@Component({ selector: 'svg-icon', template: '' })
-class SvgIconStub {
-  @Input() src;
-  @Input() matTooltip;
-}
 
 describe('UserInformationComponent', () => {
   let component: UserInformationComponent;
@@ -41,14 +33,8 @@ describe('UserInformationComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [UserInformationComponent],
-      imports: [BrowserModule, NoopAnimationsModule],
-      providers: [
-        SvgIconStub,
-        { provide: KadaiEngineService, useClass: KadaiEngineServiceMock },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-      ]
+      imports: [UserInformationComponent],
+      providers: [{ provide: KadaiEngineService, useClass: KadaiEngineServiceMock }, provideAnimationsAsync()]
     }).compileComponents();
   }));
 

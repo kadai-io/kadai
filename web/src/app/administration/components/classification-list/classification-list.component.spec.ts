@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,67 +17,25 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Component, DebugElement, EventEmitter, Input, Output } from '@angular/core';
-import { Actions, NgxsModule, ofActionDispatched, Store } from '@ngxs/store';
+import { DebugElement } from '@angular/core';
+import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
-import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
-import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { ClassificationListComponent } from './classification-list.component';
 import { classificationStateMock, engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
-import { KadaiType } from '../../../shared/models/kadai-type';
-import { ImportExportService } from '../../services/import-export.service';
 import { Observable, of } from 'rxjs';
 import { CreateClassification } from '../../../shared/store/classification-store/classification.actions';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
-import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { MatInputModule } from '@angular/material/input';
 import { By } from '@angular/platform-browser';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { provideHttpClient } from '@angular/common/http';
 
-@Component({ selector: 'kadai-administration-import-export', template: '' })
-class ImportExportStub {
-  @Input() currentSelection: KadaiType;
-  @Input() parentComponent: string;
-}
+jest.mock('angular-svg-icon');
 
-@Component({ selector: 'kadai-administration-classification-types-selector', template: '' })
-class ClassificationTypesSelectorStub {}
-
-@Component({ selector: 'kadai-administration-tree', template: '' })
-class TreeStub {
-  @Input() filterText;
-  @Input() filterIcon;
-  @Output() switchKadaiSpinnerEmit = new EventEmitter();
-}
-
-@Component({ selector: 'svg-icon', template: '' })
-class SvgIconStub {
-  @Input() src;
-  @Input() matTooltip;
-}
-
-@Component({ selector: 'input', template: '' })
-class InputStub {
-  @Input() ngModel;
-}
-
-const classificationServiceSpy: Partial<ClassificationsService> = {
-  getClassification: jest.fn().mockReturnValue(of()),
-  getClassifications: jest.fn().mockReturnValue(of())
-};
-const classificationCategoriesServiceSpy = jest.fn().mockImplementation(() => jest.fn().mockReturnValue(of()));
 const domainServiceSpy: Partial<DomainService> = {
   getSelectedDomainValue: jest.fn().mockReturnValue(of()),
-  getSelectedDomain: jest.fn().mockReturnValue(of())
-};
-const getImportingFinishedFn = jest.fn().mockReturnValue(of(true));
-const importExportServiceSpy: Partial<ImportExportService> = {
-  getImportingFinished: getImportingFinishedFn
+  getSelectedDomain: jest.fn().mockReturnValue(of()),
+  getDomains: jest.fn().mockReturnValue(of())
 };
 
 const requestInProgressServiceSpy: Partial<RequestInProgressService> = {
@@ -94,35 +52,11 @@ describe('ClassificationListComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
-        NgxsModule.forRoot([ClassificationState, EngineConfigurationState]),
-        MatIconModule,
-        MatMenuModule,
-        MatFormFieldModule,
-        MatInputModule,
-        NoopAnimationsModule,
-        MatProgressBarModule
-      ],
-      declarations: [ClassificationListComponent],
+      imports: [ClassificationListComponent],
       providers: [
-        ClassificationTypesSelectorStub,
-        TreeStub,
-        SvgIconStub,
-        ImportExportStub,
-        InputStub,
-        {
-          provide: ClassificationsService,
-          useValue: classificationServiceSpy
-        },
-        {
-          provide: ClassificationCategoriesService,
-          useValue: classificationCategoriesServiceSpy
-        },
+        provideStore([ClassificationState, EngineConfigurationState]),
+        provideHttpClient(),
         { provide: DomainService, useValue: domainServiceSpy },
-        {
-          provide: ImportExportService,
-          useValue: importExportServiceSpy
-        },
         { provide: RequestInProgressService, useValue: requestInProgressServiceSpy }
       ]
     }).compileComponents();

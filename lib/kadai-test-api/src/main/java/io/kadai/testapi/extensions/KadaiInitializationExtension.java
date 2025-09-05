@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -71,12 +71,17 @@ import org.junit.platform.commons.JUnitException;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+/**
+ * JUnit-Extension for initializing and modifying the {@link KadaiConfiguration} in integration
+ * tests.
+ */
 public class KadaiInitializationExtension
     implements TestInstancePostProcessor, TestInstancePreDestroyCallback {
 
   public static final String STORE_KADAI_ENTITY_MAP = "kadaiEntityMap";
 
-  private static Map<Class<?>, Object> extractEnclosingTestInstances(Object instance) {
+  private static Map<Class<?>, Object> extractEnclosingTestInstances(Object instance)
+      throws IllegalAccessException {
     HashMap<Class<?>, Object> instanceByClass = new HashMap<>();
     while (instance != null) {
       instanceByClass.put(instance.getClass(), instance);

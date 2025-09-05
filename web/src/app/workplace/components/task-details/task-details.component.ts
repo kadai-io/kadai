@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -32,11 +32,34 @@ import { take, takeUntil } from 'rxjs/operators';
 import { trimObject } from '../../../shared/util/form-trimmer';
 import { ObjectReference } from '../../models/object-reference';
 
+import { MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatTab, MatTabGroup } from '@angular/material/tabs';
+import { TaskInformationComponent } from '../task-information/task-information.component';
+import { TaskStatusDetailsComponent } from '../task-status-details/task-status-details.component';
+import { TaskCustomFieldsComponent } from '../task-custom-fields/task-custom-fields.component';
+import { TaskAttributeValueComponent } from '../task-attribute-value/task-attribute-value.component';
+
 @Component({
   selector: 'kadai-task-details',
   templateUrl: './task-details.component.html',
   styleUrls: ['./task-details.component.scss'],
-  standalone: false
+  imports: [
+    MatButton,
+    MatTooltip,
+    MatIcon,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuItem,
+    MatTabGroup,
+    MatTab,
+    TaskInformationComponent,
+    TaskStatusDetailsComponent,
+    TaskCustomFieldsComponent,
+    TaskAttributeValueComponent
+  ]
 })
 export class TaskDetailsComponent implements OnInit, OnDestroy {
   task: Task;
@@ -47,21 +70,17 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   currentId: string;
   showDetail = false;
   destroy$ = new Subject<void>();
-
+  private route = inject(ActivatedRoute);
+  private taskService = inject(TaskService);
+  private workplaceService = inject(WorkplaceService);
+  private router = inject(Router);
+  private requestInProgressService = inject(RequestInProgressService);
+  private notificationService = inject(NotificationService);
+  private masterAndDetailService = inject(MasterAndDetailService);
   private routeSubscription: Subscription;
   private workbasketSubscription: Subscription;
   private masterAndDetailSubscription: Subscription;
   private deleteTaskSubscription: Subscription;
-
-  constructor(
-    private route: ActivatedRoute,
-    private taskService: TaskService,
-    private workplaceService: WorkplaceService,
-    private router: Router,
-    private requestInProgressService: RequestInProgressService,
-    private notificationService: NotificationService,
-    private masterAndDetailService: MasterAndDetailService
-  ) {}
 
   ngOnInit() {
     this.workbasketSubscription = this.workplaceService.getSelectedWorkbasket().subscribe((workbasket) => {

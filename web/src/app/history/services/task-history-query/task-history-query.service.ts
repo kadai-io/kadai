@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { TaskHistoryEventResourceData } from 'app/shared/models/task-history-event-resource';
 import { QueryParameters } from 'app/shared/models/query-parameters';
 import { KadaiQueryParameters } from 'app/shared/util/query-parameters';
@@ -32,10 +32,8 @@ import { asUrlQueryString } from '../../../shared/util/query-parameters-v2';
   providedIn: 'root'
 })
 export class TaskHistoryQueryService {
-  constructor(
-    private httpClient: HttpClient,
-    private startupService: StartupService
-  ) {}
+  private httpClient = inject(HttpClient);
+  private startupService = inject(StartupService);
 
   get url(): string {
     return this.startupService.getKadaiRestUrl();

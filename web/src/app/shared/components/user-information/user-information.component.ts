@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,23 +16,25 @@
  *
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
 import { UserInfo } from 'app/shared/models/user-info';
 import { expandDown } from '../../animations/expand.animation';
+import { SvgIconComponent } from 'angular-svg-icon';
+import { MatButton } from '@angular/material/button';
 
 @Component({
   selector: 'kadai-shared-user-information',
   templateUrl: './user-information.component.html',
   styleUrls: ['./user-information.component.scss'],
   animations: [expandDown],
-  standalone: false
+  imports: [SvgIconComponent, MatButton]
 })
 export class UserInformationComponent implements OnInit {
   userInformation: UserInfo;
   roles = '';
   showRoles = false;
-  constructor(private kadaiEngineService: KadaiEngineService) {}
+  private kadaiEngineService = inject(KadaiEngineService);
 
   ngOnInit() {
     this.userInformation = this.kadaiEngineService.currentUserInfo;

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -47,7 +47,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -441,7 +440,6 @@ class QueryTasksWithSortingAccTest extends AbstractAccTest {
     @Nested
     @TestInstance(Lifecycle.PER_CLASS)
     class ClassificationName {
-      @Disabled
       @WithAccessId(user = "admin")
       @Test
       void should_OrderByClassificationNameAndListClassificationNameColumn() {
@@ -451,7 +449,7 @@ class QueryTasksWithSortingAccTest extends AbstractAccTest {
                 .createTaskQuery()
                 .orderByClassificationName(ASCENDING)
                 .listValues(TaskQueryColumnName.CLASSIFICATION_NAME, null);
-        assertThat(columnValueList).hasSize(5);
+        assertThat(columnValueList).hasSize(7);
       }
     }
 

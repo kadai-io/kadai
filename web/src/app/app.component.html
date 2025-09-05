@@ -1,20 +1,20 @@
 <!--
-  ~ Copyright [2024] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2025] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
 <mat-sidenav-container class="sidenav">
   <mat-sidenav #sidenav [autoFocus]="false" class="sidenav__drawer" mode="over">
@@ -26,28 +26,31 @@
       </div>
       <div class="sidenav__drawer__container-logout">
         <button (click)="logout()" aria-controls="logout" aria-expanded="true" data-toggle="tooltip"
-                mat-icon-button
-                title="Logout">
+          mat-icon-button
+          title="Logout">
           <mat-icon>exit_to_app</mat-icon>
         </button>
       </div>
     </div>
-    <kadai-shared-user-information
-      class="sidenav__drawer-user-info"></kadai-shared-user-information>
-    <kadai-sidenav-list></kadai-sidenav-list>
+    <kadai-shared-user-information class="sidenav__drawer-user-info"/>
+    <kadai-sidenav-list/>
     <div class="sidenav__drawer-version">
-      <p> KADAI version: {{version}} </p>
+      <p> KADAI version: {{ version }} </p>
     </div>
   </mat-sidenav>
   <mat-sidenav-content>
-    <kadai-shared-nav-bar></kadai-shared-nav-bar>
+    <kadai-shared-nav-bar/>
     <div (window:resize)="onResize()">
       <div class="kadai-main">
         <div class="kadai-main__progress-bar">
-          <mat-progress-bar *ngIf="requestInProgress" color="accent"
-                            mode="indeterminate"></mat-progress-bar>
-          <mat-progress-bar *ngIf="requestInProgress" color="accent"
-                            mode="indeterminate"></mat-progress-bar>
+          @if (requestInProgress) {
+            <mat-progress-bar color="accent"
+            mode="indeterminate"></mat-progress-bar>
+          }
+          @if (requestInProgress) {
+            <mat-progress-bar color="accent"
+            mode="indeterminate"></mat-progress-bar>
+          }
         </div>
         <router-outlet></router-outlet>
       </div>

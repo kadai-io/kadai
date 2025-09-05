@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,8 +18,9 @@
 
 package io.kadai.user.jobs;
 
-import static io.kadai.common.internal.util.CheckedFunction.wrap;
+import static io.kadai.common.internal.util.CheckedFunction.rethrowing;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.rest.ldap.LdapClient;
@@ -42,6 +43,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 @KadaiSpringBootTest
 @ExtendWith(JaasExtension.class)
@@ -50,7 +52,7 @@ class UserInfoRefreshJobIntTest {
 
   KadaiEngine kadaiEngine;
   UserService userService;
-  LdapClient ldapClient;
+  @MockitoSpyBean LdapClient ldapClient;
 
   @Autowired
   public UserInfoRefreshJobIntTest(
@@ -64,11 +66,10 @@ class UserInfoRefreshJobIntTest {
   @WithAccessId(user = "businessadmin")
   @Order(1)
   void should_RefreshUserInfo_When_UserInfoRefreshJobIsExecuted() throws Exception {
-
     try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
 
       List<User> users = getUsers(connection);
-      assertThat(users).hasSize(14);
+      assertThat(users).hasSize(18);
 
       UserInfoRefreshJob userInfoRefreshJob = new UserInfoRefreshJob(kadaiEngine);
       userInfoRefreshJob.execute();
@@ -97,9 +98,7 @@ class UserInfoRefreshJobIntTest {
 
         User ldapUser = ldapusers.get(i);
         List<String> ldapGroups =
-            ldapUser.getGroups().stream()
-                .sorted(Comparator.naturalOrder())
-                .toList();
+            ldapUser.getGroups().stream().sorted(Comparator.naturalOrder()).toList();
 
         // we know that our users from ldap have groups defined
         // so non should be empty
@@ -117,9 +116,7 @@ class UserInfoRefreshJobIntTest {
 
         User ldapUser = ldapusers.get(i);
         List<String> ldapPermissions =
-            ldapUser.getPermissions().stream()
-                .sorted(Comparator.naturalOrder())
-                .toList();
+            ldapUser.getPermissions().stream().sorted(Comparator.naturalOrder()).toList();
 
         assertThat(permissionIds)
             .hasSameSizeAs(ldapPermissions)
@@ -151,6 +148,32 @@ class UserInfoRefreshJobIntTest {
     }
   }
 
+  @Test
+  @WithAccessId(user = "businessadmin")
+  @Order(3)
+  void should_RefreshUserInfoAndSkipErrorProneUsers_When_UserInfoRefreshJobIsExecuted()
+      throws Exception {
+
+    try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
+
+      List<User> users = getUsers(connection);
+      assertThat(users).hasSize(6);
+
+      // Incomplete user - supposed to fail in the Job
+      users.get(0).setId(null);
+      when(ldapClient.searchUsersInUserRole()).thenReturn(users);
+
+      UserInfoRefreshJob userInfoRefreshJob = new UserInfoRefreshJob(kadaiEngine);
+      userInfoRefreshJob.execute();
+
+      users = getUsers(connection);
+      List<User> ldapusers = ldapClient.searchUsersInUserRole();
+
+      assertThat(users).hasSize(ldapusers.size() - 1);
+      assertThat(users).hasSize(5);
+    }
+  }
+
   private List<User> getUsers(Connection connection) throws Exception {
 
     List<String> users = new ArrayList<>();
@@ -161,7 +184,7 @@ class UserInfoRefreshJobIntTest {
       users.add(rs.getString("USER_ID"));
     }
 
-    List<User> userList = users.stream().map(wrap(userService::getUser)).toList();
+    List<User> userList = users.stream().map(rethrowing(userService::getUser)).toList();
     return new ArrayList<>(userList);
   }
 

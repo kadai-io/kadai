@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -188,6 +188,7 @@ public class TaskQueryImpl implements TaskQuery {
   private String[] porValueNotLike;
   private Boolean isRead;
   private Boolean isTransferred;
+  private Boolean isReopened;
   private String[] attachmentClassificationIdIn;
   private String[] attachmentClassificationIdNotIn;
   private String[] attachmentClassificationNameIn;
@@ -1137,6 +1138,12 @@ public class TaskQueryImpl implements TaskQuery {
   @Override
   public TaskQuery transferredEquals(Boolean isTransferred) {
     this.isTransferred = isTransferred;
+    return this;
+  }
+
+  @Override
+  public TaskQuery reopenedEquals(Boolean isReopened) {
+    this.isReopened = isReopened;
     return this;
   }
 
@@ -2580,6 +2587,8 @@ public class TaskQueryImpl implements TaskQuery {
         + isRead
         + ", isTransferred="
         + isTransferred
+        + ", isReopened="
+        + isReopened
         + ", attachmentClassificationIdIn="
         + Arrays.toString(attachmentClassificationIdIn)
         + ", attachmentClassificationIdNotIn="

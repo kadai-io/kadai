@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -166,7 +166,7 @@ class KadaiConfigurationTest {
     }
 
     @Test
-    void should_PopulateEveryKadaiConfiguration_When_ImportingPropertiesFile() {
+    void should_PopulateEveryKadaiConfiguration_When_ImportingPropertiesFile() throws Exception {
       KadaiConfiguration configuration =
           new Builder(TestContainerExtension.createDataSourceForH2(), true, "KADAI")
               .initKadaiProperties("/fullKadai.properties")
@@ -243,7 +243,8 @@ class KadaiConfigurationTest {
     }
 
     @Test
-    void should_PopulateEveryKadaiConfiguration_When_EveryBuilderFunctionIsCalled() {
+    void should_PopulateEveryKadaiConfiguration_When_EveryBuilderFunctionIsCalled()
+        throws Exception {
       // given
       // general configuration
       DataSource expectedDataSource = TestContainerExtension.createDataSourceForH2();
@@ -467,7 +468,7 @@ class KadaiConfigurationTest {
     }
 
     @Test
-    void should_PopulateEveryConfigurationProperty_When_UsingCopyConstructor() {
+    void should_PopulateEveryConfigurationProperty_When_UsingCopyConstructor()  throws Exception {
       // given
       KadaiConfiguration configuration =
           new Builder(TestContainerExtension.createDataSourceForH2(), false, "KADAI", false)
@@ -543,7 +544,7 @@ class KadaiConfigurationTest {
     }
 
     private void verifyConfigurationValuesDifferFromDefaultConfiguration(
-        KadaiConfiguration configuration) {
+        KadaiConfiguration configuration) throws Exception {
       KadaiConfiguration defaultConfiguration =
           new Builder(TestContainerExtension.createDataSourceForH2(), true, "KADAI").build();
       Set<String> ignoredFields =
@@ -556,7 +557,7 @@ class KadaiConfigurationTest {
       ReflectionUtil.retrieveAllFields(KadaiConfiguration.class).stream()
           .filter(f -> !ignoredFields.contains(f.getName()))
           .forEach(
-              CheckedConsumer.wrap(
+              CheckedConsumer.rethrowing(
                   field -> {
                     field.setAccessible(true);
                     Object value = field.get(configuration);
@@ -637,7 +638,7 @@ class KadaiConfigurationTest {
             Map.entry(Queue.class, PriorityQueue::new));
 
     @TestFactory
-    Stream<DynamicTest> should_SaveUnmodifiableCollections() {
+    Stream<DynamicTest> should_SaveUnmodifiableCollections() throws Exception {
       // given
       KadaiConfiguration.Builder builder =
           new KadaiConfiguration.Builder(
@@ -670,7 +671,8 @@ class KadaiConfigurationTest {
     }
 
     @TestFactory
-    Stream<DynamicTest> should_SaveUnmodifiableCollections_For_CollectionsAsMapValues() {
+    Stream<DynamicTest> should_SaveUnmodifiableCollections_For_CollectionsAsMapValues()
+        throws Exception {
       // given
       KadaiConfiguration.Builder builder =
           new KadaiConfiguration.Builder(
@@ -718,7 +720,7 @@ class KadaiConfigurationTest {
     }
 
     @TestFactory
-    Stream<DynamicTest> should_SaveUnmodifiableMaps() {
+    Stream<DynamicTest> should_SaveUnmodifiableMaps() throws Exception {
       // given
       KadaiConfiguration.Builder builder =
           new KadaiConfiguration.Builder(
@@ -750,11 +752,11 @@ class KadaiConfigurationTest {
       return DynamicTest.stream(fields, Field::getName, testCase);
     }
 
-    private void initializeWithMutableCollections(Builder builder) {
+    private void initializeWithMutableCollections(Builder builder) throws Exception {
       ReflectionUtil.retrieveAllFields(Builder.class).stream()
           .filter(f -> Collection.class.isAssignableFrom(f.getType()))
           .forEach(
-              CheckedConsumer.wrap(
+              CheckedConsumer.rethrowing(
                   f -> {
                     f.setAccessible(true);
                     Supplier<Collection<?>> collectionSupplier =
@@ -767,18 +769,18 @@ class KadaiConfigurationTest {
                   }));
     }
 
-    private void initializeWithMutableMaps(Builder builder) {
+    private void initializeWithMutableMaps(Builder builder) throws Exception {
       ReflectionUtil.retrieveAllFields(Builder.class).stream()
           .filter(f -> Map.class.isAssignableFrom(f.getType()))
           .forEach(
-              CheckedConsumer.wrap(
+              CheckedConsumer.rethrowing(
                   f -> {
                     f.setAccessible(true);
                     f.set(builder, new HashMap<>());
                   }));
     }
 
-    private void initializeWithMutableCollectionsAsMapValues(Builder builder) {
+    private void initializeWithMutableCollectionsAsMapValues(Builder builder) throws Exception {
       ReflectionUtil.retrieveAllFields(Builder.class).stream()
           .filter(f -> Map.class.isAssignableFrom(f.getType()))
           .filter(
@@ -789,7 +791,7 @@ class KadaiConfigurationTest {
                 return Collection.class.isAssignableFrom(childClass);
               })
           .forEach(
-              CheckedConsumer.wrap(
+              CheckedConsumer.rethrowing(
                   f -> {
                     ParameterizedType genericType = (ParameterizedType) f.getGenericType();
                     Class<?> childClass =

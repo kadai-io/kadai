@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
 import io.kadai.common.rest.QueryParameter;
+import java.lang.reflect.Modifier;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
@@ -58,7 +59,11 @@ class SpringArchitectureTest {
       @Override
       public void check(JavaClass javaClass, ConditionEvents events) {
         javaClass.getAllFields().stream()
-            .filter(not(field -> field.reflect().isSynthetic()))
+            .filter(
+                not(
+                    field ->
+                        field.reflect().isSynthetic()
+                            || Modifier.isStatic(field.reflect().getModifiers())))
             .filter(
                 field ->
                     Stream.of(JsonProperty.class, JsonIgnore.class)

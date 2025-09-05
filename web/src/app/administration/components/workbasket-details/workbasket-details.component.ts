@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,19 +16,17 @@
  *
  */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { Observable, of, Subject, timeout } from 'rxjs';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { ACTION } from 'app/shared/models/action';
-import { DomainService } from 'app/shared/services/domain/domain.service';
-import { Actions, ofActionSuccessful, Select, Store } from '@ngxs/store';
+import { Actions, ofActionSuccessful, Store } from '@ngxs/store';
 import { catchError, filter, take, takeUntil } from 'rxjs/operators';
 import {
   WorkbasketAndComponentAndAction,
   WorkbasketSelectors
 } from '../../../shared/store/workbasket-store/workbasket.selectors';
-import { Location } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import {
   CopyWorkbasket,
   DeselectWorkbasket,
@@ -39,44 +37,52 @@ import {
   UpdateWorkbasketDistributionTargets
 } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { ButtonAction } from '../../models/button-action';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { cloneDeep } from 'lodash';
+import { MatToolbar } from '@angular/material/toolbar';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatTab, MatTabContent, MatTabGroup } from '@angular/material/tabs';
+import { WorkbasketInformationComponent } from '../workbasket-information/workbasket-information.component';
+import { WorkbasketAccessItemsComponent } from '../workbasket-access-items/workbasket-access-items.component';
+import { WorkbasketDistributionTargetsComponent } from '../workbasket-distribution-targets/workbasket-distribution-targets.component';
 
 @Component({
   selector: 'kadai-administration-workbasket-details',
   templateUrl: './workbasket-details.component.html',
   styleUrls: ['./workbasket-details.component.scss'],
-  standalone: false
+  imports: [
+    MatToolbar,
+    MatTooltip,
+    MatButton,
+    MatIcon,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuItem,
+    MatTabGroup,
+    MatTab,
+    WorkbasketInformationComponent,
+    WorkbasketAccessItemsComponent,
+    MatTabContent,
+    WorkbasketDistributionTargetsComponent,
+    AsyncPipe
+  ]
 })
 export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
   workbasket: Workbasket;
   action: ACTION;
-
-  @Select(WorkbasketSelectors.selectedComponent)
-  selectedTab$: Observable<number>;
-
-  @Select(WorkbasketSelectors.badgeMessage)
-  badgeMessage$: Observable<string>;
-
-  @Select(WorkbasketSelectors.selectedWorkbasketAndComponentAndAction)
-  selectedWorkbasketAndComponentAndAction$: Observable<WorkbasketAndComponentAndAction>;
-
-  @Select(WorkbasketSelectors.selectedWorkbasket)
-  selectedWorkbasket$: Observable<Workbasket>;
-
+  selectedTab$: Observable<number> = inject(Store).select(WorkbasketSelectors.selectedComponent);
+  badgeMessage$: Observable<string> = inject(Store).select(WorkbasketSelectors.badgeMessage);
+  selectedWorkbasketAndComponentAndAction$: Observable<WorkbasketAndComponentAndAction> = inject(Store).select(
+    WorkbasketSelectors.selectedWorkbasketAndComponentAndAction
+  );
+  selectedWorkbasket$: Observable<Workbasket> = inject(Store).select(WorkbasketSelectors.selectedWorkbasket);
   destroy$ = new Subject<void>();
-
   @Input() expanded: boolean;
-
-  constructor(
-    private location: Location,
-    private route: ActivatedRoute,
-    private router: Router,
-    private domainService: DomainService,
-    private requestInProgressService: RequestInProgressService,
-    private store: Store,
-    private ngxsActions$: Actions
-  ) {}
+  private store = inject(Store);
+  private ngxsActions$ = inject(Actions);
+  areAllAccessItemsValid = true;
 
   ngOnInit() {
     this.getWorkbasketFromStore();
@@ -143,6 +149,10 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
     this.store.dispatch(new OnButtonPressed(ButtonAction.SAVE));
   }
 
+  handleAccessItemsValidityChanged(isValid: boolean) {
+    this.areAllAccessItemsValid = isValid;
+  }
+
   onRestore() {
     this.store.dispatch(new OnButtonPressed(ButtonAction.UNDO));
   }
@@ -169,4 +179,6 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  protected readonly ACTION = ACTION;
 }

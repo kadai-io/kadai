@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import { WorkbasketSummary } from '../../models/workbasket-summary';
 import { WorkbasketSummaryRepresentation } from '../../models/workbasket-summary-representation';
 import { ACTION } from '../../models/action';
 import { WorkbasketAccessItemsRepresentation } from '../../models/workbasket-access-items-representation';
-import { WorkbasketDistributionTargets } from '../../models/workbasket-distribution-targets';
 import { Workbasket } from '../../models/workbasket';
 import { WorkbasketComponent } from '../../../administration/models/workbasket-component';
 import { ButtonAction } from '../../../administration/models/button-action';

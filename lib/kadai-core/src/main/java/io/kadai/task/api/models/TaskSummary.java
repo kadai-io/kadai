@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -295,21 +295,18 @@ public interface TaskSummary {
   boolean isManualPriorityActive();
 
   /**
+   * Returns whether the {@linkplain Task} has been previously reopened.
+   *
+   * @return true, if Tasks has been reopened before
+   */
+  boolean isReopened();
+
+  /**
    * Returns the count of the comments of the {@linkplain Task}.
    *
    * @return numberOfComments
    */
   int getNumberOfComments();
-
-  /**
-   * Returns the value of the specified {@linkplain TaskCustomField} of the {@linkplain Task}.
-   *
-   * @param customField identifies which {@linkplain TaskCustomField} is requested
-   * @return the value for the given customField
-   * @deprecated Use {@linkplain #getCustomField(TaskCustomField)} instead
-   */
-  @Deprecated
-  String getCustomAttribute(TaskCustomField customField);
 
   /**
    * Returns the value of the specified {@linkplain TaskCustomField} of the {@linkplain Task}.

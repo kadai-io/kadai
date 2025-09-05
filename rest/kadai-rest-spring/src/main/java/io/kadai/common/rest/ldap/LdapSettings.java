@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,11 +18,12 @@
 
 package io.kadai.common.rest.ldap;
 
+import static java.util.function.Predicate.not;
+
+import java.util.Arrays;
 import org.springframework.core.env.Environment;
 
-/**
- * Required settings to run ldap.
- */
+/** All possible settings for LDAP. */
 enum LdapSettings {
   KADAI_LDAP_USER_SEARCH_BASE("kadai.ldap.userSearchBase"),
   KADAI_LDAP_USER_SEARCH_FILTER_NAME("kadai.ldap.userSearchFilterName"),
@@ -53,18 +54,57 @@ enum LdapSettings {
   KADAI_LDAP_GROUP_ID_ATTRIBUTE("kadai.ldap.groupIdAttribute"),
   KADAI_LDAP_MIN_SEARCH_FOR_LENGTH("kadai.ldap.minSearchForLength"),
   KADAI_LDAP_MAX_NUMBER_OF_RETURNED_ACCESS_IDS("kadai.ldap.maxNumberOfReturnedAccessIds"),
-  KADAI_LDAP_GROUPS_OF_USER("kadai.ldap.groupsOfUser"),
   KADAI_LDAP_GROUPS_OF_USER_NAME("kadai.ldap.groupsOfUser.name"),
   KADAI_LDAP_GROUPS_OF_USER_TYPE("kadai.ldap.groupsOfUser.type"),
-  KADAI_LDAP_PERMISSIONS_OF_USER("kadai.ldap.permissionsOfUser"),
   KADAI_LDAP_PERMISSIONS_OF_USER_NAME("kadai.ldap.permissionsOfUser.name"),
   KADAI_LDAP_PERMISSIONS_OF_USER_TYPE("kadai.ldap.permissionsOfUser.type"),
   KADAI_LDAP_USE_DN_FOR_GROUPS("kadai.ldap.useDnForGroups");
+
+  public static final LdapSettings[] OPTIONAL_SETTINGS = {
+    KADAI_LDAP_MAX_NUMBER_OF_RETURNED_ACCESS_IDS,
+    KADAI_LDAP_MIN_SEARCH_FOR_LENGTH,
+    KADAI_LDAP_USER_EMAIL_ATTRIBUTE,
+    KADAI_LDAP_USER_PHONE_ATTRIBUTE,
+    KADAI_LDAP_USER_MOBILE_PHONE_ATTRIBUTE,
+    KADAI_LDAP_USER_ORG_LEVEL_1_ATTRIBUTE,
+    KADAI_LDAP_USER_ORG_LEVEL_2_ATTRIBUTE,
+    KADAI_LDAP_USER_ORG_LEVEL_3_ATTRIBUTE,
+    KADAI_LDAP_USER_ORG_LEVEL_4_ATTRIBUTE,
+    KADAI_LDAP_GROUPS_OF_USER_NAME,
+    KADAI_LDAP_GROUPS_OF_USER_TYPE,
+    KADAI_LDAP_PERMISSIONS_OF_USER_NAME,
+    KADAI_LDAP_PERMISSIONS_OF_USER_TYPE,
+    KADAI_LDAP_PERMISSION_ID_ATTRIBUTE,
+    KADAI_LDAP_PERMISSION_SEARCH_BASE,
+    KADAI_LDAP_PERMISSION_SEARCH_FILTER_NAME,
+    KADAI_LDAP_PERMISSION_SEARCH_FILTER_VALUE,
+    KADAI_LDAP_PERMISSION_NAME_ATTRIBUTE,
+    KADAI_LDAP_USER_PERMISSIONS_ATTRIBUTE,
+    KADAI_LDAP_GROUP_ID_ATTRIBUTE
+  };
+
+  public static final LdapSettings[] REQUIRED_SETTINGS =
+      Arrays.stream(values())
+          .filter(not(LdapSettings::isOptional))
+          .toList()
+          .toArray(new LdapSettings[0]);
 
   private final String key;
 
   LdapSettings(String key) {
     this.key = key;
+  }
+
+  public boolean in(LdapSettings... states) {
+    return Arrays.asList(states).contains(this);
+  }
+
+  public boolean isOptional() {
+    return in(OPTIONAL_SETTINGS);
+  }
+
+  public boolean isRequired() {
+    return in(REQUIRED_SETTINGS);
   }
 
   String getKey() {

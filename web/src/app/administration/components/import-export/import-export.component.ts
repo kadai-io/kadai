@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ClassificationDefinitionService } from 'app/administration/services/classification-definition.service';
 import { WorkbasketDefinitionService } from 'app/administration/services/workbasket-definition.service';
 import { DomainService } from 'app/shared/services/domain/domain.service';
@@ -26,6 +26,12 @@ import { NotificationService } from '../../../shared/services/notifications/noti
 import { Observable, Subject } from 'rxjs';
 import { HotToastService } from '@ngneat/hot-toast';
 import { takeUntil } from 'rxjs/operators';
+import { MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { FormsModule } from '@angular/forms';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { AsyncPipe } from '@angular/common';
 
 /**
  * Recommendation: Turn this component into presentational component - no logic, instead events are
@@ -36,26 +42,21 @@ import { takeUntil } from 'rxjs/operators';
   selector: 'kadai-administration-import-export',
   templateUrl: './import-export.component.html',
   styleUrls: ['./import-export.component.scss'],
-  standalone: false
+  imports: [MatButton, MatTooltip, MatIcon, FormsModule, MatMenuTrigger, MatMenu, MatMenuItem, AsyncPipe]
 })
 export class ImportExportComponent implements OnInit, OnDestroy {
   @Input() currentSelection: KadaiType;
   @Input() parentComponent: string;
-
   @ViewChild('selectedFile', { static: true })
   selectedFileInput;
-
   domains$: Observable<string[]>;
   destroy$ = new Subject<void>();
-
-  constructor(
-    private domainService: DomainService,
-    private workbasketDefinitionService: WorkbasketDefinitionService,
-    private classificationDefinitionService: ClassificationDefinitionService,
-    private notificationService: NotificationService,
-    private importExportService: ImportExportService,
-    private hotToastService: HotToastService
-  ) {}
+  private domainService = inject(DomainService);
+  private workbasketDefinitionService = inject(WorkbasketDefinitionService);
+  private classificationDefinitionService = inject(ClassificationDefinitionService);
+  private notificationService = inject(NotificationService);
+  private importExportService = inject(ImportExportService);
+  private hotToastService = inject(HotToastService);
 
   ngOnInit() {
     this.domains$ = this.domainService.getDomains();
@@ -109,6 +110,11 @@ export class ImportExportComponent implements OnInit, OnDestroy {
     this.resetProgress();
   }
 
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   private checkFormatFile(file): boolean {
     const ending = file.name.match(/\.([^.]+)$/)[1];
     let check = false;
@@ -123,10 +129,5 @@ export class ImportExportComponent implements OnInit, OnDestroy {
 
   private resetProgress() {
     this.selectedFileInput.nativeElement.value = '';
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

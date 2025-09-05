@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 package io.kadai.spi.history.internal;
 
 import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.internal.util.CheckedConsumer;
 import io.kadai.common.internal.util.LogSanitizer;
 import io.kadai.common.internal.util.SpiLoader;
@@ -56,7 +57,7 @@ public final class HistoryEventManager {
       LOGGER.debug(
           "Sending {} to history service providers: {}", event.getClass().getSimpleName(), event);
     }
-    kadaiHistories.forEach(CheckedConsumer.wrap(historyProvider -> historyProvider.create(event)));
+    kadaiHistories.forEach(historyProvider -> historyProvider.create(event));
   }
 
   public void createEvent(WorkbasketHistoryEvent event) {
@@ -66,7 +67,7 @@ public final class HistoryEventManager {
           event.getClass().getSimpleName(),
           LogSanitizer.stripLineBreakingChars(event));
     }
-    kadaiHistories.forEach(CheckedConsumer.wrap(historyProvider -> historyProvider.create(event)));
+    kadaiHistories.forEach(historyProvider -> historyProvider.create(event));
   }
 
   public void createEvent(ClassificationHistoryEvent event) {
@@ -75,10 +76,10 @@ public final class HistoryEventManager {
           "Sending {} to history service providers: {}", event.getClass().getSimpleName(), event);
     }
 
-    kadaiHistories.forEach(CheckedConsumer.wrap(historyProvider -> historyProvider.create(event)));
+    kadaiHistories.forEach(historyProvider -> historyProvider.create(event));
   }
 
-  public void deleteEvents(List<String> taskIds) {
+  public void deleteEvents(List<String> taskIds) throws NotAuthorizedException {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug(
           "Sending taskIds to history service providers: {}",
@@ -86,7 +87,7 @@ public final class HistoryEventManager {
     }
 
     kadaiHistories.forEach(
-        CheckedConsumer.wrap(
+        CheckedConsumer.rethrowing(
             historyProvider -> historyProvider.deleteHistoryEventsByTaskIds(taskIds)));
   }
 }
