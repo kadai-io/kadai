@@ -37,6 +37,7 @@ import io.kadai.common.internal.util.Pair;
 import io.kadai.task.api.TaskCustomField;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.TaskState;
+import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.models.Attachment;
 import io.kadai.task.api.models.AttachmentSummary;
@@ -221,7 +222,7 @@ class CreateTaskAccTest {
     task.setDue(due);
 
     assertThatThrownBy(() -> taskService.createTask(task))
-        .isInstanceOf(InvalidArgumentException.class)
+        .isInstanceOf(ServiceLevelViolationException.class)
         .hasMessageContaining("not matching the service level");
   }
 

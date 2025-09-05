@@ -24,10 +24,10 @@ import static java.util.stream.Collectors.groupingBy;
 import io.kadai.classification.api.models.ClassificationSummary;
 import io.kadai.common.api.BulkOperationResults;
 import io.kadai.common.api.WorkingTimeCalculator;
-import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.util.Pair;
+import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.models.Attachment;
 import io.kadai.task.api.models.AttachmentSummary;
 import io.kadai.task.api.models.Task;
@@ -126,7 +126,7 @@ class ServiceLevelHandler {
   // TODO: Is it worth splitting the logic of this method into two separate methods one for
   //  creating new task the other for updating a task.
   TaskImpl updatePrioPlannedDueOfTask(TaskImpl newTaskImpl, TaskImpl oldTaskImpl)
-      throws InvalidArgumentException {
+      throws ServiceLevelViolationException {
     boolean onlyPriority = false;
     if (newTaskImpl.getClassificationSummary() == null
         || newTaskImpl.getClassificationSummary().getServiceLevel() == null) {
@@ -266,7 +266,7 @@ class ServiceLevelHandler {
 
   private TaskImpl updatePlannedDueOnTaskUpdate(
       TaskImpl newTaskImpl, TaskImpl oldTaskImpl, Duration duration)
-      throws InvalidArgumentException {
+      throws ServiceLevelViolationException {
     // TODO pull this one out and in updatePlannedDueOnCreationOfNewTask, too.
     if (!kadaiEngine.getEngine().getConfiguration().isEnforceServiceLevel()
         && newTaskImpl.getDue() != null
@@ -297,7 +297,7 @@ class ServiceLevelHandler {
 
   private void recalcPlannedBasedOnDue(
       TaskImpl newTaskImpl, TaskImpl oldTaskImpl, Duration duration)
-      throws InvalidArgumentException {
+      throws ServiceLevelViolationException {
     Instant calcDue = normalizeDue(newTaskImpl.getDue());
     Instant calcPlanned = calculatePlanned(calcDue, duration);
     if (plannedHasChanged(newTaskImpl, oldTaskImpl)) {
@@ -381,10 +381,10 @@ class ServiceLevelHandler {
    * @param task the task for the difference between planned and due must be duration
    * @param duration the serviceLevel for the task
    * @param calcPlanned the planned timestamp that was calculated based on due and duration
-   * @throws InvalidArgumentException if service level is violated.
+   * @throws ServiceLevelViolationException if service level is violated.
    */
   private void ensureServiceLevelIsNotViolated(
-      TaskImpl task, Duration duration, Instant calcPlanned) throws InvalidArgumentException {
+      TaskImpl task, Duration duration, Instant calcPlanned) throws ServiceLevelViolationException {
     if (task.getPlanned() != null
         && !task.getPlanned().equals(calcPlanned)
         // We allow a diff of at most one millisecond, because calcPlanned is based on due date
@@ -394,16 +394,12 @@ class ServiceLevelHandler {
                 .workingTimeBetween(task.getPlanned(), calcPlanned)
                 .compareTo(Duration.ofMillis(1))
             > 0)) {
-      throw new InvalidArgumentException(
-          String.format(
-              "Cannot update a task with given planned %s "
-                  + "and due date %s not matching the service level %s.",
-              task.getPlanned(), task.getDue(), duration));
+      throw new ServiceLevelViolationException(task.getPlanned(), task.getDue(), duration);
     }
   }
 
   private TaskImpl updatePlannedDueOnCreationOfNewTask(TaskImpl newTask, Duration duration)
-      throws InvalidArgumentException {
+      throws ServiceLevelViolationException {
     if (!kadaiEngine.getEngine().getConfiguration().isEnforceServiceLevel()
         && newTask.getDue() != null
         && newTask.getPlanned() != null) {
