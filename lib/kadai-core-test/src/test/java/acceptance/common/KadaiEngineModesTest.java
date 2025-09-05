@@ -40,18 +40,18 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-public class KadaiEngineModesTest {
+class KadaiEngineModesTest {
 
   @Nested
   @TestInstance(Lifecycle.PER_CLASS)
-  public class KadaiEngineParticipateModeTest {
+  class KadaiEngineParticipateModeTest {
 
     private KadaiEngineProxy thisKadaiEngineProxy;
     private KadaiEngineProxy thatKadaiEngineProxy;
     private TransactionTemplate transactionTemplate;
 
     @BeforeEach
-    public void setupKadaiEngines() throws Exception {
+    void setupKadaiEngines() throws Exception {
       String schemaName = TestContainerExtension.determineSchemaName();
       DataSource dataSource = TestContainerExtension.DATA_SOURCE;
       KadaiConfiguration kadaiConfiguration =
@@ -137,7 +137,7 @@ public class KadaiEngineModesTest {
     private KadaiEngineProxy thatKadaiEngineProxy;
 
     @BeforeEach
-    public void setupKadaiEngines() throws Exception {
+    void setupKadaiEngines() throws Exception {
       String schemaName = TestContainerExtension.determineSchemaName();
       DataSource dataSource = TestContainerExtension.DATA_SOURCE;
       KadaiConfiguration kadaiConfiguration =
@@ -185,7 +185,7 @@ public class KadaiEngineModesTest {
     private KadaiEngineProxy thatKadaiEngineProxy;
 
     @BeforeEach
-    public void setupKadaiEngines() throws Exception {
+    void setupKadaiEngines() throws Exception {
       String schemaName = TestContainerExtension.determineSchemaName();
       DataSource dataSource = TestContainerExtension.DATA_SOURCE;
       KadaiConfiguration kadaiConfiguration =

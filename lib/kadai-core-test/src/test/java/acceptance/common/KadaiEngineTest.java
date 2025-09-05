@@ -36,7 +36,7 @@ class KadaiEngineTest {
   private KadaiEngine kadaiEngine;
 
   @BeforeEach
-  public void setupKadaiEngine() throws Exception {
+  void setupKadaiEngine() throws Exception {
     String schemaName = TestContainerExtension.determineSchemaName();
     DataSource dataSource = TestContainerExtension.DATA_SOURCE;
     KadaiConfiguration kadaiConfiguration =
