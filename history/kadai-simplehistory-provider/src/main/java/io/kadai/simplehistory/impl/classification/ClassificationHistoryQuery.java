@@ -168,8 +168,8 @@ public interface ClassificationHistoryQuery
       ClassificationCustomField customField, String... searchArguments);
 
   /**
-   * Add your eventType to your query. It will be compared in SQL with an LIKE. If you use a
-   * wildcard like % then it will be transmitted to the database.
+   * Add your eventType to your query. It will be compared in SQL with a LIKE. If you use a wildcard
+   * like % then it will be transmitted to the database.
    *
    * @param eventTypes as String
    * @return the query
@@ -177,7 +177,7 @@ public interface ClassificationHistoryQuery
   ClassificationHistoryQuery eventTypeLike(String... eventTypes);
 
   /**
-   * Add your userId to your query. It will be compared in SQL with an LIKE. If you use a wildcard
+   * Add your userId to your query. It will be compared in SQL with a LIKE. If you use a wildcard
    * like % then it will be transmitted to the database.
    *
    * @param userIds as String
@@ -186,7 +186,7 @@ public interface ClassificationHistoryQuery
   ClassificationHistoryQuery userIdLike(String... userIds);
 
   /**
-   * Add your proxyAccessIds to your query. It will be compared in SQL with an LIKE. If you use a
+   * Add your proxyAccessIds to your query. It will be compared in SQL with a LIKE. If you use a
    * wildcard like % then it will be transmitted to the database.
    *
    * @param proxyAccessIds as String
@@ -195,7 +195,7 @@ public interface ClassificationHistoryQuery
   ClassificationHistoryQuery proxyAccessIdLike(String... proxyAccessIds);
 
   /**
-   * Add your classificationId to your query. It will be compared in SQL with an LIKE. If you use a
+   * Add your classificationId to your query. It will be compared in SQL with a LIKE. If you use a
    * wildcard like % then it will be transmitted to the database.
    *
    * @param classificationIds as String
@@ -204,7 +204,7 @@ public interface ClassificationHistoryQuery
   ClassificationHistoryQuery classificationIdLike(String... classificationIds);
 
   /**
-   * Add your applicationEntryPoint to your query. It will be compared in SQL with an LIKE. If you
+   * Add your applicationEntryPoint to your query. It will be compared in SQL with a LIKE. If you
    * use a * wildcard like % then it will be transmitted to the database.
    *
    * @param applicationEntryPoints name of the applications entrypoint
@@ -213,7 +213,7 @@ public interface ClassificationHistoryQuery
   ClassificationHistoryQuery applicationEntryPointLike(String... applicationEntryPoints);
 
   /**
-   * Add your category to your query. It will be compared in SQL with an LIKE. If you use a wildcard
+   * Add your category to your query. It will be compared in SQL with a LIKE. If you use a wildcard
    * like % then it will be transmitted to the database.
    *
    * @param categories as String
@@ -222,7 +222,7 @@ public interface ClassificationHistoryQuery
   ClassificationHistoryQuery categoryLike(String... categories);
 
   /**
-   * Add your domain to your query. It will be compared in SQL with an LIKE. If you use a wildcard
+   * Add your domain to your query. It will be compared in SQL with a LIKE. If you use a wildcard
    * like % then it will be transmitted to the database.
    *
    * @param domains as String
@@ -231,7 +231,7 @@ public interface ClassificationHistoryQuery
   ClassificationHistoryQuery domainLike(String... domains);
 
   /**
-   * Add your key to your query. It will be compared in SQL with an LIKE. If you use a wildcard like
+   * Add your key to your query. It will be compared in SQL with a LIKE. If you use a wildcard like
    * % then it will be transmitted to the database.
    *
    * @param keys as String
@@ -240,8 +240,8 @@ public interface ClassificationHistoryQuery
   ClassificationHistoryQuery keyLike(String... keys);
 
   /**
-   * Add your name to your query. It will be compared in SQL with an LIKE. If you use a wildcard
-   * like % then it will be transmitted to the database.
+   * Add your name to your query. It will be compared in SQL with a LIKE. If you use a wildcard like
+   * % then it will be transmitted to the database.
    *
    * @param names as String
    * @return the query
@@ -249,7 +249,7 @@ public interface ClassificationHistoryQuery
   ClassificationHistoryQuery nameLike(String... names);
 
   /**
-   * Add your parentId to your query. It will be compared in SQL with an LIKE. If you use a wildcard
+   * Add your parentId to your query. It will be compared in SQL with a LIKE. If you use a wildcard
    * like % then it will be transmitted to the database.
    *
    * @param parentIds as String
@@ -258,8 +258,8 @@ public interface ClassificationHistoryQuery
   ClassificationHistoryQuery parentIdLike(String... parentIds);
 
   /**
-   * Add your parentKey to your query. It will be compared in SQL with an LIKE. If you use a
-   * wildcard like % then it will be transmitted to the database.
+   * Add your parentKey to your query. It will be compared in SQL with a LIKE. If you use a wildcard
+   * like % then it will be transmitted to the database.
    *
    * @param parentKeys as String
    * @return the query
@@ -267,7 +267,7 @@ public interface ClassificationHistoryQuery
   ClassificationHistoryQuery parentKeyLike(String... parentKeys);
 
   /**
-   * Add your serviceLevel to your query. It will be compared in SQL with an LIKE. If you use a
+   * Add your serviceLevel to your query. It will be compared in SQL with a LIKE. If you use a
    * wildcard like % then it will be transmitted to the database.
    *
    * @param serviceLevels as String
@@ -276,8 +276,8 @@ public interface ClassificationHistoryQuery
   ClassificationHistoryQuery serviceLevelLike(String... serviceLevels);
 
   /**
-   * Add your type to your query. It will be compared in SQL with an LIKE. If you use a wildcard
-   * like % then it will be transmitted to the database.
+   * Add your type to your query. It will be compared in SQL with a LIKE. If you use a wildcard like
+   * % then it will be transmitted to the database.
    *
    * @param types as String
    * @return the query
