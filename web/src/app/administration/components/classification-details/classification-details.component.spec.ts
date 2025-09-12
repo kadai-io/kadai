@@ -18,7 +18,7 @@
 
 import { DebugElement } from '@angular/core';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
-import { EMPTY, Observable, of } from 'rxjs';
+import { EMPTY, Observable, of, Subject } from 'rxjs';
 import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { ComponentFixture, fakeAsync, flush, TestBed, tick, waitForAsync } from '@angular/core/testing';
@@ -35,9 +35,12 @@ import {
   RemoveSelectedClassification,
   RestoreSelectedClassification,
   SaveCreatedClassification,
-  SaveModifiedClassification
+  SaveModifiedClassification,
+  DeselectClassification,
+  SelectClassification
 } from '../../../shared/store/classification-store/classification.actions';
 import { By } from '@angular/platform-browser';
+import { ImportExportService } from '../../services/import-export.service';
 
 jest.mock('angular-svg-icon');
 
@@ -73,6 +76,12 @@ const notificationServiceSpy: Partial<NotificationService> = {
   showDialog: jest.fn()
 };
 
+const importingFinished$ = new Subject<boolean>();
+const importExportServiceMock: Partial<ImportExportService> = {
+  getImportingFinished: jest.fn().mockReturnValue(importingFinished$.asObservable()),
+  setImportingFinished: jest.fn((v: boolean) => importingFinished$.next(v))
+};
+
 describe('ClassificationDetailsComponent', () => {
   let fixture: ComponentFixture<ClassificationDetailsComponent>;
   let debugElement: DebugElement;
@@ -89,7 +98,8 @@ describe('ClassificationDetailsComponent', () => {
         { provide: ClassificationCategoriesService, useValue: classificationCategoriesServiceSpy },
         { provide: DomainService, useValue: domainServiceSpy },
         { provide: FormsValidatorService, useValue: formsValidatorServiceSpy },
-        { provide: NotificationService, useValue: notificationServiceSpy }
+        { provide: NotificationService, useValue: notificationServiceSpy },
+        { provide: ImportExportService, useValue: importExportServiceMock }
       ]
     }).compileComponents();
 
@@ -365,4 +375,37 @@ describe('ClassificationDetailsComponent', () => {
     expect(component.classification['custom3']).toBe(undefined);
     expect(component.classification['custom4']).toBe(newValue);
   }));
+
+  it('should dispatch DeselectClassification when onCloseClassification() is called', () => {
+    let dispatched = false;
+    actions$.pipe(ofActionDispatched(DeselectClassification)).subscribe(() => (dispatched = true));
+    component.onCloseClassification();
+    expect(dispatched).toBe(true);
+  });
+
+  it('should dispatch SelectClassification when import finished event is emitted', () => {
+    let dispatched = false;
+    actions$.pipe(ofActionDispatched(SelectClassification)).subscribe(() => (dispatched = true));
+    (importExportServiceMock.setImportingFinished as any)(true);
+    expect(dispatched).toBe(true);
+  });
+
+  it('should handle error on saving modified classification and call afterRequest()', async () => {
+    component.classification = { classificationId: 'ID01', key: 'K01' } as any;
+    const storeInstance = TestBed.inject(Store);
+    const dispatchSpy = jest.spyOn(storeInstance, 'dispatch').mockImplementation((): any => {
+      throw new Error('BOOM');
+    });
+    const reqService = TestBed.inject(RequestInProgressService);
+    const setReqSpy = jest.spyOn(reqService, 'setRequestInProgress');
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    await component.onSave();
+
+    expect(consoleSpy).toHaveBeenCalled();
+    expect(setReqSpy).toHaveBeenLastCalledWith(false);
+
+    dispatchSpy.mockRestore();
+    consoleSpy.mockRestore();
+  });
 });
