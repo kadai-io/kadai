@@ -25,6 +25,7 @@ import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
 
 /** HistoryQuery for generating dynamic sql. */
+@SuppressWarnings("unused")
 public interface ClassificationHistoryQuery
     extends BaseQuery<ClassificationHistoryEvent, ClassificationHistoryQueryColumnName> {
 
