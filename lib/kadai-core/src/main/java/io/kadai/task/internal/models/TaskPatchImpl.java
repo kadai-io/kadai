@@ -17,9 +17,6 @@ import java.util.stream.Collectors;
 /** Internal model for Task patch operations. All fields are nullable to support partial updates. */
 public class TaskPatchImpl implements TaskPatch {
 
-  // Base fields - all nullable
-  private String id;
-  private String externalId;
   private Instant received;
   private Instant created;
   private Instant claimed;
@@ -79,23 +76,6 @@ public class TaskPatchImpl implements TaskPatch {
   private Map<String, String> callbackInfo;
   private CallbackState callbackState;
   private List<Attachment> attachments;
-
-  // Getters and setters for all fields
-  public String getId() {
-    return id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  public String getExternalId() {
-    return externalId;
-  }
-
-  public void setExternalId(String externalId) {
-    this.externalId = externalId;
-  }
 
   public Instant getPlanned() {
     return planned;
@@ -563,13 +543,6 @@ public class TaskPatchImpl implements TaskPatch {
       return null;
     }
 
-    // Base/scalar fields
-    if (id != null) {
-      task.setId(id);
-    }
-    if (externalId != null) {
-      task.setExternalId(externalId);
-    }
     if (received != null) {
       task.setReceived(received);
     }
@@ -631,7 +604,6 @@ public class TaskPatchImpl implements TaskPatch {
       task.setPrimaryObjRef(primaryObjRef);
     }
 
-    // Summary booleans and numbers
     if (priority != null) {
       task.setPriority(priority);
     }
@@ -734,7 +706,6 @@ public class TaskPatchImpl implements TaskPatch {
       task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_8, customInt8);
     }
 
-    // Maps and attachments
     if (customAttributes != null) {
       task.setCustomAttributeMap(customAttributes);
     }

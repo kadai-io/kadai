@@ -335,8 +335,6 @@ class TaskRepresentationModelAssemblerTest {
   void should_ReturnTaskPatch_When_ConvertingTaskPatchRepresentationModelWithAllFields() {
     // given
     TaskPatchRepresentationModel repModel = new TaskPatchRepresentationModel();
-    repModel.setTaskId("TKI:123");
-    repModel.setExternalId("EXT-123");
     repModel.setReceived(Instant.parse("2024-01-01T10:00:00.000Z"));
     repModel.setCreated(Instant.parse("2024-01-01T11:00:00.000Z"));
     repModel.setClaimed(Instant.parse("2024-01-01T12:00:00.000Z"));
@@ -444,12 +442,10 @@ class TaskRepresentationModelAssemblerTest {
     repModel.setAttachments(List.of(attachment));
 
     // when
-    TaskPatchImpl taskPatchImpl = assembler.toPatchModel(repModel);
+    TaskPatchImpl taskPatchImpl = assembler.toPatchImpl(repModel);
 
     // then
     assertThat(taskPatchImpl).isNotNull();
-    assertThat(taskPatchImpl.getId()).isEqualTo("TKI:123");
-    assertThat(taskPatchImpl.getExternalId()).isEqualTo("EXT-123");
     assertThat(taskPatchImpl.getReceived()).isEqualTo(Instant.parse("2024-01-01T10:00:00.000Z"));
     assertThat(taskPatchImpl.getCreated()).isEqualTo(Instant.parse("2024-01-01T11:00:00.000Z"));
     assertThat(taskPatchImpl.getClaimed()).isEqualTo(Instant.parse("2024-01-01T12:00:00.000Z"));
@@ -543,7 +539,7 @@ class TaskRepresentationModelAssemblerTest {
     repModel.setPriority(100);
 
     // when
-    TaskPatchImpl taskPatchImpl = assembler.toPatchModel(repModel);
+    TaskPatchImpl taskPatchImpl = assembler.toPatchImpl(repModel);
 
     // then
     assertThat(taskPatchImpl).isNotNull();
@@ -551,8 +547,6 @@ class TaskRepresentationModelAssemblerTest {
     assertThat(taskPatchImpl.getPriority()).isEqualTo(100);
 
     // Verify null fields are not set
-    assertThat(taskPatchImpl.getId()).isNull();
-    assertThat(taskPatchImpl.getExternalId()).isNull();
     assertThat(taskPatchImpl.getReceived()).isNull();
     assertThat(taskPatchImpl.getCreated()).isNull();
     assertThat(taskPatchImpl.getClaimed()).isNull();
