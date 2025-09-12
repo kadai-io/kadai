@@ -1475,16 +1475,15 @@ public interface TaskService {
   /**
    * Adds the given comment text to all {@linkplain Task Tasks} identified by the provided ids.
    *
-   * @param taskIds {@linkplain Task#getId() ids} of the {@linkplain Task Tasks}
-   *        that should receive the comment.
+   * @param taskIds {@linkplain Task#getId() ids} of the {@linkplain Task Tasks} that should receive
+   *     the comment.
    * @param text the comment text to add to each task.
-   * @return the result of the operation with each {@linkplain Task#getId() id} mapped to a
-   *         {@link KadaiException} if adding the comment failed (empty if all succeeded).
+   * @return the result of the operation with each {@linkplain Task#getId() id} mapped to a {@link
+   *     KadaiException} if adding the comment failed (empty if all succeeded).
    * @throws InvalidArgumentException if {@code taskIds} or {@code text} is {@code null}.
    */
   BulkOperationResults<String, KadaiException> createTaskCommentsBulk(
-          List<String> taskIds, String text)
-          throws InvalidArgumentException;
+      List<String> taskIds, String text) throws InvalidArgumentException;
 
   // endregion
 
@@ -1643,9 +1642,8 @@ public interface TaskService {
   /**
    * Bulk updates multiple tasks by their IDs.
    *
-   * <p>Updates only the specified fields for each task. If the user lacks permission for a task,
-   * that task is skipped and an error is reported for it, but other tasks are still updated. The
-   * update is performed in a single database statement for all permitted tasks.
+   * <p>Updates only the specified fields for each task. If a task fails to be updated, e.g. due to
+   * missing permission of the user, an error is reported for it, but other tasks are still updated.
    *
    * @param taskIds list of task Ids to be updated
    * @param taskPatch contains the fields and values to be updated

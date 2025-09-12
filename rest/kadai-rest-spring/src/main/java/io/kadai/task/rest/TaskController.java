@@ -116,6 +116,7 @@ public class TaskController implements TaskApi {
       throws WorkbasketNotFoundException,
           ClassificationNotFoundException,
           TaskAlreadyExistException,
+          InvalidArgumentException,
           ServiceLevelViolationException,
           AttachmentPersistenceException,
           ObjectReferencePersistenceException,
@@ -555,7 +556,7 @@ public class TaskController implements TaskApi {
     }
 
     TaskPatchImpl taskPatchImpl =
-        taskRepresentationModelAssembler.toPatchModel(requestModel.getFieldsToUpdate());
+        taskRepresentationModelAssembler.toPatchImpl(requestModel.getFieldsToUpdate());
 
     BulkOperationResults<String, KadaiException> result =
         taskService.bulkUpdateTasks(requestModel.getTaskIds(), taskPatchImpl);

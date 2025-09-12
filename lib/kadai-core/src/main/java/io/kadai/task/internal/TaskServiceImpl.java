@@ -1057,9 +1057,7 @@ public class TaskServiceImpl implements TaskService {
 
   @Override
   public BulkOperationResults<String, KadaiException> createTaskCommentsBulk(
-      List<String> taskIds,
-      String text
-  ) throws InvalidArgumentException {
+      List<String> taskIds, String text) throws InvalidArgumentException {
     return taskCommentService.createTaskCommentsBulk(taskIds, text);
   }
 
@@ -2610,14 +2608,15 @@ public class TaskServiceImpl implements TaskService {
         try {
           TaskImpl oldTaskImpl = (TaskImpl) getTask(taskId);
           if (!checkEditTasksPerm(oldTaskImpl)) {
-            throw new NotAuthorizedOnWorkbasketException(
-                kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
-                oldTaskImpl.getWorkbasketSummary().getId(),
-                WorkbasketPermission.EDITTASKS);
+            bulkLog.addError(
+                taskId,
+                new NotAuthorizedOnWorkbasketException(
+                    kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                    oldTaskImpl.getWorkbasketSummary().getId(),
+                    WorkbasketPermission.EDITTASKS));
           }
           TaskPatchImpl taskPatchImpl = (TaskPatchImpl) taskPatch;
-          TaskImpl newTaskImpl =
-              taskPatchImpl.toTaskImpl(duplicateTaskExactly(oldTaskImpl));
+          TaskImpl newTaskImpl = taskPatchImpl.toTaskImpl(duplicateTaskExactly(oldTaskImpl));
           attachmentHandler.insertAndDeleteAttachmentsOnTaskUpdate(newTaskImpl, oldTaskImpl);
           objectReferenceHandler.insertAndDeleteObjectReferencesOnTaskUpdate(
               newTaskImpl, oldTaskImpl);

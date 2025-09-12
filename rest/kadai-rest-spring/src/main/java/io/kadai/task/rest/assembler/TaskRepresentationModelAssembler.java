@@ -236,19 +236,12 @@ public class TaskRepresentationModelAssembler
     }
   }
 
-  public TaskPatchImpl toPatchModel(TaskPatchRepresentationModel repModel) {
+  public TaskPatchImpl toPatchImpl(TaskPatchRepresentationModel repModel) {
     if (repModel.getCustomAttributes() != null) {
       verifyCorrectCustomAttributesFormat(repModel.getCustomAttributes());
     }
     TaskPatchImpl taskPatchImpl = new TaskPatchImpl();
 
-    // Base fields - only set if not null
-    if (repModel.getTaskId() != null) {
-      taskPatchImpl.setId(repModel.getTaskId());
-    }
-    if (repModel.getExternalId() != null) {
-      taskPatchImpl.setExternalId(repModel.getExternalId());
-    }
     if (repModel.getReceived() != null) {
       taskPatchImpl.setReceived(repModel.getReceived());
     }

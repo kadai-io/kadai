@@ -145,15 +145,9 @@ public interface TaskApi {
             }),
         @ApiResponse(
             responseCode = "400",
-            description = "INVALID_ARGUMENT, SERVICE_LEVEL_VIOLATION",
+            description = "INVALID_ARGUMENT",
             content = {
-              @Content(
-                  schema =
-                      @Schema(
-                          anyOf = {
-                            InvalidArgumentException.class,
-                            ServiceLevelViolationException.class
-                          }))
+              @Content(schema = @Schema(implementation = InvalidArgumentException.class))
             }),
         @ApiResponse(
             responseCode = "403",
@@ -190,7 +184,14 @@ public interface TaskApi {
                             AttachmentPersistenceException.class,
                             ObjectReferencePersistenceException.class
                           }))
-            })
+            }),
+          @ApiResponse(
+              responseCode = "422",
+              description =
+                  "SERVICE_LEVEL_VIOLATION",
+              content = {
+                  @Content(schema = @Schema(implementation = ServiceLevelViolationException.class))
+              })
       })
   @PostMapping(path = RestEndpoints.URL_TASKS)
   @Transactional(rollbackFor = Exception.class)
@@ -199,6 +200,7 @@ public interface TaskApi {
       throws WorkbasketNotFoundException,
           ClassificationNotFoundException,
           TaskAlreadyExistException,
+          InvalidArgumentException,
           ServiceLevelViolationException,
           AttachmentPersistenceException,
           ObjectReferencePersistenceException,
@@ -1678,15 +1680,14 @@ public interface TaskApi {
                     schema = @Schema(implementation = TaskRepresentationModel.class))),
         @ApiResponse(
             responseCode = "400",
-            description = "INVALID_ARGUMENT, TASK_INVALID_STATE, SERVICE_LEVEL_VIOLATION",
+            description = "INVALID_ARGUMENT, TASK_INVALID_STATE",
             content = {
               @Content(
                   schema =
                       @Schema(
                           anyOf = {
                             InvalidArgumentException.class,
-                            InvalidTaskStateException.class,
-                            ServiceLevelViolationException.class
+                            InvalidTaskStateException.class
                           }))
             }),
         @ApiResponse(
@@ -1725,6 +1726,13 @@ public interface TaskApi {
                             ObjectReferencePersistenceException.class
                           }))
             }),
+          @ApiResponse(
+              responseCode = "422",
+              description =
+                  "SERVICE_LEVEL_VIOLATION",
+              content = {
+                  @Content(schema = @Schema(implementation = ServiceLevelViolationException.class))
+              })
       })
   @PutMapping(path = RestEndpoints.URL_TASKS_ID)
   @Transactional(rollbackFor = Exception.class)
