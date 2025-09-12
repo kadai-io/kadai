@@ -76,7 +76,6 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
   requestInProgress = true;
   inputValue: string;
   selectedCategory = '';
-  classificationTypes$: Observable<string[]> = inject(Store).select(ClassificationSelectors.classificationTypes);
   classificationTypeSelected$: Observable<string> = inject(Store).select(
     ClassificationSelectors.selectedClassificationType
   );
