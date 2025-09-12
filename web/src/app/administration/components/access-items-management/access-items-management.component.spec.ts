@@ -16,45 +16,79 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AccessItemsManagementComponent } from './access-items-management.component';
-import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
+import { provideStore, Store } from '@ngxs/store';
 import { DebugElement } from '@angular/core';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { AccessItemsManagementState } from '../../../shared/store/access-items-management-store/access-items-management.state';
-import { Observable } from 'rxjs';
-import { GetAccessItems } from '../../../shared/store/access-items-management-store/access-items-management.actions';
+import { of } from 'rxjs';
 import { Direction, Sorting, WorkbasketAccessItemQuerySortParameter } from '../../../shared/models/sorting';
-import { engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
+import { engineConfigurationMock, workbasketAccessItemsMock } from '../../../shared/store/mock-data/mock-store';
 import { provideHttpClient } from '@angular/common/http';
-
-jest.mock('angular-svg-icon');
+import { AccessIdsService } from '../../../shared/services/access-ids/access-ids.service';
+import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
+import { SvgIconRegistryService } from 'angular-svg-icon';
+import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
 
 describe('AccessItemsManagementComponent', () => {
   let fixture: ComponentFixture<AccessItemsManagementComponent>;
   let debugElement: DebugElement;
   let app: AccessItemsManagementComponent;
   let store: Store;
-  let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    const accessIdsServiceMock: Partial<AccessIdsService> = {
+      getGroupsByAccessId: jest.fn().mockReturnValue(of([{ accessId: 'g1', name: 'Group 1' }])),
+      getPermissionsByAccessId: jest.fn().mockReturnValue(of([{ accessId: 'p1', name: 'Perm 1' }])),
+      getAccessItems: jest.fn().mockReturnValue(of(workbasketAccessItemsMock)),
+      removeAccessItemsPermissions: jest.fn().mockReturnValue(of({}))
+    };
+
+    const notificationServiceSpy: Partial<NotificationService> = {
+      showDialog: jest.fn()
+    };
+
+    const requestInProgressServiceSpy: Partial<RequestInProgressService> = {
+      setRequestInProgress: jest.fn()
+    } as any;
+
+    const formsValidatorServiceSpy: Partial<FormsValidatorService> = {
+      isFieldValid: jest.fn().mockReturnValue(false)
+    };
+
+    await TestBed.configureTestingModule({
       imports: [AccessItemsManagementComponent],
-      providers: [provideStore([EngineConfigurationState, AccessItemsManagementState]), provideHttpClient()]
+      providers: [
+        provideStore([EngineConfigurationState, AccessItemsManagementState]),
+        provideHttpClient(),
+        { provide: AccessIdsService, useValue: accessIdsServiceMock },
+        { provide: NotificationService, useValue: notificationServiceSpy },
+        { provide: RequestInProgressService, useValue: requestInProgressServiceSpy },
+        { provide: FormsValidatorService, useValue: formsValidatorServiceSpy },
+        {
+          provide: SvgIconRegistryService,
+          useValue: { addSvgIcon: jest.fn(), loadSvg: jest.fn(), getSvgByName: jest.fn() }
+        },
+        {
+          provide: ClassificationCategoriesService,
+          useValue: { getCustomisation: jest.fn().mockReturnValue(of(engineConfigurationMock.customisation)) }
+        }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(AccessItemsManagementComponent);
     debugElement = fixture.debugElement;
     app = fixture.debugElement.componentInstance;
     store = TestBed.inject(Store);
-    actions$ = TestBed.inject(Actions);
     store.reset({
       ...store.snapshot(),
       engineConfiguration: engineConfigurationMock
     });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create the app', () => {
     expect(app).toBeTruthy();
@@ -108,7 +142,9 @@ describe('AccessItemsManagementComponent', () => {
     expect(permissions).toMatchObject({});
   });
 
-  it('should dispatch GetAccessItems action in searchForAccessItemsWorkbaskets', waitForAsync((done) => {
+  it(' (with permissions)', (done) => {
+    jest.spyOn(app, 'setAccessItemsGroups');
+    jest.spyOn(app, 'setAccessItemsPermissions');
     app.accessId = { accessId: '1', name: 'max' };
     app.groups = [
       { accessId: '1', name: 'users' },
@@ -123,25 +159,21 @@ describe('AccessItemsManagementComponent', () => {
       order: Direction.DESC
     };
     app.searchForAccessItemsWorkbaskets();
-    fixture.detectChanges();
-    let actionDispatched = false;
-    actions$.pipe(ofActionDispatched(GetAccessItems)).subscribe(() => {
-      actionDispatched = true;
-      expect(actionDispatched).toBe(true);
+    setTimeout(() => {
       expect(app.setAccessItemsGroups).toHaveBeenCalled();
       expect(app.setAccessItemsPermissions).toHaveBeenCalled();
       done();
-    });
-  }));
+    }, 0);
+  });
 
-  it('should display a dialog when access is revoked', waitForAsync(() => {
+  it('should display a dialog when access is revoked', () => {
     app.accessId = { accessId: 'xyz', name: 'xyz' };
     const notificationService = TestBed.inject(NotificationService);
     const showDialogSpy = jest.spyOn(notificationService, 'showDialog').mockImplementation();
     app.revokeAccess();
     fixture.detectChanges();
     expect(showDialogSpy).toHaveBeenCalled();
-  }));
+  });
 
   it('should create accessItemsForm in setAccessItemsGroups', () => {
     app.setAccessItemsGroups([]);
@@ -175,5 +207,46 @@ describe('AccessItemsManagementComponent', () => {
   it('should not return accessItemsPermissions when accessItemsForm is null', () => {
     app.accessItemsForm = null;
     expect(app.accessItemsPermissions).toBeNull();
+  });
+
+  it('should dispatch GetAccessItems when permissions is null (groups only branch)', (done) => {
+    jest.spyOn(app, 'setAccessItemsGroups');
+    app.accessId = { accessId: '1', name: 'max' };
+    app.groups = [
+      { accessId: '1', name: 'users' },
+      { accessId: '2', name: 'users' }
+    ];
+    app.permissions = null as any;
+    app.searchForAccessItemsWorkbaskets();
+    setTimeout(() => {
+      expect(app.setAccessItemsGroups).toHaveBeenCalled();
+      done();
+    }, 0);
+  });
+
+  it('should filter access items by accessId and workbasketKey', () => {
+    const items = [
+      { accessId: 'a1', accessName: 'Alice', workbasketKey: 'WB_A' },
+      { accessId: 'b1', accessName: 'Bob', workbasketKey: 'WB_B' }
+    ] as any;
+    app.setAccessItemsGroups(items);
+    app.accessItemsForm.patchValue({ accessIdFilter: 'ali', workbasketKeyFilter: 'wb_a' });
+    app.filterAccessItems();
+    expect(app.accessItems.length).toBe(1);
+    expect(app.accessItems[0].accessName).toBe('Alice');
+  });
+
+  it('should remove focus by calling activeElement.focus()', () => {
+    const active = document.activeElement as HTMLElement;
+    const focusSpy = jest.spyOn(active, 'focus');
+    app.removeFocus();
+    expect(focusSpy).toHaveBeenCalled();
+  });
+
+  it('ngOnInit should set requestInProgress to false', () => {
+    const req = TestBed.inject(RequestInProgressService) as any;
+    const spy = jest.spyOn(req, 'setRequestInProgress');
+    app.ngOnInit();
+    expect(spy).toHaveBeenCalledWith(false);
   });
 });

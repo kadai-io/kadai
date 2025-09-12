@@ -28,7 +28,6 @@ import {
   Validators
 } from '@angular/forms';
 import { Observable, Subject } from 'rxjs';
-import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
 import { WorkbasketAccessItems } from 'app/shared/models/workbasket-access-items';
 import {
   Direction,
@@ -133,7 +132,6 @@ export class AccessItemsManagementComponent implements OnInit {
   permissions$: Observable<AccessId[]> = inject(Store).select(AccessItemsManagementSelector.permissions);
   destroy$ = new Subject<void>();
   private formBuilder = inject(FormBuilder);
-  private formsValidatorService = inject(FormsValidatorService);
   private notificationService = inject(NotificationService);
   private store = inject(Store);
   private requestInProgressService = inject(RequestInProgressService);
@@ -301,13 +299,6 @@ export class AccessItemsManagementComponent implements OnInit {
     );
   }
 
-  isFieldValid(field: string, index: number): boolean {
-    return (
-      this.formsValidatorService.isFieldValid(this.accessItemsGroups[index], field) ||
-      this.formsValidatorService.isFieldValid(this.accessItemsPermissions[index], field)
-    );
-  }
-
   sorting(sort: Sorting<WorkbasketAccessItemQuerySortParameter>) {
     this.sortModel = sort;
     this.searchForAccessItemsWorkbaskets();
@@ -317,20 +308,5 @@ export class AccessItemsManagementComponent implements OnInit {
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.focus();
     }
-  }
-
-  clearFilter() {
-    if (this.accessItemsForm) {
-      this.accessItemsForm.patchValue({
-        workbasketKeyFilter: '',
-        accessIdFilter: ''
-      });
-      this.searchForAccessItemsWorkbaskets();
-    }
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }
