@@ -17,18 +17,23 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { DebugElement } from '@angular/core';
+import { DebugElement, NO_ERRORS_SCHEMA } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { ClassificationListComponent } from './classification-list.component';
 import { classificationStateMock, engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
 import { Observable, of } from 'rxjs';
-import { CreateClassification } from '../../../shared/store/classification-store/classification.actions';
+import {
+  CreateClassification,
+  GetClassifications
+} from '../../../shared/store/classification-store/classification.actions';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { By } from '@angular/platform-browser';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { provideHttpClient } from '@angular/common/http';
+import { Location } from '@angular/common';
+import { ImportExportService } from '../../services/import-export.service';
 
 jest.mock('angular-svg-icon');
 
@@ -43,6 +48,11 @@ const requestInProgressServiceSpy: Partial<RequestInProgressService> = {
   getRequestInProgress: jest.fn().mockReturnValue(of(false))
 };
 
+const locationSpy: Partial<Location> = {
+  path: jest.fn().mockReturnValue('/administration/classifications'),
+  go: jest.fn()
+};
+
 describe('ClassificationListComponent', () => {
   let fixture: ComponentFixture<ClassificationListComponent>;
   let debugElement: DebugElement;
@@ -53,14 +63,17 @@ describe('ClassificationListComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [ClassificationListComponent],
+      schemas: [NO_ERRORS_SCHEMA],
       providers: [
         provideStore([ClassificationState, EngineConfigurationState]),
         provideHttpClient(),
         { provide: DomainService, useValue: domainServiceSpy },
-        { provide: RequestInProgressService, useValue: requestInProgressServiceSpy }
+        { provide: RequestInProgressService, useValue: requestInProgressServiceSpy },
+        { provide: Location, useValue: locationSpy }
       ]
     }).compileComponents();
 
+    TestBed.overrideComponent(ClassificationListComponent, { set: { schemas: [NO_ERRORS_SCHEMA] } });
     fixture = TestBed.createComponent(ClassificationListComponent);
     debugElement = fixture.debugElement;
     component = fixture.debugElement.componentInstance;
@@ -160,5 +173,103 @@ describe('ClassificationListComponent', () => {
       expect(iconPair.left).toBe('assets/icons/categories/missing-icon.svg');
       done();
     });
+  });
+
+  it('should return the "all" icon and label when getCategoryIcon is called with empty category', (done) => {
+    const customEngineConfig = JSON.parse(JSON.stringify(engineConfigurationMock));
+    customEngineConfig.customisation.EN.classifications.categories.all = 'assets/icons/categories/all.svg';
+    store.reset({
+      ...store.snapshot(),
+      engineConfiguration: customEngineConfig
+    });
+    const categoryIcon$ = component.getCategoryIcon('');
+    categoryIcon$.subscribe((iconPair) => {
+      expect(iconPair.left).toBe('assets/icons/categories/all.svg');
+      expect(iconPair.right).toBe('All');
+      done();
+    });
+  });
+
+  it('should navigate to new-classification on addClassification and dispatch CreateClassification', () => {
+    (locationSpy.path as jest.Mock).mockReturnValue('/administration/classifications');
+    let dispatched = false;
+    actions$.pipe(ofActionDispatched(CreateClassification)).subscribe(() => (dispatched = true));
+    component.addClassification();
+    expect(dispatched).toBe(true);
+    expect(locationSpy.go).toHaveBeenCalledWith('/administration/classifications/new-classification');
+  });
+
+  it('should toggle requestInProgress when GetClassifications is dispatched and completed', async () => {
+    (requestInProgressServiceSpy.setRequestInProgress as jest.Mock).mockClear();
+    await store.dispatch(new (class extends (CreateClassification as any).constructor {})()); // noop to flush queue
+    await store.dispatch(new (GetClassifications as any)());
+    expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalledWith(true);
+    // ofActionCompleted should fire and set false as well
+    expect((requestInProgressServiceSpy.setRequestInProgress as jest.Mock).mock.calls.some((c) => c[0] === false)).toBe(
+      true
+    );
+  });
+
+  it('should reset selectedCategory and dispatch GetClassifications when classification type changes', (done) => {
+    component.selectedCategory = 'MANUAL';
+    let dispatched = false;
+    const sub = actions$.pipe(ofActionDispatched(GetClassifications)).subscribe(() => (dispatched = true));
+    const newState = {
+      ...store.snapshot(),
+      classification: { ...classificationStateMock, selectedClassificationType: 'TASK' }
+    } as any;
+    store.reset(newState);
+    setTimeout(() => {
+      expect(component.selectedCategory).toBe('');
+      expect(dispatched).toBe(true);
+      sub.unsubscribe();
+      done();
+    }, 0);
+  });
+
+  it('should delegate setRequestInProgress to the service', () => {
+    (requestInProgressServiceSpy.setRequestInProgress as jest.Mock).mockClear();
+    component.setRequestInProgress(true);
+    expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalledWith(true);
+  });
+
+  it('should set selected category when selectCategory is called', () => {
+    component.selectCategory('EXTERNAL');
+    expect(component.selectedCategory).toBe('EXTERNAL');
+  });
+
+  it('should update requestInProgress from the service on init', () => {
+    // service returns of(false), so component.requestInProgress should be false after init
+    expect(component.requestInProgress).toBe(false);
+  });
+
+  it('should unsubscribe from actions on destroy (no more setRequestInProgress calls)', () => {
+    (requestInProgressServiceSpy.setRequestInProgress as jest.Mock).mockClear();
+    component.ngOnDestroy();
+    store.dispatch(new (GetClassifications as any)());
+    expect(requestInProgressServiceSpy.setRequestInProgress).not.toHaveBeenCalled();
+  });
+
+  it('should dispatch GetClassifications when import/export finishes', (done) => {
+    const importExportService = TestBed.inject(ImportExportService);
+    let dispatched = false;
+    const sub = actions$.pipe(ofActionDispatched(GetClassifications)).subscribe(() => (dispatched = true));
+    importExportService.setImportingFinished(true);
+    setTimeout(() => {
+      expect(dispatched).toBe(true);
+      sub.unsubscribe();
+      done();
+    }, 0);
+  });
+
+  it('should dispatch on domain change subscription in ngOnInit', (done) => {
+    const dispatchSpy = jest.spyOn(store, 'dispatch');
+    (domainServiceSpy.getSelectedDomain as jest.Mock).mockReturnValue(of('X'));
+    component.ngOnDestroy();
+    component.ngOnInit();
+    setTimeout(() => {
+      expect(dispatchSpy).toHaveBeenCalledWith(GetClassifications);
+      done();
+    }, 0);
   });
 });
