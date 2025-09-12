@@ -52,6 +52,7 @@ public class ClassificationHistoryQueryImpl implements ClassificationHistoryQuer
   private String[] eventTypeIn;
   private TimeInterval[] createdIn;
   private String[] userIdIn;
+  private String[] proxyAccessIdIn;
   private String[] classificationIdIn;
   private String[] applicationEntryPointIn;
   private String[] categoryIn;
@@ -73,6 +74,7 @@ public class ClassificationHistoryQueryImpl implements ClassificationHistoryQuer
   private String[] custom8In;
   private String[] eventTypeLike;
   private String[] userIdLike;
+  private String[] proxyAccessIdLike;
   private String[] classificationIdLike;
   private String[] applicationEntryPointLike;
   private String[] categoryLike;
@@ -117,6 +119,12 @@ public class ClassificationHistoryQueryImpl implements ClassificationHistoryQuer
   @Override
   public ClassificationHistoryQuery userIdIn(String... userId) {
     this.userIdIn = userId;
+    return this;
+  }
+
+  @Override
+  public ClassificationHistoryQuery proxyAccessIdIn(String... accessIds) {
+    this.proxyAccessIdIn = accessIds;
     return this;
   }
 
@@ -229,6 +237,12 @@ public class ClassificationHistoryQueryImpl implements ClassificationHistoryQuer
   @Override
   public ClassificationHistoryQuery userIdLike(String... userId) {
     this.userIdLike = toLowerCopy(userId);
+    return this;
+  }
+
+  @Override
+  public ClassificationHistoryQuery proxyAccessIdLike(String... proxyAccessIds) {
+    this.proxyAccessIdLike = toLowerCopy(proxyAccessIds);
     return this;
   }
 
@@ -409,8 +423,9 @@ public class ClassificationHistoryQueryImpl implements ClassificationHistoryQuer
       case 6 -> addOrderCriteria("CUSTOM_6", sortDirection);
       case 7 -> addOrderCriteria("CUSTOM_7", sortDirection);
       case 8 -> addOrderCriteria("CUSTOM_8", sortDirection);
-      default -> throw new InvalidArgumentException(
-          "Custom number has to be between 1 and 8, but this is: " + num);
+      default ->
+          throw new InvalidArgumentException(
+              "Custom number has to be between 1 and 8, but this is: " + num);
     };
   }
 
@@ -502,6 +517,10 @@ public class ClassificationHistoryQueryImpl implements ClassificationHistoryQuer
     return userIdIn;
   }
 
+  public String[] getProxyAccessIdIn() {
+    return proxyAccessIdIn;
+  }
+
   public String[] getClassificationIdIn() {
     return classificationIdIn;
   }
@@ -584,6 +603,10 @@ public class ClassificationHistoryQueryImpl implements ClassificationHistoryQuer
 
   public String[] getUserIdLike() {
     return userIdLike;
+  }
+
+  public String[] getProxyAccessIdLike() {
+    return proxyAccessIdLike;
   }
 
   public String[] getClassificationIdLike() {

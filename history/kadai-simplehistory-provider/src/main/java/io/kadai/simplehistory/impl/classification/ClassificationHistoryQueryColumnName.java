@@ -26,6 +26,7 @@ public enum ClassificationHistoryQueryColumnName implements QueryColumnName {
   EVENT_TYPE("event_type"),
   CREATED("created"),
   USER_ID("user_id"),
+  PROXY_ACCESS_ID("proxy_access_id"),
   CLASSIFICATION_ID("classification_id"),
   APPLICATION_ENTRY_POINT("application_entry_point"),
   CATEGORY("category"),

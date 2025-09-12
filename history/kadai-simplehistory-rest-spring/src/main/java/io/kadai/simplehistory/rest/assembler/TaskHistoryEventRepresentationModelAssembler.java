@@ -51,6 +51,7 @@ public class TaskHistoryEventRepresentationModelAssembler
     repModel.setEventType(historyEvent.getEventType());
     repModel.setCreated(historyEvent.getCreated());
     repModel.setUserId(historyEvent.getUserId());
+    repModel.setProxyAccessId(historyEvent.getProxyAccessId());
     repModel.setUserLongName(historyEvent.getUserLongName());
     repModel.setDomain(historyEvent.getDomain());
     repModel.setWorkbasketKey(historyEvent.getWorkbasketKey());
