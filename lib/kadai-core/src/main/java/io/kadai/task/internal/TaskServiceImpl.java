@@ -83,6 +83,7 @@ import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.NotAuthorizedOnTaskCommentException;
 import io.kadai.task.api.exceptions.ObjectReferencePersistenceException;
 import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
+import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
@@ -91,6 +92,7 @@ import io.kadai.task.api.models.AttachmentSummary;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.api.models.TaskComment;
+import io.kadai.task.api.models.TaskPatch;
 import io.kadai.task.api.models.TaskSummary;
 import io.kadai.task.internal.ServiceLevelHandler.BulkLog;
 import io.kadai.task.internal.models.AttachmentImpl;
@@ -98,6 +100,7 @@ import io.kadai.task.internal.models.AttachmentSummaryImpl;
 import io.kadai.task.internal.models.MinimalTaskSummary;
 import io.kadai.task.internal.models.ObjectReferenceImpl;
 import io.kadai.task.internal.models.TaskImpl;
+import io.kadai.task.internal.models.TaskPatchImpl;
 import io.kadai.task.internal.models.TaskSummaryImpl;
 import io.kadai.user.api.models.User;
 import io.kadai.user.internal.UserMapper;
@@ -378,7 +381,8 @@ public class TaskServiceImpl implements TaskService {
           InvalidArgumentException,
           AttachmentPersistenceException,
           ObjectReferencePersistenceException,
-          NotAuthorizedOnWorkbasketException {
+          NotAuthorizedOnWorkbasketException,
+          ServiceLevelViolationException {
 
     TaskImpl task = preprocessTaskCreation(taskToCreate);
 
@@ -600,7 +604,8 @@ public class TaskServiceImpl implements TaskService {
           ObjectReferencePersistenceException,
           ClassificationNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          ServiceLevelViolationException {
     String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
     TaskImpl newTaskImpl = (TaskImpl) task;
     try {
@@ -1052,9 +1057,7 @@ public class TaskServiceImpl implements TaskService {
 
   @Override
   public BulkOperationResults<String, KadaiException> createTaskCommentsBulk(
-      List<String> taskIds,
-      String text
-  ) throws InvalidArgumentException {
+      List<String> taskIds, String text) throws InvalidArgumentException {
     return taskCommentService.createTaskCommentsBulk(taskIds, text);
   }
 
@@ -2128,7 +2131,7 @@ public class TaskServiceImpl implements TaskService {
   }
 
   private void applyTaskSettingsOnTaskCreation(TaskImpl taskToCreate, Classification classification)
-      throws InvalidArgumentException,
+      throws ServiceLevelViolationException,
           ClassificationNotFoundException,
           AttachmentPersistenceException,
           ObjectReferencePersistenceException {
@@ -2494,7 +2497,9 @@ public class TaskServiceImpl implements TaskService {
   }
 
   private void standardUpdateActions(TaskImpl oldTaskImpl, TaskImpl newTaskImpl)
-      throws InvalidArgumentException, ClassificationNotFoundException, InvalidTaskStateException {
+      throws ServiceLevelViolationException,
+          ClassificationNotFoundException,
+          InvalidTaskStateException {
 
     if (oldTaskImpl.getExternalId() == null
         || !oldTaskImpl.getExternalId().equals(newTaskImpl.getExternalId())) {
@@ -2588,5 +2593,70 @@ public class TaskServiceImpl implements TaskService {
     WorkbasketSummary workbasket =
         query.idIn(workbasketId).callerHasPermissions(WorkbasketPermission.EDITTASKS).single();
     return workbasket != null;
+  }
+
+  @Override
+  public BulkOperationResults<String, KadaiException> bulkUpdateTasks(
+      List<String> taskIds, TaskPatch taskPatch) {
+    BulkOperationResults<String, KadaiException> bulkLog = new BulkOperationResults<>();
+
+    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+    try {
+      kadaiEngine.openConnection();
+
+      for (String taskId : taskIds) {
+        try {
+          TaskImpl oldTaskImpl = (TaskImpl) getTask(taskId);
+          if (!checkEditTasksPerm(oldTaskImpl)) {
+            bulkLog.addError(
+                taskId,
+                new NotAuthorizedOnWorkbasketException(
+                    kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                    oldTaskImpl.getWorkbasketSummary().getId(),
+                    WorkbasketPermission.EDITTASKS));
+          }
+          TaskPatchImpl taskPatchImpl = (TaskPatchImpl) taskPatch;
+          TaskImpl newTaskImpl = taskPatchImpl.toTaskImpl(duplicateTaskExactly(oldTaskImpl));
+          attachmentHandler.insertAndDeleteAttachmentsOnTaskUpdate(newTaskImpl, oldTaskImpl);
+          objectReferenceHandler.insertAndDeleteObjectReferencesOnTaskUpdate(
+              newTaskImpl, oldTaskImpl);
+          ObjectReferenceImpl.validate(
+              newTaskImpl.getPrimaryObjRef(), "primary ObjectReference", "Task");
+          standardUpdateActions(oldTaskImpl, newTaskImpl);
+
+          priorityServiceManager
+              .calculatePriorityOfTask(newTaskImpl)
+              .ifPresent(newTaskImpl::setPriority);
+          taskMapper.update(newTaskImpl);
+
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(
+                "Method bulkUpdateTasks() updated task '{}' for user '{}'.",
+                newTaskImpl.getId(),
+                userId);
+          }
+
+          if (historyEventManager.isEnabled()) {
+
+            String changeDetails =
+                ObjectAttributeChangeDetector.determineChangesInAttributes(
+                    oldTaskImpl, newTaskImpl);
+
+            historyEventManager.createEvent(
+                new TaskUpdatedEvent(
+                    IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                    newTaskImpl,
+                    userId,
+                    changeDetails));
+          }
+        } catch (KadaiException e) {
+          bulkLog.addError(taskId, e);
+        }
+      }
+
+      return bulkLog;
+    } finally {
+      kadaiEngine.returnConnection();
+    }
   }
 }
