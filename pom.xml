@@ -92,7 +92,7 @@
         <version.jakarta.xml.bind-api>4.0.2</version.jakarta.xml.bind-api>
         <version.jaxb-core>4.0.5</version.jaxb-core>
         <version.jaxb-impl>4.0.5</version.jaxb-impl>
-        <version.jakarta.activation>2.1.3</version.jakarta.activation>
+        <version.jakarta.activation>2.1.4</version.jakarta.activation>
 
         <!-- database driver versions -->
         <version.db2>12.1.2.0</version.db2>
