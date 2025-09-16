@@ -7744,9 +7744,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-preset-angular@npm:15.0.0":
-  version: 15.0.0
-  resolution: "jest-preset-angular@npm:15.0.0"
+"jest-preset-angular@npm:15.0.1":
+  version: 15.0.1
+  resolution: "jest-preset-angular@npm:15.0.1"
   dependencies:
     "@jest/environment-jsdom-abstract": "npm:^30.0.0"
     bs-logger: "npm:^0.2.6"
@@ -7758,15 +7758,15 @@ __metadata:
   peerDependencies:
     "@angular/compiler-cli": ">=18.0.0 <21.0.0"
     "@angular/core": ">=18.0.0 <21.0.0"
+    "@angular/platform-browser": ">=18.0.0 <21.0.0"
     "@angular/platform-browser-dynamic": ">=18.0.0 <21.0.0"
     jest: ^30.0.0
-    jest-environment-jsdom: ^30.0.0
     jsdom: ">=26.0.0"
     typescript: ">=5.5"
   dependenciesMeta:
     esbuild:
       optional: true
-  checksum: 10c0/c459f40ce6f26e756cd51c0a45b24db3f5f6610c80078f8913520cefa4389f3c3de1b46e9a01c777761d90af9ff9267711fd01135b90edd62f930f451d6a4812
+  checksum: 10c0/0906c9dd26d2d6780aea6fcdc4c1f1d8d2a2262d999e47cd27ce276174d8571b3248e8ff58693f195f95b3ba941645e51b9dd98f34dd9f89891f5ac0eadc35ce
   languageName: node
   linkType: hard
 
@@ -8210,7 +8210,7 @@ __metadata:
     globals: "npm:16.4.0"
     jest: "npm:30.1.3"
     jest-environment-jsdom: "npm:30.1.2"
-    jest-preset-angular: "npm:15.0.0"
+    jest-preset-angular: "npm:15.0.1"
     lodash-es: "npm:4.17.21"
     ng2-charts: "npm:8.0.0"
     prettier: "npm:3.6.2"
