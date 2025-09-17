@@ -968,6 +968,7 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
+  @Deprecated
   public List<String> updateTasks(
       List<String> taskIds, Map<TaskCustomField, String> customFieldsToUpdate)
       throws InvalidArgumentException {
