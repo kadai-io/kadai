@@ -353,8 +353,6 @@ class TaskRepresentationModelAssemblerTest {
     repModel.setGroupByCount(3);
     repModel.setBusinessProcessId("BPI-001");
     repModel.setParentBusinessProcessId("PBPI-001");
-    repModel.setOwner("test-owner");
-    repModel.setOwnerLongName("Test Owner Long Name");
     repModel.setCustom1("custom1-value");
     repModel.setCustom2("custom2-value");
     repModel.setCustom3("custom3-value");
@@ -436,7 +434,6 @@ class TaskRepresentationModelAssemblerTest {
     AttachmentRepresentationModel attachment = new AttachmentRepresentationModel();
     attachment.setAttachmentId("ATT:123");
     attachment.setClassificationSummary(classificationSummary);
-    repModel.setAttachments(List.of(attachment));
 
     // when
     TaskPatchImpl taskPatchImpl = assembler.toPatchImpl(repModel);
