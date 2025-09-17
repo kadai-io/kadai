@@ -579,6 +579,8 @@ class UpdateTaskAccTest {
 
   @WithAccessId(user = "user-1-2")
   @Test
+  @Deprecated
+  @SuppressWarnings("deprecation")
   void should_UpdateTaskCustomAttributes_When_UpdateTasksIsCalled() throws Exception {
     Task task1 =
         TaskBuilder.newTask()
@@ -617,6 +619,8 @@ class UpdateTaskAccTest {
 
   @WithAccessId(user = "user-1-2")
   @TestFactory
+  @Deprecated
+  @SuppressWarnings("deprecation")
   Stream<DynamicTest> should_UpdateNoTasksWithTaskId_When_UserHasMissingPermission() {
     List<Pair<String, WorkbasketSummary>> list =
         List.of(
