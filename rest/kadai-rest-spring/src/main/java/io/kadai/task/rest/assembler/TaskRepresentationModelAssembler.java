@@ -295,12 +295,6 @@ public class TaskRepresentationModelAssembler
     if (repModel.getParentBusinessProcessId() != null) {
       taskPatchImpl.setParentBusinessProcessId(repModel.getParentBusinessProcessId());
     }
-    if (repModel.getOwner() != null) {
-      taskPatchImpl.setOwner(repModel.getOwner());
-    }
-    if (repModel.getOwnerLongName() != null) {
-      taskPatchImpl.setOwnerLongName(repModel.getOwnerLongName());
-    }
     if (repModel.getPrimaryObjRef() != null) {
       taskPatchImpl.setPrimaryObjRef(
           objectReferenceAssembler.toEntity(repModel.getPrimaryObjRef()));
@@ -311,18 +305,6 @@ public class TaskRepresentationModelAssembler
     }
     if (repModel.getManualPriority() != null) {
       taskPatchImpl.setManualPriority(repModel.getManualPriority());
-    }
-    if (repModel.getNumberOfComments() != null) {
-      taskPatchImpl.setNumberOfComments(repModel.getNumberOfComments());
-    }
-    if (repModel.getIsRead() != null) {
-      taskPatchImpl.setIsRead(repModel.getIsRead());
-    }
-    if (repModel.getIsTransferred() != null) {
-      taskPatchImpl.setIsTransferred(repModel.getIsTransferred());
-    }
-    if (repModel.getIsReopened() != null) {
-      taskPatchImpl.setIsReopened(repModel.getIsReopened());
     }
     if (repModel.getSecondaryObjectReferences() != null) {
       taskPatchImpl.setSecondaryObjectReferences(
@@ -405,10 +387,6 @@ public class TaskRepresentationModelAssembler
     }
     if (repModel.getCustomInt8() != null) {
       taskPatchImpl.setCustomInt8(repModel.getCustomInt8());
-    }
-    if (repModel.getAttachments() != null) {
-      taskPatchImpl.setAttachments(
-          repModel.getAttachments().stream().map(attachmentAssembler::toEntityModel).toList());
     }
 
     if (repModel.getCustomAttributes() != null) {

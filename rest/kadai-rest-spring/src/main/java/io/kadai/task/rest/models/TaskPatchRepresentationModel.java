@@ -44,17 +44,8 @@ public class TaskPatchRepresentationModel extends BaseTaskRepresentationModel {
               + " prioritized manually.")
   protected Integer manualPriority;
 
-  @Schema(name = "numberOfComments", description = "The current count of the comments.")
-  protected Integer numberOfComments;
-
   @Schema(name = "isRead", description = "Indicator if the task has been read.")
   protected Boolean isRead;
-
-  @Schema(name = "isTransferred", description = "Indicator if the task has been transferred.")
-  protected Boolean isTransferred;
-
-  @Schema(name = "isReopened", description = "Indicator if the task has been reopened.")
-  protected Boolean isReopened;
 
   @Schema(
       name = "secondaryObjectReferences",
@@ -70,9 +61,6 @@ public class TaskPatchRepresentationModel extends BaseTaskRepresentationModel {
 
   @Schema(name = "callbackInfo", description = "Callback Information of the task.")
   private List<CustomAttribute> callbackInfo;
-
-  @Schema(name = "attachments", description = "Attachments of the task.")
-  private List<AttachmentRepresentationModel> attachments;
 
   // Getters and setters for the additional fields
   public Integer getPriority() {
@@ -91,36 +79,12 @@ public class TaskPatchRepresentationModel extends BaseTaskRepresentationModel {
     this.manualPriority = manualPriority;
   }
 
-  public Integer getNumberOfComments() {
-    return numberOfComments;
-  }
-
-  public void setNumberOfComments(Integer numberOfComments) {
-    this.numberOfComments = numberOfComments;
-  }
-
   public Boolean getIsRead() {
     return isRead;
   }
 
   public void setIsRead(Boolean isRead) {
     this.isRead = isRead;
-  }
-
-  public Boolean getIsTransferred() {
-    return isTransferred;
-  }
-
-  public void setIsTransferred(Boolean isTransferred) {
-    this.isTransferred = isTransferred;
-  }
-
-  public Boolean getIsReopened() {
-    return isReopened;
-  }
-
-  public void setIsReopened(Boolean isReopened) {
-    this.isReopened = isReopened;
   }
 
   public List<ObjectReferenceRepresentationModel> getSecondaryObjectReferences() {
@@ -142,13 +106,5 @@ public class TaskPatchRepresentationModel extends BaseTaskRepresentationModel {
 
   public void setCallbackInfo(List<CustomAttribute> callbackInfo) {
     this.callbackInfo = callbackInfo;
-  }
-
-  public List<AttachmentRepresentationModel> getAttachments() {
-    return attachments;
-  }
-
-  public void setAttachments(List<AttachmentRepresentationModel> attachments) {
-    this.attachments = attachments;
   }
 }

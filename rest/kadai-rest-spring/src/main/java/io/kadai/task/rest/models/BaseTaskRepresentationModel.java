@@ -109,14 +109,6 @@ public class BaseTaskRepresentationModel
   @Schema(name = "parentBusinessProcessId", description = "the parent business process id.")
   protected String parentBusinessProcessId;
 
-  @Schema(
-      name = "owner",
-      description = "The owner of the task. The owner is set upon claiming of the task.")
-  protected String owner;
-
-  @Schema(name = "ownerLongName", description = "The long name of the task owner.")
-  protected String ownerLongName;
-
   @Schema(name = "primaryObjRef", description = "The Objects primary ObjectReference.")
   @NotNull
   protected ObjectReferenceRepresentationModel primaryObjRef;
@@ -344,22 +336,6 @@ public class BaseTaskRepresentationModel
 
   public void setParentBusinessProcessId(String parentBusinessProcessId) {
     this.parentBusinessProcessId = parentBusinessProcessId;
-  }
-
-  public String getOwner() {
-    return owner;
-  }
-
-  public void setOwner(String owner) {
-    this.owner = owner;
-  }
-
-  public String getOwnerLongName() {
-    return ownerLongName;
-  }
-
-  public void setOwnerLongName(String ownerLongName) {
-    this.ownerLongName = ownerLongName;
   }
 
   public ObjectReferenceRepresentationModel getPrimaryObjRef() {

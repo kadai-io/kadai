@@ -1300,7 +1300,9 @@ public interface TaskService {
    * @return a list of the {@linkplain Task#getId() ids} of all modified {@linkplain Task Tasks}
    * @throws InvalidArgumentException if the given customFieldsToUpdate are NULL or empty
    * @see #updateTasks(ObjectReference, Map)
+   * @deprecated Use {@link #bulkUpdateTasks(List, TaskPatch)} instead.
    */
+  @Deprecated
   List<String> updateTasks(List<String> taskIds, Map<TaskCustomField, String> customFieldsToUpdate)
       throws InvalidArgumentException;
 

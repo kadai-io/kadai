@@ -349,10 +349,7 @@ class TaskRepresentationModelAssemblerTest {
     repModel.setState(TaskState.READY);
     repModel.setPriority(50);
     repModel.setManualPriority(25);
-    repModel.setNumberOfComments(5);
     repModel.setIsRead(true);
-    repModel.setIsTransferred(false);
-    repModel.setIsReopened(true);
     repModel.setGroupByCount(3);
     repModel.setBusinessProcessId("BPI-001");
     repModel.setParentBusinessProcessId("PBPI-001");

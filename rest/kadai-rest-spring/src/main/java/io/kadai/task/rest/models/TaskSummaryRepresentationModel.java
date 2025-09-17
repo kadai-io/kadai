@@ -24,8 +24,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TaskSummaryRepresentationModel
-    extends BaseTaskRepresentationModel {
+public class TaskSummaryRepresentationModel extends BaseTaskRepresentationModel {
+
+  @Schema(
+      name = "owner",
+      description = "The owner of the task. The owner is set upon claiming of the task.")
+  protected String owner;
+
+  @Schema(name = "ownerLongName", description = "The long name of the task owner.")
+  protected String ownerLongName;
 
   @Schema(name = "priority", description = "The priority of the task.")
   protected int priority;
@@ -57,6 +64,22 @@ public class TaskSummaryRepresentationModel
   protected List<ObjectReferenceRepresentationModel> secondaryObjectReferences = new ArrayList<>();
 
   // Getters and setters for the unique fields only
+  public String getOwner() {
+    return owner;
+  }
+
+  public void setOwner(String owner) {
+    this.owner = owner;
+  }
+
+  public String getOwnerLongName() {
+    return ownerLongName;
+  }
+
+  public void setOwnerLongName(String ownerLongName) {
+    this.ownerLongName = ownerLongName;
+  }
+
   public int getPriority() {
     return priority;
   }

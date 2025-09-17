@@ -544,15 +544,7 @@ public class TaskController implements TaskApi {
       throw new InvalidArgumentException("taskIds must not be empty");
     }
     if (requestModel.getFieldsToUpdate() == null) {
-      throw new InvalidArgumentException("fieldsToUpdate must not be empty");
-    }
-
-    if (requestModel.getFieldsToUpdate().getOwner() != null) {
-      throw new InvalidArgumentException("Owner can only be updated by transferring tasks");
-    }
-    if (requestModel.getFieldsToUpdate().getAttachments() != null) {
-      throw new InvalidArgumentException(
-          "Attachments cannot be updated in bulk as they are task " + "specific");
+      return ResponseEntity.ok().build();
     }
 
     TaskPatchImpl taskPatchImpl =
