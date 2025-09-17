@@ -113,12 +113,8 @@ class BulkUpdateTasksAccTest {
     patch.setName("Bulk Updated Task");
     patch.setDescription("Bulk update description");
     patch.setNote("Bulk update note");
-    patch.setPriority(42);
     patch.setManualPriority(42);
-    patch.setNumberOfComments(7);
     patch.setIsRead(true);
-    patch.setIsTransferred(false);
-    patch.setIsReopened(true);
     patch.setBusinessProcessId("BPI-BULK-001");
     patch.setParentBusinessProcessId("PBPI-BULK-001");
     patch.setCustom1("bulk-custom1");
@@ -153,10 +149,7 @@ class BulkUpdateTasksAccTest {
       assertThat(ut.getNote()).isEqualTo("Bulk update note");
       assertThat(ut.getPriority()).isEqualTo(42);
       assertThat(ut.getManualPriority()).isEqualTo(42);
-      assertThat(ut.getNumberOfComments()).isEqualTo(7);
       assertThat(ut.isRead()).isTrue();
-      assertThat(ut.isTransferred()).isFalse();
-      assertThat(ut.isReopened()).isTrue();
       assertThat(ut.getBusinessProcessId()).isEqualTo("BPI-BULK-001");
       assertThat(ut.getParentBusinessProcessId()).isEqualTo("PBPI-BULK-001");
       assertThat(((TaskImpl) ut).getCustom1()).isEqualTo("bulk-custom1");

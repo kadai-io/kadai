@@ -299,12 +299,11 @@ public class TaskRepresentationModelAssembler
       taskPatchImpl.setPrimaryObjRef(
           objectReferenceAssembler.toEntity(repModel.getPrimaryObjRef()));
     }
-
-    if (repModel.getPriority() != null) {
-      taskPatchImpl.setPriority(repModel.getPriority());
-    }
     if (repModel.getManualPriority() != null) {
       taskPatchImpl.setManualPriority(repModel.getManualPriority());
+    }
+    if (repModel.getIsRead() != null) {
+      taskPatchImpl.setIsRead(repModel.getIsRead());
     }
     if (repModel.getSecondaryObjectReferences() != null) {
       taskPatchImpl.setSecondaryObjectReferences(

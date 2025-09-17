@@ -32,9 +32,6 @@ import java.util.List;
 @JsonIgnoreProperties("attachmentSummaries")
 public class TaskPatchRepresentationModel extends BaseTaskRepresentationModel {
 
-  @Schema(name = "priority", description = "The priority of the task.")
-  protected Integer priority;
-
   @Schema(
       name = "manualPriority",
       description =
@@ -63,14 +60,6 @@ public class TaskPatchRepresentationModel extends BaseTaskRepresentationModel {
   private List<CustomAttribute> callbackInfo;
 
   // Getters and setters for the additional fields
-  public Integer getPriority() {
-    return priority;
-  }
-
-  public void setPriority(Integer priority) {
-    this.priority = priority;
-  }
-
   public Integer getManualPriority() {
     return manualPriority;
   }

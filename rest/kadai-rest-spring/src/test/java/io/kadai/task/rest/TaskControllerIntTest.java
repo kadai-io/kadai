@@ -2257,15 +2257,11 @@ class TaskControllerIntTest {
       fieldsToUpdate.put("name", "Bulk Updated Task");
       fieldsToUpdate.put("note", "Bulk update note");
       fieldsToUpdate.put("description", "Bulk update description");
-      fieldsToUpdate.put("priority", 50);
       fieldsToUpdate.put("manualPriority", 25);
       fieldsToUpdate.put("state", "READY");
-      fieldsToUpdate.put("numberOfComments", 10);
       fieldsToUpdate.put("businessProcessId", "BPI-BULK-001");
       fieldsToUpdate.put("parentBusinessProcessId", "PBPI-BULK-001");
       fieldsToUpdate.put("isRead", true);
-      fieldsToUpdate.put("isTransferred", false);
-      fieldsToUpdate.put("isReopened", true);
       fieldsToUpdate.put("custom1", "bulk-custom1");
       fieldsToUpdate.put("custom2", "bulk-custom2");
       fieldsToUpdate.put("custom3", "bulk-custom3");
@@ -2400,10 +2396,7 @@ class TaskControllerIntTest {
       // Priority and status fields
       assertThat(updatedTask.getPriority()).isEqualTo(25);
       assertThat(updatedTask.getManualPriority()).isEqualTo(25);
-      assertThat(updatedTask.getNumberOfComments()).isEqualTo(10);
       assertThat(updatedTask.isRead()).isTrue();
-      assertThat(updatedTask.isTransferred()).isFalse();
-      assertThat(updatedTask.isReopened()).isTrue();
 
       // Business process fields
       assertThat(updatedTask.getBusinessProcessId()).isEqualTo("BPI-BULK-001");

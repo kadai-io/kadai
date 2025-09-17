@@ -136,32 +136,11 @@ public interface TaskPatch {
   String getParentBusinessProcessId();
 
   /**
-   * Returns the owner.
-   *
-   * @return owner
-   */
-  String getOwner();
-
-  /**
-   * Returns long name of the owner of the {@linkplain TaskPatch}.
-   *
-   * @return the long name of the owner
-   */
-  String getOwnerLongName();
-
-  /**
    * Returns the primary {@linkplain ObjectReference} of the {@linkplain TaskPatch}.
    *
    * @return the Tasks primary {@linkplain ObjectReference}
    */
   ObjectReference getPrimaryObjRef();
-
-  /**
-   * Returns the priority of the {@linkplain Task}.
-   *
-   * @return priority
-   */
-  Integer getPriority();
 
   /**
    * Gets the manualPriority of the {@linkplain TaskPatch}. If the value of manualPriority is zero
@@ -174,32 +153,11 @@ public interface TaskPatch {
   Integer getManualPriority();
 
   /**
-   * Returns the count of the comments of the {@linkplain TaskPatch}.
-   *
-   * @return numberOfComments
-   */
-  Integer getNumberOfComments();
-
-  /**
    * Returns the isRead flag of the {@linkplain TaskPatch}.
    *
    * @return the Tasks isRead flag
    */
   Boolean isRead();
-
-  /**
-   * Returns the isTransferred flag of the {@linkplain TaskPatch}.
-   *
-   * @return the Tasks isTransferred flag
-   */
-  Boolean isTransferred();
-
-  /**
-   * Returns whether the {@linkplain Task} has been previously reopened.
-   *
-   * @return true, if Tasks has been reopened before
-   */
-  Boolean isReopened();
 
   /**
    * Returns the {@linkplain ObjectReference secondaryObjectReferences} of the {@linkplain
@@ -397,13 +355,4 @@ public interface TaskPatch {
    * @return callbackState
    */
   CallbackState getCallbackState();
-
-  /**
-   * Return the {@linkplain Attachment attachment} for the TaskPatch. <br>
-   * Do not use List.add()/addAll() for adding elements, because it can cause redundant data. Use
-   * addAttachment(). Clear() and remove() can be used, because it's a controllable change.
-   *
-   * @return the List of {@linkplain Attachment attachments} for this TaskPatch
-   */
-  List<Attachment> getAttachments();
 }

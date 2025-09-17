@@ -347,7 +347,6 @@ class TaskRepresentationModelAssemblerTest {
     repModel.setNote("Test note");
     repModel.setDescription("Test description");
     repModel.setState(TaskState.READY);
-    repModel.setPriority(50);
     repModel.setManualPriority(25);
     repModel.setIsRead(true);
     repModel.setGroupByCount(3);
@@ -430,11 +429,6 @@ class TaskRepresentationModelAssemblerTest {
             TaskRepresentationModel.CustomAttribute.of("callback1", "callback-value1"),
             TaskRepresentationModel.CustomAttribute.of("callback2", "callback-value2")));
 
-    // Attachments
-    AttachmentRepresentationModel attachment = new AttachmentRepresentationModel();
-    attachment.setAttachmentId("ATT:123");
-    attachment.setClassificationSummary(classificationSummary);
-
     // when
     TaskPatchImpl taskPatchImpl = assembler.toPatchImpl(repModel);
 
@@ -452,17 +446,11 @@ class TaskRepresentationModelAssemblerTest {
     assertThat(taskPatchImpl.getNote()).isEqualTo("Test note");
     assertThat(taskPatchImpl.getDescription()).isEqualTo("Test description");
     assertThat(taskPatchImpl.getState()).isEqualTo(TaskState.READY);
-    assertThat(taskPatchImpl.getPriority()).isEqualTo(50);
     assertThat(taskPatchImpl.getManualPriority()).isEqualTo(25);
-    assertThat(taskPatchImpl.getNumberOfComments()).isEqualTo(5);
     assertThat(taskPatchImpl.isRead()).isTrue();
-    assertThat(taskPatchImpl.isTransferred()).isFalse();
-    assertThat(taskPatchImpl.isReopened()).isTrue();
     assertThat(taskPatchImpl.getGroupByCount()).isEqualTo(3);
     assertThat(taskPatchImpl.getBusinessProcessId()).isEqualTo("BPI-001");
     assertThat(taskPatchImpl.getParentBusinessProcessId()).isEqualTo("PBPI-001");
-    assertThat(taskPatchImpl.getOwner()).isEqualTo("test-owner");
-    assertThat(taskPatchImpl.getOwnerLongName()).isEqualTo("Test Owner Long Name");
     assertThat(taskPatchImpl.getCustom1()).isEqualTo("custom1-value");
     assertThat(taskPatchImpl.getCustom2()).isEqualTo("custom2-value");
     assertThat(taskPatchImpl.getCustom3()).isEqualTo("custom3-value");
@@ -519,9 +507,6 @@ class TaskRepresentationModelAssemblerTest {
     assertThat(taskPatchImpl.getCallbackInfo()).hasSize(2);
     assertThat(taskPatchImpl.getCallbackInfo().get("callback1")).isEqualTo("callback-value1");
     assertThat(taskPatchImpl.getCallbackInfo().get("callback2")).isEqualTo("callback-value2");
-
-    assertThat(taskPatchImpl.getAttachments()).hasSize(1);
-    assertThat(taskPatchImpl.getAttachments().get(0).getId()).isEqualTo("ATT:123");
   }
 
   @Test
@@ -530,7 +515,7 @@ class TaskRepresentationModelAssemblerTest {
     TaskPatchRepresentationModel repModel = new TaskPatchRepresentationModel();
     // Only set a few fields, leave others null
     repModel.setName("Only Name Set");
-    repModel.setPriority(100);
+    repModel.setManualPriority(100);
 
     // when
     TaskPatchImpl taskPatchImpl = assembler.toPatchImpl(repModel);
@@ -538,7 +523,7 @@ class TaskRepresentationModelAssemblerTest {
     // then
     assertThat(taskPatchImpl).isNotNull();
     assertThat(taskPatchImpl.getName()).isEqualTo("Only Name Set");
-    assertThat(taskPatchImpl.getPriority()).isEqualTo(100);
+    assertThat(taskPatchImpl.getManualPriority()).isEqualTo(100);
 
     // Verify null fields are not set
     assertThat(taskPatchImpl.getReceived()).isNull();
@@ -552,23 +537,16 @@ class TaskRepresentationModelAssemblerTest {
     assertThat(taskPatchImpl.getNote()).isNull();
     assertThat(taskPatchImpl.getDescription()).isNull();
     assertThat(taskPatchImpl.getState()).isNull();
-    assertThat(taskPatchImpl.getManualPriority()).isNull();
-    assertThat(taskPatchImpl.getNumberOfComments()).isNull();
     assertThat(taskPatchImpl.isRead()).isNull();
-    assertThat(taskPatchImpl.isTransferred()).isNull();
-    assertThat(taskPatchImpl.isReopened()).isNull();
     assertThat(taskPatchImpl.getGroupByCount()).isNull();
     assertThat(taskPatchImpl.getBusinessProcessId()).isNull();
     assertThat(taskPatchImpl.getParentBusinessProcessId()).isNull();
-    assertThat(taskPatchImpl.getOwner()).isNull();
-    assertThat(taskPatchImpl.getOwnerLongName()).isNull();
     assertThat(taskPatchImpl.getClassificationSummary()).isNull();
     assertThat(taskPatchImpl.getWorkbasketSummary()).isNull();
     assertThat(taskPatchImpl.getPrimaryObjRef()).isNull();
     assertThat(taskPatchImpl.getSecondaryObjectReferences()).isNull();
     assertThat(taskPatchImpl.getCustomAttributes()).isNull();
     assertThat(taskPatchImpl.getCallbackInfo()).isNull();
-    assertThat(taskPatchImpl.getAttachments()).isNull();
 
     assertThat(taskPatchImpl.getCustom1()).isNull();
     assertThat(taskPatchImpl.getCustom2()).isNull();

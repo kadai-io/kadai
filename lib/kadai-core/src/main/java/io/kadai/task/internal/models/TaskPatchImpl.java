@@ -5,7 +5,6 @@ import io.kadai.task.api.CallbackState;
 import io.kadai.task.api.TaskCustomField;
 import io.kadai.task.api.TaskCustomIntField;
 import io.kadai.task.api.TaskState;
-import io.kadai.task.api.models.Attachment;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.TaskPatch;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
@@ -34,16 +33,10 @@ public class TaskPatchImpl implements TaskPatch {
   private WorkbasketSummary workbasketSummary;
   private String businessProcessId;
   private String parentBusinessProcessId;
-  private String owner;
-  private String ownerLongName;
   private ObjectReference primaryObjRef;
   
-  private Integer priority;
   private Integer manualPriority;
-  private Integer numberOfComments;
   private Boolean isRead;
-  private Boolean isTransferred;
-  private Boolean isReopened;
   private List<ObjectReference> secondaryObjectReferences;
 
   // Custom fields - all nullable
@@ -75,7 +68,6 @@ public class TaskPatchImpl implements TaskPatch {
   private Map<String, String> customAttributes;
   private Map<String, String> callbackInfo;
   private CallbackState callbackState;
-  private List<Attachment> attachments;
 
   public Instant getPlanned() {
     return planned;
@@ -173,14 +165,6 @@ public class TaskPatchImpl implements TaskPatch {
     this.parentBusinessProcessId = parentBusinessProcessId;
   }
 
-  public String getOwner() {
-    return owner;
-  }
-
-  public void setOwner(String owner) {
-    this.owner = owner;
-  }
-
   public Instant getModified() {
     return modified;
   }
@@ -190,13 +174,6 @@ public class TaskPatchImpl implements TaskPatch {
   }
 
   // Summary field getters and setters
-  public Integer getPriority() {
-    return priority;
-  }
-
-  public void setPriority(Integer priority) {
-    this.priority = priority;
-  }
 
   public Integer getManualPriority() {
     return manualPriority;
@@ -206,36 +183,12 @@ public class TaskPatchImpl implements TaskPatch {
     this.manualPriority = manualPriority;
   }
 
-  public Integer getNumberOfComments() {
-    return numberOfComments;
-  }
-
-  public void setNumberOfComments(Integer numberOfComments) {
-    this.numberOfComments = numberOfComments;
-  }
-
   public Boolean isRead() {
     return isRead;
   }
 
   public void setIsRead(Boolean isRead) {
     this.isRead = isRead;
-  }
-
-  public Boolean isTransferred() {
-    return isTransferred;
-  }
-
-  public void setIsTransferred(Boolean isTransferred) {
-    this.isTransferred = isTransferred;
-  }
-
-  public Boolean isReopened() {
-    return isReopened;
-  }
-
-  public void setIsReopened(Boolean isReopened) {
-    this.isReopened = isReopened;
   }
 
   public List<ObjectReference> getSecondaryObjectReferences() {
@@ -479,26 +432,6 @@ public class TaskPatchImpl implements TaskPatch {
     this.groupByCount = groupByCount;
   }
 
-  public String getOwnerLongName() {
-    return ownerLongName;
-  }
-
-  public void setOwnerLongName(String ownerLongName) {
-    this.ownerLongName = ownerLongName;
-  }
-
-  public Boolean getRead() {
-    return isRead;
-  }
-
-  public Boolean getTransferred() {
-    return isTransferred;
-  }
-
-  public Boolean getReopened() {
-    return isReopened;
-  }
-
   public Map<String, String> getCustomAttributes() {
     return customAttributes;
   }
@@ -521,14 +454,6 @@ public class TaskPatchImpl implements TaskPatch {
 
   public void setCallbackState(CallbackState callbackState) {
     this.callbackState = callbackState;
-  }
-
-  public List<Attachment> getAttachments() {
-    return attachments;
-  }
-
-  public void setAttachments(List<Attachment> attachments) {
-    this.attachments = attachments;
   }
 
   /**
@@ -594,33 +519,14 @@ public class TaskPatchImpl implements TaskPatch {
     if (parentBusinessProcessId != null) {
       task.setParentBusinessProcessId(parentBusinessProcessId);
     }
-    if (owner != null) {
-      task.setOwner(owner);
-    }
-    if (ownerLongName != null) {
-      task.setOwnerLongName(ownerLongName);
-    }
     if (primaryObjRef != null) {
       task.setPrimaryObjRef(primaryObjRef);
-    }
-
-    if (priority != null) {
-      task.setPriority(priority);
     }
     if (manualPriority != null) {
       task.setManualPriority(manualPriority);
     }
-    if (numberOfComments != null) {
-      task.setNumberOfComments(numberOfComments);
-    }
     if (isRead != null) {
       task.setRead(isRead);
-    }
-    if (isTransferred != null) {
-      task.setTransferred(isTransferred);
-    }
-    if (isReopened != null) {
-      task.setReopened(isReopened);
     }
     if (secondaryObjectReferences != null) {
       // Copy to avoid reference issues
@@ -714,10 +620,6 @@ public class TaskPatchImpl implements TaskPatch {
     }
     if (callbackState != null) {
       task.setCallbackState(callbackState);
-    }
-    if (attachments != null) {
-      // Copy to avoid reference issues
-      task.setAttachments(attachments.stream().map(Attachment::copy).collect(Collectors.toList()));
     }
 
     return task;
