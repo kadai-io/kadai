@@ -77,6 +77,7 @@ class KadaiEngineTest {
 
   @Test
   void should_SetModeParticipate_When_CloseConnectionForModeExplicit() {
+    kadaiEngine.setConnectionManagementMode(ConnectionManagementMode.EXPLICIT);
     kadaiEngine.closeConnection();
 
     assertThat(kadaiEngine.getConnectionManagementMode())
