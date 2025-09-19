@@ -28,11 +28,11 @@ import io.kadai.KadaiConfiguration.Builder;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.models.Classification;
 import io.kadai.common.api.BulkOperationResults;
-import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
 import io.kadai.task.api.TaskService;
+import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.Task;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
@@ -163,7 +163,7 @@ class ServiceLevelPriorityWithWorkingDaysCalculationAccTest extends AbstractAccT
     newTask.setPlanned(planned);
     newTask.setDue(planned); // due date not according to service level
     ThrowingCallable call = () -> taskService.createTask(newTask);
-    assertThatThrownBy(call).isInstanceOf(InvalidArgumentException.class);
+    assertThatThrownBy(call).isInstanceOf(ServiceLevelViolationException.class);
   }
 
   @WithAccessId(user = "user-1-1")
@@ -221,7 +221,7 @@ class ServiceLevelPriorityWithWorkingDaysCalculationAccTest extends AbstractAccT
     task.setDue(Instant.parse("2020-07-02T00:00:00Z"));
     task.setPlanned(Instant.parse("2020-07-07T00:00:00Z"));
     assertThatThrownBy(() -> taskService.updateTask(task))
-        .isInstanceOf(InvalidArgumentException.class)
+        .isInstanceOf(ServiceLevelViolationException.class)
         .hasMessage(
             "Cannot update a task with given planned 2020-07-07T00:00:00Z and due "
                 + "date 2020-07-02T00:00:00Z not matching the service level PT24H.");

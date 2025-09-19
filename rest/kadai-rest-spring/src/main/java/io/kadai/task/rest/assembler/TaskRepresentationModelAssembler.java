@@ -30,10 +30,13 @@ import io.kadai.task.api.TaskCustomIntField;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.internal.models.TaskImpl;
+import io.kadai.task.internal.models.TaskPatchImpl;
 import io.kadai.task.rest.TaskController;
+import io.kadai.task.rest.models.TaskPatchRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel.CustomAttribute;
 import io.kadai.workbasket.rest.assembler.WorkbasketSummaryRepresentationModelAssembler;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,7 +145,7 @@ public class TaskRepresentationModelAssembler
   }
 
   public Task toEntityModel(TaskRepresentationModel repModel) throws InvalidArgumentException {
-    verifyCorrectCustomAttributesFormat(repModel);
+    verifyCorrectCustomAttributesFormat(repModel.getCustomAttributes());
     TaskImpl task = (TaskImpl) taskService.newTask();
     task.setId(repModel.getTaskId());
     task.setExternalId(repModel.getExternalId());
@@ -218,10 +221,10 @@ public class TaskRepresentationModelAssembler
     return task;
   }
 
-  private void verifyCorrectCustomAttributesFormat(TaskRepresentationModel repModel)
+  private void verifyCorrectCustomAttributesFormat(List<CustomAttribute> customAttributes)
       throws InvalidArgumentException {
 
-    if (repModel.getCustomAttributes().stream()
+    if (customAttributes.stream()
         .anyMatch(
             customAttribute ->
                 customAttribute.getKey() == null
@@ -231,5 +234,172 @@ public class TaskRepresentationModelAssembler
           "Format of custom attributes is not valid. Please provide the following format: "
               + "\"customAttributes\": [{\"key\": \"someKey\",\"value\": \"someValue\"},{...}])");
     }
+  }
+
+  public TaskPatchImpl toPatchImpl(TaskPatchRepresentationModel repModel) {
+    if (repModel.getCustomAttributes() != null) {
+      verifyCorrectCustomAttributesFormat(repModel.getCustomAttributes());
+    }
+    TaskPatchImpl taskPatchImpl = new TaskPatchImpl();
+
+    if (repModel.getReceived() != null) {
+      taskPatchImpl.setReceived(repModel.getReceived());
+    }
+    if (repModel.getCreated() != null) {
+      taskPatchImpl.setCreated(repModel.getCreated());
+    }
+    if (repModel.getClaimed() != null) {
+      taskPatchImpl.setClaimed(repModel.getClaimed());
+    }
+    if (repModel.getModified() != null) {
+      taskPatchImpl.setModified(repModel.getModified());
+    }
+    if (repModel.getPlanned() != null) {
+      taskPatchImpl.setPlanned(repModel.getPlanned());
+    }
+    if (repModel.getDue() != null) {
+      taskPatchImpl.setDue(repModel.getDue());
+    }
+    if (repModel.getCompleted() != null) {
+      taskPatchImpl.setCompleted(repModel.getCompleted());
+    }
+    if (repModel.getName() != null) {
+      taskPatchImpl.setName(repModel.getName());
+    }
+    if (repModel.getCreator() != null) {
+      taskPatchImpl.setCreator(repModel.getCreator());
+    }
+    if (repModel.getNote() != null) {
+      taskPatchImpl.setNote(repModel.getNote());
+    }
+    if (repModel.getDescription() != null) {
+      taskPatchImpl.setDescription(repModel.getDescription());
+    }
+    if (repModel.getState() != null) {
+      taskPatchImpl.setState(repModel.getState());
+    }
+    if (repModel.getClassificationSummary() != null) {
+      taskPatchImpl.setClassificationSummary(
+          classificationAssembler.toEntityModel(repModel.getClassificationSummary()));
+    }
+    if (repModel.getGroupByCount() != null) {
+      taskPatchImpl.setGroupByCount(repModel.getGroupByCount());
+    }
+    if (repModel.getWorkbasketSummary() != null) {
+      taskPatchImpl.setWorkbasketSummary(
+          workbasketAssembler.toEntityModel(repModel.getWorkbasketSummary()));
+    }
+    if (repModel.getBusinessProcessId() != null) {
+      taskPatchImpl.setBusinessProcessId(repModel.getBusinessProcessId());
+    }
+    if (repModel.getParentBusinessProcessId() != null) {
+      taskPatchImpl.setParentBusinessProcessId(repModel.getParentBusinessProcessId());
+    }
+    if (repModel.getPrimaryObjRef() != null) {
+      taskPatchImpl.setPrimaryObjRef(
+          objectReferenceAssembler.toEntity(repModel.getPrimaryObjRef()));
+    }
+    if (repModel.getManualPriority() != null) {
+      taskPatchImpl.setManualPriority(repModel.getManualPriority());
+    }
+    if (repModel.getIsRead() != null) {
+      taskPatchImpl.setIsRead(repModel.getIsRead());
+    }
+    if (repModel.getSecondaryObjectReferences() != null) {
+      taskPatchImpl.setSecondaryObjectReferences(
+          repModel.getSecondaryObjectReferences().stream()
+              .map(objectReferenceAssembler::toEntity)
+              .toList());
+    }
+
+    // Custom fields - only set if not null
+    if (repModel.getCustom1() != null) {
+      taskPatchImpl.setCustom1(repModel.getCustom1());
+    }
+    if (repModel.getCustom2() != null) {
+      taskPatchImpl.setCustom2(repModel.getCustom2());
+    }
+    if (repModel.getCustom3() != null) {
+      taskPatchImpl.setCustom3(repModel.getCustom3());
+    }
+    if (repModel.getCustom4() != null) {
+      taskPatchImpl.setCustom4(repModel.getCustom4());
+    }
+    if (repModel.getCustom5() != null) {
+      taskPatchImpl.setCustom5(repModel.getCustom5());
+    }
+    if (repModel.getCustom6() != null) {
+      taskPatchImpl.setCustom6(repModel.getCustom6());
+    }
+    if (repModel.getCustom7() != null) {
+      taskPatchImpl.setCustom7(repModel.getCustom7());
+    }
+    if (repModel.getCustom8() != null) {
+      taskPatchImpl.setCustom8(repModel.getCustom8());
+    }
+    if (repModel.getCustom9() != null) {
+      taskPatchImpl.setCustom9(repModel.getCustom9());
+    }
+    if (repModel.getCustom10() != null) {
+      taskPatchImpl.setCustom10(repModel.getCustom10());
+    }
+    if (repModel.getCustom11() != null) {
+      taskPatchImpl.setCustom11(repModel.getCustom11());
+    }
+    if (repModel.getCustom12() != null) {
+      taskPatchImpl.setCustom12(repModel.getCustom12());
+    }
+    if (repModel.getCustom13() != null) {
+      taskPatchImpl.setCustom13(repModel.getCustom13());
+    }
+    if (repModel.getCustom14() != null) {
+      taskPatchImpl.setCustom14(repModel.getCustom14());
+    }
+    if (repModel.getCustom15() != null) {
+      taskPatchImpl.setCustom15(repModel.getCustom15());
+    }
+    if (repModel.getCustom16() != null) {
+      taskPatchImpl.setCustom16(repModel.getCustom16());
+    }
+
+    // Custom int fields - only set if not null
+    if (repModel.getCustomInt1() != null) {
+      taskPatchImpl.setCustomInt1(repModel.getCustomInt1());
+    }
+    if (repModel.getCustomInt2() != null) {
+      taskPatchImpl.setCustomInt2(repModel.getCustomInt2());
+    }
+    if (repModel.getCustomInt3() != null) {
+      taskPatchImpl.setCustomInt3(repModel.getCustomInt3());
+    }
+    if (repModel.getCustomInt4() != null) {
+      taskPatchImpl.setCustomInt4(repModel.getCustomInt4());
+    }
+    if (repModel.getCustomInt5() != null) {
+      taskPatchImpl.setCustomInt5(repModel.getCustomInt5());
+    }
+    if (repModel.getCustomInt6() != null) {
+      taskPatchImpl.setCustomInt6(repModel.getCustomInt6());
+    }
+    if (repModel.getCustomInt7() != null) {
+      taskPatchImpl.setCustomInt7(repModel.getCustomInt7());
+    }
+    if (repModel.getCustomInt8() != null) {
+      taskPatchImpl.setCustomInt8(repModel.getCustomInt8());
+    }
+
+    if (repModel.getCustomAttributes() != null) {
+      taskPatchImpl.setCustomAttributes(
+          repModel.getCustomAttributes().stream()
+              .collect(Collectors.toMap(CustomAttribute::getKey, CustomAttribute::getValue)));
+    }
+    if (repModel.getCallbackInfo() != null) {
+      taskPatchImpl.setCallbackInfo(
+          repModel.getCallbackInfo().stream()
+              .filter(e -> Objects.nonNull(e.getKey()))
+              .filter(not(e -> e.getKey().isEmpty()))
+              .collect(Collectors.toMap(CustomAttribute::getKey, CustomAttribute::getValue)));
+    }
+    return taskPatchImpl;
   }
 }
