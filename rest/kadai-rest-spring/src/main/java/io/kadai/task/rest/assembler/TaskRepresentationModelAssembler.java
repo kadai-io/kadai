@@ -27,10 +27,11 @@ import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.task.api.TaskCustomField;
 import io.kadai.task.api.TaskCustomIntField;
+import io.kadai.task.api.TaskPatch;
+import io.kadai.task.api.TaskPatchBuilder;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.internal.models.TaskImpl;
-import io.kadai.task.internal.models.TaskPatchImpl;
 import io.kadai.task.rest.TaskController;
 import io.kadai.task.rest.models.TaskPatchRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
@@ -236,170 +237,153 @@ public class TaskRepresentationModelAssembler
     }
   }
 
-  public TaskPatchImpl toPatchImpl(TaskPatchRepresentationModel repModel) {
+  public TaskPatch toPatch(TaskPatchRepresentationModel repModel) {
     if (repModel.getCustomAttributes() != null) {
       verifyCorrectCustomAttributesFormat(repModel.getCustomAttributes());
     }
-    TaskPatchImpl taskPatchImpl = new TaskPatchImpl();
+
+    TaskPatchBuilder builder = new TaskPatchBuilder();
 
     if (repModel.getReceived() != null) {
-      taskPatchImpl.setReceived(repModel.getReceived());
-    }
-    if (repModel.getCreated() != null) {
-      taskPatchImpl.setCreated(repModel.getCreated());
-    }
-    if (repModel.getClaimed() != null) {
-      taskPatchImpl.setClaimed(repModel.getClaimed());
-    }
-    if (repModel.getModified() != null) {
-      taskPatchImpl.setModified(repModel.getModified());
+      builder.received(repModel.getReceived());
     }
     if (repModel.getPlanned() != null) {
-      taskPatchImpl.setPlanned(repModel.getPlanned());
+      builder.planned(repModel.getPlanned());
     }
     if (repModel.getDue() != null) {
-      taskPatchImpl.setDue(repModel.getDue());
+      builder.due(repModel.getDue());
     }
-    if (repModel.getCompleted() != null) {
-      taskPatchImpl.setCompleted(repModel.getCompleted());
-    }
+
     if (repModel.getName() != null) {
-      taskPatchImpl.setName(repModel.getName());
-    }
-    if (repModel.getCreator() != null) {
-      taskPatchImpl.setCreator(repModel.getCreator());
+      builder.name(repModel.getName());
     }
     if (repModel.getNote() != null) {
-      taskPatchImpl.setNote(repModel.getNote());
+      builder.note(repModel.getNote());
     }
     if (repModel.getDescription() != null) {
-      taskPatchImpl.setDescription(repModel.getDescription());
+      builder.description(repModel.getDescription());
     }
-    if (repModel.getState() != null) {
-      taskPatchImpl.setState(repModel.getState());
-    }
+
     if (repModel.getClassificationSummary() != null) {
-      taskPatchImpl.setClassificationSummary(
+      builder.classificationSummary(
           classificationAssembler.toEntityModel(repModel.getClassificationSummary()));
     }
-    if (repModel.getGroupByCount() != null) {
-      taskPatchImpl.setGroupByCount(repModel.getGroupByCount());
-    }
     if (repModel.getWorkbasketSummary() != null) {
-      taskPatchImpl.setWorkbasketSummary(
-          workbasketAssembler.toEntityModel(repModel.getWorkbasketSummary()));
+      builder.workbasketSummary(workbasketAssembler.toEntityModel(repModel.getWorkbasketSummary()));
     }
+
     if (repModel.getBusinessProcessId() != null) {
-      taskPatchImpl.setBusinessProcessId(repModel.getBusinessProcessId());
+      builder.businessProcessId(repModel.getBusinessProcessId());
     }
     if (repModel.getParentBusinessProcessId() != null) {
-      taskPatchImpl.setParentBusinessProcessId(repModel.getParentBusinessProcessId());
+      builder.parentBusinessProcessId(repModel.getParentBusinessProcessId());
     }
     if (repModel.getPrimaryObjRef() != null) {
-      taskPatchImpl.setPrimaryObjRef(
-          objectReferenceAssembler.toEntity(repModel.getPrimaryObjRef()));
+      builder.primaryObjRef(objectReferenceAssembler.toEntity(repModel.getPrimaryObjRef()));
     }
+
     if (repModel.getManualPriority() != null) {
-      taskPatchImpl.setManualPriority(repModel.getManualPriority());
+      builder.manualPriority(repModel.getManualPriority());
     }
     if (repModel.getIsRead() != null) {
-      taskPatchImpl.setIsRead(repModel.getIsRead());
+      builder.isRead(repModel.getIsRead());
     }
     if (repModel.getSecondaryObjectReferences() != null) {
-      taskPatchImpl.setSecondaryObjectReferences(
+      builder.secondaryObjectReferences(
           repModel.getSecondaryObjectReferences().stream()
               .map(objectReferenceAssembler::toEntity)
               .toList());
     }
 
-    // Custom fields - only set if not null
+    // custom string fields
     if (repModel.getCustom1() != null) {
-      taskPatchImpl.setCustom1(repModel.getCustom1());
+      builder.custom1(repModel.getCustom1());
     }
     if (repModel.getCustom2() != null) {
-      taskPatchImpl.setCustom2(repModel.getCustom2());
+      builder.custom2(repModel.getCustom2());
     }
     if (repModel.getCustom3() != null) {
-      taskPatchImpl.setCustom3(repModel.getCustom3());
+      builder.custom3(repModel.getCustom3());
     }
     if (repModel.getCustom4() != null) {
-      taskPatchImpl.setCustom4(repModel.getCustom4());
+      builder.custom4(repModel.getCustom4());
     }
     if (repModel.getCustom5() != null) {
-      taskPatchImpl.setCustom5(repModel.getCustom5());
+      builder.custom5(repModel.getCustom5());
     }
     if (repModel.getCustom6() != null) {
-      taskPatchImpl.setCustom6(repModel.getCustom6());
+      builder.custom6(repModel.getCustom6());
     }
     if (repModel.getCustom7() != null) {
-      taskPatchImpl.setCustom7(repModel.getCustom7());
+      builder.custom7(repModel.getCustom7());
     }
     if (repModel.getCustom8() != null) {
-      taskPatchImpl.setCustom8(repModel.getCustom8());
+      builder.custom8(repModel.getCustom8());
     }
     if (repModel.getCustom9() != null) {
-      taskPatchImpl.setCustom9(repModel.getCustom9());
+      builder.custom9(repModel.getCustom9());
     }
     if (repModel.getCustom10() != null) {
-      taskPatchImpl.setCustom10(repModel.getCustom10());
+      builder.custom10(repModel.getCustom10());
     }
     if (repModel.getCustom11() != null) {
-      taskPatchImpl.setCustom11(repModel.getCustom11());
+      builder.custom11(repModel.getCustom11());
     }
     if (repModel.getCustom12() != null) {
-      taskPatchImpl.setCustom12(repModel.getCustom12());
+      builder.custom12(repModel.getCustom12());
     }
     if (repModel.getCustom13() != null) {
-      taskPatchImpl.setCustom13(repModel.getCustom13());
+      builder.custom13(repModel.getCustom13());
     }
     if (repModel.getCustom14() != null) {
-      taskPatchImpl.setCustom14(repModel.getCustom14());
+      builder.custom14(repModel.getCustom14());
     }
     if (repModel.getCustom15() != null) {
-      taskPatchImpl.setCustom15(repModel.getCustom15());
+      builder.custom15(repModel.getCustom15());
     }
     if (repModel.getCustom16() != null) {
-      taskPatchImpl.setCustom16(repModel.getCustom16());
+      builder.custom16(repModel.getCustom16());
     }
 
-    // Custom int fields - only set if not null
+    // custom int fields
     if (repModel.getCustomInt1() != null) {
-      taskPatchImpl.setCustomInt1(repModel.getCustomInt1());
+      builder.customInt1(repModel.getCustomInt1());
     }
     if (repModel.getCustomInt2() != null) {
-      taskPatchImpl.setCustomInt2(repModel.getCustomInt2());
+      builder.customInt2(repModel.getCustomInt2());
     }
     if (repModel.getCustomInt3() != null) {
-      taskPatchImpl.setCustomInt3(repModel.getCustomInt3());
+      builder.customInt3(repModel.getCustomInt3());
     }
     if (repModel.getCustomInt4() != null) {
-      taskPatchImpl.setCustomInt4(repModel.getCustomInt4());
+      builder.customInt4(repModel.getCustomInt4());
     }
     if (repModel.getCustomInt5() != null) {
-      taskPatchImpl.setCustomInt5(repModel.getCustomInt5());
+      builder.customInt5(repModel.getCustomInt5());
     }
     if (repModel.getCustomInt6() != null) {
-      taskPatchImpl.setCustomInt6(repModel.getCustomInt6());
+      builder.customInt6(repModel.getCustomInt6());
     }
     if (repModel.getCustomInt7() != null) {
-      taskPatchImpl.setCustomInt7(repModel.getCustomInt7());
+      builder.customInt7(repModel.getCustomInt7());
     }
     if (repModel.getCustomInt8() != null) {
-      taskPatchImpl.setCustomInt8(repModel.getCustomInt8());
+      builder.customInt8(repModel.getCustomInt8());
     }
 
     if (repModel.getCustomAttributes() != null) {
-      taskPatchImpl.setCustomAttributes(
+      builder.customAttributes(
           repModel.getCustomAttributes().stream()
               .collect(Collectors.toMap(CustomAttribute::getKey, CustomAttribute::getValue)));
     }
     if (repModel.getCallbackInfo() != null) {
-      taskPatchImpl.setCallbackInfo(
+      builder.callbackInfo(
           repModel.getCallbackInfo().stream()
               .filter(e -> Objects.nonNull(e.getKey()))
               .filter(not(e -> e.getKey().isEmpty()))
               .collect(Collectors.toMap(CustomAttribute::getKey, CustomAttribute::getValue)));
     }
-    return taskPatchImpl;
+
+    return builder.build();
   }
 }

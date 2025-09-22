@@ -30,6 +30,7 @@ import io.kadai.common.rest.QueryPagingParameter;
 import io.kadai.common.rest.QuerySortParameter;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.common.rest.util.QueryParamsValidator;
+import io.kadai.task.api.TaskPatch;
 import io.kadai.task.api.TaskQuery;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.exceptions.AttachmentPersistenceException;
@@ -43,7 +44,6 @@ import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.api.models.TaskSummary;
-import io.kadai.task.internal.models.TaskPatchImpl;
 import io.kadai.task.rest.assembler.BulkOperationResultsRepresentationModelAssembler;
 import io.kadai.task.rest.assembler.TaskRepresentationModelAssembler;
 import io.kadai.task.rest.assembler.TaskSummaryRepresentationModelAssembler;
@@ -547,8 +547,8 @@ public class TaskController implements TaskApi {
       return ResponseEntity.ok().build();
     }
 
-    TaskPatchImpl taskPatchImpl =
-        taskRepresentationModelAssembler.toPatchImpl(requestModel.getFieldsToUpdate());
+    TaskPatch taskPatchImpl =
+        taskRepresentationModelAssembler.toPatch(requestModel.getFieldsToUpdate());
 
     BulkOperationResults<String, KadaiException> result =
         taskService.bulkUpdateTasks(requestModel.getTaskIds(), taskPatchImpl);

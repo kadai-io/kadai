@@ -2249,16 +2249,12 @@ class TaskControllerIntTest {
 
       // extend with secondaryObjectReference, customAttributes, callbackInfo
       Map<String, Object> fieldsToUpdate = new HashMap<>();
-      fieldsToUpdate.put("claimed", "2024-01-02T11:00:00.000Z");
-      fieldsToUpdate.put("completed", "2024-01-03T12:00:00.000Z");
-      fieldsToUpdate.put("modified", "2024-01-04T13:00:00.000Z");
       fieldsToUpdate.put("planned", "2024-01-05T14:00:00.000Z");
       fieldsToUpdate.put("received", "2024-01-06T15:00:00.000Z");
       fieldsToUpdate.put("name", "Bulk Updated Task");
       fieldsToUpdate.put("note", "Bulk update note");
       fieldsToUpdate.put("description", "Bulk update description");
       fieldsToUpdate.put("manualPriority", 25);
-      fieldsToUpdate.put("state", "READY");
       fieldsToUpdate.put("businessProcessId", "BPI-BULK-001");
       fieldsToUpdate.put("parentBusinessProcessId", "PBPI-BULK-001");
       fieldsToUpdate.put("isRead", true);
@@ -2384,12 +2380,8 @@ class TaskControllerIntTest {
       assertThat(updatedTask.getName()).isEqualTo("Bulk Updated Task");
       assertThat(updatedTask.getDescription()).isEqualTo("Bulk update description");
       assertThat(updatedTask.getNote()).isEqualTo("Bulk update note");
-      assertThat(updatedTask.getState()).isEqualTo(TaskState.READY);
 
       // Timestamps
-      assertThat(updatedTask.getClaimed()).isEqualTo(Instant.parse("2024-01-02T11:00:00.000Z"));
-      assertThat(updatedTask.getCompleted()).isEqualTo(Instant.parse("2024-01-03T12:00:00.000Z"));
-      assertThat(updatedTask.getModified()).isEqualTo(Instant.parse("2024-01-04T13:00:00.000Z"));
       assertThat(updatedTask.getPlanned()).isEqualTo(Instant.parse("2024-01-05T14:00:00.000Z"));
       assertThat(updatedTask.getReceived()).isEqualTo(Instant.parse("2024-01-06T15:00:00.000Z"));
 

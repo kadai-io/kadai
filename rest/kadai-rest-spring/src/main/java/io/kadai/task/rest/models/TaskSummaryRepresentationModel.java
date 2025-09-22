@@ -20,11 +20,42 @@ package io.kadai.task.rest.models;
 
 import static io.kadai.task.api.models.TaskSummary.DEFAULT_MANUAL_PRIORITY;
 
+import io.kadai.task.api.TaskState;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TaskSummaryRepresentationModel extends BaseTaskRepresentationModel {
+
+  @Schema(name = "created", description = "The creation timestamp in the system.")
+  protected Instant created;
+
+  @Schema(name = "claimed", description = "The timestamp of the last claim-operation.")
+  protected Instant claimed;
+
+  @Schema(name = "completed", description = "The timestamp of the completion.")
+  protected Instant completed;
+
+  @Schema(name = "modified", description = "The timestamp of the last modification.")
+  protected Instant modified;
+
+  @Schema(name = "creator", description = "the creator of the task.")
+  protected String creator;
+
+  @Schema(
+      name = "state",
+      description =
+          "The manual priority of the task. If the value of manualPriority is zero or greater, the "
+              + "priority is automatically set to manualPriority. In this case, all computations of"
+              + " priority are disabled. If the value of manualPriority is negative, Tasks are not "
+              + "prioritized manually.")
+  protected TaskState state;
+
+  @Schema(
+      name = "groupByCount",
+      description = "Number of Tasks that are grouped together with this Task during a groupBy.")
+  protected Integer groupByCount;
 
   @Schema(
       name = "owner",
@@ -63,7 +94,62 @@ public class TaskSummaryRepresentationModel extends BaseTaskRepresentationModel 
       description = "Secondary object references of the task.")
   protected List<ObjectReferenceRepresentationModel> secondaryObjectReferences = new ArrayList<>();
 
-  // Getters and setters for the unique fields only
+  public Instant getCreated() {
+    return created;
+  }
+
+  public void setCreated(Instant created) {
+    this.created = created;
+  }
+
+  public Instant getClaimed() {
+    return claimed;
+  }
+
+  public void setClaimed(Instant claimed) {
+    this.claimed = claimed;
+  }
+
+  public Instant getCompleted() {
+    return completed;
+  }
+
+  public void setCompleted(Instant completed) {
+    this.completed = completed;
+  }
+
+  public Instant getModified() {
+    return modified;
+  }
+
+  public void setModified(Instant modified) {
+    this.modified = modified;
+  }
+
+  public String getCreator() {
+    return creator;
+  }
+
+  public void setCreator(String creator) {
+    this.creator = creator;
+  }
+
+  public TaskState getState() {
+    return state;
+  }
+
+  public void setState(TaskState state) {
+    this.state = state;
+  }
+
+  public Integer getGroupByCount() {
+    return groupByCount;
+  }
+
+  public void setGroupByCount(Integer groupByCount) {
+    this.groupByCount = groupByCount;
+  }
+
   public String getOwner() {
     return owner;
   }

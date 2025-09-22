@@ -73,6 +73,8 @@ import io.kadai.spi.task.internal.TaskEndstatePreprocessorManager;
 import io.kadai.task.api.CallbackState;
 import io.kadai.task.api.TaskCommentQuery;
 import io.kadai.task.api.TaskCustomField;
+import io.kadai.task.api.TaskCustomIntField;
+import io.kadai.task.api.TaskPatch;
 import io.kadai.task.api.TaskQuery;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.TaskState;
@@ -92,7 +94,6 @@ import io.kadai.task.api.models.AttachmentSummary;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.api.models.TaskComment;
-import io.kadai.task.api.models.TaskPatch;
 import io.kadai.task.api.models.TaskSummary;
 import io.kadai.task.internal.ServiceLevelHandler.BulkLog;
 import io.kadai.task.internal.models.AttachmentImpl;
@@ -100,7 +101,6 @@ import io.kadai.task.internal.models.AttachmentSummaryImpl;
 import io.kadai.task.internal.models.MinimalTaskSummary;
 import io.kadai.task.internal.models.ObjectReferenceImpl;
 import io.kadai.task.internal.models.TaskImpl;
-import io.kadai.task.internal.models.TaskPatchImpl;
 import io.kadai.task.internal.models.TaskSummaryImpl;
 import io.kadai.user.api.models.User;
 import io.kadai.user.internal.UserMapper;
@@ -2616,8 +2616,7 @@ public class TaskServiceImpl implements TaskService {
                     oldTaskImpl.getWorkbasketSummary().getId(),
                     WorkbasketPermission.EDITTASKS));
           }
-          TaskPatchImpl taskPatchImpl = (TaskPatchImpl) taskPatch;
-          TaskImpl newTaskImpl = taskPatchImpl.toTaskImpl(duplicateTaskExactly(oldTaskImpl));
+          TaskImpl newTaskImpl = toTaskImpl(taskPatch, duplicateTaskExactly(oldTaskImpl));
           attachmentHandler.insertAndDeleteAttachmentsOnTaskUpdate(newTaskImpl, oldTaskImpl);
           objectReferenceHandler.insertAndDeleteObjectReferencesOnTaskUpdate(
               newTaskImpl, oldTaskImpl);
@@ -2659,5 +2658,146 @@ public class TaskServiceImpl implements TaskService {
     } finally {
       kadaiEngine.returnConnection();
     }
+  }
+
+  public static TaskImpl toTaskImpl(TaskPatch patch, TaskImpl task) {
+    if (patch == null || task == null) {
+      return task;
+    }
+
+    if (patch.received() != null) {
+      task.setReceived(patch.received());
+    }
+    if (patch.planned() != null) {
+      task.setPlanned(patch.planned());
+    }
+    if (patch.due() != null) {
+      task.setDue(patch.due());
+    }
+
+    if (patch.name() != null) {
+      task.setName(patch.name());
+    }
+    if (patch.note() != null) {
+      task.setNote(patch.note());
+    }
+    if (patch.description() != null) {
+      task.setDescription(patch.description());
+    }
+    if (patch.classificationSummary() != null) {
+      task.setClassificationSummary(patch.classificationSummary());
+    }
+    if (patch.workbasketSummary() != null) {
+      task.setWorkbasketSummary(patch.workbasketSummary());
+    }
+    if (patch.businessProcessId() != null) {
+      task.setBusinessProcessId(patch.businessProcessId());
+    }
+    if (patch.parentBusinessProcessId() != null) {
+      task.setParentBusinessProcessId(patch.parentBusinessProcessId());
+    }
+    if (patch.primaryObjRef() != null) {
+      task.setPrimaryObjRef(patch.primaryObjRef());
+    }
+    if (patch.manualPriority() != null) {
+      task.setManualPriority(patch.manualPriority());
+    }
+    if (patch.isRead() != null) {
+      task.setRead(patch.isRead());
+    }
+    if (patch.secondaryObjectReferences() != null) {
+      task.setSecondaryObjectReferences(
+          patch.secondaryObjectReferences().stream()
+              .map(ObjectReference::copy)
+              .collect(Collectors.toList()));
+    }
+
+    // Custom string fields
+    if (patch.custom1() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_1, patch.custom1());
+    }
+    if (patch.custom2() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_2, patch.custom2());
+    }
+    if (patch.custom3() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_3, patch.custom3());
+    }
+    if (patch.custom4() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_4, patch.custom4());
+    }
+    if (patch.custom5() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_5, patch.custom5());
+    }
+    if (patch.custom6() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_6, patch.custom6());
+    }
+    if (patch.custom7() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_7, patch.custom7());
+    }
+    if (patch.custom8() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_8, patch.custom8());
+    }
+    if (patch.custom9() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_9, patch.custom9());
+    }
+    if (patch.custom10() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_10, patch.custom10());
+    }
+    if (patch.custom11() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_11, patch.custom11());
+    }
+    if (patch.custom12() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_12, patch.custom12());
+    }
+    if (patch.custom13() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_13, patch.custom13());
+    }
+    if (patch.custom14() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_14, patch.custom14());
+    }
+    if (patch.custom15() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_15, patch.custom15());
+    }
+    if (patch.custom16() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_16, patch.custom16());
+    }
+
+    // Custom int fields
+    if (patch.customInt1() != null) {
+      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_1, patch.customInt1());
+    }
+    if (patch.customInt2() != null) {
+      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_2, patch.customInt2());
+    }
+    if (patch.customInt3() != null) {
+      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_3, patch.customInt3());
+    }
+    if (patch.customInt4() != null) {
+      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_4, patch.customInt4());
+    }
+    if (patch.customInt5() != null) {
+      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_5, patch.customInt5());
+    }
+    if (patch.customInt6() != null) {
+      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_6, patch.customInt6());
+    }
+    if (patch.customInt7() != null) {
+      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_7, patch.customInt7());
+    }
+    if (patch.customInt8() != null) {
+      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_8, patch.customInt8());
+    }
+
+    if (patch.customAttributes() != null) {
+      task.setCustomAttributeMap(patch.customAttributes());
+    }
+    if (patch.callbackInfo() != null) {
+      task.setCallbackInfo(patch.callbackInfo());
+    }
+    if (patch.callbackState() != null) {
+      task.setCallbackState(patch.callbackState());
+    }
+
+    return task;
   }
 }

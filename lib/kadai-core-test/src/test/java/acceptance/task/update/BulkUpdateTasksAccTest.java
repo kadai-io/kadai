@@ -28,11 +28,12 @@ import io.kadai.classification.api.models.ClassificationSummary;
 import io.kadai.common.api.BulkOperationResults;
 import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.internal.util.Pair;
+import io.kadai.task.api.TaskPatch;
+import io.kadai.task.api.TaskPatchBuilder;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.internal.models.TaskImpl;
-import io.kadai.task.internal.models.TaskPatchImpl;
 import io.kadai.testapi.KadaiInject;
 import io.kadai.testapi.KadaiIntegrationTest;
 import io.kadai.testapi.builder.TaskBuilder;
@@ -109,21 +110,19 @@ class BulkUpdateTasksAccTest {
             .state(TaskState.READY)
             .buildAndStore(taskService);
 
-    TaskPatchImpl patch = new TaskPatchImpl();
-    patch.setName("Bulk Updated Task");
-    patch.setDescription("Bulk update description");
-    patch.setNote("Bulk update note");
-    patch.setManualPriority(42);
-    patch.setIsRead(true);
-    patch.setBusinessProcessId("BPI-BULK-001");
-    patch.setParentBusinessProcessId("PBPI-BULK-001");
-    patch.setCustom1("bulk-custom1");
-    patch.setCustomInt1(1001);
-    patch.setClaimed(Instant.parse("2024-01-02T11:00:00Z"));
-    patch.setCompleted(Instant.parse("2024-01-03T12:00:00Z"));
-    patch.setModified(Instant.parse("2024-01-04T13:00:00Z"));
-    patch.setPlanned(Instant.parse("2024-01-05T14:00:00Z"));
-    patch.setReceived(Instant.parse("2024-01-06T15:00:00Z"));
+    TaskPatch patch = new TaskPatchBuilder()
+        .name("Bulk Updated Task")
+        .description("Bulk update description")
+        .note("Bulk update note")
+        .manualPriority(42)
+        .isRead(true)
+        .businessProcessId("BPI-BULK-001")
+        .parentBusinessProcessId("PBPI-BULK-001")
+        .custom1("bulk-custom1")
+        .customInt1(1001)
+        .planned(Instant.parse("2024-01-05T14:00:00Z"))
+        .received(Instant.parse("2024-01-06T15:00:00Z"))
+        .build();
 
     List<String> taskIds = List.of(t1.getId(), t2.getId());
 
@@ -154,9 +153,6 @@ class BulkUpdateTasksAccTest {
       assertThat(ut.getParentBusinessProcessId()).isEqualTo("PBPI-BULK-001");
       assertThat(((TaskImpl) ut).getCustom1()).isEqualTo("bulk-custom1");
       assertThat(((TaskImpl) ut).getCustomInt1()).isEqualTo(1001);
-      assertThat(ut.getClaimed()).isEqualTo(Instant.parse("2024-01-02T11:00:00Z"));
-      assertThat(ut.getCompleted()).isEqualTo(Instant.parse("2024-01-03T12:00:00Z"));
-      assertThat(ut.getModified()).isEqualTo(Instant.parse("2024-01-04T13:00:00Z"));
       assertThat(ut.getPlanned()).isEqualTo(Instant.parse("2024-01-05T14:00:00Z"));
       assertThat(ut.getReceived()).isEqualTo(Instant.parse("2024-01-06T15:00:00Z"));
     }
@@ -174,9 +170,10 @@ class BulkUpdateTasksAccTest {
             .buildAndStore(taskService);
 
     List<String> taskIds = List.of(task1.getId(), unauthorizedTask.getId());
-    TaskPatchImpl patch = new TaskPatchImpl();
-    patch.setName("Bulk Updated Task");
-    patch.setDescription("Bulk update description");
+    TaskPatch patch = new TaskPatchBuilder()
+        .name("Bulk Updated Task")
+        .description("Bulk update description")
+        .build();
 
     BulkOperationResults<String, KadaiException> result =
         taskService.bulkUpdateTasks(taskIds, patch);

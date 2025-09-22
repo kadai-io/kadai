@@ -42,7 +42,6 @@ import io.kadai.task.api.models.Attachment;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.api.models.TaskComment;
-import io.kadai.task.api.models.TaskPatch;
 import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import io.kadai.workbasket.api.exceptions.WorkbasketNotFoundException;

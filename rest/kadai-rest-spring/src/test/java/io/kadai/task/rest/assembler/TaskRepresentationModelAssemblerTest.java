@@ -28,6 +28,7 @@ import io.kadai.common.rest.RestEndpoints;
 import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.task.api.TaskCustomField;
 import io.kadai.task.api.TaskCustomIntField;
+import io.kadai.task.api.TaskPatch;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.api.models.Attachment;
@@ -35,7 +36,6 @@ import io.kadai.task.api.models.Task;
 import io.kadai.task.internal.models.AttachmentImpl;
 import io.kadai.task.internal.models.ObjectReferenceImpl;
 import io.kadai.task.internal.models.TaskImpl;
-import io.kadai.task.internal.models.TaskPatchImpl;
 import io.kadai.task.rest.models.AttachmentRepresentationModel;
 import io.kadai.task.rest.models.ObjectReferenceRepresentationModel;
 import io.kadai.task.rest.models.TaskPatchRepresentationModel;
@@ -336,20 +336,13 @@ class TaskRepresentationModelAssemblerTest {
     // given
     TaskPatchRepresentationModel repModel = new TaskPatchRepresentationModel();
     repModel.setReceived(Instant.parse("2024-01-01T10:00:00.000Z"));
-    repModel.setCreated(Instant.parse("2024-01-01T11:00:00.000Z"));
-    repModel.setClaimed(Instant.parse("2024-01-01T12:00:00.000Z"));
-    repModel.setModified(Instant.parse("2024-01-01T13:00:00.000Z"));
     repModel.setPlanned(Instant.parse("2024-01-01T14:00:00.000Z"));
     repModel.setDue(Instant.parse("2024-01-01T15:00:00.000Z"));
-    repModel.setCompleted(Instant.parse("2024-01-01T16:00:00.000Z"));
     repModel.setName("Test Task");
-    repModel.setCreator("test-creator");
     repModel.setNote("Test note");
     repModel.setDescription("Test description");
-    repModel.setState(TaskState.READY);
     repModel.setManualPriority(25);
     repModel.setIsRead(true);
-    repModel.setGroupByCount(3);
     repModel.setBusinessProcessId("BPI-001");
     repModel.setParentBusinessProcessId("PBPI-001");
     repModel.setCustom1("custom1-value");
@@ -430,83 +423,76 @@ class TaskRepresentationModelAssemblerTest {
             TaskRepresentationModel.CustomAttribute.of("callback2", "callback-value2")));
 
     // when
-    TaskPatchImpl taskPatchImpl = assembler.toPatchImpl(repModel);
+    TaskPatch taskPatchImpl = assembler.toPatch(repModel);
 
     // then
     assertThat(taskPatchImpl).isNotNull();
-    assertThat(taskPatchImpl.getReceived()).isEqualTo(Instant.parse("2024-01-01T10:00:00.000Z"));
-    assertThat(taskPatchImpl.getCreated()).isEqualTo(Instant.parse("2024-01-01T11:00:00.000Z"));
-    assertThat(taskPatchImpl.getClaimed()).isEqualTo(Instant.parse("2024-01-01T12:00:00.000Z"));
-    assertThat(taskPatchImpl.getModified()).isEqualTo(Instant.parse("2024-01-01T13:00:00.000Z"));
-    assertThat(taskPatchImpl.getPlanned()).isEqualTo(Instant.parse("2024-01-01T14:00:00.000Z"));
-    assertThat(taskPatchImpl.getDue()).isEqualTo(Instant.parse("2024-01-01T15:00:00.000Z"));
-    assertThat(taskPatchImpl.getCompleted()).isEqualTo(Instant.parse("2024-01-01T16:00:00.000Z"));
-    assertThat(taskPatchImpl.getName()).isEqualTo("Test Task");
-    assertThat(taskPatchImpl.getCreator()).isEqualTo("test-creator");
-    assertThat(taskPatchImpl.getNote()).isEqualTo("Test note");
-    assertThat(taskPatchImpl.getDescription()).isEqualTo("Test description");
-    assertThat(taskPatchImpl.getState()).isEqualTo(TaskState.READY);
-    assertThat(taskPatchImpl.getManualPriority()).isEqualTo(25);
+    assertThat(taskPatchImpl.received()).isEqualTo(Instant.parse("2024-01-01T10:00:00.000Z"));
+    assertThat(taskPatchImpl.planned()).isEqualTo(Instant.parse("2024-01-01T14:00:00.000Z"));
+    assertThat(taskPatchImpl.due()).isEqualTo(Instant.parse("2024-01-01T15:00:00.000Z"));
+    assertThat(taskPatchImpl.name()).isEqualTo("Test Task");
+    assertThat(taskPatchImpl.note()).isEqualTo("Test note");
+    assertThat(taskPatchImpl.description()).isEqualTo("Test description");
+    assertThat(taskPatchImpl.manualPriority()).isEqualTo(25);
     assertThat(taskPatchImpl.isRead()).isTrue();
-    assertThat(taskPatchImpl.getGroupByCount()).isEqualTo(3);
-    assertThat(taskPatchImpl.getBusinessProcessId()).isEqualTo("BPI-001");
-    assertThat(taskPatchImpl.getParentBusinessProcessId()).isEqualTo("PBPI-001");
-    assertThat(taskPatchImpl.getCustom1()).isEqualTo("custom1-value");
-    assertThat(taskPatchImpl.getCustom2()).isEqualTo("custom2-value");
-    assertThat(taskPatchImpl.getCustom3()).isEqualTo("custom3-value");
-    assertThat(taskPatchImpl.getCustom4()).isEqualTo("custom4-value");
-    assertThat(taskPatchImpl.getCustom5()).isEqualTo("custom5-value");
-    assertThat(taskPatchImpl.getCustom6()).isEqualTo("custom6-value");
-    assertThat(taskPatchImpl.getCustom7()).isEqualTo("custom7-value");
-    assertThat(taskPatchImpl.getCustom8()).isEqualTo("custom8-value");
-    assertThat(taskPatchImpl.getCustom9()).isEqualTo("custom9-value");
-    assertThat(taskPatchImpl.getCustom10()).isEqualTo("custom10-value");
-    assertThat(taskPatchImpl.getCustom11()).isEqualTo("custom11-value");
-    assertThat(taskPatchImpl.getCustom12()).isEqualTo("custom12-value");
-    assertThat(taskPatchImpl.getCustom13()).isEqualTo("custom13-value");
-    assertThat(taskPatchImpl.getCustom14()).isEqualTo("custom14-value");
-    assertThat(taskPatchImpl.getCustom15()).isEqualTo("custom15-value");
-    assertThat(taskPatchImpl.getCustom16()).isEqualTo("custom16-value");
-    assertThat(taskPatchImpl.getCustomInt1()).isEqualTo(1001);
-    assertThat(taskPatchImpl.getCustomInt2()).isEqualTo(1002);
-    assertThat(taskPatchImpl.getCustomInt3()).isEqualTo(1003);
-    assertThat(taskPatchImpl.getCustomInt4()).isEqualTo(1004);
-    assertThat(taskPatchImpl.getCustomInt5()).isEqualTo(1005);
-    assertThat(taskPatchImpl.getCustomInt6()).isEqualTo(1006);
-    assertThat(taskPatchImpl.getCustomInt7()).isEqualTo(1007);
-    assertThat(taskPatchImpl.getCustomInt8()).isEqualTo(1008);
+    assertThat(taskPatchImpl.businessProcessId()).isEqualTo("BPI-001");
+    assertThat(taskPatchImpl.parentBusinessProcessId()).isEqualTo("PBPI-001");
+    assertThat(taskPatchImpl.custom1()).isEqualTo("custom1-value");
+    assertThat(taskPatchImpl.custom2()).isEqualTo("custom2-value");
+    assertThat(taskPatchImpl.custom3()).isEqualTo("custom3-value");
+    assertThat(taskPatchImpl.custom4()).isEqualTo("custom4-value");
+    assertThat(taskPatchImpl.custom5()).isEqualTo("custom5-value");
+    assertThat(taskPatchImpl.custom6()).isEqualTo("custom6-value");
+    assertThat(taskPatchImpl.custom7()).isEqualTo("custom7-value");
+    assertThat(taskPatchImpl.custom8()).isEqualTo("custom8-value");
+    assertThat(taskPatchImpl.custom9()).isEqualTo("custom9-value");
+    assertThat(taskPatchImpl.custom10()).isEqualTo("custom10-value");
+    assertThat(taskPatchImpl.custom11()).isEqualTo("custom11-value");
+    assertThat(taskPatchImpl.custom12()).isEqualTo("custom12-value");
+    assertThat(taskPatchImpl.custom13()).isEqualTo("custom13-value");
+    assertThat(taskPatchImpl.custom14()).isEqualTo("custom14-value");
+    assertThat(taskPatchImpl.custom15()).isEqualTo("custom15-value");
+    assertThat(taskPatchImpl.custom16()).isEqualTo("custom16-value");
+    assertThat(taskPatchImpl.customInt1()).isEqualTo(1001);
+    assertThat(taskPatchImpl.customInt2()).isEqualTo(1002);
+    assertThat(taskPatchImpl.customInt3()).isEqualTo(1003);
+    assertThat(taskPatchImpl.customInt4()).isEqualTo(1004);
+    assertThat(taskPatchImpl.customInt5()).isEqualTo(1005);
+    assertThat(taskPatchImpl.customInt6()).isEqualTo(1006);
+    assertThat(taskPatchImpl.customInt7()).isEqualTo(1007);
+    assertThat(taskPatchImpl.customInt8()).isEqualTo(1008);
 
-    assertThat(taskPatchImpl.getClassificationSummary()).isNotNull();
-    assertThat(taskPatchImpl.getClassificationSummary().getId()).isEqualTo("CLI:123");
-    assertThat(taskPatchImpl.getClassificationSummary().getKey()).isEqualTo("TEST-KEY");
-    assertThat(taskPatchImpl.getClassificationSummary().getDomain()).isEqualTo("DOMAIN_A");
-    assertThat(taskPatchImpl.getClassificationSummary().getType()).isEqualTo("TASK");
+    assertThat(taskPatchImpl.classificationSummary()).isNotNull();
+    assertThat(taskPatchImpl.classificationSummary().getId()).isEqualTo("CLI:123");
+    assertThat(taskPatchImpl.classificationSummary().getKey()).isEqualTo("TEST-KEY");
+    assertThat(taskPatchImpl.classificationSummary().getDomain()).isEqualTo("DOMAIN_A");
+    assertThat(taskPatchImpl.classificationSummary().getType()).isEqualTo("TASK");
 
-    assertThat(taskPatchImpl.getWorkbasketSummary()).isNotNull();
-    assertThat(taskPatchImpl.getWorkbasketSummary().getId()).isEqualTo("WBI:123");
-    assertThat(taskPatchImpl.getWorkbasketSummary().getKey()).isEqualTo("TEST-WB");
-    assertThat(taskPatchImpl.getWorkbasketSummary().getDomain()).isEqualTo("DOMAIN_A");
+    assertThat(taskPatchImpl.workbasketSummary()).isNotNull();
+    assertThat(taskPatchImpl.workbasketSummary().getId()).isEqualTo("WBI:123");
+    assertThat(taskPatchImpl.workbasketSummary().getKey()).isEqualTo("TEST-WB");
+    assertThat(taskPatchImpl.workbasketSummary().getDomain()).isEqualTo("DOMAIN_A");
 
-    assertThat(taskPatchImpl.getPrimaryObjRef()).isNotNull();
-    assertThat(taskPatchImpl.getPrimaryObjRef().getCompany()).isEqualTo("TestCompany");
-    assertThat(taskPatchImpl.getPrimaryObjRef().getSystem()).isEqualTo("TestSystem");
-    assertThat(taskPatchImpl.getPrimaryObjRef().getSystemInstance()).isEqualTo("TestInstance");
-    assertThat(taskPatchImpl.getPrimaryObjRef().getType()).isEqualTo("TestType");
-    assertThat(taskPatchImpl.getPrimaryObjRef().getValue()).isEqualTo("test-value");
+    assertThat(taskPatchImpl.primaryObjRef()).isNotNull();
+    assertThat(taskPatchImpl.primaryObjRef().getCompany()).isEqualTo("TestCompany");
+    assertThat(taskPatchImpl.primaryObjRef().getSystem()).isEqualTo("TestSystem");
+    assertThat(taskPatchImpl.primaryObjRef().getSystemInstance()).isEqualTo("TestInstance");
+    assertThat(taskPatchImpl.primaryObjRef().getType()).isEqualTo("TestType");
+    assertThat(taskPatchImpl.primaryObjRef().getValue()).isEqualTo("test-value");
 
-    assertThat(taskPatchImpl.getSecondaryObjectReferences()).hasSize(2);
-    assertThat(taskPatchImpl.getSecondaryObjectReferences().get(0).getCompany())
+    assertThat(taskPatchImpl.secondaryObjectReferences()).hasSize(2);
+    assertThat(taskPatchImpl.secondaryObjectReferences().get(0).getCompany())
         .isEqualTo("SecCompany1");
-    assertThat(taskPatchImpl.getSecondaryObjectReferences().get(1).getCompany())
+    assertThat(taskPatchImpl.secondaryObjectReferences().get(1).getCompany())
         .isEqualTo("SecCompany2");
 
-    assertThat(taskPatchImpl.getCustomAttributes()).hasSize(2);
-    assertThat(taskPatchImpl.getCustomAttributes().get("attr1")).isEqualTo("value1");
-    assertThat(taskPatchImpl.getCustomAttributes().get("attr2")).isEqualTo("value2");
+    assertThat(taskPatchImpl.customAttributes()).hasSize(2);
+    assertThat(taskPatchImpl.customAttributes().get("attr1")).isEqualTo("value1");
+    assertThat(taskPatchImpl.customAttributes().get("attr2")).isEqualTo("value2");
 
-    assertThat(taskPatchImpl.getCallbackInfo()).hasSize(2);
-    assertThat(taskPatchImpl.getCallbackInfo().get("callback1")).isEqualTo("callback-value1");
-    assertThat(taskPatchImpl.getCallbackInfo().get("callback2")).isEqualTo("callback-value2");
+    assertThat(taskPatchImpl.callbackInfo()).hasSize(2);
+    assertThat(taskPatchImpl.callbackInfo().get("callback1")).isEqualTo("callback-value1");
+    assertThat(taskPatchImpl.callbackInfo().get("callback2")).isEqualTo("callback-value2");
   }
 
   @Test
@@ -518,60 +504,54 @@ class TaskRepresentationModelAssemblerTest {
     repModel.setManualPriority(100);
 
     // when
-    TaskPatchImpl taskPatchImpl = assembler.toPatchImpl(repModel);
+    TaskPatch taskPatch = assembler.toPatch(repModel);
 
     // then
-    assertThat(taskPatchImpl).isNotNull();
-    assertThat(taskPatchImpl.getName()).isEqualTo("Only Name Set");
-    assertThat(taskPatchImpl.getManualPriority()).isEqualTo(100);
+    assertThat(taskPatch).isNotNull();
+    assertThat(taskPatch.name()).isEqualTo("Only Name Set");
+    assertThat(taskPatch.manualPriority()).isEqualTo(100);
 
     // Verify null fields are not set
-    assertThat(taskPatchImpl.getReceived()).isNull();
-    assertThat(taskPatchImpl.getCreated()).isNull();
-    assertThat(taskPatchImpl.getClaimed()).isNull();
-    assertThat(taskPatchImpl.getModified()).isNull();
-    assertThat(taskPatchImpl.getPlanned()).isNull();
-    assertThat(taskPatchImpl.getDue()).isNull();
-    assertThat(taskPatchImpl.getCompleted()).isNull();
-    assertThat(taskPatchImpl.getCreator()).isNull();
-    assertThat(taskPatchImpl.getNote()).isNull();
-    assertThat(taskPatchImpl.getDescription()).isNull();
-    assertThat(taskPatchImpl.getState()).isNull();
-    assertThat(taskPatchImpl.isRead()).isNull();
-    assertThat(taskPatchImpl.getGroupByCount()).isNull();
-    assertThat(taskPatchImpl.getBusinessProcessId()).isNull();
-    assertThat(taskPatchImpl.getParentBusinessProcessId()).isNull();
-    assertThat(taskPatchImpl.getClassificationSummary()).isNull();
-    assertThat(taskPatchImpl.getWorkbasketSummary()).isNull();
-    assertThat(taskPatchImpl.getPrimaryObjRef()).isNull();
-    assertThat(taskPatchImpl.getSecondaryObjectReferences()).isNull();
-    assertThat(taskPatchImpl.getCustomAttributes()).isNull();
-    assertThat(taskPatchImpl.getCallbackInfo()).isNull();
+    assertThat(taskPatch.received()).isNull();
+    assertThat(taskPatch.planned()).isNull();
+    assertThat(taskPatch.due()).isNull();
+    assertThat(taskPatch.note()).isNull();
+    assertThat(taskPatch.description()).isNull();
+    assertThat(taskPatch.isRead()).isNull();
+    assertThat(taskPatch.businessProcessId()).isNull();
+    assertThat(taskPatch.parentBusinessProcessId()).isNull();
+    assertThat(taskPatch.classificationSummary()).isNull();
+    assertThat(taskPatch.workbasketSummary()).isNull();
+    assertThat(taskPatch.primaryObjRef()).isNull();
+    assertThat(taskPatch.secondaryObjectReferences()).isNull();
+    assertThat(taskPatch.customAttributes()).isNull();
+    assertThat(taskPatch.callbackInfo()).isNull();
 
-    assertThat(taskPatchImpl.getCustom1()).isNull();
-    assertThat(taskPatchImpl.getCustom2()).isNull();
-    assertThat(taskPatchImpl.getCustom3()).isNull();
-    assertThat(taskPatchImpl.getCustom4()).isNull();
-    assertThat(taskPatchImpl.getCustom5()).isNull();
-    assertThat(taskPatchImpl.getCustom6()).isNull();
-    assertThat(taskPatchImpl.getCustom7()).isNull();
-    assertThat(taskPatchImpl.getCustom8()).isNull();
-    assertThat(taskPatchImpl.getCustom9()).isNull();
-    assertThat(taskPatchImpl.getCustom10()).isNull();
-    assertThat(taskPatchImpl.getCustom11()).isNull();
-    assertThat(taskPatchImpl.getCustom12()).isNull();
-    assertThat(taskPatchImpl.getCustom13()).isNull();
-    assertThat(taskPatchImpl.getCustom14()).isNull();
-    assertThat(taskPatchImpl.getCustom15()).isNull();
-    assertThat(taskPatchImpl.getCustom16()).isNull();
-    assertThat(taskPatchImpl.getCustomInt1()).isNull();
-    assertThat(taskPatchImpl.getCustomInt2()).isNull();
-    assertThat(taskPatchImpl.getCustomInt3()).isNull();
-    assertThat(taskPatchImpl.getCustomInt4()).isNull();
-    assertThat(taskPatchImpl.getCustomInt5()).isNull();
-    assertThat(taskPatchImpl.getCustomInt6()).isNull();
-    assertThat(taskPatchImpl.getCustomInt7()).isNull();
-    assertThat(taskPatchImpl.getCustomInt8()).isNull();
+    assertThat(taskPatch.custom1()).isNull();
+    assertThat(taskPatch.custom2()).isNull();
+    assertThat(taskPatch.custom3()).isNull();
+    assertThat(taskPatch.custom4()).isNull();
+    assertThat(taskPatch.custom5()).isNull();
+    assertThat(taskPatch.custom6()).isNull();
+    assertThat(taskPatch.custom7()).isNull();
+    assertThat(taskPatch.custom8()).isNull();
+    assertThat(taskPatch.custom9()).isNull();
+    assertThat(taskPatch.custom10()).isNull();
+    assertThat(taskPatch.custom11()).isNull();
+    assertThat(taskPatch.custom12()).isNull();
+    assertThat(taskPatch.custom13()).isNull();
+    assertThat(taskPatch.custom14()).isNull();
+    assertThat(taskPatch.custom15()).isNull();
+    assertThat(taskPatch.custom16()).isNull();
+
+    assertThat(taskPatch.customInt1()).isNull();
+    assertThat(taskPatch.customInt2()).isNull();
+    assertThat(taskPatch.customInt3()).isNull();
+    assertThat(taskPatch.customInt4()).isNull();
+    assertThat(taskPatch.customInt5()).isNull();
+    assertThat(taskPatch.customInt6()).isNull();
+    assertThat(taskPatch.customInt7()).isNull();
+    assertThat(taskPatch.customInt8()).isNull();
   }
 
   private void testEquality(Task task, TaskRepresentationModel repModel) throws Exception {

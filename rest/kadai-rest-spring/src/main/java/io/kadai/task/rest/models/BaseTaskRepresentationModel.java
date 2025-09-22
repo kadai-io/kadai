@@ -19,7 +19,6 @@
 package io.kadai.task.rest.models;
 
 import io.kadai.classification.rest.models.ClassificationSummaryRepresentationModel;
-import io.kadai.task.api.TaskState;
 import io.kadai.workbasket.rest.models.WorkbasketSummaryRepresentationModel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
@@ -40,18 +39,6 @@ public class BaseTaskRepresentationModel
           "External Id. Can be used to enforce idempotence at task creation. Can identify an "
               + "external task.")
   protected String externalId;
-
-  @Schema(name = "created", description = "The creation timestamp in the system.")
-  protected Instant created;
-
-  @Schema(name = "claimed", description = "The timestamp of the last claim-operation.")
-  protected Instant claimed;
-
-  @Schema(name = "completed", description = "The timestamp of the completion.")
-  protected Instant completed;
-
-  @Schema(name = "modified", description = "The timestamp of the last modification.")
-  protected Instant modified;
 
   @Schema(
       name = "planned",
@@ -77,23 +64,11 @@ public class BaseTaskRepresentationModel
   @Schema(name = "name", description = "The name of the task.")
   protected String name;
 
-  @Schema(name = "creator", description = "the creator of the task.")
-  protected String creator;
-
   @Schema(name = "note", description = "note.")
   protected String note;
 
   @Schema(name = "description", description = "The description of the task.")
   protected String description;
-
-  @Schema(
-      name = "state",
-      description =
-          "The manual priority of the task. If the value of manualPriority is zero or greater, the "
-              + "priority is automatically set to manualPriority. In this case, all computations of"
-              + " priority are disabled. If the value of manualPriority is negative, Tasks are not "
-              + "prioritized manually.")
-  protected TaskState state;
 
   @Schema(name = "classificationSummary", description = "The classification of this task.")
   @NotNull
@@ -112,11 +87,6 @@ public class BaseTaskRepresentationModel
   @Schema(name = "primaryObjRef", description = "The Objects primary ObjectReference.")
   @NotNull
   protected ObjectReferenceRepresentationModel primaryObjRef;
-
-  @Schema(
-      name = "groupByCount",
-      description = "Number of Tasks that are grouped together with this Task during a groupBy.")
-  protected Integer groupByCount;
 
   @Schema(name = "custom1", description = "A custom property with name \"1\".")
   protected String custom1;
@@ -209,38 +179,6 @@ public class BaseTaskRepresentationModel
     this.externalId = externalId;
   }
 
-  public Instant getCreated() {
-    return created;
-  }
-
-  public void setCreated(Instant created) {
-    this.created = created;
-  }
-
-  public Instant getClaimed() {
-    return claimed;
-  }
-
-  public void setClaimed(Instant claimed) {
-    this.claimed = claimed;
-  }
-
-  public Instant getCompleted() {
-    return completed;
-  }
-
-  public void setCompleted(Instant completed) {
-    this.completed = completed;
-  }
-
-  public Instant getModified() {
-    return modified;
-  }
-
-  public void setModified(Instant modified) {
-    this.modified = modified;
-  }
-
   public Instant getPlanned() {
     return planned;
   }
@@ -273,14 +211,6 @@ public class BaseTaskRepresentationModel
     this.name = name;
   }
 
-  public String getCreator() {
-    return creator;
-  }
-
-  public void setCreator(String creator) {
-    this.creator = creator;
-  }
-
   public String getNote() {
     return note;
   }
@@ -295,14 +225,6 @@ public class BaseTaskRepresentationModel
 
   public void setDescription(String description) {
     this.description = description;
-  }
-
-  public TaskState getState() {
-    return state;
-  }
-
-  public void setState(TaskState state) {
-    this.state = state;
   }
 
   public ClassificationSummaryRepresentationModel getClassificationSummary() {
@@ -353,14 +275,6 @@ public class BaseTaskRepresentationModel
   public void setAttachmentSummaries(
       List<AttachmentSummaryRepresentationModel> attachmentSummaries) {
     this.attachmentSummaries = attachmentSummaries;
-  }
-
-  public Integer getGroupByCount() {
-    return groupByCount;
-  }
-
-  public void setGroupByCount(Integer groupByCount) {
-    this.groupByCount = groupByCount;
   }
 
   public String getCustom1() {
