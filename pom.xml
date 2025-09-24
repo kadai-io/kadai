@@ -91,7 +91,7 @@
         <version.docx4j>11.5.5</version.docx4j>
         <version.jakarta.xml.bind-api>4.0.4</version.jakarta.xml.bind-api>
         <version.jaxb-core>4.0.6</version.jaxb-core>
-        <version.jaxb-impl>4.0.5</version.jaxb-impl>
+        <version.jaxb-impl>4.0.6</version.jaxb-impl>
         <version.jakarta.activation>2.1.4</version.jakarta.activation>
 
         <!-- database driver versions -->
