@@ -244,26 +244,12 @@ public class TaskRepresentationModelAssembler
 
     TaskPatchBuilder builder = new TaskPatchBuilder();
 
-    if (repModel.getReceived() != null) {
-      builder.received(repModel.getReceived());
-    }
-    if (repModel.getPlanned() != null) {
-      builder.planned(repModel.getPlanned());
-    }
-    if (repModel.getDue() != null) {
-      builder.due(repModel.getDue());
-    }
-
-    if (repModel.getName() != null) {
-      builder.name(repModel.getName());
-    }
-    if (repModel.getNote() != null) {
-      builder.note(repModel.getNote());
-    }
-    if (repModel.getDescription() != null) {
-      builder.description(repModel.getDescription());
-    }
-
+    builder.received(repModel.getReceived());
+    builder.planned(repModel.getPlanned());
+    builder.due(repModel.getDue());
+    builder.name(repModel.getName());
+    builder.note(repModel.getNote());
+    builder.description(repModel.getDescription());
     if (repModel.getClassificationSummary() != null) {
       builder.classificationSummary(
           classificationAssembler.toEntityModel(repModel.getClassificationSummary()));
@@ -271,106 +257,43 @@ public class TaskRepresentationModelAssembler
     if (repModel.getWorkbasketSummary() != null) {
       builder.workbasketSummary(workbasketAssembler.toEntityModel(repModel.getWorkbasketSummary()));
     }
-
-    if (repModel.getBusinessProcessId() != null) {
-      builder.businessProcessId(repModel.getBusinessProcessId());
-    }
-    if (repModel.getParentBusinessProcessId() != null) {
-      builder.parentBusinessProcessId(repModel.getParentBusinessProcessId());
-    }
+    builder.businessProcessId(repModel.getBusinessProcessId());
+    builder.parentBusinessProcessId(repModel.getParentBusinessProcessId());
     if (repModel.getPrimaryObjRef() != null) {
       builder.primaryObjRef(objectReferenceAssembler.toEntity(repModel.getPrimaryObjRef()));
     }
-
-    if (repModel.getManualPriority() != null) {
-      builder.manualPriority(repModel.getManualPriority());
-    }
-    if (repModel.getIsRead() != null) {
-      builder.isRead(repModel.getIsRead());
-    }
+    builder.manualPriority(repModel.getManualPriority());
+    builder.isRead(repModel.getIsRead());
     if (repModel.getSecondaryObjectReferences() != null) {
       builder.secondaryObjectReferences(
           repModel.getSecondaryObjectReferences().stream()
               .map(objectReferenceAssembler::toEntity)
               .toList());
     }
-
-    // custom string fields
-    if (repModel.getCustom1() != null) {
-      builder.custom1(repModel.getCustom1());
-    }
-    if (repModel.getCustom2() != null) {
-      builder.custom2(repModel.getCustom2());
-    }
-    if (repModel.getCustom3() != null) {
-      builder.custom3(repModel.getCustom3());
-    }
-    if (repModel.getCustom4() != null) {
-      builder.custom4(repModel.getCustom4());
-    }
-    if (repModel.getCustom5() != null) {
-      builder.custom5(repModel.getCustom5());
-    }
-    if (repModel.getCustom6() != null) {
-      builder.custom6(repModel.getCustom6());
-    }
-    if (repModel.getCustom7() != null) {
-      builder.custom7(repModel.getCustom7());
-    }
-    if (repModel.getCustom8() != null) {
-      builder.custom8(repModel.getCustom8());
-    }
-    if (repModel.getCustom9() != null) {
-      builder.custom9(repModel.getCustom9());
-    }
-    if (repModel.getCustom10() != null) {
-      builder.custom10(repModel.getCustom10());
-    }
-    if (repModel.getCustom11() != null) {
-      builder.custom11(repModel.getCustom11());
-    }
-    if (repModel.getCustom12() != null) {
-      builder.custom12(repModel.getCustom12());
-    }
-    if (repModel.getCustom13() != null) {
-      builder.custom13(repModel.getCustom13());
-    }
-    if (repModel.getCustom14() != null) {
-      builder.custom14(repModel.getCustom14());
-    }
-    if (repModel.getCustom15() != null) {
-      builder.custom15(repModel.getCustom15());
-    }
-    if (repModel.getCustom16() != null) {
-      builder.custom16(repModel.getCustom16());
-    }
-
-    // custom int fields
-    if (repModel.getCustomInt1() != null) {
-      builder.customInt1(repModel.getCustomInt1());
-    }
-    if (repModel.getCustomInt2() != null) {
-      builder.customInt2(repModel.getCustomInt2());
-    }
-    if (repModel.getCustomInt3() != null) {
-      builder.customInt3(repModel.getCustomInt3());
-    }
-    if (repModel.getCustomInt4() != null) {
-      builder.customInt4(repModel.getCustomInt4());
-    }
-    if (repModel.getCustomInt5() != null) {
-      builder.customInt5(repModel.getCustomInt5());
-    }
-    if (repModel.getCustomInt6() != null) {
-      builder.customInt6(repModel.getCustomInt6());
-    }
-    if (repModel.getCustomInt7() != null) {
-      builder.customInt7(repModel.getCustomInt7());
-    }
-    if (repModel.getCustomInt8() != null) {
-      builder.customInt8(repModel.getCustomInt8());
-    }
-
+    builder.custom1(repModel.getCustom1());
+    builder.custom2(repModel.getCustom2());
+    builder.custom3(repModel.getCustom3());
+    builder.custom4(repModel.getCustom4());
+    builder.custom5(repModel.getCustom5());
+    builder.custom6(repModel.getCustom6());
+    builder.custom7(repModel.getCustom7());
+    builder.custom8(repModel.getCustom8());
+    builder.custom9(repModel.getCustom9());
+    builder.custom10(repModel.getCustom10());
+    builder.custom11(repModel.getCustom11());
+    builder.custom12(repModel.getCustom12());
+    builder.custom13(repModel.getCustom13());
+    builder.custom14(repModel.getCustom14());
+    builder.custom15(repModel.getCustom15());
+    builder.custom16(repModel.getCustom16());
+    builder.customInt1(repModel.getCustomInt1());
+    builder.customInt2(repModel.getCustomInt2());
+    builder.customInt3(repModel.getCustomInt3());
+    builder.customInt4(repModel.getCustomInt4());
+    builder.customInt5(repModel.getCustomInt5());
+    builder.customInt6(repModel.getCustomInt6());
+    builder.customInt7(repModel.getCustomInt7());
+    builder.customInt8(repModel.getCustomInt8());
     if (repModel.getCustomAttributes() != null) {
       builder.customAttributes(
           repModel.getCustomAttributes().stream()

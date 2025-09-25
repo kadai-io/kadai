@@ -44,6 +44,7 @@ class PojoTest {
       new ClassFileImporter()
           .importPackages("io.kadai").stream()
               .filter(javaClass -> javaClass.tryGetMethod("equals", Object.class).isPresent())
+              .filter(clazz -> !clazz.isRecord())
               .filter(
                   javaClass ->
                       !javaClass.getSimpleName().equals("TaskHistoryEvent")
@@ -55,10 +56,7 @@ class PojoTest {
                           && !javaClass.getSimpleName().equals("IntItem")
                           && !javaClass.getSimpleName().equals("LongItem")
                           // This is a record, it has a getter per definition
-                          && !javaClass.getSimpleName().equals("DurationPrioHolder")
-                          && !javaClass.getSimpleName().equals("TaskPatch")
-                          // This is a record, it has a getter per definition
-                          && !javaClass.getSimpleName().equals("CustomHoliday"))
+                          && !javaClass.getSimpleName().equals("DurationPrioHolder"))
               .map(JavaClass::reflect)
               .toList();
 

@@ -185,13 +185,12 @@ public interface TaskApi {
                             ObjectReferencePersistenceException.class
                           }))
             }),
-          @ApiResponse(
-              responseCode = "422",
-              description =
-                  "SERVICE_LEVEL_VIOLATION",
-              content = {
-                  @Content(schema = @Schema(implementation = ServiceLevelViolationException.class))
-              })
+        @ApiResponse(
+            responseCode = "422",
+            description = "SERVICE_LEVEL_VIOLATION",
+            content = {
+              @Content(schema = @Schema(implementation = ServiceLevelViolationException.class))
+            })
       })
   @PostMapping(path = RestEndpoints.URL_TASKS)
   @Transactional(rollbackFor = Exception.class)
@@ -903,52 +902,49 @@ public interface TaskApi {
   /**
    * This endpoint completes multiple Tasks.
    *
-   * <p>Processes all provided task IDs and marks them as completed.
-   *  In case of success (no error), the task ID will not appear in the response.
-   *  The response contains only the IDs that failed, along with their error codes.</p>
+   * <p>Processes all provided task IDs and marks them as completed. In case of success (no error),
+   * the task ID will not appear in the response. The response contains only the IDs that failed,
+   * along with their error codes.
    *
-   * @param completeTasksRepresentationModel containing the list of task IDs
-   *                                         that are to be completed.
-   * @return BulkOperationResultsRepresentationModel containing the list of
-   *         failed task IDs with error codes.
-   *
+   * @param completeTasksRepresentationModel containing the list of task IDs that are to be
+   *     completed.
+   * @return BulkOperationResultsRepresentationModel containing the list of failed task IDs with
+   *     error codes.
    */
   @Operation(
       summary = "Bulk complete Tasks",
       description = "This endpoint completes multiple Tasks in one call.",
-      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-          description = "List with the IDs of the tasks to be completed",
-          required = true,
-              content = @Content(
-                  schema = @Schema(implementation = TaskIdListRepresentationModel.class),
-                  examples = @ExampleObject(
-                      value =
-                      """
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              description = "List with the IDs of the tasks to be completed",
+              required = true,
+              content =
+                  @Content(
+                      schema = @Schema(implementation = TaskIdListRepresentationModel.class),
+                      examples =
+                          @ExampleObject(
+                              value =
+                                  """
                           {
                             "taskIds": [
                               "TKI:000000000000000000000000000000000003",
                               "TKI:000000000000000000000000000000000002"
                             ]
                           }
-                          """
-                  )
-              )
-      ),
+                          """))),
       responses = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "List of failed IDs with their error codes",
-              content = @Content(
-                  schema = @Schema(implementation = BulkOperationResultsRepresentationModel.class)
-              )
-          )
-      }
-  )
+        @ApiResponse(
+            responseCode = "200",
+            description = "List of failed IDs with their error codes",
+            content =
+                @Content(
+                    schema =
+                        @Schema(implementation = BulkOperationResultsRepresentationModel.class)))
+      })
   @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE)
   @Transactional(rollbackFor = Exception.class)
   ResponseEntity<BulkOperationResultsRepresentationModel> bulkComplete(
-          @RequestBody TaskIdListRepresentationModel completeTasksRepresentationModel
-  );
+      @RequestBody TaskIdListRepresentationModel completeTasksRepresentationModel);
 
   /**
    * This endpoint force completes a Task.
@@ -1014,48 +1010,45 @@ public interface TaskApi {
   /**
    * This endpoint force completes multiple Tasks.
    *
-   * @param completeTasksRepresentationModel Containing the list of task IDs
-   *                                         that are to be completed.
-   * @return BulkOperationResultsRepresentationModel containing the list of
-   *         failed task IDs with error codes.
-   *
+   * @param completeTasksRepresentationModel Containing the list of task IDs that are to be
+   *     completed.
+   * @return BulkOperationResultsRepresentationModel containing the list of failed task IDs with
+   *     error codes.
    */
   @Operation(
       summary = "Bulk force complete Tasks",
       description = "This endpoint force‑completes multiple Tasks in one call.",
-      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-          description = "List with the IDs of the tasks to be completed",
-          required = true,
-              content = @Content(
-                  schema = @Schema(implementation = TaskIdListRepresentationModel.class),
-                  examples = @ExampleObject(
-                      value =
-                          """
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              description = "List with the IDs of the tasks to be completed",
+              required = true,
+              content =
+                  @Content(
+                      schema = @Schema(implementation = TaskIdListRepresentationModel.class),
+                      examples =
+                          @ExampleObject(
+                              value =
+                                  """
                               {
                                 "taskIds": [
                                   "TKI:000000000000000000000000000000000003",
                                   "TKI:000000000000000000000000000000000002"
                                 ]
                               }
-                              """
-                  )
-              )
-      ),
+                              """))),
       responses = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "List of failed IDs with their error codes",
-              content = @Content(
-                  schema = @Schema(implementation = BulkOperationResultsRepresentationModel.class)
-              )
-          )
-      }
-  )
+        @ApiResponse(
+            responseCode = "200",
+            description = "List of failed IDs with their error codes",
+            content =
+                @Content(
+                    schema =
+                        @Schema(implementation = BulkOperationResultsRepresentationModel.class)))
+      })
   @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE_FORCE)
   @Transactional(rollbackFor = Exception.class)
   ResponseEntity<BulkOperationResultsRepresentationModel> bulkForceComplete(
-          @RequestBody TaskIdListRepresentationModel completeTasksRepresentationModel
-  );
+      @RequestBody TaskIdListRepresentationModel completeTasksRepresentationModel);
 
   /**
    * This endpoint cancels a Task. Cancellation marks a Task as obsolete. The actual work the Task
@@ -1726,13 +1719,12 @@ public interface TaskApi {
                             ObjectReferencePersistenceException.class
                           }))
             }),
-          @ApiResponse(
-              responseCode = "422",
-              description =
-                  "SERVICE_LEVEL_VIOLATION",
-              content = {
-                  @Content(schema = @Schema(implementation = ServiceLevelViolationException.class))
-              })
+        @ApiResponse(
+            responseCode = "422",
+            description = "SERVICE_LEVEL_VIOLATION",
+            content = {
+              @Content(schema = @Schema(implementation = ServiceLevelViolationException.class))
+            })
       })
   @PutMapping(path = RestEndpoints.URL_TASKS_ID)
   @Transactional(rollbackFor = Exception.class)
@@ -1760,9 +1752,8 @@ public interface TaskApi {
       summary = "Updates multiple Tasks",
       description =
           "This endpoint updates a list of Tasks listed in the body with the fields and values "
-              + "listed in the body, if possible. Tasks that can be updated without throwing an "
-              + "exception get updated independent of other Tasks. If the update of a Task throws "
-              + "an exception, then the Task will not get updated.",
+              + "listed in the body, if possible. If the update of a Task fails, it will not be"
+              + " updated, but other valid updates are still applied (i.e., fails partially).",
       requestBody =
           @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description =

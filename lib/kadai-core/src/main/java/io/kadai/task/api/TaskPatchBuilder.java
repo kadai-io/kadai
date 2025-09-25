@@ -308,7 +308,6 @@ public class TaskPatchBuilder {
         customInt7,
         customInt8,
         customAttributes,
-        callbackInfo,
-        callbackState);
+        callbackInfo);
   }
 }

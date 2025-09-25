@@ -25,15 +25,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Record representing a patch for a Task.
- * All fields are nullable to allow partial updates.
- */
+/** Record representing a patch for a Task. All fields are nullable to allow partial updates. */
 public record TaskPatch(
     Instant received,
     Instant planned,
     Instant due,
-
     String name,
     String note,
     String description,
@@ -63,7 +59,6 @@ public record TaskPatch(
     String custom14,
     String custom15,
     String custom16,
-
     Integer customInt1,
     Integer customInt2,
     Integer customInt3,
@@ -72,8 +67,5 @@ public record TaskPatch(
     Integer customInt6,
     Integer customInt7,
     Integer customInt8,
-
     Map<String, String> customAttributes,
-    Map<String, String> callbackInfo,
-    CallbackState callbackState
-) {}
+    Map<String, String> callbackInfo) {}

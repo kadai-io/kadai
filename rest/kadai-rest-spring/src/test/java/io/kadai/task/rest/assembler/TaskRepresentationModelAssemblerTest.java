@@ -342,7 +342,7 @@ class TaskRepresentationModelAssemblerTest {
     repModel.setNote("Test note");
     repModel.setDescription("Test description");
     repModel.setManualPriority(25);
-    repModel.setIsRead(true);
+    repModel.setRead(true);
     repModel.setBusinessProcessId("BPI-001");
     repModel.setParentBusinessProcessId("PBPI-001");
     repModel.setCustom1("custom1-value");

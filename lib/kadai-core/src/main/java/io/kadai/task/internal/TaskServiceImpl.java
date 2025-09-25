@@ -968,7 +968,7 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
-  @Deprecated
+  @Deprecated(forRemoval = true, since = "12.0.0")
   public List<String> updateTasks(
       List<String> taskIds, Map<TaskCustomField, String> customFieldsToUpdate)
       throws InvalidArgumentException {
@@ -2601,63 +2601,17 @@ public class TaskServiceImpl implements TaskService {
       List<String> taskIds, TaskPatch taskPatch) {
     BulkOperationResults<String, KadaiException> bulkLog = new BulkOperationResults<>();
 
-    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
-    try {
-      kadaiEngine.openConnection();
-
-      for (String taskId : taskIds) {
-        try {
-          TaskImpl oldTaskImpl = (TaskImpl) getTask(taskId);
-          if (!checkEditTasksPerm(oldTaskImpl)) {
-            bulkLog.addError(
-                taskId,
-                new NotAuthorizedOnWorkbasketException(
-                    kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
-                    oldTaskImpl.getWorkbasketSummary().getId(),
-                    WorkbasketPermission.EDITTASKS));
-          }
-          TaskImpl newTaskImpl = toTaskImpl(taskPatch, duplicateTaskExactly(oldTaskImpl));
-          attachmentHandler.insertAndDeleteAttachmentsOnTaskUpdate(newTaskImpl, oldTaskImpl);
-          objectReferenceHandler.insertAndDeleteObjectReferencesOnTaskUpdate(
-              newTaskImpl, oldTaskImpl);
-          ObjectReferenceImpl.validate(
-              newTaskImpl.getPrimaryObjRef(), "primary ObjectReference", "Task");
-          standardUpdateActions(oldTaskImpl, newTaskImpl);
-
-          priorityServiceManager
-              .calculatePriorityOfTask(newTaskImpl)
-              .ifPresent(newTaskImpl::setPriority);
-          taskMapper.update(newTaskImpl);
-
-          if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(
-                "Method bulkUpdateTasks() updated task '{}' for user '{}'.",
-                newTaskImpl.getId(),
-                userId);
-          }
-
-          if (historyEventManager.isEnabled()) {
-
-            String changeDetails =
-                ObjectAttributeChangeDetector.determineChangesInAttributes(
-                    oldTaskImpl, newTaskImpl);
-
-            historyEventManager.createEvent(
-                new TaskUpdatedEvent(
-                    IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                    newTaskImpl,
-                    userId,
-                    changeDetails));
-          }
-        } catch (KadaiException e) {
-          bulkLog.addError(taskId, e);
-        }
+    for (String taskId : taskIds) {
+      try {
+        TaskImpl oldTaskImpl = (TaskImpl) getTask(taskId);
+        TaskImpl newTaskImpl = toTaskImpl(taskPatch, duplicateTaskExactly(oldTaskImpl));
+        updateTask(newTaskImpl);
+      } catch (KadaiException e) {
+        bulkLog.addError(taskId, e);
       }
-
-      return bulkLog;
-    } finally {
-      kadaiEngine.returnConnection();
     }
+
+    return bulkLog;
   }
 
   public static TaskImpl toTaskImpl(TaskPatch patch, TaskImpl task) {
@@ -2793,9 +2747,6 @@ public class TaskServiceImpl implements TaskService {
     }
     if (patch.callbackInfo() != null) {
       task.setCallbackInfo(patch.callbackInfo());
-    }
-    if (patch.callbackState() != null) {
-      task.setCallbackState(patch.callbackState());
     }
 
     return task;
