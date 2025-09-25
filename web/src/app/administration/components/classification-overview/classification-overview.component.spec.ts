@@ -25,6 +25,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import {
   CreateClassification,
+  GetClassifications,
   SelectClassification
 } from '../../../shared/store/classification-store/classification.actions';
 import { classificationStateMock, engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
@@ -104,7 +105,7 @@ describe('ClassificationOverviewComponent', () => {
 
   it('should set routerParams property when firstChild of route exists', async () => {
     await fixture.whenStable();
-    expect(component.routerParams).toEqual(routeParamsMock);
+    expect(component.routerParams).toStrictEqual(routeParamsMock);
   });
 
   it('should dispatch SelectClassification action when routerParams id exists', async () => {
@@ -120,5 +121,55 @@ describe('ClassificationOverviewComponent', () => {
     actions$.pipe(ofActionDispatched(CreateClassification)).subscribe(() => (isActionDispatched = true));
     component.ngOnInit();
     expect(isActionDispatched).toBe(true);
+  });
+
+  it('should set showDetail to true when selectedClassification$ emits a truthy value', () => {
+    // Simulate selectedClassification$ emitting a value
+    (component as any).selectedClassification$ = of({ id: '123' });
+    component.showDetail = false;
+    component.ngOnInit();
+    expect(component.showDetail).toBe(true);
+  });
+
+  it('should set showDetail to false when selectedClassification$ emits a falsy value', () => {
+    (component as any).selectedClassification$ = of(null);
+    component.showDetail = true;
+    component.ngOnInit();
+    expect(component.showDetail).toBe(false);
+  });
+
+  it('should dispatch GetClassifications after SelectClassification', async () => {
+    const dispatchSpy = jest.spyOn(store, 'dispatch').mockImplementation((action: any) => {
+      if (action instanceof SelectClassification) {
+        return of(undefined);
+      }
+      if (action instanceof GetClassifications) {
+        return of(undefined);
+      }
+      return of(undefined);
+    });
+    component.routerParams = { id: 'some-id' };
+    component.ngOnInit();
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.any(SelectClassification));
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.any(GetClassifications));
+    dispatchSpy.mockRestore();
+  });
+
+  it('should not set routerParams or dispatch actions if route.firstChild is undefined', () => {
+    mockActivatedRoute.firstChild = undefined;
+    component.routerParams = undefined;
+    const dispatchSpy = jest.spyOn(store, 'dispatch');
+    component.ngOnInit();
+    expect(component.routerParams).toBeUndefined();
+    expect(dispatchSpy).not.toHaveBeenCalled();
+    dispatchSpy.mockRestore();
+  });
+
+  it('should clean up subscriptions on ngOnDestroy', () => {
+    const destroy$ = (component as any).destroy$;
+    const completeSpy = jest.spyOn(destroy$, 'complete');
+    component.ngOnDestroy();
+    expect(completeSpy).toHaveBeenCalled();
+    completeSpy.mockRestore();
   });
 });
