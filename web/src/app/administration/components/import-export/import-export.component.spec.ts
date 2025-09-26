@@ -33,48 +33,49 @@ import { KadaiType } from '../../../shared/models/kadai-type';
 
 jest.mock('../../../shared/util/blob-generator');
 
-xdescribe('ImportExportComponent', () => {
+describe('ImportExportComponent', () => {
   let fixture: ComponentFixture<ImportExportComponent>;
   let debugElement: DebugElement;
-  let app: ImportExportComponent;
+  let component: ImportExportComponent;
 
-  const domainServiceSpy = jest.fn().mockImplementation(
-    (): Partial<DomainService> => ({
-      getSelectedDomainValue: jest.fn().mockReturnValue(of()),
-      getSelectedDomain: jest.fn().mockReturnValue(of()),
-      getDomains: jest.fn().mockReturnValue(of())
-    })
-  );
+  const domainServiceMock: Partial<DomainService> = {
+    getSelectedDomainValue: jest.fn(),
+    getSelectedDomain: jest.fn(),
+    getDomains: jest.fn().mockReturnValue(of(['A', 'B']))
+  };
 
-  const httpSpy = jest.fn().mockImplementation(
-    (): Partial<HttpClient> => ({
-      get: jest.fn().mockReturnValue(of([])),
-      post: jest.fn().mockReturnValue(of([]))
-    })
-  );
+  const workbasketDefinitionServiceMock: Partial<WorkbasketDefinitionService> = {
+    exportWorkbaskets: jest.fn(),
+    importWorkbasket: jest.fn().mockReturnValue(of({}))
+  } as any;
 
-  const showDialogFn = jest.fn().mockReturnValue(true);
-  const notificationServiceSpy = jest.fn().mockImplementation(
-    (): Partial<NotificationService> => ({
-      showDialog: showDialogFn,
-      showSuccess: showDialogFn
-    })
-  );
+  const classificationDefinitionServiceMock: Partial<ClassificationDefinitionService> = {
+    exportClassifications: jest.fn(),
+    importClassification: jest.fn().mockReturnValue(of({}))
+  } as any;
+
+  const notificationServiceMock: Partial<NotificationService> = {
+    showError: jest.fn()
+  } as any;
+
+  const importExportServiceMock: Partial<ImportExportService> = {
+    setImportingFinished: jest.fn()
+  } as any;
+
+  const hotToastServiceMock: any = {
+    observe: jest.fn().mockImplementation(() => (source$) => source$)
+  };
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [],
-      declarations: [ImportExportComponent],
+      imports: [ImportExportComponent],
       providers: [
-        StartupService,
-        KadaiEngineService,
-        WindowRefService,
-        WorkbasketDefinitionService,
-        ClassificationDefinitionService,
-        ImportExportService,
-        { provide: DomainService, useClass: domainServiceSpy },
-        { provide: NotificationService, useClass: notificationServiceSpy },
-        { provide: HttpClient, useClass: httpSpy }
+        { provide: DomainService, useValue: domainServiceMock },
+        { provide: WorkbasketDefinitionService, useValue: workbasketDefinitionServiceMock },
+        { provide: ClassificationDefinitionService, useValue: classificationDefinitionServiceMock },
+        { provide: NotificationService, useValue: notificationServiceMock },
+        { provide: ImportExportService, useValue: importExportServiceMock },
+        { provide: require('@ngneat/hot-toast').HotToastService, useValue: hotToastServiceMock }
       ]
     }).compileComponents();
 
@@ -82,69 +83,75 @@ xdescribe('ImportExportComponent', () => {
 
     fixture = TestBed.createComponent(ImportExportComponent);
     debugElement = fixture.debugElement;
-    app = fixture.debugElement.componentInstance;
-    app.currentSelection = KadaiType.WORKBASKETS;
+    component = fixture.componentInstance;
+    component.currentSelection = KadaiType.WORKBASKETS;
     fixture.detectChanges();
   }));
 
   it('should create component', () => {
-    expect(app).toBeTruthy();
-  });
-  /*
-  it('should successfully upload a valid file', () => {
-    app.selectedFileInput = {
-      nativeElement: {
-        files: [
-          {
-            lastModified: 1599117374674,
-            name: 'Workbaskets_2020-09-03T09_16_14.1414Z.json',
-            size: 59368,
-            type: 'application/json',
-            webkitRelativePath: ''
-          }
-        ]
-      }
-    };
-    app.uploadFile();
-    expect(app.uploadService.isInUse).toBeTruthy();
+    expect(component).toBeTruthy();
   });
 
-  it('should trigger an error when uploading an invalid file format', () => {
-    app.selectedFileInput = {
-      nativeElement: {
-        files: [
-          {
-            lastModified: 1599117374674,
-            name: 'Workbaskets_2020-09-03T09_16_14.1414Z.pdf',
-            size: 59368,
-            type: 'application/pdf',
-            webkitRelativePath: ''
-          }
-        ]
-      }
-    };
-    app.uploadFile();
-    expect(notificationServiceSpy).toHaveBeenCalled();
-  });
-
-    it('should successfully export the workbaskets', async (done) => {
-      app
-        .export()
-        .pipe(take(1))
-        .subscribe(() => {
-          expect(BlobGenerator.saveFile).toHaveBeenCalledWith([], expect.stringMatching(/Workbaskets_.*\.json/));
-          done();
-        });
+  it('should load domains on init', (done) => {
+    component.ngOnInit();
+    component.domains$.subscribe((domains) => {
+      expect(domains).toEqual(['A', 'B']);
+      done();
     });
+  });
 
-    it('should successfully export the classifications', async (done) => {
-      app.currentSelection = KadaiType.CLASSIFICATIONS;
-      app
-        .export()
-        .pipe(take(1))
-        .subscribe(() => {
-          expect(BlobGenerator.saveFile).toHaveBeenCalledWith([], expect.stringMatching(/Classifications_.*\.json/));
-          done();
-        });
-    });*/
+  it('should call exportWorkbaskets when currentSelection is WORKBASKETS', () => {
+    component.currentSelection = KadaiType.WORKBASKETS;
+    component.export('D1');
+    expect(workbasketDefinitionServiceMock.exportWorkbaskets).toHaveBeenCalledWith('D1');
+  });
+
+  it('should call exportClassifications when currentSelection is CLASSIFICATIONS', () => {
+    component.currentSelection = KadaiType.CLASSIFICATIONS;
+    component.export('D2');
+    expect(classificationDefinitionServiceMock.exportClassifications).toHaveBeenCalledWith('D2');
+  });
+
+  it('should upload workbaskets file when valid .json file is selected', () => {
+    const file: any = { name: 'Workbaskets_2025-09-26.json' };
+    const native = { files: [file], value: 'somepath' } as any;
+    (component as any).selectedFileInput = { nativeElement: native };
+    component.currentSelection = KadaiType.WORKBASKETS;
+
+    component.uploadFile();
+
+    expect(workbasketDefinitionServiceMock.importWorkbasket).toHaveBeenCalledWith(file);
+    expect(importExportServiceMock.setImportingFinished).toHaveBeenCalledWith(true);
+    expect(native.value).toBe('');
+  });
+
+  it('should upload classifications file when valid .json file is selected', () => {
+    const file: any = { name: 'Classifications_2025-09-26.json' };
+    const native = { files: [file], value: 'abc' } as any;
+    (component as any).selectedFileInput = { nativeElement: native };
+    component.currentSelection = KadaiType.CLASSIFICATIONS;
+
+    component.uploadFile();
+
+    expect(classificationDefinitionServiceMock.importClassification).toHaveBeenCalledWith(file);
+    expect(importExportServiceMock.setImportingFinished).toHaveBeenCalledWith(true);
+    expect(native.value).toBe('');
+  });
+
+  it('should show error and reset input when uploading invalid file format', () => {
+    const file: any = { name: 'Workbaskets_2025-09-26.pdf', value: 'x' };
+    const native = { files: [file], value: 'xyz' } as any;
+    (component as any).selectedFileInput = { nativeElement: native };
+    component.currentSelection = KadaiType.WORKBASKETS;
+
+    component.uploadFile();
+
+    expect(notificationServiceMock.showError).toHaveBeenCalledWith('IMPORT_EXPORT_UPLOAD_FILE_FORMAT');
+    expect(native.value).toBe('');
+  });
+
+  it('should complete destroy$ on ngOnDestroy', () => {
+    component.ngOnDestroy();
+    expect((component.destroy$ as any).closed || (component.destroy$ as any).isStopped).toBe(true);
+  });
 });
