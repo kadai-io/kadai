@@ -26,6 +26,8 @@ import { ClassificationCategoriesService } from '../../../shared/services/classi
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { classificationStateMock } from '../../../shared/store/mock-data/mock-store';
 import { By } from '@angular/platform-browser';
+import { Location } from '@angular/common';
+import { SetSelectedClassificationType } from '../../../shared/store/classification-store/classification.actions';
 
 const classificationServiceSpy = jest.fn();
 const classificationCategoriesServiceSpy = jest.fn();
@@ -89,5 +91,23 @@ describe('ClassificationTypesSelectorComponent', () => {
     expect(options.length).toBe(2);
     expect(options[0].nativeElement.textContent.trim()).toBe('TASK');
     expect(options[1].nativeElement.textContent.trim()).toBe('DOCUMENT');
+  });
+
+  it('should dispatch SetSelectedClassificationType and navigate to classifications on select', () => {
+    const dispatchSpy = jest.spyOn(store, 'dispatch');
+    const location = TestBed.inject(Location);
+    const pathSpy = jest.spyOn(location, 'path').mockReturnValue('classifications/123/details');
+    const goSpy = jest.spyOn(location, 'go').mockImplementation(() => {});
+
+    component.select('TASK');
+
+    // Verify action dispatch with correct payload
+    expect(dispatchSpy).toHaveBeenCalledWith(new SetSelectedClassificationType('TASK'));
+    // Verify URL is normalized to just 'classifications'
+    expect(goSpy).toHaveBeenCalledWith('classifications');
+
+    pathSpy.mockRestore();
+    goSpy.mockRestore();
+    dispatchSpy.mockRestore();
   });
 });
