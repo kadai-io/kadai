@@ -259,6 +259,36 @@ Our focus is mainly directed to the backend, but we maintain a demo frontend in 
 
 For login choose username `teamlead-1` with password `teamlead-1`.
 
+# ⚡️OpenEnergyBadge
+
+KADAI is currently undergoing certification with the *Blauer Engel for Software*, an eco-label for resource- and energy-efficient software products. A central part of the certification is the definition of a standard usage scenario, which reflects typical user interactions.
+
+In our defined scenario, the following activities are performed:
+
+* Create a new task
+* Search for workbaskets with a specific permission (OPEN)
+* Open a workbasket 
+* Retrieve the first 50 tasks from a workbasket
+* Read a single task
+* Edit a task
+* Transfer a task to another workbasket
+* Claim a task  
+* Retrieve comments for a task
+* Add a new comment to a task
+* Delete a comment
+* Complete a task
+* Search for additional tasks with the same object reference
+
+Additionally, a single user performs the following activity:
+* Retrieve the task status report (monitoring)
+
+These badges show the energy cost for this scenario (done by 100 virtual users): 
+
+<img src="https://api.green-coding.io/v1/badge/single/59ce2670-046e-4911-b1bc-a9f618616002?metric=psu_energy_ac_mcp_machine" loading="lazy">
+
+         
+<img src="https://api.green-coding.io/v1/badge/single/59ce2670-046e-4911-b1bc-a9f618616002?metric=cpu_energy_rapl_msr_component" loading="lazy">
+
 # 📨Contact
 
 If you have any questions or ideas feel free to create an [issue](https://github.com/kadai-io/kadai/issues),
@@ -273,3 +303,5 @@ with the support of the open source community.
 ---
 [![envite consulting GmbH](docs/images/envite-black.png)](https://envite.de/)
 ---
+
+                       
