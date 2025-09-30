@@ -284,10 +284,18 @@ Additionally, a single user performs the following activity:
 
 These badges show the energy cost for this scenario (done by 100 virtual users): 
 
-<img src="https://api.green-coding.io/v1/badge/single/59ce2670-046e-4911-b1bc-a9f618616002?metric=psu_energy_ac_mcp_machine" loading="lazy">
+<a href="https://metrics.green-coding.io/stats.html?id=59ce2670-046e-4911-b1bc-a9f618616002">
+  <img src="https://api.green-coding.io/v1/badge/single/59ce2670-046e-4911-b1bc-a9f618616002?metric=psu_energy_ac_mcp_machine" 
+       alt="Machine Energy Badge" 
+       loading="lazy">
+</a>
 
-         
-<img src="https://api.green-coding.io/v1/badge/single/59ce2670-046e-4911-b1bc-a9f618616002?metric=cpu_energy_rapl_msr_component" loading="lazy">
+
+<a href="https://metrics.green-coding.io/stats.html?id=59ce2670-046e-4911-b1bc-a9f618616002">
+  <img src="https://api.green-coding.io/v1/badge/single/59ce2670-046e-4911-b1bc-a9f618616002?metric=cpu_energy_rapl_msr_component" 
+       alt="CPU Package Energy Badge" 
+       loading="lazy">
+</a>
 
 # 📨Contact
 
