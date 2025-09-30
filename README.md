@@ -261,7 +261,8 @@ For login choose username `teamlead-1` with password `teamlead-1`.
 
 # ⚡️OpenEnergyBadge
 
-KADAI is currently undergoing certification with the *Blauer Engel for Software*, an eco-label for resource- and energy-efficient software products awarded by the German Environment Agency (Umweltbundesamt). A central part of the certification is the definition of a standard usage scenario, which reflects typical user interactions.
+KADAI is currently undergoing certification with the [*Blauer Engel for Software*](https://www.blauer-engel.de/en/productworld/software), an eco-label for resource- and energy-efficient software products awarded by the [German Environment Agency (Umweltbundesamt)](https://www.umweltbundesamt.de/en). A central part of the certification is the definition of a standard usage scenario, which reflects typical user interactions.
+
 
 In our defined scenario, the following activities are performed:
 
