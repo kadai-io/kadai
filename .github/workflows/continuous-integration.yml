@@ -472,7 +472,7 @@ jobs:
           --settings ci/mvnsettings.xml -DskipTests -Dcheckstyle.skip -Djacoco.skip \
           -pl :kadai-parent,\
           :kadai-common-parent,:kadai-common-logging,:kadai-common,:kadai-common-security,\
-          :kadai-common-data,:kadai-common-test,\
+          :kadai-common-data,:kadai-common-test,:kadai-test-api,\
           :kadai-lib-parent,:kadai-core,:kadai-spring,\
           :kadai-rest-parent,:kadai-web,:kadai-rest-spring,\
           :kadai-history-parent,:kadai-simplehistory-provider,:kadai-simplehistory-rest-spring,:kadai-loghistory-provider,\
