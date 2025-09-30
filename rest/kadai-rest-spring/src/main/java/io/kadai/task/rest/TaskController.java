@@ -540,11 +540,8 @@ public class TaskController implements TaskApi {
   public ResponseEntity<BulkOperationResultsRepresentationModel> bulkUpdateTasks(
       @RequestBody TaskBulkUpdateRepresentationModel requestModel) {
 
-    if (requestModel == null) {
-      throw new InvalidArgumentException("Request body must not be null");
-    }
     if (requestModel.getTaskIds() == null || requestModel.getTaskIds().isEmpty()) {
-      throw new InvalidArgumentException("taskIds must not be empty");
+      return ResponseEntity.ok().build();
     }
     if (requestModel.getFieldsToUpdate() == null) {
       return ResponseEntity.ok().build();

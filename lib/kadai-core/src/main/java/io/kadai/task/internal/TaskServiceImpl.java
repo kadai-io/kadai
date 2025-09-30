@@ -968,7 +968,8 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
-  @Deprecated(forRemoval = true, since = "12.0.0")
+  @Deprecated(forRemoval = true, since = "11.0.0")
+  @SuppressWarnings({"deprecation", "removal"})
   public List<String> updateTasks(
       List<String> taskIds, Map<TaskCustomField, String> customFieldsToUpdate)
       throws InvalidArgumentException {

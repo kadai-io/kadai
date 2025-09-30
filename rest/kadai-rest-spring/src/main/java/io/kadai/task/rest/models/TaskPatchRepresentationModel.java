@@ -29,9 +29,8 @@ import java.util.List;
 @Schema(
     description =
         "Patch model for Task with all fields nullable - null values are ignored during updates. "
-            + "Note: Some complex fields like workbasketSummary, primaryObjRef, "
-            + "secondaryObjectReferences, and attachments are not yet supported in bulk updates and"
-            + " will be ignored.")
+            + "Note: Fields that are not supposed to be updated manually by user e.g modified will"
+            + " be ignored.")
 @JsonIgnoreProperties("attachmentSummaries")
 public class TaskPatchRepresentationModel {
 

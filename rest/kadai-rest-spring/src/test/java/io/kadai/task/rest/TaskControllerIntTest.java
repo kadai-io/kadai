@@ -2557,6 +2557,74 @@ class TaskControllerIntTest {
       assertThat(taskResponse.getBody().getDescription())
           .isEqualTo("Testing various failure scenarios");
     }
+
+    @Test
+    void should_ReturnOk_When_TaskIdsAreMissingOrEmpty() {
+      Map<String, Object> requestBody = new HashMap<>();
+      requestBody.put("fieldsToUpdate", Map.of("name", "EdgeCaseUpdate"));
+
+      // Case 1: Missing taskIds entirely (null)
+      requestBody.put("taskIds", null);
+
+      ResponseEntity<Map<String, Object>> responseMissing =
+          CLIENT
+              .patch()
+              .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .contentType(MediaType.APPLICATION_JSON)
+              .body(requestBody)
+              .retrieve()
+              .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
+
+      assertThat(responseMissing.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+      // Case 2: Empty taskIds
+      requestBody.replace("taskIds", List.of());
+
+      ResponseEntity<Map<String, Object>> responseEmpty =
+          CLIENT
+              .patch()
+              .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .contentType(MediaType.APPLICATION_JSON)
+              .body(requestBody)
+              .retrieve()
+              .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
+
+      assertThat(responseEmpty.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void should_ReturnOk_When_FieldsToUpdateIsNullOrEmpty() {
+      Map<String, Object> requestBody = new HashMap<>();
+      requestBody.put("taskIds", List.of("TKI:000000000000000000000000000000000003"));
+
+      // Case 1: fieldsToUpdate is null
+      requestBody.put("fieldsToUpdate", null);
+      ResponseEntity<Map<String, Object>> responseNull =
+          CLIENT
+              .patch()
+              .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .contentType(MediaType.APPLICATION_JSON)
+              .body(requestBody)
+              .retrieve()
+              .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
+      assertThat(responseNull.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+      // Case 2: fieldsToUpdate is empty
+      requestBody.put("fieldsToUpdate", Map.of());
+      ResponseEntity<Map<String, Object>> responseEmpty =
+          CLIENT
+              .patch()
+              .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .contentType(MediaType.APPLICATION_JSON)
+              .body(requestBody)
+              .retrieve()
+              .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
+      assertThat(responseEmpty.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
   }
 
   @Nested
