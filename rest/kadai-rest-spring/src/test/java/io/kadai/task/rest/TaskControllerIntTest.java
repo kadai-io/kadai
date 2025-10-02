@@ -22,6 +22,7 @@ import static io.kadai.rest.test.RestHelper.CLIENT;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.kadai.KadaiConfiguration;
 import io.kadai.classification.rest.models.ClassificationSummaryRepresentationModel;
@@ -2559,28 +2560,31 @@ class TaskControllerIntTest {
     }
 
     @Test
-    void should_ReturnOk_When_TaskIdsAreMissingOrEmpty() {
+    void should_ThrowBadRequest_When_TaskIdsAreNull_Or_ReturnOk_When_Empty() {
       Map<String, Object> requestBody = new HashMap<>();
-      requestBody.put("fieldsToUpdate", Map.of("name", "EdgeCaseUpdate"));
+      requestBody.put("fieldsToUpdate", Map.of("name", "RandomUpdate"));
 
-      // Case 1: Missing taskIds entirely (null)
+      // Case 1: taskIds is null -> BAD_REQUEST
       requestBody.put("taskIds", null);
+      HttpClientErrorException ex =
+          assertThrows(
+              HttpClientErrorException.BadRequest.class,
+              () ->
+                  CLIENT
+                      .patch()
+                      .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
+                      .headers(
+                          headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .body(requestBody)
+                      .retrieve()
+                      .toEntity(BULK_RESULT_TASKS_MODEL_TYPE));
 
-      ResponseEntity<Map<String, Object>> responseMissing =
-          CLIENT
-              .patch()
-              .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
-              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
-              .contentType(MediaType.APPLICATION_JSON)
-              .body(requestBody)
-              .retrieve()
-              .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
+      assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+      assertThat(ex.getResponseBodyAsString()).contains("taskIds must not be null");
 
-      assertThat(responseMissing.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-      // Case 2: Empty taskIds
+      // Case 2: taskIds is empty -> OK
       requestBody.replace("taskIds", List.of());
-
       ResponseEntity<Map<String, Object>> responseEmpty =
           CLIENT
               .patch()
@@ -2595,25 +2599,31 @@ class TaskControllerIntTest {
     }
 
     @Test
-    void should_ReturnOk_When_FieldsToUpdateIsNullOrEmpty() {
+    void should_ThrowBadRequest_When_FieldsToUpdateIsNull_Or_ReturnOk_When_Empty() {
       Map<String, Object> requestBody = new HashMap<>();
       requestBody.put("taskIds", List.of("TKI:000000000000000000000000000000000003"));
 
-      // Case 1: fieldsToUpdate is null
+      // Case 1: fieldsToUpdate is null -> BAD_REQUEST
       requestBody.put("fieldsToUpdate", null);
-      ResponseEntity<Map<String, Object>> responseNull =
-          CLIENT
-              .patch()
-              .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
-              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
-              .contentType(MediaType.APPLICATION_JSON)
-              .body(requestBody)
-              .retrieve()
-              .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
-      assertThat(responseNull.getStatusCode()).isEqualTo(HttpStatus.OK);
+      HttpClientErrorException ex =
+          assertThrows(
+              HttpClientErrorException.BadRequest.class,
+              () ->
+                  CLIENT
+                      .patch()
+                      .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
+                      .headers(
+                          headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .body(requestBody)
+                      .retrieve()
+                      .toEntity(BULK_RESULT_TASKS_MODEL_TYPE));
 
-      // Case 2: fieldsToUpdate is empty
-      requestBody.put("fieldsToUpdate", Map.of());
+      assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+      assertThat(ex.getResponseBodyAsString()).contains("fieldsToUpdate must not be null");
+
+      // Case 2: fieldsToUpdate is empty -> OK
+      requestBody.replace("fieldsToUpdate", Map.of());
       ResponseEntity<Map<String, Object>> responseEmpty =
           CLIENT
               .patch()
@@ -2623,6 +2633,7 @@ class TaskControllerIntTest {
               .body(requestBody)
               .retrieve()
               .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
+
       assertThat(responseEmpty.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
   }
@@ -3671,21 +3682,21 @@ class TaskControllerIntTest {
     void should_partialFailCompleteTasks_when_UserHasNoAuthorization() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_BULK_COMPLETE);
 
-      List<String> taskIds = List.of(
+      List<String> taskIds =
+          List.of(
               "TKI:000000000000000000000000000000000103",
-              "TKI:000000000000000000000000000000000041"
-      );
+              "TKI:000000000000000000000000000000000041");
 
       TaskIdListRepresentationModel request = new TaskIdListRepresentationModel(taskIds);
 
       ResponseEntity<Map> response =
-              CLIENT
-                      .patch()
-                      .uri(url)
-                      .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
-                      .body(request)
-                      .retrieve()
-                      .toEntity(Map.class);
+          CLIENT
+              .patch()
+              .uri(url)
+              .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
+              .body(request)
+              .retrieve()
+              .toEntity(Map.class);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
       Map<?, ?> body = response.getBody();
@@ -3694,10 +3705,7 @@ class TaskControllerIntTest {
       Map<String, ?> failuresMap = (Map<String, ?>) body.get("tasksWithErrors");
       List<String> failures = new ArrayList<>(failuresMap.keySet());
 
-      assertThat(failures).hasSize(1)
-              .containsExactly(
-                      "TKI:000000000000000000000000000000000041"
-      );
+      assertThat(failures).hasSize(1).containsExactly("TKI:000000000000000000000000000000000041");
     }
 
     @Test
@@ -3742,21 +3750,21 @@ class TaskControllerIntTest {
     void should_ForceCompleteAllTasks_When_CurrentUserIsNotTheOwner() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_BULK_COMPLETE_FORCE);
 
-      List<String> taskIds = List.of(
-          "TKI:000000000000000000000000000000000027",
-          "TKI:000000000000000000000000000000000026"
-      );
+      List<String> taskIds =
+          List.of(
+              "TKI:000000000000000000000000000000000027",
+              "TKI:000000000000000000000000000000000026");
 
       TaskIdListRepresentationModel request = new TaskIdListRepresentationModel(taskIds);
 
       ResponseEntity<BulkOperationResultsRepresentationModel> response =
-              CLIENT
-                  .patch()
-                  .uri(url)
-                  .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
-                  .body(request)
-                  .retrieve()
-                  .toEntity(BulkOperationResultsRepresentationModel.class);
+          CLIENT
+              .patch()
+              .uri(url)
+              .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
+              .body(request)
+              .retrieve()
+              .toEntity(BulkOperationResultsRepresentationModel.class);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
       BulkOperationResultsRepresentationModel body = response.getBody();

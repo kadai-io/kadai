@@ -353,14 +353,14 @@ public class TaskController implements TaskApi {
   @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<BulkOperationResultsRepresentationModel> bulkComplete(
-         @RequestBody TaskIdListRepresentationModel completeTasksRepresentationModel)
+      @RequestBody TaskIdListRepresentationModel completeTasksRepresentationModel)
       throws InvalidArgumentException {
 
     BulkOperationResults<String, KadaiException> errors =
-            taskService.completeTasks(completeTasksRepresentationModel.getTaskIds());
+        taskService.completeTasks(completeTasksRepresentationModel.getTaskIds());
 
     BulkOperationResultsRepresentationModel model =
-           bulkOperationResultsRepresentationModelAssembler.toModel(errors);
+        bulkOperationResultsRepresentationModelAssembler.toModel(errors);
 
     return ResponseEntity.ok(model);
   }
@@ -382,14 +382,14 @@ public class TaskController implements TaskApi {
   @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE_FORCE)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<BulkOperationResultsRepresentationModel> bulkForceComplete(
-          @RequestBody TaskIdListRepresentationModel completeTasksRepresentationModel)
-          throws InvalidArgumentException {
+      @RequestBody TaskIdListRepresentationModel completeTasksRepresentationModel)
+      throws InvalidArgumentException {
 
     BulkOperationResults<String, KadaiException> errors =
-            taskService.forceCompleteTasks(completeTasksRepresentationModel.getTaskIds());
+        taskService.forceCompleteTasks(completeTasksRepresentationModel.getTaskIds());
 
     BulkOperationResultsRepresentationModel model =
-            bulkOperationResultsRepresentationModelAssembler.toModel(errors);
+        bulkOperationResultsRepresentationModelAssembler.toModel(errors);
 
     return ResponseEntity.ok(model);
   }
@@ -540,13 +540,18 @@ public class TaskController implements TaskApi {
   public ResponseEntity<BulkOperationResultsRepresentationModel> bulkUpdateTasks(
       @RequestBody TaskBulkUpdateRepresentationModel requestModel) {
 
-    if (requestModel.getTaskIds() == null || requestModel.getTaskIds().isEmpty()) {
-      return ResponseEntity.ok().build();
+    if (requestModel.getTaskIds() == null) {
+      throw new InvalidArgumentException("taskIds must not be null");
     }
     if (requestModel.getFieldsToUpdate() == null) {
+      throw new InvalidArgumentException("fieldsToUpdate must not be null");
+    }
+    if (requestModel.getTaskIds().isEmpty()) {
       return ResponseEntity.ok().build();
     }
-
+    if (requestModel.getFieldsToUpdate().isEmpty()) {
+      return ResponseEntity.ok().build();
+    }
     TaskPatch taskPatchImpl =
         taskRepresentationModelAssembler.toPatch(requestModel.getFieldsToUpdate());
 

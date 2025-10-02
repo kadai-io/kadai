@@ -495,4 +495,48 @@ public class TaskPatchRepresentationModel {
   public void setCallbackInfo(List<CustomAttribute> callbackInfo) {
     this.callbackInfo = callbackInfo;
   }
+
+  public boolean isEmpty() {
+    return received == null
+        && planned == null
+        && due == null
+        && name == null
+        && note == null
+        && description == null
+        && classificationSummary == null
+        && workbasketSummary == null
+        && businessProcessId == null
+        && parentBusinessProcessId == null
+        && primaryObjRef == null
+        && manualPriority == null
+        && isRead == null
+        && (secondaryObjectReferences == null || secondaryObjectReferences.isEmpty())
+        && custom1 == null
+        && custom2 == null
+        && custom3 == null
+        && custom4 == null
+        && custom5 == null
+        && custom6 == null
+        && custom7 == null
+        && custom8 == null
+        && custom9 == null
+        && custom10 == null
+        && custom11 == null
+        && custom12 == null
+        && custom13 == null
+        && custom14 == null
+        && custom15 == null
+        && custom16 == null
+        && customInt1 == null
+        && customInt2 == null
+        && customInt3 == null
+        && customInt4 == null
+        && customInt5 == null
+        && customInt6 == null
+        && customInt7 == null
+        && customInt8 == null
+        && (customAttributes == null || customAttributes.isEmpty())
+        && (callbackInfo == null || callbackInfo.isEmpty());
+  }
+
 }

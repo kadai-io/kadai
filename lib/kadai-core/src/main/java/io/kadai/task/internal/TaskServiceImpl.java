@@ -2605,7 +2605,7 @@ public class TaskServiceImpl implements TaskService {
     for (String taskId : taskIds) {
       try {
         TaskImpl oldTaskImpl = (TaskImpl) getTask(taskId);
-        TaskImpl newTaskImpl = toTaskImpl(taskPatch, duplicateTaskExactly(oldTaskImpl));
+        TaskImpl newTaskImpl = applyTaskPatch(taskPatch, duplicateTaskExactly(oldTaskImpl));
         updateTask(newTaskImpl);
       } catch (KadaiException e) {
         bulkLog.addError(taskId, e);
@@ -2615,7 +2615,7 @@ public class TaskServiceImpl implements TaskService {
     return bulkLog;
   }
 
-  public static TaskImpl toTaskImpl(TaskPatch patch, TaskImpl task) {
+  public static TaskImpl applyTaskPatch(TaskPatch patch, TaskImpl task) {
     if (patch == null || task == null) {
       return task;
     }
