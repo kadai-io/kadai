@@ -28,9 +28,7 @@ import java.util.List;
 
 @Schema(
     description =
-        "Patch model for Task with all fields nullable - null values are ignored during updates. "
-            + "Note: Fields that are not supposed to be updated manually by user e.g modified will"
-            + " be ignored.")
+        "Patch model for Task with all fields nullable - null values are ignored during updates.")
 @JsonIgnoreProperties("attachmentSummaries")
 public class TaskPatchRepresentationModel {
 
@@ -538,5 +536,4 @@ public class TaskPatchRepresentationModel {
         && (customAttributes == null || customAttributes.isEmpty())
         && (callbackInfo == null || callbackInfo.isEmpty());
   }
-
 }
