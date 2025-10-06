@@ -78,10 +78,10 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
     try {
 
       List<User> users = ldapClient.searchUsersInUserRole();
+      clearExistingUsersAndGroupsAndPermissions();
       List<User> usersAfterProcessing =
           users.stream().map(refreshUserPostprocessorManager::processUserAfterRefresh).toList();
       addExistingConfigurationDataToUsers(usersAfterProcessing);
-      clearExistingUsersAndGroupsAndPermissions();
       insertNewUsers(usersAfterProcessing);
 
       LOGGER.info("Job to refresh all user info has finished.");

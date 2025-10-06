@@ -1,2 +1,3 @@
 io.kadai.user.rest.FirstRefreshUserPostprocessor
 io.kadai.user.rest.SecondRefreshUserPostprocessor
+io.kadai.user.rest.ThirdRefreshUserPostprocessor
