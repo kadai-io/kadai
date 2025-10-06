@@ -151,6 +151,38 @@ class UserInfoRefreshJobIntTest {
     }
   }
 
+  @Test
+  @WithAccessId(user = "businessadmin")
+  @Order(3)
+  void should_UpdateUserData_When_RefreshUserPostprocessorSetsData() throws Exception {
+    try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
+
+      // Step 1: Fetch a user from DB
+      User user = userService.getUser("user-2-2");
+
+      // Step 2: Manually clear the data field
+      try (PreparedStatement ps = connection.prepareStatement(
+          "UPDATE " + connection.getSchema() + ".USER_INFO SET DATA='oldValue' WHERE USER_ID=?")) {
+        ps.setString(1, user.getId());
+        ps.executeUpdate();
+      }
+
+      // Step 3: Verify data is null
+      User clearedUser = userService.getUser(user.getId());
+      assertThat(clearedUser.getData()).isEqualTo("oldValue");
+
+      // Step 4: Run the UserInfoRefreshJob
+      UserInfoRefreshJob userInfoRefreshJob = new UserInfoRefreshJob(kadaiEngine);
+      userInfoRefreshJob.execute();
+
+      // Step 5: Fetch the user again
+      User updatedUser = userService.getUser(user.getId());
+
+      // Step 6: Assert that data was updated by the SPI
+      assertThat(updatedUser.getData()).isEqualTo("newData");
+    }
+  }
+
   private List<User> getUsers(Connection connection) throws Exception {
 
     List<String> users = new ArrayList<>();
