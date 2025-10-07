@@ -30,6 +30,7 @@ import io.kadai.common.rest.QueryPagingParameter;
 import io.kadai.common.rest.QuerySortParameter;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.common.rest.util.QueryParamsValidator;
+import io.kadai.task.api.TaskPatch;
 import io.kadai.task.api.TaskQuery;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.exceptions.AttachmentPersistenceException;
@@ -38,6 +39,7 @@ import io.kadai.task.api.exceptions.InvalidOwnerException;
 import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.ObjectReferencePersistenceException;
 import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
+import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.Task;
@@ -48,6 +50,7 @@ import io.kadai.task.rest.assembler.TaskSummaryRepresentationModelAssembler;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
+import io.kadai.task.rest.models.TaskBulkUpdateRepresentationModel;
 import io.kadai.task.rest.models.TaskIdListRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryCollectionRepresentationModel;
@@ -114,6 +117,7 @@ public class TaskController implements TaskApi {
           ClassificationNotFoundException,
           TaskAlreadyExistException,
           InvalidArgumentException,
+          ServiceLevelViolationException,
           AttachmentPersistenceException,
           ObjectReferencePersistenceException,
           NotAuthorizedOnWorkbasketException {
@@ -349,14 +353,14 @@ public class TaskController implements TaskApi {
   @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<BulkOperationResultsRepresentationModel> bulkComplete(
-         @RequestBody TaskIdListRepresentationModel completeTasksRepresentationModel)
+      @RequestBody TaskIdListRepresentationModel completeTasksRepresentationModel)
       throws InvalidArgumentException {
 
     BulkOperationResults<String, KadaiException> errors =
-            taskService.completeTasks(completeTasksRepresentationModel.getTaskIds());
+        taskService.completeTasks(completeTasksRepresentationModel.getTaskIds());
 
     BulkOperationResultsRepresentationModel model =
-           bulkOperationResultsRepresentationModelAssembler.toModel(errors);
+        bulkOperationResultsRepresentationModelAssembler.toModel(errors);
 
     return ResponseEntity.ok(model);
   }
@@ -378,14 +382,14 @@ public class TaskController implements TaskApi {
   @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE_FORCE)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<BulkOperationResultsRepresentationModel> bulkForceComplete(
-          @RequestBody TaskIdListRepresentationModel completeTasksRepresentationModel)
-          throws InvalidArgumentException {
+      @RequestBody TaskIdListRepresentationModel completeTasksRepresentationModel)
+      throws InvalidArgumentException {
 
     BulkOperationResults<String, KadaiException> errors =
-            taskService.forceCompleteTasks(completeTasksRepresentationModel.getTaskIds());
+        taskService.forceCompleteTasks(completeTasksRepresentationModel.getTaskIds());
 
     BulkOperationResultsRepresentationModel model =
-            bulkOperationResultsRepresentationModelAssembler.toModel(errors);
+        bulkOperationResultsRepresentationModelAssembler.toModel(errors);
 
     return ResponseEntity.ok(model);
   }
@@ -503,7 +507,7 @@ public class TaskController implements TaskApi {
       @RequestBody TaskRepresentationModel taskRepresentationModel)
       throws TaskNotFoundException,
           ClassificationNotFoundException,
-          InvalidArgumentException,
+          ServiceLevelViolationException,
           ConcurrencyException,
           NotAuthorizedOnWorkbasketException,
           AttachmentPersistenceException,
@@ -529,6 +533,33 @@ public class TaskController implements TaskApi {
     Task task = taskRepresentationModelAssembler.toEntityModel(taskRepresentationModel);
     task = taskService.updateTask(task);
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
+  }
+
+  @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_UPDATE)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<BulkOperationResultsRepresentationModel> bulkUpdateTasks(
+      @RequestBody TaskBulkUpdateRepresentationModel requestModel) {
+
+    if (requestModel.getTaskIds() == null) {
+      throw new InvalidArgumentException("taskIds must not be null");
+    }
+    if (requestModel.getFieldsToUpdate() == null) {
+      throw new InvalidArgumentException("fieldsToUpdate must not be null");
+    }
+    if (requestModel.getTaskIds().isEmpty() || requestModel.getFieldsToUpdate().isEmpty()) {
+      return ResponseEntity.ok().build();
+    }
+
+    TaskPatch taskPatchImpl =
+        taskRepresentationModelAssembler.toPatch(requestModel.getFieldsToUpdate());
+
+    BulkOperationResults<String, KadaiException> result =
+        taskService.bulkUpdateTasks(requestModel.getTaskIds(), taskPatchImpl);
+
+    BulkOperationResultsRepresentationModel repModel =
+        bulkOperationResultsRepresentationModelAssembler.toModel(result);
+
+    return ResponseEntity.ok(repModel);
   }
 
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_SET_READ)

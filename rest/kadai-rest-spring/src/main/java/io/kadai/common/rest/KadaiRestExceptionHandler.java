@@ -42,6 +42,7 @@ import io.kadai.task.api.exceptions.InvalidOwnerException;
 import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.NotAuthorizedOnTaskCommentException;
 import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
+import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
@@ -163,6 +164,12 @@ public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
     return handle(ex.getErrorCode(), ex, req, HttpStatus.FORBIDDEN);
   }
 
+  @ExceptionHandler(ServiceLevelViolationException.class)
+  public ResponseEntity<Object> handleServiceLevelViolationException(
+      ServiceLevelViolationException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.UNPROCESSABLE_ENTITY);
+  }
+
   @ExceptionHandler(ClassificationNotFoundException.class)
   public ResponseEntity<Object> handleClassificationNotFoundException(
       ClassificationNotFoundException ex, WebRequest req) {
@@ -272,8 +279,7 @@ public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   @ExceptionHandler(SystemException.class)
-  public ResponseEntity<Object> handleSystemException(
-      SystemException ex, WebRequest req) {
+  public ResponseEntity<Object> handleSystemException(SystemException ex, WebRequest req) {
     return handle(ex.getErrorCode(), ex, req, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
@@ -289,11 +295,7 @@ public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
       @NonNull HttpHeaders headers,
       @NonNull HttpStatusCode status,
       @NonNull WebRequest req) {
-    return handle(
-        ErrorCode.of(ERROR_KEY_PAYLOAD),
-        ex,
-        req,
-        HttpStatus.PAYLOAD_TOO_LARGE);
+    return handle(ErrorCode.of(ERROR_KEY_PAYLOAD), ex, req, HttpStatus.PAYLOAD_TOO_LARGE);
   }
 
   @ExceptionHandler(BeanInstantiationException.class)
@@ -310,11 +312,7 @@ public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
   protected ResponseEntity<Object> handleIllegalArgumentException(
       IllegalArgumentException ex, WebRequest req) {
     return handle(
-        ErrorCode.of(InvalidArgumentException.ERROR_KEY),
-        ex,
-        req,
-        HttpStatus.BAD_REQUEST
-    );
+        ErrorCode.of(InvalidArgumentException.ERROR_KEY), ex, req, HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(Exception.class)
@@ -358,12 +356,15 @@ public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
         new ExceptionRepresentationModel(errorCode, status, ex, req);
 
     switch (status.series()) {
-      case CLIENT_ERROR -> logger.warn(
-          String.format("Exception thrown during processing of rest request: %s", errorData));
-      case SERVER_ERROR -> logger.error(
-          String.format("Error occurred during processing of rest request: %s", errorData), ex);
-      default -> logger.warn(
-          String.format("Something occurred during processing of rest request: %s", errorData));
+      case CLIENT_ERROR ->
+          logger.warn(
+              String.format("Exception thrown during processing of rest request: %s", errorData));
+      case SERVER_ERROR ->
+          logger.error(
+              String.format("Error occurred during processing of rest request: %s", errorData), ex);
+      default ->
+          logger.warn(
+              String.format("Something occurred during processing of rest request: %s", errorData));
     }
 
     return ResponseEntity.status(status).body(errorData);

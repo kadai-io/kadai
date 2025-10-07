@@ -22,6 +22,7 @@ import static io.kadai.rest.test.RestHelper.CLIENT;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.kadai.KadaiConfiguration;
 import io.kadai.classification.rest.models.ClassificationSummaryRepresentationModel;
@@ -2242,6 +2243,411 @@ class TaskControllerIntTest {
 
   @Nested
   @TestInstance(Lifecycle.PER_CLASS)
+  class BulkUpdateTasks {
+
+    @Test
+    void should_UpdateAllPossibleAttributes_When_BulkUpdatingTasks() {
+
+      // extend with secondaryObjectReference, customAttributes, callbackInfo
+      Map<String, Object> fieldsToUpdate = new HashMap<>();
+      fieldsToUpdate.put("planned", "2024-01-05T14:00:00.000Z");
+      fieldsToUpdate.put("received", "2024-01-06T15:00:00.000Z");
+      fieldsToUpdate.put("name", "Bulk Updated Task");
+      fieldsToUpdate.put("note", "Bulk update note");
+      fieldsToUpdate.put("description", "Bulk update description");
+      fieldsToUpdate.put("manualPriority", 25);
+      fieldsToUpdate.put("businessProcessId", "BPI-BULK-001");
+      fieldsToUpdate.put("parentBusinessProcessId", "PBPI-BULK-001");
+      fieldsToUpdate.put("isRead", true);
+      fieldsToUpdate.put("custom1", "bulk-custom1");
+      fieldsToUpdate.put("custom2", "bulk-custom2");
+      fieldsToUpdate.put("custom3", "bulk-custom3");
+      fieldsToUpdate.put("custom4", "bulk-custom4");
+      fieldsToUpdate.put("custom5", "bulk-custom5");
+      fieldsToUpdate.put("custom6", "bulk-custom6");
+      fieldsToUpdate.put("custom7", "bulk-custom7");
+      fieldsToUpdate.put("custom8", "bulk-custom8");
+      fieldsToUpdate.put("custom9", "bulk-custom9");
+      fieldsToUpdate.put("custom10", "bulk-custom10");
+      fieldsToUpdate.put("custom11", "bulk-custom11");
+      fieldsToUpdate.put("custom12", "bulk-custom12");
+      fieldsToUpdate.put("custom13", "bulk-custom13");
+      fieldsToUpdate.put("custom14", "bulk-custom14");
+      fieldsToUpdate.put("custom15", "bulk-custom15");
+      fieldsToUpdate.put("custom16", "bulk-custom16");
+      fieldsToUpdate.put("customInt1", 1001);
+      fieldsToUpdate.put("customInt2", 1002);
+      fieldsToUpdate.put("customInt3", 1003);
+      fieldsToUpdate.put("customInt4", 1004);
+      fieldsToUpdate.put("customInt5", 1005);
+      fieldsToUpdate.put("customInt6", 1006);
+      fieldsToUpdate.put("customInt7", 1007);
+      fieldsToUpdate.put("customInt8", 1008);
+
+      // Classification summary
+      Map<String, Object> classificationSummary = new HashMap<>();
+      classificationSummary.put("classificationId", "CLI:100000000000000000000000000000000003");
+      classificationSummary.put("key", "L1050");
+      classificationSummary.put("applicationEntryPoint", "entry-point-app");
+      classificationSummary.put("category", "EXTERNAL");
+      classificationSummary.put("domain", "DOMAIN_A");
+      classificationSummary.put("name", "Widerruf");
+      classificationSummary.put("parentId", "");
+      classificationSummary.put("parentKey", "");
+      classificationSummary.put("priority", 1);
+      classificationSummary.put("serviceLevel", "P13D");
+      classificationSummary.put("type", "TASK");
+      classificationSummary.put("custom1", "VNR,RVNR,KOLVNR");
+      classificationSummary.put("custom2", "");
+      classificationSummary.put("custom3", "");
+      classificationSummary.put("custom4", "");
+      classificationSummary.put("custom5", "");
+      classificationSummary.put("custom6", "");
+      classificationSummary.put("custom7", "");
+      classificationSummary.put("custom8", "");
+      fieldsToUpdate.put("classificationSummary", classificationSummary);
+
+      // Custom attributes
+      List<Map<String, String>> customAttributes =
+          Arrays.asList(
+              Map.of("key", "bulk-attr-key1", "value", "bulk-attr-value1"),
+              Map.of("key", "bulk-attr-key2", "value", "bulk-attr-value2"));
+      fieldsToUpdate.put("customAttributes", customAttributes);
+
+      // Callback info
+      List<Map<String, String>> callbackInfo =
+          Arrays.asList(
+              Map.of("key", "bulk-callback-key1", "value", "bulk-callback-value1"),
+              Map.of("key", "bulk-callback-key2", "value", "bulk-callback-value2"));
+      fieldsToUpdate.put("callbackInfo", callbackInfo);
+
+      // Secondary object references using helper
+      ObjectReferenceRepresentationModel obj0 = getSampleSecondaryObjectReference("0");
+      ObjectReferenceRepresentationModel obj1 = getSampleSecondaryObjectReference("1");
+
+      fieldsToUpdate.put("secondaryObjectReferences", List.of(obj0, obj1));
+
+      // Primary object reference using helper
+      fieldsToUpdate.put("primaryObjRef", getObjectReferenceResourceSample());
+
+      List<String> taskIds =
+          Arrays.asList(
+              "TKI:000000000000000000000000000000000003",
+              "TKI:000000000000000000000000000000000004");
+      Map<String, Object> requestBody = new HashMap<>();
+      requestBody.put("taskIds", taskIds);
+      requestBody.put("fieldsToUpdate", fieldsToUpdate);
+
+      // When: Performing bulk update
+      ResponseEntity<Map<String, Object>> response =
+          CLIENT
+              .patch()
+              .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .contentType(MediaType.APPLICATION_JSON)
+              .body(requestBody)
+              .retrieve()
+              .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
+
+      // Then: Verify response
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody()).isNotNull();
+
+      // Verify that all tasks were updated successfully
+      Map<String, Object> responseBody = response.getBody();
+      assertThat(responseBody).containsKey("tasksWithErrors");
+
+      Map<String, Object> tasksWithErrors =
+          (Map<String, Object>) responseBody.get("tasksWithErrors");
+
+      // All tasks should be successfully updated (no errors)
+      assertThat(tasksWithErrors).isEmpty();
+
+      // Verify that one of the tasks was actually updated by fetching it
+      String firstTaskId = taskIds.get(0);
+      ResponseEntity<TaskRepresentationModel> getResponse =
+          CLIENT
+              .get()
+              .uri(restHelper.toUrl("/api/v1/tasks/" + firstTaskId))
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class);
+
+      assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+      TaskRepresentationModel updatedTask = getResponse.getBody();
+      assertThat(updatedTask).isNotNull();
+
+      // Basic fields
+      assertThat(updatedTask.getName()).isEqualTo("Bulk Updated Task");
+      assertThat(updatedTask.getDescription()).isEqualTo("Bulk update description");
+      assertThat(updatedTask.getNote()).isEqualTo("Bulk update note");
+
+      // Timestamps
+      assertThat(updatedTask.getPlanned()).isEqualTo(Instant.parse("2024-01-05T14:00:00.000Z"));
+      assertThat(updatedTask.getReceived()).isEqualTo(Instant.parse("2024-01-06T15:00:00.000Z"));
+
+      // Priority and status fields
+      assertThat(updatedTask.getPriority()).isEqualTo(25);
+      assertThat(updatedTask.getManualPriority()).isEqualTo(25);
+      assertThat(updatedTask.isRead()).isTrue();
+
+      // Business process fields
+      assertThat(updatedTask.getBusinessProcessId()).isEqualTo("BPI-BULK-001");
+      assertThat(updatedTask.getParentBusinessProcessId()).isEqualTo("PBPI-BULK-001");
+
+      // Custom string fields
+      assertThat(updatedTask.getCustom1()).isEqualTo("bulk-custom1");
+      assertThat(updatedTask.getCustom2()).isEqualTo("bulk-custom2");
+      assertThat(updatedTask.getCustom3()).isEqualTo("bulk-custom3");
+      assertThat(updatedTask.getCustom4()).isEqualTo("bulk-custom4");
+      assertThat(updatedTask.getCustom5()).isEqualTo("bulk-custom5");
+      assertThat(updatedTask.getCustom6()).isEqualTo("bulk-custom6");
+      assertThat(updatedTask.getCustom7()).isEqualTo("bulk-custom7");
+      assertThat(updatedTask.getCustom8()).isEqualTo("bulk-custom8");
+      assertThat(updatedTask.getCustom9()).isEqualTo("bulk-custom9");
+      assertThat(updatedTask.getCustom10()).isEqualTo("bulk-custom10");
+      assertThat(updatedTask.getCustom11()).isEqualTo("bulk-custom11");
+      assertThat(updatedTask.getCustom12()).isEqualTo("bulk-custom12");
+      assertThat(updatedTask.getCustom13()).isEqualTo("bulk-custom13");
+      assertThat(updatedTask.getCustom14()).isEqualTo("bulk-custom14");
+      assertThat(updatedTask.getCustom15()).isEqualTo("bulk-custom15");
+      assertThat(updatedTask.getCustom16()).isEqualTo("bulk-custom16");
+
+      // Custom int fields
+      assertThat(updatedTask.getCustomInt1()).isEqualTo(1001);
+      assertThat(updatedTask.getCustomInt2()).isEqualTo(1002);
+      assertThat(updatedTask.getCustomInt3()).isEqualTo(1003);
+      assertThat(updatedTask.getCustomInt4()).isEqualTo(1004);
+      assertThat(updatedTask.getCustomInt5()).isEqualTo(1005);
+      assertThat(updatedTask.getCustomInt6()).isEqualTo(1006);
+      assertThat(updatedTask.getCustomInt7()).isEqualTo(1007);
+      assertThat(updatedTask.getCustomInt8()).isEqualTo(1008);
+      assertThat(updatedTask.getClassificationSummary().getClassificationId())
+          .isEqualTo("CLI:100000000000000000000000000000000003");
+
+      // Verify secondary object references were updated
+      assertThat(updatedTask.getSecondaryObjectReferences()).isNotNull();
+      assertThat(updatedTask.getSecondaryObjectReferences()).hasSizeGreaterThanOrEqualTo(2);
+      assertThat(updatedTask.getSecondaryObjectReferences())
+          .anySatisfy(
+              sor -> {
+                assertThat(sor.getCompany()).isEqualTo("SecondaryCompany0");
+                assertThat(sor.getSystem()).isEqualTo("SecondarySystem0");
+                assertThat(sor.getSystemInstance()).isEqualTo("SecondaryInstance0");
+                assertThat(sor.getType()).isEqualTo("SecondaryType0");
+                assertThat(sor.getValue()).isEqualTo("00000000");
+              })
+          .anySatisfy(
+              sor -> {
+                assertThat(sor.getCompany()).isEqualTo("SecondaryCompany1");
+                assertThat(sor.getSystem()).isEqualTo("SecondarySystem1");
+                assertThat(sor.getSystemInstance()).isEqualTo("SecondaryInstance1");
+                assertThat(sor.getType()).isEqualTo("SecondaryType1");
+                assertThat(sor.getValue()).isEqualTo("00000001");
+              });
+
+      // Verify primary object reference was updated
+      assertThat(updatedTask.getPrimaryObjRef()).isNotNull();
+      assertThat(updatedTask.getPrimaryObjRef().getCompany()).isEqualTo("MyCompany1");
+      assertThat(updatedTask.getPrimaryObjRef().getSystem()).isEqualTo("MySystem1");
+      assertThat(updatedTask.getPrimaryObjRef().getSystemInstance()).isEqualTo("MyInstance1");
+      assertThat(updatedTask.getPrimaryObjRef().getType()).isEqualTo("MyType1");
+      assertThat(updatedTask.getPrimaryObjRef().getValue()).isEqualTo("00000001");
+
+      // Verify custom attributes mapped
+      assertThat(updatedTask.getCustomAttributes()).isNotNull();
+      assertThat(updatedTask.getCustomAttributes())
+          .anySatisfy(
+              attr -> {
+                assertThat(attr.getKey()).isEqualTo("bulk-attr-key1");
+                assertThat(attr.getValue()).isEqualTo("bulk-attr-value1");
+              })
+          .anySatisfy(
+              attr -> {
+                assertThat(attr.getKey()).isEqualTo("bulk-attr-key2");
+                assertThat(attr.getValue()).isEqualTo("bulk-attr-value2");
+              });
+
+      // Verify callback info mapped
+      assertThat(updatedTask.getCallbackInfo()).isNotNull();
+      assertThat(updatedTask.getCallbackInfo())
+          .anySatisfy(
+              info -> {
+                assertThat(info.getKey()).isEqualTo("bulk-callback-key1");
+                assertThat(info.getValue()).isEqualTo("bulk-callback-value1");
+              })
+          .anySatisfy(
+              info -> {
+                assertThat(info.getKey()).isEqualTo("bulk-callback-key2");
+                assertThat(info.getValue()).isEqualTo("bulk-callback-value2");
+              });
+    }
+
+    @Test
+    void should_ReturnMixedResults_When_BulkUpdatingTasksWithVariousFailureScenarios() {
+      List<String> taskIds =
+          Arrays.asList(
+              "TKI:000000000000000000000000000000000003", // READY state, user authorized - should
+              // succeed
+              "TKI:NONEXISTENT0000000000000000000000001", // Non-existent task - should fail with
+              // TASK_NOT_FOUND
+              "TKI:000000000000000000000000000000000004");
+
+      Map<String, Object> fieldsToUpdate = new HashMap<>();
+      fieldsToUpdate.put("name", "Mixed Scenario Test");
+      fieldsToUpdate.put("description", "Testing various failure scenarios");
+
+      Map<String, Object> requestBody = new HashMap<>();
+      requestBody.put("taskIds", taskIds);
+      requestBody.put("fieldsToUpdate", fieldsToUpdate);
+
+      // When: Performing bulk update
+      ResponseEntity<Map<String, Object>> response =
+          CLIENT
+              .patch()
+              .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .contentType(MediaType.APPLICATION_JSON)
+              .body(requestBody)
+              .retrieve()
+              .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
+
+      // Then: Verify response
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody()).isNotNull();
+
+      Map<String, Object> responseBody = response.getBody();
+      Map<String, Object> tasksWithErrors =
+          (Map<String, Object>) responseBody.get("tasksWithErrors");
+
+      // Should have 3 failed tasks and 1 successful task
+      assertThat(tasksWithErrors).hasSize(1);
+
+      // Verify the successful task is not in the errors map
+      assertThat(tasksWithErrors).doesNotContainKey("TKI:000000000000000000000000000000000003");
+      assertThat(tasksWithErrors).doesNotContainKey("TKI:000000000000000000000000000000000004");
+
+      // Verify each failed task has the correct error type
+      for (Map.Entry<String, Object> entry : tasksWithErrors.entrySet()) {
+        Object errorCode = entry.getValue();
+
+        // Verify the error code structure
+        assertThat(errorCode).isNotNull();
+        assertThat(errorCode).isInstanceOf(Map.class);
+
+        Map<String, Object> errorCodeMap = (Map<String, Object>) errorCode;
+        assertThat(errorCodeMap).containsKey("key");
+        assertThat(errorCodeMap).containsKey("messageVariables");
+
+        String errorKey = (String) errorCodeMap.get("key");
+
+        assertThat(errorKey).isEqualTo("TASK_NOT_FOUND");
+      }
+
+      // Verify that the successful task was actually updated
+      ResponseEntity<TaskRepresentationModel> taskResponse =
+          CLIENT
+              .get()
+              .uri(restHelper.toUrl("/api/v1/tasks/TKI:000000000000000000000000000000000003"))
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class);
+
+      assertThat(taskResponse.getBody()).isNotNull();
+      assertThat(taskResponse.getBody().getName()).isEqualTo("Mixed Scenario Test");
+      assertThat(taskResponse.getBody().getDescription())
+          .isEqualTo("Testing various failure scenarios");
+    }
+
+    @Test
+    void should_ThrowBadRequest_When_TaskIdsAreNull() {
+      Map<String, Object> requestBody = new HashMap<>();
+      requestBody.put("fieldsToUpdate", Map.of("name", "RandomUpdate"));
+      requestBody.put("taskIds", null);
+
+      HttpClientErrorException ex =
+          assertThrows(
+              HttpClientErrorException.BadRequest.class,
+              () ->
+                  CLIENT
+                      .patch()
+                      .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
+                      .headers(
+                          headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .body(requestBody)
+                      .retrieve()
+                      .toEntity(BULK_RESULT_TASKS_MODEL_TYPE));
+
+      assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+      assertThat(ex.getResponseBodyAsString()).contains("taskIds must not be null");
+    }
+
+    @Test
+    void should_ReturnOk_When_TaskIdsAreEmpty() {
+      Map<String, Object> requestBody = new HashMap<>();
+      requestBody.put("fieldsToUpdate", Map.of("name", "RandomUpdate"));
+      requestBody.put("taskIds", List.of());
+
+      ResponseEntity<Map<String, Object>> response =
+          CLIENT
+              .patch()
+              .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .contentType(MediaType.APPLICATION_JSON)
+              .body(requestBody)
+              .retrieve()
+              .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void should_ThrowBadRequest_When_FieldsToUpdateIsNull() {
+      Map<String, Object> requestBody = new HashMap<>();
+      requestBody.put("taskIds", List.of("TKI:000000000000000000000000000000000003"));
+      requestBody.put("fieldsToUpdate", null);
+
+      HttpClientErrorException ex =
+          assertThrows(
+              HttpClientErrorException.BadRequest.class,
+              () ->
+                  CLIENT
+                      .patch()
+                      .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
+                      .headers(
+                          headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .body(requestBody)
+                      .retrieve()
+                      .toEntity(BULK_RESULT_TASKS_MODEL_TYPE));
+
+      assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+      assertThat(ex.getResponseBodyAsString()).contains("fieldsToUpdate must not be null");
+    }
+
+    @Test
+    void should_ReturnOk_When_FieldsToUpdateIsEmpty() {
+      Map<String, Object> requestBody = new HashMap<>();
+      requestBody.put("taskIds", List.of("TKI:000000000000000000000000000000000003"));
+      requestBody.put("fieldsToUpdate", Map.of());
+
+      ResponseEntity<Map<String, Object>> response =
+          CLIENT
+              .patch()
+              .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .contentType(MediaType.APPLICATION_JSON)
+              .body(requestBody)
+              .retrieve()
+              .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
   class DeleteTasks {
 
     @Test
@@ -3284,21 +3690,21 @@ class TaskControllerIntTest {
     void should_partialFailCompleteTasks_when_UserHasNoAuthorization() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_BULK_COMPLETE);
 
-      List<String> taskIds = List.of(
+      List<String> taskIds =
+          List.of(
               "TKI:000000000000000000000000000000000103",
-              "TKI:000000000000000000000000000000000041"
-      );
+              "TKI:000000000000000000000000000000000041");
 
       TaskIdListRepresentationModel request = new TaskIdListRepresentationModel(taskIds);
 
       ResponseEntity<Map> response =
-              CLIENT
-                      .patch()
-                      .uri(url)
-                      .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
-                      .body(request)
-                      .retrieve()
-                      .toEntity(Map.class);
+          CLIENT
+              .patch()
+              .uri(url)
+              .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
+              .body(request)
+              .retrieve()
+              .toEntity(Map.class);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
       Map<?, ?> body = response.getBody();
@@ -3307,10 +3713,7 @@ class TaskControllerIntTest {
       Map<String, ?> failuresMap = (Map<String, ?>) body.get("tasksWithErrors");
       List<String> failures = new ArrayList<>(failuresMap.keySet());
 
-      assertThat(failures).hasSize(1)
-              .containsExactly(
-                      "TKI:000000000000000000000000000000000041"
-      );
+      assertThat(failures).hasSize(1).containsExactly("TKI:000000000000000000000000000000000041");
     }
 
     @Test
@@ -3355,21 +3758,21 @@ class TaskControllerIntTest {
     void should_ForceCompleteAllTasks_When_CurrentUserIsNotTheOwner() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_BULK_COMPLETE_FORCE);
 
-      List<String> taskIds = List.of(
-          "TKI:000000000000000000000000000000000027",
-          "TKI:000000000000000000000000000000000026"
-      );
+      List<String> taskIds =
+          List.of(
+              "TKI:000000000000000000000000000000000027",
+              "TKI:000000000000000000000000000000000026");
 
       TaskIdListRepresentationModel request = new TaskIdListRepresentationModel(taskIds);
 
       ResponseEntity<BulkOperationResultsRepresentationModel> response =
-              CLIENT
-                  .patch()
-                  .uri(url)
-                  .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
-                  .body(request)
-                  .retrieve()
-                  .toEntity(BulkOperationResultsRepresentationModel.class);
+          CLIENT
+              .patch()
+              .uri(url)
+              .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
+              .body(request)
+              .retrieve()
+              .toEntity(BulkOperationResultsRepresentationModel.class);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
       BulkOperationResultsRepresentationModel body = response.getBody();

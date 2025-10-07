@@ -27,13 +27,17 @@ import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.task.api.TaskCustomField;
 import io.kadai.task.api.TaskCustomIntField;
+import io.kadai.task.api.TaskPatch;
+import io.kadai.task.api.TaskPatchBuilder;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.internal.models.TaskImpl;
 import io.kadai.task.rest.TaskController;
+import io.kadai.task.rest.models.TaskPatchRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel.CustomAttribute;
 import io.kadai.workbasket.rest.assembler.WorkbasketSummaryRepresentationModelAssembler;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,7 +146,7 @@ public class TaskRepresentationModelAssembler
   }
 
   public Task toEntityModel(TaskRepresentationModel repModel) throws InvalidArgumentException {
-    verifyCorrectCustomAttributesFormat(repModel);
+    verifyCorrectCustomAttributesFormat(repModel.getCustomAttributes());
     TaskImpl task = (TaskImpl) taskService.newTask();
     task.setId(repModel.getTaskId());
     task.setExternalId(repModel.getExternalId());
@@ -218,10 +222,10 @@ public class TaskRepresentationModelAssembler
     return task;
   }
 
-  private void verifyCorrectCustomAttributesFormat(TaskRepresentationModel repModel)
+  private void verifyCorrectCustomAttributesFormat(List<CustomAttribute> customAttributes)
       throws InvalidArgumentException {
 
-    if (repModel.getCustomAttributes().stream()
+    if (customAttributes.stream()
         .anyMatch(
             customAttribute ->
                 customAttribute.getKey() == null
@@ -231,5 +235,78 @@ public class TaskRepresentationModelAssembler
           "Format of custom attributes is not valid. Please provide the following format: "
               + "\"customAttributes\": [{\"key\": \"someKey\",\"value\": \"someValue\"},{...}])");
     }
+  }
+
+  public TaskPatch toPatch(TaskPatchRepresentationModel repModel) {
+    if (repModel.getCustomAttributes() != null) {
+      verifyCorrectCustomAttributesFormat(repModel.getCustomAttributes());
+    }
+
+    TaskPatchBuilder builder = new TaskPatchBuilder();
+
+    builder.received(repModel.getReceived());
+    builder.planned(repModel.getPlanned());
+    builder.due(repModel.getDue());
+    builder.name(repModel.getName());
+    builder.note(repModel.getNote());
+    builder.description(repModel.getDescription());
+    if (repModel.getClassificationSummary() != null) {
+      builder.classificationSummary(
+          classificationAssembler.toEntityModel(repModel.getClassificationSummary()));
+    }
+    if (repModel.getWorkbasketSummary() != null) {
+      builder.workbasketSummary(workbasketAssembler.toEntityModel(repModel.getWorkbasketSummary()));
+    }
+    builder.businessProcessId(repModel.getBusinessProcessId());
+    builder.parentBusinessProcessId(repModel.getParentBusinessProcessId());
+    if (repModel.getPrimaryObjRef() != null) {
+      builder.primaryObjRef(objectReferenceAssembler.toEntity(repModel.getPrimaryObjRef()));
+    }
+    builder.manualPriority(repModel.getManualPriority());
+    builder.isRead(repModel.getIsRead());
+    if (repModel.getSecondaryObjectReferences() != null) {
+      builder.secondaryObjectReferences(
+          repModel.getSecondaryObjectReferences().stream()
+              .map(objectReferenceAssembler::toEntity)
+              .toList());
+    }
+    builder.custom1(repModel.getCustom1());
+    builder.custom2(repModel.getCustom2());
+    builder.custom3(repModel.getCustom3());
+    builder.custom4(repModel.getCustom4());
+    builder.custom5(repModel.getCustom5());
+    builder.custom6(repModel.getCustom6());
+    builder.custom7(repModel.getCustom7());
+    builder.custom8(repModel.getCustom8());
+    builder.custom9(repModel.getCustom9());
+    builder.custom10(repModel.getCustom10());
+    builder.custom11(repModel.getCustom11());
+    builder.custom12(repModel.getCustom12());
+    builder.custom13(repModel.getCustom13());
+    builder.custom14(repModel.getCustom14());
+    builder.custom15(repModel.getCustom15());
+    builder.custom16(repModel.getCustom16());
+    builder.customInt1(repModel.getCustomInt1());
+    builder.customInt2(repModel.getCustomInt2());
+    builder.customInt3(repModel.getCustomInt3());
+    builder.customInt4(repModel.getCustomInt4());
+    builder.customInt5(repModel.getCustomInt5());
+    builder.customInt6(repModel.getCustomInt6());
+    builder.customInt7(repModel.getCustomInt7());
+    builder.customInt8(repModel.getCustomInt8());
+    if (repModel.getCustomAttributes() != null) {
+      builder.customAttributes(
+          repModel.getCustomAttributes().stream()
+              .collect(Collectors.toMap(CustomAttribute::getKey, CustomAttribute::getValue)));
+    }
+    if (repModel.getCallbackInfo() != null) {
+      builder.callbackInfo(
+          repModel.getCallbackInfo().stream()
+              .filter(e -> Objects.nonNull(e.getKey()))
+              .filter(not(e -> e.getKey().isEmpty()))
+              .collect(Collectors.toMap(CustomAttribute::getKey, CustomAttribute::getValue)));
+    }
+
+    return builder.build();
   }
 }
