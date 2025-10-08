@@ -37,6 +37,11 @@ jobs:
     name: Compile all maven modules
     runs-on: ubuntu-22.04
     steps:
+      - name: Start Eco CI Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: start-measurement
+        continue-on-error: true
       - name: Git checkout
         uses: actions/checkout@v5
       - name: Set up JDK ${{ env.JAVA_VERSION }}
@@ -55,6 +60,19 @@ jobs:
         run: ci/change_version.sh -m .
       - name: Compile & build
         run: ./mvnw -B install -DskipTests -Djacoco.skip
+      - name: Eco CI Measurement of mvn install
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: "compile_backend: mvn install"
+        continue-on-error: true
+      - name: Show Eco CI Results
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: display-results
+          display-badge: true
+          pr-comment: false
+        continue-on-error: true
       - name: Populate cache
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
@@ -177,6 +195,11 @@ jobs:
     name: Test E2E
     needs: [ compile_frontend, compile_backend ]
     steps:
+      - name: Start Eco CI Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: start-measurement
+        continue-on-error: true
       - name: Git checkout
         uses: actions/checkout@v5
       - name: Set up JDK ${{ env.JAVA_VERSION }}
@@ -232,6 +255,19 @@ jobs:
         run: |
           ../mvnw -B spring-boot:run -P history.plugin -f .. -pl :kadai-rest-spring-example-boot &> /dev/null &
           npx wait-port -t 30000 localhost:8080 && yarn run e2e-standalone --spec "cypress/e2e/monitor/**"
+      - name: Eco CI Measurement of cypress e2e
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: "test_e2e: cypress"
+        continue-on-error: true
+      - name: Show Eco CI Result with pr comment
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: display-results
+          pr-comment: true
+          display-badge: true
+        continue-on-error: true
       - name: Upload Cypress tests
         if: failure()
         uses: actions/upload-artifact@v4
@@ -289,6 +325,12 @@ jobs:
           - module: kadai-rest-spring-example-boot
             database: DB2
     steps:
+      - name: Start Eco CI Measurement
+        if: matrix.database == 'H2'
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: start-measurement
+        continue-on-error: true
       - name: Git checkout
         uses: actions/checkout@v5
       - name: Set up JDK ${{ env.JAVA_VERSION }}
@@ -314,6 +356,21 @@ jobs:
         run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip
         env:
           DB: ${{ matrix.database }}
+      - name: Eco CI Measurement of ${{ matrix.module }} (H2)
+        if: matrix.database == 'H2'
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: "test_backend_17: ${{ matrix.module }} (H2)"
+        continue-on-error: true
+      - name: Show Eco CI Results
+        if: matrix.database == 'H2'
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: display-results
+          display-badge: true
+          pr-comment: false
+        continue-on-error: true
       - name: Upload JaCoCo Report
         if: matrix.database == 'H2'
         uses: actions/upload-artifact@v4
