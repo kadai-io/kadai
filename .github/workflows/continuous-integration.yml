@@ -194,9 +194,11 @@ jobs:
     runs-on: ubuntu-22.04
     name: Test E2E
     needs: [ compile_frontend, compile_backend ]
-    permissions:
-      contents: read
-      pull-requests: write
+  permissions:
+    actions: read
+    contents: read
+    pull-requests: write
+    issues: write
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
