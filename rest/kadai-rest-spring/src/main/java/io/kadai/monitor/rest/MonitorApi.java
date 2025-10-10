@@ -107,7 +107,7 @@ public interface MonitorApi {
       throws NotAuthorizedException, InvalidArgumentException;
 
   /**
-   * This endpoint generates a Classification Category Report
+   * This endpoint generates a Classification Category Report.
    *
    * <p>Each Row represents a Classification category.
    *
