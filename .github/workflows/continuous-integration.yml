@@ -472,7 +472,40 @@ jobs:
         run: ci/change_version.sh -m .
       - name: Release artifacts to Sonatype-Central
         run: |
-          ./mvnw -B deploy -P $([[ "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo "release" || echo "snapshot") \
+          VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "Detected version: $VERSION"
+          
+          # Validate version is not empty/null
+          if [[ -z "$VERSION" || "$VERSION" == "null" ]]; then
+          echo "CRITICAL ERROR: Version is empty or null!"
+          echo "   Detected version: '$VERSION'"
+          echo "   Expected:"
+          echo "     - Master branch: x.x.x-SNAPSHOT"
+          echo "     - Tag (vx.x.x): x.x.x"
+          echo "   Possible causes:"
+          echo "     - Incorrect tag format"
+          echo "     - Missing or invalid <version> in pom.xml"
+          exit 1
+          fi
+          
+          if [[ "$GITHUB_REF" == "refs/heads/master" && "$VERSION" == *-SNAPSHOT ]]; then
+            echo "Deploying as SNAPSHOT"
+            PROFILE="snapshot"
+          elif [[ "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ && "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Deploying as RELEASE"
+            PROFILE="release"
+          else
+            echo "NOT ALLOWED: Invalid combination"
+            echo "   GITHUB_REF: $GITHUB_REF"
+            echo "   Version: $VERSION"
+            echo "   Expected:"
+            echo "     - Master branch + SNAPSHOT version (x.x.x-SNAPSHOT), OR"
+            echo "     - Tag (vx.x.x) + RELEASE version (x.x.x)"
+            exit 1
+          fi
+          
+          echo "Using Maven profile: $PROFILE"
+          ./mvnw -B deploy -P $PROFILE \
           --settings ci/mvnsettings.xml -DskipTests -Dcheckstyle.skip -Djacoco.skip \
           -pl :kadai-parent,\
           :kadai-common-parent,:kadai-common-logging,:kadai-common,:kadai-common-security,\
