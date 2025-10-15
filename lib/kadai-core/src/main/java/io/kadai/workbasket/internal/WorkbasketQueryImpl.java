@@ -20,7 +20,6 @@ package io.kadai.workbasket.internal;
 
 import static io.kadai.common.api.BaseQuery.toLowerCopy;
 
-import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.api.TimeInterval;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
@@ -107,12 +106,10 @@ public class WorkbasketQueryImpl implements WorkbasketQuery {
   }
 
   public static void lowercaseAccessIds(String[] accessIdArray) {
-    if (KadaiConfiguration.shouldUseLowerCaseForAccessIds()) {
-      for (int i = 0; i < accessIdArray.length; i++) {
-        String id = accessIdArray[i];
-        if (id != null) {
-          accessIdArray[i] = id.toLowerCase();
-        }
+    for (int i = 0; i < accessIdArray.length; i++) {
+      String id = accessIdArray[i];
+      if (id != null) {
+        accessIdArray[i] = id.toLowerCase();
       }
     }
   }

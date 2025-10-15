@@ -30,7 +30,7 @@ public interface WorkbasketHistoryQueryMapper {
 
   @Select(
       "<script>"
-          + "SELECT ID, WORKBASKET_ID, EVENT_TYPE, CREATED, USER_ID, DOMAIN, KEY, TYPE,"
+          + "SELECT ID, WORKBASKET_ID, EVENT_TYPE, CREATED, USER_ID, PROXY_ACCESS_ID, DOMAIN, KEY, TYPE,"
           + "OWNER, CUSTOM_1, CUSTOM_2, CUSTOM_3, CUSTOM_4, ORG_LEVEL_1, ORG_LEVEL_2, ORG_LEVEL_3, ORG_LEVEL_4 "
           + "FROM WORKBASKET_HISTORY_EVENT"
           + "<where>"
@@ -40,6 +40,7 @@ public interface WorkbasketHistoryQueryMapper {
           + "<if test='eventTypeIn != null'>AND EVENT_TYPE IN (<foreach item='item' collection='eventTypeIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='createdIn !=null'> AND ( <foreach item='item' collection='createdIn' separator=',' > ( <if test='item.begin!=null'> CREATED &gt;= #{item.begin} </if> <if test='item.begin!=null and item.end!=null'> AND </if><if test='item.end!=null'> CREATED &lt;=#{item.end} </if>)</foreach>)</if> "
           + "<if test='userIdIn != null'>AND USER_ID IN (<foreach item='item' collection='userIdIn' separator=',' >#{item}</foreach>)</if> "
+          + "<if test='proxyAccessIdIn != null'>AND PROXY_ACCESS_ID IN (<foreach item='item' collection='proxyAccessIdIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='domainIn != null'>AND DOMAIN IN (<foreach item='item' collection='domainIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='keyIn != null'>AND KEY IN (<foreach item='item' collection='keyIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='typeIn != null'>AND TYPE IN (<foreach item='item' collection='typeIn' separator=',' >#{item}</foreach>)</if> "
@@ -56,6 +57,7 @@ public interface WorkbasketHistoryQueryMapper {
           + "<if test='workbasketIdLike != null'>AND (<foreach item='item' collection='workbasketIdLike' separator=' OR ' >LOWER(WORKBASKET_ID) LIKE #{item}</foreach>)</if> "
           + "<if test='eventTypeLike != null'>AND (<foreach item='item' collection='eventTypeLike' separator=' OR ' >LOWER(EVENT_TYPE) LIKE #{item}</foreach>)</if> "
           + "<if test='userIdLike != null'>AND (<foreach item='item' collection='userIdLike' separator=' OR ' >LOWER(USER_ID) LIKE #{item}</foreach>)</if> "
+          + "<if test='proxyAccessIdLike != null'>AND (<foreach item='item' collection='proxyAccessIdLike' separator=' OR ' > LOWER(PROXY_ACCESS_ID) LIKE #{item}</foreach>)</if> "
           + "<if test='domainLike != null'>AND (<foreach item='item' collection='domainLike' separator=' OR ' >LOWER(DOMAIN) LIKE #{item}</foreach>)</if> "
           + "<if test='keyLike != null'>AND (<foreach item='item' collection='keyLike' separator=' OR ' >LOWER(KEY) LIKE #{item}</foreach>)</if> "
           + "<if test='typeLike != null'>AND (<foreach item='item' collection='typeLike' separator=' OR ' >LOWER(TYPE) LIKE #{item}</foreach>)</if> "
@@ -76,6 +78,7 @@ public interface WorkbasketHistoryQueryMapper {
   @Result(property = "eventType", column = "EVENT_TYPE")
   @Result(property = "created", column = "CREATED")
   @Result(property = "userId", column = "USER_ID")
+  @Result(property = "proxyAccessId", column = "PROXY_ACCESS_ID")
   @Result(property = "domain", column = "DOMAIN")
   @Result(property = "key", column = "KEY")
   @Result(property = "type", column = "TYPE")
@@ -100,6 +103,7 @@ public interface WorkbasketHistoryQueryMapper {
           + "<if test='eventTypeIn != null'>AND LOWER(EVENT_TYPE) IN (<foreach item='item' collection='eventTypeIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='createdIn !=null'> AND ( <foreach item='item' collection='createdIn' separator=',' > ( <if test='item.begin!=null'> CREATED &gt;= #{item.begin} </if> <if test='item.begin!=null and item.end!=null'> AND </if><if test='item.end!=null'> CREATED &lt;=#{item.end} </if>)</foreach>)</if> "
           + "<if test='userIdIn != null'>AND LOWER(USER_ID) IN (<foreach item='item' collection='userIdIn' separator=',' >#{item}</foreach>)</if> "
+          + "<if test='proxyAccessIdIn != null'>AND PROXY_ACCESS_ID IN (<foreach item='item' collection='proxyAccessIdIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='domainIn != null'>AND LOWER(DOMAIN) IN (<foreach item='item' collection='domainIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='keyIn != null'>AND LOWER(KEY) IN (<foreach item='item' collection='keyIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='typeIn != null'>AND LOWER(TYPE) IN (<foreach item='item' collection='typeIn' separator=',' >#{item}</foreach>)</if> "
@@ -116,6 +120,7 @@ public interface WorkbasketHistoryQueryMapper {
           + "<if test='workbasketIdLike != null'>AND (<foreach item='item' collection='workbasketIdLike' separator=' OR ' >LOWER(WORKBASKET_ID) LIKE #{item}</foreach>)</if> "
           + "<if test='eventTypeLike != null'>AND (<foreach item='item' collection='eventTypeLike' separator=' OR ' >LOWER(EVENT_TYPE) LIKE #{item}</foreach>)</if> "
           + "<if test='userIdLike != null'>AND (<foreach item='item' collection='userIdLike' separator=' OR ' >LOWER(USER_ID) LIKE #{item}</foreach>)</if> "
+          + "<if test='proxyAccessIdLike != null'>AND (<foreach item='item' collection='proxyAccessIdLike' separator=' OR ' > LOWER(PROXY_ACCESS_ID) LIKE #{item}</foreach>)</if> "
           + "<if test='domainLike != null'>AND (<foreach item='item' collection='domainLike' separator=' OR ' >LOWER(DOMAIN) LIKE #{item}</foreach>)</if> "
           + "<if test='keyLike != null'>AND (<foreach item='item' collection='keyLike' separator=' OR ' >LOWER(KEY) LIKE #{item}</foreach>)</if> "
           + "<if test='typeLike != null'>AND (<foreach item='item' collection='typeLike' separator=' OR ' >LOWER(TYPE) LIKE #{item}</foreach>)</if> "
@@ -141,6 +146,7 @@ public interface WorkbasketHistoryQueryMapper {
           + "<if test='eventTypeIn != null'>AND LOWER(EVENT_TYPE) IN (<foreach item='item' collection='eventTypeIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='createdIn !=null'> AND ( <foreach item='item' collection='createdIn' separator=',' > ( <if test='item.begin!=null'> CREATED &gt;= #{item.begin} </if> <if test='item.begin!=null and item.end!=null'> AND </if><if test='item.end!=null'> CREATED &lt;=#{item.end} </if>)</foreach>)</if> "
           + "<if test='userIdIn != null'>AND LOWER(USER_ID) IN (<foreach item='item' collection='userIdIn' separator=',' >#{item}</foreach>)</if> "
+          + "<if test='proxyAccessIdIn != null'>AND PROXY_ACCESS_ID IN (<foreach item='item' collection='proxyAccessIdIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='domainIn != null'>AND LOWER(DOMAIN) IN (<foreach item='item' collection='domainIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='keyIn != null'>AND LOWER(KEY) IN (<foreach item='item' collection='keyIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='typeIn != null'>AND LOWER(TYPE) IN (<foreach item='item' collection='typeIn' separator=',' >#{item}</foreach>)</if> "
@@ -157,6 +163,7 @@ public interface WorkbasketHistoryQueryMapper {
           + "<if test='workbasketIdLike != null'>AND (<foreach item='item' collection='workbasketIdLike' separator=' OR ' >LOWER(WORKBASKET_ID) LIKE #{item}</foreach>)</if> "
           + "<if test='eventTypeLike != null'>AND (<foreach item='item' collection='eventTypeLike' separator=' OR ' >LOWER(EVENT_TYPE) LIKE #{item}</foreach>)</if> "
           + "<if test='userIdLike != null'>AND (<foreach item='item' collection='userIdLike' separator=' OR ' >LOWER(USER_ID) LIKE #{item}</foreach>)</if> "
+          + "<if test='proxyAccessIdLike != null'>AND (<foreach item='item' collection='proxyAccessIdLike' separator=' OR ' > LOWER(PROXY_ACCESS_ID) LIKE #{item}</foreach>)</if> "
           + "<if test='domainLike != null'>AND (<foreach item='item' collection='domainLike' separator=' OR ' >LOWER(DOMAIN) LIKE #{item}</foreach>)</if> "
           + "<if test='keyLike != null'>AND (<foreach item='item' collection='keyLike' separator=' OR ' >LOWER(KEY) LIKE #{item}</foreach>)</if> "
           + "<if test='typeLike != null'>AND (<foreach item='item' collection='typeLike' separator=' OR ' >LOWER(TYPE) LIKE #{item}</foreach>)</if> "

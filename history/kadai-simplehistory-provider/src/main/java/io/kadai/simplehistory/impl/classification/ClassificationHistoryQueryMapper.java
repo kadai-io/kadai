@@ -30,7 +30,7 @@ public interface ClassificationHistoryQueryMapper {
 
   @Select(
       "<script>"
-          + "SELECT ID, EVENT_TYPE, CREATED, USER_ID, CLASSIFICATION_ID, APPLICATION_ENTRY_POINT, CATEGORY, DOMAIN, KEY, NAME,"
+          + "SELECT ID, EVENT_TYPE, CREATED, USER_ID, PROXY_ACCESS_ID, CLASSIFICATION_ID, APPLICATION_ENTRY_POINT, CATEGORY, DOMAIN, KEY, NAME,"
           + "PARENT_ID, PARENT_KEY, PRIORITY, SERVICE_LEVEL, TYPE, CUSTOM_1, CUSTOM_2, CUSTOM_3, CUSTOM_4, CUSTOM_5, CUSTOM_6, CUSTOM_7, CUSTOM_8 "
           + "FROM CLASSIFICATION_HISTORY_EVENT"
           + "<where>"
@@ -39,6 +39,7 @@ public interface ClassificationHistoryQueryMapper {
           + "<if test='eventTypeIn != null'>AND EVENT_TYPE IN (<foreach item='item' collection='eventTypeIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='createdIn !=null'> AND ( <foreach item='item' collection='createdIn' separator=',' > ( <if test='item.begin!=null'> CREATED &gt;= #{item.begin} </if> <if test='item.begin!=null and item.end!=null'> AND </if><if test='item.end!=null'> CREATED &lt;=#{item.end} </if>)</foreach>)</if> "
           + "<if test='userIdIn != null'>AND USER_ID IN (<foreach item='item' collection='userIdIn' separator=',' >#{item}</foreach>)</if> "
+          + "<if test='proxyAccessIdIn != null'>AND PROXY_ACCESS_ID IN (<foreach item='item' collection='proxyAccessIdIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='classificationIdIn != null'>AND CLASSIFICATION_ID IN (<foreach item='item' collection='classificationIdIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='applicationEntryPointIn != null'>AND APPLICATION_ENTRY_POINT IN (<foreach item='item' collection='applicationEntryPointIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='categoryIn != null'>AND CATEGORY IN (<foreach item='item' collection='categoryIn' separator=',' >#{item}</foreach>)</if> "
@@ -61,6 +62,7 @@ public interface ClassificationHistoryQueryMapper {
           // LIKE-Queries
           + "<if test='eventTypeLike != null'>AND (<foreach item='item' collection='eventTypeLike' separator= ' OR ' >LOWER(EVENT_TYPE) LIKE #{item}</foreach>)</if> "
           + "<if test='userIdLike != null'>AND (<foreach item='item' collection='userIdLike' separator=' OR ' > LOWER(USER_ID) LIKE #{item}</foreach>)</if> "
+          + "<if test='proxyAccessIdLike != null'>AND (<foreach item='item' collection='proxyAccessIdLike' separator=' OR ' > LOWER(PROXY_ACCESS_ID) LIKE #{item}</foreach>)</if> "
           + "<if test='classificationIdLike != null'>AND (<foreach item='item' collection='classificationIdLike' separator=' OR ' >LOWER(CLASSIFICATION_ID) LIKE #{item}</foreach>)</if> "
           + "<if test='applicationEntryPointLike != null'>AND (<foreach item='item' collection='applicationEntryPointLike' separator=' OR ' >LOWER(APPLICATION_ENTRY_POINT) LIKE #{item}</foreach>)</if> "
           + "<if test='categoryLike != null'>AND (<foreach item='item' collection='categoryLike' separator=' OR ' >LOWER(CATEGORY) LIKE #{item}</foreach>)</if> "
@@ -86,6 +88,7 @@ public interface ClassificationHistoryQueryMapper {
   @Result(property = "eventType", column = "EVENT_TYPE")
   @Result(property = "created", column = "CREATED")
   @Result(property = "userId", column = "USER_ID")
+  @Result(property = "proxyAccessId", column = "PROXY_ACCESS_ID")
   @Result(property = "classificationId", column = "CLASSIFICATION_ID")
   @Result(property = "applicationEntryPoint", column = "APPLICATION_ENTRY_POINT")
   @Result(property = "category", column = "CATEGORY")
@@ -117,6 +120,7 @@ public interface ClassificationHistoryQueryMapper {
           + "<if test='eventTypeIn != null'>AND LOWER(EVENT_TYPE) IN (<foreach item='item' collection='eventTypeIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='createdIn !=null'> AND ( <foreach item='item' collection='createdIn' separator=',' > ( <if test='item.begin!=null'> CREATED &gt;= #{item.begin} </if> <if test='item.begin!=null and item.end!=null'> AND </if><if test='item.end!=null'> CREATED &lt;=#{item.end} </if>)</foreach>)</if> "
           + "<if test='userIdIn != null'>AND LOWER(USER_ID) IN (<foreach item='item' collection='userIdIn' separator=',' >#{item}</foreach>)</if> "
+          + "<if test='proxyAccessIdIn != null'>AND PROXY_ACCESS_ID IN (<foreach item='item' collection='proxyAccessIdIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='classificationIdIn != null'>AND LOWER(CLASSIFICATION_ID) IN (<foreach item='item' collection='classificationIdIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='applicationEntryPointIn != null'>AND LOWER(APPLICATION_ENTRY_POINT) IN (<foreach item='item' collection='applicationEntryPointIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='categoryIn != null'>AND LOWER(CATEGORY) IN (<foreach item='item' collection='categoryIn' separator=',' >#{item}</foreach>)</if> "
@@ -139,6 +143,7 @@ public interface ClassificationHistoryQueryMapper {
           // LIKE-Queries
           + "<if test='eventTypeLike != null'>AND (<foreach item='item' collection='eventTypeLike' separator= ' OR ' >LOWER(EVENT_TYPE) LIKE #{item}</foreach>)</if> "
           + "<if test='userIdLike != null'>AND (<foreach item='item' collection='userIdLike' separator=' OR ' > LOWER(USER_ID) LIKE #{item}</foreach>)</if> "
+          + "<if test='proxyAccessIdLike != null'>AND (<foreach item='item' collection='proxyAccessIdLike' separator=' OR ' > LOWER(PROXY_ACCESS_ID) LIKE #{item}</foreach>)</if> "
           + "<if test='classificationIdLike != null'>AND (<foreach item='item' collection='classificationIdLike' separator=' OR ' >LOWER(CLASSIFICATION_ID) LIKE #{item}</foreach>)</if> "
           + "<if test='applicationEntryPointLike != null'>AND (<foreach item='item' collection='applicationEntryPointLike' separator=' OR ' >LOWER(APPLICATION_ENTRY_POINT) LIKE #{item}</foreach>)</if> "
           + "<if test='categoryLike != null'>AND (<foreach item='item' collection='categoryLike' separator=' OR ' >LOWER(CATEGORY) LIKE #{item}</foreach>)</if> "
@@ -170,6 +175,7 @@ public interface ClassificationHistoryQueryMapper {
           + "<if test='eventTypeIn != null'>AND LOWER(EVENT_TYPE) IN (<foreach item='item' collection='eventTypeIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='createdIn !=null'> AND ( <foreach item='item' collection='createdIn' separator=',' > ( <if test='item.begin!=null'> CREATED &gt;= #{item.begin} </if> <if test='item.begin!=null and item.end!=null'> AND </if><if test='item.end!=null'> CREATED &lt;=#{item.end} </if>)</foreach>)</if> "
           + "<if test='userIdIn != null'>AND LOWER(USER_ID) IN (<foreach item='item' collection='userIdIn' separator=',' >#{item}</foreach>)</if> "
+          + "<if test='proxyAccessIdIn != null'>AND PROXY_ACCESS_ID IN (<foreach item='item' collection='proxyAccessIdIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='classificationIdIn != null'>AND LOWER(CLASSIFICATION_ID) IN (<foreach item='item' collection='classificationIdIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='applicationEntryPointIn != null'>AND LOWER(APPLICATION_ENTRY_POINT) IN (<foreach item='item' collection='applicationEntryPointIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='categoryIn != null'>AND LOWER(CATEGORY) IN (<foreach item='item' collection='categoryIn' separator=',' >#{item}</foreach>)</if> "
@@ -192,6 +198,7 @@ public interface ClassificationHistoryQueryMapper {
           // LIKE-Queries
           + "<if test='eventTypeLike != null'>AND (<foreach item='item' collection='eventTypeLike' separator= ' OR ' >LOWER(EVENT_TYPE) LIKE #{item}</foreach>)</if> "
           + "<if test='userIdLike != null'>AND (<foreach item='item' collection='userIdLike' separator=' OR ' >LOWER(USER_ID) LIKE #{item}</foreach>)</if> "
+          + "<if test='proxyAccessIdLike != null'>AND (<foreach item='item' collection='proxyAccessIdLike' separator=' OR ' > LOWER(PROXY_ACCESS_ID) LIKE #{item}</foreach>)</if> "
           + "<if test='classificationIdLike != null'>AND (<foreach item='item' collection='classificationIdLike' separator=' OR ' >LOWER(CLASSIFICATION_ID) LIKE #{item}</foreach>)</if> "
           + "<if test='applicationEntryPointLike != null'>AND (<foreach item='item' collection='applicationEntryPointLike' separator=' OR ' >LOWER(APPLICATION_ENTRY_POINT) LIKE #{item}</foreach>)</if> "
           + "<if test='categoryLike != null'>AND (<foreach item='item' collection='categoryLike' separator=' OR ' >LOWER(CATEGORY) LIKE #{item}</foreach>)</if> "

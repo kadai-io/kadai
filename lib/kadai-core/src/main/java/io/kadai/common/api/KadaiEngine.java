@@ -21,6 +21,7 @@ package io.kadai.common.api;
 import io.kadai.KadaiConfiguration;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
+import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.common.internal.workingtime.WorkingTimeCalculatorImpl;
@@ -28,6 +29,7 @@ import io.kadai.monitor.api.MonitorService;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.models.Task;
 import io.kadai.user.api.UserService;
+import io.kadai.user.api.models.User;
 import io.kadai.workbasket.api.WorkbasketService;
 import java.sql.SQLException;
 import java.util.function.Supplier;
@@ -35,7 +37,7 @@ import org.apache.ibatis.transaction.TransactionFactory;
 
 /** The KadaiEngine represents an overall set of all needed services. */
 public interface KadaiEngine {
-  String MINIMAL_KADAI_SCHEMA_VERSION = "10.0.0";
+  String MINIMAL_KADAI_SCHEMA_VERSION = "11.0.0";
 
   /**
    * This method creates the {@linkplain KadaiEngine} with {@linkplain
@@ -221,8 +223,7 @@ public interface KadaiEngine {
   boolean isUserInRole(KadaiRole... roles);
 
   /**
-   * Checks whether current user is member of any of the specified {@linkplain KadaiRole
-   * KadaiRoles}.
+   * Checks whether current user is member of the specified {@linkplain KadaiRole KadaiRoles}.
    *
    * @param roles The {@linkplain KadaiRole KadaiRoles} that are checked for membership of the
    *     current user
@@ -232,28 +233,104 @@ public interface KadaiEngine {
   void checkRoleMembership(KadaiRole... roles) throws NotAuthorizedException;
 
   /**
-   * Executes a given {@code Supplier} with admin privileges and thus skips further permission
-   * checks. With great power comes great responsibility.
+   * Execute an action for a user with the privileges of another {@link KadaiRole}.
    *
-   * @param supplier will be executed with admin privileges
-   * @param <T> defined with the return value of the {@code Supplier}
-   * @return output from {@code Supplier}
+   * <p>This can be thought of as temporarily <i>lifting</i> the user into the given role - the role
+   * therefore is acting as proxy.
+   *
+   * @param supplier the action to execute
+   * @param proxy the role to temporarily lift the user to - acting as proxy
+   * @param userId the {@linkplain User#getId() id} of the user to be lifted
+   * @return the return value of the action
+   * @param <T> the return value of the action
    */
-  <T> T runAsAdmin(Supplier<T> supplier);
+  <T> T runAs(Supplier<T> supplier, KadaiRole proxy, String userId);
 
   /**
-   * Executes a given {@code Runnable} with admin privileges and thus skips further permission
-   * checks. With great power comes great responsibility.
+   * This is a convenience-method for {@link #runAs(Supplier, KadaiRole, String)}.
    *
-   * @see #runAsAdmin(Supplier)
+   * @param runnable the action to execute
+   * @param proxy the role to temporarily lift the user to - acting as proxy
+   * @param userId the {@linkplain User#getId() id} of the user to be lifted
+   * @see #runAs(Supplier, KadaiRole, String)
    */
-  @SuppressWarnings("checkstyle:JavadocMethod")
+  default void runAs(Runnable runnable, KadaiRole proxy, String userId) {
+    runAs(
+        () -> {
+          runnable.run();
+          return null;
+        },
+        proxy,
+        userId);
+  }
+
+  /**
+   * This is a convenience-method for {@link #runAs(Supplier, KadaiRole, String)}.
+   *
+   * <p>It <b>overrides</b> the {@linkplain CurrentUserContext#getUserId() current userId} with one
+   * of an admin, leaving the <b>proxy empty</b>.
+   *
+   * @param supplier the action to execute
+   * @param <T> the return value of the action
+   * @return the return value of the action
+   * @see #runAs(Supplier, KadaiRole, String)
+   */
+  default <T> T runAsAdmin(Supplier<T> supplier) {
+    if (isUserInRole(KadaiRole.ADMIN)) {
+      return supplier.get();
+    }
+
+    String adminName =
+        this.getConfiguration().getRoleMap().get(KadaiRole.ADMIN).stream()
+            .findFirst()
+            .orElseThrow(() -> new SystemException("There is no admin configured"));
+    return runAs(supplier, null, adminName);
+  }
+
+  /**
+   * This is a convenience-method for {@link #runAs(Supplier, KadaiRole, String)}.
+   *
+   * @param supplier the action to execute
+   * @param userId the {@linkplain User#getId() id} of the user to be lifted
+   * @param <T> the return value of the action
+   * @return the return value of the action
+   * @see #runAs(Supplier, KadaiRole, String)
+   */
+  default <T> T runAsAdmin(Supplier<T> supplier, String userId) {
+    return runAs(supplier, KadaiRole.ADMIN, userId);
+  }
+
+  /**
+   * This is a convenience-method for {@link #runAs(Supplier, KadaiRole, String)}.
+   *
+   * <p>It <b>overrides</b> the {@linkplain CurrentUserContext#getUserId() current userId} with one
+   * of an admin, leaving the <b>proxy empty</b>.
+   *
+   * @param runnable the action to execute
+   * @see #runAs(Supplier, KadaiRole, String)
+   */
   default void runAsAdmin(Runnable runnable) {
     runAsAdmin(
         () -> {
           runnable.run();
           return null;
         });
+  }
+
+  /**
+   * This is a convenience-method for {@link #runAs(Runnable, KadaiRole, String)}.
+   *
+   * @param runnable the action to execute
+   * @param userId the {@linkplain User#getId() id} of the user to be lifted
+   * @see #runAs(Supplier, KadaiRole, String)
+   */
+  default void runAsAdmin(Runnable runnable, String userId) {
+    runAsAdmin(
+        () -> {
+          runnable.run();
+          return null;
+        },
+        userId);
   }
 
   /**

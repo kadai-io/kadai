@@ -20,13 +20,13 @@ package io.kadai.workbasket.internal;
 
 import static io.kadai.common.api.SharedConstants.MASTER_DOMAIN;
 
-import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.BulkOperationResults;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.KadaiException;
+import io.kadai.common.api.exceptions.LogicalDuplicateInPayloadException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.util.IdGenerator;
@@ -185,7 +185,8 @@ public class WorkbasketServiceImpl implements WorkbasketService {
             new WorkbasketCreatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                 newWorkbasket,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 details));
       }
       if (LOGGER.isDebugEnabled()) {
@@ -245,7 +246,8 @@ public class WorkbasketServiceImpl implements WorkbasketService {
             new WorkbasketUpdatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                 workbasketToUpdate,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 details));
       }
 
@@ -264,11 +266,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
   public WorkbasketAccessItem newWorkbasketAccessItem(String workbasketId, String accessId) {
     WorkbasketAccessItemImpl accessItem = new WorkbasketAccessItemImpl();
     accessItem.setWorkbasketId(workbasketId);
-    if (KadaiConfiguration.shouldUseLowerCaseForAccessIds()) {
-      accessItem.setAccessId(accessId != null ? accessId.toLowerCase() : null);
-    } else {
-      accessItem.setAccessId(accessId);
-    }
+    accessItem.setAccessId(accessId != null ? accessId.toLowerCase() : null);
     return accessItem;
   }
 
@@ -312,7 +310,8 @@ public class WorkbasketServiceImpl implements WorkbasketService {
               new WorkbasketAccessItemCreatedEvent(
                   IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                   wb,
-                  kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                   details));
         }
         if (LOGGER.isDebugEnabled()) {
@@ -374,7 +373,8 @@ public class WorkbasketServiceImpl implements WorkbasketService {
             new WorkbasketAccessItemUpdatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                 workbasket,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 details));
       }
 
@@ -412,7 +412,8 @@ public class WorkbasketServiceImpl implements WorkbasketService {
             new WorkbasketAccessItemDeletedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                 workbasket,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 details));
       }
 
@@ -450,7 +451,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
           || !new HashSet<>(grantedPermissions.get())
               .containsAll(Arrays.asList(requestedPermissions))) {
         throw new NotAuthorizedOnWorkbasketException(
-            kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+            kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
             workbasketId,
             requestedPermissions);
       }
@@ -485,7 +486,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
           || !new HashSet<>(grantedPermissions.get())
               .containsAll(Arrays.asList(requestedPermissions))) {
         throw new NotAuthorizedOnWorkbasketException(
-            kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+            kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
             workbasketKey,
             domain,
             requestedPermissions);
@@ -514,7 +515,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
   @Override
   public void setWorkbasketAccessItems(
       String workbasketId, List<WorkbasketAccessItem> wbAccessItems)
-      throws WorkbasketAccessItemAlreadyExistException,
+      throws LogicalDuplicateInPayloadException,
           InvalidArgumentException,
           WorkbasketNotFoundException,
           NotAuthorizedException,
@@ -550,7 +551,8 @@ public class WorkbasketServiceImpl implements WorkbasketService {
             new WorkbasketAccessItemsUpdatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                 workbasket,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 details));
       }
     } finally {
@@ -677,7 +679,8 @@ public class WorkbasketServiceImpl implements WorkbasketService {
               new WorkbasketDistributionTargetsUpdatedEvent(
                   IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                   sourceWorkbasket,
-                  kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                   details));
         }
       }
@@ -728,7 +731,8 @@ public class WorkbasketServiceImpl implements WorkbasketService {
               new WorkbasketDistributionTargetAddedEvent(
                   IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                   sourceWorkbasket,
-                  kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                   details));
         }
         if (LOGGER.isDebugEnabled()) {
@@ -775,7 +779,8 @@ public class WorkbasketServiceImpl implements WorkbasketService {
                 new WorkbasketDistributionTargetRemovedEvent(
                     IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                     workbasket,
-                    kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                    kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                    kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                     details));
           }
         }
@@ -863,7 +868,8 @@ public class WorkbasketServiceImpl implements WorkbasketService {
               new WorkbasketDeletedEvent(
                   IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                   workbasketToDelete,
-                  kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                   details));
         }
       } else {
@@ -955,7 +961,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
     kadaiEngine.getEngine().checkRoleMembership(KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
     try {
       kadaiEngine.openConnection();
-      if (KadaiConfiguration.shouldUseLowerCaseForAccessIds() && accessId != null) {
+      if (accessId != null) {
         accessId = accessId.toLowerCase();
       }
 
@@ -979,7 +985,8 @@ public class WorkbasketServiceImpl implements WorkbasketService {
               new WorkbasketAccessItemDeletedEvent(
                   IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                   workbasket,
-                  kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                   details));
         }
       }
@@ -1006,7 +1013,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
 
   private Set<WorkbasketAccessItemImpl> checkAccessItemsPreconditionsAndSetId(
       String workbasketId, List<WorkbasketAccessItem> wbAccessItems)
-      throws InvalidArgumentException, WorkbasketAccessItemAlreadyExistException {
+      throws InvalidArgumentException, LogicalDuplicateInPayloadException {
 
     Set<String> ids = new HashSet<>();
     Set<WorkbasketAccessItemImpl> accessItems = new HashSet<>();
@@ -1043,8 +1050,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
               IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_AUTHORIZATION));
         }
         if (ids.contains(accessId)) {
-          throw new WorkbasketAccessItemAlreadyExistException(
-              accessId, wbAccessItemImpl.getWorkbasketId());
+          throw new LogicalDuplicateInPayloadException(accessId);
         }
         ids.add(accessId);
         accessItems.add(wbAccessItemImpl);
@@ -1105,10 +1111,10 @@ public class WorkbasketServiceImpl implements WorkbasketService {
     // check that required properties (database not null) are set
     validateNameAndType(workbasket);
 
-    if (workbasket.getId() == null || workbasket.getId().length() == 0) {
+    if (workbasket.getId() == null || workbasket.getId().isEmpty()) {
       throw new InvalidArgumentException("Id must not be null for " + workbasket);
     }
-    if (workbasket.getKey() == null || workbasket.getKey().length() == 0) {
+    if (workbasket.getKey() == null || workbasket.getKey().isEmpty()) {
       throw new InvalidArgumentException("Key must not be null for " + workbasket);
     }
     if (workbasket.getDomain() == null) {
@@ -1132,7 +1138,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
     if (workbasket.getName() == null) {
       throw new InvalidArgumentException("Name must not be NULL for " + workbasket);
     }
-    if (workbasket.getName().length() == 0) {
+    if (workbasket.getName().isEmpty()) {
       throw new InvalidArgumentException("Name must not be EMPTY for " + workbasket);
     }
     if (workbasket.getType() == null) {
@@ -1169,7 +1175,8 @@ public class WorkbasketServiceImpl implements WorkbasketService {
             new WorkbasketMarkedForDeletionEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
                 workbasket,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 null));
       }
     } finally {

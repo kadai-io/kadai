@@ -432,7 +432,7 @@ public class TaskServiceImpl implements TaskService {
             query.idIn(workbasketId).callerHasPermissions(WorkbasketPermission.READTASKS).list();
         if (workbaskets.isEmpty()) {
           throw new NotAuthorizedOnWorkbasketException(
-              kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+              kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
               workbasketId,
               WorkbasketPermission.READ,
               WorkbasketPermission.READTASKS);
@@ -606,7 +606,7 @@ public class TaskServiceImpl implements TaskService {
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
           ServiceLevelViolationException {
-    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
     TaskImpl newTaskImpl = (TaskImpl) task;
     try {
       kadaiEngine.openConnection();
@@ -615,7 +615,7 @@ public class TaskServiceImpl implements TaskService {
       checkConcurrencyAndSetModified(newTaskImpl, oldTaskImpl);
       if (!checkEditTasksPerm(oldTaskImpl)) {
         throw new NotAuthorizedOnWorkbasketException(
-            kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+            kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
             oldTaskImpl.getWorkbasketSummary().getId(),
             WorkbasketPermission.EDITTASKS);
       }
@@ -647,6 +647,7 @@ public class TaskServiceImpl implements TaskService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                 task,
                 userId,
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 changeDetails));
       }
 
@@ -711,7 +712,7 @@ public class TaskServiceImpl implements TaskService {
     TaskImpl task;
     try {
       kadaiEngine.openConnection();
-      String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+      String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
       task = (TaskImpl) getTask(taskId);
       if (!checkEditTasksPerm(task)) {
         throw new NotAuthorizedOnWorkbasketException(
@@ -753,6 +754,7 @@ public class TaskServiceImpl implements TaskService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                 task,
                 userId,
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 changeDetails));
       }
     } finally {
@@ -1035,14 +1037,15 @@ public class TaskServiceImpl implements TaskService {
         LOGGER.debug(
             "Task '{}' cancelled by user '{}'.",
             cancelledTask.getId(),
-            kadaiEngine.getEngine().getCurrentUserContext().getUserid());
+            kadaiEngine.getEngine().getCurrentUserContext().getUserId());
       }
       if (historyEventManager.isEnabled()) {
         historyEventManager.createEvent(
             new TaskCancelledEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                 cancelledTask,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserid()));
+                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId()));
       }
     } finally {
       kadaiEngine.returnConnection();
@@ -1217,14 +1220,15 @@ public class TaskServiceImpl implements TaskService {
         LOGGER.debug(
             "Task '{}' cancelled by user '{}'.",
             terminatedTask.getId(),
-            kadaiEngine.getEngine().getCurrentUserContext().getUserid());
+            kadaiEngine.getEngine().getCurrentUserContext().getUserId());
       }
       if (historyEventManager.isEnabled()) {
         historyEventManager.createEvent(
             new TaskTerminatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                 terminatedTask,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserid()));
+                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId()));
       }
 
     } finally {
@@ -1279,7 +1283,7 @@ public class TaskServiceImpl implements TaskService {
       kadaiEngine.openConnection();
       Set<String> adminAccessIds =
           kadaiEngine.getEngine().getConfiguration().getRoleMap().get(KadaiRole.ADMIN);
-      if (adminAccessIds.contains(kadaiEngine.getEngine().getCurrentUserContext().getUserid())) {
+      if (adminAccessIds.contains(kadaiEngine.getEngine().getCurrentUserContext().getUserId())) {
         serviceLevelHandler.refreshPriorityAndDueDatesOfTasks(
             tasks, serviceLevelChanged, priorityChanged);
       } else {
@@ -1295,6 +1299,162 @@ public class TaskServiceImpl implements TaskService {
     }
   }
 
+  @Override
+  public BulkOperationResults<String, KadaiException> bulkUpdateTasks(
+      List<String> taskIds, TaskPatch taskPatch) {
+    BulkOperationResults<String, KadaiException> bulkLog = new BulkOperationResults<>();
+
+    for (String taskId : taskIds) {
+      try {
+        TaskImpl oldTaskImpl = (TaskImpl) getTask(taskId);
+        TaskImpl newTaskImpl = applyTaskPatch(taskPatch, duplicateTaskExactly(oldTaskImpl));
+        updateTask(newTaskImpl);
+      } catch (KadaiException e) {
+        bulkLog.addError(taskId, e);
+      }
+    }
+
+    return bulkLog;
+  }
+
+  public static TaskImpl applyTaskPatch(TaskPatch patch, TaskImpl task) {
+    if (patch == null || task == null) {
+      return task;
+    }
+
+    if (patch.received() != null) {
+      task.setReceived(patch.received());
+    }
+    if (patch.planned() != null) {
+      task.setPlanned(patch.planned());
+    }
+    if (patch.due() != null) {
+      task.setDue(patch.due());
+    }
+
+    if (patch.name() != null) {
+      task.setName(patch.name());
+    }
+    if (patch.note() != null) {
+      task.setNote(patch.note());
+    }
+    if (patch.description() != null) {
+      task.setDescription(patch.description());
+    }
+    if (patch.classificationSummary() != null) {
+      task.setClassificationSummary(patch.classificationSummary());
+    }
+    if (patch.workbasketSummary() != null) {
+      task.setWorkbasketSummary(patch.workbasketSummary());
+    }
+    if (patch.businessProcessId() != null) {
+      task.setBusinessProcessId(patch.businessProcessId());
+    }
+    if (patch.parentBusinessProcessId() != null) {
+      task.setParentBusinessProcessId(patch.parentBusinessProcessId());
+    }
+    if (patch.primaryObjRef() != null) {
+      task.setPrimaryObjRef(patch.primaryObjRef());
+    }
+    if (patch.manualPriority() != null) {
+      task.setManualPriority(patch.manualPriority());
+    }
+    if (patch.isRead() != null) {
+      task.setRead(patch.isRead());
+    }
+    if (patch.secondaryObjectReferences() != null) {
+      task.setSecondaryObjectReferences(
+          patch.secondaryObjectReferences().stream()
+              .map(ObjectReference::copy)
+              .collect(Collectors.toList()));
+    }
+
+    // Custom string fields
+    if (patch.custom1() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_1, patch.custom1());
+    }
+    if (patch.custom2() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_2, patch.custom2());
+    }
+    if (patch.custom3() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_3, patch.custom3());
+    }
+    if (patch.custom4() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_4, patch.custom4());
+    }
+    if (patch.custom5() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_5, patch.custom5());
+    }
+    if (patch.custom6() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_6, patch.custom6());
+    }
+    if (patch.custom7() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_7, patch.custom7());
+    }
+    if (patch.custom8() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_8, patch.custom8());
+    }
+    if (patch.custom9() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_9, patch.custom9());
+    }
+    if (patch.custom10() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_10, patch.custom10());
+    }
+    if (patch.custom11() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_11, patch.custom11());
+    }
+    if (patch.custom12() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_12, patch.custom12());
+    }
+    if (patch.custom13() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_13, patch.custom13());
+    }
+    if (patch.custom14() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_14, patch.custom14());
+    }
+    if (patch.custom15() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_15, patch.custom15());
+    }
+    if (patch.custom16() != null) {
+      task.setCustomField(TaskCustomField.CUSTOM_16, patch.custom16());
+    }
+
+    // Custom int fields
+    if (patch.customInt1() != null) {
+      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_1, patch.customInt1());
+    }
+    if (patch.customInt2() != null) {
+      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_2, patch.customInt2());
+    }
+    if (patch.customInt3() != null) {
+      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_3, patch.customInt3());
+    }
+    if (patch.customInt4() != null) {
+      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_4, patch.customInt4());
+    }
+    if (patch.customInt5() != null) {
+      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_5, patch.customInt5());
+    }
+    if (patch.customInt6() != null) {
+      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_6, patch.customInt6());
+    }
+    if (patch.customInt7() != null) {
+      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_7, patch.customInt7());
+    }
+    if (patch.customInt8() != null) {
+      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_8, patch.customInt8());
+    }
+
+    if (patch.customAttributes() != null) {
+      task.setCustomAttributeMap(patch.customAttributes());
+    }
+    if (patch.callbackInfo() != null) {
+      task.setCallbackInfo(patch.callbackInfo());
+    }
+
+    return task;
+  }
+
   Pair<List<MinimalTaskSummary>, BulkLog> filterTasksAuthorizedForAndLogErrorsForNotAuthorized(
       List<MinimalTaskSummary> existingTasks) {
     BulkLog bulkLog = new BulkLog();
@@ -1305,7 +1465,7 @@ public class TaskServiceImpl implements TaskService {
       List<String> accessIds = kadaiEngine.getEngine().getCurrentUserContext().getAccessIds();
       List<Pair<String, String>> taskAndWorkbasketIdsNotAuthorizedFor =
           taskMapper.getTaskAndWorkbasketIdsNotAuthorizedFor(existingTasks, accessIds);
-      String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+      String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
 
       for (Pair<String, String> taskAndWorkbasketIds : taskAndWorkbasketIdsNotAuthorizedFor) {
         bulkLog.addError(
@@ -1533,7 +1693,8 @@ public class TaskServiceImpl implements TaskService {
           new TaskCreatedEvent(
               IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
               createdTask,
-              kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+              kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+              kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
               details));
     }
   }
@@ -1613,7 +1774,7 @@ public class TaskServiceImpl implements TaskService {
             filteredSummaries.filter(
                 addErrorToBulkLog(this::checkPreconditionsForCompleteTask, bulkLog));
       } else {
-        String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+        String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
         String userLongName;
         if (kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo()) {
           User user = userMapper.findById(userId);
@@ -1695,7 +1856,7 @@ public class TaskServiceImpl implements TaskService {
 
       checkPreconditionsForClaimTask(task, forceClaim);
 
-      String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+      String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
       String userLongName = null;
       if (kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo()) {
         User user = userMapper.findById(userId);
@@ -1719,6 +1880,7 @@ public class TaskServiceImpl implements TaskService {
                   IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                   task,
                   userId,
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                   changeDetails));
         } else {
           historyEventManager.createEvent(
@@ -1726,6 +1888,7 @@ public class TaskServiceImpl implements TaskService {
                   IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                   task,
                   userId,
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                   changeDetails));
         }
       }
@@ -1740,7 +1903,7 @@ public class TaskServiceImpl implements TaskService {
           InvalidTaskStateException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException {
-    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
     TaskImpl task;
     try {
       kadaiEngine.openConnection();
@@ -1775,6 +1938,7 @@ public class TaskServiceImpl implements TaskService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                 task,
                 userId,
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 changeDetails));
       }
 
@@ -1790,7 +1954,7 @@ public class TaskServiceImpl implements TaskService {
           TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException {
-    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
     TaskImpl task;
     try {
       kadaiEngine.openConnection();
@@ -1827,6 +1991,7 @@ public class TaskServiceImpl implements TaskService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                 task,
                 userId,
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 changeDetails));
       }
       task = (TaskImpl) afterRequestChangesManager.afterRequestChanges(task, workbasketId, ownerId);
@@ -1844,13 +2009,13 @@ public class TaskServiceImpl implements TaskService {
           task.getId(), task.getState(), EnumUtil.allValuesExceptFor(END_STATES));
     }
 
-    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
     if (!forced && state.isClaimedState() && !task.getOwner().equals(userId)) {
       throw new InvalidOwnerException(userId, task.getId());
     }
     if (!checkEditTasksPerm(task)) {
       throw new NotAuthorizedOnWorkbasketException(
-          kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+          kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
           task.getWorkbasketSummary().getId(),
           WorkbasketPermission.EDITTASKS);
     }
@@ -1867,11 +2032,11 @@ public class TaskServiceImpl implements TaskService {
             .contains(task.getOwner())
         && !kadaiEngine.getEngine().isUserInRole(KadaiRole.ADMIN)) {
       throw new InvalidOwnerException(
-          kadaiEngine.getEngine().getCurrentUserContext().getUserid(), task.getId());
+          kadaiEngine.getEngine().getCurrentUserContext().getUserId(), task.getId());
     }
     if (!checkEditTasksPerm(task)) {
       throw new NotAuthorizedOnWorkbasketException(
-          kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+          kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
           task.getWorkbasketSummary().getId(),
           WorkbasketPermission.EDITTASKS);
     }
@@ -1882,7 +2047,7 @@ public class TaskServiceImpl implements TaskService {
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException {
-    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
     TaskImpl task;
     try {
       kadaiEngine.openConnection();
@@ -1892,7 +2057,7 @@ public class TaskServiceImpl implements TaskService {
       TaskState state = task.getState();
       if (!checkEditTasksPerm(task)) {
         throw new NotAuthorizedOnWorkbasketException(
-            kadaiEngine.getEngine().getCurrentUserContext().getUserid(),
+            kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
             task.getWorkbasketSummary().getId(),
             WorkbasketPermission.EDITTASKS);
       }
@@ -1917,6 +2082,7 @@ public class TaskServiceImpl implements TaskService {
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                 task,
                 userId,
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 changeDetails));
       }
     } finally {
@@ -1930,7 +2096,7 @@ public class TaskServiceImpl implements TaskService {
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException {
-    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
     TaskImpl task;
     try {
       kadaiEngine.openConnection();
@@ -1963,7 +2129,8 @@ public class TaskServiceImpl implements TaskService {
             new TaskCompletedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                 task,
-                userId));
+                userId,
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId()));
       }
     } finally {
       kadaiEngine.returnConnection();
@@ -2023,7 +2190,7 @@ public class TaskServiceImpl implements TaskService {
       List<MinimalTaskSummary> taskSummaries,
       Iterator<String> taskIdIterator) {
     String currentTaskId = taskIdIterator.next();
-    if (currentTaskId == null || currentTaskId.equals("")) {
+    if (currentTaskId == null || currentTaskId.isEmpty()) {
       bulkLog.addError("", new TaskNotFoundException(null));
       taskIdIterator.remove();
     } else {
@@ -2061,7 +2228,7 @@ public class TaskServiceImpl implements TaskService {
       Iterator<String> externalIdIterator,
       CallbackState desiredCallbackState) {
     String currentExternalId = externalIdIterator.next();
-    if (currentExternalId == null || currentExternalId.equals("")) {
+    if (currentExternalId == null || currentExternalId.isEmpty()) {
       bulkLog.addError("", new TaskNotFoundException(null));
       externalIdIterator.remove();
     } else {
@@ -2149,7 +2316,7 @@ public class TaskServiceImpl implements TaskService {
     taskToCreate.setTransferred(false);
     taskToCreate.setReopened(false);
 
-    String creator = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+    String creator = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
     if (kadaiEngine.getEngine().getConfiguration().isSecurityEnabled() && creator == null) {
       throw new SystemException(
           "KadaiSecurity is enabled, but the current UserId is NULL while creating a Task.");
@@ -2229,7 +2396,7 @@ public class TaskServiceImpl implements TaskService {
             .map(
                 summary -> {
                   completeActionsOnTask(
-                      summary, kadaiEngine.getEngine().getCurrentUserContext().getUserid(), now);
+                      summary, kadaiEngine.getEngine().getCurrentUserContext().getUserId(), now);
                   return (TaskSummary) summary;
                 })
             .toList();
@@ -2568,7 +2735,8 @@ public class TaskServiceImpl implements TaskService {
                 new TaskCompletedEvent(
                     IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
                     task,
-                    kadaiEngine.getEngine().getCurrentUserContext().getUserid())));
+                    kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                    kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId())));
   }
 
   private void createTaskDeletedEvent(String taskId) {
@@ -2577,7 +2745,8 @@ public class TaskServiceImpl implements TaskService {
             IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
             newTask().asSummary(),
             taskId,
-            kadaiEngine.getEngine().getCurrentUserContext().getUserid()));
+            kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+            kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId()));
   }
 
   private TaskImpl duplicateTaskExactly(TaskImpl task) {
@@ -2595,161 +2764,5 @@ public class TaskServiceImpl implements TaskService {
     WorkbasketSummary workbasket =
         query.idIn(workbasketId).callerHasPermissions(WorkbasketPermission.EDITTASKS).single();
     return workbasket != null;
-  }
-
-  @Override
-  public BulkOperationResults<String, KadaiException> bulkUpdateTasks(
-      List<String> taskIds, TaskPatch taskPatch) {
-    BulkOperationResults<String, KadaiException> bulkLog = new BulkOperationResults<>();
-
-    for (String taskId : taskIds) {
-      try {
-        TaskImpl oldTaskImpl = (TaskImpl) getTask(taskId);
-        TaskImpl newTaskImpl = applyTaskPatch(taskPatch, duplicateTaskExactly(oldTaskImpl));
-        updateTask(newTaskImpl);
-      } catch (KadaiException e) {
-        bulkLog.addError(taskId, e);
-      }
-    }
-
-    return bulkLog;
-  }
-
-  public static TaskImpl applyTaskPatch(TaskPatch patch, TaskImpl task) {
-    if (patch == null || task == null) {
-      return task;
-    }
-
-    if (patch.received() != null) {
-      task.setReceived(patch.received());
-    }
-    if (patch.planned() != null) {
-      task.setPlanned(patch.planned());
-    }
-    if (patch.due() != null) {
-      task.setDue(patch.due());
-    }
-
-    if (patch.name() != null) {
-      task.setName(patch.name());
-    }
-    if (patch.note() != null) {
-      task.setNote(patch.note());
-    }
-    if (patch.description() != null) {
-      task.setDescription(patch.description());
-    }
-    if (patch.classificationSummary() != null) {
-      task.setClassificationSummary(patch.classificationSummary());
-    }
-    if (patch.workbasketSummary() != null) {
-      task.setWorkbasketSummary(patch.workbasketSummary());
-    }
-    if (patch.businessProcessId() != null) {
-      task.setBusinessProcessId(patch.businessProcessId());
-    }
-    if (patch.parentBusinessProcessId() != null) {
-      task.setParentBusinessProcessId(patch.parentBusinessProcessId());
-    }
-    if (patch.primaryObjRef() != null) {
-      task.setPrimaryObjRef(patch.primaryObjRef());
-    }
-    if (patch.manualPriority() != null) {
-      task.setManualPriority(patch.manualPriority());
-    }
-    if (patch.isRead() != null) {
-      task.setRead(patch.isRead());
-    }
-    if (patch.secondaryObjectReferences() != null) {
-      task.setSecondaryObjectReferences(
-          patch.secondaryObjectReferences().stream()
-              .map(ObjectReference::copy)
-              .collect(Collectors.toList()));
-    }
-
-    // Custom string fields
-    if (patch.custom1() != null) {
-      task.setCustomField(TaskCustomField.CUSTOM_1, patch.custom1());
-    }
-    if (patch.custom2() != null) {
-      task.setCustomField(TaskCustomField.CUSTOM_2, patch.custom2());
-    }
-    if (patch.custom3() != null) {
-      task.setCustomField(TaskCustomField.CUSTOM_3, patch.custom3());
-    }
-    if (patch.custom4() != null) {
-      task.setCustomField(TaskCustomField.CUSTOM_4, patch.custom4());
-    }
-    if (patch.custom5() != null) {
-      task.setCustomField(TaskCustomField.CUSTOM_5, patch.custom5());
-    }
-    if (patch.custom6() != null) {
-      task.setCustomField(TaskCustomField.CUSTOM_6, patch.custom6());
-    }
-    if (patch.custom7() != null) {
-      task.setCustomField(TaskCustomField.CUSTOM_7, patch.custom7());
-    }
-    if (patch.custom8() != null) {
-      task.setCustomField(TaskCustomField.CUSTOM_8, patch.custom8());
-    }
-    if (patch.custom9() != null) {
-      task.setCustomField(TaskCustomField.CUSTOM_9, patch.custom9());
-    }
-    if (patch.custom10() != null) {
-      task.setCustomField(TaskCustomField.CUSTOM_10, patch.custom10());
-    }
-    if (patch.custom11() != null) {
-      task.setCustomField(TaskCustomField.CUSTOM_11, patch.custom11());
-    }
-    if (patch.custom12() != null) {
-      task.setCustomField(TaskCustomField.CUSTOM_12, patch.custom12());
-    }
-    if (patch.custom13() != null) {
-      task.setCustomField(TaskCustomField.CUSTOM_13, patch.custom13());
-    }
-    if (patch.custom14() != null) {
-      task.setCustomField(TaskCustomField.CUSTOM_14, patch.custom14());
-    }
-    if (patch.custom15() != null) {
-      task.setCustomField(TaskCustomField.CUSTOM_15, patch.custom15());
-    }
-    if (patch.custom16() != null) {
-      task.setCustomField(TaskCustomField.CUSTOM_16, patch.custom16());
-    }
-
-    // Custom int fields
-    if (patch.customInt1() != null) {
-      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_1, patch.customInt1());
-    }
-    if (patch.customInt2() != null) {
-      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_2, patch.customInt2());
-    }
-    if (patch.customInt3() != null) {
-      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_3, patch.customInt3());
-    }
-    if (patch.customInt4() != null) {
-      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_4, patch.customInt4());
-    }
-    if (patch.customInt5() != null) {
-      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_5, patch.customInt5());
-    }
-    if (patch.customInt6() != null) {
-      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_6, patch.customInt6());
-    }
-    if (patch.customInt7() != null) {
-      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_7, patch.customInt7());
-    }
-    if (patch.customInt8() != null) {
-      task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_8, patch.customInt8());
-    }
-
-    if (patch.customAttributes() != null) {
-      task.setCustomAttributeMap(patch.customAttributes());
-    }
-    if (patch.callbackInfo() != null) {
-      task.setCallbackInfo(patch.callbackInfo());
-    }
-
-    return task;
   }
 }

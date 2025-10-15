@@ -182,6 +182,10 @@ class QueryClassificationHistoryAccTest extends AbstractAccTest {
     assertThat(returnValues).hasSize(7);
 
     returnValues =
+        historyService.createClassificationHistoryQuery().proxyAccessIdIn("businessadmin").list();
+    assertThat(returnValues).hasSize(1);
+
+    returnValues =
         historyService
             .createClassificationHistoryQuery()
             .classificationIdIn("CLI:000000000000000000000000000000000002")
@@ -291,6 +295,10 @@ class QueryClassificationHistoryAccTest extends AbstractAccTest {
 
     returnValues = historyService.createClassificationHistoryQuery().userIdLike("p%", "c%").list();
     assertThat(returnValues).hasSize(8);
+
+    returnValues =
+        historyService.createClassificationHistoryQuery().proxyAccessIdLike("%admin").list();
+    assertThat(returnValues).hasSize(2);
 
     returnValues =
         historyService.createClassificationHistoryQuery().classificationIdLike("%0004").list();
@@ -409,6 +417,12 @@ class QueryClassificationHistoryAccTest extends AbstractAccTest {
             .createClassificationHistoryQuery()
             .listValues(ClassificationHistoryQueryColumnName.USER_ID, null);
     assertThat(returnedList).hasSize(4);
+
+    returnedList =
+        historyService
+            .createClassificationHistoryQuery()
+            .listValues(ClassificationHistoryQueryColumnName.PROXY_ACCESS_ID, null);
+    assertThat(returnedList).hasSize(3);
 
     returnedList =
         historyService

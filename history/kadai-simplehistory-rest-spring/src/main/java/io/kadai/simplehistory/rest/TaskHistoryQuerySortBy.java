@@ -32,6 +32,7 @@ public enum TaskHistoryQuerySortBy implements QuerySortBy<TaskHistoryQuery> {
   EVENT_TYPE(TaskHistoryQuery::orderByEventType),
   CREATED(TaskHistoryQuery::orderByCreated),
   USER_ID(TaskHistoryQuery::orderByUserId),
+  PROXY_ACCESS_ID(TaskHistoryQuery::orderByProxyAccessId),
   DOMAIN(TaskHistoryQuery::orderByDomain),
   WORKBASKET_KEY(TaskHistoryQuery::orderByWorkbasketKey),
   POR_COMPANY(TaskHistoryQuery::orderByPorCompany),

@@ -21,12 +21,12 @@ package io.kadai.workbasket.rest;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.api.exceptions.LogicalDuplicateInPayloadException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.QueryPagingParameter;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.workbasket.api.WorkbasketQuery;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
-import io.kadai.workbasket.api.exceptions.WorkbasketAccessItemAlreadyExistException;
 import io.kadai.workbasket.api.exceptions.WorkbasketAlreadyExistException;
 import io.kadai.workbasket.api.exceptions.WorkbasketInUseException;
 import io.kadai.workbasket.api.exceptions.WorkbasketNotFoundException;
@@ -482,8 +482,8 @@ public interface WorkbasketApi {
    *     ADMIN
    * @throws InvalidArgumentException if the new Workbasket Access Items are not provided.
    * @throws WorkbasketNotFoundException TODO: this is never thrown.
-   * @throws WorkbasketAccessItemAlreadyExistException if a duplicate Workbasket Access Item exists
-   *     in the provided list.
+   * @throws LogicalDuplicateInPayloadException if a duplicate Workbasket Access Item exists in the
+   *     provided list.
    * @throws NotAuthorizedOnWorkbasketException if the current user has not correct permissions
    */
   @Operation(
@@ -551,23 +551,21 @@ public interface WorkbasketApi {
             }),
         @ApiResponse(
             responseCode = "400",
-            description = "INVALID_ARGUMENT",
+            description = "INVALID_ARGUMENT, LOGICAL_DUPLICATE_IN_PAYLOAD",
             content = {
-              @Content(schema = @Schema(implementation = InvalidArgumentException.class))
+              @Content(
+                  schema =
+                      @Schema(
+                          anyOf = {
+                            InvalidArgumentException.class,
+                            LogicalDuplicateInPayloadException.class
+                          }))
             }),
         @ApiResponse(
             responseCode = "404",
             description = "WORKBASKET_WITH_ID_NOT_FOUND, WORKBASKET_WITH_KEY_NOT_FOUND",
             content = {
               @Content(schema = @Schema(implementation = WorkbasketNotFoundException.class))
-            }),
-        @ApiResponse(
-            responseCode = "409",
-            description = "WORKBASKET_ACCESS_ITEM_ALREADY_EXISTS",
-            content = {
-              @Content(
-                  schema =
-                      @Schema(implementation = WorkbasketAccessItemAlreadyExistException.class))
             }),
         @ApiResponse(
             responseCode = "403",
@@ -591,7 +589,7 @@ public interface WorkbasketApi {
       @RequestBody WorkbasketAccessItemCollectionRepresentationModel workbasketAccessItemRepModels)
       throws InvalidArgumentException,
           WorkbasketNotFoundException,
-          WorkbasketAccessItemAlreadyExistException,
+          LogicalDuplicateInPayloadException,
           NotAuthorizedException,
           NotAuthorizedOnWorkbasketException;
 

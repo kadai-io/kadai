@@ -18,13 +18,13 @@
 
 package io.kadai.classification.rest;
 
-import io.kadai.classification.api.exceptions.ClassificationAlreadyExistException;
 import io.kadai.classification.api.exceptions.ClassificationNotFoundException;
 import io.kadai.classification.api.exceptions.MalformedServiceLevelException;
 import io.kadai.classification.rest.assembler.ClassificationDefinitionCollectionRepresentationModel;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.api.exceptions.LogicalDuplicateInPayloadException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.RestEndpoints;
 import io.swagger.v3.oas.annotations.Operation;
@@ -84,14 +84,17 @@ public interface ClassificationDefinitionApi {
             content = {@Content(schema = @Schema())}),
         @ApiResponse(
             responseCode = "400",
-            description = "INVALID_ARGUMENT, CLASSIFICATION_SERVICE_LEVEL_MALFORMED",
+            description =
+                "INVALID_ARGUMENT, CLASSIFICATION_SERVICE_LEVEL_MALFORMED,"
+                    + " LOGICAL_DUPLICATE_IN_PAYLOAD",
             content = {
               @Content(
                   schema =
                       @Schema(
                           anyOf = {
                             InvalidArgumentException.class,
-                            MalformedServiceLevelException.class
+                            MalformedServiceLevelException.class,
+                            LogicalDuplicateInPayloadException.class
                           }))
             }),
         @ApiResponse(
@@ -114,14 +117,13 @@ public interface ClassificationDefinitionApi {
             }),
         @ApiResponse(
             responseCode = "409",
-            description = "ENTITY_NOT_UP_TO_DATE, CLASSIFICATION_ALREADY_EXISTS",
+            description = "ENTITY_NOT_UP_TO_DATE",
             content = {
               @Content(
                   schema =
                       @Schema(
                           anyOf = {
                             ConcurrencyException.class,
-                            ClassificationAlreadyExistException.class
                           }))
             }),
       })
@@ -133,7 +135,7 @@ public interface ClassificationDefinitionApi {
       throws InvalidArgumentException,
           ConcurrencyException,
           ClassificationNotFoundException,
-          ClassificationAlreadyExistException,
+          LogicalDuplicateInPayloadException,
           DomainNotFoundException,
           IOException,
           MalformedServiceLevelException,

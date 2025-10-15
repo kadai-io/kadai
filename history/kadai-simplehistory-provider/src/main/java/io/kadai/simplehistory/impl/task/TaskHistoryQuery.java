@@ -84,6 +84,14 @@ public interface TaskHistoryQuery extends BaseQuery<TaskHistoryEvent, TaskHistor
   TaskHistoryQuery userIdIn(String... userIds);
 
   /**
+   * Add your proxyAccessIds to your query.
+   *
+   * @param accessIds as String
+   * @return the query
+   */
+  TaskHistoryQuery proxyAccessIdIn(String... accessIds);
+
+  /**
    * Add your domain to your query.
    *
    * @param domains as String
@@ -223,6 +231,15 @@ public interface TaskHistoryQuery extends BaseQuery<TaskHistoryEvent, TaskHistor
    * @return the query
    */
   TaskHistoryQuery userIdLike(String... userIds);
+
+  /**
+   * Add your proxyAccessIds to your query. It will be compared in SQL with an LIKE. If you use a
+   * wildcard like % then it will be transmitted to the database.
+   *
+   * @param accessIds as String
+   * @return the query
+   */
+  TaskHistoryQuery proxyAccessIdLike(String... accessIds);
 
   /**
    * Add your domain to your query. It will be compared in SQL with an LIKE. If you use a wildcard
@@ -415,6 +432,15 @@ public interface TaskHistoryQuery extends BaseQuery<TaskHistoryEvent, TaskHistor
    * @return the query
    */
   TaskHistoryQuery orderByUserId(SortDirection sortDirection);
+
+  /**
+   * Sort the query result by proxyAccessId.
+   *
+   * @param sortDirection Determines whether the result is sorted in ascending or descending order.
+   *     If sortDirection is null, the result is sorted in ascending order
+   * @return the query
+   */
+  TaskHistoryQuery orderByProxyAccessId(SortDirection sortDirection);
 
   /**
    * Sort the query result by Domain.

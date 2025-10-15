@@ -59,6 +59,12 @@ public class TaskHistoryEventRepresentationModel
   @Schema(name = "userId", description = "The Id of the user.")
   private String userId;
 
+  /** The proxy-access-id. */
+  @Schema(
+      name = "proxyAccessId",
+      description = "The Access-Id of the proxy used for the action behind this event.")
+  private String proxyAccessId;
+
   /** The long name of the user. */
   @Schema(name = "userLongName", description = "The long name of the user.")
   private String userLongName;
@@ -204,6 +210,14 @@ public class TaskHistoryEventRepresentationModel
 
   public void setUserId(String userId) {
     this.userId = userId;
+  }
+
+  public String getProxyAccessId() {
+    return proxyAccessId;
+  }
+
+  public void setProxyAccessId(String proxyAccessId) {
+    this.proxyAccessId = proxyAccessId;
   }
 
   public String getUserLongName() {
@@ -374,6 +388,8 @@ public class TaskHistoryEventRepresentationModel
         + created
         + ", userId="
         + userId
+        + ", proxyAccessId="
+        + proxyAccessId
         + ", userLongName="
         + userLongName
         + ", domain="

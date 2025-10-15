@@ -21,61 +21,70 @@ package acceptance.events.task;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import acceptance.AbstractAccTest;
-import io.kadai.common.test.security.JaasExtension;
-import io.kadai.common.test.security.WithAccessId;
+import io.kadai.common.internal.util.CheckedRunnable;
 import io.kadai.simplehistory.impl.SimpleHistoryServiceImpl;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
 import io.kadai.task.api.TaskService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(JaasExtension.class)
 class CreateHistoryEventOnTaskTerminationAccTest extends AbstractAccTest {
 
   private final TaskService taskService = kadaiEngine.getTaskService();
   private final SimpleHistoryServiceImpl historyService = getHistoryService();
 
   @Test
-  @WithAccessId(user = "admin")
   void should_CreateTerminatedHistoryEvent_When_TerminatingTaskInStateClaimed() throws Exception {
+    kadaiEngine.runAsAdmin(
+        CheckedRunnable.rethrowing(
+            () -> {
+              final String taskId = "TKI:000000000000000000000000000000000001";
 
-    final String taskId = "TKI:000000000000000000000000000000000001";
+              List<TaskHistoryEvent> events =
+                  historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
-    List<TaskHistoryEvent> events = historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
+              assertThat(events).isEmpty();
 
-    assertThat(events).isEmpty();
+              taskService.terminateTask(taskId);
 
-    taskService.terminateTask(taskId);
+              events = historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
-    events = historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
+              assertThat(events).hasSize(1);
 
-    assertThat(events).hasSize(1);
+              String eventType = events.get(0).getEventType();
 
-    String eventType = events.get(0).getEventType();
-
-    assertThat(eventType).isEqualTo(TaskHistoryEventType.TERMINATED.getName());
+              assertThat(eventType).isEqualTo(TaskHistoryEventType.TERMINATED.getName());
+              assertThat(events.get(0).getUserId()).isEqualTo("user-1-3");
+              assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
+            }),
+        "user-1-3");
   }
 
   @Test
-  @WithAccessId(user = "admin")
   void should_CreateTerminatedHistoryEvent_When_TerminatingTaskInStateReady() throws Exception {
+    kadaiEngine.runAsAdmin(
+        CheckedRunnable.rethrowing(
+            () -> {
+              final String taskId = "TKI:000000000000000000000000000000000003";
 
-    final String taskId = "TKI:000000000000000000000000000000000003";
+              List<TaskHistoryEvent> events =
+                  historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
-    List<TaskHistoryEvent> events = historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
+              assertThat(events).isEmpty();
 
-    assertThat(events).isEmpty();
+              taskService.terminateTask(taskId);
 
-    taskService.terminateTask(taskId);
+              events = historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
-    events = historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
+              assertThat(events).hasSize(1);
 
-    assertThat(events).hasSize(1);
+              String eventType = events.get(0).getEventType();
 
-    String eventType = events.get(0).getEventType();
-
-    assertThat(eventType).isEqualTo(TaskHistoryEventType.TERMINATED.getName());
+              assertThat(eventType).isEqualTo(TaskHistoryEventType.TERMINATED.getName());
+              assertThat(events.get(0).getUserId()).isEqualTo("teamlead-1");
+              assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
+            }),
+        "teamlead-1");
   }
 }

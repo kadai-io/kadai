@@ -30,6 +30,7 @@ import io.kadai.common.api.exceptions.ConnectionNotSetException;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.ErrorCode;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.api.exceptions.LogicalDuplicateInPayloadException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.api.exceptions.UnsupportedDatabaseException;
@@ -137,6 +138,12 @@ public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(InvalidTaskStateException.class)
   public ResponseEntity<Object> handleInvalidTaskStateException(
       InvalidTaskStateException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(LogicalDuplicateInPayloadException.class)
+  public ResponseEntity<Object> handleLogicalDuplicateInPayloadException(
+      LogicalDuplicateInPayloadException ex, WebRequest req) {
     return handle(ex.getErrorCode(), ex, req, HttpStatus.BAD_REQUEST);
   }
 

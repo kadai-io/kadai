@@ -63,7 +63,8 @@ class TerminateTaskAccTest {
   @KadaiInject TaskService taskService;
   @KadaiInject ClassificationService classificationService;
   @KadaiInject WorkbasketService workbasketService;
-  @KadaiInject CurrentUserContext currentUserContext;
+  @KadaiInject
+  CurrentUserContext currentUserContext;
 
   ClassificationSummary defaultClassificationSummary;
   WorkbasketSummary defaultWorkbasketSummary;
@@ -132,7 +133,7 @@ class TerminateTaskAccTest {
     ThrowingCallable call = () -> taskService.terminateTask(task.getId());
 
     NotAuthorizedException e = catchThrowableOfType(NotAuthorizedException.class, call);
-    assertThat(e.getCurrentUserId()).isEqualTo(currentUserContext.getUserid());
+    assertThat(e.getCurrentUserId()).isEqualTo(currentUserContext.getUserId());
     assertThat(e.getRoles()).containsExactlyInAnyOrder(KadaiRole.ADMIN, KadaiRole.TASK_ADMIN);
   }
 
