@@ -28,7 +28,7 @@
     </h4>
     <span class="workbasket-details__spacer"></span>
 
-    <!-- SAVE -->
+    <!-- ACCESS ITEM VALIDATION -->
     @if (!areAllAccessItemsValid) {
       <div class="workbasket-details__access-item-warning">
         <mat-icon color="warn" class="workbasket-details__access-item-warning-icon">
@@ -39,8 +39,12 @@
         </div>
       </div>
     }
-    <button (click)="onSubmit()" class="workbasket-details__button workbasket-details__save-button"
-            mat-button matTooltip="Save changes in current workbasket">
+    <!-- SAVE -->
+    <button (click)="onSubmit()"
+            class="workbasket-details__button workbasket-details__save-button"
+            mat-button
+            matTooltip="Save changes in current workbasket"
+            [disabled]="action === ACTION.CREATE && !areAllAccessItemsValid">
       Save
       <mat-icon class="md-20">save</mat-icon>
     </button>

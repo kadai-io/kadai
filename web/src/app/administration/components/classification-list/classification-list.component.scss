@@ -16,7 +16,7 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 .classification-list {
   height: 100%;
@@ -43,7 +43,7 @@
   }
 
   &__add-button {
-    background-color: $aquamarine;
+    background-color: colors.$aquamarine;
     color: white;
   }
 

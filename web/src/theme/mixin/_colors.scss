@@ -16,15 +16,17 @@
  *
  */
 
+@use '../colors';
+
 @mixin colors {
   &-red {
-    background-color: $invalid;
+    background-color: colors.$invalid;
   }
   &-green {
-    background-color: $pallete-green;
+    background-color: colors.$palette-green;
   }
   &-orange {
-    background-color: $brown;
+    background-color: colors.$brown;
   }
 }
 

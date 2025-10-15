@@ -28,7 +28,7 @@ import {
   SimpleChanges,
   ViewChild
 } from '@angular/core';
-import { isEqual } from 'lodash';
+import { isEqual } from 'lodash-es';
 import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
 import { expandDown } from 'app/shared/animations/expand.animation';
 import { MatListOption, MatSelectionList } from '@angular/material/list';

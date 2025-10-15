@@ -16,7 +16,7 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 .task-list {
   &__task {
@@ -36,11 +36,11 @@
     text-align: center;
     margin-right: 16px;
     color: white;
-    background-color: $green;
+    background-color: colors.$green;
   }
 
   &__task-priority-badge_selected {
-    color: $green;
+    color: colors.$green;
     background-color: white;
   }
 }
@@ -58,7 +58,7 @@ p {
 }
 
 .mdc-list-item--selected {
-  background-color: $green !important;
+  background-color: colors.$green !important;
 }
 
 .mdc-list-item--selected * .task-list__task-info {

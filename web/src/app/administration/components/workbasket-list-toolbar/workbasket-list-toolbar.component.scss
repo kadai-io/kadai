@@ -16,7 +16,7 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 .workbasket-list-toolbar {
   padding: 16px 16px 20px;
@@ -41,7 +41,7 @@
   }
 
   &__add-button {
-    background-color: $aquamarine;
+    background-color: colors.$aquamarine;
     color: white;
     height: 36px;
   }

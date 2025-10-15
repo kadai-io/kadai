@@ -43,6 +43,7 @@ import io.kadai.task.api.exceptions.InvalidOwnerException;
 import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.NotAuthorizedOnTaskCommentException;
 import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
+import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
@@ -168,6 +169,12 @@ public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
   public ResponseEntity<Object> handleNotAuthorizedOnWorkbasketException(
       NotAuthorizedToQueryWorkbasketException ex, WebRequest req) {
     return handle(ex.getErrorCode(), ex, req, HttpStatus.FORBIDDEN);
+  }
+
+  @ExceptionHandler(ServiceLevelViolationException.class)
+  public ResponseEntity<Object> handleServiceLevelViolationException(
+      ServiceLevelViolationException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.UNPROCESSABLE_ENTITY);
   }
 
   @ExceptionHandler(ClassificationNotFoundException.class)

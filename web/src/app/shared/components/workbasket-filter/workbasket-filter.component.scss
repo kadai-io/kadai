@@ -16,7 +16,7 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 .filter {
   &__collapsed-filter {
@@ -44,7 +44,7 @@
   }
 
   &__search-button {
-    background: $aquamarine;
+    background: colors.$aquamarine;
     color: white;
     margin-left: 4px;
   }
