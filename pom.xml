@@ -69,7 +69,7 @@
         <version.spring.mybatis>3.0.5</version.spring.mybatis>
 
         <!-- camunda dependencies -->
-        <version.camunda.dmn>7.23.0</version.camunda.dmn>
+        <version.camunda.dmn>7.24.0</version.camunda.dmn>
 
         <!-- test dependencies -->
         <version.archunit>1.4.1</version.archunit>
