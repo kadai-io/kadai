@@ -80,14 +80,27 @@ export class MonitorService {
 
   getTasksByPriorityReport(type: string[], priority: any[], customFilters: {} = {}): Observable<ReportData> {
     const queryParams = {
-      'workbasket-type': type,
-      state: 'READY',
-      columnHeader: priority,
+      'workbasket-types': type,
+      states: ['READY'],
+      'column-headers': priority,
       ...customFilters
     };
 
     return this.httpClient.get<ReportData>(
       `${environment.kadaiRestUrl + monitorUrl}/workbasket-priority-report${asUrlQueryString(queryParams)}`
+    );
+  }
+
+  getDetailedTasksByPriorityReport(type: string[], priority: any[], customFilters: {} = {}): Observable<ReportData> {
+    const queryParams = {
+      'workbasket-types': type,
+      states: ['READY'],
+      'column-headers': priority,
+      ...customFilters
+    };
+
+    return this.httpClient.get<ReportData>(
+      `${environment.kadaiRestUrl + monitorUrl}/detailed-workbasket-priority-report${asUrlQueryString(queryParams)}`
     );
   }
 }
