@@ -315,7 +315,7 @@ jobs:
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
         with:
           task: display-results
-          pr-comment: true
+          pr-comment: false
           display-badge: true
         continue-on-error: true
       - name: Upload Cypress tests
