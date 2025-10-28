@@ -159,17 +159,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ali-hm/angular-tree-component@npm:20.3.3":
-  version: 20.3.3
-  resolution: "@ali-hm/angular-tree-component@npm:20.3.3"
+"@ali-hm/angular-tree-component@npm:20.3.4":
+  version: 20.3.4
+  resolution: "@ali-hm/angular-tree-component@npm:20.3.4"
   dependencies:
-    mobx: "npm:~4.14.1"
     tslib: "npm:^2.5.0"
   peerDependencies:
     "@angular/common": ">=20.0"
     "@angular/core": ">=20.0"
-    mobx: ~4.14.1
-  checksum: 10c0/cee6c0d6e904a896236d2795c0bd7be884c4a4dfe93cfeef96c6f85d039fa293d2765bbb07d8191cc7a953f44f240b4ef503b13a25dab74db573cf2f053e40ab
+  checksum: 10c0/ea8987cc6af4dcb348a980b50829a4059a7a0cf7f1d80d93164e4d1207ea01457d7cef0968b87addad40452f6e050dc1f12e2679bbd4edd933fabf30591fafbe
   languageName: node
   linkType: hard
 
@@ -8226,7 +8224,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "kadai@workspace:."
   dependencies:
-    "@ali-hm/angular-tree-component": "npm:20.3.3"
+    "@ali-hm/angular-tree-component": "npm:20.3.4"
     "@angular/animations": "npm:20.3.7"
     "@angular/build": "npm:20.3.7"
     "@angular/cdk": "npm:20.2.10"
@@ -8798,13 +8796,6 @@ __metadata:
   bin:
     mkdirp: dist/cjs/src/bin.js
   checksum: 10c0/9f2b975e9246351f5e3a40dcfac99fcd0baa31fbfab615fe059fb11e51f10e4803c63de1f384c54d656e4db31d000e4767e9ef076a22e12a641357602e31d57d
-  languageName: node
-  linkType: hard
-
-"mobx@npm:~4.14.1":
-  version: 4.14.1
-  resolution: "mobx@npm:4.14.1"
-  checksum: 10c0/a813ffe395e45c30084bf9142e5cf7c3afd93024027a89a2b7f4a37db029aad3582ac90181af44536b0c79d9fefcd92885fc9a8f2761a3d9f0f1129ff9fdbcb7
   languageName: node
   linkType: hard
 
