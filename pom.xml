@@ -45,7 +45,7 @@
 
         <!-- build dependencies -->
         <version.checkstyle>12.1.1</version.checkstyle>
-        <version.google-java-format>1.30.0</version.google-java-format>
+        <version.google-java-format>1.31.0</version.google-java-format>
         <version.maven.checkstyle>3.6.0</version.maven.checkstyle>
         <version.maven.jar>3.4.2</version.maven.jar>
         <version.maven.war>3.5.0</version.maven.war>
