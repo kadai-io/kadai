@@ -18,12 +18,16 @@
 
 package io.kadai.monitor.api.reports;
 
+import io.kadai.classification.api.models.Classification;
 import io.kadai.common.api.IntInterval;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.monitor.api.reports.header.ColumnHeader;
 import io.kadai.monitor.api.reports.header.PriorityColumnHeader;
+import io.kadai.monitor.api.reports.item.DetailedPriorityQueryItem;
 import io.kadai.monitor.api.reports.item.PriorityQueryItem;
+import io.kadai.monitor.api.reports.row.DetailedWorkbasketPriorityRow;
+import io.kadai.monitor.api.reports.row.FoldableRow;
 import io.kadai.monitor.api.reports.row.Row;
 import io.kadai.task.api.TaskCustomField;
 import io.kadai.task.api.TaskCustomIntField;
@@ -34,7 +38,7 @@ import io.kadai.workbasket.api.models.Workbasket;
 import java.util.List;
 
 /**
- * A WorkbasketReport aggregates {@linkplain Task} related data.
+ * A WorkbasketPriorityReport aggregates {@linkplain Task} related data.
  *
  * <p>Each {@linkplain Row} represents a {@linkplain Workbasket}.
  *
@@ -51,6 +55,8 @@ public class WorkbasketPriorityReport extends Report<PriorityQueryItem, Priority
 
     @Override
     WorkbasketPriorityReport buildReport() throws NotAuthorizedException;
+
+    DetailedWorkbasketPriorityReport buildDetailedReport() throws NotAuthorizedException;
 
     /**
      * Adds {@linkplain WorkbasketType WorkbasketTypes} to the builder. The created report will only
@@ -105,6 +111,15 @@ public class WorkbasketPriorityReport extends Report<PriorityQueryItem, Priority
      * @return the {@linkplain Builder}
      */
     Builder excludedClassificationIdIn(List<String> excludedClassificationIds);
+
+    /**
+     * Adds a list of classificationKeys to the builder. The created report contains only tasks with
+     * a classificationKey in this list.
+     *
+     * @param classificationKeys a list of classificationKeys
+     * @return the {@linkplain Builder}
+     */
+    Builder classificationKeyIn(List<String> classificationKeys);
 
     /**
      * Adds a list of domains to the builder. The created report contains only tasks with a domain
@@ -246,5 +261,32 @@ public class WorkbasketPriorityReport extends Report<PriorityQueryItem, Priority
      * @return the {@linkplain Builder}
      */
     Builder inWorkingDays();
+  }
+
+  /**
+   * A DetailedWorkbasketPriorityReport aggregates {@linkplain Task} related data.
+   *
+   * <p>Each {@linkplain FoldableRow} represents a {@linkplain Workbasket} and can be expanded to
+   * show the {@linkplain Task#getPriority() priority} of {@linkplain Task}s grouped by {@linkplain
+   * Classification}s.
+   *
+   * <p>Each {@linkplain ColumnHeader} represents a {@linkplain Task#getPriority() priority range}.
+   */
+  public static class DetailedWorkbasketPriorityReport
+      extends Report<DetailedPriorityQueryItem, PriorityColumnHeader> {
+
+    public DetailedWorkbasketPriorityReport(List<PriorityColumnHeader> priorityColumnHeaders) {
+      super(priorityColumnHeaders, new String[] {"WORKBASKET", "CLASSIFICATION"});
+    }
+
+    @Override
+    public DetailedWorkbasketPriorityRow getRow(String key) {
+      return (DetailedWorkbasketPriorityRow) super.getRow(key);
+    }
+
+    @Override
+    protected DetailedWorkbasketPriorityRow createRow(String key, int columnSize) {
+      return new DetailedWorkbasketPriorityRow(key, columnSize);
+    }
   }
 }
