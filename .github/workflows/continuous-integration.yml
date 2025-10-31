@@ -37,6 +37,13 @@ jobs:
     name: Compile all maven modules
     runs-on: ubuntu-22.04
     steps:
+      - name: Start Eco CI Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: start-measurement
+          project: "KADAI"
+          tags: "CI/CD, Build Backend"
+        continue-on-error: true
       - name: Git checkout
         uses: actions/checkout@v5
       - name: Set up JDK ${{ env.JAVA_VERSION }}
@@ -55,6 +62,19 @@ jobs:
         run: ci/change_version.sh -m .
       - name: Compile & build
         run: ./mvnw -B install -DskipTests -Djacoco.skip
+      - name: Eco CI Measurement of mvn install
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: "compile_backend: mvn install"
+        continue-on-error: true
+      - name: Show Eco CI Results
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: display-results
+          display-badge: true
+          pr-comment: false
+        continue-on-error: true
       - name: Populate cache
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
@@ -76,6 +96,13 @@ jobs:
     name: Compile kadai-web
     runs-on: ubuntu-22.04
     steps:
+      - name: Start Eco CI Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: start-measurement
+          project: "KADAI"
+          tags: "CI/CD, Build Frontend"
+        continue-on-error: true
       - name: Git checkout
         uses: actions/checkout@v5
       - name: Set up JDK ${{ env.JAVA_VERSION }}
@@ -114,8 +141,27 @@ jobs:
         run: |
           yarn lint
           yarn build:prod
+      - name: Eco CI Measurement of yarn build
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: "compile_frontend: yarn build"
+        continue-on-error: true
       - name: Build maven artifact
         run: ./mvnw -B install -pl :kadai-web -am
+      - name: Eco CI Measurement of mvn :kadai-web
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: "compile_frontend: mvn :kadai-web"
+        continue-on-error: true
+      - name: Show Eco CI Results
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: display-results
+          display-badge: true
+          pr-comment: false
+        continue-on-error: true
       - name: Upload kadai-web dist artifact
         uses: actions/upload-artifact@v5
         with:
@@ -133,6 +179,13 @@ jobs:
     name: Test kadai-web
     needs: [ compile_frontend ]
     steps:
+      - name: Start Eco CI Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: start-measurement
+          project: "KADAI"
+          tags: "CI/CD, Test Frontend"
+        continue-on-error: true
       - name: Git checkout
         uses: actions/checkout@v5
       - name: Enable Corepack
@@ -168,6 +221,19 @@ jobs:
       - name: Test
         working-directory: web
         run: yarn run test --coverageReporters text-summary
+      - name: Eco CI Measurement of web unit tests
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: "test_frontend: web unit tests"
+        continue-on-error: true
+      - name: Show Eco CI Results
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: display-results
+          display-badge: true
+          pr-comment: false
+        continue-on-error: true
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
@@ -177,6 +243,13 @@ jobs:
     name: Test E2E
     needs: [ compile_frontend, compile_backend ]
     steps:
+      - name: Start Eco CI Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: start-measurement
+          project: "KADAI"
+          tags: "CI/CD, Test e2e"
+        continue-on-error: true
       - name: Git checkout
         uses: actions/checkout@v5
       - name: Set up JDK ${{ env.JAVA_VERSION }}
@@ -232,6 +305,19 @@ jobs:
         run: |
           ../mvnw -B spring-boot:run -P history.plugin -f .. -pl :kadai-rest-spring-example-boot &> /dev/null &
           npx wait-port -t 30000 localhost:8080 && yarn run e2e-standalone --spec "cypress/e2e/monitor/**"
+      - name: Eco CI Measurement of cypress e2e
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: "test_e2e: cypress"
+        continue-on-error: true
+      - name: Show Eco CI Results
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: display-results
+          pr-comment: false
+          display-badge: true
+        continue-on-error: true
       - name: Upload Cypress tests
         if: failure()
         uses: actions/upload-artifact@v5
@@ -293,6 +379,14 @@ jobs:
           - module: kadai-rest-spring-example-boot  # ← ADD THIS
             database: H2
     steps:
+      - name: Start Eco CI Measurement
+        if: matrix.database == 'H2'
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: start-measurement
+          project: "KADAI"
+          tags: "CI/CD, Test Backend (H2)"
+        continue-on-error: true
       - name: Git checkout
         uses: actions/checkout@v5
       - name: Set up JDK ${{ env.JAVA_VERSION }}
@@ -318,6 +412,21 @@ jobs:
         run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip
         env:
           DB: ${{ matrix.database }}
+      - name: Eco CI Measurement of ${{ matrix.module }} (H2)
+        if: matrix.database == 'H2'
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: "test_backend_17: ${{ matrix.module }} (H2)"
+        continue-on-error: true
+      - name: Show Eco CI Results
+        if: matrix.database == 'H2'
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: display-results
+          display-badge: true
+          pr-comment: false
+        continue-on-error: true
       - name: Upload JaCoCo Report
         if: matrix.database == 'H2'
         uses: actions/upload-artifact@v5
@@ -343,6 +452,13 @@ jobs:
         database:
           - DB2
     steps:
+      - name: Start Eco CI Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: start-measurement
+          project: "KADAI"
+          tags: "CI/CD, Test Backend (JDK21/DB2)"
+        continue-on-error: true
       - name: Git checkout
         uses: actions/checkout@v5
       - name: Set up JDK 21
@@ -368,6 +484,19 @@ jobs:
         run: ./mvnw -B test -pl :${{matrix.module}} -Dcheckstyle.skip -D"java.version=21"
         env:
           DB: ${{ matrix.database }}
+      - name: Eco CI Measurement of ${{ matrix.module }} (JDK21/DB2)
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: "test_backend_21: ${{ matrix.module }} (DB2)"
+        continue-on-error: true
+      - name: Show Eco CI Results
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: display-results
+          display-badge: true
+          pr-comment: false
+        continue-on-error: true
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
@@ -436,6 +565,13 @@ jobs:
     env:
       GPG_TTY: $(tty)
     steps:
+      - name: Start Eco CI Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: start-measurement
+          project: "KADAI"
+          tags: "CI/CD, Release"
+        continue-on-error: true
       - name: Git checkout
         uses: actions/checkout@v5
         with:
@@ -517,6 +653,19 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+      - name: Eco CI Measurement of release deploy
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: "release_artifacts: mvn deploy"
+        continue-on-error: true
+      - name: Show Eco CI Results
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: display-results
+          display-badge: true
+          pr-comment: false
+        continue-on-error: true
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
@@ -612,6 +761,13 @@ jobs:
       github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request'
     needs: [ test_frontend, test_e2e, test_backend_17, test_backend_21 ]
     steps:
+      - name: Start Eco CI Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: start-measurement
+          project: "KADAI"
+          tags: "CI/CD, Sonar"
+        continue-on-error: true
       - name: Git checkout
         uses: actions/checkout@v5
         with:
@@ -646,6 +802,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+      - name: Eco CI Measurement of sonar verify
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: "upload_to_sonar: mvn verify + sonar"
+        continue-on-error: true
+      - name: Show Eco CI Results
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: display-results
+          display-badge: true
+          pr-comment: false
+        continue-on-error: true
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
