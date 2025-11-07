@@ -261,7 +261,7 @@ For login choose username `teamlead-1` with password `teamlead-1`.
 
 # ⚡️OpenEnergyBadge
 
-KADAI is successfully underwent [certification](docs/Urkunde-Blauer-Engel-KADAI.pdf) with the [*Blauer Engel for Software*](https://www.blauer-engel.de/en/productworld/software), an eco-label for resource- and energy-efficient software products awarded by the [German Environment Agency (Umweltbundesamt)](https://www.umweltbundesamt.de/en). 
+[KADAI](https://www.blauer-engel.de/de/produkte/kadai-open-source-software-for-task-management) is successfully underwent [certification](docs/Urkunde-Blauer-Engel-KADAI.pdf) with the [*Blauer Engel for Software*](https://www.blauer-engel.de/en/productworld/software), an eco-label for resource- and energy-efficient software products awarded by the [German Environment Agency (Umweltbundesamt)](https://www.umweltbundesamt.de/en). 
 A central part of the certification is the definition of a standard usage scenario, which reflects typical user interactions.
 
 In our defined scenario, the following activities were performed:
@@ -297,8 +297,6 @@ These badges show the energy cost for this scenario (done by 100 virtual users):
        alt="CPU Package Energy Badge" 
        loading="lazy">
 </a>
-
-We're delighted to be [listed](https://www.blauer-engel.de/de/produkte/kadai-open-source-software-for-task-management) among the certified software-solutions! 
 
 <a href="https://www.blauer-engel.de/en/productworld/software">
   <img src="docs/images/Blauer_Engel_LEF_blau_D_UZ215.png" width="420" />
