@@ -38,7 +38,14 @@
           class="task-priority-report__workbasket">
           <!-- WORKBASKET NAME -->
           <div class="task-priority-report__workbasket-headline">
-            <h6> {{ row.desc[0] }} </h6>
+            <h6>
+              @if (isDepthZero()){
+                <!-- TODO FIXME domain() signal -->
+                <a [routerLink]="['/kadai/monitor/tasks-priority', 'DOMAIN_A', row.desc[0]]">{{row.desc[0]}}</a>
+              } @else {
+                {{row.desc[1]}}
+              }
+            </h6>
           </div>
           <!-- CHART -->
           <kadai-monitor-canvas [id]="indexToString(i)" [row]="row"></kadai-monitor-canvas>

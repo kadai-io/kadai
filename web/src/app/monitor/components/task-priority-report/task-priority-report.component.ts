@@ -16,7 +16,7 @@
  *
  */
 
-import { AfterViewChecked, Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewChecked, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ReportData } from '../../models/report-data';
 import { MonitorService } from '../../services/monitor.service';
 import { WorkbasketType } from '../../../shared/models/workbasket-type';
@@ -43,6 +43,7 @@ import {
   MatTable
 } from '@angular/material/table';
 import { DatePipe, NgClass } from '@angular/common';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'kadai-monitor-task-priority-report',
@@ -63,7 +64,8 @@ import { DatePipe, NgClass } from '@angular/common';
     MatRowDef,
     MatRow,
     DatePipe,
-    NgClass
+    NgClass,
+    RouterLink
   ],
   providers: [MonitorService]
 })
@@ -83,6 +85,20 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
   settings$: Observable<Settings> = inject(Store).select(SettingsSelectors.getSettings);
   private monitorService = inject(MonitorService);
   private requestInProgressService = inject(RequestInProgressService);
+  workbasketKey = signal<string>(undefined);
+  domain = signal<string>(undefined);
+  private activatedRoute = inject(ActivatedRoute);
+
+  constructor() {
+    this.activatedRoute.params.subscribe((params) => {
+      this.workbasketKey.set(params['workbasketKey']);
+      this.domain.set(params['domain']);
+    });
+  }
+
+  protected isDepthZero() {
+    return this.workbasketKey() === undefined && this.domain() === undefined;
+  }
 
   ngOnInit() {
     this.requestInProgressService.setRequestInProgress(true);
@@ -97,7 +113,16 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
             settings[SettingMembers.IntervalMediumPriority],
             settings[SettingMembers.IntervalLowPriority]
           ].map((arr) => ({ lowerBound: arr[0], upperBound: arr[1] }));
-          return this.monitorService.getTasksByPriorityReport([WorkbasketType.TOPIC], this.priority);
+          if (this.isDepthZero()) {
+            return this.monitorService.getTasksByPriorityReport([WorkbasketType.TOPIC], this.priority);
+          }
+
+          return this.monitorService.getTasksByDetailedPriorityReport(
+            [WorkbasketType.TOPIC],
+            this.priority,
+            this.domain(),
+            this.workbasketKey()
+          );
         })
       )
       .subscribe((reportData) => {
@@ -125,8 +150,15 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
     this.colorLowPriority = settings[SettingMembers.ColorLowPriority];
   }
 
-  setValuesFromReportData(reportData) {
-    this.reportData = reportData;
+  setValuesFromReportData(reportData: ReportData) {
+    const depth = this.isDepthZero() ? 0 : 1;
+    this.reportData = {
+      meta: reportData.meta,
+      rows: reportData.rows
+        .filter((row) => row.depth == depth)
+        .filter((row) => this.workbasketKey() === undefined || row.desc[0] === this.workbasketKey()),
+      sumRow: reportData.sumRow
+    };
 
     // the order must be high, medium, low because the canvas component defines its labels in this order
     let indexHigh = 0;
@@ -134,7 +166,7 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
     let indexLow = 2;
 
     this.tableDataArray = [];
-    reportData.rows.forEach((row) => {
+    this.reportData.rows.forEach((row) => {
       this.tableDataArray.push([
         { priority: this.nameHighPriority, number: row.cells[indexHigh] },
         { priority: this.nameMediumPriority, number: row.cells[indexMedium] },

@@ -36,6 +36,13 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'tasks-priority/:domain/:workbasketKey',
+        loadComponent: () =>
+          import('./components/task-priority-report/task-priority-report.component').then(
+            (m) => m.TaskPriorityReportComponent
+          )
+      },
+      {
         path: 'tasks-status',
         loadComponent: () => import('./components/task-report/task-report.component').then((m) => m.TaskReportComponent)
       },

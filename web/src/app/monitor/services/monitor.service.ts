@@ -90,4 +90,23 @@ export class MonitorService {
       `${environment.kadaiRestUrl + monitorUrl}/workbasket-priority-report${asUrlQueryString(queryParams)}`
     );
   }
+
+  getTasksByDetailedPriorityReport(
+    type: string[],
+    priority: any[],
+    domain: string, // TODO FIXME
+    customFilters: {} = {}
+  ): Observable<ReportData> {
+    const queryParams = {
+      'workbasket-type': type,
+      domain: 'DOMAIN_A', // TODO FIXME
+      state: 'READY',
+      columnHeader: priority,
+      ...customFilters
+    };
+
+    return this.httpClient.get<ReportData>(
+      `${environment.kadaiRestUrl + monitorUrl}/detailed-workbasket-priority-report${asUrlQueryString(queryParams)}`
+    );
+  }
 }
