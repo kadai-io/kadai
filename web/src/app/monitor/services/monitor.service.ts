@@ -94,12 +94,12 @@ export class MonitorService {
   getTasksByDetailedPriorityReport(
     type: string[],
     priority: any[],
-    domain: string, // TODO FIXME
+    domain: string,
     customFilters: {} = {}
   ): Observable<ReportData> {
     const queryParams = {
       'workbasket-type': type,
-      domain: 'DOMAIN_A', // TODO FIXME
+      domain: domain,
       state: 'READY',
       columnHeader: priority,
       ...customFilters

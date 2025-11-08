@@ -83,10 +83,10 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
   colorLowPriority: string;
   destroy$ = new Subject<void>();
   settings$: Observable<Settings> = inject(Store).select(SettingsSelectors.getSettings);
-  private monitorService = inject(MonitorService);
-  private requestInProgressService = inject(RequestInProgressService);
   workbasketKey = signal<string>(undefined);
   domain = signal<string>(undefined);
+  private monitorService = inject(MonitorService);
+  private requestInProgressService = inject(RequestInProgressService);
   private activatedRoute = inject(ActivatedRoute);
 
   constructor() {
@@ -94,10 +94,6 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
       this.workbasketKey.set(params['workbasketKey']);
       this.domain.set(params['domain']);
     });
-  }
-
-  protected isDepthZero() {
-    return this.workbasketKey() === undefined && this.domain() === undefined;
   }
 
   ngOnInit() {
@@ -114,6 +110,7 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
             settings[SettingMembers.IntervalLowPriority]
           ].map((arr) => ({ lowerBound: arr[0], upperBound: arr[1] }));
           if (this.isDepthZero()) {
+            // TODO FIXME this is probably wrong/useless now, because we have to filter per domain...
             return this.monitorService.getTasksByPriorityReport([WorkbasketType.TOPIC], this.priority);
           }
 
@@ -210,5 +207,9 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  protected isDepthZero() {
+    return this.workbasketKey() === undefined;
   }
 }
