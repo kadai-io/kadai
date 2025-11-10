@@ -48,7 +48,9 @@ jobs:
         id: cache
         uses: actions/cache@v4
         with:
-          path: ~/.m2
+          path: |
+            ~/.m2
+            !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Change versions to match tag
@@ -99,7 +101,9 @@ jobs:
         id: maven-cache
         uses: actions/cache@v4
         with:
-          path: ~/.m2
+          path: |
+            ~/.m2
+            !~/.m2/repository/io/kadai
           key: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}
       - name: Populate maven cache
@@ -157,7 +161,9 @@ jobs:
         id: maven-cache
         uses: actions/cache@v4
         with:
-          path: ~/.m2
+          path: |
+            ~/.m2
+            !~/.m2/repository/io/kadai
           key: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}
       # Theoretically this step below not necessary because we reuse the cache from the 'compile_frontend' job.
@@ -206,7 +212,9 @@ jobs:
         id: maven-cache
         uses: actions/cache@v4
         with:
-          path: ~/.m2
+          path: |
+            ~/.m2
+            !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
       - name: Download kadai artifacts
         uses: actions/download-artifact@v5
@@ -303,7 +311,9 @@ jobs:
       - name: Cache maven dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.m2
+          path: |
+            ~/.m2
+            !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download kadai artifacts
@@ -353,7 +363,9 @@ jobs:
       - name: Cache maven dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.m2
+          path: |
+            ~/.m2
+            !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download kadai artifacts
@@ -451,7 +463,9 @@ jobs:
       - name: Cache maven dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.m2
+          path: |
+            ~/.m2
+            !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download kadai artifacts
@@ -566,7 +580,9 @@ jobs:
       - name: Cache maven dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.m2
+          path: |
+            ~/.m2
+            !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download kadai artifacts
@@ -635,7 +651,9 @@ jobs:
       - name: Cache maven dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.m2
+          path: |
+            ~/.m2
+            !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download JaCoCo reports
