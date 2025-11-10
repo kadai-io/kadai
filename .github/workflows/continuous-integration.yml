@@ -519,7 +519,7 @@ jobs:
           fi
           
           echo "Using Maven profile: $PROFILE"
-          ./mvnw -B deploy -P $PROFILE \
+          ./mvnw -B deploy:deploy -P $PROFILE \
           --settings ci/mvnsettings.xml \
           -pl :kadai-parent,\
           :kadai-common-parent,:kadai-common-logging,:kadai-common,:kadai-common-security,\
