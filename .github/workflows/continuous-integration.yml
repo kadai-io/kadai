@@ -66,6 +66,8 @@ jobs:
           name: ${{ env.ARTIFACTS_KADAI_JARS_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
           if-no-files-found: error
+      - name: Remove kadai artifacts from cache
+        run: rm -rf ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
@@ -120,6 +122,8 @@ jobs:
           name: ${{ env.ARTIFACTS_KADAI_WEB_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_WEB_PATH }}
           if-no-files-found: error
+      - name: Remove kadai artifacts from cache
+        run: rm -rf ~/.m2/repository/io/kadai
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
@@ -502,15 +506,12 @@ jobs:
           
           echo "Using Maven profile: $PROFILE"
           ./mvnw -B deploy -P $PROFILE \
-          --settings ci/mvnsettings.xml -DskipTests -Dcheckstyle.skip -Djacoco.skip \
-          -Dmaven.main.skip=true -Dmaven.compiler.skip=true -Dmaven.resources.skip=true \
-          -Dmaven.install.skip=true \
+          --settings ci/mvnsettings.xml \
           -pl :kadai-parent,\
           :kadai-common-parent,:kadai-common-logging,:kadai-common,:kadai-common-security,\
           :kadai-common-data,:kadai-common-test,:kadai-test-api,\
           :kadai-lib-parent,:kadai-core,:kadai-spring,\
           :kadai-rest-parent,:kadai-web,:kadai-rest-spring,\
-          :kadai-rest-spring-test-lib,:kadai-rest-spring-example-common,:kadai-rest-spring-example-boot,\
           :kadai-history-parent,:kadai-simplehistory-provider,:kadai-simplehistory-rest-spring,:kadai-loghistory-provider,\
           :kadai-routing-parent,:kadai-spi-routing-dmn-router,:kadai-routing-rest \
           -T 4
