@@ -286,6 +286,115 @@ jobs:
         if: failure()
         uses: andymckay/cancel-action@0.5
 
+  generate_backend_test_matrices:
+    name: Generate backend test matrices
+    runs-on: ubuntu-22.04
+    needs: [detect_changes]
+    if: needs.detect_changes.outputs.backend_changed == 'true'
+    outputs:
+      matrix_17: ${{ steps.set-matrices.outputs.matrix_17 }}
+      matrix_21: ${{ steps.set-matrices.outputs.matrix_21 }}
+    steps:
+      - name: Determine test matrices
+        id: set-matrices
+        run: |
+          CORE_CHANGED="${{ needs.detect_changes.outputs.core_modules_changed }}"
+          
+          if [ "$CORE_CHANGED" == "true" ]; then
+            # Full test suite - all combinations
+            MATRIX_17='{"include":[
+              {"module":"kadai-common","database":"H2"},
+              {"module":"kadai-common-security","database":"H2"},
+              {"module":"kadai-common-data","database":"H2"},
+              {"module":"kadai-common-logging","database":"H2"},
+              {"module":"kadai-common-test","database":"H2"},
+              {"module":"kadai-core","database":"H2"},
+              {"module":"kadai-core","database":"POSTGRES"},
+              {"module":"kadai-core","database":"DB2"},
+              {"module":"kadai-core-test","database":"H2"},
+              {"module":"kadai-core-test","database":"POSTGRES"},
+              {"module":"kadai-core-test","database":"DB2"},
+              {"module":"kadai-test-api","database":"H2"},
+              {"module":"kadai-test-api","database":"POSTGRES"},
+              {"module":"kadai-test-api","database":"DB2"},
+              {"module":"kadai-spring","database":"H2"},
+              {"module":"kadai-spring-example","database":"H2"},
+              {"module":"kadai-spi-routing-dmn-router","database":"H2"},
+              {"module":"kadai-routing-rest","database":"H2"},
+              {"module":"kadai-rest-spring","database":"H2"},
+              {"module":"kadai-rest-spring-test-lib","database":"H2"},
+              {"module":"kadai-rest-spring-example-common","database":"H2"},
+              {"module":"kadai-loghistory-provider","database":"H2"},
+              {"module":"kadai-simplehistory-provider","database":"H2"},
+              {"module":"kadai-simplehistory-provider","database":"POSTGRES"},
+              {"module":"kadai-simplehistory-provider","database":"DB2"},
+              {"module":"kadai-simplehistory-rest-spring","database":"H2"},
+              {"module":"kadai-rest-spring-example-boot","database":"H2"},
+              {"module":"kadai-rest-spring-example-boot","database":"POSTGRES"},
+              {"module":"kadai-rest-spring-example-boot","database":"DB2"}
+            ]}'
+            
+            MATRIX_21='{"include":[
+              {"module":"kadai-routing-rest","database":"DB2"},
+              {"module":"kadai-rest-spring-example-boot","database":"DB2"},
+              {"module":"kadai-simplehistory-rest-spring","database":"DB2"},
+              {"module":"kadai-rest-spring-example-common","database":"DB2"}
+            ]}'
+            
+          else
+            # Selective testing
+            MATRIX_17='{"include":[]}'
+            MATRIX_21='{"include":[]}'
+            
+            # Add modules that changed (with all their database variants)
+            if [ "${{ needs.detect_changes.outputs.kadai_spring_example_changed }}" == "true" ]; then
+              MATRIX_17=$(echo "$MATRIX_17" | jq '.include += [{"module":"kadai-spring-example","database":"H2"}]')
+            fi
+            
+            if [ "${{ needs.detect_changes.outputs.kadai_loghistory_provider_changed }}" == "true" ]; then
+              MATRIX_17=$(echo "$MATRIX_17" | jq '.include += [{"module":"kadai-loghistory-provider","database":"H2"}]')
+            fi
+            
+            if [ "${{ needs.detect_changes.outputs.kadai_simplehistory_provider_changed }}" == "true" ]; then
+              MATRIX_17=$(echo "$MATRIX_17" | jq '.include += [
+                {"module":"kadai-simplehistory-provider","database":"H2"},
+                {"module":"kadai-simplehistory-provider","database":"POSTGRES"},
+                {"module":"kadai-simplehistory-provider","database":"DB2"}
+              ]')
+            fi
+            
+            if [ "${{ needs.detect_changes.outputs.kadai_simplehistory_rest_spring_changed }}" == "true" ]; then
+              MATRIX_17=$(echo "$MATRIX_17" | jq '.include += [{"module":"kadai-simplehistory-rest-spring","database":"H2"}]')
+              MATRIX_21=$(echo "$MATRIX_21" | jq '.include += [{"module":"kadai-simplehistory-rest-spring","database":"DB2"}]')
+            fi
+            
+            if [ "${{ needs.detect_changes.outputs.kadai_spi_routing_dmn_router_changed }}" == "true" ]; then
+              MATRIX_17=$(echo "$MATRIX_17" | jq '.include += [{"module":"kadai-spi-routing-dmn-router","database":"H2"}]')
+            fi
+            
+            if [ "${{ needs.detect_changes.outputs.kadai_routing_rest_changed }}" == "true" ]; then
+              MATRIX_17=$(echo "$MATRIX_17" | jq '.include += [{"module":"kadai-routing-rest","database":"H2"}]')
+              MATRIX_21=$(echo "$MATRIX_21" | jq '.include += [{"module":"kadai-routing-rest","database":"DB2"}]')
+            fi
+            
+            # kadai-rest-spring-example-boot (leaf-to-leaf dependencies + multiple databases)
+            if [ "${{ needs.detect_changes.outputs.kadai_rest_spring_example_boot_changed }}" == "true" ] || \
+              [ "${{ needs.detect_changes.outputs.kadai_spi_routing_dmn_router_changed }}" == "true" ] || \
+              [ "${{ needs.detect_changes.outputs.kadai_routing_rest_changed }}" == "true" ]; then
+              MATRIX_17=$(echo "$MATRIX_17" | jq '.include += [
+                {"module":"kadai-rest-spring-example-boot","database":"H2"},
+                {"module":"kadai-rest-spring-example-boot","database":"POSTGRES"},
+                {"module":"kadai-rest-spring-example-boot","database":"DB2"}
+              ]')
+              MATRIX_21=$(echo "$MATRIX_21" | jq '.include += [{"module":"kadai-rest-spring-example-boot","database":"DB2"}]')
+            fi
+          fi
+          
+          echo "matrix_17=${MATRIX_17}" >> $GITHUB_OUTPUT
+          echo "matrix_21=${MATRIX_21}" >> $GITHUB_OUTPUT
+          echo "JDK 17 matrix: ${MATRIX_17}"
+          echo "JDK 21 matrix: ${MATRIX_21}"
+
   test_frontend:
     runs-on: ubuntu-22.04
     name: Test kadai-web
@@ -447,81 +556,10 @@ jobs:
   test_backend_17:
     runs-on: ubuntu-22.04
     name: Test ${{ matrix.module }} with JDK 17 on ${{ matrix.database }}
-    needs: [detect_changes, compile_backend]
-    if: |
-      needs.detect_changes.outputs.backend_changed == 'true' &&
-      (
-        needs.detect_changes.outputs.core_modules_changed == 'true' ||
-        
-        (matrix.module == 'kadai-spring-example' && 
-        needs.detect_changes.outputs.kadai_spring_example_changed == 'true') ||
-        
-        (matrix.module == 'kadai-loghistory-provider' && 
-        needs.detect_changes.outputs.kadai_loghistory_provider_changed == 'true') ||
-        
-        (matrix.module == 'kadai-simplehistory-provider' && 
-        needs.detect_changes.outputs.kadai_simplehistory_provider_changed == 'true') ||
-        
-        (matrix.module == 'kadai-simplehistory-rest-spring' && 
-        needs.detect_changes.outputs.kadai_simplehistory_rest_spring_changed == 'true') ||
-        
-        (matrix.module == 'kadai-spi-routing-dmn-router' && 
-        needs.detect_changes.outputs.kadai_spi_routing_dmn_router_changed == 'true') ||
-        
-        (matrix.module == 'kadai-routing-rest' && 
-        needs.detect_changes.outputs.kadai_routing_rest_changed == 'true') ||
-        
-        (matrix.module == 'kadai-rest-spring-example-boot' && 
-        (needs.detect_changes.outputs.kadai_rest_spring_example_boot_changed == 'true' ||
-          needs.detect_changes.outputs.kadai_spi_routing_dmn_router_changed == 'true' ||
-          needs.detect_changes.outputs.kadai_routing_rest_changed == 'true'))
-      )
+    needs: [detect_changes, compile_backend, generate_backend_test_matrices]
+    if: needs.decide_backend_tests.outputs.matrix_17 != '{"include":[]}'
     strategy:
-      matrix:
-        module:
-          - kadai-common
-          - kadai-common-security
-          - kadai-common-data
-          - kadai-common-logging
-          - kadai-common-test
-          - kadai-core
-          - kadai-core-test
-          - kadai-test-api
-          - kadai-spring
-          - kadai-spring-example
-          - kadai-spi-routing-dmn-router
-          - kadai-routing-rest
-          - kadai-rest-spring
-          - kadai-rest-spring-test-lib
-          - kadai-rest-spring-example-common
-          - kadai-loghistory-provider
-          - kadai-simplehistory-provider
-          - kadai-simplehistory-rest-spring
-        database:
-          - H2
-        include:
-          - module: kadai-core
-            database: POSTGRES
-          - module: kadai-core
-            database: DB2
-          - module: kadai-core-test
-            database: POSTGRES
-          - module: kadai-core-test
-            database: DB2
-          - module: kadai-test-api
-            database: POSTGRES
-          - module: kadai-test-api
-            database: DB2
-          - module: kadai-simplehistory-provider
-            database: DB2
-          - module: kadai-simplehistory-provider
-            database: POSTGRES
-          - module: kadai-rest-spring-example-boot
-            database: DB2
-          - module: kadai-rest-spring-example-boot  # ← ADD THIS
-            database: POSTGRES
-          - module: kadai-rest-spring-example-boot  # ← ADD THIS
-            database: H2
+      matrix: ${{ fromJson(needs.decide_backend_tests.outputs.matrix_17) }}
     steps:
       - name: Start Eco CI Measurement
         if: matrix.database == 'H2'
@@ -585,32 +623,10 @@ jobs:
   test_backend_21:
     runs-on: ubuntu-22.04
     name: Test ${{ matrix.module }} with JDK 21 on ${{ matrix.database }}
-    needs: [detect_changes, compile_backend ]
-    if: |
-      needs.detect_changes.outputs.backend_changed == 'true' &&
-      (
-        needs.detect_changes.outputs.core_modules_changed == 'true' ||
-        
-        (matrix.module == 'kadai-routing-rest' && 
-        needs.detect_changes.outputs.kadai_routing_rest_changed == 'true') ||
-        
-        (matrix.module == 'kadai-rest-spring-example-boot' && 
-        (needs.detect_changes.outputs.kadai_rest_spring_example_boot_changed == 'true' ||
-          needs.detect_changes.outputs.kadai_spi_routing_dmn_router_changed == 'true' ||
-          needs.detect_changes.outputs.kadai_routing_rest_changed == 'true')) ||
-        
-        (matrix.module == 'kadai-simplehistory-rest-spring' && 
-        needs.detect_changes.outputs.kadai_simplehistory_rest_spring_changed == 'true')
-      )
+    needs: [detect_changes, compile_backend, generate_backend_test_matrices ]
+    if: needs.decide_backend_tests.outputs.matrix_21 != '{"include":[]}'
     strategy:
-      matrix:
-        module:
-          - kadai-routing-rest
-          - kadai-rest-spring-example-boot
-          - kadai-simplehistory-rest-spring
-          - kadai-rest-spring-example-common
-        database:
-          - DB2
+      matrix: ${{ fromJson(needs.decide_backend_tests.outputs.matrix_21) }}
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
