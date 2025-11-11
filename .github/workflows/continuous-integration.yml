@@ -352,9 +352,9 @@ jobs:
             fi
           fi
           
-          # Output compact JSON (single line)
-          echo "matrix_17=${MATRIX_17}" >> $GITHUB_OUTPUT
-          echo "matrix_21=${MATRIX_21}" >> $GITHUB_OUTPUT
+          # Output compact JSON
+          echo "matrix_17=$MATRIX_17" >> $GITHUB_OUTPUT
+          echo "matrix_21=$MATRIX_21" >> $GITHUB_OUTPUT
           
           # Pretty print for logs (optional, for debugging)
           echo "=== JDK 17 Matrix ==="
