@@ -299,101 +299,68 @@ jobs:
         id: set-matrices
         run: |
           CORE_CHANGED="${{ needs.detect_changes.outputs.core_modules_changed }}"
-          
+        
           if [ "$CORE_CHANGED" == "true" ]; then
-            # Full test suite - all combinations
-            MATRIX_17='{"include":[
-              {"module":"kadai-common","database":"H2"},
-              {"module":"kadai-common-security","database":"H2"},
-              {"module":"kadai-common-data","database":"H2"},
-              {"module":"kadai-common-logging","database":"H2"},
-              {"module":"kadai-common-test","database":"H2"},
-              {"module":"kadai-core","database":"H2"},
-              {"module":"kadai-core","database":"POSTGRES"},
-              {"module":"kadai-core","database":"DB2"},
-              {"module":"kadai-core-test","database":"H2"},
-              {"module":"kadai-core-test","database":"POSTGRES"},
-              {"module":"kadai-core-test","database":"DB2"},
-              {"module":"kadai-test-api","database":"H2"},
-              {"module":"kadai-test-api","database":"POSTGRES"},
-              {"module":"kadai-test-api","database":"DB2"},
-              {"module":"kadai-spring","database":"H2"},
-              {"module":"kadai-spring-example","database":"H2"},
-              {"module":"kadai-spi-routing-dmn-router","database":"H2"},
-              {"module":"kadai-routing-rest","database":"H2"},
-              {"module":"kadai-rest-spring","database":"H2"},
-              {"module":"kadai-rest-spring-test-lib","database":"H2"},
-              {"module":"kadai-rest-spring-example-common","database":"H2"},
-              {"module":"kadai-loghistory-provider","database":"H2"},
-              {"module":"kadai-simplehistory-provider","database":"H2"},
-              {"module":"kadai-simplehistory-provider","database":"POSTGRES"},
-              {"module":"kadai-simplehistory-provider","database":"DB2"},
-              {"module":"kadai-simplehistory-rest-spring","database":"H2"},
-              {"module":"kadai-rest-spring-example-boot","database":"H2"},
-              {"module":"kadai-rest-spring-example-boot","database":"POSTGRES"},
-              {"module":"kadai-rest-spring-example-boot","database":"DB2"}
-            ]}'
+            # Full test suite - use compact JSON (single line)
+            MATRIX_17='{"include":[{"module":"kadai-common","database":"H2"},{"module":"kadai-common-security","database":"H2"},{"module":"kadai-common-data","database":"H2"},{"module":"kadai-common-logging","database":"H2"},{"module":"kadai-common-test","database":"H2"},{"module":"kadai-core","database":"H2"},{"module":"kadai-core","database":"POSTGRES"},{"module":"kadai-core","database":"DB2"},{"module":"kadai-core-test","database":"H2"},{"module":"kadai-core-test","database":"POSTGRES"},{"module":"kadai-core-test","database":"DB2"},{"module":"kadai-test-api","database":"H2"},{"module":"kadai-test-api","database":"POSTGRES"},{"module":"kadai-test-api","database":"DB2"},{"module":"kadai-spring","database":"H2"},{"module":"kadai-spring-example","database":"H2"},{"module":"kadai-spi-routing-dmn-router","database":"H2"},{"module":"kadai-routing-rest","database":"H2"},{"module":"kadai-rest-spring","database":"H2"},{"module":"kadai-rest-spring-test-lib","database":"H2"},{"module":"kadai-rest-spring-example-common","database":"H2"},{"module":"kadai-loghistory-provider","database":"H2"},{"module":"kadai-simplehistory-provider","database":"H2"},{"module":"kadai-simplehistory-provider","database":"POSTGRES"},{"module":"kadai-simplehistory-provider","database":"DB2"},{"module":"kadai-simplehistory-rest-spring","database":"H2"},{"module":"kadai-rest-spring-example-boot","database":"H2"},{"module":"kadai-rest-spring-example-boot","database":"POSTGRES"},{"module":"kadai-rest-spring-example-boot","database":"DB2"}]}'
             
-            MATRIX_21='{"include":[
-              {"module":"kadai-routing-rest","database":"DB2"},
-              {"module":"kadai-rest-spring-example-boot","database":"DB2"},
-              {"module":"kadai-simplehistory-rest-spring","database":"DB2"},
-              {"module":"kadai-rest-spring-example-common","database":"DB2"}
-            ]}'
-            
+            MATRIX_21='{"include":[{"module":"kadai-routing-rest","database":"DB2"},{"module":"kadai-rest-spring-example-boot","database":"DB2"},{"module":"kadai-simplehistory-rest-spring","database":"DB2"},{"module":"kadai-rest-spring-example-common","database":"DB2"}]}'
           else
-            # Selective testing
+            # Selective testing - start with empty
             MATRIX_17='{"include":[]}'
             MATRIX_21='{"include":[]}'
             
-            # Add modules that changed (with all their database variants)
+            # kadai-spring-example: H2 only
             if [ "${{ needs.detect_changes.outputs.kadai_spring_example_changed }}" == "true" ]; then
-              MATRIX_17=$(echo "$MATRIX_17" | jq '.include += [{"module":"kadai-spring-example","database":"H2"}]')
+              MATRIX_17=$(echo "$MATRIX_17" | jq -c '.include += [{"module":"kadai-spring-example","database":"H2"}]')
             fi
             
+            # kadai-loghistory-provider: H2 only
             if [ "${{ needs.detect_changes.outputs.kadai_loghistory_provider_changed }}" == "true" ]; then
-              MATRIX_17=$(echo "$MATRIX_17" | jq '.include += [{"module":"kadai-loghistory-provider","database":"H2"}]')
+              MATRIX_17=$(echo "$MATRIX_17" | jq -c '.include += [{"module":"kadai-loghistory-provider","database":"H2"}]')
             fi
             
+            # kadai-simplehistory-provider: H2, POSTGRES, DB2
             if [ "${{ needs.detect_changes.outputs.kadai_simplehistory_provider_changed }}" == "true" ]; then
-              MATRIX_17=$(echo "$MATRIX_17" | jq '.include += [
-                {"module":"kadai-simplehistory-provider","database":"H2"},
-                {"module":"kadai-simplehistory-provider","database":"POSTGRES"},
-                {"module":"kadai-simplehistory-provider","database":"DB2"}
-              ]')
+              MATRIX_17=$(echo "$MATRIX_17" | jq -c '.include += [{"module":"kadai-simplehistory-provider","database":"H2"},{"module":"kadai-simplehistory-provider","database":"POSTGRES"},{"module":"kadai-simplehistory-provider","database":"DB2"}]')
             fi
             
+            # kadai-simplehistory-rest-spring: H2 (JDK17), DB2 (JDK21)
             if [ "${{ needs.detect_changes.outputs.kadai_simplehistory_rest_spring_changed }}" == "true" ]; then
-              MATRIX_17=$(echo "$MATRIX_17" | jq '.include += [{"module":"kadai-simplehistory-rest-spring","database":"H2"}]')
-              MATRIX_21=$(echo "$MATRIX_21" | jq '.include += [{"module":"kadai-simplehistory-rest-spring","database":"DB2"}]')
+              MATRIX_17=$(echo "$MATRIX_17" | jq -c '.include += [{"module":"kadai-simplehistory-rest-spring","database":"H2"}]')
+              MATRIX_21=$(echo "$MATRIX_21" | jq -c '.include += [{"module":"kadai-simplehistory-rest-spring","database":"DB2"}]')
             fi
             
+            # kadai-spi-routing-dmn-router: H2 only
             if [ "${{ needs.detect_changes.outputs.kadai_spi_routing_dmn_router_changed }}" == "true" ]; then
-              MATRIX_17=$(echo "$MATRIX_17" | jq '.include += [{"module":"kadai-spi-routing-dmn-router","database":"H2"}]')
+              MATRIX_17=$(echo "$MATRIX_17" | jq -c '.include += [{"module":"kadai-spi-routing-dmn-router","database":"H2"}]')
             fi
             
+            # kadai-routing-rest: H2 (JDK17), DB2 (JDK21)
             if [ "${{ needs.detect_changes.outputs.kadai_routing_rest_changed }}" == "true" ]; then
-              MATRIX_17=$(echo "$MATRIX_17" | jq '.include += [{"module":"kadai-routing-rest","database":"H2"}]')
-              MATRIX_21=$(echo "$MATRIX_21" | jq '.include += [{"module":"kadai-routing-rest","database":"DB2"}]')
+              MATRIX_17=$(echo "$MATRIX_17" | jq -c '.include += [{"module":"kadai-routing-rest","database":"H2"}]')
+              MATRIX_21=$(echo "$MATRIX_21" | jq -c '.include += [{"module":"kadai-routing-rest","database":"DB2"}]')
             fi
             
-            # kadai-rest-spring-example-boot (leaf-to-leaf dependencies + multiple databases)
+            # kadai-rest-spring-example-boot: H2, POSTGRES, DB2 (JDK17 & JDK21)
+            # Has leaf-to-leaf dependencies
             if [ "${{ needs.detect_changes.outputs.kadai_rest_spring_example_boot_changed }}" == "true" ] || \
               [ "${{ needs.detect_changes.outputs.kadai_spi_routing_dmn_router_changed }}" == "true" ] || \
               [ "${{ needs.detect_changes.outputs.kadai_routing_rest_changed }}" == "true" ]; then
-              MATRIX_17=$(echo "$MATRIX_17" | jq '.include += [
-                {"module":"kadai-rest-spring-example-boot","database":"H2"},
-                {"module":"kadai-rest-spring-example-boot","database":"POSTGRES"},
-                {"module":"kadai-rest-spring-example-boot","database":"DB2"}
-              ]')
-              MATRIX_21=$(echo "$MATRIX_21" | jq '.include += [{"module":"kadai-rest-spring-example-boot","database":"DB2"}]')
+              MATRIX_17=$(echo "$MATRIX_17" | jq -c '.include += [{"module":"kadai-rest-spring-example-boot","database":"H2"},{"module":"kadai-rest-spring-example-boot","database":"POSTGRES"},{"module":"kadai-rest-spring-example-boot","database":"DB2"}]')
+              MATRIX_21=$(echo "$MATRIX_21" | jq -c '.include += [{"module":"kadai-rest-spring-example-boot","database":"DB2"}]')
             fi
           fi
           
+          # Output compact JSON (single line)
           echo "matrix_17=${MATRIX_17}" >> $GITHUB_OUTPUT
           echo "matrix_21=${MATRIX_21}" >> $GITHUB_OUTPUT
-          echo "JDK 17 matrix: ${MATRIX_17}"
-          echo "JDK 21 matrix: ${MATRIX_21}"
+          
+          # Pretty print for logs (optional, for debugging)
+          echo "=== JDK 17 Matrix ==="
+          echo "$MATRIX_17" | jq '.'
+          echo "=== JDK 21 Matrix ==="
+          echo "$MATRIX_21" | jq '.'
 
   test_frontend:
     runs-on: ubuntu-22.04
