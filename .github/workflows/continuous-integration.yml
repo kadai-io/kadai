@@ -33,9 +33,119 @@ env:
   CACHE_SONAR_NAME: sonar
 
 jobs:
+  detect_changes:
+    name: Detect changed files and modules
+    runs-on: ubuntu-22.04
+    outputs:
+      # High-level triggers
+      backend_changed: ${{ steps.filter.outputs.backend }}
+      frontend_changed: ${{ steps.filter.outputs.frontend }}
+      
+      # Core modules (require full test suite)
+      core_modules_changed: ${{ steps.filter.outputs.core_modules }}
+      
+      # Leaf modules (selective testing)
+      kadai_spring_example_changed: ${{ steps.filter.outputs.kadai_spring_example }}
+      kadai_loghistory_provider_changed: ${{ steps.filter.outputs.kadai_loghistory_provider }}
+      kadai_simplehistory_provider_changed: ${{ steps.filter.outputs.kadai_simplehistory_provider }}
+      kadai_simplehistory_rest_spring_changed: ${{ steps.filter.outputs.kadai_simplehistory_rest_spring }}
+      kadai_spi_routing_dmn_router_changed: ${{ steps.filter.outputs.kadai_spi_routing_dmn_router }}
+      kadai_routing_rest_changed: ${{ steps.filter.outputs.kadai_routing_rest }}
+      kadai_rest_spring_example_boot_changed: ${{ steps.filter.outputs.kadai_rest_spring_example_boot }}
+      
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            # ================================================================
+            # BACKEND & FRONTEND CHANGES
+            # ================================================================
+            backend:
+              - 'common/**'
+              - 'lib/**'
+              - 'history/**'
+              - 'rest/**'
+              - 'routing/**'
+              - 'ci/**'
+              - 'qa/**'
+              - 'pom.xml'
+              - 'mvnw'
+              - 'mvnw.cmd'
+              - '.mvn/**'
+              - '.github/workflows/continuous-integration.yml'
+            
+            frontend:
+              - 'web/**'
+              - '.github/workflows/continuous-integration.yml'
+              - 'ci/**' 
+            
+            # ================================================================
+            # CORE MODULES (changes require FULL test suite)
+            # ================================================================
+            core_modules:
+              # Foundation layer
+              - 'common/kadai-common-logging/**'
+              - 'common/kadai-common/**'
+              - 'common/kadai-common-security/**'
+              - 'common/kadai-common-data/**'
+              
+              # Test infrastructure
+              - 'common/kadai-common-test/**'
+              - 'lib/kadai-test-api/**'
+              - 'lib/kadai-core-test/**'
+              - 'rest/kadai-rest-spring-test-lib/**'
+              
+              # Core business logic
+              - 'lib/kadai-core/**'
+              
+              # Framework integration
+              - 'lib/kadai-spring/**'
+              
+              # REST API
+              - 'rest/kadai-rest-spring/**'
+              
+              # Shared example infrastructure
+              - 'rest/kadai-rest-spring-example-common/**'
+              
+              # Infrastructure
+              - 'pom.xml'
+              - '.github/workflows/**'
+              - 'ci/**'
+              - 'qa/**'
+              - 'mvnw'
+              - 'mvnw.cmd'
+              - '.mvn/**'
+            
+            # ================================================================
+            # LEAF MODULES (selective testing)
+            # ================================================================
+            kadai_spring_example:
+              - 'lib/kadai-spring-example/**'
+            
+            kadai_rest_spring_example_boot:
+              - 'rest/kadai-rest-spring-example-boot/**'
+            
+            kadai_loghistory_provider:
+              - 'history/kadai-loghistory-provider/**'
+            
+            kadai_simplehistory_provider:
+              - 'history/kadai-simplehistory-provider/**'
+            
+            kadai_simplehistory_rest_spring:
+              - 'history/kadai-simplehistory-rest-spring/**'
+            
+            kadai_spi_routing_dmn_router:
+              - 'routing/kadai-spi-routing-dmn-router/**'
+            
+            kadai_routing_rest:
+              - 'routing/kadai-routing-rest/**'
   compile_backend:
     name: Compile all maven modules
     runs-on: ubuntu-22.04
+    needs: [detect_changes]
+    if: needs.detect_changes.outputs.backend_changed == 'true'
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -95,6 +205,8 @@ jobs:
   compile_frontend:
     name: Compile kadai-web
     runs-on: ubuntu-22.04
+    needs: [detect_changes]
+    if: needs.detect_changes.outputs.frontend_changed == 'true'
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -177,7 +289,8 @@ jobs:
   test_frontend:
     runs-on: ubuntu-22.04
     name: Test kadai-web
-    needs: [ compile_frontend ]
+    needs: [detect_changes, compile_frontend]
+    if: needs.detect_changes.outputs.frontend_code_changed == 'true'
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -241,7 +354,10 @@ jobs:
   test_e2e:
     runs-on: ubuntu-22.04
     name: Test E2E
-    needs: [ compile_frontend, compile_backend ]
+    needs: [detect_changes, compile_frontend, compile_backend]
+    if: |
+      needs.detect_changes.outputs.core_modules_changed == 'true' ||
+      needs.detect_changes.outputs.frontend_changed == 'true' 
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -331,7 +447,35 @@ jobs:
   test_backend_17:
     runs-on: ubuntu-22.04
     name: Test ${{ matrix.module }} with JDK 17 on ${{ matrix.database }}
-    needs: [ compile_backend ]
+    needs: [detect_changes, compile_backend]
+    if: |
+      needs.detect_changes.outputs.backend_changed == 'true' &&
+      (
+        needs.detect_changes.outputs.core_modules_changed == 'true' ||
+        
+        (matrix.module == 'kadai-spring-example' && 
+        needs.detect_changes.outputs.kadai_spring_example_changed == 'true') ||
+        
+        (matrix.module == 'kadai-loghistory-provider' && 
+        needs.detect_changes.outputs.kadai_loghistory_provider_changed == 'true') ||
+        
+        (matrix.module == 'kadai-simplehistory-provider' && 
+        needs.detect_changes.outputs.kadai_simplehistory_provider_changed == 'true') ||
+        
+        (matrix.module == 'kadai-simplehistory-rest-spring' && 
+        needs.detect_changes.outputs.kadai_simplehistory_rest_spring_changed == 'true') ||
+        
+        (matrix.module == 'kadai-spi-routing-dmn-router' && 
+        needs.detect_changes.outputs.kadai_spi_routing_dmn_router_changed == 'true') ||
+        
+        (matrix.module == 'kadai-routing-rest' && 
+        needs.detect_changes.outputs.kadai_routing_rest_changed == 'true') ||
+        
+        (matrix.module == 'kadai-rest-spring-example-boot' && 
+        (needs.detect_changes.outputs.kadai_rest_spring_example_boot_changed == 'true' ||
+          needs.detect_changes.outputs.kadai_spi_routing_dmn_router_changed == 'true' ||
+          needs.detect_changes.outputs.kadai_routing_rest_changed == 'true'))
+      )
     strategy:
       matrix:
         module:
@@ -441,7 +585,23 @@ jobs:
   test_backend_21:
     runs-on: ubuntu-22.04
     name: Test ${{ matrix.module }} with JDK 21 on ${{ matrix.database }}
-    needs: [ compile_backend ]
+    needs: [detect_changes, compile_backend ]
+    if: |
+      needs.detect_changes.outputs.backend_changed == 'true' &&
+      (
+        needs.detect_changes.outputs.core_modules_changed == 'true' ||
+        
+        (matrix.module == 'kadai-routing-rest' && 
+        needs.detect_changes.outputs.kadai_routing_rest_changed == 'true') ||
+        
+        (matrix.module == 'kadai-rest-spring-example-boot' && 
+        (needs.detect_changes.outputs.kadai_rest_spring_example_boot_changed == 'true' ||
+          needs.detect_changes.outputs.kadai_spi_routing_dmn_router_changed == 'true' ||
+          needs.detect_changes.outputs.kadai_routing_rest_changed == 'true')) ||
+        
+        (matrix.module == 'kadai-simplehistory-rest-spring' && 
+        needs.detect_changes.outputs.kadai_simplehistory_rest_spring_changed == 'true')
+      )
     strategy:
       matrix:
         module:
