@@ -524,9 +524,9 @@ jobs:
     runs-on: ubuntu-22.04
     name: Test ${{ matrix.module }} with JDK 17 on ${{ matrix.database }}
     needs: [detect_changes, compile_backend, generate_backend_test_matrices]
-    if: needs.decide_backend_tests.outputs.matrix_17 != '{"include":[]}'
+    if: needs.generate_backend_test_matrices.outputs.matrix_17 != '{"include":[]}'
     strategy:
-      matrix: ${{ fromJson(needs.decide_backend_tests.outputs.matrix_17) }}
+      matrix: ${{ fromJson(needs.generate_backend_test_matrices.outputs.matrix_17) }}
     steps:
       - name: Start Eco CI Measurement
         if: matrix.database == 'H2'
@@ -591,9 +591,9 @@ jobs:
     runs-on: ubuntu-22.04
     name: Test ${{ matrix.module }} with JDK 21 on ${{ matrix.database }}
     needs: [detect_changes, compile_backend, generate_backend_test_matrices ]
-    if: needs.decide_backend_tests.outputs.matrix_21 != '{"include":[]}'
+    if: needs.generate_backend_test_matrices.outputs.matrix_21 != '{"include":[]}'
     strategy:
-      matrix: ${{ fromJson(needs.decide_backend_tests.outputs.matrix_21) }}
+      matrix: ${{ fromJson(needs.generate_backend_test_matrices.outputs.matrix_21) }}
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
