@@ -55,7 +55,7 @@
     "@types/file-saver-es": "2",
     "@types/jest": "30.0.0",
     "@types/lodash-es": "4",
-    "@types/node": "24.10.0",
+    "@types/node": "24.10.1",
     "@typescript-eslint/eslint-plugin": "8.46.4",
     "@typescript-eslint/parser": "8.46.4",
     "cypress": "15.6.0",
