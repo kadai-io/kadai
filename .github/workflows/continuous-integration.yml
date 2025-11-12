@@ -58,7 +58,7 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
-          base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before || 'HEAD~1' }}
+          base: ${{ github.ref_name }}
           filters: |
             # ================================================================
             # BACKEND & FRONTEND CHANGES
