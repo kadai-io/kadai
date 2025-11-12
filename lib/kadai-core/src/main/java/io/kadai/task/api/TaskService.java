@@ -1646,7 +1646,7 @@ public interface TaskService {
    * Bulk updates multiple tasks by their IDs.
    *
    * <p>Updates only the specified fields for each task. If a task fails to be updated, e.g. due to
-   * missing permission of the user, an error is reported for it, but other tasks are still updated test.
+   * missing permission of the user, an error is reported for it, but other tasks are still updated.
    *
    * @param taskIds list of task Ids to be updated
    * @param taskPatch contains the fields and values to be updated
