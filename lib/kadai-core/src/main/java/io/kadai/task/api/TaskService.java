@@ -18,11 +18,6 @@
 
 package io.kadai.task.api;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import io.kadai.classification.api.exceptions.ClassificationNotFoundException;
 import io.kadai.classification.api.models.Classification;
 import io.kadai.common.api.BulkOperationResults;
@@ -51,6 +46,10 @@ import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import io.kadai.workbasket.api.exceptions.WorkbasketNotFoundException;
 import io.kadai.workbasket.api.models.Workbasket;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /** The TaskService manages all operations on {@linkplain Task Tasks}. */
 public interface TaskService {
