@@ -259,9 +259,9 @@ Our focus is mainly directed to the backend, but we maintain a demo frontend in 
 
 For login choose username `teamlead-1` with password `teamlead-1`.
 
-# ⚡️OpenEnergyBadge
+# 🌱 Sustainability
 
-[KADAI](https://www.blauer-engel.de/de/produkte/kadai-open-source-software-for-task-management) is successfully underwent [certification](docs/Urkunde-Blauer-Engel-KADAI.pdf) with the [*Blauer Engel for Software*](https://www.blauer-engel.de/en/productworld/software), an eco-label for resource- and energy-efficient software products awarded by the [German Environment Agency (Umweltbundesamt)](https://www.umweltbundesamt.de/en). 
+[KADAI](https://www.blauer-engel.de/de/produkte/kadai-open-source-software-for-task-management) successfully underwent [certification](docs/Urkunde-Blauer-Engel-KADAI.pdf) for the [*Blauer Engel for Software*](https://www.blauer-engel.de/en/productworld/software), an eco-label for resource- and energy-efficient software products awarded by the [German Environment Agency (Umweltbundesamt)](https://www.umweltbundesamt.de/en). 
 A central part of the certification is the definition of a standard usage scenario, which reflects typical user interactions.
 
 In our defined scenario, the following activities were performed:
