@@ -433,8 +433,9 @@ jobs:
     name: Test E2E
     needs: [detect_changes, compile_frontend, compile_backend]
     if: |
-      needs.detect_changes.outputs.core_modules_changed == 'true' ||
-      needs.detect_changes.outputs.frontend_changed == 'true' 
+      always() &&
+      (needs.detect_changes.outputs.core_modules_changed == 'true' ||
+      needs.detect_changes.outputs.frontend_changed == 'true')
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
