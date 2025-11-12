@@ -1650,7 +1650,6 @@ public interface TaskService {
    * @param taskIds list of task Ids to be updated
    * @param taskPatch contains the fields and values to be updated
    * @return the result of the operation for each task ID (success or error)
-   * testing line
    */
   BulkOperationResults<String, KadaiException> bulkUpdateTasks(
       List<String> taskIds, TaskPatch taskPatch);
