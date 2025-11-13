@@ -95,7 +95,7 @@
         <version.jakarta.activation>2.1.4</version.jakarta.activation>
 
         <!-- database driver versions -->
-        <version.db2>12.1.2.0</version.db2>
+        <version.db2>12.1.3.0</version.db2>
 
         <!-- sonar settings -->
         <sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
