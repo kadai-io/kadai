@@ -44,7 +44,7 @@ import {
 } from '@angular/material/table';
 import { DatePipe, NgClass } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import {MatIcon} from "@angular/material/icon";
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'kadai-monitor-task-priority-report',
@@ -67,7 +67,7 @@ import {MatIcon} from "@angular/material/icon";
     DatePipe,
     NgClass,
     RouterLink,
-    MatIcon,
+    MatIcon
   ],
   providers: [MonitorService]
 })
@@ -108,12 +108,10 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
             settings[SettingMembers.IntervalHighPriority],
             settings[SettingMembers.IntervalMediumPriority],
             settings[SettingMembers.IntervalLowPriority]
-          ].map((arr) => ({lowerBound: arr[0], upperBound: arr[1]}));
+          ].map((arr) => ({ lowerBound: arr[0], upperBound: arr[1] }));
 
           if (this.isDepthZero()) {
-            return this.monitorService.getTasksByPriorityReport(
-              [WorkbasketType.TOPIC],
-              this.priority);
+            return this.monitorService.getTasksByPriorityReport([WorkbasketType.TOPIC], this.priority);
           } else {
             return this.monitorService.getTasksByDetailedPriorityReport(
               [WorkbasketType.TOPIC],
@@ -157,9 +155,7 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
       meta: reportData.meta,
       rows: reportData.rows
         .filter((row) => row.depth === depth)
-        .filter((row) =>
-          this.workbasketKey() === undefined || row.desc[0] === this.workbasketKey()
-        ),
+        .filter((row) => this.workbasketKey() === undefined || row.desc[0] === this.workbasketKey()),
       sumRow: reportData.sumRow
     };
 
