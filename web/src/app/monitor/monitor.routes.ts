@@ -26,17 +26,17 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'tasks-priority/:domain'
+        redirectTo: 'tasks-priority'
       },
       {
-        path: 'tasks-priority/:domain',
+        path: 'tasks-priority',
         loadComponent: () =>
           import('./components/task-priority-report/task-priority-report.component').then(
             (m) => m.TaskPriorityReportComponent
           )
       },
       {
-        path: 'tasks-priority/:domain/:workbasketKey',
+        path: 'tasks-priority/:workbasketKey',
         loadComponent: () =>
           import('./components/task-priority-report/task-priority-report.component').then(
             (m) => m.TaskPriorityReportComponent
@@ -64,11 +64,6 @@ export const routes: Routes = [
           import('./components/timestamp-report/timestamp-report.component').then((m) => m.TimestampReportComponent)
       }
     ]
-  },
-  {
-    path: '',
-    redirectTo: 'tasks-priority/:domain',
-    pathMatch: 'full'
   },
   {
     path: '**',

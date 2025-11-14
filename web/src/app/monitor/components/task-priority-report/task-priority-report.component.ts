@@ -44,6 +44,7 @@ import {
 } from '@angular/material/table';
 import { DatePipe, NgClass } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import {MatIcon} from "@angular/material/icon";
 
 @Component({
   selector: 'kadai-monitor-task-priority-report',
@@ -65,7 +66,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
     MatRow,
     DatePipe,
     NgClass,
-    RouterLink
+    RouterLink,
+    MatIcon,
   ],
   providers: [MonitorService]
 })
@@ -84,7 +86,6 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
   destroy$ = new Subject<void>();
   settings$: Observable<Settings> = inject(Store).select(SettingsSelectors.getSettings);
   workbasketKey = signal<string>(undefined);
-  domain = signal<string>(undefined);
   private monitorService = inject(MonitorService);
   private requestInProgressService = inject(RequestInProgressService);
   private activatedRoute = inject(ActivatedRoute);
@@ -92,7 +93,6 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
   constructor() {
     this.activatedRoute.params.subscribe((params) => {
       this.workbasketKey.set(params['workbasketKey']);
-      this.domain.set(params['domain']);
     });
   }
 
@@ -108,21 +108,25 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
             settings[SettingMembers.IntervalHighPriority],
             settings[SettingMembers.IntervalMediumPriority],
             settings[SettingMembers.IntervalLowPriority]
-          ].map((arr) => ({ lowerBound: arr[0], upperBound: arr[1] }));
-          if (this.isDepthZero()) {
-            // TODO FIXME this is probably wrong/useless now, because we have to filter per domain...
-            return this.monitorService.getTasksByPriorityReport([WorkbasketType.TOPIC], this.priority);
-          }
+          ].map((arr) => ({lowerBound: arr[0], upperBound: arr[1]}));
 
-          return this.monitorService.getTasksByDetailedPriorityReport(
-            [WorkbasketType.TOPIC],
-            this.priority,
-            this.domain(),
-            this.workbasketKey()
-          );
+          if (this.isDepthZero()) {
+            return this.monitorService.getTasksByPriorityReport(
+              [WorkbasketType.TOPIC],
+              this.priority);
+          } else {
+            return this.monitorService.getTasksByDetailedPriorityReport(
+              [WorkbasketType.TOPIC],
+              this.priority,
+              undefined,
+              this.workbasketKey(),
+              {}
+            );
+          }
         })
       )
       .subscribe((reportData) => {
+        this.colorShouldChange = true;
         this.setValuesFromReportData(reportData);
         this.requestInProgressService.setRequestInProgress(false);
       });
@@ -152,8 +156,10 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
     this.reportData = {
       meta: reportData.meta,
       rows: reportData.rows
-        .filter((row) => row.depth == depth)
-        .filter((row) => this.workbasketKey() === undefined || row.desc[0] === this.workbasketKey()),
+        .filter((row) => row.depth === depth)
+        .filter((row) =>
+          this.workbasketKey() === undefined || row.desc[0] === this.workbasketKey()
+        ),
       sumRow: reportData.sumRow
     };
 
@@ -194,14 +200,30 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
 
   applyFilter(filter: {}) {
     this.requestInProgressService.setRequestInProgress(true);
-    this.monitorService
-      .getTasksByPriorityReport([WorkbasketType.TOPIC], this.priority, filter)
-      .pipe(take(1))
-      .subscribe((reportData) => {
-        this.colorShouldChange = true;
-        this.setValuesFromReportData(reportData);
-        this.requestInProgressService.setRequestInProgress(false);
-      });
+
+    if (this.isDepthZero()) {
+      this.monitorService
+        .getTasksByPriorityReport([WorkbasketType.TOPIC], this.priority, filter)
+        .pipe(take(1))
+        .subscribe((reportData) => {
+          this.setValuesFromReportData(reportData);
+          this.requestInProgressService.setRequestInProgress(false);
+        });
+    } else {
+      this.monitorService
+        .getTasksByDetailedPriorityReport(
+          [WorkbasketType.TOPIC],
+          this.priority,
+          undefined,
+          this.workbasketKey(),
+          filter
+        )
+        .pipe(take(1))
+        .subscribe((reportData) => {
+          this.setValuesFromReportData(reportData);
+          this.requestInProgressService.setRequestInProgress(false);
+        });
+    }
   }
 
   ngOnDestroy() {

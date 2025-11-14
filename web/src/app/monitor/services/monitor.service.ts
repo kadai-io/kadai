@@ -94,14 +94,16 @@ export class MonitorService {
   getTasksByDetailedPriorityReport(
     type: string[],
     priority: any[],
-    domain: string,
+    classificationKey?: string,
+    workbasketKey?: string,
     customFilters: {} = {}
   ): Observable<ReportData> {
     const queryParams = {
       'workbasket-type': type,
-      domain: domain,
+      ...(classificationKey && { 'classification-key': classificationKey }),
       state: 'READY',
       columnHeader: priority,
+      ...(workbasketKey && { 'workbasket-key': workbasketKey }),
       ...customFilters
     };
 

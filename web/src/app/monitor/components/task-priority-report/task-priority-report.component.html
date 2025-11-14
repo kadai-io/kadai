@@ -19,14 +19,33 @@
 @if (reportData) {
   <div class="task-priority-report">
     <!-- HEADER -->
-    <div class="task-priority-report__header">
       <h4 class="task-priority-report__headline"> {{ reportData?.meta.name }} ({{
-          reportData?.meta.date | date: 'medium'
-        }}) </h4>
-      <kadai-monitor-task-priority-report-filter
-        (applyFilter)="applyFilter($event)"></kadai-monitor-task-priority-report-filter>
-    </div>
+          reportData?.meta.date | date: 'medium' }})
+      </h4>
     <mat-divider class="task-priority-report__divider"></mat-divider>
+    <div class="breadcrumb-filter-row">
+      <nav class="breadcrumb">
+        @if (isDepthZero()) {
+          <span>
+      <mat-icon>list_alt</mat-icon>
+      <span>Workbaskets</span>
+    </span>
+        } @else {
+          <matbutton [routerLink]="['/kadai/monitor/tasks-priority']" class="breadcrumb-item">
+            <mat-icon>list_alt</mat-icon>
+            <span>Workbaskets</span>
+          </matbutton>
+          <mat-icon>chevron_right</mat-icon>
+          <span>
+      <mat-icon>folder_open</mat-icon>
+      <span>{{ workbasketKey() }}</span>
+    </span>
+        }
+      </nav>
+      <kadai-monitor-task-priority-report-filter
+        (applyFilter)="applyFilter($event)">
+      </kadai-monitor-task-priority-report-filter>
+    </div>
     @if (reportData?.rows.length == 0) {
       <div> Could not find any tasks which fulfill the current
         filter criteria.
@@ -40,8 +59,9 @@
           <div class="task-priority-report__workbasket-headline">
             <h6>
               @if (isDepthZero()) {
-                <a
-                  [routerLink]="['/kadai/monitor/tasks-priority', domain(), row.desc[0]]">{{ row.desc[0] }}</a>
+                <a [routerLink]="['/kadai/monitor/tasks-priority', row.desc[0]]">
+                  {{ row.desc[0] }}
+                </a>
               } @else {
                 {{ row.desc[1] }}
               }
