@@ -302,6 +302,8 @@ These badges show the energy cost for this scenario (done by 100 virtual users):
   <img src="docs/images/Blauer_Engel_LEF_blau_D_UZ215.png" width="420" />
 </a>
 
+The full procedure for the measurement can be found [here](docs/Messungen-Blauer-Engel-KADAI.pdf).
+
 # 📨Contact
 
 If you have any questions or ideas feel free to create an [issue](https://github.com/kadai-io/kadai/issues),
