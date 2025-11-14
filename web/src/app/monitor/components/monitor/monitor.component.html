@@ -21,7 +21,7 @@
     <nav [tabPanel]="monitorTabPanel" class="monitor__navbar" mat-stretch-tabs="false"
          mat-tab-nav-bar>
       <a (click)="selectedTab = 'tasks-priority'" [active]="selectedTab === 'tasks-priority'"
-         [routerLink]="['/kadai/monitor/tasks-priority', selectedDomain]"
+         [routerLink]="['/kadai/monitor/tasks-priority']"
          class="nav-bar__tasks--priority"
          mat-tab-link>Tasks by Priority</a>
       <a (click)="selectedTab = 'tasks-status'" [active]="selectedTab === 'tasks-status'"

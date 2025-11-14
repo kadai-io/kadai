@@ -19,9 +19,10 @@
 @if (reportData) {
   <div class="task-priority-report">
     <!-- HEADER -->
-      <h4 class="task-priority-report__headline"> {{ reportData?.meta.name }} ({{
-          reportData?.meta.date | date: 'medium' }})
-      </h4>
+    <h4 class="task-priority-report__headline"> {{ reportData?.meta.name }} ({{
+        reportData?.meta.date | date: 'medium'
+      }})
+    </h4>
     <mat-divider class="task-priority-report__divider"></mat-divider>
     <div class="breadcrumb-filter-row">
       <nav class="breadcrumb">
@@ -59,9 +60,8 @@
           <div class="task-priority-report__workbasket-headline">
             <h6>
               @if (isDepthZero()) {
-                <a [routerLink]="['/kadai/monitor/tasks-priority', row.desc[0]]">
-                  {{ row.desc[0] }}
-                </a>
+                <a
+                  [routerLink]="['/kadai/monitor/tasks-priority', row.desc[0]]">{{ row.desc[0] }}</a>
               } @else {
                 {{ row.desc[1] }}
               }

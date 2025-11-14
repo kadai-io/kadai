@@ -78,9 +78,15 @@ export class MonitorService {
     });
   }
 
-  getTasksByPriorityReport(type: string[], priority: any[], customFilters: {} = {}): Observable<ReportData> {
+  getTasksByPriorityReport(
+    type: string[],
+    priority: any[],
+    domain: string,
+    customFilters: {} = {}
+  ): Observable<ReportData> {
     const queryParams = {
       'workbasket-type': type,
+      domain: domain,
       state: 'READY',
       columnHeader: priority,
       ...customFilters
@@ -94,16 +100,14 @@ export class MonitorService {
   getTasksByDetailedPriorityReport(
     type: string[],
     priority: any[],
-    classificationKey?: string,
-    workbasketKey?: string,
+    domain: string,
     customFilters: {} = {}
   ): Observable<ReportData> {
     const queryParams = {
       'workbasket-type': type,
-      ...(classificationKey && { 'classification-key': classificationKey }),
+      domain: domain,
       state: 'READY',
       columnHeader: priority,
-      ...(workbasketKey && { 'workbasket-key': workbasketKey }),
       ...customFilters
     };
 
