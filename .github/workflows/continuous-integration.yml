@@ -363,7 +363,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Test kadai-web
     needs: [detect_changes, compile_frontend]
-    if: needs.detect_changes.outputs.frontend_code_changed == 'true'
+    if: needs.detect_changes.outputs.frontend_changed == 'true'
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
