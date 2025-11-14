@@ -1,4 +1,4 @@
-/*!
+/*
  * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,39 +16,21 @@
  *
  */
 
-@use 'colors';
+package io.kadai.monitor.api.reports.item;
 
-.monitor {
-  &__navbar-container {
-    display: flex;
-    background-color: colors.$light-grey;
-    justify-content: space-between;
-    align-items: flex-end;
+/**
+ * The DetailedPriorityQueryItem extends the {@linkplain MonitorQueryItem}. The additional
+ * classificationKey is used for the detailed classification report.
+ */
+public class DetailedPriorityQueryItem extends PriorityQueryItem {
+
+  private String classificationKey;
+
+  public String getClassificationKey() {
+    return classificationKey;
   }
 
-  &__navbar {
-    position: relative;
-    background-color: colors.$light-grey;
-    flex-grow: 2;
+  public void setClassificationKey(String classificationKey) {
+    this.classificationKey = classificationKey;
   }
-
-  &__domain {
-    height: 48px;
-    margin-right: 24px;
-    z-index: 11;
-    flex-shrink: 1;
-  }
-}
-
-::ng-deep .monitor__navbar-container * .mat-mdc-text-field-wrapper {
-  height: 48px;
-}
-
-.mat-mdc-tab-link {
-  color: #1a202c !important;
-}
-
-.mdc-tab--active {
-  font-weight: bolder !important;
-  opacity: 1;
 }
