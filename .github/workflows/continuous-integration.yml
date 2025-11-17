@@ -68,8 +68,6 @@ jobs:
           name: ${{ env.ARTIFACTS_KADAI_JARS_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
           if-no-files-found: error
-      - name: Remove kadai artifacts from cache
-        run: rm -rf ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
@@ -126,8 +124,6 @@ jobs:
           name: ${{ env.ARTIFACTS_KADAI_WEB_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_WEB_PATH }}
           if-no-files-found: error
-      - name: Remove kadai artifacts from cache
-        run: rm -rf ~/.m2/repository/io/kadai
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
