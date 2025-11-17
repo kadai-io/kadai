@@ -2,7 +2,7 @@
 <Configuration status="info">
     <!--
         - Abweichungen der Log4j Struktur muessen mit dem Anwendungsbetrieb abgesprochen werden
-        - SCHEMA_ID, BUSINESS_APPLICATION und GLOBAL_ID werden in ARA gesetzttest
+        - SCHEMA_ID, BUSINESS_APPLICATION und GLOBAL_ID werden in ARA gesetzt
         - LOG_FOLDER fuer jboss ${sys:jboss.server.log.dir} | fuer weblogic ${env:LOG_PATH}/${SCHEMA_ID} | fuer tomcat ${sys:catalina.base}/logs
     -->
     <Properties>
