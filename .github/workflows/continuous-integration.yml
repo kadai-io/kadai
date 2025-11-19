@@ -677,6 +677,7 @@ jobs:
     needs: [ release_artifacts ]
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - name: Git checkout
         uses: actions/checkout@v5
@@ -690,6 +691,7 @@ jobs:
         env:
           GH_EMAIL: ${{ secrets.GH_EMAIL }}
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
