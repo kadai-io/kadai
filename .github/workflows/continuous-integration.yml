@@ -523,8 +523,7 @@ jobs:
           :kadai-lib-parent,:kadai-core,:kadai-spring,\
           :kadai-rest-parent,:kadai-web,:kadai-rest-spring,\
           :kadai-history-parent,:kadai-simplehistory-provider,:kadai-simplehistory-rest-spring,:kadai-loghistory-provider,\
-          :kadai-routing-parent,:kadai-spi-routing-dmn-router,:kadai-routing-rest \
-          -T 4
+          :kadai-routing-parent,:kadai-spi-routing-dmn-router,:kadai-routing-rest
         env:
           GPG_KEY_NAME: ${{ secrets.GPG_KEY_NAME }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
