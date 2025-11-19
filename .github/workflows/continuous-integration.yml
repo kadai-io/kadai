@@ -684,7 +684,7 @@ jobs:
         with:
           fetch-depth: 0 # necessary for push back
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Update version to next snapshot and push back
+      - name: Update version to next snapshot and create PR
         run: |
           ci/change_version.sh -i -m .
           ci/commitPoms.sh
