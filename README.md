@@ -297,7 +297,7 @@ These badges show the energy cost for this scenario (done by 100 virtual users):
        alt="CPU Package Energy Badge" 
        loading="lazy">
 </a>
-
+<br>
 <a href="https://www.blauer-engel.de/en/productworld/software">
   <img src="docs/images/Blauer_Engel_LEF_blau_D_UZ215.png" width="420" />
 </a>
