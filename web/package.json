@@ -38,7 +38,7 @@
     "@ngxs/store": "20.1.0",
     "angular-svg-icon": "19.1.1",
     "chart.js": "4.5.1",
-    "core-js": "3.46.0",
+    "core-js": "3.47.0",
     "file-saver-es": "2.0.5",
     "lodash-es": "4.17.21",
     "ng2-charts": "8.0.0",
