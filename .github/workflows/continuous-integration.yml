@@ -689,8 +689,6 @@ jobs:
           ci/change_version.sh -i -m .
           ci/commitPoms.sh
         env:
-          GH_EMAIL: ${{ secrets.GH_EMAIL }}
-          GH_USERNAME: ${{ secrets.GH_USERNAME }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Cancel workflow
         if: failure()

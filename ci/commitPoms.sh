@@ -12,8 +12,6 @@ set -e # fail fast
 #H
 #H Requirements:
 #H   current commit is a HEAD commit
-#H   GH_USERNAME - github username / displayname (for git config)
-#H   GH_EMAIL - github email address (for git config)
 #H   GH_TOKEN - GitHub token for authentication
 #H   GITHUB_REF (format refs/tags/v[0-9]+\.[0-9]+\.[0-9]+)
 # Arguments:
@@ -57,8 +55,8 @@ function main() {
       exit 1
     fi
     set -x
-    git config --global user.email "$GH_EMAIL"
-    git config --global user.name "$GH_USERNAME"
+    git config --global user.email "github-actions[bot]@users.noreply.github.com"
+    git config --global user.name "github-actions[bot]"
 
     #commit all poms
     git checkout "$branch"
