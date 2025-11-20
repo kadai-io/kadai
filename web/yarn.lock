@@ -4970,9 +4970,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cypress@npm:15.6.0":
-  version: 15.6.0
-  resolution: "cypress@npm:15.6.0"
+"cypress@npm:15.7.0":
+  version: 15.7.0
+  resolution: "cypress@npm:15.7.0"
   dependencies:
     "@cypress/request": "npm:^3.0.9"
     "@cypress/xvfb": "npm:^1.2.4"
@@ -5010,7 +5010,6 @@ __metadata:
     process: "npm:^0.11.10"
     proxy-from-env: "npm:1.0.0"
     request-progress: "npm:^3.0.0"
-    semver: "npm:^7.7.1"
     supports-color: "npm:^8.1.1"
     systeminformation: "npm:5.27.7"
     tmp: "npm:~0.2.4"
@@ -5019,7 +5018,7 @@ __metadata:
     yauzl: "npm:^2.10.0"
   bin:
     cypress: bin/cypress
-  checksum: 10c0/55534a2ee8e86bb9c7adaf42aaa4160cbafb3f52f78f5d288cba48230e431565ef1654d0c626238e2122a6fb08765db7447725516e6c28c05b05b7c51f5e4624
+  checksum: 10c0/e0d25943862ae442c16320f1f5766fd1e38986a9a1b20592cec8247b7a6a5ec1066abecc283d8e5c7cbc4a447b20b55e5dbb662e86046ad846e0cff61c4b2056
   languageName: node
   linkType: hard
 
@@ -8252,7 +8251,7 @@ __metadata:
     angular-svg-icon: "npm:19.1.1"
     chart.js: "npm:4.5.1"
     core-js: "npm:3.47.0"
-    cypress: "npm:15.6.0"
+    cypress: "npm:15.7.0"
     eslint: "npm:9.39.1"
     eslint-config-prettier: "npm:10.1.8"
     eslint-plugin-import: "npm:2.32.0"
@@ -10184,7 +10183,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:7.7.2, semver@npm:^7.0.0, semver@npm:^7.1.1, semver@npm:^7.3.5, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0, semver@npm:^7.7.1, semver@npm:^7.7.2":
+"semver@npm:7.7.2, semver@npm:^7.0.0, semver@npm:^7.1.1, semver@npm:^7.3.5, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0, semver@npm:^7.7.2":
   version: 7.7.2
   resolution: "semver@npm:7.7.2"
   bin:
