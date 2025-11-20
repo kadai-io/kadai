@@ -429,7 +429,7 @@ jobs:
   test_e2e:
     runs-on: ubuntu-22.04
     name: Test E2E
-    needs: [detect_changes, compile_frontend, compile_backend, test_frontend, test_backend_17, test_backend_21]
+    needs: [test_frontend, test_backend_17, test_backend_21]
     if: |
       always() &&
       (needs.detect_changes.outputs.frontend_changed == 'true' || needs.detect_changes.outputs.backend_changed == 'true') &&
@@ -527,7 +527,7 @@ jobs:
   test_backend_17:
     runs-on: ubuntu-22.04
     name: Test ${{ matrix.module }} with JDK 17 on ${{ matrix.database }}
-    needs: [detect_changes, compile_backend, generate_backend_test_matrices]
+    needs: [compile_backend, generate_backend_test_matrices]
     if: needs.generate_backend_test_matrices.outputs.matrix_17 != '{"include":[]}'
     strategy:
       matrix: ${{ fromJson(needs.generate_backend_test_matrices.outputs.matrix_17) }}
@@ -596,7 +596,7 @@ jobs:
   test_backend_21:
     runs-on: ubuntu-22.04
     name: Test ${{ matrix.module }} with JDK 21 on ${{ matrix.database }}
-    needs: [detect_changes, compile_backend, generate_backend_test_matrices ]
+    needs: [compile_backend, generate_backend_test_matrices ]
     if: needs.generate_backend_test_matrices.outputs.matrix_21 != '{"include":[]}'
     strategy:
       matrix: ${{ fromJson(needs.generate_backend_test_matrices.outputs.matrix_21) }}
