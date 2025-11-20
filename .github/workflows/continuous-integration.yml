@@ -33,9 +33,45 @@ env:
   CACHE_SONAR_NAME: sonar
 
 jobs:
+  detect_changes:
+    name: Detect changed files and modules
+    runs-on: ubuntu-22.04
+    outputs:
+      # High-level triggers
+      backend_changed: ${{ steps.filter.outputs.backend }}
+      frontend_changed: ${{ steps.filter.outputs.frontend }}   
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          base: ${{ github.ref_name }}
+          filters: |
+            # ================================================================
+            # BACKEND & FRONTEND CHANGES
+            # ================================================================
+            backend:
+              - 'common/**'
+              - 'lib/**'
+              - 'history/**'
+              - 'rest/**'
+              - 'routing/**'
+              - 'ci/**'
+              - 'qa/checkstyle/checkstyle.xml'
+              - 'pom.xml'
+              - 'mvnw'
+              - '.mvn/**'
+              - '!**/*.md'
+            
+            frontend:
+              - 'web/**'
+              - '!web/*.md'
+
   compile_backend:
     name: Compile all maven modules
     runs-on: ubuntu-22.04
+    needs: [ detect_changes ]
+    if: needs.detect_changes.outputs.backend_changed == 'true' || needs.detect_changes.outputs.frontend_changed == 'true'
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -95,6 +131,8 @@ jobs:
   compile_frontend:
     name: Compile kadai-web
     runs-on: ubuntu-22.04
+    needs: [ detect_changes ]
+    if: needs.detect_changes.outputs.backend_changed == 'true' || needs.detect_changes.outputs.frontend_changed == 'true'
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -243,7 +281,13 @@ jobs:
   test_e2e:
     runs-on: ubuntu-22.04
     name: Test E2E
-    needs: [ compile_frontend, compile_backend ]
+    needs: [detect_changes, compile_frontend, compile_backend, test_frontend, test_backend_17, test_backend_21]
+    if: |
+      always() &&
+      (needs.detect_changes.outputs.frontend_changed == 'true' || needs.detect_changes.outputs.backend_changed == 'true') &&
+      (needs.test_frontend.result == 'success' || needs.test_frontend.result == 'skipped') &&
+      (needs.test_backend_17.result == 'success' || needs.test_backend_17.result == 'skipped') &&
+      (needs.test_backend_21.result == 'success' || needs.test_backend_21.result == 'skipped')
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
