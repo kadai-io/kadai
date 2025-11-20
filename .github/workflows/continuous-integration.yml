@@ -427,7 +427,13 @@ jobs:
   test_e2e:
     runs-on: ubuntu-22.04
     name: Test E2E
-    needs: [detect_changes, compile_frontend, compile_backend]
+    needs: [detect_changes, compile_frontend, compile_backend, test_frontend, test_backend_17, test_backend_21]
+    if: |
+      always() &&
+      (needs.detect_changes.outputs.frontend_changed == 'true' || needs.detect_changes.outputs.backend_changed == 'true') &&
+      (needs.test_frontend.result == 'success' || needs.test_frontend.result == 'skipped') &&
+      (needs.test_backend_17.result == 'success' || needs.test_backend_17.result == 'skipped') &&
+      (needs.test_backend_21.result == 'success' || needs.test_backend_21.result == 'skipped')
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
