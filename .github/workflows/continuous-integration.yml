@@ -649,8 +649,8 @@ jobs:
           fi
           
           echo "Using Maven profile: $PROFILE"
-          ./mvnw -B deploy:deploy -P $PROFILE \
-          --settings ci/mvnsettings.xml \
+          ./mvnw -B deploy -P $PROFILE \
+          --settings ci/mvnsettings.xml -DskipTests -Dcheckstyle.skip -Djacoco.skip \
           -pl :kadai-parent,\
           :kadai-common-parent,:kadai-common-logging,:kadai-common,:kadai-common-security,\
           :kadai-common-data,:kadai-common-test,:kadai-test-api,\
