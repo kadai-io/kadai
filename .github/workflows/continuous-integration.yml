@@ -63,7 +63,7 @@ jobs:
       - name: Change versions to match tag
         run: ci/change_version.sh -m .
       - name: Compile & build
-        run: ./mvnw -B install -DskipTests -Djacoco.skip
+        run: ./mvnw -B install -DskipTests -Djacoco.skip -T 1C
       - name: Eco CI Measurement of mvn install
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
         with:
@@ -80,8 +80,8 @@ jobs:
       - name: Populate cache
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          ./mvnw -B dependency:go-offline
-          ./mvnw -B test -Dtest=GibtEsNet -Dsurefire.failIfNoSpecifiedTests=false
+          ./mvnw -B dependency:go-offline -T 1C
+          ./mvnw -B test -Dtest=GibtEsNet -Dsurefire.failIfNoSpecifiedTests=false -T 1C
       - name: Upload kadai artifacts
         uses: actions/upload-artifact@v5
         with:
@@ -132,7 +132,7 @@ jobs:
           key: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}
       - name: Populate maven cache
-        run: ./mvnw -B dependency:go-offline -pl :kadai-web -am
+        run: ./mvnw -B dependency:go-offline -pl :kadai-web -am -T 1C
         if: steps.maven-cache.outputs.cache-hit != 'true'
       - name: Install Dependencies
         if: steps.web-cache.outputs.cache-hit != 'true'
@@ -150,7 +150,7 @@ jobs:
           label: "compile_frontend: yarn build"
         continue-on-error: true
       - name: Build maven artifact
-        run: ./mvnw -B install -pl :kadai-web -am
+        run: ./mvnw -B install -pl :kadai-web -am -T 1C
       - name: Eco CI Measurement of mvn :kadai-web
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
         with:
@@ -218,7 +218,7 @@ jobs:
       # Theoretically this step below not necessary because we reuse the cache from the 'compile_frontend' job.
       # Sometimes the cache is not created, therefore this is a fallback.
       - name: Populate cache
-        run: ./mvnw -B dependency:go-offline -pl :kadai-web -am
+        run: ./mvnw -B dependency:go-offline -pl :kadai-web -am -T 1C
         if: steps.maven-cache.outputs.cache-hit != 'true'
       - name: Test
         working-directory: web
@@ -295,7 +295,7 @@ jobs:
         # Theoretically this step below not necessary because we reuse the cache from the 'compile_frontend' job.
         # Sometimes the cache is not created, therefore this is a fallback.
       - name: Populate cache
-        run: ./mvnw -B dependency:go-offline -pl :kadai-rest-spring-example-boot -am
+        run: ./mvnw -B dependency:go-offline -pl :kadai-rest-spring-example-boot -am -T 1C
         if: steps.maven-cache.outputs.cache-hit != 'true'
       - name: Download kadai-web dist artifact
         uses: actions/download-artifact@v6
@@ -303,7 +303,7 @@ jobs:
           name: ${{ env.ARTIFACTS_KADAI_WEB_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_WEB_PATH }}
       - name: Build frontend
-        run: ./mvnw install -pl :kadai-web
+        run: ./mvnw install -pl :kadai-web -T 1C
       - name: Cypress tests
         working-directory: web
         run: |
@@ -415,7 +415,7 @@ jobs:
         run: |
           ci/change_version.sh -m .
       - name: Test
-        run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip
+        run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip -T 1C
         env:
           DB: ${{ matrix.database }}
       - name: Eco CI Measurement of ${{ matrix.module }} (H2)
@@ -489,7 +489,7 @@ jobs:
         run: |
           ci/change_version.sh -m .
       - name: Test
-        run: ./mvnw -B test -pl :${{matrix.module}} -Dcheckstyle.skip -D"java.version=21"
+        run: ./mvnw -B test -pl :${{matrix.module}} -Dcheckstyle.skip -D"java.version=21" -T 1C
         env:
           DB: ${{ matrix.database }}
       - name: Eco CI Measurement of ${{ matrix.module }} (JDK21/DB2)
