@@ -18,12 +18,11 @@
 
 import { Component, inject, Input, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
-import { Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { takeUntil } from 'rxjs/operators';
 import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
 import { MatTabLink, MatTabNav, MatTabNavPanel } from '@angular/material/tabs';
-
 import { MatFormField } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -50,7 +49,6 @@ export class AdministrationOverviewComponent implements OnInit {
   domains: Array<string> = [];
   selectedDomain: string;
   destroy$ = new Subject<void>();
-  url$: Observable<any>;
   routingAccess = false;
   private router = inject(Router);
   private domainService = inject(DomainService);
@@ -91,12 +89,7 @@ export class AdministrationOverviewComponent implements OnInit {
       });
   }
 
-  switchDomain(domain) {
+  switchDomain(domain: string) {
     this.domainService.switchDomain(domain);
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }
