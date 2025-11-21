@@ -18,10 +18,30 @@
 
 @use 'colors';
 
-.nav-bar {
-  background-color: colors.$light-grey;
-  position: relative;
-  border: none;
+.monitor {
+  &__navbar-container {
+    display: flex;
+    background-color: colors.$light-grey;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  &__navbar {
+    position: relative;
+    background-color: colors.$light-grey;
+    flex-grow: 2;
+  }
+
+  &__domain {
+    height: 48px;
+    margin-right: 24px;
+    z-index: 11;
+    flex-shrink: 1;
+  }
+}
+
+::ng-deep .monitor__navbar-container * .mat-mdc-text-field-wrapper {
+  height: 48px;
 }
 
 .mat-mdc-tab-link {

@@ -16,25 +16,42 @@
   ~
   -->
 
-<nav [tabPanel]="monitorTabPanel" class="nav-bar" mat-stretch-tabs="false" mat-tab-nav-bar>
-  <a (click)="selectedTab = 'tasks-priority'" [active]="selectedTab === 'tasks-priority'"
-     class="nav-bar__tasks--priority"
-     mat-tab-link
-     routerLink="/kadai/monitor/tasks-priority">Tasks by Priority</a>
-  <a (click)="selectedTab = 'tasks-status'" [active]="selectedTab === 'tasks-status'"
-     class="nav-bar__tasks--status"
-     mat-tab-link
-     routerLink="/kadai/monitor/tasks-status">Tasks by Status </a>
-  <a (click)="selectedTab = 'workbaskets'" [active]="selectedTab === 'workbaskets'"
-     class="nav-bar__workbaskets"
-     mat-tab-link routerLink="/kadai/monitor/workbaskets">Workbaskets</a>
-  <a (click)="selectedTab = 'classifications'" [active]="selectedTab === 'classifications'"
-     class="nav-bar__classifications"
-     mat-tab-link routerLink="/kadai/monitor/classifications">Classifications</a>
-  <a (click)="selectedTab = 'timestamp'" [active]="selectedTab === 'timestamp'"
-     class="nav-bar__timestamp"
-     mat-tab-link routerLink="/kadai/monitor/timestamp">Timestamp</a>
-</nav>
-<mat-tab-nav-panel #monitorTabPanel>
-  <router-outlet/>
-</mat-tab-nav-panel>
+<div class="monitor">
+  <div class="monitor__navbar-container">
+    <nav [tabPanel]="monitorTabPanel" class="monitor__navbar" mat-stretch-tabs="false"
+         mat-tab-nav-bar>
+      <a (click)="selectedTab = 'tasks-priority'" [active]="selectedTab === 'tasks-priority'"
+         [routerLink]="['/kadai/monitor/tasks-priority']"
+         class="nav-bar__tasks--priority"
+         mat-tab-link>Tasks by Priority</a>
+      <a (click)="selectedTab = 'tasks-status'" [active]="selectedTab === 'tasks-status'"
+         class="nav-bar__tasks--status"
+         mat-tab-link
+         routerLink="/kadai/monitor/tasks-status">Tasks by Status </a>
+      <a (click)="selectedTab = 'workbaskets'" [active]="selectedTab === 'workbaskets'"
+         class="nav-bar__workbaskets"
+         mat-tab-link routerLink="/kadai/monitor/workbaskets">Workbaskets</a>
+      <a (click)="selectedTab = 'classifications'" [active]="selectedTab === 'classifications'"
+         class="nav-bar__classifications"
+         mat-tab-link routerLink="/kadai/monitor/classifications">Classifications</a>
+      <a (click)="selectedTab = 'timestamp'" [active]="selectedTab === 'timestamp'"
+         class="nav-bar__timestamp"
+         mat-tab-link routerLink="/kadai/monitor/timestamp">Timestamp</a>
+    </nav>
+    <div class="monitor__domain">
+      <mat-form-field>
+        <mat-select [value]="selectedDomain" matTooltip="Select domain">
+          @for (domain of domains; track domain) {
+            <mat-option (click)="switchDomain(domain)"
+                        [value]="domain">
+              {{ domain ? domain : 'MASTER DOMAIN' }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+  <mat-tab-nav-panel #monitorTabPanel>
+    <router-outlet />
+  </mat-tab-nav-panel>
+</div>

@@ -16,7 +16,7 @@
  *
  */
 
-import { AfterViewChecked, Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewChecked, Component, effect, inject, OnDestroy, signal } from '@angular/core';
 import { ReportData } from '../../models/report-data';
 import { MonitorService } from '../../services/monitor.service';
 import { WorkbasketType } from '../../../shared/models/workbasket-type';
@@ -24,7 +24,7 @@ import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 import { SettingsSelectors } from '../../../shared/store/settings-store/settings.selectors';
 import { Settings } from '../../../settings/models/settings';
-import { mergeMap, take, takeUntil } from 'rxjs/operators';
+import { take, takeUntil } from 'rxjs/operators';
 import { SettingMembers } from '../../../settings/components/Settings/expected-members';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { TaskPriorityReportFilterComponent } from '../task-priority-report-filter/task-priority-report-filter.component';
@@ -43,6 +43,10 @@ import {
   MatTable
 } from '@angular/material/table';
 import { DatePipe, NgClass } from '@angular/common';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { MatIcon } from '@angular/material/icon';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { DomainService } from '../../../shared/services/domain/domain.service';
 
 @Component({
   selector: 'kadai-monitor-task-priority-report',
@@ -63,11 +67,13 @@ import { DatePipe, NgClass } from '@angular/common';
     MatRowDef,
     MatRow,
     DatePipe,
-    NgClass
+    NgClass,
+    RouterLink,
+    MatIcon
   ],
   providers: [MonitorService]
 })
-export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, OnDestroy {
+export class TaskPriorityReportComponent implements AfterViewChecked, OnDestroy {
   columns: string[] = ['priority', 'number'];
   reportData: ReportData;
   tableDataArray: { priority: string; number: number }[][] = [];
@@ -81,29 +87,55 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
   colorLowPriority: string;
   destroy$ = new Subject<void>();
   settings$: Observable<Settings> = inject(Store).select(SettingsSelectors.getSettings);
-  private monitorService = inject(MonitorService);
-  private requestInProgressService = inject(RequestInProgressService);
+  workbasketKey = signal<string>(undefined);
+  private readonly monitorService = inject(MonitorService);
+  private readonly requestInProgressService = inject(RequestInProgressService);
+  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly domainService = inject(DomainService);
+  private readonly domain = toSignal(this.domainService.getSelectedDomain(), {
+    initialValue: this.domainService.getSelectedDomainValue?.()
+  });
 
-  ngOnInit() {
-    this.requestInProgressService.setRequestInProgress(true);
-    this.settings$
-      .pipe(
-        takeUntil(this.destroy$),
-        mergeMap((settings) => {
-          this.setValuesFromSettings(settings);
-          // the order must be high, medium, low because the canvas component defines its labels in this order
-          this.priority = [
-            settings[SettingMembers.IntervalHighPriority],
-            settings[SettingMembers.IntervalMediumPriority],
-            settings[SettingMembers.IntervalLowPriority]
-          ].map((arr) => ({ lowerBound: arr[0], upperBound: arr[1] }));
-          return this.monitorService.getTasksByPriorityReport([WorkbasketType.TOPIC], this.priority);
-        })
-      )
-      .subscribe((reportData) => {
-        this.setValuesFromReportData(reportData);
-        this.requestInProgressService.setRequestInProgress(false);
+  private readonly settings = toSignal(this.settings$, { initialValue: undefined as Settings });
+  private readonly currentFilter = signal<{}>({});
+
+  constructor() {
+    this.activatedRoute.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      this.workbasketKey.set(params['workbasketKey']);
+    });
+
+    effect((onCleanup) => {
+      const settings = this.settings();
+      const domain = this.domain();
+      const filter = this.currentFilter();
+
+      this.requestInProgressService.setRequestInProgress(true);
+      this.setValuesFromSettings(settings);
+      // the order must be high, medium, low because the canvas component defines its labels in this order
+      this.priority = [
+        settings[SettingMembers.IntervalHighPriority],
+        settings[SettingMembers.IntervalMediumPriority],
+        settings[SettingMembers.IntervalLowPriority]
+      ].map((arr) => ({ lowerBound: arr[0], upperBound: arr[1] }));
+
+      const reportData = this.isDepthZero()
+        ? this.monitorService.getTasksByPriorityReport([WorkbasketType.TOPIC], this.priority, domain, filter)
+        : this.monitorService.getTasksByDetailedPriorityReport([WorkbasketType.TOPIC], this.priority, domain, filter);
+
+      const reportDataSubscription = reportData.subscribe({
+        next: (reportData) => {
+          this.colorShouldChange = true;
+          this.setValuesFromReportData(reportData);
+          this.requestInProgressService.setRequestInProgress(false);
+        },
+        error: (err) => {
+          console.error('Failed to load Task Priority Report', err);
+          this.requestInProgressService.setRequestInProgress(false);
+        }
       });
+
+      onCleanup(() => reportDataSubscription.unsubscribe());
+    });
   }
 
   ngAfterViewChecked() {
@@ -125,8 +157,15 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
     this.colorLowPriority = settings[SettingMembers.ColorLowPriority];
   }
 
-  setValuesFromReportData(reportData) {
-    this.reportData = reportData;
+  setValuesFromReportData(reportData: ReportData) {
+    const depth = this.isDepthZero() ? 0 : 1;
+    this.reportData = {
+      meta: reportData.meta,
+      rows: reportData.rows
+        .filter((row) => row.depth === depth)
+        .filter((row) => this.isDepthZero() || row.desc[0] === this.workbasketKey()),
+      sumRow: reportData.sumRow
+    };
 
     // the order must be high, medium, low because the canvas component defines its labels in this order
     let indexHigh = 0;
@@ -134,7 +173,7 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
     let indexLow = 2;
 
     this.tableDataArray = [];
-    reportData.rows.forEach((row) => {
+    this.reportData.rows.forEach((row) => {
       this.tableDataArray.push([
         { priority: this.nameHighPriority, number: row.cells[indexHigh] },
         { priority: this.nameMediumPriority, number: row.cells[indexMedium] },
@@ -164,19 +203,34 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
   }
 
   applyFilter(filter: {}) {
+    this.currentFilter.set(filter);
     this.requestInProgressService.setRequestInProgress(true);
-    this.monitorService
-      .getTasksByPriorityReport([WorkbasketType.TOPIC], this.priority, filter)
-      .pipe(take(1))
-      .subscribe((reportData) => {
-        this.colorShouldChange = true;
-        this.setValuesFromReportData(reportData);
-        this.requestInProgressService.setRequestInProgress(false);
-      });
+
+    if (this.isDepthZero()) {
+      this.monitorService
+        .getTasksByPriorityReport([WorkbasketType.TOPIC], this.priority, this.domain(), filter)
+        .pipe(take(1))
+        .subscribe((reportData) => {
+          this.setValuesFromReportData(reportData);
+          this.requestInProgressService.setRequestInProgress(false);
+        });
+    } else {
+      this.monitorService
+        .getTasksByDetailedPriorityReport([WorkbasketType.TOPIC], this.priority, this.domain(), filter)
+        .pipe(take(1))
+        .subscribe((reportData) => {
+          this.setValuesFromReportData(reportData);
+          this.requestInProgressService.setRequestInProgress(false);
+        });
+    }
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  protected isDepthZero() {
+    return this.workbasketKey() === undefined;
   }
 }

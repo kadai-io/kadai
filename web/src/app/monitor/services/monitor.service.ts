@@ -78,9 +78,15 @@ export class MonitorService {
     });
   }
 
-  getTasksByPriorityReport(type: string[], priority: any[], customFilters: {} = {}): Observable<ReportData> {
+  getTasksByPriorityReport(
+    type: string[],
+    priority: any[],
+    domain: string,
+    customFilters: {} = {}
+  ): Observable<ReportData> {
     const queryParams = {
       'workbasket-type': type,
+      domain: domain,
       state: 'READY',
       columnHeader: priority,
       ...customFilters
@@ -88,6 +94,25 @@ export class MonitorService {
 
     return this.httpClient.get<ReportData>(
       `${environment.kadaiRestUrl + monitorUrl}/workbasket-priority-report${asUrlQueryString(queryParams)}`
+    );
+  }
+
+  getTasksByDetailedPriorityReport(
+    type: string[],
+    priority: any[],
+    domain: string,
+    customFilters: {} = {}
+  ): Observable<ReportData> {
+    const queryParams = {
+      'workbasket-type': type,
+      domain: domain,
+      state: 'READY',
+      columnHeader: priority,
+      ...customFilters
+    };
+
+    return this.httpClient.get<ReportData>(
+      `${environment.kadaiRestUrl + monitorUrl}/detailed-workbasket-priority-report${asUrlQueryString(queryParams)}`
     );
   }
 }

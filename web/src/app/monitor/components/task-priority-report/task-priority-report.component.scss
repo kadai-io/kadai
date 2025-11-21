@@ -25,16 +25,9 @@ table {
   overflow-y: scroll;
   height: calc(100vh - 104px);
 
-  &__header {
-    display: grid;
-    grid-gap: 4px;
-    grid-template-columns: 2fr 1fr;
-  }
-
   &__headline {
     margin: 0 0 0 8px;
     position: relative;
-    top: 12px;
   }
 
   &__divider {
@@ -57,5 +50,20 @@ table {
   &__workbasket-headline {
     text-align: center;
     margin-bottom: 8px;
+  }
+
+  .breadcrumb-filter-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0 0 8px;
+    height: 60px;
+  }
+
+  .breadcrumb-item {
+    cursor: pointer;
+
+    :hover {
+      text-decoration: underline;
+    }
   }
 }
