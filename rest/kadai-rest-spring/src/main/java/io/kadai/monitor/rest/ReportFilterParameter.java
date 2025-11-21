@@ -64,6 +64,12 @@ public class ReportFilterParameter {
   protected final String[] excludedClassificationId;
 
   @Parameter(
+      name = "classification-key",
+      description = "Filter by the classification key of the Task. This is an exact match.")
+  @JsonProperty("classification-key")
+  protected final String[] classificationKey;
+
+  @Parameter(
       name = "custom-1",
       description = "Filter by the value of the field custom1 of the Task. This is an exact match.")
   @JsonProperty("custom-1")
@@ -430,6 +436,7 @@ public class ReportFilterParameter {
     "domain",
     "classification-id",
     "excluded-classification-id",
+    "classification-key",
     "custom-1",
     "custom-1-like",
     "custom-1-not-in",
@@ -487,6 +494,7 @@ public class ReportFilterParameter {
       String[] domain,
       String[] classificationId,
       String[] excludedClassificationId,
+      String[] classificationKey,
       String[] custom1,
       String[] custom1Like,
       String[] custom1NotIn,
@@ -542,6 +550,7 @@ public class ReportFilterParameter {
     this.domain = domain;
     this.classificationId = classificationId;
     this.excludedClassificationId = excludedClassificationId;
+    this.classificationKey = classificationKey;
     this.custom1 = custom1;
     this.custom1Like = custom1Like;
     this.custom1NotIn = custom1NotIn;
@@ -618,6 +627,10 @@ public class ReportFilterParameter {
 
   public String[] getExcludedClassificationId() {
     return excludedClassificationId;
+  }
+
+  public String[] getClassificationKey() {
+    return classificationKey;
   }
 
   public String[] getCustom1() {

@@ -66,6 +66,7 @@ abstract class TimeIntervalReportBuilderImpl<
   protected String[] domains;
   protected String[] classificationIds;
   protected String[] excludedClassificationIds;
+  protected String[] classificationKeys;
   protected WorkingTimeCalculator workingTimeCalculator;
   private String[] custom1In;
   private String[] custom1NotIn;
@@ -204,6 +205,14 @@ abstract class TimeIntervalReportBuilderImpl<
   public B excludedClassificationIdIn(List<String> excludedClassificationIds) {
     if (excludedClassificationIds != null) {
       this.excludedClassificationIds = excludedClassificationIds.toArray(new String[0]);
+    }
+    return _this();
+  }
+
+  @Override
+  public B classificationKeyIn(List<String> classificationKeys) {
+    if (classificationKeys != null) {
+      this.classificationKeys = classificationKeys.toArray(new String[0]);
     }
     return _this();
   }

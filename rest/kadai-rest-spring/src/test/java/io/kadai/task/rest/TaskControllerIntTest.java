@@ -979,7 +979,7 @@ class TaskControllerIntTest {
       assertThat(response.getBody()).isNotNull();
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
-      assertThat(response.getBody().getContent()).hasSize(91);
+      assertThat(response.getBody().getContent()).hasSize(95);
     }
 
     @Test
@@ -1368,7 +1368,7 @@ class TaskControllerIntTest {
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
-      assertThat(response.getBody().getContent()).hasSize(94);
+      assertThat(response.getBody().getContent()).hasSize(98);
     }
 
     @Test
@@ -1395,12 +1395,12 @@ class TaskControllerIntTest {
     @ParameterizedTest
     @CsvSource({
       "owner=user-1-1, 10",
-      "owner-is-null, 65",
-      "owner-is-null=true, 65",
-      "owner-is-null&owner=user-1-1, 75",
-      "owner-is-null=TRUE&owner=user-1-1, 75",
-      "state=READY&owner-is-null&owner=user-1-1, 56",
-      "state=READY&owner-is-null=TrUe&owner=user-1-1, 56",
+      "owner-is-null, 69",
+      "owner-is-null=true, 69",
+      "owner-is-null&owner=user-1-1, 79",
+      "owner-is-null=TRUE&owner=user-1-1, 79",
+      "state=READY&owner-is-null&owner=user-1-1, 58",
+      "state=READY&owner-is-null=TrUe&owner=user-1-1, 58",
     })
     void should_ReturnTasksWithVariousOwnerParameters_When_GettingTasks(
         String queryParams, int expectedSize) {
@@ -1432,7 +1432,7 @@ class TaskControllerIntTest {
               .toEntity(TaskSummaryCollectionRepresentationModel.class);
 
       assertThat(response.getBody()).isNotNull();
-      assertThat(response.getBody().getContent()).hasSize(65);
+      assertThat(response.getBody().getContent()).hasSize(69);
       assertThat(response.getBody().getContent())
           .allSatisfy(task -> assertThat(task).extracting("owner").isNull());
     }
@@ -1477,9 +1477,9 @@ class TaskControllerIntTest {
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getContent()).hasSize(5);
       assertThat(response.getBody().getRequiredLink(IanaLinkRelations.LAST).getHref())
-          .contains("page=16");
+          .contains("page=17");
       assertThat(response.getBody().getContent().iterator().next().getTaskId())
-          .isEqualTo("TKI:000000000000000000000000000000000064");
+          .isEqualTo("TKI:000000000000000000000000000000000048");
       assertThat(response.getBody().getLink(IanaLinkRelations.SELF)).isNotNull();
       assertThat(response.getBody().getRequiredLink(IanaLinkRelations.SELF).getHref())
           .endsWith(
@@ -1729,7 +1729,7 @@ class TaskControllerIntTest {
 
       assertThat(response.getBody()).isNotNull();
       assertThat((response.getBody()).getLink(IanaLinkRelations.SELF)).isNotNull();
-      assertThat(response.getBody().getContent()).hasSize(87);
+      assertThat(response.getBody().getContent()).hasSize(91);
     }
 
     @Test
