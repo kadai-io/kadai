@@ -687,19 +687,19 @@ jobs:
     needs: [ release_artifacts ]
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - name: Git checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0 # necessary for push back
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Update version to next snapshot and push back
+      - name: Update version to next snapshot and create PR
         run: |
           ci/change_version.sh -i -m .
           ci/commitPoms.sh
         env:
-          GH_EMAIL: ${{ secrets.GH_EMAIL }}
-          GH_USERNAME: ${{ secrets.GH_USERNAME }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
