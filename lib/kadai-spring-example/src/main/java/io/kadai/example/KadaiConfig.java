@@ -47,10 +47,6 @@ public class KadaiConfig {
   @Value("${kadai.schemaName:KADAI}")
   private String schemaName;
 
-  /**
-   * Spring Boot 4 removed DataSourceProperties.
-   * We now bind configuration directly onto a HikariDataSource.
-   */
   @Bean
   @Primary
   @ConfigurationProperties(prefix = "customdb.datasource")
