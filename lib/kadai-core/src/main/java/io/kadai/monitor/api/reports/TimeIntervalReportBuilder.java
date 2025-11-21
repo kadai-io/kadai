@@ -107,6 +107,15 @@ public interface TimeIntervalReportBuilder<
   B excludedClassificationIdIn(List<String> excludedClassificationIds);
 
   /**
+   * Adds a list of classificationKeys to the builder. The created {@linkplain Report} contains only
+   * {@linkplain Task Tasks} with a classificationKey in this list.
+   *
+   * @param classificationKeys a list of classificationKeys
+   * @return the TimeIntervalReportBuilder
+   */
+  B classificationKeyIn(List<String> classificationKeys);
+
+  /**
    * Adds a list of domains to the builder. The created {@linkplain Report} contains only
    * {@linkplain Task Tasks} with a domain in this list.
    *

@@ -23,6 +23,7 @@ import io.kadai.monitor.api.SelectedItem;
 import io.kadai.monitor.api.TaskTimestamp;
 import io.kadai.monitor.api.reports.TimeIntervalReportBuilder;
 import io.kadai.monitor.api.reports.item.DetailedMonitorQueryItem;
+import io.kadai.monitor.api.reports.item.DetailedPriorityQueryItem;
 import io.kadai.monitor.api.reports.item.MonitorQueryItem;
 import io.kadai.monitor.api.reports.item.PriorityQueryItem;
 import io.kadai.monitor.api.reports.item.TaskQueryItem;
@@ -140,5 +141,13 @@ public interface MonitorMapper {
   @Result(column = "COUNT", property = "count")
   @Result(column = "PRIORITY", property = "priority")
   List<PriorityQueryItem> getTaskCountByPriority(
+      @Param("report") WorkbasketPriorityReportBuilderImpl report);
+
+  @SelectProvider(type = MonitorMapperSqlProvider.class, method = "getTaskCountByDetailedPriority")
+  @Result(column = "WORKBASKET_KEY", property = "workbasketKey")
+  @Result(column = "CLASSIFICATION_KEY", property = "classificationKey")
+  @Result(column = "COUNT", property = "count")
+  @Result(column = "PRIORITY", property = "priority")
+  List<DetailedPriorityQueryItem> getTaskCountByDetailedPriority(
       @Param("report") WorkbasketPriorityReportBuilderImpl report);
 }

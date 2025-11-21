@@ -28,7 +28,9 @@ import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.monitor.api.reports.WorkbasketPriorityReport;
 import io.kadai.monitor.api.reports.WorkbasketPriorityReport.Builder;
+import io.kadai.monitor.api.reports.WorkbasketPriorityReport.DetailedWorkbasketPriorityReport;
 import io.kadai.monitor.api.reports.header.PriorityColumnHeader;
+import io.kadai.monitor.api.reports.item.DetailedPriorityQueryItem;
 import io.kadai.monitor.api.reports.item.PriorityQueryItem;
 import io.kadai.monitor.internal.MonitorMapper;
 import io.kadai.task.api.TaskCustomField;
@@ -50,6 +52,7 @@ public class WorkbasketPriorityReportBuilderImpl implements WorkbasketPriorityRe
   protected String[] domains;
   protected String[] classificationIds;
   protected String[] excludedClassificationIds;
+  protected String[] classificationKeys;
   private WorkbasketType[] workbasketTypes;
   private String[] custom1In;
   private String[] custom1NotIn;
@@ -153,6 +156,19 @@ public class WorkbasketPriorityReportBuilderImpl implements WorkbasketPriorityRe
   }
 
   @Override
+  public DetailedWorkbasketPriorityReport buildDetailedReport() throws NotAuthorizedException {
+    this.kadaiEngine.getEngine().checkRoleMembership(KadaiRole.MONITOR, KadaiRole.ADMIN);
+
+    DetailedWorkbasketPriorityReport report =
+          new DetailedWorkbasketPriorityReport(this.columnHeaders);
+    List<DetailedPriorityQueryItem> items =
+          kadaiEngine.executeInDatabaseConnection(
+              () -> monitorMapper.getTaskCountByDetailedPriority(this));
+    report.addItems(items);
+    return report;
+  }
+
+  @Override
   public Builder workbasketTypeIn(WorkbasketType... workbasketTypes) {
     this.workbasketTypes = workbasketTypes;
     return this;
@@ -206,6 +222,14 @@ public class WorkbasketPriorityReportBuilderImpl implements WorkbasketPriorityRe
   public Builder excludedClassificationIdIn(List<String> excludedClassificationIds) {
     if (excludedClassificationIds != null) {
       this.excludedClassificationIds = excludedClassificationIds.toArray(new String[0]);
+    }
+    return this;
+  }
+
+  @Override
+  public Builder classificationKeyIn(List<String> classificationKeys) {
+    if (classificationKeys != null) {
+      this.classificationKeys = classificationKeys.toArray(new String[0]);
     }
     return this;
   }
