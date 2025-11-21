@@ -31,8 +31,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -74,19 +74,20 @@ public class RestHelper {
    * @return RestClient
    */
   private static RestClient getRestClient() {
-    ObjectMapper mapper =
-        new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-            .registerModule(new Jackson2HalModule())
-            .registerModule(new ParameterNamesModule())
-            .registerModule(new Jdk8Module())
-            .registerModule(new JavaTimeModule());
-    MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+    // Configure ObjectMapper with HAL support using Jackson2ObjectMapperBuilder
+    // Spring HATEOAS 2.x auto-configures HAL support when spring-hateoas is on classpath
+    ObjectMapper mapper = Jackson2ObjectMapperBuilder.json()
+        .featuresToDisable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        .featuresToDisable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+        .modules(new ParameterNamesModule(), new Jdk8Module(), new JavaTimeModule())
+        .build();
+    
+    // Create message converter with HAL JSON support
+    MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
     converter.setSupportedMediaTypes(Collections.singletonList(MediaTypes.HAL_JSON));
-    converter.setObjectMapper(mapper);
 
     // Create RestClient with custom message converter
+    // Note: messageConverters() is deprecated but still functional in Spring Framework 7.0
     return RestClient.builder()
         .messageConverters(converters -> converters.add(0, converter))
         .build();

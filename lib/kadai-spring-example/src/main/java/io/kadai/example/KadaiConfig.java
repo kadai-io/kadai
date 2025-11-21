@@ -18,6 +18,7 @@
 
 package io.kadai.example;
 
+import com.zaxxer.hikari.HikariDataSource;
 import io.kadai.KadaiConfiguration;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.common.api.KadaiEngine;
@@ -29,7 +30,6 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,17 +47,15 @@ public class KadaiConfig {
   @Value("${kadai.schemaName:KADAI}")
   private String schemaName;
 
+  /**
+   * Spring Boot 4 removed DataSourceProperties.
+   * We now bind configuration directly onto a HikariDataSource.
+   */
   @Bean
   @Primary
   @ConfigurationProperties(prefix = "customdb.datasource")
-  public DataSourceProperties dataSourceProperties() {
-    return new DataSourceProperties();
-  }
-
-  @Bean
-  @Primary
-  public DataSource dataSource(DataSourceProperties properties) {
-    return properties.initializeDataSourceBuilder().build();
+  public DataSource dataSource() {
+    return new HikariDataSource();
   }
 
   @Bean
