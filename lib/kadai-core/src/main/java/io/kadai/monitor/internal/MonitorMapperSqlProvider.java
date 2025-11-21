@@ -302,6 +302,20 @@ public class MonitorMapperSqlProvider {
         + CLOSING_SCRIPT_TAG;
   }
 
+  @SuppressWarnings("unused")
+  public static String getTaskCountByDetailedPriority() {
+    return OPENING_SCRIPT_TAG
+        + "SELECT T.WORKBASKET_KEY, T.CLASSIFICATION_KEY, T.PRIORITY, COUNT(T.PRIORITY) as COUNT "
+        + "FROM TASK T "
+        + "INNER JOIN WORKBASKET W ON W.ID = T.WORKBASKET_ID "
+        + OPENING_WHERE_TAG
+        + taskWhereStatements()
+        + workbasketWhereStatements()
+        + CLOSING_WHERE_TAG
+        + "GROUP BY T.WORKBASKET_KEY, T.CLASSIFICATION_KEY, T.PRIORITY"
+        + CLOSING_SCRIPT_TAG;
+  }
+
   private static StringBuilder whereCustomStatements(
       String baseCollection, String baseColumn, int customBound, StringBuilder sb) {
     IntStream.rangeClosed(1, customBound)
@@ -337,6 +351,7 @@ public class MonitorMapperSqlProvider {
     SqlProviderUtil.whereIn("report.domains", "T.DOMAIN", sb);
     SqlProviderUtil.whereIn("report.classificationIds", "T.CLASSIFICATION_ID", sb);
     SqlProviderUtil.whereNotIn("report.excludedClassificationIds", "T.CLASSIFICATION_ID", sb);
+    SqlProviderUtil.whereIn("report.classificationKeys", "T.CLASSIFICATION_KEY", sb);
     whereCustomStatements("report.custom", "T.CUSTOM", 16, sb);
     whereCustomIntStatements("report.customInt", "T.CUSTOM_INT", 8, sb);
     return sb;
