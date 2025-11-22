@@ -33,6 +33,115 @@ env:
   CACHE_SONAR_NAME: sonar
 
 jobs:
+  detect_changes:
+    name: Detect changed files and modules
+    runs-on: ubuntu-22.04
+    outputs:
+      # High-level triggers
+      backend_changed: ${{ steps.filter.outputs.backend }}
+      frontend_changed: ${{ steps.filter.outputs.frontend }}
+      
+      # Core modules (require full test suite)
+      core_modules_changed: ${{ steps.filter.outputs.core_modules }}
+      
+      # Leaf modules (selective testing)
+      kadai_spring_example_changed: ${{ steps.filter.outputs.kadai_spring_example }}
+      kadai_loghistory_provider_changed: ${{ steps.filter.outputs.kadai_loghistory_provider }}
+      kadai_simplehistory_provider_changed: ${{ steps.filter.outputs.kadai_simplehistory_provider }}
+      kadai_simplehistory_rest_spring_changed: ${{ steps.filter.outputs.kadai_simplehistory_rest_spring }}
+      kadai_spi_routing_dmn_router_changed: ${{ steps.filter.outputs.kadai_spi_routing_dmn_router }}
+      kadai_routing_rest_changed: ${{ steps.filter.outputs.kadai_routing_rest }}
+      kadai_rest_spring_example_boot_changed: ${{ steps.filter.outputs.kadai_rest_spring_example_boot }}
+      
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          base: ${{ github.ref_name }}
+          filters: |
+            # ================================================================
+            # BACKEND & FRONTEND CHANGES
+            # ================================================================
+            backend:
+              - 'common/**'
+              - 'lib/**'
+              - 'history/**'
+              - 'rest/**'
+              - 'routing/**'
+              - 'ci/**'
+              - 'qa/**'
+              - 'pom.xml'
+              - 'mvnw'
+              - 'mvnw.cmd'
+              - '.mvn/**'
+              - '.github/workflows/continuous-integration.yml'
+            
+            frontend:
+              - 'web/**'
+              - '.github/workflows/continuous-integration.yml'
+              - 'ci/**' 
+            
+            # ================================================================
+            # CORE MODULES (changes require FULL test suite)
+            # ================================================================
+            core_modules:
+              # Foundation layer
+              - 'common/kadai-common-logging/**'
+              - 'common/kadai-common/**'
+              - 'common/kadai-common-security/**'
+              - 'common/kadai-common-data/**'
+              
+              # Test infrastructure
+              - 'common/kadai-common-test/**'
+              - 'lib/kadai-test-api/**'
+              - 'lib/kadai-core-test/**'
+              - 'rest/kadai-rest-spring-test-lib/**'
+              
+              # Core business logic
+              - 'lib/kadai-core/**'
+              
+              # Framework integration
+              - 'lib/kadai-spring/**'
+              
+              # REST API
+              - 'rest/kadai-rest-spring/**'
+              
+              # Shared example infrastructure
+              - 'rest/kadai-rest-spring-example-common/**'
+              
+              # Infrastructure
+              - 'pom.xml'
+              - '.github/workflows/**'
+              - 'ci/**'
+              - 'qa/**'
+              - 'mvnw'
+              - 'mvnw.cmd'
+              - '.mvn/**'
+            
+            # ================================================================
+            # LEAF MODULES (selective testing)
+            # ================================================================
+            kadai_spring_example:
+              - 'lib/kadai-spring-example/**'
+            
+            kadai_rest_spring_example_boot:
+              - 'rest/kadai-rest-spring-example-boot/**'
+            
+            kadai_loghistory_provider:
+              - 'history/kadai-loghistory-provider/**'
+            
+            kadai_simplehistory_provider:
+              - 'history/kadai-simplehistory-provider/**'
+            
+            kadai_simplehistory_rest_spring:
+              - 'history/kadai-simplehistory-rest-spring/**'
+            
+            kadai_spi_routing_dmn_router:
+              - 'routing/kadai-spi-routing-dmn-router/**'
+            
+            kadai_routing_rest:
+              - 'routing/kadai-routing-rest/**'
   compile_backend:
     name: Compile all maven modules
     runs-on: ubuntu-22.04
@@ -63,7 +172,7 @@ jobs:
       - name: Change versions to match tag
         run: ci/change_version.sh -m .
       - name: Compile & build
-        run: ./mvnw -B install -DskipTests -Djacoco.skip
+        run: ./mvnw -B install -DskipTests -Djacoco.skip -T 1C
       - name: Eco CI Measurement of mvn install
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
         with:
@@ -80,8 +189,8 @@ jobs:
       - name: Populate cache
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          ./mvnw -B dependency:go-offline
-          ./mvnw -B test -Dtest=GibtEsNet -Dsurefire.failIfNoSpecifiedTests=false
+          ./mvnw -B dependency:go-offline -T 1C
+          ./mvnw -B test -Dtest=GibtEsNet -Dsurefire.failIfNoSpecifiedTests=false -T 1C
       - name: Upload kadai artifacts
         uses: actions/upload-artifact@v5
         with:
@@ -132,7 +241,7 @@ jobs:
           key: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}
       - name: Populate maven cache
-        run: ./mvnw -B dependency:go-offline -pl :kadai-web -am
+        run: ./mvnw -B dependency:go-offline -pl :kadai-web -am -T 1C
         if: steps.maven-cache.outputs.cache-hit != 'true'
       - name: Install Dependencies
         if: steps.web-cache.outputs.cache-hit != 'true'
@@ -150,7 +259,7 @@ jobs:
           label: "compile_frontend: yarn build"
         continue-on-error: true
       - name: Build maven artifact
-        run: ./mvnw -B install -pl :kadai-web -am
+        run: ./mvnw -B install -pl :kadai-web -am -T 1C
       - name: Eco CI Measurement of mvn :kadai-web
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
         with:
@@ -174,10 +283,87 @@ jobs:
         if: failure()
         uses: andymckay/cancel-action@0.5
 
+  generate_backend_test_matrices:
+    name: Generate backend test matrices
+    runs-on: ubuntu-22.04
+    needs: [detect_changes]
+    if: needs.detect_changes.outputs.backend_changed == 'true'
+    outputs:
+      matrix_17: ${{ steps.set-matrices.outputs.matrix_17 }}
+      matrix_21: ${{ steps.set-matrices.outputs.matrix_21 }}
+    steps:
+      - name: Determine test matrices
+        id: set-matrices
+        run: |
+          CORE_CHANGED="${{ needs.detect_changes.outputs.core_modules_changed }}"
+        
+          if [ "$CORE_CHANGED" == "true" ]; then
+            # Full test suite - use compact JSON (single line)
+            MATRIX_17='{"include":[{"module":"kadai-common","database":"H2"},{"module":"kadai-common-security","database":"H2"},{"module":"kadai-common-data","database":"H2"},{"module":"kadai-common-logging","database":"H2"},{"module":"kadai-common-test","database":"H2"},{"module":"kadai-core","database":"H2"},{"module":"kadai-core","database":"POSTGRES"},{"module":"kadai-core","database":"DB2"},{"module":"kadai-core-test","database":"H2"},{"module":"kadai-core-test","database":"POSTGRES"},{"module":"kadai-core-test","database":"DB2"},{"module":"kadai-test-api","database":"H2"},{"module":"kadai-test-api","database":"POSTGRES"},{"module":"kadai-test-api","database":"DB2"},{"module":"kadai-spring","database":"H2"},{"module":"kadai-spring-example","database":"H2"},{"module":"kadai-spi-routing-dmn-router","database":"H2"},{"module":"kadai-routing-rest","database":"H2"},{"module":"kadai-rest-spring","database":"H2"},{"module":"kadai-rest-spring-test-lib","database":"H2"},{"module":"kadai-rest-spring-example-common","database":"H2"},{"module":"kadai-loghistory-provider","database":"H2"},{"module":"kadai-simplehistory-provider","database":"H2"},{"module":"kadai-simplehistory-provider","database":"POSTGRES"},{"module":"kadai-simplehistory-provider","database":"DB2"},{"module":"kadai-simplehistory-rest-spring","database":"H2"},{"module":"kadai-rest-spring-example-boot","database":"H2"},{"module":"kadai-rest-spring-example-boot","database":"POSTGRES"},{"module":"kadai-rest-spring-example-boot","database":"DB2"}]}'
+            
+            MATRIX_21='{"include":[{"module":"kadai-routing-rest","database":"DB2"},{"module":"kadai-rest-spring-example-boot","database":"DB2"},{"module":"kadai-simplehistory-rest-spring","database":"DB2"},{"module":"kadai-rest-spring-example-common","database":"DB2"}]}'
+          else
+            # Selective testing - start with empty
+            MATRIX_17='{"include":[]}'
+            MATRIX_21='{"include":[]}'
+            
+            # kadai-spring-example: H2 only
+            if [ "${{ needs.detect_changes.outputs.kadai_spring_example_changed }}" == "true" ]; then
+              MATRIX_17=$(echo "$MATRIX_17" | jq -c '.include += [{"module":"kadai-spring-example","database":"H2"}]')
+            fi
+            
+            # kadai-loghistory-provider: H2 only
+            if [ "${{ needs.detect_changes.outputs.kadai_loghistory_provider_changed }}" == "true" ]; then
+              MATRIX_17=$(echo "$MATRIX_17" | jq -c '.include += [{"module":"kadai-loghistory-provider","database":"H2"}]')
+            fi
+            
+            # kadai-simplehistory-provider: H2, POSTGRES, DB2
+            if [ "${{ needs.detect_changes.outputs.kadai_simplehistory_provider_changed }}" == "true" ]; then
+              MATRIX_17=$(echo "$MATRIX_17" | jq -c '.include += [{"module":"kadai-simplehistory-provider","database":"H2"},{"module":"kadai-simplehistory-provider","database":"POSTGRES"},{"module":"kadai-simplehistory-provider","database":"DB2"}]')
+            fi
+            
+            # kadai-simplehistory-rest-spring: H2 (JDK17), DB2 (JDK21)
+            if [ "${{ needs.detect_changes.outputs.kadai_simplehistory_rest_spring_changed }}" == "true" ]; then
+              MATRIX_17=$(echo "$MATRIX_17" | jq -c '.include += [{"module":"kadai-simplehistory-rest-spring","database":"H2"}]')
+              MATRIX_21=$(echo "$MATRIX_21" | jq -c '.include += [{"module":"kadai-simplehistory-rest-spring","database":"DB2"}]')
+            fi
+            
+            # kadai-spi-routing-dmn-router: H2 only
+            if [ "${{ needs.detect_changes.outputs.kadai_spi_routing_dmn_router_changed }}" == "true" ]; then
+              MATRIX_17=$(echo "$MATRIX_17" | jq -c '.include += [{"module":"kadai-spi-routing-dmn-router","database":"H2"}]')
+            fi
+            
+            # kadai-routing-rest: H2 (JDK17), DB2 (JDK21)
+            if [ "${{ needs.detect_changes.outputs.kadai_routing_rest_changed }}" == "true" ]; then
+              MATRIX_17=$(echo "$MATRIX_17" | jq -c '.include += [{"module":"kadai-routing-rest","database":"H2"}]')
+              MATRIX_21=$(echo "$MATRIX_21" | jq -c '.include += [{"module":"kadai-routing-rest","database":"DB2"}]')
+            fi
+            
+            # kadai-rest-spring-example-boot: H2, POSTGRES, DB2 (JDK17 & JDK21)
+            # Has leaf-to-leaf dependencies
+            if [ "${{ needs.detect_changes.outputs.kadai_rest_spring_example_boot_changed }}" == "true" ] || \
+              [ "${{ needs.detect_changes.outputs.kadai_spi_routing_dmn_router_changed }}" == "true" ] || \
+              [ "${{ needs.detect_changes.outputs.kadai_routing_rest_changed }}" == "true" ]; then
+              MATRIX_17=$(echo "$MATRIX_17" | jq -c '.include += [{"module":"kadai-rest-spring-example-boot","database":"H2"},{"module":"kadai-rest-spring-example-boot","database":"POSTGRES"},{"module":"kadai-rest-spring-example-boot","database":"DB2"}]')
+              MATRIX_21=$(echo "$MATRIX_21" | jq -c '.include += [{"module":"kadai-rest-spring-example-boot","database":"DB2"}]')
+            fi
+          fi
+          
+          # Output compact JSON
+          echo "matrix_17=$MATRIX_17" >> $GITHUB_OUTPUT
+          echo "matrix_21=$MATRIX_21" >> $GITHUB_OUTPUT
+          
+          # Pretty print for logs (optional, for debugging)
+          echo "=== JDK 17 Matrix ==="
+          echo "$MATRIX_17" | jq '.'
+          echo "=== JDK 21 Matrix ==="
+          echo "$MATRIX_21" | jq '.'
+
   test_frontend:
     runs-on: ubuntu-22.04
     name: Test kadai-web
-    needs: [ compile_frontend ]
+    needs: [detect_changes, compile_frontend]
+    if: needs.detect_changes.outputs.frontend_changed == 'true'
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -218,7 +404,7 @@ jobs:
       # Theoretically this step below not necessary because we reuse the cache from the 'compile_frontend' job.
       # Sometimes the cache is not created, therefore this is a fallback.
       - name: Populate cache
-        run: ./mvnw -B dependency:go-offline -pl :kadai-web -am
+        run: ./mvnw -B dependency:go-offline -pl :kadai-web -am -T 1C
         if: steps.maven-cache.outputs.cache-hit != 'true'
       - name: Test
         working-directory: web
@@ -243,7 +429,13 @@ jobs:
   test_e2e:
     runs-on: ubuntu-22.04
     name: Test E2E
-    needs: [ compile_frontend, compile_backend ]
+    needs: [test_frontend, test_backend_17, test_backend_21]
+    if: |
+      always() &&
+      (needs.detect_changes.outputs.frontend_changed == 'true' || needs.detect_changes.outputs.backend_changed == 'true') &&
+      (needs.test_frontend.result == 'success' || needs.test_frontend.result == 'skipped') &&
+      (needs.test_backend_17.result == 'success' || needs.test_backend_17.result == 'skipped') &&
+      (needs.test_backend_21.result == 'success' || needs.test_backend_21.result == 'skipped')
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -295,7 +487,7 @@ jobs:
         # Theoretically this step below not necessary because we reuse the cache from the 'compile_frontend' job.
         # Sometimes the cache is not created, therefore this is a fallback.
       - name: Populate cache
-        run: ./mvnw -B dependency:go-offline -pl :kadai-rest-spring-example-boot -am
+        run: ./mvnw -B dependency:go-offline -pl :kadai-rest-spring-example-boot -am -T 1C
         if: steps.maven-cache.outputs.cache-hit != 'true'
       - name: Download kadai-web dist artifact
         uses: actions/download-artifact@v6
@@ -303,7 +495,7 @@ jobs:
           name: ${{ env.ARTIFACTS_KADAI_WEB_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_WEB_PATH }}
       - name: Build frontend
-        run: ./mvnw install -pl :kadai-web
+        run: ./mvnw install -pl :kadai-web -T 1C
       - name: Cypress tests
         working-directory: web
         run: |
@@ -335,53 +527,10 @@ jobs:
   test_backend_17:
     runs-on: ubuntu-22.04
     name: Test ${{ matrix.module }} with JDK 17 on ${{ matrix.database }}
-    needs: [ compile_backend ]
+    needs: [compile_backend, generate_backend_test_matrices]
+    if: needs.generate_backend_test_matrices.outputs.matrix_17 != '{"include":[]}'
     strategy:
-      matrix:
-        module:
-          - kadai-common
-          - kadai-common-security
-          - kadai-common-data
-          - kadai-common-logging
-          - kadai-common-test
-          - kadai-core
-          - kadai-core-test
-          - kadai-test-api
-          - kadai-spring
-          - kadai-spring-example
-          - kadai-spi-routing-dmn-router
-          - kadai-routing-rest
-          - kadai-rest-spring
-          - kadai-rest-spring-test-lib
-          - kadai-rest-spring-example-common
-          - kadai-loghistory-provider
-          - kadai-simplehistory-provider
-          - kadai-simplehistory-rest-spring
-        database:
-          - H2
-        include:
-          - module: kadai-core
-            database: POSTGRES
-          - module: kadai-core
-            database: DB2
-          - module: kadai-core-test
-            database: POSTGRES
-          - module: kadai-core-test
-            database: DB2
-          - module: kadai-test-api
-            database: POSTGRES
-          - module: kadai-test-api
-            database: DB2
-          - module: kadai-simplehistory-provider
-            database: DB2
-          - module: kadai-simplehistory-provider
-            database: POSTGRES
-          - module: kadai-rest-spring-example-boot
-            database: DB2
-          - module: kadai-rest-spring-example-boot  # ← ADD THIS
-            database: POSTGRES
-          - module: kadai-rest-spring-example-boot  # ← ADD THIS
-            database: H2
+      matrix: ${{ fromJson(needs.generate_backend_test_matrices.outputs.matrix_17) }}
     steps:
       - name: Start Eco CI Measurement
         if: matrix.database == 'H2'
@@ -415,7 +564,7 @@ jobs:
         run: |
           ci/change_version.sh -m .
       - name: Test
-        run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip
+        run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip -T 1C
         env:
           DB: ${{ matrix.database }}
       - name: Eco CI Measurement of ${{ matrix.module }} (H2)
@@ -447,16 +596,10 @@ jobs:
   test_backend_21:
     runs-on: ubuntu-22.04
     name: Test ${{ matrix.module }} with JDK 21 on ${{ matrix.database }}
-    needs: [ compile_backend ]
+    needs: [compile_backend, generate_backend_test_matrices ]
+    if: needs.generate_backend_test_matrices.outputs.matrix_21 != '{"include":[]}'
     strategy:
-      matrix:
-        module:
-          - kadai-routing-rest
-          - kadai-rest-spring-example-boot
-          - kadai-simplehistory-rest-spring
-          - kadai-rest-spring-example-common
-        database:
-          - DB2
+      matrix: ${{ fromJson(needs.generate_backend_test_matrices.outputs.matrix_21) }}
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -489,7 +632,7 @@ jobs:
         run: |
           ci/change_version.sh -m .
       - name: Test
-        run: ./mvnw -B test -pl :${{matrix.module}} -Dcheckstyle.skip -D"java.version=21"
+        run: ./mvnw -B test -pl :${{matrix.module}} -Dcheckstyle.skip -D"java.version=21" -T 1C
         env:
           DB: ${{ matrix.database }}
       - name: Eco CI Measurement of ${{ matrix.module }} (JDK21/DB2)
