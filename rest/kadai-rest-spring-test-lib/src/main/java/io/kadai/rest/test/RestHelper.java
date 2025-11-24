@@ -39,6 +39,10 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /** Helps to simplify rest api testing. */
+@SuppressWarnings(
+    "deprecation") // temporary suppression: MappingJackson2HttpMessageConverter /
+                   // Jackson2ObjectMapperBuilder are deprecated in Spring Framework 7.x; TODO
+                   // remove later
 @Component
 public class RestHelper {
 
@@ -76,12 +80,13 @@ public class RestHelper {
   private static RestClient getRestClient() {
     // Configure ObjectMapper with HAL support using Jackson2ObjectMapperBuilder
     // Spring HATEOAS 2.x auto-configures HAL support when spring-hateoas is on classpath
-    ObjectMapper mapper = Jackson2ObjectMapperBuilder.json()
-        .featuresToDisable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-        .featuresToDisable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-        .modules(new ParameterNamesModule(), new Jdk8Module(), new JavaTimeModule())
-        .build();
-    
+    ObjectMapper mapper =
+        Jackson2ObjectMapperBuilder.json()
+            .featuresToDisable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .featuresToDisable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+            .modules(new ParameterNamesModule(), new Jdk8Module(), new JavaTimeModule())
+            .build();
+
     // Create message converter with HAL JSON support
     MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
     converter.setSupportedMediaTypes(Collections.singletonList(MediaTypes.HAL_JSON));
