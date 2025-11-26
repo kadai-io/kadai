@@ -103,13 +103,13 @@ function main() {
         --base "$branch" \
         --title "chore(test): version bump to ${NEW_VERSION}" \
         --body "TEST MODE: automated version update based on fake tag '${GITHUB_REF_OVERRIDE}'. No release was performed. Use this PR to validate the bump/PR flow." \
-        --label "dependencies,automated,test"
+        --label "dependencies"
     else
       gh pr create \
         --base "$branch" \
         --title "chore: version bump to ${NEW_VERSION}" \
         --body "Automated version update after release. All tests have passed in the release workflow." \
-        --label "dependencies,automated"
+        --label "dependencies"
     fi
   else
     echo "Nothing to push - this is not a release!"
