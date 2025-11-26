@@ -1,6 +1,13 @@
 name: CI
 on:
   workflow_dispatch:
+    inputs:
+      next_version:
+        description: 'Optional: next base version (e.g. 4.0.1) used for test PR'
+        required: false
+      github_ref:
+        description: 'Optional: fake GITHUB_REF for testing (e.g. refs/tags/v4.0.0). Not used to perform a release.'
+        required: false
   push:
     branches-ignore:
       - dependabot/**
@@ -690,6 +697,33 @@ jobs:
           ci/commitPoms.sh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # --- NEW: test job to verify update_version/PR creation without doing a real release ---
+  update_version_test:
+    name: Test update version to next snapshot and create PR (manual)
+    runs-on: ubuntu-22.04
+    if: github.repository == 'kadai-io/kadai' && github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # necessary for push back
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Dry run Update version to next snapshot and create PR (test mode)
+        run: |
+          ci/change_version.sh -i -m .
+          ci/commitPoms.sh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # set FORCE_PR so commitPoms.sh runs in test mode even when no tag exists
+          FORCE_PR: "true"
+          # optional: provide a desired next version (without -SNAPSHOT), e.g. 1.2.3
+          NEXT_VERSION: ${{ github.event.inputs.next_version || '' }}
+          # optional: allow faking a GITHUB_REF in the script for testing purposes only
+          GITHUB_REF_OVERRIDE: ${{ github.event.inputs.github_ref || '' }}
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5

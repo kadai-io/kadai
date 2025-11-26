@@ -38,6 +38,16 @@ function increment_version() {
 function main() {
   [[ "$1" == '-h' || "$1" == '--help' ]] && helpAndExit 0
   [[ -z "$GH_TOKEN" ]] && helpAndExit 1
+
+  # --- NEW: allow overriding GITHUB_REF for local/manual testing ---
+  # If GITHUB_REF_OVERRIDE is set (e.g. refs/tags/v4.0.0), use it as GITHUB_REF.
+  # This lets you "fake" a tag so the script executes the tag-based branch/PR flow.
+  # WARNING: Use with care in real CI; override only for testing PR creation.
+  if [[ -n "$GITHUB_REF_OVERRIDE" ]]; then
+    echo "GITHUB_REF_OVERRIDE detected -> overriding GITHUB_REF with: $GITHUB_REF_OVERRIDE"
+    export GITHUB_REF="$GITHUB_REF_OVERRIDE"
+  fi
+
   if [[ "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     #check if tagged commit is a head commit of any branch
     commit=$(git ls-remote -q -t origin | grep "$GITHUB_REF" | cut -c1-40)
