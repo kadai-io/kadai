@@ -61,11 +61,9 @@ jobs:
               - 'pom.xml'
               - 'mvnw'
               - '.mvn/**'
-              - '!**/*.md'
             
             frontend:
               - 'web/**'
-              - '!web/*.md'
 
   compile_backend:
     name: Compile all maven modules
@@ -281,7 +279,7 @@ jobs:
   test_e2e:
     runs-on: ubuntu-22.04
     name: Test E2E
-    needs: [detect_changes, compile_frontend, compile_backend, test_frontend, test_backend_17, test_backend_21]
+    needs: [detect_changes, test_frontend, test_backend_17, test_backend_21]
     if: |
       always() &&
       (needs.detect_changes.outputs.frontend_changed == 'true' || needs.detect_changes.outputs.backend_changed == 'true') &&
