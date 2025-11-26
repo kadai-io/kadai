@@ -37,7 +37,7 @@ function increment_version() {
 
 function main() {
   [[ "$1" == '-h' || "$1" == '--help' ]] && helpAndExit 0
-  [[ -z "$GH_EMAIL" || -z "$GH_USERNAME" || -z "$GH_TOKEN" ]] && helpAndExit 1
+  [[ -z "$GH_TOKEN" ]] && helpAndExit 1
   if [[ "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     #check if tagged commit is a head commit of any branch
     commit=$(git ls-remote -q -t origin | grep "$GITHUB_REF" | cut -c1-40)
