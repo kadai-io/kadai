@@ -12,7 +12,7 @@
     <parent>
         <groupId>io.kadai</groupId>
         <artifactId>kadai-parent</artifactId>
-        <version>11.1.1-SNAPSHOT</version>
+        <version>4.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
