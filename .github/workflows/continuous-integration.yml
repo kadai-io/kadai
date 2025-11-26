@@ -702,7 +702,7 @@ jobs:
   update_version_test:
     name: Test update version to next snapshot and create PR (manual)
     runs-on: ubuntu-22.04
-    if: github.repository == 'kadai-io/kadai' && github.event_name == 'workflow_dispatch'
+    if: github.repository == 'kadai-io/kadai'
     permissions:
       contents: write
       pull-requests: write
