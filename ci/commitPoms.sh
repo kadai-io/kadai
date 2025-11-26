@@ -53,16 +53,31 @@ function main() {
     commit=$(git ls-remote -q -t origin | grep "$GITHUB_REF" | cut -c1-40)
     branch=$(git ls-remote -q -h origin | grep "$commit" | sed "s/$commit.*refs\/heads\///")
 
+    # If override is used but the tag is not present in the remote, allow a safe fake/test-mode:
     if [[ -z "$commit" || -z "$branch" ]]; then
-      echo "the commit '$commit' of tag '${GITHUB_REF##refs/tags/}' is not a head commit. Can not release" >&2
-      exit 1
+      if [[ -n "$GITHUB_REF_OVERRIDE" ]]; then
+        echo "WARNING: override tag '$GITHUB_REF_OVERRIDE' not found in remote."
+        echo "Proceeding in FAKE-TAG TEST MODE using current checked-out branch/HEAD. No release will be performed."
+        # use current branch/HEAD as base for creating the PR
+        branch=$(git rev-parse --abbrev-ref HEAD || echo "master")
+        commit=$(git rev-parse HEAD)
+        TEST_MODE="true"
+      else
+        echo "the commit '$commit' of tag '${GITHUB_REF##refs/tags/}' is not a head commit. Can not release" >&2
+        exit 1
+      fi
     fi
 
     if [[ $(echo "$branch" | wc -l) != '1' ]]; then
-      echo "can not match commit '$commit' to a unique branch." >&2
-      echo "Please make sure, that the tag '${GITHUB_REF##refs/tags/}' is the head of a unique branch" >&2
-      echo "Branches detected: $branch"
-      exit 1
+      # In fake/test mode we accept multiple candidates by using the current branch
+      if [[ -z "$TEST_MODE" ]]; then
+        echo "can not match commit '$commit' to a unique branch." >&2
+        echo "Please make sure, that the tag '${GITHUB_REF##refs/tags/}' is the head of a unique branch" >&2
+        echo "Branches detected: $branch"
+        exit 1
+      else
+        echo "TEST MODE: using branch '$branch' (from current checkout)"
+      fi
     fi
     set -x
     git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -83,11 +98,19 @@ function main() {
     git push origin "$BRANCH_NAME"
 
     echo "Creating pull request for version bump..."
-    gh pr create \
-      --base "$branch" \
-      --title "chore: version bump to ${NEW_VERSION}" \
-      --body "Automated version update after release. All tests have passed in the release workflow." \
-      --label "dependencies,automated"
+    if [[ -n "$TEST_MODE" ]]; then
+      gh pr create \
+        --base "$branch" \
+        --title "chore(test): version bump to ${NEW_VERSION}" \
+        --body "TEST MODE: automated version update based on fake tag '${GITHUB_REF_OVERRIDE}'. No release was performed. Use this PR to validate the bump/PR flow." \
+        --label "dependencies,automated,test"
+    else
+      gh pr create \
+        --base "$branch" \
+        --title "chore: version bump to ${NEW_VERSION}" \
+        --body "Automated version update after release. All tests have passed in the release workflow." \
+        --label "dependencies,automated"
+    fi
   else
     echo "Nothing to push - this is not a release!"
   fi
