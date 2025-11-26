@@ -77,7 +77,7 @@ function main() {
       --base "$branch" \
       --title "chore: version bump to ${NEW_VERSION}" \
       --body "Automated version update after release. All tests have passed in the release workflow." \
-      --label "dependencies,automated"
+      --label "dependencies"
   else
     echo "Nothing to push - this is not a release!"
   fi
