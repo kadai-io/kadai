@@ -563,9 +563,11 @@ jobs:
           git push
 
   release_artifacts:
+    # Temporarily disabled to avoid accidental releases. Remove this line to re-enable.
+    if: false
     runs-on: ubuntu-22.04
     name: Release artifacts to Sonatype-Central
-    if: github.repository == 'kadai-io/kadai' && ( startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' ) && github.head_ref == ''
+    #if: github.repository == 'kadai-io/kadai' && ( startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' ) && github.head_ref == ''
     needs: [ test_frontend, test_e2e, test_backend_17, test_backend_21 ]
     # as documented in the gpg manual (https://www.gnupg.org/documentation/manuals/gnupg/Invoking-GPG_002dAGENT.html)
     # we should execute this command before interacting with gpg (otherwise gpg won't work)
