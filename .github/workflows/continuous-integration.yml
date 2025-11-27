@@ -213,7 +213,8 @@ jobs:
   test_frontend:
     runs-on: ubuntu-22.04
     name: Test kadai-web
-    needs: [ compile_frontend ]
+    needs: [detect_changes, compile_frontend ]
+    if: needs.detect_changes.outputs.frontend_changed == 'true'
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -377,7 +378,8 @@ jobs:
   test_backend_17:
     runs-on: ubuntu-22.04
     name: Test ${{ matrix.module }} with JDK 17 on ${{ matrix.database }}
-    needs: [ compile_backend ]
+    needs: [detect_changes, compile_backend ]
+    if: needs.detect_changes.outputs.backend_changed == 'true'
     strategy:
       matrix:
         module:
@@ -489,7 +491,8 @@ jobs:
   test_backend_21:
     runs-on: ubuntu-22.04
     name: Test ${{ matrix.module }} with JDK 21 on ${{ matrix.database }}
-    needs: [ compile_backend ]
+    needs: [detect_changes, compile_backend ]
+    if: needs.detect_changes.outputs.backend_changed == 'true'
     strategy:
       matrix:
         module:
