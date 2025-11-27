@@ -79,7 +79,7 @@ jobs:
           tags: "CI/CD, Build Backend"
         continue-on-error: true
       - name: Git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v5
         with:
@@ -140,7 +140,7 @@ jobs:
           tags: "CI/CD, Build Frontend"
         continue-on-error: true
       - name: Git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v5
         with:
@@ -223,7 +223,7 @@ jobs:
           tags: "CI/CD, Test Frontend"
         continue-on-error: true
       - name: Git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Enable Corepack
         run: corepack enable
       - name: Use Node.js ${{ env.NODE_VERSION }}
@@ -295,7 +295,7 @@ jobs:
           tags: "CI/CD, Test e2e"
         continue-on-error: true
       - name: Git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v5
         with:
@@ -434,7 +434,7 @@ jobs:
           tags: "CI/CD, Test Backend (H2)"
         continue-on-error: true
       - name: Git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v5
         with:
@@ -508,7 +508,7 @@ jobs:
           tags: "CI/CD, Test Backend (JDK21/DB2)"
         continue-on-error: true
       - name: Git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Set up JDK 21
         uses: actions/setup-java@v5
         with:
@@ -558,7 +558,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Add Copyright Headers
         run: |
@@ -623,7 +623,7 @@ jobs:
           tags: "CI/CD, Release"
         continue-on-error: true
       - name: Git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # necessary for push back
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -731,7 +731,7 @@ jobs:
       contents: write
     steps:
       - name: Git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # necessary for push back
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -753,7 +753,7 @@ jobs:
     needs: [ test_frontend, test_e2e, test_backend_17, test_backend_21 ]
     steps:
       - name: Git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v5
         with:
@@ -823,7 +823,7 @@ jobs:
           tags: "CI/CD, Sonar"
         continue-on-error: true
       - name: Git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - name: Set up JDK ${{ env.JAVA_VERSION }}
