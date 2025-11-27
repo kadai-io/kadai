@@ -611,8 +611,17 @@ jobs:
   release_artifacts:
     runs-on: ubuntu-22.04
     name: Release artifacts to Sonatype-Central
-    if: github.repository == 'kadai-io/kadai' && ( startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' ) && github.head_ref == ''
     needs: [ test_frontend, test_e2e, test_backend_17, test_backend_21 ]
+    if: |
+      always() &&
+      github.repository == 'kadai-io/kadai' &&
+      ( startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' ) &&
+      github.head_ref == '' &&
+      needs.test_frontend.result != 'failure' &&
+      needs.test_e2e.result != 'failure' &&
+      needs.test_backend_17.result != 'failure' &&
+      needs.test_backend_21.result != 'failure'
+
     # as documented in the gpg manual (https://www.gnupg.org/documentation/manuals/gnupg/Invoking-GPG_002dAGENT.html)
     # we should execute this command before interacting with gpg (otherwise gpg won't work)
     env:
@@ -752,8 +761,16 @@ jobs:
   deploy_to_azure:
     runs-on: ubuntu-22.04
     name: Deploy demo app to Microsoft Azure
-    if: github.repository == 'kadai-io/kadai' && github.ref == 'refs/heads/master' && github.head_ref == ''
     needs: [ test_frontend, test_e2e, test_backend_17, test_backend_21 ]
+    if: |
+      always() &&
+      github.repository == 'kadai-io/kadai' &&
+      github.ref == 'refs/heads/master' &&
+      github.head_ref == '' &&
+      needs.test_frontend.result != 'failure' &&
+      needs.test_e2e.result != 'failure' &&
+      needs.test_backend_17.result != 'failure' &&
+      needs.test_backend_21.result != 'failure'
     steps:
       - name: Git checkout
         uses: actions/checkout@v6
@@ -811,12 +828,17 @@ jobs:
     runs-on: ubuntu-22.04
     name: Upload SonarQube analysis to sonarcloud
     # neither on release nor forks nor dependabot
+    needs: [ test_frontend, test_e2e, test_backend_17, test_backend_21 ]
     if: |
+      always() &&
       github.repository == 'kadai-io/kadai' &&
       !startsWith(github.ref, 'refs/tags') &&
       !startsWith(github.head_ref || github.ref_name, 'dependabot/') &&
-      github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request'
-    needs: [ test_frontend, test_e2e, test_backend_17, test_backend_21 ]
+      github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request' &&
+      needs.test_frontend.result != 'failure' &&
+      needs.test_e2e.result != 'failure' &&
+      needs.test_backend_17.result != 'failure' &&
+      needs.test_backend_21.result != 'failure'
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
