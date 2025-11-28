@@ -96,6 +96,25 @@ class QueryTasksAccTest extends AbstractAccTest {
 
   @WithAccessId(user = "user-1-1")
   @Test
+  void should_NotSetOwnerLongNameOfTask_When_PropertyAndLockingEnabled() throws Exception {
+    KadaiConfiguration kadaiConfiguration =
+        new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(true).build();
+    KadaiEngine kadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
+
+    List<TaskSummary> tasks =
+        kadaiEngine
+            .getTaskService()
+            .createTaskQuery()
+            .lockResultsEquals(64)
+            .idIn("TKI:000000000000000000000000000000000000")
+            .list();
+
+    assertThat(tasks).hasSize(1);
+    assertThat(tasks.get(0)).extracting(TaskSummary::getOwnerLongName).isNull();
+  }
+
+  @WithAccessId(user = "user-1-1")
+  @Test
   void should_NotSetOwnerLongNameOfTask_When_PropertyDisabled() throws Exception {
     KadaiConfiguration kadaiConfiguration =
         new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(false).build();
