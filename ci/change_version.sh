@@ -81,6 +81,15 @@ function main() {
     helpAndExit 1
   fi
 
+  # --- NEW: allow overriding GITHUB_REF for local/manual testing ---
+  # If GITHUB_REF_OVERRIDE is set (e.g. refs/tags/v4.0.0), use it as GITHUB_REF.
+  # This lets you "fake" a tag so the script executes the tag-based version change.
+  # WARNING: Use with care in real CI; override only for testing PR creation.
+  if [[ -n "$GITHUB_REF_OVERRIDE" ]]; then
+    echo "GITHUB_REF_OVERRIDE detected -> overriding GITHUB_REF with: $GITHUB_REF_OVERRIDE"
+    export GITHUB_REF="$GITHUB_REF_OVERRIDE"
+  fi
+
   if [[ "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     version=$([[ -n "$INCREMENT" ]] && echo "$(increment_version "${GITHUB_REF##refs/tags/v}")-SNAPSHOT" || echo "${GITHUB_REF##refs/tags/v}")
     for dir in "${MODULES[@]}"; do
