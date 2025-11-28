@@ -284,7 +284,7 @@ jobs:
     needs: [detect_changes, test_frontend, test_backend_17, test_backend_21]
     if: |
       always() &&
-      (needs.detect_changes.outputs.code_changed == 'true' &&
+      needs.detect_changes.outputs.code_changed == 'true' &&
       needs.test_frontend.result != 'failure' &&
       needs.test_backend_17.result != 'failure' &&
       needs.test_backend_21.result != 'failure'
