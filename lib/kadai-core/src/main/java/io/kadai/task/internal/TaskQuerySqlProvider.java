@@ -55,7 +55,7 @@ public class TaskQuerySqlProvider {
         + "<if test=\"addAttachmentClassificationNameToSelectClauseForOrdering\">, "
         + "ac.NAME as ACNAME </if>"
         + "<if test=\"addWorkbasketNameToSelectClauseForOrdering\">, w.NAME as WNAME </if>"
-        + "<if test=\"joinWithUserInfo and lockResults == 0\">, u.LONG_NAME</if>"
+        + "<if test=\"joinWithUserInfo\">, u.LONG_NAME</if>"
         + groupByPorIfActive()
         + groupBySorIfActive()
         + "FROM TASK t "
@@ -74,7 +74,7 @@ public class TaskQuerySqlProvider {
         + "<if test=\"joinWithWorkbaskets\">"
         + "LEFT JOIN WORKBASKET w ON t.WORKBASKET_ID = w.ID "
         + "</if>"
-        + "<if test=\"joinWithUserInfo and lockResults == 0\">"
+        + "<if test=\"joinWithUserInfo\">"
         + "LEFT JOIN USER_INFO u ON t.owner = u.USER_ID "
         + "</if>"
         + OPENING_WHERE_TAG
