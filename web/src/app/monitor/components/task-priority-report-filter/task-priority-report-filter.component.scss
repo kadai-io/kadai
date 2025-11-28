@@ -15,3 +15,15 @@
  *
  *
  */
+
+mat-accordion {
+  position: relative;
+
+  mat-expansion-panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    min-width: 350px;
+    z-index: 1000;
+  }
+}
