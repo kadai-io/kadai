@@ -33,9 +33,44 @@ env:
   CACHE_SONAR_NAME: sonar
 
 jobs:
+  detect_changes:
+    name: Detect changed files and modules
+    runs-on: ubuntu-22.04
+    outputs:
+      # High-level triggers
+      backend_changed: ${{ steps.filter.outputs.backend }}
+      frontend_changed: ${{ steps.filter.outputs.frontend }} 
+      code_changed: ${{ steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' }}  
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          base: ${{ github.ref_name }}
+          filters: |
+            # ================================================================
+            # BACKEND & FRONTEND CHANGES
+            # ================================================================
+            backend:
+              - 'common/**'
+              - 'lib/**'
+              - 'history/**'
+              - 'rest/**'
+              - 'routing/**'
+              - 'ci/**'
+              - 'qa/checkstyle/checkstyle.xml'
+              - 'pom.xml'
+              - 'mvnw'
+              - '.mvn/**'
+            
+            frontend:
+              - 'web/**'
+
   compile_backend:
     name: Compile all maven modules
     runs-on: ubuntu-22.04
+    needs: [ detect_changes ]
+    if: needs.detect_changes.outputs.code_changed == 'true'
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -63,7 +98,7 @@ jobs:
       - name: Change versions to match tag
         run: ci/change_version.sh -m .
       - name: Compile & build
-        run: ./mvnw -B install -DskipTests -Djacoco.skip
+        run: ./mvnw -B install -DskipTests -Djacoco.skip -T 1C
       - name: Eco CI Measurement of mvn install
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
         with:
@@ -80,8 +115,8 @@ jobs:
       - name: Populate cache
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          ./mvnw -B dependency:go-offline
-          ./mvnw -B test -Dtest=GibtEsNet -Dsurefire.failIfNoSpecifiedTests=false
+          ./mvnw -B dependency:go-offline -T 1C
+          ./mvnw -B test -Dtest=GibtEsNet -Dsurefire.failIfNoSpecifiedTests=false -T 1C
       - name: Upload kadai artifacts
         uses: actions/upload-artifact@v5
         with:
@@ -95,6 +130,8 @@ jobs:
   compile_frontend:
     name: Compile kadai-web
     runs-on: ubuntu-22.04
+    needs: [ detect_changes ]
+    if: needs.detect_changes.outputs.code_changed == 'true'
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -132,7 +169,7 @@ jobs:
           key: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}
       - name: Populate maven cache
-        run: ./mvnw -B dependency:go-offline -pl :kadai-web -am
+        run: ./mvnw -B dependency:go-offline -pl :kadai-web -am -T 1C
         if: steps.maven-cache.outputs.cache-hit != 'true'
       - name: Install Dependencies
         if: steps.web-cache.outputs.cache-hit != 'true'
@@ -150,7 +187,7 @@ jobs:
           label: "compile_frontend: yarn build"
         continue-on-error: true
       - name: Build maven artifact
-        run: ./mvnw -B install -pl :kadai-web -am
+        run: ./mvnw -B install -pl :kadai-web -am -T 1C
       - name: Eco CI Measurement of mvn :kadai-web
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
         with:
@@ -177,7 +214,8 @@ jobs:
   test_frontend:
     runs-on: ubuntu-22.04
     name: Test kadai-web
-    needs: [ compile_frontend ]
+    needs: [compile_frontend ]
+    if: needs.detect_changes.outputs.frontend_changed == 'true'
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -218,7 +256,7 @@ jobs:
       # Theoretically this step below not necessary because we reuse the cache from the 'compile_frontend' job.
       # Sometimes the cache is not created, therefore this is a fallback.
       - name: Populate cache
-        run: ./mvnw -B dependency:go-offline -pl :kadai-web -am
+        run: ./mvnw -B dependency:go-offline -pl :kadai-web -am -T 1C
         if: steps.maven-cache.outputs.cache-hit != 'true'
       - name: Test
         working-directory: web
@@ -243,7 +281,13 @@ jobs:
   test_e2e:
     runs-on: ubuntu-22.04
     name: Test E2E
-    needs: [ compile_frontend, compile_backend ]
+    needs: [test_frontend, test_backend_17, test_backend_21]
+    if: |
+      always() &&
+      needs.detect_changes.outputs.code_changed == 'true' &&
+      needs.test_frontend.result != 'failure' &&
+      needs.test_backend_17.result != 'failure' &&
+      needs.test_backend_21.result != 'failure'
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -295,7 +339,7 @@ jobs:
         # Theoretically this step below not necessary because we reuse the cache from the 'compile_frontend' job.
         # Sometimes the cache is not created, therefore this is a fallback.
       - name: Populate cache
-        run: ./mvnw -B dependency:go-offline -pl :kadai-rest-spring-example-boot -am
+        run: ./mvnw -B dependency:go-offline -pl :kadai-rest-spring-example-boot -am -T 1C
         if: steps.maven-cache.outputs.cache-hit != 'true'
       - name: Download kadai-web dist artifact
         uses: actions/download-artifact@v6
@@ -303,7 +347,7 @@ jobs:
           name: ${{ env.ARTIFACTS_KADAI_WEB_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_WEB_PATH }}
       - name: Build frontend
-        run: ./mvnw install -pl :kadai-web
+        run: ./mvnw install -pl :kadai-web -T 1C
       - name: Cypress tests
         working-directory: web
         run: |
@@ -335,7 +379,8 @@ jobs:
   test_backend_17:
     runs-on: ubuntu-22.04
     name: Test ${{ matrix.module }} with JDK 17 on ${{ matrix.database }}
-    needs: [ compile_backend ]
+    needs: [compile_backend ]
+    if: needs.detect_changes.outputs.backend_changed == 'true'
     strategy:
       matrix:
         module:
@@ -415,7 +460,7 @@ jobs:
         run: |
           ci/change_version.sh -m .
       - name: Test
-        run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip
+        run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip -T 1C
         env:
           DB: ${{ matrix.database }}
       - name: Eco CI Measurement of ${{ matrix.module }} (H2)
@@ -447,7 +492,8 @@ jobs:
   test_backend_21:
     runs-on: ubuntu-22.04
     name: Test ${{ matrix.module }} with JDK 21 on ${{ matrix.database }}
-    needs: [ compile_backend ]
+    needs: [compile_backend ]
+    if: needs.detect_changes.outputs.backend_changed == 'true'
     strategy:
       matrix:
         module:
@@ -489,7 +535,7 @@ jobs:
         run: |
           ci/change_version.sh -m .
       - name: Test
-        run: ./mvnw -B test -pl :${{matrix.module}} -Dcheckstyle.skip -D"java.version=21"
+        run: ./mvnw -B test -pl :${{matrix.module}} -Dcheckstyle.skip -D"java.version=21" -T 1C
         env:
           DB: ${{ matrix.database }}
       - name: Eco CI Measurement of ${{ matrix.module }} (JDK21/DB2)
@@ -566,8 +612,18 @@ jobs:
   release_artifacts:
     runs-on: ubuntu-22.04
     name: Release artifacts to Sonatype-Central
-    if: github.repository == 'kadai-io/kadai' && ( startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' ) && github.head_ref == ''
     needs: [ test_frontend, test_e2e, test_backend_17, test_backend_21 ]
+    if: |
+      always() &&
+      github.repository == 'kadai-io/kadai' &&
+      ( startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' ) &&
+      github.head_ref == '' &&
+      needs.detect_changes.outputs.code_changed == 'true' &&
+      needs.test_frontend.result != 'failure' &&
+      needs.test_e2e.result != 'failure' &&
+      needs.test_backend_17.result != 'failure' &&
+      needs.test_backend_21.result != 'failure'
+
     # as documented in the gpg manual (https://www.gnupg.org/documentation/manuals/gnupg/Invoking-GPG_002dAGENT.html)
     # we should execute this command before interacting with gpg (otherwise gpg won't work)
     env:
@@ -707,8 +763,17 @@ jobs:
   deploy_to_azure:
     runs-on: ubuntu-22.04
     name: Deploy demo app to Microsoft Azure
-    if: github.repository == 'kadai-io/kadai' && github.ref == 'refs/heads/master' && github.head_ref == ''
     needs: [ test_frontend, test_e2e, test_backend_17, test_backend_21 ]
+    if: |
+      always() &&
+      github.repository == 'kadai-io/kadai' &&
+      github.ref == 'refs/heads/master' &&
+      github.head_ref == '' &&
+      needs.detect_changes.outputs.code_changed == 'true' &&
+      needs.test_frontend.result != 'failure' &&
+      needs.test_e2e.result != 'failure' &&
+      needs.test_backend_17.result != 'failure' &&
+      needs.test_backend_21.result != 'failure'
     steps:
       - name: Git checkout
         uses: actions/checkout@v6
@@ -766,12 +831,18 @@ jobs:
     runs-on: ubuntu-22.04
     name: Upload SonarQube analysis to sonarcloud
     # neither on release nor forks nor dependabot
+    needs: [ test_frontend, test_e2e, test_backend_17, test_backend_21 ]
     if: |
+      always() &&
       github.repository == 'kadai-io/kadai' &&
       !startsWith(github.ref, 'refs/tags') &&
       !startsWith(github.head_ref || github.ref_name, 'dependabot/') &&
-      github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request'
-    needs: [ test_frontend, test_e2e, test_backend_17, test_backend_21 ]
+      github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request' &&
+      needs.detect_changes.outputs.code_changed == 'true' &&
+      needs.test_frontend.result != 'failure' &&
+      needs.test_e2e.result != 'failure' &&
+      needs.test_backend_17.result != 'failure' &&
+      needs.test_backend_21.result != 'failure'
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
