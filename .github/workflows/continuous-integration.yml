@@ -42,7 +42,7 @@ jobs:
       frontend_changed: ${{ steps.filter.outputs.frontend }} 
       code_changed: ${{ steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' }}  
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: dorny/paths-filter@v3
         id: filter
         with:
