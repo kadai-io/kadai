@@ -69,7 +69,7 @@
     "jest-preset-angular": "15.0.3",
     "prettier": "3.7.3",
     "sass": "1.94.2",
-    "ts-jest": "29.4.5",
+    "ts-jest": "29.4.6",
     "typescript": "5.9.3"
   },
   "packageManager": "yarn@4.10.3"
