@@ -8223,7 +8223,7 @@ __metadata:
     ng2-charts: "npm:8.0.0"
     prettier: "npm:3.7.4"
     rxjs: "npm:7.8.2"
-    sass: "npm:1.94.2"
+    sass: "npm:1.95.0"
     ts-jest: "npm:29.4.6"
     tslib: "npm:2.8.1"
     typescript: "npm:5.9.3"
@@ -10085,9 +10085,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sass@npm:1.94.2":
-  version: 1.94.2
-  resolution: "sass@npm:1.94.2"
+"sass@npm:1.95.0":
+  version: 1.95.0
+  resolution: "sass@npm:1.95.0"
   dependencies:
     "@parcel/watcher": "npm:^2.4.1"
     chokidar: "npm:^4.0.0"
@@ -10098,7 +10098,7 @@ __metadata:
       optional: true
   bin:
     sass: sass.js
-  checksum: 10c0/49a656dfab58299165ef94e71483a333972daee68c49fa542858d4912accdfb1707338226a165b1a2dfcdb2509fcda5a5b4f3780d14e49b6d38d93c8043475d3
+  checksum: 10c0/5f4093eb6fe569d65fbf30baf1fdd36b499ebc90a2f36fedf64aea2f5a72889a9df34cc96cd7cb640a10156708c9b8894b6f89953f26b57b44b96731e9c27fb5
   languageName: node
   linkType: hard
 
