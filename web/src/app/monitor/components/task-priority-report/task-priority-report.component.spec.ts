@@ -343,4 +343,29 @@ describe('TaskPriorityReportComponent', () => {
     expect(component.priority[0]).toHaveProperty('lowerBound');
     expect(component.priority[0]).toHaveProperty('upperBound');
   });
+
+  it('should append filter name to activeFilters list when it is selected (migrated)', () => {
+    component.activeFilters.set(['Tasks with state READY']);
+
+    component.emitFilter(true, 'Tasks with state CLAIMED');
+
+    expect(component.activeFilters()).toStrictEqual(['Tasks with state READY', 'Tasks with state CLAIMED']);
+  });
+
+  it('should remove filter name from list when it is not selected anymore (migrated)', () => {
+    component.activeFilters.set(['Tasks with state READY', 'Tasks with state CLAIMED']);
+
+    component.emitFilter(false, 'Tasks with state CLAIMED');
+
+    expect(component.activeFilters()).toStrictEqual(['Tasks with state READY']);
+  });
+
+  it('should apply query according to values in activeFilters (migrated)', () => {
+    const applySpy = jest.spyOn(component, 'applyFilter').mockImplementation(() => {});
+    component.activeFilters.set(['Tasks with state READY']);
+
+    component.emitFilter(true, 'Tasks with state CLAIMED');
+
+    expect(applySpy).toHaveBeenCalledWith({ state: ['READY', 'CLAIMED'] });
+  });
 });

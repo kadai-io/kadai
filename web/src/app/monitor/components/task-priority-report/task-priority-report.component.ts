@@ -16,7 +16,7 @@
  *
  */
 
-import { AfterViewChecked, Component, effect, inject, OnDestroy, signal } from '@angular/core';
+import { AfterViewChecked, Component, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ReportData } from '../../models/report-data';
 import { MonitorService } from '../../services/monitor.service';
 import { WorkbasketType } from '../../../shared/models/workbasket-type';
@@ -27,7 +27,6 @@ import { Settings } from '../../../settings/models/settings';
 import { take, takeUntil } from 'rxjs/operators';
 import { SettingMembers } from '../../../settings/components/Settings/expected-members';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { TaskPriorityReportFilterComponent } from '../task-priority-report-filter/task-priority-report-filter.component';
 import { MatDivider } from '@angular/material/divider';
 import { CanvasComponent } from '../canvas/canvas.component';
 import {
@@ -47,13 +46,20 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DomainService } from '../../../shared/services/domain/domain.service';
+import {
+  MatAccordion,
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle
+} from '@angular/material/expansion';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { TaskPriorityReportFilterStateService } from '../../services/task-priority-report-filter-state.service';
 
 @Component({
   selector: 'kadai-monitor-task-priority-report',
   templateUrl: './task-priority-report.component.html',
   styleUrls: ['./task-priority-report.component.scss'],
   imports: [
-    TaskPriorityReportFilterComponent,
     MatDivider,
     CanvasComponent,
     MatTable,
@@ -69,11 +75,16 @@ import { DomainService } from '../../../shared/services/domain/domain.service';
     DatePipe,
     NgClass,
     RouterLink,
-    MatIcon
+    MatIcon,
+    MatAccordion,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    MatCheckbox
   ],
   providers: [MonitorService]
 })
-export class TaskPriorityReportComponent implements AfterViewChecked, OnDestroy {
+export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, OnDestroy {
   columns: string[] = ['priority', 'number'];
   reportData: ReportData;
   tableDataArray: { priority: string; number: number }[][] = [];
@@ -92,12 +103,19 @@ export class TaskPriorityReportComponent implements AfterViewChecked, OnDestroy 
   private readonly requestInProgressService = inject(RequestInProgressService);
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly domainService = inject(DomainService);
+  private readonly filterState = inject(TaskPriorityReportFilterStateService);
   private readonly domain = toSignal(this.domainService.getSelectedDomain(), {
     initialValue: this.domainService.getSelectedDomainValue?.()
   });
 
   private readonly settings = toSignal(this.settings$, { initialValue: undefined as Settings });
-  private readonly currentFilter = signal<{}>({});
+  private readonly currentFilter = this.filterState.currentFilter;
+
+  isPanelOpen = false;
+  filters: {}[];
+  keys: string[];
+  readonly activeFilters = this.filterState.activeFilters;
+  filtersAreSpecified = false;
 
   constructor() {
     this.activatedRoute.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
@@ -135,6 +153,26 @@ export class TaskPriorityReportComponent implements AfterViewChecked, OnDestroy 
       });
 
       onCleanup(() => reportDataSubscription.unsubscribe());
+    });
+  }
+
+  ngOnInit(): void {
+    this.settings$.pipe(takeUntil(this.destroy$)).subscribe((settings) => {
+      this.filtersAreSpecified = !!settings?.['filter'] && settings['filter'] !== '';
+      if (this.filtersAreSpecified) {
+        try {
+          this.filters = JSON.parse(settings['filter']);
+          this.keys = Object.keys(this.filters as any);
+          this.rebuildActiveFiltersFromCurrentFilter();
+        } catch {
+          this.filters = [] as any;
+          this.keys = [];
+          this.filtersAreSpecified = false;
+        }
+      } else {
+        this.filters = [] as any;
+        this.keys = [];
+      }
     });
   }
 
@@ -223,6 +261,48 @@ export class TaskPriorityReportComponent implements AfterViewChecked, OnDestroy 
           this.requestInProgressService.setRequestInProgress(false);
         });
     }
+  }
+
+  emitFilter(isEnabled: boolean, key: string) {
+    const next = isEnabled ? [...this.activeFilters(), key] : this.activeFilters().filter((element) => element !== key);
+    this.activeFilters.set(next);
+    this.applyFilter(this.buildQuery());
+  }
+
+  buildQuery(): {} {
+    const filterQuery: any = {};
+    (this.activeFilters() || []).forEach((activeFilter) => {
+      const filter: any = (this.filters as any)[activeFilter];
+      if (!filter) return;
+      const keys = Object.keys(filter);
+      keys.forEach((k) => {
+        const newValue = filter[k];
+        filterQuery[k] = filterQuery[k] ? [...filterQuery[k], ...newValue] : newValue;
+      });
+    });
+    return filterQuery;
+  }
+
+  private rebuildActiveFiltersFromCurrentFilter() {
+    const cfg: any = this.filters as any;
+    if (!cfg) {
+      this.activeFilters.set([]);
+      return;
+    }
+    const curr: any = this.currentFilter();
+    const next: string[] = [];
+    Object.keys(cfg).forEach((key) => {
+      const defs = cfg[key];
+      const allMatch = Object.keys(defs || {}).every((k) => {
+        const need: any[] = defs[k] || [];
+        const have: any[] = curr?.[k] || [];
+        return need.every((v) => have.includes(v));
+      });
+      if (allMatch) {
+        next.push(key);
+      }
+    });
+    this.activeFilters.set(next);
   }
 
   ngOnDestroy() {
