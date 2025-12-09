@@ -1,4 +1,4 @@
-/*!
+/*
  * Copyright [2025] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,17 +13,12 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  *
- *
  */
 
-mat-accordion {
-  position: relative;
+import { Injectable, signal } from '@angular/core';
 
-  mat-expansion-panel {
-    position: absolute;
-    right: 0;
-    top: 0;
-    min-width: 350px;
-    z-index: 1000;
-  }
+@Injectable({ providedIn: 'root' })
+export class TaskPriorityReportFilterStateService {
+  readonly currentFilter = signal<{}>({});
+  readonly activeFilters = signal<string[]>([]);
 }

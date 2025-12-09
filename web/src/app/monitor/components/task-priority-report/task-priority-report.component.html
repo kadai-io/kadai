@@ -43,9 +43,26 @@
     </span>
         }
       </nav>
-      <kadai-monitor-task-priority-report-filter
-        (applyFilter)="applyFilter($event)">
-      </kadai-monitor-task-priority-report-filter>
+      @if (filtersAreSpecified) {
+        <mat-accordion>
+          <mat-expansion-panel (opened)="isPanelOpen = true" (closed)="isPanelOpen = false">
+            <mat-expansion-panel-header>
+              <mat-panel-title>Task Filter</mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="task-priority-report__filters">
+              @for (key of keys; track key) {
+                <mat-checkbox
+                  [checked]="activeFilters().includes(key)"
+                  (change)="emitFilter($event.checked, key)">
+                  {{ key }}
+                </mat-checkbox>
+              }
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+      } @else {
+        <div>No filters defined.</div>
+      }
     </div>
     @if (reportData?.rows.length == 0) {
       <div> Could not find any tasks which fulfill the current
