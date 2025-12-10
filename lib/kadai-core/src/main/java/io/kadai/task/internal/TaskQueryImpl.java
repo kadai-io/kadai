@@ -2196,10 +2196,6 @@ public class TaskQueryImpl implements TaskQuery {
           "The params \"wildcardSearchFieldIn\" and \"wildcardSearchValueLike\""
               + " must be used together!");
     }
-    if (selectAndClaim && lockResults != null && lockResults != 0) {
-      throw new IllegalArgumentException(
-          "The params \"lockResultsEquals\" and \"selectAndClaim\"" + " cannot be used together!");
-    }
     if (withoutAttachment
         && (attachmentChannelIn != null
             || attachmentChannelLike != null

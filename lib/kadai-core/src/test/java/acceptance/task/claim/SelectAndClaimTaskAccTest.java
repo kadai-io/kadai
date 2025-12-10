@@ -21,7 +21,10 @@ package acceptance.task.claim;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import acceptance.AbstractAccTest;
+import io.kadai.KadaiConfiguration;
+import io.kadai.KadaiConfiguration.Builder;
 import io.kadai.common.api.BaseQuery.SortDirection;
+import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.api.security.UserPrincipal;
 import io.kadai.common.internal.util.CheckedConsumer;
@@ -132,6 +135,21 @@ class SelectAndClaimTaskAccTest extends AbstractAccTest {
     TaskQuery query = kadaiEngine.getTaskService().createTaskQuery().idIn("notexisting");
     Optional<Task> task = kadaiEngine.getTaskService().selectAndClaim(query);
     assertThat(task).isEmpty();
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_AllowSelectAndClaimWithUserInfo_When_PropertyEnabled() throws Exception {
+    KadaiConfiguration kadaiConfiguration =
+        new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(true).build();
+    KadaiEngine kadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
+
+    Optional<Task> task =
+        kadaiEngine
+            .getTaskService()
+            .selectAndClaim(kadaiEngine.getTaskService().createTaskQuery().idIn(task1.getId()));
+
+    assertThat(task).isPresent();
   }
 
   private Runnable getRunnableTest(List<Task> selectedAndClaimedTasks, List<String> accessIds)
