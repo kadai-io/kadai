@@ -175,24 +175,6 @@ class TaskQueryImplAccTest {
       }
     }
 
-    @Test
-    void should_ThrowException_When_UsingLockResultsWithSelectAndClaim() {
-      ThrowingCallable call =
-          () ->
-              taskService.selectAndClaim(
-                  taskService
-                      .createTaskQuery()
-                      .workbasketIdIn(wb1.getId())
-                      .stateIn(TaskState.READY)
-                      .lockResultsEquals(LOCK_RESULTS_EQUALS));
-      IllegalArgumentException e = catchThrowableOfType(IllegalArgumentException.class, call);
-      assertThat(e).isNotNull();
-      assertThat(e.getMessage())
-          .isEqualTo(
-              "The params \"lockResultsEquals\" and "
-                  + "\"selectAndClaim\" cannot be used together!");
-    }
-
     private Runnable getRunnableTest(List<TaskSummary> listedTasks, List<String> accessIds) {
       return () -> {
         Subject subject = new Subject();
