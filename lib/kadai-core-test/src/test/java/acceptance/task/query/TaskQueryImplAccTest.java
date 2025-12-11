@@ -24,7 +24,6 @@ import static io.kadai.testapi.DefaultTestEntities.defaultTestObjectReference;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestWorkbasket;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.models.ClassificationSummary;
