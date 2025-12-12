@@ -26,7 +26,7 @@ import { ClassificationCategoriesService } from '../../../shared/services/classi
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { classificationStateMock } from '../../../shared/store/mock-data/mock-store';
 import { By } from '@angular/platform-browser';
-import { vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const classificationServiceSpy = vi.fn();
 const classificationCategoriesServiceSpy = vi.fn();
@@ -90,5 +90,16 @@ describe('ClassificationTypesSelectorComponent', () => {
     expect(options.length).toBe(2);
     expect(options[0].nativeElement.textContent.trim()).toBe('TASK');
     expect(options[1].nativeElement.textContent.trim()).toBe('DOCUMENT');
+  });
+
+  it('should dispatch SetSelectedClassificationType and update location when select is called', () => {
+    const storeSpy = vi.spyOn(store, 'dispatch');
+    const location = TestBed.inject(Location);
+    const locationSpy = vi.spyOn(location, 'go');
+
+    component.select('TASK');
+
+    expect(storeSpy).toHaveBeenCalled();
+    expect(locationSpy).toHaveBeenCalled();
   });
 });

@@ -30,7 +30,7 @@ import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { ClassificationDefinitionService } from '../../services/classification-definition.service';
 import { KadaiType } from '../../../shared/models/kadai-type';
-import { beforeEach, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../../../shared/util/blob-generator');
 
