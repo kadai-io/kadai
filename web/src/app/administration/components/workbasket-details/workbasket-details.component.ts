@@ -17,11 +17,11 @@
  */
 
 import { Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
-import { Observable, of, Subject, timeout } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { ACTION } from 'app/shared/models/action';
 import { Actions, ofActionSuccessful, Store } from '@ngxs/store';
-import { catchError, filter, take, takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import {
   WorkbasketAndComponentAndAction,
   WorkbasketSelectors
@@ -70,21 +70,31 @@ import { WorkbasketDistributionTargetsComponent } from '../workbasket-distributi
   ]
 })
 export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
-  workbasket: Workbasket;
-  action: ACTION;
+  workbasket: Workbasket = {} as Workbasket;
+  action: ACTION = ACTION.READ;
   selectedTab$: Observable<number> = inject(Store).select(WorkbasketSelectors.selectedComponent);
   badgeMessage$: Observable<string> = inject(Store).select(WorkbasketSelectors.badgeMessage);
   selectedWorkbasketAndComponentAndAction$: Observable<WorkbasketAndComponentAndAction> = inject(Store).select(
     WorkbasketSelectors.selectedWorkbasketAndComponentAndAction
   );
-  selectedWorkbasket$: Observable<Workbasket> = inject(Store).select(WorkbasketSelectors.selectedWorkbasket);
   destroy$ = new Subject<void>();
   @Input() expanded: boolean;
+  areAllAccessItemsValid = true;
+  protected readonly ACTION = ACTION;
   private store = inject(Store);
   private ngxsActions$ = inject(Actions);
-  areAllAccessItemsValid = true;
 
-  ngOnInit() {
+  ngOnInit(): void {
+    const workbasketAndComponentAndAction = this.store.selectSnapshot(
+      WorkbasketSelectors.selectedWorkbasketAndComponentAndAction
+    );
+    if (workbasketAndComponentAndAction?.selectedWorkbasket) {
+      this.workbasket = cloneDeep(workbasketAndComponentAndAction.selectedWorkbasket);
+    }
+    if (workbasketAndComponentAndAction?.action) {
+      this.action = workbasketAndComponentAndAction.action;
+    }
+
     this.getWorkbasketFromStore();
   }
 
@@ -95,13 +105,13 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
         b) empty workbasket is created
       */
     this.selectedWorkbasketAndComponentAndAction$.pipe(takeUntil(this.destroy$)).subscribe((object) => {
-      const workbasket = object.selectedWorkbasket;
+      const selectedWorkbasket = object.selectedWorkbasket;
       const action = object.action;
 
-      const isAnotherId = this.workbasket?.workbasketId !== workbasket?.workbasketId;
+      const isAnotherId = this.workbasket?.workbasketId !== selectedWorkbasket?.workbasketId;
       const isCreation = action !== this.action && action === ACTION.CREATE;
-      if (isAnotherId || isCreation) {
-        this.workbasket = cloneDeep(workbasket);
+      if ((isAnotherId || isCreation) && selectedWorkbasket) {
+        this.workbasket = cloneDeep(selectedWorkbasket);
       }
 
       this.action = action;
@@ -113,14 +123,10 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
         .dispatch(new UpdateWorkbasketDistributionTargets())
         .pipe(takeUntil(this.destroy$))
         .subscribe(() => {
-          this.selectedWorkbasket$
-            .pipe(
-              take(5),
-              timeout(250),
-              catchError(() => of(null)),
-              filter((val) => val !== null)
-            )
-            .subscribe((wb) => (this.workbasket = wb));
+          const workbasket = this.store.selectSnapshot(WorkbasketSelectors.selectedWorkbasket);
+          if (workbasket) {
+            this.workbasket = workbasket;
+          }
         });
     });
 
@@ -129,19 +135,15 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
         .dispatch(new UpdateWorkbasketDistributionTargets())
         .pipe(takeUntil(this.destroy$))
         .subscribe(() => {
-          this.selectedWorkbasket$
-            .pipe(
-              take(5),
-              timeout(250),
-              catchError(() => of(null)),
-              filter((val) => val !== null)
-            )
-            .subscribe((wb) => (this.workbasket = wb));
+          const workbasket = this.store.selectSnapshot(WorkbasketSelectors.selectedWorkbasket);
+          if (workbasket) {
+            this.workbasket = workbasket;
+          }
         });
     });
   }
 
-  selectComponent(index) {
+  selectComponent(index: number) {
     this.store.dispatch(new SelectComponent(index));
   }
 
@@ -179,6 +181,4 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
-
-  protected readonly ACTION = ACTION;
 }

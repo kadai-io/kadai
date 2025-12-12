@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, fakeAsync, flush, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { WorkbasketDistributionTargetsListComponent } from './workbasket-distribution-targets-list.component';
 import { engineConfigurationMock, workbasketReadStateMock } from '../../../shared/store/mock-data/mock-store';
@@ -24,12 +24,12 @@ import { Side } from '../../models/workbasket-distribution-enums';
 import { provideStore, Store } from '@ngxs/store';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { EMPTY, of } from 'rxjs';
-import { provideHttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { OrderBy } from '../../../shared/pipes/order-by.pipe';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
-
-jest.mock('angular-svg-icon');
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('WorkbasketDistributionTargetsListComponent', () => {
   let fixture: ComponentFixture<WorkbasketDistributionTargetsListComponent>;
@@ -43,12 +43,13 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
     }
   };
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [WorkbasketDistributionTargetsListComponent],
       providers: [
         provideStore([WorkbasketState, FilterState]),
-        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideAngularSvgIcon(),
         { provide: ActivatedRoute, useValue: activatedRouteMock }
       ]
     }).compileComponents();
@@ -65,7 +66,7 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
       engineConfiguration: engineConfigurationMock,
       workbasket: workbasketReadStateMock
     });
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();
@@ -89,22 +90,17 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
     expect(debugElement.nativeElement.querySelector('kadai-shared-workbasket-filter')).toBeTruthy();
   });
 
-  it('should display all available workbaskets', fakeAsync(() => {
-    // On the first cycle we render the items.
-    fixture.detectChanges();
-    flush();
-
-    fixture.detectChanges();
-    flush();
+  it('should display all available workbaskets', async () => {
+    await fixture.whenStable();
 
     const distributionTargetList = debugElement.nativeElement.getElementsByClassName(
       'workbasket-distribution-targets__workbaskets-item'
     );
     expect(distributionTargetList).toHaveLength(3);
-  }));
+  });
 
   it('should call orderBy pipe', () => {
-    const orderBySpy = jest.spyOn(OrderBy.prototype, 'transform');
+    const orderBySpy = vi.spyOn(OrderBy.prototype, 'transform');
     fixture.detectChanges();
     expect(orderBySpy).toHaveBeenCalledWith(component.distributionTargets, ['name']);
   });

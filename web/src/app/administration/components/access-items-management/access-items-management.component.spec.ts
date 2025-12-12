@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AccessItemsManagementComponent } from './access-items-management.component';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { DebugElement } from '@angular/core';
@@ -28,8 +28,8 @@ import { GetAccessItems } from '../../../shared/store/access-items-management-st
 import { Direction, Sorting, WorkbasketAccessItemQuerySortParameter } from '../../../shared/models/sorting';
 import { engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
 import { provideHttpClient } from '@angular/common/http';
-
-jest.mock('angular-svg-icon');
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 describe('AccessItemsManagementComponent', () => {
   let fixture: ComponentFixture<AccessItemsManagementComponent>;
@@ -38,10 +38,14 @@ describe('AccessItemsManagementComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [AccessItemsManagementComponent],
-      providers: [provideStore([EngineConfigurationState, AccessItemsManagementState]), provideHttpClient()]
+      providers: [
+        provideStore([EngineConfigurationState, AccessItemsManagementState]),
+        provideHttpClient(),
+        provideAngularSvgIcon()
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(AccessItemsManagementComponent);
@@ -54,7 +58,7 @@ describe('AccessItemsManagementComponent', () => {
       engineConfiguration: engineConfigurationMock
     });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create the app', () => {
     expect(app).toBeTruthy();
@@ -108,7 +112,7 @@ describe('AccessItemsManagementComponent', () => {
     expect(permissions).toMatchObject({});
   });
 
-  it('should dispatch GetAccessItems action in searchForAccessItemsWorkbaskets', waitForAsync((done) => {
+  it('should dispatch GetAccessItems action in searchForAccessItemsWorkbaskets', async () => {
     app.accessId = { accessId: '1', name: 'max' };
     app.groups = [
       { accessId: '1', name: 'users' },
@@ -130,18 +134,17 @@ describe('AccessItemsManagementComponent', () => {
       expect(actionDispatched).toBe(true);
       expect(app.setAccessItemsGroups).toHaveBeenCalled();
       expect(app.setAccessItemsPermissions).toHaveBeenCalled();
-      done();
     });
-  }));
+  });
 
-  it('should display a dialog when access is revoked', waitForAsync(() => {
+  it('should display a dialog when access is revoked', async () => {
     app.accessId = { accessId: 'xyz', name: 'xyz' };
     const notificationService = TestBed.inject(NotificationService);
-    const showDialogSpy = jest.spyOn(notificationService, 'showDialog').mockImplementation();
+    const showDialogSpy = vi.spyOn(notificationService, 'showDialog').mockImplementation(() => undefined);
     app.revokeAccess();
     fixture.detectChanges();
     expect(showDialogSpy).toHaveBeenCalled();
-  }));
+  });
 
   it('should create accessItemsForm in setAccessItemsGroups', () => {
     app.setAccessItemsGroups([]);

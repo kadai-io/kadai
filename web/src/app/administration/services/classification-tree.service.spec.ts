@@ -20,6 +20,7 @@ import { ClassificationTreeService } from './classification-tree.service';
 import { TestBed } from '@angular/core/testing';
 import { Classification } from '../../shared/models/classification';
 import { TreeNodeModel } from '../models/tree-node';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('ClassificationTreeService', () => {
   let service: ClassificationTreeService;

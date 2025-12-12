@@ -16,66 +16,86 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { SidenavListComponent } from './sidenav-list.component';
 import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.service';
-import { EMPTY } from 'rxjs';
-
-const KadaiEngineServiceSpy: Partial<KadaiEngineService> = {
-  hasRole: jest.fn().mockReturnValue(EMPTY),
-  isHistoryProviderEnabled: jest.fn().mockReturnValue(EMPTY),
-  isCustomRoutingRulesEnabled: jest.fn().mockReturnValue(EMPTY)
-};
+import { SidenavService } from '../../services/sidenav/sidenav.service';
+import { of } from 'rxjs';
+import { MonitorRoles } from '../../roles/monitor.roles';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('SidenavListComponent', () => {
   let component: SidenavListComponent;
   let fixture: ComponentFixture<SidenavListComponent>;
   let debugElement: DebugElement;
+  let KadaiEngineServiceSpy: Partial<KadaiEngineService>;
+  let SidenavServiceSpy: Partial<SidenavService>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    KadaiEngineServiceSpy = {
+      hasRole: vi.fn().mockReturnValue(false),
+      isHistoryProviderEnabled: vi.fn().mockReturnValue(of(false)),
+      isCustomRoutingRulesEnabled: vi.fn().mockReturnValue(of(false))
+    };
+
+    SidenavServiceSpy = {
+      toggleSidenav: vi.fn()
+    };
+
+    await TestBed.configureTestingModule({
       imports: [SidenavListComponent],
-      providers: [provideRouter([]), { provide: KadaiEngineService, useValue: KadaiEngineServiceSpy }]
+      providers: [
+        provideRouter([]),
+        provideHttpClientTesting(),
+        {
+          provide: KadaiEngineService,
+          useValue: KadaiEngineServiceSpy
+        },
+        {
+          provide: SidenavService,
+          useValue: SidenavServiceSpy
+        }
+      ]
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SidenavListComponent);
     debugElement = fixture.debugElement;
     component = fixture.debugElement.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
+    fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
   it('should show all links if user has all permissions', () => {
-    component.administrationAccess = true;
-    component.monitorAccess = true;
-    component.workplaceAccess = true;
-    component.historyAccess = true;
+    vi.mocked(KadaiEngineServiceSpy.hasRole).mockReturnValue(true);
+    vi.mocked(KadaiEngineServiceSpy.isHistoryProviderEnabled).mockReturnValue(of(true));
+    vi.mocked(KadaiEngineServiceSpy.isCustomRoutingRulesEnabled).mockReturnValue(of(true));
     fixture.detectChanges();
     const menuList = debugElement.queryAll(By.css('.navlist__item'));
-    expect(menuList.length).toBe(10);
-    fixture.detectChanges();
+    expect(menuList.length).toBe(11);
   });
 
   it('should show all links if user has only monitor access', () => {
-    component.administrationAccess = false;
-    component.monitorAccess = true;
-    component.workplaceAccess = false;
-    component.historyAccess = false;
-    component.settingsAccess = false;
+    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles) => {
+      return JSON.stringify(roles) === JSON.stringify(Object.values(MonitorRoles));
+    });
+    vi.mocked(KadaiEngineServiceSpy.isHistoryProviderEnabled).mockReturnValue(of(false));
+    vi.mocked(KadaiEngineServiceSpy.isCustomRoutingRulesEnabled).mockReturnValue(of(false));
     fixture.detectChanges();
     const menuList = debugElement.queryAll(By.css('.navlist__item'));
     expect(menuList.length).toBe(1);
   });
 
   it('should toggle sidenav when link clicked', () => {
+    vi.mocked(KadaiEngineServiceSpy.hasRole).mockReturnValue(true);
     component.toggle = true;
     fixture.detectChanges();
     const button = debugElement.query(By.css('.navlist__admin-workbaskets')).nativeElement;

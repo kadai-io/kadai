@@ -24,8 +24,8 @@
 
       <!-- ADD BUTTON -->
       <button (click)="addClassification()" class="classification-list__add-button mr-1"
-        mat-flat-button
-        matTooltip="Create new classification">
+              mat-flat-button
+              matTooltip="Create new classification">
         Add
         <mat-icon class="md-20">add</mat-icon>
       </button>
@@ -43,8 +43,8 @@
       <!-- CATEGORY FILTER -->
       <div class="classification-list__category-filter">
         <button [matMenuTriggerFor]="menu" class="classification-list__filter-button"
-          mat-stroked-button
-          matTooltip="Filter Category">
+                mat-stroked-button
+                matTooltip="Filter Category">
 
           @if (selectedCategory == '') {
             <mat-icon class="classification-list__mat-icon">
@@ -61,15 +61,15 @@
 
         <mat-menu #menu="matMenu">
           <button (click)="selectCategory('')" class="classification-list__all-button"
-            mat-menu-item>
+                  mat-menu-item>
             <span> <mat-icon class="classification-list__filter-all-icon" style="color: #555">filter_list</mat-icon> All </span>
           </button>
           @for (category of categories$ | async; track category) {
             <button (click)="selectCategory(category)"
-              mat-menu-item>
+                    mat-menu-item>
               <svg-icon [src]="(getCategoryIcon(category) | async)?.left"
-                class="classification-list__categories"
-              matTooltip="{{(getCategoryIcon(category) | async)?.right}}"></svg-icon>
+                        class="classification-list__categories"
+                        matTooltip="{{(getCategoryIcon(category) | async)?.right}}"></svg-icon>
               <span> {{ category }} </span>
             </button>
           }
@@ -81,7 +81,7 @@
         <mat-form-field class="classification-list__input-field" floatLabel="auto">
           <mat-label>Filter classification</mat-label>
           <input (ngModelChange)="inputValue = $event" [ngModel]="inputValue" matInput
-            matTooltip="Type to filter classifications">
+                 matTooltip="Type to filter classifications">
         </mat-form-field>
       </div>
 
@@ -97,8 +97,8 @@
   <!-- CLASSIFICATION TREE -->
   @if ((classifications && classifications.length)) {
     <kadai-administration-tree (switchKadaiSpinnerEmit)="setRequestInProgress($event)"
-      [filterIcon]="selectedCategory"
-    [filterText]="inputValue"></kadai-administration-tree>
+                               [filterIcon]="selectedCategory"
+                               [filterText]="inputValue"></kadai-administration-tree>
   } @else {
     @if (!requestInProgress) {
       <div class="classification-list__no-items">

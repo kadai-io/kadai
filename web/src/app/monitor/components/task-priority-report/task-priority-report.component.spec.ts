@@ -21,7 +21,6 @@ import { provideStore, Store } from '@ngxs/store';
 import { TaskPriorityReportComponent } from './task-priority-report.component';
 import { SettingsState } from '../../../shared/store/settings-store/settings.state';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { MonitorService } from '../../services/monitor.service';
 import { DomainService } from '../../../shared/services/domain/domain.service';
@@ -29,6 +28,7 @@ import { RequestInProgressService } from '../../../shared/services/request-in-pr
 import { of } from 'rxjs';
 import { SettingMembers } from '../../../settings/components/Settings/expected-members';
 import { settingsStateMock } from '../../../shared/store/mock-data/mock-store';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockReportData = {
   meta: { name: 'Test Report', date: '2025-11-20' },
@@ -54,17 +54,17 @@ const mockSettings = {
 };
 
 const mockMonitorService = {
-  getTasksByPriorityReport: jest.fn().mockReturnValue(of(mockReportData)),
-  getTasksByDetailedPriorityReport: jest.fn().mockReturnValue(of(mockReportData))
+  getTasksByPriorityReport: vi.fn().mockReturnValue(of(mockReportData)),
+  getTasksByDetailedPriorityReport: vi.fn().mockReturnValue(of(mockReportData))
 };
 
 const mockDomainService = {
-  getSelectedDomain: jest.fn().mockReturnValue(of('DOMAIN_A')),
-  getSelectedDomainValue: jest.fn().mockReturnValue('DOMAIN_A')
+  getSelectedDomain: vi.fn().mockReturnValue(of('DOMAIN_A')),
+  getSelectedDomainValue: vi.fn().mockReturnValue('DOMAIN_A')
 };
 
 const mockRequestInProgressService = {
-  setRequestInProgress: jest.fn()
+  setRequestInProgress: vi.fn()
 };
 
 describe('TaskPriorityReportComponent', () => {
@@ -76,7 +76,6 @@ describe('TaskPriorityReportComponent', () => {
       imports: [TaskPriorityReportComponent],
       providers: [
         provideStore([SettingsState]),
-        provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([]),
         { provide: MonitorService, useValue: mockMonitorService },
@@ -98,7 +97,7 @@ describe('TaskPriorityReportComponent', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
     document.body.innerHTML = '';
   });
 
@@ -131,7 +130,7 @@ describe('TaskPriorityReportComponent', () => {
 
   it('should query for elements with correct class name', () => {
     component.colorShouldChange = true;
-    const getElementsSpy = jest.spyOn(document, 'getElementsByClassName').mockReturnValue([] as any);
+    const getElementsSpy = vi.spyOn(document, 'getElementsByClassName').mockReturnValue([] as any);
 
     component.ngAfterViewChecked();
 
@@ -140,7 +139,7 @@ describe('TaskPriorityReportComponent', () => {
 
   it('should not query DOM when colorShouldChange is false', () => {
     component.colorShouldChange = false;
-    const getElementsSpy = jest.spyOn(document, 'getElementsByClassName');
+    const getElementsSpy = vi.spyOn(document, 'getElementsByClassName');
 
     component.ngAfterViewChecked();
 
@@ -149,10 +148,10 @@ describe('TaskPriorityReportComponent', () => {
 
   it('should call changeColor and set colorShouldChange to false when high priority elements exist', () => {
     component.colorShouldChange = true;
-    const changeColorSpy = jest.spyOn(component, 'changeColor');
+    const changeColorSpy = vi.spyOn(component, 'changeColor');
 
     const mockElements = [document.createElement('div')] as any;
-    jest.spyOn(document, 'getElementsByClassName').mockReturnValue(mockElements);
+    vi.spyOn(document, 'getElementsByClassName').mockReturnValue(mockElements);
 
     component.ngAfterViewChecked();
 
@@ -267,11 +266,11 @@ describe('TaskPriorityReportComponent', () => {
     ] as any;
 
     const filter = { a: 1 } as any;
-    const setValuesSpy = jest.spyOn(component, 'setValuesFromReportData');
-    const getTasksByPriorityReportSpy = jest
+    const setValuesSpy = vi.spyOn(component, 'setValuesFromReportData');
+    const getTasksByPriorityReportSpy = vi
       .spyOn((component as any)['monitorService'], 'getTasksByPriorityReport')
       .mockReturnValue(of(mockReportData) as any);
-    const getTasksByDetailedPriorityReportSpy = jest
+    const getTasksByDetailedPriorityReportSpy = vi
       .spyOn((component as any)['monitorService'], 'getTasksByDetailedPriorityReport')
       .mockReturnValue(of(mockReportData) as any);
 
@@ -293,11 +292,11 @@ describe('TaskPriorityReportComponent', () => {
     ] as any;
 
     const filter = { b: 2 } as any;
-    const setValuesSpy = jest.spyOn(component, 'setValuesFromReportData');
-    const getTasksByPriorityReportSpy = jest
+    const setValuesSpy = vi.spyOn(component, 'setValuesFromReportData');
+    const getTasksByPriorityReportSpy = vi
       .spyOn((component as any)['monitorService'], 'getTasksByPriorityReport')
       .mockReturnValue(of(mockReportData) as any);
-    const getTasksByDetailedPriorityReportSpy = jest
+    const getTasksByDetailedPriorityReportSpy = vi
       .spyOn((component as any)['monitorService'], 'getTasksByDetailedPriorityReport')
       .mockReturnValue(of(mockReportData) as any);
 
@@ -311,8 +310,8 @@ describe('TaskPriorityReportComponent', () => {
   });
 
   it('should complete destroy$ on ngOnDestroy', () => {
-    const nextSpy = jest.spyOn(component.destroy$, 'next');
-    const completeSpy = jest.spyOn(component.destroy$, 'complete');
+    const nextSpy = vi.spyOn(component.destroy$, 'next');
+    const completeSpy = vi.spyOn(component.destroy$, 'complete');
 
     component.ngOnDestroy();
 
@@ -361,7 +360,7 @@ describe('TaskPriorityReportComponent', () => {
   });
 
   it('should apply query according to values in activeFilters (migrated)', () => {
-    const applySpy = jest.spyOn(component, 'applyFilter').mockImplementation(() => {});
+    const applySpy = vi.spyOn(component, 'applyFilter').mockImplementation(() => {});
     component.activeFilters.set(['Tasks with state READY']);
 
     component.emitFilter(true, 'Tasks with state CLAIMED');

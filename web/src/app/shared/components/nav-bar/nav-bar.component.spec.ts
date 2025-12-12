@@ -16,12 +16,13 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { NavBarComponent } from './nav-bar.component';
 import { By } from '@angular/platform-browser';
-
-jest.mock('angular-svg-icon');
+import { SidenavService } from '../../services/sidenav/sidenav.service';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 describe('NavBarComponent', () => {
   let component: NavBarComponent;
@@ -29,11 +30,16 @@ describe('NavBarComponent', () => {
   let debugElement: DebugElement;
   let route = '';
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      imports: [NavBarComponent]
+  const SidenavServiceSpy: Partial<SidenavService> = {
+    toggleSidenav: vi.fn()
+  };
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [NavBarComponent],
+      providers: [provideAngularSvgIcon(), { provide: SidenavService, useValue: SidenavServiceSpy }]
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(NavBarComponent);

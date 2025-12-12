@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { WorkbasketDistributionTargetsComponent } from './workbasket-distribution-targets.component';
 import { Observable, of } from 'rxjs';
@@ -27,8 +27,8 @@ import { ActivatedRoute } from '@angular/router';
 import { engineConfigurationMock, workbasketReadStateMock } from '../../../shared/store/mock-data/mock-store';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
-
-jest.mock('angular-svg-icon');
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const activatedRouteMock = {
   firstChild: {
@@ -37,14 +37,15 @@ const activatedRouteMock = {
 };
 
 const domainServiceSpy: Partial<DomainService> = {
-  getSelectedDomainValue: jest.fn().mockReturnValue(of(null)),
-  getSelectedDomain: jest.fn().mockReturnValue(of('A')),
-  getDomains: jest.fn().mockReturnValue(of(null))
+  getSelectedDomainValue: vi.fn().mockReturnValue('A'),
+  getSelectedDomain: vi.fn().mockReturnValue(of('A')),
+  getDomains: vi.fn().mockReturnValue(of('A'))
 };
 
 const workbasketServiceSpy: Partial<WorkbasketService> = {
-  getWorkBasketsSummary: jest.fn().mockReturnValue(of(null)),
-  getWorkBasketsDistributionTargets: jest.fn().mockReturnValue(of(null))
+  getWorkBasketsSummary: vi.fn().mockReturnValue(of({ workbaskets: [] })),
+  getWorkBasketsDistributionTargets: vi.fn().mockReturnValue(of({ distributionTargets: [] })),
+  getWorkBasket: vi.fn().mockReturnValue(of({}))
 };
 
 describe('WorkbasketDistributionTargetsComponent', () => {
@@ -54,11 +55,12 @@ describe('WorkbasketDistributionTargetsComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [WorkbasketDistributionTargetsComponent],
       providers: [
         provideStore([WorkbasketState, FilterState]),
+        provideAngularSvgIcon(),
         { provide: WorkbasketService, useValue: workbasketServiceSpy },
         { provide: ActivatedRoute, useValue: activatedRouteMock },
         { provide: DomainService, useValue: domainServiceSpy }
@@ -76,7 +78,7 @@ describe('WorkbasketDistributionTargetsComponent', () => {
       workbasket: workbasketReadStateMock
     });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();
