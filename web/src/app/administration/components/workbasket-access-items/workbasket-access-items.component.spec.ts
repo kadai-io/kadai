@@ -35,6 +35,7 @@ import {
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { vi } from 'vitest';
 
 describe('WorkbasketAccessItemsComponent', () => {
   let fixture: ComponentFixture<WorkbasketAccessItemsComponent>;
@@ -94,7 +95,7 @@ describe('WorkbasketAccessItemsComponent', () => {
   });
 
   it('should call access items sorting when access items are obtained from store', () => {
-    const sortSpy = jest.spyOn(component, 'sortAccessItems');
+    const sortSpy = vi.spyOn(component, 'sortAccessItems');
     component.ngOnInit();
     expect(sortSpy).toHaveBeenCalled();
   });
@@ -113,7 +114,7 @@ describe('WorkbasketAccessItemsComponent', () => {
     const addAccessItemButton = debugElement.nativeElement.querySelector(
       'button.workbasket-access-items__buttons-add-access'
     );
-    const clearSpy = jest.spyOn(component, 'addAccessItem');
+    const clearSpy = vi.spyOn(component, 'addAccessItem');
 
     addAccessItemButton.click();
     expect(clearSpy).toHaveBeenCalled();
@@ -121,14 +122,14 @@ describe('WorkbasketAccessItemsComponent', () => {
 
   it('should undo changes when undo button is clicked', () => {
     fixture.detectChanges();
-    const clearSpy = jest.spyOn(component, 'clear');
+    const clearSpy = vi.spyOn(component, 'clear');
     component.clear();
     expect(clearSpy).toHaveBeenCalled();
   });
 
   it('should check all permissions when check all box is checked', () => {
     fixture.detectChanges();
-    const checkAllSpy = jest.spyOn(component, 'checkAll');
+    const checkAllSpy = vi.spyOn(component, 'checkAll');
     const checkAllButton = debugElement.nativeElement.querySelector('#checkbox-0-00');
     expect(checkAllButton).toBeTruthy();
     checkAllButton.click();
@@ -137,7 +138,7 @@ describe('WorkbasketAccessItemsComponent', () => {
 
   it('should dispatch UpdateWorkbasketAccessItems action when save button is triggered', () => {
     component.accessItemsRepresentation._links.self.href = 'https://link.mock';
-    const onSaveSpy = jest.spyOn(component, 'onSave');
+    const onSaveSpy = vi.spyOn(component, 'onSave');
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(UpdateWorkbasketAccessItems)).subscribe(() => (actionDispatched = true));
     component.onSave();
@@ -146,7 +147,7 @@ describe('WorkbasketAccessItemsComponent', () => {
   });
 
   it('should emit accessItemsValidityChanged when accessItemsGroups status changes', fakeAsync(() => {
-    const emitSpy = jest.spyOn(component.accessItemsValidityChanged, 'emit');
+    const emitSpy = vi.spyOn(component.accessItemsValidityChanged, 'emit');
 
     component.ngOnInit();
     fixture.detectChanges();

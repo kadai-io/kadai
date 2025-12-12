@@ -29,18 +29,19 @@ import { EngineConfigurationState } from '../../../shared/store/engine-configura
 import { By } from '@angular/platform-browser';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { provideHttpClient } from '@angular/common/http';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('angular-svg-icon');
+vi.mock('angular-svg-icon');
 
 const domainServiceSpy: Partial<DomainService> = {
-  getSelectedDomainValue: jest.fn().mockReturnValue(of()),
-  getSelectedDomain: jest.fn().mockReturnValue(of()),
-  getDomains: jest.fn().mockReturnValue(of())
+  getSelectedDomainValue: vi.fn().mockReturnValue(of()),
+  getSelectedDomain: vi.fn().mockReturnValue(of()),
+  getDomains: vi.fn().mockReturnValue(of())
 };
 
 const requestInProgressServiceSpy: Partial<RequestInProgressService> = {
-  setRequestInProgress: jest.fn().mockReturnValue(of()),
-  getRequestInProgress: jest.fn().mockReturnValue(of(false))
+  setRequestInProgress: vi.fn().mockReturnValue(of()),
+  getRequestInProgress: vi.fn().mockReturnValue(of(false))
 };
 
 describe('ClassificationListComponent', () => {

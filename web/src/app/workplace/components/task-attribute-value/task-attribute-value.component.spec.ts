@@ -18,6 +18,7 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { TaskAttributeValueComponent } from './task-attribute-value.component';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('TaskAttributeValueComponent', () => {
   let component: TaskAttributeValueComponent;

@@ -30,19 +30,20 @@ import { selectedWorkbasketMock } from '../../../shared/store/mock-data/mock-sto
 import { WorkbasketQueryFilterParameter } from '../../../shared/models/workbasket-query-filter-parameter';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
 import { provideRouter } from '@angular/router';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const workbasketServiceMock: Partial<WorkbasketService> = {
-  workbasketSavedTriggered: jest.fn().mockReturnValue(of(1)),
-  getWorkBasketsSummary: jest.fn().mockReturnValue(of({})),
-  getWorkBasket: jest.fn().mockReturnValue(of(selectedWorkbasketMock)),
-  getWorkbasketActionToolbarExpansion: jest.fn().mockReturnValue(of(false)),
-  getWorkBasketAccessItems: jest.fn().mockReturnValue(of({})),
-  getWorkBasketsDistributionTargets: jest.fn().mockReturnValue(of({}))
+  workbasketSavedTriggered: vi.fn().mockReturnValue(of(1)),
+  getWorkBasketsSummary: vi.fn().mockReturnValue(of({})),
+  getWorkBasket: vi.fn().mockReturnValue(of(selectedWorkbasketMock)),
+  getWorkbasketActionToolbarExpansion: vi.fn().mockReturnValue(of(false)),
+  getWorkBasketAccessItems: vi.fn().mockReturnValue(of({})),
+  getWorkBasketsDistributionTargets: vi.fn().mockReturnValue(of({}))
 };
 
 const domainServiceSpy: Partial<DomainService> = {
-  getSelectedDomainValue: jest.fn().mockReturnValue(of()),
-  getSelectedDomain: jest.fn().mockReturnValue(of())
+  getSelectedDomainValue: vi.fn().mockReturnValue(of()),
+  getSelectedDomain: vi.fn().mockReturnValue(of())
 };
 
 describe('WorkbasketListComponent', () => {
@@ -124,7 +125,7 @@ describe('WorkbasketListComponent', () => {
   });
 
   it('should call performFilter when filter value from store is obtained', () => {
-    const performFilter = jest.spyOn(component, 'performFilter');
+    const performFilter = vi.spyOn(component, 'performFilter');
     component.ngOnInit();
     expect(performFilter).toHaveBeenCalled();
   });

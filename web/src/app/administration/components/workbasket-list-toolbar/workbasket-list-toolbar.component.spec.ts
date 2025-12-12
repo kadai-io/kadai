@@ -29,12 +29,13 @@ import { ACTION } from '../../../shared/models/action';
 import { provideHttpClient } from '@angular/common/http';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
 import { provideRouter } from '@angular/router';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('angular-svg-icon');
+vi.mock('angular-svg-icon');
 
 const domainServiceMock: Partial<DomainService> = {
-  getDomains: jest.fn().mockResolvedValue(''),
-  getSelectedDomain: jest.fn().mockReturnValue(of('A'))
+  getDomains: vi.fn().mockResolvedValue(''),
+  getSelectedDomain: vi.fn().mockReturnValue(of('A'))
 };
 
 describe('WorkbasketListToolbarComponent', () => {
@@ -108,7 +109,7 @@ describe('WorkbasketListToolbarComponent', () => {
     expect(button).toBeTruthy();
     expect(button.textContent).toContain('add');
     expect(button.textContent).toContain('Add');
-    component.addWorkbasket = jest.fn().mockImplementation();
+    component.addWorkbasket = vi.fn().mockImplementation();
     button.click();
     expect(component.addWorkbasket).toHaveBeenCalled();
   });

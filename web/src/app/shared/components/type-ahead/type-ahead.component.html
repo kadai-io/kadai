@@ -24,13 +24,13 @@
       </mat-label>
       <!-- TEXT INPUT -->
       <input [matAutocomplete]="auto"
-        [required]="isRequired"
-        class="type-ahead__input-field"
-        formControlName="accessId"
-        matInput
-        matTooltip="{{accessIdForm.controls['accessId'].value}}"
-        placeholder="{{placeHolderMessage}}"
-        type="text">
+             [required]="isRequired"
+             class="type-ahead__input-field"
+             formControlName="accessId"
+             matInput
+             matTooltip="{{accessIdForm.controls['accessId'].value}}"
+             placeholder="{{placeHolderMessage}}"
+             type="text">
       <!-- ERROR MESSAGE -->
       @if (displayError && !accessIdForm.valid) {
         <mat-error
@@ -42,8 +42,8 @@
       <mat-autocomplete #auto>
         @for (accessId of filteredAccessIds; track accessId) {
           <mat-option [value]="accessId.accessId"
-            class="type-ahead__form-options"
-            matTooltip="{{accessId.accessId}} {{accessId.name}}">
+                      class="type-ahead__form-options"
+                      matTooltip="{{accessId.accessId}} {{accessId.name}}">
             <small>{{ accessId.accessId }}&nbsp;&nbsp;{{ accessId.name }}</small>
           </mat-option>
         }
