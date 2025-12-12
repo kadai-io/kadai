@@ -18,7 +18,7 @@
 
 import { DebugElement } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { SettingsState } from '../../../shared/store/settings-store/settings.state';
@@ -27,11 +27,12 @@ import { settingsStateMock } from '../../../shared/store/mock-data/mock-store';
 import { SetSettings } from '../../../shared/store/settings-store/settings.actions';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const notificationServiceSpy: Partial<NotificationService> = {
-  showError: jest.fn(),
-  showSuccess: jest.fn(),
-  showDialog: jest.fn()
+  showError: vi.fn(),
+  showSuccess: vi.fn(),
+  showDialog: vi.fn()
 };
 
 describe('SettingsComponent', () => {
@@ -41,8 +42,8 @@ describe('SettingsComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [SettingsComponent],
       providers: [
         provideStore([SettingsState]),
@@ -65,21 +66,21 @@ describe('SettingsComponent', () => {
       settings: settingsStateMock
     });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();
   });
 
   it('should show success when form is saved successfully', () => {
-    const showSuccessSpy = jest.spyOn(notificationServiceSpy, 'showSuccess');
+    const showSuccessSpy = vi.spyOn(notificationServiceSpy, 'showSuccess');
     component.onSave();
     expect(showSuccessSpy).toHaveBeenCalled();
   });
 
   it('should show error when an invalid form is tried to be saved', () => {
     component.settings['intervalHighPriority'] = [-100, 100];
-    const showErrorSpy = jest.spyOn(notificationServiceSpy, 'showError');
+    const showErrorSpy = vi.spyOn(notificationServiceSpy, 'showError');
     component.onSave();
     expect(showErrorSpy).toHaveBeenCalled();
   });

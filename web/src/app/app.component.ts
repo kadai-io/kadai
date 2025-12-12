@@ -71,7 +71,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private kadaiEngineService = inject(KadaiEngineService);
   private window = inject(WindowRefService);
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onResize() {
     this.orientationService.onResize();
   }

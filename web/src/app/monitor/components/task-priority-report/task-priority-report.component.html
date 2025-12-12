@@ -45,15 +45,15 @@
       </nav>
       @if (filtersAreSpecified) {
         <mat-accordion>
-          <mat-expansion-panel (opened)="isPanelOpen = true" (closed)="isPanelOpen = false">
+          <mat-expansion-panel (closed)="isPanelOpen = false" (opened)="isPanelOpen = true">
             <mat-expansion-panel-header>
               <mat-panel-title>Task Filter</mat-panel-title>
             </mat-expansion-panel-header>
             <div class="task-priority-report__filters">
               @for (key of keys; track key) {
                 <mat-checkbox
-                  [checked]="activeFilters().includes(key)"
-                  (change)="emitFilter($event.checked, key)">
+                  (change)="emitFilter($event.checked, key)"
+                  [checked]="activeFilters().includes(key)">
                   {{ key }}
                 </mat-checkbox>
               }

@@ -18,6 +18,7 @@
 
 import { inject, TestBed } from '@angular/core/testing';
 import { OrientationService } from './orientation.service';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('OrientationService', () => {
   beforeEach(() => {

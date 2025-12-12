@@ -16,11 +16,11 @@
  *
  */
 
-import { ComponentFixture, fakeAsync, flush, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketInformationComponent } from './workbasket-information.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
-import { EMPTY, Observable, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
@@ -37,23 +37,24 @@ import {
 import { By } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
-
-jest.mock('angular-svg-icon');
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const workbasketServiceMock: Partial<WorkbasketService> = {
-  triggerWorkBasketSaved: jest.fn(),
-  updateWorkbasket: jest.fn().mockReturnValue(of(true)),
-  markWorkbasketForDeletion: jest.fn().mockReturnValue(of(true)),
-  createWorkbasket: jest.fn().mockReturnValue(of({ ...selectedWorkbasketMock })),
-  getWorkBasket: jest.fn().mockReturnValue(of({ ...selectedWorkbasketMock })),
-  getWorkBasketAccessItems: jest.fn().mockReturnValue(EMPTY),
-  getWorkBasketsDistributionTargets: jest.fn().mockReturnValue(EMPTY)
+  triggerWorkBasketSaved: vi.fn(),
+  updateWorkbasket: vi.fn().mockReturnValue(of(true)),
+  markWorkbasketForDeletion: vi.fn().mockReturnValue(of(true)),
+  createWorkbasket: vi.fn().mockReturnValue(of({ ...selectedWorkbasketMock })),
+  getWorkBasket: vi.fn().mockReturnValue(of({ ...selectedWorkbasketMock })),
+  getWorkBasketsSummary: vi.fn().mockReturnValue(of({ workbaskets: [] })),
+  getWorkBasketAccessItems: vi.fn().mockReturnValue(of({ accessItems: [] })),
+  getWorkBasketsDistributionTargets: vi.fn().mockReturnValue(of({ distributionTargets: [] }))
 };
 
 const formValidatorServiceMock: Partial<FormsValidatorService> = {
-  isFieldValid: jest.fn().mockReturnValue(true),
-  validateInputOverflow: jest.fn(),
-  validateFormInformation: jest.fn().mockImplementation((): Promise<any> => Promise.resolve(true)),
+  isFieldValid: vi.fn().mockReturnValue(true),
+  validateInputOverflow: vi.fn(),
+  validateFormInformation: vi.fn().mockImplementation((): Promise<any> => Promise.resolve(true)),
   get inputOverflowObservable(): Observable<Map<string, boolean>> {
     return of(new Map<string, boolean>());
   }
@@ -66,8 +67,8 @@ describe('WorkbasketInformationComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [WorkbasketInformationComponent],
       providers: [
         provideStore([EngineConfigurationState, WorkbasketState]),
@@ -75,7 +76,8 @@ describe('WorkbasketInformationComponent', () => {
         { provide: WorkbasketService, useValue: workbasketServiceMock },
         { provide: FormsValidatorService, useValue: formValidatorServiceMock },
         provideHttpClient(),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        provideAngularSvgIcon()
       ]
     }).compileComponents();
 
@@ -92,7 +94,7 @@ describe('WorkbasketInformationComponent', () => {
     component.workbasket = selectedWorkbasketMock;
 
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();
@@ -118,13 +120,13 @@ describe('WorkbasketInformationComponent', () => {
   it('should reset workbasket information when onUndo is called', () => {
     component.workbasketClone = selectedWorkbasketMock;
     const notificationService = TestBed.inject(NotificationService);
-    const showSuccessSpy = jest.spyOn(notificationService, 'showSuccess');
+    const showSuccessSpy = vi.spyOn(notificationService, 'showSuccess');
     component.onUndo();
     expect(showSuccessSpy).toHaveBeenCalled();
     expect(component.workbasket).toMatchObject(component.workbasketClone);
   });
 
-  it('should save workbasket when workbasketId there', waitForAsync(() => {
+  it('should save workbasket when workbasketId there', async () => {
     component.workbasket = { ...selectedWorkbasketMock };
     component.workbasket.workbasketId = '1';
     component.action = ACTION.COPY;
@@ -133,18 +135,18 @@ describe('WorkbasketInformationComponent', () => {
     component.onSave();
     expect(actionDispatched).toBe(true);
     expect(component.workbasketClone).toMatchObject(component.workbasket);
-  }));
+  });
 
-  it('should dispatch MarkWorkbasketforDeletion action when onRemoveConfirmed is called', waitForAsync(() => {
+  it('should dispatch MarkWorkbasketforDeletion action when onRemoveConfirmed is called', async () => {
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(MarkWorkbasketForDeletion)).subscribe(() => (actionDispatched = true));
     component.onRemoveConfirmed();
     expect(actionDispatched).toBe(true);
-  }));
+  });
 
   it('should create new workbasket when workbasketId is undefined', () => {
     component.workbasket.workbasketId = undefined;
-    const postNewWorkbasketSpy = jest.spyOn(component, 'postNewWorkbasket');
+    const postNewWorkbasketSpy = vi.spyOn(component, 'postNewWorkbasket');
     component.onSave();
     expect(postNewWorkbasketSpy).toHaveBeenCalled();
   });
@@ -154,7 +156,7 @@ describe('WorkbasketInformationComponent', () => {
     expect(inputCustoms).toHaveLength(3);
   });
 
-  it('should save custom field input at position 4 when custom field at position 3 is not visible', fakeAsync(() => {
+  it('should save custom field input at position 4 when custom field at position 3 is not visible', async () => {
     const newValue = 'New value';
 
     let inputCustom3 = debugElement.nativeElement.querySelector('#wb-custom-3');
@@ -164,11 +166,9 @@ describe('WorkbasketInformationComponent', () => {
     inputCustom4.value = newValue;
     inputCustom4.dispatchEvent(new Event('input'));
 
-    tick();
-    fixture.detectChanges();
-    flush();
+    await fixture.whenStable();
 
     expect(component.workbasket['custom3']).toBe('');
     expect(component.workbasket['custom4']).toBe(newValue);
-  }));
+  });
 });

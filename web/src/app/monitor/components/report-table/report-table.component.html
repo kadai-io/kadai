@@ -41,22 +41,22 @@
     <div class="table-body">
       @for (row of reportData.rows; track row; let i = $index) {
         @if (row.display) {
-<div [ngClass]="{'table-row--highlight': row.depth === 0 && currentExpHeaders > 0,
+          <div [ngClass]="{'table-row--highlight': row.depth === 0 && currentExpHeaders > 0,
              'table-row--hover': row.depth > 0 && currentExpHeaders > 0,
              'table-row--white': row.depth > 0 && currentExpHeaders > 0}" class="table-row">
-        @for (header of row.desc; track header; let idx = $index) {
+            @for (header of row.desc; track header; let idx = $index) {
 
-          @if (idx <= currentExpHeaders) {
-<div (click)="toggleFold(i)"
-               [ngClass]="{'table-cell--border-right': currentExpHeaders === idx,
+              @if (idx <= currentExpHeaders) {
+                <div (click)="toggleFold(i)"
+                     [ngClass]="{'table-cell--border-right': currentExpHeaders === idx,
                          'table-cell--bold': row.depth === 0 && currentExpHeaders > 0,
                          'table-cell--clickable': reportData.meta.rowDesc.length - 1 > row.depth}"
-               class="table-cell table-cell--justify">
+                     class="table-cell table-cell--justify">
                   @if (reportData.meta.rowDesc.length - 1 > row.depth && idx === row.depth) {
                     <span
                       class="material-icons md-18">{{
-                      canRowCollapse(i) ? "expand_more" : "expand_less"
-                    }}</span>
+                        canRowCollapse(i) ? "expand_more" : "expand_less"
+                      }}</span>
                   }
                   {{ header }}
                 </div>
@@ -75,28 +75,29 @@
           </div>
         }
       }
-      <button (click)="showMoreRows()" [disabled]="!hasMoreRows()" color="accent" mat-flat-button>Show
+      <button (click)="showMoreRows()" [disabled]="!hasMoreRows()" color="accent" mat-flat-button>
+        Show
         more rows
       </button>
     </div>
     <div class="table-footer">
       @for (row of reportData.sumRow; track row; let i = $index) {
         @if (row.display) {
-<div [ngClass]="{'table-row--highlight': row.depth === 0 && currentExpHeaders > 0,
+          <div [ngClass]="{'table-row--highlight': row.depth === 0 && currentExpHeaders > 0,
              'table-row--hover': row.depth > 0 && currentExpHeaders > 0,
              'table-row--white': row.depth > 0 && currentExpHeaders > 0}" class="table-row">
-        @for (header of row.desc; track header; let idx = $index) {
+            @for (header of row.desc; track header; let idx = $index) {
 
-          @if (idx <= currentExpHeaders) {
-<div (click)="toggleFold(i, true)"
-               [ngClass]="{'table-cell--border-right': currentExpHeaders === idx,
+              @if (idx <= currentExpHeaders) {
+                <div (click)="toggleFold(i, true)"
+                     [ngClass]="{'table-cell--border-right': currentExpHeaders === idx,
                          'table-cell--clickable': reportData.meta.rowDesc.length - 1 > row.depth}"
-               class="table-cell table-cell--bold table-cell--justify">
+                     class="table-cell table-cell--bold table-cell--justify">
                   @if (reportData.meta.rowDesc.length - 1 > row.depth && idx === row.depth) {
                     <span
                       class="material-icons md-18">{{
-                      canRowCollapse(i, true) ? "expand_more" : "expand_less"
-                    }}</span>
+                        canRowCollapse(i, true) ? "expand_more" : "expand_less"
+                      }}</span>
                   }
                   {{ header }}
                 </div>

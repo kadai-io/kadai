@@ -19,6 +19,7 @@
 import { inject, TestBed } from '@angular/core/testing';
 
 import { MasterAndDetailService } from './master-and-detail.service';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('MasterAndDetailService', () => {
   beforeEach(() => {

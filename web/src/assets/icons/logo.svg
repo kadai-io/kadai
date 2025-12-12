@@ -6,12 +6,12 @@
   version="1.1" viewBox="-0.5 -0.5 207 62"
   xmlns="http://www.w3.org/2000/svg"
   xmlns:xlink="http://www.w3.org/1999/xlink">
-  <defs/>
+  <defs />
   <g>
     <image height="60" preserveAspectRatio="none" width="55.85" x="-0.5"
            xlink:href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3NzkuMTIgODM2LjkzIiBpZD0iRWJlbmVfMSI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiM4NGM4YjQ7fS5jbHMtMntmaWxsOiMxZjFmMWY7fTwvc3R5bGU+PC9kZWZzPjxwYXRoIGQ9Im0yOC4zMyw0MzIuNTloOC4yNWM3LjYzLDAsMTQuOS0zLjI0LDIwLjAxLTguOWwxNjIuNjgtMTgwLjQ3YzQuNDYtNC45NSw2LjkzLTExLjM4LDYuOTMtMTguMDRWMjcuOTRjMC0xNC44OC0xMi4wNi0yNi45NC0yNi45NC0yNi45NEgyOC4zM0MxMy40NSwxLDEuMzgsMTMuMDYsMS4zOCwyNy45NHYzNzcuN2MwLDE0Ljg4LDEyLjA2LDI2Ljk0LDI2Ljk0LDI2Ljk0WiIgY2xhc3M9ImNscy0xIi8+PHBhdGggZD0ibTQ3OC40MSw1MDAuMTljLTEwLjQ3LTExLjM0LTI4LjMtMTEuNTgtMzkuMDgtLjU0bC0xMTEuOTQsMTE0LjcyYy05Ljk1LDEwLjItMTAuMjQsMjYuMzgtLjY2LDM2LjkzbDE1OC44OCwxNzQuOTNjNS4xMSw1LjYyLDEyLjM1LDguODMsMTkuOTUsOC44M2gyMjAuNTRjMjMuNDksMCwzNS43My0yNy45NywxOS44LTQ1LjIybC0yNjcuNDgtMjg5LjY0WiIgY2xhc3M9ImNscy0xIi8+PHBhdGggZD0ibTYzLjI5LDUwMS44bC01My4wNiw1OC41Yy00LjUsNC45Ni02Ljk5LDExLjQxLTYuOTksMTguMXYxMC4yM2gyNzMuMWw3OS42OC04Ni44M0g2My4yOVoiIGNsYXNzPSJjbHMtMiIvPjxwb2x5Z29uIHBvaW50cz0iMTU0LjIgNzIxLjc0IDIzMy44OCA2MzQuOSAzLjI0IDYzNC45IDMuMjQgNzIxLjc0IDE1NC4yIDcyMS43NCIgY2xhc3M9ImNscy0yIi8+PHBhdGggZD0ibTc2NC44OCw1Ni4yM2w0LjItNC41OGM0LjU2LTQuOTcsNy4wOS0xMS40Nyw3LjA5LTE4LjIydi01LjQ5YzAtMTQuODgtMTIuMDYtMjYuOTQtMjYuOTQtMjYuOTRoLTIxOS43N2MtNy42LDAtMTQuODUsMy4yMS0xOS45Niw4Ljg0bC00Mi4wNyw0Ni4zOWgyOTcuNDVaIiBjbGFzcz0iY2xzLTIiLz48cGF0aCBkPSJtMy4yNCw3NjguMDF2NDAuMTFjMCwxNC44OCwxMi4wNiwyNi45NCwyNi45NCwyNi45NGg4LjE5YzcuNTUsMCwxNC43NS0zLjE3LDE5Ljg1LTguNzNsNTMuNTItNTguMzJIMy4yNFoiIGNsYXNzPSJjbHMtMiIvPjxwb2x5Z29uIHBvaW50cz0iMTg0LjAxIDM2OC43IDEwNS4yNSA0NTUuNTMgMzk4LjQ3IDQ1NS41MyA0NzguMTUgMzY4LjcgMTg0LjAxIDM2OC43IiBjbGFzcz0iY2xzLTIiLz48cG9seWdvbiBwb2ludHM9IjQyNS40NiAxMDIuNSAzNDYuNyAxODkuMzMgNjQyLjc1IDE4OS4zMyA3MjIuNDMgMTAyLjUgNDI1LjQ2IDEwMi41IiBjbGFzcz0iY2xzLTIiLz48cG9seWdvbiBwb2ludHM9IjMwNC43NCAyMzUuNiAyMjUuOTggMzIyLjQzIDUyMC42MSAzMjIuNDMgNjAwLjI5IDIzNS42IDMwNC43NCAyMzUuNiIgY2xhc3M9ImNscy0yIi8+PC9zdmc+"
-           y="-0.5"/>
-    <rect fill="none" height="55" pointer-events="all" stroke="none" width="150" x="55.85" y="5"/>
+           y="-0.5" />
+    <rect fill="none" height="55" pointer-events="all" stroke="none" width="150" x="55.85" y="5" />
     <g transform="translate(-0.5 -0.5)">
       <switch>
         <foreignObject height="100%" pointer-events="none"
@@ -36,7 +36,7 @@
     </g>
   </g>
   <switch>
-    <g requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"/>
+    <g requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" />
     <a target="_blank"
        transform="translate(0,-5)"
        xlink:href="https://www.diagrams.net/doc/faq/svg-export-text-problems">

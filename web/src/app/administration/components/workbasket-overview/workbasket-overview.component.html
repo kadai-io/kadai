@@ -20,18 +20,18 @@
 
   <div #workbasketList class="workbasket-overview__list">
     <kadai-administration-workbasket-list
-    [expanded]="expanded"></kadai-administration-workbasket-list>
+      [expanded]="expanded"></kadai-administration-workbasket-list>
   </div>
 
   <div class="vertical-right-divider">
     <span #toggleButton (click)="toggleWidth()" class="workbasket-overview__toggle-view-button">
       @if (expanded) {
         <mat-icon
-        class="vertical-right-divider__mat-icon md-36">chevron_left</mat-icon>
+          class="vertical-right-divider__mat-icon md-36">chevron_left</mat-icon>
       }
       @if (!expanded) {
         <mat-icon
-        class="vertical-right-divider__mat-icon md-36">chevron_right</mat-icon>
+          class="vertical-right-divider__mat-icon md-36">chevron_right</mat-icon>
       }
     </span>
   </div>
@@ -39,7 +39,7 @@
   @if (showDetail) {
     <div class="workbasket-overview__details">
       <kadai-administration-workbasket-details
-      [expanded]="expanded"></kadai-administration-workbasket-details>
+        [expanded]="expanded"></kadai-administration-workbasket-details>
     </div>
   } @else {
     <div class="workbasket-overview__empty-page">
