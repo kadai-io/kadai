@@ -31,7 +31,7 @@
     <!-- ACCESS ITEM VALIDATION -->
     @if (!areAllAccessItemsValid) {
       <div class="workbasket-details__access-item-warning">
-        <mat-icon color="warn" class="workbasket-details__access-item-warning-icon">
+        <mat-icon class="workbasket-details__access-item-warning-icon" color="warn">
           error_outline
         </mat-icon>
         <div class="workbasket-details__access-item-warning-text">
@@ -41,10 +41,10 @@
     }
     <!-- SAVE -->
     <button (click)="onSubmit()"
+            [disabled]="action === ACTION.CREATE && !areAllAccessItemsValid"
             class="workbasket-details__button workbasket-details__save-button"
             mat-button
-            matTooltip="Save changes in current workbasket"
-            [disabled]="action === ACTION.CREATE && !areAllAccessItemsValid">
+            matTooltip="Save changes in current workbasket">
       Save
       <mat-icon class="md-20">save</mat-icon>
     </button>
@@ -104,9 +104,9 @@
       </kadai-administration-workbasket-information>
     </mat-tab>
     <mat-tab label="Access">
-      <kadai-administration-workbasket-access-items [expanded]="expanded"
-                                                    [workbasket]="workbasket"
-                                                    (accessItemsValidityChanged)="handleAccessItemsValidityChanged($event)">
+      <kadai-administration-workbasket-access-items (accessItemsValidityChanged)="handleAccessItemsValidityChanged($event)"
+                                                    [expanded]="expanded"
+                                                    [workbasket]="workbasket">
       </kadai-administration-workbasket-access-items>
     </mat-tab>
     <mat-tab label="Distribution Targets">

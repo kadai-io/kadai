@@ -19,6 +19,7 @@
 import { inject, TestBed } from '@angular/core/testing';
 
 import { SidenavService } from './sidenav.service';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('SidenavService', () => {
   beforeEach(() => {

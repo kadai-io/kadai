@@ -174,7 +174,7 @@ jobs:
       - name: Install Dependencies
         if: steps.web-cache.outputs.cache-hit != 'true'
         working-directory: web
-        run: yarn install && yarn ci
+        run: yarn install
       - name: Compile & build
         working-directory: web
         run: |
@@ -260,7 +260,7 @@ jobs:
         if: steps.maven-cache.outputs.cache-hit != 'true'
       - name: Test
         working-directory: web
-        run: yarn run test --coverageReporters text-summary
+        run: yarn test
       - name: Eco CI Measurement of web unit tests
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
         with:

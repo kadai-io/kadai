@@ -17,6 +17,7 @@
  */
 
 import { Action, NgxsOnInit, State, StateContext } from '@ngxs/store';
+import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-filter-parameter';
 import { ClearTaskFilter, ClearWorkbasketFilter, SetTaskFilter, SetWorkbasketFilter } from './filter.actions';
@@ -41,7 +42,12 @@ const emptyTaskFilter: TaskQueryFilterParameter = {
   'wildcard-search-value': []
 };
 
-@State<FilterStateModel>({ name: 'FilterState' })
+@Injectable({
+  providedIn: 'root'
+})
+@State<FilterStateModel>({
+  name: 'FilterState'
+})
 export class FilterState implements NgxsOnInit {
   @Action(SetWorkbasketFilter)
   setWorkbasketFilter(ctx: StateContext<FilterStateModel>, action: SetWorkbasketFilter): Observable<null> {

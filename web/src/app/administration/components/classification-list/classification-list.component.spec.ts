@@ -16,31 +16,31 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { ClassificationListComponent } from './classification-list.component';
 import { classificationStateMock, engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
-import { Observable, of } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { CreateClassification } from '../../../shared/store/classification-store/classification.actions';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { By } from '@angular/platform-browser';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { provideHttpClient } from '@angular/common/http';
-
-jest.mock('angular-svg-icon');
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const domainServiceSpy: Partial<DomainService> = {
-  getSelectedDomainValue: jest.fn().mockReturnValue(of()),
-  getSelectedDomain: jest.fn().mockReturnValue(of()),
-  getDomains: jest.fn().mockReturnValue(of())
+  getSelectedDomainValue: vi.fn().mockReturnValue('A'),
+  getSelectedDomain: vi.fn().mockReturnValue(of('A')),
+  getDomains: vi.fn().mockReturnValue(of('A'))
 };
 
 const requestInProgressServiceSpy: Partial<RequestInProgressService> = {
-  setRequestInProgress: jest.fn().mockReturnValue(of()),
-  getRequestInProgress: jest.fn().mockReturnValue(of(false))
+  setRequestInProgress: vi.fn().mockReturnValue(of()),
+  getRequestInProgress: vi.fn().mockReturnValue(of(false))
 };
 
 describe('ClassificationListComponent', () => {
@@ -50,12 +50,13 @@ describe('ClassificationListComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [ClassificationListComponent],
       providers: [
         provideStore([ClassificationState, EngineConfigurationState]),
         provideHttpClient(),
+        provideAngularSvgIcon(),
         { provide: DomainService, useValue: domainServiceSpy },
         { provide: RequestInProgressService, useValue: requestInProgressServiceSpy }
       ]
@@ -72,7 +73,7 @@ describe('ClassificationListComponent', () => {
       engineConfiguration: engineConfigurationMock
     });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();
@@ -145,20 +146,14 @@ describe('ClassificationListComponent', () => {
   });
 
   /* TS: getCategoryIcon() */
-  it('should return icon for category when getCategoryIcon is called and category exists', (done) => {
-    const categoryIcon = component.getCategoryIcon('MANUAL');
-    categoryIcon.subscribe((iconPair) => {
-      expect(iconPair.left).toBe('assets/icons/categories/manual.svg');
-      expect(iconPair.right).toBe('MANUAL');
-      done();
-    });
+  it('should return icon for category when getCategoryIcon is called and category exists', async () => {
+    const iconPair = await firstValueFrom(component.getCategoryIcon('MANUAL'));
+    expect(iconPair.left).toBe('assets/icons/categories/manual.svg');
+    expect(iconPair.right).toBe('MANUAL');
   });
 
-  it('should return a special icon when getCategoryIcon is called and category does not exist', (done) => {
-    const categoryIcon = component.getCategoryIcon('CLOUD');
-    categoryIcon.subscribe((iconPair) => {
-      expect(iconPair.left).toBe('assets/icons/categories/missing-icon.svg');
-      done();
-    });
+  it('should return a special icon when getCategoryIcon is called and category does not exist', async () => {
+    const iconPair = await firstValueFrom(component.getCategoryIcon('CLOUD'));
+    expect(iconPair.left).toBe('assets/icons/categories/missing-icon.svg');
   });
 });

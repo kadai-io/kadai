@@ -76,6 +76,14 @@
           "options": {
             "buildTarget": "kadai-web:build"
           }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "kadai-web:build",
+            "coverage": true,
+            "coverageReporters": ["text-summary"]
+          }
         }
       }
     },
