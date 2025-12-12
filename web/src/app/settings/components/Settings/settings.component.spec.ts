@@ -27,11 +27,12 @@ import { settingsStateMock } from '../../../shared/store/mock-data/mock-store';
 import { SetSettings } from '../../../shared/store/settings-store/settings.actions';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const notificationServiceSpy: Partial<NotificationService> = {
-  showError: jest.fn(),
-  showSuccess: jest.fn(),
-  showDialog: jest.fn()
+  showError: vi.fn(),
+  showSuccess: vi.fn(),
+  showDialog: vi.fn()
 };
 
 describe('SettingsComponent', () => {
@@ -72,14 +73,14 @@ describe('SettingsComponent', () => {
   });
 
   it('should show success when form is saved successfully', () => {
-    const showSuccessSpy = jest.spyOn(notificationServiceSpy, 'showSuccess');
+    const showSuccessSpy = vi.spyOn(notificationServiceSpy, 'showSuccess');
     component.onSave();
     expect(showSuccessSpy).toHaveBeenCalled();
   });
 
   it('should show error when an invalid form is tried to be saved', () => {
     component.settings['intervalHighPriority'] = [-100, 100];
-    const showErrorSpy = jest.spyOn(notificationServiceSpy, 'showError');
+    const showErrorSpy = vi.spyOn(notificationServiceSpy, 'showError');
     component.onSave();
     expect(showErrorSpy).toHaveBeenCalled();
   });

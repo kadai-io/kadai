@@ -93,13 +93,13 @@ export class WorkbasketInformationComponent implements OnInit, OnChanges, OnDest
   readonly lengthError = 'You have reached the maximum length for this field';
   inputOverflowMap = new Map<string, boolean>();
   validateInputOverflow: Function;
+  customFields$: Observable<CustomField[]>;
+  destroy$ = new Subject<void>();
   private store = inject(Store);
   workbasketsCustomisation$: Observable<WorkbasketsCustomisation> = this.store.select(
     EngineConfigurationSelectors.workbasketsCustomisation
   );
   buttonAction$: Observable<ButtonAction> = this.store.select(WorkbasketSelectors.buttonAction);
-  customFields$: Observable<CustomField[]>;
-  destroy$ = new Subject<void>();
   private workbasketService = inject(WorkbasketService);
   private requestInProgressService = inject(RequestInProgressService);
   private formsValidatorService = inject(FormsValidatorService);

@@ -37,23 +37,24 @@ import {
 import { By } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('angular-svg-icon');
+vi.mock('angular-svg-icon');
 
 const workbasketServiceMock: Partial<WorkbasketService> = {
-  triggerWorkBasketSaved: jest.fn(),
-  updateWorkbasket: jest.fn().mockReturnValue(of(true)),
-  markWorkbasketForDeletion: jest.fn().mockReturnValue(of(true)),
-  createWorkbasket: jest.fn().mockReturnValue(of({ ...selectedWorkbasketMock })),
-  getWorkBasket: jest.fn().mockReturnValue(of({ ...selectedWorkbasketMock })),
-  getWorkBasketAccessItems: jest.fn().mockReturnValue(EMPTY),
-  getWorkBasketsDistributionTargets: jest.fn().mockReturnValue(EMPTY)
+  triggerWorkBasketSaved: vi.fn(),
+  updateWorkbasket: vi.fn().mockReturnValue(of(true)),
+  markWorkbasketForDeletion: vi.fn().mockReturnValue(of(true)),
+  createWorkbasket: vi.fn().mockReturnValue(of({ ...selectedWorkbasketMock })),
+  getWorkBasket: vi.fn().mockReturnValue(of({ ...selectedWorkbasketMock })),
+  getWorkBasketAccessItems: vi.fn().mockReturnValue(EMPTY),
+  getWorkBasketsDistributionTargets: vi.fn().mockReturnValue(EMPTY)
 };
 
 const formValidatorServiceMock: Partial<FormsValidatorService> = {
-  isFieldValid: jest.fn().mockReturnValue(true),
-  validateInputOverflow: jest.fn(),
-  validateFormInformation: jest.fn().mockImplementation((): Promise<any> => Promise.resolve(true)),
+  isFieldValid: vi.fn().mockReturnValue(true),
+  validateInputOverflow: vi.fn(),
+  validateFormInformation: vi.fn().mockImplementation((): Promise<any> => Promise.resolve(true)),
   get inputOverflowObservable(): Observable<Map<string, boolean>> {
     return of(new Map<string, boolean>());
   }
@@ -118,7 +119,7 @@ describe('WorkbasketInformationComponent', () => {
   it('should reset workbasket information when onUndo is called', () => {
     component.workbasketClone = selectedWorkbasketMock;
     const notificationService = TestBed.inject(NotificationService);
-    const showSuccessSpy = jest.spyOn(notificationService, 'showSuccess');
+    const showSuccessSpy = vi.spyOn(notificationService, 'showSuccess');
     component.onUndo();
     expect(showSuccessSpy).toHaveBeenCalled();
     expect(component.workbasket).toMatchObject(component.workbasketClone);
@@ -144,7 +145,7 @@ describe('WorkbasketInformationComponent', () => {
 
   it('should create new workbasket when workbasketId is undefined', () => {
     component.workbasket.workbasketId = undefined;
-    const postNewWorkbasketSpy = jest.spyOn(component, 'postNewWorkbasket');
+    const postNewWorkbasketSpy = vi.spyOn(component, 'postNewWorkbasket');
     component.onSave();
     expect(postNewWorkbasketSpy).toHaveBeenCalled();
   });

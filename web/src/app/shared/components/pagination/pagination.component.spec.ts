@@ -19,6 +19,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { PaginationComponent } from './pagination.component';
 import { DebugElement } from '@angular/core';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('PaginationComponent', () => {
   let fixture: ComponentFixture<PaginationComponent>;

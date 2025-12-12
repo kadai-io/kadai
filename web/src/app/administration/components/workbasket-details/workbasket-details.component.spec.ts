@@ -36,13 +36,14 @@ import { take } from 'rxjs/operators';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { provideRouter } from '@angular/router';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('angular-svg-icon');
+vi.mock('angular-svg-icon');
 
 const domainServiceSpy: Partial<DomainService> = {
-  getSelectedDomain: jest.fn().mockReturnValue(of('A')),
-  getSelectedDomainValue: jest.fn().mockReturnValue(of()),
-  getDomains: jest.fn().mockReturnValue(of())
+  getSelectedDomain: vi.fn().mockReturnValue(of('A')),
+  getSelectedDomainValue: vi.fn().mockReturnValue(of()),
+  getDomains: vi.fn().mockReturnValue(of())
 };
 
 export const workbasketReadState = {

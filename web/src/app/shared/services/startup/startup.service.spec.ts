@@ -22,6 +22,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { StartupService } from './startup.service';
 import { environment } from '../../../../environments/environment';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('StartupService', () => {
   const environmentFile = 'environments/data-sources/environment-information.json';
