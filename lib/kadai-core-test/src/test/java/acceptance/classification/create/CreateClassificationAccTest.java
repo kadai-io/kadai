@@ -51,6 +51,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.function.ThrowingConsumer;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /** Acceptance test for all "create classification" scenarios. */
 @KadaiIntegrationTest
@@ -336,5 +338,21 @@ class CreateClassificationAccTest {
     assertThat(classification.getParentId()).isEmpty();
     assertThat(classification.getParentKey()).isEmpty();
     assertThat(classification.getIsValidInDomain()).isFalse();
+  }
+
+  @WithAccessId(user = "businessadmin")
+  @ParameterizedTest
+  @ValueSource(ints = {1, 5, 10, 32, 64, 128, 200, 255, 256, 499, 511})
+  void should_AllowFieldApplicationEntryPointToHaveValuesWith512Chars(int count) throws Exception {
+    final String key = "Key" + count;
+    Classification classification =
+        classificationService.newClassification(key, MASTER_DOMAIN, "TASK");
+    classification.setApplicationEntryPoint("a".repeat(count));
+
+    classification = classificationService.createClassification(classification);
+
+    List<ClassificationSummary> classifications =
+        classificationService.createClassificationQuery().keyIn(key).list();
+    assertThat(classifications).containsExactly(classification.asSummary());
   }
 }
