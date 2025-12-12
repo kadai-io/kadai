@@ -328,7 +328,6 @@ public class TaskQuerySqlProvider {
         .collect(Collectors.joining(", "));
   }
 
-
   private static String db2selectFields() {
     // needs to be the same order as the commonSelectFields (TaskQueryColumnValue)
     return "ID, EXTERNAL_ID, CREATED, CLAIMED, COMPLETED, MODIFIED, PLANNED, RECEIVED, DUE, NAME, "

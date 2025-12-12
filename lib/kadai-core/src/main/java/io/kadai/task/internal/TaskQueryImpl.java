@@ -2200,6 +2200,11 @@ public class TaskQueryImpl implements TaskQuery {
       throw new IllegalArgumentException(
           "The params \"lockResultsEquals\" and \"selectAndClaim\"" + " cannot be used together!");
     }
+    if (joinWithUserInfo && lockResults != null && lockResults != 0) {
+      throw new IllegalArgumentException(
+          "The params \"lockResultsEquals\" and \"joinWithUserInfo\""
+              + " cannot be used together!");
+    }
     if (withoutAttachment
         && (attachmentChannelIn != null
             || attachmentChannelLike != null

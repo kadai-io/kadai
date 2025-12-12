@@ -21,6 +21,7 @@ package acceptance.task.query;
 import static io.kadai.common.api.BaseQuery.SortDirection.ASCENDING;
 import static io.kadai.common.api.BaseQuery.SortDirection.DESCENDING;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -92,6 +93,30 @@ class QueryTasksAccTest extends AbstractAccTest {
     assertThat(tasks).hasSize(1);
     String longName = kadaiEngine.getUserService().getUser(tasks.get(0).getOwner()).getLongName();
     assertThat(tasks.get(0)).extracting(TaskSummary::getOwnerLongName).isEqualTo(longName);
+  }
+
+  @WithAccessId(user = "user-1-1")
+  @Test
+  void should_ThrowIllegalArgumentException_When_UserInfoPropertyAndLockingEnabled()
+      throws Exception {
+    KadaiConfiguration kadaiConfiguration =
+        new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(true).build();
+    KadaiEngine kadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
+
+    final ThrowingCallable call =
+        () ->
+            kadaiEngine
+                .getTaskService()
+                .createTaskQuery()
+                .lockResultsEquals(64)
+                .idIn("TKI:000000000000000000000000000000000000")
+                .list();
+
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(call)
+        .extracting(IllegalArgumentException::getMessage)
+        .isEqualTo(
+            "The params \"lockResultsEquals\" and \"joinWithUserInfo\" cannot be used together!");
   }
 
   @WithAccessId(user = "user-1-1")
