@@ -88,7 +88,7 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache maven dependencies
         id: cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.m2
@@ -155,13 +155,13 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache web dependencies
         id: web-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: web/node_modules
           key: ${{ runner.OS }}-${{ env.CACHE_WEB_NAME }}-${{ hashFiles('**/yarn.lock') }}
       - name: Cache maven dependencies (for web)
         id: maven-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.m2
@@ -234,7 +234,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache web dependencies
         id: web-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: web/node_modules
           key: ${{ runner.OS }}-${{ env.CACHE_WEB_NAME }}-${{ hashFiles('**/yarn.lock') }}
@@ -246,7 +246,7 @@ jobs:
         run: yarn ci
       - name: Cache maven dependencies (for web)
         id: maven-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.m2
@@ -311,7 +311,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache web dependencies
         id: web-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: web/node_modules
           key: ${{ runner.OS }}-${{ env.CACHE_WEB_NAME }}-${{ hashFiles('**/yarn.lock') }}
@@ -323,7 +323,7 @@ jobs:
         run: yarn ci
       - name: Cache maven dependencies
         id: maven-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.m2
@@ -444,7 +444,7 @@ jobs:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache maven dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.m2
@@ -519,7 +519,7 @@ jobs:
           distribution: adopt
           java-version: 21
       - name: Cache maven dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.m2
@@ -647,7 +647,7 @@ jobs:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache maven dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.m2
@@ -783,7 +783,7 @@ jobs:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache maven dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.m2
@@ -861,13 +861,13 @@ jobs:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache SonarCloud packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-${{ env.CACHE_SONAR_NAME }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_SONAR_NAME }}
       - name: Cache maven dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.m2
