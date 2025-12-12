@@ -18,6 +18,7 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { TaskStatusDetailsComponent } from './task-status-details.component';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('TaskStatusDetailsComponent', () => {
   let component: TaskStatusDetailsComponent;

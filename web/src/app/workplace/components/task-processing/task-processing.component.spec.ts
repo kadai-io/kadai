@@ -21,6 +21,7 @@ import { provideRouter, Routes } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { TaskProcessingComponent } from './task-processing.component';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 @Component({
   selector: 'kadai-dummy-detail',

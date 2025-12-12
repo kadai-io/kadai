@@ -22,11 +22,12 @@ import { DomainService } from '../../../shared/services/domain/domain.service';
 import { of } from 'rxjs';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const domainServiceSpy: Partial<DomainService> = {
-  getDomains: jest.fn().mockReturnValue(of(['domain a', 'domain b'])),
-  getSelectedDomain: jest.fn().mockReturnValue(of('domain a')),
-  switchDomain: jest.fn()
+  getDomains: vi.fn().mockReturnValue(of(['domain a', 'domain b'])),
+  getSelectedDomain: vi.fn().mockReturnValue(of('domain a')),
+  switchDomain: vi.fn()
 };
 
 describe('AdministrationOverviewComponent', () => {

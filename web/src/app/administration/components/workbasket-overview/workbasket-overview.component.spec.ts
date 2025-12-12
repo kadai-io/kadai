@@ -29,8 +29,9 @@ import { take } from 'rxjs/operators';
 import { provideHttpClient } from '@angular/common/http';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('angular-svg-icon');
+vi.mock('angular-svg-icon');
 
 const mockActivatedRoute = {
   firstChild: {

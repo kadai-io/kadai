@@ -80,9 +80,10 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
   selectedWorkbasket$: Observable<Workbasket> = inject(Store).select(WorkbasketSelectors.selectedWorkbasket);
   destroy$ = new Subject<void>();
   @Input() expanded: boolean;
+  areAllAccessItemsValid = true;
+  protected readonly ACTION = ACTION;
   private store = inject(Store);
   private ngxsActions$ = inject(Actions);
-  areAllAccessItemsValid = true;
 
   ngOnInit() {
     this.getWorkbasketFromStore();
@@ -179,6 +180,4 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
-
-  protected readonly ACTION = ACTION;
 }

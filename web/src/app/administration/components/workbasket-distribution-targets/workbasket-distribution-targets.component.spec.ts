@@ -27,8 +27,9 @@ import { ActivatedRoute } from '@angular/router';
 import { engineConfigurationMock, workbasketReadStateMock } from '../../../shared/store/mock-data/mock-store';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('angular-svg-icon');
+vi.mock('angular-svg-icon');
 
 const activatedRouteMock = {
   firstChild: {
@@ -37,14 +38,14 @@ const activatedRouteMock = {
 };
 
 const domainServiceSpy: Partial<DomainService> = {
-  getSelectedDomainValue: jest.fn().mockReturnValue(of(null)),
-  getSelectedDomain: jest.fn().mockReturnValue(of('A')),
-  getDomains: jest.fn().mockReturnValue(of(null))
+  getSelectedDomainValue: vi.fn().mockReturnValue(of(null)),
+  getSelectedDomain: vi.fn().mockReturnValue(of('A')),
+  getDomains: vi.fn().mockReturnValue(of(null))
 };
 
 const workbasketServiceSpy: Partial<WorkbasketService> = {
-  getWorkBasketsSummary: jest.fn().mockReturnValue(of(null)),
-  getWorkBasketsDistributionTargets: jest.fn().mockReturnValue(of(null))
+  getWorkBasketsSummary: vi.fn().mockReturnValue(of(null)),
+  getWorkBasketsDistributionTargets: vi.fn().mockReturnValue(of(null))
 };
 
 describe('WorkbasketDistributionTargetsComponent', () => {

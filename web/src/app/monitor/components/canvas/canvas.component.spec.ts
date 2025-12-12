@@ -26,6 +26,7 @@ import { settingsStateMock } from '../../../shared/store/mock-data/mock-store';
 import { MatDialogModule } from '@angular/material/dialog';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('CanvasComponent', () => {
   let fixture: ComponentFixture<CanvasComponent>;
@@ -60,7 +61,7 @@ describe('CanvasComponent', () => {
   });
 
   it('should call generateChart()', () => {
-    component.generateChart = jest.fn();
+    component.generateChart = vi.fn();
     const reportRow = workbasketReportMock.rows[1];
     component.row = reportRow;
     fixture.detectChanges();

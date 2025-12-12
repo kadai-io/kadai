@@ -26,8 +26,9 @@ import { ActivatedRoute } from '@angular/router';
 import { SelectWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { provideHttpClient } from '@angular/common/http';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('angular-svg-icon');
+vi.mock('angular-svg-icon');
 
 const mockActivatedRouteAlternative = {
   firstChild: {

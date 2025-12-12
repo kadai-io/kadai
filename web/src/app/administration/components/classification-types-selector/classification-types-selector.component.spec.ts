@@ -26,10 +26,11 @@ import { ClassificationCategoriesService } from '../../../shared/services/classi
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { classificationStateMock } from '../../../shared/store/mock-data/mock-store';
 import { By } from '@angular/platform-browser';
+import { vi } from 'vitest';
 
-const classificationServiceSpy = jest.fn();
-const classificationCategoriesServiceSpy = jest.fn();
-const domainServiceSpy = jest.fn();
+const classificationServiceSpy = vi.fn();
+const classificationCategoriesServiceSpy = vi.fn();
+const domainServiceSpy = vi.fn();
 
 describe('ClassificationTypesSelectorComponent', () => {
   let fixture: ComponentFixture<ClassificationTypesSelectorComponent>;

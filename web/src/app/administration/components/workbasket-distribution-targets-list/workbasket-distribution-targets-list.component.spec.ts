@@ -28,8 +28,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { OrderBy } from '../../../shared/pipes/order-by.pipe';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('angular-svg-icon');
+vi.mock('angular-svg-icon');
 
 describe('WorkbasketDistributionTargetsListComponent', () => {
   let fixture: ComponentFixture<WorkbasketDistributionTargetsListComponent>;
@@ -104,7 +105,7 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
   }));
 
   it('should call orderBy pipe', () => {
-    const orderBySpy = jest.spyOn(OrderBy.prototype, 'transform');
+    const orderBySpy = vi.spyOn(OrderBy.prototype, 'transform');
     fixture.detectChanges();
     expect(orderBySpy).toHaveBeenCalledWith(component.distributionTargets, ['name']);
   });

@@ -28,8 +28,9 @@ import { GetAccessItems } from '../../../shared/store/access-items-management-st
 import { Direction, Sorting, WorkbasketAccessItemQuerySortParameter } from '../../../shared/models/sorting';
 import { engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
 import { provideHttpClient } from '@angular/common/http';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('angular-svg-icon');
+vi.mock('angular-svg-icon');
 
 describe('AccessItemsManagementComponent', () => {
   let fixture: ComponentFixture<AccessItemsManagementComponent>;
@@ -137,7 +138,7 @@ describe('AccessItemsManagementComponent', () => {
   it('should display a dialog when access is revoked', waitForAsync(() => {
     app.accessId = { accessId: 'xyz', name: 'xyz' };
     const notificationService = TestBed.inject(NotificationService);
-    const showDialogSpy = jest.spyOn(notificationService, 'showDialog').mockImplementation();
+    const showDialogSpy = vi.spyOn(notificationService, 'showDialog').mockImplementation();
     app.revokeAccess();
     fixture.detectChanges();
     expect(showDialogSpy).toHaveBeenCalled();

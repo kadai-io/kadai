@@ -21,6 +21,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { Customisation, CustomisationContent } from 'app/shared/models/customisation';
 import { asteriskIcon, ClassificationCategoriesService, missingIcon } from './classification-categories.service';
 import { provideHttpClient } from '@angular/common/http';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('ClassificationCategoriesService', () => {
   let categoryService: ClassificationCategoriesService;
