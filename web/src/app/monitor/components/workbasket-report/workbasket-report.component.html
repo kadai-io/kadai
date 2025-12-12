@@ -20,11 +20,11 @@
   <div class="panel-heading">
     @if (metaInformation) {
       <h4>{{ getTitle() }} ({{ metaInformation?.date| date:'medium' }}
-      )</h4>
+        )</h4>
     }
   </div>
   <mat-tab-group (selectedIndexChange)="selectComponent($event)" animationDuration="0ms"
-    class="panel-body" mat-stretch-tabs="false">
+                 class="panel-body" mat-stretch-tabs="false">
     <mat-tab label="Due Date">
       <kadai-monitor-workbasket-report-due-date
         (metaInformation)="getMetaInformation($event)">

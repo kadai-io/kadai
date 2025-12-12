@@ -22,7 +22,7 @@ import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
 import { ClassificationOverviewComponent } from './classification-overview.component';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import {
   CreateClassification,
   SelectClassification
@@ -32,8 +32,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('angular-svg-icon');
+vi.mock('angular-svg-icon');
 
 const routeParamsMock = { id: 'new-classification' };
 
@@ -120,5 +121,55 @@ describe('ClassificationOverviewComponent', () => {
     actions$.pipe(ofActionDispatched(CreateClassification)).subscribe(() => (isActionDispatched = true));
     component.ngOnInit();
     expect(isActionDispatched).toBe(true);
+  });
+
+  it('should dispatch SelectClassification only when routerParams id exists but not new-classification', async () => {
+    // arrange: set route firstChild params to id that does not contain 'new-classification'
+    (mockActivatedRoute as any).firstChild = { params: of({ id: '101' }) };
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+
+    // act
+    component.ngOnInit();
+
+    // assert: a SelectClassification should have been dispatched, but CreateClassification should not
+    expect(dispatchSpy).toHaveBeenCalled();
+    const calls = (dispatchSpy as any).mock.calls.flat();
+    const createdActionDispatched = calls.some((c: any) => c instanceof CreateClassification);
+    expect(createdActionDispatched).toBe(false);
+  });
+
+  it('should not set routerParams or dispatch when firstChild of route does not exist', () => {
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+    // remove firstChild
+    (mockActivatedRoute as any).firstChild = undefined;
+
+    component.ngOnInit();
+
+    expect(component.routerParams).toBeUndefined();
+    expect(dispatchSpy).not.toHaveBeenCalled();
+  });
+
+  it('should react to selectedClassification$ changes and stop after destroy', () => {
+    // Tear down existing subscriptions and replace the observable with a controllable Subject
+    component.ngOnDestroy();
+    const selectedSub = new Subject<any>();
+    // override the observable used by the component
+    (component as any).selectedClassification$ = selectedSub.asObservable();
+
+    // re-initialize to subscribe to our subject
+    component.ngOnInit();
+
+    // initially emit null -> should set showDetail false
+    selectedSub.next(null);
+    expect(component.showDetail).toBe(false);
+
+    // emit a selected classification -> should set showDetail true
+    selectedSub.next({ classificationId: 'ID-1' });
+    expect(component.showDetail).toBe(true);
+
+    // destroy and emit again -> should NOT change showDetail
+    component.ngOnDestroy();
+    selectedSub.next(null);
+    expect(component.showDetail).toBe(true);
   });
 });

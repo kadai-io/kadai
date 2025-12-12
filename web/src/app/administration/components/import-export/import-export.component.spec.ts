@@ -30,31 +30,32 @@ import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { ClassificationDefinitionService } from '../../services/classification-definition.service';
 import { KadaiType } from '../../../shared/models/kadai-type';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('../../../shared/util/blob-generator');
+vi.mock('../../../shared/util/blob-generator');
 
 xdescribe('ImportExportComponent', () => {
   let fixture: ComponentFixture<ImportExportComponent>;
   let debugElement: DebugElement;
   let app: ImportExportComponent;
 
-  const domainServiceSpy = jest.fn().mockImplementation(
+  const domainServiceSpy = vi.fn().mockImplementation(
     (): Partial<DomainService> => ({
-      getSelectedDomainValue: jest.fn().mockReturnValue(of()),
-      getSelectedDomain: jest.fn().mockReturnValue(of()),
-      getDomains: jest.fn().mockReturnValue(of())
+      getSelectedDomainValue: vi.fn().mockReturnValue(of()),
+      getSelectedDomain: vi.fn().mockReturnValue(of()),
+      getDomains: vi.fn().mockReturnValue(of())
     })
   );
 
-  const httpSpy = jest.fn().mockImplementation(
+  const httpSpy = vi.fn().mockImplementation(
     (): Partial<HttpClient> => ({
-      get: jest.fn().mockReturnValue(of([])),
-      post: jest.fn().mockReturnValue(of([]))
+      get: vi.fn().mockReturnValue(of([])),
+      post: vi.fn().mockReturnValue(of([]))
     })
   );
 
-  const showDialogFn = jest.fn().mockReturnValue(true);
-  const notificationServiceSpy = jest.fn().mockImplementation(
+  const showDialogFn = vi.fn().mockReturnValue(true);
+  const notificationServiceSpy = vi.fn().mockImplementation(
     (): Partial<NotificationService> => ({
       showDialog: showDialogFn,
       showSuccess: showDialogFn
@@ -78,7 +79,7 @@ xdescribe('ImportExportComponent', () => {
       ]
     }).compileComponents();
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     fixture = TestBed.createComponent(ImportExportComponent);
     debugElement = fixture.debugElement;

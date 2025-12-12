@@ -19,6 +19,7 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { DomainService } from './domain.service';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('DomainService', () => {
   beforeEach(() => {

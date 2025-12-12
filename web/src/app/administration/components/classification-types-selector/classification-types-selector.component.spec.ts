@@ -26,10 +26,11 @@ import { ClassificationCategoriesService } from '../../../shared/services/classi
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { classificationStateMock } from '../../../shared/store/mock-data/mock-store';
 import { By } from '@angular/platform-browser';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const classificationServiceSpy = jest.fn();
-const classificationCategoriesServiceSpy = jest.fn();
-const domainServiceSpy = jest.fn();
+const classificationServiceSpy = vi.fn();
+const classificationCategoriesServiceSpy = vi.fn();
+const domainServiceSpy = vi.fn();
 
 describe('ClassificationTypesSelectorComponent', () => {
   let fixture: ComponentFixture<ClassificationTypesSelectorComponent>;
@@ -89,5 +90,16 @@ describe('ClassificationTypesSelectorComponent', () => {
     expect(options.length).toBe(2);
     expect(options[0].nativeElement.textContent.trim()).toBe('TASK');
     expect(options[1].nativeElement.textContent.trim()).toBe('DOCUMENT');
+  });
+
+  it('should dispatch SetSelectedClassificationType and update location when select is called', () => {
+    const storeSpy = vi.spyOn(store, 'dispatch');
+    const location = TestBed.inject(Location);
+    const locationSpy = vi.spyOn(location, 'go');
+
+    component.select('TASK');
+
+    expect(storeSpy).toHaveBeenCalled();
+    expect(locationSpy).toHaveBeenCalled();
   });
 });
