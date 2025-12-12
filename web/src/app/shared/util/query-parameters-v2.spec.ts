@@ -17,7 +17,7 @@
  */
 
 import { asUrlQueryString } from './query-parameters-v2';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('asUrlQueryString', () => {
   it('should create a empty query', () => {
