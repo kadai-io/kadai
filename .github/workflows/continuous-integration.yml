@@ -618,6 +618,7 @@ jobs:
       github.repository == 'kadai-io/kadai' &&
       ( startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' ) &&
       github.head_ref == '' &&
+      (needs.detect_changes.outputs.code_changed == 'true' || startsWith(github.ref, 'refs/tags/v')) &&
       needs.test_frontend.result != 'failure' &&
       needs.test_e2e.result != 'failure' &&
       needs.test_backend_17.result != 'failure' &&
