@@ -330,7 +330,7 @@ jobs:
             !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
       - name: Download kadai artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_KADAI_JARS_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
@@ -342,7 +342,7 @@ jobs:
         run: ./mvnw -B dependency:go-offline -pl :kadai-rest-spring-example-boot -am -T 1C
         if: steps.maven-cache.outputs.cache-hit != 'true'
       - name: Download kadai-web dist artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_KADAI_WEB_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_WEB_PATH }}
@@ -452,7 +452,7 @@ jobs:
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download kadai artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_KADAI_JARS_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
@@ -527,7 +527,7 @@ jobs:
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download kadai artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_KADAI_JARS_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
@@ -655,12 +655,12 @@ jobs:
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download kadai artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_KADAI_JARS_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
       - name: Download kadai-web dist artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_KADAI_WEB_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_WEB_PATH }}
@@ -791,12 +791,12 @@ jobs:
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download kadai artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_KADAI_JARS_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
       - name: Download kadai-web dist artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_KADAI_WEB_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_WEB_PATH }}
@@ -875,7 +875,7 @@ jobs:
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download JaCoCo reports
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: ${{ env.ARTIFACTS_JACOCO_REPORTS_NAME }}-*
           merge-multiple: true
