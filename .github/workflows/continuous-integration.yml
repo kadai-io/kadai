@@ -70,7 +70,7 @@ jobs:
     name: Compile all maven modules
     runs-on: ubuntu-22.04
     needs: [ detect_changes ]
-    if: needs.detect_changes.outputs.code_changed == 'true'
+    if: needs.detect_changes.outputs.code_changed == 'true' || startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -131,7 +131,7 @@ jobs:
     name: Compile kadai-web
     runs-on: ubuntu-22.04
     needs: [ detect_changes ]
-    if: needs.detect_changes.outputs.code_changed == 'true'
+    if: needs.detect_changes.outputs.code_changed == 'true' || startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -215,7 +215,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Test kadai-web
     needs: [compile_frontend ]
-    if: needs.detect_changes.outputs.frontend_changed == 'true'
+    if: needs.detect_changes.outputs.frontend_changed == 'true' || startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -283,11 +283,11 @@ jobs:
     name: Test E2E
     needs: [test_frontend, test_backend_17, test_backend_21]
     if: |
-      always() &&
+      (always() &&
       needs.detect_changes.outputs.code_changed == 'true' &&
       needs.test_frontend.result != 'failure' &&
       needs.test_backend_17.result != 'failure' &&
-      needs.test_backend_21.result != 'failure'
+      needs.test_backend_21.result != 'failure') || startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -380,7 +380,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Test ${{ matrix.module }} with JDK 17 on ${{ matrix.database }}
     needs: [compile_backend ]
-    if: needs.detect_changes.outputs.backend_changed == 'true'
+    if: needs.detect_changes.outputs.backend_changed == 'true' || startsWith(github.ref, 'refs/tags/')
     strategy:
       matrix:
         module:
@@ -493,7 +493,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Test ${{ matrix.module }} with JDK 21 on ${{ matrix.database }}
     needs: [compile_backend ]
-    if: needs.detect_changes.outputs.backend_changed == 'true'
+    if: needs.detect_changes.outputs.backend_changed == 'true' || startsWith(github.ref, 'refs/tags/')
     strategy:
       matrix:
         module:
