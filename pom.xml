@@ -84,7 +84,7 @@
 
         <!-- AspectJ dependencies -->
         <version.aspectj-maven-plugin>1.15.0</version.aspectj-maven-plugin>
-        <version.aspectj>1.9.25</version.aspectj>
+        <version.aspectj>1.9.25.1</version.aspectj>
 
         <!-- Excel to DMN converter dependencies -->
         <version.docx4j>11.5.8</version.docx4j>
