@@ -40,7 +40,7 @@
     "chart.js": "4.5.1",
     "core-js": "3.47.0",
     "file-saver-es": "2.0.5",
-    "lodash-es": "4.17.21",
+    "lodash-es": "4.17.22",
     "ng2-charts": "8.0.0",
     "rxjs": "7.8.2",
     "tslib": "2.8.1",
