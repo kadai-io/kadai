@@ -1,0 +1,10 @@
+SET SCHEMA %schemaName%;
+
+INSERT INTO KADAI_SCHEMA_VERSION (ID, VERSION, CREATED)
+VALUES (nextval('KADAI_SCHEMA_VERSION_ID_SEQ'), '12.0.0', CURRENT_TIMESTAMP);
+
+-- "Indexes and simple table constraints involving the column will be automatically converted [...]."
+-- See below Postgres-Docs:
+-- https://www.postgresql.org/docs/17/sql-altertable.html#SQL-ALTERTABLE-DESC-SET-DATA-TYPE
+ALTER TABLE CLASSIFICATION ALTER COLUMN APPLICATION_ENTRY_POINT TYPE VARCHAR(511);
+ALTER TABLE CLASSIFICATION_HISTORY_EVENT ALTER COLUMN APPLICATION_ENTRY_POINT TYPE VARCHAR(511);
