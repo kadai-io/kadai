@@ -2676,17 +2676,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ngxs/router-plugin@npm:20.1.0":
-  version: 20.1.0
-  resolution: "@ngxs/router-plugin@npm:20.1.0"
+"@ngxs/router-plugin@npm:21.0.0":
+  version: 21.0.0
+  resolution: "@ngxs/router-plugin@npm:21.0.0"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/core": ">=20.0.0 <21.0.0"
-    "@angular/router": ">=20.0.0 <21.0.0"
-    "@ngxs/store": ^20.1.0 || ^20.1.0-dev
+    "@angular/core": ">=21.0.0 <22.0.0"
+    "@angular/router": ">=21.0.0 <22.0.0"
+    "@ngxs/store": ^21.0.0 || ^21.0.0-dev
     rxjs: ">=7.0.0"
-  checksum: 10c0/2a232cd08dcee47aaaf8cbf59e2e2b7e8558b97afe266b92c59df86c21c45b9bc651c07b41c5f584e175429be893032c3044a28b8499353dd5a54cd1903cea1a
+  checksum: 10c0/fcdbfd11cb19d3b3116b328743a4ba6fc109b6d45522aad17278eb2f257b24f9165a4b28f4291923b06d49eaa46d15b92ea66395cff88048b3507051550d8235
   languageName: node
   linkType: hard
 
@@ -8190,7 +8190,7 @@ __metadata:
     "@ngneat/hot-toast": "npm:7.0.0"
     "@ngneat/overview": "npm:7.0.0"
     "@ngxs/devtools-plugin": "npm:20.1.0"
-    "@ngxs/router-plugin": "npm:20.1.0"
+    "@ngxs/router-plugin": "npm:21.0.0"
     "@ngxs/store": "npm:20.1.0"
     "@types/file-saver-es": "npm:2"
     "@types/jest": "npm:30.0.0"

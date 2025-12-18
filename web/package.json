@@ -34,7 +34,7 @@
     "@angular/router": "20.3.15",
     "@ngneat/hot-toast": "7.0.0",
     "@ngneat/overview": "7.0.0",
-    "@ngxs/router-plugin": "20.1.0",
+    "@ngxs/router-plugin": "21.0.0",
     "@ngxs/store": "20.1.0",
     "angular-svg-icon": "19.1.1",
     "chart.js": "4.5.1",
