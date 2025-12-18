@@ -51,7 +51,7 @@
     "@angular/cli": "20.3.13",
     "@angular/compiler": "20.3.15",
     "@angular/compiler-cli": "20.3.15",
-    "@ngxs/devtools-plugin": "20.1.0",
+    "@ngxs/devtools-plugin": "21.0.0",
     "@types/file-saver-es": "2",
     "@types/jest": "30.0.0",
     "@types/lodash-es": "4",
