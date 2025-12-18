@@ -343,7 +343,7 @@ class CreateClassificationAccTest {
   @WithAccessId(user = "businessadmin")
   @ParameterizedTest
   @ValueSource(ints = {1, 5, 10, 32, 64, 128, 200, 255, 256, 499, 511})
-  void should_AllowFieldApplicationEntryPointToHaveValuesWith512Chars(int count) throws Exception {
+  void should_AllowFieldApplicationEntryPointToHaveValuesWith511Chars(int count) throws Exception {
     final String key = String.format("par-key-%d-", count);
     Classification classification =
         classificationService.newClassification(key, MASTER_DOMAIN, "TASK");
