@@ -88,18 +88,18 @@ describe('WorkbasketListToolbarComponent', () => {
     expect(actionDispatched).toBe(false);
   }));
 
-  it('should emit value when sorting is called', (done) => {
+  it('should emit value when sorting is called', () => {
     const mockSort: Sorting<WorkbasketQuerySortParameter> = {
       'sort-by': WorkbasketQuerySortParameter.KEY,
       order: Direction.ASC
     };
-    let sort: Sorting<WorkbasketQuerySortParameter> = undefined;
-    component.performSorting.subscribe((sortBy: Sorting<WorkbasketQuerySortParameter>) => {
+    let sort: Sorting<WorkbasketQuerySortParameter> | undefined;
+    const sub = component.performSorting.subscribe((sortBy: Sorting<WorkbasketQuerySortParameter>) => {
       sort = sortBy;
-      done();
     });
     component.sorting(mockSort);
     expect(sort).toMatchObject(mockSort);
+    sub.unsubscribe();
   });
 
   /* HTML */
@@ -109,7 +109,7 @@ describe('WorkbasketListToolbarComponent', () => {
     expect(button).toBeTruthy();
     expect(button.textContent).toContain('add');
     expect(button.textContent).toContain('Add');
-    component.addWorkbasket = vi.fn().mockImplementation();
+    component.addWorkbasket = vi.fn().mockImplementation(() => undefined);
     button.click();
     expect(component.addWorkbasket).toHaveBeenCalled();
   });
