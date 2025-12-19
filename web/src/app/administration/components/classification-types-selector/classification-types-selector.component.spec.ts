@@ -19,6 +19,8 @@
 import { ClassificationTypesSelectorComponent } from './classification-types-selector.component';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
+import { Location } from '@angular/common';
+import { provideLocationMocks } from '@angular/common/testing';
 import { provideStore, Store } from '@ngxs/store';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
@@ -42,6 +44,7 @@ describe('ClassificationTypesSelectorComponent', () => {
     TestBed.configureTestingModule({
       imports: [ClassificationTypesSelectorComponent],
       providers: [
+        provideLocationMocks(),
         provideStore([ClassificationState]),
         {
           provide: ClassificationsService,

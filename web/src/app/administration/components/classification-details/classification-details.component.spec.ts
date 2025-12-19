@@ -18,7 +18,7 @@
 
 import { DebugElement } from '@angular/core';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
-import { EMPTY, Observable, of } from 'rxjs';
+import { EMPTY, firstValueFrom, Observable, of } from 'rxjs';
 import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { ComponentFixture, fakeAsync, flush, TestBed, tick, waitForAsync } from '@angular/core/testing';
@@ -112,7 +112,7 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should trigger onSave() when value exists and onSubmit() is called', async () => {
-    component.onSave = vi.fn().mockImplementation();
+    component.onSave = vi.fn().mockImplementation(() => undefined);
     await component.onSubmit();
     expect(component.onSave).toHaveBeenCalled();
   });
@@ -133,21 +133,15 @@ describe('ClassificationDetailsComponent', () => {
     expect(isActionDispatched).toBe(true);
   });
 
-  it('should return icon for category when getCategoryIcon() is called and category exists', (done) => {
-    const categoryIcon = component.getCategoryIcon('AUTOMATIC');
-    categoryIcon.subscribe((iconPair) => {
-      expect(iconPair.left).toBe('assets/icons/categories/automatic.svg');
-      expect(iconPair.right).toBe('AUTOMATIC');
-      done();
-    });
+  it('should return icon for category when getCategoryIcon() is called and category exists', async () => {
+    const iconPair = await firstValueFrom(component.getCategoryIcon('AUTOMATIC'));
+    expect(iconPair.left).toBe('assets/icons/categories/automatic.svg');
+    expect(iconPair.right).toBe('AUTOMATIC');
   });
 
-  it('should return icon when getCategoryIcon() is called and category does not exist', (done) => {
-    const categoryIcon = component.getCategoryIcon('WATER');
-    categoryIcon.subscribe((iconPair) => {
-      expect(iconPair.left).toBe('assets/icons/categories/missing-icon.svg');
-      done();
-    });
+  it('should return icon when getCategoryIcon() is called and category does not exist', async () => {
+    const iconPair = await firstValueFrom(component.getCategoryIcon('WATER'));
+    expect(iconPair.left).toBe('assets/icons/categories/missing-icon.svg');
   });
 
   it('should dispatch SaveCreatedClassification action in onSave() when classificationId is undefined', async () => {
@@ -219,7 +213,7 @@ describe('ClassificationDetailsComponent', () => {
     expect(button).toBeTruthy();
     expect(button.textContent).toContain('Save');
     expect(button.textContent).toContain('save');
-    component.onSubmit = vi.fn().mockImplementation();
+    component.onSubmit = vi.fn().mockImplementation(() => undefined);
     button.click();
     expect(component.onSubmit).toHaveBeenCalled();
   });
@@ -263,7 +257,7 @@ describe('ClassificationDetailsComponent', () => {
     const copyButton = debugElement.queryAll(By.css('.action-toolbar__dropdown'))[0];
     expect(copyButton.nativeElement.textContent).toContain('content_copy');
     expect(copyButton.nativeElement.textContent).toContain('Copy');
-    component.onCopy = vi.fn().mockImplementation();
+    component.onCopy = vi.fn().mockImplementation(() => undefined);
     copyButton.nativeElement.click();
     expect(component.onCopy).toHaveBeenCalled();
   });
@@ -296,7 +290,7 @@ describe('ClassificationDetailsComponent', () => {
     const closeButton = debugElement.queryAll(By.css('.action-toolbar__dropdown'))[2];
     expect(closeButton.nativeElement.textContent).toContain('close');
     expect(closeButton.nativeElement.textContent).toContain('close');
-    component.onCloseClassification = vi.fn().mockImplementation();
+    component.onCloseClassification = vi.fn().mockImplementation(() => undefined);
     closeButton.nativeElement.click();
     expect(component.onCloseClassification).toHaveBeenCalled();
   });

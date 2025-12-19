@@ -34,7 +34,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../../../shared/util/blob-generator');
 
-xdescribe('ImportExportComponent', () => {
+describe.skip('ImportExportComponent', () => {
   let fixture: ComponentFixture<ImportExportComponent>;
   let debugElement: DebugElement;
   let app: ImportExportComponent;

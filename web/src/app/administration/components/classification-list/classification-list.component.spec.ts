@@ -23,7 +23,7 @@ import { ClassificationState } from '../../../shared/store/classification-store/
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { ClassificationListComponent } from './classification-list.component';
 import { classificationStateMock, engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
-import { Observable, of } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { CreateClassification } from '../../../shared/store/classification-store/classification.actions';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { By } from '@angular/platform-browser';
@@ -146,20 +146,14 @@ describe('ClassificationListComponent', () => {
   });
 
   /* TS: getCategoryIcon() */
-  it('should return icon for category when getCategoryIcon is called and category exists', (done) => {
-    const categoryIcon = component.getCategoryIcon('MANUAL');
-    categoryIcon.subscribe((iconPair) => {
-      expect(iconPair.left).toBe('assets/icons/categories/manual.svg');
-      expect(iconPair.right).toBe('MANUAL');
-      done();
-    });
+  it('should return icon for category when getCategoryIcon is called and category exists', async () => {
+    const iconPair = await firstValueFrom(component.getCategoryIcon('MANUAL'));
+    expect(iconPair.left).toBe('assets/icons/categories/manual.svg');
+    expect(iconPair.right).toBe('MANUAL');
   });
 
-  it('should return a special icon when getCategoryIcon is called and category does not exist', (done) => {
-    const categoryIcon = component.getCategoryIcon('CLOUD');
-    categoryIcon.subscribe((iconPair) => {
-      expect(iconPair.left).toBe('assets/icons/categories/missing-icon.svg');
-      done();
-    });
+  it('should return a special icon when getCategoryIcon is called and category does not exist', async () => {
+    const iconPair = await firstValueFrom(component.getCategoryIcon('CLOUD'));
+    expect(iconPair.left).toBe('assets/icons/categories/missing-icon.svg');
   });
 });

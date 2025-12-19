@@ -23,7 +23,7 @@ import { DebugElement } from '@angular/core';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { AccessItemsManagementState } from '../../../shared/store/access-items-management-store/access-items-management.state';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable, take } from 'rxjs';
 import { GetAccessItems } from '../../../shared/store/access-items-management-store/access-items-management.actions';
 import { Direction, Sorting, WorkbasketAccessItemQuerySortParameter } from '../../../shared/models/sorting';
 import { engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
@@ -109,7 +109,7 @@ describe('AccessItemsManagementComponent', () => {
     expect(permissions).toMatchObject({});
   });
 
-  it('should dispatch GetAccessItems action in searchForAccessItemsWorkbaskets', waitForAsync((done) => {
+  it('should dispatch GetAccessItems action in searchForAccessItemsWorkbaskets', async () => {
     app.accessId = { accessId: '1', name: 'max' };
     app.groups = [
       { accessId: '1', name: 'users' },
@@ -123,22 +123,22 @@ describe('AccessItemsManagementComponent', () => {
       'sort-by': WorkbasketAccessItemQuerySortParameter.ACCESS_ID,
       order: Direction.DESC
     };
+
+    const dispatched = firstValueFrom(actions$.pipe(ofActionDispatched(GetAccessItems), take(1)));
+
     app.searchForAccessItemsWorkbaskets();
     fixture.detectChanges();
-    let actionDispatched = false;
-    actions$.pipe(ofActionDispatched(GetAccessItems)).subscribe(() => {
-      actionDispatched = true;
-      expect(actionDispatched).toBe(true);
-      expect(app.setAccessItemsGroups).toHaveBeenCalled();
-      expect(app.setAccessItemsPermissions).toHaveBeenCalled();
-      done();
-    });
-  }));
+
+    await dispatched;
+
+    expect(app.setAccessItemsGroups).toHaveBeenCalled();
+    expect(app.setAccessItemsPermissions).toHaveBeenCalled();
+  });
 
   it('should display a dialog when access is revoked', waitForAsync(() => {
     app.accessId = { accessId: 'xyz', name: 'xyz' };
     const notificationService = TestBed.inject(NotificationService);
-    const showDialogSpy = vi.spyOn(notificationService, 'showDialog').mockImplementation();
+    const showDialogSpy = vi.spyOn(notificationService, 'showDialog').mockImplementation(() => undefined);
     app.revokeAccess();
     fixture.detectChanges();
     expect(showDialogSpy).toHaveBeenCalled();
