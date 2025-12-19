@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { NavBarComponent } from './nav-bar.component';
 import { By } from '@angular/platform-browser';
@@ -30,11 +30,11 @@ describe('NavBarComponent', () => {
   let debugElement: DebugElement;
   let route = '';
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [NavBarComponent]
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(NavBarComponent);

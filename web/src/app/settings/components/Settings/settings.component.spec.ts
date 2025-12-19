@@ -18,7 +18,7 @@
 
 import { DebugElement } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { SettingsState } from '../../../shared/store/settings-store/settings.state';
@@ -42,8 +42,8 @@ describe('SettingsComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [SettingsComponent],
       providers: [
         provideStore([SettingsState]),
@@ -66,7 +66,7 @@ describe('SettingsComponent', () => {
       settings: settingsStateMock
     });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();

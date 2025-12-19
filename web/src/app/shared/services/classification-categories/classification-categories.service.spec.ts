@@ -16,7 +16,7 @@
  *
  */
 
-import { TestBed, waitForAsync } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Customisation, CustomisationContent } from 'app/shared/models/customisation';
 import { asteriskIcon, ClassificationCategoriesService, missingIcon } from './classification-categories.service';
@@ -36,7 +36,7 @@ describe('ClassificationCategoriesService', () => {
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  it('should insert missing icon into customisation', waitForAsync(() => {
+  it('should insert missing icon into customisation', async () => {
     const expectedCustomisationContent: CustomisationContent = {
       classifications: { categories: { all: asteriskIcon, missing: missingIcon } }
     };
@@ -64,5 +64,5 @@ describe('ClassificationCategoriesService', () => {
 
       httpMock.verify();
     });
-  }));
+  });
 });

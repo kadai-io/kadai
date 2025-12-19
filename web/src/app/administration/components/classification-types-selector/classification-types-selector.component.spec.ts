@@ -17,7 +17,7 @@
  */
 
 import { ClassificationTypesSelectorComponent } from './classification-types-selector.component';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { Location } from '@angular/common';
 import { provideLocationMocks } from '@angular/common/testing';
@@ -40,8 +40,8 @@ describe('ClassificationTypesSelectorComponent', () => {
   let component: ClassificationTypesSelectorComponent;
   let store: Store;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [ClassificationTypesSelectorComponent],
       providers: [
         provideLocationMocks(),
@@ -67,7 +67,7 @@ describe('ClassificationTypesSelectorComponent', () => {
       classification: classificationStateMock
     });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create the app', () => {
     expect(component).toBeTruthy();

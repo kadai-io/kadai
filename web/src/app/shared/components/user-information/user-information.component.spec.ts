@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { UserInformationComponent } from './user-information.component';
 import { By } from '@angular/platform-browser';
@@ -32,12 +32,18 @@ describe('UserInformationComponent', () => {
   let fixture: ComponentFixture<UserInformationComponent>;
   let debugElement: DebugElement;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [UserInformationComponent],
-      providers: [{ provide: KadaiEngineService, useClass: KadaiEngineServiceMock }, provideAnimationsAsync()]
+      providers: [
+        {
+          provide: KadaiEngineService,
+          useClass: KadaiEngineServiceMock
+        },
+        provideAnimationsAsync()
+      ]
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UserInformationComponent);

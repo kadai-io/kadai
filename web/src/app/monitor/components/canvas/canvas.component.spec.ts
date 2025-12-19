@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { NgxsModule, Store } from '@ngxs/store';
 import { CanvasComponent } from './canvas.component';
@@ -33,8 +33,8 @@ describe('CanvasComponent', () => {
   let debugElement: DebugElement;
   let component: CanvasComponent;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [NgxsModule.forRoot([SettingsState]), MatDialogModule],
       providers: [CanvasComponent, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
     }).compileComponents();
@@ -49,7 +49,7 @@ describe('CanvasComponent', () => {
       settings: settingsStateMock
     });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create the component', () => {
     expect(component).toBeTruthy();

@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { WorkbasketAccessItemsComponent } from './workbasket-access-items.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
@@ -44,8 +44,8 @@ describe('WorkbasketAccessItemsComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [WorkbasketAccessItemsComponent],
       providers: [
         provideStore([WorkbasketState, EngineConfigurationState]),
@@ -69,22 +69,22 @@ describe('WorkbasketAccessItemsComponent', () => {
         workbasketAccessItems: workbasketAccessItemsMock
       }
     });
-  }));
+  });
 
-  afterEach(waitForAsync(() => {
+  afterEach(async () => {
     component.workbasket = { ...selectedWorkbasketMock };
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize when accessItems exist', waitForAsync(() => {
+  it('should initialize when accessItems exist', async () => {
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(GetWorkbasketAccessItems)).subscribe(() => (actionDispatched = true));
     component.init();
     expect(actionDispatched).toBe(true);
-  }));
+  });
 
   it("should discard initializing when accessItems don't exist", () => {
     component.workbasket._links.accessItems = null;

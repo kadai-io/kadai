@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketDetailsComponent } from './workbasket-details.component';
 import { DebugElement } from '@angular/core';
 import { Actions, provideStore, Store } from '@ngxs/store';
@@ -58,8 +58,8 @@ describe('WorkbasketDetailsComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [WorkbasketDetailsComponent],
       providers: [
         provideStore([WorkbasketState, EngineConfigurationState]),
@@ -85,7 +85,7 @@ describe('WorkbasketDetailsComponent', () => {
       engineConfiguration: engineConfigurationMock
     });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();

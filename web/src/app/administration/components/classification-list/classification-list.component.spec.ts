@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
@@ -51,8 +51,8 @@ describe('ClassificationListComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [ClassificationListComponent],
       providers: [
         provideStore([ClassificationState, EngineConfigurationState]),
@@ -73,7 +73,7 @@ describe('ClassificationListComponent', () => {
       engineConfiguration: engineConfigurationMock
     });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();

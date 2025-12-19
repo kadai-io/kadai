@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { SidenavListComponent } from './sidenav-list.component';
 import { By } from '@angular/platform-browser';
@@ -36,12 +36,18 @@ describe('SidenavListComponent', () => {
   let fixture: ComponentFixture<SidenavListComponent>;
   let debugElement: DebugElement;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [SidenavListComponent],
-      providers: [provideRouter([]), { provide: KadaiEngineService, useValue: KadaiEngineServiceSpy }]
+      providers: [
+        provideRouter([]),
+        {
+          provide: KadaiEngineService,
+          useValue: KadaiEngineServiceSpy
+        }
+      ]
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SidenavListComponent);

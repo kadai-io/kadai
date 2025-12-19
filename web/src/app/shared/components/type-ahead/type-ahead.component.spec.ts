@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, fakeAsync, flush, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { TypeAheadComponent } from './type-ahead.component';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
@@ -37,8 +37,8 @@ describe('TypeAheadComponent with AccessId input', () => {
   let component: TypeAheadComponent;
   let store: Store;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [TypeAheadComponent],
       providers: [
         provideStore([EngineConfigurationState]),
@@ -55,7 +55,7 @@ describe('TypeAheadComponent with AccessId input', () => {
     debugElement = fixture.debugElement;
     component = fixture.componentInstance;
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();

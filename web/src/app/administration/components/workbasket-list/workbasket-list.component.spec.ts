@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketListComponent } from './workbasket-list.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
@@ -53,8 +53,8 @@ describe('WorkbasketListComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [WorkbasketListComponent],
       providers: [
         provideStore([WorkbasketState, FilterState]),
@@ -76,22 +76,22 @@ describe('WorkbasketListComponent', () => {
     store = TestBed.inject(Store);
     actions$ = TestBed.inject(Actions);
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should dispatch SelectWorkbasket when selecting a workbasket', waitForAsync(() => {
+  it('should dispatch SelectWorkbasket when selecting a workbasket', async () => {
     component.selectedId = undefined;
     fixture.detectChanges();
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(SelectWorkbasket)).subscribe(() => (actionDispatched = true));
     component.selectWorkbasket('WBI:000000000000000000000000000000000902');
     expect(actionDispatched).toBe(true);
-  }));
+  });
 
-  it('should dispatch DeselectWorkbasket when selecting a workbasket again', waitForAsync(() => {
+  it('should dispatch DeselectWorkbasket when selecting a workbasket again', async () => {
     component.selectedId = '123';
     fixture.detectChanges();
     let actionDispatched = false;
@@ -100,7 +100,7 @@ describe('WorkbasketListComponent', () => {
     component.selectWorkbasket(mockId);
     expect(actionDispatched).toBe(true);
     expect(component.selectedId).toEqual(undefined); //because Deselect action sets selectedId to undefined
-  }));
+  });
 
   it('should set sort value when performSorting is called', () => {
     const sort: Sorting<WorkbasketQuerySortParameter> = {

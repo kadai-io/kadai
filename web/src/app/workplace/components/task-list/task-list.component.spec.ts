@@ -15,7 +15,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Routes } from '@angular/router';
 import { Component } from '@angular/core';
 import { TaskListComponent } from './task-list.component';
@@ -35,12 +35,12 @@ describe('TaskListComponent', () => {
 
   const routes: Routes = [{ path: '*', component: DummyDetailComponent }];
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [TaskListComponent],
       providers: [provideHttpClient(), provideAngularSvgIcon(), provideRouter(routes)]
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TaskListComponent);

@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { MonitorComponent } from './monitor.component';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -32,12 +32,12 @@ describe('MonitorComponent', () => {
   let fixture: ComponentFixture<MonitorComponent>;
   let debugElement: DebugElement;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [MatTabsModule, RouterModule, RouterTestingModule, NoopAnimationsModule, MonitorComponent],
       providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MonitorComponent);

@@ -21,7 +21,7 @@ import { ClassificationsService } from '../../../shared/services/classifications
 import { EMPTY, firstValueFrom, Observable, of } from 'rxjs';
 import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
 import { DomainService } from '../../../shared/services/domain/domain.service';
-import { ComponentFixture, fakeAsync, flush, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
@@ -81,8 +81,8 @@ describe('ClassificationDetailsComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [ClassificationDetailsComponent],
       providers: [
         provideStore([ClassificationState, EngineConfigurationState]),
@@ -105,7 +105,7 @@ describe('ClassificationDetailsComponent', () => {
       engineConfiguration: engineConfigurationMock
     });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();
@@ -113,7 +113,7 @@ describe('ClassificationDetailsComponent', () => {
 
   it('should trigger onSave() when value exists and onSubmit() is called', async () => {
     component.onSave = vi.fn().mockImplementation(() => undefined);
-    await component.onSubmit();
+    component.onSubmit();
     expect(component.onSave).toHaveBeenCalled();
   });
 

@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AdministrationOverviewComponent } from './administration-overview.component';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { of } from 'rxjs';
@@ -33,12 +33,19 @@ const domainServiceSpy: Partial<DomainService> = {
 describe('AdministrationOverviewComponent', () => {
   let component: AdministrationOverviewComponent;
   let fixture: ComponentFixture<AdministrationOverviewComponent>;
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [AdministrationOverviewComponent],
-      providers: [{ provide: DomainService, useValue: domainServiceSpy }, provideHttpClient(), provideRouter([])]
+      providers: [
+        {
+          provide: DomainService,
+          useValue: domainServiceSpy
+        },
+        provideHttpClient(),
+        provideRouter([])
+      ]
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AdministrationOverviewComponent);
