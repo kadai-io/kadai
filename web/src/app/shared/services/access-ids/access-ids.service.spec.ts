@@ -17,7 +17,6 @@
  */
 
 import { inject, TestBed } from '@angular/core/testing';
-
 import { AccessIdsService } from './access-ids.service';
 import { provideHttpClient } from '@angular/common/http';
 import { beforeEach, describe, expect, it } from 'vitest';

@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { WorkbasketDistributionTargetsComponent } from './workbasket-distribution-targets.component';
 import { Observable, of } from 'rxjs';
@@ -55,8 +55,8 @@ describe('WorkbasketDistributionTargetsComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [WorkbasketDistributionTargetsComponent],
       providers: [
         provideStore([WorkbasketState, FilterState]),
@@ -77,7 +77,7 @@ describe('WorkbasketDistributionTargetsComponent', () => {
       workbasket: workbasketReadStateMock
     });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();

@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketOverviewComponent } from './workbasket-overview.component';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { Observable, of } from 'rxjs';
@@ -41,7 +41,7 @@ describe('WorkbasketOverviewComponent No Params', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     TestBed.configureTestingModule({
       imports: [WorkbasketOverviewComponent],
       providers: [
@@ -63,7 +63,7 @@ describe('WorkbasketOverviewComponent No Params', () => {
       ...store.snapshot(),
       workbasket: workbasketReadStateMock
     });
-  }));
+  });
 
   it('should create the component', () => {
     expect(component).toBeTruthy();

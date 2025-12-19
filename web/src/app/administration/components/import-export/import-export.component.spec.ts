@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { ImportExportComponent } from './import-export.component';
 import { StartupService } from '../../../shared/services/startup/startup.service';
@@ -62,8 +62,8 @@ describe.skip('ImportExportComponent', () => {
     })
   );
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [],
       declarations: [ImportExportComponent],
       providers: [
@@ -86,7 +86,7 @@ describe.skip('ImportExportComponent', () => {
     app = fixture.debugElement.componentInstance;
     app.currentSelection = KadaiType.WORKBASKETS;
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(app).toBeTruthy();

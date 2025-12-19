@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AccessItemsManagementComponent } from './access-items-management.component';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { DebugElement } from '@angular/core';
@@ -39,8 +39,8 @@ describe('AccessItemsManagementComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [AccessItemsManagementComponent],
       providers: [provideStore([EngineConfigurationState, AccessItemsManagementState]), provideHttpClient()]
     }).compileComponents();
@@ -55,7 +55,7 @@ describe('AccessItemsManagementComponent', () => {
       engineConfiguration: engineConfigurationMock
     });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create the app', () => {
     expect(app).toBeTruthy();
@@ -135,14 +135,14 @@ describe('AccessItemsManagementComponent', () => {
     expect(app.setAccessItemsPermissions).toHaveBeenCalled();
   });
 
-  it('should display a dialog when access is revoked', waitForAsync(() => {
+  it('should display a dialog when access is revoked', async () => {
     app.accessId = { accessId: 'xyz', name: 'xyz' };
     const notificationService = TestBed.inject(NotificationService);
     const showDialogSpy = vi.spyOn(notificationService, 'showDialog').mockImplementation(() => undefined);
     app.revokeAccess();
     fixture.detectChanges();
     expect(showDialogSpy).toHaveBeenCalled();
-  }));
+  });
 
   it('should create accessItemsForm in setAccessItemsGroups', () => {
     app.setAccessItemsGroups([]);

@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, fakeAsync, flush, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { WorkbasketInformationComponent } from './workbasket-information.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
@@ -67,8 +67,8 @@ describe('WorkbasketInformationComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [WorkbasketInformationComponent],
       providers: [
         provideStore([EngineConfigurationState, WorkbasketState]),
@@ -93,7 +93,7 @@ describe('WorkbasketInformationComponent', () => {
     component.workbasket = selectedWorkbasketMock;
 
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();
@@ -125,7 +125,7 @@ describe('WorkbasketInformationComponent', () => {
     expect(component.workbasket).toMatchObject(component.workbasketClone);
   });
 
-  it('should save workbasket when workbasketId there', waitForAsync(() => {
+  it('should save workbasket when workbasketId there', async () => {
     component.workbasket = { ...selectedWorkbasketMock };
     component.workbasket.workbasketId = '1';
     component.action = ACTION.COPY;
@@ -134,14 +134,14 @@ describe('WorkbasketInformationComponent', () => {
     component.onSave();
     expect(actionDispatched).toBe(true);
     expect(component.workbasketClone).toMatchObject(component.workbasket);
-  }));
+  });
 
-  it('should dispatch MarkWorkbasketforDeletion action when onRemoveConfirmed is called', waitForAsync(() => {
+  it('should dispatch MarkWorkbasketforDeletion action when onRemoveConfirmed is called', async () => {
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(MarkWorkbasketForDeletion)).subscribe(() => (actionDispatched = true));
     component.onRemoveConfirmed();
     expect(actionDispatched).toBe(true);
-  }));
+  });
 
   it('should create new workbasket when workbasketId is undefined', () => {
     component.workbasket.workbasketId = undefined;

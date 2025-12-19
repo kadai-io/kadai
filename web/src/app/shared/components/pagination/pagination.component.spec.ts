@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PaginationComponent } from './pagination.component';
 import { DebugElement } from '@angular/core';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -26,8 +26,8 @@ describe('PaginationComponent', () => {
   let debugElement: DebugElement;
   let component: PaginationComponent;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [PaginationComponent]
     }).compileComponents();
 
@@ -41,7 +41,7 @@ describe('PaginationComponent', () => {
     for (let i = 1; i <= component.page.totalPages; i++) {
       component.pageNumbers.push(i);
     }
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();

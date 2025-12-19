@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketListToolbarComponent } from './workbasket-list-toolbar.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
@@ -45,8 +45,8 @@ describe('WorkbasketListToolbarComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [WorkbasketListToolbarComponent],
       providers: [
         provideRouter([]),
@@ -66,27 +66,27 @@ describe('WorkbasketListToolbarComponent', () => {
     actions$ = TestBed.inject(Actions);
     component.action = ACTION.COPY;
     fixture.detectChanges();
-  }));
+  });
 
   it('should create the component', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should dispatch CreateWorkbasket when addWorkbasket is called', waitForAsync(() => {
+  it('should dispatch CreateWorkbasket when addWorkbasket is called', async () => {
     component.action = ACTION.COPY;
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(CreateWorkbasket)).subscribe(() => (actionDispatched = true));
     component.addWorkbasket();
     expect(actionDispatched).toBe(true);
-  }));
+  });
 
-  it('should not dispatch action in addWorkbasket when action is CREATE', waitForAsync(() => {
+  it('should not dispatch action in addWorkbasket when action is CREATE', async () => {
     component.action = ACTION.CREATE;
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(CreateWorkbasket)).subscribe(() => (actionDispatched = true));
     component.addWorkbasket();
     expect(actionDispatched).toBe(false);
-  }));
+  });
 
   it('should emit value when sorting is called', () => {
     const mockSort: Sorting<WorkbasketQuerySortParameter> = {
