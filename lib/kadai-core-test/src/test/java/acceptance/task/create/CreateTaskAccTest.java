@@ -803,7 +803,8 @@ class CreateTaskAccTest {
   @WithAccessId(user = "user-1-1", groups = "cn=routers,cn=groups,OU=Test,O=KADAI")
   @ParameterizedTest
   @EnumSource(TaskCustomField.class)
-  void should_CreateTask_When_CustomFieldValueLengthIs1023(TaskCustomField customField) throws Exception {
+  void should_CreateTask_When_CustomFieldValueLengthIs1023(TaskCustomField customField)
+      throws Exception {
     Task newTask = createDefaultTask();
     newTask.setCustomField(customField, "a".repeat(1023));
 
