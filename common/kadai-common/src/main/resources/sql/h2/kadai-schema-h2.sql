@@ -20,7 +20,7 @@ CREATE SEQUENCE KADAI_SCHEMA_VERSION_ID_SEQ
     START WITH 100
     INCREMENT BY 1 CACHE 10;
 
--- The VERSION value must be equal or higher then the value of KadaiEngineImpl.MINIMAL_KADAI_SCHEMA_VERSION
+-- The VERSION value must be equal or higher than the value of KadaiEngineImpl.MINIMAL_KADAI_SCHEMA_VERSION
 INSERT INTO KADAI_SCHEMA_VERSION (ID, VERSION, CREATED)
 VALUES (nextval('KADAI_SCHEMA_VERSION_ID_SEQ'), '12.0.0', CURRENT_TIMESTAMP);
 
@@ -119,22 +119,22 @@ CREATE TABLE TASK
     CALLBACK_INFO              CLOB NULL,
     CALLBACK_STATE             VARCHAR(30) NULL,
     CUSTOM_ATTRIBUTES          CLOB NULL,
-    CUSTOM_1                   VARCHAR(255) NULL,
-    CUSTOM_2                   VARCHAR(255) NULL,
-    CUSTOM_3                   VARCHAR(255) NULL,
-    CUSTOM_4                   VARCHAR(255) NULL,
-    CUSTOM_5                   VARCHAR(255) NULL,
-    CUSTOM_6                   VARCHAR(255) NULL,
-    CUSTOM_7                   VARCHAR(255) NULL,
-    CUSTOM_8                   VARCHAR(255) NULL,
-    CUSTOM_9                   VARCHAR(255) NULL,
-    CUSTOM_10                  VARCHAR(255) NULL,
-    CUSTOM_11                  VARCHAR(255) NULL,
-    CUSTOM_12                  VARCHAR(255) NULL,
-    CUSTOM_13                  VARCHAR(255) NULL,
-    CUSTOM_14                  VARCHAR(255) NULL,
-    CUSTOM_15                  VARCHAR(255) NULL,
-    CUSTOM_16                  VARCHAR(255) NULL,
+    CUSTOM_1                   VARCHAR(1023) NULL,
+    CUSTOM_2                   VARCHAR(1023) NULL,
+    CUSTOM_3                   VARCHAR(1023) NULL,
+    CUSTOM_4                   VARCHAR(1023) NULL,
+    CUSTOM_5                   VARCHAR(1023) NULL,
+    CUSTOM_6                   VARCHAR(1023) NULL,
+    CUSTOM_7                   VARCHAR(1023) NULL,
+    CUSTOM_8                   VARCHAR(1023) NULL,
+    CUSTOM_9                   VARCHAR(1023) NULL,
+    CUSTOM_10                  VARCHAR(1023) NULL,
+    CUSTOM_11                  VARCHAR(1023) NULL,
+    CUSTOM_12                  VARCHAR(1023) NULL,
+    CUSTOM_13                  VARCHAR(1023) NULL,
+    CUSTOM_14                  VARCHAR(1023) NULL,
+    CUSTOM_15                  VARCHAR(1023) NULL,
+    CUSTOM_16                  VARCHAR(1023) NULL,
     CUSTOM_INT_1               INT NULL,
     CUSTOM_INT_2               INT NULL,
     CUSTOM_INT_3               INT NULL,
