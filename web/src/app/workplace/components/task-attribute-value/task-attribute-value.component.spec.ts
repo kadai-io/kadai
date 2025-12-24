@@ -16,18 +16,19 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TaskAttributeValueComponent } from './task-attribute-value.component';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('TaskAttributeValueComponent', () => {
   let component: TaskAttributeValueComponent;
   let fixture: ComponentFixture<TaskAttributeValueComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [TaskAttributeValueComponent]
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TaskAttributeValueComponent);

@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, fakeAsync, flush, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, flush, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { WorkbasketDistributionTargetsListComponent } from './workbasket-distribution-targets-list.component';
 import { engineConfigurationMock, workbasketReadStateMock } from '../../../shared/store/mock-data/mock-store';
@@ -28,8 +28,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { OrderBy } from '../../../shared/pipes/order-by.pipe';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('angular-svg-icon');
+vi.mock('angular-svg-icon');
 
 describe('WorkbasketDistributionTargetsListComponent', () => {
   let fixture: ComponentFixture<WorkbasketDistributionTargetsListComponent>;
@@ -43,8 +44,8 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
     }
   };
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [WorkbasketDistributionTargetsListComponent],
       providers: [
         provideStore([WorkbasketState, FilterState]),
@@ -65,7 +66,7 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
       engineConfiguration: engineConfigurationMock,
       workbasket: workbasketReadStateMock
     });
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();
@@ -104,7 +105,7 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
   }));
 
   it('should call orderBy pipe', () => {
-    const orderBySpy = jest.spyOn(OrderBy.prototype, 'transform');
+    const orderBySpy = vi.spyOn(OrderBy.prototype, 'transform');
     fixture.detectChanges();
     expect(orderBySpy).toHaveBeenCalledWith(component.distributionTargets, ['name']);
   });

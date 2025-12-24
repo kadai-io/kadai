@@ -24,16 +24,16 @@
       <mat-form-field class="filter__collapsed-filter-input-field" floatLabel="auto">
         <mat-label>Filter by name</mat-label>
         <input (keyup.enter)="search()" [(ngModel)]="filter['name-like'][0]" matInput
-          matTooltip="Type to filter by name">
+               matTooltip="Type to filter by name">
       </mat-form-field>
       <!-- CLEAR BUTTON -->
       <button (click)="clear()" class="filter__undo-button" mat-stroked-button
-        matTooltip="Clear Workbasket filter">
+              matTooltip="Clear Workbasket filter">
         <mat-icon class="filter__mat-icon" style="color: #555">undo</mat-icon>
       </button>
       <!-- SEARCH BUTTON -->
       <button (click)="search()" class="filter__search-button" mat-stroked-button
-        matTooltip="Search by given filter">
+              matTooltip="Search by given filter">
         <mat-icon class="filter__mat-icon">search</mat-icon>
       </button>
     </div>
@@ -49,51 +49,52 @@
           <mat-form-field class="filter__input-field-left" floatLabel="auto">
             <mat-label>Filter by name</mat-label>
             <input (keyup.enter)="search()" [(ngModel)]="filter['name-like'][0]" matInput
-              matTooltip="Type to filter by name">
+                   matTooltip="Type to filter by name">
           </mat-form-field>
           <mat-form-field class="filter__input-field-right" floatLabel="auto">
             <mat-label>Filter by key</mat-label>
             <input (keyup.enter)="search()" [(ngModel)]="filter['key-like'][0]" matInput
-              matTooltip="Type to filter by key">
+                   matTooltip="Type to filter by key">
           </mat-form-field>
         </div>
         <div class="filter__name-and-key-input">
           <mat-form-field class="filter__input-field-left" floatLabel="auto">
             <mat-label>Filter by description</mat-label>
             <input (keyup.enter)="search()" [(ngModel)]="filter['description-like'][0]" matInput
-              matTooltip="Type to filter by description">
+                   matTooltip="Type to filter by description">
           </mat-form-field>
           <mat-form-field class="filter__input-field-right" floatLabel="auto">
             <mat-label>Filter by owner</mat-label>
             <input (keyup.enter)="search()" [(ngModel)]="filter['owner-like'][0]" matInput
-              matTooltip="Type to filter by owner">
+                   matTooltip="Type to filter by owner">
           </mat-form-field>
         </div>
       </div>
       <!-- SEARCH AND CLEAR BUTTON -->
       <div class="filter__action-buttons">
         <!-- TYPE FILTER -->
-        <button [matMenuTriggerFor]="menu" mat-stroked-button matTooltip="Filter Workbaskets by type">
+        <button [matMenuTriggerFor]="menu" mat-stroked-button
+                matTooltip="Filter Workbaskets by type">
           Filter by type
           @if (filter.type.length == 0) {
             <mat-icon style="color: #555">filter_list</mat-icon>
           }
           @if (filter.type[0]) {
             <kadai-administration-icon-type
-            [type]="filter.type[0]"></kadai-administration-icon-type>
+              [type]="filter.type[0]"></kadai-administration-icon-type>
           }
         </button>
         <mat-menu #menu="matMenu">
           @for (type of allTypes | mapValues; track type) {
             <button (click)="selectType(type.key)"
-              mat-menu-item>
+                    mat-menu-item>
               @if (type.value === 'All') {
                 <span> <mat-icon class="filter__all-icon"
-                style="color: #555">filter_list</mat-icon> All </span>
+                                 style="color: #555">filter_list</mat-icon> All </span>
               }
               @if (type.value !== 'All') {
                 <kadai-administration-icon-type [text]="type.value"
-                [type]='type.key'></kadai-administration-icon-type>
+                                                [type]='type.key'></kadai-administration-icon-type>
               }
             </button>
           }
@@ -105,7 +106,7 @@
         </button>
         <!-- SEARCH BUTTON -->
         <button (click)="search()" class="filter__search-button" mat-stroked-button
-          matTooltip="Search by given filter">
+                matTooltip="Search by given filter">
           Apply
           <mat-icon>search</mat-icon>
         </button>

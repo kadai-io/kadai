@@ -16,18 +16,19 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { SidenavListComponent } from './sidenav-list.component';
 import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.service';
 import { EMPTY } from 'rxjs';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const KadaiEngineServiceSpy: Partial<KadaiEngineService> = {
-  hasRole: jest.fn().mockReturnValue(EMPTY),
-  isHistoryProviderEnabled: jest.fn().mockReturnValue(EMPTY),
-  isCustomRoutingRulesEnabled: jest.fn().mockReturnValue(EMPTY)
+  hasRole: vi.fn().mockReturnValue(EMPTY),
+  isHistoryProviderEnabled: vi.fn().mockReturnValue(EMPTY),
+  isCustomRoutingRulesEnabled: vi.fn().mockReturnValue(EMPTY)
 };
 
 describe('SidenavListComponent', () => {
@@ -35,12 +36,18 @@ describe('SidenavListComponent', () => {
   let fixture: ComponentFixture<SidenavListComponent>;
   let debugElement: DebugElement;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [SidenavListComponent],
-      providers: [provideRouter([]), { provide: KadaiEngineService, useValue: KadaiEngineServiceSpy }]
+      providers: [
+        provideRouter([]),
+        {
+          provide: KadaiEngineService,
+          useValue: KadaiEngineServiceSpy
+        }
+      ]
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SidenavListComponent);

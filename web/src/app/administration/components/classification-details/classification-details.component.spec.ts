@@ -18,10 +18,10 @@
 
 import { DebugElement } from '@angular/core';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
-import { EMPTY, Observable, of } from 'rxjs';
+import { EMPTY, firstValueFrom, Observable, of } from 'rxjs';
 import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
 import { DomainService } from '../../../shared/services/domain/domain.service';
-import { ComponentFixture, fakeAsync, flush, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
@@ -38,39 +38,40 @@ import {
   SaveModifiedClassification
 } from '../../../shared/store/classification-store/classification.actions';
 import { By } from '@angular/platform-browser';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('angular-svg-icon');
+vi.mock('angular-svg-icon');
 
 const classificationServiceSpy: Partial<ClassificationsService> = {
-  getClassification: jest.fn().mockReturnValue(EMPTY),
-  getClassifications: jest.fn().mockReturnValue(EMPTY),
-  postClassification: jest.fn().mockReturnValue(EMPTY),
-  putClassification: jest.fn().mockReturnValue(EMPTY),
-  deleteClassification: jest.fn().mockReturnValue(EMPTY)
+  getClassification: vi.fn().mockReturnValue(EMPTY),
+  getClassifications: vi.fn().mockReturnValue(EMPTY),
+  postClassification: vi.fn().mockReturnValue(EMPTY),
+  putClassification: vi.fn().mockReturnValue(EMPTY),
+  deleteClassification: vi.fn().mockReturnValue(EMPTY)
 };
 
 const classificationCategoriesServiceSpy: Partial<ClassificationCategoriesService> = {
-  getCustomisation: jest.fn().mockReturnValue(EMPTY)
+  getCustomisation: vi.fn().mockReturnValue(EMPTY)
 };
 
 const domainServiceSpy: Partial<DomainService> = {
-  getSelectedDomainValue: jest.fn().mockReturnValue(of('A')),
-  getSelectedDomain: jest.fn().mockReturnValue(EMPTY)
+  getSelectedDomainValue: vi.fn().mockReturnValue(of('A')),
+  getSelectedDomain: vi.fn().mockReturnValue(EMPTY)
 };
 
 const formsValidatorServiceSpy: Partial<FormsValidatorService> = {
-  isFieldValid: jest.fn().mockReturnValue(true),
-  validateInputOverflow: jest.fn(),
-  validateFormInformation: jest.fn().mockImplementation((): Promise<any> => Promise.resolve(true)),
+  isFieldValid: vi.fn().mockReturnValue(true),
+  validateInputOverflow: vi.fn(),
+  validateFormInformation: vi.fn().mockImplementation((): Promise<any> => Promise.resolve(true)),
   get inputOverflowObservable(): Observable<Map<string, boolean>> {
     return of(new Map<string, boolean>());
   }
 };
 
 const notificationServiceSpy: Partial<NotificationService> = {
-  showError: jest.fn(),
-  showSuccess: jest.fn(),
-  showDialog: jest.fn()
+  showError: vi.fn(),
+  showSuccess: vi.fn(),
+  showDialog: vi.fn()
 };
 
 describe('ClassificationDetailsComponent', () => {
@@ -80,8 +81,8 @@ describe('ClassificationDetailsComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [ClassificationDetailsComponent],
       providers: [
         provideStore([ClassificationState, EngineConfigurationState]),
@@ -104,22 +105,22 @@ describe('ClassificationDetailsComponent', () => {
       engineConfiguration: engineConfigurationMock
     });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();
   });
 
   it('should trigger onSave() when value exists and onSubmit() is called', async () => {
-    component.onSave = jest.fn().mockImplementation();
-    await component.onSubmit();
+    component.onSave = vi.fn().mockImplementation(() => undefined);
+    component.onSubmit();
     expect(component.onSave).toHaveBeenCalled();
   });
 
   it('should show warning when onCopy() is called and isCreatingNewClassification is true', () => {
     component.isCreatingNewClassification = true;
     const notificationService = TestBed.inject(NotificationService);
-    const showErrorSpy = jest.spyOn(notificationService, 'showError');
+    const showErrorSpy = vi.spyOn(notificationService, 'showError');
     component.onCopy();
     expect(showErrorSpy).toHaveBeenCalled();
   });
@@ -132,21 +133,15 @@ describe('ClassificationDetailsComponent', () => {
     expect(isActionDispatched).toBe(true);
   });
 
-  it('should return icon for category when getCategoryIcon() is called and category exists', (done) => {
-    const categoryIcon = component.getCategoryIcon('AUTOMATIC');
-    categoryIcon.subscribe((iconPair) => {
-      expect(iconPair.left).toBe('assets/icons/categories/automatic.svg');
-      expect(iconPair.right).toBe('AUTOMATIC');
-      done();
-    });
+  it('should return icon for category when getCategoryIcon() is called and category exists', async () => {
+    const iconPair = await firstValueFrom(component.getCategoryIcon('AUTOMATIC'));
+    expect(iconPair.left).toBe('assets/icons/categories/automatic.svg');
+    expect(iconPair.right).toBe('AUTOMATIC');
   });
 
-  it('should return icon when getCategoryIcon() is called and category does not exist', (done) => {
-    const categoryIcon = component.getCategoryIcon('WATER');
-    categoryIcon.subscribe((iconPair) => {
-      expect(iconPair.left).toBe('assets/icons/categories/missing-icon.svg');
-      done();
-    });
+  it('should return icon when getCategoryIcon() is called and category does not exist', async () => {
+    const iconPair = await firstValueFrom(component.getCategoryIcon('WATER'));
+    expect(iconPair.left).toBe('assets/icons/categories/missing-icon.svg');
   });
 
   it('should dispatch SaveCreatedClassification action in onSave() when classificationId is undefined', async () => {
@@ -168,7 +163,7 @@ describe('ClassificationDetailsComponent', () => {
   it('should dispatch action in removeClassificationConfirmation() when classification and classificationId exist', () => {
     component.classification = { classificationId: 'ID01' };
     const requestInProgressService = TestBed.inject(RequestInProgressService);
-    const setRequestInProgressSpy = jest.spyOn(requestInProgressService, 'setRequestInProgress');
+    const setRequestInProgressSpy = vi.spyOn(requestInProgressService, 'setRequestInProgress');
     let isActionDispatched = false;
     actions$.pipe(ofActionDispatched(RemoveSelectedClassification)).subscribe(() => (isActionDispatched = true));
     component.removeClassificationConfirmation();
@@ -218,7 +213,7 @@ describe('ClassificationDetailsComponent', () => {
     expect(button).toBeTruthy();
     expect(button.textContent).toContain('Save');
     expect(button.textContent).toContain('save');
-    component.onSubmit = jest.fn().mockImplementation();
+    component.onSubmit = vi.fn().mockImplementation(() => undefined);
     button.click();
     expect(component.onSubmit).toHaveBeenCalled();
   });
@@ -262,7 +257,7 @@ describe('ClassificationDetailsComponent', () => {
     const copyButton = debugElement.queryAll(By.css('.action-toolbar__dropdown'))[0];
     expect(copyButton.nativeElement.textContent).toContain('content_copy');
     expect(copyButton.nativeElement.textContent).toContain('Copy');
-    component.onCopy = jest.fn().mockImplementation();
+    component.onCopy = vi.fn().mockImplementation(() => undefined);
     copyButton.nativeElement.click();
     expect(component.onCopy).toHaveBeenCalled();
   });
@@ -276,13 +271,13 @@ describe('ClassificationDetailsComponent', () => {
     expect(deleteButton.nativeElement.textContent).toContain('delete');
     expect(deleteButton.nativeElement.textContent).toContain('Delete');
 
-    const onRemoveClassificationSpy = jest.spyOn(component, 'onRemoveClassification');
+    const onRemoveClassificationSpy = vi.spyOn(component, 'onRemoveClassification');
     deleteButton.nativeElement.click();
     expect(onRemoveClassificationSpy).toHaveBeenCalled();
     onRemoveClassificationSpy.mockReset();
 
     const notificationService = TestBed.inject(NotificationService);
-    const showDialogSpy = jest.spyOn(notificationService, 'showDialog');
+    const showDialogSpy = vi.spyOn(notificationService, 'showDialog');
     button.click();
     expect(showDialogSpy).toHaveBeenCalled();
   });
@@ -295,7 +290,7 @@ describe('ClassificationDetailsComponent', () => {
     const closeButton = debugElement.queryAll(By.css('.action-toolbar__dropdown'))[2];
     expect(closeButton.nativeElement.textContent).toContain('close');
     expect(closeButton.nativeElement.textContent).toContain('close');
-    component.onCloseClassification = jest.fn().mockImplementation();
+    component.onCloseClassification = vi.fn().mockImplementation(() => undefined);
     closeButton.nativeElement.click();
     expect(component.onCloseClassification).toHaveBeenCalled();
   });

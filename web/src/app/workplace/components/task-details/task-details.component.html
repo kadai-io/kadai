@@ -25,50 +25,50 @@
         <div style="max-width: calc(100% - 312px); margin-right: 4px;">
           @if (!task.taskId) {
             <span
-            class="task-details__badge-message"> &nbsp; Creating Task &nbsp; </span>
+              class="task-details__badge-message"> &nbsp; Creating Task &nbsp; </span>
           }
         </div>
         <div>
           <button (click)="toggleFormValidation = !toggleFormValidation"
-            class="task-details__button--primary"
-            mat-stroked-button
-            matTooltip="Save Task">
+                  class="task-details__button--primary"
+                  mat-stroked-button
+                  matTooltip="Save Task">
             <span> Save </span>
             <mat-icon>save</mat-icon>
           </button>
           <!-- TODO: delete ngIf when introducing workbasket store -->
           @if (currentId != 'new-task') {
             <button (click)="resetTask()"
-              class="task-details__button--secondary"
-              mat-stroked-button matTooltip="Undo changes">
+                    class="task-details__button--secondary"
+                    mat-stroked-button matTooltip="Undo changes">
               <mat-icon class="task-details__icon--aquamarine">undo</mat-icon>
               <span> Undo changes </span>
             </button>
           }
           <button [matMenuTriggerFor]="buttonMenu" class="task-details__button--secondary"
-            mat-stroked-button
-            matTooltip="More actions" style="height: 37px; top: 1px;">
+                  mat-stroked-button
+                  matTooltip="More actions" style="height: 37px; top: 1px;">
             <mat-icon class="task-details__mat-icon">more_vert</mat-icon>
           </button>
           <mat-menu #buttonMenu="matMenu">
             @if (currentId != 'new-task') {
               <button (click)="openTask()"
-                class="task-details__button--secondary"
-                mat-menu-item matTooltip="Open Task to work on it">
+                      class="task-details__button--secondary"
+                      mat-menu-item matTooltip="Open Task to work on it">
                 <mat-icon class="task-details__icon--aquamarine">open_in_new</mat-icon>
                 <span> Open </span>
               </button>
             }
             @if (currentId != 'new-task') {
               <button (click)="deleteTask()"
-                class="task-details__button--secondary"
-                mat-menu-item matTooltip="Delete Task">
+                      class="task-details__button--secondary"
+                      mat-menu-item matTooltip="Delete Task">
                 <mat-icon class="task-details__icon--red">delete</mat-icon>
                 <span> Delete </span>
               </button>
             }
             <button (click)="backClicked()" class="task-details__button--secondary" mat-menu-item
-              matTooltip="Close Task">
+                    matTooltip="Close Task">
               <mat-icon>close</mat-icon>
               <span> Close </span>
             </button>
@@ -84,8 +84,8 @@
         <mat-tab label="Information">
           <div class="task-details__tab-wrapper">
             <kadai-task-information (formValid)="onSave()"
-              [saveToggleTriggered]="toggleFormValidation"
-            [task]="task"></kadai-task-information>
+                                    [saveToggleTriggered]="toggleFormValidation"
+                                    [task]="task"></kadai-task-information>
           </div>
         </mat-tab>
         <mat-tab label="Status Details">
@@ -101,13 +101,13 @@
         <mat-tab label="Custom Attributes">
           <div class="task-details__tab-wrapper">
             <kadai-task-attribute-value
-            [attributes]="task.customAttributes"></kadai-task-attribute-value>
+              [attributes]="task.customAttributes"></kadai-task-attribute-value>
           </div>
         </mat-tab>
         <mat-tab label="Callback Information">
           <div class="task-details__tab-wrapper">
             <kadai-task-attribute-value [attributes]="task.callbackInfo"
-            [callbackInfo]="true"></kadai-task-attribute-value>
+                                        [callbackInfo]="true"></kadai-task-attribute-value>
           </div>
         </mat-tab>
       </mat-tab-group>

@@ -17,19 +17,20 @@
  */
 
 import { DebugElement } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { IconTypeComponent } from './icon-type.component';
 import { WorkbasketType } from '../../../shared/models/workbasket-type';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('angular-svg-icon');
+vi.mock('angular-svg-icon');
 
 describe('IconTypeComponent', () => {
   let fixture: ComponentFixture<IconTypeComponent>;
   let debugElement: DebugElement;
   let component: IconTypeComponent;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [IconTypeComponent],
       declarations: []
     }).compileComponents();
@@ -38,7 +39,7 @@ describe('IconTypeComponent', () => {
     debugElement = fixture.debugElement;
     component = fixture.debugElement.componentInstance;
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();

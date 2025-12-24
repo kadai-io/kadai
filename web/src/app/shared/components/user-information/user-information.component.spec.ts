@@ -16,27 +16,34 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { UserInformationComponent } from './user-information.component';
 import { By } from '@angular/platform-browser';
 import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.service';
 import { KadaiEngineServiceMock } from '../../services/kadai-engine/kadai-engine.mock.service';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('angular-svg-icon');
+vi.mock('angular-svg-icon');
 
 describe('UserInformationComponent', () => {
   let component: UserInformationComponent;
   let fixture: ComponentFixture<UserInformationComponent>;
   let debugElement: DebugElement;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [UserInformationComponent],
-      providers: [{ provide: KadaiEngineService, useClass: KadaiEngineServiceMock }, provideAnimationsAsync()]
+      providers: [
+        {
+          provide: KadaiEngineService,
+          useClass: KadaiEngineServiceMock
+        },
+        provideAnimationsAsync()
+      ]
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UserInformationComponent);

@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketOverviewComponent } from './workbasket-overview.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionCompleted, provideStore, Store } from '@ngxs/store';
@@ -29,8 +29,9 @@ import { take } from 'rxjs/operators';
 import { provideHttpClient } from '@angular/common/http';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('angular-svg-icon');
+vi.mock('angular-svg-icon');
 
 const mockActivatedRoute = {
   firstChild: {
@@ -47,8 +48,8 @@ describe('WorkbasketOverviewComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [WorkbasketOverviewComponent],
       providers: [
         provideStore([WorkbasketState, FilterState]),
@@ -68,7 +69,7 @@ describe('WorkbasketOverviewComponent', () => {
     store = TestBed.inject(Store);
     actions$ = TestBed.inject(Actions);
     fixture.detectChanges();
-  }));
+  });
 
   it('should create the component', () => {
     expect(component).toBeTruthy();
@@ -78,15 +79,14 @@ describe('WorkbasketOverviewComponent', () => {
     expect(debugElement.nativeElement.querySelector('kadai-administration-workbasket-list')).toBeTruthy();
   });
 
-  it('should display details when params id exists', waitForAsync((done) => {
+  it('should display details when params id exists', async () => {
     actions$.pipe(ofActionCompleted(CreateWorkbasket), take(1)).subscribe(() => {
       expect(component.routerParams.id).toMatch('new-workbasket');
       expect(component.showDetail).toBeTruthy();
       expect(debugElement.nativeElement.querySelector('kadai-administration-workbasket-details')).toBeTruthy();
-      done();
     });
     component.ngOnInit();
-  }));
+  });
 
   it('should display workbasket-details correctly', () => {
     component.showDetail = false;

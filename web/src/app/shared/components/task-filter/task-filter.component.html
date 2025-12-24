@@ -24,32 +24,32 @@
     <div class="task-filter__row">
       <!-- FILTER BY NAME AND OWNER -->
       <mat-form-field class="task-filter__input-field--large" matTooltip="Filter Tasks by name"
-        style="margin-right: 16px;">
+                      style="margin-right: 16px;">
         <mat-label>Filter by name</mat-label>
         <input (keyup)="updateState()" (keyup.enter)="search()" [(ngModel)]="filter['name-like'][0]"
-          matInput
-          placeholder="Name"
-          type="text">
+               matInput
+               placeholder="Name"
+               type="text">
       </mat-form-field>
 
       <!-- FILTER BY PRIORITY -->
       <mat-form-field class="task-filter__input-field--small" matTooltip="Filter Tasks by priority">
         <mat-label>Filter by priority</mat-label>
         <input (keyup.enter)="search()" (ngModelChange)="updateState()"
-          [(ngModel)]="filter.priority[0]" matInput
-          placeholder="Priority"
-          type="number">
+               [(ngModel)]="filter.priority[0]" matInput
+               placeholder="Priority"
+               type="number">
       </mat-form-field>
     </div>
 
     <div class="task-filter__row">
       <mat-form-field class="task-filter__input-field--large" matTooltip="Filter Tasks by owner"
-        style="margin-right: 16px">
+                      style="margin-right: 16px">
         <mat-label>Filter by owner</mat-label>
         <input (keyup)="updateState()" (keyup.enter)="search()"
-          [(ngModel)]="filter['owner-like'][0]" matInput
-          placeholder="Owner"
-          type="text">
+               [(ngModel)]="filter['owner-like'][0]" matInput
+               placeholder="Owner"
+               type="text">
       </mat-form-field>
 
       <!-- FILTER BY TASK STATE -->
@@ -58,8 +58,8 @@
         <mat-select [value]="filter.state && filter.state[0] ? filter.state[0] : undefined">
           @for (state of allStates | mapValues; track state) {
             <mat-option (click)="setStatus(state.key)"
-              [value]="state.key"
-              class="types-selector__options">
+                        [value]="state.key"
+                        class="types-selector__options">
               {{ state.value }}
             </mat-option>
           }

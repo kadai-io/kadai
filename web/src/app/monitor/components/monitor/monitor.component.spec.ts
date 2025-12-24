@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { MonitorComponent } from './monitor.component';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -25,18 +25,19 @@ import { RouterModule } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('MonitorComponent', () => {
   let component: MonitorComponent;
   let fixture: ComponentFixture<MonitorComponent>;
   let debugElement: DebugElement;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [MatTabsModule, RouterModule, RouterTestingModule, NoopAnimationsModule, MonitorComponent],
       providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MonitorComponent);

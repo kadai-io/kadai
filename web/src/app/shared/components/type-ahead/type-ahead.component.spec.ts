@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, fakeAsync, flush, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { TypeAheadComponent } from './type-ahead.component';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
@@ -25,9 +25,10 @@ import { provideStore, Store } from '@ngxs/store';
 import { EngineConfigurationState } from '../../store/engine-configuration-store/engine-configuration.state';
 import { engineConfigurationMock } from '../../store/mock-data/mock-store';
 import { provideHttpClient } from '@angular/common/http';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const accessIdService: Partial<AccessIdsService> = {
-  searchForAccessId: jest.fn().mockReturnValue(of([{ accessId: 'user-g-1', name: 'Gerda' }]))
+  searchForAccessId: vi.fn().mockReturnValue(of([{ accessId: 'user-g-1', name: 'Gerda' }]))
 };
 
 describe('TypeAheadComponent with AccessId input', () => {
@@ -36,8 +37,8 @@ describe('TypeAheadComponent with AccessId input', () => {
   let component: TypeAheadComponent;
   let store: Store;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [TypeAheadComponent],
       providers: [
         provideStore([EngineConfigurationState]),
@@ -54,7 +55,7 @@ describe('TypeAheadComponent with AccessId input', () => {
     debugElement = fixture.debugElement;
     component = fixture.componentInstance;
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();
@@ -72,7 +73,7 @@ describe('TypeAheadComponent with AccessId input', () => {
   }));
 
   it('should emit false when an invalid access id is set', fakeAsync(() => {
-    const emitSpy = jest.spyOn(component.isFormValid, 'emit');
+    const emitSpy = vi.spyOn(component.isFormValid, 'emit');
     component.displayError = true;
     component.accessIdForm.get('accessId').setValue('invalid-user');
     component.accessIdForm.get('accessId').updateValueAndValidity({ emitEvent: true });
@@ -85,7 +86,7 @@ describe('TypeAheadComponent with AccessId input', () => {
   }));
 
   it('should emit true when a valid access id is set', fakeAsync(() => {
-    const emitSpy = jest.spyOn(component.isFormValid, 'emit');
+    const emitSpy = vi.spyOn(component.isFormValid, 'emit');
     component.accessIdForm.get('accessId').setValue('user-g-1');
     component.accessIdForm.get('accessId').updateValueAndValidity({ emitEvent: true });
 
@@ -98,7 +99,7 @@ describe('TypeAheadComponent with AccessId input', () => {
 
   it('should mark the accessId control as touched when invalid and displayError is true', fakeAsync(() => {
     const control = component.accessIdForm.get('accessId');
-    const markAsTouchedSpy = jest.spyOn(control!, 'markAsTouched');
+    const markAsTouchedSpy = vi.spyOn(control!, 'markAsTouched');
     component.displayError = true;
 
     component.accessIdForm.get('accessId')?.setValue('invalid-user');
