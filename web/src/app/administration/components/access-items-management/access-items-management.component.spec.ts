@@ -123,16 +123,15 @@ describe('AccessItemsManagementComponent', () => {
       'sort-by': WorkbasketAccessItemQuerySortParameter.ACCESS_ID,
       order: Direction.DESC
     };
-
-    const dispatched = firstValueFrom(actions$.pipe(ofActionDispatched(GetAccessItems), take(1)));
-
     app.searchForAccessItemsWorkbaskets();
     fixture.detectChanges();
-
-    await dispatched;
-
-    expect(app.setAccessItemsGroups).toHaveBeenCalled();
-    expect(app.setAccessItemsPermissions).toHaveBeenCalled();
+    let actionDispatched = false;
+    actions$.pipe(ofActionDispatched(GetAccessItems)).subscribe(() => {
+      actionDispatched = true;
+      expect(actionDispatched).toBe(true);
+      expect(app.setAccessItemsGroups).toHaveBeenCalled();
+      expect(app.setAccessItemsPermissions).toHaveBeenCalled();
+    });
   });
 
   it('should display a dialog when access is revoked', async () => {

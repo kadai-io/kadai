@@ -90,19 +90,14 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
     expect(debugElement.nativeElement.querySelector('kadai-shared-workbasket-filter')).toBeTruthy();
   });
 
-  it('should display all available workbaskets', fakeAsync(() => {
-    // On the first cycle we render the items.
-    fixture.detectChanges();
-    flush();
-
-    fixture.detectChanges();
-    flush();
+  it('should display all available workbaskets', async () => {
+    await fixture.whenStable();
 
     const distributionTargetList = debugElement.nativeElement.getElementsByClassName(
       'workbasket-distribution-targets__workbaskets-item'
     );
     expect(distributionTargetList).toHaveLength(3);
-  }));
+  });
 
   it('should call orderBy pipe', () => {
     const orderBySpy = vi.spyOn(OrderBy.prototype, 'transform');

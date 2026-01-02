@@ -155,7 +155,7 @@ describe('WorkbasketInformationComponent', () => {
     expect(inputCustoms).toHaveLength(3);
   });
 
-  it('should save custom field input at position 4 when custom field at position 3 is not visible', fakeAsync(() => {
+  it('should save custom field input at position 4 when custom field at position 3 is not visible', async () => {
     const newValue = 'New value';
 
     let inputCustom3 = debugElement.nativeElement.querySelector('#wb-custom-3');
@@ -165,11 +165,9 @@ describe('WorkbasketInformationComponent', () => {
     inputCustom4.value = newValue;
     inputCustom4.dispatchEvent(new Event('input'));
 
-    tick();
-    fixture.detectChanges();
-    flush();
+    await fixture.whenStable();
 
     expect(component.workbasket['custom3']).toBe('');
     expect(component.workbasket['custom4']).toBe(newValue);
-  }));
+  });
 });

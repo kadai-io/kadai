@@ -61,43 +61,40 @@ describe('TypeAheadComponent with AccessId input', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should fetch name when typing in an access id', fakeAsync(() => {
+  it('should fetch name when typing in an access id', async () => {
     const input = debugElement.nativeElement.querySelector('.type-ahead__input-field');
     expect(input).toBeTruthy();
     input.value = 'user-g-1';
     input.dispatchEvent(new Event('input'));
     component.accessIdForm.get('accessId').updateValueAndValidity({ emitEvent: true });
 
-    tick(50);
-    expect(component.name).toBe('Gerda');
-  }));
+    await fixture.whenStable();
 
-  it('should emit false when an invalid access id is set', fakeAsync(() => {
+    expect(component.name).toBe('Gerda');
+  });
+
+  it('should emit false when an invalid access id is set', async () => {
     const emitSpy = vi.spyOn(component.isFormValid, 'emit');
     component.displayError = true;
     component.accessIdForm.get('accessId').setValue('invalid-user');
     component.accessIdForm.get('accessId').updateValueAndValidity({ emitEvent: true });
 
-    tick(50);
-    fixture.detectChanges();
-    flush();
+    await fixture.whenStable();
 
     expect(emitSpy).toHaveBeenCalledWith(false);
-  }));
+  });
 
-  it('should emit true when a valid access id is set', fakeAsync(() => {
+  it('should emit true when a valid access id is set', async () => {
     const emitSpy = vi.spyOn(component.isFormValid, 'emit');
     component.accessIdForm.get('accessId').setValue('user-g-1');
     component.accessIdForm.get('accessId').updateValueAndValidity({ emitEvent: true });
 
-    tick(50);
-    fixture.detectChanges();
-    flush();
+    await fixture.whenStable();
 
     expect(emitSpy).toHaveBeenCalledWith(true);
-  }));
+  });
 
-  it('should mark the accessId control as touched when invalid and displayError is true', fakeAsync(() => {
+  it('should mark the accessId control as touched when invalid and displayError is true', async () => {
     const control = component.accessIdForm.get('accessId');
     const markAsTouchedSpy = vi.spyOn(control!, 'markAsTouched');
     component.displayError = true;
@@ -105,10 +102,8 @@ describe('TypeAheadComponent with AccessId input', () => {
     component.accessIdForm.get('accessId')?.setValue('invalid-user');
     component.searchForAccessId('invalid-user');
 
-    tick(50);
-    fixture.detectChanges();
-    flush();
+    await fixture.whenStable();
 
     expect(markAsTouchedSpy).toHaveBeenCalled();
-  }));
+  });
 });

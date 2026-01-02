@@ -146,12 +146,11 @@ describe('WorkbasketAccessItemsComponent', () => {
     expect(actionDispatched).toBe(true);
   });
 
-  it('should emit accessItemsValidityChanged when accessItemsGroups status changes', fakeAsync(() => {
+  it('should emit accessItemsValidityChanged when accessItemsGroups status changes', async () => {
     const emitSpy = vi.spyOn(component.accessItemsValidityChanged, 'emit');
 
     component.ngOnInit();
-    fixture.detectChanges();
-    tick();
+    await fixture.whenStable();
 
     const control = component.AccessItemsForm.get('accessItemsGroups')?.get('0.accessId');
     expect(control).toBeTruthy();
@@ -160,8 +159,6 @@ describe('WorkbasketAccessItemsComponent', () => {
     control?.markAsTouched();
     control?.updateValueAndValidity();
 
-    tick();
-
     expect(emitSpy).toHaveBeenCalledWith(false);
-  }));
+  });
 });
