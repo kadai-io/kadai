@@ -75,8 +75,8 @@ describe('TypeAheadComponent with AccessId input', () => {
     input.dispatchEvent(new Event('input'));
     component.accessIdForm.get('accessId').updateValueAndValidity({ emitEvent: true });
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
     fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     expect(component.name).toBe('Gerda');
   });
@@ -87,8 +87,8 @@ describe('TypeAheadComponent with AccessId input', () => {
     component.accessIdForm.get('accessId').setValue('invalid-user');
     component.accessIdForm.get('accessId').updateValueAndValidity({ emitEvent: true });
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
     fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     expect(emitSpy).toHaveBeenCalledWith(false);
   });
@@ -98,8 +98,8 @@ describe('TypeAheadComponent with AccessId input', () => {
     component.accessIdForm.get('accessId').setValue('user-g-1');
     component.accessIdForm.get('accessId').updateValueAndValidity({ emitEvent: true });
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
     fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     expect(emitSpy).toHaveBeenCalledWith(true);
   });
@@ -112,8 +112,8 @@ describe('TypeAheadComponent with AccessId input', () => {
     component.accessIdForm.get('accessId')?.setValue('invalid-user');
     component.searchForAccessId('invalid-user');
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
     fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     expect(markAsTouchedSpy).toHaveBeenCalled();
   });

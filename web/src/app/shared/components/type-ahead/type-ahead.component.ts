@@ -74,8 +74,6 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
   });
   emptyAccessId: AccessId = { accessId: '', name: '' };
   private accessIdService = inject(AccessIdsService);
-  // TODO FIXME
-  //private cd = inject(ChangeDetectorRef);
 
   ngOnInit() {
     if (this.isDisabled) {
@@ -116,8 +114,6 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
 
   handleEmptyAccessId() {
     this.name = '';
-    // TODO FIXME
-    //this.cd.detectChanges();
     this.isFormValid.emit(!this.isRequired);
     if (this.placeHolderMessage !== 'Search for AccessId') {
       this.accessIdEventEmitter.emit(this.emptyAccessId);
@@ -137,8 +133,6 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
 
         if (typeof accessId !== 'undefined') {
           this.name = accessId?.name;
-          // TODO FIXME
-          //this.cd.detectChanges();
           this.isFormValid.emit(true);
           this.accessIdEventEmitter.emit(accessId);
         } else if (this.displayError) {
