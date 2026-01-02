@@ -26,24 +26,33 @@ import { WorkbasketService } from '../../../shared/services/workbasket/workbaske
 import { DeselectWorkbasket, SelectWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { Direction, Sorting, WorkbasketQuerySortParameter } from '../../../shared/models/sorting';
 import { DomainService } from '../../../shared/services/domain/domain.service';
+import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
 import { selectedWorkbasketMock } from '../../../shared/store/mock-data/mock-store';
 import { WorkbasketQueryFilterParameter } from '../../../shared/models/workbasket-query-filter-parameter';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const workbasketServiceMock: Partial<WorkbasketService> = {
   workbasketSavedTriggered: vi.fn().mockReturnValue(of(1)),
-  getWorkBasketsSummary: vi.fn().mockReturnValue(of({})),
+  getWorkBasketsSummary: vi.fn().mockReturnValue(of({ workbaskets: [] })),
   getWorkBasket: vi.fn().mockReturnValue(of(selectedWorkbasketMock)),
   getWorkbasketActionToolbarExpansion: vi.fn().mockReturnValue(of(false)),
-  getWorkBasketAccessItems: vi.fn().mockReturnValue(of({})),
-  getWorkBasketsDistributionTargets: vi.fn().mockReturnValue(of({}))
+  getWorkBasketAccessItems: vi.fn().mockReturnValue(of({ accessItems: [] })),
+  getWorkBasketsDistributionTargets: vi.fn().mockReturnValue(of({ distributionTargets: [] }))
 };
 
 const domainServiceSpy: Partial<DomainService> = {
   getSelectedDomainValue: vi.fn().mockReturnValue(of()),
   getSelectedDomain: vi.fn().mockReturnValue(of())
+};
+
+const kadaiEngineServiceSpy: Partial<KadaiEngineService> = {
+  isCustomRoutingRulesEnabled: vi.fn().mockReturnValue(of(false)),
+  hasRole: vi.fn().mockReturnValue(true)
 };
 
 describe('WorkbasketListComponent', () => {
@@ -66,7 +75,14 @@ describe('WorkbasketListComponent', () => {
         {
           provide: DomainService,
           useValue: domainServiceSpy
-        }
+        },
+        {
+          provide: KadaiEngineService,
+          useValue: kadaiEngineServiceSpy
+        },
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideAngularSvgIcon()
       ]
     }).compileComponents();
 

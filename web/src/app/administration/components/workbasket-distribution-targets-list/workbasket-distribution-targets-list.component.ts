@@ -202,11 +202,6 @@ export class WorkbasketDistributionTargetsListComponent
     return true;
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
   private assignWbs(wbs: WorkbasketSummary[]) {
     this.distributionTargets = wbs.map((wb) => {
       return { ...wb, selected: this.allSelected };

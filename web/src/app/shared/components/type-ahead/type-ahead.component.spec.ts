@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { TypeAheadComponent } from './type-ahead.component';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
@@ -25,6 +25,7 @@ import { provideStore, Store } from '@ngxs/store';
 import { EngineConfigurationState } from '../../store/engine-configuration-store/engine-configuration.state';
 import { engineConfigurationMock } from '../../store/mock-data/mock-store';
 import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const accessIdService: Partial<AccessIdsService> = {
@@ -36,6 +37,7 @@ describe('TypeAheadComponent with AccessId input', () => {
   let debugElement: DebugElement;
   let component: TypeAheadComponent;
   let store: Store;
+  let httpMock: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -43,10 +45,12 @@ describe('TypeAheadComponent with AccessId input', () => {
       providers: [
         provideStore([EngineConfigurationState]),
         { provide: AccessIdsService, useValue: accessIdService },
-        provideHttpClient()
+        provideHttpClient(),
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 
+    httpMock = TestBed.inject(HttpTestingController);
     store = TestBed.inject(Store);
     store.reset({
       engineConfiguration: engineConfigurationMock
@@ -54,6 +58,9 @@ describe('TypeAheadComponent with AccessId input', () => {
     fixture = TestBed.createComponent(TypeAheadComponent);
     debugElement = fixture.debugElement;
     component = fixture.componentInstance;
+    httpMock
+      .expectOne('environments/data-sources/kadai-customization.json')
+      .flush(engineConfigurationMock.customisation);
     fixture.detectChanges();
   });
 
@@ -68,7 +75,8 @@ describe('TypeAheadComponent with AccessId input', () => {
     input.dispatchEvent(new Event('input'));
     component.accessIdForm.get('accessId').updateValueAndValidity({ emitEvent: true });
 
-    await fixture.whenStable();
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    fixture.detectChanges();
 
     expect(component.name).toBe('Gerda');
   });
@@ -79,7 +87,8 @@ describe('TypeAheadComponent with AccessId input', () => {
     component.accessIdForm.get('accessId').setValue('invalid-user');
     component.accessIdForm.get('accessId').updateValueAndValidity({ emitEvent: true });
 
-    await fixture.whenStable();
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    fixture.detectChanges();
 
     expect(emitSpy).toHaveBeenCalledWith(false);
   });
@@ -89,7 +98,8 @@ describe('TypeAheadComponent with AccessId input', () => {
     component.accessIdForm.get('accessId').setValue('user-g-1');
     component.accessIdForm.get('accessId').updateValueAndValidity({ emitEvent: true });
 
-    await fixture.whenStable();
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    fixture.detectChanges();
 
     expect(emitSpy).toHaveBeenCalledWith(true);
   });
@@ -102,7 +112,8 @@ describe('TypeAheadComponent with AccessId input', () => {
     component.accessIdForm.get('accessId')?.setValue('invalid-user');
     component.searchForAccessId('invalid-user');
 
-    await fixture.whenStable();
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    fixture.detectChanges();
 
     expect(markAsTouchedSpy).toHaveBeenCalled();
   });

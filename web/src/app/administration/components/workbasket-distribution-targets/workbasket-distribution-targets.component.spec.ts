@@ -44,8 +44,9 @@ const domainServiceSpy: Partial<DomainService> = {
 };
 
 const workbasketServiceSpy: Partial<WorkbasketService> = {
-  getWorkBasketsSummary: vi.fn().mockReturnValue(of(null)),
-  getWorkBasketsDistributionTargets: vi.fn().mockReturnValue(of(null))
+  getWorkBasketsSummary: vi.fn().mockReturnValue(of({ workbaskets: [] })),
+  getWorkBasketsDistributionTargets: vi.fn().mockReturnValue(of({ distributionTargets: [] })),
+  getWorkBasket: vi.fn().mockReturnValue(of({}))
 };
 
 describe('WorkbasketDistributionTargetsComponent', () => {

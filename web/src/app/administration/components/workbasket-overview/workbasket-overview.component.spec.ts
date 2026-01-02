@@ -28,6 +28,8 @@ import { CreateWorkbasket } from '../../../shared/store/workbasket-store/workbas
 import { take } from 'rxjs/operators';
 import { provideHttpClient } from '@angular/common/http';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
+import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
+import { engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -52,7 +54,7 @@ describe('WorkbasketOverviewComponent', () => {
     await TestBed.configureTestingModule({
       imports: [WorkbasketOverviewComponent],
       providers: [
-        provideStore([WorkbasketState, FilterState]),
+        provideStore([WorkbasketState, FilterState, EngineConfigurationState]),
         provideNoopAnimations(),
         {
           provide: ActivatedRoute,
@@ -67,6 +69,10 @@ describe('WorkbasketOverviewComponent', () => {
     debugElement = fixture.debugElement;
     component = fixture.debugElement.componentInstance;
     store = TestBed.inject(Store);
+    store.reset({
+      ...store.snapshot(),
+      engineConfiguration: engineConfigurationMock
+    });
     actions$ = TestBed.inject(Actions);
     fixture.detectChanges();
   });

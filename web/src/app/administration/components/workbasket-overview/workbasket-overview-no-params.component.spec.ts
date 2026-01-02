@@ -24,10 +24,13 @@ import { WorkbasketState } from '../../../shared/store/workbasket-store/workbask
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { SelectWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
-import { workbasketReadStateMock } from '../../../shared/store/mock-data/mock-store';
+import { engineConfigurationMock, workbasketReadStateMock } from '../../../shared/store/mock-data/mock-store';
 import { provideHttpClient } from '@angular/common/http';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 
 vi.mock('angular-svg-icon');
 
@@ -45,34 +48,36 @@ describe('WorkbasketOverviewComponent No Params', () => {
     TestBed.configureTestingModule({
       imports: [WorkbasketOverviewComponent],
       providers: [
-        provideStore([WorkbasketState, FilterState]),
+        provideStore([WorkbasketState, FilterState, EngineConfigurationState]),
         {
           provide: ActivatedRoute,
           useValue: mockActivatedRouteNoParams
         },
         provideHttpClient(),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        provideNoopAnimations()
       ]
     }).compileComponents();
     fixture = TestBed.createComponent(WorkbasketOverviewComponent);
     component = fixture.debugElement.componentInstance;
-    fixture.detectChanges();
     store = TestBed.inject(Store);
     actions$ = TestBed.inject(Actions);
     store.reset({
       ...store.snapshot(),
-      workbasket: workbasketReadStateMock
+      workbasket: workbasketReadStateMock,
+      engineConfiguration: engineConfigurationMock
     });
   });
 
   it('should create the component', () => {
+    fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
   it('should dispatch SelectWorkbasket action when route contains workbasket', async () => {
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(SelectWorkbasket)).subscribe(() => (actionDispatched = true));
-    component.ngOnInit();
+    fixture.detectChanges();
     expect(actionDispatched).toBe(true);
   });
 });

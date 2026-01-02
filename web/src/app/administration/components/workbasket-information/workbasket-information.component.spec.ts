@@ -47,8 +47,9 @@ const workbasketServiceMock: Partial<WorkbasketService> = {
   markWorkbasketForDeletion: vi.fn().mockReturnValue(of(true)),
   createWorkbasket: vi.fn().mockReturnValue(of({ ...selectedWorkbasketMock })),
   getWorkBasket: vi.fn().mockReturnValue(of({ ...selectedWorkbasketMock })),
-  getWorkBasketAccessItems: vi.fn().mockReturnValue(EMPTY),
-  getWorkBasketsDistributionTargets: vi.fn().mockReturnValue(EMPTY)
+  getWorkBasketsSummary: vi.fn().mockReturnValue(of({ workbaskets: [] })),
+  getWorkBasketAccessItems: vi.fn().mockReturnValue(of({ accessItems: [] })),
+  getWorkBasketsDistributionTargets: vi.fn().mockReturnValue(of({ distributionTargets: [] }))
 };
 
 const formValidatorServiceMock: Partial<FormsValidatorService> = {
