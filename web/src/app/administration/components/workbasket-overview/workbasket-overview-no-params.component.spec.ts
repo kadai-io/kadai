@@ -28,8 +28,7 @@ import { engineConfigurationMock, workbasketReadStateMock } from '../../../share
 import { provideHttpClient } from '@angular/common/http';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
 
@@ -70,14 +69,13 @@ describe('WorkbasketOverviewComponent No Params', () => {
   });
 
   it('should create the component', () => {
-    fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
   it('should dispatch SelectWorkbasket action when route contains workbasket', async () => {
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(SelectWorkbasket)).subscribe(() => (actionDispatched = true));
-    fixture.detectChanges();
+    component.ngOnInit();
     expect(actionDispatched).toBe(true);
   });
 });
