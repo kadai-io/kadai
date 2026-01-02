@@ -25,15 +25,15 @@
 
       <!-- TRANSFER TASK -->
       <button [matMenuTriggerFor]="menu" class="task-processing__button--secondary"
-        mat-stroked-button
-        matTooltip="Transfer Task to another Workbasket">
+              mat-stroked-button
+              matTooltip="Transfer Task to another Workbasket">
         Transfer Task
         <mat-icon class="task-processing__icon--aquamarine">transfer_within_a_station</mat-icon>
       </button>
       <mat-menu #menu="matMenu">
         @for (workbasket of workbaskets; track workbasket) {
           <button (click)="transferTask(workbasket)"
-            mat-menu-item>
+                  mat-menu-item>
             {{ workbasket.name }}
           </button>
         }
@@ -41,14 +41,14 @@
 
       <!-- COMPLETE TASK -->
       <button (click)="completeTask()" class="task-processing__button--secondary"
-        mat-stroked-button matTooltip="Complete Task and return to Task list">
+              mat-stroked-button matTooltip="Complete Task and return to Task list">
         <span> Complete Task </span>
         <mat-icon class="task-processing__icon--aquamarine">check</mat-icon>
       </button>
 
       <!-- CANCEL CLAIM -->
       <button (click)="cancelClaimTask()" class="task-processing__button--secondary"
-        mat-stroked-button matTooltip="Cancel Task claim and return to Task overview">
+              mat-stroked-button matTooltip="Cancel Task claim and return to Task overview">
         <span> Cancel claim </span>
         <mat-icon class="task-processing__icon--aquamarine">clear</mat-icon>
       </button>

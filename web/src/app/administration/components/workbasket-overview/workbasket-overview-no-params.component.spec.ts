@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketOverviewComponent } from './workbasket-overview.component';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { Observable, of } from 'rxjs';
@@ -24,11 +24,13 @@ import { WorkbasketState } from '../../../shared/store/workbasket-store/workbask
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { SelectWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
-import { workbasketReadStateMock } from '../../../shared/store/mock-data/mock-store';
+import { engineConfigurationMock, workbasketReadStateMock } from '../../../shared/store/mock-data/mock-store';
 import { provideHttpClient } from '@angular/common/http';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
-
-jest.mock('angular-svg-icon');
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const mockActivatedRouteNoParams = {
   url: of([{ path: 'workbaskets' }])
@@ -40,29 +42,31 @@ describe('WorkbasketOverviewComponent No Params', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     TestBed.configureTestingModule({
       imports: [WorkbasketOverviewComponent],
       providers: [
-        provideStore([WorkbasketState, FilterState]),
+        provideStore([WorkbasketState, FilterState, EngineConfigurationState]),
         {
           provide: ActivatedRoute,
           useValue: mockActivatedRouteNoParams
         },
         provideHttpClient(),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        provideNoopAnimations(),
+        provideAngularSvgIcon()
       ]
     }).compileComponents();
     fixture = TestBed.createComponent(WorkbasketOverviewComponent);
     component = fixture.debugElement.componentInstance;
-    fixture.detectChanges();
     store = TestBed.inject(Store);
     actions$ = TestBed.inject(Actions);
     store.reset({
       ...store.snapshot(),
-      workbasket: workbasketReadStateMock
+      workbasket: workbasketReadStateMock,
+      engineConfiguration: engineConfigurationMock
     });
-  }));
+  });
 
   it('should create the component', () => {
     expect(component).toBeTruthy();

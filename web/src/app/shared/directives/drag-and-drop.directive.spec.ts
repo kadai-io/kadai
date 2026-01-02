@@ -17,6 +17,7 @@
  */
 
 import { DragAndDropDirective } from './drag-and-drop.directive';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('DragAndDropDirective', () => {
   it('should create an instance', () => {

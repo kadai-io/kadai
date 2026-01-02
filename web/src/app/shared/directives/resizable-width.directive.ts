@@ -25,13 +25,13 @@ export class ResizableWidthDirective {
 
   private startX: number;
 
-  @HostListener('mouseover', ['$event'])
+  @HostListener('mouseover')
   onMouseover() {
     this.renderer.setStyle(document.body, 'cursor', 'col-resize');
     this.renderer.setStyle(this.el.nativeElement, 'user-select', 'none');
   }
 
-  @HostListener('mouseout', ['$event'])
+  @HostListener('mouseout')
   onMouseout() {
     this.renderer.setStyle(document.body, 'cursor', '');
     this.renderer.setStyle(this.el.nativeElement, 'user-select', '');
