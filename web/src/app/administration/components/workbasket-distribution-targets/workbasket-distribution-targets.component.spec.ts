@@ -28,8 +28,7 @@ import { engineConfigurationMock, workbasketReadStateMock } from '../../../share
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-vi.mock('angular-svg-icon');
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const activatedRouteMock = {
   firstChild: {
@@ -61,6 +60,7 @@ describe('WorkbasketDistributionTargetsComponent', () => {
       imports: [WorkbasketDistributionTargetsComponent],
       providers: [
         provideStore([WorkbasketState, FilterState]),
+        provideAngularSvgIcon(),
         { provide: WorkbasketService, useValue: workbasketServiceSpy },
         { provide: ActivatedRoute, useValue: activatedRouteMock },
         { provide: DomainService, useValue: domainServiceSpy }

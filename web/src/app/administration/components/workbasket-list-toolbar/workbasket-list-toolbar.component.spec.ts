@@ -30,8 +30,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-vi.mock('angular-svg-icon');
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const domainServiceMock: Partial<DomainService> = {
   getDomains: vi.fn().mockResolvedValue(''),
@@ -55,7 +54,8 @@ describe('WorkbasketListToolbarComponent', () => {
           provide: DomainService,
           useValue: domainServiceMock
         },
-        provideHttpClient()
+        provideHttpClient(),
+        provideAngularSvgIcon()
       ]
     }).compileComponents();
 

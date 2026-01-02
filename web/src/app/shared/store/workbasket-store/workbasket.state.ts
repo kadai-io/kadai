@@ -68,7 +68,9 @@ class InitializeStore {
 @Injectable({
   providedIn: 'root'
 })
-@State<WorkbasketStateModel>({ name: 'workbasket' })
+@State<WorkbasketStateModel>({
+  name: 'workbasket'
+})
 export class WorkbasketState implements NgxsAfterBootstrap {
   private workbasketService = inject(WorkbasketService);
   private location = inject(Location);

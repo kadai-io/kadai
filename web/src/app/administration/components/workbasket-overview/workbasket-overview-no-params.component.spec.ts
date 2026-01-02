@@ -31,8 +31,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
-
-vi.mock('angular-svg-icon');
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const mockActivatedRouteNoParams = {
   url: of([{ path: 'workbaskets' }])
@@ -55,7 +54,8 @@ describe('WorkbasketOverviewComponent No Params', () => {
         },
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideNoopAnimations()
+        provideNoopAnimations(),
+        provideAngularSvgIcon()
       ]
     }).compileComponents();
     fixture = TestBed.createComponent(WorkbasketOverviewComponent);

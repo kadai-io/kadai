@@ -38,8 +38,7 @@ import { By } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-vi.mock('angular-svg-icon');
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const workbasketServiceMock: Partial<WorkbasketService> = {
   triggerWorkBasketSaved: vi.fn(),
@@ -77,7 +76,8 @@ describe('WorkbasketInformationComponent', () => {
         { provide: WorkbasketService, useValue: workbasketServiceMock },
         { provide: FormsValidatorService, useValue: formValidatorServiceMock },
         provideHttpClient(),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        provideAngularSvgIcon()
       ]
     }).compileComponents();
 

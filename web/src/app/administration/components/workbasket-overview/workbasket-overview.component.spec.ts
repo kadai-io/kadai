@@ -32,8 +32,7 @@ import { EngineConfigurationState } from '../../../shared/store/engine-configura
 import { engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-vi.mock('angular-svg-icon');
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const mockActivatedRoute = {
   firstChild: {
@@ -61,7 +60,8 @@ describe('WorkbasketOverviewComponent', () => {
           useValue: mockActivatedRoute
         },
         provideHttpClient(),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        provideAngularSvgIcon()
       ]
     }).compileComponents();
 

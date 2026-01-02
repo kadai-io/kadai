@@ -33,8 +33,7 @@ import { EngineConfigurationState } from '../../../shared/store/engine-configura
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-vi.mock('angular-svg-icon');
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const routeParamsMock = { id: 'new-classification' };
 
@@ -60,6 +59,7 @@ describe('ClassificationOverviewComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideNoopAnimations(),
+        provideAngularSvgIcon(),
         {
           provide: ActivatedRoute,
           useValue: mockActivatedRoute

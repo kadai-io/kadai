@@ -29,8 +29,8 @@ import { ActivatedRoute } from '@angular/router';
 import { OrderBy } from '../../../shared/pipes/order-by.pipe';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-vi.mock('angular-svg-icon');
+import { provideAngularSvgIcon } from 'angular-svg-icon';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('WorkbasketDistributionTargetsListComponent', () => {
   let fixture: ComponentFixture<WorkbasketDistributionTargetsListComponent>;
@@ -49,7 +49,8 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
       imports: [WorkbasketDistributionTargetsListComponent],
       providers: [
         provideStore([WorkbasketState, FilterState]),
-        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideAngularSvgIcon(),
         { provide: ActivatedRoute, useValue: activatedRouteMock }
       ]
     }).compileComponents();

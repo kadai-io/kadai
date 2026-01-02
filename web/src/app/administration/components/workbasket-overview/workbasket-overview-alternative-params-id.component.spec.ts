@@ -27,8 +27,7 @@ import { SelectWorkbasket } from '../../../shared/store/workbasket-store/workbas
 import { provideHttpClient } from '@angular/common/http';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-vi.mock('angular-svg-icon');
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const mockActivatedRouteAlternative = {
   firstChild: {
@@ -54,7 +53,8 @@ describe('WorkbasketOverviewComponent Alternative Params ID', () => {
           useValue: mockActivatedRouteAlternative
         },
         provideHttpClient(),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        provideAngularSvgIcon()
       ]
     }).compileComponents();
     fixture = TestBed.createComponent(WorkbasketOverviewComponent);

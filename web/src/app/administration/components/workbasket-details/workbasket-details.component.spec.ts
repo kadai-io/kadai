@@ -37,8 +37,7 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-vi.mock('angular-svg-icon');
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const domainServiceSpy: Partial<DomainService> = {
   getSelectedDomain: vi.fn().mockReturnValue(of('A')),
@@ -70,7 +69,8 @@ describe('WorkbasketDetailsComponent', () => {
           useValue: domainServiceSpy
         },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        provideAngularSvgIcon()
       ]
     }).compileComponents();
 

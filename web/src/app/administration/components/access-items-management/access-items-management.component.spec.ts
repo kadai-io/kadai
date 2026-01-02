@@ -29,8 +29,7 @@ import { Direction, Sorting, WorkbasketAccessItemQuerySortParameter } from '../.
 import { engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
 import { provideHttpClient } from '@angular/common/http';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-vi.mock('angular-svg-icon');
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 describe('AccessItemsManagementComponent', () => {
   let fixture: ComponentFixture<AccessItemsManagementComponent>;
@@ -42,7 +41,11 @@ describe('AccessItemsManagementComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AccessItemsManagementComponent],
-      providers: [provideStore([EngineConfigurationState, AccessItemsManagementState]), provideHttpClient()]
+      providers: [
+        provideStore([EngineConfigurationState, AccessItemsManagementState]),
+        provideHttpClient(),
+        provideAngularSvgIcon()
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(AccessItemsManagementComponent);

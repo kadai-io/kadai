@@ -30,8 +30,7 @@ import { By } from '@angular/platform-browser';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { provideHttpClient } from '@angular/common/http';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-vi.mock('angular-svg-icon');
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const domainServiceSpy: Partial<DomainService> = {
   getSelectedDomainValue: vi.fn().mockReturnValue(of()),
@@ -57,6 +56,7 @@ describe('ClassificationListComponent', () => {
       providers: [
         provideStore([ClassificationState, EngineConfigurationState]),
         provideHttpClient(),
+        provideAngularSvgIcon(),
         { provide: DomainService, useValue: domainServiceSpy },
         { provide: RequestInProgressService, useValue: requestInProgressServiceSpy }
       ]

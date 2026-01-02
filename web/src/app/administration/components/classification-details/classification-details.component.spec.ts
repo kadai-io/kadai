@@ -39,8 +39,8 @@ import {
 } from '../../../shared/store/classification-store/classification.actions';
 import { By } from '@angular/platform-browser';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-vi.mock('angular-svg-icon');
+import { provideAngularSvgIcon } from 'angular-svg-icon';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 const classificationServiceSpy: Partial<ClassificationsService> = {
   getClassification: vi.fn().mockReturnValue(EMPTY),
@@ -86,6 +86,8 @@ describe('ClassificationDetailsComponent', () => {
       imports: [ClassificationDetailsComponent],
       providers: [
         provideStore([ClassificationState, EngineConfigurationState]),
+        provideHttpClientTesting(),
+        provideAngularSvgIcon(),
         { provide: ClassificationsService, useValue: classificationServiceSpy },
         { provide: ClassificationCategoriesService, useValue: classificationCategoriesServiceSpy },
         { provide: DomainService, useValue: domainServiceSpy },

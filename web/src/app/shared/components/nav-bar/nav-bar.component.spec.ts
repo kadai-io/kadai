@@ -22,8 +22,7 @@ import { NavBarComponent } from './nav-bar.component';
 import { By } from '@angular/platform-browser';
 import { SidenavService } from '../../services/sidenav/sidenav.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-vi.mock('angular-svg-icon');
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 describe('NavBarComponent', () => {
   let component: NavBarComponent;
@@ -38,7 +37,7 @@ describe('NavBarComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [NavBarComponent],
-      providers: [{ provide: SidenavService, useValue: SidenavServiceSpy }]
+      providers: [provideAngularSvgIcon(), { provide: SidenavService, useValue: SidenavServiceSpy }]
     }).compileComponents();
   });
 

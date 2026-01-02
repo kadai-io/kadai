@@ -25,8 +25,7 @@ import { KadaiEngineServiceMock } from '../../services/kadai-engine/kadai-engine
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-
-vi.mock('angular-svg-icon');
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 describe('UserInformationComponent', () => {
   let component: UserInformationComponent;
@@ -42,7 +41,8 @@ describe('UserInformationComponent', () => {
           useClass: KadaiEngineServiceMock
         },
         provideAnimationsAsync(),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        provideAngularSvgIcon()
       ]
     }).compileComponents();
   });
