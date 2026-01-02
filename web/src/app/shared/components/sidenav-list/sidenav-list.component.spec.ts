@@ -26,6 +26,7 @@ import { SidenavService } from '../../services/sidenav/sidenav.service';
 import { of } from 'rxjs';
 import { MonitorRoles } from '../../roles/monitor.roles';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('SidenavListComponent', () => {
   let component: SidenavListComponent;
@@ -49,6 +50,7 @@ describe('SidenavListComponent', () => {
       imports: [SidenavListComponent],
       providers: [
         provideRouter([]),
+        provideHttpClientTesting(),
         {
           provide: KadaiEngineService,
           useValue: KadaiEngineServiceSpy

@@ -20,9 +20,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AdministrationOverviewComponent } from './administration-overview.component';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { of } from 'rxjs';
-import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 const domainServiceSpy: Partial<DomainService> = {
   getDomains: vi.fn().mockReturnValue(of(['domain a', 'domain b'])),
@@ -41,7 +41,7 @@ describe('AdministrationOverviewComponent', () => {
           provide: DomainService,
           useValue: domainServiceSpy
         },
-        provideHttpClient(),
+        provideHttpClientTesting(),
         provideRouter([])
       ]
     }).compileComponents();

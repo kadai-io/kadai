@@ -18,10 +18,10 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Routes } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { TaskProcessingComponent } from './task-processing.component';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 @Component({
   selector: 'kadai-dummy-detail',
@@ -38,7 +38,7 @@ describe('TaskProcessingComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TaskProcessingComponent],
-      providers: [provideRouter(routes), provideHttpClient()]
+      providers: [provideRouter(routes), provideHttpClientTesting()]
     }).compileComponents();
   });
 

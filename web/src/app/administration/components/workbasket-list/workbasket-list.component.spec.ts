@@ -30,10 +30,8 @@ import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-
 import { selectedWorkbasketMock } from '../../../shared/store/mock-data/mock-store';
 import { WorkbasketQueryFilterParameter } from '../../../shared/models/workbasket-query-filter-parameter';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
-import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const workbasketServiceMock: Partial<WorkbasketService> = {
@@ -80,9 +78,7 @@ describe('WorkbasketListComponent', () => {
           provide: KadaiEngineService,
           useValue: kadaiEngineServiceSpy
         },
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        provideAngularSvgIcon()
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 

@@ -21,7 +21,6 @@ import { provideStore, Store } from '@ngxs/store';
 import { TaskPriorityReportComponent } from './task-priority-report.component';
 import { SettingsState } from '../../../shared/store/settings-store/settings.state';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { MonitorService } from '../../services/monitor.service';
 import { DomainService } from '../../../shared/services/domain/domain.service';
@@ -77,7 +76,6 @@ describe('TaskPriorityReportComponent', () => {
       imports: [TaskPriorityReportComponent],
       providers: [
         provideStore([SettingsState]),
-        provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([]),
         { provide: MonitorService, useValue: mockMonitorService },
