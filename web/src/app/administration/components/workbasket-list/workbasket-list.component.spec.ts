@@ -30,7 +30,6 @@ import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-
 import { selectedWorkbasketMock } from '../../../shared/store/mock-data/mock-store';
 import { WorkbasketQueryFilterParameter } from '../../../shared/models/workbasket-query-filter-parameter';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -46,11 +45,6 @@ const workbasketServiceMock: Partial<WorkbasketService> = {
 const domainServiceSpy: Partial<DomainService> = {
   getSelectedDomainValue: vi.fn().mockReturnValue(of()),
   getSelectedDomain: vi.fn().mockReturnValue(of())
-};
-
-const kadaiEngineServiceSpy: Partial<KadaiEngineService> = {
-  isCustomRoutingRulesEnabled: vi.fn().mockReturnValue(of(false)),
-  hasRole: vi.fn().mockReturnValue(true)
 };
 
 describe('WorkbasketListComponent', () => {
@@ -73,12 +67,7 @@ describe('WorkbasketListComponent', () => {
         {
           provide: DomainService,
           useValue: domainServiceSpy
-        },
-        {
-          provide: KadaiEngineService,
-          useValue: kadaiEngineServiceSpy
-        },
-        provideHttpClientTesting()
+        }
       ]
     }).compileComponents();
 
