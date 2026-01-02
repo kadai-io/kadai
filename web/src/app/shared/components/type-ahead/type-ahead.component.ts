@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
 import { debounceTime, distinctUntilChanged, Observable, Subject } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -74,6 +74,8 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
   });
   emptyAccessId: AccessId = { accessId: '', name: '' };
   private accessIdService = inject(AccessIdsService);
+  // TODO FIXME
+  //private cd = inject(ChangeDetectorRef);
 
   ngOnInit() {
     if (this.isDisabled) {
@@ -114,6 +116,8 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
 
   handleEmptyAccessId() {
     this.name = '';
+    // TODO FIXME
+    //this.cd.detectChanges();
     this.isFormValid.emit(!this.isRequired);
     if (this.placeHolderMessage !== 'Search for AccessId') {
       this.accessIdEventEmitter.emit(this.emptyAccessId);
@@ -133,6 +137,8 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
 
         if (typeof accessId !== 'undefined') {
           this.name = accessId?.name;
+          // TODO FIXME
+          //this.cd.detectChanges();
           this.isFormValid.emit(true);
           this.accessIdEventEmitter.emit(accessId);
         } else if (this.displayError) {
