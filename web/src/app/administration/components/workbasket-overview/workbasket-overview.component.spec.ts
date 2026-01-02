@@ -88,11 +88,13 @@ describe('WorkbasketOverviewComponent', () => {
     component.ngOnInit();
   });
 
-  it('should display workbasket-details correctly', () => {
+  it('should not display workbasket-details', () => {
     component.showDetail = false;
     fixture.detectChanges();
     expect(debugElement.nativeElement.querySelector('kadai-administration-workbasket-details')).toBeNull();
+  });
 
+  it('should display workbasket-details', () => {
     store.reset({
       ...store.snapshot(),
       workbasket: {
