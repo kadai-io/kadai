@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketListComponent } from './workbasket-list.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
@@ -30,19 +30,20 @@ import { selectedWorkbasketMock } from '../../../shared/store/mock-data/mock-sto
 import { WorkbasketQueryFilterParameter } from '../../../shared/models/workbasket-query-filter-parameter';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
 import { provideRouter } from '@angular/router';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const workbasketServiceMock: Partial<WorkbasketService> = {
-  workbasketSavedTriggered: jest.fn().mockReturnValue(of(1)),
-  getWorkBasketsSummary: jest.fn().mockReturnValue(of({})),
-  getWorkBasket: jest.fn().mockReturnValue(of(selectedWorkbasketMock)),
-  getWorkbasketActionToolbarExpansion: jest.fn().mockReturnValue(of(false)),
-  getWorkBasketAccessItems: jest.fn().mockReturnValue(of({})),
-  getWorkBasketsDistributionTargets: jest.fn().mockReturnValue(of({}))
+  workbasketSavedTriggered: vi.fn().mockReturnValue(of(1)),
+  getWorkBasketsSummary: vi.fn().mockReturnValue(of({ workbaskets: [] })),
+  getWorkBasket: vi.fn().mockReturnValue(of(selectedWorkbasketMock)),
+  getWorkbasketActionToolbarExpansion: vi.fn().mockReturnValue(of(false)),
+  getWorkBasketAccessItems: vi.fn().mockReturnValue(of({ accessItems: [] })),
+  getWorkBasketsDistributionTargets: vi.fn().mockReturnValue(of({ distributionTargets: [] }))
 };
 
 const domainServiceSpy: Partial<DomainService> = {
-  getSelectedDomainValue: jest.fn().mockReturnValue(of()),
-  getSelectedDomain: jest.fn().mockReturnValue(of())
+  getSelectedDomainValue: vi.fn().mockReturnValue('A'),
+  getSelectedDomain: vi.fn().mockReturnValue(of('A'))
 };
 
 describe('WorkbasketListComponent', () => {
@@ -52,8 +53,8 @@ describe('WorkbasketListComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [WorkbasketListComponent],
       providers: [
         provideStore([WorkbasketState, FilterState]),
@@ -75,22 +76,22 @@ describe('WorkbasketListComponent', () => {
     store = TestBed.inject(Store);
     actions$ = TestBed.inject(Actions);
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should dispatch SelectWorkbasket when selecting a workbasket', waitForAsync(() => {
+  it('should dispatch SelectWorkbasket when selecting a workbasket', async () => {
     component.selectedId = undefined;
     fixture.detectChanges();
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(SelectWorkbasket)).subscribe(() => (actionDispatched = true));
     component.selectWorkbasket('WBI:000000000000000000000000000000000902');
     expect(actionDispatched).toBe(true);
-  }));
+  });
 
-  it('should dispatch DeselectWorkbasket when selecting a workbasket again', waitForAsync(() => {
+  it('should dispatch DeselectWorkbasket when selecting a workbasket again', async () => {
     component.selectedId = '123';
     fixture.detectChanges();
     let actionDispatched = false;
@@ -99,7 +100,7 @@ describe('WorkbasketListComponent', () => {
     component.selectWorkbasket(mockId);
     expect(actionDispatched).toBe(true);
     expect(component.selectedId).toEqual(undefined); //because Deselect action sets selectedId to undefined
-  }));
+  });
 
   it('should set sort value when performSorting is called', () => {
     const sort: Sorting<WorkbasketQuerySortParameter> = {
@@ -124,7 +125,7 @@ describe('WorkbasketListComponent', () => {
   });
 
   it('should call performFilter when filter value from store is obtained', () => {
-    const performFilter = jest.spyOn(component, 'performFilter');
+    const performFilter = vi.spyOn(component, 'performFilter');
     component.ngOnInit();
     expect(performFilter).toHaveBeenCalled();
   });

@@ -52,17 +52,15 @@ export class WorkbasketOverviewComponent implements OnInit {
   private store = inject(Store);
 
   ngOnInit() {
-    if (this.route.url) {
-      this.route.url.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-        if (params[0].path === 'workbaskets') {
-          this.selectedWorkbasket$.pipe(take(1)).subscribe((workbasket) => {
-            if (typeof workbasket.workbasketId !== 'undefined') {
-              this.store.dispatch(new SelectWorkbasket(workbasket.workbasketId));
-            }
-          });
-        }
-      });
-    }
+    this.route.url.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      if (params[0].path === 'workbaskets') {
+        this.selectedWorkbasket$.pipe(take(1)).subscribe((workbasket) => {
+          if (typeof workbasket.workbasketId !== 'undefined') {
+            this.store.dispatch(new SelectWorkbasket(workbasket.workbasketId));
+          }
+        });
+      }
+    });
     if (this.route.firstChild) {
       this.route.firstChild.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
         this.routerParams = params;
@@ -93,10 +91,5 @@ export class WorkbasketOverviewComponent implements OnInit {
       this.workbasketList.nativeElement.style.minWidth = '250px';
       this.toggleButton.nativeElement.style.left = '230px';
     }
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

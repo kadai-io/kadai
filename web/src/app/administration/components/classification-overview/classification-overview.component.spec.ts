@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
@@ -32,8 +32,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-
-jest.mock('angular-svg-icon');
+import { beforeEach, describe, expect, it } from 'vitest';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const routeParamsMock = { id: 'new-classification' };
 
@@ -45,20 +45,21 @@ describe('ClassificationOverviewComponent', () => {
   let actions$: Observable<any>;
   let mockActivatedRoute: any;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     mockActivatedRoute = {
       firstChild: {
         params: of(routeParamsMock)
       }
     };
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       imports: [ClassificationOverviewComponent],
       providers: [
         provideStore([ClassificationState, EngineConfigurationState]),
         provideHttpClient(),
         provideHttpClientTesting(),
         provideNoopAnimations(),
+        provideAngularSvgIcon(),
         {
           provide: ActivatedRoute,
           useValue: mockActivatedRoute
@@ -77,7 +78,7 @@ describe('ClassificationOverviewComponent', () => {
       engineConfiguration: engineConfigurationMock
     });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();
