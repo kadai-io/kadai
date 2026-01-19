@@ -83,7 +83,7 @@
         <version.spring-openapi>2.8.14</version.spring-openapi>
 
         <!-- AspectJ dependencies -->
-        <version.aspectj-maven-plugin>1.15.0</version.aspectj-maven-plugin>
+        <version.aspectj-maven-plugin>1.16.0</version.aspectj-maven-plugin>
         <version.aspectj>1.9.25.1</version.aspectj>
 
         <!-- Excel to DMN converter dependencies -->
