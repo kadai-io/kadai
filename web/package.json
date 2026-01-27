@@ -55,7 +55,7 @@
     "@types/jsdom": "27",
     "@types/lodash-es": "4",
     "@types/node": "25.0.10",
-    "@typescript-eslint/eslint-plugin": "8.53.1",
+    "@typescript-eslint/eslint-plugin": "8.54.0",
     "@typescript-eslint/parser": "8.53.1",
     "@vitest/coverage-v8": "4.0.18",
     "cypress": "15.9.0",
