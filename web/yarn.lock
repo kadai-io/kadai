@@ -5203,10 +5203,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"globals@npm:17.1.0":
-  version: 17.1.0
-  resolution: "globals@npm:17.1.0"
-  checksum: 10c0/4a4a17847676a09f164b8bdce7df105a4f484d6d44586e374087ba9ec7089cbf4c578b8648838dee9917074199c542ce157ea3c07b266f708dfb1652010900c8
+"globals@npm:17.2.0":
+  version: 17.2.0
+  resolution: "globals@npm:17.2.0"
+  checksum: 10c0/fd25a98b08c1d31082337cbbb5ff1b90b9980e1db69a8621fb942bdb2cdca8aa54d61466742e8bf4910578ea5fa903b8bf83bffd1b2d45551cc614830dba910b
   languageName: node
   linkType: hard
 
@@ -6140,7 +6140,7 @@ __metadata:
     eslint-plugin-import: "npm:2.32.0"
     eslint-plugin-prettier: "npm:5.5.5"
     file-saver-es: "npm:2.0.5"
-    globals: "npm:17.1.0"
+    globals: "npm:17.2.0"
     jsdom: "npm:27.4.0"
     lodash-es: "npm:4.17.23"
     ng2-charts: "npm:8.0.0"
