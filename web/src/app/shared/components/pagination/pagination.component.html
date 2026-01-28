@@ -1,5 +1,5 @@
 <!--
-~ Copyright [2025] [envite consulting GmbH]
+~ Copyright [2026] [envite consulting GmbH]
 ~
 ~    Licensed under the Apache License, Version 2.0 (the "License");
 ~    you may not use this file except in compliance with the License.
@@ -21,19 +21,19 @@
                  [ngClass]="
                  {'pagination__mat-paginator--expanded': expanded,
                  'pagination__mat-paginator--collapsed': !expanded }" [pageSize]="page?.size"
-    [showFirstLastButtons]="true" class="pagination__mat-paginator"
-  hidePageSize="true"></mat-paginator>
+                 [showFirstLastButtons]="true" class="pagination__mat-paginator"
+                 hidePageSize="true"></mat-paginator>
   @if (expanded) {
     <div class="pagination__go-to">
       <div class="pagination__go-to-label">Page:</div>
       <mat-form-field>
         <input (click)="onSelectText()" (focus)="filter(pageSelected)"
-          (ngModelChange)="filter(pageSelected)"
-          [(ngModel)]="pageSelected" [matAutocomplete]="auto"
-          id="inputTypeAhead"
-          matInput name="accessId" type="text"/>
+               (ngModelChange)="filter(pageSelected)"
+               [(ngModel)]="pageSelected" [matAutocomplete]="auto"
+               id="inputTypeAhead"
+               matInput name="accessId" type="text" />
         <mat-autocomplete #auto="matAutocomplete" (optionSelected)="goToPage($event.option.value)"
-          autoActiveFirstOption>
+                          autoActiveFirstOption>
           @for (pageNumber of filteredPages; track pageNumber) {
             <mat-option [value]="pageNumber">{{ pageNumber }}
             </mat-option>

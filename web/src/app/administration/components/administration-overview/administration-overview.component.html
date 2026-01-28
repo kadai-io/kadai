@@ -1,5 +1,5 @@
 <!--
-~ Copyright [2025] [envite consulting GmbH]
+~ Copyright [2026] [envite consulting GmbH]
 ~
 ~    Licensed under the Apache License, Version 2.0 (the "License");
 ~    you may not use this file except in compliance with the License.
@@ -19,23 +19,23 @@
 <div class="administration-overview">
   <div class="administration-overview__navbar-container">
     <nav [tabPanel]="administrationOverviewTabPanel" class="administration-overview__navbar"
-      mat-stretch-tabs="false" mat-tab-nav-bar>
+         mat-stretch-tabs="false" mat-tab-nav-bar>
       <a (click)="selectedTab = 'workbaskets'" [active]="selectedTab == 'workbaskets'"
-        class="administration-overview__navbar-links" mat-tab-link
-      routerLink="/kadai/administration/workbaskets">Workbaskets</a>
+         class="administration-overview__navbar-links" mat-tab-link
+         routerLink="/kadai/administration/workbaskets">Workbaskets</a>
       <a (click)="selectedTab = 'classifications'" [active]="selectedTab == 'classifications'"
-        class="administration-overview__navbar-links" mat-tab-link
-      routerLink="/kadai/administration/classifications">Classifications</a>
+         class="administration-overview__navbar-links" mat-tab-link
+         routerLink="/kadai/administration/classifications">Classifications</a>
       <a (click)="selectedTab = 'access-items-management'"
-        [active]="selectedTab == 'access-items-management'"
-        class="administration-overview__navbar-links"
-        mat-tab-link routerLink="/kadai/administration/access-items-management">Access Items
-      Management</a>
+         [active]="selectedTab == 'access-items-management'"
+         class="administration-overview__navbar-links"
+         mat-tab-link routerLink="/kadai/administration/access-items-management">Access Items
+        Management</a>
       @if ((routingAccess)) {
         <a (click)="selectedTab = 'task-routing'"
-          [active]="selectedTab == 'task-routing'"
-          class="administration-overview__navbar-links" mat-tab-link
-        routerLink="/kadai/administration/task-routing">Task Routing</a>
+           [active]="selectedTab == 'task-routing'"
+           class="administration-overview__navbar-links" mat-tab-link
+           routerLink="/kadai/administration/task-routing">Task Routing</a>
       }
     </nav>
     <div class="administration-overview__domain">
@@ -43,7 +43,7 @@
         <mat-select [value]="selectedDomain" matTooltip="Select domain">
           @for (domain of domains; track domain) {
             <mat-option (click)="switchDomain(domain)"
-              [value]="domain">
+                        [value]="domain">
               {{ domain ? domain : 'MASTER DOMAIN' }}
             </mat-option>
           }

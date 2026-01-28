@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -7,8 +7,7 @@
  *
  *        http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    Unless required by applicable law of an "AS IS" BASIS,
  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
@@ -16,12 +15,13 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Routes } from '@angular/router';
 import { Component } from '@angular/core';
 import { TaskListComponent } from './task-list.component';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 @Component({
   selector: 'kadai-dummy-detail',
@@ -35,12 +35,12 @@ describe('TaskListComponent', () => {
 
   const routes: Routes = [{ path: '*', component: DummyDetailComponent }];
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [TaskListComponent],
       providers: [provideHttpClient(), provideAngularSvgIcon(), provideRouter(routes)]
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TaskListComponent);

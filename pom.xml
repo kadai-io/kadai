@@ -41,10 +41,10 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <version.mybatis>3.5.19</version.mybatis>
-        <version.json>20250517</version.json>
+        <version.json>20251224</version.json>
 
         <!-- build dependencies -->
-        <version.checkstyle>12.3.0</version.checkstyle>
+        <version.checkstyle>12.3.1</version.checkstyle>
         <version.google-java-format>1.33.0</version.google-java-format>
         <version.maven.checkstyle>3.6.0</version.maven.checkstyle>
         <version.maven.jar>3.5.0</version.maven.jar>
@@ -64,7 +64,7 @@
 
         <!-- spring dependencies -->
         <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
-        <version.spring.boot>3.5.7</version.spring.boot>
+        <version.spring.boot>3.5.9</version.spring.boot>
         <version.spring.mybatis>3.0.5</version.spring.mybatis>
 
         <!-- camunda dependencies -->
@@ -72,8 +72,8 @@
 
         <!-- test dependencies -->
         <version.archunit>1.4.1</version.archunit>
-        <version.equalsverifier>4.2.5</version.equalsverifier>
-        <version.assertj>3.27.6</version.assertj>
+        <version.equalsverifier>4.3.1</version.equalsverifier>
+        <version.assertj>3.27.7</version.assertj>
         <version.openpojo>0.9.1</version.openpojo>
         <version.jacoco>0.8.14</version.jacoco>
         <version.slf4j-test>3.0.3</version.slf4j-test>
@@ -83,11 +83,11 @@
         <version.spring-openapi>2.8.14</version.spring-openapi>
 
         <!-- AspectJ dependencies -->
-        <version.aspectj-maven-plugin>1.15.0</version.aspectj-maven-plugin>
+        <version.aspectj-maven-plugin>1.16.0</version.aspectj-maven-plugin>
         <version.aspectj>1.9.25.1</version.aspectj>
 
         <!-- Excel to DMN converter dependencies -->
-        <version.docx4j>11.5.8</version.docx4j>
+        <version.docx4j>11.5.9</version.docx4j>
         <version.jakarta.xml.bind-api>4.0.4</version.jakarta.xml.bind-api>
         <version.jaxb-core>4.0.6</version.jaxb-core>
         <version.jaxb-impl>4.0.6</version.jaxb-impl>
@@ -168,7 +168,7 @@
                     <plugin>
                       <groupId>org.sonatype.central</groupId>
                       <artifactId>central-publishing-maven-plugin</artifactId>
-                      <version>0.9.0</version>
+                      <version>0.10.0</version>
                       <extensions>true</extensions>
                       <configuration>
                           <publishingServerId>central</publishingServerId>
@@ -214,7 +214,7 @@
                   <plugin>
                     <groupId>org.sonatype.central</groupId>
                     <artifactId>central-publishing-maven-plugin</artifactId>
-                    <version>0.9.0</version>
+                    <version>0.10.0</version>
                     <extensions>true</extensions>
                     <configuration>
                       <publishingServerId>central</publishingServerId>
@@ -392,8 +392,8 @@
 
   <repositories>
     <repository>
-      <name>Central Portal Snapshots</name>
       <id>central-portal-snapshots</id>
+      <name>Central Portal Snapshots</name>
       <url>https://central.sonatype.com/repository/maven-snapshots/</url>
       <releases>
         <enabled>false</enabled>

@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketListToolbarComponent } from './workbasket-list-toolbar.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
@@ -29,12 +29,12 @@ import { ACTION } from '../../../shared/models/action';
 import { provideHttpClient } from '@angular/common/http';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
 import { provideRouter } from '@angular/router';
-
-jest.mock('angular-svg-icon');
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const domainServiceMock: Partial<DomainService> = {
-  getDomains: jest.fn().mockResolvedValue(''),
-  getSelectedDomain: jest.fn().mockReturnValue(of('A'))
+  getDomains: vi.fn().mockResolvedValue(''),
+  getSelectedDomain: vi.fn().mockReturnValue(of('A'))
 };
 
 describe('WorkbasketListToolbarComponent', () => {
@@ -44,8 +44,8 @@ describe('WorkbasketListToolbarComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [WorkbasketListToolbarComponent],
       providers: [
         provideRouter([]),
@@ -54,7 +54,8 @@ describe('WorkbasketListToolbarComponent', () => {
           provide: DomainService,
           useValue: domainServiceMock
         },
-        provideHttpClient()
+        provideHttpClient(),
+        provideAngularSvgIcon()
       ]
     }).compileComponents();
 
@@ -65,40 +66,40 @@ describe('WorkbasketListToolbarComponent', () => {
     actions$ = TestBed.inject(Actions);
     component.action = ACTION.COPY;
     fixture.detectChanges();
-  }));
+  });
 
   it('should create the component', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should dispatch CreateWorkbasket when addWorkbasket is called', waitForAsync(() => {
+  it('should dispatch CreateWorkbasket when addWorkbasket is called', async () => {
     component.action = ACTION.COPY;
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(CreateWorkbasket)).subscribe(() => (actionDispatched = true));
     component.addWorkbasket();
     expect(actionDispatched).toBe(true);
-  }));
+  });
 
-  it('should not dispatch action in addWorkbasket when action is CREATE', waitForAsync(() => {
+  it('should not dispatch action in addWorkbasket when action is CREATE', async () => {
     component.action = ACTION.CREATE;
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(CreateWorkbasket)).subscribe(() => (actionDispatched = true));
     component.addWorkbasket();
     expect(actionDispatched).toBe(false);
-  }));
+  });
 
-  it('should emit value when sorting is called', (done) => {
+  it('should emit value when sorting is called', () => {
     const mockSort: Sorting<WorkbasketQuerySortParameter> = {
       'sort-by': WorkbasketQuerySortParameter.KEY,
       order: Direction.ASC
     };
-    let sort: Sorting<WorkbasketQuerySortParameter> = undefined;
-    component.performSorting.subscribe((sortBy: Sorting<WorkbasketQuerySortParameter>) => {
+    let sort: Sorting<WorkbasketQuerySortParameter> | undefined;
+    const sub = component.performSorting.subscribe((sortBy: Sorting<WorkbasketQuerySortParameter>) => {
       sort = sortBy;
-      done();
     });
     component.sorting(mockSort);
     expect(sort).toMatchObject(mockSort);
+    sub.unsubscribe();
   });
 
   /* HTML */
@@ -108,7 +109,7 @@ describe('WorkbasketListToolbarComponent', () => {
     expect(button).toBeTruthy();
     expect(button.textContent).toContain('add');
     expect(button.textContent).toContain('Add');
-    component.addWorkbasket = jest.fn().mockImplementation();
+    component.addWorkbasket = vi.fn().mockImplementation(() => undefined);
     button.click();
     expect(component.addWorkbasket).toHaveBeenCalled();
   });

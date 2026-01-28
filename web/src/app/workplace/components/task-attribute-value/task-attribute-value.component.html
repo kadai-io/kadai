@@ -1,5 +1,5 @@
 <!--
-~ Copyright [2025] [envite consulting GmbH]
+~ Copyright [2026] [envite consulting GmbH]
 ~
 ~    Licensed under the Apache License, Version 2.0 (the "License");
 ~    you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@
             <!-- REMOVE BUTTON -->
             <div class="task-attribute-value__column--button">
               <button (click)="removeAttribute(i)" color="warn"
-                mat-stroked-button
-                matTooltip="Remove attribute">
+                      mat-stroked-button
+                      matTooltip="Remove attribute">
                 <mat-icon class="task-attribute-value__mat-icon">clear</mat-icon>
               </button>
             </div>
@@ -44,16 +44,16 @@
             <div class="task-attribute-value__column--inputs">
               <mat-form-field appearance="outline" style="width: 100%">
                 <input [(ngModel)]="entry.key" matInput
-                  name="{{callbackInfo ? 'callback-info' : 'custom-attribute'}}-{{i}}"
-                  type="text">
+                       name="{{callbackInfo ? 'callback-info' : 'custom-attribute'}}-{{i}}"
+                       type="text">
               </mat-form-field>
             </div>
             <!-- VALUE INPUT -->
             <div class="task-attribute-value__column--inputs">
               <mat-form-field appearance="outline" style="width: 100%">
                 <input [(ngModel)]="entry.value" matInput
-                  name="{{callbackInfo ? 'callback-info' : 'custom-attribute'}}-{{i}}-val"
-                  type="text">
+                       name="{{callbackInfo ? 'callback-info' : 'custom-attribute'}}-{{i}}-val"
+                       type="text">
               </mat-form-field>
             </div>
           </div>
@@ -71,7 +71,7 @@
 
   <!-- ADD BUTTON -->
   <button (click)="addAttribute()" class="task-attribute-value__button--primary"
-    mat-flat-button>
+          mat-flat-button>
     <span> Add {{ callbackInfo ? 'callback information' : 'custom attribute' }} </span>
     <mat-icon>add</mat-icon>
   </button>

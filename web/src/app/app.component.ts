@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private kadaiEngineService = inject(KadaiEngineService);
   private window = inject(WindowRefService);
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onResize() {
     this.orientationService.onResize();
   }

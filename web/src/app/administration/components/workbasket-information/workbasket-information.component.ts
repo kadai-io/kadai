@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -93,13 +93,13 @@ export class WorkbasketInformationComponent implements OnInit, OnChanges, OnDest
   readonly lengthError = 'You have reached the maximum length for this field';
   inputOverflowMap = new Map<string, boolean>();
   validateInputOverflow: Function;
+  customFields$: Observable<CustomField[]>;
+  destroy$ = new Subject<void>();
   private store = inject(Store);
   workbasketsCustomisation$: Observable<WorkbasketsCustomisation> = this.store.select(
     EngineConfigurationSelectors.workbasketsCustomisation
   );
   buttonAction$: Observable<ButtonAction> = this.store.select(WorkbasketSelectors.buttonAction);
-  customFields$: Observable<CustomField[]>;
-  destroy$ = new Subject<void>();
   private workbasketService = inject(WorkbasketService);
   private requestInProgressService = inject(RequestInProgressService);
   private formsValidatorService = inject(FormsValidatorService);

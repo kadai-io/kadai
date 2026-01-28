@@ -1,5 +1,5 @@
 <!--
-~ Copyright [2025] [envite consulting GmbH]
+~ Copyright [2026] [envite consulting GmbH]
 ~
 ~    Licensed under the Apache License, Version 2.0 (the "License");
 ~    you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@
 <mat-form-field class="types-selector">
   <mat-label>Type</mat-label>
   <mat-select [value]="classificationTypeSelected$ | async" class="types-selector__selected-type"
-    matTooltip="Change type">
+              matTooltip="Change type">
     @for (classificationType of classificationTypes$ | async; track classificationType) {
       <mat-option (click)="select(classificationType)"
-        [value]="classificationType" class="types-selector__options">
+                  [value]="classificationType" class="types-selector__options">
         {{ classificationType }}
       </mat-option>
     }

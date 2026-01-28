@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketOverviewComponent } from './workbasket-overview.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionCompleted, provideStore, Store } from '@ngxs/store';
@@ -28,11 +28,14 @@ import { CreateWorkbasket } from '../../../shared/store/workbasket-store/workbas
 import { take } from 'rxjs/operators';
 import { provideHttpClient } from '@angular/common/http';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
+import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
+import { engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-
-jest.mock('angular-svg-icon');
+import { beforeEach, describe, expect, it } from 'vitest';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const mockActivatedRoute = {
+  url: of([{ path: 'foobar' }]),
   firstChild: {
     params: of({
       id: 'new-workbasket'
@@ -47,18 +50,19 @@ describe('WorkbasketOverviewComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [WorkbasketOverviewComponent],
       providers: [
-        provideStore([WorkbasketState, FilterState]),
+        provideStore([WorkbasketState, FilterState, EngineConfigurationState]),
         provideNoopAnimations(),
         {
           provide: ActivatedRoute,
           useValue: mockActivatedRoute
         },
         provideHttpClient(),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        provideAngularSvgIcon()
       ]
     }).compileComponents();
 
@@ -66,9 +70,13 @@ describe('WorkbasketOverviewComponent', () => {
     debugElement = fixture.debugElement;
     component = fixture.debugElement.componentInstance;
     store = TestBed.inject(Store);
+    store.reset({
+      ...store.snapshot(),
+      engineConfiguration: engineConfigurationMock
+    });
     actions$ = TestBed.inject(Actions);
     fixture.detectChanges();
-  }));
+  });
 
   it('should create the component', () => {
     expect(component).toBeTruthy();
@@ -78,21 +86,22 @@ describe('WorkbasketOverviewComponent', () => {
     expect(debugElement.nativeElement.querySelector('kadai-administration-workbasket-list')).toBeTruthy();
   });
 
-  it('should display details when params id exists', waitForAsync((done) => {
+  it('should display details when params id exists', async () => {
     actions$.pipe(ofActionCompleted(CreateWorkbasket), take(1)).subscribe(() => {
       expect(component.routerParams.id).toMatch('new-workbasket');
       expect(component.showDetail).toBeTruthy();
       expect(debugElement.nativeElement.querySelector('kadai-administration-workbasket-details')).toBeTruthy();
-      done();
     });
     component.ngOnInit();
-  }));
+  });
 
-  it('should display workbasket-details correctly', () => {
+  it('should not display workbasket-details', () => {
     component.showDetail = false;
     fixture.detectChanges();
     expect(debugElement.nativeElement.querySelector('kadai-administration-workbasket-details')).toBeNull();
+  });
 
+  it('should display workbasket-details', () => {
     store.reset({
       ...store.snapshot(),
       workbasket: {

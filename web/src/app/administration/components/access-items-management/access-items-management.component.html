@@ -1,5 +1,5 @@
 <!--
-~ Copyright [2025] [envite consulting GmbH]
+~ Copyright [2026] [envite consulting GmbH]
 ~
 ~    Licensed under the Apache License, Version 2.0 (the "License");
 ~    you may not use this file except in compliance with the License.
@@ -45,13 +45,13 @@
           <ng-container matColumnDef="Name">
             <th *matHeaderCellDef mat-header-cell> Name</th>
             <td *matCellDef="let element" class="access-items__group-table-cell"
-              mat-cell> {{ element.name }}
+                mat-cell> {{ element.name }}
             </td>
           </ng-container>
           <ng-container matColumnDef="Access Id">
             <th *matHeaderCellDef mat-header-cell> Access Id</th>
             <td *matCellDef="let element" class="access-items__group-table-cell"
-              mat-cell> {{ element.accessId }}
+                mat-cell> {{ element.accessId }}
             </td>
           </ng-container>
           <tr *matHeaderRowDef="['Name', 'Access Id']" mat-header-row></tr>
@@ -78,13 +78,13 @@
           <ng-container matColumnDef="Name">
             <th *matHeaderCellDef mat-header-cell> Name</th>
             <td *matCellDef="let element" class="access-items__permission-table-cell"
-              mat-cell> {{ element.name }}
+                mat-cell> {{ element.name }}
             </td>
           </ng-container>
           <ng-container matColumnDef="Access Id">
             <th *matHeaderCellDef mat-header-cell> Access Id</th>
             <td *matCellDef="let element" class="access-items__permission-table-cell"
-              mat-cell> {{ element.accessId }}
+                mat-cell> {{ element.accessId }}
             </td>
           </ng-container>
           <tr *matHeaderRowDef="['Name', 'Access Id']" mat-header-row></tr>
@@ -99,7 +99,7 @@
   <!-- EXPANSION PANEL AUTHORIZATION -->
   @if (accessItemsForm) {
     <mat-expansion-panel [expanded]="true"
-      class="access-items__authorization-expansion-panel">
+                         class="access-items__authorization-expansion-panel">
       <mat-expansion-panel-header>
         <mat-panel-title>
           Authorizations of {{ accessId.accessId }}
@@ -110,52 +110,53 @@
           <ng-form [formGroup]="accessItemsForm">
             <table>
               <thead>
-                <tr>
-                  <th></th>
-                  <th class="align-left">Workbasket Key</th>
-                  <th class="align-left">Access Id</th>
-                  <th>Read</th>
-                  <th>Read tasks</th>
-                  <th>Open</th>
-                  <th>Edit tasks</th>
-                  <th>Append</th>
-                  <th>Transfer</th>
-                  <th>Distribute</th>
-                  @for (customField of customFields$ | async; track customField) {
-                    @if (customField.visible) {
-                      <th>
-                        {{ customField.field }}
-                      </th>
-                    }
+              <tr>
+                <th></th>
+                <th class="align-left">Workbasket Key</th>
+                <th class="align-left">Access Id</th>
+                <th>Read</th>
+                <th>Read tasks</th>
+                <th>Open</th>
+                <th>Edit tasks</th>
+                <th>Append</th>
+                <th>Transfer</th>
+                <th>Distribute</th>
+                @for (customField of customFields$ | async; track customField) {
+                  @if (customField.visible) {
+                    <th>
+                      {{ customField.field }}
+                    </th>
                   }
-                </tr>
-                <tr>
-                  <th class="align-left">
-                    <kadai-shared-sort (performSorting)="sorting($event)" [defaultSortBy]="defaultSortBy"
-                      [sortingFields]="sortingFields" menuPosition="left">
-                    </kadai-shared-sort>
-                  </th>
-                  <th>
-                    <mat-form-field appearance="outline"
-                      class="access-items__authorization-expansion-panel-filter">
-                      <mat-label>Workbasket filter</mat-label>
-                      <input (keyup.enter)="searchForAccessItemsWorkbaskets()"
-                        formControlName="workbasketKeyFilter"
-                        matInput type="text">
-                    </mat-form-field>
-                  </th>
-                  <th>
-                    <mat-form-field appearance="outline"
-                      class="access-items__authorization-expansion-panel-filter">
-                      <mat-label>Access id filter</mat-label>
-                      <input (keyup.enter)="searchForAccessItemsWorkbaskets()"
-                        formControlName="accessIdFilter" matInput
-                        type="text">
-                    </mat-form-field>
-                  </th>
-                  <th>
-                  </th>
-                </tr>
+                }
+              </tr>
+              <tr>
+                <th class="align-left">
+                  <kadai-shared-sort (performSorting)="sorting($event)"
+                                     [defaultSortBy]="defaultSortBy"
+                                     [sortingFields]="sortingFields" menuPosition="left">
+                  </kadai-shared-sort>
+                </th>
+                <th>
+                  <mat-form-field appearance="outline"
+                                  class="access-items__authorization-expansion-panel-filter">
+                    <mat-label>Workbasket filter</mat-label>
+                    <input (keyup.enter)="searchForAccessItemsWorkbaskets()"
+                           formControlName="workbasketKeyFilter"
+                           matInput type="text">
+                  </mat-form-field>
+                </th>
+                <th>
+                  <mat-form-field appearance="outline"
+                                  class="access-items__authorization-expansion-panel-filter">
+                    <mat-label>Access id filter</mat-label>
+                    <input (keyup.enter)="searchForAccessItemsWorkbaskets()"
+                           formControlName="accessIdFilter" matInput
+                           type="text">
+                  </mat-form-field>
+                </th>
+                <th>
+                </th>
+              </tr>
               </thead>
               <tbody formArrayName="accessItemsGroups">
                 @for (accessItem of accessItems; track accessItem; let index = $index) {
@@ -170,38 +171,42 @@
                       <td
                         class="align-left">
                         <label class="wrap"
-                        matTooltip="{{accessItem.accessId}}">{{ accessItem.accessName }}</label>
+                               matTooltip="{{accessItem.accessId}}">{{ accessItem.accessName }}</label>
                       </td>
                     }
                     <td>
-                      <mat-checkbox formControlName="permRead" id="checkbox-{{index}}-0"></mat-checkbox>
+                      <mat-checkbox formControlName="permRead"
+                                    id="checkbox-{{index}}-0"></mat-checkbox>
                     </td>
                     <td>
                       <mat-checkbox formControlName="permReadTasks"
-                      id="checkbox-{{index}}-1"></mat-checkbox>
+                                    id="checkbox-{{index}}-1"></mat-checkbox>
                     </td>
                     <td>
-                      <mat-checkbox formControlName="permOpen" id="checkbox-{{index}}-2"></mat-checkbox>
+                      <mat-checkbox formControlName="permOpen"
+                                    id="checkbox-{{index}}-2"></mat-checkbox>
                     </td>
                     <td>
                       <mat-checkbox formControlName="permEditTasks"
-                      id="checkbox-{{index}}-3"></mat-checkbox>
+                                    id="checkbox-{{index}}-3"></mat-checkbox>
                     </td>
                     <td>
-                      <mat-checkbox formControlName="permAppend" id="checkbox-{{index}}-4"></mat-checkbox>
+                      <mat-checkbox formControlName="permAppend"
+                                    id="checkbox-{{index}}-4"></mat-checkbox>
                     </td>
                     <td>
-                      <mat-checkbox formControlName="permTransfer" id="checkbox-{{index}}-5"></mat-checkbox>
+                      <mat-checkbox formControlName="permTransfer"
+                                    id="checkbox-{{index}}-5"></mat-checkbox>
                     </td>
                     <td>
                       <mat-checkbox formControlName="permDistribute"
-                      id="checkbox-{{index}}-6"></mat-checkbox>
+                                    id="checkbox-{{index}}-6"></mat-checkbox>
                     </td>
                     @for (customField of customFields$ | async; track customField; let customIndex = $index) {
                       @if (customField.visible) {
                         <td>
                           <mat-checkbox formControlName="permCustom{{customIndex + 1}}"
-                          id="checkbox-{{index}}-{{customIndex + 7}}"></mat-checkbox>
+                                        id="checkbox-{{index}}-{{customIndex + 7}}"></mat-checkbox>
                         </td>
                       }
                     }
@@ -212,9 +217,9 @@
             <!-- Revoke Access button -->
             @if (accessItemsForm) {
               <button (click)="revokeAccess()" [disabled]=isGroup
-                class="access-items__revoke-button"
-                color="warn"
-                mat-raised-button>
+                      class="access-items__revoke-button"
+                      color="warn"
+                      mat-raised-button>
                 Revoke access
                 <mat-icon>clear</mat-icon>
               </button>

@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,17 @@
  *
  */
 
-import { Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges
+} from '@angular/core';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
 import { debounceTime, distinctUntilChanged, Observable, Subject } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -51,7 +61,7 @@ import { MatOption } from '@angular/material/core';
     MatOption
   ]
 })
-export class TypeAheadComponent implements OnInit, OnDestroy {
+export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
   @Input() savedAccessId;
   @Input() placeHolderMessage;
   @Input() entityId;

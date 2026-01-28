@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketDetailsComponent } from './workbasket-details.component';
 import { DebugElement } from '@angular/core';
 import { Actions, provideStore, Store } from '@ngxs/store';
-import { Observable, of } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { ACTION } from '../../../shared/models/action';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { DomainService } from '../../../shared/services/domain/domain.service';
@@ -33,16 +33,15 @@ import {
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { CopyWorkbasket, CreateWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { take } from 'rxjs/operators';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { provideRouter } from '@angular/router';
-
-jest.mock('angular-svg-icon');
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const domainServiceSpy: Partial<DomainService> = {
-  getSelectedDomain: jest.fn().mockReturnValue(of('A')),
-  getSelectedDomainValue: jest.fn().mockReturnValue(of()),
-  getDomains: jest.fn().mockReturnValue(of())
+  getSelectedDomain: vi.fn().mockReturnValue(of('A')),
+  getSelectedDomainValue: vi.fn().mockReturnValue('A'),
+  getDomains: vi.fn().mockReturnValue(of(['A']))
 };
 
 export const workbasketReadState = {
@@ -57,8 +56,8 @@ describe('WorkbasketDetailsComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [WorkbasketDetailsComponent],
       providers: [
         provideStore([WorkbasketState, EngineConfigurationState]),
@@ -68,61 +67,52 @@ describe('WorkbasketDetailsComponent', () => {
           provide: DomainService,
           useValue: domainServiceSpy
         },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        provideAngularSvgIcon()
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(WorkbasketDetailsComponent);
-    debugElement = fixture.debugElement;
-    component = fixture.debugElement.componentInstance;
     store = TestBed.inject(Store);
-    actions$ = TestBed.inject(Actions);
     store.reset({
       ...store.snapshot(),
       workbasket: workbasketReadStateMock,
       engineConfiguration: engineConfigurationMock
     });
+
+    fixture = TestBed.createComponent(WorkbasketDetailsComponent);
+
+    debugElement = fixture.debugElement;
+    component = fixture.debugElement.componentInstance;
+    actions$ = TestBed.inject(Actions);
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();
   });
 
   it('should render information component when workbasket details is opened', () => {
-    component.workbasket = { workbasketId: '1' };
     fixture.detectChanges();
     const information = debugElement.nativeElement.querySelector('kadai-administration-workbasket-information');
     expect(information).toBeTruthy();
   });
 
-  it('should render new workbasket when action is CREATE', (done) => {
-    store
-      .dispatch(new CreateWorkbasket())
-      .pipe(take(1))
-      .subscribe(() => {
-        component.selectedWorkbasketAndComponentAndAction$.pipe(take(1)).subscribe((state) => {
-          expect(state.selectedWorkbasket.workbasketId).toBeUndefined();
-          done();
-        });
-      });
+  it('should render new workbasket when action is CREATE', async () => {
+    await firstValueFrom(store.dispatch(new CreateWorkbasket()).pipe(take(1)));
+    const state = await firstValueFrom(component.selectedWorkbasketAndComponentAndAction$.pipe(take(1)));
+
+    expect(state.selectedWorkbasket.workbasketId).toBeUndefined();
   });
 
-  it('should render copied workbasket when action is COPY', (done) => {
+  it('should render copied workbasket when action is COPY', async () => {
     const workbasket = component.workbasket;
-    store
-      .dispatch(new CopyWorkbasket(component.workbasket))
-      .pipe(take(1))
-      .subscribe(() => {
-        component.selectedWorkbasketAndComponentAndAction$.pipe(take(1)).subscribe((state) => {
-          const workbasketCopy = state.selectedWorkbasket;
-          expect(workbasketCopy.workbasketId).toBeUndefined();
-          expect(workbasketCopy.key).toEqual(workbasket.key);
-          expect(workbasketCopy.owner).toEqual(workbasket.owner);
-          done();
-        });
-      });
+    await firstValueFrom(store.dispatch(new CopyWorkbasket(component.workbasket)).pipe(take(1)));
+    const state = await firstValueFrom(component.selectedWorkbasketAndComponentAndAction$.pipe(take(1)));
+    const workbasketCopy = state.selectedWorkbasket;
+
+    expect(workbasketCopy.workbasketId).toBeUndefined();
+    expect(workbasketCopy.key).toEqual(workbasket.key);
+    expect(workbasketCopy.owner).toEqual(workbasket.owner);
   });
 
   it('should render workbasket when action is READ', () => {
@@ -136,17 +126,12 @@ describe('WorkbasketDetailsComponent', () => {
     expect(component.workbasket).toEqual(selectedWorkbasketMock);
   });
 
-  it('should select information tab when action is CREATE', (done) => {
+  it('should select information tab when action is CREATE', async () => {
     component.selectComponent(1);
-    store
-      .dispatch(new CreateWorkbasket())
-      .pipe(take(1))
-      .subscribe(() => {
-        component.selectedTab$.pipe(take(1)).subscribe((tab) => {
-          expect(tab).toEqual(0);
-          done();
-        });
-      });
+    await firstValueFrom(store.dispatch(new CreateWorkbasket()).pipe(take(1)));
+    const tab = await firstValueFrom(component.selectedTab$.pipe(take(1)));
+
+    expect(tab).toEqual(0);
   });
 
   it('should set areAllAccessItemsValid to false when isValid is false', () => {

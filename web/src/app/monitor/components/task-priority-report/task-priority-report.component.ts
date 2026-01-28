@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -99,23 +99,21 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
   destroy$ = new Subject<void>();
   settings$: Observable<Settings> = inject(Store).select(SettingsSelectors.getSettings);
   workbasketKey = signal<string>(undefined);
+  isPanelOpen = false;
+  filters: {}[];
+  keys: string[];
+  filtersAreSpecified = false;
   private readonly monitorService = inject(MonitorService);
   private readonly requestInProgressService = inject(RequestInProgressService);
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly domainService = inject(DomainService);
   private readonly filterState = inject(TaskPriorityReportFilterStateService);
+  readonly activeFilters = this.filterState.activeFilters;
   private readonly domain = toSignal(this.domainService.getSelectedDomain(), {
     initialValue: this.domainService.getSelectedDomainValue?.()
   });
-
   private readonly settings = toSignal(this.settings$, { initialValue: undefined as Settings });
   private readonly currentFilter = this.filterState.currentFilter;
-
-  isPanelOpen = false;
-  filters: {}[];
-  keys: string[];
-  readonly activeFilters = this.filterState.activeFilters;
-  filtersAreSpecified = false;
 
   constructor() {
     this.activatedRoute.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
@@ -283,6 +281,15 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
     return filterQuery;
   }
 
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  protected isDepthZero() {
+    return this.workbasketKey() === undefined;
+  }
+
   private rebuildActiveFiltersFromCurrentFilter() {
     const cfg: any = this.filters as any;
     if (!cfg) {
@@ -303,14 +310,5 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
       }
     });
     this.activeFilters.set(next);
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  protected isDepthZero() {
-    return this.workbasketKey() === undefined;
   }
 }

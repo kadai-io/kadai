@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  */
 
 import { Action, NgxsAfterBootstrap, State, StateContext } from '@ngxs/store';
-import { concatMap, take, tap, catchError } from 'rxjs/operators';
+import { catchError, concatMap, take, tap } from 'rxjs/operators';
 import { Observable, of, throwError } from 'rxjs';
 import { Location } from '@angular/common';
 import { WorkbasketService } from '../../services/workbasket/workbasket.service';
@@ -68,7 +68,9 @@ class InitializeStore {
 @Injectable({
   providedIn: 'root'
 })
-@State<WorkbasketStateModel>({ name: 'workbasket' })
+@State<WorkbasketStateModel>({
+  name: 'workbasket'
+})
 export class WorkbasketState implements NgxsAfterBootstrap {
   private workbasketService = inject(WorkbasketService);
   private location = inject(Location);

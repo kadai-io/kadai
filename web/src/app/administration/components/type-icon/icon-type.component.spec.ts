@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@
  */
 
 import { DebugElement } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { IconTypeComponent } from './icon-type.component';
 import { WorkbasketType } from '../../../shared/models/workbasket-type';
-
-jest.mock('angular-svg-icon');
+import { beforeEach, describe, expect, it } from 'vitest';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 describe('IconTypeComponent', () => {
   let fixture: ComponentFixture<IconTypeComponent>;
   let debugElement: DebugElement;
   let component: IconTypeComponent;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [IconTypeComponent],
-      declarations: []
+      providers: [provideAngularSvgIcon()]
     }).compileComponents();
 
     fixture = TestBed.createComponent(IconTypeComponent);
     debugElement = fixture.debugElement;
     component = fixture.debugElement.componentInstance;
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();

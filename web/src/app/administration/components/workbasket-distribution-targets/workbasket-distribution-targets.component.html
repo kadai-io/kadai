@@ -1,5 +1,5 @@
 <!--
-~ Copyright [2025] [envite consulting GmbH]
+~ Copyright [2026] [envite consulting GmbH]
 ~
 ~    Licensed under the Apache License, Version 2.0 (the "License");
 ~    you may not use this file except in compliance with the License.
@@ -20,16 +20,16 @@
   <mat-toolbar class="distribution-targets-list__action-toolbar">
     @if (!sideBySide) {
       <button (click)="toggleSideBySideView()"
-        class="distribution-targets-list__action-button distribution-targets-list__toggle-view-button"
-        mat-flat-button>
+              class="distribution-targets-list__action-button distribution-targets-list__toggle-view-button"
+              mat-flat-button>
         Display side-by-side
         <mat-icon class="distribution-targets-list__button-icon">view_week</mat-icon>
       </button>
     }
     @if (sideBySide) {
       <button (click)="toggleSideBySideView()"
-        class="distribution-targets-list__action-button distribution-targets-list__toggle-view-button"
-        mat-flat-button>
+              class="distribution-targets-list__action-button distribution-targets-list__toggle-view-button"
+              mat-flat-button>
         Display in single-view
         <mat-icon class="distribution-targets-list__button-icon">view_agenda</mat-icon>
       </button>
@@ -39,22 +39,22 @@
     @if (sideBySide) {
       <div class="distribution-targets-list__action-buttons">
         <div class="distribution-targets-list__action-buttons--chooser"
-          style="justify-content: flex-end; margin-right: 2%">
+             style="justify-content: flex-end; margin-right: 2%">
           <button (click)="moveDistributionTargets(sideEnum.SELECTED)"
-            class="distribution-targets-list__action-button distribution-targets-list-dialog__add-button"
-            color="accent"
-            mat-flat-button>
+                  class="distribution-targets-list__action-button distribution-targets-list-dialog__add-button"
+                  color="accent"
+                  mat-flat-button>
             Add selected distribution targets
             <mat-icon>add</mat-icon>
           </button>
         </div>
         <span style="flex-grow: 1"> </span>
         <div class="distribution-targets-list__action-buttons--selected"
-          style="justify-content: flex-end;">
+             style="justify-content: flex-end;">
           <button (click)="moveDistributionTargets(sideEnum.AVAILABLE)"
-            class="distribution-targets-list__action-button distribution-targets-list-dialog__remove-button"
-            color="warn"
-            mat-flat-button>
+                  class="distribution-targets-list__action-button distribution-targets-list-dialog__remove-button"
+                  color="warn"
+                  mat-flat-button>
             Remove selected distribution target
             <mat-icon>remove</mat-icon>
           </button>
@@ -67,16 +67,16 @@
       <div
         class="distribution-targets-list__action-buttons distribution-targets-list__action-buttons--selected">
         <button (click)="moveDistributionTargets(sideEnum.AVAILABLE)"
-          class="distribution-targets-list__action-button distribution-targets-list-dialog__remove-button"
-          color="warn"
-          mat-flat-button>
+                class="distribution-targets-list__action-button distribution-targets-list-dialog__remove-button"
+                color="warn"
+                mat-flat-button>
           Remove selected distribution target
           <mat-icon>remove</mat-icon>
         </button>
         <span style="flex: 1 1 auto"> </span>
         <button (click)="toggleDistributionTargetsPicker()"
-          class="distribution-targets-list__action-button distribution-targets-list-dialog__display-button"
-          mat-stroked-button>
+                class="distribution-targets-list__action-button distribution-targets-list-dialog__display-button"
+                mat-stroked-button>
           Display available distribution targets
           <mat-icon>launch</mat-icon>
         </button>
@@ -88,17 +88,17 @@
       <div
         class="distribution-targets-list__action-buttons distribution-targets-list__action-buttons--chooser">
         <button (click)="moveDistributionTargets(sideEnum.SELECTED)"
-          class="distribution-targets-list__action-button distribution-targets-list-dialog__add-button"
-          color="accent"
-          mat-flat-button>
+                class="distribution-targets-list__action-button distribution-targets-list-dialog__add-button"
+                color="accent"
+                mat-flat-button>
           Add selected distribution targets
           <mat-icon>add</mat-icon>
         </button>
         <span style="flex: 1 1 auto"> </span>
         <button (click)="toggleDistributionTargetsPicker()"
-          class="distribution-targets-list-dialog__check-button"
-          color="warn"
-          mat-flat-button>
+                class="distribution-targets-list-dialog__check-button"
+                color="warn"
+                mat-flat-button>
           Close selection
           <mat-icon>close</mat-icon>
         </button>
@@ -120,7 +120,7 @@
         [transferDistributionTargetObservable]="transferDistributionTargetObservable"
         header="Available distribution targets"
         id="dual-list-Left"
-        >
+      >
       </kadai-administration-workbasket-distribution-targets-list>
     }
 
@@ -131,7 +131,7 @@
       [transferDistributionTargetObservable]="transferDistributionTargetObservable"
       header="Selected distribution targets"
       id="dual-list-Right"
-      >
+    >
     </kadai-administration-workbasket-distribution-targets-list>
   </div>
 </div>

@@ -150,7 +150,7 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v6.1.0
+        uses: actions/setup-node@v6.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache web dependencies
@@ -174,7 +174,7 @@ jobs:
       - name: Install Dependencies
         if: steps.web-cache.outputs.cache-hit != 'true'
         working-directory: web
-        run: yarn install && yarn ci
+        run: yarn install
       - name: Compile & build
         working-directory: web
         run: |
@@ -229,7 +229,7 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v6.1.0
+        uses: actions/setup-node@v6.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache web dependencies
@@ -260,7 +260,7 @@ jobs:
         if: steps.maven-cache.outputs.cache-hit != 'true'
       - name: Test
         working-directory: web
-        run: yarn run test --coverageReporters text-summary
+        run: yarn test
       - name: Eco CI Measurement of web unit tests
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
         with:
@@ -306,7 +306,7 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v6.1.0
+        uses: actions/setup-node@v6.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache web dependencies

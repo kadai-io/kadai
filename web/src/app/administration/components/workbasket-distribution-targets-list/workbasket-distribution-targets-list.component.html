@@ -1,5 +1,5 @@
 <!--
-~ Copyright [2025] [envite consulting GmbH]
+~ Copyright [2026] [envite consulting GmbH]
 ~
 ~    Licensed under the Apache License, Version 2.0 (the "License");
 ~    you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@
 
     <!-- FILTER BUTTON -->
     <button (click)="changeToolbarState(!toolbarState)"
-      class="distribution-targets-list__action-button" mat-flat-button
-      >
+            class="distribution-targets-list__action-button" mat-flat-button
+    >
       @if (!toolbarState) {
         <span>
           Display filter
@@ -42,15 +42,15 @@
 
     <!-- SELECT ALL BUTTON -->
     <button (click)="selectAll(!allSelected);" class="distribution-targets-list__action-button"
-      mat-flat-button>
+            mat-flat-button>
       @if (allSelected) {
         <mat-icon class="distribution-targets-list__mat-icon button-icon"
-          matTooltip="Deselect all items">check_box
+                  matTooltip="Deselect all items">check_box
         </mat-icon>
       }
       @if (!allSelected) {
         <mat-icon class=" distribution-targets-list__mat-icon button-icon"
-          matTooltip="Select all items">
+                  matTooltip="Select all items">
           check_box_outline_blank
         </mat-icon>
       }
@@ -60,7 +60,7 @@
   <!-- FILTER COMPONENT -->
   @if (toolbarState) {
     <kadai-shared-workbasket-filter [component]="component"
-    isExpanded="true"></kadai-shared-workbasket-filter>
+                                    isExpanded="true"></kadai-shared-workbasket-filter>
   }
 
   <!-- EMPTY LIST -->
@@ -85,8 +85,8 @@
   <!-- WORKBASKET LIST -->
   <mat-selection-list #workbasket [multiple]="true">
     <cdk-virtual-scroll-viewport #scroller
-      class="{{toolbarState?  'distribution-targets-list__list--with-filter' : 'distribution-targets-list__list--no-filter'}}"
-      itemSize="90">
+                                 class="{{toolbarState?  'distribution-targets-list__list--with-filter' : 'distribution-targets-list__list--no-filter'}}"
+                                 itemSize="90">
       <mat-list-option
         (click)="updateSelectAll(!workbasket.selected) && (workbasket.selected = !workbasket.selected)"
         *cdkVirtualFor="let workbasket of distributionTargets| orderBy: ['name']; templateCacheSize: 0"
@@ -99,7 +99,7 @@
           <!-- ICON -->
           <div class="distribution-targets-list__item-icon">
             <kadai-administration-icon-type [type]="workbasket.type" size="large"
-            tooltip="true"></kadai-administration-icon-type>
+                                            tooltip="true"></kadai-administration-icon-type>
           </div>
 
           <!-- INFO -->
@@ -117,7 +117,7 @@
               <span
                 class="material-icons md-20 red "
                 matTooltip="Marked for deletion"
-              title="Marked for deletion">error</span>
+                title="Marked for deletion">error</span>
             </div>
           }
         </div>

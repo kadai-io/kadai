@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.ser
 import { OrientationService } from 'app/shared/services/orientation/orientation.service';
 import { ImportExportService } from 'app/administration/services/import-export.service';
 import { Actions, ofActionCompleted, ofActionDispatched, Store } from '@ngxs/store';
-import { takeUntil } from 'rxjs/operators';
+import { delay, takeUntil, tap } from 'rxjs/operators';
 import {
   DeselectWorkbasket,
   GetWorkbasketsSummary,
@@ -150,12 +150,14 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
 
     this.workbasketService
       .getWorkbasketActionToolbarExpansion()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        tap(() => this.requestInProgressService.setRequestInProgress(true)),
+        delay(1),
+        takeUntil(this.destroy$)
+      )
       .subscribe(() => {
-        this.requestInProgressService.setRequestInProgress(true);
-        setTimeout(() => {
-          this.refreshWorkbasketList();
-        }, 1);
+        this.refreshWorkbasketList();
       });
 
     this.requestInProgressService
@@ -175,10 +177,12 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
     if (this.selectedId === id) {
       this.store
         .dispatch(new DeselectWorkbasket())
+        .pipe(takeUntil(this.destroy$))
         .subscribe(() => this.requestInProgressService.setRequestInProgress(false));
     } else {
       this.store
         .dispatch(new SelectWorkbasket(id))
+        .pipe(takeUntil(this.destroy$))
         .subscribe(() => this.requestInProgressService.setRequestInProgress(false));
     }
   }
@@ -193,7 +197,6 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
     this.filterBy = { ...filterBy };
     this.filterBy.domain = domain;
     this.resetPagingSubject.next(null);
-    // this.performRequest();
   }
 
   changePage(page) {
@@ -212,9 +215,12 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   }
 
   performRequest() {
-    this.store.dispatch(new GetWorkbasketsSummary(true, this.filterBy, this.sort, this.pageParameter)).subscribe(() => {
-      this.requestInProgressService.setRequestInProgress(false);
-    });
+    this.store
+      .dispatch(new GetWorkbasketsSummary(true, this.filterBy, this.sort, this.pageParameter))
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.requestInProgressService.setRequestInProgress(false);
+      });
   }
 
   ngOnDestroy() {

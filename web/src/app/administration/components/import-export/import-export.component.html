@@ -1,5 +1,5 @@
 <!--
-~ Copyright [2025] [envite consulting GmbH]
+~ Copyright [2026] [envite consulting GmbH]
 ~
 ~    Licensed under the Apache License, Version 2.0 (the "License");
 ~    you may not use this file except in compliance with the License.
@@ -18,19 +18,19 @@
 
 <div class="import-export">
   <button (click)="selectedFile.click()" class="mr-1" mat-stroked-button
-    matTooltip="Import {{parentComponent}}"
-    title="Import">
+          matTooltip="Import {{parentComponent}}"
+          title="Import">
     Import
     <mat-icon>cloud_upload</mat-icon>
   </button>
 
   <form class="hide" enctype="multipart/form-data" method="post">
-    <input #selectedFile (change)="uploadFile()" accept=".json" class="hidden" type="file"/>
+    <input #selectedFile (change)="uploadFile()" accept=".json" class="hidden" type="file" />
   </form>
 
   <button [matMenuTriggerFor]="menu" class="mr-1" mat-stroked-button
-    matTooltip="Export {{parentComponent}}"
-    title="Export">
+          matTooltip="Export {{parentComponent}}"
+          title="Export">
     Export
     <mat-icon>cloud_download</mat-icon>
   </button>
@@ -40,7 +40,7 @@
     </button>
     @for (domain of (domains$ | async); track domain) {
       <button (click)="export(domain)"
-        href="javascript:void(0)" mat-menu-item>
+              href="javascript:void(0)" mat-menu-item>
         {{ domain === '' ? 'Master' : domain }}
       </button>
     }

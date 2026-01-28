@@ -1,5 +1,5 @@
 <!--
-~ Copyright [2025] [envite consulting GmbH]
+~ Copyright [2026] [envite consulting GmbH]
 ~
 ~    Licensed under the Apache License, Version 2.0 (the "License");
 ~    you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@
   <!-- TOOLBAR -->
   <section #wbToolbar class="workbasket-list__toolbar">
     <kadai-administration-workbasket-list-toolbar (performSorting)="performSorting($event)"
-      [workbasketDefaultSortBy]="workbasketDefaultSortBy"
-      [workbasketListExpanded]="expanded"
-      [workbaskets]="workbasketsSummary$ | async">
+                                                  [workbasketDefaultSortBy]="workbasketDefaultSortBy"
+                                                  [workbasketListExpanded]="expanded"
+                                                  [workbaskets]="workbasketsSummary$ | async">
     </kadai-administration-workbasket-list-toolbar>
   </section>
 
@@ -33,18 +33,19 @@
       <mat-selection-list #workbasket [multiple]="false" hideSingleSelectionIndicator="true">
         @for (workbasket of (workbasketsSummary$ | async); track workbasket) {
           <mat-list-option (click)="selectWorkbasket(workbasket.workbasketId)"
-            [selected]="workbasket.workbasketId == selectedId"
-            [value]="workbasket.workbasketId"
-            class="workbasket-list__list-item">
+                           [selected]="workbasket.workbasketId == selectedId"
+                           [value]="workbasket.workbasketId"
+                           class="workbasket-list__list-item">
             <!-- WORKBASKET LIST ITEM -->
             <div class="workbasket-list__list-item--wrapper">
               <!-- ICON -->
               @if (expanded) {
                 <div class="workbasket-list__list-item--icon">
-                  <kadai-administration-icon-type [selected]="workbasket.workbasketId === selectedId"
+                  <kadai-administration-icon-type
+                    [selected]="workbasket.workbasketId === selectedId"
                     [type]="workbasket.type"
                     size="large"
-                  tooltip="true"></kadai-administration-icon-type>
+                    tooltip="true"></kadai-administration-icon-type>
                 </div>
               }
               <!-- INFORMATION -->
@@ -59,7 +60,7 @@
                     <span
                       class="material-icons md-20 {{workbasket.workbasketId === selectedId ? 'white': 'red' }} "
                       data-toggle="tooltip"
-                    title="Marked for deletion">error</span>
+                      title="Marked for deletion">error</span>
                   </div>
                 }
               </div>
@@ -84,8 +85,8 @@
 <!-- PAGINATION -->
 
 <kadai-shared-pagination (changePage)="changePage($event)"
-  [expanded]="expanded"
-  [numberOfItems]="(workbasketsSummary$ | async)?.length"
-  [page]="(workbasketsSummaryRepresentation$ | async) ? (workbasketsSummaryRepresentation$ | async)?.page : (workbasketsSummaryRepresentation$ | async)"
-  [resetPaging]="resetPagingSubject.asObservable()"
-  [type]="type"/>
+                         [expanded]="expanded"
+                         [numberOfItems]="(workbasketsSummary$ | async)?.length"
+                         [page]="(workbasketsSummaryRepresentation$ | async) ? (workbasketsSummaryRepresentation$ | async)?.page : (workbasketsSummaryRepresentation$ | async)"
+                         [resetPaging]="resetPagingSubject.asObservable()"
+                         [type]="type" />

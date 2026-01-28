@@ -1,5 +1,5 @@
 <!--
-~ Copyright [2025] [envite consulting GmbH]
+~ Copyright [2026] [envite consulting GmbH]
 ~
 ~    Licensed under the Apache License, Version 2.0 (the "License");
 ~    you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@
 
     <!-- ACTION BUTTONS -->
     <button (click)="addWorkbasket()" class="workbasket-list-toolbar__add-button mr-1"
-      mat-flat-button
-      matTooltip="Create new workbasket">
+            mat-flat-button
+            matTooltip="Create new workbasket">
       Add
       <mat-icon class="md-20">add</mat-icon>
     </button>
@@ -32,7 +32,7 @@
     @if (workbasketListExpanded) {
       <kadai-administration-import-export
         [currentSelection]="selectionToImport"
-      [parentComponent]="'workbaskets'"></kadai-administration-import-export>
+        [parentComponent]="'workbaskets'"></kadai-administration-import-export>
     }
 
     <span class="workbasket-details__spacer" style="flex: 1 1 auto"> </span>
@@ -49,7 +49,7 @@
   <!-- FILTER -->
   <div class="workbasket-list-toolbar__filter">
     <button (click)="onClickFilter()" class="filter__filter-button" mat-stroked-button
-      matTooltip="Display more filter options">
+            matTooltip="Display more filter options">
       @if (!isExpanded) {
         <mat-icon class="filter__mat-icon">keyboard_arrow_down</mat-icon>
       }
@@ -60,7 +60,7 @@
 
     <div class="filter__filter-component-wrapper">
       <kadai-shared-workbasket-filter [isExpanded]="isExpanded"
-      component="workbasketList"></kadai-shared-workbasket-filter>
+                                      component="workbasketList"></kadai-shared-workbasket-filter>
     </div>
   </div>
 </div>
