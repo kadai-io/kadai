@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, viewChild } from '@angular/core';
 import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 
@@ -105,7 +105,7 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   inputOverflowMap = new Map<string, boolean>();
   validateInputOverflow: Function;
   requestInProgress: boolean;
-  @ViewChild('ClassificationForm') classificationForm: NgForm;
+  readonly classificationForm = viewChild<NgForm>('ClassificationForm');
   toggleValidationMap = new Map<string, boolean>();
   destroy$ = new Subject<void>();
   private location = inject(Location);
@@ -150,14 +150,15 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   }
 
   isFieldValid(field: string): boolean {
-    return this.formsValidatorService.isFieldValid(this.classificationForm, field);
+    return this.formsValidatorService.isFieldValid(this.classificationForm(), field);
   }
 
   onSubmit() {
     this.formsValidatorService.formSubmitAttempt = true;
-    trimForm(this.classificationForm);
+    const classificationForm = this.classificationForm();
+    trimForm(classificationForm);
     this.formsValidatorService
-      .validateFormInformation(this.classificationForm, this.toggleValidationMap)
+      .validateFormInformation(classificationForm, this.toggleValidationMap)
       .then((value) => {
         if (value) {
           this.onSave();

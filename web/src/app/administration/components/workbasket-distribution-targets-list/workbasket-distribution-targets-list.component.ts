@@ -25,8 +25,8 @@ import {
   OnChanges,
   OnInit,
   SimpleChanges,
-  ViewChild,
-  input
+  input,
+  viewChild
 } from '@angular/core';
 import { isEqual } from 'lodash-es';
 import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
@@ -100,8 +100,8 @@ export class WorkbasketDistributionTargetsListComponent
   toolbarState = false;
   distributionTargets: WorkbasketDistributionTarget[];
   distributionTargetsClone: WorkbasketDistributionTarget[];
-  @ViewChild('workbasket') distributionTargetsList: MatSelectionList;
-  @ViewChild('scroller') workbasketList: CdkVirtualScrollViewport;
+  readonly distributionTargetsList = viewChild<MatSelectionList>('workbasket');
+  readonly workbasketList = viewChild<CdkVirtualScrollViewport>('scroller');
   requestInProgress: number;
   private changeDetector = inject(ChangeDetectorRef);
   private store = inject(Store);
@@ -152,10 +152,10 @@ export class WorkbasketDistributionTargetsListComponent
   }
 
   ngAfterViewInit() {
-    this.workbasketList
+    this.workbasketList()
       .elementScrolled()
       .pipe(
-        map(() => this.workbasketList.measureScrollOffset('bottom')),
+        map(() => this.workbasketList().measureScrollOffset('bottom')),
         pairwise(),
         filter(([y1, y2]) => y2 < y1 && y2 < 270),
         throttleTime(200)
@@ -170,7 +170,7 @@ export class WorkbasketDistributionTargetsListComponent
   }
 
   selectAll(selected: boolean) {
-    if (typeof this.distributionTargetsList !== 'undefined') {
+    if (typeof this.distributionTargetsList() !== 'undefined') {
       this.allSelected = selected;
       this.distributionTargets.map((wb) => (wb.selected = selected));
       if (selected) this.allSelectedDiff = this.distributionTargets.length;

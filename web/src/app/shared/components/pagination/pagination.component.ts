@@ -24,8 +24,8 @@ import {
   OnInit,
   Output,
   SimpleChanges,
-  ViewChild,
-  input
+  input,
+  viewChild
 } from '@angular/core';
 import { Page } from 'app/shared/models/page';
 import { MatPaginator } from '@angular/material/paginator';
@@ -66,9 +66,9 @@ export class PaginationComponent implements OnInit, OnChanges {
 
   @Output() changePage = new EventEmitter<number>();
 
-  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
+  readonly paginator = viewChild(MatPaginator);
 
-  @ViewChild('pagination') paginationWrapper: ElementRef;
+  readonly paginationWrapper = viewChild<ElementRef>('pagination');
 
   destroy$ = new Subject<void>();
 
@@ -84,8 +84,9 @@ export class PaginationComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    const rangeLabel = this.paginationWrapper?.nativeElement?.querySelector('.mat-mdc-paginator-range-label');
-    const container = this.paginationWrapper?.nativeElement?.querySelector('.mat-mdc-paginator-container');
+    const paginationWrapper = this.paginationWrapper();
+    const rangeLabel = paginationWrapper?.nativeElement?.querySelector('.mat-mdc-paginator-range-label');
+    const container = paginationWrapper?.nativeElement?.querySelector('.mat-mdc-paginator-container');
     if (rangeLabel && container) {
       if (!this.expanded()) {
         container.style.justifyContent = 'center';
@@ -109,8 +110,8 @@ export class PaginationComponent implements OnInit, OnChanges {
     // Custom label: EG. "1-7 of 21 workbaskets"
     // return `${start} - ${end} of ${length} workbaskets`;
 
-    this.paginator._intl.itemsPerPageLabel = 'Per page';
-    this.paginator._intl.getRangeLabel = (page: number, pageSize: number, length: number) => {
+    paginator._intl.itemsPerPageLabel = 'Per page';
+    paginator._intl.getRangeLabel = (page: number, pageSize: number, length: number) => {
       page += 1;
       const start = pageSize * (page - 1) + 1;
       const end = pageSize * page < length ? pageSize * page : length;
@@ -141,7 +142,7 @@ export class PaginationComponent implements OnInit, OnChanges {
   }
 
   goToPage(page: number) {
-    this.paginator.pageIndex = page - 1;
+    this.paginator().pageIndex = page - 1;
     this.pageSelected = page;
     this.changePage.emit(page);
   }

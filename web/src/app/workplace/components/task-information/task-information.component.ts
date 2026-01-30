@@ -24,9 +24,9 @@ import {
   OnDestroy,
   OnInit,
   SimpleChanges,
-  ViewChild,
   input,
-  output
+  output,
+  viewChild
 } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
@@ -87,8 +87,7 @@ export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
   readonly taskChange = output<Task>();
   readonly saveToggleTriggered = input<boolean>(undefined);
   readonly formValid = output<boolean>();
-  @ViewChild('TaskForm')
-  taskForm: NgForm;
+  readonly taskForm = viewChild<NgForm>('TaskForm');
   toggleValidationMap = new Map<string, boolean>();
   requestInProgress = false;
   classifications: Classification[];
@@ -124,7 +123,7 @@ export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   isFieldValid(field: string): boolean {
-    return this.formsValidatorService.isFieldValid(this.taskForm, field);
+    return this.formsValidatorService.isFieldValid(this.taskForm(), field);
   }
 
   updateDate($event) {
@@ -157,7 +156,7 @@ export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
   private validate() {
     this.isClassificationEmpty = typeof this.task.classificationSummary === 'undefined';
     this.formsValidatorService.formSubmitAttempt = true;
-    this.formsValidatorService.validateFormInformation(this.taskForm, this.toggleValidationMap).then((value) => {
+    this.formsValidatorService.validateFormInformation(this.taskForm(), this.toggleValidationMap).then((value) => {
       if (value && !this.isClassificationEmpty && this.isOwnerValid) {
         this.formValid.emit(true);
       }

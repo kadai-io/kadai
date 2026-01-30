@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild, input } from '@angular/core';
+import { Component, ElementRef, inject, OnDestroy, OnInit, input, viewChild } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 
 import { WorkbasketSummaryRepresentation } from 'app/shared/models/workbasket-summary-representation';
@@ -87,7 +87,7 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
     FilterSelectors.getWorkbasketListFilter
   );
   destroy$ = new Subject<void>();
-  @ViewChild('workbasket') workbasketList: MatSelectionList;
+  readonly workbasketList = viewChild<MatSelectionList>('workbasket');
   private store = inject(Store);
   private workbasketService = inject(WorkbasketService);
   private orientationService = inject(OrientationService);
@@ -95,8 +95,7 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   private domainService = inject(DomainService);
   private requestInProgressService = inject(RequestInProgressService);
   private ngxsActions$ = inject(Actions);
-  @ViewChild('wbToolbar', { static: true })
-  private toolbarElement: ElementRef;
+  private readonly toolbarElement = viewChild<ElementRef>('wbToolbar');
 
   constructor() {
     this.ngxsActions$.pipe(ofActionDispatched(GetWorkbasketsSummary), takeUntil(this.destroy$)).subscribe(() => {
@@ -208,7 +207,7 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
     this.pageParameter['page-size'] = this.orientationService.calculateNumberItemsList(
       window.innerHeight,
       92,
-      200 + this.toolbarElement.nativeElement.offsetHeight,
+      200 + this.toolbarElement().nativeElement.offsetHeight,
       false
     );
     this.performRequest();

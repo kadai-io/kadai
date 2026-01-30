@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, ViewChild } from '@angular/core';
+import { Component, inject, viewChild } from '@angular/core';
 import { Direction, Sorting, TaskHistoryQuerySortParameter } from 'app/shared/models/sorting';
 import { TaskHistoryEventData } from '../../shared/models/task-history-event';
 import { TaskHistoryQueryService } from '../services/task-history-query/task-history-query.service';
@@ -111,18 +111,18 @@ export class TaskHistoryQueryComponent {
     'sort-by': TaskHistoryQuerySortParameter.CREATED,
     order: Direction.ASC
   };
-  @ViewChild(MatSort) sort: MatSort;
-  @ViewChild(PaginationComponent) pagination: PaginationComponent;
+  readonly sort = viewChild(MatSort);
+  readonly pagination = viewChild(PaginationComponent);
   private taskHistoryQueryService = inject(TaskHistoryQueryService);
   private requestInProgressService = inject(RequestInProgressService);
 
   ngAfterViewInit() {
-    const sortChange$ = this.sort.sortChange.pipe(
+    const sortChange$ = this.sort().sortChange.pipe(
       tap((sort) => this.updateSortParameter(sort)),
       tap(() => (this.pageParameter.page = 1))
     );
 
-    const pageChange$ = this.pagination.changePage.pipe(tap((newPage) => (this.pageParameter.page = newPage)));
+    const pageChange$ = this.pagination().changePage.pipe(tap((newPage) => (this.pageParameter.page = newPage)));
 
     merge(sortChange$, pageChange$)
       .pipe(

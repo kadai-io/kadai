@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit, ViewChild, input } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, input, viewChild } from '@angular/core';
 import { ClassificationDefinitionService } from 'app/administration/services/classification-definition.service';
 import { WorkbasketDefinitionService } from 'app/administration/services/workbasket-definition.service';
 import { DomainService } from 'app/shared/services/domain/domain.service';
@@ -47,8 +47,7 @@ import { AsyncPipe } from '@angular/common';
 export class ImportExportComponent implements OnInit, OnDestroy {
   readonly currentSelection = input<KadaiType>(undefined);
   readonly parentComponent = input<string>(undefined);
-  @ViewChild('selectedFile', { static: true })
-  selectedFileInput;
+  readonly selectedFileInput = viewChild('selectedFile');
   domains$: Observable<string[]>;
   destroy$ = new Subject<void>();
   private domainService = inject(DomainService);
@@ -71,7 +70,7 @@ export class ImportExportComponent implements OnInit, OnDestroy {
   }
 
   uploadFile() {
-    const file = this.selectedFileInput.nativeElement.files[0];
+    const file = this.selectedFileInput().nativeElement.files[0];
     if (this.checkFormatFile(file)) {
       if (this.currentSelection() === KadaiType.WORKBASKETS) {
         this.workbasketDefinitionService
@@ -128,6 +127,6 @@ export class ImportExportComponent implements OnInit, OnDestroy {
   }
 
   private resetProgress() {
-    this.selectedFileInput.nativeElement.value = '';
+    this.selectedFileInput().nativeElement.value = '';
   }
 }

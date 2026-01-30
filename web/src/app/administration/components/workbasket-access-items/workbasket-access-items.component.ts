@@ -87,6 +87,8 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
   readonly workbasket = input<Workbasket>(undefined);
   readonly expanded = input<boolean>(undefined);
   readonly accessItemsValidityChanged = output<boolean>();
+  // TODO: Skipped for migration because:
+  //  There are references to this query that cannot be migrated automatically.
   @ViewChildren('htmlInputElement') inputs: QueryList<ElementRef>;
   selectedRows: number[] = [];
   workbasketClone: Workbasket;
