@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, EventEmitter, OnInit, Output, input } from '@angular/core';
+import { Component, OnInit, input, output } from '@angular/core';
 import { Direction, Sorting } from 'app/shared/models/sorting';
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -36,7 +36,7 @@ export class SortComponent<T> implements OnInit {
   readonly menuPosition = input('right');
   readonly defaultSortBy = input<T>(undefined);
 
-  @Output() performSorting = new EventEmitter<Sorting<T>>();
+  readonly performSorting = output<Sorting<T>>();
 
   sort: Sorting<T> = {
     'sort-by': undefined,

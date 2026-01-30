@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import { Component, inject, Input, output } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -40,8 +40,7 @@ export class TaskListComponent {
   //  Your application code writes to the input. This prevents migration.
   @Input()
   selectedId: string;
-  @Output()
-  selectedIdChange = new EventEmitter<string>();
+  readonly selectedIdChange = output<string>();
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 

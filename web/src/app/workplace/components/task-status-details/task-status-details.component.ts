@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input, output } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { DatePipe } from '@angular/common';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
@@ -33,5 +33,5 @@ export class TaskStatusDetailsComponent {
   // TODO: Skipped for migration because:
   //  Your application code writes to the input. This prevents migration.
   @Input() task: Task;
-  @Output() taskChange: EventEmitter<Task> = new EventEmitter<Task>();
+  readonly taskChange = output<Task>();
 }

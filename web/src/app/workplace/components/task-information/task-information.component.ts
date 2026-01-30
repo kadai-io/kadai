@@ -18,16 +18,15 @@
 
 import {
   Component,
-  EventEmitter,
   inject,
   Input,
   OnChanges,
   OnDestroy,
   OnInit,
-  Output,
   SimpleChanges,
   ViewChild,
-  input
+  input,
+  output
 } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
@@ -85,9 +84,9 @@ export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
   //  Your application code writes to the input. This prevents migration.
   @Input()
   task: Task;
-  @Output() taskChange: EventEmitter<Task> = new EventEmitter<Task>();
+  readonly taskChange = output<Task>();
   readonly saveToggleTriggered = input<boolean>(undefined);
-  @Output() formValid: EventEmitter<boolean> = new EventEmitter<boolean>();
+  readonly formValid = output<boolean>();
   @ViewChild('TaskForm')
   taskForm: NgForm;
   toggleValidationMap = new Map<string, boolean>();
