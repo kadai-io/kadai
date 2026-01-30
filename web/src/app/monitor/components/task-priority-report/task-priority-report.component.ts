@@ -80,7 +80,7 @@ import { TaskPriorityReportFilterStateService } from '../../services/task-priori
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,
     MatCheckbox
-],
+  ],
   providers: [MonitorService]
 })
 export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, OnDestroy {

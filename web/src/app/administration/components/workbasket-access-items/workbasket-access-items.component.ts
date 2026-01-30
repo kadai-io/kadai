@@ -78,7 +78,7 @@ import { MatInput } from '@angular/material/input';
     MatInput,
     AsyncPipe,
     ReactiveFormsModule
-]
+  ]
 })
 export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit, AfterViewChecked {
   formsValidatorService = inject(FormsValidatorService);
