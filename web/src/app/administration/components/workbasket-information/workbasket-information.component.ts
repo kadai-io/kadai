@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, input } from '@angular/core';
+import { Component, inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, input, viewChild } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Store } from '@ngxs/store';
@@ -84,8 +84,7 @@ export class WorkbasketInformationComponent implements OnInit, OnChanges, OnDest
   @Input()
   workbasket: Workbasket;
   readonly action = input<ACTION>(undefined);
-  @ViewChild('WorkbasketForm')
-  workbasketForm: NgForm;
+  readonly workbasketForm = viewChild<NgForm>('WorkbasketForm');
   workbasketClone: Workbasket;
   allTypes: Map<string, string>;
   toggleValidationMap = new Map<string, boolean>();
@@ -161,8 +160,9 @@ export class WorkbasketInformationComponent implements OnInit, OnChanges, OnDest
 
   onSubmit() {
     this.formsValidatorService.formSubmitAttempt = true;
-    trimForm(this.workbasketForm);
-    this.formsValidatorService.validateFormInformation(this.workbasketForm, this.toggleValidationMap).then((value) => {
+    const workbasketForm = this.workbasketForm();
+    trimForm(workbasketForm);
+    this.formsValidatorService.validateFormInformation(workbasketForm, this.toggleValidationMap).then((value) => {
       if (value && this.isOwnerValid) {
         this.onSave();
       } else {
@@ -172,7 +172,7 @@ export class WorkbasketInformationComponent implements OnInit, OnChanges, OnDest
   }
 
   isFieldValid(field: string): boolean {
-    return this.formsValidatorService.isFieldValid(this.workbasketForm, field);
+    return this.formsValidatorService.isFieldValid(this.workbasketForm(), field);
   }
 
   onUndo() {

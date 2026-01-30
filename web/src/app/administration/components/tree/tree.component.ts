@@ -25,9 +25,9 @@ import {
   Input,
   OnDestroy,
   OnInit,
-  ViewChild,
   input,
-  output
+  output,
+  viewChild
 } from '@angular/core';
 import { TreeNodeModel } from 'app/administration/models/tree-node';
 
@@ -104,8 +104,7 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
   private notificationsService = inject(NotificationService);
   private classificationTreeService = inject(ClassificationTreeService);
   private requestInProgressService = inject(RequestInProgressService);
-  @ViewChild('tree', { static: true })
-  private tree: TreeComponent;
+  private readonly tree = viewChild<TreeComponent>('tree');
 
   private filterTextOld: string;
   private filterIconOld = '';
@@ -113,7 +112,7 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event) {
-    if (this.checkValidElements(event) && this.tree.treeModel.getActiveNode()) {
+    if (this.checkValidElements(event) && this.tree().treeModel.getActiveNode()) {
       this.deselectActiveNode();
     }
   }
@@ -130,8 +129,8 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
         this.treeNodes = treeNodes;
         this.selectNodeId = typeof selectedClassificationId !== 'undefined' ? selectedClassificationId : undefined;
         this.requestInProgressService.setRequestInProgress(false);
-        if (typeof this.tree.treeModel.getActiveNode() !== 'undefined') {
-          if (this.tree.treeModel.getActiveNode().data.classificationId !== this.selectNodeId) {
+        if (typeof this.tree().treeModel.getActiveNode() !== 'undefined') {
+          if (this.tree().treeModel.getActiveNode().data.classificationId !== this.selectNodeId) {
             // wait for angular's two-way binding to convert the treeNodes to the internal tree structure.
             // after that conversion the new treeNodes are available
             setTimeout(() => this.selectNode(this.selectNodeId), 0);
@@ -140,7 +139,7 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
       });
 
     this.classificationTypeSelected$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      if (this.tree.treeModel.getActiveNode()) {
+      if (this.tree().treeModel.getActiveNode()) {
         this.deselectActiveNode();
       }
     });
@@ -151,7 +150,7 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   ngAfterViewChecked(): void {
-    if (this.selectNodeId && !this.tree.treeModel.getActiveNode()) {
+    if (this.selectNodeId && !this.tree().treeModel.getActiveNode()) {
       this.selectNode(this.selectNodeId);
     }
 
@@ -242,27 +241,27 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   private deselectActiveNode() {
-    const activeNode = this.tree.treeModel.getActiveNode();
+    const activeNode = this.tree().treeModel.getActiveNode();
     delete this.selectNodeId;
     activeNode.setIsActive(false);
     activeNode.blur();
   }
 
   private getNode(nodeId: string) {
-    return this.tree.treeModel.getNodeById(nodeId);
+    return this.tree().treeModel.getNodeById(nodeId);
   }
 
   private filterNodes(filterText, category) {
-    this.tree.treeModel.filterNodes((node) => this.checkNameAndKey(node, filterText) && this.checkIcon(node, category));
+    this.tree().treeModel.filterNodes((node) => this.checkNameAndKey(node, filterText) && this.checkIcon(node, category));
     this.filter = filterText;
     this.category = category || 'ALL';
-    this.emptyTreeNodes = !this.tree.treeModel.getVisibleRoots().length;
+    this.emptyTreeNodes = !this.tree().treeModel.getVisibleRoots().length;
   }
 
   private manageTreeState() {
-    this.tree.treeModel.collapseAll();
+    this.tree().treeModel.collapseAll();
     if (this.filterText() === '') {
-      this.tree.treeModel.collapseAll();
+      this.tree().treeModel.collapseAll();
     }
   }
 
@@ -286,7 +285,7 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   private collapseParentNodeIfItIsTheLastChild(node: any) {
     if (node.parentId.length > 0 && this.getNode(node.parentId) && this.getNode(node.parentId).children.length < 2) {
-      this.tree.treeModel.update();
+      this.tree().treeModel.update();
       this.getNode(node.parentId).collapse();
     }
   }

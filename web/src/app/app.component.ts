@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, HostListener, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, inject, OnDestroy, OnInit, viewChild } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Subject } from 'rxjs';
 import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
@@ -61,7 +61,7 @@ export class AppComponent implements OnInit, OnDestroy {
   version: string;
   toggle: boolean = false;
   destroy$ = new Subject<void>();
-  @ViewChild('sidenav') public sidenav: MatSidenav;
+  public readonly sidenav = viewChild<MatSidenav>('sidenav');
   private router = inject(Router);
   private requestInProgressService = inject(RequestInProgressService);
   private orientationService = inject(OrientationService);
@@ -122,7 +122,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.sidenavService.setSidenav(this.sidenav);
+    this.sidenavService.setSidenav(this.sidenav());
   }
 
   ngOnDestroy() {

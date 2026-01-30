@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, viewChild } from '@angular/core';
 import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
@@ -46,8 +46,8 @@ export class WorkbasketOverviewComponent implements OnInit {
   destroy$ = new Subject<void>();
   routerParams: any;
   expanded = true;
-  @ViewChild('workbasketList') workbasketList: ElementRef;
-  @ViewChild('toggleButton') toggleButton: ElementRef;
+  readonly workbasketList = viewChild<ElementRef>('workbasketList');
+  readonly toggleButton = viewChild<ElementRef>('toggleButton');
   private route = inject(ActivatedRoute);
   private store = inject(Store);
 
@@ -80,16 +80,17 @@ export class WorkbasketOverviewComponent implements OnInit {
   }
 
   toggleWidth() {
-    if (this.workbasketList.nativeElement.offsetWidth === 250) {
+    const workbasketList = this.workbasketList();
+    if (workbasketList.nativeElement.offsetWidth === 250) {
       this.expanded = true;
-      this.workbasketList.nativeElement.style.width = '500px';
-      this.workbasketList.nativeElement.style.minWidth = '500px';
-      this.toggleButton.nativeElement.style.left = '480px';
+      workbasketList.nativeElement.style.width = '500px';
+      workbasketList.nativeElement.style.minWidth = '500px';
+      this.toggleButton().nativeElement.style.left = '480px';
     } else {
       this.expanded = false;
-      this.workbasketList.nativeElement.style.width = '250px';
-      this.workbasketList.nativeElement.style.minWidth = '250px';
-      this.toggleButton.nativeElement.style.left = '230px';
+      workbasketList.nativeElement.style.width = '250px';
+      workbasketList.nativeElement.style.minWidth = '250px';
+      this.toggleButton().nativeElement.style.left = '230px';
     }
   }
 }
