@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, inject, Input, OnDestroy, OnInit, output } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { takeUntil } from 'rxjs/operators';
 import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
@@ -36,7 +36,7 @@ export class TaskCustomFieldsComponent implements OnInit, OnDestroy {
   // TODO: Skipped for migration because:
   //  Your application code writes to the input. This prevents migration.
   @Input() task: Task;
-  @Output() taskChange: EventEmitter<Task> = new EventEmitter<Task>();
+  readonly taskChange = output<Task>();
   readonly lengthError = 'You have reached the maximum length';
   inputOverflowMap = new Map<string, boolean>();
   validateKeypress: Function;

@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, EventEmitter, inject, OnInit, Output, input } from '@angular/core';
+import { Component, inject, OnInit, input, output } from '@angular/core';
 import { Sorting, WORKBASKET_SORT_PARAMETER_NAMING, WorkbasketQuerySortParameter } from 'app/shared/models/sorting';
 import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
 import { KadaiType } from 'app/shared/models/kadai-type';
@@ -47,7 +47,7 @@ export class WorkbasketListToolbarComponent implements OnInit {
   readonly workbasketListExpanded = input<boolean>(true);
   readonly workbaskets = input<WorkbasketSummary[]>(undefined);
   readonly workbasketDefaultSortBy = input<WorkbasketQuerySortParameter>(undefined);
-  @Output() performSorting = new EventEmitter<Sorting<WorkbasketQuerySortParameter>>();
+  readonly performSorting = output<Sorting<WorkbasketQuerySortParameter>>();
   selectionToImport = KadaiType.WORKBASKETS;
   sortingFields: Map<WorkbasketQuerySortParameter, string> = WORKBASKET_SORT_PARAMETER_NAMING;
   isExpanded = false;
