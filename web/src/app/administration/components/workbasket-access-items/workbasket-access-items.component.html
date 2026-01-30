@@ -20,7 +20,7 @@
   <div id="wb-information">
     <!-- ACCESS ITEMS -->
     <div
-      [ngStyle]="{'width': expanded() ? 'calc(' + 100 + 'vw - 500px)' : 'calc(' + 100 + 'vw - 250px)'}"
+      [style.width]="expanded() ? 'calc(' + 100 + 'vw - 500px)' : 'calc(' + 100 + 'vw - 250px)'"
       class="workbasket-access-items">
       <div class=" workbasket-access-items__buttons">
         <button (click)="addAccessItem()" class="workbasket-access-items__buttons-add-access"
