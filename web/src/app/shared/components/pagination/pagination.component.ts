@@ -31,7 +31,7 @@ import { Page } from 'app/shared/models/page';
 import { MatPaginator } from '@angular/material/paginator';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { NgClass } from '@angular/common';
+
 import { MatFormField } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
@@ -44,14 +44,13 @@ import { MatOption } from '@angular/material/core';
   styleUrls: ['./pagination.component.scss'],
   imports: [
     MatPaginator,
-    NgClass,
     MatFormField,
     MatInput,
     FormsModule,
     MatAutocompleteTrigger,
     MatAutocomplete,
     MatOption
-  ]
+]
 })
 export class PaginationComponent implements OnInit, OnChanges {
   readonly page = input<Page>(undefined);

@@ -41,7 +41,7 @@ import {
   MatRowDef,
   MatTable
 } from '@angular/material/table';
-import { DatePipe, NgClass } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -73,7 +73,6 @@ import { TaskPriorityReportFilterStateService } from '../../services/task-priori
     MatRowDef,
     MatRow,
     DatePipe,
-    NgClass,
     RouterLink,
     MatIcon,
     MatAccordion,
@@ -81,7 +80,7 @@ import { TaskPriorityReportFilterStateService } from '../../services/task-priori
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,
     MatCheckbox
-  ],
+],
   providers: [MonitorService]
 })
 export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, OnDestroy {

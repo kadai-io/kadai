@@ -19,14 +19,14 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { ReportData } from 'app/monitor/models/report-data';
 import { ReportRow } from '../../models/report-row';
-import { NgClass } from '@angular/common';
+
 import { MatButton } from '@angular/material/button';
 
 @Component({
   selector: 'kadai-monitor-report-table',
   templateUrl: './report-table.component.html',
   styleUrls: ['./report-table.component.scss'],
-  imports: [NgClass, MatButton]
+  imports: [MatButton]
 })
 export class ReportTableComponent implements OnChanges {
   // TODO: Skipped for migration because:

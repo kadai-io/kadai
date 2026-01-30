@@ -23,7 +23,7 @@
         @for (header of reportData.meta.rowDesc; track header; let i = $index) {
           @if (i <= currentExpHeaders) {
             <div
-              [ngClass]="{'table-cell--border-right': currentExpHeaders === i}"
+              [class.table-cell--border-right]="currentExpHeaders === i"
               class="table-cell table-cell--bold table-cell--justify">{{ header }}
             </div>
           }
@@ -41,14 +41,14 @@
     <div class="table-body">
       @for (row of reportData.rows; track row; let i = $index) {
         @if (row.display) {
-          <div [ngClass]="{'table-row--highlight': row.depth === 0 && currentExpHeaders > 0,
+          <div [class]="{'table-row--highlight': row.depth === 0 && currentExpHeaders > 0,
              'table-row--hover': row.depth > 0 && currentExpHeaders > 0,
              'table-row--white': row.depth > 0 && currentExpHeaders > 0}" class="table-row">
             @for (header of row.desc; track header; let idx = $index) {
 
               @if (idx <= currentExpHeaders) {
                 <div (click)="toggleFold(i)"
-                     [ngClass]="{'table-cell--border-right': currentExpHeaders === idx,
+                     [class]="{'table-cell--border-right': currentExpHeaders === idx,
                          'table-cell--bold': row.depth === 0 && currentExpHeaders > 0,
                          'table-cell--clickable': reportData.meta.rowDesc.length - 1 > row.depth}"
                      class="table-cell table-cell--justify">
@@ -64,7 +64,7 @@
             }
             @for (val of row.cells; track val) {
               <div
-                [ngClass]="{'table-cell--bold': row.depth === 0 && currentExpHeaders > 0}"
+                [class.table-cell--bold]="row.depth === 0 && currentExpHeaders > 0"
                 class="table-cell">
                 {{ val }}
               </div>
@@ -83,14 +83,14 @@
     <div class="table-footer">
       @for (row of reportData.sumRow; track row; let i = $index) {
         @if (row.display) {
-          <div [ngClass]="{'table-row--highlight': row.depth === 0 && currentExpHeaders > 0,
+          <div [class]="{'table-row--highlight': row.depth === 0 && currentExpHeaders > 0,
              'table-row--hover': row.depth > 0 && currentExpHeaders > 0,
              'table-row--white': row.depth > 0 && currentExpHeaders > 0}" class="table-row">
             @for (header of row.desc; track header; let idx = $index) {
 
               @if (idx <= currentExpHeaders) {
                 <div (click)="toggleFold(i, true)"
-                     [ngClass]="{'table-cell--border-right': currentExpHeaders === idx,
+                     [class]="{'table-cell--border-right': currentExpHeaders === idx,
                          'table-cell--clickable': reportData.meta.rowDesc.length - 1 > row.depth}"
                      class="table-cell table-cell--bold table-cell--justify">
                   @if (reportData.meta.rowDesc.length - 1 > row.depth && idx === row.depth) {
