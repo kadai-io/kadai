@@ -19,7 +19,7 @@
 import {
   Component,
   inject,
-  Input,
+  model,
   OnChanges,
   OnDestroy,
   OnInit,
@@ -80,11 +80,7 @@ import { Store } from '@ngxs/store';
   ]
 })
 export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
-  @Input()
-  task: Task;
-  readonly taskChange = output<Task>();
+  readonly task = model<Task>();
   readonly saveToggleTriggered = input<boolean>(undefined);
   readonly formValid = output<boolean>();
   readonly taskForm = viewChild<NgForm>('TaskForm');
@@ -130,21 +126,21 @@ export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
     const newDate = $event.value;
     if (typeof newDate !== 'undefined' && newDate !== null) {
       const newDateISOString = newDate.toISOString();
-      const currentDate = new Date(this.task.due);
+      const currentDate = new Date(this.task().due);
       if (typeof currentDate === 'undefined' || currentDate !== newDate) {
-        this.task.due = newDateISOString;
+        this.task.update((t) => ({ ...t, due: newDateISOString }));
       }
     }
   }
 
   changedClassification(itemSelected: Classification) {
-    this.task.classificationSummary = itemSelected;
+    this.task.update((t) => ({ ...t, classificationSummary: itemSelected }));
     this.isClassificationEmpty = false;
   }
 
   onSelectedOwner(owner: AccessId) {
     if (owner?.accessId) {
-      this.task.owner = owner.accessId;
+      this.task.update((t) => ({ ...t, owner: owner.accessId }));
     }
   }
 
@@ -154,7 +150,7 @@ export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private validate() {
-    this.isClassificationEmpty = typeof this.task.classificationSummary === 'undefined';
+    this.isClassificationEmpty = typeof this.task().classificationSummary === 'undefined';
     this.formsValidatorService.formSubmitAttempt = true;
     this.formsValidatorService.validateFormInformation(this.taskForm(), this.toggleValidationMap).then((value) => {
       if (value && !this.isClassificationEmpty && this.isOwnerValid) {
@@ -166,12 +162,15 @@ export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
   // TODO: this is currently called for every selected task and is only necessary when we switch the workbasket -> can be optimized.
   private getClassificationByDomain() {
     this.requestInProgress = true;
-    this.classificationService
-      .getClassifications({ domain: [this.task.workbasketSummary.domain] })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((classificationPagingList) => {
-        this.classifications = classificationPagingList.classifications;
-        this.requestInProgress = false;
-      });
+    const currentTask = this.task();
+    if (currentTask?.workbasketSummary?.domain) {
+      this.classificationService
+        .getClassifications({ domain: [currentTask.workbasketSummary.domain] })
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((classificationPagingList) => {
+          this.classifications = classificationPagingList.classifications;
+          this.requestInProgress = false;
+        });
+    }
   }
 }

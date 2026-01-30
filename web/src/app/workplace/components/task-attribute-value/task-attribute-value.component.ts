@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, Input, input } from '@angular/core';
+import { Component, input, model } from '@angular/core';
 import { CustomAttribute } from 'app/workplace/models/task';
 
 import { MatDivider } from '@angular/material/divider';
@@ -35,16 +35,13 @@ import { FormsModule } from '@angular/forms';
 })
 export class TaskAttributeValueComponent {
   readonly callbackInfo = input(false);
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
-  @Input() attributes: CustomAttribute[] = [];
+  readonly attributes = model<CustomAttribute[]>([]);
 
   addAttribute(): void {
-    this.attributes.push({ key: '', value: '' });
+    this.attributes.update((attrs) => [...attrs, { key: '', value: '' }]);
   }
 
   removeAttribute(idx: number): void {
-    this.attributes.splice(idx, 1);
+    this.attributes.update((attrs) => attrs.filter((_, i) => i !== idx));
   }
 }

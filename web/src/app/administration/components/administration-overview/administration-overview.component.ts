@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, Input, OnInit } from '@angular/core';
+import { Component, inject, model, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Subject } from 'rxjs';
 import { DomainService } from '../../../shared/services/domain/domain.service';
@@ -45,9 +45,7 @@ import { MatOption } from '@angular/material/core';
   ]
 })
 export class AdministrationOverviewComponent implements OnInit {
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
-  @Input() selectedTab = '';
+  readonly selectedTab = model<string>('');
   domains: Array<string> = [];
   selectedDomain: string;
   destroy$ = new Subject<void>();
@@ -62,9 +60,9 @@ export class AdministrationOverviewComponent implements OnInit {
     router.events.pipe(takeUntil(this.destroy$)).subscribe((e) => {
       const urlPaths = this.router.url.split('/');
       if (this.router.url.includes('detail')) {
-        this.selectedTab = urlPaths[urlPaths.length - 2];
+        this.selectedTab.set(urlPaths[urlPaths.length - 2]);
       } else {
-        this.selectedTab = urlPaths[urlPaths.length - 1];
+        this.selectedTab.set(urlPaths[urlPaths.length - 1]);
       }
     });
   }

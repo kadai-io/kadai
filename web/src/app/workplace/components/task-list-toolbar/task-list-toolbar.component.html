@@ -30,12 +30,12 @@
         <button (click)="setFilterExpansion()" class="task-list-toolbar__button--secondary"
                 mat-stroked-button
                 matTooltip="Display more filter options" style="min-width: 1%">
-          @if (!(isFilterExpanded$ | async)) {
+          @if (!isFilterExpanded()) {
             <mat-icon class="task-list-toolbar__mat-icon">
               keyboard_arrow_down
             </mat-icon>
           }
-          @if ((isFilterExpanded$ | async)) {
+          @if (isFilterExpanded()) {
             <mat-icon class="task-list-toolbar__mat-icon">
               keyboard_arrow_up
             </mat-icon>
@@ -93,12 +93,12 @@
         <button (click)="setFilterExpansion()" class="task-list-toolbar__button--secondary"
                 mat-stroked-button
                 matTooltip="Display more filter options" style="min-width: 1%">
-          @if (!(isFilterExpanded$ | async)) {
+          @if (!isFilterExpanded()) {
             <mat-icon class="task-list-toolbar__mat-icon">
               keyboard_arrow_down
             </mat-icon>
           }
-          @if ((isFilterExpanded$ | async)) {
+          @if (isFilterExpanded()) {
             <mat-icon class="task-list-toolbar__mat-icon">
               keyboard_arrow_up
             </mat-icon>
@@ -139,7 +139,7 @@
   </mat-tab-group>
 
   <!-- FURTHER FILTER OPTIONS -->
-  @if ((isFilterExpanded$ | async)) {
+  @if (isFilterExpanded()) {
     <div class="task-list-toolbar__additional-filter">
       <kadai-shared-task-filter />
     </div>

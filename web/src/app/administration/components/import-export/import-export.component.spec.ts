@@ -84,7 +84,7 @@ describe.skip('ImportExportComponent', () => {
     fixture = TestBed.createComponent(ImportExportComponent);
     debugElement = fixture.debugElement;
     app = fixture.debugElement.componentInstance;
-    app.currentSelection = KadaiType.WORKBASKETS;
+    fixture.componentRef.setInput('currentSelection', KadaiType.WORKBASKETS);
     fixture.detectChanges();
   });
 

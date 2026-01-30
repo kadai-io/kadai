@@ -22,9 +22,7 @@ import {
   ChangeDetectorRef,
   Component,
   inject,
-  OnChanges,
   OnInit,
-  SimpleChanges,
   input,
   viewChild
 } from '@angular/core';
@@ -77,9 +75,7 @@ import { OrderBy } from '../../../shared/pipes/order-by.pipe';
     OrderBy
   ]
 })
-export class WorkbasketDistributionTargetsListComponent
-  implements AfterContentChecked, OnChanges, OnInit, AfterViewInit
-{
+export class WorkbasketDistributionTargetsListComponent implements AfterContentChecked, OnInit, AfterViewInit {
   readonly side = input<Side>(undefined);
   readonly header = input<string>(undefined);
   allSelected;
@@ -143,12 +139,6 @@ export class WorkbasketDistributionTargetsListComponent
 
   ngAfterContentChecked(): void {
     this.changeDetector.detectChanges();
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (typeof changes.allSelected?.currentValue !== 'undefined') {
-      this.selectAll(changes.allSelected.currentValue);
-    }
   }
 
   ngAfterViewInit() {

@@ -19,7 +19,7 @@
 <div class="task-attribute-value">
 
   <!-- ATTRIBUTE VALUE TABLE -->
-  @if (attributes.length > 0) {
+  @if (attributes().length > 0) {
     <div class="task-attribute-value__table">
       <!-- HEADER -->
       <div class="task-attribute-value__row">
@@ -28,7 +28,7 @@
       </div>
       <mat-divider />
       <!-- ENTRIES -->
-      @for (entry of attributes; track entry; let i = $index) {
+      @for (entry of attributes(); track entry; let i = $index) {
         <div>
           <div
             class="task-attribute-value__row {{(i % 2 === 0)? 'task-attribute-value__background-grey' : 'task-attribute-value__background-white'}}">

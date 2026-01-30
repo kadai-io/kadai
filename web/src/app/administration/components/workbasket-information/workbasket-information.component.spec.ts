@@ -91,7 +91,7 @@ describe('WorkbasketInformationComponent', () => {
       engineConfiguration: engineConfigurationMock,
       workbasket: workbasketReadStateMock
     });
-    component.workbasket = selectedWorkbasketMock;
+    fixture.componentRef.setInput('workbasket', selectedWorkbasketMock);
 
     fixture.detectChanges();
   });
@@ -106,7 +106,7 @@ describe('WorkbasketInformationComponent', () => {
   });
 
   it('should create clone of workbasket when workbasket value changes', () => {
-    component.action = ACTION.READ;
+    fixture.componentRef.setInput('action', ACTION.READ);
     component.ngOnChanges();
     expect(component.workbasketClone).toMatchObject(component.workbasket);
   });
@@ -127,9 +127,10 @@ describe('WorkbasketInformationComponent', () => {
   });
 
   it('should save workbasket when workbasketId there', async () => {
-    component.workbasket = { ...selectedWorkbasketMock };
-    component.workbasket.workbasketId = '1';
-    component.action = ACTION.COPY;
+    const workbasketWithId = { ...selectedWorkbasketMock, workbasketId: '1' };
+    fixture.componentRef.setInput('workbasket', workbasketWithId);
+    fixture.componentRef.setInput('action', ACTION.COPY);
+    fixture.detectChanges();
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(UpdateWorkbasket)).subscribe(() => (actionDispatched = true));
     component.onSave();
@@ -145,7 +146,9 @@ describe('WorkbasketInformationComponent', () => {
   });
 
   it('should create new workbasket when workbasketId is undefined', () => {
-    component.workbasket.workbasketId = undefined;
+    const workbasketWithoutId = { ...selectedWorkbasketMock, workbasketId: undefined };
+    fixture.componentRef.setInput('workbasket', workbasketWithoutId);
+    fixture.detectChanges();
     const postNewWorkbasketSpy = vi.spyOn(component, 'postNewWorkbasket');
     component.onSave();
     expect(postNewWorkbasketSpy).toHaveBeenCalled();
@@ -163,8 +166,9 @@ describe('WorkbasketInformationComponent', () => {
     let inputCustom4 = debugElement.nativeElement.querySelector('#wb-custom-4');
     expect(inputCustom3).toBeFalsy();
     expect(inputCustom4).toBeTruthy();
-    inputCustom4.value = newValue;
-    inputCustom4.dispatchEvent(new Event('input'));
+
+    component.workbasket = { ...component.workbasket, custom4: newValue };
+    fixture.detectChanges();
 
     await fixture.whenStable();
 

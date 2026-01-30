@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, Input, output } from '@angular/core';
+import { Component, inject, input, model } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -31,23 +31,14 @@ import { SvgIconComponent } from 'angular-svg-icon';
   imports: [MatSelectionList, MatListOption, MatDivider, SvgIconComponent, DatePipe]
 })
 export class TaskListComponent {
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
-  @Input()
-  tasks: Task[];
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
-  @Input()
-  selectedId: string;
-  readonly selectedIdChange = output<string>();
+  readonly tasks = input<Task[]>([]);
+  readonly selectedId = model<string>();
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   selectTask(taskId: string) {
-    this.selectedId = taskId;
-    this.selectedIdChange.emit(taskId);
-    this.router.navigate([{ outlets: { detail: `taskdetail/${this.selectedId}` } }], {
+    this.selectedId.set(taskId);
+    this.router.navigate([{ outlets: { detail: `taskdetail/${this.selectedId()}` } }], {
       relativeTo: this.route.parent,
       queryParamsHandling: 'merge'
     });

@@ -34,11 +34,11 @@ describe('PaginationComponent', () => {
     fixture = TestBed.createComponent(PaginationComponent);
     debugElement = fixture.debugElement;
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('page', { totalPages: 10 });
     fixture.detectChanges();
 
-    component.page = { totalPages: 10 };
     component.pageNumbers = [];
-    for (let i = 1; i <= component.page.totalPages; i++) {
+    for (let i = 1; i <= component.page().totalPages; i++) {
       component.pageNumbers.push(i);
     }
   });

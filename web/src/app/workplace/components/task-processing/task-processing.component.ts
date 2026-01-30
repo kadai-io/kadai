@@ -18,20 +18,19 @@
 
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { filter, take, takeUntil } from 'rxjs/operators';
 import { Task } from 'app/workplace/models/task';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TaskService } from 'app/workplace/services/task.service';
 import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
-import { Subscription } from 'rxjs';
 import { ClassificationsService } from 'app/shared/services/classifications/classifications.service';
-import { take } from 'rxjs/operators';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
-
 import { MatDivider } from '@angular/material/divider';
 
 @Component({
@@ -41,7 +40,6 @@ import { MatDivider } from '@angular/material/divider';
   imports: [MatButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatDivider]
 })
 export class TaskProcessingComponent implements OnInit, OnDestroy {
-  routeSubscription: Subscription;
   regex = /\${(.*?)}/g;
   address = 'https://bing.com';
   link: SafeResourceUrl;
@@ -54,22 +52,28 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private sanitizer = inject(DomSanitizer);
+  private destroy$ = new Subject<void>();
 
   ngOnInit() {
-    this.routeSubscription = this.route.params.subscribe((params) => {
-      const { id } = params;
-      this.getTask(id);
+    this.route.params
+      .pipe(
+        filter((params) => params && 'id' in params && params.id),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((params) => {
+        const { id } = params;
+        this.getTask(id);
 
-      this.requestInProgressService.setRequestInProgress(true);
-      this.taskService
-        .claimTask(id)
-        .pipe(take(1))
-        .subscribe((task) => {
-          this.task = task;
-          this.taskService.publishUpdatedTask(task);
-          this.requestInProgressService.setRequestInProgress(false);
-        });
-    });
+        this.requestInProgressService.setRequestInProgress(true);
+        this.taskService
+          .claimTask(id)
+          .pipe(take(1))
+          .subscribe((task) => {
+            this.task = task;
+            this.taskService.publishUpdatedTask(task);
+            this.requestInProgressService.setRequestInProgress(false);
+          });
+      });
   }
 
   async getTask(id: string) {
@@ -138,9 +142,8 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.routeSubscription) {
-      this.routeSubscription.unsubscribe();
-    }
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private extractUrl(url: string): string {

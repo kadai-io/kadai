@@ -16,12 +16,30 @@
  *
  */
 
+import { Component } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DragAndDropDirective } from './drag-and-drop.directive';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+
+@Component({
+  template: `<div kadaiDragAndDrop></div>`,
+  imports: [DragAndDropDirective]
+})
+class TestHostComponent {}
 
 describe('DragAndDropDirective', () => {
+  let fixture: ComponentFixture<TestHostComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TestHostComponent, DragAndDropDirective]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(TestHostComponent);
+    fixture.detectChanges();
+  });
+
   it('should create an instance', () => {
-    const directive = new DragAndDropDirective();
-    expect(directive).toBeTruthy();
+    expect(fixture.componentInstance).toBeTruthy();
   });
 });

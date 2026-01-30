@@ -16,9 +16,10 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, effect, inject, OnDestroy, OnInit } from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { TaskService } from 'app/workplace/services/task.service';
 import { Task } from 'app/workplace/models/task';
@@ -77,23 +78,29 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   private requestInProgressService = inject(RequestInProgressService);
   private notificationService = inject(NotificationService);
   private masterAndDetailService = inject(MasterAndDetailService);
-  private routeSubscription: Subscription;
+  private routeParams = toSignal(this.route.params, { initialValue: {} });
   private workbasketSubscription: Subscription;
   private masterAndDetailSubscription: Subscription;
   private deleteTaskSubscription: Subscription;
 
+  constructor() {
+    // Use effect to react to route parameter changes
+    effect(() => {
+      const params = this.routeParams();
+      if (params && 'id' in params) {
+        this.currentId = params.id;
+        // redirect if user enters through a deep-link
+        if (!this.currentWorkbasket && this.currentId === 'new-task') {
+          this.router.navigate([''], { queryParamsHandling: 'merge' });
+        }
+        this.getTask();
+      }
+    });
+  }
+
   ngOnInit() {
     this.workbasketSubscription = this.workplaceService.getSelectedWorkbasket().subscribe((workbasket) => {
       this.currentWorkbasket = workbasket;
-    });
-
-    this.routeSubscription = this.route.params.subscribe((params) => {
-      this.currentId = params.id;
-      // redirect if user enters through a deep-link
-      if (!this.currentWorkbasket && this.currentId === 'new-task') {
-        this.router.navigate([''], { queryParamsHandling: 'merge' });
-      }
-      this.getTask();
     });
 
     this.masterAndDetailSubscription = this.masterAndDetailService.getShowDetail().subscribe((showDetail) => {
@@ -178,9 +185,6 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.routeSubscription) {
-      this.routeSubscription.unsubscribe();
-    }
     if (this.workbasketSubscription) {
       this.workbasketSubscription.unsubscribe();
     }
