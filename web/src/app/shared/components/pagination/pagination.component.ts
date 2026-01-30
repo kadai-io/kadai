@@ -42,15 +42,7 @@ import { MatOption } from '@angular/material/core';
   selector: 'kadai-shared-pagination',
   templateUrl: './pagination.component.html',
   styleUrls: ['./pagination.component.scss'],
-  imports: [
-    MatPaginator,
-    MatFormField,
-    MatInput,
-    FormsModule,
-    MatAutocompleteTrigger,
-    MatAutocomplete,
-    MatOption
-]
+  imports: [MatPaginator, MatFormField, MatInput, FormsModule, MatAutocompleteTrigger, MatAutocomplete, MatOption]
 })
 export class PaginationComponent implements OnInit, OnChanges {
   readonly page = input<Page>(undefined);
@@ -109,17 +101,20 @@ export class PaginationComponent implements OnInit, OnChanges {
     // Custom label: EG. "1-7 of 21 workbaskets"
     // return `${start} - ${end} of ${length} workbaskets`;
 
-    paginator._intl.itemsPerPageLabel = 'Per page';
-    paginator._intl.getRangeLabel = (page: number, pageSize: number, length: number) => {
-      page += 1;
-      const start = pageSize * (page - 1) + 1;
-      const end = pageSize * page < length ? pageSize * page : length;
-      if (length === 0) {
-        return 'loading...';
-      } else {
-        return `${start} - ${end} of ${length}`;
-      }
-    };
+    const paginator = this.paginator();
+    if (paginator) {
+      paginator._intl.itemsPerPageLabel = 'Per page';
+      paginator._intl.getRangeLabel = (page: number, pageSize: number, length: number) => {
+        page += 1;
+        const start = pageSize * (page - 1) + 1;
+        const end = pageSize * page < length ? pageSize * page : length;
+        if (length === 0) {
+          return 'loading...';
+        } else {
+          return `${start} - ${end} of ${length}`;
+        }
+      };
+    }
     this.pageSelected = 1;
   }
 

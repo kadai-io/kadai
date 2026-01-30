@@ -79,7 +79,7 @@ export class TaskListToolbarComponent implements OnInit {
   readonly taskDefaultSortBy = input<TaskQuerySortParameter>(undefined);
   readonly performSorting = output<Sorting<TaskQuerySortParameter>>();
   readonly performFilter = output<TaskQueryFilterParameter>();
-  readonly selectSearchType = output();
+  readonly selectSearchType = output<Search>();
   sortingFields: Map<TaskQuerySortParameter, string> = TASK_SORT_PARAMETER_NAMING;
   tasks: Task[] = [];
   workbasketNames: string[] = [];
@@ -231,13 +231,19 @@ export class TaskListToolbarComponent implements OnInit {
 
   onFilter() {
     // TODO: The 'emit' function requires a mandatory TaskQueryFilterParameter argument
-    this.performFilter.emit();
+    const wildcardFilter: TaskQueryFilterParameter = {
+      'wildcard-search-value': [this.filterInput]
+    };
+    this.performFilter.emit(wildcardFilter);
   }
 
   onClearFilter() {
     this.store.dispatch(new ClearTaskFilter()).subscribe(() => {
       // TODO: The 'emit' function requires a mandatory TaskQueryFilterParameter argument
-      this.performFilter.emit();
+      const wildcardFilter: TaskQueryFilterParameter = {
+        'wildcard-search-value': [this.filterInput]
+      };
+      this.performFilter.emit(wildcardFilter);
     });
   }
 

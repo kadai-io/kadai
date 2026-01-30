@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit, input, viewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnDestroy, OnInit, input, viewChild } from '@angular/core';
 import { ClassificationDefinitionService } from 'app/administration/services/classification-definition.service';
 import { WorkbasketDefinitionService } from 'app/administration/services/workbasket-definition.service';
 import { DomainService } from 'app/shared/services/domain/domain.service';
@@ -47,7 +47,7 @@ import { AsyncPipe } from '@angular/common';
 export class ImportExportComponent implements OnInit, OnDestroy {
   readonly currentSelection = input<KadaiType>(undefined);
   readonly parentComponent = input<string>(undefined);
-  readonly selectedFileInput = viewChild('selectedFile');
+  readonly selectedFileInput = viewChild('selectedFile', { read: ElementRef });
   domains$: Observable<string[]>;
   destroy$ = new Subject<void>();
   private domainService = inject(DomainService);
@@ -70,40 +70,43 @@ export class ImportExportComponent implements OnInit, OnDestroy {
   }
 
   uploadFile() {
-    const file = this.selectedFileInput().nativeElement.files[0];
-    if (this.checkFormatFile(file)) {
-      if (this.currentSelection() === KadaiType.WORKBASKETS) {
-        this.workbasketDefinitionService
-          .importWorkbasket(file)
-          .pipe(
-            takeUntil(this.destroy$),
-            this.hotToastService.observe({
-              loading: 'Uploading...',
-              success: 'File successfully uploaded',
-              error: 'Upload failed'
-            })
-          )
-          .subscribe({
-            next: () => {
-              this.importExportService.setImportingFinished(true);
-            }
-          });
-      } else {
-        this.classificationDefinitionService
-          .importClassification(file)
-          .pipe(
-            takeUntil(this.destroy$),
-            this.hotToastService.observe({
-              loading: 'Uploading...',
-              success: 'File successfully uploaded',
-              error: 'Upload failed'
-            })
-          )
-          .subscribe({
-            next: () => {
-              this.importExportService.setImportingFinished(true);
-            }
-          });
+    const inputElement = this.selectedFileInput();
+    if (inputElement) {
+      const file = inputElement.nativeElement.files[0];
+      if (this.checkFormatFile(file)) {
+        if (this.currentSelection() === KadaiType.WORKBASKETS) {
+          this.workbasketDefinitionService
+            .importWorkbasket(file)
+            .pipe(
+              takeUntil(this.destroy$),
+              this.hotToastService.observe({
+                loading: 'Uploading...',
+                success: 'File successfully uploaded',
+                error: 'Upload failed'
+              })
+            )
+            .subscribe({
+              next: () => {
+                this.importExportService.setImportingFinished(true);
+              }
+            });
+        } else {
+          this.classificationDefinitionService
+            .importClassification(file)
+            .pipe(
+              takeUntil(this.destroy$),
+              this.hotToastService.observe({
+                loading: 'Uploading...',
+                success: 'File successfully uploaded',
+                error: 'Upload failed'
+              })
+            )
+            .subscribe({
+              next: () => {
+                this.importExportService.setImportingFinished(true);
+              }
+            });
+        }
       }
     }
     this.resetProgress();
@@ -127,6 +130,9 @@ export class ImportExportComponent implements OnInit, OnDestroy {
   }
 
   private resetProgress() {
-    this.selectedFileInput().nativeElement.value = '';
+    const inputElement = this.selectedFileInput();
+    if (inputElement) {
+      inputElement.nativeElement.value = '';
+    }
   }
 }
