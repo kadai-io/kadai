@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { highlight } from 'app/shared/animations/validation.animation';
 
 @Component({
@@ -27,12 +27,9 @@ import { highlight } from 'app/shared/animations/validation.animation';
   imports: []
 })
 export class FieldErrorDisplayComponent {
-  @Input()
-  displayError: boolean;
+  readonly displayError = input<boolean>(undefined);
 
-  @Input()
-  errorMessage: string;
+  readonly errorMessage = input<string>(undefined);
 
-  @Input()
-  validationTrigger: boolean;
+  readonly validationTrigger = input<boolean>(undefined);
 }

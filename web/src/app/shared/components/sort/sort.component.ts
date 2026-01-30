@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, input } from '@angular/core';
 import { Direction, Sorting } from 'app/shared/models/sorting';
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -32,9 +32,9 @@ import { MapValuesPipe } from '../../pipes/map-values.pipe';
   imports: [MatButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MapValuesPipe]
 })
 export class SortComponent<T> implements OnInit {
-  @Input() sortingFields: Map<T, string>;
-  @Input() menuPosition = 'right';
-  @Input() defaultSortBy: T;
+  readonly sortingFields = input<Map<T, string>>(undefined);
+  readonly menuPosition = input('right');
+  readonly defaultSortBy = input<T>(undefined);
 
   @Output() performSorting = new EventEmitter<Sorting<T>>();
 
@@ -47,7 +47,7 @@ export class SortComponent<T> implements OnInit {
   sortDirectionEnum = Direction;
 
   ngOnInit() {
-    this.sort['sort-by'] = this.defaultSortBy;
+    this.sort['sort-by'] = this.defaultSortBy();
   }
 
   changeOrder(sortDirection: Direction) {

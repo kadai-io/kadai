@@ -30,6 +30,8 @@ import { FormsModule } from '@angular/forms';
   imports: [MatFormField, MatLabel, MatInput, FormsModule, DatePipe]
 })
 export class TaskStatusDetailsComponent {
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() task: Task;
   @Output() taskChange: EventEmitter<Task> = new EventEmitter<Task>();
 }

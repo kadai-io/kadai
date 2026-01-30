@@ -45,6 +45,8 @@ import { MatOption } from '@angular/material/core';
   ]
 })
 export class AdministrationOverviewComponent implements OnInit {
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() selectedTab = '';
   domains: Array<string> = [];
   selectedDomain: string;

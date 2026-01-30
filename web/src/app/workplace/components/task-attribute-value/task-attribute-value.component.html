@@ -44,7 +44,7 @@
             <div class="task-attribute-value__column--inputs">
               <mat-form-field appearance="outline" style="width: 100%">
                 <input [(ngModel)]="entry.key" matInput
-                       name="{{callbackInfo ? 'callback-info' : 'custom-attribute'}}-{{i}}"
+                       name="{{callbackInfo() ? 'callback-info' : 'custom-attribute'}}-{{i}}"
                        type="text">
               </mat-form-field>
             </div>
@@ -52,7 +52,7 @@
             <div class="task-attribute-value__column--inputs">
               <mat-form-field appearance="outline" style="width: 100%">
                 <input [(ngModel)]="entry.value" matInput
-                       name="{{callbackInfo ? 'callback-info' : 'custom-attribute'}}-{{i}}-val"
+                       name="{{callbackInfo() ? 'callback-info' : 'custom-attribute'}}-{{i}}-val"
                        type="text">
               </mat-form-field>
             </div>
@@ -61,7 +61,7 @@
       }
     </div>
   } @else {
-    <div> There is currently no {{ callbackInfo ? 'callback information' : 'custom attribute' }}.
+    <div> There is currently no {{ callbackInfo() ? 'callback information' : 'custom attribute' }}.
     </div>
   }
 
@@ -72,7 +72,7 @@
   <!-- ADD BUTTON -->
   <button (click)="addAttribute()" class="task-attribute-value__button--primary"
           mat-flat-button>
-    <span> Add {{ callbackInfo ? 'callback information' : 'custom attribute' }} </span>
+    <span> Add {{ callbackInfo() ? 'callback information' : 'custom attribute' }} </span>
     <mat-icon>add</mat-icon>
   </button>
 

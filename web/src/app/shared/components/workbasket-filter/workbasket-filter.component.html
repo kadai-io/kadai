@@ -18,7 +18,7 @@
 
 <div class="filter">
   <!-- COLLAPSED WORKBASKET FILTER -->
-  @if (!isExpanded) {
+  @if (!isExpanded()) {
     <div class="filter__collapsed-filter">
       <!-- TEXT INPUT -->
       <mat-form-field class="filter__collapsed-filter-input-field" floatLabel="auto">
@@ -41,7 +41,7 @@
 
 
   <!-- EXPANDED WORKBASKET FILTER -->
-  @if (isExpanded) {
+  @if (isExpanded()) {
     <div class="filter__expanded-filter">
       <!-- TEXT INPUT -->
       <div class="filter__text-input">

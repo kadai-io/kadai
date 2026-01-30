@@ -33,6 +33,8 @@ import { FormsModule } from '@angular/forms';
   imports: [MatFormField, MatLabel, MatInput, FormsModule]
 })
 export class TaskCustomFieldsComponent implements OnInit, OnDestroy {
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() task: Task;
   @Output() taskChange: EventEmitter<Task> = new EventEmitter<Task>();
   readonly lengthError = 'You have reached the maximum length';

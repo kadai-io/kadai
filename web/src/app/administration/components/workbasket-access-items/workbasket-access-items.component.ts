@@ -23,14 +23,14 @@ import {
   ElementRef,
   EventEmitter,
   inject,
-  Input,
   OnChanges,
   OnDestroy,
   OnInit,
   Output,
   QueryList,
   SimpleChanges,
-  ViewChildren
+  ViewChildren,
+  input
 } from '@angular/core';
 import { distinctUntilChanged, Observable, Subject } from 'rxjs';
 import { Actions, ofActionCompleted, Store } from '@ngxs/store';
@@ -85,8 +85,8 @@ import { MatInput } from '@angular/material/input';
 })
 export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit, AfterViewChecked {
   formsValidatorService = inject(FormsValidatorService);
-  @Input() workbasket: Workbasket;
-  @Input() expanded: boolean;
+  readonly workbasket = input<Workbasket>(undefined);
+  readonly expanded = input<boolean>(undefined);
   @Output() accessItemsValidityChanged = new EventEmitter<boolean>();
   @ViewChildren('htmlInputElement') inputs: QueryList<ElementRef>;
   selectedRows: number[] = [];
@@ -234,18 +234,20 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
   }
 
   ngOnChanges(changes?: SimpleChanges) {
+    const workbasket = this.workbasket();
     if (this.workbasketClone) {
-      if (this.workbasketClone.workbasketId != this.workbasket.workbasketId) {
+      if (this.workbasketClone.workbasketId != workbasket.workbasketId) {
         this.init();
       }
     }
-    this.workbasketClone = this.workbasket;
+    this.workbasketClone = workbasket;
   }
 
   init() {
-    if (this.workbasket._links?.accessItems) {
+    const workbasket = this.workbasket();
+    if (workbasket._links?.accessItems) {
       this.requestInProgressService.setRequestInProgress(true);
-      this.store.dispatch(new GetWorkbasketAccessItems(this.workbasket._links.accessItems.href)).subscribe(() => {
+      this.store.dispatch(new GetWorkbasketAccessItems(workbasket._links.accessItems.href)).subscribe(() => {
         this.requestInProgressService.setRequestInProgress(false);
       });
     }
@@ -305,7 +307,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
 
   addAccessItem() {
     const workbasketAccessItems: WorkbasketAccessItems = this.createWorkbasketAccessItems();
-    workbasketAccessItems.workbasketId = this.workbasket.workbasketId;
+    workbasketAccessItems.workbasketId = this.workbasket().workbasketId;
     workbasketAccessItems.permRead = true;
     const newForm = this.formBuilder.group(workbasketAccessItems);
     newForm.controls.accessId.setValidators(Validators.required);

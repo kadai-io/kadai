@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, input } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { ACTION } from 'app/shared/models/action';
@@ -78,7 +78,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
     WorkbasketSelectors.selectedWorkbasketAndComponentAndAction
   );
   destroy$ = new Subject<void>();
-  @Input() expanded: boolean;
+  readonly expanded = input<boolean>(undefined);
   areAllAccessItemsValid = true;
   protected readonly ACTION = ACTION;
   private store = inject(Store);
