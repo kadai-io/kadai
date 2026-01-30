@@ -18,17 +18,16 @@
 
 <div class="classification-overview">
 
-  <kadai-administration-classification-list></kadai-administration-classification-list>
+  <kadai-administration-classification-list />
   <div class="vertical-right-divider"></div>
   @if (showDetail) {
-    <kadai-administration-classification-details
-    ></kadai-administration-classification-details>
+    <kadai-administration-classification-details />
   } @else {
     <div class="classification-overview__empty-page">
       <div class="center-block no-detail">
         <h3 class="grey select-classification">Select a classification</h3>
         <svg-icon class="img-responsive empty-icon"
-                  src="./assets/icons/classification-empty.svg"></svg-icon>
+                  src="./assets/icons/classification-empty.svg" />
       </div>
     </div>
   }

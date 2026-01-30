@@ -23,7 +23,7 @@
         reportData?.meta.date | date: 'medium'
       }})
     </h4>
-    <mat-divider class="task-priority-report__divider"></mat-divider>
+    <mat-divider class="task-priority-report__divider" />
     <div class="breadcrumb-filter-row">
       <nav class="breadcrumb">
         @if (isDepthZero()) {
@@ -85,7 +85,7 @@
             </h6>
           </div>
           <!-- CHART -->
-          <kadai-monitor-canvas [id]="indexToString(i)" [row]="row"></kadai-monitor-canvas>
+          <kadai-monitor-canvas [id]="indexToString(i)" [row]="row" />
           <!-- TABLE -->
           <div>
             <table [dataSource]="tableDataArray[i]" mat-table>

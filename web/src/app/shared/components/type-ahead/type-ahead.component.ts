@@ -16,16 +16,7 @@
  *
  */
 
-import {
-  Component,
-  inject,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  SimpleChanges,
-  input,
-  output
-} from '@angular/core';
+import { Component, inject, OnChanges, OnDestroy, OnInit, SimpleChanges, input, output } from '@angular/core';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
 import { debounceTime, distinctUntilChanged, Observable, Subject } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';

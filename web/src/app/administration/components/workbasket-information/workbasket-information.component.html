@@ -23,7 +23,7 @@
         <div class="form">
           <!-- GENERAL FIELDS -->
           <h6 class="subheading"> General </h6>
-          <mat-divider class="horizontal-line"></mat-divider>
+          <mat-divider class="horizontal-line" />
           <!-- GENERAL -->
           <div class="general">
             <!-- GENERAL LEFT COLUMN -->
@@ -42,11 +42,9 @@
                 <div class="error">{{ lengthError }}</div>
               }
               @if (action() != 3) {
-                <kadai-shared-field-error-display
-                  [displayError]="!isFieldValid('workbasket.key')"
+                <kadai-shared-field-error-display [displayError]="!isFieldValid('workbasket.key')"
                   [validationTrigger]="toggleValidationMap.get('workbasket.key')"
-                  errorMessage="* Key is required">
-                </kadai-shared-field-error-display>
+                  errorMessage="* Key is required" />
               }
               <!-- NAME -->
               <mat-form-field appearance="outline">
@@ -63,8 +61,7 @@
               }
               <kadai-shared-field-error-display [displayError]="!isFieldValid('workbasket.name')"
                                                 [validationTrigger]="toggleValidationMap.get('workbasket.name')"
-                                                errorMessage="* Name is required">
-              </kadai-shared-field-error-display>
+                                                errorMessage="* Name is required" />
               <!-- OWNER -->
               @if (lookupField) {
                 <kadai-shared-type-ahead (accessIdEventEmitter)="onSelectedOwner($event)"
@@ -72,8 +69,7 @@
                                          [displayError]="true"
                                          [entityId]="workbasket.workbasketId"
                                          [savedAccessId]="workbasket.owner"
-                                         placeHolderMessage="Owner">
-                </kadai-shared-type-ahead>
+                                         placeHolderMessage="Owner" />
               } @else {
                 <input #owner="ngModel" (input)="validateInputOverflow(owner, 128)"
                        [(ngModel)]="workbasket.owner"
@@ -85,8 +81,7 @@
                 }
                 <kadai-shared-field-error-display [displayError]="!isFieldValid('workbasket.owner')"
                                                   [validationTrigger]="toggleValidationMap.get('workbasket.owner')"
-                                                  errorMessage="* Owner is required">
-                </kadai-shared-field-error-display>
+                                                  errorMessage="* Owner is required" />
               }
               <!-- DESCRIPTION AND TYPE -->
               <div class="general__description-and-type">
@@ -95,15 +90,13 @@
                   <mat-label>Type</mat-label>
                   <mat-select [(value)]="workbasket.type">
                     <mat-select-trigger>
-                      <kadai-administration-icon-type
-                        [type]='workbasket.type'></kadai-administration-icon-type>
+                      <kadai-administration-icon-type [type]='workbasket.type' />
                       {{ allTypes.get(workbasket.type) }}
                     </mat-select-trigger>
                     @for (type of allTypes | mapValues | removeEmptyType; track type) {
                       <mat-option
                         value="{{type.key}}">
-                        <kadai-administration-icon-type [text]="type.value" [type]='type.key'>
-                        </kadai-administration-icon-type>
+                        <kadai-administration-icon-type [text]="type.value" [type]='type.key' />
                       </mat-option>
                     }
                   </mat-select>
@@ -189,7 +182,7 @@
           </div>
           <!-- CUSTOM FIELDS -->
           <h6 class="subheading"> Custom Fields </h6>
-          <mat-divider class="horizontal-line"></mat-divider>
+          <mat-divider class="horizontal-line" />
           <div class="custom-fields">
             @for (customField of customFields$ | async; track customField; let index = $index) {
               @if (customField.visible) {

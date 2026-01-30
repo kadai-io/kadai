@@ -22,8 +22,7 @@
     <kadai-administration-workbasket-list-toolbar (performSorting)="performSorting($event)"
                                                   [workbasketDefaultSortBy]="workbasketDefaultSortBy"
                                                   [workbasketListExpanded]="expanded()"
-                                                  [workbaskets]="workbasketsSummary$ | async">
-    </kadai-administration-workbasket-list-toolbar>
+                                                  [workbaskets]="workbasketsSummary$ | async" />
   </section>
 
   <!-- WORKBASKET LIST -->
@@ -41,11 +40,10 @@
               <!-- ICON -->
               @if (expanded()) {
                 <div class="workbasket-list__list-item--icon">
-                  <kadai-administration-icon-type
-                    [selected]="workbasket.workbasketId === selectedId"
+                  <kadai-administration-icon-type [selected]="workbasket.workbasketId === selectedId"
                     [type]="workbasket.type"
                     size="large"
-                    tooltip="true"></kadai-administration-icon-type>
+                    tooltip="true" />
                 </div>
               }
               <!-- INFORMATION -->
@@ -65,7 +63,7 @@
                 }
               </div>
             </div>
-            <mat-divider></mat-divider>
+            <mat-divider />
           </mat-list-option>
         }
       </mat-selection-list>
