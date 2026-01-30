@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, input } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Store } from '@ngxs/store';
@@ -79,10 +79,11 @@ import { RemoveNoneTypePipe } from '../../../shared/pipes/remove-empty-type.pipe
   ]
 })
 export class WorkbasketInformationComponent implements OnInit, OnChanges, OnDestroy {
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   workbasket: Workbasket;
-  @Input()
-  action: ACTION;
+  readonly action = input<ACTION>(undefined);
   @ViewChild('WorkbasketForm')
   workbasketForm: NgForm;
   workbasketClone: Workbasket;

@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, OnChanges, OnInit, SimpleChanges, input } from '@angular/core';
 import { WorkbasketType } from 'app/shared/models/workbasket-type';
 import { SvgIconComponent } from 'angular-svg-icon';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -28,26 +28,21 @@ import { MatTooltip } from '@angular/material/tooltip';
   imports: [SvgIconComponent, MatTooltip]
 })
 export class IconTypeComponent implements OnInit, OnChanges {
-  @Input()
-  type: WorkbasketType;
+  readonly type = input<WorkbasketType>(undefined);
 
-  @Input()
-  selected = false;
+  readonly selected = input(false);
 
-  @Input()
-  tooltip = false;
+  readonly tooltip = input(false);
 
-  @Input()
-  text: string;
+  readonly text = input<string>(undefined);
 
-  @Input()
-  size = 'small';
+  readonly size = input('small');
 
   iconSize: string;
   iconColor: string;
 
   ngOnInit() {
-    this.iconSize = this.size === 'large' ? '24' : '16';
+    this.iconSize = this.size() === 'large' ? '24' : '16';
   }
 
   ngOnChanges(changes: SimpleChanges) {

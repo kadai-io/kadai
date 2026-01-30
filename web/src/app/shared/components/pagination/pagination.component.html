@@ -17,13 +17,13 @@
 -->
 
 <div #pagination class="pagination">
-  <mat-paginator (page)="changeToPage($event)" [length]="page?.totalElements"
+  <mat-paginator (page)="changeToPage($event)" [length]="page()?.totalElements"
                  [ngClass]="
-                 {'pagination__mat-paginator--expanded': expanded,
-                 'pagination__mat-paginator--collapsed': !expanded }" [pageSize]="page?.size"
+                 {'pagination__mat-paginator--expanded': expanded(),
+                 'pagination__mat-paginator--collapsed': !expanded() }" [pageSize]="page()?.size"
                  [showFirstLastButtons]="true" class="pagination__mat-paginator"
                  hidePageSize="true"></mat-paginator>
-  @if (expanded) {
+  @if (expanded()) {
     <div class="pagination__go-to">
       <div class="pagination__go-to-label">Page:</div>
       <mat-form-field>

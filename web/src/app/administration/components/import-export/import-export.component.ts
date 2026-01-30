@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild, input } from '@angular/core';
 import { ClassificationDefinitionService } from 'app/administration/services/classification-definition.service';
 import { WorkbasketDefinitionService } from 'app/administration/services/workbasket-definition.service';
 import { DomainService } from 'app/shared/services/domain/domain.service';
@@ -45,8 +45,8 @@ import { AsyncPipe } from '@angular/common';
   imports: [MatButton, MatTooltip, MatIcon, FormsModule, MatMenuTrigger, MatMenu, MatMenuItem, AsyncPipe]
 })
 export class ImportExportComponent implements OnInit, OnDestroy {
-  @Input() currentSelection: KadaiType;
-  @Input() parentComponent: string;
+  readonly currentSelection = input<KadaiType>(undefined);
+  readonly parentComponent = input<string>(undefined);
   @ViewChild('selectedFile', { static: true })
   selectedFileInput;
   domains$: Observable<string[]>;
@@ -63,7 +63,7 @@ export class ImportExportComponent implements OnInit, OnDestroy {
   }
 
   export(domain = '') {
-    if (this.currentSelection === KadaiType.WORKBASKETS) {
+    if (this.currentSelection() === KadaiType.WORKBASKETS) {
       this.workbasketDefinitionService.exportWorkbaskets(domain);
     } else {
       this.classificationDefinitionService.exportClassifications(domain);
@@ -73,7 +73,7 @@ export class ImportExportComponent implements OnInit, OnDestroy {
   uploadFile() {
     const file = this.selectedFileInput.nativeElement.files[0];
     if (this.checkFormatFile(file)) {
-      if (this.currentSelection === KadaiType.WORKBASKETS) {
+      if (this.currentSelection() === KadaiType.WORKBASKETS) {
         this.workbasketDefinitionService
           .importWorkbasket(file)
           .pipe(

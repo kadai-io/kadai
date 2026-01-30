@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, ElementRef, inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild, input } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 
 import { WorkbasketSummaryRepresentation } from 'app/shared/models/workbasket-summary-representation';
@@ -77,7 +77,7 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   requestInProgress: boolean;
   requestInProgressLocal = false;
   resetPagingSubject = new Subject<null>();
-  @Input() expanded: boolean;
+  readonly expanded = input<boolean>(undefined);
   workbasketsSummary$: Observable<WorkbasketSummary[]> = inject(Store).select(WorkbasketSelectors.workbasketsSummary);
   workbasketsSummaryRepresentation$: Observable<WorkbasketSummaryRepresentation> = inject(Store).select(
     WorkbasketSelectors.workbasketsSummaryRepresentation

@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, input } from '@angular/core';
 import { ALL_TYPES, WorkbasketType } from '../../models/workbasket-type';
 import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-filter-parameter';
 import { Store } from '@ngxs/store';
@@ -56,8 +56,8 @@ import { MapValuesPipe } from '../../pipes/map-values.pipe';
 })
 export class WorkbasketFilterComponent implements OnInit, OnDestroy {
   allTypes: Map<WorkbasketType, string> = ALL_TYPES;
-  @Input() component: string;
-  @Input() isExpanded: boolean;
+  readonly component = input<string>(undefined);
+  readonly isExpanded = input<boolean>(undefined);
   availableDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter> = inject(Store).select(
     FilterSelectors.getAvailableDistributionTargetsFilter
   );
@@ -72,15 +72,16 @@ export class WorkbasketFilterComponent implements OnInit, OnDestroy {
   private store = inject(Store);
 
   ngOnInit(): void {
-    if (this.component === 'availableDistributionTargets') {
+    const component = this.component();
+    if (component === 'availableDistributionTargets') {
       this.availableDistributionTargetsFilter$.pipe(takeUntil(this.destroy$)).subscribe((filter) => {
         this.setFilter(filter);
       });
-    } else if (this.component === 'selectedDistributionTargets') {
+    } else if (component === 'selectedDistributionTargets') {
       this.selectedDistributionTargetsFilter$.pipe(takeUntil(this.destroy$)).subscribe((filter) => {
         this.setFilter(filter);
       });
-    } else if (this.component === 'workbasketList') {
+    } else if (component === 'workbasketList') {
       this.workbasketListFilter$.pipe(takeUntil(this.destroy$)).subscribe((filter) => {
         this.setFilter(filter);
       });
@@ -98,7 +99,7 @@ export class WorkbasketFilterComponent implements OnInit, OnDestroy {
   }
 
   clear() {
-    this.store.dispatch(new ClearWorkbasketFilter(this.component));
+    this.store.dispatch(new ClearWorkbasketFilter(this.component()));
   }
 
   selectType(type: WorkbasketType) {
@@ -106,7 +107,7 @@ export class WorkbasketFilterComponent implements OnInit, OnDestroy {
   }
 
   search() {
-    this.store.dispatch(new SetWorkbasketFilter(this.filter, this.component));
+    this.store.dispatch(new SetWorkbasketFilter(this.filter, this.component()));
   }
 
   ngOnDestroy() {

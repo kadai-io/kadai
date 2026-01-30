@@ -20,12 +20,12 @@ import {
   Component,
   EventEmitter,
   inject,
-  Input,
   OnChanges,
   OnDestroy,
   OnInit,
   Output,
-  SimpleChanges
+  SimpleChanges,
+  input
 } from '@angular/core';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
 import { debounceTime, distinctUntilChanged, Observable, Subject } from 'rxjs';
@@ -62,12 +62,12 @@ import { MatOption } from '@angular/material/core';
   ]
 })
 export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
-  @Input() savedAccessId;
-  @Input() placeHolderMessage;
-  @Input() entityId;
-  @Input() isRequired = false;
-  @Input() isDisabled = false;
-  @Input() displayError = false;
+  readonly savedAccessId = input(undefined);
+  readonly placeHolderMessage = input(undefined);
+  readonly entityId = input(undefined);
+  readonly isRequired = input(false);
+  readonly isDisabled = input(false);
+  readonly displayError = input(false);
   @Output() accessIdEventEmitter = new EventEmitter<AccessId>();
   @Output() isFormValid = new EventEmitter<boolean>();
   globalCustomisation$: Observable<GlobalCustomisation> = inject(Store).select(
@@ -93,7 +93,7 @@ export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnInit() {
-    if (this.isDisabled) {
+    if (this.isDisabled()) {
       this.accessIdForm.controls['accessId'].disable();
     }
 
@@ -131,11 +131,12 @@ export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
 
   handleEmptyAccessId() {
     this.name = '';
-    this.isFormValid.emit(!this.isRequired);
-    if (this.placeHolderMessage !== 'Search for AccessId') {
+    const isRequired = this.isRequired();
+    this.isFormValid.emit(!isRequired);
+    if (this.placeHolderMessage() !== 'Search for AccessId') {
       this.accessIdEventEmitter.emit(this.emptyAccessId);
     }
-    if (this.isRequired) {
+    if (isRequired) {
       this.accessIdForm.controls['accessId'].setErrors({ incorrect: true });
     }
   }
@@ -152,7 +153,7 @@ export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
           this.name = accessId?.name;
           this.isFormValid.emit(true);
           this.accessIdEventEmitter.emit(accessId);
-        } else if (this.displayError) {
+        } else if (this.displayError()) {
           this.isFormValid.emit(false);
           this.accessIdEventEmitter.emit(this.emptyAccessId);
           this.accessIdForm.controls['accessId'].setErrors({ incorrect: true });
@@ -162,8 +163,9 @@ export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   setAccessIdFromInput() {
-    const accessId = this.savedAccessId?.value;
-    const access = accessId?.accessId || accessId?.accessId == '' ? accessId.accessId : this.savedAccessId || '';
+    const savedAccessId = this.savedAccessId();
+    const accessId = savedAccessId?.value;
+    const access = accessId?.accessId || accessId?.accessId == '' ? accessId.accessId : savedAccessId || '';
     this.accessIdForm.controls['accessId'].setValue(access);
     this.lastSavedAccessId = access;
     this.name = accessId?.accessName || '';

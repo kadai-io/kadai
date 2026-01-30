@@ -27,7 +27,8 @@ import {
   OnDestroy,
   OnInit,
   Output,
-  ViewChild
+  ViewChild,
+  input
 } from '@angular/core';
 import { TreeNodeModel } from 'app/administration/models/tree-node';
 
@@ -66,9 +67,11 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
   emptyTreeNodes = false;
   filter: string;
   category: string;
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() selectNodeId: string;
-  @Input() filterText: string;
-  @Input() filterIcon = '';
+  readonly filterText = input<string>(undefined);
+  readonly filterIcon = input('');
   @Output() switchKadaiSpinnerEmit = new EventEmitter<boolean>();
   categoryIcons$: Observable<ClassificationCategoryImages> = inject(Store).select(
     EngineConfigurationSelectors.selectCategoryIcons
@@ -159,10 +162,12 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
       }
     }
 
-    if (this.filterTextOld !== this.filterText || this.filterIconOld !== this.filterIcon) {
-      this.filterIconOld = this.filterIcon;
-      this.filterTextOld = this.filterText;
-      this.filterNodes(this.filterText ? this.filterText : '', this.filterIcon);
+    const filterText = this.filterText();
+    const filterIcon = this.filterIcon();
+    if (this.filterTextOld !== filterText || this.filterIconOld !== filterIcon) {
+      this.filterIconOld = filterIcon;
+      this.filterTextOld = filterText;
+      this.filterNodes(filterText ? filterText : '', filterIcon);
       this.manageTreeState();
     }
   }
@@ -257,7 +262,7 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   private manageTreeState() {
     this.tree.treeModel.collapseAll();
-    if (this.filterText === '') {
+    if (this.filterText() === '') {
       this.tree.treeModel.collapseAll();
     }
   }
