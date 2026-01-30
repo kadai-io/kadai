@@ -93,13 +93,11 @@
                     [ngClass]="{	'has-warning': (accessItemsClone[index].accessId !== accessItem.value.accessId),
                 							'has-error': !accessItem.value.accessId || accessItemsGroups.controls[index].get('accessId')?.invalid }"
                     class="workbasket-access-items__typeahead">
-                    <kadai-shared-type-ahead
-                      (accessIdEventEmitter)="accessItemSelected($event, index)"
+                    <kadai-shared-type-ahead (accessIdEventEmitter)="accessItemSelected($event, index)"
                       [displayError]="true"
                       [isRequired]="true"
                       [savedAccessId]="accessItem"
-                      placeHolderMessage="Access id">
-                    </kadai-shared-type-ahead>
+                      placeHolderMessage="Access id" />
                   </td>
                 } @else {
                   <td>

@@ -100,18 +100,15 @@
                  [selectedIndex]="selectedTab$ | async"
                  animationDuration="0ms" mat-stretch-tabs="false">
     <mat-tab label="Information">
-      <kadai-administration-workbasket-information [action]="action" [workbasket]="workbasket">
-      </kadai-administration-workbasket-information>
+      <kadai-administration-workbasket-information [action]="action" [workbasket]="workbasket" />
     </mat-tab>
     <mat-tab label="Access">
       <kadai-administration-workbasket-access-items (accessItemsValidityChanged)="handleAccessItemsValidityChanged($event)"
                                                     [expanded]="expanded()"
-                                                    [workbasket]="workbasket">
-      </kadai-administration-workbasket-access-items>
+                                                    [workbasket]="workbasket" />
     </mat-tab>
     <mat-tab label="Distribution Targets">
-      <kadai-administration-workbasket-distribution-targets *matTabContent>
-      </kadai-administration-workbasket-distribution-targets>
+      <kadai-administration-workbasket-distribution-targets *matTabContent />
     </mat-tab>
   </mat-tab-group>
 </div>

@@ -252,7 +252,9 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   private filterNodes(filterText, category) {
-    this.tree().treeModel.filterNodes((node) => this.checkNameAndKey(node, filterText) && this.checkIcon(node, category));
+    this.tree().treeModel.filterNodes(
+      (node) => this.checkNameAndKey(node, filterText) && this.checkIcon(node, category)
+    );
     this.filter = filterText;
     this.category = category || 'ALL';
     this.emptyTreeNodes = !this.tree().treeModel.getVisibleRoots().length;
