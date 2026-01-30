@@ -81,7 +81,7 @@
         <ng-form #ClassificationForm="ngForm">
           <div class="detailed-fields">
             <h6 class="detailed-fields__subheading"> General </h6>
-            <mat-divider class="detailed-fields__horizontal-line"></mat-divider>
+            <mat-divider class="detailed-fields__horizontal-line" />
             <!-- GENERAL -->
             <div class="detailed-fields__general">
               <!-- GENERAL LEFT COLUMN -->
@@ -194,11 +194,9 @@
                              matInput
                              min="0" name="classification.priority" required type="number">
                     </mat-form-field>
-                    <kadai-shared-field-error-display
-                      [displayError]="!isFieldValid('classification.priority')"
+                    <kadai-shared-field-error-display [displayError]="!isFieldValid('classification.priority')"
                       [validationTrigger]="toggleValidationMap.get('classification.priority.name')"
-                      errorMessage="* Priority is required">
-                    </kadai-shared-field-error-display>
+                      errorMessage="* Priority is required" />
                   </div>
                 </div>
                 <!-- APPLICATION ENTRY POINT -->
@@ -225,16 +223,14 @@
                   <mat-label>Category</mat-label>
                   <mat-select [(value)]="classification.category" required>
                     <mat-select-trigger>
-                      <svg-icon
-                        [src]="(getCategoryIcon(classification.category) | async)?.left"
-                        class="detailed-fields__category-icon">
-                      </svg-icon>
+                      <svg-icon [src]="(getCategoryIcon(classification.category) | async)?.left"
+                        class="detailed-fields__category-icon" />
                       {{ classification.category }}
                     </mat-select-trigger>
                     @for (category of categories$ | async; track category) {
                       <mat-option value="{{category}}">
                         <svg-icon [src]="(getCategoryIcon(category) | async)?.left"
-                                  class="detailed-fields__category-icon"></svg-icon>
+                                  class="detailed-fields__category-icon" />
                         {{ category }}
                       </mat-option>
                     }
@@ -244,7 +240,7 @@
             </div>
             <!-- CUSTOM FIELDS -->
             <h6 class="detailed-fields__subheading"> Custom Fields </h6>
-            <mat-divider class="detailed-fields__horizontal-line"></mat-divider>
+            <mat-divider class="detailed-fields__horizontal-line" />
             <div class="detailed-fields__custom-fields">
               @for (customField of (customFields$ | async); track customField; let i = $index) {
                 @if (customField.visible) {

@@ -141,7 +141,7 @@
   <!-- FURTHER FILTER OPTIONS -->
   @if ((isFilterExpanded$ | async)) {
     <div class="task-list-toolbar__additional-filter">
-      <kadai-shared-task-filter></kadai-shared-task-filter>
+      <kadai-shared-task-filter />
     </div>
   }
 
@@ -156,10 +156,8 @@
         <mat-icon class="md-20">add</mat-icon>
       </button>
       <!-- SORT TASKS BUTTON -->
-      <kadai-shared-sort
-        (performSorting)="sorting($event)" [defaultSortBy]="taskDefaultSortBy()"
-        [sortingFields]="sortingFields">
-      </kadai-shared-sort>
+      <kadai-shared-sort (performSorting)="sorting($event)" [defaultSortBy]="taskDefaultSortBy()"
+        [sortingFields]="sortingFields" />
     </div>
   }
 

@@ -36,11 +36,9 @@
   <ng-template #treeNodeTemplate let-index="index" let-node>
     <span class="tree__svg-icon">
       @if (node.data.category) {
-        <svg-icon
-          [src]="getCategoryIcon(node.data.category).left"
+        <svg-icon [src]="getCategoryIcon(node.data.category).left"
           matTooltip="{{ getCategoryIcon(node.data.category).right }}"
-        >
-        </svg-icon>
+         />
       }
     </span>
     <span>

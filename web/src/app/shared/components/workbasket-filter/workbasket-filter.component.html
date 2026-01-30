@@ -80,8 +80,7 @@
             <mat-icon style="color: #555">filter_list</mat-icon>
           }
           @if (filter.type[0]) {
-            <kadai-administration-icon-type
-              [type]="filter.type[0]"></kadai-administration-icon-type>
+            <kadai-administration-icon-type [type]="filter.type[0]" />
           }
         </button>
         <mat-menu #menu="matMenu">
@@ -94,7 +93,7 @@
               }
               @if (type.value !== 'All') {
                 <kadai-administration-icon-type [text]="type.value"
-                                                [type]='type.key'></kadai-administration-icon-type>
+                                                [type]='type.key' />
               }
             </button>
           }

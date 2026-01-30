@@ -157,13 +157,11 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
     this.formsValidatorService.formSubmitAttempt = true;
     const classificationForm = this.classificationForm();
     trimForm(classificationForm);
-    this.formsValidatorService
-      .validateFormInformation(classificationForm, this.toggleValidationMap)
-      .then((value) => {
-        if (value) {
-          this.onSave();
-        }
-      });
+    this.formsValidatorService.validateFormInformation(classificationForm, this.toggleValidationMap).then((value) => {
+      if (value) {
+        this.onSave();
+      }
+    });
   }
 
   onRestore() {
