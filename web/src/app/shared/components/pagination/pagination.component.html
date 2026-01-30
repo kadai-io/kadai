@@ -18,7 +18,7 @@
 
 <div #pagination class="pagination">
   <mat-paginator (page)="changeToPage($event)" [length]="page()?.totalElements"
-                 [ngClass]="
+                 [class]="
                  {'pagination__mat-paginator--expanded': expanded(),
                  'pagination__mat-paginator--collapsed': !expanded() }" [pageSize]="page()?.size"
                  [showFirstLastButtons]="true" class="pagination__mat-paginator"

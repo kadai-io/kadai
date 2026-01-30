@@ -92,7 +92,7 @@
               <!-- Column: Priority -->
               <ng-container matColumnDef="priority">
                 <th *matHeaderCellDef mat-header-cell> Priority</th>
-                <td *matCellDef="let element" [ngClass]="{
+                <td *matCellDef="let element" [class]="{
            'task-priority-report__row--high': element.priority == nameHighPriority,
            'task-priority-report__row--medium': element.priority == nameMediumPriority,
            'task-priority-report__row--low': element.priority == nameLowPriority}" mat-cell>
@@ -102,7 +102,7 @@
               <!-- Column: Number of Tasks -->
               <ng-container matColumnDef="number">
                 <th *matHeaderCellDef mat-header-cell> Number of Tasks</th>
-                <td *matCellDef="let element" [ngClass]="{
+                <td *matCellDef="let element" [class]="{
            'task-priority-report__row--high': element.priority == nameHighPriority,
            'task-priority-report__row--medium': element.priority == nameMediumPriority,
            'task-priority-report__row--low': element.priority == nameLowPriority}" mat-cell>
