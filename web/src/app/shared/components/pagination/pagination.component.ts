@@ -20,12 +20,12 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  Input,
   OnChanges,
   OnInit,
   Output,
   SimpleChanges,
-  ViewChild
+  ViewChild,
+  input
 } from '@angular/core';
 import { Page } from 'app/shared/models/page';
 import { MatPaginator } from '@angular/material/paginator';
@@ -54,15 +54,15 @@ import { MatOption } from '@angular/material/core';
   ]
 })
 export class PaginationComponent implements OnInit, OnChanges {
-  @Input() page: Page;
+  readonly page = input<Page>(undefined);
 
-  @Input() type: String;
+  readonly type = input<String>(undefined);
 
-  @Input() numberOfItems: number;
+  readonly numberOfItems = input<number>(undefined);
 
-  @Input() expanded: boolean = true;
+  readonly expanded = input<boolean>(true);
 
-  @Input() resetPaging: Observable<null>;
+  readonly resetPaging = input<Observable<null>>(undefined);
 
   @Output() changePage = new EventEmitter<number>();
 
@@ -79,14 +79,15 @@ export class PaginationComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.changeLabel();
-    if (this.resetPaging) this.resetPaging.pipe(takeUntil(this.destroy$)).subscribe(() => this.goToPage(1));
+    const resetPaging = this.resetPaging();
+    if (resetPaging) resetPaging.pipe(takeUntil(this.destroy$)).subscribe(() => this.goToPage(1));
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     const rangeLabel = this.paginationWrapper?.nativeElement?.querySelector('.mat-mdc-paginator-range-label');
     const container = this.paginationWrapper?.nativeElement?.querySelector('.mat-mdc-paginator-container');
     if (rangeLabel && container) {
-      if (!this.expanded) {
+      if (!this.expanded()) {
         container.style.justifyContent = 'center';
         rangeLabel.style.display = 'none';
       } else {
@@ -98,7 +99,7 @@ export class PaginationComponent implements OnInit, OnChanges {
     if (changes.page && changes.page.currentValue) {
       this.pageSelected = changes.page.currentValue.number;
     }
-    this.hasItems = this.numberOfItems > 0;
+    this.hasItems = this.numberOfItems() > 0;
     if (changes.page) {
       this.updateGoto();
     }
@@ -134,7 +135,7 @@ export class PaginationComponent implements OnInit, OnChanges {
 
   updateGoto() {
     this.pageNumbers = [];
-    for (let i = 1; i <= this.page?.totalPages; i++) {
+    for (let i = 1; i <= this.page()?.totalPages; i++) {
       this.pageNumbers.push(i);
     }
   }

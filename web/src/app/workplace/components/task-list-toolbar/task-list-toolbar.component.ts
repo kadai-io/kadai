@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, OnInit, Output, input } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { TaskService } from 'app/workplace/services/task.service';
@@ -76,7 +76,7 @@ export enum Search {
   ]
 })
 export class TaskListToolbarComponent implements OnInit {
-  @Input() taskDefaultSortBy: TaskQuerySortParameter;
+  readonly taskDefaultSortBy = input<TaskQuerySortParameter>(undefined);
   @Output() performSorting = new EventEmitter<Sorting<TaskQuerySortParameter>>();
   @Output() performFilter = new EventEmitter<TaskQueryFilterParameter>();
   @Output() selectSearchType = new EventEmitter();

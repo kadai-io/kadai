@@ -22,11 +22,11 @@ import {
   ChangeDetectorRef,
   Component,
   inject,
-  Input,
   OnChanges,
   OnInit,
   SimpleChanges,
-  ViewChild
+  ViewChild,
+  input
 } from '@angular/core';
 import { isEqual } from 'lodash-es';
 import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
@@ -80,11 +80,11 @@ import { OrderBy } from '../../../shared/pipes/order-by.pipe';
 export class WorkbasketDistributionTargetsListComponent
   implements AfterContentChecked, OnChanges, OnInit, AfterViewInit
 {
-  @Input() side: Side;
-  @Input() header: string;
+  readonly side = input<Side>(undefined);
+  readonly header = input<string>(undefined);
   allSelected;
-  @Input() component;
-  @Input() transferDistributionTargetObservable: Observable<Side>;
+  readonly component = input(undefined);
+  readonly transferDistributionTargetObservable = input<Observable<Side>>(undefined);
   workbasketDistributionTargets$: Observable<WorkbasketSummary[]> = inject(Store).select(
     WorkbasketSelectors.workbasketDistributionTargets
   );
@@ -111,7 +111,7 @@ export class WorkbasketDistributionTargetsListComponent
 
   ngOnInit(): void {
     this.requestInProgress = 2;
-    if (this.side === Side.AVAILABLE) {
+    if (this.side() === Side.AVAILABLE) {
       this.availableDistributionTargets$.pipe(takeUntil(this.destroy$)).subscribe((wbs) => this.assignWbs(wbs));
       this.availableDistributionTargetsFilter$.pipe(takeUntil(this.destroy$)).subscribe((filter) => {
         if (typeof this.filter === 'undefined' || isEqual(this.filter, filter)) {
@@ -136,8 +136,8 @@ export class WorkbasketDistributionTargetsListComponent
         this.requestInProgress--;
       });
     }
-    this.transferDistributionTargetObservable.subscribe((targetSide) => {
-      if (targetSide !== this.side) this.transferDistributionTargets(targetSide);
+    this.transferDistributionTargetObservable().subscribe((targetSide) => {
+      if (targetSide !== this.side()) this.transferDistributionTargets(targetSide);
     });
   }
 
@@ -161,7 +161,7 @@ export class WorkbasketDistributionTargetsListComponent
         throttleTime(200)
       )
       .subscribe(() => {
-        if (this.side === Side.AVAILABLE) {
+        if (this.side() === Side.AVAILABLE) {
           this.store.dispatch(new FetchAvailableDistributionTargets(false, this.filter));
         } else {
           this.store.dispatch(new FetchWorkbasketDistributionTargets(false, this.filter));

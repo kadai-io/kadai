@@ -31,8 +31,13 @@ import { SvgIconComponent } from 'angular-svg-icon';
   imports: [MatSelectionList, MatListOption, MatDivider, SvgIconComponent, DatePipe]
 })
 export class TaskListComponent {
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input()
   tasks: Task[];
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   selectedId: string;
   @Output()

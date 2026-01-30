@@ -21,7 +21,7 @@
   <section #wbToolbar class="workbasket-list__toolbar">
     <kadai-administration-workbasket-list-toolbar (performSorting)="performSorting($event)"
                                                   [workbasketDefaultSortBy]="workbasketDefaultSortBy"
-                                                  [workbasketListExpanded]="expanded"
+                                                  [workbasketListExpanded]="expanded()"
                                                   [workbaskets]="workbasketsSummary$ | async">
     </kadai-administration-workbasket-list-toolbar>
   </section>
@@ -39,7 +39,7 @@
             <!-- WORKBASKET LIST ITEM -->
             <div class="workbasket-list__list-item--wrapper">
               <!-- ICON -->
-              @if (expanded) {
+              @if (expanded()) {
                 <div class="workbasket-list__list-item--icon">
                   <kadai-administration-icon-type
                     [selected]="workbasket.workbasketId === selectedId"
@@ -85,7 +85,7 @@
 <!-- PAGINATION -->
 
 <kadai-shared-pagination (changePage)="changePage($event)"
-                         [expanded]="expanded"
+                         [expanded]="expanded()"
                          [numberOfItems]="(workbasketsSummary$ | async)?.length"
                          [page]="(workbasketsSummaryRepresentation$ | async) ? (workbasketsSummaryRepresentation$ | async)?.page : (workbasketsSummaryRepresentation$ | async)"
                          [resetPaging]="resetPagingSubject.asObservable()"

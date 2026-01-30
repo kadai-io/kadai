@@ -34,14 +34,14 @@
                 <label for="workbasket-key"></label>
                 <input #key="ngModel" (input)="validateInputOverflow(key, 64, $event)"
                        [(ngModel)]="workbasket.key"
-                       [disabled]="action == 0 || action == 3" id="workbasket-key" matInput
+                       [disabled]="action() == 0 || action() == 3" id="workbasket-key" matInput
                        maxlength="64" name="workbasket.key" placeholder="Key" required
                        type="text">
               </mat-form-field>
               @if (inputOverflowMap.get(key.name)) {
                 <div class="error">{{ lengthError }}</div>
               }
-              @if (action != 3) {
+              @if (action() != 3) {
                 <kadai-shared-field-error-display
                   [displayError]="!isFieldValid('workbasket.key')"
                   [validationTrigger]="toggleValidationMap.get('workbasket.key')"
