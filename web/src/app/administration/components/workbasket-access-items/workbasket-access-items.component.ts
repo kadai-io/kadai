@@ -21,16 +21,15 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
-  EventEmitter,
   inject,
   OnChanges,
   OnDestroy,
   OnInit,
-  Output,
   QueryList,
   SimpleChanges,
   ViewChildren,
-  input
+  input,
+  output
 } from '@angular/core';
 import { distinctUntilChanged, Observable, Subject } from 'rxjs';
 import { Actions, ofActionCompleted, Store } from '@ngxs/store';
@@ -87,7 +86,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
   formsValidatorService = inject(FormsValidatorService);
   readonly workbasket = input<Workbasket>(undefined);
   readonly expanded = input<boolean>(undefined);
-  @Output() accessItemsValidityChanged = new EventEmitter<boolean>();
+  readonly accessItemsValidityChanged = output<boolean>();
   @ViewChildren('htmlInputElement') inputs: QueryList<ElementRef>;
   selectedRows: number[] = [];
   workbasketClone: Workbasket;

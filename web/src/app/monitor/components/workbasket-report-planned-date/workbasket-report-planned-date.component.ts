@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, EventEmitter, inject, OnInit, Output } from '@angular/core';
+import { Component, inject, OnInit, output } from '@angular/core';
 import { ReportData } from '../../models/report-data';
 import { ChartData } from '../../models/chart-data';
 import { MonitorService } from '../../services/monitor.service';
@@ -35,8 +35,7 @@ import { BaseChartDirective } from 'ng2-charts';
   providers: [MonitorService]
 })
 export class WorkbasketReportPlannedDateComponent implements OnInit {
-  @Output()
-  metaInformation = new EventEmitter<MetaInfoData>();
+  readonly metaInformation = output<MetaInfoData>();
   reportData: ReportData;
   lineChartLabels: Array<any>;
   lineChartLegend = true;

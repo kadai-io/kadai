@@ -20,15 +20,14 @@ import {
   AfterViewChecked,
   Component,
   ElementRef,
-  EventEmitter,
   HostListener,
   inject,
   Input,
   OnDestroy,
   OnInit,
-  Output,
   ViewChild,
-  input
+  input,
+  output
 } from '@angular/core';
 import { TreeNodeModel } from 'app/administration/models/tree-node';
 
@@ -72,7 +71,7 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
   @Input() selectNodeId: string;
   readonly filterText = input<string>(undefined);
   readonly filterIcon = input('');
-  @Output() switchKadaiSpinnerEmit = new EventEmitter<boolean>();
+  readonly switchKadaiSpinnerEmit = output<boolean>();
   categoryIcons$: Observable<ClassificationCategoryImages> = inject(Store).select(
     EngineConfigurationSelectors.selectCategoryIcons
   );

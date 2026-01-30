@@ -18,14 +18,13 @@
 
 import {
   Component,
-  EventEmitter,
   inject,
   OnChanges,
   OnDestroy,
   OnInit,
-  Output,
   SimpleChanges,
-  input
+  input,
+  output
 } from '@angular/core';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
 import { debounceTime, distinctUntilChanged, Observable, Subject } from 'rxjs';
@@ -68,8 +67,8 @@ export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
   readonly isRequired = input(false);
   readonly isDisabled = input(false);
   readonly displayError = input(false);
-  @Output() accessIdEventEmitter = new EventEmitter<AccessId>();
-  @Output() isFormValid = new EventEmitter<boolean>();
+  readonly accessIdEventEmitter = output<AccessId>();
+  readonly isFormValid = output<boolean>();
   globalCustomisation$: Observable<GlobalCustomisation> = inject(Store).select(
     EngineConfigurationSelectors.globalCustomisation
   );
