@@ -10,7 +10,7 @@
     <parent>
         <groupId>io.kadai</groupId>
         <artifactId>kadai-common-parent</artifactId>
-        <version>11.3.0</version>
+        <version>11.3.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
