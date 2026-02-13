@@ -92,20 +92,20 @@
               <!-- Column: Priority -->
               <ng-container matColumnDef="priority">
                 <th *matHeaderCellDef mat-header-cell> Priority</th>
-                <td *matCellDef="let element" [class]="{
-           'task-priority-report__row--high': element.priority == nameHighPriority,
-           'task-priority-report__row--medium': element.priority == nameMediumPriority,
-           'task-priority-report__row--low': element.priority == nameLowPriority}" mat-cell>
+                <td *matCellDef="let element"
+                    [class.task-priority-report__row--high]="element.priority == nameHighPriority"
+                    [class.task-priority-report__row--medium]="element.priority == nameMediumPriority"
+                    [class.task-priority-report__row--low]="element.priority == nameLowPriority" mat-cell>
                   {{ element.priority }}
                 </td>
               </ng-container>
               <!-- Column: Number of Tasks -->
               <ng-container matColumnDef="number">
                 <th *matHeaderCellDef mat-header-cell> Number of Tasks</th>
-                <td *matCellDef="let element" [class]="{
-           'task-priority-report__row--high': element.priority == nameHighPriority,
-           'task-priority-report__row--medium': element.priority == nameMediumPriority,
-           'task-priority-report__row--low': element.priority == nameLowPriority}" mat-cell>
+                <td *matCellDef="let element"
+                    [class.task-priority-report__row--high]="element.priority == nameHighPriority"
+                    [class.task-priority-report__row--medium]="element.priority == nameMediumPriority"
+                    [class.task-priority-report__row--low]="element.priority == nameLowPriority" mat-cell>
                   {{ element.number }}
                 </td>
               </ng-container>

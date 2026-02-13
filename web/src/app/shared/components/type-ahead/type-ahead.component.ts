@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnChanges, OnDestroy, OnInit, SimpleChanges, input, output } from '@angular/core';
+import { Component, effect, inject, OnDestroy, OnInit, input, output } from '@angular/core';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
 import { debounceTime, distinctUntilChanged, Observable, Subject } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -51,7 +51,7 @@ import { MatOption } from '@angular/material/core';
     MatOption
   ]
 })
-export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
+export class TypeAheadComponent implements OnInit, OnDestroy {
   readonly savedAccessId = input(undefined);
   readonly placeHolderMessage = input(undefined);
   readonly entityId = input(undefined);
@@ -74,12 +74,18 @@ export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
   });
   emptyAccessId: AccessId = { accessId: '', name: '' };
   private accessIdService = inject(AccessIdsService);
+  private entityIdInitialized = false;
 
-  ngOnChanges(changes: SimpleChanges) {
+  constructor() {
+    // React to entityId changes (replaces ngOnChanges)
     // currently needed because when saving, workbasket-details components sends old workbasket which reverts changes in this component
-    if (changes.entityId) {
-      this.setAccessIdFromInput();
-    }
+    effect(() => {
+      this.entityId(); // track the signal
+      if (this.entityIdInitialized) {
+        this.setAccessIdFromInput();
+      }
+      this.entityIdInitialized = true;
+    });
   }
 
   ngOnInit() {

@@ -17,6 +17,7 @@
  */
 
 import { Component, inject, viewChild } from '@angular/core';
+import { outputToObservable } from '@angular/core/rxjs-interop';
 import { Direction, Sorting, TaskHistoryQuerySortParameter } from 'app/shared/models/sorting';
 import { TaskHistoryEventData } from '../../shared/models/task-history-event';
 import { TaskHistoryQueryService } from '../services/task-history-query/task-history-query.service';
@@ -122,7 +123,9 @@ export class TaskHistoryQueryComponent {
       tap(() => (this.pageParameter.page = 1))
     );
 
-    const pageChange$ = this.pagination().changePage.pipe(tap((newPage) => (this.pageParameter.page = newPage)));
+    const pageChange$ = outputToObservable(this.pagination().changePage).pipe(
+      tap((newPage) => (this.pageParameter.page = newPage))
+    );
 
     merge(sortChange$, pageChange$)
       .pipe(

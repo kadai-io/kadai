@@ -16,7 +16,8 @@
  *
  */
 
-import { Component, inject, OnInit, input, output } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, input, output } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Task } from 'app/workplace/models/task';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { TaskService } from 'app/workplace/services/task.service';
@@ -37,7 +38,6 @@ import { RequestInProgressService } from '../../../shared/services/request-in-pr
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
-import { AsyncPipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -70,7 +70,6 @@ export enum Search {
     MatAutocompleteTrigger,
     MatAutocomplete,
     MatOption,
-    AsyncPipe,
     TaskFilterComponent,
     SortComponent
   ]
@@ -94,7 +93,10 @@ export class TaskListToolbarComponent implements OnInit {
   searchSelected: Search = Search.byWorkbasket;
   activeTab: number = 0;
   filterInput = '';
-  isFilterExpanded$: Observable<boolean> = inject(Store).select(WorkplaceSelectors.getFilterExpansion);
+  // Convert store selector to signal
+  protected isFilterExpanded = toSignal(inject(Store).select(WorkplaceSelectors.getFilterExpansion), {
+    initialValue: false
+  });
   destroy$ = new Subject<void>();
   private kadaiEngineService = inject(KadaiEngineService);
   private taskService = inject(TaskService);
@@ -105,6 +107,31 @@ export class TaskListToolbarComponent implements OnInit {
   private store = inject(Store);
   private ngxsActions$ = inject(Actions);
   private requestInProgressService = inject(RequestInProgressService);
+  private queryParams = toSignal(this.route.queryParams, { initialValue: {} });
+  private componentParam = computed(() => {
+    const params = this.queryParams();
+    return 'component' in params ? params.component : undefined;
+  });
+
+  constructor() {
+    // Use effect to react to query parameter changes
+    effect(() => {
+      const component = this.componentParam();
+      if (component == 'workbaskets') {
+        this.activeTab = 0;
+        if (this.currentBasket) {
+          this.resultName = this.currentBasket.name;
+          this.resultId = this.currentBasket.workbasketId;
+        }
+        this.selectSearch(this.search.byWorkbasket);
+      }
+      if (component == 'task-search') {
+        this.activeTab = 1;
+        this.searched = true;
+        this.selectSearch(this.search.byTypeAndValue);
+      }
+    });
+  }
 
   ngOnInit() {
     this.ngxsActions$.pipe(ofActionCompleted(ClearTaskFilter), takeUntil(this.destroy$)).subscribe(() => {
@@ -151,23 +178,6 @@ export class TaskListToolbarComponent implements OnInit {
           }
         }
       });
-
-    this.route.queryParams.subscribe((params) => {
-      const component = params.component;
-      if (component == 'workbaskets') {
-        this.activeTab = 0;
-        if (this.currentBasket) {
-          this.resultName = this.currentBasket.name;
-          this.resultId = this.currentBasket.workbasketId;
-        }
-        this.selectSearch(this.search.byWorkbasket);
-      }
-      if (component == 'task-search') {
-        this.activeTab = 1;
-        this.searched = true;
-        this.selectSearch(this.search.byTypeAndValue);
-      }
-    });
 
     if (this.router.url.includes('taskdetail')) {
       this.searched = true;
@@ -230,7 +240,6 @@ export class TaskListToolbarComponent implements OnInit {
   }
 
   onFilter() {
-    // TODO: The 'emit' function requires a mandatory TaskQueryFilterParameter argument
     const wildcardFilter: TaskQueryFilterParameter = {
       'wildcard-search-value': [this.filterInput]
     };
@@ -239,7 +248,6 @@ export class TaskListToolbarComponent implements OnInit {
 
   onClearFilter() {
     this.store.dispatch(new ClearTaskFilter()).subscribe(() => {
-      // TODO: The 'emit' function requires a mandatory TaskQueryFilterParameter argument
       const wildcardFilter: TaskQueryFilterParameter = {
         'wildcard-search-value': [this.filterInput]
       };

@@ -41,16 +41,16 @@
     <div class="table-body">
       @for (row of reportData.rows; track row; let i = $index) {
         @if (row.display) {
-          <div [class]="{'table-row--highlight': row.depth === 0 && currentExpHeaders > 0,
-             'table-row--hover': row.depth > 0 && currentExpHeaders > 0,
-             'table-row--white': row.depth > 0 && currentExpHeaders > 0}" class="table-row">
+          <div [class.table-row--highlight]="row.depth === 0 && currentExpHeaders > 0"
+               [class.table-row--hover]="row.depth > 0 && currentExpHeaders > 0"
+               [class.table-row--white]="row.depth > 0 && currentExpHeaders > 0" class="table-row">
             @for (header of row.desc; track header; let idx = $index) {
 
               @if (idx <= currentExpHeaders) {
                 <div (click)="toggleFold(i)"
-                     [class]="{'table-cell--border-right': currentExpHeaders === idx,
-                         'table-cell--bold': row.depth === 0 && currentExpHeaders > 0,
-                         'table-cell--clickable': reportData.meta.rowDesc.length - 1 > row.depth}"
+                     [class.table-cell--border-right]="currentExpHeaders === idx"
+                     [class.table-cell--bold]="row.depth === 0 && currentExpHeaders > 0"
+                     [class.table-cell--clickable]="reportData.meta.rowDesc.length - 1 > row.depth"
                      class="table-cell table-cell--justify">
                   @if (reportData.meta.rowDesc.length - 1 > row.depth && idx === row.depth) {
                     <span
@@ -83,15 +83,15 @@
     <div class="table-footer">
       @for (row of reportData.sumRow; track row; let i = $index) {
         @if (row.display) {
-          <div [class]="{'table-row--highlight': row.depth === 0 && currentExpHeaders > 0,
-             'table-row--hover': row.depth > 0 && currentExpHeaders > 0,
-             'table-row--white': row.depth > 0 && currentExpHeaders > 0}" class="table-row">
+          <div [class.table-row--highlight]="row.depth === 0 && currentExpHeaders > 0"
+               [class.table-row--hover]="row.depth > 0 && currentExpHeaders > 0"
+               [class.table-row--white]="row.depth > 0 && currentExpHeaders > 0" class="table-row">
             @for (header of row.desc; track header; let idx = $index) {
 
               @if (idx <= currentExpHeaders) {
                 <div (click)="toggleFold(i, true)"
-                     [class]="{'table-cell--border-right': currentExpHeaders === idx,
-                         'table-cell--clickable': reportData.meta.rowDesc.length - 1 > row.depth}"
+                     [class.table-cell--border-right]="currentExpHeaders === idx"
+                     [class.table-cell--clickable]="reportData.meta.rowDesc.length - 1 > row.depth"
                      class="table-cell table-cell--bold table-cell--justify">
                   @if (reportData.meta.rowDesc.length - 1 > row.depth && idx === row.depth) {
                     <span

@@ -16,12 +16,13 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, effect, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { Store } from '@ngxs/store';
 import { takeUntil } from 'rxjs/operators';
 import { ClassificationSelectors } from '../../../shared/store/classification-store/classification.selectors';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   CreateClassification,
   GetClassifications,
@@ -44,12 +45,16 @@ export class ClassificationOverviewComponent implements OnInit, OnDestroy {
   selectedClassification$: Observable<Classification> = inject(Store).select(
     ClassificationSelectors.selectedClassification
   );
+  // Convert to signals with proper initialValue
+  private selectedClassification = toSignal(this.selectedClassification$, { initialValue: undefined });
   routerParams: any;
   private route = inject(ActivatedRoute);
   private store = inject(Store);
   private destroy$ = new Subject<void>();
+  // Note: Cannot use toSignal for firstChild.params because firstChild might be undefined
 
   ngOnInit() {
+    // Subscribe to child params signal for test compatibility
     if (this.route.firstChild) {
       this.route.firstChild.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
         this.routerParams = params;

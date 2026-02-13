@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, input, viewChild } from '@angular/core';
+import { Component, inject, Input, OnChanges, OnDestroy, OnInit, input, viewChild } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Store } from '@ngxs/store';
@@ -79,10 +79,7 @@ import { RemoveNoneTypePipe } from '../../../shared/pipes/remove-empty-type.pipe
   ]
 })
 export class WorkbasketInformationComponent implements OnInit, OnChanges, OnDestroy {
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
-  @Input()
-  workbasket: Workbasket;
+  @Input() workbasket: Workbasket;
   readonly action = input<ACTION>(undefined);
   readonly workbasketForm = viewChild<NgForm>('WorkbasketForm');
   workbasketClone: Workbasket;
@@ -104,6 +101,10 @@ export class WorkbasketInformationComponent implements OnInit, OnChanges, OnDest
   private requestInProgressService = inject(RequestInProgressService);
   private formsValidatorService = inject(FormsValidatorService);
   private notificationService = inject(NotificationService);
+
+  ngOnChanges() {
+    this.workbasketClone = { ...this.workbasket };
+  }
 
   ngOnInit() {
     this.allTypes = new Map([
@@ -152,10 +153,6 @@ export class WorkbasketInformationComponent implements OnInit, OnChanges, OnDest
         }
         this.store.dispatch(new OnButtonPressed(undefined));
       });
-  }
-
-  ngOnChanges(changes?: SimpleChanges) {
-    this.workbasketClone = { ...this.workbasket };
   }
 
   onSubmit() {

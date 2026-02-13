@@ -16,17 +16,7 @@
  *
  */
 
-import {
-  Component,
-  ElementRef,
-  EventEmitter,
-  OnChanges,
-  OnInit,
-  Output,
-  SimpleChanges,
-  input,
-  viewChild
-} from '@angular/core';
+import { Component, effect, ElementRef, OnInit, input, output, viewChild } from '@angular/core';
 import { Page } from 'app/shared/models/page';
 import { MatPaginator } from '@angular/material/paginator';
 import { Observable, Subject } from 'rxjs';
@@ -44,7 +34,7 @@ import { MatOption } from '@angular/material/core';
   styleUrls: ['./pagination.component.scss'],
   imports: [MatPaginator, MatFormField, MatInput, FormsModule, MatAutocompleteTrigger, MatAutocomplete, MatOption]
 })
-export class PaginationComponent implements OnInit, OnChanges {
+export class PaginationComponent implements OnInit {
   readonly page = input<Page>(undefined);
 
   readonly type = input<String>(undefined);
@@ -55,7 +45,7 @@ export class PaginationComponent implements OnInit, OnChanges {
 
   readonly resetPaging = input<Observable<null>>(undefined);
 
-  @Output() changePage = new EventEmitter<number>();
+  readonly changePage = output<number>();
 
   readonly paginator = viewChild(MatPaginator);
 
@@ -68,33 +58,40 @@ export class PaginationComponent implements OnInit, OnChanges {
   pageNumbers: number[];
   filteredPages: string[] = [];
 
+  constructor() {
+    effect(() => {
+      const page = this.page();
+      if (page) {
+        this.pageSelected = page.number;
+        this.updateGoto();
+      }
+    });
+
+    effect(() => {
+      this.hasItems = this.numberOfItems() > 0;
+    });
+
+    effect(() => {
+      const expanded = this.expanded();
+      const paginationWrapper = this.paginationWrapper();
+      const rangeLabel = paginationWrapper?.nativeElement?.querySelector('.mat-mdc-paginator-range-label');
+      const container = paginationWrapper?.nativeElement?.querySelector('.mat-mdc-paginator-container');
+      if (rangeLabel && container) {
+        if (!expanded) {
+          container.style.justifyContent = 'center';
+          rangeLabel.style.display = 'none';
+        } else {
+          container.style.justifyContent = 'flex-end';
+          rangeLabel.style.display = 'block';
+        }
+      }
+    });
+  }
+
   ngOnInit() {
     this.changeLabel();
     const resetPaging = this.resetPaging();
     if (resetPaging) resetPaging.pipe(takeUntil(this.destroy$)).subscribe(() => this.goToPage(1));
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    const paginationWrapper = this.paginationWrapper();
-    const rangeLabel = paginationWrapper?.nativeElement?.querySelector('.mat-mdc-paginator-range-label');
-    const container = paginationWrapper?.nativeElement?.querySelector('.mat-mdc-paginator-container');
-    if (rangeLabel && container) {
-      if (!this.expanded()) {
-        container.style.justifyContent = 'center';
-        rangeLabel.style.display = 'none';
-      } else {
-        container.style.justifyContent = 'flex-end';
-        rangeLabel.style.display = 'block';
-      }
-    }
-
-    if (changes.page && changes.page.currentValue) {
-      this.pageSelected = changes.page.currentValue.number;
-    }
-    this.hasItems = this.numberOfItems() > 0;
-    if (changes.page) {
-      this.updateGoto();
-    }
   }
 
   changeLabel() {

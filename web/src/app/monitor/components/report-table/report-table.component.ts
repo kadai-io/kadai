@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, model, OnChanges } from '@angular/core';
 import { ReportData } from 'app/monitor/models/report-data';
 import { ReportRow } from '../../models/report-row';
 
@@ -29,18 +29,17 @@ import { MatButton } from '@angular/material/button';
   imports: [MatButton]
 })
 export class ReportTableComponent implements OnChanges {
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
-  @Input()
-  reportData: ReportData;
+  readonly reportData = model<ReportData>();
 
   fullReportData: ReportData;
   fullRowsData: ReportRow[][];
   currentExpHeaders = 0;
 
   ngOnChanges() {
-    this.fullReportData = { ...this.reportData };
+    const currentData = this.reportData();
+    if (!currentData) return;
+
+    this.fullReportData = { ...currentData };
     this.fullRowsData = this.fullReportData.rows?.reduce((resultArray: ReportRow[][], item, index) => {
       const itemsPerChunk = 20;
       if (this.fullReportData.rows.length > itemsPerChunk) {
@@ -57,14 +56,17 @@ export class ReportTableComponent implements OnChanges {
       return resultArray;
     }, []);
     if (this.fullRowsData) {
-      this.reportData.rows = this.fullRowsData[0];
+      this.reportData.update((data) => ({ ...data, rows: this.fullRowsData[0] }));
       this.fullRowsData.splice(0, 1);
     }
   }
 
   showMoreRows() {
     if (this.hasMoreRows()) {
-      this.reportData.rows = [...this.reportData.rows, ...this.fullRowsData[0]];
+      this.reportData.update((data) => ({
+        ...data,
+        rows: [...data.rows, ...this.fullRowsData[0]]
+      }));
       this.fullRowsData.splice(0, 1);
     }
   }
@@ -74,9 +76,9 @@ export class ReportTableComponent implements OnChanges {
   }
 
   toggleFold(index: number, sumRow: boolean = false) {
-    let rows = sumRow ? this.reportData.sumRow : this.reportData.rows;
+    let rows = sumRow ? this.reportData().sumRow : this.reportData().rows;
     const toggleRow = rows[index];
-    if (toggleRow.depth < this.reportData.meta.rowDesc.length - 1) {
+    if (toggleRow.depth < this.reportData().meta.rowDesc.length - 1) {
       const firstChildRow = rows[index + 1];
       firstChildRow.display = !firstChildRow.display;
 
@@ -87,14 +89,18 @@ export class ReportTableComponent implements OnChanges {
       });
 
       this.currentExpHeaders = Math.max(
-        ...this.reportData.rows.filter((r) => r.display).map((r) => r.depth),
-        ...this.reportData.sumRow.filter((r) => r.display).map((r) => r.depth)
+        ...this.reportData()
+          .rows.filter((r) => r.display)
+          .map((r) => r.depth),
+        ...this.reportData()
+          .sumRow.filter((r) => r.display)
+          .map((r) => r.depth)
       );
     }
   }
 
   canRowCollapse(index: number, sumRow: boolean = false) {
-    const rows = sumRow ? this.reportData.sumRow : this.reportData.rows;
+    const rows = sumRow ? this.reportData().sumRow : this.reportData().rows;
     return !rows[index + 1].display;
   }
 }

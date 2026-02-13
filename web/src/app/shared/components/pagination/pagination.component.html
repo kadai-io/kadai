@@ -18,9 +18,8 @@
 
 <div #pagination class="pagination">
   <mat-paginator (page)="changeToPage($event)" [length]="page()?.totalElements"
-                 [class]="
-                 {'pagination__mat-paginator--expanded': expanded(),
-                 'pagination__mat-paginator--collapsed': !expanded() }" [pageSize]="page()?.size"
+                 [class.pagination__mat-paginator--expanded]="expanded()"
+                 [class.pagination__mat-paginator--collapsed]="!expanded()" [pageSize]="page()?.size"
                  [showFirstLastButtons]="true" class="pagination__mat-paginator"
                  hidePageSize="true" />
   @if (expanded()) {

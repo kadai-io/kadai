@@ -20,13 +20,12 @@ import {
   AfterViewChecked,
   AfterViewInit,
   Component,
+  effect,
   ElementRef,
   inject,
-  OnChanges,
   OnDestroy,
   OnInit,
   QueryList,
-  SimpleChanges,
   ViewChildren,
   input,
   output
@@ -80,13 +79,11 @@ import { MatInput } from '@angular/material/input';
     ReactiveFormsModule
   ]
 })
-export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit, AfterViewChecked {
+export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked {
   formsValidatorService = inject(FormsValidatorService);
   readonly workbasket = input<Workbasket>(undefined);
   readonly expanded = input<boolean>(undefined);
   readonly accessItemsValidityChanged = output<boolean>();
-  // TODO: Skipped for migration because:
-  //  There are references to this query that cannot be migrated automatically.
   @ViewChildren('htmlInputElement') inputs: QueryList<ElementRef>;
   selectedRows: number[] = [];
   workbasketClone: Workbasket;
@@ -117,6 +114,19 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
   private notificationsService = inject(NotificationService);
   private store = inject(Store);
   private ngxsActions$ = inject(Actions);
+
+  constructor() {
+    // React to workbasket input changes (replaces ngOnChanges)
+    effect(() => {
+      const workbasket = this.workbasket();
+      if (workbasket) {
+        if (this.workbasketClone && this.workbasketClone.workbasketId !== workbasket.workbasketId) {
+          this.init();
+        }
+        this.workbasketClone = workbasket;
+      }
+    });
+  }
 
   get accessItemsGroups(): FormArray {
     return this.AccessItemsForm.get('accessItemsGroups') as FormArray;
@@ -230,16 +240,6 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
         this.isNewAccessItemsFromStore = false;
       }
     }
-  }
-
-  ngOnChanges(changes?: SimpleChanges) {
-    const workbasket = this.workbasket();
-    if (this.workbasketClone) {
-      if (this.workbasketClone.workbasketId != workbasket.workbasketId) {
-        this.init();
-      }
-    }
-    this.workbasketClone = workbasket;
   }
 
   init() {

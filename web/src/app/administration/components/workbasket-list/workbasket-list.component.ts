@@ -16,8 +16,9 @@
  *
  */
 
-import { Component, ElementRef, inject, OnDestroy, OnInit, input, viewChild } from '@angular/core';
+import { Component, computed, effect, ElementRef, inject, OnDestroy, OnInit, input, viewChild } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { WorkbasketSummaryRepresentation } from 'app/shared/models/workbasket-summary-representation';
 import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
@@ -82,10 +83,18 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   workbasketsSummaryRepresentation$: Observable<WorkbasketSummaryRepresentation> = inject(Store).select(
     WorkbasketSelectors.workbasketsSummaryRepresentation
   );
-  selectedWorkbasket$: Observable<Workbasket> = inject(Store).select(WorkbasketSelectors.selectedWorkbasket);
-  getWorkbasketListFilter$: Observable<WorkbasketQueryFilterParameter> = inject(Store).select(
-    FilterSelectors.getWorkbasketListFilter
-  );
+  // Convert store selectors to signals
+  private selectedWorkbasket = toSignal(inject(Store).select(WorkbasketSelectors.selectedWorkbasket), {
+    initialValue: undefined
+  });
+  private workbasketListFilter = toSignal(inject(Store).select(FilterSelectors.getWorkbasketListFilter), {
+    initialValue: {}
+  });
+  // Computed selectedId from workbasket signal
+  private selectedIdComputed = computed(() => {
+    const workbasket = this.selectedWorkbasket();
+    return workbasket?.workbasketId;
+  });
   destroy$ = new Subject<void>();
   readonly workbasketList = viewChild<MatSelectionList>('workbasket');
   private store = inject(Store);
@@ -106,17 +115,22 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
       this.requestInProgressService.setRequestInProgress(false);
       this.requestInProgressLocal = false;
     });
+
+    // Use effect to sync selectedId with signal
+    effect(() => {
+      const id = this.selectedIdComputed();
+      this.selectedId = id ?? undefined;
+    });
+
+    // Use effect to react to filter changes
+    effect(() => {
+      const filter = this.workbasketListFilter();
+      this.performFilter(filter);
+    });
   }
 
   ngOnInit() {
     this.requestInProgressService.setRequestInProgress(true);
-    this.selectedWorkbasket$.pipe(takeUntil(this.destroy$)).subscribe((selectedWorkbasket) => {
-      if (typeof selectedWorkbasket !== 'undefined') {
-        this.selectedId = selectedWorkbasket.workbasketId;
-      } else {
-        this.selectedId = undefined;
-      }
-    });
 
     this.workbasketService
       .workbasketSavedTriggered()
@@ -165,10 +179,6 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
       .subscribe((value) => {
         this.requestInProgress = value;
       });
-
-    this.getWorkbasketListFilter$.pipe(takeUntil(this.destroy$)).subscribe((filter) => {
-      this.performFilter(filter);
-    });
   }
 
   selectWorkbasket(id: string) {

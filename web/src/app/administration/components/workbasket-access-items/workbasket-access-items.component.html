@@ -90,8 +90,8 @@
                 <!-- ACCESS ID -->
                 @if ((accessItemsCustomization$ | async)?.accessId.lookupField) {
                   <td
-                    [class]="{	'has-warning': (accessItemsClone[index].accessId !== accessItem.value.accessId),
-                							'has-error': !accessItem.value.accessId || accessItemsGroups.controls[index].get('accessId')?.invalid }"
+                    [class.has-warning]="accessItemsClone[index].accessId !== accessItem.value.accessId"
+                    [class.has-error]="!accessItem.value.accessId || accessItemsGroups.controls[index].get('accessId')?.invalid"
                     class="workbasket-access-items__typeahead">
                     <kadai-shared-type-ahead (accessIdEventEmitter)="accessItemSelected($event, index)"
                       [displayError]="true"
@@ -101,8 +101,8 @@
                   </td>
                 } @else {
                   <td>
-                    <div [class]="{ 'has-warning': (accessItemsClone[index].accessId !== accessItem.value.accessId),
-																  'has-error': !accessItem.value.accessId && formsValidatorService.formSubmitAttempt}">
+                    <div [class.has-warning]="accessItemsClone[index].accessId !== accessItem.value.accessId"
+                         [class.has-error]="!accessItem.value.accessId && formsValidatorService.formSubmitAttempt">
                       <input #htmlInputElement
                              [@validation]="toggleValidationAccessIdMap.get(index)"
                              formControlName="accessId"

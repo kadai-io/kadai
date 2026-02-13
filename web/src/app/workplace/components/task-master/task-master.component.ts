@@ -16,7 +16,8 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, effect, inject, OnDestroy, OnInit } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Task } from 'app/workplace/models/task';
 import { TaskService } from 'app/workplace/services/task.service';
 import { Observable, Subject } from 'rxjs';
@@ -64,8 +65,11 @@ export class TaskMasterComponent implements OnInit, OnDestroy {
   requestInProgress = false;
   selectedSearchType: Search = Search.byWorkbasket;
   destroy$ = new Subject();
-  filter$: Observable<TaskQueryFilterParameter> = inject(Store).select(FilterSelectors.getTaskFilter);
-  cards$: Observable<number> = inject(Store).select(WorkplaceSelectors.getNumberOfCards);
+  // Convert store selectors to signals for direct access
+  private filter = toSignal(inject(Store).select(FilterSelectors.getTaskFilter), {
+    initialValue: {} as TaskQueryFilterParameter
+  });
+  private cards = toSignal(inject(Store).select(WorkplaceSelectors.getNumberOfCards), { initialValue: 9 });
   private taskService = inject(TaskService);
   private workplaceService = inject(WorkplaceService);
   private notificationsService = inject(NotificationService);
@@ -73,12 +77,16 @@ export class TaskMasterComponent implements OnInit, OnDestroy {
   private store = inject(Store);
   private requestInProgressService = inject(RequestInProgressService);
 
-  ngOnInit() {
-    this.cards$.pipe(takeUntil(this.destroy$)).subscribe((cards) => {
-      this.paging['page-size'] = cards;
+  constructor() {
+    // Use effect to react to card count changes
+    effect(() => {
+      const cardCount = this.cards();
+      this.paging['page-size'] = cardCount;
       this.getTasks();
     });
+  }
 
+  ngOnInit() {
     this.taskService.taskSelectedStream.pipe(takeUntil(this.destroy$)).subscribe((task: Task) => {
       this.selectedId = task ? task.taskId : '';
       if (!this.tasks) {
@@ -122,10 +130,9 @@ export class TaskMasterComponent implements OnInit, OnDestroy {
 
   performFilter() {
     this.paging.page = 1;
-    this.filter$.pipe(take(1)).subscribe((filter) => {
-      this.filterBy = { ...filter };
-      this.getTasks();
-    });
+    // Direct signal access instead of pipe(take(1))
+    this.filterBy = { ...this.filter() };
+    this.getTasks();
   }
 
   selectSearchType(type: Search) {

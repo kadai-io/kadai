@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, Input, OnDestroy, OnInit, output } from '@angular/core';
+import { Component, inject, model, OnDestroy, OnInit } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { takeUntil } from 'rxjs/operators';
 import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
@@ -33,10 +33,7 @@ import { FormsModule } from '@angular/forms';
   imports: [MatFormField, MatLabel, MatInput, FormsModule]
 })
 export class TaskCustomFieldsComponent implements OnInit, OnDestroy {
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
-  @Input() task: Task;
-  readonly taskChange = output<Task>();
+  readonly task = model<Task>();
   readonly lengthError = 'You have reached the maximum length';
   inputOverflowMap = new Map<string, boolean>();
   validateKeypress: Function;
@@ -52,9 +49,12 @@ export class TaskCustomFieldsComponent implements OnInit, OnDestroy {
       this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
     };
 
-    this.customFields = Object.keys(this.task).filter(
-      (attribute) => attribute.startsWith('custom') && /\d/.test(attribute)
-    );
+    const currentTask = this.task();
+    if (currentTask) {
+      this.customFields = Object.keys(currentTask).filter(
+        (attribute) => attribute.startsWith('custom') && /\d/.test(attribute)
+      );
+    }
   }
 
   ngOnDestroy(): void {

@@ -16,7 +16,7 @@
 ~
 -->
 
-@if (task && task.taskId) {
+@if (task() && task().taskId) {
   <div class="task-status-details">
     <!-- LEFT COLUMN -->
     <div class="task-status-details__column--left">
@@ -24,8 +24,8 @@
       <mat-form-field appearance="outline">
         <mat-label>Modification Date</mat-label>
         <label for="task-modified"></label>
-        <input [value]="task.modified | date: 'medium'" disabled id="task-modified" matInput
-               name="task.modified"
+        <input [value]="task().modified | date: 'medium'" disabled id="task-modified" matInput
+               name="task-modified"
                placeholder="Modified Date"
                type="text">
       </mat-form-field>
@@ -33,8 +33,8 @@
       <mat-form-field appearance="outline">
         <mat-label>Completion Date</mat-label>
         <label for="task-completed"></label>
-        <input [value]="task.completed | date: 'medium'" disabled id="task-completed" matInput
-               name="task.completed"
+        <input [value]="task().completed | date: 'medium'" disabled id="task-completed" matInput
+               name="task-completed"
                placeholder="Complete Date"
                type="text">
       </mat-form-field>
@@ -42,7 +42,7 @@
       <mat-form-field appearance="outline">
         <mat-label>State</mat-label>
         <label for="task-state"></label>
-        <input [(ngModel)]="task.state" disabled id="task-state" matInput name="task.state"
+        <input [value]="task().state" disabled id="task-state" matInput name="task-state"
                placeholder="State"
                type="text">
       </mat-form-field>
@@ -51,7 +51,7 @@
         <mat-form-field appearance="outline">
           <mat-label>Task read</mat-label>
           <label for="task-read"></label>
-          <input [(ngModel)]="task.read" disabled id="task-read" matInput name="task.read"
+          <input [value]="task().read" disabled id="task-read" matInput name="task-read"
                  placeholder="Read" type="text">
         </mat-form-field>
         <span class="task-status-details__gap"></span>
@@ -59,8 +59,8 @@
         <mat-form-field appearance="outline">
           <mat-label>Transferred</mat-label>
           <label for="task-transferred"></label>
-          <input [(ngModel)]="task.transferred" disabled id="task-transferred" matInput
-                 name="task.transferred"
+          <input [value]="task().transferred" disabled id="task-transferred" matInput
+                 name="task-transferred"
                  placeholder="Transferred"
                  type="text">
         </mat-form-field>
@@ -72,8 +72,8 @@
       <mat-form-field appearance="outline">
         <mat-label>Claim Date</mat-label>
         <label for="task-claimed"></label>
-        <input [value]="task.claimed | date: 'medium'" disabled id="task-claimed" matInput
-               name="task.claimed"
+        <input [value]="task().claimed | date: 'medium'" disabled id="task-claimed" matInput
+               name="task-claimed"
                placeholder="Claimed Date"
                type="text">
       </mat-form-field>
@@ -81,8 +81,8 @@
       <mat-form-field appearance="outline">
         <mat-label>Planned Date</mat-label>
         <label for="task-planned"></label>
-        <input [value]="task.planned | date: 'medium'" disabled id="task-planned" matInput
-               name="task.planned"
+        <input [value]="task().planned | date: 'medium'" disabled id="task-planned" matInput
+               name="task-planned"
                placeholder="Planned Date"
                type="text">
       </mat-form-field>
@@ -90,8 +90,8 @@
       <mat-form-field appearance="outline">
         <mat-label>Creation Date</mat-label>
         <label for="task-created"></label>
-        <input [value]="task.created | date: 'medium'" disabled id="task-created" matInput
-               name="task.created"
+        <input [value]="task().created | date: 'medium'" disabled id="task-created" matInput
+               name="task-created"
                placeholder="Creation Date"
                type="text">
       </mat-form-field>
@@ -99,7 +99,7 @@
       <mat-form-field appearance="outline">
         <mat-label>Received</mat-label>
         <label for="task-received"></label>
-        <input [(ngModel)]="task.received" disabled id="task-received" matInput name="task.received"
+        <input [value]="task().received" disabled id="task-received" matInput name="task-received"
                placeholder="Received"
                type="text">
       </mat-form-field>

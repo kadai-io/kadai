@@ -22,7 +22,7 @@ import {
   ElementRef,
   HostListener,
   inject,
-  Input,
+  model,
   OnDestroy,
   OnInit,
   input,
@@ -66,9 +66,7 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
   emptyTreeNodes = false;
   filter: string;
   category: string;
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
-  @Input() selectNodeId: string;
+  readonly selectNodeId = model<string>();
   readonly filterText = input<string>(undefined);
   readonly filterIcon = input('');
   readonly switchKadaiSpinnerEmit = output<boolean>();
@@ -127,13 +125,13 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(([selectedClassificationId, treeNodes]) => {
         this.treeNodes = treeNodes;
-        this.selectNodeId = typeof selectedClassificationId !== 'undefined' ? selectedClassificationId : undefined;
+        this.selectNodeId.set(typeof selectedClassificationId !== 'undefined' ? selectedClassificationId : undefined);
         this.requestInProgressService.setRequestInProgress(false);
         if (typeof this.tree().treeModel.getActiveNode() !== 'undefined') {
-          if (this.tree().treeModel.getActiveNode().data.classificationId !== this.selectNodeId) {
+          if (this.tree().treeModel.getActiveNode().data.classificationId !== this.selectNodeId()) {
             // wait for angular's two-way binding to convert the treeNodes to the internal tree structure.
             // after that conversion the new treeNodes are available
-            setTimeout(() => this.selectNode(this.selectNodeId), 0);
+            setTimeout(() => this.selectNode(this.selectNodeId()), 0);
           }
         }
       });
@@ -150,13 +148,13 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   ngAfterViewChecked(): void {
-    if (this.selectNodeId && !this.tree().treeModel.getActiveNode()) {
-      this.selectNode(this.selectNodeId);
+    if (this.selectNodeId() && !this.tree().treeModel.getActiveNode()) {
+      this.selectNode(this.selectNodeId());
     }
 
-    if (typeof this.selectNodeId !== 'undefined') {
-      if (typeof this.getNode(this.selectNodeId) !== 'undefined') {
-        this.getNode(this.selectNodeId).ensureVisible();
+    if (typeof this.selectNodeId() !== 'undefined') {
+      if (typeof this.getNode(this.selectNodeId()) !== 'undefined') {
+        this.getNode(this.selectNodeId()).ensureVisible();
       }
     }
 
@@ -172,7 +170,7 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   onActivate(treeNode: any) {
     const id = treeNode.node.data.classificationId;
-    this.selectNodeId = id;
+    this.selectNodeId.set(id);
     this.requestInProgressService.setRequestInProgress(true);
     this.store.dispatch(new SelectClassification(id));
     this.location.go(this.location.path().replace(/(classifications).*/g, `classifications/(detail:${id})`));
@@ -242,7 +240,7 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   private deselectActiveNode() {
     const activeNode = this.tree().treeModel.getActiveNode();
-    delete this.selectNodeId;
+    this.selectNodeId.set(undefined);
     activeNode.setIsActive(false);
     activeNode.blur();
   }
