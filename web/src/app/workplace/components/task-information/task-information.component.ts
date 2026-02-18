@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import {
 import { Task } from 'app/workplace/models/task';
 import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
 import { FormsModule, NgForm } from '@angular/forms';
-import { Select } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
@@ -39,7 +38,7 @@ import { Classification } from '../../../shared/models/classification';
 import { TasksCustomisation } from '../../../shared/models/customisation';
 import { takeUntil } from 'rxjs/operators';
 import { AccessId } from '../../../shared/models/access-id';
-import { AsyncPipe, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatSelect } from '@angular/material/select';
@@ -54,19 +53,18 @@ import {
   MatDatepickerModule,
   MatDatepickerToggle
 } from '@angular/material/datepicker';
+import { Store } from '@ngxs/store';
 
 @Component({
   selector: 'kadai-task-information',
   templateUrl: './task-information.component.html',
   styleUrls: ['./task-information.component.scss'],
   imports: [
-    NgIf,
     FormsModule,
     MatFormField,
     MatLabel,
     MatInput,
     MatSelect,
-    NgFor,
     MatOption,
     MatTooltip,
     MatDatepickerInput,
@@ -98,7 +96,9 @@ export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
   readonly lengthError = 'You have reached the maximum length';
   inputOverflowMap = new Map<string, boolean>();
   validateInputOverflow: Function;
-  @Select(EngineConfigurationSelectors.tasksCustomisation) tasksCustomisation$: Observable<TasksCustomisation>;
+  tasksCustomisation$: Observable<TasksCustomisation> = inject(Store).select(
+    EngineConfigurationSelectors.tasksCustomisation
+  );
   private classificationService = inject(ClassificationsService);
   private formsValidatorService = inject(FormsValidatorService);
   private destroy$ = new Subject<void>();

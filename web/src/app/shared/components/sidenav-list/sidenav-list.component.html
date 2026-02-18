@@ -1,65 +1,87 @@
 <!--
-  ~ Copyright [2025] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2026] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
 <mat-nav-list class="navlist">
-  <a (click)="toggleSidenav(administrationsUrl)" *ngIf="administrationAccess"
-     [routerLinkActive]="['active']"
-     [routerLink]=[administrationsUrl] class="navlist__item navlist__admin" mat-list-item>Administration</a>
+  @if (administrationAccess) {
+    <a (click)="toggleSidenav(administrationsUrl)"
+       [routerLinkActive]="['active']"
+       [routerLink]=[administrationsUrl] class="navlist__item navlist__admin" mat-list-item>Administration</a>
+  }
   <div class="navlist__admin-item">
-    <a (click)="toggleSidenav(workbasketsUrl)" *ngIf="administrationAccess"
-       [routerLinkActive]="['active__sub']"
-       [routerLink]=[workbasketsUrl] class="navlist__item  navlist__admin-workbaskets"
-       mat-list-item>Workbaskets</a>
-    <a (click)="toggleSidenav(classificationUrl)" *ngIf="administrationAccess"
-       [routerLinkActive]="['active__sub']"
-       [routerLink]=[classificationUrl] class="navlist__item  navlist__admin-classifications"
-       mat-list-item>Classifications</a>
-    <a (click)="toggleSidenav(accessUrl)" *ngIf="administrationAccess"
-       [routerLinkActive]="['active__sub']"
-       [routerLink]=[accessUrl] class="navlist__item  navlist__admin-access-items" mat-list-item>Access
-      Items</a>
-    <a (click)="toggleSidenav(routingUrl)" *ngIf="(routingAccess)"
-       [routerLinkActive]="['active__sub']"
-       [routerLink]=[routingUrl] class="navlist__item  navlist__admin-task-routing" mat-list-item>Task
-      Routing</a>
+    @if (administrationAccess) {
+      <a (click)="toggleSidenav(workbasketsUrl)"
+         [routerLinkActive]="['active__sub']"
+         [routerLink]=[workbasketsUrl] class="navlist__item  navlist__admin-workbaskets"
+         mat-list-item>Workbaskets</a>
+    }
+    @if (administrationAccess) {
+      <a (click)="toggleSidenav(classificationUrl)"
+         [routerLinkActive]="['active__sub']"
+         [routerLink]=[classificationUrl] class="navlist__item  navlist__admin-classifications"
+         mat-list-item>Classifications</a>
+    }
+    @if (administrationAccess) {
+      <a (click)="toggleSidenav(accessUrl)"
+         [routerLinkActive]="['active__sub']"
+         [routerLink]=[accessUrl] class="navlist__item  navlist__admin-access-items" mat-list-item>Access
+        Items</a>
+    }
+    @if ((routingAccess)) {
+      <a (click)="toggleSidenav(routingUrl)"
+         [routerLinkActive]="['active__sub']"
+         [routerLink]=[routingUrl] class="navlist__item  navlist__admin-task-routing" mat-list-item>Task
+        Routing</a>
+    }
   </div>
-  <a (click)="toggleSidenav(monitorUrl)" *ngIf="monitorAccess" [routerLinkActive]="['active']"
-     [routerLink]=[monitorUrl]
-     class="navlist__item navlist__monitor" mat-list-item>Monitor</a>
-  <a (click)="toggleSidenav(workplaceUrl)" *ngIf="workplaceAccess" [routerLinkActive]="['active']"
-     [routerLink]=[workplaceUrl] class="navlist__item navlist__workplace"
-     mat-list-item>Workplace</a>
+  @if (monitorAccess) {
+    <a (click)="toggleSidenav(monitorUrl)" [routerLinkActive]="['active']"
+       [routerLink]=[monitorUrl]
+       class="navlist__item navlist__monitor" mat-list-item>Monitor</a>
+  }
+  @if (workplaceAccess) {
+    <a (click)="toggleSidenav(workplaceUrl)" [routerLinkActive]="['active']"
+       [routerLink]=[workplaceUrl] class="navlist__item navlist__workplace"
+       mat-list-item>Workplace</a>
+  }
   <div class="navlist__admin-item">
-    <a (click)="toggleSidenav(workplaceUrl)" *ngIf="workplaceAccess"
-       [queryParams]="{component: 'workbaskets'}"
-       [routerLinkActive]="['active__sub']"
-       [routerLink]=[workplaceUrl] class="navlist__item  navlist__workplace--workbaskets"
-       mat-list-item>Workbaskets</a>
-    <a (click)="toggleSidenav(workplaceUrl)" *ngIf="workplaceAccess"
-       [queryParams]="{component: 'task-search'}"
-       [routerLinkActive]="['active__sub']"
-       [routerLink]=[workplaceUrl] class="navlist__item  navlist__workplace--task-search"
-       mat-list-item>Task Search</a>
+    @if (workplaceAccess) {
+      <a (click)="toggleSidenav(workplaceUrl)"
+         [queryParams]="{component: 'workbaskets'}"
+         [routerLinkActive]="['active__sub']"
+         [routerLink]=[workplaceUrl] class="navlist__item  navlist__workplace--workbaskets"
+         mat-list-item>Workbaskets</a>
+    }
+    @if (workplaceAccess) {
+      <a (click)="toggleSidenav(workplaceUrl)"
+         [queryParams]="{component: 'task-search'}"
+         [routerLinkActive]="['active__sub']"
+         [routerLink]=[workplaceUrl] class="navlist__item  navlist__workplace--task-search"
+         mat-list-item>Task Search</a>
+    }
   </div>
-  <a (click)="toggleSidenav(historyUrl)" *ngIf="historyAccess" [routerLinkActive]="['active']"
-     [routerLink]=[historyUrl]
-     class="navlist__item navlist__history" mat-list-item>History</a>
-  <a (click)="toggleSidenav(settingsURL)" *ngIf="settingsAccess" [routerLinkActive]="['active']"
-     [routerLink]=[settingsURL]
-     class="navlist__item navlist__setting" mat-list-item>Settings</a>
+  @if (historyAccess) {
+    <a (click)="toggleSidenav(historyUrl)" [routerLinkActive]="['active']"
+       [routerLink]=[historyUrl]
+       class="navlist__item navlist__history" mat-list-item>History</a>
+  }
+  @if (settingsAccess) {
+    <a (click)="toggleSidenav(settingsURL)" [routerLinkActive]="['active']"
+       [routerLink]=[settingsURL]
+       class="navlist__item navlist__setting" mat-list-item>Settings</a>
+  }
 </mat-nav-list>

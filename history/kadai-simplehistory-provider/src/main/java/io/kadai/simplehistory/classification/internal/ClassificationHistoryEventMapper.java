@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -30,11 +30,11 @@ public interface ClassificationHistoryEventMapper {
 
   @Insert(
       "<script>INSERT INTO CLASSIFICATION_HISTORY_EVENT (ID,"
-          + " EVENT_TYPE, CREATED, USER_ID, CLASSIFICATION_ID, APPLICATION_ENTRY_POINT, CATEGORY,"
+          + " EVENT_TYPE, CREATED, USER_ID, PROXY_ACCESS_ID, CLASSIFICATION_ID, APPLICATION_ENTRY_POINT, CATEGORY,"
           + " DOMAIN, KEY, NAME, PARENT_ID, PARENT_KEY, PRIORITY, SERVICE_LEVEL, TYPE,"
           + " CUSTOM_1, CUSTOM_2, CUSTOM_3, CUSTOM_4, CUSTOM_5, CUSTOM_6, CUSTOM_7, CUSTOM_8, DETAILS)"
           + " VALUES ( #{historyEvent.id}, #{historyEvent.eventType},"
-          + " #{historyEvent.created}, #{historyEvent.userId}, #{historyEvent.classificationId}, "
+          + " #{historyEvent.created}, #{historyEvent.userId}, #{historyEvent.proxyAccessId}, #{historyEvent.classificationId}, "
           + " #{historyEvent.applicationEntryPoint}, #{historyEvent.category}, "
           + " #{historyEvent.domain}, #{historyEvent.key}, #{historyEvent.name}, #{historyEvent.parentId}, "
           + " #{historyEvent.parentKey}, #{historyEvent.priority}, #{historyEvent.serviceLevel}, #{historyEvent.type}, "
@@ -46,7 +46,7 @@ public interface ClassificationHistoryEventMapper {
 
   @Select(
       "<script>"
-          + "SELECT ID, EVENT_TYPE, CREATED, USER_ID, CLASSIFICATION_ID, APPLICATION_ENTRY_POINT, CATEGORY,"
+          + "SELECT ID, EVENT_TYPE, CREATED, USER_ID, PROXY_ACCESS_ID, CLASSIFICATION_ID, APPLICATION_ENTRY_POINT, CATEGORY,"
           + " DOMAIN, KEY, NAME, PARENT_ID, PARENT_KEY, PRIORITY, SERVICE_LEVEL, TYPE,"
           + " CUSTOM_1, CUSTOM_2, CUSTOM_3, CUSTOM_4, CUSTOM_5, CUSTOM_6, CUSTOM_7, CUSTOM_8, DETAILS"
           + " FROM CLASSIFICATION_HISTORY_EVENT WHERE ID = #{id} "
@@ -56,6 +56,7 @@ public interface ClassificationHistoryEventMapper {
   @Result(property = "eventType", column = "EVENT_TYPE")
   @Result(property = "created", column = "CREATED")
   @Result(property = "userId", column = "USER_ID")
+  @Result(property = "proxyAccessId", column = "PROXY_ACCESS_ID")
   @Result(property = "classificationId", column = "CLASSIFICATION_ID")
   @Result(property = "applicationEntryPoint", column = "APPLICATION_ENTRY_POINT")
   @Result(property = "category", column = "CATEGORY")

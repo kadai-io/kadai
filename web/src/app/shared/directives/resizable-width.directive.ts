@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,13 +25,13 @@ export class ResizableWidthDirective {
 
   private startX: number;
 
-  @HostListener('mouseover', ['$event'])
+  @HostListener('mouseover')
   onMouseover() {
     this.renderer.setStyle(document.body, 'cursor', 'col-resize');
     this.renderer.setStyle(this.el.nativeElement, 'user-select', 'none');
   }
 
-  @HostListener('mouseout', ['$event'])
+  @HostListener('mouseout')
   onMouseout() {
     this.renderer.setStyle(document.body, 'cursor', '');
     this.renderer.setStyle(this.el.nativeElement, 'user-select', '');

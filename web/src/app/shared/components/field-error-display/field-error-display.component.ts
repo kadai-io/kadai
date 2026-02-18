@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,14 +18,13 @@
 
 import { Component, Input } from '@angular/core';
 import { highlight } from 'app/shared/animations/validation.animation';
-import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'kadai-shared-field-error-display',
   templateUrl: './field-error-display.component.html',
   animations: [highlight],
   styleUrls: ['./field-error-display.component.scss'],
-  imports: [NgIf]
+  imports: []
 })
 export class FieldErrorDisplayComponent {
   @Input()

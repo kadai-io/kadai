@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package io.kadai.user.internal.models;
 
 import io.kadai.user.api.models.UserSummary;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -46,9 +47,8 @@ public class UserSummaryImpl implements UserSummary {
   public UserSummaryImpl() {}
 
   protected UserSummaryImpl(UserSummaryImpl copyFrom) {
-    this.id = copyFrom.id;
-    this.groups = copyFrom.groups;
-    this.permissions = copyFrom.permissions;
+    this.groups = new HashSet<>(copyFrom.groups);
+    this.permissions = new HashSet<>(copyFrom.permissions);
     this.firstName = copyFrom.firstName;
     this.lastName = copyFrom.lastName;
     this.fullName = copyFrom.fullName;
@@ -60,7 +60,7 @@ public class UserSummaryImpl implements UserSummary {
     this.orgLevel3 = copyFrom.orgLevel3;
     this.orgLevel2 = copyFrom.orgLevel2;
     this.orgLevel1 = copyFrom.orgLevel1;
-    this.domains = copyFrom.domains;
+    this.domains = new HashSet<>(copyFrom.domains);
   }
 
   @Override

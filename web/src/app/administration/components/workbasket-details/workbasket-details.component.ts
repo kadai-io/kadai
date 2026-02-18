@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@
  */
 
 import { Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
-import { Observable, of, Subject, timeout } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { ACTION } from 'app/shared/models/action';
-import { Actions, ofActionSuccessful, Select, Store } from '@ngxs/store';
-import { catchError, filter, take, takeUntil } from 'rxjs/operators';
+import { Actions, ofActionSuccessful, Store } from '@ngxs/store';
+import { takeUntil } from 'rxjs/operators';
 import {
   WorkbasketAndComponentAndAction,
   WorkbasketSelectors
@@ -37,7 +37,7 @@ import {
   UpdateWorkbasketDistributionTargets
 } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { ButtonAction } from '../../models/button-action';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
@@ -70,22 +70,31 @@ import { WorkbasketDistributionTargetsComponent } from '../workbasket-distributi
   ]
 })
 export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
-  workbasket: Workbasket;
-  action: ACTION;
-  @Select(WorkbasketSelectors.selectedComponent)
-  selectedTab$: Observable<number>;
-  @Select(WorkbasketSelectors.badgeMessage)
-  badgeMessage$: Observable<string>;
-  @Select(WorkbasketSelectors.selectedWorkbasketAndComponentAndAction)
-  selectedWorkbasketAndComponentAndAction$: Observable<WorkbasketAndComponentAndAction>;
-  @Select(WorkbasketSelectors.selectedWorkbasket)
-  selectedWorkbasket$: Observable<Workbasket>;
+  workbasket: Workbasket = {} as Workbasket;
+  action: ACTION = ACTION.READ;
+  selectedTab$: Observable<number> = inject(Store).select(WorkbasketSelectors.selectedComponent);
+  badgeMessage$: Observable<string> = inject(Store).select(WorkbasketSelectors.badgeMessage);
+  selectedWorkbasketAndComponentAndAction$: Observable<WorkbasketAndComponentAndAction> = inject(Store).select(
+    WorkbasketSelectors.selectedWorkbasketAndComponentAndAction
+  );
   destroy$ = new Subject<void>();
   @Input() expanded: boolean;
+  areAllAccessItemsValid = true;
+  protected readonly ACTION = ACTION;
   private store = inject(Store);
   private ngxsActions$ = inject(Actions);
 
-  ngOnInit() {
+  ngOnInit(): void {
+    const workbasketAndComponentAndAction = this.store.selectSnapshot(
+      WorkbasketSelectors.selectedWorkbasketAndComponentAndAction
+    );
+    if (workbasketAndComponentAndAction?.selectedWorkbasket) {
+      this.workbasket = cloneDeep(workbasketAndComponentAndAction.selectedWorkbasket);
+    }
+    if (workbasketAndComponentAndAction?.action) {
+      this.action = workbasketAndComponentAndAction.action;
+    }
+
     this.getWorkbasketFromStore();
   }
 
@@ -96,13 +105,13 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
         b) empty workbasket is created
       */
     this.selectedWorkbasketAndComponentAndAction$.pipe(takeUntil(this.destroy$)).subscribe((object) => {
-      const workbasket = object.selectedWorkbasket;
+      const selectedWorkbasket = object.selectedWorkbasket;
       const action = object.action;
 
-      const isAnotherId = this.workbasket?.workbasketId !== workbasket?.workbasketId;
+      const isAnotherId = this.workbasket?.workbasketId !== selectedWorkbasket?.workbasketId;
       const isCreation = action !== this.action && action === ACTION.CREATE;
-      if (isAnotherId || isCreation) {
-        this.workbasket = cloneDeep(workbasket);
+      if ((isAnotherId || isCreation) && selectedWorkbasket) {
+        this.workbasket = cloneDeep(selectedWorkbasket);
       }
 
       this.action = action;
@@ -114,14 +123,10 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
         .dispatch(new UpdateWorkbasketDistributionTargets())
         .pipe(takeUntil(this.destroy$))
         .subscribe(() => {
-          this.selectedWorkbasket$
-            .pipe(
-              take(5),
-              timeout(250),
-              catchError(() => of(null)),
-              filter((val) => val !== null)
-            )
-            .subscribe((wb) => (this.workbasket = wb));
+          const workbasket = this.store.selectSnapshot(WorkbasketSelectors.selectedWorkbasket);
+          if (workbasket) {
+            this.workbasket = workbasket;
+          }
         });
     });
 
@@ -130,24 +135,24 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
         .dispatch(new UpdateWorkbasketDistributionTargets())
         .pipe(takeUntil(this.destroy$))
         .subscribe(() => {
-          this.selectedWorkbasket$
-            .pipe(
-              take(5),
-              timeout(250),
-              catchError(() => of(null)),
-              filter((val) => val !== null)
-            )
-            .subscribe((wb) => (this.workbasket = wb));
+          const workbasket = this.store.selectSnapshot(WorkbasketSelectors.selectedWorkbasket);
+          if (workbasket) {
+            this.workbasket = workbasket;
+          }
         });
     });
   }
 
-  selectComponent(index) {
+  selectComponent(index: number) {
     this.store.dispatch(new SelectComponent(index));
   }
 
   onSubmit() {
     this.store.dispatch(new OnButtonPressed(ButtonAction.SAVE));
+  }
+
+  handleAccessItemsValidityChanged(isValid: boolean) {
+    this.areAllAccessItemsValid = isValid;
   }
 
   onRestore() {

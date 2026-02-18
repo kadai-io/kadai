@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import io.kadai.task.api.models.Task;
 /** Event fired if a task is cancelled. */
 public class TaskCancelledEvent extends TaskHistoryEvent {
 
-  public TaskCancelledEvent(String id, Task task, String userId) {
-    super(id, task, userId, null);
+  public TaskCancelledEvent(String id, Task task, String userId, String proxyAccessId) {
+    super(id, task, userId, proxyAccessId, null);
     eventType = TaskHistoryEventType.CANCELLED.getName();
     created = task.getCompleted();
   }

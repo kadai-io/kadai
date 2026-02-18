@@ -1,5 +1,5 @@
 /*!
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 .settings {
   padding: 8px 32px;
@@ -38,7 +38,7 @@
   }
 
   &__button--primary {
-    background-color: $aquamarine;
+    background-color: colors.$aquamarine;
     color: white;
     margin: 4px;
   }
@@ -81,7 +81,7 @@
   }
 
   &__icon {
-    color: $aquamarine;
+    color: colors.$aquamarine;
   }
 }
 

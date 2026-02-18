@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@
 
 package io.kadai.task.rest;
 
+import io.kadai.common.api.BulkOperationResults;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.QueryPagingParameter;
 import io.kadai.common.rest.QuerySortParameter;
@@ -31,9 +33,12 @@ import io.kadai.task.api.exceptions.NotAuthorizedOnTaskCommentException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskComment;
+import io.kadai.task.rest.assembler.BulkOperationResultsRepresentationModelAssembler;
 import io.kadai.task.rest.assembler.TaskCommentRepresentationModelAssembler;
+import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
+import io.kadai.task.rest.models.TasksCommentBatchRepresentationModel;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -56,16 +61,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @EnableHypermediaSupport(type = HypermediaType.HAL)
 public class TaskCommentController implements TaskCommentApi {
-
   private final TaskService taskService;
   private final TaskCommentRepresentationModelAssembler taskCommentRepresentationModelAssembler;
+  private final BulkOperationResultsRepresentationModelAssembler
+          bulkOperationResultsRepresentationModelAssembler;
 
   @Autowired
   TaskCommentController(
-      TaskService taskService,
-      TaskCommentRepresentationModelAssembler taskCommentRepresentationModelAssembler) {
+          TaskService taskService,
+          TaskCommentRepresentationModelAssembler taskCommentRepresentationModelAssembler,
+          BulkOperationResultsRepresentationModelAssembler bulkOperationResultsRepModelAssembler) {
     this.taskService = taskService;
     this.taskCommentRepresentationModelAssembler = taskCommentRepresentationModelAssembler;
+    this.bulkOperationResultsRepresentationModelAssembler = bulkOperationResultsRepModelAssembler;
   }
 
   @GetMapping(path = RestEndpoints.URL_TASK_COMMENT)
@@ -168,5 +176,21 @@ public class TaskCommentController implements TaskCommentApi {
 
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(taskCommentRepresentationModelAssembler.toModel(createdTaskComment));
+  }
+
+  @PostMapping(path = RestEndpoints.URL_TASKS_COMMENTS)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<BulkOperationResultsRepresentationModel> createTaskCommentsBatch(
+          @RequestBody TasksCommentBatchRepresentationModel requestModel)
+          throws InvalidArgumentException {
+
+    BulkOperationResults<String, KadaiException> errors =
+            taskService.createTaskCommentsBulk(requestModel.getTaskIds(),
+                    requestModel.getTextField());
+
+    BulkOperationResultsRepresentationModel model =
+            bulkOperationResultsRepresentationModelAssembler.toModel(errors);
+
+    return ResponseEntity.ok(model);
   }
 }

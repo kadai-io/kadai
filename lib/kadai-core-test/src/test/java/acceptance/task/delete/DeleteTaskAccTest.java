@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -151,7 +151,8 @@ class DeleteTaskAccTest {
     ThrowingCallable call = () -> taskService.deleteTasks(List.of(task1.getId(), task2.getId()));
 
     NotAuthorizedException e = catchThrowableOfType(NotAuthorizedException.class, call);
-    assertThat(e.getCurrentUserId()).isEqualTo(kadaiEngine.getCurrentUserContext().getUserid());
+    assertThat(e.getCurrentUserId())
+        .isEqualTo(kadaiEngine.getCurrentUserContext().getUserId());
     assertThat(e.getRoles()).containsExactly(KadaiRole.ADMIN);
   }
 
@@ -175,7 +176,8 @@ class DeleteTaskAccTest {
     ThrowingCallable call = () -> taskService.deleteTask(task1.getId());
 
     NotAuthorizedException e = catchThrowableOfType(NotAuthorizedException.class, call);
-    assertThat(e.getCurrentUserId()).isEqualTo(kadaiEngine.getCurrentUserContext().getUserid());
+    assertThat(e.getCurrentUserId())
+        .isEqualTo(kadaiEngine.getCurrentUserContext().getUserId());
     assertThat(e.getRoles()).containsExactly(KadaiRole.ADMIN);
   }
 

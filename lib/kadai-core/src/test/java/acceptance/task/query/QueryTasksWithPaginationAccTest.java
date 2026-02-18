@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import java.lang.reflect.Field;
 import java.util.List;
 import org.apache.ibatis.session.SqlSessionManager;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -199,13 +198,12 @@ class QueryTasksWithPaginationAccTest extends AbstractAccTest {
     @Nested
     @TestInstance(Lifecycle.PER_CLASS)
     class Count {
-      @Disabled()
       @WithAccessId(user = "teamlead-1")
       @Test
       void testCountOfTaskQuery() {
         TaskService taskService = kadaiEngine.getTaskService();
         long count = taskService.createTaskQuery().count();
-        assertThat(count).isEqualTo(22L);
+        assertThat(count).isEqualTo(26L);
       }
     }
   }

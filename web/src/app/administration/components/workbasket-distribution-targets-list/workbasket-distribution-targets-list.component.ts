@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -28,13 +28,13 @@ import {
   SimpleChanges,
   ViewChild
 } from '@angular/core';
-import { isEqual } from 'lodash';
+import { isEqual } from 'lodash-es';
 import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
 import { expandDown } from 'app/shared/animations/expand.animation';
 import { MatListOption, MatSelectionList } from '@angular/material/list';
 import { CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { Side } from '../../models/workbasket-distribution-enums';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
 import { filter, map, pairwise, take, takeUntil, throttleTime } from 'rxjs/operators';
 import {
@@ -49,7 +49,7 @@ import { WorkbasketDistributionTarget } from '../../../shared/models/workbasket-
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
-import { NgIf } from '@angular/common';
+
 import { MatIcon } from '@angular/material/icon';
 import { WorkbasketFilterComponent } from '../../../shared/components/workbasket-filter/workbasket-filter.component';
 import { IconTypeComponent } from '../type-icon/icon-type.component';
@@ -65,7 +65,6 @@ import { OrderBy } from '../../../shared/pipes/order-by.pipe';
     MatToolbar,
     MatTooltip,
     MatButton,
-    NgIf,
     MatIcon,
     WorkbasketFilterComponent,
     MatSelectionList,
@@ -86,14 +85,18 @@ export class WorkbasketDistributionTargetsListComponent
   allSelected;
   @Input() component;
   @Input() transferDistributionTargetObservable: Observable<Side>;
-  @Select(WorkbasketSelectors.workbasketDistributionTargets)
-  workbasketDistributionTargets$: Observable<WorkbasketSummary[]>;
-  @Select(WorkbasketSelectors.availableDistributionTargets)
-  availableDistributionTargets$: Observable<WorkbasketSummary[]>;
-  @Select(FilterSelectors.getAvailableDistributionTargetsFilter)
-  availableDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter>;
-  @Select(FilterSelectors.getSelectedDistributionTargetsFilter)
-  selectedDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter>;
+  workbasketDistributionTargets$: Observable<WorkbasketSummary[]> = inject(Store).select(
+    WorkbasketSelectors.workbasketDistributionTargets
+  );
+  availableDistributionTargets$: Observable<WorkbasketSummary[]> = inject(Store).select(
+    WorkbasketSelectors.availableDistributionTargets
+  );
+  availableDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter> = inject(Store).select(
+    FilterSelectors.getAvailableDistributionTargetsFilter
+  );
+  selectedDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter> = inject(Store).select(
+    FilterSelectors.getSelectedDistributionTargetsFilter
+  );
   toolbarState = false;
   distributionTargets: WorkbasketDistributionTarget[];
   distributionTargetsClone: WorkbasketDistributionTarget[];
@@ -197,11 +200,6 @@ export class WorkbasketDistributionTargetsListComponent
     else this.allSelectedDiff--;
     this.allSelected = this.allSelectedDiff === this.distributionTargets.length;
     return true;
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   private assignWbs(wbs: WorkbasketSummary[]) {

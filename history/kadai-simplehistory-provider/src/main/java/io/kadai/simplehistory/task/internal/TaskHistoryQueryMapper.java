@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ public interface TaskHistoryQueryMapper {
 
   @Select(
       "<script>"
-          + "SELECT ID, BUSINESS_PROCESS_ID, PARENT_BUSINESS_PROCESS_ID, TASK_ID, EVENT_TYPE, CREATED, t.USER_ID, DOMAIN, WORKBASKET_KEY, "
+          + "SELECT ID, BUSINESS_PROCESS_ID, PARENT_BUSINESS_PROCESS_ID, TASK_ID, EVENT_TYPE, CREATED, t.USER_ID, PROXY_ACCESS_ID, DOMAIN, WORKBASKET_KEY, "
           + "POR_COMPANY, POR_SYSTEM, POR_INSTANCE, POR_TYPE, POR_VALUE, TASK_CLASSIFICATION_KEY, TASK_CLASSIFICATION_CATEGORY,"
           + "ATTACHMENT_CLASSIFICATION_KEY, OLD_VALUE, NEW_VALUE, CUSTOM_1, CUSTOM_2, CUSTOM_3, CUSTOM_4 "
           + "<if test=\"joinWithUserInfo\">, u.LONG_NAME AS USER_LONG_NAME, o.LONG_NAME AS TASK_OWNER_LONG_NAME </if>"
@@ -47,6 +47,7 @@ public interface TaskHistoryQueryMapper {
           + "<if test='eventTypeIn != null'>AND EVENT_TYPE IN (<foreach item='item' collection='eventTypeIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='createdIn !=null'> AND ( <foreach item='item' collection='createdIn' separator=',' > ( <if test='item.begin!=null'> CREATED &gt;= #{item.begin} </if> <if test='item.begin!=null and item.end!=null'> AND </if><if test='item.end!=null'> CREATED &lt;=#{item.end} </if>)</foreach>)</if> "
           + "<if test='userIdIn != null'>AND t.USER_ID IN (<foreach item='item' collection='userIdIn' separator=',' >#{item}</foreach>)</if> "
+          + "<if test='proxyAccessIdIn != null'>AND PROXY_ACCESS_ID IN (<foreach item='item' collection='proxyAccessIdIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='domainIn != null'>AND DOMAIN IN (<foreach item='item' collection='domainIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='workbasketKeyIn != null'>AND WORKBASKET_KEY IN (<foreach item='item' collection='workbasketKeyIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='porCompanyIn != null'>AND POR_COMPANY IN (<foreach item='item' collection='porCompanyIn' separator=',' >#{item}</foreach>)</if> "
@@ -69,6 +70,7 @@ public interface TaskHistoryQueryMapper {
           + "<if test='taskIdLike != null'>AND (<foreach item='item' collection='taskIdLike' separator=' OR ' >LOWER(TASK_ID) LIKE #{item}</foreach>)</if> "
           + "<if test='eventTypeLike != null'>AND (<foreach item='item' collection='eventTypeLike' separator=' OR ' >LOWER(EVENT_TYPE) LIKE #{item}</foreach>)</if> "
           + "<if test='userIdLike != null'>AND (<foreach item='item' collection='userIdLike' separator=' OR ' >LOWER(t.USER_ID) LIKE #{item}</foreach>)</if> "
+          + "<if test='proxyAccessIdLike != null'>AND (<foreach item='item' collection='proxyAccessIdLike' separator=' OR ' > LOWER(PROXY_ACCESS_ID) LIKE #{item}</foreach>)</if> "
           + "<if test='domainLike != null'>AND (<foreach item='item' collection='domainLike' separator=' OR ' >LOWER(DOMAIN) LIKE #{item}</foreach>)</if> "
           + "<if test='workbasketKeyLike != null'>AND (<foreach item='item' collection='workbasketKeyLike' separator=' OR ' >LOWER(WORKBASKET_KEY) LIKE #{item}</foreach>)</if> "
           + "<if test='porCompanyLike != null'>AND (<foreach item='item' collection='porCompanyLike' separator=' OR ' >LOWER(POR_COMPANY) LIKE #{item}</foreach>)</if> "
@@ -96,6 +98,7 @@ public interface TaskHistoryQueryMapper {
   @Result(property = "eventType", column = "EVENT_TYPE")
   @Result(property = "created", column = "CREATED")
   @Result(property = "userId", column = "USER_ID")
+  @Result(property = "proxyAccessId", column = "PROXY_ACCESS_ID")
   @Result(property = "userLongName", column = "USER_LONG_NAME")
   @Result(property = "domain", column = "DOMAIN")
   @Result(property = "workbasketKey", column = "WORKBASKET_KEY")
@@ -117,7 +120,7 @@ public interface TaskHistoryQueryMapper {
 
   @Select(
       "<script>"
-          + "SELECT COUNT(ID) "
+          + "SELECT COUNT(*) "
           + "FROM TASK_HISTORY_EVENT"
           + "<where>"
           // IN-Queries
@@ -127,6 +130,7 @@ public interface TaskHistoryQueryMapper {
           + "<if test='eventTypeIn != null'>AND EVENT_TYPE IN (<foreach item='item' collection='eventTypeIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='createdIn !=null'> AND ( <foreach item='item' collection='createdIn' separator=',' > ( <if test='item.begin!=null'> CREATED &gt;= #{item.begin} </if> <if test='item.begin!=null and item.end!=null'> AND </if><if test='item.end!=null'> CREATED &lt;=#{item.end} </if>)</foreach>)</if> "
           + "<if test='userIdIn != null'>AND USER_ID IN (<foreach item='item' collection='userIdIn' separator=',' >#{item}</foreach>)</if> "
+          + "<if test='proxyAccessIdIn != null'>AND PROXY_ACCESS_ID IN (<foreach item='item' collection='proxyAccessIdIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='domainIn != null'>AND DOMAIN IN (<foreach item='item' collection='domainIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='workbasketKeyIn != null'>AND WORKBASKET_KEY IN (<foreach item='item' collection='workbasketKeyIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='porCompanyIn != null'>AND POR_COMPANY IN (<foreach item='item' collection='porCompanyIn' separator=',' >#{item}</foreach>)</if> "
@@ -149,6 +153,7 @@ public interface TaskHistoryQueryMapper {
           + "<if test='taskIdLike != null'>AND (<foreach item='item' collection='taskIdLike' separator=' OR ' >LOWER(TASK_ID) LIKE #{item}</foreach>)</if> "
           + "<if test='eventTypeLike != null'>AND (<foreach item='item' collection='eventTypeLike' separator=' OR ' >LOWER(EVENT_TYPE) LIKE #{item}</foreach>)</if> "
           + "<if test='userIdLike != null'>AND (<foreach item='item' collection='userIdLike' separator=' OR ' >LOWER(USER_ID) LIKE #{item}</foreach>)</if> "
+          + "<if test='proxyAccessIdLike != null'>AND (<foreach item='item' collection='proxyAccessIdLike' separator=' OR ' > LOWER(PROXY_ACCESS_ID) LIKE #{item}</foreach>)</if> "
           + "<if test='domainLike != null'>AND (<foreach item='item' collection='domainLike' separator=' OR ' >LOWER(DOMAIN) LIKE #{item}</foreach>)</if> "
           + "<if test='workbasketKeyLike != null'>AND (<foreach item='item' collection='workbasketKeyLike' separator=' OR ' >LOWER(WORKBASKET_KEY) LIKE #{item}</foreach>)</if> "
           + "<if test='porCompanyLike != null'>AND (<foreach item='item' collection='porCompanyLike' separator=' OR ' >LOWER(POR_COMPANY) LIKE #{item}</foreach>)</if> "
@@ -185,6 +190,7 @@ public interface TaskHistoryQueryMapper {
           + "<if test='eventTypeIn != null'>AND LOWER(EVENT_TYPE) IN (<foreach item='item' collection='eventTypeIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='createdIn !=null'> AND ( <foreach item='item' collection='createdIn' separator=',' > ( <if test='item.begin!=null'> CREATED &gt;= #{item.begin} </if> <if test='item.begin!=null and item.end!=null'> AND </if><if test='item.end!=null'> CREATED &lt;=#{item.end} </if>)</foreach>)</if> "
           + "<if test='userIdIn != null'>AND LOWER(USER_ID) IN (<foreach item='item' collection='userIdIn' separator=',' >#{item}</foreach>)</if> "
+          + "<if test='proxyAccessIdIn != null'>AND PROXY_ACCESS_ID IN (<foreach item='item' collection='proxyAccessIdIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='domainIn != null'>AND LOWER(DOMAIN) IN (<foreach item='item' collection='domainIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='workbasketKeyIn != null'>AND LOWER(WORKBASKET_KEY) IN (<foreach item='item' collection='workbasketKeyIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='porCompanyIn != null'>AND LOWER(POR_COMPANY) IN (<foreach item='item' collection='porCompanyIn' separator=',' >#{item}</foreach>)</if> "
@@ -207,6 +213,7 @@ public interface TaskHistoryQueryMapper {
           + "<if test='taskIdLike != null'>AND (<foreach item='item' collection='taskIdLike' separator=' OR ' >LOWER(TASK_ID) LIKE #{item}</foreach>)</if> "
           + "<if test='eventTypeLike != null'>AND (<foreach item='item' collection='eventTypeLike' separator=' OR ' >LOWER(EVENT_TYPE) LIKE #{item}</foreach>)</if> "
           + "<if test='userIdLike != null'>AND (<foreach item='item' collection='userIdLike' separator=' OR ' >LOWER(USER_ID) LIKE #{item}</foreach>)</if> "
+          + "<if test='proxyAccessIdLike != null'>AND (<foreach item='item' collection='proxyAccessIdLike' separator=' OR ' > LOWER(PROXY_ACCESS_ID) LIKE #{item}</foreach>)</if> "
           + "<if test='domainLike != null'>AND (<foreach item='item' collection='domainLike' separator=' OR ' >LOWER(DOMAIN) LIKE #{item}</foreach>)</if> "
           + "<if test='workbasketKeyLike != null'>AND (<foreach item='item' collection='workbasketKeyLike' separator=' OR ' >LOWER(WORKBASKET_KEY) LIKE #{item}</foreach>)</if> "
           + "<if test='porCompanyLike != null'>AND (<foreach item='item' collection='porCompanyLike' separator=' OR ' >LOWER(POR_COMPANY) LIKE #{item}</foreach>)</if> "

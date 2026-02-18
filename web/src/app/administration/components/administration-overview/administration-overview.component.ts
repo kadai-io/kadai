@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,12 +18,11 @@
 
 import { Component, inject, Input, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
-import { Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { takeUntil } from 'rxjs/operators';
 import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
 import { MatTabLink, MatTabNav, MatTabNavPanel } from '@angular/material/tabs';
-import { NgFor, NgIf } from '@angular/common';
 import { MatFormField } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -37,11 +36,9 @@ import { MatOption } from '@angular/material/core';
     MatTabNav,
     MatTabLink,
     RouterLink,
-    NgIf,
     MatFormField,
     MatSelect,
     MatTooltip,
-    NgFor,
     MatOption,
     MatTabNavPanel,
     RouterOutlet
@@ -52,7 +49,6 @@ export class AdministrationOverviewComponent implements OnInit {
   domains: Array<string> = [];
   selectedDomain: string;
   destroy$ = new Subject<void>();
-  url$: Observable<any>;
   routingAccess = false;
   private router = inject(Router);
   private domainService = inject(DomainService);
@@ -93,12 +89,7 @@ export class AdministrationOverviewComponent implements OnInit {
       });
   }
 
-  switchDomain(domain) {
+  switchDomain(domain: string) {
     this.domainService.switchDomain(domain);
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

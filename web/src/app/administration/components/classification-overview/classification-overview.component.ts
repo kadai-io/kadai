@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { takeUntil } from 'rxjs/operators';
 import { ClassificationSelectors } from '../../../shared/store/classification-store/classification.selectors';
 import {
@@ -29,7 +29,7 @@ import {
 } from '../../../shared/store/classification-store/classification.actions';
 import { Classification } from '../../../shared/models/classification';
 import { ClassificationListComponent } from '../classification-list/classification-list.component';
-import { NgIf } from '@angular/common';
+
 import { ClassificationDetailsComponent } from '../classification-details/classification-details.component';
 import { SvgIconComponent } from 'angular-svg-icon';
 
@@ -37,11 +37,13 @@ import { SvgIconComponent } from 'angular-svg-icon';
   selector: 'kadai-administration-classification-overview',
   templateUrl: './classification-overview.component.html',
   styleUrls: ['./classification-overview.component.scss'],
-  imports: [ClassificationListComponent, NgIf, ClassificationDetailsComponent, SvgIconComponent]
+  imports: [ClassificationListComponent, ClassificationDetailsComponent, SvgIconComponent]
 })
 export class ClassificationOverviewComponent implements OnInit, OnDestroy {
   showDetail = false;
-  @Select(ClassificationSelectors.selectedClassification) selectedClassification$: Observable<Classification>;
+  selectedClassification$: Observable<Classification> = inject(Store).select(
+    ClassificationSelectors.selectedClassification
+  );
   routerParams: any;
   private route = inject(ActivatedRoute);
   private store = inject(Store);

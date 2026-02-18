@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ public enum TaskHistoryQueryColumnName implements QueryColumnName {
   EVENT_TYPE("event_type"),
   CREATED("created"),
   USER_ID("t.user_id"),
+  PROXY_ACCESS_ID("proxy_access_id"),
   USER_LONG_NAME("u.long_name"),
   DOMAIN("domain"),
   WORKBASKET_KEY("workbasket_key"),

@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  */
 
 import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 
 import { highlight } from 'app/shared/animations/validation.animation';
@@ -31,7 +31,7 @@ import { ImportExportService } from 'app/administration/services/import-export.s
 import { map, take, takeUntil } from 'rxjs/operators';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
-import { AsyncPipe, Location, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe, Location } from '@angular/common';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { ClassificationCategoryImages, CustomField, getCustomFields } from '../../../shared/models/customisation';
 import { Classification } from '../../../shared/models/classification';
@@ -68,7 +68,6 @@ import { MatOption } from '@angular/material/core';
   animations: [highlight],
   styleUrls: ['./classification-details.component.scss'],
   imports: [
-    NgIf,
     MatToolbar,
     MatTooltip,
     MatButton,
@@ -86,18 +85,20 @@ import { MatOption } from '@angular/material/core';
     MatSelect,
     MatSelectTrigger,
     SvgIconComponent,
-    NgFor,
     MatOption,
     AsyncPipe
   ]
 })
 export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   classification: Classification;
-  @Select(ClassificationSelectors.selectCategories) categories$: Observable<string[]>;
-  @Select(EngineConfigurationSelectors.selectCategoryIcons) categoryIcons$: Observable<ClassificationCategoryImages>;
-  @Select(ClassificationSelectors.selectedClassificationType) selectedClassificationType$: Observable<string>;
-  @Select(ClassificationSelectors.selectedClassification) selectedClassification$: Observable<Classification>;
-  @Select(ClassificationSelectors.getBadgeMessage) badgeMessage$: Observable<string>;
+  categories$: Observable<string[]> = inject(Store).select(ClassificationSelectors.selectCategories);
+  categoryIcons$: Observable<ClassificationCategoryImages> = inject(Store).select(
+    EngineConfigurationSelectors.selectCategoryIcons
+  );
+  selectedClassification$: Observable<Classification> = inject(Store).select(
+    ClassificationSelectors.selectedClassification
+  );
+  badgeMessage$: Observable<string> = inject(Store).select(ClassificationSelectors.getBadgeMessage);
   customFields$: Observable<CustomField[]>;
   isCreatingNewClassification: boolean = false;
   readonly lengthError = 'You have reached the maximum length for this field';
@@ -239,6 +240,9 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
             });
           });
       } catch (error) {
+        console.error(
+          `Exception while saving modified classification! [classification=${this.classification}, error=${error}`
+        );
         this.afterRequest();
       }
     }

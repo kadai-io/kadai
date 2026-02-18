@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -186,6 +186,13 @@ class QueryClassificationHistoryAccTest extends AbstractAccTest {
     returnValues =
         classificationHistoryService
             .createClassificationHistoryQuery()
+            .proxyAccessIdIn("businessadmin")
+            .list();
+    assertThat(returnValues).hasSize(1);
+
+    returnValues =
+        classificationHistoryService
+            .createClassificationHistoryQuery()
             .classificationIdIn("CLI:000000000000000000000000000000000002")
             .list();
     assertThat(returnValues).hasSize(2);
@@ -315,6 +322,13 @@ class QueryClassificationHistoryAccTest extends AbstractAccTest {
             .userIdLike("p%", "c%")
             .list();
     assertThat(returnValues).hasSize(8);
+
+    returnValues =
+        classificationHistoryService
+            .createClassificationHistoryQuery()
+            .proxyAccessIdLike("%admin")
+            .list();
+    assertThat(returnValues).hasSize(2);
 
     returnValues =
         classificationHistoryService
@@ -456,6 +470,12 @@ class QueryClassificationHistoryAccTest extends AbstractAccTest {
             .createClassificationHistoryQuery()
             .listValues(ClassificationHistoryQueryColumnName.USER_ID, null);
     assertThat(returnedList).hasSize(4);
+
+    returnedList =
+        classificationHistoryService
+            .createClassificationHistoryQuery()
+            .listValues(ClassificationHistoryQueryColumnName.PROXY_ACCESS_ID, null);
+    assertThat(returnedList).hasSize(3);
 
     returnedList =
         classificationHistoryService

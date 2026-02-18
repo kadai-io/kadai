@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DatePipe, NgFor, NgIf } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { MatListOption, MatSelectionList } from '@angular/material/list';
 import { MatDivider } from '@angular/material/divider';
 import { SvgIconComponent } from 'angular-svg-icon';
@@ -28,7 +28,7 @@ import { SvgIconComponent } from 'angular-svg-icon';
   selector: 'kadai-task-list',
   templateUrl: './task-list.component.html',
   styleUrls: ['./task-list.component.scss'],
-  imports: [NgIf, MatSelectionList, NgFor, MatListOption, MatDivider, SvgIconComponent, DatePipe]
+  imports: [MatSelectionList, MatListOption, MatDivider, SvgIconComponent, DatePipe]
 })
 export class TaskListComponent {
   @Input()

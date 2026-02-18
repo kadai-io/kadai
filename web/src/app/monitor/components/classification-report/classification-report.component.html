@@ -1,41 +1,43 @@
 <!--
-  ~ Copyright [2025] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2026] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
-<div *ngIf="reportData" class="panel panel-default">
-  <div class="panel-heading">
-    <h4>{{ reportData.meta.name }} ({{ reportData.meta.date | date: 'medium' }})</h4>
-  </div>
-  <div class="panel-body">
-    <div class="row">
-      <div class="col-xs-12 col-md-7 col-md-offset-2">
-        <div style="position: relative; width:100vw">
-          <canvas
-            [datasets]="lineChartData"
-            [labels]="lineChartLabels"
-            [legend]="lineChartLegend"
-            [options]="lineChartOptions"
-            [type]="lineChartType"
-            baseChart
-          >
-          </canvas>
+@if (reportData) {
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4>{{ reportData.meta.name }} ({{ reportData.meta.date | date: 'medium' }})</h4>
+    </div>
+    <div class="panel-body">
+      <div class="row">
+        <div class="col-xs-12 col-md-7 col-md-offset-2">
+          <div style="position: relative; width:100vw">
+            <canvas
+              [datasets]="lineChartData"
+              [labels]="lineChartLabels"
+              [legend]="lineChartLegend"
+              [options]="lineChartOptions"
+              [type]="lineChartType"
+              baseChart
+            >
+            </canvas>
+          </div>
         </div>
       </div>
+      <kadai-monitor-report-table [reportData]="reportData"></kadai-monitor-report-table>
     </div>
-    <kadai-monitor-report-table [reportData]="reportData"></kadai-monitor-report-table>
   </div>
-</div>
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,14 +19,14 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import { Actions, ofActionCompleted, ofActionDispatched, Select, Store } from '@ngxs/store';
+import { Actions, ofActionCompleted, ofActionDispatched, Store } from '@ngxs/store';
 
 import { ImportExportService } from 'app/administration/services/import-export.service';
 
 import { KadaiType } from 'app/shared/models/kadai-type';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
-import { AsyncPipe, Location, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe, Location } from '@angular/common';
 import { ClassificationCategoryImages } from '../../../shared/models/customisation';
 
 import {
@@ -59,11 +59,9 @@ import { KadaiTreeComponent } from '../tree/tree.component';
     MatIcon,
     ImportExportComponent,
     MatMenuTrigger,
-    NgIf,
     SvgIconComponent,
     MatMenu,
     MatMenuItem,
-    NgFor,
     MatFormField,
     MatLabel,
     MatInput,
@@ -78,11 +76,15 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
   requestInProgress = true;
   inputValue: string;
   selectedCategory = '';
-  @Select(ClassificationSelectors.classificationTypes) classificationTypes$: Observable<string[]>;
-  @Select(ClassificationSelectors.selectedClassificationType) classificationTypeSelected$: Observable<string>;
-  @Select(ClassificationSelectors.selectCategories) categories$: Observable<string[]>;
-  @Select(ClassificationSelectors.classifications) classifications$: Observable<ClassificationSummary[]>;
-  @Select(EngineConfigurationSelectors.selectCategoryIcons) categoryIcons$: Observable<ClassificationCategoryImages>;
+  classificationTypes$: Observable<string[]> = inject(Store).select(ClassificationSelectors.classificationTypes);
+  classificationTypeSelected$: Observable<string> = inject(Store).select(
+    ClassificationSelectors.selectedClassificationType
+  );
+  categories$: Observable<string[]> = inject(Store).select(ClassificationSelectors.selectCategories);
+  classifications$: Observable<ClassificationSummary[]> = inject(Store).select(ClassificationSelectors.classifications);
+  categoryIcons$: Observable<ClassificationCategoryImages> = inject(Store).select(
+    EngineConfigurationSelectors.selectCategoryIcons
+  );
   destroy$ = new Subject<void>();
   classifications: ClassificationSummary[];
   private location = inject(Location);

@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketAccessItemsComponent } from './workbasket-access-items.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
@@ -35,6 +35,7 @@ import {
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('WorkbasketAccessItemsComponent', () => {
   let fixture: ComponentFixture<WorkbasketAccessItemsComponent>;
@@ -43,8 +44,8 @@ describe('WorkbasketAccessItemsComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [WorkbasketAccessItemsComponent],
       providers: [
         provideStore([WorkbasketState, EngineConfigurationState]),
@@ -68,22 +69,22 @@ describe('WorkbasketAccessItemsComponent', () => {
         workbasketAccessItems: workbasketAccessItemsMock
       }
     });
-  }));
+  });
 
-  afterEach(waitForAsync(() => {
+  afterEach(async () => {
     component.workbasket = { ...selectedWorkbasketMock };
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize when accessItems exist', waitForAsync(() => {
+  it('should initialize when accessItems exist', async () => {
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(GetWorkbasketAccessItems)).subscribe(() => (actionDispatched = true));
     component.init();
     expect(actionDispatched).toBe(true);
-  }));
+  });
 
   it("should discard initializing when accessItems don't exist", () => {
     component.workbasket._links.accessItems = null;
@@ -94,7 +95,7 @@ describe('WorkbasketAccessItemsComponent', () => {
   });
 
   it('should call access items sorting when access items are obtained from store', () => {
-    const sortSpy = jest.spyOn(component, 'sortAccessItems');
+    const sortSpy = vi.spyOn(component, 'sortAccessItems');
     component.ngOnInit();
     expect(sortSpy).toHaveBeenCalled();
   });
@@ -113,7 +114,7 @@ describe('WorkbasketAccessItemsComponent', () => {
     const addAccessItemButton = debugElement.nativeElement.querySelector(
       'button.workbasket-access-items__buttons-add-access'
     );
-    const clearSpy = jest.spyOn(component, 'addAccessItem');
+    const clearSpy = vi.spyOn(component, 'addAccessItem');
 
     addAccessItemButton.click();
     expect(clearSpy).toHaveBeenCalled();
@@ -121,14 +122,14 @@ describe('WorkbasketAccessItemsComponent', () => {
 
   it('should undo changes when undo button is clicked', () => {
     fixture.detectChanges();
-    const clearSpy = jest.spyOn(component, 'clear');
+    const clearSpy = vi.spyOn(component, 'clear');
     component.clear();
     expect(clearSpy).toHaveBeenCalled();
   });
 
   it('should check all permissions when check all box is checked', () => {
     fixture.detectChanges();
-    const checkAllSpy = jest.spyOn(component, 'checkAll');
+    const checkAllSpy = vi.spyOn(component, 'checkAll');
     const checkAllButton = debugElement.nativeElement.querySelector('#checkbox-0-00');
     expect(checkAllButton).toBeTruthy();
     checkAllButton.click();
@@ -137,11 +138,27 @@ describe('WorkbasketAccessItemsComponent', () => {
 
   it('should dispatch UpdateWorkbasketAccessItems action when save button is triggered', () => {
     component.accessItemsRepresentation._links.self.href = 'https://link.mock';
-    const onSaveSpy = jest.spyOn(component, 'onSave');
+    const onSaveSpy = vi.spyOn(component, 'onSave');
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(UpdateWorkbasketAccessItems)).subscribe(() => (actionDispatched = true));
     component.onSave();
     expect(onSaveSpy).toHaveBeenCalled();
     expect(actionDispatched).toBe(true);
+  });
+
+  it('should emit accessItemsValidityChanged when accessItemsGroups status changes', async () => {
+    const emitSpy = vi.spyOn(component.accessItemsValidityChanged, 'emit');
+
+    component.ngOnInit();
+    await fixture.whenStable();
+
+    const control = component.AccessItemsForm.get('accessItemsGroups')?.get('0.accessId');
+    expect(control).toBeTruthy();
+
+    control?.setValue('');
+    control?.markAsTouched();
+    control?.updateValueAndValidity();
+
+    expect(emitSpy).toHaveBeenCalledWith(false);
   });
 });

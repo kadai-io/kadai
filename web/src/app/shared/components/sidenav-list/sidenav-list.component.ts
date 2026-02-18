@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,13 +25,12 @@ import { MonitorRoles } from '../../roles/monitor.roles';
 import { UserRoles } from '../../roles/user.roles';
 import { BusinessAdminRoles } from '../../roles/business-admin.roles';
 import { MatListItem, MatNavList } from '@angular/material/list';
-import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'kadai-sidenav-list',
   templateUrl: './sidenav-list.component.html',
   styleUrls: ['./sidenav-list.component.scss'],
-  imports: [MatNavList, NgIf, MatListItem, RouterLinkActive, RouterLink]
+  imports: [MatNavList, MatListItem, RouterLinkActive, RouterLink]
 })
 export class SidenavListComponent implements OnInit {
   toggle: boolean = false;

@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import io.kadai.common.internal.util.Pair;
 import io.kadai.task.api.TaskCustomField;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.TaskState;
+import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.models.Attachment;
 import io.kadai.task.api.models.AttachmentSummary;
@@ -76,6 +77,8 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.function.ThrowingConsumer;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 @KadaiIntegrationTest
 class CreateTaskAccTest {
@@ -189,7 +192,7 @@ class CreateTaskAccTest {
 
     Instant expectedPlanned = moveForwardToWorkingDay(createdTask.getCreated());
     assertThat(createdTask).isNotNull();
-    assertThat(createdTask.getCreator()).isEqualTo(kadaiEngine.getCurrentUserContext().getUserid());
+    assertThat(createdTask.getCreator()).isEqualTo(kadaiEngine.getCurrentUserContext().getUserId());
     assertThat(createdTask.getOwner()).isEqualTo("user-1-2");
     assertThat(createdTask.getWorkbasketKey()).isEqualTo(defaultWorkbasketSummary.getKey());
     assertThat(createdTask.getName()).isEqualTo(defaultClassificationSummary.getName());
@@ -221,7 +224,7 @@ class CreateTaskAccTest {
     task.setDue(due);
 
     assertThatThrownBy(() -> taskService.createTask(task))
-        .isInstanceOf(InvalidArgumentException.class)
+        .isInstanceOf(ServiceLevelViolationException.class)
         .hasMessageContaining("not matching the service level");
   }
 
@@ -373,7 +376,7 @@ class CreateTaskAccTest {
     assertThat(createdTask.getCreator()).isEqualTo("user-1-2");
     Task readTask = taskService.getTask(createdTask.getId());
     assertThat(readTask).isNotNull();
-    assertThat(createdTask.getCreator()).isEqualTo(kadaiEngine.getCurrentUserContext().getUserid());
+    assertThat(createdTask.getCreator()).isEqualTo(kadaiEngine.getCurrentUserContext().getUserId());
     assertThat(readTask.getAttachments()).isNotNull();
     assertThat(readTask.getAttachments()).hasSize(2);
     assertThat(readTask.getAttachments().get(1).getCreated()).isNotNull();
@@ -795,6 +798,19 @@ class CreateTaskAccTest {
     assertThat(newClassificationSummary.getId()).isNotNull();
     assertThat(newClassificationSummary.getDomain()).isNotNull();
     assertThat(newClassificationSummary.getServiceLevel()).isNotNull();
+  }
+
+  @WithAccessId(user = "user-1-1", groups = "cn=routers,cn=groups,OU=Test,O=KADAI")
+  @ParameterizedTest
+  @EnumSource(TaskCustomField.class)
+  void should_CreateTask_When_CustomFieldValueLengthIs1023(TaskCustomField customField)
+      throws Exception {
+    Task newTask = createDefaultTask();
+    newTask.setCustomField(customField, "a".repeat(1023));
+
+    Task createdTask = taskService.createTask(newTask);
+
+    assertThat(createdTask).isNotNull();
   }
 
   private Map<String, String> createSimpleCustomPropertyMap(int propertiesCount) {

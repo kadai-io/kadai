@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import io.kadai.monitor.api.reports.TaskCustomFieldValueReport;
 import io.kadai.monitor.api.reports.TaskStatusReport;
 import io.kadai.monitor.api.reports.TimestampReport;
 import io.kadai.monitor.api.reports.WorkbasketPriorityReport;
+import io.kadai.monitor.api.reports.WorkbasketPriorityReport.DetailedWorkbasketPriorityReport;
 import io.kadai.monitor.api.reports.WorkbasketReport;
 import io.kadai.monitor.api.reports.header.ColumnHeader;
 import io.kadai.monitor.api.reports.item.QueryItem;
@@ -88,6 +89,23 @@ public class ReportRepresentationModelAssembler {
                 methodOn(MonitorController.class)
                     .computePriorityWorkbasketReport(
                         filterParameter, workbasketTypes, columnHeaders))
+            .withSelfRel());
+    return resource;
+  }
+
+  @NonNull
+  public ReportRepresentationModel toModel(
+      @NonNull DetailedWorkbasketPriorityReport report,
+      @NonNull PriorityReportFilterParameter filterParameter,
+      WorkbasketType[] workbasketTypes,
+      PriorityColumnHeaderRepresentationModel[] columnHeaders)
+      throws InvalidArgumentException, NotAuthorizedException {
+    ReportRepresentationModel resource = toReportResource(report);
+    resource.add(
+        linkTo(
+            methodOn(MonitorController.class)
+                .computeDetailedWorkbasketPriorityReport(
+                    filterParameter, workbasketTypes, columnHeaders))
             .withSelfRel());
     return resource;
   }

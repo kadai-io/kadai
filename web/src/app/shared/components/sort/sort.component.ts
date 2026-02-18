@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,14 +22,14 @@ import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
-import { NgFor, NgIf } from '@angular/common';
+
 import { MapValuesPipe } from '../../pipes/map-values.pipe';
 
 @Component({
   selector: 'kadai-shared-sort',
   templateUrl: './sort.component.html',
   styleUrls: ['./sort.component.scss'],
-  imports: [MatButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, NgIf, NgFor, MapValuesPipe]
+  imports: [MatButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MapValuesPipe]
 })
 export class SortComponent<T> implements OnInit {
   @Input() sortingFields: Map<T, string>;

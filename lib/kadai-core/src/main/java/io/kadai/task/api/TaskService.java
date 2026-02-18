@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.NotAuthorizedOnTaskCommentException;
 import io.kadai.task.api.exceptions.ObjectReferencePersistenceException;
 import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
+import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
@@ -142,6 +143,8 @@ public interface TaskService {
    * @throws ObjectReferencePersistenceException if an {@linkplain ObjectReference} with the same
    *     {@linkplain ObjectReference#getId() id} was added to the {@linkplain Task} multiple times
    *     without using {@linkplain Task#addSecondaryObjectReference(ObjectReference)}
+   * @throws ServiceLevelViolationException if the {@linkplain Task#getDue() due} and {@linkplain
+   *     Task#getPlanned() planned} do not match service level
    */
   Task createTask(Task taskToCreate)
       throws WorkbasketNotFoundException,
@@ -150,7 +153,8 @@ public interface TaskService {
           InvalidArgumentException,
           AttachmentPersistenceException,
           ObjectReferencePersistenceException,
-          NotAuthorizedOnWorkbasketException;
+          NotAuthorizedOnWorkbasketException,
+          ServiceLevelViolationException;
 
   // endregion
 
@@ -1250,6 +1254,8 @@ public interface TaskService {
    * @throws InvalidTaskStateException if an attempt is made to change the {@linkplain
    *     Task#getOwner() owner} of the {@linkplain Task} that {@linkplain Task#getState() state}
    *     isn't {@linkplain TaskState#READY}
+   * @throws ServiceLevelViolationException if the {@linkplain Task#getDue() due} and {@linkplain
+   *     Task#getPlanned() planned} do not match service level
    */
   Task updateTask(Task task)
       throws InvalidArgumentException,
@@ -1259,7 +1265,8 @@ public interface TaskService {
           AttachmentPersistenceException,
           ObjectReferencePersistenceException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException;
+          InvalidTaskStateException,
+          ServiceLevelViolationException;
 
   /**
    * Updates specified {@linkplain TaskCustomField TaskCustomFields} of {@linkplain Task Tasks}
@@ -1292,7 +1299,10 @@ public interface TaskService {
    * @return a list of the {@linkplain Task#getId() ids} of all modified {@linkplain Task Tasks}
    * @throws InvalidArgumentException if the given customFieldsToUpdate are NULL or empty
    * @see #updateTasks(ObjectReference, Map)
+   * @deprecated forRemoval = "11.0.0" — Use {@link #bulkUpdateTasks(List, TaskPatch)} instead.
    */
+  @Deprecated(forRemoval = true, since = "11.0.0")
+  @SuppressWarnings({"deprecation", "removal"})
   List<String> updateTasks(List<String> taskIds, Map<TaskCustomField, String> customFieldsToUpdate)
       throws InvalidArgumentException;
 
@@ -1464,6 +1474,19 @@ public interface TaskService {
   TaskComment createTaskComment(TaskComment taskComment)
       throws TaskNotFoundException, InvalidArgumentException, NotAuthorizedOnWorkbasketException;
 
+  /**
+   * Adds the given comment text to all {@linkplain Task Tasks} identified by the provided ids.
+   *
+   * @param taskIds {@linkplain Task#getId() ids} of the {@linkplain Task Tasks} that should receive
+   *     the comment.
+   * @param text the comment text to add to each task.
+   * @return the result of the operation with each {@linkplain Task#getId() id} mapped to a {@link
+   *     KadaiException} if adding the comment failed (empty if all succeeded).
+   * @throws InvalidArgumentException if {@code taskIds} or {@code text} is {@code null}.
+   */
+  BulkOperationResults<String, KadaiException> createTaskCommentsBulk(
+      List<String> taskIds, String text) throws InvalidArgumentException;
+
   // endregion
 
   // region READ
@@ -1617,4 +1640,17 @@ public interface TaskService {
    * @return a {@linkplain TaskCommentQuery}
    */
   TaskCommentQuery createTaskCommentQuery();
+
+  /**
+   * Bulk updates multiple tasks by their IDs.
+   *
+   * <p>Updates only the specified fields for each task. If a task fails to be updated, e.g. due to
+   * missing permission of the user, an error is reported for it, but other tasks are still updated.
+   *
+   * @param taskIds list of task Ids to be updated
+   * @param taskPatch contains the fields and values to be updated
+   * @return the result of the operation for each task ID (success or error)
+   */
+  BulkOperationResults<String, KadaiException> bulkUpdateTasks(
+      List<String> taskIds, TaskPatch taskPatch);
 }

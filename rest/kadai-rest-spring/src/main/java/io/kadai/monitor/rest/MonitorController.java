@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -115,6 +115,33 @@ public class MonitorController implements MonitorApi {
     ReportRepresentationModel report =
         reportRepresentationModelAssembler.toModel(
             builder.buildReport(), filterParameter, workbasketTypes, columnHeaders);
+
+    return ResponseEntity.status(HttpStatus.OK).body(report);
+  }
+
+  @GetMapping(path = RestEndpoints.URL_MONITOR_DETAILED_WORKBASKET_PRIORITY_REPORT)
+  public ResponseEntity<ReportRepresentationModel> computeDetailedWorkbasketPriorityReport(
+      @ParameterObject PriorityReportFilterParameter filterParameter,
+      @RequestParam(name = "workbasket-type", required = false) WorkbasketType[] workbasketTypes,
+      @RequestParam(name = "columnHeader", required = false)
+          PriorityColumnHeaderRepresentationModel[] columnHeaders)
+      throws NotAuthorizedException, InvalidArgumentException {
+
+    WorkbasketPriorityReport.Builder builder =
+        monitorService.createWorkbasketPriorityReportBuilder().workbasketTypeIn(workbasketTypes);
+    filterParameter.apply(builder);
+
+    if (columnHeaders != null) {
+      List<PriorityColumnHeader> priorityColumnHeaders =
+          Arrays.stream(columnHeaders)
+              .map(priorityColumnHeaderRepresentationModelAssembler::toEntityModel)
+              .toList();
+      builder.withColumnHeaders(priorityColumnHeaders);
+    }
+
+    ReportRepresentationModel report =
+        reportRepresentationModelAssembler.toModel(
+            builder.buildDetailedReport(), filterParameter, workbasketTypes, columnHeaders);
 
     return ResponseEntity.status(HttpStatus.OK).body(report);
   }

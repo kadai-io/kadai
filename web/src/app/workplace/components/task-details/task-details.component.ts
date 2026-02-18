@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import { NotificationService } from '../../../shared/services/notifications/noti
 import { take, takeUntil } from 'rxjs/operators';
 import { trimObject } from '../../../shared/util/form-trimmer';
 import { ObjectReference } from '../../models/object-reference';
-import { NgIf } from '@angular/common';
+
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
@@ -47,7 +47,6 @@ import { TaskAttributeValueComponent } from '../task-attribute-value/task-attrib
   templateUrl: './task-details.component.html',
   styleUrls: ['./task-details.component.scss'],
   imports: [
-    NgIf,
     MatButton,
     MatTooltip,
     MatIcon,

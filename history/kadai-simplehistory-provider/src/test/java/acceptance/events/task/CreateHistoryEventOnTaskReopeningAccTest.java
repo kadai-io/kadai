@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
 
 import acceptance.AbstractAccTest;
+import io.kadai.common.api.KadaiRole;
+import io.kadai.common.internal.util.CheckedRunnable;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
 import io.kadai.simplehistory.task.internal.TaskHistoryQueryImpl;
@@ -42,29 +44,38 @@ class CreateHistoryEventOnTaskReopeningAccTest extends AbstractAccTest {
   private final TaskService taskService = kadaiEngine.getTaskService();
 
   @Test
-  @WithAccessId(user = "admin")
   void should_CreateReopenedHistoryEvent_When_TaskReopeningSucceeded() throws Exception {
-    final String taskId = "TKI:300000000000000000000000000000000000";
+    kadaiEngine.runAs(
+        CheckedRunnable.rethrowing(
+            () -> {
+              final String taskId = "TKI:300000000000000000000000000000000000";
 
-    TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
+              TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
 
-    List<TaskHistoryEvent> events =
-        taskHistoryQueryMapper.queryHistoryEvents(
-            (TaskHistoryQueryImpl) taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
+              List<TaskHistoryEvent> events =
+                  taskHistoryQueryMapper.queryHistoryEvents(
+                      (TaskHistoryQueryImpl)
+                          taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
 
-    assertThat(events).isEmpty();
+              assertThat(events).isEmpty();
 
-    assertThat(taskService.getTask(taskId).getState()).isEqualTo(TaskState.CANCELLED);
-    Task task = taskService.reopen(taskId);
-    assertThat(task.getState()).isEqualTo(TaskState.CLAIMED);
+              assertThat(taskService.getTask(taskId).getState()).isEqualTo(TaskState.CANCELLED);
+              Task task = taskService.reopen(taskId);
+              assertThat(task.getState()).isEqualTo(TaskState.CLAIMED);
 
-    events =
-        taskHistoryQueryMapper.queryHistoryEvents(
-            (TaskHistoryQueryImpl) taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
+              events =
+                  taskHistoryQueryMapper.queryHistoryEvents(
+                      (TaskHistoryQueryImpl)
+                          taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
 
-    String eventType = events.get(0).getEventType();
+              String eventType = events.get(0).getEventType();
 
-    assertThat(eventType).isEqualTo(TaskHistoryEventType.REOPENED.getName());
+              assertThat(eventType).isEqualTo(TaskHistoryEventType.REOPENED.getName());
+              assertThat(events.get(0).getUserId()).isEqualTo("user-4-1");
+              assertThat(events.get(0).getProxyAccessId()).isEqualTo("taskadmin");
+            }),
+        KadaiRole.TASK_ADMIN,
+        "user-4-1");
   }
 
   @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -30,12 +30,12 @@ import { Search, TaskListToolbarComponent } from '../task-list-toolbar/task-list
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { QueryPagingParameter } from '../../../shared/models/query-paging-parameter';
 import { TaskQueryFilterParameter } from '../../../shared/models/task-query-filter-parameter';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { FilterSelectors } from '../../../shared/store/filter-store/filter.selectors';
 import { WorkplaceSelectors } from '../../../shared/store/workplace-store/workplace.selectors';
 import { CalculateNumberOfCards } from '../../../shared/store/workplace-store/workplace.actions';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { NgIf } from '@angular/common';
+
 import { TaskListComponent } from '../task-list/task-list.component';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 
@@ -43,7 +43,7 @@ import { PaginationComponent } from '../../../shared/components/pagination/pagin
   selector: 'kadai-task-master',
   templateUrl: './task-master.component.html',
   styleUrls: ['./task-master.component.scss'],
-  imports: [TaskListToolbarComponent, NgIf, TaskListComponent, PaginationComponent]
+  imports: [TaskListToolbarComponent, TaskListComponent, PaginationComponent]
 })
 export class TaskMasterComponent implements OnInit, OnDestroy {
   tasks: Task[];
@@ -64,8 +64,8 @@ export class TaskMasterComponent implements OnInit, OnDestroy {
   requestInProgress = false;
   selectedSearchType: Search = Search.byWorkbasket;
   destroy$ = new Subject();
-  @Select(FilterSelectors.getTaskFilter) filter$: Observable<TaskQueryFilterParameter>;
-  @Select(WorkplaceSelectors.getNumberOfCards) cards$: Observable<number>;
+  filter$: Observable<TaskQueryFilterParameter> = inject(Store).select(FilterSelectors.getTaskFilter);
+  cards$: Observable<number> = inject(Store).select(WorkplaceSelectors.getNumberOfCards);
   private taskService = inject(TaskService);
   private workplaceService = inject(WorkplaceService);
   private notificationsService = inject(NotificationService);

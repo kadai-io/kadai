@@ -1,20 +1,20 @@
 <!--
-  ~ Copyright [2025] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2026] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
 <div class="access-items">
 
@@ -24,183 +24,209 @@
       (accessIdEventEmitter)="onSelectAccessId($event)" placeHolderMessage="Search for AccessId">
     </kadai-shared-type-ahead>
   </div>
-  <div *ngIf="!accessItemsForm" class="access-items__icon">
-    <h3>Select an access id</h3>
-    <svg-icon class="empty-icon" src="./assets/icons/users.svg"></svg-icon>
-  </div>
+  @if (!accessItemsForm) {
+    <div class="access-items__icon">
+      <h3>Select an access id</h3>
+      <svg-icon class="empty-icon" src="./assets/icons/users.svg"></svg-icon>
+    </div>
+  }
 
   <!-- EXPANSION PANEL GROUPS -->
-  <mat-expansion-panel *ngIf="accessItemsForm" class="access-items__groups-expansion-panel">
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        Groups of {{ accessId.accessId }}
-      </mat-panel-title>
-    </mat-expansion-panel-header>
-    <!-- TABLE WITH GROUP NAMES AND ACCESS IDs -->
-    <table *ngIf="groups && groups.length > 0; else noGroups" [dataSource]="groups" mat-table>
-      <ng-container matColumnDef="Name">
-        <th *matHeaderCellDef mat-header-cell> Name</th>
-        <td *matCellDef="let element" class="access-items__group-table-cell"
-            mat-cell> {{ element.name }}
-        </td>
-      </ng-container>
-      <ng-container matColumnDef="Access Id">
-        <th *matHeaderCellDef mat-header-cell> Access Id</th>
-        <td *matCellDef="let element" class="access-items__group-table-cell"
-            mat-cell> {{ element.accessId }}
-        </td>
-      </ng-container>
-      <tr *matHeaderRowDef="['Name', 'Access Id']" mat-header-row></tr>
-      <tr *matRowDef="let row; columns: ['Name', 'Access Id'];" mat-row></tr>
-    </table>
-
-    <ng-template #noGroups>The user is not associated to any groups</ng-template>
-  </mat-expansion-panel>
+  @if (accessItemsForm) {
+    <mat-expansion-panel class="access-items__groups-expansion-panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Groups of {{ accessId.accessId }}
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <!-- TABLE WITH GROUP NAMES AND ACCESS IDs -->
+      @if (groups && groups.length > 0) {
+        <table [dataSource]="groups" mat-table>
+          <ng-container matColumnDef="Name">
+            <th *matHeaderCellDef mat-header-cell> Name</th>
+            <td *matCellDef="let element" class="access-items__group-table-cell"
+                mat-cell> {{ element.name }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="Access Id">
+            <th *matHeaderCellDef mat-header-cell> Access Id</th>
+            <td *matCellDef="let element" class="access-items__group-table-cell"
+                mat-cell> {{ element.accessId }}
+            </td>
+          </ng-container>
+          <tr *matHeaderRowDef="['Name', 'Access Id']" mat-header-row></tr>
+          <tr *matRowDef="let row; columns: ['Name', 'Access Id'];" mat-row></tr>
+        </table>
+      } @else {
+        The user is not associated to any groups
+      }
+    </mat-expansion-panel>
+  }
 
   <!-- EXPANSION PANEL PERMISSIONS -->
-  <mat-expansion-panel *ngIf="accessItemsForm" class="access-items__permissions-expansion-panel">
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        Permissions of {{ accessId.accessId }}
-      </mat-panel-title>
-    </mat-expansion-panel-header>
-    <!-- TABLE WITH PERMISSION NAMES AND ACCESS IDs -->
-    <table *ngIf="permissions && permissions.length > 0; else noPermissions"
-           [dataSource]="permissions" mat-table>
-      <ng-container matColumnDef="Name">
-        <th *matHeaderCellDef mat-header-cell> Name</th>
-        <td *matCellDef="let element" class="access-items__permission-table-cell"
-            mat-cell> {{ element.name }}
-        </td>
-      </ng-container>
-      <ng-container matColumnDef="Access Id">
-        <th *matHeaderCellDef mat-header-cell> Access Id</th>
-        <td *matCellDef="let element" class="access-items__permission-table-cell"
-            mat-cell> {{ element.accessId }}
-        </td>
-      </ng-container>
-      <tr *matHeaderRowDef="['Name', 'Access Id']" mat-header-row></tr>
-      <tr *matRowDef="let row; columns: ['Name', 'Access Id'];" mat-row></tr>
-    </table>
-
-    <ng-template #noPermissions>The user is not associated to any permissions</ng-template>
-  </mat-expansion-panel>
+  @if (accessItemsForm) {
+    <mat-expansion-panel class="access-items__permissions-expansion-panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Permissions of {{ accessId.accessId }}
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <!-- TABLE WITH PERMISSION NAMES AND ACCESS IDs -->
+      @if (permissions && permissions.length > 0) {
+        <table
+          [dataSource]="permissions" mat-table>
+          <ng-container matColumnDef="Name">
+            <th *matHeaderCellDef mat-header-cell> Name</th>
+            <td *matCellDef="let element" class="access-items__permission-table-cell"
+                mat-cell> {{ element.name }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="Access Id">
+            <th *matHeaderCellDef mat-header-cell> Access Id</th>
+            <td *matCellDef="let element" class="access-items__permission-table-cell"
+                mat-cell> {{ element.accessId }}
+            </td>
+          </ng-container>
+          <tr *matHeaderRowDef="['Name', 'Access Id']" mat-header-row></tr>
+          <tr *matRowDef="let row; columns: ['Name', 'Access Id'];" mat-row></tr>
+        </table>
+      } @else {
+        The user is not associated to any permissions
+      }
+    </mat-expansion-panel>
+  }
 
   <!-- EXPANSION PANEL AUTHORIZATION -->
-  <mat-expansion-panel *ngIf="accessItemsForm" [expanded]="true"
-                       class="access-items__authorization-expansion-panel">
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        Authorizations of {{ accessId.accessId }}
-      </mat-panel-title>
-    </mat-expansion-panel-header>
-    <div *ngIf="accessItemsForm" class="access-items__table">
-      <ng-form [formGroup]="accessItemsForm">
-        <table>
-          <thead>
-          <tr>
-            <th></th>
-            <th class="align-left">Workbasket Key</th>
-            <th class="align-left">Access Id</th>
-            <th>Read</th>
-            <th>Read tasks</th>
-            <th>Open</th>
-            <th>Edit tasks</th>
-            <th>Append</th>
-            <th>Transfer</th>
-            <th>Distribute</th>
-            <ng-container *ngFor="let customField of customFields$ | async">
-              <th *ngIf="customField.visible">
-                {{ customField.field }}
-              </th>
-            </ng-container>
-          </tr>
-          <tr>
-            <th class="align-left">
-              <kadai-shared-sort (performSorting)="sorting($event)" [defaultSortBy]="defaultSortBy"
-                                 [sortingFields]="sortingFields" menuPosition="left">
-              </kadai-shared-sort>
-            </th>
-            <th>
-              <mat-form-field appearance="outline"
-                              class="access-items__authorization-expansion-panel-filter">
-                <mat-label>Workbasket filter</mat-label>
-                <input (keyup.enter)="searchForAccessItemsWorkbaskets()"
-                       formControlName="workbasketKeyFilter"
-                       matInput type="text">
-              </mat-form-field>
-            </th>
-            <th>
-              <mat-form-field appearance="outline"
-                              class="access-items__authorization-expansion-panel-filter">
-                <mat-label>Access id filter</mat-label>
-                <input (keyup.enter)="searchForAccessItemsWorkbaskets()"
-                       formControlName="accessIdFilter" matInput
-                       type="text">
-              </mat-form-field>
-            </th>
-            <th>
-            </th>
-          </tr>
-          </thead>
-          <tbody formArrayName="accessItemsGroups">
-          <tr *ngFor="let accessItem of accessItems; let index = index;"
-              [formGroupName]="index.toString()"
-              class="access-items__authorization-expansion-panel__content">
-            <td></td>
-            <td class="align-left">
-              <label class="wrap">{{ accessItem.workbasketKey }}</label>
-            </td>
-            <td *ngIf="(accessItemsCustomization$ | async)?.accessId.lookupField"
-                class="align-left">
-              <label class="wrap"
-                     matTooltip="{{accessItem.accessId}}">{{ accessItem.accessName }}</label>
-            </td>
-            <td>
-              <mat-checkbox formControlName="permRead" id="checkbox-{{index}}-0"></mat-checkbox>
-            </td>
-            <td>
-              <mat-checkbox formControlName="permReadTasks"
-                            id="checkbox-{{index}}-1"></mat-checkbox>
-            </td>
-            <td>
-              <mat-checkbox formControlName="permOpen" id="checkbox-{{index}}-2"></mat-checkbox>
-            </td>
-            <td>
-              <mat-checkbox formControlName="permEditTasks"
-                            id="checkbox-{{index}}-3"></mat-checkbox>
-            </td>
-            <td>
-              <mat-checkbox formControlName="permAppend" id="checkbox-{{index}}-4"></mat-checkbox>
-            </td>
-            <td>
-              <mat-checkbox formControlName="permTransfer" id="checkbox-{{index}}-5"></mat-checkbox>
-            </td>
-            <td>
-              <mat-checkbox formControlName="permDistribute"
-                            id="checkbox-{{index}}-6"></mat-checkbox>
-            </td>
-            <ng-container
-              *ngFor="let customField of customFields$ | async; let customIndex = index">
-              <td *ngIf="customField.visible">
-                <mat-checkbox formControlName="permCustom{{customIndex + 1}}"
-                              id="checkbox-{{index}}-{{customIndex + 7}}"></mat-checkbox>
-              </td>
-            </ng-container>
-          </tr>
-          </tbody>
-        </table>
-
-        <!-- Revoke Access button -->
-        <button (click)="revokeAccess()" *ngIf="accessItemsForm" [disabled]=isGroup
-                class="access-items__revoke-button"
-                color="warn"
-                mat-raised-button>
-          Revoke access
-          <mat-icon>clear</mat-icon>
-        </button>
-
-      </ng-form>
-    </div>
-  </mat-expansion-panel>
+  @if (accessItemsForm) {
+    <mat-expansion-panel [expanded]="true"
+                         class="access-items__authorization-expansion-panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Authorizations of {{ accessId.accessId }}
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      @if (accessItemsForm) {
+        <div class="access-items__table">
+          <ng-form [formGroup]="accessItemsForm">
+            <table>
+              <thead>
+              <tr>
+                <th></th>
+                <th class="align-left">Workbasket Key</th>
+                <th class="align-left">Access Id</th>
+                <th>Read</th>
+                <th>Read tasks</th>
+                <th>Open</th>
+                <th>Edit tasks</th>
+                <th>Append</th>
+                <th>Transfer</th>
+                <th>Distribute</th>
+                @for (customField of customFields$ | async; track customField) {
+                  @if (customField.visible) {
+                    <th>
+                      {{ customField.field }}
+                    </th>
+                  }
+                }
+              </tr>
+              <tr>
+                <th class="align-left">
+                  <kadai-shared-sort (performSorting)="sorting($event)"
+                                     [defaultSortBy]="defaultSortBy"
+                                     [sortingFields]="sortingFields" menuPosition="left">
+                  </kadai-shared-sort>
+                </th>
+                <th>
+                  <mat-form-field appearance="outline"
+                                  class="access-items__authorization-expansion-panel-filter">
+                    <mat-label>Workbasket filter</mat-label>
+                    <input (keyup.enter)="searchForAccessItemsWorkbaskets()"
+                           formControlName="workbasketKeyFilter"
+                           matInput type="text">
+                  </mat-form-field>
+                </th>
+                <th>
+                  <mat-form-field appearance="outline"
+                                  class="access-items__authorization-expansion-panel-filter">
+                    <mat-label>Access id filter</mat-label>
+                    <input (keyup.enter)="searchForAccessItemsWorkbaskets()"
+                           formControlName="accessIdFilter" matInput
+                           type="text">
+                  </mat-form-field>
+                </th>
+                <th>
+                </th>
+              </tr>
+              </thead>
+              <tbody formArrayName="accessItemsGroups">
+                @for (accessItem of accessItems; track accessItem; let index = $index) {
+                  <tr
+                    [formGroupName]="index.toString()"
+                    class="access-items__authorization-expansion-panel__content">
+                    <td></td>
+                    <td class="align-left">
+                      <label class="wrap">{{ accessItem.workbasketKey }}</label>
+                    </td>
+                    @if ((accessItemsCustomization$ | async)?.accessId.lookupField) {
+                      <td
+                        class="align-left">
+                        <label class="wrap"
+                               matTooltip="{{accessItem.accessId}}">{{ accessItem.accessName }}</label>
+                      </td>
+                    }
+                    <td>
+                      <mat-checkbox formControlName="permRead"
+                                    id="checkbox-{{index}}-0"></mat-checkbox>
+                    </td>
+                    <td>
+                      <mat-checkbox formControlName="permReadTasks"
+                                    id="checkbox-{{index}}-1"></mat-checkbox>
+                    </td>
+                    <td>
+                      <mat-checkbox formControlName="permOpen"
+                                    id="checkbox-{{index}}-2"></mat-checkbox>
+                    </td>
+                    <td>
+                      <mat-checkbox formControlName="permEditTasks"
+                                    id="checkbox-{{index}}-3"></mat-checkbox>
+                    </td>
+                    <td>
+                      <mat-checkbox formControlName="permAppend"
+                                    id="checkbox-{{index}}-4"></mat-checkbox>
+                    </td>
+                    <td>
+                      <mat-checkbox formControlName="permTransfer"
+                                    id="checkbox-{{index}}-5"></mat-checkbox>
+                    </td>
+                    <td>
+                      <mat-checkbox formControlName="permDistribute"
+                                    id="checkbox-{{index}}-6"></mat-checkbox>
+                    </td>
+                    @for (customField of customFields$ | async; track customField; let customIndex = $index) {
+                      @if (customField.visible) {
+                        <td>
+                          <mat-checkbox formControlName="permCustom{{customIndex + 1}}"
+                                        id="checkbox-{{index}}-{{customIndex + 7}}"></mat-checkbox>
+                        </td>
+                      }
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+            <!-- Revoke Access button -->
+            @if (accessItemsForm) {
+              <button (click)="revokeAccess()" [disabled]=isGroup
+                      class="access-items__revoke-button"
+                      color="warn"
+                      mat-raised-button>
+                Revoke access
+                <mat-icon>clear</mat-icon>
+              </button>
+            }
+          </ng-form>
+        </div>
+      }
+    </mat-expansion-panel>
+  }
 </div>

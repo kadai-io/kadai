@@ -246,7 +246,7 @@ Currently, KADAI provides the following SPIs:
 
 # 📚Releases
 [![Maven Central](https://img.shields.io/maven-central/v/io.kadai/kadai-core.svg)](https://central.sonatype.com/artifact/io.kadai/kadai-core)
-[![Maven Central Snapshots](https://img.shields.io/badge/maven--central--snapshots-v9.3.1--SNAPSHOT-blue?link=https%3A%2F%2Fcentral.sonatype.com%2Fservice%2Frest%2Frepository%2Fbrowse%2Fmaven-snapshots%2Fio%2Fkadai%2F)](https://central.sonatype.com/service/rest/repository/browse/maven-snapshots/io/kadai/)
+![Maven Central Snapshots](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcentral.sonatype.com%2Frepository%2Fmaven-snapshots%2Fio%2Fkadai%2Fkadai-core%2Fmaven-metadata.xml&label=maven-central-snapshots&strategy=latestProperty)
 
 The list of [releases](https://github.com/kadai-io/kadai/releases) contains a detailed changelog.
 
@@ -258,6 +258,51 @@ We use [Semantic Versioning](https://semver.org/).
 Our focus is mainly directed to the backend, but we maintain a demo frontend in Angular, check it out by clicking on the badge!
 
 For login choose username `teamlead-1` with password `teamlead-1`.
+
+# 🌱 Sustainability
+
+[KADAI](https://www.blauer-engel.de/de/produkte/kadai-open-source-software-for-task-management) successfully underwent [certification](docs/Urkunde-Blauer-Engel-KADAI.pdf) for the [*Blauer Engel for Software*](https://www.blauer-engel.de/en/productworld/software), an eco-label for resource- and energy-efficient software products awarded by the [German Environment Agency (Umweltbundesamt)](https://www.umweltbundesamt.de/en). 
+A central part of the certification is the definition of a standard usage scenario, which reflects typical user interactions.
+
+In our defined scenario, the following activities were performed:
+
+* Create a new task
+* Search for workbaskets with a specific permission (OPEN)
+* Open a workbasket 
+* Retrieve the first 50 tasks from a workbasket
+* Read a single task
+* Edit a task
+* Transfer a task to another workbasket
+* Claim a task  
+* Retrieve comments for a task
+* Add a new comment to a task
+* Delete a comment
+* Complete a task
+* Search for additional tasks with the same object reference
+
+Additionally, a single user performed the following activity:
+* Retrieve the task status report (monitoring)
+
+These badges show the energy cost for this scenario (done by 100 virtual users): 
+
+<a href="https://metrics.green-coding.io/stats.html?id=59ce2670-046e-4911-b1bc-a9f618616002">
+  <img src="https://api.green-coding.io/v1/badge/single/59ce2670-046e-4911-b1bc-a9f618616002?metric=psu_energy_ac_mcp_machine" 
+       alt="Machine Energy Badge" 
+       loading="lazy">
+</a>
+
+
+<a href="https://metrics.green-coding.io/stats.html?id=59ce2670-046e-4911-b1bc-a9f618616002">
+  <img src="https://api.green-coding.io/v1/badge/single/59ce2670-046e-4911-b1bc-a9f618616002?metric=cpu_energy_rapl_msr_component" 
+       alt="CPU Package Energy Badge" 
+       loading="lazy">
+</a>
+<br>
+<a href="https://www.blauer-engel.de/en/productworld/software">
+  <img src="docs/images/Blauer_Engel_LEF_blau_D_UZ215.png" width="420" />
+</a>
+
+The full procedure for the measurement can be found [here](docs/Messungen-Blauer-Engel-KADAI.pdf).
 
 # 📨Contact
 
@@ -273,3 +318,5 @@ with the support of the open source community.
 ---
 [![envite consulting GmbH](docs/images/envite-black.png)](https://envite.de/)
 ---
+
+                       

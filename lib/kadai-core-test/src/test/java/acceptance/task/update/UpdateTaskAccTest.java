@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import io.kadai.common.internal.util.Triplet;
 import io.kadai.task.api.TaskCustomField;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.TaskState;
+import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.Task;
@@ -228,7 +229,7 @@ class UpdateTaskAccTest {
     task.setDue(due);
 
     assertThatThrownBy(() -> taskService.updateTask(task))
-        .isInstanceOf(InvalidArgumentException.class)
+        .isInstanceOf(ServiceLevelViolationException.class)
         .hasMessageContaining("not matching the service level");
   }
 
@@ -578,6 +579,8 @@ class UpdateTaskAccTest {
 
   @WithAccessId(user = "user-1-2")
   @Test
+  @Deprecated
+  @SuppressWarnings({"deprecation", "removal"})
   void should_UpdateTaskCustomAttributes_When_UpdateTasksIsCalled() throws Exception {
     Task task1 =
         TaskBuilder.newTask()
@@ -616,6 +619,8 @@ class UpdateTaskAccTest {
 
   @WithAccessId(user = "user-1-2")
   @TestFactory
+  @Deprecated
+  @SuppressWarnings({"deprecation", "removal"})
   Stream<DynamicTest> should_UpdateNoTasksWithTaskId_When_UserHasMissingPermission() {
     List<Pair<String, WorkbasketSummary>> list =
         List.of(

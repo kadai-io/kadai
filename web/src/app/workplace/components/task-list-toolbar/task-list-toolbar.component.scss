@@ -1,5 +1,5 @@
 /*!
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 .task-list-toolbar {
   padding: 0 0 16px 0;
@@ -45,7 +45,7 @@
   }
 
   &__button--primary {
-    background-color: $aquamarine;
+    background-color: colors.$aquamarine;
     color: white;
     margin-right: 4px;
   }
@@ -61,7 +61,7 @@
 }
 
 ::ng-deep .task-list-toolbar * .mat-mdc-tab-labels {
-  background-color: $light-grey;
+  background-color: colors.$light-grey;
 }
 
 ::ng-deep .task-list-toolbar__filter-input .mat-mdc-text-field-wrapper {

@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import { Direction, Sorting, WorkbasketQuerySortParameter } from 'app/shared/mod
 import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
 import { OrientationService } from 'app/shared/services/orientation/orientation.service';
 import { ImportExportService } from 'app/administration/services/import-export.service';
-import { Actions, ofActionCompleted, ofActionDispatched, Select, Store } from '@ngxs/store';
-import { takeUntil } from 'rxjs/operators';
+import { Actions, ofActionCompleted, ofActionDispatched, Store } from '@ngxs/store';
+import { delay, takeUntil, tap } from 'rxjs/operators';
 import {
   DeselectWorkbasket,
   GetWorkbasketsSummary,
@@ -42,7 +42,7 @@ import { WorkbasketQueryFilterParameter } from '../../../shared/models/workbaske
 import { QueryPagingParameter } from '../../../shared/models/query-paging-parameter';
 import { FilterSelectors } from '../../../shared/store/filter-store/filter.selectors';
 import { WorkbasketListToolbarComponent } from '../workbasket-list-toolbar/workbasket-list-toolbar.component';
-import { AsyncPipe, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { IconTypeComponent } from '../type-icon/icon-type.component';
 import { MatDivider } from '@angular/material/divider';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
@@ -53,9 +53,7 @@ import { PaginationComponent } from '../../../shared/components/pagination/pagin
   styleUrls: ['./workbasket-list.component.scss'],
   imports: [
     WorkbasketListToolbarComponent,
-    NgIf,
     MatSelectionList,
-    NgFor,
     MatListOption,
     IconTypeComponent,
     MatDivider,
@@ -80,14 +78,14 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   requestInProgressLocal = false;
   resetPagingSubject = new Subject<null>();
   @Input() expanded: boolean;
-  @Select(WorkbasketSelectors.workbasketsSummary)
-  workbasketsSummary$: Observable<WorkbasketSummary[]>;
-  @Select(WorkbasketSelectors.workbasketsSummaryRepresentation)
-  workbasketsSummaryRepresentation$: Observable<WorkbasketSummaryRepresentation>;
-  @Select(WorkbasketSelectors.selectedWorkbasket)
-  selectedWorkbasket$: Observable<Workbasket>;
-  @Select(FilterSelectors.getWorkbasketListFilter)
-  getWorkbasketListFilter$: Observable<WorkbasketQueryFilterParameter>;
+  workbasketsSummary$: Observable<WorkbasketSummary[]> = inject(Store).select(WorkbasketSelectors.workbasketsSummary);
+  workbasketsSummaryRepresentation$: Observable<WorkbasketSummaryRepresentation> = inject(Store).select(
+    WorkbasketSelectors.workbasketsSummaryRepresentation
+  );
+  selectedWorkbasket$: Observable<Workbasket> = inject(Store).select(WorkbasketSelectors.selectedWorkbasket);
+  getWorkbasketListFilter$: Observable<WorkbasketQueryFilterParameter> = inject(Store).select(
+    FilterSelectors.getWorkbasketListFilter
+  );
   destroy$ = new Subject<void>();
   @ViewChild('workbasket') workbasketList: MatSelectionList;
   private store = inject(Store);
@@ -152,12 +150,14 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
 
     this.workbasketService
       .getWorkbasketActionToolbarExpansion()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        tap(() => this.requestInProgressService.setRequestInProgress(true)),
+        delay(1),
+        takeUntil(this.destroy$)
+      )
       .subscribe(() => {
-        this.requestInProgressService.setRequestInProgress(true);
-        setTimeout(() => {
-          this.refreshWorkbasketList();
-        }, 1);
+        this.refreshWorkbasketList();
       });
 
     this.requestInProgressService
@@ -177,10 +177,12 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
     if (this.selectedId === id) {
       this.store
         .dispatch(new DeselectWorkbasket())
+        .pipe(takeUntil(this.destroy$))
         .subscribe(() => this.requestInProgressService.setRequestInProgress(false));
     } else {
       this.store
         .dispatch(new SelectWorkbasket(id))
+        .pipe(takeUntil(this.destroy$))
         .subscribe(() => this.requestInProgressService.setRequestInProgress(false));
     }
   }
@@ -195,7 +197,6 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
     this.filterBy = { ...filterBy };
     this.filterBy.domain = domain;
     this.resetPagingSubject.next(null);
-    // this.performRequest();
   }
 
   changePage(page) {
@@ -214,9 +215,12 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   }
 
   performRequest() {
-    this.store.dispatch(new GetWorkbasketsSummary(true, this.filterBy, this.sort, this.pageParameter)).subscribe(() => {
-      this.requestInProgressService.setRequestInProgress(false);
-    });
+    this.store
+      .dispatch(new GetWorkbasketsSummary(true, this.filterBy, this.sort, this.pageParameter))
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.requestInProgressService.setRequestInProgress(false);
+      });
   }
 
   ngOnDestroy() {

@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
  */
 
 import { inject, TestBed } from '@angular/core/testing';
-
 import { AccessIdsService } from './access-ids.service';
 import { provideHttpClient } from '@angular/common/http';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('ValidateAccessItemsService', () => {
   beforeEach(() => {

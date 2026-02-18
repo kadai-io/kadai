@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -36,6 +36,13 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'tasks-priority/:workbasketKey',
+        loadComponent: () =>
+          import('./components/task-priority-report/task-priority-report.component').then(
+            (m) => m.TaskPriorityReportComponent
+          )
+      },
+      {
         path: 'tasks-status',
         loadComponent: () => import('./components/task-report/task-report.component').then((m) => m.TaskReportComponent)
       },
@@ -57,11 +64,6 @@ export const routes: Routes = [
           import('./components/timestamp-report/timestamp-report.component').then((m) => m.TimestampReportComponent)
       }
     ]
-  },
-  {
-    path: '',
-    redirectTo: 'tasks-priority',
-    pathMatch: 'full'
   },
   {
     path: '**',

@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,8 +23,9 @@ import io.kadai.task.api.models.Task;
 /** Event fired if a task is claimed. */
 public class TaskClaimedEvent extends TaskHistoryEvent {
 
-  public TaskClaimedEvent(String id, Task task, String userId, String details) {
-    super(id, task, userId, details);
+  public TaskClaimedEvent(
+      String id, Task task, String userId, String proxyAccessId, String details) {
+    super(id, task, userId, proxyAccessId, details);
     eventType = (TaskHistoryEventType.CLAIMED.getName());
     created = task.getClaimed();
   }

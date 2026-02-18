@@ -1,20 +1,20 @@
 <!--
-  ~ Copyright [2025] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2026] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
 <div class="distribution-targets-list">
   <mat-toolbar>
@@ -24,14 +24,18 @@
     <button (click)="changeToolbarState(!toolbarState)"
             class="distribution-targets-list__action-button" mat-flat-button
     >
-      <span *ngIf="!toolbarState">
-        Display filter
-        <mat-icon class="button-icon">filter_list</mat-icon>
-      </span>
-      <span *ngIf="toolbarState">
-        Hide filter
-        <mat-icon class="button-icon">keyboard_arrow_up</mat-icon>
-      </span>
+      @if (!toolbarState) {
+        <span>
+          Display filter
+          <mat-icon class="button-icon">filter_list</mat-icon>
+        </span>
+      }
+      @if (toolbarState) {
+        <span>
+          Hide filter
+          <mat-icon class="button-icon">keyboard_arrow_up</mat-icon>
+        </span>
+      }
     </button>
 
     <span style="flex: 1 1 auto"> </span>
@@ -39,35 +43,44 @@
     <!-- SELECT ALL BUTTON -->
     <button (click)="selectAll(!allSelected);" class="distribution-targets-list__action-button"
             mat-flat-button>
-      <mat-icon *ngIf="allSelected" class="distribution-targets-list__mat-icon button-icon"
-                matTooltip="Deselect all items">check_box
-      </mat-icon>
-      <mat-icon *ngIf="!allSelected" class=" distribution-targets-list__mat-icon button-icon"
-                matTooltip="Select all items">
-        check_box_outline_blank
-      </mat-icon>
+      @if (allSelected) {
+        <mat-icon class="distribution-targets-list__mat-icon button-icon"
+                  matTooltip="Deselect all items">check_box
+        </mat-icon>
+      }
+      @if (!allSelected) {
+        <mat-icon class=" distribution-targets-list__mat-icon button-icon"
+                  matTooltip="Select all items">
+          check_box_outline_blank
+        </mat-icon>
+      }
     </button>
   </mat-toolbar>
 
   <!-- FILTER COMPONENT -->
-  <kadai-shared-workbasket-filter *ngIf="toolbarState" [component]="component"
-                                  isExpanded="true"></kadai-shared-workbasket-filter>
+  @if (toolbarState) {
+    <kadai-shared-workbasket-filter [component]="component"
+                                    isExpanded="true"></kadai-shared-workbasket-filter>
+  }
 
   <!-- EMPTY LIST -->
-  <div *ngIf="distributionTargets?.length == 0 && requestInProgress < 0"
-       class="distribution-targets-list__empty-list">
-
-    <!-- AVAILABLE SIDE -->
-    <div *ngIf="side === 0" style="padding: 0 16px;">
-      There are currently no Workbaskets for distribution
+  @if (distributionTargets?.length == 0 && requestInProgress < 0) {
+    <div
+      class="distribution-targets-list__empty-list">
+      <!-- AVAILABLE SIDE -->
+      @if (side === 0) {
+        <div style="padding: 0 16px;">
+          There are currently no Workbaskets for distribution
+        </div>
+      }
+      <!-- SELECTED SIDE -->
+      @if (side === 1) {
+        <div style="padding: 0 16px;">
+          There is currently no distributed Workbasket
+        </div>
+      }
     </div>
-
-    <!-- SELECTED SIDE -->
-    <div *ngIf="side === 1" style="padding: 0 16px;">
-      There is currently no distributed Workbasket
-    </div>
-
-  </div>
+  }
 
   <!-- WORKBASKET LIST -->
   <mat-selection-list #workbasket [multiple]="true">
@@ -99,12 +112,14 @@
           </div>
 
           <!-- MARKED FOR DELETION -->
-          <div *ngIf="workbasket.markedForDeletion" class="workbaskets-item__marked">
-            <span
-              class="material-icons md-20 red "
-              matTooltip="Marked for deletion"
-              title="Marked for deletion">error</span>
-          </div>
+          @if (workbasket.markedForDeletion) {
+            <div class="workbaskets-item__marked">
+              <span
+                class="material-icons md-20 red "
+                matTooltip="Marked for deletion"
+                title="Marked for deletion">error</span>
+            </div>
+          }
         </div>
 
         <mat-divider></mat-divider>

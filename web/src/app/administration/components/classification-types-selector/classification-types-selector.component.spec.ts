@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
  */
 
 import { ClassificationTypesSelectorComponent } from './classification-types-selector.component';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
+import { Location } from '@angular/common';
+import { provideLocationMocks } from '@angular/common/testing';
 import { provideStore, Store } from '@ngxs/store';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
@@ -26,10 +28,11 @@ import { ClassificationCategoriesService } from '../../../shared/services/classi
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { classificationStateMock } from '../../../shared/store/mock-data/mock-store';
 import { By } from '@angular/platform-browser';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const classificationServiceSpy = jest.fn();
-const classificationCategoriesServiceSpy = jest.fn();
-const domainServiceSpy = jest.fn();
+const classificationServiceSpy = vi.fn();
+const classificationCategoriesServiceSpy = vi.fn();
+const domainServiceSpy = vi.fn();
 
 describe('ClassificationTypesSelectorComponent', () => {
   let fixture: ComponentFixture<ClassificationTypesSelectorComponent>;
@@ -37,10 +40,11 @@ describe('ClassificationTypesSelectorComponent', () => {
   let component: ClassificationTypesSelectorComponent;
   let store: Store;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [ClassificationTypesSelectorComponent],
       providers: [
+        provideLocationMocks(),
         provideStore([ClassificationState]),
         {
           provide: ClassificationsService,
@@ -63,7 +67,7 @@ describe('ClassificationTypesSelectorComponent', () => {
       classification: classificationStateMock
     });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create the app', () => {
     expect(component).toBeTruthy();
@@ -89,5 +93,16 @@ describe('ClassificationTypesSelectorComponent', () => {
     expect(options.length).toBe(2);
     expect(options[0].nativeElement.textContent.trim()).toBe('TASK');
     expect(options[1].nativeElement.textContent.trim()).toBe('DOCUMENT');
+  });
+
+  it('should dispatch SetSelectedClassificationType and update location when select is called', () => {
+    const storeSpy = vi.spyOn(store, 'dispatch');
+    const location = TestBed.inject(Location);
+    const locationSpy = vi.spyOn(location, 'go');
+
+    component.select('TASK');
+
+    expect(storeSpy).toHaveBeenCalled();
+    expect(locationSpy).toHaveBeenCalled();
   });
 });

@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ public class TimeIntervalReportFilterParameter extends ReportFilterParameter
     "domain",
     "classification-id",
     "excluded-classification-id",
+    "classification-key",
     "custom-1",
     "custom-1-like",
     "custom-1-not-in",
@@ -100,6 +101,7 @@ public class TimeIntervalReportFilterParameter extends ReportFilterParameter
       String[] domain,
       String[] classificationId,
       String[] excludedClassificationId,
+      String[] classificationKey,
       String[] custom1,
       String[] custom1Like,
       String[] custom1NotIn,
@@ -156,6 +158,7 @@ public class TimeIntervalReportFilterParameter extends ReportFilterParameter
         domain,
         classificationId,
         excludedClassificationId,
+        classificationKey,
         custom1,
         custom1Like,
         custom1NotIn,

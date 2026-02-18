@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -53,7 +53,8 @@ import org.junit.jupiter.api.Test;
 class TaskQueryImplGroupByAccTest implements KadaiConfigurationModifier {
   @KadaiInject TaskService taskService;
   @KadaiInject WorkbasketService workbasketService;
-  @KadaiInject CurrentUserContext currentUserContext;
+  @KadaiInject
+  CurrentUserContext currentUserContext;
   @KadaiInject ClassificationService classificationService;
   @KadaiInject UserService userService;
 
@@ -341,7 +342,7 @@ class TaskQueryImplGroupByAccTest implements KadaiConfigurationModifier {
   private void persistPermission(WorkbasketSummary workbasketSummary) throws Exception {
     WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
         .workbasketId(workbasketSummary.getId())
-        .accessId(currentUserContext.getUserid())
+        .accessId(currentUserContext.getUserId())
         .permission(WorkbasketPermission.OPEN)
         .permission(WorkbasketPermission.READ)
         .permission(WorkbasketPermission.READTASKS)

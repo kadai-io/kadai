@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -128,13 +128,16 @@ public interface AttachmentMapper {
   String getCustomAttributesAsString(@Param("attachmentId") String attachmentId);
 
   @Select(
-      "<script> SELECT DISTINCT t.ID, t.PLANNED FROM TASK t "
-          + "LEFT JOIN ATTACHMENT a on a.TASK_ID = t.ID "
-          + "WHERE a.CLASSIFICATION_ID = #{classificationId} "
+      "<script>"
+          + "SELECT t.ID, t.PLANNED FROM TASK t "
+          + "WHERE EXISTS ("
+          + "SELECT 1 FROM ATTACHMENT a WHERE a.TASK_ID = t.ID AND a.CLASSIFICATION_ID = #{classificationId}"
+          + ") "
           + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   @Result(property = "left", column = "ID")
   @Result(property = "right", column = "PLANNED")
   List<Pair<String, Instant>> findTaskIdsAndPlannedAffectedByClassificationChange(
       @Param("classificationId") String classificationId);
+
 }

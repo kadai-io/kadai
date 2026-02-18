@@ -1,113 +1,116 @@
 <!--
-  ~ Copyright [2025] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2026] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
 <div class="filter">
   <!-- COLLAPSED WORKBASKET FILTER -->
-  <div *ngIf="!isExpanded" class="filter__collapsed-filter">
-    <!-- TEXT INPUT -->
-    <mat-form-field class="filter__collapsed-filter-input-field" floatLabel="auto">
-      <mat-label>Filter by name</mat-label>
-      <input (keyup.enter)="search()" [(ngModel)]="filter['name-like'][0]" matInput
-             matTooltip="Type to filter by name">
-    </mat-form-field>
-
-    <!-- CLEAR BUTTON -->
-    <button (click)="clear()" class="filter__undo-button" mat-stroked-button
-            matTooltip="Clear Workbasket filter">
-      <mat-icon class="filter__mat-icon" style="color: #555">undo</mat-icon>
-    </button>
-
-    <!-- SEARCH BUTTON -->
-    <button (click)="search()" class="filter__search-button" mat-stroked-button
-            matTooltip="Search by given filter">
-      <mat-icon class="filter__mat-icon">search</mat-icon>
-    </button>
-  </div>
-
-
-  <!-- EXPANDED WORKBASKET FILTER -->
-  <div *ngIf="isExpanded" class="filter__expanded-filter">
-
-    <!-- TEXT INPUT -->
-    <div class="filter__text-input">
-      <div class="filter__name-and-key-input">
-        <mat-form-field class="filter__input-field-left" floatLabel="auto">
-          <mat-label>Filter by name</mat-label>
-          <input (keyup.enter)="search()" [(ngModel)]="filter['name-like'][0]" matInput
-                 matTooltip="Type to filter by name">
-        </mat-form-field>
-
-        <mat-form-field class="filter__input-field-right" floatLabel="auto">
-          <mat-label>Filter by key</mat-label>
-          <input (keyup.enter)="search()" [(ngModel)]="filter['key-like'][0]" matInput
-                 matTooltip="Type to filter by key">
-        </mat-form-field>
-      </div>
-
-      <div class="filter__name-and-key-input">
-        <mat-form-field class="filter__input-field-left" floatLabel="auto">
-          <mat-label>Filter by description</mat-label>
-          <input (keyup.enter)="search()" [(ngModel)]="filter['description-like'][0]" matInput
-                 matTooltip="Type to filter by description">
-        </mat-form-field>
-
-        <mat-form-field class="filter__input-field-right" floatLabel="auto">
-          <mat-label>Filter by owner</mat-label>
-          <input (keyup.enter)="search()" [(ngModel)]="filter['owner-like'][0]" matInput
-                 matTooltip="Type to filter by owner">
-        </mat-form-field>
-      </div>
-    </div>
-
-
-    <!-- SEARCH AND CLEAR BUTTON -->
-    <div class="filter__action-buttons">
-
-      <!-- TYPE FILTER -->
-      <button [matMenuTriggerFor]="menu" mat-stroked-button matTooltip="Filter Workbaskets by type">
-        Filter by type
-        <mat-icon *ngIf="filter.type.length == 0" style="color: #555">filter_list</mat-icon>
-        <kadai-administration-icon-type *ngIf="filter.type[0]"
-                                        [type]="filter.type[0]"></kadai-administration-icon-type>
-      </button>
-
-      <mat-menu #menu="matMenu">
-        <button (click)="selectType(type.key)" *ngFor="let type of allTypes | mapValues"
-                mat-menu-item>
-          <span *ngIf="type.value === 'All'"> <mat-icon class="filter__all-icon"
-                                                        style="color: #555">filter_list</mat-icon> All </span>
-          <kadai-administration-icon-type *ngIf="type.value !== 'All'" [text]="type.value"
-                                          [type]='type.key'></kadai-administration-icon-type>
-        </button>
-      </mat-menu>
-
+  @if (!isExpanded) {
+    <div class="filter__collapsed-filter">
+      <!-- TEXT INPUT -->
+      <mat-form-field class="filter__collapsed-filter-input-field" floatLabel="auto">
+        <mat-label>Filter by name</mat-label>
+        <input (keyup.enter)="search()" [(ngModel)]="filter['name-like'][0]" matInput
+               matTooltip="Type to filter by name">
+      </mat-form-field>
       <!-- CLEAR BUTTON -->
-      <button (click)="clear()" mat-stroked-button matTooltip="Clear Workbasket filter">
-        Reset
-        <mat-icon style="color: #555">undo</mat-icon>
+      <button (click)="clear()" class="filter__undo-button" mat-stroked-button
+              matTooltip="Clear Workbasket filter">
+        <mat-icon class="filter__mat-icon" style="color: #555">undo</mat-icon>
       </button>
-
       <!-- SEARCH BUTTON -->
       <button (click)="search()" class="filter__search-button" mat-stroked-button
               matTooltip="Search by given filter">
-        Apply
-        <mat-icon>search</mat-icon>
+        <mat-icon class="filter__mat-icon">search</mat-icon>
       </button>
     </div>
-  </div>
+  }
+
+
+  <!-- EXPANDED WORKBASKET FILTER -->
+  @if (isExpanded) {
+    <div class="filter__expanded-filter">
+      <!-- TEXT INPUT -->
+      <div class="filter__text-input">
+        <div class="filter__name-and-key-input">
+          <mat-form-field class="filter__input-field-left" floatLabel="auto">
+            <mat-label>Filter by name</mat-label>
+            <input (keyup.enter)="search()" [(ngModel)]="filter['name-like'][0]" matInput
+                   matTooltip="Type to filter by name">
+          </mat-form-field>
+          <mat-form-field class="filter__input-field-right" floatLabel="auto">
+            <mat-label>Filter by key</mat-label>
+            <input (keyup.enter)="search()" [(ngModel)]="filter['key-like'][0]" matInput
+                   matTooltip="Type to filter by key">
+          </mat-form-field>
+        </div>
+        <div class="filter__name-and-key-input">
+          <mat-form-field class="filter__input-field-left" floatLabel="auto">
+            <mat-label>Filter by description</mat-label>
+            <input (keyup.enter)="search()" [(ngModel)]="filter['description-like'][0]" matInput
+                   matTooltip="Type to filter by description">
+          </mat-form-field>
+          <mat-form-field class="filter__input-field-right" floatLabel="auto">
+            <mat-label>Filter by owner</mat-label>
+            <input (keyup.enter)="search()" [(ngModel)]="filter['owner-like'][0]" matInput
+                   matTooltip="Type to filter by owner">
+          </mat-form-field>
+        </div>
+      </div>
+      <!-- SEARCH AND CLEAR BUTTON -->
+      <div class="filter__action-buttons">
+        <!-- TYPE FILTER -->
+        <button [matMenuTriggerFor]="menu" mat-stroked-button
+                matTooltip="Filter Workbaskets by type">
+          Filter by type
+          @if (filter.type.length == 0) {
+            <mat-icon style="color: #555">filter_list</mat-icon>
+          }
+          @if (filter.type[0]) {
+            <kadai-administration-icon-type
+              [type]="filter.type[0]"></kadai-administration-icon-type>
+          }
+        </button>
+        <mat-menu #menu="matMenu">
+          @for (type of allTypes | mapValues; track type) {
+            <button (click)="selectType(type.key)"
+                    mat-menu-item>
+              @if (type.value === 'All') {
+                <span> <mat-icon class="filter__all-icon"
+                                 style="color: #555">filter_list</mat-icon> All </span>
+              }
+              @if (type.value !== 'All') {
+                <kadai-administration-icon-type [text]="type.value"
+                                                [type]='type.key'></kadai-administration-icon-type>
+              }
+            </button>
+          }
+        </mat-menu>
+        <!-- CLEAR BUTTON -->
+        <button (click)="clear()" mat-stroked-button matTooltip="Clear Workbasket filter">
+          Reset
+          <mat-icon style="color: #555">undo</mat-icon>
+        </button>
+        <!-- SEARCH BUTTON -->
+        <button (click)="search()" class="filter__search-button" mat-stroked-button
+                matTooltip="Search by given filter">
+          Apply
+          <mat-icon>search</mat-icon>
+        </button>
+      </div>
+    </div>
+  }
 </div>

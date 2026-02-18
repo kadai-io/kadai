@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -41,12 +41,12 @@ public class AttachmentSummaryImpl implements AttachmentSummary {
   AttachmentSummaryImpl() {}
 
   protected AttachmentSummaryImpl(AttachmentSummaryImpl copyFrom) {
-    created = copyFrom.created;
-    modified = copyFrom.modified;
-    classificationSummary = copyFrom.classificationSummary;
-    objectReference = copyFrom.objectReference;
-    channel = copyFrom.channel;
-    received = copyFrom.received;
+    this.created = copyFrom.created != null ? Instant.from(copyFrom.created) : null;
+    this.modified = copyFrom.modified != null ? Instant.from(copyFrom.modified) : null;
+    this.classificationSummary = copyFrom.classificationSummary;
+    this.objectReference = copyFrom.objectReference;
+    this.channel = copyFrom.channel;
+    this.received = copyFrom.received != null ? Instant.from(copyFrom.received) : null;
   }
 
   @Override

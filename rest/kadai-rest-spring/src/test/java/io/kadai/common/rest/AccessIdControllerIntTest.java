@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.ThrowingConsumer;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
@@ -145,12 +147,13 @@ class AccessIdControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_ACCESS_ID) + "?search-for=al";
 
     ThrowingCallable httpCall =
-        () -> CLIENT
-            .get()
-            .uri(url)
-            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
-            .retrieve()
-            .toEntity(ACCESS_ID_LIST_TYPE);
+        () ->
+            CLIENT
+                .get()
+                .uri(url)
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                .retrieve()
+                .toEntity(ACCESS_ID_LIST_TYPE);
 
     assertThatThrownBy(httpCall)
         .isInstanceOf(HttpStatusCodeException.class)
@@ -367,5 +370,26 @@ class AccessIdControllerIntTest {
         .isNotNull()
         .extracting(AccessIdRepresentationModel::getAccessId)
         .containsExactlyInAnyOrder("user-1-1", "user-1-2");
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "cn=invalid-cn,cn=groups,OU=Test,O=KADAI",
+        "cn=invalid-cn,cn=boop,OU=Test,O=KADAI"
+      })
+  void should_ReturnEmptyList_When_SearchedForValueIsAValidDnButDoesNotExist(String validDn) {
+    String url = restHelper.toUrl(RestEndpoints.URL_ACCESS_ID) + "?search-for=" + validDn;
+
+    ResponseEntity<List<AccessIdRepresentationModel>> response =
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(ACCESS_ID_LIST_TYPE);
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody()).isEmpty();
   }
 }

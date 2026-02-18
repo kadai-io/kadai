@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import { forkJoin, Observable, Subject } from 'rxjs';
 
 import { Workbasket } from 'app/shared/models/workbasket';
 import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { filter, take, takeUntil } from 'rxjs/operators';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import {
@@ -34,7 +34,7 @@ import { ButtonAction } from '../../models/button-action';
 import { Side } from '../../models/workbasket-distribution-enums';
 import { ClearWorkbasketFilter } from '../../../shared/store/filter-store/filter.actions';
 import { MatToolbar } from '@angular/material/toolbar';
-import { NgClass, NgIf } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { WorkbasketDistributionTargetsListComponent } from '../workbasket-distribution-targets-list/workbasket-distribution-targets-list.component';
@@ -43,17 +43,15 @@ import { WorkbasketDistributionTargetsListComponent } from '../workbasket-distri
   selector: 'kadai-administration-workbasket-distribution-targets',
   templateUrl: './workbasket-distribution-targets.component.html',
   styleUrls: ['./workbasket-distribution-targets.component.scss'],
-  imports: [MatToolbar, NgIf, MatButton, MatIcon, NgClass, WorkbasketDistributionTargetsListComponent]
+  imports: [MatToolbar, MatButton, MatIcon, NgClass, WorkbasketDistributionTargetsListComponent]
 })
 export class WorkbasketDistributionTargetsComponent implements OnInit, OnDestroy {
   sideEnum = Side;
   sideBySide = true;
   displayingDistributionTargetsPicker = true;
   transferDistributionTargetObservable = new Subject<Side>();
-  @Select(WorkbasketSelectors.buttonAction)
-  buttonAction$: Observable<ButtonAction>;
-  @Select(WorkbasketSelectors.selectedWorkbasket)
-  selectedWorkbasket$: Observable<Workbasket>;
+  buttonAction$: Observable<ButtonAction> = inject(Store).select(WorkbasketSelectors.buttonAction);
+  selectedWorkbasket$: Observable<Workbasket> = inject(Store).select(WorkbasketSelectors.selectedWorkbasket);
   destroy$ = new Subject<void>();
   private notificationsService = inject(NotificationService);
   private store = inject(Store);

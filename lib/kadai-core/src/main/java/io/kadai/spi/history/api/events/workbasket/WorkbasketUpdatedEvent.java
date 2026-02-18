@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@ import io.kadai.workbasket.api.models.Workbasket;
 
 public class WorkbasketUpdatedEvent extends WorkbasketHistoryEvent {
 
-  public WorkbasketUpdatedEvent(String id, Workbasket workbasket, String userId, String details) {
-    super(id, workbasket, userId, details);
+  public WorkbasketUpdatedEvent(
+      String id, Workbasket workbasket, String userId, String proxyAccessId, String details) {
+    super(id, workbasket, userId, proxyAccessId, details);
     eventType = WorkbasketHistoryEventType.UPDATED.getName();
     created = workbasket.getModified();
   }

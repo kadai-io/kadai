@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
   private String[] eventTypeIn;
   private TimeInterval[] createdIn;
   private String[] userIdIn;
+  private String[] proxyAccessIdIn;
   private String[] domainIn;
   private String[] keyIn;
   private String[] typeIn;
@@ -70,6 +71,7 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
   private String[] workbasketIdLike;
   private String[] eventTypeLike;
   private String[] userIdLike;
+  private String[] proxyAccessIdLike;
   private String[] domainLike;
   private String[] keyLike;
   private String[] typeLike;
@@ -107,6 +109,10 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
 
   public String[] getUserIdIn() {
     return userIdIn;
+  }
+
+  public String[] getProxyAccessIdIn() {
+    return proxyAccessIdIn;
   }
 
   public String[] getDomainIn() {
@@ -167,6 +173,10 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
 
   public String[] getUserIdLike() {
     return userIdLike;
+  }
+
+  public String[] getProxyAccessIdLike() {
+    return proxyAccessIdLike;
   }
 
   public String[] getDomainLike() {
@@ -244,6 +254,12 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
   @Override
   public WorkbasketHistoryQuery userIdIn(String... userId) {
     this.userIdIn = userId;
+    return this;
+  }
+
+  @Override
+  public WorkbasketHistoryQuery proxyAccessIdIn(String... accessIds) {
+    this.proxyAccessIdIn = accessIds;
     return this;
   }
 
@@ -358,6 +374,12 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
   }
 
   @Override
+  public WorkbasketHistoryQuery proxyAccessIdLike(String... proxyAccessIds) {
+    this.proxyAccessIdLike = toLowerCopy(proxyAccessIds);
+    return this;
+  }
+
+  @Override
   public WorkbasketHistoryQuery domainLike(String... domain) {
     this.domainLike = toLowerCopy(domain);
     return this;
@@ -463,10 +485,10 @@ public class WorkbasketHistoryQueryImpl implements WorkbasketHistoryQuery {
   public WorkbasketHistoryQuery orderByOrgLevel(int num, SortDirection sortDirection)
       throws InvalidArgumentException {
     return switch (num) {
-      case 1 -> addOrderCriteria("ORGLEVEL_1", sortDirection);
-      case 2 -> addOrderCriteria("ORGLEVEL_2", sortDirection);
-      case 3 -> addOrderCriteria("ORGLEVEL_3", sortDirection);
-      case 4 -> addOrderCriteria("ORGLEVEL_4", sortDirection);
+      case 1 -> addOrderCriteria("ORG_LEVEL_1", sortDirection);
+      case 2 -> addOrderCriteria("ORG_LEVEL_2", sortDirection);
+      case 3 -> addOrderCriteria("ORG_LEVEL_3", sortDirection);
+      case 4 -> addOrderCriteria("ORG_LEVEL_4", sortDirection);
       default ->
           throw new InvalidArgumentException(
               "Org number has to be between 1 and 4, but this is: " + num);

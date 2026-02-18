@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ public class UserQueryFilterParameter implements QueryParameter<UserQuery, Void>
       return;
     }
     if (currentUser.isBlank() || currentUser.equalsIgnoreCase("true")) {
-      final String currentUserId = currentUserContext.getUserid();
+      final String currentUserId = currentUserContext.getUserId();
       if (currentUserId != null) {
         this.userIds = ArrayUtils.add(this.userIds, currentUserId);
       }

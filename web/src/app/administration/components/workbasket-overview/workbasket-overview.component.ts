@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,16 +17,16 @@
  */
 
 import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { take, takeUntil } from 'rxjs/operators';
-import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
+import { WorkbasketAndAction, WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
 
 import { CreateWorkbasket, SelectWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { Workbasket } from '../../../shared/models/workbasket';
 import { WorkbasketListComponent } from '../workbasket-list/workbasket-list.component';
-import { NgIf } from '@angular/common';
+
 import { MatIcon } from '@angular/material/icon';
 import { WorkbasketDetailsComponent } from '../workbasket-details/workbasket-details.component';
 import { SvgIconComponent } from 'angular-svg-icon';
@@ -35,12 +35,14 @@ import { SvgIconComponent } from 'angular-svg-icon';
   selector: 'kadai-administration-workbasket-overview',
   templateUrl: './workbasket-overview.component.html',
   styleUrls: ['./workbasket-overview.component.scss'],
-  imports: [WorkbasketListComponent, NgIf, MatIcon, WorkbasketDetailsComponent, SvgIconComponent]
+  imports: [WorkbasketListComponent, MatIcon, WorkbasketDetailsComponent, SvgIconComponent]
 })
 export class WorkbasketOverviewComponent implements OnInit {
   showDetail = false;
-  @Select(WorkbasketSelectors.selectedWorkbasketAndAction) selectedWorkbasketAndAction$: Observable<any>;
-  @Select(WorkbasketSelectors.selectedWorkbasket) selectedWorkbasket$: Observable<Workbasket>;
+  selectedWorkbasketAndAction$: Observable<WorkbasketAndAction> = inject(Store).select(
+    WorkbasketSelectors.selectedWorkbasketAndAction
+  );
+  selectedWorkbasket$: Observable<Workbasket> = inject(Store).select(WorkbasketSelectors.selectedWorkbasket);
   destroy$ = new Subject<void>();
   routerParams: any;
   expanded = true;
@@ -50,17 +52,15 @@ export class WorkbasketOverviewComponent implements OnInit {
   private store = inject(Store);
 
   ngOnInit() {
-    if (this.route.url) {
-      this.route.url.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-        if (params[0].path === 'workbaskets') {
-          this.selectedWorkbasket$.pipe(take(1)).subscribe((workbasket) => {
-            if (typeof workbasket.workbasketId !== 'undefined') {
-              this.store.dispatch(new SelectWorkbasket(workbasket.workbasketId));
-            }
-          });
-        }
-      });
-    }
+    this.route.url.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      if (params[0].path === 'workbaskets') {
+        this.selectedWorkbasket$.pipe(take(1)).subscribe((workbasket) => {
+          if (typeof workbasket.workbasketId !== 'undefined') {
+            this.store.dispatch(new SelectWorkbasket(workbasket.workbasketId));
+          }
+        });
+      }
+    });
     if (this.route.firstChild) {
       this.route.firstChild.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
         this.routerParams = params;
@@ -91,10 +91,5 @@ export class WorkbasketOverviewComponent implements OnInit {
       this.workbasketList.nativeElement.style.minWidth = '250px';
       this.toggleButton.nativeElement.style.left = '230px';
     }
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

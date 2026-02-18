@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import { Sorting, WORKBASKET_SORT_PARAMETER_NAMING, WorkbasketQuerySortParameter
 import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
 import { KadaiType } from 'app/shared/models/kadai-type';
 import { expandDown } from 'app/shared/animations/expand.animation';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ACTION } from '../../../shared/models/action';
@@ -31,7 +31,7 @@ import { WorkbasketService } from '../../../shared/services/workbasket/workbaske
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import { NgIf } from '@angular/common';
+
 import { ImportExportComponent } from '../import-export/import-export.component';
 import { SortComponent } from '../../../shared/components/sort/sort.component';
 import { WorkbasketFilterComponent } from '../../../shared/components/workbasket-filter/workbasket-filter.component';
@@ -41,7 +41,7 @@ import { WorkbasketFilterComponent } from '../../../shared/components/workbasket
   animations: [expandDown],
   templateUrl: './workbasket-list-toolbar.component.html',
   styleUrls: ['./workbasket-list-toolbar.component.scss'],
-  imports: [MatButton, MatTooltip, MatIcon, NgIf, ImportExportComponent, SortComponent, WorkbasketFilterComponent]
+  imports: [MatButton, MatTooltip, MatIcon, ImportExportComponent, SortComponent, WorkbasketFilterComponent]
 })
 export class WorkbasketListToolbarComponent implements OnInit {
   @Input() workbasketListExpanded: boolean = true;
@@ -52,8 +52,7 @@ export class WorkbasketListToolbarComponent implements OnInit {
   sortingFields: Map<WorkbasketQuerySortParameter, string> = WORKBASKET_SORT_PARAMETER_NAMING;
   isExpanded = false;
   showFilter = false;
-  @Select(WorkbasketSelectors.workbasketActiveAction)
-  workbasketActiveAction$: Observable<ACTION>;
+  workbasketActiveAction$: Observable<ACTION> = inject(Store).select(WorkbasketSelectors.workbasketActiveAction);
   destroy$ = new Subject<void>();
   action: ACTION;
   private store = inject(Store);

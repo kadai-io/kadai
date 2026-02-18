@@ -1,123 +1,116 @@
 <!--
-  ~ Copyright [2025] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2026] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
-<div *ngIf="task && !requestInProgress" class="task-details">
-
-  <div class="task-details__header">
-
-
-    <!-- ACTION BUTTONS -->
-    <div class="task-details__action-buttons">
-
-      <!-- BADGE MESSAGE -->
-      <div style="max-width: calc(100% - 312px); margin-right: 4px;">
-        <span *ngIf="!task.taskId"
+@if (task && !requestInProgress) {
+  <div class="task-details">
+    <div class="task-details__header">
+      <!-- ACTION BUTTONS -->
+      <div class="task-details__action-buttons">
+        <!-- BADGE MESSAGE -->
+        <div style="max-width: calc(100% - 312px); margin-right: 4px;">
+          @if (!task.taskId) {
+            <span
               class="task-details__badge-message"> &nbsp; Creating Task &nbsp; </span>
+          }
+        </div>
+        <div>
+          <button (click)="toggleFormValidation = !toggleFormValidation"
+                  class="task-details__button--primary"
+                  mat-stroked-button
+                  matTooltip="Save Task">
+            <span> Save </span>
+            <mat-icon>save</mat-icon>
+          </button>
+          <!-- TODO: delete ngIf when introducing workbasket store -->
+          @if (currentId != 'new-task') {
+            <button (click)="resetTask()"
+                    class="task-details__button--secondary"
+                    mat-stroked-button matTooltip="Undo changes">
+              <mat-icon class="task-details__icon--aquamarine">undo</mat-icon>
+              <span> Undo changes </span>
+            </button>
+          }
+          <button [matMenuTriggerFor]="buttonMenu" class="task-details__button--secondary"
+                  mat-stroked-button
+                  matTooltip="More actions" style="height: 37px; top: 1px;">
+            <mat-icon class="task-details__mat-icon">more_vert</mat-icon>
+          </button>
+          <mat-menu #buttonMenu="matMenu">
+            @if (currentId != 'new-task') {
+              <button (click)="openTask()"
+                      class="task-details__button--secondary"
+                      mat-menu-item matTooltip="Open Task to work on it">
+                <mat-icon class="task-details__icon--aquamarine">open_in_new</mat-icon>
+                <span> Open </span>
+              </button>
+            }
+            @if (currentId != 'new-task') {
+              <button (click)="deleteTask()"
+                      class="task-details__button--secondary"
+                      mat-menu-item matTooltip="Delete Task">
+                <mat-icon class="task-details__icon--red">delete</mat-icon>
+                <span> Delete </span>
+              </button>
+            }
+            <button (click)="backClicked()" class="task-details__button--secondary" mat-menu-item
+                    matTooltip="Close Task">
+              <mat-icon>close</mat-icon>
+              <span> Close </span>
+            </button>
+          </mat-menu>
+        </div>
       </div>
-
-      <div>
-
-        <button (click)="toggleFormValidation = !toggleFormValidation"
-                class="task-details__button--primary"
-                mat-stroked-button
-                matTooltip="Save Task">
-          <span> Save </span>
-          <mat-icon>save</mat-icon>
-        </button>
-
-        <!-- TODO: delete ngIf when introducing workbasket store -->
-        <button (click)="resetTask()" *ngIf="currentId != 'new-task'"
-                class="task-details__button--secondary"
-                mat-stroked-button matTooltip="Undo changes">
-          <mat-icon class="task-details__icon--aquamarine">undo</mat-icon>
-          <span> Undo changes </span>
-        </button>
-
-        <button [matMenuTriggerFor]="buttonMenu" class="task-details__button--secondary"
-                mat-stroked-button
-                matTooltip="More actions" style="height: 37px; top: 1px;">
-          <mat-icon class="task-details__mat-icon">more_vert</mat-icon>
-        </button>
-
-        <mat-menu #buttonMenu="matMenu">
-          <button (click)="openTask()" *ngIf="currentId != 'new-task'"
-                  class="task-details__button--secondary"
-                  mat-menu-item matTooltip="Open Task to work on it">
-            <mat-icon class="task-details__icon--aquamarine">open_in_new</mat-icon>
-            <span> Open </span>
-          </button>
-
-          <button (click)="deleteTask()" *ngIf="currentId != 'new-task'"
-                  class="task-details__button--secondary"
-                  mat-menu-item matTooltip="Save Task">
-            <mat-icon class="task-details__icon--red">delete</mat-icon>
-            <span> Delete </span>
-          </button>
-
-          <button (click)="backClicked()" class="task-details__button--secondary" mat-menu-item
-                  matTooltip="Close Task">
-            <mat-icon>close</mat-icon>
-            <span> Close </span>
-          </button>
-        </mat-menu>
-      </div>
-
+      <!-- TITLE -->
+      <h4 class="task-details__task-name"> {{ task.name }} </h4>
     </div>
-
-    <!-- TITLE -->
-    <h4 class="task-details__task-name"> {{ task.name }} </h4>
-
+    <!-- TABS -->
+    <div class="task-details__tab-group-wrapper">
+      <mat-tab-group animationDuration="0ms" mat-stretch-tabs="false">
+        <mat-tab label="Information">
+          <div class="task-details__tab-wrapper">
+            <kadai-task-information (formValid)="onSave()"
+                                    [saveToggleTriggered]="toggleFormValidation"
+                                    [task]="task"></kadai-task-information>
+          </div>
+        </mat-tab>
+        <mat-tab label="Status Details">
+          <div class="task-details__tab-wrapper">
+            <kadai-task-status-details [task]="task"></kadai-task-status-details>
+          </div>
+        </mat-tab>
+        <mat-tab label="Custom Fields">
+          <div class="task-details__tab-wrapper">
+            <kadai-task-custom-fields [task]="task"></kadai-task-custom-fields>
+          </div>
+        </mat-tab>
+        <mat-tab label="Custom Attributes">
+          <div class="task-details__tab-wrapper">
+            <kadai-task-attribute-value
+              [attributes]="task.customAttributes"></kadai-task-attribute-value>
+          </div>
+        </mat-tab>
+        <mat-tab label="Callback Information">
+          <div class="task-details__tab-wrapper">
+            <kadai-task-attribute-value [attributes]="task.callbackInfo"
+                                        [callbackInfo]="true"></kadai-task-attribute-value>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
   </div>
-
-  <!-- TABS -->
-  <div class="task-details__tab-group-wrapper">
-
-    <mat-tab-group animationDuration="0ms" mat-stretch-tabs="false">
-      <mat-tab label="Information">
-        <div class="task-details__tab-wrapper">
-          <kadai-task-information (formValid)="onSave()"
-                                  [saveToggleTriggered]="toggleFormValidation"
-                                  [task]="task"></kadai-task-information>
-        </div>
-      </mat-tab>
-      <mat-tab label="Status Details">
-        <div class="task-details__tab-wrapper">
-          <kadai-task-status-details [task]="task"></kadai-task-status-details>
-        </div>
-      </mat-tab>
-      <mat-tab label="Custom Fields">
-        <div class="task-details__tab-wrapper">
-          <kadai-task-custom-fields [task]="task"></kadai-task-custom-fields>
-        </div>
-      </mat-tab>
-      <mat-tab label="Custom Attributes">
-        <div class="task-details__tab-wrapper">
-          <kadai-task-attribute-value
-            [attributes]="task.customAttributes"></kadai-task-attribute-value>
-        </div>
-      </mat-tab>
-      <mat-tab label="Callback Information">
-        <div class="task-details__tab-wrapper">
-          <kadai-task-attribute-value [attributes]="task.callbackInfo"
-                                      [callbackInfo]="true"></kadai-task-attribute-value>
-        </div>
-      </mat-tab>
-    </mat-tab-group>
-
-  </div>
-</div>
+}

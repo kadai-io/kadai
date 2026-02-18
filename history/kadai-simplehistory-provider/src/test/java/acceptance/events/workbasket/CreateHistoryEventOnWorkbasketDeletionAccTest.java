@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,8 +21,7 @@ package acceptance.events.workbasket;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import acceptance.AbstractAccTest;
-import io.kadai.common.test.security.JaasExtension;
-import io.kadai.common.test.security.WithAccessId;
+import io.kadai.common.internal.util.CheckedRunnable;
 import io.kadai.simplehistory.workbasket.api.WorkbasketHistoryService;
 import io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryEventMapper;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
@@ -30,9 +29,7 @@ import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEventType;
 import io.kadai.workbasket.api.WorkbasketService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(JaasExtension.class)
 class CreateHistoryEventOnWorkbasketDeletionAccTest extends AbstractAccTest {
 
   private final WorkbasketService workbasketService = kadaiEngine.getWorkbasketService();
@@ -40,27 +37,34 @@ class CreateHistoryEventOnWorkbasketDeletionAccTest extends AbstractAccTest {
   private final WorkbasketHistoryEventMapper workbasketHistoryEventMapper =
       getWorkbasketHistoryEventMapper();
 
-  @WithAccessId(user = "admin")
   @Test
   void should_CreateWorkbasketDeletedHistoryEvent_When_WorkbasketIsDeleted() throws Exception {
+    kadaiEngine.runAsAdmin(
+        CheckedRunnable.rethrowing(
+            () -> {
+              final String workbasketId = "WBI:100000000000000000000000000000000008";
 
-    final String workbasketId = "WBI:100000000000000000000000000000000008";
+              List<WorkbasketHistoryEvent> events =
+                  historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
 
-    List<WorkbasketHistoryEvent> events =
-        historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
+              assertThat(events).isEmpty();
 
-    assertThat(events).isEmpty();
+              workbasketService.deleteWorkbasket(workbasketId);
 
-    workbasketService.deleteWorkbasket(workbasketId);
+              events =
+                  historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
+              assertThat(events).hasSize(1);
 
-    events = historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
-    assertThat(events).hasSize(1);
+              String eventType = events.get(0).getEventType();
+              String details =
+                  workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
 
-    String eventType = events.get(0).getEventType();
-    String details = workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
-
-    assertThat(eventType).isEqualTo(WorkbasketHistoryEventType.DELETED.getName());
-
-    assertThat(details).contains("\"oldValue\":\"WBI:100000000000000000000000000000000008\"");
+              assertThat(eventType).isEqualTo(WorkbasketHistoryEventType.DELETED.getName());
+              assertThat(details)
+                  .contains("\"oldValue\":\"WBI:100000000000000000000000000000000008\"");
+              assertThat(events.get(0).getUserId()).isEqualTo("user-7-8");
+              assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
+            }),
+        "user-7-8");
   }
 }

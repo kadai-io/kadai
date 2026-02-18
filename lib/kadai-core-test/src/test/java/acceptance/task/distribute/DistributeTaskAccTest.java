@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -499,13 +499,30 @@ class DistributeTaskAccTest {
 
   @WithAccessId(user = "user-1-2")
   @Test
-  void should_ThrowTaskNotFoundException_When_TaskDoesNotExist() {
+  void should_ReturnErrorInBulkResult_When_TaskDoesNotExist() throws Exception {
     String sourceWorkbasketId = workbasketSummary1.getId();
-    String nonExistingTask = "NonExistingTaskId";
-    List<String> taskIds = List.of(nonExistingTask, taskSummaries.get(0).getId());
-    assertThatThrownBy(() -> taskService.distribute(sourceWorkbasketId, taskIds))
+    String nonExistingTask1 = "NonExistingTaskId";
+    String nonExistingTask2 = "Boop";
+    List<String> taskIds = new ArrayList<>(taskSummaries.stream().map(TaskSummary::getId).toList());
+    taskIds.add(nonExistingTask1);
+    taskIds.add(nonExistingTask2);
+
+    BulkOperationResults<String, KadaiException> result =
+        taskService.distribute(sourceWorkbasketId, taskIds);
+
+    assertThat(result.getErrorMap()).hasSize(2);
+    assertThat(result.getErrorMap()).containsKey(nonExistingTask1);
+    assertThat(result.getErrorMap()).containsKey(nonExistingTask2);
+    assertThat(result.getErrorMap().get(nonExistingTask1))
         .isInstanceOf(TaskNotFoundException.class)
-        .hasMessageContaining(String.format("Task with id '%s' was not found.", nonExistingTask));
+        .hasMessageContaining("Task with id 'NonExistingTaskId' was not found.");
+    assertThat(result.getErrorMap().get(nonExistingTask2))
+        .isInstanceOf(TaskNotFoundException.class)
+        .hasMessageContaining("Task with id 'Boop' was not found.");
+
+    assertThat(result.getErrorMap())
+        .doesNotContainKeys(
+            taskSummaries.stream().map(TaskSummary::getId).toList().toArray(new String[0]));
   }
 
   @WithAccessId(user = "user-1-2")

@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ public enum TaskHistoryQuerySortBy implements QuerySortBy<TaskHistoryQuery> {
   EVENT_TYPE(TaskHistoryQuery::orderByEventType),
   CREATED(TaskHistoryQuery::orderByCreated),
   USER_ID(TaskHistoryQuery::orderByUserId),
+  PROXY_ACCESS_ID(TaskHistoryQuery::orderByProxyAccessId),
   DOMAIN(TaskHistoryQuery::orderByDomain),
   WORKBASKET_KEY(TaskHistoryQuery::orderByWorkbasketKey),
   POR_COMPANY(TaskHistoryQuery::orderByPorCompany),

@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
  *
  */
 
-import { getTestBed, inject, TestBed } from '@angular/core/testing';
+import { getTestBed, TestBed } from '@angular/core/testing';
 
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { StartupService } from './startup.service';
 import { environment } from '../../../../environments/environment';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('StartupService', () => {
   const environmentFile = 'environments/data-sources/environment-information.json';
@@ -44,39 +45,46 @@ describe('StartupService', () => {
   beforeEach(() => {
     const injector = getTestBed();
     httpMock = injector.inject(HttpTestingController);
-    // UserService provided to the TestBed
     service = injector.inject(StartupService);
   });
 
-  it('should be created', inject([StartupService], () => {
+  it('should be created', () => {
     expect(service).toBeTruthy();
-  }));
+  });
 
-  it('should initialize rest and logout url from external file', (done) => {
+  it('should initialize rest and logout url from external file', async () => {
     environment.kadaiRestUrl = '';
     environment.kadaiLogoutUrl = '';
-    service.getEnvironmentFilePromise().then((res) => {
-      expect(environment.kadaiRestUrl).toBe(someRestUrl);
-      expect(environment.kadaiLogoutUrl).toBe(someLogoutUrl);
-      done();
-    });
+
+    const promise = service.getEnvironmentFilePromise();
+
     const req = httpMock.expectOne(environmentFile);
     expect(req.request.method).toBe('GET');
     req.flush(dummyEnvironmentInformation);
+
+    await promise;
+
+    expect(environment.kadaiRestUrl).toBe(someRestUrl);
+    expect(environment.kadaiLogoutUrl).toBe(someLogoutUrl);
+
     httpMock.verify();
   });
 
-  it('should initialize rest and logout url from external file and override previous config', (done) => {
+  it('should initialize rest and logout url from external file and override previous config', async () => {
     environment.kadaiRestUrl = 'oldRestUrl';
     environment.kadaiLogoutUrl = 'oldLogoutUrl';
-    service.getEnvironmentFilePromise().then(() => {
-      expect(environment.kadaiRestUrl).toBe(someRestUrl);
-      expect(environment.kadaiLogoutUrl).toBe(someLogoutUrl);
-      done();
-    });
+
+    const promise = service.getEnvironmentFilePromise();
+
     const req = httpMock.expectOne(environmentFile);
     expect(req.request.method).toBe('GET');
     req.flush(dummyEnvironmentInformation);
+
+    await promise;
+
+    expect(environment.kadaiRestUrl).toBe(someRestUrl);
+    expect(environment.kadaiLogoutUrl).toBe(someLogoutUrl);
+
     httpMock.verify();
   });
 });

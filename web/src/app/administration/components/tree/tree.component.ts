@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -34,10 +34,10 @@ import { TreeNodeModel } from 'app/administration/models/tree-node';
 import { ITreeOptions, KEYS, TREE_ACTIONS, TreeComponent, TreeModule } from '@ali-hm/angular-tree-component';
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { filter, map, takeUntil } from 'rxjs/operators';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 
-import { Location, NgIf } from '@angular/common';
+import { Location } from '@angular/common';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import { Classification } from '../../../shared/models/classification';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
@@ -58,7 +58,7 @@ import { MatTooltip } from '@angular/material/tooltip';
   selector: 'kadai-administration-tree',
   templateUrl: './tree.component.html',
   styleUrls: ['./tree.component.scss'],
-  imports: [NgIf, TreeModule, SvgIconComponent, MatTooltip]
+  imports: [TreeModule, SvgIconComponent, MatTooltip]
 })
 export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
   treeNodes: TreeNodeModel[];
@@ -70,10 +70,16 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
   @Input() filterText: string;
   @Input() filterIcon = '';
   @Output() switchKadaiSpinnerEmit = new EventEmitter<boolean>();
-  @Select(EngineConfigurationSelectors.selectCategoryIcons) categoryIcons$: Observable<ClassificationCategoryImages>;
-  @Select(ClassificationSelectors.selectedClassificationId) selectedClassificationId$: Observable<string>;
-  @Select(ClassificationSelectors.classifications) classifications$: Observable<Classification[]>;
-  @Select(ClassificationSelectors.selectedClassificationType) classificationTypeSelected$: Observable<string>;
+  categoryIcons$: Observable<ClassificationCategoryImages> = inject(Store).select(
+    EngineConfigurationSelectors.selectCategoryIcons
+  );
+  selectedClassificationId$: Observable<string> = inject(Store).select(
+    ClassificationSelectors.selectedClassificationId
+  );
+  classifications$: Observable<Classification[]> = inject(Store).select(ClassificationSelectors.classifications);
+  classificationTypeSelected$: Observable<string> = inject(Store).select(
+    ClassificationSelectors.selectedClassificationType
+  );
   options: ITreeOptions = {
     displayField: 'name',
     idField: 'classificationId',

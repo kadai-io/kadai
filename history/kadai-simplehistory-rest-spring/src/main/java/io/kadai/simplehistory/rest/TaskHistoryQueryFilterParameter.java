@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -59,6 +59,23 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
               + "\"LIKE\" wildcard characters will be resolved correctly.")
   @JsonProperty("user-id-like")
   private final String[] userIdLike;
+
+  @Parameter(
+      name = "proxy-access-id",
+      description =
+          "Filter by the proxy access id of the Task History Event. This is an exact match.")
+  @JsonProperty("proxy-access-id")
+  private final String[] proxyAccessId;
+
+  @Parameter(
+      name = "proxy-access-id-like",
+      description =
+          "Filter by the proxy access id of the Task History Event. "
+              + "This results in a substring search.. "
+              + "(% is appended to the beginning and end of the requested value). Further SQL "
+              + "\"LIKE\" wildcard characters will be resolved correctly.")
+  @JsonProperty("proxy-access-id-like")
+  private final String[] proxyAccessIdLike;
 
   @Parameter(
       name = "created",
@@ -326,6 +343,8 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
     "event-type-like",
     "user-id",
     "user-id-like",
+    "proxy-access-id",
+    "proxy-access-id-like",
     "created",
     "domain",
     "task-id",
@@ -364,6 +383,8 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
       String[] eventTypeLike,
       String[] userId,
       String[] userIdLike,
+      String[] proxyAccessId,
+      String[] proxyAccessIdLike,
       Instant[] created,
       String[] domain,
       String[] taskId,
@@ -401,6 +422,8 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
     this.eventTypeLike = eventTypeLike;
     this.userId = userId;
     this.userIdLike = userIdLike;
+    this.proxyAccessId = proxyAccessId;
+    this.proxyAccessIdLike = proxyAccessIdLike;
     this.created = created;
     this.domain = domain;
     this.taskId = taskId;
@@ -451,6 +474,14 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
 
   public String[] getUserIdLike() {
     return userIdLike;
+  }
+
+  public String[] getProxyAccessId() {
+    return proxyAccessId;
+  }
+
+  public String[] getProxyAccessIdLike() {
+    return proxyAccessIdLike;
   }
 
   public Instant[] getCreated() {
@@ -589,6 +620,10 @@ public class TaskHistoryQueryFilterParameter implements QueryParameter<TaskHisto
         .ifPresent(query::eventTypeLike);
     ofNullable(userId).ifPresent(query::userIdIn);
     ofNullable(userIdLike).map(this::wrapElementsInLikeStatement).ifPresent(query::userIdLike);
+    ofNullable(proxyAccessId).ifPresent(query::proxyAccessIdIn);
+    ofNullable(proxyAccessIdLike)
+        .map(this::wrapElementsInLikeStatement)
+        .ifPresent(query::proxyAccessIdLike);
     ofNullable(created).map(this::extractTimeIntervals).ifPresent(query::createdWithin);
     ofNullable(domain).ifPresent(query::domainIn);
     ofNullable(taskId).ifPresent(query::taskIdIn);

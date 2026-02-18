@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,13 +21,12 @@ import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent } f
 import { ObtainMessageService } from '../../services/obtain-message/obtain-message.service';
 import { messageTypes } from '../../services/obtain-message/message-types';
 import { MatButton } from '@angular/material/button';
-import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'kadai-shared-dialog-pop-up',
   templateUrl: './dialog-pop-up.component.html',
   styleUrls: ['./dialog-pop-up.component.scss'],
-  imports: [MatDialogContent, MatDialogActions, MatButton, MatDialogClose, NgIf]
+  imports: [MatDialogContent, MatDialogActions, MatButton, MatDialogClose]
 })
 export class DialogPopUpComponent implements OnInit {
   message: string;

@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ public enum UserQueryColumnName implements QueryColumnName {
   GROUPS("groups"),
   PERMISSIONS("permissions"),
   FIRST_NAME("first_name"),
-  LASTNAME("lastname"),
+  LAST_NAME("last_name"),
   FULL_NAME("full_name"),
   LONG_NAME("long_name"),
   E_MAIL("e_mail"),

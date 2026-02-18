@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,18 +16,28 @@
  *
  */
 
-import { Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges
+} from '@angular/core';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
 import { debounceTime, distinctUntilChanged, Observable, Subject } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { AccessId } from '../../models/access-id';
 import { map, take, takeUntil } from 'rxjs/operators';
-import { Select } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { WorkbasketSelectors } from '../../store/workbasket-store/workbasket.selectors';
 import { ButtonAction } from '../../../administration/models/button-action';
 import { EngineConfigurationSelectors } from '../../store/engine-configuration-store/engine-configuration.selectors';
 import { GlobalCustomisation } from '../../models/customisation';
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatInput } from '@angular/material/input';
@@ -46,14 +56,12 @@ import { MatOption } from '@angular/material/core';
     MatTooltip,
     MatInput,
     MatAutocompleteTrigger,
-    NgIf,
     MatError,
     MatAutocomplete,
-    NgFor,
     MatOption
   ]
 })
-export class TypeAheadComponent implements OnInit, OnDestroy {
+export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
   @Input() savedAccessId;
   @Input() placeHolderMessage;
   @Input() entityId;
@@ -62,10 +70,10 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
   @Input() displayError = false;
   @Output() accessIdEventEmitter = new EventEmitter<AccessId>();
   @Output() isFormValid = new EventEmitter<boolean>();
-  @Select(EngineConfigurationSelectors.globalCustomisation)
-  globalCustomisation$: Observable<GlobalCustomisation>;
-  @Select(WorkbasketSelectors.buttonAction)
-  buttonAction$: Observable<ButtonAction>;
+  globalCustomisation$: Observable<GlobalCustomisation> = inject(Store).select(
+    EngineConfigurationSelectors.globalCustomisation
+  );
+  buttonAction$: Observable<ButtonAction> = inject(Store).select(WorkbasketSelectors.buttonAction);
   name: string = '';
   lastSavedAccessId: string = '';
   filteredAccessIds: AccessId[] = [];
@@ -148,6 +156,7 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
           this.isFormValid.emit(false);
           this.accessIdEventEmitter.emit(this.emptyAccessId);
           this.accessIdForm.controls['accessId'].setErrors({ incorrect: true });
+          this.accessIdForm.controls['accessId'].markAsTouched();
         }
       });
   }

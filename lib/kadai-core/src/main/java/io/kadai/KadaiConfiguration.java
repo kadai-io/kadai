@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -246,16 +246,6 @@ public class KadaiConfiguration {
     this.properties = Map.copyOf(builder.properties);
   }
 
-  /**
-   * Helper method to determine whether all access ids (user id and group ids) should be used in
-   * lower case.
-   *
-   * @return true if all access ids should be used in lower case, false otherwise
-   */
-  public static boolean shouldUseLowerCaseForAccessIds() {
-    return true;
-  }
-
   public List<String> getAllClassificationCategories() {
     return this.classificationCategoriesByType.values().stream()
         .flatMap(Collection::stream)
@@ -299,7 +289,6 @@ public class KadaiConfiguration {
   public boolean isIncludeOwnerWhenRouting() {
     return includeOwnerWhenRouting;
   }
-
 
   public Map<KadaiRole, Set<String>> getRoleMap() {
     return roleMap;
@@ -487,6 +476,13 @@ public class KadaiConfiguration {
   // endregion
 
   // region hashCode, equals + toString
+
+  private Map<String, String> filterOutNonKadaiAndSensitiveProperties() {
+    return properties.entrySet().stream()
+        .filter(entry -> entry.getKey().startsWith("kadai."))
+        .filter((entry -> !entry.getKey().toLowerCase().contains("password")))
+        .collect(Collectors.toUnmodifiableMap(Entry::getKey, Entry::getValue));
+  }
 
   @Override
   public int hashCode() {
@@ -732,13 +728,6 @@ public class KadaiConfiguration {
         + ", properties="
         + filterOutNonKadaiAndSensitiveProperties()
         + '}';
-  }
-
-  private Map<String, String> filterOutNonKadaiAndSensitiveProperties() {
-    return properties.entrySet().stream()
-        .filter(entry ->  entry.getKey().startsWith("kadai."))
-        .filter((entry -> !entry.getKey().toLowerCase().contains("password")))
-        .collect(Collectors.toUnmodifiableMap(Entry::getKey, Entry::getValue));
   }
 
   // endregion
@@ -1039,18 +1028,6 @@ public class KadaiConfiguration {
       this.properties = conf.properties;
     }
 
-    private static Map<DayOfWeek, Set<LocalTimeInterval>> initDefaultWorkingTimeSchedule() {
-      Map<DayOfWeek, Set<LocalTimeInterval>> workingTime = new EnumMap<>(DayOfWeek.class);
-      Set<LocalTimeInterval> standardWorkingSlots =
-          Set.of(new LocalTimeInterval(LocalTime.MIN, LocalTime.MAX));
-      workingTime.put(DayOfWeek.MONDAY, standardWorkingSlots);
-      workingTime.put(DayOfWeek.TUESDAY, standardWorkingSlots);
-      workingTime.put(DayOfWeek.WEDNESDAY, standardWorkingSlots);
-      workingTime.put(DayOfWeek.THURSDAY, standardWorkingSlots);
-      workingTime.put(DayOfWeek.FRIDAY, standardWorkingSlots);
-      return workingTime;
-    }
-
     /**
      * Configure the {@linkplain KadaiConfiguration} with the default {@linkplain
      * #DEFAULT_KADAI_PROPERTIES property file location} and {@linkplain
@@ -1073,10 +1050,6 @@ public class KadaiConfiguration {
     public Builder initKadaiProperties(String propertiesFile) {
       return initKadaiProperties(propertiesFile, DEFAULT_KADAI_PROPERTY_SEPARATOR);
     }
-
-    // region builder methods
-
-    // region general configuration
 
     /**
      * Configure the {@linkplain KadaiConfiguration} using a property file from the classpath of
@@ -1107,6 +1080,10 @@ public class KadaiConfiguration {
       return this;
     }
 
+    // region builder methods
+
+    // region general configuration
+
     public Builder domains(List<String> domains) {
       this.domains = domains;
       return this;
@@ -1117,10 +1094,6 @@ public class KadaiConfiguration {
       return this;
     }
 
-    // endregion
-
-    // region authentication configuration
-
     public Builder enforceServiceLevel(boolean enforceServiceLevel) {
       this.enforceServiceLevel = enforceServiceLevel;
       return this;
@@ -1128,27 +1101,31 @@ public class KadaiConfiguration {
 
     // endregion
 
-    // region classification configuration
+    // region authentication configuration
 
     public Builder roleMap(Map<KadaiRole, Set<String>> roleMap) {
       this.roleMap = roleMap;
       return this;
     }
 
+    // endregion
+
+    // region classification configuration
+
     public Builder classificationTypes(List<String> classificationTypes) {
       this.classificationTypes = classificationTypes;
       return this;
     }
-
-    // endregion
-
-    // region working time configuration
 
     public Builder classificationCategoriesByType(
         Map<String, List<String>> classificationCategoriesByType) {
       this.classificationCategoriesByType = classificationCategoriesByType;
       return this;
     }
+
+    // endregion
+
+    // region working time configuration
 
     public Builder useWorkingTimeCalculation(boolean useWorkingTimeCalculation) {
       this.useWorkingTimeCalculation = useWorkingTimeCalculation;
@@ -1175,15 +1152,15 @@ public class KadaiConfiguration {
       return this;
     }
 
-    // endregion
-
-    // region history configuration
-
     public Builder germanPublicHolidaysCorpusChristiEnabled(
         boolean germanPublicHolidaysCorpusChristiEnabled) {
       this.germanPublicHolidaysCorpusChristiEnabled = germanPublicHolidaysCorpusChristiEnabled;
       return this;
     }
+
+    // endregion
+
+    // region history configuration
 
     public Builder deleteHistoryEventsOnTaskDeletionEnabled(
         boolean deleteHistoryEventsOnTaskDeletionEnabled) {
@@ -1191,14 +1168,14 @@ public class KadaiConfiguration {
       return this;
     }
 
-    // endregion
-
-    // region job configuration
-
     public Builder logHistoryLoggerName(String loggerName) {
       this.logHistoryLoggerName = loggerName;
       return this;
     }
+
+    // endregion
+
+    // region job configuration
 
     public Builder jobSchedulerEnabled(boolean jobSchedulerEnabled) {
       this.jobSchedulerEnabled = jobSchedulerEnabled;
@@ -1353,14 +1330,14 @@ public class KadaiConfiguration {
       return this;
     }
 
-    // endregion
-
-    // region user configuration
-
     public Builder customJobs(Set<String> customJobs) {
       this.customJobs = customJobs;
       return this;
     }
+
+    // endregion
+
+    // region user configuration
 
     public Builder addAdditionalUserInfo(boolean addAdditionalUserInfo) {
       this.addAdditionalUserInfo = addAdditionalUserInfo;
@@ -1380,12 +1357,24 @@ public class KadaiConfiguration {
       return this;
     }
 
-    // endregion
-
     public KadaiConfiguration build() {
       adjustConfiguration();
       validateConfiguration();
       return new KadaiConfiguration(this);
+    }
+
+    // endregion
+
+    private static Map<DayOfWeek, Set<LocalTimeInterval>> initDefaultWorkingTimeSchedule() {
+      Map<DayOfWeek, Set<LocalTimeInterval>> workingTime = new EnumMap<>(DayOfWeek.class);
+      Set<LocalTimeInterval> standardWorkingSlots =
+          Set.of(new LocalTimeInterval(LocalTime.MIN, LocalTime.MAX));
+      workingTime.put(DayOfWeek.MONDAY, standardWorkingSlots);
+      workingTime.put(DayOfWeek.TUESDAY, standardWorkingSlots);
+      workingTime.put(DayOfWeek.WEDNESDAY, standardWorkingSlots);
+      workingTime.put(DayOfWeek.THURSDAY, standardWorkingSlots);
+      workingTime.put(DayOfWeek.FRIDAY, standardWorkingSlots);
+      return workingTime;
     }
 
     private void addMasterDomain() {
@@ -1440,16 +1429,12 @@ public class KadaiConfiguration {
           Arrays.stream(KadaiRole.values())
               .map(role -> Pair.of(role, roleMap.getOrDefault(role, Set.of())))
               .map(
-                  pair -> {
-                    if (KadaiConfiguration.shouldUseLowerCaseForAccessIds()) {
-                      return Pair.of(
+                  pair ->
+                      Pair.of(
                           pair.getLeft(),
                           pair.getRight().stream()
                               .map(String::toLowerCase)
-                              .collect(Collectors.toSet()));
-                    }
-                    return pair;
-                  })
+                              .collect(Collectors.toSet())))
               .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
     }
 

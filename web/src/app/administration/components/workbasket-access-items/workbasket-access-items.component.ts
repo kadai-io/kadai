@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,17 +21,19 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  EventEmitter,
   inject,
   Input,
   OnChanges,
   OnDestroy,
   OnInit,
+  Output,
   QueryList,
   SimpleChanges,
   ViewChildren
 } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
-import { Actions, ofActionCompleted, Select, Store } from '@ngxs/store';
+import { distinctUntilChanged, Observable, Subject } from 'rxjs';
+import { Actions, ofActionCompleted, Store } from '@ngxs/store';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { Workbasket } from 'app/shared/models/workbasket';
@@ -42,7 +44,7 @@ import { highlight } from 'app/shared/animations/validation.animation';
 import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
 import { AccessId } from 'app/shared/models/access-id';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
-import { filter, take, takeUntil, tap } from 'rxjs/operators';
+import { filter, map, startWith, take, takeUntil, tap } from 'rxjs/operators';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { AccessItemsCustomisation, CustomField, getCustomFields } from '../../../shared/models/customisation';
 import {
@@ -55,7 +57,7 @@ import {
 import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
 import { WorkbasketComponent } from '../../models/workbasket-component';
 import { ButtonAction } from '../../models/button-action';
-import { AsyncPipe, NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
+import { AsyncPipe, NgClass, NgStyle } from '@angular/common';
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
@@ -69,13 +71,11 @@ import { MatInput } from '@angular/material/input';
   animations: [highlight],
   styleUrls: ['./workbasket-access-items.component.scss'],
   imports: [
-    NgIf,
     NgStyle,
     MatButton,
     MatTooltip,
     MatIcon,
     ResizableWidthDirective,
-    NgFor,
     NgClass,
     TypeAheadComponent,
     MatInput,
@@ -87,6 +87,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
   formsValidatorService = inject(FormsValidatorService);
   @Input() workbasket: Workbasket;
   @Input() expanded: boolean;
+  @Output() accessItemsValidityChanged = new EventEmitter<boolean>();
   @ViewChildren('htmlInputElement') inputs: QueryList<ElementRef>;
   selectedRows: number[] = [];
   workbasketClone: Workbasket;
@@ -100,13 +101,15 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
   isNewAccessItemsFromStore = false;
   isAccessItemsTabSelected = false;
   destroy$ = new Subject<void>();
-  @Select(WorkbasketSelectors.selectedWorkbasket) selectedWorkbasket$: Observable<Workbasket>;
-  @Select(EngineConfigurationSelectors.accessItemsCustomisation)
-  accessItemsCustomization$: Observable<AccessItemsCustomisation>;
-  @Select(WorkbasketSelectors.workbasketAccessItems)
-  accessItemsRepresentation$: Observable<WorkbasketAccessItemsRepresentation>;
-  @Select(WorkbasketSelectors.buttonAction) buttonAction$: Observable<ButtonAction>;
-  @Select(WorkbasketSelectors.selectedComponent) selectedComponent$: Observable<WorkbasketComponent>;
+  selectedWorkbasket$: Observable<Workbasket> = inject(Store).select(WorkbasketSelectors.selectedWorkbasket);
+  accessItemsCustomization$: Observable<AccessItemsCustomisation> = inject(Store).select(
+    EngineConfigurationSelectors.accessItemsCustomisation
+  );
+  accessItemsRepresentation$: Observable<WorkbasketAccessItemsRepresentation> = inject(Store).select(
+    WorkbasketSelectors.workbasketAccessItems
+  );
+  buttonAction$: Observable<ButtonAction> = inject(Store).select(WorkbasketSelectors.buttonAction);
+  selectedComponent$: Observable<WorkbasketComponent> = inject(Store).select(WorkbasketSelectors.selectedComponent);
   private requestInProgressService = inject(RequestInProgressService);
   private formBuilder = inject(FormBuilder);
   AccessItemsForm = this.formBuilder.group({
@@ -160,6 +163,18 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
           _links: accessItemsRepresentation._links
         };
         this.setAccessItemsGroups(accessItems);
+
+        this.AccessItemsForm.get('accessItemsGroups')
+          ?.statusChanges.pipe(
+            startWith(null),
+            map(() => this.AccessItemsForm.get('accessItemsGroups')?.valid ?? false),
+            distinctUntilChanged(),
+            takeUntil(this.destroy$)
+          )
+          .subscribe((isValid) => {
+            this.accessItemsValidityChanged.emit(isValid);
+          });
+
         this.accessItemsClone = this.cloneAccessItems();
         this.accessItemsResetClone = this.cloneAccessItems();
 

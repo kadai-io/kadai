@@ -1,5 +1,5 @@
 /*!
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 table {
   font-family: arial, sans-serif;
@@ -51,7 +51,7 @@ tr:nth-child(odd) > td {
 }
 
 tr:first-child > td {
-  border-top: 2px solid $grey;
+  border-top: 2px solid colors.$grey;
 }
 
 .access-items {

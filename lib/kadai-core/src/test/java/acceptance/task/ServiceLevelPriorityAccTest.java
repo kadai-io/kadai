@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ import acceptance.AbstractAccTest;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.models.Classification;
 import io.kadai.common.api.BulkOperationResults;
-import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
 import io.kadai.task.api.TaskService;
+import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.Task;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
@@ -145,7 +145,7 @@ class ServiceLevelPriorityAccTest extends AbstractAccTest {
     newTask.setPlanned(planned);
     newTask.setDue(planned); // due date not according to service level
     ThrowingCallable call = () -> taskService.createTask(newTask);
-    assertThatThrownBy(call).isInstanceOf(InvalidArgumentException.class);
+    assertThatThrownBy(call).isInstanceOf(ServiceLevelViolationException.class);
   }
 
   @WithAccessId(user = "user-1-1")
@@ -189,7 +189,7 @@ class ServiceLevelPriorityAccTest extends AbstractAccTest {
     task.setDue(Instant.parse("2020-07-02T00:00:00Z"));
     task.setPlanned(Instant.parse("2020-07-07T00:00:00Z"));
     assertThatThrownBy(() -> taskService.updateTask(task))
-        .isInstanceOf(InvalidArgumentException.class)
+        .isInstanceOf(ServiceLevelViolationException.class)
         .hasMessage(
             "Cannot update a task with given planned 2020-07-07T00:00:00Z and due "
                 + "date 2020-07-02T00:00:00Z not matching the service level PT24H.");
@@ -580,7 +580,7 @@ class ServiceLevelPriorityAccTest extends AbstractAccTest {
     task.setDue(getInstant("2020-03-23T07:00:00")); // Monday
     Task finalTask = task;
     assertThatThrownBy(() -> taskService.updateTask(finalTask))
-        .isInstanceOf(InvalidArgumentException.class)
+        .isInstanceOf(ServiceLevelViolationException.class)
         .hasMessage(
             "Cannot update a task with given planned 2020-03-24T07:00:00Z and "
                 + "due date 2020-03-23T07:00:00Z not matching the service level PT0S.");

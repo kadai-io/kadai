@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import io.kadai.classification.rest.models.ClassificationSummaryRepresentationMo
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.api.exceptions.LogicalDuplicateInPayloadException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.RestEndpoints;
 import java.io.IOException;
@@ -105,7 +106,7 @@ public class ClassificationDefinitionController implements ClassificationDefinit
       throws InvalidArgumentException,
           ConcurrencyException,
           ClassificationNotFoundException,
-          ClassificationAlreadyExistException,
+          LogicalDuplicateInPayloadException,
           DomainNotFoundException,
           IOException,
           MalformedServiceLevelException,
@@ -135,7 +136,7 @@ public class ClassificationDefinitionController implements ClassificationDefinit
 
   private void checkForDuplicates(
       Collection<ClassificationDefinitionRepresentationModel> definitionList)
-      throws ClassificationAlreadyExistException {
+      throws LogicalDuplicateInPayloadException {
     Set<String> seen = new HashSet<>();
     definitionList.stream()
         .map(ClassificationDefinitionRepresentationModel::getClassification)
@@ -145,7 +146,7 @@ public class ClassificationDefinitionController implements ClassificationDefinit
                   String key = cl.getKey();
                   String domain = cl.getDomain();
                   if (!seen.add(logicalId(key, domain))) {
-                    throw new ClassificationAlreadyExistException(key, domain);
+                    throw new LogicalDuplicateInPayloadException(logicalId(key, domain));
                   }
                 }));
   }
@@ -214,7 +215,6 @@ public class ClassificationDefinitionController implements ClassificationDefinit
       Map<String, String> systemIds)
       throws ClassificationNotFoundException,
           InvalidArgumentException,
-          ClassificationAlreadyExistException,
           DomainNotFoundException,
           ConcurrencyException,
           MalformedServiceLevelException,
@@ -231,7 +231,11 @@ public class ClassificationDefinitionController implements ClassificationDefinit
       if (systemId != null) {
         updateExistingClassification(newClassification, systemId);
       } else {
-        classificationService.createClassification(newClassification);
+        try {
+          classificationService.createClassification(newClassification);
+        } catch (ClassificationAlreadyExistException ignore) {
+          // Cannot exist because we previously checked and then updated
+        }
       }
     }
   }

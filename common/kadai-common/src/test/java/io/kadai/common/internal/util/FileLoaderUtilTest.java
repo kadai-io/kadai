@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -31,13 +31,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
-@DisabledOnOs(
-    value = OS.WINDOWS,
-    disabledReason = "Deleting Windows temp dir is a junit bug. Fixed with Junit 5.8.0")
 class FileLoaderUtilTest {
   @TempDir Path tempDir;
 
@@ -66,11 +61,12 @@ class FileLoaderUtilTest {
     String expectedFileContent = "This file is in the file system";
     Files.write(file, List.of(expectedFileContent), StandardCharsets.UTF_8);
 
-    InputStream stream =
-        FileLoaderUtil.openFileFromClasspathOrSystem(file.toAbsolutePath().toString(), getClass());
-
-    String fileContent = convertToString(stream);
-    assertThat(fileContent).isEqualTo(expectedFileContent);
+    try (InputStream stream =
+        FileLoaderUtil.openFileFromClasspathOrSystem(
+            file.toAbsolutePath().toString(), getClass())) {
+      String fileContent = convertToString(stream);
+      assertThat(fileContent).isEqualTo(expectedFileContent);
+    }
   }
 
   @Test

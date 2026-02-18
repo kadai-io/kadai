@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  */
 
 import { Component, inject, OnInit } from '@angular/core';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import {
   FormArray,
   FormBuilder,
@@ -53,7 +53,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { WorkbasketAccessItemQueryFilterParameter } from '../../../shared/models/workbasket-access-item-query-filter-parameter';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { TypeAheadComponent } from '../../../shared/components/type-ahead/type-ahead.component';
-import { AsyncPipe, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { SvgIconComponent } from 'angular-svg-icon';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import {
@@ -82,7 +82,6 @@ import { MatIcon } from '@angular/material/icon';
   styleUrls: ['./access-items-management.component.scss'],
   imports: [
     TypeAheadComponent,
-    NgIf,
     SvgIconComponent,
     MatExpansionPanel,
     MatExpansionPanelHeader,
@@ -99,7 +98,6 @@ import { MatIcon } from '@angular/material/icon';
     MatRow,
     FormsModule,
     ReactiveFormsModule,
-    NgFor,
     SortComponent,
     MatFormField,
     MatLabel,
@@ -127,11 +125,12 @@ export class AccessItemsManagementComponent implements OnInit {
   };
   accessItems: WorkbasketAccessItems[];
   isGroup: boolean = false;
-  @Select(EngineConfigurationSelectors.accessItemsCustomisation)
-  accessItemsCustomization$: Observable<AccessItemsCustomisation>;
-  @Select(AccessItemsManagementSelector.groups) groups$: Observable<AccessId[]>;
+  accessItemsCustomization$: Observable<AccessItemsCustomisation> = inject(Store).select(
+    EngineConfigurationSelectors.accessItemsCustomisation
+  );
+  groups$: Observable<AccessId[]> = inject(Store).select(AccessItemsManagementSelector.groups);
   customFields$: Observable<CustomField[]>;
-  @Select(AccessItemsManagementSelector.permissions) permissions$: Observable<AccessId[]>;
+  permissions$: Observable<AccessId[]> = inject(Store).select(AccessItemsManagementSelector.permissions);
   destroy$ = new Subject<void>();
   private formBuilder = inject(FormBuilder);
   private formsValidatorService = inject(FormsValidatorService);

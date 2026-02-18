@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -68,6 +68,14 @@ public interface WorkbasketHistoryQuery
    * @return the query
    */
   WorkbasketHistoryQuery userIdIn(String... userIds);
+
+  /**
+   * Add your proxyAccessIds to your query.
+   *
+   * @param accessIds as String
+   * @return the query
+   */
+  WorkbasketHistoryQuery proxyAccessIdIn(String... accessIds);
 
   /**
    * Add your domain to your query.
@@ -181,6 +189,15 @@ public interface WorkbasketHistoryQuery
    * @return the query
    */
   WorkbasketHistoryQuery userIdLike(String... userIds);
+
+  /**
+   * Add your proxyAccessId to your query. It will be compared in SQL with an LIKE. If you use a
+   * wildcard like % then it will be transmitted to the database.
+   *
+   * @param proxyAccessIds as String
+   * @return the query
+   */
+  WorkbasketHistoryQuery proxyAccessIdLike(String... proxyAccessIds);
 
   /**
    * Add your domain to your query. It will be compared in SQL with an LIKE. If you use a wildcard

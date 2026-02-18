@@ -1,5 +1,5 @@
 /*!
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 .workbasket-list {
   height: calc(100vh - 156px);
@@ -73,7 +73,7 @@ p {
 }
 
 .mdc-list-item--selected {
-  background-color: $green !important;
+  background-color: colors.$green !important;
 }
 
 .mdc-list-item--selected * .workbasket-list__list-item--info {

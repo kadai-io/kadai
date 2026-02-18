@@ -1,20 +1,20 @@
 <!--
-  ~ Copyright [2025] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2026] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
 <div class="import-export">
   <button (click)="selectedFile.click()" class="mr-1" mat-stroked-button
@@ -25,7 +25,7 @@
   </button>
 
   <form class="hide" enctype="multipart/form-data" method="post">
-    <input #selectedFile (change)="uploadFile()" accept=".json" class="hidden" type="file"/>
+    <input #selectedFile (change)="uploadFile()" accept=".json" class="hidden" type="file" />
   </form>
 
   <button [matMenuTriggerFor]="menu" class="mr-1" mat-stroked-button
@@ -38,9 +38,11 @@
     <button (click)="export()" href="javascript:void(0)" mat-menu-item>
       All Domains
     </button>
-    <button (click)="export(domain)" *ngFor="let domain of (domains$ | async)"
-            href="javascript:void(0)" mat-menu-item>
-      {{ domain === '' ? 'Master' : domain }}
-    </button>
+    @for (domain of (domains$ | async); track domain) {
+      <button (click)="export(domain)"
+              href="javascript:void(0)" mat-menu-item>
+        {{ domain === '' ? 'Master' : domain }}
+      </button>
+    }
   </mat-menu>
 </div>

@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -24,8 +24,12 @@ import java.time.Instant;
 public class ClassificationDeletedEvent extends ClassificationHistoryEvent {
 
   public ClassificationDeletedEvent(
-      String id, Classification classification, String userId, String details) {
-    super(id, classification, userId, details);
+      String id,
+      Classification classification,
+      String userId,
+      String proxyAccessId,
+      String details) {
+    super(id, classification, userId, proxyAccessId, details);
     eventType = ClassificationHistoryEventType.DELETED.getName();
     created = Instant.now();
   }

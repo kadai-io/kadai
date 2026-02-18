@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -24,13 +24,13 @@ import { RequestInProgressService } from '../../../shared/services/request-in-pr
 import { ChartConfiguration } from 'chart.js';
 import { ReportTableComponent } from '../report-table/report-table.component';
 import { BaseChartDirective } from 'ng2-charts';
-import { DatePipe, NgIf } from '@angular/common';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'kadai-monitor-classification-report',
   templateUrl: './classification-report.component.html',
   styleUrls: ['./classification-report.component.scss'],
-  imports: [ReportTableComponent, BaseChartDirective, NgIf, DatePipe],
+  imports: [ReportTableComponent, BaseChartDirective, DatePipe],
   providers: [MonitorService]
 })
 export class ClassificationReportComponent implements OnInit {

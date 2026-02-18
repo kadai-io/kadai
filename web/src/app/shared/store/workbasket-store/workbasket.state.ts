@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
  */
 
 import { Action, NgxsAfterBootstrap, State, StateContext } from '@ngxs/store';
-import { concatMap, take, tap } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
+import { catchError, concatMap, take, tap } from 'rxjs/operators';
+import { Observable, of, throwError } from 'rxjs';
 import { Location } from '@angular/common';
 import { WorkbasketService } from '../../services/workbasket/workbasket.service';
 import { Workbasket } from '../../models/workbasket';
@@ -59,7 +59,7 @@ import { ClearWorkbasketFilter } from '../filter-store/filter.actions';
 import { inject, Injectable } from '@angular/core';
 import { WorkbasketQueryPagingParameter } from '../../models/workbasket-query-paging-parameter';
 import { Side } from '../../../administration/models/workbasket-distribution-enums';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 
 class InitializeStore {
   static readonly type = '[Workbasket] Initializing state';
@@ -68,7 +68,9 @@ class InitializeStore {
 @Injectable({
   providedIn: 'root'
 })
-@State<WorkbasketStateModel>({ name: 'workbasket' })
+@State<WorkbasketStateModel>({
+  name: 'workbasket'
+})
 export class WorkbasketState implements NgxsAfterBootstrap {
   private workbasketService = inject(WorkbasketService);
   private location = inject(Location);
@@ -208,9 +210,6 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   @Action(OnButtonPressed)
   doWorkbasketDetailsAction(ctx: StateContext<WorkbasketStateModel>, action: OnButtonPressed): Observable<any> {
     ctx.patchState({ button: action.button });
-    setTimeout(() => {
-      ctx.patchState({ button: undefined });
-    }, 500);
     return of(null);
   }
 
@@ -386,34 +385,38 @@ export class WorkbasketState implements NgxsAfterBootstrap {
       )
       .pipe(
         take(1),
-        tap({
-          next: (updatedWorkbasketsDistributionTargets) => {
-            ctx.patchState({
-              workbasketDistributionTargets: updatedWorkbasketsDistributionTargets
-            });
-            const workbasketId = ctx.getState().selectedWorkbasket?.workbasketId;
-
-            if (typeof workbasketId !== 'undefined') {
-              this.workbasketService.getWorkBasket(workbasketId).subscribe((selectedWorkbasket) => {
+        tap((updatedWorkbasketsDistributionTargets) => {
+          ctx.patchState({
+            workbasketDistributionTargets: updatedWorkbasketsDistributionTargets
+          });
+        }),
+        concatMap(() => {
+          const workbasketId = ctx.getState().selectedWorkbasket?.workbasketId;
+          if (typeof workbasketId !== 'undefined') {
+            return this.workbasketService.getWorkBasket(workbasketId).pipe(
+              tap((selectedWorkbasket) => {
                 ctx.patchState({
                   selectedWorkbasket,
                   action: ACTION.READ
                 });
                 ctx.dispatch(new ClearWorkbasketFilter('selectedDistributionTargets'));
                 ctx.dispatch(new ClearWorkbasketFilter('availableDistributionTargets'));
-              });
-            }
-            this.requestInProgressService.setRequestInProgress(false);
-            this.notificationService.showSuccess('WORKBASKET_DISTRIBUTION_TARGET_SAVE', {
-              workbasketName: ctx.getState().selectedWorkbasket.name
-            });
-            ctx.dispatch(new FetchAvailableDistributionTargets(true));
-            ctx.dispatch(new FetchWorkbasketDistributionTargets(true));
-            return of(null);
-          },
-          error: () => {
-            this.requestInProgressService.setRequestInProgress(false);
+              })
+            );
           }
+          return of(null);
+        }),
+        tap(() => {
+          this.requestInProgressService.setRequestInProgress(false);
+          this.notificationService.showSuccess('WORKBASKET_DISTRIBUTION_TARGET_SAVE', {
+            workbasketName: ctx.getState().selectedWorkbasket.name
+          });
+          ctx.dispatch(new FetchAvailableDistributionTargets(true));
+          ctx.dispatch(new FetchWorkbasketDistributionTargets(true));
+        }),
+        catchError((error) => {
+          this.requestInProgressService.setRequestInProgress(false);
+          return throwError(() => error);
         })
       );
   }

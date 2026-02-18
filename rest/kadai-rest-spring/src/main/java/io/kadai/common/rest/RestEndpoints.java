@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -74,7 +74,9 @@ public final class RestEndpoints {
   public static final String URL_TASKS_ID_REQUEST_CHANGES_FORCE =
       API_V1 + "tasks/{taskId}/request-changes/force";
   public static final String URL_TASKS_ID_COMPLETE = API_V1 + "tasks/{taskId}/complete";
+  public static final String URL_TASKS_BULK_COMPLETE = API_V1 + "tasks/bulkcomplete";
   public static final String URL_TASKS_ID_COMPLETE_FORCE = API_V1 + "tasks/{taskId}/complete/force";
+  public static final String URL_TASKS_BULK_COMPLETE_FORCE = API_V1 + "tasks/bulkcomplete/force";
   public static final String URL_TASKS_ID_CANCEL = API_V1 + "tasks/{taskId}/cancel";
   public static final String URL_TASKS_ID_TERMINATE = API_V1 + "tasks/{taskId}/terminate";
   public static final String URL_TASKS_ID_REOPEN = API_V1 + "tasks/{taskId}/reopen";
@@ -84,8 +86,10 @@ public final class RestEndpoints {
   public static final String URL_TASKS_ID_SET_READ = API_V1 + "tasks/{taskId}/set-read";
   public static final String URL_DISTRIBUTE =
       API_V1 + "tasks/distribute/{workbasketId}";
+  public static final String URL_TASKS_BULK_UPDATE = API_V1 + "tasks/bulkupdate";
 
   // task comment endpoints
+  public static final String URL_TASKS_COMMENTS = API_V1 + "tasks/comments";
   public static final String URL_TASK_COMMENTS = API_V1 + "tasks/{taskId}/comments";
   public static final String URL_TASK_COMMENT = API_V1 + "tasks/comments/{taskCommentId}";
 
@@ -93,6 +97,8 @@ public final class RestEndpoints {
   public static final String URL_MONITOR_WORKBASKET_REPORT = API_V1 + "monitor/workbasket-report";
   public static final String URL_MONITOR_WORKBASKET_PRIORITY_REPORT =
       API_V1 + "monitor/workbasket-priority-report";
+  public static final String URL_MONITOR_DETAILED_WORKBASKET_PRIORITY_REPORT =
+      API_V1 + "monitor/detailed-workbasket-priority-report";
   public static final String URL_MONITOR_CLASSIFICATION_CATEGORY_REPORT =
       API_V1 + "monitor/classification-category-report";
   public static final String URL_MONITOR_CLASSIFICATION_REPORT =

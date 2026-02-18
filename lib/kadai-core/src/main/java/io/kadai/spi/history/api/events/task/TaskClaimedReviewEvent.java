@@ -1,5 +1,5 @@
-/*!
- * Copyright [2024] [envite consulting GmbH]
+/*
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,3 +15,18 @@
  *
  *
  */
+
+package io.kadai.spi.history.api.events.task;
+
+import io.kadai.task.api.models.Task;
+
+/** Event fired if a task is claimed for a review. */
+public class TaskClaimedReviewEvent extends TaskHistoryEvent {
+
+  public TaskClaimedReviewEvent(
+      String id, Task task, String userId, String proxyAccessId, String details) {
+    super(id, task, userId, proxyAccessId, details);
+    eventType = (TaskHistoryEventType.CLAIMED_REVIEW.getName());
+    created = task.getClaimed();
+  }
+}

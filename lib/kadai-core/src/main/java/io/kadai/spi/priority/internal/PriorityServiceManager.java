@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -56,12 +56,14 @@ public class PriorityServiceManager {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug(
             "Skip using PriorityServiceProviders because the Task is prioritised manually: {}",
-            task);
+            LogSanitizer.stripLineBreakingChars(task));
       }
       return OptionalInt.empty();
     }
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Sending Task to PriorityServiceProviders: {}", task);
+      LOGGER.debug(
+          "Sending Task to PriorityServiceProviders: {}",
+          LogSanitizer.stripLineBreakingChars(task));
     }
 
     Set<OptionalInt> priorities =

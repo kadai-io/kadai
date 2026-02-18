@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -168,7 +168,7 @@ class MonitorControllerIntTest {
 
     assertThat(report).isNotNull();
 
-    assertThat(report.getSumRow()).extracting(RowRepresentationModel::getTotal).containsExactly(28);
+    assertThat(report.getSumRow()).extracting(RowRepresentationModel::getTotal).containsExactly(32);
   }
 
   @Test
@@ -233,6 +233,99 @@ class MonitorControllerIntTest {
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
                 .retrieve()
                 .toEntity(ReportRepresentationModel.class);
+
+    assertThatThrownBy(httpCall).isInstanceOf(BadRequest.class);
+  }
+
+  @Test
+  void should_ComputeWorkbasketPriorityReport_When_QueryingForADetailedWorkbasketPriorityReport() {
+    String url =
+        restHelper.toUrl(RestEndpoints.URL_MONITOR_DETAILED_WORKBASKET_PRIORITY_REPORT)
+            + "?workbasket-type=TOPIC&workbasket-type=GROUP";
+
+    ResponseEntity<ReportRepresentationModel> response =
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
+            .retrieve()
+            .toEntity(ReportRepresentationModel.class);
+
+    ReportRepresentationModel report = response.getBody();
+
+    assertThat(report).isNotNull();
+
+    assertThat(report.getSumRow())
+        .extracting(RowRepresentationModel::getTotal)
+        .containsExactly(32, 24, 2, 3, 3);
+  }
+
+  @Test
+  void should_ApplyComplexFilterCombination_When_QueryingForADetailedWorkbasketPriorityReport() {
+    String url =
+        restHelper.toUrl(RestEndpoints.URL_MONITOR_DETAILED_WORKBASKET_PRIORITY_REPORT)
+            + "?workbasket-type=TOPIC&workbasket-type=GROUP"
+            + "&state=READY&state=CLAIMED"
+            + "&custom-6=074&custom-6=075"
+            + "&custom-7-not-in=20";
+
+    ResponseEntity<ReportRepresentationModel> response =
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
+            .retrieve()
+            .toEntity(ReportRepresentationModel.class);
+
+    ReportRepresentationModel report = response.getBody();
+    assertThat(report).isNotNull();
+    assertThat(report.getSumRow())
+        .extracting(RowRepresentationModel::getCells)
+        .containsExactlyInAnyOrder(
+            new int[] {2, 0, 1},
+            new int[] {2, 0, 1}
+        );
+  }
+
+  @Test
+  void should_DetectPriorityColumnHeader_When_HeaderIsPassedAsQueryParameterForDetailedWorkbasket()
+      throws Exception {
+    PriorityColumnHeaderRepresentationModel columnHeader =
+        new PriorityColumnHeaderRepresentationModel(10, 20);
+
+    String url =
+        restHelper.toUrl(RestEndpoints.URL_MONITOR_DETAILED_WORKBASKET_PRIORITY_REPORT)
+            + "?columnHeader="
+            + URLEncoder.encode(
+                objectMapper.writeValueAsString(columnHeader), StandardCharsets.UTF_8);
+
+    ResponseEntity<ReportRepresentationModel> response =
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
+            .retrieve()
+            .toEntity(ReportRepresentationModel.class);
+
+    ReportRepresentationModel report = response.getBody();
+    assertThat(report).isNotNull();
+    assertThat(report.getMeta().getHeader()).containsExactly("10 - 20");
+  }
+
+  @Test
+  void should_ReturnBadRequest_When_PriorityColumnHeaderIsNotAValidJsonForDetailedWorkbasket() {
+    String url =
+        restHelper.toUrl(RestEndpoints.URL_MONITOR_DETAILED_WORKBASKET_PRIORITY_REPORT)
+            + "?columnHeader=invalidJson";
+
+    ThrowingCallable httpCall =
+        () ->
+        CLIENT
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
+            .retrieve()
+            .toEntity(ReportRepresentationModel.class);
 
     assertThatThrownBy(httpCall).isInstanceOf(BadRequest.class);
   }

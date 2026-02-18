@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,9 +18,11 @@
 
 package io.kadai.task.internal;
 
+import io.kadai.common.api.BulkOperationResults;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.util.IdGenerator;
@@ -28,12 +30,16 @@ import io.kadai.task.api.exceptions.NotAuthorizedOnTaskCommentException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskComment;
+import io.kadai.task.internal.models.MinimalTaskSummary;
 import io.kadai.task.internal.models.TaskCommentImpl;
 import io.kadai.user.api.models.User;
 import io.kadai.user.internal.UserMapper;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +82,7 @@ class TaskCommentServiceImpl {
           NotAuthorizedOnTaskCommentException,
           NotAuthorizedOnWorkbasketException {
 
-    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
 
     TaskCommentImpl taskCommentImplToUpdate = (TaskCommentImpl) taskCommentToUpdate;
 
@@ -140,6 +146,50 @@ class TaskCommentServiceImpl {
     return taskCommentImplToCreate;
   }
 
+  public BulkOperationResults<String, KadaiException> createTaskCommentsBulk(
+          Collection<String> taskIds, String text) throws InvalidArgumentException {
+
+    if (taskIds == null) {
+      throw new InvalidArgumentException("taskIds must not be null");
+    }
+    if (text == null || text.isEmpty()) {
+      throw new InvalidArgumentException("text must not be null/empty");
+    }
+
+    try {
+      kadaiEngine.openConnection();
+      BulkOperationResults<String, KadaiException> errors = new BulkOperationResults<>();
+      Instant now = Instant.now();
+
+      Set<String> existingTaskIds = taskMapper.findExistingTasks(taskIds, null).stream()
+              .map(MinimalTaskSummary::getTaskId)
+              .collect(Collectors.toSet());
+
+      taskIds.stream()
+              .filter(id -> !existingTaskIds.contains(id))
+              .forEach(id -> errors.addError(
+                      id, new TaskNotFoundException(id)));
+
+      List<TaskCommentImpl> toInsert = existingTaskIds.stream()
+              .map(id -> {
+                TaskCommentImpl comment = (TaskCommentImpl) newTaskComment(id);
+                comment.setTextField(text);
+                comment.setId(null);
+                initDefaultTaskCommentValues(comment);
+                return comment;
+              })
+              .toList();
+
+      for (TaskCommentImpl comment : toInsert) {
+        taskCommentMapper.insert(comment);
+        taskMapper.incrementNumberOfComments(comment.getTaskId(), now);
+      }
+      return errors;
+    } finally {
+      kadaiEngine.returnConnection();
+    }
+  }
+
   void deleteTaskComment(String taskCommentId)
       throws TaskCommentNotFoundException,
           TaskNotFoundException,
@@ -147,7 +197,7 @@ class TaskCommentServiceImpl {
           NotAuthorizedOnTaskCommentException,
           NotAuthorizedOnWorkbasketException {
 
-    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+    String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
 
     try {
 
@@ -250,7 +300,7 @@ class TaskCommentServiceImpl {
     taskCommentImplToCreate.setModified(now);
     taskCommentImplToCreate.setCreated(now);
 
-    String creator = kadaiEngine.getEngine().getCurrentUserContext().getUserid();
+    String creator = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
     if (kadaiEngine.getEngine().getConfiguration().isSecurityEnabled() && creator == null) {
       throw new SystemException(
           "KadaiSecurity is enabled, but the current UserId is"

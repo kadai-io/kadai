@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
  */
 
 import { asUrlQueryString } from './query-parameters-v2';
+import { describe, expect, it } from 'vitest';
 
 describe('asUrlQueryString', () => {
   it('should create a empty query', () => {

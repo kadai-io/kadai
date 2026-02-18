@@ -1,81 +1,121 @@
 <!--
-  ~ Copyright [2025] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2026] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
-<div *ngIf="reportData" class="task-priority-report">
-
-  <!-- HEADER -->
-  <div class="task-priority-report__header">
+@if (reportData) {
+  <div class="task-priority-report">
+    <!-- HEADER -->
     <h4 class="task-priority-report__headline"> {{ reportData?.meta.name }} ({{
         reportData?.meta.date | date: 'medium'
-      }}) </h4>
-    <kadai-monitor-task-priority-report-filter
-      (applyFilter)="applyFilter($event)"></kadai-monitor-task-priority-report-filter>
-  </div>
-
-  <mat-divider class="task-priority-report__divider"></mat-divider>
-
-  <div *ngIf="reportData?.rows.length == 0"> Could not find any tasks which fulfill the current
-    filter criteria.
-  </div>
-
-  <div class="task-priority-report__workbaskets">
-    <div *ngFor="let row of reportData?.rows; let i = index"
-         class="task-priority-report__workbasket">
-
-      <!-- WORKBASKET NAME -->
-      <div class="task-priority-report__workbasket-headline">
-        <h6> {{ row.desc[0] }} </h6>
+      }})
+    </h4>
+    <mat-divider class="task-priority-report__divider"></mat-divider>
+    <div class="breadcrumb-filter-row">
+      <nav class="breadcrumb">
+        @if (isDepthZero()) {
+          <span>
+      <mat-icon>list_alt</mat-icon>
+      <span>Workbaskets</span>
+    </span>
+        } @else {
+          <matbutton [routerLink]="['/kadai/monitor/tasks-priority']" class="breadcrumb-item">
+            <mat-icon>list_alt</mat-icon>
+            <span>Workbaskets</span>
+          </matbutton>
+          <mat-icon>chevron_right</mat-icon>
+          <span>
+      <mat-icon>folder_open</mat-icon>
+      <span>{{ workbasketKey() }}</span>
+    </span>
+        }
+      </nav>
+      @if (filtersAreSpecified) {
+        <mat-accordion>
+          <mat-expansion-panel (closed)="isPanelOpen = false" (opened)="isPanelOpen = true">
+            <mat-expansion-panel-header>
+              <mat-panel-title>Task Filter</mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="task-priority-report__filters">
+              @for (key of keys; track key) {
+                <mat-checkbox
+                  (change)="emitFilter($event.checked, key)"
+                  [checked]="activeFilters().includes(key)">
+                  {{ key }}
+                </mat-checkbox>
+              }
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+      } @else {
+        <div>No filters defined.</div>
+      }
+    </div>
+    @if (reportData?.rows.length == 0) {
+      <div> Could not find any tasks which fulfill the current
+        filter criteria.
       </div>
-
-      <!-- CHART -->
-      <kadai-monitor-canvas [id]="indexToString(i)" [row]="row"></kadai-monitor-canvas>
-
-      <!-- TABLE -->
-      <div>
-        <table [dataSource]="tableDataArray[i]" mat-table>
-
-          <!-- Column: Priority -->
-          <ng-container matColumnDef="priority">
-            <th *matHeaderCellDef mat-header-cell> Priority</th>
-            <td *matCellDef="let element" [ngClass]="{
+    }
+    <div class="task-priority-report__workbaskets">
+      @for (row of reportData?.rows; track row; let i = $index) {
+        <div
+          class="task-priority-report__workbasket">
+          <!-- WORKBASKET NAME -->
+          <div class="task-priority-report__workbasket-headline">
+            <h6>
+              @if (isDepthZero()) {
+                <a
+                  [routerLink]="['/kadai/monitor/tasks-priority', row.desc[0]]">{{ row.desc[0] }}</a>
+              } @else {
+                {{ row.desc[1] }}
+              }
+            </h6>
+          </div>
+          <!-- CHART -->
+          <kadai-monitor-canvas [id]="indexToString(i)" [row]="row"></kadai-monitor-canvas>
+          <!-- TABLE -->
+          <div>
+            <table [dataSource]="tableDataArray[i]" mat-table>
+              <!-- Column: Priority -->
+              <ng-container matColumnDef="priority">
+                <th *matHeaderCellDef mat-header-cell> Priority</th>
+                <td *matCellDef="let element" [ngClass]="{
            'task-priority-report__row--high': element.priority == nameHighPriority,
            'task-priority-report__row--medium': element.priority == nameMediumPriority,
            'task-priority-report__row--low': element.priority == nameLowPriority}" mat-cell>
-              {{ element.priority }}
-            </td>
-          </ng-container>
-
-          <!-- Column: Number of Tasks -->
-          <ng-container matColumnDef="number">
-            <th *matHeaderCellDef mat-header-cell> Number of Tasks</th>
-            <td *matCellDef="let element" [ngClass]="{
+                  {{ element.priority }}
+                </td>
+              </ng-container>
+              <!-- Column: Number of Tasks -->
+              <ng-container matColumnDef="number">
+                <th *matHeaderCellDef mat-header-cell> Number of Tasks</th>
+                <td *matCellDef="let element" [ngClass]="{
            'task-priority-report__row--high': element.priority == nameHighPriority,
            'task-priority-report__row--medium': element.priority == nameMediumPriority,
            'task-priority-report__row--low': element.priority == nameLowPriority}" mat-cell>
-              {{ element.number }}
-            </td>
-          </ng-container>
-
-          <tr *matHeaderRowDef="columns" mat-header-row></tr>
-          <tr *matRowDef="let row; columns: columns;" mat-row>
-          </tr>
-        </table>
-      </div>
+                  {{ element.number }}
+                </td>
+              </ng-container>
+              <tr *matHeaderRowDef="columns" mat-header-row></tr>
+              <tr *matRowDef="let row; columns: columns;" mat-row>
+              </tr>
+            </table>
+          </div>
+        </div>
+      }
     </div>
   </div>
-</div>
+}

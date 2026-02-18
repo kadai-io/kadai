@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -395,6 +395,39 @@ class WorkbasketControllerIntTest {
     assertThat(returnedWbAccessItem.getAccessId()).isEqualTo("new-access-id");
     assertThat(returnedWbAccessItem.getAccessName()).isEqualTo("new-access-name");
     assertThat(returnedWbAccessItem.isPermOpen()).isTrue();
+  }
+
+  @Test
+  void should_ThrowExceptionForSetWorkbasketAccessItems_When_PayloadContainsDuplicateAccessId() {
+    String workbasketId = "WBI:000000000000000000000000000000000900";
+    String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET_ID_ACCESS_ITEMS, workbasketId);
+    WorkbasketAccessItemRepresentationModel wbAccessItem =
+        new WorkbasketAccessItemRepresentationModel();
+    wbAccessItem.setWorkbasketId(workbasketId);
+    wbAccessItem.setAccessId("new-access-id");
+    wbAccessItem.setAccessName("new-access-name");
+    wbAccessItem.setPermOpen(true);
+
+    WorkbasketAccessItemCollectionRepresentationModel repModel =
+        new WorkbasketAccessItemCollectionRepresentationModel(List.of(wbAccessItem, wbAccessItem));
+
+    HttpHeaders httpHeaders = RestHelper.generateHeadersForUser("admin");
+
+    final ThrowingCallable call =
+        () ->
+            CLIENT
+                .put()
+                .uri(url)
+                .headers(headers -> headers.addAll(httpHeaders))
+                .body(repModel)
+                .retrieve()
+                .toEntity(WorkbasketAccessItemCollectionRepresentationModel.class);
+
+    assertThatThrownBy(call)
+        .isInstanceOf(HttpStatusCodeException.class)
+        .extracting(HttpStatusCodeException.class::cast)
+        .extracting(HttpStatusCodeException::getStatusCode)
+        .isEqualTo(HttpStatus.BAD_REQUEST);
   }
 
   @Test

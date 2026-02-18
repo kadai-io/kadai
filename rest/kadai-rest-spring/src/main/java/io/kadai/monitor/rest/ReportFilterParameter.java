@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -62,6 +62,12 @@ public class ReportFilterParameter {
       description = "Filter by the classification id of the Task. This is an exact match.")
   @JsonProperty("excluded-classification-id")
   protected final String[] excludedClassificationId;
+
+  @Parameter(
+      name = "classification-key",
+      description = "Filter by the classification key of the Task. This is an exact match.")
+  @JsonProperty("classification-key")
+  protected final String[] classificationKey;
 
   @Parameter(
       name = "custom-1",
@@ -430,6 +436,7 @@ public class ReportFilterParameter {
     "domain",
     "classification-id",
     "excluded-classification-id",
+    "classification-key",
     "custom-1",
     "custom-1-like",
     "custom-1-not-in",
@@ -487,6 +494,7 @@ public class ReportFilterParameter {
       String[] domain,
       String[] classificationId,
       String[] excludedClassificationId,
+      String[] classificationKey,
       String[] custom1,
       String[] custom1Like,
       String[] custom1NotIn,
@@ -542,6 +550,7 @@ public class ReportFilterParameter {
     this.domain = domain;
     this.classificationId = classificationId;
     this.excludedClassificationId = excludedClassificationId;
+    this.classificationKey = classificationKey;
     this.custom1 = custom1;
     this.custom1Like = custom1Like;
     this.custom1NotIn = custom1NotIn;
@@ -618,6 +627,10 @@ public class ReportFilterParameter {
 
   public String[] getExcludedClassificationId() {
     return excludedClassificationId;
+  }
+
+  public String[] getClassificationKey() {
+    return classificationKey;
   }
 
   public String[] getCustom1() {

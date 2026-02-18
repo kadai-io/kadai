@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,28 +16,21 @@
  *
  */
 
-import { setupZoneTestEnv } from 'jest-preset-angular/setup-env/zone';
+package io.kadai.monitor.api.reports.item;
 
-setupZoneTestEnv();
+/**
+ * The DetailedPriorityQueryItem extends the {@linkplain MonitorQueryItem}. The additional
+ * classificationKey is used for the detailed classification report.
+ */
+public class DetailedPriorityQueryItem extends PriorityQueryItem {
 
-Object.defineProperty(window, 'CSS', { value: null });
-Object.defineProperty(window, 'getComputedStyle', {
-  value: () => {
-    return {
-      display: 'none',
-      appearance: ['-webkit-appearance']
-    };
+  private String classificationKey;
+
+  public String getClassificationKey() {
+    return classificationKey;
   }
-});
 
-Object.defineProperty(document, 'doctype', {
-  value: '<!DOCTYPE html>'
-});
-Object.defineProperty(document.body.style, 'transform', {
-  value: () => {
-    return {
-      enumerable: true,
-      configurable: true
-    };
+  public void setClassificationKey(String classificationKey) {
+    this.classificationKey = classificationKey;
   }
-});
+}

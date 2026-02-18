@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
  *
  */
 
-import { AfterViewInit, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { ArcElement, Chart, DoughnutController, Legend, Title, Tooltip } from 'chart.js';
 import { ReportRow } from '../../models/report-row';
-import { Select } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { SettingsSelectors } from '../../../shared/store/settings-store/settings.selectors';
 import { Observable, Subject } from 'rxjs';
 import { Settings } from '../../../settings/models/settings';
@@ -39,7 +39,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   colors: string[];
   destroy$ = new Subject<void>();
 
-  @Select(SettingsSelectors.getSettings) settings$: Observable<Settings>;
+  settings$: Observable<Settings> = inject(Store).select(SettingsSelectors.getSettings);
 
   constructor() {
     Chart.register(DoughnutController, ArcElement, Tooltip, Legend, Title);

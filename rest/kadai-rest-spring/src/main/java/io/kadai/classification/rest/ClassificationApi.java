@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -169,12 +169,6 @@ public interface ClassificationApi {
                   schema = @Schema(implementation = ClassificationRepresentationModel.class))
             }),
         @ApiResponse(
-            responseCode = "403",
-            description = "CLASSIFICATION_ALREADY_EXISTS",
-            content = {
-              @Content(schema = @Schema(implementation = ClassificationAlreadyExistException.class))
-            }),
-        @ApiResponse(
             responseCode = "400",
             description =
                 "DOMAIN_NOT_FOUND, INVALID_ARGUMENT, CLASSIFICATION_SERVICE_LEVEL_MALFORMED",
@@ -191,7 +185,13 @@ public interface ClassificationApi {
         @ApiResponse(
             responseCode = "403",
             description = "NOT_AUTHORIZED",
-            content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
+            content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))}),
+        @ApiResponse(
+            responseCode = "409",
+            description = "CLASSIFICATION_ALREADY_EXISTS",
+            content = {
+              @Content(schema = @Schema(implementation = ClassificationAlreadyExistException.class))
+            }),
       })
   @PostMapping(path = RestEndpoints.URL_CLASSIFICATIONS)
   @Transactional(rollbackFor = Exception.class)

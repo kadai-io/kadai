@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ public enum ClassificationHistoryQueryColumnName implements QueryColumnName {
   EVENT_TYPE("event_type"),
   CREATED("created"),
   USER_ID("user_id"),
+  PROXY_ACCESS_ID("proxy_access_id"),
   CLASSIFICATION_ID("classification_id"),
   APPLICATION_ENTRY_POINT("application_entry_point"),
   CATEGORY("category"),

@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -217,6 +217,9 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
     returnValues = taskHistoryService.createTaskHistoryQuery().userIdIn("admin").list();
     assertThat(returnValues).hasSize(6);
 
+    returnValues = taskHistoryService.createTaskHistoryQuery().proxyAccessIdIn("admin").list();
+    assertThat(returnValues).hasSize(4);
+
     returnValues = taskHistoryService.createTaskHistoryQuery().domainIn("DOMAIN_A").list();
     assertThat(returnValues).hasSize(13);
 
@@ -312,6 +315,9 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
         taskHistoryService.createTaskHistoryQuery().taskIdLike("TKI:000000000000000%").list();
     assertThat(returnValues).hasSize(14);
 
+    returnValues = taskHistoryService.createTaskHistoryQuery().proxyAccessIdLike("adm%").list();
+    assertThat(returnValues).hasSize(4);
+
     returnValues = taskHistoryService.createTaskHistoryQuery().oldValueLike("old%").list();
     assertThat(returnValues).hasSize(1);
 
@@ -360,6 +366,12 @@ class QueryTaskHistoryAccTest extends AbstractAccTest {
             .createTaskHistoryQuery()
             .listValues(TaskHistoryQueryColumnName.USER_ID, null);
     assertThat(returnedList).hasSize(4);
+
+    returnedList =
+        taskHistoryService
+            .createTaskHistoryQuery()
+            .listValues(TaskHistoryQueryColumnName.PROXY_ACCESS_ID, null);
+    assertThat(returnedList).hasSize(2);
 
     returnedList =
         taskHistoryService

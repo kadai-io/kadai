@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -72,7 +72,8 @@ import org.junit.jupiter.api.function.ThrowingConsumer;
 class CompleteTaskAccTest implements KadaiConfigurationModifier {
 
   @KadaiInject TaskService taskService;
-  @KadaiInject CurrentUserContext currentUserContext;
+  @KadaiInject
+  CurrentUserContext currentUserContext;
 
   @KadaiInject UserService userService;
 
@@ -317,7 +318,7 @@ class CompleteTaskAccTest implements KadaiConfigurationModifier {
 
     NotAuthorizedOnWorkbasketException e =
         catchThrowableOfType(NotAuthorizedOnWorkbasketException.class, call);
-    assertThat(e.getCurrentUserId()).isEqualTo(currentUserContext.getUserid());
+    assertThat(e.getCurrentUserId()).isEqualTo(currentUserContext.getUserId());
     WorkbasketSummary workbasket = claimedTask.getWorkbasketSummary();
     assertThat(e.getWorkbasketId()).isEqualTo(workbasket.getId());
     assertThat(e.getRequiredPermissions())
@@ -836,7 +837,7 @@ class CompleteTaskAccTest implements KadaiConfigurationModifier {
   private void assertTaskIsComplete(Instant before, Task completedTask) {
     assertThat(completedTask).isNotNull();
     assertThat(completedTask.getState()).isEqualTo(TaskState.COMPLETED);
-    assertThat(completedTask.getOwner()).isEqualTo(currentUserContext.getUserid());
+    assertThat(completedTask.getOwner()).isEqualTo(currentUserContext.getUserId());
     assertThat(completedTask.getCompleted())
         .isNotNull()
         .isEqualTo(completedTask.getModified())

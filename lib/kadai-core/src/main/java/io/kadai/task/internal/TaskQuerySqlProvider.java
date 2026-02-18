@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -177,7 +177,7 @@ public class TaskQuerySqlProvider {
   @SuppressWarnings("unused")
   public static String countQueryTasks() {
     return OPENING_SCRIPT_TAG
-        + "SELECT COUNT( <if test=\"useDistinctKeyword\">DISTINCT</if> t.ID) "
+        + "SELECT COUNT(*) "
         + "<if test=\"groupByPor or groupBySor != null\"> "
         + "FROM (SELECT t.ID, t.POR_VALUE "
         + "</if> "
@@ -327,7 +327,6 @@ public class TaskQuerySqlProvider {
         .filter(column -> column.startsWith("t"))
         .collect(Collectors.joining(", "));
   }
-
 
   private static String db2selectFields() {
     // needs to be the same order as the commonSelectFields (TaskQueryColumnValue)

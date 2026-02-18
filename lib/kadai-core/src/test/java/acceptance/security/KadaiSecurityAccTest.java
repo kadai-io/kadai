@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -30,6 +30,9 @@ import io.kadai.common.test.security.WithAccessId;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /** Acceptance test for task queries and authorization. */
 @ExtendWith(JaasExtension.class)
@@ -47,18 +50,80 @@ class KadaiSecurityAccTest extends AbstractAccTest {
     assertThatThrownBy(call).isInstanceOf(NotAuthorizedException.class);
   }
 
-  @WithAccessId(user = "businessadmin")
-  @Test
-  void should_RunAsAdminOnlyTemorarily_When_RunAsAdminMethodIsCalled() throws Exception {
-    assertThat(kadaiEngine.isUserInRole(KadaiRole.BUSINESS_ADMIN)).isTrue();
-    assertThat(kadaiEngine.isUserInRole(KadaiRole.ADMIN)).isFalse();
+  @ParameterizedTest
+  @CsvSource(
+      value = {
+        "ADMIN;user-1-1;uid=admin,cn=users,ou=test,o=kadai",
+        "BUSINESS_ADMIN;teamlead-1;cn=business-admins,cn=groups,ou=test,o=kadai",
+        "MONITOR;user-1-3;cn=monitor-users,cn=groups,ou=test,o=kadai",
+        "TASK_ADMIN;user-1-4;taskadmin",
+        "TASK_ROUTER;user-4-2;cn=routers,cn=groups,ou=test,o=kadai",
+      },
+      delimiter = ';')
+  @WithAccessId(user = "user-1-1")
+  void should_TemporarilyRunAsWithProxiedAccessId(
+      KadaiRole proxy, String userId, String expectedProxyAccessId) throws Exception {
+    assertThat(kadaiEngine.isUserInRole(proxy)).isFalse();
+    assertThat(kadaiEngine.getCurrentUserContext().getProxyAccessId()).isNull();
+    assertThat(kadaiEngine.getCurrentUserContext().getUserId()).isEqualTo("user-1-1");
+    assertThat(kadaiEngine.getCurrentUserContext().getUserId()).isEqualTo("user-1-1");
 
     new KadaiEngineProxy(kadaiEngine)
         .getEngine()
         .getEngine()
-        .runAsAdmin(() -> assertThat(kadaiEngine.isUserInRole(KadaiRole.ADMIN)).isTrue());
+        .runAs(
+            () -> {
+              assertThat(kadaiEngine.isUserInRole(proxy)).isTrue();
+              assertThat(kadaiEngine.getCurrentUserContext().getProxyAccessId())
+                  .isEqualTo(expectedProxyAccessId);
+              assertThat(kadaiEngine.getCurrentUserContext().getUserId()).isEqualTo(userId);
+              assertThat(kadaiEngine.getCurrentUserContext().getUserId()).isEqualTo(userId);
+            },
+            proxy,
+            userId);
+
+    assertThat(kadaiEngine.isUserInRole(proxy)).isFalse();
+    assertThat(kadaiEngine.getCurrentUserContext().getProxyAccessId()).isNull();
+    assertThat(kadaiEngine.getCurrentUserContext().getUserId()).isEqualTo("user-1-1");
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "user-1-1",
+        "user-1-2",
+        "user-1-3",
+        "user-2-1",
+        "user-2-5",
+        "user-4-2",
+        "teamlead-1",
+        "teamlead-2",
+        "businessadmin",
+        "admin",
+      })
+  @WithAccessId(user = "user-1-2")
+  void should_TemporarilyRunAsAdmin(String userId) throws Exception {
+    assertThat(kadaiEngine.isUserInRole(KadaiRole.ADMIN)).isFalse();
+    assertThat(kadaiEngine.getCurrentUserContext().getProxyAccessId()).isNull();
+    assertThat(kadaiEngine.getCurrentUserContext().getUserId()).isEqualTo("user-1-2");
+    assertThat(kadaiEngine.getCurrentUserContext().getUserId()).isEqualTo("user-1-2");
+
+    new KadaiEngineProxy(kadaiEngine)
+        .getEngine()
+        .getEngine()
+        .runAsAdmin(
+            () -> {
+              assertThat(kadaiEngine.isUserInRole(KadaiRole.ADMIN)).isTrue();
+              assertThat(kadaiEngine.getCurrentUserContext().getProxyAccessId())
+                  .isEqualTo("uid=admin,cn=users,ou=test,o=kadai");
+              assertThat(kadaiEngine.getCurrentUserContext().getUserId()).isEqualTo(userId);
+              assertThat(kadaiEngine.getCurrentUserContext().getUserId()).isEqualTo(userId);
+            },
+            userId);
 
     assertThat(kadaiEngine.isUserInRole(KadaiRole.ADMIN)).isFalse();
+    assertThat(kadaiEngine.getCurrentUserContext().getProxyAccessId()).isNull();
+    assertThat(kadaiEngine.getCurrentUserContext().getUserId()).isEqualTo("user-1-2");
   }
 
   @WithAccessId(user = "user-1-1")

@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -248,7 +248,7 @@ class ClassificationDefinitionControllerIntTest {
         .isInstanceOf(HttpStatusCodeException.class)
         .extracting(HttpStatusCodeException.class::cast)
         .extracting(HttpStatusCodeException::getStatusCode)
-        .isEqualTo(HttpStatus.CONFLICT);
+        .isEqualTo(HttpStatus.BAD_REQUEST);
   }
 
   @Test

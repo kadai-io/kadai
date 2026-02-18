@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,21 +16,22 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TaskCustomFieldsComponent } from './task-custom-fields.component';
 import { provideHttpClient } from '@angular/common/http';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 // TODO: test pending to test. Failing random
-xdescribe('TaskCustomFieldsComponent', () => {
+describe.skip('TaskCustomFieldsComponent', () => {
   let component: TaskCustomFieldsComponent;
   let fixture: ComponentFixture<TaskCustomFieldsComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [TaskCustomFieldsComponent],
       providers: [provideHttpClient()]
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TaskCustomFieldsComponent);

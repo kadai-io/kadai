@@ -1,44 +1,49 @@
 <!--
-  ~ Copyright [2025] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2026] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
-<div *ngIf="task">
-  <div class="task-custom-fields">
-    <div *ngFor="let customField of customFields; let i = index"
-         class="task-custom-fields__custom-field">
-
-      <!-- INPUT -->
-      <div class="task-custom-fields__input">
-        <mat-form-field appearance="outline" style="width: 100%">
-          <mat-label>Custom {{ i + 1 }}</mat-label>
-          <label for="task-custom-{{i + 1}}"></label>
-          <input #custom="ngModel" (input)="validateKeypress(custom, 255)"
-                 [(ngModel)]="task[customField]"
-                 id="task-custom-{{i + 1}}" matInput
-                 maxlength="255"
-                 name="task.custom{{i + 1}}" placeholder="Custom {{i + 1}}"
-                 type="text">
-        </mat-form-field>
-        <div *ngIf="inputOverflowMap.get(custom.name)" class="error">{{ lengthError }}</div>
-      </div>
-
-      <!-- WHITE SPACE BETWEEN INPUTS -->
-      <div *ngIf="i % 2 === 0" class="task-custom-fields__spacer"></div>
-
+@if (task) {
+  <div>
+    <div class="task-custom-fields">
+      @for (customField of customFields; track customField; let i = $index) {
+        <div
+          class="task-custom-fields__custom-field">
+          <!-- INPUT -->
+          <div class="task-custom-fields__input">
+            <mat-form-field appearance="outline" style="width: 100%">
+              <mat-label>Custom {{ i + 1 }}</mat-label>
+              <label for="task-custom-{{i + 1}}"></label>
+              <input #custom="ngModel" (input)="validateKeypress(custom, 255)"
+                     [(ngModel)]="task[customField]"
+                     id="task-custom-{{i + 1}}" matInput
+                     maxlength="255"
+                     name="task.custom{{i + 1}}" placeholder="Custom {{i + 1}}"
+                     type="text">
+            </mat-form-field>
+            @if (inputOverflowMap.get(custom.name)) {
+              <div class="error">{{ lengthError }}</div>
+            }
+          </div>
+          <!-- WHITE SPACE BETWEEN INPUTS -->
+          @if (i % 2 === 0) {
+            <div class="task-custom-fields__spacer"></div>
+          }
+        </div>
+      }
     </div>
   </div>
-</div>
+}

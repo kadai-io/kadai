@@ -1,5 +1,5 @@
 /*!
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
  *
  */
 
-@import 'variables';
-@import 'colors';
+@use 'colors';
 
 .sidenav {
   position: absolute;
@@ -32,7 +31,7 @@
     z-index: 999;
     box-shadow: none;
     width: 350px;
-    background-color: $dark-green;
+    background-color: colors.$dark-green;
 
     &__container {
       display: flex;
@@ -86,7 +85,7 @@
 
 .kadai-main__progress-bar {
   height: 8px;
-  background-color: $light-grey;
+  background-color: colors.$light-grey;
   margin-bottom: 2px;
 }
 

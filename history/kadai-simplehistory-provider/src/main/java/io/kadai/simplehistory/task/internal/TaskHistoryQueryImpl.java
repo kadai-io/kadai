@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ public class TaskHistoryQueryImpl implements TaskHistoryQuery {
   private String[] eventTypeIn;
   private TimeInterval[] createdIn;
   private String[] userIdIn;
+  private String[] proxyAccessIdIn;
   private String[] domainIn;
   private String[] workbasketKeyIn;
   private String[] porCompanyIn;
@@ -77,6 +78,7 @@ public class TaskHistoryQueryImpl implements TaskHistoryQuery {
   private String[] taskIdLike;
   private String[] eventTypeLike;
   private String[] userIdLike;
+  private String[] proxyAccessIdLike;
   private String[] domainLike;
   private String[] workbasketKeyLike;
   private String[] porCompanyLike;
@@ -128,6 +130,10 @@ public class TaskHistoryQueryImpl implements TaskHistoryQuery {
 
   public String[] getUserIdIn() {
     return userIdIn;
+  }
+
+  public String[] getProxyAccessIdIn() {
+    return proxyAccessIdIn;
   }
 
   public String[] getDomainIn() {
@@ -212,6 +218,10 @@ public class TaskHistoryQueryImpl implements TaskHistoryQuery {
 
   public String[] getUserIdLike() {
     return userIdLike;
+  }
+
+  public String[] getProxyAccessIdLike() {
+    return proxyAccessIdLike;
   }
 
   public String[] getDomainLike() {
@@ -321,6 +331,12 @@ public class TaskHistoryQueryImpl implements TaskHistoryQuery {
   }
 
   @Override
+  public TaskHistoryQuery proxyAccessIdIn(String... accessIds) {
+    this.proxyAccessIdIn = accessIds;
+    return this;
+  }
+
+  @Override
   public TaskHistoryQuery domainIn(String... domain) {
     this.domainIn = domain;
     return this;
@@ -419,6 +435,12 @@ public class TaskHistoryQueryImpl implements TaskHistoryQuery {
   @Override
   public TaskHistoryQuery userIdLike(String... userId) {
     this.userIdLike = toLowerCopy(userId);
+    return this;
+  }
+
+  @Override
+  public TaskHistoryQuery proxyAccessIdLike(String... proxyAccessIds) {
+    this.proxyAccessIdLike = toLowerCopy(proxyAccessIds);
     return this;
   }
 
@@ -571,6 +593,11 @@ public class TaskHistoryQueryImpl implements TaskHistoryQuery {
   @Override
   public TaskHistoryQuery orderByUserId(SortDirection sortDirection) {
     return addOrderCriteria("USER_ID", sortDirection);
+  }
+
+  @Override
+  public TaskHistoryQuery orderByProxyAccessId(SortDirection sortDirection) {
+    return addOrderCriteria("PROXY_ACCESS_ID", sortDirection);
   }
 
   @Override

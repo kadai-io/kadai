@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import { MonitorService } from '../../services/monitor.service';
 import { MetaInfoData } from '../../models/meta-info-data';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { ChartConfiguration } from 'chart.js';
-import { NgIf } from '@angular/common';
+
 import { BaseChartDirective } from 'ng2-charts';
 import { ReportTableComponent } from '../report-table/report-table.component';
 
@@ -31,7 +31,7 @@ import { ReportTableComponent } from '../report-table/report-table.component';
   selector: 'kadai-monitor-workbasket-report-due-date',
   templateUrl: './workbasket-report-due-date.component.html',
   styleUrls: ['./workbasket-report-due-date.component.scss'],
-  imports: [NgIf, BaseChartDirective, ReportTableComponent],
+  imports: [BaseChartDirective, ReportTableComponent],
   providers: [MonitorService]
 })
 export class WorkbasketReportDueDateComponent implements OnInit {

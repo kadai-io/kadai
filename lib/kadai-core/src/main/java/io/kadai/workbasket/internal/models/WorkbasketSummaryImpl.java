@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ public class WorkbasketSummaryImpl implements WorkbasketSummary {
   public WorkbasketSummaryImpl() {}
 
   protected WorkbasketSummaryImpl(WorkbasketSummaryImpl copyFrom) {
+    key = copyFrom.key;
     name = copyFrom.name;
     description = copyFrom.description;
     owner = copyFrom.owner;

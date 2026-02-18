@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -60,15 +60,19 @@ class QueryTasksByRoleAccTest extends AbstractAccTest {
       TaskService taskService = kadaiEngine.getTaskService();
       List<TaskSummary> results = taskService.createTaskQuery().list();
 
-      int expectedSize = switch (kadaiEngine.getCurrentUserContext().getUserid()) {
-        case "admin", "taskadmin" -> 100;
-        case "businessadmin", "monitor" -> 0;
-        case "teamlead-1" -> 26;
-        case "user-1-1" -> 10;
-        case "user-taskrouter" -> 0;
-        default -> throw new SystemException(
-            String.format("Invalid User: '%s'", kadaiEngine.getCurrentUserContext().getUserid()));
-      };
+      int expectedSize =
+          switch (kadaiEngine.getCurrentUserContext().getUserId()) {
+            case "admin", "taskadmin" -> 100;
+            case "businessadmin", "monitor" -> 0;
+            case "teamlead-1" -> 26;
+            case "user-1-1" -> 10;
+            case "user-taskrouter" -> 0;
+            default ->
+                throw new SystemException(
+                    String.format(
+                        "Invalid User: '%s'",
+                        kadaiEngine.getCurrentUserContext().getUserId()));
+          };
 
       assertThat(results).hasSize(expectedSize);
     }

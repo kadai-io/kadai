@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,8 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import acceptance.AbstractAccTest;
 import io.kadai.common.api.TimeInterval;
-import io.kadai.common.test.security.JaasExtension;
-import io.kadai.common.test.security.WithAccessId;
+import io.kadai.common.internal.util.CheckedRunnable;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
 import io.kadai.task.api.TaskService;
@@ -31,31 +30,39 @@ import io.kadai.task.api.models.Task;
 import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(JaasExtension.class)
 class CreateHistoryEventOnTaskUpdateAccTest extends AbstractAccTest {
 
   private final TaskService taskService = kadaiEngine.getTaskService();
 
   @Test
-  @WithAccessId(user = "admin")
   void should_CreateUpdatedHistoryEvent_When_TaskIsCreated() throws Exception {
-    final String taskId = "TKI:000000000000000000000000000000000000";
-    Instant before = Instant.now();
+    kadaiEngine.runAsAdmin(
+        CheckedRunnable.rethrowing(
+            () -> {
+              final String taskId = "TKI:000000000000000000000000000000000000";
+              Instant before = Instant.now();
 
-    Task task = taskService.getTask(taskId);
-    task.setName("someUpdatedName");
-    taskService.updateTask(task);
-    List<TaskHistoryEvent> events =
-        taskHistoryService
-            .createTaskHistoryQuery()
-            .taskIdIn(taskId)
-            .createdWithin(new TimeInterval(before, null))
-            .list();
+              Task task = taskService.getTask(taskId);
+              task.setName("someUpdatedName");
+              taskService.updateTask(task);
+              List<TaskHistoryEvent> events =
+                  taskHistoryService
+                      .createTaskHistoryQuery()
+                      .taskIdIn(taskId)
+                      .createdWithin(new TimeInterval(before, null))
+                      .list();
 
-    assertThat(events)
-        .extracting(TaskHistoryEvent::getEventType)
-        .containsExactly(TaskHistoryEventType.UPDATED.getName());
+              assertThat(events)
+                  .extracting(TaskHistoryEvent::getEventType)
+                  .containsExactly(TaskHistoryEventType.UPDATED.getName());
+              assertThat(events)
+                  .extracting(TaskHistoryEvent::getUserId)
+                  .containsExactly("user-3-2");
+              assertThat(events)
+                  .extracting(TaskHistoryEvent::getProxyAccessId)
+                  .containsExactly("admin");
+            }),
+        "user-3-2");
   }
 }

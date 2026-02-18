@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -29,8 +29,9 @@ public class TaskTransferredEvent extends TaskHistoryEvent {
       String oldWorkbasketId,
       String newWorkbasketId,
       String userId,
+      String proxyAccessId,
       String details) {
-    super(id, task, userId, details);
+    super(id, task, userId, proxyAccessId, details);
     eventType = TaskHistoryEventType.TRANSFERRED.getName();
     created = task.getModified();
     this.oldValue = oldWorkbasketId;

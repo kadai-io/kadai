@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -187,6 +187,10 @@ class QueryWorkbasketHistoryAccTest extends AbstractAccTest {
 
     returnValues = workbasketHistoryService.createWorkbasketHistoryQuery().userIdIn("peter").list();
     assertThat(returnValues).hasSize(6);
+
+    returnValues =
+        workbasketHistoryService.createWorkbasketHistoryQuery().proxyAccessIdIn("taskadmin").list();
+    assertThat(returnValues).hasSize(1);
 
     returnValues =
         workbasketHistoryService.createWorkbasketHistoryQuery().domainIn("DOMAIN_A").list();
@@ -387,6 +391,10 @@ class QueryWorkbasketHistoryAccTest extends AbstractAccTest {
         workbasketHistoryService.createWorkbasketHistoryQuery().userIdLike("p%", "c%").list();
     assertThat(returnValues).hasSize(8);
 
+    returnValues =
+        workbasketHistoryService.createWorkbasketHistoryQuery().proxyAccessIdLike("%admin%").list();
+    assertThat(returnValues).hasSize(3);
+
     returnValues = workbasketHistoryService.createWorkbasketHistoryQuery().domainLike("%_A").list();
     assertThat(returnValues).hasSize(10);
 
@@ -481,6 +489,12 @@ class QueryWorkbasketHistoryAccTest extends AbstractAccTest {
     returnedList =
         workbasketHistoryService
             .createWorkbasketHistoryQuery()
+            .listValues(WorkbasketHistoryQueryColumnName.PROXY_ACCESS_ID, null);
+    assertThat(returnedList).hasSize(4);
+
+    returnedList =
+        workbasketHistoryService
+            .createWorkbasketHistoryQuery()
             .listValues(WorkbasketHistoryQueryColumnName.DOMAIN, null);
     assertThat(returnedList).hasSize(1);
 
@@ -529,25 +543,25 @@ class QueryWorkbasketHistoryAccTest extends AbstractAccTest {
     returnedList =
         workbasketHistoryService
             .createWorkbasketHistoryQuery()
-            .listValues(WorkbasketHistoryQueryColumnName.ORGLEVEL_1, null);
+            .listValues(WorkbasketHistoryQueryColumnName.ORG_LEVEL_1, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
         workbasketHistoryService
             .createWorkbasketHistoryQuery()
-            .listValues(WorkbasketHistoryQueryColumnName.ORGLEVEL_2, null);
+            .listValues(WorkbasketHistoryQueryColumnName.ORG_LEVEL_2, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
         workbasketHistoryService
             .createWorkbasketHistoryQuery()
-            .listValues(WorkbasketHistoryQueryColumnName.ORGLEVEL_3, null);
+            .listValues(WorkbasketHistoryQueryColumnName.ORG_LEVEL_3, null);
     assertThat(returnedList).hasSize(2);
 
     returnedList =
         workbasketHistoryService
             .createWorkbasketHistoryQuery()
-            .listValues(WorkbasketHistoryQueryColumnName.ORGLEVEL_4, null);
+            .listValues(WorkbasketHistoryQueryColumnName.ORG_LEVEL_4, null);
     assertThat(returnedList).hasSize(2);
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public class UserQueryImpl implements UserQuery {
 
   @Override
   public UserQuery orderByLastName(SortDirection sortDirection) {
-    return addOrderCriteria("LASTNAME", sortDirection);
+    return addOrderCriteria("LAST_NAME", sortDirection);
   }
 
   @Override

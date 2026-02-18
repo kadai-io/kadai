@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public interface UserMapper {
       column = "USER_ID",
       many = @Many(select = "findPermissionsById"))
   @Result(property = "firstName", column = "FIRST_NAME")
-  @Result(property = "lastName", column = "LASTNAME")
+  @Result(property = "lastName", column = "LAST_NAME")
   @Result(property = "fullName", column = "FULL_NAME")
   @Result(property = "longName", column = "LONG_NAME")
   @Result(property = "email", column = "E_MAIL")
@@ -59,7 +59,7 @@ public interface UserMapper {
       column = "USER_ID",
       many = @Many(select = "findPermissionsById"))
   @Result(property = "firstName", column = "FIRST_NAME")
-  @Result(property = "lastName", column = "LASTNAME")
+  @Result(property = "lastName", column = "LAST_NAME")
   @Result(property = "fullName", column = "FULL_NAME")
   @Result(property = "longName", column = "LONG_NAME")
   @Result(property = "email", column = "E_MAIL")
@@ -94,9 +94,18 @@ public interface UserMapper {
   @DeleteProvider(type = UserMapperSqlProvider.class, method = "delete")
   void delete(String id);
 
+  @DeleteProvider(type = UserMapperSqlProvider.class, method = "deleteAll")
+  void deleteAll();
+
   @DeleteProvider(type = UserMapperSqlProvider.class, method = "deleteGroups")
   void deleteGroups(String id);
 
+  @DeleteProvider(type = UserMapperSqlProvider.class, method = "deleteAllGroups")
+  void deleteAllGroups();
+
   @DeleteProvider(type = UserMapperSqlProvider.class, method = "deletePermissions")
   void deletePermissions(String id);
+
+  @DeleteProvider(type = UserMapperSqlProvider.class, method = "deleteAllPermissions")
+  void deleteAllPermissions();
 }

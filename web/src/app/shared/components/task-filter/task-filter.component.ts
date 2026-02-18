@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
-import { NgFor } from '@angular/common';
+
 import { MatOption } from '@angular/material/core';
 import { MapValuesPipe } from '../../pipes/map-values.pipe';
 
@@ -36,7 +36,7 @@ import { MapValuesPipe } from '../../pipes/map-values.pipe';
   selector: 'kadai-shared-task-filter',
   templateUrl: './task-filter.component.html',
   styleUrls: ['./task-filter.component.scss'],
-  imports: [MatFormField, MatTooltip, MatLabel, MatInput, FormsModule, MatSelect, NgFor, MatOption, MapValuesPipe]
+  imports: [MatFormField, MatTooltip, MatLabel, MatInput, FormsModule, MatSelect, MatOption, MapValuesPipe]
 })
 export class TaskFilterComponent implements OnInit, OnDestroy {
   filter: TaskQueryFilterParameter;

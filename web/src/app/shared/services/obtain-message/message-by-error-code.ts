@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ export const messageByErrorCode = {
       "The format must be 'PnD'.",
     INVALID_ARGUMENT: 'A method was called with an invalid argument.',
     EMPTY_FIELDS: 'There are empty fields which are required',
-    OWNER_NOT_VALID: 'The {owner} introduced is not valid',
+    OWNER_NOT_VALID: 'The {owner} entered is invalid and has not been saved',
 
     CLASSIFICATION_IN_USE:
       'Classification with key {classificationKey} in domain {domain} cannot be deleted since there are Tasks associated with this Classification.',
@@ -95,7 +95,7 @@ export const messageByErrorCode = {
     CLASSIFICATION_IMPORT: 'Classifications imported',
 
     WORKBASKET_CREATE: 'Workbasket with key {workbasketKey} was created',
-    WORKBASKET_UPDATE: 'Workbasket with key {workbasketKey} was updated',
+    WORKBASKET_UPDATE: 'Workbasket information with key {workbasketKey} was updated',
     WORKBASKET_REMOVE: 'Workbasket with key {workbasketKey} was removed',
     WORKBASKET_RESTORE: 'Workbasket restored',
     WORKBASKET_IMPORT: 'Workbaskets imported',

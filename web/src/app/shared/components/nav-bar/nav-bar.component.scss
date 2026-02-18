@@ -1,5 +1,5 @@
 /*!
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
  *
  */
 
-@import 'variables';
+@use 'colors';
 
 .navbar {
-  background-color: $aquamarine;
+  background-color: colors.$aquamarine;
   max-height: 52px;
   overflow-x: hidden;
   padding-right: 50px;

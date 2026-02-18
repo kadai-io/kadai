@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import { MatIcon } from '@angular/material/icon';
 import { UserInformationComponent } from './shared/components/user-information/user-information.component';
 import { SidenavListComponent } from './shared/components/sidenav-list/sidenav-list.component';
 import { NavBarComponent } from './shared/components/nav-bar/nav-bar.component';
-import { NgIf } from '@angular/common';
+
 import { MatProgressBar } from '@angular/material/progress-bar';
 
 @Component({
@@ -50,7 +50,6 @@ import { MatProgressBar } from '@angular/material/progress-bar';
     SidenavListComponent,
     MatSidenavContent,
     NavBarComponent,
-    NgIf,
     MatProgressBar,
     RouterOutlet
   ]
@@ -72,7 +71,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private kadaiEngineService = inject(KadaiEngineService);
   private window = inject(WindowRefService);
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onResize() {
     this.orientationService.onResize();
   }

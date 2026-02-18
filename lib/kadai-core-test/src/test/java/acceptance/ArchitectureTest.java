@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -80,7 +80,6 @@ import org.apache.ibatis.annotations.SelectProvider;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -209,7 +208,7 @@ class ArchitectureTest {
         for (JavaField field : item.getAllFields()) {
           if (!field.reflect().isSynthetic()
               && !(field.getModifiers().isEmpty()
-                  || field.getModifiers().equals(modifiersForConstants))) {
+              || field.getModifiers().equals(modifiersForConstants))) {
             events.add(
                 SimpleConditionEvent.violated(
                     item,
@@ -427,7 +426,8 @@ class ArchitectureTest {
   }
 
   @Test
-  @Disabled("this has way too many false positives during regular development without refactoring")
+  //@Disabled("this has way too many false positives during development without refactoring")
+  // Is that actually still the case? We'll see!
   void packagesShouldBeFreeOfCyclicDependencies() {
     // Frozen, so it can be improved over time:
     // https://www.archunit.org/userguide/html/000_Index.html#_freezing_arch_rules
@@ -435,7 +435,8 @@ class ArchitectureTest {
   }
 
   @Test
-  @Disabled("this has way too many false positives during regular development without refactoring")
+  //@Disabled("this has way too many false positives during development without refactoring")
+  // Is that actually still the case? We'll see!
   void classesShouldBeFreeOfCyclicDependencies() {
     SliceAssignment everySingleClass =
         new SliceAssignment() {
@@ -477,9 +478,7 @@ class ArchitectureTest {
   // region Structure
 
   @Test
-  @Disabled("Test is failing for an unknown reason")
   void moduleMonitorShouldOnlyDependOn() {
-    // FIXME fails for some unknown reason...
     moduleShouldOnlyDependOn("monitor", List.of("common", "classification", "task", "workbasket"));
   }
 
@@ -490,7 +489,6 @@ class ArchitectureTest {
 
   @Test
   void moduleSpiShouldOnlyDependOn() {
-    // FIXME should not depend on task, classification and workbasket
     moduleShouldOnlyDependOn("spi", List.of("common", "task", "classification", "workbasket"));
   }
 
@@ -505,11 +503,15 @@ class ArchitectureTest {
   }
 
   @Test
-  @Disabled("Needs to be replaced")
   void allClassesAreInsideApiOrInternal() {
     classes()
         .that()
-        .resideOutsideOfPackages("acceptance..", "testapi..", "..test..")
+        .areNotAssignableFrom(KadaiConfiguration.class)
+        .and()
+        .areNotAssignableFrom(KadaiConfiguration.Builder.class)
+        .and()
+        .resideOutsideOfPackages("acceptance..", "..testapi..", "..test..", "..sampledata..")
+        .and(resideOutsideOfPackage("..simplehistory..")) // FIXME: With #994
         .should()
         .resideInAnyPackage("..api..", "..internal..")
         .check(importedClasses);

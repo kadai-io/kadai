@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -2199,6 +2199,11 @@ public class TaskQueryImpl implements TaskQuery {
     if (selectAndClaim && lockResults != null && lockResults != 0) {
       throw new IllegalArgumentException(
           "The params \"lockResultsEquals\" and \"selectAndClaim\"" + " cannot be used together!");
+    }
+    if (joinWithUserInfo && lockResults != null && lockResults != 0) {
+      throw new IllegalArgumentException(
+          "The params \"lockResultsEquals\" and \"joinWithUserInfo\""
+              + " cannot be used together!");
     }
     if (withoutAttachment
         && (attachmentChannelIn != null

@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -68,6 +68,8 @@ class CreateHistoryEventOnTaskRequestChangesAccTest extends AbstractAccTest {
     TaskHistoryEvent event = events.get(0);
 
     assertThat(event.getEventType()).isEqualTo(TaskHistoryEventType.CHANGES_REQUESTED.getName());
+    assertThat(event.getUserId()).isEqualTo("user-1-1");
+    assertThat(event.getProxyAccessId()).isNull();
 
     event = taskHistoryService.getTaskHistoryEvent(event.getId());
 

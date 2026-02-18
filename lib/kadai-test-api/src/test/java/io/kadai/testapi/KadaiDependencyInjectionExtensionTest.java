@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -68,8 +68,10 @@ class KadaiDependencyInjectionExtensionTest {
   @KadaiInject ConfigurationServiceImpl configurationServiceImpl;
   @KadaiInject WorkingTimeCalculator workingTimeCalculator;
   @KadaiInject WorkingTimeCalculatorImpl workingTimeCalculatorImpl;
-  @KadaiInject CurrentUserContext currentUserContext;
-  @KadaiInject CurrentUserContextImpl currentUserContextImpl;
+  @KadaiInject
+  CurrentUserContext currentUserContext;
+  @KadaiInject
+  CurrentUserContextImpl currentUserContextImpl;
   @KadaiInject ConfigurationMapper configurationMapper;
   @KadaiInject UserService userService;
   @KadaiInject UserServiceImpl userServiceImpl;

@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,9 +21,8 @@ package acceptance.events.task;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import acceptance.AbstractAccTest;
-import io.kadai.common.internal.util.Pair;
-import io.kadai.common.test.security.JaasExtension;
-import io.kadai.common.test.security.WithAccessId;
+import io.kadai.common.api.KadaiRole;
+import io.kadai.common.internal.util.CheckedRunnable;
 import io.kadai.simplehistory.task.internal.TaskHistoryQueryImpl;
 import io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
@@ -33,100 +32,179 @@ import io.kadai.task.api.TaskState;
 import io.kadai.task.api.models.Task;
 import java.time.Instant;
 import java.util.List;
-import java.util.stream.Stream;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.function.ThrowingConsumer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-@ExtendWith(JaasExtension.class)
 class CreateHistoryEventOnTaskClaimAccTest extends AbstractAccTest {
 
   private final TaskService taskService = kadaiEngine.getTaskService();
 
-  @WithAccessId(user = "admin")
-  @TestFactory
-  Stream<DynamicTest> should_CreateClaimedHistoryEvent_When_TaskIsClaimed() {
-    List<Pair<String, String>> list =
-        List.of(
-            Pair.of(
-                "With Attachment and secondary Object Reference",
-                "TKI:000000000000000000000000000000000053"),
-            Pair.of(
-                "Without Attachment and secondary Object References",
-                "TKI:000000000000000000000000000000000047"));
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "TKI:000000000000000000000000000000000053",
+        "TKI:000000000000000000000000000000000047"
+      })
+  void should_CreateClaimedHistoryEvent_When_TaskIsClaimedFromReady(String taskId)
+      throws Exception {
+    kadaiEngine.runAs(
+        CheckedRunnable.rethrowing(
+            () -> {
+              final Instant oldModified = taskService.getTask(taskId).getModified();
 
-    ThrowingConsumer<Pair<String, String>> test =
-        pair -> {
-          final Instant oldModified = taskService.getTask(pair.getRight()).getModified();
+              TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
 
-          TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
+              List<TaskHistoryEvent> events =
+                  taskHistoryQueryMapper.queryHistoryEvents(
+                      (TaskHistoryQueryImpl)
+                          taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
 
-          List<TaskHistoryEvent> events =
-              taskHistoryQueryMapper.queryHistoryEvents(
-                  (TaskHistoryQueryImpl)
-                      taskHistoryService.createTaskHistoryQuery().taskIdIn(pair.getRight()));
+              assertThat(events).isEmpty();
 
-          assertThat(events).isEmpty();
+              assertThat(taskService.getTask(taskId).getState()).isEqualTo(TaskState.READY);
+              Task task = taskService.claim(taskId);
 
-          assertThat(taskService.getTask(pair.getRight()).getState()).isEqualTo(TaskState.READY);
-          Task task = taskService.claim(pair.getRight());
+              assertThat(task.getState()).isEqualTo(TaskState.CLAIMED);
 
-          assertThat(task.getState()).isEqualTo(TaskState.CLAIMED);
+              events =
+                  taskHistoryQueryMapper.queryHistoryEvents(
+                      (TaskHistoryQueryImpl)
+                          taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
 
-          events =
-              taskHistoryQueryMapper.queryHistoryEvents(
-                  (TaskHistoryQueryImpl)
-                      taskHistoryService.createTaskHistoryQuery().taskIdIn(pair.getRight()));
+              TaskHistoryEvent event = events.get(0);
 
-          TaskHistoryEvent event = events.get(0);
+              assertThat(event.getEventType()).isEqualTo(TaskHistoryEventType.CLAIMED.getName());
+              assertThat(event.getUserId()).isEqualTo("teamlead-1");
+              assertThat(event.getProxyAccessId()).isEqualTo("admin");
 
-          assertThat(event.getEventType()).isEqualTo(TaskHistoryEventType.CLAIMED.getName());
+              event = taskHistoryService.getTaskHistoryEvent(event.getId());
 
-          event = taskHistoryService.getTaskHistoryEvent(event.getId());
+              assertThat(event.getDetails()).isNotNull();
 
-          assertThat(event.getDetails()).isNotNull();
+              JSONArray changes = new JSONObject(event.getDetails()).getJSONArray("changes");
 
-          JSONArray changes = new JSONObject(event.getDetails()).getJSONArray("changes");
+              JSONObject expectedClaimed =
+                  new JSONObject()
+                      .put("newValue", task.getModified().toString())
+                      .put("fieldName", "claimed")
+                      .put("oldValue", "");
+              JSONObject expectedModified =
+                  new JSONObject()
+                      .put("newValue", task.getModified().toString())
+                      .put("fieldName", "modified")
+                      .put("oldValue", oldModified.toString());
+              JSONObject expectedState =
+                  new JSONObject()
+                      .put("newValue", TaskState.CLAIMED.name())
+                      .put("fieldName", "state")
+                      .put("oldValue", TaskState.READY.name());
+              JSONObject expectedOwner =
+                  new JSONObject()
+                      .put("newValue", "teamlead-1")
+                      .put("fieldName", "owner")
+                      .put("oldValue", "");
+              JSONObject expectedIsRead =
+                  new JSONObject()
+                      .put("newValue", true)
+                      .put("fieldName", "isRead")
+                      .put("oldValue", false);
 
-          JSONObject expectedClaimed =
-              new JSONObject()
-                  .put("newValue", task.getModified().toString())
-                  .put("fieldName", "claimed")
-                  .put("oldValue", "");
-          JSONObject expectedModified =
-              new JSONObject()
-                  .put("newValue", task.getModified().toString())
-                  .put("fieldName", "modified")
-                  .put("oldValue", oldModified.toString());
-          JSONObject expectedState =
-              new JSONObject()
-                  .put("newValue", TaskState.CLAIMED.name())
-                  .put("fieldName", "state")
-                  .put("oldValue", TaskState.READY.name());
-          JSONObject expectedOwner =
-              new JSONObject()
-                  .put("newValue", "admin")
-                  .put("fieldName", "owner")
-                  .put("oldValue", "");
-          JSONObject expectedIsRead =
-              new JSONObject()
-                  .put("newValue", true)
-                  .put("fieldName", "isRead")
-                  .put("oldValue", false);
+              JSONArray expectedChanges =
+                  new JSONArray()
+                      .put(expectedClaimed)
+                      .put(expectedModified)
+                      .put(expectedState)
+                      .put(expectedOwner)
+                      .put(expectedIsRead);
 
-          JSONArray expectedChanges =
-              new JSONArray()
-                  .put(expectedClaimed)
-                  .put(expectedModified)
-                  .put(expectedState)
-                  .put(expectedOwner)
-                  .put(expectedIsRead);
+              assertThat(changes.similar(expectedChanges)).isTrue();
+            }),
+        KadaiRole.ADMIN,
+        "teamlead-1");
+  }
 
-          assertThat(changes.similar(expectedChanges)).isTrue();
-        };
-    return DynamicTest.stream(list.iterator(), Pair::getLeft, test);
+  @Test
+  void should_CreateClaimedReviewHistoryEvent_When_TaskIsClaimedFromReadyForReview()
+      throws Exception {
+    kadaiEngine.runAs(
+        CheckedRunnable.rethrowing(
+            () -> {
+              final String taskId = "TKI:100000000000000000000000000000000025";
+              final Instant oldModified = taskService.getTask(taskId).getModified();
+
+              TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
+
+              List<TaskHistoryEvent> events =
+                  taskHistoryQueryMapper.queryHistoryEvents(
+                      (TaskHistoryQueryImpl)
+                          taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
+
+              assertThat(events).isEmpty();
+
+              assertThat(taskService.getTask(taskId).getState())
+                  .isEqualTo(TaskState.READY_FOR_REVIEW);
+              Task task = taskService.claim(taskId);
+
+              assertThat(task.getState()).isEqualTo(TaskState.IN_REVIEW);
+
+              events =
+                  taskHistoryQueryMapper.queryHistoryEvents(
+                      (TaskHistoryQueryImpl)
+                          taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
+
+              TaskHistoryEvent event = events.get(0);
+
+              assertThat(event.getEventType())
+                  .isEqualTo(TaskHistoryEventType.CLAIMED_REVIEW.getName());
+              assertThat(event.getUserId()).isEqualTo("teamlead-1");
+              assertThat(event.getProxyAccessId()).isEqualTo("admin");
+
+              event = taskHistoryService.getTaskHistoryEvent(event.getId());
+
+              assertThat(event.getDetails()).isNotNull();
+
+              JSONArray changes = new JSONObject(event.getDetails()).getJSONArray("changes");
+
+              JSONObject expectedClaimed =
+                  new JSONObject()
+                      .put("newValue", task.getModified().toString())
+                      .put("fieldName", "claimed")
+                      .put("oldValue", "");
+              JSONObject expectedModified =
+                  new JSONObject()
+                      .put("newValue", task.getModified().toString())
+                      .put("fieldName", "modified")
+                      .put("oldValue", oldModified.toString());
+              JSONObject expectedState =
+                  new JSONObject()
+                      .put("newValue", TaskState.IN_REVIEW.name())
+                      .put("fieldName", "state")
+                      .put("oldValue", TaskState.READY_FOR_REVIEW.name());
+              JSONObject expectedOwner =
+                  new JSONObject()
+                      .put("newValue", "teamlead-1")
+                      .put("fieldName", "owner")
+                      .put("oldValue", "");
+              JSONObject expectedIsRead =
+                  new JSONObject()
+                      .put("newValue", true)
+                      .put("fieldName", "isRead")
+                      .put("oldValue", false);
+
+              JSONArray expectedChanges =
+                  new JSONArray()
+                      .put(expectedClaimed)
+                      .put(expectedModified)
+                      .put(expectedState)
+                      .put(expectedOwner)
+                      .put(expectedIsRead);
+
+              assertThat(changes.similar(expectedChanges)).isTrue();
+            }),
+        KadaiRole.ADMIN,
+        "teamlead-1");
   }
 }

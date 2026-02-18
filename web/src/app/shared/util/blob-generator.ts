@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { saveAs } from 'file-saver';
+import { saveAs } from 'file-saver-es';
 
 export class BlobGenerator {
   public static saveFile(object: Object, fileName: string) {

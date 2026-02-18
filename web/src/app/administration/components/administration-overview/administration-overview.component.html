@@ -1,20 +1,20 @@
 <!--
-  ~ Copyright [2025] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2026] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
 <div class="administration-overview">
   <div class="administration-overview__navbar-container">
@@ -31,18 +31,22 @@
          class="administration-overview__navbar-links"
          mat-tab-link routerLink="/kadai/administration/access-items-management">Access Items
         Management</a>
-      <a (click)="selectedTab = 'task-routing'" *ngIf="(routingAccess)"
-         [active]="selectedTab == 'task-routing'"
-         class="administration-overview__navbar-links" mat-tab-link
-         routerLink="/kadai/administration/task-routing">Task Routing</a>
+      @if ((routingAccess)) {
+        <a (click)="selectedTab = 'task-routing'"
+           [active]="selectedTab == 'task-routing'"
+           class="administration-overview__navbar-links" mat-tab-link
+           routerLink="/kadai/administration/task-routing">Task Routing</a>
+      }
     </nav>
     <div class="administration-overview__domain">
       <mat-form-field>
         <mat-select [value]="selectedDomain" matTooltip="Select domain">
-          <mat-option (click)="switchDomain(domain)" *ngFor="let domain of domains"
-                      [value]="domain">
-            {{ domain ? domain : 'MASTER DOMAIN' }}
-          </mat-option>
+          @for (domain of domains; track domain) {
+            <mat-option (click)="switchDomain(domain)"
+                        [value]="domain">
+              {{ domain ? domain : 'MASTER DOMAIN' }}
+            </mat-option>
+          }
         </mat-select>
       </mat-form-field>
     </div>

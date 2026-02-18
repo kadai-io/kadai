@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import { Component, DebugElement, runInInjectionContext } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ResizableWidthDirective } from './resizable-width.directive';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 @Component({
   imports: [ResizableWidthDirective],

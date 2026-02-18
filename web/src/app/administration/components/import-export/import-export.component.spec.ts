@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { ImportExportComponent } from './import-export.component';
 import { StartupService } from '../../../shared/services/startup/startup.service';
@@ -30,39 +30,40 @@ import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { ClassificationDefinitionService } from '../../services/classification-definition.service';
 import { KadaiType } from '../../../shared/models/kadai-type';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-jest.mock('../../../shared/util/blob-generator');
+vi.mock('../../../shared/util/blob-generator');
 
-xdescribe('ImportExportComponent', () => {
+describe.skip('ImportExportComponent', () => {
   let fixture: ComponentFixture<ImportExportComponent>;
   let debugElement: DebugElement;
   let app: ImportExportComponent;
 
-  const domainServiceSpy = jest.fn().mockImplementation(
+  const domainServiceSpy = vi.fn().mockImplementation(
     (): Partial<DomainService> => ({
-      getSelectedDomainValue: jest.fn().mockReturnValue(of()),
-      getSelectedDomain: jest.fn().mockReturnValue(of()),
-      getDomains: jest.fn().mockReturnValue(of())
+      getSelectedDomainValue: vi.fn().mockReturnValue('A'),
+      getSelectedDomain: vi.fn().mockReturnValue(of('A')),
+      getDomains: vi.fn().mockReturnValue(of('A'))
     })
   );
 
-  const httpSpy = jest.fn().mockImplementation(
+  const httpSpy = vi.fn().mockImplementation(
     (): Partial<HttpClient> => ({
-      get: jest.fn().mockReturnValue(of([])),
-      post: jest.fn().mockReturnValue(of([]))
+      get: vi.fn().mockReturnValue(of([])),
+      post: vi.fn().mockReturnValue(of([]))
     })
   );
 
-  const showDialogFn = jest.fn().mockReturnValue(true);
-  const notificationServiceSpy = jest.fn().mockImplementation(
+  const showDialogFn = vi.fn().mockReturnValue(true);
+  const notificationServiceSpy = vi.fn().mockImplementation(
     (): Partial<NotificationService> => ({
       showDialog: showDialogFn,
       showSuccess: showDialogFn
     })
   );
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [],
       declarations: [ImportExportComponent],
       providers: [
@@ -78,14 +79,14 @@ xdescribe('ImportExportComponent', () => {
       ]
     }).compileComponents();
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     fixture = TestBed.createComponent(ImportExportComponent);
     debugElement = fixture.debugElement;
     app = fixture.debugElement.componentInstance;
     app.currentSelection = KadaiType.WORKBASKETS;
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(app).toBeTruthy();

@@ -1,5 +1,5 @@
 /*!
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 .workbasket-details {
   &__toolbar {
@@ -39,7 +39,7 @@
 
   &__title-badge {
     font-size: 1.1rem;
-    background-color: $transparent-grey;
+    background-color: colors.$transparent-grey;
     border-radius: 4px;
 
     display: block;
@@ -56,19 +56,46 @@
   }
 
   &__save-button {
-    background-color: $aquamarine;
+    background-color: colors.$aquamarine;
     color: white;
   }
 
+  &__save-button[disabled] {
+    opacity: 0.5;
+  }
+
   &__button-aquamarine {
-    color: $aquamarine;
+    color: colors.$aquamarine;
   }
 
   &__button-red {
-    color: $invalid;
+    color: colors.$invalid;
   }
 
   &__mat-icon {
     margin-left: 8px;
+  }
+
+  &__access-item-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    margin-right: 5px;
+    padding: 6px 8px;
+    background-color: #fcebea;
+    border: 1px solid #f5c6cb;
+    color: colors.$invalid;
+    border-radius: 4px;
+  }
+
+  &__access-item-warning-icon {
+    font-size: 20px;
+    line-height: 1;
+    margin-top: 1px;
+  }
+
+  &__access-item-warning-text {
+    font-size: 0.7rem;
+    line-height: 1.1;
   }
 }

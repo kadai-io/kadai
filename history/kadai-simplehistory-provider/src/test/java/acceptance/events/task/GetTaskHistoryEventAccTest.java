@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ class GetTaskHistoryEventAccTest extends AbstractAccTest {
         taskHistoryService.getTaskHistoryEvent("THI:000000000000000000000000000000000000");
     assertThat(taskHistoryEvent.getBusinessProcessId()).isEqualTo("BPI:01");
     assertThat(taskHistoryEvent.getUserId()).isEqualTo("user-1-1");
+    assertThat(taskHistoryEvent.getProxyAccessId()).isNull();
     assertThat(taskHistoryEvent.getEventType()).isEqualTo(TaskHistoryEventType.UPDATED.getName());
     assertThat(taskHistoryEvent.getDetails()).isEqualTo(detailsJson);
   }
@@ -57,6 +58,7 @@ class GetTaskHistoryEventAccTest extends AbstractAccTest {
     TaskHistoryEvent taskHistoryEvent =
         taskHistoryService.getTaskHistoryEvent("THI:000000000000000000000000000000000000");
     assertThat(taskHistoryEvent.getUserId()).isEqualTo("user-1-1");
+    assertThat(taskHistoryEvent.getProxyAccessId()).isNull();
 
     String userLongName =
         kadaiEngine.getUserService().getUser(taskHistoryEvent.getUserId()).getLongName();
@@ -74,6 +76,7 @@ class GetTaskHistoryEventAccTest extends AbstractAccTest {
         taskHistoryService.getTaskHistoryEvent("THI:000000000000000000000000000000000000");
 
     assertThat(taskHistoryEvent.getUserId()).isEqualTo("user-1-1");
+    assertThat(taskHistoryEvent.getProxyAccessId()).isNull();
 
     assertThat(taskHistoryEvent).extracting(TaskHistoryEvent::getUserLongName).isNull();
   }

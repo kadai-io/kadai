@@ -1,5 +1,5 @@
 /*
- * Copyright [2025] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketOverviewComponent } from './workbasket-overview.component';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { Observable, of } from 'rxjs';
@@ -26,10 +26,11 @@ import { ActivatedRoute } from '@angular/router';
 import { SelectWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { provideHttpClient } from '@angular/common/http';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
-
-jest.mock('angular-svg-icon');
+import { beforeEach, describe, expect, it } from 'vitest';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const mockActivatedRouteAlternative = {
+  url: of([{ path: 'foobar' }]),
   firstChild: {
     params: of({
       id: '101'
@@ -43,8 +44,8 @@ describe('WorkbasketOverviewComponent Alternative Params ID', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [WorkbasketOverviewComponent],
       providers: [
         provideStore([WorkbasketState, FilterState]),
@@ -53,7 +54,8 @@ describe('WorkbasketOverviewComponent Alternative Params ID', () => {
           useValue: mockActivatedRouteAlternative
         },
         provideHttpClient(),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        provideAngularSvgIcon()
       ]
     }).compileComponents();
     fixture = TestBed.createComponent(WorkbasketOverviewComponent);
@@ -61,13 +63,13 @@ describe('WorkbasketOverviewComponent Alternative Params ID', () => {
     store = TestBed.inject(Store);
     actions$ = TestBed.inject(Actions);
     fixture.detectChanges();
-  }));
+  });
 
-  it('should display details when params id exists', waitForAsync(() => {
+  it('should display details when params id exists', async () => {
     expect(component.routerParams.id).toBeTruthy();
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(SelectWorkbasket)).subscribe(() => (actionDispatched = true));
     component.ngOnInit();
     expect(actionDispatched).toBe(true);
-  }));
+  });
 });
