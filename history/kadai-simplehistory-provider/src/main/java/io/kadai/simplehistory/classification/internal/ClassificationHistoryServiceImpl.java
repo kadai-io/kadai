@@ -50,10 +50,10 @@ public class ClassificationHistoryServiceImpl
     try {
       kadaiEngine.openConnection();
       eventMapper.insert(event);
+      return event;
     } finally {
       kadaiEngine.returnConnection();
     }
-    return event;
   }
 
   @Override
