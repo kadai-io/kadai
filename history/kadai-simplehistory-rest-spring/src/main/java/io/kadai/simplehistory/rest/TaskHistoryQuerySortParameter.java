@@ -21,7 +21,7 @@ package io.kadai.simplehistory.rest;
 import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.rest.QuerySortParameter;
-import io.kadai.simplehistory.impl.task.TaskHistoryQuery;
+import io.kadai.simplehistory.task.api.TaskHistoryQuery;
 import java.beans.ConstructorProperties;
 import java.util.List;
 

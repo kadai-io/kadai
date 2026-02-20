@@ -26,10 +26,13 @@ import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.common.internal.util.IdGenerator;
 import io.kadai.common.test.config.DataSourceGenerator;
 import io.kadai.sampledata.SampleDataGenerator;
-import io.kadai.simplehistory.impl.SimpleHistoryServiceImpl;
-import io.kadai.simplehistory.impl.classification.ClassificationHistoryEventMapper;
-import io.kadai.simplehistory.impl.task.TaskHistoryQueryMapper;
-import io.kadai.simplehistory.impl.workbasket.WorkbasketHistoryEventMapper;
+import io.kadai.simplehistory.classification.internal.ClassificationHistoryEventMapper;
+import io.kadai.simplehistory.classification.internal.ClassificationHistoryServiceImpl;
+import io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper;
+import io.kadai.simplehistory.task.internal.TaskHistoryServiceImpl;
+import io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryEventMapper;
+import io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryServiceImpl;
+import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import io.kadai.task.api.TaskService;
@@ -47,7 +50,9 @@ public abstract class AbstractAccTest {
 
   protected static KadaiConfiguration kadaiConfiguration;
   protected static KadaiEngine kadaiEngine;
-  protected static SimpleHistoryServiceImpl historyService;
+  protected static TaskHistoryServiceImpl taskHistoryService;
+  protected static WorkbasketHistoryServiceImpl workbasketHistoryService;
+  protected static ClassificationHistoryServiceImpl classificationHistoryService;
 
   protected static TaskService taskService;
 
@@ -92,7 +97,20 @@ public abstract class AbstractAccTest {
   public static WorkbasketHistoryEvent createWorkbasketHistoryEvent(
       String workbasketKey, String type, String userid, String details) {
     WorkbasketHistoryEvent historyEvent = new WorkbasketHistoryEvent();
-    historyEvent.setId(IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT));
+    historyEvent.setId(
+        IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT));
+    historyEvent.setUserId(userid);
+    historyEvent.setDetails(details);
+    historyEvent.setKey(workbasketKey);
+    historyEvent.setEventType(type);
+    return historyEvent;
+  }
+
+  public static ClassificationHistoryEvent createClassificationHistoryEvent(
+      String workbasketKey, String type, String userid, String details) {
+    ClassificationHistoryEvent historyEvent = new ClassificationHistoryEvent();
+    historyEvent.setId(
+        IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT));
     historyEvent.setUserId(userid);
     historyEvent.setDetails(details);
     historyEvent.setKey(workbasketKey);
@@ -123,12 +141,15 @@ public abstract class AbstractAccTest {
     kadaiEngine =
         KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
     taskService = kadaiEngine.getTaskService();
-    historyService = new SimpleHistoryServiceImpl();
-    historyService.initialize(kadaiEngine);
-  }
 
-  protected static SimpleHistoryServiceImpl getHistoryService() {
-    return historyService;
+    taskHistoryService = new TaskHistoryServiceImpl();
+    taskHistoryService.initialize(kadaiEngine);
+
+    workbasketHistoryService = new WorkbasketHistoryServiceImpl();
+    workbasketHistoryService.initialize(kadaiEngine);
+
+    classificationHistoryService = new ClassificationHistoryServiceImpl();
+    classificationHistoryService.initialize(kadaiEngine);
   }
 
   protected static WorkbasketHistoryEventMapper getWorkbasketHistoryEventMapper() {
@@ -162,11 +183,6 @@ public abstract class AbstractAccTest {
     }
   }
 
-  @BeforeAll
-  static void setupTest() throws Exception {
-    resetDb(null);
-  }
-
   protected TaskHistoryQueryMapper getHistoryQueryMapper()
       throws NoSuchFieldException, IllegalAccessException {
 
@@ -195,5 +211,10 @@ public abstract class AbstractAccTest {
     objectRef.setType(type);
     objectRef.setValue(value);
     return objectRef;
+  }
+
+  @BeforeAll
+  static void setupTest() throws Exception {
+    resetDb(null);
   }
 }

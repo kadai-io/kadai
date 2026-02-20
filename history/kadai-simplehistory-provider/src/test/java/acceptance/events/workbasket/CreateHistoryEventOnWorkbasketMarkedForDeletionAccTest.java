@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import acceptance.AbstractAccTest;
 import io.kadai.common.internal.util.CheckedRunnable;
-import io.kadai.simplehistory.impl.SimpleHistoryServiceImpl;
+import io.kadai.simplehistory.workbasket.api.WorkbasketHistoryService;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEventType;
 import io.kadai.workbasket.api.WorkbasketService;
@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 class CreateHistoryEventOnWorkbasketMarkedForDeletionAccTest extends AbstractAccTest {
 
   private final WorkbasketService workbasketService = kadaiEngine.getWorkbasketService();
-  private final SimpleHistoryServiceImpl historyService = getHistoryService();
+  private final WorkbasketHistoryService historyService = AbstractAccTest.workbasketHistoryService;
 
   @Test
   void should_CreateWorkbasketMarkedForDeletionHistoryEvent_When_WorkbasketIsMarkedForDeletion()
