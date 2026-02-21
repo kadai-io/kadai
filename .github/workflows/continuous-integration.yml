@@ -830,14 +830,16 @@ jobs:
   upload_to_sonar:
     runs-on: ubuntu-22.04
     name: Upload SonarQube analysis to sonarcloud
-    # neither on release nor forks nor dependabot
     needs: [ test_frontend, test_e2e, test_backend_17, test_backend_21 ]
+    # Runs on every push to main and on PRs originating from kadai-io/kadai (not forks).
+    # Skipped for release tags, dependabot PRs, and if any test job failed.
     if: |
       always() &&
       github.repository == 'kadai-io/kadai' &&
+      ( github.event_name != 'pull_request' ||
+        github.event.pull_request.head.repo.full_name == github.repository ) &&
       !startsWith(github.ref, 'refs/tags') &&
       !startsWith(github.head_ref || github.ref_name, 'dependabot/') &&
-      github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request' &&
       needs.detect_changes.outputs.code_changed == 'true' &&
       needs.test_frontend.result != 'failure' &&
       needs.test_e2e.result != 'failure' &&
