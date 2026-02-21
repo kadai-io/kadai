@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, model } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -28,22 +28,18 @@ import { SvgIconComponent } from 'angular-svg-icon';
   selector: 'kadai-task-list',
   templateUrl: './task-list.component.html',
   styleUrls: ['./task-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatSelectionList, MatListOption, MatDivider, SvgIconComponent, DatePipe]
 })
 export class TaskListComponent {
-  @Input()
-  tasks: Task[];
-  @Input()
-  selectedId: string;
-  @Output()
-  selectedIdChange = new EventEmitter<string>();
+  tasks = input<Task[]>();
+  selectedId = model<string>();
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   selectTask(taskId: string) {
-    this.selectedId = taskId;
-    this.selectedIdChange.emit(taskId);
-    this.router.navigate([{ outlets: { detail: `taskdetail/${this.selectedId}` } }], {
+    this.selectedId.set(taskId);
+    this.router.navigate([{ outlets: { detail: `taskdetail/${taskId}` } }], {
       relativeTo: this.route.parent,
       queryParamsHandling: 'merge'
     });

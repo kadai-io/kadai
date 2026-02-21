@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ALL_STATES, TaskState } from '../../models/task-state';
 import { TaskQueryFilterParameter } from '../../models/task-query-filter-parameter';
 import { Actions, ofActionCompleted, Store } from '@ngxs/store';
@@ -36,6 +36,7 @@ import { MapValuesPipe } from '../../pipes/map-values.pipe';
   selector: 'kadai-shared-task-filter',
   templateUrl: './task-filter.component.html',
   styleUrls: ['./task-filter.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatFormField, MatTooltip, MatLabel, MatInput, FormsModule, MatSelect, MatOption, MapValuesPipe]
 })
 export class TaskFilterComponent implements OnInit, OnDestroy {
@@ -44,10 +45,14 @@ export class TaskFilterComponent implements OnInit, OnDestroy {
   allStates: Map<TaskState, string> = ALL_STATES;
   private store = inject(Store);
   private ngxsActions$ = inject(Actions);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.clear();
-    this.ngxsActions$.pipe(ofActionCompleted(ClearTaskFilter), takeUntil(this.destroy$)).subscribe(() => this.clear());
+    this.ngxsActions$.pipe(ofActionCompleted(ClearTaskFilter), takeUntil(this.destroy$)).subscribe(() => {
+      this.clear();
+      this.cdr.markForCheck();
+    });
   }
 
   setStatus(state: TaskState) {

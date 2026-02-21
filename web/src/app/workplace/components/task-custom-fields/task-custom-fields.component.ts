@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, model, OnDestroy, OnInit } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { takeUntil } from 'rxjs/operators';
 import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
@@ -30,27 +30,29 @@ import { FormsModule } from '@angular/forms';
   selector: 'kadai-task-custom-fields',
   templateUrl: './task-custom-fields.component.html',
   styleUrls: ['./task-custom-fields.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatFormField, MatLabel, MatInput, FormsModule]
 })
 export class TaskCustomFieldsComponent implements OnInit, OnDestroy {
-  @Input() task: Task;
-  @Output() taskChange: EventEmitter<Task> = new EventEmitter<Task>();
+  task = model<Task>();
   readonly lengthError = 'You have reached the maximum length';
   inputOverflowMap = new Map<string, boolean>();
   validateKeypress: Function;
   customFields: string[];
   destroy$ = new Subject<void>();
   private formsValidatorService = inject(FormsValidatorService);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.formsValidatorService.inputOverflowObservable.pipe(takeUntil(this.destroy$)).subscribe((inputOverflowMap) => {
       this.inputOverflowMap = inputOverflowMap;
+      this.cdr.markForCheck();
     });
     this.validateKeypress = (inputFieldModel, maxLength) => {
       this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
     };
 
-    this.customFields = Object.keys(this.task).filter(
+    this.customFields = Object.keys(this.task()).filter(
       (attribute) => attribute.startsWith('custom') && /\d/.test(attribute)
     );
   }

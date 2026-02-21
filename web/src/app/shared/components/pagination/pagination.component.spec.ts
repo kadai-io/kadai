@@ -36,9 +36,10 @@ describe('PaginationComponent', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
 
-    component.page = { totalPages: 10 };
+    const totalPages = 10;
+    fixture.componentRef.setInput('page', { totalPages });
     component.pageNumbers = [];
-    for (let i = 1; i <= component.page.totalPages; i++) {
+    for (let i = 1; i <= totalPages; i++) {
       component.pageNumbers.push(i);
     }
   });

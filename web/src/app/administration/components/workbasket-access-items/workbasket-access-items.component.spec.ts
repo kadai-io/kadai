@@ -60,7 +60,7 @@ describe('WorkbasketAccessItemsComponent', () => {
     component = fixture.componentInstance;
     store = TestBed.inject(Store);
     actions$ = TestBed.inject(Actions);
-    component.workbasket = { ...selectedWorkbasketMock };
+    fixture.componentRef.setInput('workbasket', { ...selectedWorkbasketMock });
     component.accessItemsRepresentation = workbasketAccessItemsMock;
     store.reset({
       ...store.snapshot(),
@@ -72,7 +72,7 @@ describe('WorkbasketAccessItemsComponent', () => {
   });
 
   afterEach(async () => {
-    component.workbasket = { ...selectedWorkbasketMock };
+    fixture.componentRef.setInput('workbasket', { ...selectedWorkbasketMock });
   });
 
   it('should create component', () => {
@@ -87,7 +87,10 @@ describe('WorkbasketAccessItemsComponent', () => {
   });
 
   it("should discard initializing when accessItems don't exist", () => {
-    component.workbasket._links.accessItems = null;
+    fixture.componentRef.setInput('workbasket', {
+      ...selectedWorkbasketMock,
+      _links: { ...selectedWorkbasketMock._links, accessItems: null }
+    });
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(GetWorkbasketAccessItems)).subscribe(() => (actionDispatched = true));
     component.init();

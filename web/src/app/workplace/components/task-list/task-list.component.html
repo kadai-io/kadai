@@ -17,17 +17,17 @@
 -->
 
 <!-- TASK LIST -->
-@if ((tasks && tasks.length > 0)) {
+@if (tasks() && tasks()!.length > 0) {
   <div>
     <mat-selection-list [multiple]="false" hideSingleSelectionIndicator="true">
-      @for (task of tasks; track task) {
+      @for (task of tasks()!; track task) {
         <mat-list-option (click)="selectTask(task.taskId)"
-                         [selected]="task.taskId == selectedId"
+                         [selected]="task.taskId == selectedId()"
                          [value]="task.taskId">
           <div class="task-list__task">
             <!-- TASK PRIORITY -->
             <div
-              class="task-list__task-priority-badge {{task.taskId == selectedId ? 'task-list__task-priority-badge_selected' : ''}}"
+              class="task-list__task-priority-badge {{task.taskId == selectedId() ? 'task-list__task-priority-badge_selected' : ''}}"
             >
               {{ task.priority }}
             </div>

@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, input, OnInit, output } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { TaskService } from 'app/workplace/services/task.service';
@@ -57,6 +57,7 @@ export enum Search {
   animations: [expandDown],
   templateUrl: './task-list-toolbar.component.html',
   styleUrls: ['./task-list-toolbar.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatTabGroup,
     MatTab,
@@ -76,10 +77,10 @@ export enum Search {
   ]
 })
 export class TaskListToolbarComponent implements OnInit {
-  @Input() taskDefaultSortBy: TaskQuerySortParameter;
-  @Output() performSorting = new EventEmitter<Sorting<TaskQuerySortParameter>>();
-  @Output() performFilter = new EventEmitter<TaskQueryFilterParameter>();
-  @Output() selectSearchType = new EventEmitter();
+  taskDefaultSortBy = input<TaskQuerySortParameter>();
+  performSorting = output<Sorting<TaskQuerySortParameter>>();
+  performFilter = output<void>();
+  selectSearchType = output<Search>();
   sortingFields: Map<TaskQuerySortParameter, string> = TASK_SORT_PARAMETER_NAMING;
   tasks: Task[] = [];
   workbasketNames: string[] = [];
@@ -105,10 +106,12 @@ export class TaskListToolbarComponent implements OnInit {
   private store = inject(Store);
   private ngxsActions$ = inject(Actions);
   private requestInProgressService = inject(RequestInProgressService);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.ngxsActions$.pipe(ofActionCompleted(ClearTaskFilter), takeUntil(this.destroy$)).subscribe(() => {
       this.filterInput = '';
+      this.cdr.markForCheck();
     });
 
     this.workbasketService
@@ -134,6 +137,7 @@ export class TaskListToolbarComponent implements OnInit {
           this.workbasketSelected = true;
           this.searched = true;
         }
+        this.cdr.markForCheck();
       });
 
     this.taskService
@@ -148,6 +152,7 @@ export class TaskListToolbarComponent implements OnInit {
             this.currentBasket = workbasketSummary;
             this.workplaceService.selectWorkbasket(this.currentBasket);
             this.workbasketSelected = true;
+            this.cdr.markForCheck();
           }
         }
       });
@@ -167,6 +172,7 @@ export class TaskListToolbarComponent implements OnInit {
         this.searched = true;
         this.selectSearch(this.search.byTypeAndValue);
       }
+      this.cdr.markForCheck();
     });
 
     if (this.router.url.includes('taskdetail')) {

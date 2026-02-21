@@ -18,16 +18,20 @@
 
 import {
   AfterViewChecked,
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
+  effect,
   ElementRef,
-  EventEmitter,
   HostListener,
   inject,
-  Input,
+  input,
   OnDestroy,
   OnInit,
-  Output,
-  ViewChild
+  output,
+  untracked,
+  viewChild
 } from '@angular/core';
 import { TreeNodeModel } from 'app/administration/models/tree-node';
 
@@ -58,18 +62,19 @@ import { MatTooltip } from '@angular/material/tooltip';
   selector: 'kadai-administration-tree',
   templateUrl: './tree.component.html',
   styleUrls: ['./tree.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TreeModule, SvgIconComponent, MatTooltip]
 })
-export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
+export class KadaiTreeComponent implements OnInit, AfterViewInit, AfterViewChecked, OnDestroy {
   treeNodes: TreeNodeModel[];
   categoryIcons: ClassificationCategoryImages;
   emptyTreeNodes = false;
   filter: string;
   category: string;
-  @Input() selectNodeId: string;
-  @Input() filterText: string;
-  @Input() filterIcon = '';
-  @Output() switchKadaiSpinnerEmit = new EventEmitter<boolean>();
+  selectNodeId: string;
+  filterText = input<string>();
+  filterIcon = input('');
+  switchKadaiSpinnerEmit = output<boolean>();
   categoryIcons$: Observable<ClassificationCategoryImages> = inject(Store).select(
     EngineConfigurationSelectors.selectCategoryIcons
   );
@@ -102,21 +107,38 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
   private notificationsService = inject(NotificationService);
   private classificationTreeService = inject(ClassificationTreeService);
   private requestInProgressService = inject(RequestInProgressService);
-  @ViewChild('tree', { static: true })
-  private tree: TreeComponent;
+  private cdr = inject(ChangeDetectorRef);
+  private tree = viewChild.required<TreeComponent>('tree');
+  _selectNodeIdInput = input<string>(undefined, { alias: 'selectNodeId' });
 
   private filterTextOld: string;
   private filterIconOld = '';
   private destroy$ = new Subject<void>();
 
+  constructor() {
+    effect(() => {
+      const id = this._selectNodeIdInput();
+      untracked(() => {
+        this.selectNodeId = id;
+      });
+    });
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event) {
-    if (this.checkValidElements(event) && this.tree.treeModel.getActiveNode()) {
+    if (this.checkValidElements(event) && this.tree().treeModel.getActiveNode()) {
       this.deselectActiveNode();
     }
   }
 
   ngOnInit() {
+    this.categoryIcons$.pipe(takeUntil(this.destroy$)).subscribe((categoryIcons) => {
+      this.categoryIcons = categoryIcons;
+      this.cdr.markForCheck();
+    });
+  }
+
+  ngAfterViewInit() {
     const computedTreeNodes$: Observable<TreeNodeModel[]> = this.classifications$.pipe(
       filter((classifications) => typeof classifications !== 'undefined'),
       map((classifications) => this.classificationTreeService.transformToTreeNode(classifications))
@@ -128,41 +150,40 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
         this.treeNodes = treeNodes;
         this.selectNodeId = typeof selectedClassificationId !== 'undefined' ? selectedClassificationId : undefined;
         this.requestInProgressService.setRequestInProgress(false);
-        if (typeof this.tree.treeModel.getActiveNode() !== 'undefined') {
-          if (this.tree.treeModel.getActiveNode().data.classificationId !== this.selectNodeId) {
+        if (typeof this.tree().treeModel.getActiveNode() !== 'undefined') {
+          if (this.tree().treeModel.getActiveNode().data.classificationId !== this.selectNodeId) {
             // wait for angular's two-way binding to convert the treeNodes to the internal tree structure.
             // after that conversion the new treeNodes are available
             setTimeout(() => this.selectNode(this.selectNodeId), 0);
           }
         }
+        this.cdr.markForCheck();
       });
 
     this.classificationTypeSelected$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      if (this.tree.treeModel.getActiveNode()) {
+      if (this.tree().treeModel.getActiveNode()) {
         this.deselectActiveNode();
       }
-    });
-
-    this.categoryIcons$.pipe(takeUntil(this.destroy$)).subscribe((categoryIcons) => {
-      this.categoryIcons = categoryIcons;
+      this.cdr.markForCheck();
     });
   }
 
   ngAfterViewChecked(): void {
-    if (this.selectNodeId && !this.tree.treeModel.getActiveNode()) {
+    if (this.selectNodeId && !this.tree().treeModel.getActiveNode()) {
       this.selectNode(this.selectNodeId);
     }
 
-    if (typeof this.selectNodeId !== 'undefined') {
-      if (typeof this.getNode(this.selectNodeId) !== 'undefined') {
-        this.getNode(this.selectNodeId).ensureVisible();
+    if (this.selectNodeId != null) {
+      const node = this.getNode(this.selectNodeId);
+      if (node != null) {
+        node.ensureVisible();
       }
     }
 
-    if (this.filterTextOld !== this.filterText || this.filterIconOld !== this.filterIcon) {
-      this.filterIconOld = this.filterIcon;
-      this.filterTextOld = this.filterText;
-      this.filterNodes(this.filterText ? this.filterText : '', this.filterIcon);
+    if (this.filterTextOld !== this.filterText() || this.filterIconOld !== this.filterIcon()) {
+      this.filterIconOld = this.filterIcon();
+      this.filterTextOld = this.filterText();
+      this.filterNodes(this.filterText() ? this.filterText() : '', this.filterIcon());
       this.manageTreeState();
     }
   }
@@ -238,27 +259,29 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   private deselectActiveNode() {
-    const activeNode = this.tree.treeModel.getActiveNode();
+    const activeNode = this.tree().treeModel.getActiveNode();
     delete this.selectNodeId;
     activeNode.setIsActive(false);
     activeNode.blur();
   }
 
   private getNode(nodeId: string) {
-    return this.tree.treeModel.getNodeById(nodeId);
+    return this.tree().treeModel.getNodeById(nodeId);
   }
 
   private filterNodes(filterText, category) {
-    this.tree.treeModel.filterNodes((node) => this.checkNameAndKey(node, filterText) && this.checkIcon(node, category));
+    this.tree().treeModel.filterNodes(
+      (node) => this.checkNameAndKey(node, filterText) && this.checkIcon(node, category)
+    );
     this.filter = filterText;
     this.category = category || 'ALL';
-    this.emptyTreeNodes = !this.tree.treeModel.getVisibleRoots().length;
+    this.emptyTreeNodes = !this.tree().treeModel.getVisibleRoots().length;
   }
 
   private manageTreeState() {
-    this.tree.treeModel.collapseAll();
-    if (this.filterText === '') {
-      this.tree.treeModel.collapseAll();
+    this.tree().treeModel.collapseAll();
+    if (this.filterText() === '') {
+      this.tree().treeModel.collapseAll();
     }
   }
 
@@ -282,7 +305,7 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   private collapseParentNodeIfItIsTheLastChild(node: any) {
     if (node.parentId.length > 0 && this.getNode(node.parentId) && this.getNode(node.parentId).children.length < 2) {
-      this.tree.treeModel.update();
+      this.tree().treeModel.update();
       this.getNode(node.parentId).collapse();
     }
   }

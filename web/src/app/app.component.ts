@@ -16,7 +16,16 @@
  *
  */
 
-import { Component, HostListener, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  HostListener,
+  inject,
+  OnDestroy,
+  OnInit,
+  viewChild
+} from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Subject } from 'rxjs';
 import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
@@ -41,6 +50,7 @@ import { MatProgressBar } from '@angular/material/progress-bar';
   selector: 'kadai-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatSidenavContainer,
     MatSidenav,
@@ -61,7 +71,7 @@ export class AppComponent implements OnInit, OnDestroy {
   version: string;
   toggle: boolean = false;
   destroy$ = new Subject<void>();
-  @ViewChild('sidenav') public sidenav: MatSidenav;
+  public sidenav = viewChild<MatSidenav>('sidenav');
   private router = inject(Router);
   private requestInProgressService = inject(RequestInProgressService);
   private orientationService = inject(OrientationService);
@@ -70,6 +80,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private sidenavService = inject(SidenavService);
   private kadaiEngineService = inject(KadaiEngineService);
   private window = inject(WindowRefService);
+  private cdr = inject(ChangeDetectorRef);
 
   @HostListener('window:resize')
   onResize() {
@@ -90,6 +101,7 @@ export class AppComponent implements OnInit, OnDestroy {
       .subscribe((value: boolean) => {
         setTimeout(() => {
           this.requestInProgress = value;
+          this.cdr.markForCheck();
         });
       });
 
@@ -101,6 +113,7 @@ export class AppComponent implements OnInit, OnDestroy {
           this.workbasketsRoute = false;
         }
         this.selectedRoute = value;
+        this.cdr.markForCheck();
       });
 
     this.kadaiEngineService
@@ -108,6 +121,7 @@ export class AppComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((restVersion) => {
         this.version = restVersion.version;
+        this.cdr.markForCheck();
       });
   }
 
@@ -122,7 +136,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.sidenavService.setSidenav(this.sidenav);
+    this.sidenavService.setSidenav(this.sidenav()!);
   }
 
   ngOnDestroy() {

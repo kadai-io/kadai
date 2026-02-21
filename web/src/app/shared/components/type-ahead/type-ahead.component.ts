@@ -17,15 +17,16 @@
  */
 
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
-  EventEmitter,
+  effect,
   inject,
-  Input,
-  OnChanges,
+  input,
   OnDestroy,
   OnInit,
-  Output,
-  SimpleChanges
+  output,
+  untracked
 } from '@angular/core';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
 import { debounceTime, distinctUntilChanged, Observable, Subject } from 'rxjs';
@@ -48,6 +49,7 @@ import { MatOption } from '@angular/material/core';
   selector: 'kadai-shared-type-ahead',
   templateUrl: './type-ahead.component.html',
   styleUrls: ['./type-ahead.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
     NgClass,
@@ -61,15 +63,15 @@ import { MatOption } from '@angular/material/core';
     MatOption
   ]
 })
-export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
-  @Input() savedAccessId;
-  @Input() placeHolderMessage;
-  @Input() entityId;
-  @Input() isRequired = false;
-  @Input() isDisabled = false;
-  @Input() displayError = false;
-  @Output() accessIdEventEmitter = new EventEmitter<AccessId>();
-  @Output() isFormValid = new EventEmitter<boolean>();
+export class TypeAheadComponent implements OnInit, OnDestroy {
+  savedAccessId = input<any>();
+  placeHolderMessage = input<string>();
+  entityId = input<any>();
+  isRequired = input(false);
+  isDisabled = input(false);
+  displayError = input(false);
+  accessIdEventEmitter = output<AccessId>();
+  isFormValid = output<boolean>();
   globalCustomisation$: Observable<GlobalCustomisation> = inject(Store).select(
     EngineConfigurationSelectors.globalCustomisation
   );
@@ -84,16 +86,17 @@ export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
   });
   emptyAccessId: AccessId = { accessId: '', name: '' };
   private accessIdService = inject(AccessIdsService);
+  private cdr = inject(ChangeDetectorRef);
 
-  ngOnChanges(changes: SimpleChanges) {
-    // currently needed because when saving, workbasket-details components sends old workbasket which reverts changes in this component
-    if (changes.entityId) {
-      this.setAccessIdFromInput();
-    }
+  constructor() {
+    effect(() => {
+      this.entityId(); // track entityId changes
+      untracked(() => this.setAccessIdFromInput());
+    });
   }
 
   ngOnInit() {
-    if (this.isDisabled) {
+    if (this.isDisabled()) {
       this.accessIdForm.controls['accessId'].disable();
     }
 
@@ -101,6 +104,7 @@ export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
     this.buttonAction$.pipe(takeUntil(this.destroy$)).subscribe((button) => {
       if (button == ButtonAction.UNDO) {
         this.accessIdForm.controls['accessId'].setValue(this.lastSavedAccessId);
+        this.cdr.markForCheck();
       }
     });
 
@@ -125,19 +129,18 @@ export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
         }
         this.searchForAccessId(value);
       });
-
-    this.setAccessIdFromInput();
   }
 
   handleEmptyAccessId() {
     this.name = '';
-    this.isFormValid.emit(!this.isRequired);
-    if (this.placeHolderMessage !== 'Search for AccessId') {
+    this.isFormValid.emit(!this.isRequired());
+    if (this.placeHolderMessage() !== 'Search for AccessId') {
       this.accessIdEventEmitter.emit(this.emptyAccessId);
     }
-    if (this.isRequired) {
+    if (this.isRequired()) {
       this.accessIdForm.controls['accessId'].setErrors({ incorrect: true });
     }
+    this.cdr.markForCheck();
   }
 
   searchForAccessId(value: string) {
@@ -152,21 +155,23 @@ export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
           this.name = accessId?.name;
           this.isFormValid.emit(true);
           this.accessIdEventEmitter.emit(accessId);
-        } else if (this.displayError) {
+        } else if (this.displayError()) {
           this.isFormValid.emit(false);
           this.accessIdEventEmitter.emit(this.emptyAccessId);
           this.accessIdForm.controls['accessId'].setErrors({ incorrect: true });
           this.accessIdForm.controls['accessId'].markAsTouched();
         }
+        this.cdr.markForCheck();
       });
   }
 
   setAccessIdFromInput() {
-    const accessId = this.savedAccessId?.value;
-    const access = accessId?.accessId || accessId?.accessId == '' ? accessId.accessId : this.savedAccessId || '';
+    const accessId = this.savedAccessId()?.value;
+    const access = accessId?.accessId || accessId?.accessId == '' ? accessId.accessId : this.savedAccessId() || '';
     this.accessIdForm.controls['accessId'].setValue(access);
     this.lastSavedAccessId = access;
     this.name = accessId?.accessName || '';
+    this.cdr.markForCheck();
   }
 
   ngOnDestroy() {

@@ -16,11 +16,11 @@
  *
  */
 
-import { Directive, EventEmitter, HostBinding, HostListener, Output } from '@angular/core';
+import { Directive, HostBinding, HostListener, output } from '@angular/core';
 
 @Directive({ selector: '[kadaiDragAndDrop]' })
 export class DragAndDropDirective {
-  @Output() onFileDropped = new EventEmitter<any>();
+  onFileDropped = output<any>();
   @HostBinding('class.fileover') fileOver: boolean;
 
   //Dragover listener

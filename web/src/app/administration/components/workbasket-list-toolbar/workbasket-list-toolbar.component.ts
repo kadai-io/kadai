@@ -16,7 +16,16 @@
  *
  */
 
-import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  input,
+  OnDestroy,
+  OnInit,
+  output
+} from '@angular/core';
 import { Sorting, WORKBASKET_SORT_PARAMETER_NAMING, WorkbasketQuerySortParameter } from 'app/shared/models/sorting';
 import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
 import { KadaiType } from 'app/shared/models/kadai-type';
@@ -41,13 +50,14 @@ import { WorkbasketFilterComponent } from '../../../shared/components/workbasket
   animations: [expandDown],
   templateUrl: './workbasket-list-toolbar.component.html',
   styleUrls: ['./workbasket-list-toolbar.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatButton, MatTooltip, MatIcon, ImportExportComponent, SortComponent, WorkbasketFilterComponent]
 })
-export class WorkbasketListToolbarComponent implements OnInit {
-  @Input() workbasketListExpanded: boolean = true;
-  @Input() workbaskets: WorkbasketSummary[];
-  @Input() workbasketDefaultSortBy: WorkbasketQuerySortParameter;
-  @Output() performSorting = new EventEmitter<Sorting<WorkbasketQuerySortParameter>>();
+export class WorkbasketListToolbarComponent implements OnInit, OnDestroy {
+  workbasketListExpanded = input(true);
+  workbaskets = input<WorkbasketSummary[]>();
+  workbasketDefaultSortBy = input<WorkbasketQuerySortParameter>();
+  performSorting = output<Sorting<WorkbasketQuerySortParameter>>();
   selectionToImport = KadaiType.WORKBASKETS;
   sortingFields: Map<WorkbasketQuerySortParameter, string> = WORKBASKET_SORT_PARAMETER_NAMING;
   isExpanded = false;
@@ -57,10 +67,12 @@ export class WorkbasketListToolbarComponent implements OnInit {
   action: ACTION;
   private store = inject(Store);
   private workbasketService = inject(WorkbasketService);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.workbasketActiveAction$.pipe(takeUntil(this.destroy$)).subscribe((action) => {
       this.action = action;
+      this.cdr.markForCheck();
     });
   }
 

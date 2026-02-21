@@ -16,7 +16,15 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  OnDestroy,
+  OnInit,
+  viewChild
+} from '@angular/core';
 import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 
@@ -67,6 +75,7 @@ import { MatOption } from '@angular/material/core';
   templateUrl: './classification-details.component.html',
   animations: [highlight],
   styleUrls: ['./classification-details.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatToolbar,
     MatTooltip,
@@ -105,7 +114,7 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   inputOverflowMap = new Map<string, boolean>();
   validateInputOverflow: Function;
   requestInProgress: boolean;
-  @ViewChild('ClassificationForm') classificationForm: NgForm;
+  classificationForm = viewChild<NgForm>('ClassificationForm');
   toggleValidationMap = new Map<string, boolean>();
   destroy$ = new Subject<void>();
   private location = inject(Location);
@@ -115,6 +124,7 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   private notificationsService = inject(NotificationService);
   private importExportService = inject(ImportExportService);
   private store = inject(Store);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.customFields$ = this.store.select(EngineConfigurationSelectors.classificationsCustomisation).pipe(
@@ -125,6 +135,7 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
     this.selectedClassification$.pipe(takeUntil(this.destroy$)).subscribe((classification) => {
       this.classification = { ...classification };
       this.isCreatingNewClassification = typeof this.classification.classificationId === 'undefined';
+      this.cdr.markForCheck();
     });
 
     this.importExportService
@@ -139,10 +150,12 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((value) => {
         this.requestInProgress = value;
+        this.cdr.markForCheck();
       });
 
     this.formsValidatorService.inputOverflowObservable.pipe(takeUntil(this.destroy$)).subscribe((inputOverflowMap) => {
       this.inputOverflowMap = inputOverflowMap;
+      this.cdr.markForCheck();
     });
     this.validateInputOverflow = (inputFieldModel, maxLength) => {
       this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
@@ -150,14 +163,14 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   }
 
   isFieldValid(field: string): boolean {
-    return this.formsValidatorService.isFieldValid(this.classificationForm, field);
+    return this.formsValidatorService.isFieldValid(this.classificationForm(), field);
   }
 
   onSubmit() {
     this.formsValidatorService.formSubmitAttempt = true;
-    trimForm(this.classificationForm);
+    trimForm(this.classificationForm());
     this.formsValidatorService
-      .validateFormInformation(this.classificationForm, this.toggleValidationMap)
+      .validateFormInformation(this.classificationForm(), this.toggleValidationMap)
       .then((value) => {
         if (value) {
           this.onSave();

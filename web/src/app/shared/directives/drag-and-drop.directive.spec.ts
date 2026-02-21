@@ -16,12 +16,15 @@
  *
  */
 
+import { TestBed } from '@angular/core/testing';
 import { DragAndDropDirective } from './drag-and-drop.directive';
 import { describe, expect, it } from 'vitest';
 
 describe('DragAndDropDirective', () => {
   it('should create an instance', () => {
-    const directive = new DragAndDropDirective();
-    expect(directive).toBeTruthy();
+    TestBed.runInInjectionContext(() => {
+      const directive = new DragAndDropDirective();
+      expect(directive).toBeTruthy();
+    });
   });
 });

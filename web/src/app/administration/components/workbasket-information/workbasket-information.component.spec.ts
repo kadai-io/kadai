@@ -91,7 +91,7 @@ describe('WorkbasketInformationComponent', () => {
       engineConfiguration: engineConfigurationMock,
       workbasket: workbasketReadStateMock
     });
-    component.workbasket = selectedWorkbasketMock;
+    fixture.componentRef.setInput('workbasket', selectedWorkbasketMock);
 
     fixture.detectChanges();
   });
@@ -106,9 +106,9 @@ describe('WorkbasketInformationComponent', () => {
   });
 
   it('should create clone of workbasket when workbasket value changes', () => {
-    component.action = ACTION.READ;
-    component.ngOnChanges();
-    expect(component.workbasketClone).toMatchObject(component.workbasket);
+    fixture.componentRef.setInput('action', ACTION.READ);
+    fixture.detectChanges();
+    expect(component.workbasketClone).toMatchObject(component.workbasket());
   });
 
   it('should submit when validatorService is true', () => {
@@ -123,18 +123,17 @@ describe('WorkbasketInformationComponent', () => {
     const showSuccessSpy = vi.spyOn(notificationService, 'showSuccess');
     component.onUndo();
     expect(showSuccessSpy).toHaveBeenCalled();
-    expect(component.workbasket).toMatchObject(component.workbasketClone);
+    expect(component.workbasket()).toMatchObject(component.workbasketClone);
   });
 
   it('should save workbasket when workbasketId there', async () => {
-    component.workbasket = { ...selectedWorkbasketMock };
-    component.workbasket.workbasketId = '1';
-    component.action = ACTION.COPY;
+    component.workbasket.set({ ...selectedWorkbasketMock, workbasketId: '1' });
+    fixture.componentRef.setInput('action', ACTION.COPY);
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(UpdateWorkbasket)).subscribe(() => (actionDispatched = true));
     component.onSave();
     expect(actionDispatched).toBe(true);
-    expect(component.workbasketClone).toMatchObject(component.workbasket);
+    expect(component.workbasketClone).toMatchObject(component.workbasket());
   });
 
   it('should dispatch MarkWorkbasketforDeletion action when onRemoveConfirmed is called', async () => {
@@ -145,7 +144,7 @@ describe('WorkbasketInformationComponent', () => {
   });
 
   it('should create new workbasket when workbasketId is undefined', () => {
-    component.workbasket.workbasketId = undefined;
+    component.workbasket.set({ ...component.workbasket(), workbasketId: undefined });
     const postNewWorkbasketSpy = vi.spyOn(component, 'postNewWorkbasket');
     component.onSave();
     expect(postNewWorkbasketSpy).toHaveBeenCalled();
@@ -168,7 +167,7 @@ describe('WorkbasketInformationComponent', () => {
 
     await fixture.whenStable();
 
-    expect(component.workbasket['custom3']).toBe('');
-    expect(component.workbasket['custom4']).toBe(newValue);
+    expect(component.workbasket()['custom3']).toBe('');
+    expect(component.workbasket()['custom4']).toBe(newValue);
   });
 });

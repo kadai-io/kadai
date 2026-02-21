@@ -16,7 +16,7 @@
  *
  */
 
-import { AfterViewInit, Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, inject, input, OnDestroy, OnInit } from '@angular/core';
 import { ArcElement, Chart, DoughnutController, Legend, Title, Tooltip } from 'chart.js';
 import { ReportRow } from '../../models/report-row';
 import { Store } from '@ngxs/store';
@@ -29,11 +29,12 @@ import { SettingMembers } from '../../../settings/components/Settings/expected-m
 @Component({
   selector: 'kadai-monitor-canvas',
   templateUrl: './canvas.component.html',
-  styleUrls: ['./canvas.component.scss']
+  styleUrls: ['./canvas.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
-  @Input() row: ReportRow;
-  @Input() id: string;
+  row = input<ReportRow>();
+  id = input<string>();
 
   labels: string[];
   colors: string[];
@@ -65,9 +66,11 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    const canvas = document.getElementById(this.id) as HTMLCanvasElement;
-    if (canvas && this.id && this.row) {
-      this.generateChart(this.id, this.row);
+    const id = this.id();
+    const row = this.row();
+    const canvas = document.getElementById(id) as HTMLCanvasElement;
+    if (canvas && id && row) {
+      this.generateChart(id, row);
     }
   }
 
@@ -104,7 +107,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    document.getElementById(this.id).outerHTML = ''; // destroy HTML element
+    document.getElementById(this.id()).outerHTML = ''; // destroy HTML element
     this.destroy$.next();
     this.destroy$.complete();
   }

@@ -16,7 +16,7 @@
 ~
 -->
 
-@if (task && !requestInProgress) {
+@if (task() && !requestInProgress) {
   <div>
     <ng-form #TaskForm="ngForm">
       <div class="task-information">
@@ -26,7 +26,7 @@
             <mat-label>Name</mat-label>
             <label for="task-name"></label>
             <input #name="ngModel" (input)="validateInputOverflow(name, 255)"
-                   [(ngModel)]="task.name"
+                   [(ngModel)]="task()!.name"
                    id="task-name"
                    matInput maxlength="255" name="task.name"
                    placeholder="Name" required type="text">
@@ -43,7 +43,7 @@
             <mat-label>System</mat-label>
             <label for="task.primaryObjRef.system"></label>
             <input #system="ngModel" (input)="validateInputOverflow(system, 32)"
-                   [(ngModel)]="task.primaryObjRef.system"
+                   [(ngModel)]="task()!.primaryObjRef.system"
                    id="task.primaryObjRef.system" matInput maxlength="32"
                    name="task.primaryObjRef.system"
                    placeholder="System description" required
@@ -62,7 +62,7 @@
             <mat-label>Reference type</mat-label>
             <label for="task.primaryObjRef.type"></label>
             <input #type="ngModel" (input)="validateInputOverflow(type, 32)"
-                   [(ngModel)]="task.primaryObjRef.type"
+                   [(ngModel)]="task()!.primaryObjRef.type"
                    id="task.primaryObjRef.type" matInput maxlength="32"
                    name="task.primaryObjRef.type"
                    placeholder="Reference type" required
@@ -77,10 +77,10 @@
             errorMessage="* Reference type is required">
           </kadai-shared-field-error-display>
           <!-- CLASSIFICATION -->
-          @if (task.classificationSummary) {
+          @if (task()!.classificationSummary) {
             <mat-form-field appearance="outline">
               <mat-label>Classification</mat-label>
-              <mat-select [value]="task.classificationSummary.name" required>
+              <mat-select [value]="task()!.classificationSummary.name" required>
                 @for (classification of classifications; track classification) {
                   <mat-option (click)="changedClassification(classification)"
                               [value]="classification.name">
@@ -111,7 +111,7 @@
             <label for="task-parent-business-p-id"></label>
             <input #parentBusinessProcessId="ngModel"
                    (input)="validateInputOverflow(parentBusinessProcessId, 128)"
-                   [(ngModel)]="task.parentBusinessProcessId" id="task-parent-business-p-id"
+                   [(ngModel)]="task()!.parentBusinessProcessId" id="task-parent-business-p-id"
                    matInput
                    maxlength="128"
                    name="task.parentBusinessProcessId" placeholder="Parent Business Process Id"
@@ -127,10 +127,10 @@
             <kadai-shared-type-ahead (accessIdEventEmitter)="onSelectedOwner($event)"
                                      (isFormValid)="isOwnerValid = $event"
                                      [displayError]="true"
-                                     [entityId]="task.taskId"
-                                     [isDisabled]="task.state && task.state !== 'READY'"
-                                     [savedAccessId]="task.owner"
-                                     matTooltip="{{task.state && task.state !== 'READY'? 'Cannot be modified since Task is not in state READY' : '' }}"
+                                     [entityId]="task()!.taskId"
+                                     [isDisabled]="task()!.state && task()!.state !== 'READY'"
+                                     [savedAccessId]="task()!.owner"
+                                     matTooltip="{{task()!.state && task()!.state !== 'READY'? 'Cannot be modified since Task is not in state READY' : '' }}"
                                      placeHolderMessage="Owner">
             </kadai-shared-type-ahead>
           } @else {
@@ -138,7 +138,7 @@
               <mat-label>Owner</mat-label>
               <label for="ts-owner"></label>
               <input #owner="ngModel" (input)="validateInputOverflow(owner, 32)"
-                     [(ngModel)]="task.owner" id="ts-owner"
+                     [(ngModel)]="task()!.owner" id="ts-owner"
                      matInput maxlength="32"
                      name="task.owner" placeholder="Owner" type="text">
             </mat-form-field>
@@ -153,7 +153,7 @@
             <mat-label>Company</mat-label>
             <label for="task.primaryObjRef.company"></label>
             <input #company="ngModel" (input)="validateInputOverflow(company, 32)"
-                   [(ngModel)]="task.primaryObjRef.company" id="task.primaryObjRef.company" matInput
+                   [(ngModel)]="task()!.primaryObjRef.company" id="task.primaryObjRef.company" matInput
                    maxlength="32"
                    name="task.primaryObjRef.company"
                    placeholder="Company description" required
@@ -172,7 +172,7 @@
             <mat-label>System Instance</mat-label>
             <label for="task.primaryObjRef.systemInstance"></label>
             <input #systemInstance="ngModel" (input)="validateInputOverflow(systemInstance, 32)"
-                   [(ngModel)]="task.primaryObjRef.systemInstance"
+                   [(ngModel)]="task()!.primaryObjRef.systemInstance"
                    id="task.primaryObjRef.systemInstance" matInput
                    maxlength="32" name="task.primaryObjRef.systemInstance"
                    placeholder="System Instance description" required
@@ -191,7 +191,7 @@
             <mat-label>Reference value</mat-label>
             <label for="task.primaryObjRef.value"></label>
             <input #value="ngModel" (input)="validateInputOverflow(value, 32)"
-                   [(ngModel)]="task.primaryObjRef.value"
+                   [(ngModel)]="task()!.primaryObjRef.value"
                    id="task.primaryObjRef.value" matInput maxlength="32"
                    name="task.primaryObjRef.value"
                    placeholder="Reference value" required
@@ -210,7 +210,7 @@
             <mat-form-field appearance="outline" style="min-width: 0">
               <mat-label> Due Date</mat-label>
               <input (dateInput)="updateDate($event)" [matDatepicker]="picker" matInput
-                     value="{{task.due}}">
+                     value="{{task()!.due}}">
               <mat-datepicker-toggle [for]="picker" matSuffix></mat-datepicker-toggle>
               <mat-datepicker #picker></mat-datepicker>
             </mat-form-field>
@@ -218,7 +218,7 @@
             <mat-form-field appearance="outline" style="min-width: 100px; padding-left: 8px;">
               <mat-label>Priority</mat-label>
               <input
-                [(ngModel)]="task.priority" id="task-priority" matInput min="0"
+                [(ngModel)]="task()!.priority" id="task-priority" matInput min="0"
                 name="task.priority" placeholder="Priority" type="number">
             </mat-form-field>
           </div>
@@ -228,7 +228,7 @@
             <label for="task-business-p-id"></label>
             <input #businessProcessId="ngModel"
                    (input)="validateInputOverflow(businessProcessId, 128)"
-                   [(ngModel)]="task.businessProcessId" id="task-business-p-id" matInput
+                   [(ngModel)]="task()!.businessProcessId" id="task-business-p-id" matInput
                    maxlength="128"
                    name="task.businessProcessId" placeholder="Business Process Id"
                    type="text">
@@ -243,7 +243,7 @@
               <mat-label>Note</mat-label>
               <label for="task-note"></label>
               <textarea #note="ngModel" (input)="validateInputOverflow(note, 4096)"
-                        [(ngModel)]="task.note"
+                        [(ngModel)]="task()!.note"
                         cdkAutosizeMaxRows="6" cdkAutosizeMinRows="1"
                         cdkTextareaAutosize id="task-note" matInput
                         maxlength="4096" name="task.note"

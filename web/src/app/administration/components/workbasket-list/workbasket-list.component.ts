@@ -16,7 +16,17 @@
  *
  */
 
-import { Component, ElementRef, inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  inject,
+  input,
+  OnDestroy,
+  OnInit,
+  viewChild
+} from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 
 import { WorkbasketSummaryRepresentation } from 'app/shared/models/workbasket-summary-representation';
@@ -51,6 +61,7 @@ import { PaginationComponent } from '../../../shared/components/pagination/pagin
   selector: 'kadai-administration-workbasket-list',
   templateUrl: './workbasket-list.component.html',
   styleUrls: ['./workbasket-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     WorkbasketListToolbarComponent,
     MatSelectionList,
@@ -62,6 +73,8 @@ import { PaginationComponent } from '../../../shared/components/pagination/pagin
   ]
 })
 export class WorkbasketListComponent implements OnInit, OnDestroy {
+  expanded = input<boolean>();
+
   selectedId = '';
   type = 'workbaskets';
   workbasketDefaultSortBy: WorkbasketQuerySortParameter = WorkbasketQuerySortParameter.NAME;
@@ -77,7 +90,6 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   requestInProgress: boolean;
   requestInProgressLocal = false;
   resetPagingSubject = new Subject<null>();
-  @Input() expanded: boolean;
   workbasketsSummary$: Observable<WorkbasketSummary[]> = inject(Store).select(WorkbasketSelectors.workbasketsSummary);
   workbasketsSummaryRepresentation$: Observable<WorkbasketSummaryRepresentation> = inject(Store).select(
     WorkbasketSelectors.workbasketsSummaryRepresentation
@@ -87,7 +99,7 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
     FilterSelectors.getWorkbasketListFilter
   );
   destroy$ = new Subject<void>();
-  @ViewChild('workbasket') workbasketList: MatSelectionList;
+  toolbarElement = viewChild<ElementRef>('wbToolbar');
   private store = inject(Store);
   private workbasketService = inject(WorkbasketService);
   private orientationService = inject(OrientationService);
@@ -95,17 +107,18 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   private domainService = inject(DomainService);
   private requestInProgressService = inject(RequestInProgressService);
   private ngxsActions$ = inject(Actions);
-  @ViewChild('wbToolbar', { static: true })
-  private toolbarElement: ElementRef;
+  private cdr = inject(ChangeDetectorRef);
 
   constructor() {
     this.ngxsActions$.pipe(ofActionDispatched(GetWorkbasketsSummary), takeUntil(this.destroy$)).subscribe(() => {
       this.requestInProgressService.setRequestInProgress(true);
       this.requestInProgressLocal = true;
+      this.cdr.markForCheck();
     });
     this.ngxsActions$.pipe(ofActionCompleted(GetWorkbasketsSummary), takeUntil(this.destroy$)).subscribe(() => {
       this.requestInProgressService.setRequestInProgress(false);
       this.requestInProgressLocal = false;
+      this.cdr.markForCheck();
     });
   }
 
@@ -117,6 +130,7 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
       } else {
         this.selectedId = undefined;
       }
+      this.cdr.markForCheck();
     });
 
     this.workbasketService
@@ -165,6 +179,7 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((value) => {
         this.requestInProgress = value;
+        this.cdr.markForCheck();
       });
 
     this.getWorkbasketListFilter$.pipe(takeUntil(this.destroy$)).subscribe((filter) => {
@@ -208,7 +223,7 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
     this.pageParameter['page-size'] = this.orientationService.calculateNumberItemsList(
       window.innerHeight,
       92,
-      200 + this.toolbarElement.nativeElement.offsetHeight,
+      200 + (this.toolbarElement()?.nativeElement?.offsetHeight ?? 0),
       false
     );
     this.performRequest();

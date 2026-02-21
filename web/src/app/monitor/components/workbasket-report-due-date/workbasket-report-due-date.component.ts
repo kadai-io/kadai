@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, EventEmitter, inject, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, output } from '@angular/core';
 import { ReportData } from '../../models/report-data';
 import { ChartData } from '../../models/chart-data';
 import { MonitorService } from '../../services/monitor.service';
@@ -31,12 +31,12 @@ import { ReportTableComponent } from '../report-table/report-table.component';
   selector: 'kadai-monitor-workbasket-report-due-date',
   templateUrl: './workbasket-report-due-date.component.html',
   styleUrls: ['./workbasket-report-due-date.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [BaseChartDirective, ReportTableComponent],
   providers: [MonitorService]
 })
 export class WorkbasketReportDueDateComponent implements OnInit {
-  @Output()
-  metaInformation = new EventEmitter<MetaInfoData>();
+  metaInformation = output<MetaInfoData>();
   reportData: ReportData;
   lineChartLabels: Array<any>;
   lineChartLegend = true;

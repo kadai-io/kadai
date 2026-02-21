@@ -61,7 +61,7 @@
 
     <!-- SORT VALUE -->
     <mat-menu #sortValue="matMenu">
-      @for (sortingField of sortingFields | mapValues; track sortingField) {
+      @for (sortingField of sortingFields() | mapValues; track sortingField) {
         <button (click)="changeSortBy(sortingField.key)"
                 mat-menu-item>
           <span class="{{sortingField.key === sort['sort-by']  ? 'sort__selected-value' : ''}}">

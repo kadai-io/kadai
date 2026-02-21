@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, Input, OnChanges } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, effect, inject, input, untracked } from '@angular/core';
 import { ReportData } from 'app/monitor/models/report-data';
 import { ReportRow } from '../../models/report-row';
 import { NgClass } from '@angular/common';
@@ -26,37 +26,31 @@ import { MatButton } from '@angular/material/button';
   selector: 'kadai-monitor-report-table',
   templateUrl: './report-table.component.html',
   styleUrls: ['./report-table.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgClass, MatButton]
 })
-export class ReportTableComponent implements OnChanges {
-  @Input()
-  reportData: ReportData;
+export class ReportTableComponent {
+  // Use alias so parent can still bind with [reportData]="..."
+  reportDataInput = input<ReportData>(undefined, { alias: 'reportData' });
 
+  // Local mutable copy used by the template and mutation methods
+  reportData: ReportData;
   fullReportData: ReportData;
   fullRowsData: ReportRow[][];
   currentExpHeaders = 0;
 
-  ngOnChanges() {
-    this.fullReportData = { ...this.reportData };
-    this.fullRowsData = this.fullReportData.rows?.reduce((resultArray: ReportRow[][], item, index) => {
-      const itemsPerChunk = 20;
-      if (this.fullReportData.rows.length > itemsPerChunk) {
-        const chunkIndex = Math.floor(index / itemsPerChunk);
+  private cdr = inject(ChangeDetectorRef);
 
-        if (!resultArray[chunkIndex]) {
-          resultArray[chunkIndex] = []; // start a new chunk
+  constructor() {
+    effect(() => {
+      const data = this.reportDataInput();
+      untracked(() => {
+        if (data) {
+          this.processReportData(data);
         }
-
-        resultArray[chunkIndex].push(item);
-      } else {
-        return [this.fullReportData.rows];
-      }
-      return resultArray;
-    }, []);
-    if (this.fullRowsData) {
-      this.reportData.rows = this.fullRowsData[0];
-      this.fullRowsData.splice(0, 1);
-    }
+        this.cdr.markForCheck();
+      });
+    });
   }
 
   showMoreRows() {
@@ -93,5 +87,29 @@ export class ReportTableComponent implements OnChanges {
   canRowCollapse(index: number, sumRow: boolean = false) {
     const rows = sumRow ? this.reportData.sumRow : this.reportData.rows;
     return !rows[index + 1].display;
+  }
+
+  private processReportData(data: ReportData) {
+    this.fullReportData = { ...data };
+    this.reportData = { ...data };
+    this.fullRowsData = this.fullReportData.rows?.reduce((resultArray: ReportRow[][], item, index) => {
+      const itemsPerChunk = 20;
+      if (this.fullReportData.rows.length > itemsPerChunk) {
+        const chunkIndex = Math.floor(index / itemsPerChunk);
+
+        if (!resultArray[chunkIndex]) {
+          resultArray[chunkIndex] = []; // start a new chunk
+        }
+
+        resultArray[chunkIndex].push(item);
+      } else {
+        return [this.fullReportData.rows];
+      }
+      return resultArray;
+    }, []);
+    if (this.fullRowsData) {
+      this.reportData.rows = this.fullRowsData[0];
+      this.fullRowsData.splice(0, 1);
+    }
   }
 }

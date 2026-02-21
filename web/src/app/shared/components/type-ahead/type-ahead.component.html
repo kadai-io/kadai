@@ -17,24 +17,24 @@
 -->
 
 <form [formGroup]="accessIdForm">
-  <div [ngClass]="placeHolderMessage == 'Access id'? 'type-ahead--small' : 'type-ahead--large'">
+  <div [ngClass]="placeHolderMessage() == 'Access id'? 'type-ahead--small' : 'type-ahead--large'">
     <mat-form-field appearance="outline" class="type-ahead__form-field">
       <mat-label class="type-ahead__label" matTooltip="{{name}}" matTooltipPosition="above">
-        {{ name || placeHolderMessage }}
+        {{ name || placeHolderMessage() }}
       </mat-label>
       <!-- TEXT INPUT -->
       <input [matAutocomplete]="auto"
-             [required]="isRequired"
+             [required]="isRequired()"
              class="type-ahead__input-field"
              formControlName="accessId"
              matInput
              matTooltip="{{accessIdForm.controls['accessId'].value}}"
-             placeholder="{{placeHolderMessage}}"
+             placeholder="{{placeHolderMessage()}}"
              type="text">
       <!-- ERROR MESSAGE -->
-      @if (displayError && !accessIdForm.valid) {
+      @if (displayError() && !accessIdForm.valid) {
         <mat-error
-          [ngClass]="placeHolderMessage == 'Access id' ? 'type-ahead__error--accessId' : 'type-ahead__error--general'">
+          [ngClass]="placeHolderMessage() == 'Access id' ? 'type-ahead__error--accessId' : 'type-ahead__error--general'">
           Access id not valid
         </mat-error>
       }

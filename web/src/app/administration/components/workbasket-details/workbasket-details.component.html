@@ -105,7 +105,7 @@
     </mat-tab>
     <mat-tab label="Access">
       <kadai-administration-workbasket-access-items (accessItemsValidityChanged)="handleAccessItemsValidityChanged($event)"
-                                                    [expanded]="expanded"
+                                                    [expanded]="expanded()"
                                                     [workbasket]="workbasket">
       </kadai-administration-workbasket-access-items>
     </mat-tab>

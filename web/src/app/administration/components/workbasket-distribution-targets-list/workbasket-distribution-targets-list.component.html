@@ -18,7 +18,7 @@
 
 <div class="distribution-targets-list">
   <mat-toolbar>
-    <span class="distribution-targets-list__header" matTooltip="{{header}}">{{ header }}</span>
+    <span class="distribution-targets-list__header" matTooltip="{{header()}}">{{ header() }}</span>
 
     <!-- FILTER BUTTON -->
     <button (click)="changeToolbarState(!toolbarState)"
@@ -59,7 +59,7 @@
 
   <!-- FILTER COMPONENT -->
   @if (toolbarState) {
-    <kadai-shared-workbasket-filter [component]="component"
+    <kadai-shared-workbasket-filter [component]="component()"
                                     isExpanded="true"></kadai-shared-workbasket-filter>
   }
 
@@ -68,13 +68,13 @@
     <div
       class="distribution-targets-list__empty-list">
       <!-- AVAILABLE SIDE -->
-      @if (side === 0) {
+      @if (side() === 0) {
         <div style="padding: 0 16px;">
           There are currently no Workbaskets for distribution
         </div>
       }
       <!-- SELECTED SIDE -->
-      @if (side === 1) {
+      @if (side() === 1) {
         <div style="padding: 0 16px;">
           There is currently no distributed Workbasket
         </div>

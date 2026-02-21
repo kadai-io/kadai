@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { highlight } from 'app/shared/animations/validation.animation';
 
 @Component({
@@ -24,15 +24,11 @@ import { highlight } from 'app/shared/animations/validation.animation';
   templateUrl: './field-error-display.component.html',
   animations: [highlight],
   styleUrls: ['./field-error-display.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: []
 })
 export class FieldErrorDisplayComponent {
-  @Input()
-  displayError: boolean;
-
-  @Input()
-  errorMessage: string;
-
-  @Input()
-  validationTrigger: boolean;
+  displayError = input<boolean>();
+  errorMessage = input<string>();
+  validationTrigger = input<boolean>();
 }

@@ -157,7 +157,7 @@
       </button>
       <!-- SORT TASKS BUTTON -->
       <kadai-shared-sort
-        (performSorting)="sorting($event)" [defaultSortBy]="taskDefaultSortBy"
+        (performSorting)="sorting($event)" [defaultSortBy]="taskDefaultSortBy()"
         [sortingFields]="sortingFields">
       </kadai-shared-sort>
     </div>

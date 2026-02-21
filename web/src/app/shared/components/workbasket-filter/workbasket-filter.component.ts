@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, input, OnDestroy, OnInit } from '@angular/core';
 import { ALL_TYPES, WorkbasketType } from '../../models/workbasket-type';
 import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-filter-parameter';
 import { Store } from '@ngxs/store';
@@ -39,6 +39,7 @@ import { MapValuesPipe } from '../../pipes/map-values.pipe';
   selector: 'kadai-shared-workbasket-filter',
   templateUrl: './workbasket-filter.component.html',
   styleUrls: ['./workbasket-filter.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatFormField,
     MatLabel,
@@ -56,8 +57,8 @@ import { MapValuesPipe } from '../../pipes/map-values.pipe';
 })
 export class WorkbasketFilterComponent implements OnInit, OnDestroy {
   allTypes: Map<WorkbasketType, string> = ALL_TYPES;
-  @Input() component: string;
-  @Input() isExpanded: boolean;
+  component = input<string>();
+  isExpanded = input<boolean>();
   availableDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter> = inject(Store).select(
     FilterSelectors.getAvailableDistributionTargetsFilter
   );
@@ -70,19 +71,23 @@ export class WorkbasketFilterComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
   filter: WorkbasketQueryFilterParameter;
   private store = inject(Store);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
-    if (this.component === 'availableDistributionTargets') {
+    if (this.component() === 'availableDistributionTargets') {
       this.availableDistributionTargetsFilter$.pipe(takeUntil(this.destroy$)).subscribe((filter) => {
         this.setFilter(filter);
+        this.cdr.markForCheck();
       });
-    } else if (this.component === 'selectedDistributionTargets') {
+    } else if (this.component() === 'selectedDistributionTargets') {
       this.selectedDistributionTargetsFilter$.pipe(takeUntil(this.destroy$)).subscribe((filter) => {
         this.setFilter(filter);
+        this.cdr.markForCheck();
       });
-    } else if (this.component === 'workbasketList') {
+    } else if (this.component() === 'workbasketList') {
       this.workbasketListFilter$.pipe(takeUntil(this.destroy$)).subscribe((filter) => {
         this.setFilter(filter);
+        this.cdr.markForCheck();
       });
     }
   }
@@ -98,7 +103,7 @@ export class WorkbasketFilterComponent implements OnInit, OnDestroy {
   }
 
   clear() {
-    this.store.dispatch(new ClearWorkbasketFilter(this.component));
+    this.store.dispatch(new ClearWorkbasketFilter(this.component()));
   }
 
   selectType(type: WorkbasketType) {
@@ -106,7 +111,7 @@ export class WorkbasketFilterComponent implements OnInit, OnDestroy {
   }
 
   search() {
-    this.store.dispatch(new SetWorkbasketFilter(this.filter, this.component));
+    this.store.dispatch(new SetWorkbasketFilter(this.filter, this.component()));
   }
 
   ngOnDestroy() {

@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, input, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Subject } from 'rxjs';
 import { DomainService } from '../../../shared/services/domain/domain.service';
@@ -32,6 +32,7 @@ import { MatOption } from '@angular/material/core';
   selector: 'kadai-administration-overview',
   templateUrl: './administration-overview.component.html',
   styleUrls: ['./administration-overview.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatTabNav,
     MatTabLink,
@@ -45,7 +46,8 @@ import { MatOption } from '@angular/material/core';
   ]
 })
 export class AdministrationOverviewComponent implements OnInit {
-  @Input() selectedTab = '';
+  _selectedTabInput = input('', { alias: 'selectedTab' });
+  selectedTab = '';
   domains: Array<string> = [];
   selectedDomain: string;
   destroy$ = new Subject<void>();
@@ -53,6 +55,7 @@ export class AdministrationOverviewComponent implements OnInit {
   private router = inject(Router);
   private domainService = inject(DomainService);
   private kadaiEngineService = inject(KadaiEngineService);
+  private cdr = inject(ChangeDetectorRef);
 
   constructor() {
     const router = this.router;
@@ -64,21 +67,26 @@ export class AdministrationOverviewComponent implements OnInit {
       } else {
         this.selectedTab = urlPaths[urlPaths.length - 1];
       }
+      this.cdr.markForCheck();
     });
   }
 
   ngOnInit() {
+    this.selectedTab = this._selectedTabInput();
+
     this.kadaiEngineService
       .isCustomRoutingRulesEnabled()
       .pipe(takeUntil(this.destroy$))
       .subscribe((value) => {
         this.routingAccess = value;
+        this.cdr.markForCheck();
       });
     this.domainService
       .getDomains()
       .pipe(takeUntil(this.destroy$))
       .subscribe((domains) => {
         this.domains = domains;
+        this.cdr.markForCheck();
       });
 
     this.domainService
@@ -86,6 +94,7 @@ export class AdministrationOverviewComponent implements OnInit {
       .pipe(takeUntil(this.destroy$))
       .subscribe((domain) => {
         this.selectedDomain = domain;
+        this.cdr.markForCheck();
       });
   }
 

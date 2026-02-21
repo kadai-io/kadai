@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, input, OnDestroy, OnInit } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { ACTION } from 'app/shared/models/action';
@@ -52,6 +52,7 @@ import { WorkbasketDistributionTargetsComponent } from '../workbasket-distributi
   selector: 'kadai-administration-workbasket-details',
   templateUrl: './workbasket-details.component.html',
   styleUrls: ['./workbasket-details.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MatToolbar,
     MatTooltip,
@@ -77,12 +78,13 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
   selectedWorkbasketAndComponentAndAction$: Observable<WorkbasketAndComponentAndAction> = inject(Store).select(
     WorkbasketSelectors.selectedWorkbasketAndComponentAndAction
   );
+  expanded = input<boolean>();
   destroy$ = new Subject<void>();
-  @Input() expanded: boolean;
   areAllAccessItemsValid = true;
   protected readonly ACTION = ACTION;
   private store = inject(Store);
   private ngxsActions$ = inject(Actions);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
     const workbasketAndComponentAndAction = this.store.selectSnapshot(
@@ -115,6 +117,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
       }
 
       this.action = action;
+      this.cdr.markForCheck();
     });
 
     // c) saving the workbasket
@@ -126,6 +129,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
           const workbasket = this.store.selectSnapshot(WorkbasketSelectors.selectedWorkbasket);
           if (workbasket) {
             this.workbasket = workbasket;
+            this.cdr.markForCheck();
           }
         });
     });
@@ -138,6 +142,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
           const workbasket = this.store.selectSnapshot(WorkbasketSelectors.selectedWorkbasket);
           if (workbasket) {
             this.workbasket = workbasket;
+            this.cdr.markForCheck();
           }
         });
     });

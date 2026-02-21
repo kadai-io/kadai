@@ -16,7 +16,7 @@
 ~
 -->
 
-@if (task) {
+@if (task()) {
   <div>
     <div class="task-custom-fields">
       @for (customField of customFields; track customField; let i = $index) {
@@ -28,7 +28,7 @@
               <mat-label>Custom {{ i + 1 }}</mat-label>
               <label for="task-custom-{{i + 1}}"></label>
               <input #custom="ngModel" (input)="validateKeypress(custom, 255)"
-                     [(ngModel)]="task[customField]"
+                     [(ngModel)]="task()![customField]"
                      id="task-custom-{{i + 1}}" matInput
                      maxlength="255"
                      name="task.custom{{i + 1}}" placeholder="Custom {{i + 1}}"

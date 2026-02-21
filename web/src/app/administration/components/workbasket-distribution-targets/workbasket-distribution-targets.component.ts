@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { forkJoin, Observable, Subject } from 'rxjs';
 
 import { Workbasket } from 'app/shared/models/workbasket';
@@ -43,6 +43,7 @@ import { WorkbasketDistributionTargetsListComponent } from '../workbasket-distri
   selector: 'kadai-administration-workbasket-distribution-targets',
   templateUrl: './workbasket-distribution-targets.component.html',
   styleUrls: ['./workbasket-distribution-targets.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatToolbar, MatButton, MatIcon, NgClass, WorkbasketDistributionTargetsListComponent]
 })
 export class WorkbasketDistributionTargetsComponent implements OnInit, OnDestroy {
