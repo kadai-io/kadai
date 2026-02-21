@@ -16,6 +16,7 @@
  *
  */
 
+import { TestBed } from '@angular/core/testing';
 import { DragAndDropDirective } from './drag-and-drop.directive';
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -35,8 +36,10 @@ class TestHostComponent {
 
 describe('DragAndDropDirective', () => {
   it('should create an instance', () => {
-    const directive = new DragAndDropDirective();
-    expect(directive).toBeTruthy();
+    TestBed.runInInjectionContext(() => {
+      const directive = new DragAndDropDirective();
+      expect(directive).toBeTruthy();
+    });
   });
 
   describe('with TestBed', () => {

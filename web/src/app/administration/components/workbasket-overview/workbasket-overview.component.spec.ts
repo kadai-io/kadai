@@ -89,14 +89,14 @@ describe('WorkbasketOverviewComponent', () => {
   it('should display details when params id exists', async () => {
     actions$.pipe(ofActionCompleted(CreateWorkbasket), take(1)).subscribe(() => {
       expect(component.routerParams.id).toMatch('new-workbasket');
-      expect(component.showDetail).toBeTruthy();
+      expect(component.showDetail()).toBeTruthy();
       expect(debugElement.nativeElement.querySelector('kadai-administration-workbasket-details')).toBeTruthy();
     });
     component.ngOnInit();
   });
 
   it('should not display workbasket-details', () => {
-    component.showDetail = false;
+    component.showDetail.set(false);
     fixture.detectChanges();
     expect(debugElement.nativeElement.querySelector('kadai-administration-workbasket-details')).toBeNull();
   });
@@ -112,7 +112,7 @@ describe('WorkbasketOverviewComponent', () => {
       }
     });
 
-    component.showDetail = true;
+    component.showDetail.set(true);
     fixture.detectChanges();
     expect(debugElement.nativeElement.querySelector('kadai-administration-workbasket-details')).toBeTruthy();
   });

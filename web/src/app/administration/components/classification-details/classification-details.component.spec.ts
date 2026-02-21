@@ -17,6 +17,7 @@
  */
 
 import { DebugElement } from '@angular/core';
+import { Classification } from '../../../shared/models/classification';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
 import { EMPTY, firstValueFrom, Observable, of } from 'rxjs';
 import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
@@ -121,7 +122,7 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should show warning when onCopy() is called and isCreatingNewClassification is true', () => {
-    component.isCreatingNewClassification = true;
+    component.classification.set({} as Classification);
     const notificationService = TestBed.inject(NotificationService);
     const showErrorSpy = vi.spyOn(notificationService, 'showError');
     component.onCopy();
@@ -129,7 +130,6 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should dispatch action when onCopy() is called and isCreatingNewClassification is false', async () => {
-    component.isCreatingNewClassification = false;
     let isActionDispatched = false;
     actions$.pipe(ofActionDispatched(CopyClassification)).subscribe(() => (isActionDispatched = true));
     component.onCopy();
@@ -148,7 +148,7 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should dispatch SaveCreatedClassification action in onSave() when classificationId is undefined', async () => {
-    component.classification = {};
+    component.classification.set({} as Classification);
     let isActionDispatched = false;
     actions$.pipe(ofActionDispatched(SaveCreatedClassification)).subscribe(() => (isActionDispatched = true));
     await component.onSave();
@@ -156,7 +156,7 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should dispatch SaveModifiedClassification action in onSave() when classificationId is defined', async () => {
-    component.classification = { classificationId: 'ID01' };
+    component.classification.set({ classificationId: 'ID01' } as Classification);
     let isActionDispatched = false;
     actions$.pipe(ofActionDispatched(SaveModifiedClassification)).subscribe(() => (isActionDispatched = true));
     await component.onSave();
@@ -164,7 +164,7 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should dispatch action in removeClassificationConfirmation() when classification and classificationId exist', () => {
-    component.classification = { classificationId: 'ID01' };
+    component.classification.set({ classificationId: 'ID01' } as Classification);
     const requestInProgressService = TestBed.inject(RequestInProgressService);
     const setRequestInProgressSpy = vi.spyOn(requestInProgressService, 'setRequestInProgress');
     let isActionDispatched = false;
@@ -177,16 +177,16 @@ describe('ClassificationDetailsComponent', () => {
   /* HTML */
 
   it('should not show details when spinner is running', () => {
-    component.requestInProgress = true;
-    component.classification = {};
+    TestBed.inject(RequestInProgressService).setRequestInProgress(true);
+    component.classification.set({} as Classification);
     fixture.detectChanges();
     expect(debugElement.nativeElement.querySelector('.action-toolbar')).toBeFalsy();
     expect(debugElement.nativeElement.querySelector('.detailed-fields')).toBeFalsy();
   });
 
   it('should not show details when classification does not exist', () => {
-    component.requestInProgress = false;
-    component.classification = null;
+    TestBed.inject(RequestInProgressService).setRequestInProgress(false);
+    component.classification.set(null);
     fixture.detectChanges();
     expect(debugElement.nativeElement.querySelector('.action-toolbar')).toBeFalsy();
     expect(debugElement.nativeElement.querySelector('.detailed-fields')).toBeFalsy();
@@ -199,8 +199,7 @@ describe('ClassificationDetailsComponent', () => {
 
   /* HTML: TITLE + ACTION BUTTONS */
   it('should display headline with badge message when a new classification is created', () => {
-    component.classification = { name: 'Recommendation', type: 'DOCUMENT' };
-    component.isCreatingNewClassification = true;
+    component.classification.set({ name: 'Recommendation', type: 'DOCUMENT' } as Classification);
     fixture.detectChanges();
     const headline = debugElement.nativeElement.querySelector('.action-toolbar__headline');
     expect(headline).toBeTruthy();
@@ -243,7 +242,7 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should not show delete button when creating or copying a Classification', () => {
-    component.classification.classificationId = null;
+    component.classification.update(c => ({ ...c, classificationId: null }));
     const button = debugElement.nativeElement.querySelector('#action-toolbar__more-buttons');
     expect(button).toBeTruthy();
     button.click();
@@ -334,11 +333,11 @@ describe('ClassificationDetailsComponent', () => {
   it('should change isValidInDomain when button is clicked', () => {
     const button = debugElement.nativeElement.querySelector('.detailed-fields__domain-checkbox-icon').parentNode;
     expect(button).toBeTruthy();
-    component.classification.isValidInDomain = false;
+    component.classification.update(c => ({ ...c, isValidInDomain: false }));
     button.click();
-    expect(component.classification.isValidInDomain).toBe(true);
+    expect(component.classification().isValidInDomain).toBe(true);
     button.click();
-    expect(component.classification.isValidInDomain).toBe(false);
+    expect(component.classification().isValidInDomain).toBe(false);
   });
 
   it('should not show custom fields with attribute visible = false', () => {
@@ -358,7 +357,7 @@ describe('ClassificationDetailsComponent', () => {
 
     await fixture.whenStable();
 
-    expect(component.classification['custom3']).toBe(undefined);
-    expect(component.classification['custom4']).toBe(newValue);
+    expect(component.classification()['custom3']).toBe(undefined);
+    expect(component.classification()['custom4']).toBe(newValue);
   });
 });

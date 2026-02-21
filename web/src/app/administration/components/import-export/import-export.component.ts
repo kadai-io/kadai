@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, OnDestroy, OnInit, viewChild } from '@angular/core';
 import { ClassificationDefinitionService } from 'app/administration/services/classification-definition.service';
 import { WorkbasketDefinitionService } from 'app/administration/services/workbasket-definition.service';
 import { DomainService } from 'app/shared/services/domain/domain.service';
@@ -42,13 +42,13 @@ import { AsyncPipe } from '@angular/common';
   selector: 'kadai-administration-import-export',
   templateUrl: './import-export.component.html',
   styleUrls: ['./import-export.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatButton, MatTooltip, MatIcon, FormsModule, MatMenuTrigger, MatMenu, MatMenuItem, AsyncPipe]
 })
 export class ImportExportComponent implements OnInit, OnDestroy {
-  @Input() currentSelection: KadaiType;
-  @Input() parentComponent: string;
-  @ViewChild('selectedFile', { static: true })
-  selectedFileInput;
+  currentSelection = input<KadaiType>();
+  parentComponent = input<string>();
+  selectedFileInput = viewChild<any>('selectedFile');
   domains$: Observable<string[]>;
   destroy$ = new Subject<void>();
   private domainService = inject(DomainService);
@@ -63,7 +63,7 @@ export class ImportExportComponent implements OnInit, OnDestroy {
   }
 
   export(domain = '') {
-    if (this.currentSelection === KadaiType.WORKBASKETS) {
+    if (this.currentSelection() === KadaiType.WORKBASKETS) {
       this.workbasketDefinitionService.exportWorkbaskets(domain);
     } else {
       this.classificationDefinitionService.exportClassifications(domain);
@@ -71,9 +71,9 @@ export class ImportExportComponent implements OnInit, OnDestroy {
   }
 
   uploadFile() {
-    const file = this.selectedFileInput.nativeElement.files[0];
+    const file = this.selectedFileInput()!.nativeElement.files[0];
     if (this.checkFormatFile(file)) {
-      if (this.currentSelection === KadaiType.WORKBASKETS) {
+      if (this.currentSelection() === KadaiType.WORKBASKETS) {
         this.workbasketDefinitionService
           .importWorkbasket(file)
           .pipe(
@@ -128,6 +128,6 @@ export class ImportExportComponent implements OnInit, OnDestroy {
   }
 
   private resetProgress() {
-    this.selectedFileInput.nativeElement.value = '';
+    this.selectedFileInput()!.nativeElement.value = '';
   }
 }

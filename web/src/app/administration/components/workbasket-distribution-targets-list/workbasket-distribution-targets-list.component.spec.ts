@@ -100,9 +100,9 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
     fixture = TestBed.createComponent(WorkbasketDistributionTargetsListComponent);
     debugElement = fixture.debugElement;
     component = fixture.componentInstance;
-    component.distributionTargets = workbasketReadStateMock.paginatedWorkbasketsSummary.workbaskets;
-    component.side = Side.AVAILABLE;
-    component.transferDistributionTargetObservable = EMPTY;
+    component.distributionTargets = workbasketReadStateMock.paginatedWorkbasketsSummary.workbaskets as any;
+    fixture.componentRef.setInput('side', Side.AVAILABLE);
+    fixture.componentRef.setInput('transferDistributionTargetObservable', EMPTY);
     store = TestBed.inject(Store);
     store.reset({
       ...store.snapshot(),
@@ -117,7 +117,7 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
 
   it('should set sideNumber to 0 when side is Side.AVAILABLE', () => {
     fixture.detectChanges();
-    expect(component.side).toBe(Side.AVAILABLE);
+    expect(component.side()).toBe(Side.AVAILABLE);
   });
 
   it('should change toolbar state', () => {
@@ -127,7 +127,7 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
   });
 
   it('should display filter when toolbarState is true', () => {
-    component.component = 'availableDistributionTargets';
+    fixture.componentRef.setInput('component', 'availableDistributionTargets');
     component.toolbarState = true;
     fixture.detectChanges();
     expect(debugElement.nativeElement.querySelector('kadai-shared-workbasket-filter')).toBeTruthy();

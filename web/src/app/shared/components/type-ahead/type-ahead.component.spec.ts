@@ -78,12 +78,12 @@ describe('TypeAheadComponent with AccessId input', () => {
     fixture.detectChanges();
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    expect(component.name).toBe('Gerda');
+    expect(component.name()).toBe('Gerda');
   });
 
   it('should emit false when an invalid access id is set', async () => {
     const emitSpy = vi.spyOn(component.isFormValid, 'emit');
-    component.displayError = true;
+    fixture.componentRef.setInput('displayError', true);
     component.accessIdForm.get('accessId').setValue('invalid-user');
     component.accessIdForm.get('accessId').updateValueAndValidity({ emitEvent: true });
 
@@ -107,7 +107,7 @@ describe('TypeAheadComponent with AccessId input', () => {
   it('should mark the accessId control as touched when invalid and displayError is true', async () => {
     const control = component.accessIdForm.get('accessId');
     const markAsTouchedSpy = vi.spyOn(control!, 'markAsTouched');
-    component.displayError = true;
+    fixture.componentRef.setInput('displayError', true);
 
     component.accessIdForm.get('accessId')?.setValue('invalid-user');
     component.searchForAccessId('invalid-user');

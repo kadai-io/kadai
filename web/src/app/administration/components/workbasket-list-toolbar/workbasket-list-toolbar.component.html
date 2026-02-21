@@ -29,7 +29,7 @@
     </button>
 
     <!-- IMPORT EXPORT -->
-    @if (workbasketListExpanded) {
+    @if (workbasketListExpanded()) {
       <kadai-administration-import-export
         [currentSelection]="selectionToImport"
         [parentComponent]="'workbaskets'"></kadai-administration-import-export>
@@ -39,7 +39,7 @@
 
     <!-- SORTING -->
     <kadai-shared-sort
-      (performSorting)="sorting($event)" [defaultSortBy]="workbasketDefaultSortBy"
+      (performSorting)="sorting($event)" [defaultSortBy]="workbasketDefaultSortBy()"
       [sortingFields]="sortingFields"
       style="margin-right: 4px;">
     </kadai-shared-sort>

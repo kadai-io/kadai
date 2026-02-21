@@ -78,7 +78,6 @@ describe('ImportExportComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [ImportExportComponent],
-      declarations: [],
       providers: [
         StartupService,
         KadaiEngineService,
