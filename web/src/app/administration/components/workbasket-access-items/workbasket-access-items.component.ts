@@ -19,7 +19,6 @@
 import {
   AfterViewChecked,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   effect,
   ElementRef,
@@ -31,6 +30,7 @@ import {
   untracked,
   viewChildren
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged, Observable, Subject } from 'rxjs';
 import { Actions, ofActionCompleted, Store } from '@ngxs/store';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -54,7 +54,6 @@ import {
   UpdateWorkbasketAccessItems
 } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
-import { WorkbasketComponent } from '../../models/workbasket-component';
 import { ButtonAction } from '../../models/button-action';
 import { AsyncPipe, NgClass, NgStyle } from '@angular/common';
 import { MatButton } from '@angular/material/button';
@@ -105,11 +104,9 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
   accessItemsCustomization$: Observable<AccessItemsCustomisation> = inject(Store).select(
     EngineConfigurationSelectors.accessItemsCustomisation
   );
-  accessItemsRepresentation$: Observable<WorkbasketAccessItemsRepresentation> = inject(Store).select(
-    WorkbasketSelectors.workbasketAccessItems
-  );
   buttonAction$: Observable<ButtonAction> = inject(Store).select(WorkbasketSelectors.buttonAction);
-  selectedComponent$: Observable<WorkbasketComponent> = inject(Store).select(WorkbasketSelectors.selectedComponent);
+  private selectedComponentSig = toSignal(inject(Store).select(WorkbasketSelectors.selectedComponent));
+  private accessItemsRepresentationSig = toSignal(inject(Store).select(WorkbasketSelectors.workbasketAccessItems));
   private requestInProgressService = inject(RequestInProgressService);
   private formBuilder = inject(FormBuilder);
   AccessItemsForm = this.formBuilder.group({
@@ -118,7 +115,6 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
   private notificationsService = inject(NotificationService);
   private store = inject(Store);
   private ngxsActions$ = inject(Actions);
-  private cdr = inject(ChangeDetectorRef);
 
   constructor() {
     effect(() => {
@@ -139,6 +135,47 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
         }
       });
     });
+
+    effect(() => {
+      const component = this.selectedComponentSig();
+      untracked(() => {
+        if (component === 1) {
+          this.isAccessItemsTabSelected = true;
+        }
+      });
+    });
+
+    effect(() => {
+      const accessItemsRepresentation = this.accessItemsRepresentationSig();
+      untracked(() => {
+        if (typeof accessItemsRepresentation !== 'undefined') {
+          let accessItems = [...accessItemsRepresentation.accessItems];
+          accessItems = this.sortAccessItems(accessItems, 'accessId');
+
+          this.accessItemsRepresentation = {
+            accessItems: accessItems,
+            _links: accessItemsRepresentation._links
+          };
+          this.setAccessItemsGroups(accessItems);
+
+          this.AccessItemsForm.get('accessItemsGroups')
+            ?.statusChanges.pipe(
+              startWith(null),
+              map(() => this.AccessItemsForm.get('accessItemsGroups')?.valid ?? false),
+              distinctUntilChanged(),
+              takeUntil(this.destroy$)
+            )
+            .subscribe((isValid) => {
+              this.accessItemsValidityChanged.emit(isValid);
+            });
+
+          this.accessItemsClone = this.cloneAccessItems();
+          this.accessItemsResetClone = this.cloneAccessItems();
+
+          this.isNewAccessItemsFromStore = true;
+        }
+      });
+    });
   }
 
   get accessItemsGroups(): FormArray {
@@ -148,13 +185,6 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
   ngOnInit() {
     this.workbasketClone = this.workbasket();
     this.init();
-
-    this.selectedComponent$.pipe(takeUntil(this.destroy$)).subscribe((component) => {
-      if (component === 1) {
-        this.isAccessItemsTabSelected = true;
-      }
-      this.cdr.markForCheck();
-    });
 
     this.customFields$ = this.accessItemsCustomization$.pipe(
       getCustomFields(customFieldCount),
@@ -176,36 +206,6 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
         }
       })
     );
-
-    this.accessItemsRepresentation$.pipe(takeUntil(this.destroy$)).subscribe((accessItemsRepresentation) => {
-      if (typeof accessItemsRepresentation !== 'undefined') {
-        let accessItems = [...accessItemsRepresentation.accessItems];
-        accessItems = this.sortAccessItems(accessItems, 'accessId');
-
-        this.accessItemsRepresentation = {
-          accessItems: accessItems,
-          _links: accessItemsRepresentation._links
-        };
-        this.setAccessItemsGroups(accessItems);
-
-        this.AccessItemsForm.get('accessItemsGroups')
-          ?.statusChanges.pipe(
-            startWith(null),
-            map(() => this.AccessItemsForm.get('accessItemsGroups')?.valid ?? false),
-            distinctUntilChanged(),
-            takeUntil(this.destroy$)
-          )
-          .subscribe((isValid) => {
-            this.accessItemsValidityChanged.emit(isValid);
-          });
-
-        this.accessItemsClone = this.cloneAccessItems();
-        this.accessItemsResetClone = this.cloneAccessItems();
-
-        this.isNewAccessItemsFromStore = true;
-        this.cdr.markForCheck();
-      }
-    });
 
     // saving workbasket access items when workbasket already exists
     this.ngxsActions$.pipe(ofActionCompleted(UpdateWorkbasket), takeUntil(this.destroy$)).subscribe(() => {

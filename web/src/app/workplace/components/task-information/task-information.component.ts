@@ -18,7 +18,6 @@
 
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   effect,
   inject,
@@ -27,6 +26,7 @@ import {
   OnDestroy,
   OnInit,
   output,
+  signal,
   untracked,
   viewChild
 } from '@angular/core';
@@ -56,6 +56,7 @@ import {
   MatDatepickerToggle
 } from '@angular/material/datepicker';
 import { Store } from '@ngxs/store';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'kadai-task-information',
@@ -88,19 +89,20 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
   formValid = output<boolean>();
   taskForm = viewChild<NgForm>('TaskForm');
   toggleValidationMap = new Map<string, boolean>();
-  requestInProgress = false;
-  classifications: Classification[];
+  requestInProgress = signal(false);
+  classifications = signal<Classification[]>([]);
   isClassificationEmpty: boolean;
   isOwnerValid: boolean = true;
   readonly lengthError = 'You have reached the maximum length';
-  inputOverflowMap = new Map<string, boolean>();
+  inputOverflowMap = toSignal(inject(FormsValidatorService).inputOverflowObservable, {
+    initialValue: new Map<string, boolean>()
+  });
   validateInputOverflow: Function;
   tasksCustomisation$: Observable<TasksCustomisation> = inject(Store).select(
     EngineConfigurationSelectors.tasksCustomisation
   );
   private classificationService = inject(ClassificationsService);
   private formsValidatorService = inject(FormsValidatorService);
-  private cdr = inject(ChangeDetectorRef);
   private destroy$ = new Subject<void>();
 
   constructor() {
@@ -114,10 +116,6 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.getClassificationByDomain();
-    this.formsValidatorService.inputOverflowObservable.pipe(takeUntil(this.destroy$)).subscribe((inputOverflowMap) => {
-      this.inputOverflowMap = inputOverflowMap;
-      this.cdr.markForCheck();
-    });
     this.validateInputOverflow = (inputFieldModel, maxLength) => {
       this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
     };
@@ -168,14 +166,13 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
 
   // TODO: this is currently called for every selected task and is only necessary when we switch the workbasket -> can be optimized.
   private getClassificationByDomain() {
-    this.requestInProgress = true;
+    this.requestInProgress.set(true);
     this.classificationService
       .getClassifications({ domain: [this.task().workbasketSummary.domain] })
       .pipe(takeUntil(this.destroy$))
       .subscribe((classificationPagingList) => {
-        this.classifications = classificationPagingList.classifications;
-        this.requestInProgress = false;
-        this.cdr.markForCheck();
+        this.classifications.set(classificationPagingList.classifications);
+        this.requestInProgress.set(false);
       });
   }
 }

@@ -18,7 +18,6 @@
 
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   effect,
   inject,
@@ -66,6 +65,7 @@ import { MatOption } from '@angular/material/core';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MapValuesPipe } from '../../../shared/pipes/map-values.pipe';
 import { RemoveNoneTypePipe } from '../../../shared/pipes/remove-empty-type.pipe';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'kadai-administration-workbasket-information',
@@ -98,10 +98,11 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
   workbasketClone: Workbasket;
   allTypes: Map<string, string>;
   toggleValidationMap = new Map<string, boolean>();
-  lookupField = false;
   isOwnerValid: boolean = true;
   readonly lengthError = 'You have reached the maximum length for this field';
-  inputOverflowMap = new Map<string, boolean>();
+  inputOverflowMap = toSignal(inject(FormsValidatorService).inputOverflowObservable, {
+    initialValue: new Map<string, boolean>()
+  });
   validateInputOverflow: Function;
   customFields$: Observable<CustomField[]>;
   destroy$ = new Subject<void>();
@@ -109,12 +110,15 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
   workbasketsCustomisation$: Observable<WorkbasketsCustomisation> = this.store.select(
     EngineConfigurationSelectors.workbasketsCustomisation
   );
+  lookupField = toSignal(
+    this.workbasketsCustomisation$.pipe(map((c) => c.information.owner?.lookupField ?? false)),
+    { requireSync: true }
+  );
   buttonAction$: Observable<ButtonAction> = this.store.select(WorkbasketSelectors.buttonAction);
   private workbasketService = inject(WorkbasketService);
   private requestInProgressService = inject(RequestInProgressService);
   private formsValidatorService = inject(FormsValidatorService);
   private notificationService = inject(NotificationService);
-  private cdr = inject(ChangeDetectorRef);
 
   constructor() {
     effect(() => {
@@ -137,16 +141,6 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
       map((customisation) => customisation.information),
       getCustomFields(customFieldCount)
     );
-    this.workbasketsCustomisation$.pipe(takeUntil(this.destroy$)).subscribe((workbasketsCustomization) => {
-      if (workbasketsCustomization.information.owner) {
-        this.lookupField = workbasketsCustomization.information.owner.lookupField;
-        this.cdr.markForCheck();
-      }
-    });
-    this.formsValidatorService.inputOverflowObservable.pipe(takeUntil(this.destroy$)).subscribe((inputOverflowMap) => {
-      this.inputOverflowMap = inputOverflowMap;
-      this.cdr.markForCheck();
-    });
     this.validateInputOverflow = (inputFieldModel, maxLength) => {
       if (typeof inputFieldModel.value !== 'undefined') {
         this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);

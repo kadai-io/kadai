@@ -16,7 +16,7 @@
  *
  */
 
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, viewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, inject, signal, viewChild } from '@angular/core';
 import { outputToObservable } from '@angular/core/rxjs-interop';
 import { Direction, Sorting, TaskHistoryQuerySortParameter } from 'app/shared/models/sorting';
 import { TaskHistoryEventData } from '../../shared/models/task-history-event';
@@ -66,7 +66,7 @@ import { DatePipe } from '@angular/common';
   ]
 })
 export class TaskHistoryQueryComponent implements AfterViewInit {
-  data: TaskHistoryEventData[] = [];
+  data = signal<TaskHistoryEventData[]>([]);
   displayedColumns: Pair<string, TaskHistoryQuerySortParameter>[] = [
     {
       left: 'parentBusinessProcessId',
@@ -103,7 +103,7 @@ export class TaskHistoryQueryComponent implements AfterViewInit {
     { left: 'oldData', right: undefined },
     { left: 'newData', right: undefined }
   ];
-  pageInformation: Page;
+  pageInformation = signal<Page>(undefined);
   pageParameter: QueryPagingParameter = {
     page: 1,
     'page-size': 9
@@ -117,7 +117,6 @@ export class TaskHistoryQueryComponent implements AfterViewInit {
   pagination = viewChild.required<PaginationComponent>(PaginationComponent);
   private taskHistoryQueryService = inject(TaskHistoryQueryService);
   private requestInProgressService = inject(RequestInProgressService);
-  private cdr = inject(ChangeDetectorRef);
 
   ngAfterViewInit() {
     const sortChange$ = this.sort().sortChange.pipe(
@@ -139,10 +138,9 @@ export class TaskHistoryQueryComponent implements AfterViewInit {
         })
       )
       .subscribe((data) => {
-        this.data = data.taskHistoryEvents;
-        this.pageInformation = data.page;
+        this.data.set(data.taskHistoryEvents);
+        this.pageInformation.set(data.page);
         this.requestInProgressService.setRequestInProgress(false);
-        this.cdr.markForCheck();
       });
   }
 

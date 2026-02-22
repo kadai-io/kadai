@@ -18,11 +18,11 @@
 
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   ElementRef,
   inject,
   OnInit,
+  signal,
   viewChild
 } from '@angular/core';
 import { Store } from '@ngxs/store';
@@ -47,7 +47,7 @@ import { SvgIconComponent } from 'angular-svg-icon';
   imports: [WorkbasketListComponent, MatIcon, WorkbasketDetailsComponent, SvgIconComponent]
 })
 export class WorkbasketOverviewComponent implements OnInit {
-  showDetail = false;
+  showDetail = signal(false);
   selectedWorkbasketAndAction$: Observable<WorkbasketAndAction> = inject(Store).select(
     WorkbasketSelectors.selectedWorkbasketAndAction
   );
@@ -59,7 +59,6 @@ export class WorkbasketOverviewComponent implements OnInit {
   toggleButton = viewChild<ElementRef>('toggleButton');
   private route = inject(ActivatedRoute);
   private store = inject(Store);
-  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.route.url.pipe(takeUntil(this.destroy$)).subscribe((params) => {
@@ -75,19 +74,17 @@ export class WorkbasketOverviewComponent implements OnInit {
       this.route.firstChild.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
         this.routerParams = params;
         if (this.routerParams.id) {
-          this.showDetail = true;
+          this.showDetail.set(true);
           if (this.routerParams.id === 'new-workbasket') {
             this.store.dispatch(new CreateWorkbasket());
           } else {
             this.store.dispatch(new SelectWorkbasket(this.routerParams.id));
           }
         }
-        this.cdr.markForCheck();
       });
     }
     this.selectedWorkbasketAndAction$.pipe(takeUntil(this.destroy$)).subscribe((state) => {
-      this.showDetail = !!state.selectedWorkbasket || state.action === 1;
-      this.cdr.markForCheck();
+      this.showDetail.set(!!state.selectedWorkbasket || state.action === 1);
     });
   }
 

@@ -78,7 +78,7 @@ describe('TypeAheadComponent with AccessId input', () => {
     fixture.detectChanges();
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    expect(component.name).toBe('Gerda');
+    expect(component.name()).toBe('Gerda');
   });
 
   it('should emit false when an invalid access id is set', async () => {

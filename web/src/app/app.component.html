@@ -35,7 +35,7 @@
     <kadai-shared-user-information class="sidenav__drawer-user-info" />
     <kadai-sidenav-list />
     <div class="sidenav__drawer-version">
-      <p> KADAI version: {{ version }} </p>
+      <p> KADAI version: {{ version() }} </p>
     </div>
   </mat-sidenav>
   <mat-sidenav-content>
@@ -43,11 +43,11 @@
     <div (window:resize)="onResize()">
       <div class="kadai-main">
         <div class="kadai-main__progress-bar">
-          @if (requestInProgress) {
+          @if (requestInProgress()) {
             <mat-progress-bar color="accent"
                               mode="indeterminate"></mat-progress-bar>
           }
-          @if (requestInProgress) {
+          @if (requestInProgress()) {
             <mat-progress-bar color="accent"
                               mode="indeterminate"></mat-progress-bar>
           }

@@ -105,8 +105,8 @@ describe('WorkbasketDetailsComponent', () => {
   });
 
   it('should render copied workbasket when action is COPY', async () => {
-    const workbasket = component.workbasket;
-    await firstValueFrom(store.dispatch(new CopyWorkbasket(component.workbasket)).pipe(take(1)));
+    const workbasket = component.workbasket();
+    await firstValueFrom(store.dispatch(new CopyWorkbasket(component.workbasket())).pipe(take(1)));
     const state = await firstValueFrom(component.selectedWorkbasketAndComponentAndAction$.pipe(take(1)));
     const workbasketCopy = state.selectedWorkbasket;
 
@@ -121,9 +121,9 @@ describe('WorkbasketDetailsComponent', () => {
       workbasket: workbasketReadState
     });
     fixture.detectChanges();
-    expect(component.workbasket).not.toBeUndefined();
-    expect(component.workbasket).not.toBeNull();
-    expect(component.workbasket).toEqual(selectedWorkbasketMock);
+    expect(component.workbasket()).not.toBeUndefined();
+    expect(component.workbasket()).not.toBeNull();
+    expect(component.workbasket()).toEqual(selectedWorkbasketMock);
   });
 
   it('should select information tab when action is CREATE', async () => {

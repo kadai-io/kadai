@@ -38,7 +38,7 @@
                        maxlength="64" name="workbasket.key" placeholder="Key" required
                        type="text">
               </mat-form-field>
-              @if (inputOverflowMap.get(key.name)) {
+              @if (inputOverflowMap()?.get(key.name)) {
                 <div class="error">{{ lengthError }}</div>
               }
               @if (action() != 3) {
@@ -58,7 +58,7 @@
                        name="workbasket.name"
                        placeholder="Name" required type="text">
               </mat-form-field>
-              @if (inputOverflowMap.get(name.name)) {
+              @if (inputOverflowMap()?.get(name.name)) {
                 <div class="error">{{ lengthError }}</div>
               }
               <kadai-shared-field-error-display [displayError]="!isFieldValid('workbasket.name')"
@@ -66,7 +66,7 @@
                                                 errorMessage="* Name is required">
               </kadai-shared-field-error-display>
               <!-- OWNER -->
-              @if (lookupField) {
+              @if (lookupField()) {
                 <kadai-shared-type-ahead (accessIdEventEmitter)="onSelectedOwner($event)"
                                          (isFormValid)="isOwnerValid = $event"
                                          [displayError]="true"
@@ -80,7 +80,7 @@
                        class="form-control" id="wb-owner" maxlength="128"
                        name="workbasket.owner" placeholder="Owner" required
                        type="text">
-                @if (inputOverflowMap.get(owner.name)) {
+                @if (inputOverflowMap()?.get(owner.name)) {
                   <div class="error">{{ lengthError }}</div>
                 }
                 <kadai-shared-field-error-display [displayError]="!isFieldValid('workbasket.owner')"
@@ -121,7 +121,7 @@
                               maxlength="255" name="workbasket.description"
                               placeholder="Description"></textarea>
                   </mat-form-field>
-                  @if (inputOverflowMap.get(description.name)) {
+                  @if (inputOverflowMap()?.get(description.name)) {
                     <mat-error
                       class="error">{{ lengthError }}
                     </mat-error>
@@ -149,7 +149,7 @@
                        name="workbasket.orgLevel1" placeholder="OrgLevel 1"
                        type="text">
               </mat-form-field>
-              @if (inputOverflowMap.get(orgLevel1.name)) {
+              @if (inputOverflowMap()?.get(orgLevel1.name)) {
                 <div class="error">{{ lengthError }}</div>
               }
               <!-- ORGANISATIONAL LEVEL 2 -->
@@ -160,7 +160,7 @@
                        name="workbasket.orgLevel2" placeholder="OrgLevel 2"
                        type="text">
               </mat-form-field>
-              @if (inputOverflowMap.get(orgLevel2.name)) {
+              @if (inputOverflowMap()?.get(orgLevel2.name)) {
                 <div class="error">{{ lengthError }}</div>
               }
               <!-- ORGANISATIONAL LEVEL 3 -->
@@ -171,7 +171,7 @@
                        name="workbasket.orgLevel3" placeholder="OrgLevel 3"
                        type="text">
               </mat-form-field>
-              @if (inputOverflowMap.get(orgLevel3.name)) {
+              @if (inputOverflowMap()?.get(orgLevel3.name)) {
                 <div class="error">{{ lengthError }}</div>
               }
               <!-- ORGANISATIONAL LEVEL 4 -->
@@ -182,7 +182,7 @@
                        name="workbasket.orgLevel4" placeholder="OrgLevel 4"
                        type="text">
               </mat-form-field>
-              @if (inputOverflowMap.get(orgLevel4.name)) {
+              @if (inputOverflowMap()?.get(orgLevel4.name)) {
                 <div class="error">{{ lengthError }}</div>
               }
             </div>
@@ -204,7 +204,7 @@
                            name="workbasket[{{getWorkbasketCustomProperty(index + 1)}}]"
                            type="text">
                   </mat-form-field>
-                  @if (inputOverflowMap.get(custom.name)) {
+                  @if (inputOverflowMap()?.get(custom.name)) {
                     <div class="error">{{ lengthError }}</div>
                   }
                 </div>

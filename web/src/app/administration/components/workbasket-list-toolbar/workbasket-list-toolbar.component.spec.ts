@@ -64,7 +64,7 @@ describe('WorkbasketListToolbarComponent', () => {
     component = fixture.debugElement.componentInstance;
     store = TestBed.inject(Store);
     actions$ = TestBed.inject(Actions);
-    component.action = ACTION.COPY;
+    store.reset({ ...store.snapshot(), workbasket: { action: ACTION.COPY } });
     fixture.detectChanges();
   });
 
@@ -73,7 +73,7 @@ describe('WorkbasketListToolbarComponent', () => {
   });
 
   it('should dispatch CreateWorkbasket when addWorkbasket is called', async () => {
-    component.action = ACTION.COPY;
+    store.reset({ ...store.snapshot(), workbasket: { action: ACTION.COPY } });
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(CreateWorkbasket)).subscribe(() => (actionDispatched = true));
     component.addWorkbasket();
@@ -81,7 +81,7 @@ describe('WorkbasketListToolbarComponent', () => {
   });
 
   it('should not dispatch action in addWorkbasket when action is CREATE', async () => {
-    component.action = ACTION.CREATE;
+    store.reset({ ...store.snapshot(), workbasket: { action: ACTION.CREATE } });
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(CreateWorkbasket)).subscribe(() => (actionDispatched = true));
     component.addWorkbasket();

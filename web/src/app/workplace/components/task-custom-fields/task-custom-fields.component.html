@@ -34,7 +34,7 @@
                      name="task.custom{{i + 1}}" placeholder="Custom {{i + 1}}"
                      type="text">
             </mat-form-field>
-            @if (inputOverflowMap.get(custom.name)) {
+            @if (inputOverflowMap()?.get(custom.name)) {
               <div class="error">{{ lengthError }}</div>
             }
           </div>

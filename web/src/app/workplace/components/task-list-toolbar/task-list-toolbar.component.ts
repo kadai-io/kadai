@@ -16,7 +16,15 @@
  *
  */
 
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, input, OnInit, output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  input,
+  OnInit,
+  output,
+  signal
+} from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { TaskService } from 'app/workplace/services/task.service';
@@ -85,16 +93,16 @@ export class TaskListToolbarComponent implements OnInit {
   tasks: Task[] = [];
   workbasketNames: string[] = [];
   filteredWorkbasketNames: string[] = this.workbasketNames;
-  resultName = '';
-  resultId = '';
-  workbaskets: Workbasket[];
-  currentBasket: Workbasket;
-  workbasketSelected = false;
-  searched = false;
+  resultName = signal('');
+  resultId = signal('');
+  workbaskets = signal<Workbasket[]>(undefined);
+  currentBasket = signal<Workbasket>(undefined);
+  workbasketSelected = signal(false);
+  searched = signal(false);
   search = Search;
   searchSelected: Search = Search.byWorkbasket;
-  activeTab: number = 0;
-  filterInput = '';
+  activeTab = signal(0);
+  filterInput = signal('');
   isFilterExpanded$: Observable<boolean> = inject(Store).select(WorkplaceSelectors.getFilterExpansion);
   destroy$ = new Subject<void>();
   private kadaiEngineService = inject(KadaiEngineService);
@@ -106,38 +114,35 @@ export class TaskListToolbarComponent implements OnInit {
   private store = inject(Store);
   private ngxsActions$ = inject(Actions);
   private requestInProgressService = inject(RequestInProgressService);
-  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.ngxsActions$.pipe(ofActionCompleted(ClearTaskFilter), takeUntil(this.destroy$)).subscribe(() => {
-      this.filterInput = '';
-      this.cdr.markForCheck();
+      this.filterInput.set('');
     });
 
     this.workbasketService
       .getAllWorkBaskets()
       .pipe(takeUntil(this.destroy$))
       .subscribe((workbaskets) => {
-        this.workbaskets = workbaskets.workbaskets;
-        this.workbaskets.forEach((workbasket) => {
+        this.workbaskets.set(workbaskets.workbaskets);
+        this.workbaskets().forEach((workbasket) => {
           this.workbasketNames.push(workbasket.name);
         });
 
         // get workbasket of current user
         const user = this.kadaiEngineService.currentUserInfo;
-        const filteredWorkbasketsByUser = this.workbaskets.filter(
+        const filteredWorkbasketsByUser = this.workbaskets().filter(
           (workbasket) => workbasket.key == user.userId || workbasket.key == user.userId.toUpperCase()
         );
         if (filteredWorkbasketsByUser.length > 0) {
           const workbasketOfUser = filteredWorkbasketsByUser[0];
-          this.resultName = workbasketOfUser.name;
-          this.resultId = workbasketOfUser.workbasketId;
+          this.resultName.set(workbasketOfUser.name);
+          this.resultId.set(workbasketOfUser.workbasketId);
           this.workplaceService.selectWorkbasket(workbasketOfUser);
-          this.currentBasket = workbasketOfUser;
-          this.workbasketSelected = true;
-          this.searched = true;
+          this.currentBasket.set(workbasketOfUser);
+          this.workbasketSelected.set(true);
+          this.searched.set(true);
         }
-        this.cdr.markForCheck();
       });
 
     this.taskService
@@ -146,13 +151,12 @@ export class TaskListToolbarComponent implements OnInit {
       .subscribe((task) => {
         if (typeof task !== 'undefined') {
           const workbasketSummary = task.workbasketSummary;
-          if (this.searchSelected === this.search.byWorkbasket && this.resultName !== workbasketSummary.name) {
-            this.resultName = workbasketSummary.name;
-            this.resultId = workbasketSummary.workbasketId;
-            this.currentBasket = workbasketSummary;
-            this.workplaceService.selectWorkbasket(this.currentBasket);
-            this.workbasketSelected = true;
-            this.cdr.markForCheck();
+          if (this.searchSelected === this.search.byWorkbasket && this.resultName() !== workbasketSummary.name) {
+            this.resultName.set(workbasketSummary.name);
+            this.resultId.set(workbasketSummary.workbasketId);
+            this.currentBasket.set(workbasketSummary);
+            this.workplaceService.selectWorkbasket(this.currentBasket());
+            this.workbasketSelected.set(true);
           }
         }
       });
@@ -160,23 +164,22 @@ export class TaskListToolbarComponent implements OnInit {
     this.route.queryParams.subscribe((params) => {
       const component = params.component;
       if (component == 'workbaskets') {
-        this.activeTab = 0;
-        if (this.currentBasket) {
-          this.resultName = this.currentBasket.name;
-          this.resultId = this.currentBasket.workbasketId;
+        this.activeTab.set(0);
+        if (this.currentBasket()) {
+          this.resultName.set(this.currentBasket().name);
+          this.resultId.set(this.currentBasket().workbasketId);
         }
         this.selectSearch(this.search.byWorkbasket);
       }
       if (component == 'task-search') {
-        this.activeTab = 1;
-        this.searched = true;
+        this.activeTab.set(1);
+        this.searched.set(true);
         this.selectSearch(this.search.byTypeAndValue);
       }
-      this.cdr.markForCheck();
     });
 
     if (this.router.url.includes('taskdetail')) {
-      this.searched = true;
+      this.searched.set(true);
     }
   }
 
@@ -197,38 +200,38 @@ export class TaskListToolbarComponent implements OnInit {
 
   updateState() {
     const wildcardFilter: TaskQueryFilterParameter = {
-      'wildcard-search-value': [this.filterInput]
+      'wildcard-search-value': [this.filterInput()]
     };
     this.store.dispatch(new SetTaskFilter(wildcardFilter));
   }
 
   filterWorkbasketNames() {
     this.filteredWorkbasketNames = this.workbasketNames.filter((value) =>
-      value.toLowerCase().includes(this.resultName.toLowerCase())
+      value.toLowerCase().includes(this.resultName().toLowerCase())
     );
   }
 
   searchBasket() {
     this.store.dispatch(new SetFilterExpansion(false));
-    this.workbasketSelected = true;
-    if (this.searchSelected === this.search.byWorkbasket && this.workbaskets) {
-      this.workbaskets.forEach((workbasket) => {
-        if (workbasket.name === this.resultName) {
-          this.resultId = workbasket.workbasketId;
-          this.currentBasket = workbasket;
-          this.workplaceService.selectWorkbasket(this.currentBasket);
+    this.workbasketSelected.set(true);
+    if (this.searchSelected === this.search.byWorkbasket && this.workbaskets()) {
+      this.workbaskets().forEach((workbasket) => {
+        if (workbasket.name === this.resultName()) {
+          this.resultId.set(workbasket.workbasketId);
+          this.currentBasket.set(workbasket);
+          this.workplaceService.selectWorkbasket(this.currentBasket());
         }
       });
 
-      this.searched = !!this.currentBasket;
+      this.searched.set(!!this.currentBasket());
 
-      if (!this.resultId) {
-        delete this.currentBasket;
+      if (!this.resultId()) {
+        this.currentBasket.set(undefined);
         this.workplaceService.selectWorkbasket();
       }
     }
 
-    this.resultId = '';
+    this.resultId.set('');
   }
 
   sorting(sort: Sorting<TaskQuerySortParameter>) {
@@ -255,7 +258,7 @@ export class TaskListToolbarComponent implements OnInit {
 
   selectSearch(type: Search) {
     this.searchSelected = type;
-    delete this.resultId;
+    this.resultId.set(undefined);
     this.selectSearchType.emit(type);
     this.searchBasket();
     this.onClearFilter();

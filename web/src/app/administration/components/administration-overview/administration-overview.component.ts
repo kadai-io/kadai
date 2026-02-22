@@ -16,7 +16,7 @@
  *
  */
 
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, OnInit, signal } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Subject } from 'rxjs';
 import { DomainService } from '../../../shared/services/domain/domain.service';
@@ -27,6 +27,7 @@ import { MatFormField } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatOption } from '@angular/material/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'kadai-administration-overview',
@@ -47,15 +48,13 @@ import { MatOption } from '@angular/material/core';
 })
 export class AdministrationOverviewComponent implements OnInit {
   _selectedTabInput = input('', { alias: 'selectedTab' });
-  selectedTab = '';
-  domains: Array<string> = [];
-  selectedDomain: string;
+  selectedTab = signal('');
+  routingAccess = toSignal(inject(KadaiEngineService).isCustomRoutingRulesEnabled(), { initialValue: false });
+  domains = toSignal(inject(DomainService).getDomains(), { initialValue: [] as string[] });
+  selectedDomain = toSignal(inject(DomainService).getSelectedDomain(), { initialValue: '' });
   destroy$ = new Subject<void>();
-  routingAccess = false;
   private router = inject(Router);
   private domainService = inject(DomainService);
-  private kadaiEngineService = inject(KadaiEngineService);
-  private cdr = inject(ChangeDetectorRef);
 
   constructor() {
     const router = this.router;
@@ -63,39 +62,15 @@ export class AdministrationOverviewComponent implements OnInit {
     router.events.pipe(takeUntil(this.destroy$)).subscribe((e) => {
       const urlPaths = this.router.url.split('/');
       if (this.router.url.includes('detail')) {
-        this.selectedTab = urlPaths[urlPaths.length - 2];
+        this.selectedTab.set(urlPaths[urlPaths.length - 2]);
       } else {
-        this.selectedTab = urlPaths[urlPaths.length - 1];
+        this.selectedTab.set(urlPaths[urlPaths.length - 1]);
       }
-      this.cdr.markForCheck();
     });
   }
 
   ngOnInit() {
-    this.selectedTab = this._selectedTabInput();
-
-    this.kadaiEngineService
-      .isCustomRoutingRulesEnabled()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((value) => {
-        this.routingAccess = value;
-        this.cdr.markForCheck();
-      });
-    this.domainService
-      .getDomains()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((domains) => {
-        this.domains = domains;
-        this.cdr.markForCheck();
-      });
-
-    this.domainService
-      .getSelectedDomain()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((domain) => {
-        this.selectedDomain = domain;
-        this.cdr.markForCheck();
-      });
+    this.selectedTab.set(this._selectedTabInput());
   }
 
   switchDomain(domain: string) {

@@ -18,8 +18,8 @@
 
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
+  computed,
   HostListener,
   inject,
   OnDestroy,
@@ -38,6 +38,7 @@ import { WindowRefService } from 'app/shared/services/window/window.service';
 import { environment } from 'environments/environment';
 import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
 import { takeUntil } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { UserInformationComponent } from './shared/components/user-information/user-information.component';
@@ -45,6 +46,7 @@ import { SidenavListComponent } from './shared/components/sidenav-list/sidenav-l
 import { NavBarComponent } from './shared/components/nav-bar/nav-bar.component';
 
 import { MatProgressBar } from '@angular/material/progress-bar';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'kadai-root',
@@ -65,22 +67,22 @@ import { MatProgressBar } from '@angular/material/progress-bar';
   ]
 })
 export class AppComponent implements OnInit, OnDestroy {
-  workbasketsRoute = true;
-  selectedRoute = '';
-  requestInProgress = false;
-  version: string;
+  requestInProgress = toSignal(inject(RequestInProgressService).getRequestInProgress(), { initialValue: false });
+  selectedRoute = toSignal(inject(SelectedRouteService).getSelectedRoute(), { initialValue: '' });
+  workbasketsRoute = computed(() => !this.selectedRoute().includes('classifications'));
+  version = toSignal(inject(KadaiEngineService).getVersion().pipe(map((r) => r.version)), {
+    initialValue: undefined as string
+  });
   toggle: boolean = false;
   destroy$ = new Subject<void>();
   public sidenav = viewChild<MatSidenav>('sidenav');
   private router = inject(Router);
-  private requestInProgressService = inject(RequestInProgressService);
   private orientationService = inject(OrientationService);
-  private selectedRouteService = inject(SelectedRouteService);
   private formsValidatorService = inject(FormsValidatorService);
   private sidenavService = inject(SidenavService);
   private kadaiEngineService = inject(KadaiEngineService);
+  private selectedRouteService = inject(SelectedRouteService);
   private window = inject(WindowRefService);
-  private cdr = inject(ChangeDetectorRef);
 
   @HostListener('window:resize')
   onResize() {
@@ -94,35 +96,6 @@ export class AppComponent implements OnInit, OnDestroy {
         this.formsValidatorService.formSubmitAttempt = false;
       }
     });
-
-    this.requestInProgressService
-      .getRequestInProgress()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((value: boolean) => {
-        setTimeout(() => {
-          this.requestInProgress = value;
-          this.cdr.markForCheck();
-        });
-      });
-
-    this.selectedRouteService
-      .getSelectedRoute()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((value: string) => {
-        if (value.indexOf('classifications') !== -1) {
-          this.workbasketsRoute = false;
-        }
-        this.selectedRoute = value;
-        this.cdr.markForCheck();
-      });
-
-    this.kadaiEngineService
-      .getVersion()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((restVersion) => {
-        this.version = restVersion.version;
-        this.cdr.markForCheck();
-      });
   }
 
   logout() {

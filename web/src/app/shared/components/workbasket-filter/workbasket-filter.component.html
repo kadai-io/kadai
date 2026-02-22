@@ -23,7 +23,7 @@
       <!-- TEXT INPUT -->
       <mat-form-field class="filter__collapsed-filter-input-field" floatLabel="auto">
         <mat-label>Filter by name</mat-label>
-        <input (keyup.enter)="search()" [(ngModel)]="filter['name-like'][0]" matInput
+        <input (keyup.enter)="search()" [(ngModel)]="filter()!['name-like'][0]" matInput
                matTooltip="Type to filter by name">
       </mat-form-field>
       <!-- CLEAR BUTTON -->
@@ -48,24 +48,24 @@
         <div class="filter__name-and-key-input">
           <mat-form-field class="filter__input-field-left" floatLabel="auto">
             <mat-label>Filter by name</mat-label>
-            <input (keyup.enter)="search()" [(ngModel)]="filter['name-like'][0]" matInput
+            <input (keyup.enter)="search()" [(ngModel)]="filter()!['name-like'][0]" matInput
                    matTooltip="Type to filter by name">
           </mat-form-field>
           <mat-form-field class="filter__input-field-right" floatLabel="auto">
             <mat-label>Filter by key</mat-label>
-            <input (keyup.enter)="search()" [(ngModel)]="filter['key-like'][0]" matInput
+            <input (keyup.enter)="search()" [(ngModel)]="filter()!['key-like'][0]" matInput
                    matTooltip="Type to filter by key">
           </mat-form-field>
         </div>
         <div class="filter__name-and-key-input">
           <mat-form-field class="filter__input-field-left" floatLabel="auto">
             <mat-label>Filter by description</mat-label>
-            <input (keyup.enter)="search()" [(ngModel)]="filter['description-like'][0]" matInput
+            <input (keyup.enter)="search()" [(ngModel)]="filter()!['description-like'][0]" matInput
                    matTooltip="Type to filter by description">
           </mat-form-field>
           <mat-form-field class="filter__input-field-right" floatLabel="auto">
             <mat-label>Filter by owner</mat-label>
-            <input (keyup.enter)="search()" [(ngModel)]="filter['owner-like'][0]" matInput
+            <input (keyup.enter)="search()" [(ngModel)]="filter()!['owner-like'][0]" matInput
                    matTooltip="Type to filter by owner">
           </mat-form-field>
         </div>
@@ -76,12 +76,12 @@
         <button [matMenuTriggerFor]="menu" mat-stroked-button
                 matTooltip="Filter Workbaskets by type">
           Filter by type
-          @if (filter.type.length == 0) {
+          @if (filter()!.type.length == 0) {
             <mat-icon style="color: #555">filter_list</mat-icon>
           }
-          @if (filter.type[0]) {
+          @if (filter()!.type[0]) {
             <kadai-administration-icon-type
-              [type]="filter.type[0]"></kadai-administration-icon-type>
+              [type]="filter()!.type[0]"></kadai-administration-icon-type>
           }
         </button>
         <mat-menu #menu="matMenu">

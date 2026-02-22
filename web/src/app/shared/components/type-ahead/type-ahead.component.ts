@@ -18,7 +18,6 @@
 
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   effect,
   inject,
@@ -26,6 +25,7 @@ import {
   OnDestroy,
   OnInit,
   output,
+  signal,
   untracked
 } from '@angular/core';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
@@ -76,9 +76,9 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
     EngineConfigurationSelectors.globalCustomisation
   );
   buttonAction$: Observable<ButtonAction> = inject(Store).select(WorkbasketSelectors.buttonAction);
-  name: string = '';
+  name = signal('');
   lastSavedAccessId: string = '';
-  filteredAccessIds: AccessId[] = [];
+  filteredAccessIds = signal<AccessId[]>([]);
   debounceTime: number = 750;
   destroy$ = new Subject<void>();
   accessIdForm = new FormGroup({
@@ -86,7 +86,6 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
   });
   emptyAccessId: AccessId = { accessId: '', name: '' };
   private accessIdService = inject(AccessIdsService);
-  private cdr = inject(ChangeDetectorRef);
 
   constructor() {
     effect(() => {
@@ -104,7 +103,6 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
     this.buttonAction$.pipe(takeUntil(this.destroy$)).subscribe((button) => {
       if (button == ButtonAction.UNDO) {
         this.accessIdForm.controls['accessId'].setValue(this.lastSavedAccessId);
-        this.cdr.markForCheck();
       }
     });
 
@@ -132,7 +130,7 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
   }
 
   handleEmptyAccessId() {
-    this.name = '';
+    this.name.set('');
     this.isFormValid.emit(!this.isRequired());
     if (this.placeHolderMessage() !== 'Search for AccessId') {
       this.accessIdEventEmitter.emit(this.emptyAccessId);
@@ -140,7 +138,6 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
     if (this.isRequired()) {
       this.accessIdForm.controls['accessId'].setErrors({ incorrect: true });
     }
-    this.cdr.markForCheck();
   }
 
   searchForAccessId(value: string) {
@@ -148,11 +145,11 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
       .searchForAccessId(value)
       .pipe(take(1))
       .subscribe((accessIds) => {
-        this.filteredAccessIds = accessIds;
+        this.filteredAccessIds.set(accessIds);
         const accessId = accessIds.find((accessId) => accessId.accessId.toLowerCase() === value.toLowerCase());
 
         if (typeof accessId !== 'undefined') {
-          this.name = accessId?.name;
+          this.name.set(accessId?.name ?? '');
           this.isFormValid.emit(true);
           this.accessIdEventEmitter.emit(accessId);
         } else if (this.displayError()) {
@@ -161,7 +158,6 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
           this.accessIdForm.controls['accessId'].setErrors({ incorrect: true });
           this.accessIdForm.controls['accessId'].markAsTouched();
         }
-        this.cdr.markForCheck();
       });
   }
 
@@ -170,8 +166,7 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
     const access = accessId?.accessId || accessId?.accessId == '' ? accessId.accessId : this.savedAccessId() || '';
     this.accessIdForm.controls['accessId'].setValue(access);
     this.lastSavedAccessId = access;
-    this.name = accessId?.accessName || '';
-    this.cdr.markForCheck();
+    this.name.set(accessId?.accessName || '');
   }
 
   ngOnDestroy() {

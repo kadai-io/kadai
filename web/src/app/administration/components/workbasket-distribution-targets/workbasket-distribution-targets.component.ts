@@ -16,7 +16,7 @@
  *
  */
 
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { forkJoin, Observable, Subject } from 'rxjs';
 
 import { Workbasket } from 'app/shared/models/workbasket';

@@ -19,7 +19,6 @@
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   effect,
   ElementRef,
@@ -76,8 +75,6 @@ export class PaginationComponent implements OnInit, AfterViewInit, OnDestroy {
   pageNumbers: number[];
   filteredPages: string[] = [];
 
-  private cdr = inject(ChangeDetectorRef);
-
   constructor() {
     effect(() => {
       const expanded = this.expanded();
@@ -104,7 +101,6 @@ export class PaginationComponent implements OnInit, AfterViewInit, OnDestroy {
           this.pageSelected = page.number;
           this.updateGoto();
         }
-        this.cdr.markForCheck();
       });
     });
   }

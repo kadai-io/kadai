@@ -33,7 +33,7 @@
       <mat-selection-list #workbasket [multiple]="false" hideSingleSelectionIndicator="true">
         @for (workbasket of (workbasketsSummary$ | async); track workbasket) {
           <mat-list-option (click)="selectWorkbasket(workbasket.workbasketId)"
-                           [selected]="workbasket.workbasketId == selectedId"
+                           [selected]="workbasket.workbasketId == selectedId()"
                            [value]="workbasket.workbasketId"
                            class="workbasket-list__list-item">
             <!-- WORKBASKET LIST ITEM -->
@@ -42,7 +42,7 @@
               @if (expanded()) {
                 <div class="workbasket-list__list-item--icon">
                   <kadai-administration-icon-type
-                    [selected]="workbasket.workbasketId === selectedId"
+                    [selected]="workbasket.workbasketId === selectedId()"
                     [type]="workbasket.type"
                     size="large"
                     tooltip="true"></kadai-administration-icon-type>
@@ -71,7 +71,7 @@
       </mat-selection-list>
     </div>
   } @else {
-    @if (!requestInProgress && !requestInProgressLocal) {
+    @if (!requestInProgress() && !requestInProgressLocal()) {
       <div class="workbasket-list__no-items">
         <h3 class="grey">There are no workbaskets</h3>
       </div>

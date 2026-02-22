@@ -20,7 +20,6 @@ import {
   AfterViewChecked,
   AfterViewInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   effect,
   ElementRef,
@@ -28,8 +27,8 @@ import {
   inject,
   input,
   OnDestroy,
-  OnInit,
   output,
+  signal,
   untracked,
   viewChild
 } from '@angular/core';
@@ -57,6 +56,7 @@ import { Pair } from '../../../shared/models/pair';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { SvgIconComponent } from 'angular-svg-icon';
 import { MatTooltip } from '@angular/material/tooltip';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'kadai-administration-tree',
@@ -65,19 +65,18 @@ import { MatTooltip } from '@angular/material/tooltip';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TreeModule, SvgIconComponent, MatTooltip]
 })
-export class KadaiTreeComponent implements OnInit, AfterViewInit, AfterViewChecked, OnDestroy {
-  treeNodes: TreeNodeModel[];
-  categoryIcons: ClassificationCategoryImages;
+export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDestroy {
+  treeNodes = signal<TreeNodeModel[]>(undefined);
+  categoryIcons = toSignal(inject(Store).select(EngineConfigurationSelectors.selectCategoryIcons), {
+    requireSync: true
+  });
   emptyTreeNodes = false;
   filter: string;
   category: string;
-  selectNodeId: string;
+  selectNodeId = signal<string>(undefined);
   filterText = input<string>();
   filterIcon = input('');
   switchKadaiSpinnerEmit = output<boolean>();
-  categoryIcons$: Observable<ClassificationCategoryImages> = inject(Store).select(
-    EngineConfigurationSelectors.selectCategoryIcons
-  );
   selectedClassificationId$: Observable<string> = inject(Store).select(
     ClassificationSelectors.selectedClassificationId
   );
@@ -107,7 +106,6 @@ export class KadaiTreeComponent implements OnInit, AfterViewInit, AfterViewCheck
   private notificationsService = inject(NotificationService);
   private classificationTreeService = inject(ClassificationTreeService);
   private requestInProgressService = inject(RequestInProgressService);
-  private cdr = inject(ChangeDetectorRef);
   private tree = viewChild.required<TreeComponent>('tree');
   _selectNodeIdInput = input<string>(undefined, { alias: 'selectNodeId' });
 
@@ -119,7 +117,7 @@ export class KadaiTreeComponent implements OnInit, AfterViewInit, AfterViewCheck
     effect(() => {
       const id = this._selectNodeIdInput();
       untracked(() => {
-        this.selectNodeId = id;
+        this.selectNodeId.set(id);
       });
     });
   }
@@ -131,13 +129,6 @@ export class KadaiTreeComponent implements OnInit, AfterViewInit, AfterViewCheck
     }
   }
 
-  ngOnInit() {
-    this.categoryIcons$.pipe(takeUntil(this.destroy$)).subscribe((categoryIcons) => {
-      this.categoryIcons = categoryIcons;
-      this.cdr.markForCheck();
-    });
-  }
-
   ngAfterViewInit() {
     const computedTreeNodes$: Observable<TreeNodeModel[]> = this.classifications$.pipe(
       filter((classifications) => typeof classifications !== 'undefined'),
@@ -147,34 +138,32 @@ export class KadaiTreeComponent implements OnInit, AfterViewInit, AfterViewCheck
     combineLatest([this.selectedClassificationId$, computedTreeNodes$])
       .pipe(takeUntil(this.destroy$))
       .subscribe(([selectedClassificationId, treeNodes]) => {
-        this.treeNodes = treeNodes;
-        this.selectNodeId = typeof selectedClassificationId !== 'undefined' ? selectedClassificationId : undefined;
+        this.treeNodes.set(treeNodes);
+        this.selectNodeId.set(typeof selectedClassificationId !== 'undefined' ? selectedClassificationId : undefined);
         this.requestInProgressService.setRequestInProgress(false);
         if (typeof this.tree().treeModel.getActiveNode() !== 'undefined') {
-          if (this.tree().treeModel.getActiveNode().data.classificationId !== this.selectNodeId) {
+          if (this.tree().treeModel.getActiveNode().data.classificationId !== this.selectNodeId()) {
             // wait for angular's two-way binding to convert the treeNodes to the internal tree structure.
             // after that conversion the new treeNodes are available
-            setTimeout(() => this.selectNode(this.selectNodeId), 0);
+            setTimeout(() => this.selectNode(this.selectNodeId()), 0);
           }
         }
-        this.cdr.markForCheck();
       });
 
     this.classificationTypeSelected$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       if (this.tree().treeModel.getActiveNode()) {
         this.deselectActiveNode();
       }
-      this.cdr.markForCheck();
     });
   }
 
   ngAfterViewChecked(): void {
-    if (this.selectNodeId && !this.tree().treeModel.getActiveNode()) {
-      this.selectNode(this.selectNodeId);
+    if (this.selectNodeId() && !this.tree().treeModel.getActiveNode()) {
+      this.selectNode(this.selectNodeId());
     }
 
-    if (this.selectNodeId != null) {
-      const node = this.getNode(this.selectNodeId);
+    if (this.selectNodeId() != null) {
+      const node = this.getNode(this.selectNodeId());
       if (node != null) {
         node.ensureVisible();
       }
@@ -190,7 +179,7 @@ export class KadaiTreeComponent implements OnInit, AfterViewInit, AfterViewCheck
 
   onActivate(treeNode: any) {
     const id = treeNode.node.data.classificationId;
-    this.selectNodeId = id;
+    this.selectNodeId.set(id);
     this.requestInProgressService.setRequestInProgress(true);
     this.store.dispatch(new SelectClassification(id));
     this.location.go(this.location.path().replace(/(classifications).*/g, `classifications/(detail:${id})`));
@@ -224,9 +213,9 @@ export class KadaiTreeComponent implements OnInit, AfterViewInit, AfterViewCheck
   }
 
   getCategoryIcon(category: string): Pair<string, string> {
-    return this.categoryIcons[category]
-      ? { left: this.categoryIcons[category], right: category }
-      : { left: this.categoryIcons.missing, right: 'Category does not match with the configuration' };
+    return this.categoryIcons()[category]
+      ? { left: this.categoryIcons()[category], right: category }
+      : { left: this.categoryIcons().missing, right: 'Category does not match with the configuration' };
   }
 
   switchKadaiSpinner(active: boolean) {
@@ -260,7 +249,7 @@ export class KadaiTreeComponent implements OnInit, AfterViewInit, AfterViewCheck
 
   private deselectActiveNode() {
     const activeNode = this.tree().treeModel.getActiveNode();
-    delete this.selectNodeId;
+    this.selectNodeId.set(undefined);
     activeNode.setIsActive(false);
     activeNode.blur();
   }

@@ -16,7 +16,7 @@
 ~
 -->
 
-@if (task() && !requestInProgress) {
+@if (task() && !requestInProgress()) {
   <div>
     <ng-form #TaskForm="ngForm">
       <div class="task-information">
@@ -31,7 +31,7 @@
                    matInput maxlength="255" name="task.name"
                    placeholder="Name" required type="text">
           </mat-form-field>
-          @if (inputOverflowMap.get(name.name)) {
+          @if (inputOverflowMap()?.get(name.name)) {
             <div class="error">{{ lengthError }}</div>
           }
           <kadai-shared-field-error-display [displayError]="!isFieldValid('task.name')"
@@ -49,7 +49,7 @@
                    placeholder="System description" required
                    type="text">
           </mat-form-field>
-          @if (inputOverflowMap.get(system.name)) {
+          @if (inputOverflowMap()?.get(system.name)) {
             <div class="error">{{ lengthError }}</div>
           }
           <kadai-shared-field-error-display
@@ -68,7 +68,7 @@
                    placeholder="Reference type" required
                    type="text">
           </mat-form-field>
-          @if (inputOverflowMap.get(type.name)) {
+          @if (inputOverflowMap()?.get(type.name)) {
             <div class="error">{{ lengthError }}</div>
           }
           <kadai-shared-field-error-display
@@ -81,7 +81,7 @@
             <mat-form-field appearance="outline">
               <mat-label>Classification</mat-label>
               <mat-select [value]="task()!.classificationSummary.name" required>
-                @for (classification of classifications; track classification) {
+                @for (classification of classifications(); track classification) {
                   <mat-option (click)="changedClassification(classification)"
                               [value]="classification.name">
                     {{ classification.name }}
@@ -93,7 +93,7 @@
             <mat-form-field appearance="outline">
               <mat-label>Classification</mat-label>
               <mat-select required>
-                @for (classification of classifications; track classification) {
+                @for (classification of classifications(); track classification) {
                   <mat-option (click)="changedClassification(classification)"
                               [value]="classification.name">
                     {{ classification.name }}
@@ -117,7 +117,7 @@
                    name="task.parentBusinessProcessId" placeholder="Parent Business Process Id"
                    type="text">
           </mat-form-field>
-          @if (inputOverflowMap.get(parentBusinessProcessId.name)) {
+          @if (inputOverflowMap()?.get(parentBusinessProcessId.name)) {
             <div
               class="error">{{ lengthError }}
             </div>
@@ -142,7 +142,7 @@
                      matInput maxlength="32"
                      name="task.owner" placeholder="Owner" type="text">
             </mat-form-field>
-            @if (inputOverflowMap.get(owner.name)) {
+            @if (inputOverflowMap()?.get(owner.name)) {
               <div class="error">{{ lengthError }}</div>
             }
           }
@@ -159,7 +159,7 @@
                    placeholder="Company description" required
                    type="text">
           </mat-form-field>
-          @if (inputOverflowMap.get(company.name)) {
+          @if (inputOverflowMap()?.get(company.name)) {
             <div class="error">{{ lengthError }}</div>
           }
           <kadai-shared-field-error-display
@@ -178,7 +178,7 @@
                    placeholder="System Instance description" required
                    type="text">
           </mat-form-field>
-          @if (inputOverflowMap.get(systemInstance.name)) {
+          @if (inputOverflowMap()?.get(systemInstance.name)) {
             <div class="error">{{ lengthError }}</div>
           }
           <kadai-shared-field-error-display
@@ -197,7 +197,7 @@
                    placeholder="Reference value" required
                    type="text">
           </mat-form-field>
-          @if (inputOverflowMap.get(value.name)) {
+          @if (inputOverflowMap()?.get(value.name)) {
             <div class="error">{{ lengthError }}</div>
           }
           <kadai-shared-field-error-display
@@ -233,7 +233,7 @@
                    name="task.businessProcessId" placeholder="Business Process Id"
                    type="text">
           </mat-form-field>
-          @if (inputOverflowMap.get(businessProcessId.name)) {
+          @if (inputOverflowMap()?.get(businessProcessId.name)) {
             <div class="error">{{ lengthError }}
             </div>
           }
@@ -249,7 +249,7 @@
                         maxlength="4096" name="task.note"
                         placeholder="Note"></textarea>
             </mat-form-field>
-            @if (inputOverflowMap.get(note.name)) {
+            @if (inputOverflowMap()?.get(note.name)) {
               <div class="error">{{ lengthError }}</div>
             }
           </div>

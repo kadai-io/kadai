@@ -81,9 +81,6 @@ describe('WorkbasketInformationComponent', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(WorkbasketInformationComponent);
-    debugElement = fixture.debugElement;
-    component = fixture.componentInstance;
     store = TestBed.inject(Store);
     actions$ = TestBed.inject(Actions);
     store.reset({
@@ -91,6 +88,10 @@ describe('WorkbasketInformationComponent', () => {
       engineConfiguration: engineConfigurationMock,
       workbasket: workbasketReadStateMock
     });
+
+    fixture = TestBed.createComponent(WorkbasketInformationComponent);
+    debugElement = fixture.debugElement;
+    component = fixture.componentInstance;
     fixture.componentRef.setInput('workbasket', selectedWorkbasketMock);
 
     fixture.detectChanges();

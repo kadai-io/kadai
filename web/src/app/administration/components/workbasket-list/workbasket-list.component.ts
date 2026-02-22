@@ -18,13 +18,13 @@
 
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   ElementRef,
   inject,
   input,
   OnDestroy,
   OnInit,
+  signal,
   viewChild
 } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
@@ -56,6 +56,7 @@ import { AsyncPipe } from '@angular/common';
 import { IconTypeComponent } from '../type-icon/icon-type.component';
 import { MatDivider } from '@angular/material/divider';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'kadai-administration-workbasket-list',
@@ -75,7 +76,7 @@ import { PaginationComponent } from '../../../shared/components/pagination/pagin
 export class WorkbasketListComponent implements OnInit, OnDestroy {
   expanded = input<boolean>();
 
-  selectedId = '';
+  selectedId = signal<string>(undefined);
   type = 'workbaskets';
   workbasketDefaultSortBy: WorkbasketQuerySortParameter = WorkbasketQuerySortParameter.NAME;
   sort: Sorting<WorkbasketQuerySortParameter> = {
@@ -87,8 +88,8 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
     page: 1,
     'page-size': 9
   };
-  requestInProgress: boolean;
-  requestInProgressLocal = false;
+  requestInProgress = toSignal(inject(RequestInProgressService).getRequestInProgress(), { initialValue: false });
+  requestInProgressLocal = signal(false);
   resetPagingSubject = new Subject<null>();
   workbasketsSummary$: Observable<WorkbasketSummary[]> = inject(Store).select(WorkbasketSelectors.workbasketsSummary);
   workbasketsSummaryRepresentation$: Observable<WorkbasketSummaryRepresentation> = inject(Store).select(
@@ -107,18 +108,15 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   private domainService = inject(DomainService);
   private requestInProgressService = inject(RequestInProgressService);
   private ngxsActions$ = inject(Actions);
-  private cdr = inject(ChangeDetectorRef);
 
   constructor() {
     this.ngxsActions$.pipe(ofActionDispatched(GetWorkbasketsSummary), takeUntil(this.destroy$)).subscribe(() => {
       this.requestInProgressService.setRequestInProgress(true);
-      this.requestInProgressLocal = true;
-      this.cdr.markForCheck();
+      this.requestInProgressLocal.set(true);
     });
     this.ngxsActions$.pipe(ofActionCompleted(GetWorkbasketsSummary), takeUntil(this.destroy$)).subscribe(() => {
       this.requestInProgressService.setRequestInProgress(false);
-      this.requestInProgressLocal = false;
-      this.cdr.markForCheck();
+      this.requestInProgressLocal.set(false);
     });
   }
 
@@ -126,11 +124,10 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
     this.requestInProgressService.setRequestInProgress(true);
     this.selectedWorkbasket$.pipe(takeUntil(this.destroy$)).subscribe((selectedWorkbasket) => {
       if (typeof selectedWorkbasket !== 'undefined') {
-        this.selectedId = selectedWorkbasket.workbasketId;
+        this.selectedId.set(selectedWorkbasket.workbasketId);
       } else {
-        this.selectedId = undefined;
+        this.selectedId.set(undefined);
       }
-      this.cdr.markForCheck();
     });
 
     this.workbasketService
@@ -174,14 +171,6 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
         this.refreshWorkbasketList();
       });
 
-    this.requestInProgressService
-      .getRequestInProgress()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((value) => {
-        this.requestInProgress = value;
-        this.cdr.markForCheck();
-      });
-
     this.getWorkbasketListFilter$.pipe(takeUntil(this.destroy$)).subscribe((filter) => {
       this.performFilter(filter);
     });
@@ -189,7 +178,7 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
 
   selectWorkbasket(id: string) {
     this.requestInProgressService.setRequestInProgress(true);
-    if (this.selectedId === id) {
+    if (this.selectedId() === id) {
       this.store
         .dispatch(new DeselectWorkbasket())
         .pipe(takeUntil(this.destroy$))

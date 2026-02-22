@@ -20,28 +20,28 @@
   <div class="administration-overview__navbar-container">
     <nav [tabPanel]="administrationOverviewTabPanel" class="administration-overview__navbar"
          mat-stretch-tabs="false" mat-tab-nav-bar>
-      <a (click)="selectedTab = 'workbaskets'" [active]="selectedTab == 'workbaskets'"
+      <a (click)="selectedTab.set('workbaskets')" [active]="selectedTab() == 'workbaskets'"
          class="administration-overview__navbar-links" mat-tab-link
          routerLink="/kadai/administration/workbaskets">Workbaskets</a>
-      <a (click)="selectedTab = 'classifications'" [active]="selectedTab == 'classifications'"
+      <a (click)="selectedTab.set('classifications')" [active]="selectedTab() == 'classifications'"
          class="administration-overview__navbar-links" mat-tab-link
          routerLink="/kadai/administration/classifications">Classifications</a>
-      <a (click)="selectedTab = 'access-items-management'"
-         [active]="selectedTab == 'access-items-management'"
+      <a (click)="selectedTab.set('access-items-management')"
+         [active]="selectedTab() == 'access-items-management'"
          class="administration-overview__navbar-links"
          mat-tab-link routerLink="/kadai/administration/access-items-management">Access Items
         Management</a>
-      @if ((routingAccess)) {
-        <a (click)="selectedTab = 'task-routing'"
-           [active]="selectedTab == 'task-routing'"
+      @if (routingAccess()) {
+        <a (click)="selectedTab.set('task-routing')"
+           [active]="selectedTab() == 'task-routing'"
            class="administration-overview__navbar-links" mat-tab-link
            routerLink="/kadai/administration/task-routing">Task Routing</a>
       }
     </nav>
     <div class="administration-overview__domain">
       <mat-form-field>
-        <mat-select [value]="selectedDomain" matTooltip="Select domain">
-          @for (domain of domains; track domain) {
+        <mat-select [value]="selectedDomain()" matTooltip="Select domain">
+          @for (domain of domains(); track domain) {
             <mat-option (click)="switchDomain(domain)"
                         [value]="domain">
               {{ domain ? domain : 'MASTER DOMAIN' }}

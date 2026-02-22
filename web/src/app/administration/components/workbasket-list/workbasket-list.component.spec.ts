@@ -83,7 +83,7 @@ describe('WorkbasketListComponent', () => {
   });
 
   it('should dispatch SelectWorkbasket when selecting a workbasket', async () => {
-    component.selectedId = undefined;
+    component.selectedId.set(undefined);
     fixture.detectChanges();
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(SelectWorkbasket)).subscribe(() => (actionDispatched = true));
@@ -92,14 +92,14 @@ describe('WorkbasketListComponent', () => {
   });
 
   it('should dispatch DeselectWorkbasket when selecting a workbasket again', async () => {
-    component.selectedId = '123';
+    component.selectedId.set('123');
     fixture.detectChanges();
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(DeselectWorkbasket)).subscribe(() => (actionDispatched = true));
     const mockId = '123';
     component.selectWorkbasket(mockId);
     expect(actionDispatched).toBe(true);
-    expect(component.selectedId).toEqual(undefined); //because Deselect action sets selectedId to undefined
+    expect(component.selectedId()).toEqual(undefined); //because Deselect action sets selectedId to undefined
   });
 
   it('should set sort value when performSorting is called', () => {

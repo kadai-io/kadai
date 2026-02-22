@@ -99,7 +99,7 @@ describe('WorkbasketAccessItemsComponent', () => {
 
   it('should call access items sorting when access items are obtained from store', () => {
     const sortSpy = vi.spyOn(component, 'sortAccessItems');
-    component.ngOnInit();
+    fixture.detectChanges();
     expect(sortSpy).toHaveBeenCalled();
   });
 

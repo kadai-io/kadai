@@ -22,7 +22,7 @@
     <!-- TITLE -->
     <h4 class="workbasket-details__title">
       <span class="workbasket-details__title-name"
-            matTooltip="{{workbasket.name}}">{{ workbasket.name }}</span>
+            matTooltip="{{workbasket()?.name}}">{{ workbasket()?.name }}</span>
       <span class="workbasket-details__title-badge"
             matTooltip="{{ badgeMessage$ | async }}"> {{ badgeMessage$ | async }}</span>
     </h4>
@@ -41,7 +41,7 @@
     }
     <!-- SAVE -->
     <button (click)="onSubmit()"
-            [disabled]="action === ACTION.CREATE && !areAllAccessItemsValid"
+            [disabled]="action() === ACTION.CREATE && !areAllAccessItemsValid"
             class="workbasket-details__button workbasket-details__save-button"
             mat-button
             matTooltip="Save changes in current workbasket">
@@ -100,13 +100,13 @@
                  [selectedIndex]="selectedTab$ | async"
                  animationDuration="0ms" mat-stretch-tabs="false">
     <mat-tab label="Information">
-      <kadai-administration-workbasket-information [action]="action" [workbasket]="workbasket">
+      <kadai-administration-workbasket-information [action]="action()" [workbasket]="workbasket()">
       </kadai-administration-workbasket-information>
     </mat-tab>
     <mat-tab label="Access">
       <kadai-administration-workbasket-access-items (accessItemsValidityChanged)="handleAccessItemsValidityChanged($event)"
                                                     [expanded]="expanded()"
-                                                    [workbasket]="workbasket">
+                                                    [workbasket]="workbasket()">
       </kadai-administration-workbasket-access-items>
     </mat-tab>
     <mat-tab label="Distribution Targets">
