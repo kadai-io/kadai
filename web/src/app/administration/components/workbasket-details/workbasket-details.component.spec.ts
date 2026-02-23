@@ -19,11 +19,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketDetailsComponent } from './workbasket-details.component';
 import { DebugElement } from '@angular/core';
-import { Actions, provideStore, Store } from '@ngxs/store';
+import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { firstValueFrom, Observable, of } from 'rxjs';
 import { ACTION } from '../../../shared/models/action';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { DomainService } from '../../../shared/services/domain/domain.service';
+import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {
   engineConfigurationMock,
@@ -31,17 +32,40 @@ import {
   workbasketReadStateMock
 } from '../../../shared/store/mock-data/mock-store';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { CopyWorkbasket, CreateWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
+import {
+  CopyWorkbasket,
+  CreateWorkbasket,
+  DeselectWorkbasket,
+  OnButtonPressed,
+  SaveNewWorkbasket,
+  SelectComponent,
+  UpdateWorkbasket
+} from '../../../shared/store/workbasket-store/workbasket.actions';
 import { take } from 'rxjs/operators';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
+import { ButtonAction } from '../../models/button-action';
 
 const domainServiceSpy: Partial<DomainService> = {
   getSelectedDomain: vi.fn().mockReturnValue(of('A')),
   getSelectedDomainValue: vi.fn().mockReturnValue('A'),
   getDomains: vi.fn().mockReturnValue(of(['A']))
+};
+
+const workbasketServiceMock: Partial<WorkbasketService> = {
+  getWorkBasket: vi.fn().mockReturnValue(of(selectedWorkbasketMock)),
+  updateWorkbasket: vi.fn().mockReturnValue(of(selectedWorkbasketMock)),
+  createWorkbasket: vi.fn().mockReturnValue(of(selectedWorkbasketMock)),
+  getWorkBasketAccessItems: vi
+    .fn()
+    .mockReturnValue(of({ accessItems: [], _links: { self: { href: 'http://test/workbasketAccessItems' } } })),
+  updateWorkBasketAccessItem: vi.fn().mockReturnValue(of({ accessItems: [] })),
+  getWorkBasketsDistributionTargets: vi.fn().mockReturnValue(of({ distributionTargets: [], _links: {} })),
+  getWorkBasketsSummary: vi.fn().mockReturnValue(of({ workbaskets: [], page: {}, _links: {} })),
+  updateWorkBasketsDistributionTargets: vi.fn().mockReturnValue(of({ distributionTargets: [], _links: {} })),
+  removeDistributionTarget: vi.fn().mockReturnValue(of({}))
 };
 
 export const workbasketReadState = {
@@ -67,6 +91,7 @@ describe('WorkbasketDetailsComponent', () => {
           provide: DomainService,
           useValue: domainServiceSpy
         },
+        { provide: WorkbasketService, useValue: workbasketServiceMock },
         provideHttpClientTesting(),
         provideAngularSvgIcon()
       ]
@@ -142,5 +167,98 @@ describe('WorkbasketDetailsComponent', () => {
   it('should set areAllAccessItemsValid to true when isValid is true', () => {
     component.handleAccessItemsValidityChanged(true);
     expect(component.areAllAccessItemsValid).toBeTruthy();
+  });
+
+  it('should dispatch OnButtonPressed SAVE when onSubmit is called', () => {
+    let dispatched = false;
+    actions$.pipe(ofActionDispatched(OnButtonPressed)).subscribe((action) => {
+      if (action.button === ButtonAction.SAVE) dispatched = true;
+    });
+    component.onSubmit();
+    expect(dispatched).toBe(true);
+  });
+
+  it('should dispatch OnButtonPressed UNDO when onRestore is called', () => {
+    let dispatched = false;
+    actions$.pipe(ofActionDispatched(OnButtonPressed)).subscribe((action) => {
+      if (action.button === ButtonAction.UNDO) dispatched = true;
+    });
+    component.onRestore();
+    expect(dispatched).toBe(true);
+  });
+
+  it('should dispatch OnButtonPressed COPY when onCopy is called', () => {
+    let copyDispatched = false;
+    let copyWorkbasketDispatched = false;
+    actions$.pipe(ofActionDispatched(OnButtonPressed)).subscribe((action) => {
+      if (action.button === ButtonAction.COPY) copyDispatched = true;
+    });
+    actions$.pipe(ofActionDispatched(CopyWorkbasket)).subscribe(() => {
+      copyWorkbasketDispatched = true;
+    });
+    component.onCopy();
+    expect(copyDispatched).toBe(true);
+    expect(copyWorkbasketDispatched).toBe(true);
+  });
+
+  it('should dispatch OnButtonPressed REMOVE_AS_DISTRIBUTION_TARGETS when onRemoveAsDistributionTarget is called', () => {
+    let dispatched = false;
+    actions$.pipe(ofActionDispatched(OnButtonPressed)).subscribe((action) => {
+      if (action.button === ButtonAction.REMOVE_AS_DISTRIBUTION_TARGETS) dispatched = true;
+    });
+    component.onRemoveAsDistributionTarget();
+    expect(dispatched).toBe(true);
+  });
+
+  it('should dispatch OnButtonPressed DELETE when onRemoveWorkbasket is called', () => {
+    let dispatched = false;
+    actions$.pipe(ofActionDispatched(OnButtonPressed)).subscribe((action) => {
+      if (action.button === ButtonAction.DELETE) dispatched = true;
+    });
+    component.onRemoveWorkbasket();
+    expect(dispatched).toBe(true);
+  });
+
+  it('should dispatch OnButtonPressed CLOSE and DeselectWorkbasket when onClose is called', () => {
+    let closeDispatched = false;
+    let deselectDispatched = false;
+    actions$.pipe(ofActionDispatched(OnButtonPressed)).subscribe((action) => {
+      if (action.button === ButtonAction.CLOSE) closeDispatched = true;
+    });
+    actions$.pipe(ofActionDispatched(DeselectWorkbasket)).subscribe(() => {
+      deselectDispatched = true;
+    });
+    component.onClose();
+    expect(closeDispatched).toBe(true);
+    expect(deselectDispatched).toBe(true);
+  });
+
+  it('should dispatch SelectComponent when selectComponent is called', () => {
+    let dispatched = false;
+    actions$.pipe(ofActionDispatched(SelectComponent)).subscribe((index) => {
+      dispatched = true;
+    });
+    component.selectComponent(2);
+    expect(dispatched).toBe(true);
+  });
+
+  it('should complete destroy$ on ngOnDestroy', () => {
+    const nextSpy = vi.spyOn(component.destroy$, 'next');
+    const completeSpy = vi.spyOn(component.destroy$, 'complete');
+    component.ngOnDestroy();
+    expect(nextSpy).toHaveBeenCalled();
+    expect(completeSpy).toHaveBeenCalled();
+  });
+
+  it('should update workbasket after UpdateWorkbasket action succeeds', async () => {
+    await store
+      .dispatch(new UpdateWorkbasket(selectedWorkbasketMock._links.self.href, selectedWorkbasketMock))
+      .toPromise();
+    expect(workbasketServiceMock.updateWorkbasket).toHaveBeenCalled();
+  });
+
+  it('should update workbasket after SaveNewWorkbasket action succeeds', async () => {
+    await store.dispatch(new SaveNewWorkbasket(selectedWorkbasketMock)).toPromise();
+    expect(workbasketServiceMock.createWorkbasket).toHaveBeenCalled();
   });
 });

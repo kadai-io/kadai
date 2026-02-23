@@ -19,6 +19,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
+import { ImportExportService } from '../../services/import-export.service';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { ClassificationListComponent } from './classification-list.component';
@@ -77,6 +78,7 @@ describe('ClassificationListComponent', () => {
 
   it('should create component', () => {
     expect(component).toBeTruthy();
+    expect(debugElement.nativeElement.querySelector('kadai-administration-import-export')).toBeTruthy();
   });
 
   /* HTML: ACTION TOOLBAR */
@@ -87,10 +89,6 @@ describe('ClassificationListComponent', () => {
     actions$.pipe(ofActionDispatched(CreateClassification)).subscribe(() => (actionDispatched = true));
     button.click();
     expect(actionDispatched).toBe(true);
-  });
-
-  it('should display import-export component', () => {
-    expect(debugElement.nativeElement.querySelector('kadai-administration-import-export')).toBeTruthy();
   });
 
   it('should display classification-types-selector component', () => {
@@ -155,5 +153,35 @@ describe('ClassificationListComponent', () => {
   it('should return a special icon when getCategoryIcon is called and category does not exist', async () => {
     const iconPair = await firstValueFrom(component.getCategoryIcon('CLOUD'));
     expect(iconPair.left).toBe('assets/icons/categories/missing-icon.svg');
+  });
+
+  it('should call requestInProgressService.setRequestInProgress when setRequestInProgress is called', () => {
+    component.setRequestInProgress(true);
+    expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalledWith(true);
+  });
+
+  it('should call requestInProgressService.setRequestInProgress(false) when setRequestInProgress is called with false', () => {
+    component.setRequestInProgress(false);
+    expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalledWith(false);
+  });
+
+  it('should complete destroy$ on ngOnDestroy', () => {
+    const nextSpy = vi.spyOn(component.destroy$, 'next');
+    const completeSpy = vi.spyOn(component.destroy$, 'complete');
+    component.ngOnDestroy();
+    expect(nextSpy).toHaveBeenCalled();
+    expect(completeSpy).toHaveBeenCalled();
+  });
+
+  it('should trigger setRequestInProgress(true) when GetClassifications action is dispatched', () => {
+    store.dispatch({ type: '[Classification] Get Classifications' });
+    expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalled();
+  });
+
+  it('should dispatch GetClassifications when importExportService emits importing finished', () => {
+    const importExportService = TestBed.inject(ImportExportService);
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+    importExportService.setImportingFinished(true);
+    expect(dispatchSpy).toHaveBeenCalled();
   });
 });
