@@ -28,7 +28,12 @@ import { NotificationService } from '../../../shared/services/notifications/noti
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { ACTION } from '../../../shared/models/action';
-import { MarkWorkbasketForDeletion, UpdateWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
+import {
+  MarkWorkbasketForDeletion,
+  RemoveDistributionTarget,
+  UpdateWorkbasket
+} from '../../../shared/store/workbasket-store/workbasket.actions';
+import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import {
   engineConfigurationMock,
   selectedWorkbasketMock,
@@ -170,5 +175,101 @@ describe('WorkbasketInformationComponent', () => {
 
     expect(component.workbasket['custom3']).toBe('');
     expect(component.workbasket['custom4']).toBe(newValue);
+  });
+
+  it('should call formsValidatorService.isFieldValid when isFieldValid is called', () => {
+    const result = component.isFieldValid('key');
+    expect(formValidatorServiceMock.isFieldValid).toHaveBeenCalled();
+    expect(result).toBe(true);
+  });
+
+  it('should call notificationService.showDialog when removeWorkbasket is called', () => {
+    const notificationService = TestBed.inject(NotificationService);
+    const showDialogSpy = vi.spyOn(notificationService, 'showDialog').mockImplementation(() => undefined);
+    component.removeWorkbasket();
+    expect(showDialogSpy).toHaveBeenCalledWith('WORKBASKET_DELETE', expect.any(Object), expect.any(Function));
+  });
+
+  it('should dispatch RemoveDistributionTarget when removeDistributionTargets is called', () => {
+    let actionDispatched = false;
+    actions$.pipe(ofActionDispatched(RemoveDistributionTarget)).subscribe(() => (actionDispatched = true));
+    component.removeDistributionTargets();
+    expect(actionDispatched).toBe(true);
+  });
+
+  it('should set workbasket owner when onSelectedOwner is called', () => {
+    component.onSelectedOwner({ accessId: 'user-test', name: 'Test User' });
+    expect(component.workbasket.owner).toBe('user-test');
+  });
+
+  it('should return correct custom property string for getWorkbasketCustomProperty', () => {
+    expect(component.getWorkbasketCustomProperty(1)).toBe('custom1');
+    expect(component.getWorkbasketCustomProperty(4)).toBe('custom4');
+    expect(component.getWorkbasketCustomProperty(12)).toBe('custom12');
+  });
+
+  it('should handle workbasket customization without owner config', () => {
+    const engineConfigWithoutOwner = {
+      ...engineConfigurationMock,
+      customisation: {
+        ...engineConfigurationMock.customisation,
+        EN: {
+          ...engineConfigurationMock.customisation.EN,
+          workbaskets: {
+            ...engineConfigurationMock.customisation.EN.workbaskets,
+            information: {
+              custom1: engineConfigurationMock.customisation.EN.workbaskets.information.custom1,
+              custom3: engineConfigurationMock.customisation.EN.workbaskets.information.custom3
+            }
+          }
+        }
+      }
+    };
+    store.reset({ ...store.snapshot(), engineConfiguration: engineConfigWithoutOwner });
+    component.ngOnInit();
+    expect(component).toBeTruthy();
+  });
+
+  it('should not validate when validateInputOverflow is called with undefined value', () => {
+    const mockModel: any = { name: 'testField', value: undefined };
+    component.validateInputOverflow(mockModel, 10);
+    expect(component).toBeTruthy();
+  });
+
+  it('should complete destroy$ on ngOnDestroy', () => {
+    const nextSpy = vi.spyOn(component.destroy$, 'next');
+    const completeSpy = vi.spyOn(component.destroy$, 'complete');
+    component.ngOnDestroy();
+    expect(nextSpy).toHaveBeenCalled();
+    expect(completeSpy).toHaveBeenCalled();
+  });
+
+  it('should set requestInProgress to true when beforeRequest is called', () => {
+    const requestInProgressService = TestBed.inject(RequestInProgressService);
+    const setRequestSpy = vi.spyOn(requestInProgressService, 'setRequestInProgress');
+    component.beforeRequest();
+    expect(setRequestSpy).toHaveBeenCalledWith(true);
+  });
+
+  it('should set requestInProgress to false and trigger saved when afterRequest is called', () => {
+    const requestInProgressService = TestBed.inject(RequestInProgressService);
+    const setRequestSpy = vi.spyOn(requestInProgressService, 'setRequestInProgress');
+    component.afterRequest();
+    expect(setRequestSpy).toHaveBeenCalledWith(false);
+    expect(workbasketServiceMock.triggerWorkBasketSaved).toHaveBeenCalled();
+  });
+
+  it('should set created and modified dates when addDateToWorkbasket is called', () => {
+    component.addDateToWorkbasket();
+    expect(component.workbasket.created).toBeDefined();
+    expect(component.workbasket.modified).toBeDefined();
+  });
+
+  it('should call postNewWorkbasket when workbasketId is falsy in onSave', () => {
+    component.workbasket = { ...selectedWorkbasketMock };
+    component.workbasket.workbasketId = undefined;
+    const postSpy = vi.spyOn(component, 'postNewWorkbasket').mockImplementation(() => {});
+    component.onSave();
+    expect(postSpy).toHaveBeenCalled();
   });
 });

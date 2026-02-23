@@ -17,29 +17,204 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { Subject } from 'rxjs';
 import { TaskCustomFieldsComponent } from './task-custom-fields.component';
-import { provideHttpClient } from '@angular/common/http';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
+import { Task } from '../../models/task';
 
-// TODO: test pending to test. Failing random
-describe.skip('TaskCustomFieldsComponent', () => {
+describe('TaskCustomFieldsComponent', () => {
   let component: TaskCustomFieldsComponent;
   let fixture: ComponentFixture<TaskCustomFieldsComponent>;
+  let inputOverflowSubject: Subject<Map<string, boolean>>;
+  let mockFormsValidatorService: {
+    inputOverflowObservable: Subject<Map<string, boolean>>;
+    validateInputOverflow: ReturnType<typeof vi.fn>;
+  };
+
+  const createTask = (): Task =>
+    new Task(
+      'task-id-1',
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      'Test Task',
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      false,
+      false,
+      1,
+      [],
+      [],
+      'custom1-value',
+      'custom2-value',
+      'custom3-value',
+      'custom4-value'
+    );
 
   beforeEach(async () => {
+    inputOverflowSubject = new Subject<Map<string, boolean>>();
+
+    mockFormsValidatorService = {
+      inputOverflowObservable: inputOverflowSubject,
+      validateInputOverflow: vi.fn()
+    };
+
     await TestBed.configureTestingModule({
       imports: [TaskCustomFieldsComponent],
-      providers: [provideHttpClient()]
+      providers: [{ provide: FormsValidatorService, useValue: mockFormsValidatorService }]
     }).compileComponents();
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TaskCustomFieldsComponent);
     component = fixture.componentInstance;
+    component.task = createTask();
     fixture.detectChanges();
   });
 
-  it('should create component', () => {
+  it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('ngOnInit()', () => {
+    it('should set customFields from task keys starting with "custom" and containing a digit', () => {
+      expect(component.customFields).toBeDefined();
+      expect(component.customFields).toContain('custom1');
+      expect(component.customFields).toContain('custom2');
+      expect(component.customFields).toContain('custom3');
+      expect(component.customFields).toContain('custom4');
+    });
+
+    it('should exclude task keys that start with "custom" but contain no digit', () => {
+      expect(component.customFields).not.toContain('customAttributes');
+    });
+
+    it('should subscribe to inputOverflowObservable and update inputOverflowMap', () => {
+      const testMap = new Map<string, boolean>([['custom1', true]]);
+
+      inputOverflowSubject.next(testMap);
+
+      expect(component.inputOverflowMap).toBe(testMap);
+    });
+
+    it('should set validateKeypress to a function', () => {
+      expect(typeof component.validateKeypress).toBe('function');
+    });
+
+    it('should call formsValidatorService.validateInputOverflow when validateKeypress is invoked', () => {
+      const fakeModel = { name: 'custom1', value: 'some-value' } as any;
+      const maxLength = 255;
+
+      component.validateKeypress(fakeModel, maxLength);
+
+      expect(mockFormsValidatorService.validateInputOverflow).toHaveBeenCalledWith(fakeModel, maxLength);
+    });
+  });
+
+  describe('customFields filtering', () => {
+    it('should include all custom numeric fields present on the task', () => {
+      const task = createTask();
+      const allKeys = Object.keys(task);
+      const expectedCustomFields = allKeys.filter((key) => key.startsWith('custom') && /\d/.test(key));
+
+      expect(component.customFields).toEqual(expectedCustomFields);
+    });
+
+    it('should not include "customAttributes" in customFields', () => {
+      expect(component.customFields).not.toContain('customAttributes');
+    });
+
+    it('should return custom fields even when task custom values are empty strings', () => {
+      component.task = new Task(
+        'task-id-2',
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        'Name',
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        false,
+        false,
+        1,
+        [],
+        [],
+        '',
+        '',
+        ''
+      );
+      component.ngOnInit();
+
+      expect(component.customFields).toContain('custom1');
+      expect(component.customFields).toContain('custom2');
+      expect(component.customFields).toContain('custom3');
+    });
+  });
+
+  describe('ngOnDestroy()', () => {
+    it('should call next and complete on destroy$', () => {
+      const completeSpy = vi.spyOn(component.destroy$, 'complete');
+      const nextSpy = vi.spyOn(component.destroy$, 'next');
+
+      component.ngOnDestroy();
+
+      expect(nextSpy).toHaveBeenCalled();
+      expect(completeSpy).toHaveBeenCalled();
+    });
+
+    it('should unsubscribe from inputOverflowObservable after destroy', () => {
+      component.ngOnDestroy();
+
+      const mapAfterDestroy = component.inputOverflowMap;
+      const newMap = new Map<string, boolean>([['custom1', true]]);
+
+      inputOverflowSubject.next(newMap);
+
+      expect(component.inputOverflowMap).toBe(mapAfterDestroy);
+    });
+  });
+
+  describe('inputOverflowMap', () => {
+    it('should start as an empty Map before first emission', () => {
+      const freshFixture = TestBed.createComponent(TaskCustomFieldsComponent);
+      const freshComponent = freshFixture.componentInstance;
+      expect(freshComponent.inputOverflowMap).toBeDefined();
+      expect(freshComponent.inputOverflowMap.size).toBe(0);
+    });
+
+    it('should be updated each time inputOverflowObservable emits', () => {
+      const firstMap = new Map<string, boolean>([['custom1', true]]);
+      const secondMap = new Map<string, boolean>([['custom2', false]]);
+
+      inputOverflowSubject.next(firstMap);
+      expect(component.inputOverflowMap).toBe(firstMap);
+
+      inputOverflowSubject.next(secondMap);
+      expect(component.inputOverflowMap).toBe(secondMap);
+    });
   });
 });

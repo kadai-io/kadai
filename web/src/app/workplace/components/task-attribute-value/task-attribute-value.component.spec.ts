@@ -39,4 +39,44 @@ describe('TaskAttributeValueComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  describe('addAttribute()', () => {
+    it('should add a new empty attribute to the attributes array', () => {
+      component.attributes = [];
+      component.addAttribute();
+      expect(component.attributes.length).toBe(1);
+      expect(component.attributes[0]).toEqual({ key: '', value: '' });
+    });
+
+    it('should append to existing attributes', () => {
+      component.attributes = [{ key: 'existing', value: 'val' }];
+      component.addAttribute();
+      expect(component.attributes.length).toBe(2);
+      expect(component.attributes[1]).toEqual({ key: '', value: '' });
+    });
+  });
+
+  describe('removeAttribute()', () => {
+    it('should remove the attribute at the given index', () => {
+      component.attributes = [
+        { key: 'key1', value: 'val1' },
+        { key: 'key2', value: 'val2' },
+        { key: 'key3', value: 'val3' }
+      ];
+      component.removeAttribute(1);
+      expect(component.attributes.length).toBe(2);
+      expect(component.attributes[0].key).toBe('key1');
+      expect(component.attributes[1].key).toBe('key3');
+    });
+
+    it('should remove the first attribute when index is 0', () => {
+      component.attributes = [
+        { key: 'key1', value: 'val1' },
+        { key: 'key2', value: 'val2' }
+      ];
+      component.removeAttribute(0);
+      expect(component.attributes.length).toBe(1);
+      expect(component.attributes[0].key).toBe('key2');
+    });
+  });
 });

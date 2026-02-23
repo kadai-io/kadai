@@ -25,7 +25,15 @@ import { RouterModule } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { of } from 'rxjs';
+import { DomainService } from '../../../shared/services/domain/domain.service';
+
+const domainServiceMock = {
+  getDomains: vi.fn().mockReturnValue(of(['DOMAIN_A', 'DOMAIN_B'])),
+  getSelectedDomain: vi.fn().mockReturnValue(of('DOMAIN_A')),
+  switchDomain: vi.fn()
+};
 
 describe('MonitorComponent', () => {
   let component: MonitorComponent;
@@ -35,7 +43,11 @@ describe('MonitorComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [MatTabsModule, RouterModule, RouterTestingModule, NoopAnimationsModule, MonitorComponent],
-      providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+      providers: [
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+        { provide: DomainService, useValue: domainServiceMock }
+      ]
     }).compileComponents();
   });
 
@@ -48,5 +60,18 @@ describe('MonitorComponent', () => {
 
   it('should create component', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should set domains from getDomains subscription', () => {
+    expect(component.domains).toEqual(['DOMAIN_A', 'DOMAIN_B']);
+  });
+
+  it('should set selectedDomain from getSelectedDomain subscription', () => {
+    expect(component.selectedDomain).toBe('DOMAIN_A');
+  });
+
+  it('should call domainService.switchDomain when switchDomain is called', () => {
+    component.switchDomain('DOMAIN_B');
+    expect(domainServiceMock.switchDomain).toHaveBeenCalledWith('DOMAIN_B');
   });
 });

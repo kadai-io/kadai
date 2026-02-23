@@ -29,6 +29,15 @@ import { DomainService } from '../../../shared/services/domain/domain.service';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
+import { NotificationService } from '../../../shared/services/notifications/notification.service';
+import { Side } from '../../models/workbasket-distribution-enums';
+import {
+  FetchAvailableDistributionTargets,
+  FetchWorkbasketDistributionTargets,
+  UpdateWorkbasketDistributionTargets
+} from '../../../shared/store/workbasket-store/workbasket.actions';
+import { ClearWorkbasketFilter } from '../../../shared/store/filter-store/filter.actions';
+import { ButtonAction } from '../../models/button-action';
 
 const activatedRouteMock = {
   firstChild: {
@@ -45,7 +54,13 @@ const domainServiceSpy: Partial<DomainService> = {
 const workbasketServiceSpy: Partial<WorkbasketService> = {
   getWorkBasketsSummary: vi.fn().mockReturnValue(of({ workbaskets: [] })),
   getWorkBasketsDistributionTargets: vi.fn().mockReturnValue(of({ distributionTargets: [] })),
-  getWorkBasket: vi.fn().mockReturnValue(of({}))
+  getWorkBasket: vi.fn().mockReturnValue(of(undefined))
+};
+
+const notificationServiceSpy: Partial<NotificationService> = {
+  showSuccess: vi.fn(),
+  showError: vi.fn(),
+  showDialog: vi.fn()
 };
 
 describe('WorkbasketDistributionTargetsComponent', () => {
@@ -63,7 +78,8 @@ describe('WorkbasketDistributionTargetsComponent', () => {
         provideAngularSvgIcon(),
         { provide: WorkbasketService, useValue: workbasketServiceSpy },
         { provide: ActivatedRoute, useValue: activatedRouteMock },
-        { provide: DomainService, useValue: domainServiceSpy }
+        { provide: DomainService, useValue: domainServiceSpy },
+        { provide: NotificationService, useValue: notificationServiceSpy }
       ]
     }).compileComponents();
 
@@ -96,5 +112,78 @@ describe('WorkbasketDistributionTargetsComponent', () => {
     fixture.detectChanges();
     expect(component.sideBySide).toBe(false);
     expect(debugElement.nativeElement.querySelector('.distribution-targets-list__lists--side')).toBeFalsy();
+  });
+
+  it('should toggle sideBySide when toggleSideBySideView is called', () => {
+    expect(component.sideBySide).toBe(true);
+    component.toggleSideBySideView();
+    expect(component.sideBySide).toBe(false);
+    component.toggleSideBySideView();
+    expect(component.sideBySide).toBe(true);
+  });
+
+  it('should set displayingDistributionTargetsPicker to true when toggleSideBySideView is called', () => {
+    component.displayingDistributionTargetsPicker = false;
+    component.toggleSideBySideView();
+    expect(component.displayingDistributionTargetsPicker).toBe(true);
+  });
+
+  it('should toggle displayingDistributionTargetsPicker when toggleDistributionTargetsPicker is called', () => {
+    expect(component.displayingDistributionTargetsPicker).toBe(true);
+    component.toggleDistributionTargetsPicker();
+    expect(component.displayingDistributionTargetsPicker).toBe(false);
+    component.toggleDistributionTargetsPicker();
+    expect(component.displayingDistributionTargetsPicker).toBe(true);
+  });
+
+  it('should dispatch UpdateWorkbasketDistributionTargets when onSave is called', () => {
+    const dispatchSpy = vi.spyOn(store, 'dispatch').mockReturnValue(of(undefined));
+    component.onSave();
+    expect(dispatchSpy).toHaveBeenCalledWith(new UpdateWorkbasketDistributionTargets());
+  });
+
+  it('should emit to transferDistributionTargetObservable when moveDistributionTargets is called', () => {
+    const nextSpy = vi.spyOn(component.transferDistributionTargetObservable, 'next');
+    component.moveDistributionTargets(Side.SELECTED);
+    expect(nextSpy).toHaveBeenCalledWith(Side.SELECTED);
+  });
+
+  it('should emit AVAILABLE side when moveDistributionTargets is called with AVAILABLE', () => {
+    const nextSpy = vi.spyOn(component.transferDistributionTargetObservable, 'next');
+    component.moveDistributionTargets(Side.AVAILABLE);
+    expect(nextSpy).toHaveBeenCalledWith(Side.AVAILABLE);
+  });
+
+  it('should dispatch multiple actions when onClear is called', () => {
+    const dispatchSpy = vi.spyOn(store, 'dispatch').mockReturnValue(of(undefined));
+    component.onClear();
+    expect(dispatchSpy).toHaveBeenCalledWith(new FetchWorkbasketDistributionTargets(true));
+    expect(dispatchSpy).toHaveBeenCalledWith(new FetchAvailableDistributionTargets(true));
+    expect(dispatchSpy).toHaveBeenCalledWith(new ClearWorkbasketFilter('selectedDistributionTargets'));
+    expect(dispatchSpy).toHaveBeenCalledWith(new ClearWorkbasketFilter('availableDistributionTargets'));
+    expect(notificationServiceSpy.showSuccess).toHaveBeenCalledWith('WORKBASKET_DISTRIBUTION_TARGET_RESTORE');
+  });
+
+  it('should complete destroy$ and transferDistributionTargetObservable on ngOnDestroy', () => {
+    const destroySpy = vi.spyOn(component.destroy$, 'next');
+    const destroyCompleteSpy = vi.spyOn(component.destroy$, 'complete');
+    const transferCompleteSpy = vi.spyOn(component.transferDistributionTargetObservable, 'complete');
+    component.ngOnDestroy();
+    expect(transferCompleteSpy).toHaveBeenCalled();
+    expect(destroySpy).toHaveBeenCalled();
+    expect(destroyCompleteSpy).toHaveBeenCalled();
+  });
+
+  it('should have sideEnum property set to Side enum', () => {
+    expect(component.sideEnum).toBe(Side);
+  });
+
+  it('should call onClear when buttonAction$ emits UNDO action', () => {
+    const clearSpy = vi.spyOn(component, 'onClear').mockImplementation(() => {});
+    store.reset({
+      ...store.snapshot(),
+      workbasket: { ...workbasketReadStateMock, button: ButtonAction.UNDO }
+    });
+    expect(clearSpy).toHaveBeenCalled();
   });
 });

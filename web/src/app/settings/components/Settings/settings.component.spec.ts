@@ -91,4 +91,20 @@ describe('SettingsComponent', () => {
     component.onSave();
     expect(isActionDispatched).toBe(true);
   });
+
+  it('should restore settings to oldSettings when onReset is called', () => {
+    const originalSettings = component.deepCopy(component.oldSettings);
+    component.onReset();
+    expect(component.settings).toEqual(originalSettings);
+  });
+
+  it('should update settings value from DOM input when onColorChange is called', () => {
+    const input = document.createElement('input');
+    input.id = 'testColorKey';
+    input.value = '#ABCDEF';
+    document.body.appendChild(input);
+    component.onColorChange('testColorKey');
+    expect(component.settings['testColorKey']).toBe('#ABCDEF');
+    document.body.removeChild(input);
+  });
 });
