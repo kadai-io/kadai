@@ -26,7 +26,6 @@ import { ObjectReference } from '../models/object-reference';
 })
 export class WorkplaceService {
   private workbasketSelected = new BehaviorSubject<Workbasket>(undefined);
-  private objectReferenceSelected = new BehaviorSubject<ObjectReference>(undefined);
 
   selectWorkbasket(workbasket?: Workbasket): void {
     this.workbasketSelected.next(workbasket);

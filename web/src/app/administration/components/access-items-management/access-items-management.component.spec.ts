@@ -179,4 +179,160 @@ describe('AccessItemsManagementComponent', () => {
     app.accessItemsForm = null;
     expect(app.accessItemsPermissions).toBeNull();
   });
+
+  it('should filter access items by accessIdFilter', () => {
+    app.setAccessItemsGroups([
+      {
+        accessId: 'user1',
+        workbasketId: 'wb1',
+        accessItemId: 'ai1',
+        workbasketKey: 'key1',
+        accessName: 'User Alpha',
+        permRead: false,
+        permReadTasks: false,
+        permEditTasks: false,
+        permOpen: false,
+        permAppend: false,
+        permTransfer: false,
+        permDistribute: false,
+        permCustom1: false,
+        permCustom2: false,
+        permCustom3: false,
+        permCustom4: false,
+        permCustom5: false,
+        permCustom6: false,
+        permCustom7: false,
+        permCustom8: false,
+        permCustom9: false,
+        permCustom10: false,
+        permCustom11: false,
+        permCustom12: false
+      },
+      {
+        accessId: 'user2',
+        workbasketId: 'wb2',
+        accessItemId: 'ai2',
+        workbasketKey: 'key2',
+        accessName: 'User Beta',
+        permRead: false,
+        permReadTasks: false,
+        permEditTasks: false,
+        permOpen: false,
+        permAppend: false,
+        permTransfer: false,
+        permDistribute: false,
+        permCustom1: false,
+        permCustom2: false,
+        permCustom3: false,
+        permCustom4: false,
+        permCustom5: false,
+        permCustom6: false,
+        permCustom7: false,
+        permCustom8: false,
+        permCustom9: false,
+        permCustom10: false,
+        permCustom11: false,
+        permCustom12: false
+      }
+    ]);
+    app.accessItemsForm.patchValue({ accessIdFilter: 'alpha' });
+    app.filterAccessItems();
+    expect(app.accessItems.length).toBe(1);
+    expect(app.accessItems[0].accessName).toBe('User Alpha');
+  });
+
+  it('should filter access items by workbasketKeyFilter', () => {
+    app.setAccessItemsGroups([
+      {
+        accessId: 'user1',
+        workbasketId: 'wb1',
+        accessItemId: 'ai1',
+        workbasketKey: 'MYKEY1',
+        accessName: 'User Alpha',
+        permRead: false,
+        permReadTasks: false,
+        permEditTasks: false,
+        permOpen: false,
+        permAppend: false,
+        permTransfer: false,
+        permDistribute: false,
+        permCustom1: false,
+        permCustom2: false,
+        permCustom3: false,
+        permCustom4: false,
+        permCustom5: false,
+        permCustom6: false,
+        permCustom7: false,
+        permCustom8: false,
+        permCustom9: false,
+        permCustom10: false,
+        permCustom11: false,
+        permCustom12: false
+      },
+      {
+        accessId: 'user2',
+        workbasketId: 'wb2',
+        accessItemId: 'ai2',
+        workbasketKey: 'OTHERKEY',
+        accessName: 'User Beta',
+        permRead: false,
+        permReadTasks: false,
+        permEditTasks: false,
+        permOpen: false,
+        permAppend: false,
+        permTransfer: false,
+        permDistribute: false,
+        permCustom1: false,
+        permCustom2: false,
+        permCustom3: false,
+        permCustom4: false,
+        permCustom5: false,
+        permCustom6: false,
+        permCustom7: false,
+        permCustom8: false,
+        permCustom9: false,
+        permCustom10: false,
+        permCustom11: false,
+        permCustom12: false
+      }
+    ]);
+    app.accessItemsForm.patchValue({ workbasketKeyFilter: 'mykey' });
+    app.filterAccessItems();
+    expect(app.accessItems.length).toBe(1);
+    expect(app.accessItems[0].workbasketKey).toBe('MYKEY1');
+  });
+
+  it('should clear filters and call searchForAccessItemsWorkbaskets when clearFilter is called', () => {
+    app.setAccessItemsGroups([]);
+    app.accessItemsForm.patchValue({ workbasketKeyFilter: 'something', accessIdFilter: 'another' });
+    const searchSpy = vi.spyOn(app, 'searchForAccessItemsWorkbaskets').mockImplementation(() => {});
+    app.clearFilter();
+    expect(app.accessItemsForm.value.workbasketKeyFilter).toBe('');
+    expect(app.accessItemsForm.value.accessIdFilter).toBe('');
+    expect(searchSpy).toHaveBeenCalled();
+  });
+
+  it('should not throw when clearFilter is called with no accessItemsForm', () => {
+    app.accessItemsForm = null;
+    expect(() => app.clearFilter()).not.toThrow();
+  });
+
+  it('should complete destroy$ on ngOnDestroy', () => {
+    const nextSpy = vi.spyOn(app.destroy$, 'next');
+    const completeSpy = vi.spyOn(app.destroy$, 'complete');
+    app.ngOnDestroy();
+    expect(nextSpy).toHaveBeenCalled();
+    expect(completeSpy).toHaveBeenCalled();
+  });
+
+  it('should call removeFocus without throwing', () => {
+    expect(() => app.removeFocus()).not.toThrow();
+  });
+
+  it('should set null accessItemsForm when onSelectAccessId is called with null', () => {
+    app.setAccessItemsGroups([]);
+    expect(app.accessItemsForm).not.toBeNull();
+    app.onSelectAccessId(null);
+    expect(app.accessItemsForm).toBeNull();
+  });
 });
