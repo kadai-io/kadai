@@ -52,7 +52,7 @@
     "@angular/compiler-cli": "21.1.5",
     "@ngxs/devtools-plugin": "21.0.0",
     "@types/file-saver-es": "2",
-    "@types/jsdom": "27",
+    "@types/jsdom": "28",
     "@types/lodash-es": "4",
     "@types/node": "25.3.0",
     "@typescript-eslint/eslint-plugin": "8.56.1",
