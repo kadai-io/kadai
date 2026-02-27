@@ -25,8 +25,7 @@ import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.internal.util.IdGenerator;
 import io.kadai.common.internal.util.Pair;
 import io.kadai.simplehistory.jobs.TaskHistoryCleanupJob;
-import io.kadai.simplehistory.task.internal.TaskDeletedHistoryEventConsumerOnCascadeDeleteEvents;
-import io.kadai.simplehistory.task.internal.TaskHistoryEventPersister;
+import io.kadai.simplehistory.task.internal.TaskHistoryEventConsumer;
 import io.kadai.simplehistory.task.internal.TaskHistoryServiceImpl;
 import io.kadai.spi.history.api.KadaiEventConsumer;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
@@ -55,8 +54,7 @@ import org.junit.jupiter.api.function.ThrowingConsumer;
 @WithServiceProvider(
     serviceProviderInterface = KadaiEventConsumer.class,
     serviceProviders = {
-      TaskHistoryEventPersister.class,
-      TaskDeletedHistoryEventConsumerOnCascadeDeleteEvents.class
+      TaskHistoryEventConsumer.class,
     })
 @KadaiIntegrationTest
 class TaskHistoryCleanupJobAccTest {

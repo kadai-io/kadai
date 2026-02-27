@@ -19,16 +19,35 @@
 package io.kadai.simplehistory.task.internal;
 
 import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.api.exceptions.NotAuthorizedException;
+import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.spi.history.api.KadaiEventConsumer;
+import io.kadai.spi.history.api.events.task.TaskDeletedEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 
-public class TaskHistoryEventPersister implements KadaiEventConsumer<TaskHistoryEvent> {
+public class TaskHistoryEventConsumer implements KadaiEventConsumer<TaskHistoryEvent> {
 
+  private KadaiEngine kadaiEngine;
   private TaskHistoryServiceImpl taskHistoryService;
 
   @Override
   public void consume(TaskHistoryEvent event) {
-    taskHistoryService.createTaskHistoryEvent(event);
+    final boolean deletionEnabled =
+        kadaiEngine.getConfiguration().isDeleteHistoryEventsOnTaskDeletionEnabled();
+    if (event instanceof TaskDeletedEvent && deletionEnabled) {
+      final String taskEventId = event.getTaskId();
+      try {
+        taskHistoryService.deleteTaskHistoryEventsByTaskId(taskEventId);
+      } catch (NotAuthorizedException e) {
+        final String msg =
+            String.format(
+                "Caught exception while trying to delete TaskHistoryEvents for task-event-id '%s'",
+                taskEventId);
+        throw new SystemException(msg, e);
+      }
+    } else {
+      taskHistoryService.createTaskHistoryEvent(event);
+    }
   }
 
   @Override
@@ -38,6 +57,7 @@ public class TaskHistoryEventPersister implements KadaiEventConsumer<TaskHistory
 
   @Override
   public void initialize(KadaiEngine kadaiEngine) {
+    this.kadaiEngine = kadaiEngine;
     this.taskHistoryService = new TaskHistoryServiceImpl();
     taskHistoryService.initialize(kadaiEngine);
   }
