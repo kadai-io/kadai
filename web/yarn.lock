@@ -2623,12 +2623,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:25.3.1":
-  version: 25.3.1
-  resolution: "@types/node@npm:25.3.1"
+"@types/node@npm:25.3.2":
+  version: 25.3.2
+  resolution: "@types/node@npm:25.3.2"
   dependencies:
     undici-types: "npm:~7.18.0"
-  checksum: 10c0/f4714e3f2c393434cdefbf207f3fe470bcf4d6c5717298c3fc9239e362a57cd25e59603c60e9c956e7d5d0dfb97cf2e037b37cf6dc2f3876f6a963146f7adc6d
+  checksum: 10c0/946c8758668762d3c3b475281b420e580d0ce828c6847534a822b92be791e23e5879b53001ea928e5352dec8908082d854b8076b7bcfc69549e23ad54b1f98ab
   languageName: node
   linkType: hard
 
@@ -6116,7 +6116,7 @@ __metadata:
     "@types/file-saver-es": "npm:2"
     "@types/jsdom": "npm:28"
     "@types/lodash-es": "npm:4"
-    "@types/node": "npm:25.3.1"
+    "@types/node": "npm:25.3.2"
     "@typescript-eslint/eslint-plugin": "npm:8.56.1"
     "@typescript-eslint/parser": "npm:8.56.1"
     "@vitest/coverage-v8": "npm:4.0.18"
