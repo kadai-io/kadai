@@ -23,9 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import acceptance.AbstractAccTest;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.internal.util.CheckedRunnable;
-import io.kadai.simplehistory.impl.SimpleHistoryServiceImpl;
-import io.kadai.simplehistory.impl.TaskHistoryQueryImpl;
-import io.kadai.simplehistory.impl.task.TaskHistoryQueryMapper;
+import io.kadai.simplehistory.task.internal.TaskHistoryQueryImpl;
+import io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
 import io.kadai.task.api.TaskService;
@@ -37,7 +36,6 @@ import org.junit.jupiter.api.Test;
 class CreateHistoryEventOnTaskCreationAccTest extends AbstractAccTest {
 
   private final TaskService taskService = kadaiEngine.getTaskService();
-  private final SimpleHistoryServiceImpl historyService = getHistoryService();
 
   @Test
   void should_CreateCreatedHistoryEvent_When_TaskIsCreated() throws Exception {
@@ -57,7 +55,7 @@ class CreateHistoryEventOnTaskCreationAccTest extends AbstractAccTest {
               List<TaskHistoryEvent> events =
                   taskHistoryQueryMapper.queryHistoryEvents(
                       (TaskHistoryQueryImpl)
-                          historyService.createTaskHistoryQuery().taskIdIn(newTask.getId()));
+                          taskHistoryService.createTaskHistoryQuery().taskIdIn(newTask.getId()));
 
               String eventType = events.get(0).getEventType();
 

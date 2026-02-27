@@ -26,8 +26,7 @@ import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.models.Classification;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.internal.util.CheckedRunnable;
-import io.kadai.simplehistory.impl.SimpleHistoryServiceImpl;
-import io.kadai.simplehistory.impl.classification.ClassificationHistoryEventMapper;
+import io.kadai.simplehistory.classification.internal.ClassificationHistoryEventMapper;
 import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
 import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEventType;
 import java.util.List;
@@ -35,7 +34,6 @@ import org.junit.jupiter.api.Test;
 
 class CreateHistoryEventOnClassificationsUpdateAccTest extends AbstractAccTest {
 
-  private final SimpleHistoryServiceImpl historyService = getHistoryService();
   private final ClassificationService classificationService =
       kadaiEngine.getClassificationService();
   private final ClassificationHistoryEventMapper classificationHistoryEventMapper =
@@ -52,7 +50,7 @@ class CreateHistoryEventOnClassificationsUpdateAccTest extends AbstractAccTest {
                       "CLI:000000000000000000000000000000000017");
 
               List<ClassificationHistoryEvent> events =
-                  historyService
+                  classificationHistoryService
                       .createClassificationHistoryQuery()
                       .classificationIdIn(classification.getId())
                       .list();
@@ -69,7 +67,7 @@ class CreateHistoryEventOnClassificationsUpdateAccTest extends AbstractAccTest {
               classificationService.updateClassification(classification);
 
               events =
-                  historyService
+                  classificationHistoryService
                       .createClassificationHistoryQuery()
                       .classificationIdIn(classification.getId())
                       .list();

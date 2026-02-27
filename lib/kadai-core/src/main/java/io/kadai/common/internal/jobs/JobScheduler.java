@@ -65,7 +65,7 @@ public class JobScheduler {
             initJobByClassName("io.kadai.user.jobs.UserInfoRefreshJob");
           }
           if (kadaiEngine.getConfiguration().isSimpleHistoryCleanupJobEnabled()) {
-            initJobByClassName("io.kadai.simplehistory.impl.jobs.HistoryCleanupJob");
+            initJobByClassName("io.kadai.simplehistory.jobs.TaskHistoryCleanupJob");
           }
           kadaiEngine.getConfiguration().getCustomJobs().forEach(this::initJobByClassName);
 

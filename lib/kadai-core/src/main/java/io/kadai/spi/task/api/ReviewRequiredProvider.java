@@ -19,23 +19,16 @@
 package io.kadai.spi.task.api;
 
 import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.api.KadaiInitializable;
 import io.kadai.task.api.models.Task;
 
 /**
  * The ReviewRequiredProvider allows to determine whether a {@linkplain Task} requires a review
  * instead of completion.
  */
-public interface ReviewRequiredProvider {
+public interface ReviewRequiredProvider extends KadaiInitializable {
 
-  /**
-   * Provide the active {@linkplain KadaiEngine} which is initialized for this KADAI installation.
-   *
-   * <p>This method is called during KADAI startup and allows the service provider to store the
-   * active {@linkplain KadaiEngine} for later usage.
-   *
-   * @param kadaiEngine the active {@linkplain KadaiEngine} which is initialized for this
-   *     installation
-   */
+  @Override
   default void initialize(KadaiEngine kadaiEngine) {}
 
   /**

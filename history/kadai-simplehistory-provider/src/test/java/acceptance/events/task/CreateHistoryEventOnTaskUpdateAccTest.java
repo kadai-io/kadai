@@ -23,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import acceptance.AbstractAccTest;
 import io.kadai.common.api.TimeInterval;
 import io.kadai.common.internal.util.CheckedRunnable;
-import io.kadai.simplehistory.impl.SimpleHistoryServiceImpl;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
 import io.kadai.task.api.TaskService;
@@ -35,7 +34,6 @@ import org.junit.jupiter.api.Test;
 class CreateHistoryEventOnTaskUpdateAccTest extends AbstractAccTest {
 
   private final TaskService taskService = kadaiEngine.getTaskService();
-  private final SimpleHistoryServiceImpl historyService = getHistoryService();
 
   @Test
   void should_CreateUpdatedHistoryEvent_When_TaskIsCreated() throws Exception {
@@ -49,7 +47,7 @@ class CreateHistoryEventOnTaskUpdateAccTest extends AbstractAccTest {
               task.setName("someUpdatedName");
               taskService.updateTask(task);
               List<TaskHistoryEvent> events =
-                  historyService
+                  taskHistoryService
                       .createTaskHistoryQuery()
                       .taskIdIn(taskId)
                       .createdWithin(new TimeInterval(before, null))

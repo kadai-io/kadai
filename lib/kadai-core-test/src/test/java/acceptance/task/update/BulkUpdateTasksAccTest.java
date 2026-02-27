@@ -110,19 +110,20 @@ class BulkUpdateTasksAccTest {
             .state(TaskState.READY)
             .buildAndStore(taskService);
 
-    TaskPatch patch = new TaskPatchBuilder()
-        .name("Bulk Updated Task")
-        .description("Bulk update description")
-        .note("Bulk update note")
-        .manualPriority(42)
-        .isRead(true)
-        .businessProcessId("BPI-BULK-001")
-        .parentBusinessProcessId("PBPI-BULK-001")
-        .custom1("bulk-custom1")
-        .customInt1(1001)
-        .planned(Instant.parse("2024-01-05T14:00:00Z"))
-        .received(Instant.parse("2024-01-06T15:00:00Z"))
-        .build();
+    TaskPatch patch =
+        new TaskPatchBuilder()
+            .name("Bulk Updated Task")
+            .description("Bulk update description")
+            .note("Bulk update note")
+            .manualPriority(42)
+            .isRead(true)
+            .businessProcessId("BPI-BULK-001")
+            .parentBusinessProcessId("PBPI-BULK-001")
+            .custom1("bulk-custom1")
+            .customInt1(1001)
+            .planned(Instant.parse("2024-01-05T14:00:00Z"))
+            .received(Instant.parse("2024-01-06T15:00:00Z"))
+            .build();
 
     List<String> taskIds = List.of(t1.getId(), t2.getId());
 
@@ -170,10 +171,11 @@ class BulkUpdateTasksAccTest {
             .buildAndStore(taskService);
 
     List<String> taskIds = List.of(task1.getId(), unauthorizedTask.getId());
-    TaskPatch patch = new TaskPatchBuilder()
-        .name("Bulk Updated Task")
-        .description("Bulk update description")
-        .build();
+    TaskPatch patch =
+        new TaskPatchBuilder()
+            .name("Bulk Updated Task")
+            .description("Bulk update description")
+            .build();
 
     BulkOperationResults<String, KadaiException> result =
         taskService.bulkUpdateTasks(taskIds, patch);

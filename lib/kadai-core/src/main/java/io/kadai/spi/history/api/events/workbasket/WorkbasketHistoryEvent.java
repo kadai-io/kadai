@@ -19,6 +19,7 @@
 package io.kadai.spi.history.api.events.workbasket;
 
 import io.kadai.common.api.exceptions.SystemException;
+import io.kadai.spi.history.api.events.KadaiEvent;
 import io.kadai.workbasket.api.WorkbasketCustomField;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
 import java.time.Instant;
@@ -26,7 +27,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 /** Super class for all workbasket related events. */
-public class WorkbasketHistoryEvent {
+public class WorkbasketHistoryEvent implements KadaiEvent {
 
   protected String id;
   protected String eventType;
@@ -148,10 +149,12 @@ public class WorkbasketHistoryEvent {
     this.eventType = eventType;
   }
 
+  @Override
   public Instant getCreated() {
     return created != null ? created.truncatedTo(ChronoUnit.MILLIS) : null;
   }
 
+  @Override
   public void setCreated(Instant created) {
     this.created = created != null ? created.truncatedTo(ChronoUnit.MILLIS) : null;
   }
