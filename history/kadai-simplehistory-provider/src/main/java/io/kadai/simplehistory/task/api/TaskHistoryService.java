@@ -31,8 +31,6 @@ import java.util.List;
  */
 public interface TaskHistoryService {
 
-  // region CREATE
-
   /**
    * Inserts a {@link TaskHistoryEvent} that doesn't exist in the database yet.
    *
@@ -40,10 +38,6 @@ public interface TaskHistoryService {
    * @return the inserted event
    */
   TaskHistoryEvent createTaskHistoryEvent(TaskHistoryEvent event);
-
-  // endregion
-
-  // region READ
 
   /**
    * Fetches a {@link TaskHistoryEvent} from the database by the specified {@linkplain
@@ -54,10 +48,6 @@ public interface TaskHistoryService {
    * @throws TaskHistoryEventNotFoundException if the event could not be found in the database
    */
   TaskHistoryEvent getTaskHistoryEvent(String eventId) throws TaskHistoryEventNotFoundException;
-
-  // endregion
-
-  // region DELETE
 
   /**
    * Deletes all {@linkplain TaskHistoryEvent TaskHistoryEvents} associated with any of the given
@@ -82,8 +72,6 @@ public interface TaskHistoryService {
   default void deleteTaskHistoryEventsByTaskId(String taskId) throws NotAuthorizedException {
     deleteTaskHistoryEventsByTaskIds(Collections.singletonList(taskId));
   }
-
-  // endregion
 
   /**
    * Creates an empty {@link TaskHistoryQuery}.

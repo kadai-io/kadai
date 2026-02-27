@@ -18,11 +18,11 @@
 
 package io.kadai.common.internal.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class CollectionUtil {
 
@@ -52,9 +52,12 @@ public class CollectionUtil {
    * @param a the list to be appended to
    * @param b the list to append
    * @param <T> the type of elements in this list
-   * @return the appended list
+   * @return the appended list (mutable)
    */
   public static <T> List<T> append(List<T> a, List<T> b) {
-    return Stream.concat(a.stream(), b.stream()).toList();
+    final List<T> r = new ArrayList<>(a.size() + b.size());
+    r.addAll(a);
+    r.addAll(b);
+    return r;
   }
 }

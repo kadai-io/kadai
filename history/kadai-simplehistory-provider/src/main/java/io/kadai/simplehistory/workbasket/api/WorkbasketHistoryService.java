@@ -27,8 +27,6 @@ import io.kadai.spi.history.api.exceptions.WorkbasketHistoryEventNotFoundExcepti
  */
 public interface WorkbasketHistoryService {
 
-  // region CREATE
-
   /**
    * Inserts a {@link WorkbasketHistoryEvent} that doesn't exist in the database yet.
    *
@@ -36,10 +34,6 @@ public interface WorkbasketHistoryService {
    * @return the inserted event
    */
   WorkbasketHistoryEvent createWorkbasketHistoryEvent(WorkbasketHistoryEvent event);
-
-  // endregion
-
-  // region READ
 
   /**
    * Fetches a {@link WorkbasketHistoryEvent} from the database by the specified {@linkplain
@@ -51,8 +45,6 @@ public interface WorkbasketHistoryService {
    */
   WorkbasketHistoryEvent getWorkbasketHistoryEvent(String eventId)
       throws WorkbasketHistoryEventNotFoundException;
-
-  // endregion
 
   /**
    * Creates an empty {@link WorkbasketHistoryQuery}.

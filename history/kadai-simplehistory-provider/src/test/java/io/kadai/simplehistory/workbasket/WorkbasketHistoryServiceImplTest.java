@@ -40,7 +40,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/** Unit Test for SimpleHistoryServiceImplTest. */
 @ExtendWith(MockitoExtension.class)
 class WorkbasketHistoryServiceImplTest {
 

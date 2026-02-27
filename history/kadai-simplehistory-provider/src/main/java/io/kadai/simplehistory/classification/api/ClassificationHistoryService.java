@@ -27,8 +27,6 @@ import io.kadai.spi.history.api.exceptions.ClassificationHistoryEventNotFoundExc
  */
 public interface ClassificationHistoryService {
 
-  // region CREATE
-
   /**
    * Inserts a {@link ClassificationHistoryEvent} that doesn't exist in the database yet.
    *
@@ -36,10 +34,6 @@ public interface ClassificationHistoryService {
    * @return the inserted event
    */
   ClassificationHistoryEvent createClassificationHistoryEvent(ClassificationHistoryEvent event);
-
-  // endregion
-
-  // region READ
 
   /**
    * Fetches a {@link ClassificationHistoryEvent} from the database by the specified {@linkplain
@@ -52,8 +46,6 @@ public interface ClassificationHistoryService {
    */
   ClassificationHistoryEvent getClassificationHistoryEvent(String eventId)
       throws ClassificationHistoryEventNotFoundException;
-
-  // endregion
 
   /**
    * Creates an empty {@link ClassificationHistoryQuery}.

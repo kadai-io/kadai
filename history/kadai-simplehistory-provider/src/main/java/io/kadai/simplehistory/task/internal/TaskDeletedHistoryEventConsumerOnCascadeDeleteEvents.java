@@ -44,8 +44,11 @@ public class TaskDeletedHistoryEventConsumerOnCascadeDeleteEvents
       try {
         taskHistoryService.deleteTaskHistoryEventsByTaskId(taskEventId);
       } catch (NotAuthorizedException e) {
-        throw new SystemException(
-            "Caught exception while trying to delete TaskHistoryEvents: " + taskEventId, e);
+        final String msg =
+            String.format(
+                "Caught exception while trying to delete TaskHistoryEvents for task-event-id '%s'",
+                taskEventId);
+        throw new SystemException(msg, e);
       }
     }
   }
@@ -57,8 +60,11 @@ public class TaskDeletedHistoryEventConsumerOnCascadeDeleteEvents
       try {
         taskHistoryService.deleteTaskHistoryEventsByTaskIds(taskEventIds);
       } catch (NotAuthorizedException e) {
-        throw new SystemException(
-            "Caught exception while trying to delete TaskHistoryEvents: " + taskEventIds, e);
+        final String msg =
+            String.format(
+                "Caught exception while trying to delete TaskHistoryEvents for task-event-ids '%s'",
+                taskEventIds);
+        throw new SystemException(msg, e);
       }
     }
   }

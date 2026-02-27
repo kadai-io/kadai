@@ -89,9 +89,13 @@ public final class KadaiEventBroker {
     getConsumers((Class<T>) event.getClass())
         .forEach(
             consumer -> {
-              consumer.consume(event);
-              LOGGER.info(
-                  "Forwarded event {} to consumer {}", event, consumer.getClass().getName());
+              try {
+                consumer.consume(event);
+                LOGGER.info(
+                    "Forwarded event '{}' to consumer '{}'", event, consumer.getClass().getName());
+              } catch (RuntimeException e) {
+                LOGGER.error("Consumer '{}' failed", consumer.getClass().getName(), e);
+              }
             });
   }
 
@@ -123,7 +127,7 @@ public final class KadaiEventBroker {
     do {
       consumers.getOrDefault(clazz, new ArrayList<>()).stream()
           .map(consumer -> (KadaiEventConsumer<? super T>) consumer)
-          .forEach(eligible::add);
+          .forEachOrdered(eligible::add);
 
       clazz = clazz.getSuperclass();
     } while (clazz != KadaiEvent.class.getSuperclass());
