@@ -116,7 +116,6 @@ public final class KadaiEventBroker {
    * @param <T> the type of event of the most specific consumers to return
    * @return the list of all consumers who can consume events of the given class
    */
-  // TODO: Although not inherently expensive, one should consider caching this
   @SuppressWarnings({
     "unchecked", // Safe cast by construction of 'consumers'
   })
