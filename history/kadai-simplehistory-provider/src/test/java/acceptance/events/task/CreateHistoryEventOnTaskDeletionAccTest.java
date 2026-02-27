@@ -20,6 +20,7 @@ package acceptance.events.task;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.kadai.KadaiConfiguration.Builder;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.models.ClassificationSummary;
 import io.kadai.common.api.KadaiEngine;
@@ -35,6 +36,7 @@ import io.kadai.task.api.TaskService;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.api.models.Task;
 import io.kadai.testapi.DefaultTestEntities;
+import io.kadai.testapi.KadaiConfigurationModifier;
 import io.kadai.testapi.KadaiInject;
 import io.kadai.testapi.KadaiIntegrationTest;
 import io.kadai.testapi.WithServiceProvider;
@@ -51,7 +53,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
     serviceProviderInterface = KadaiEventConsumer.class,
     serviceProviders = TaskHistoryEventConsumer.class)
 @ExtendWith(JaasExtension.class)
-class CreateHistoryEventOnTaskDeletionAccTest {
+class CreateHistoryEventOnTaskDeletionAccTest implements KadaiConfigurationModifier {
   @KadaiInject KadaiEngine kadaiEngine;
   @KadaiInject TaskService taskService;
   @KadaiInject WorkbasketService workbasketService;
@@ -63,6 +65,11 @@ class CreateHistoryEventOnTaskDeletionAccTest {
   Task task3;
   Task task4;
   TaskHistoryServiceImpl historyService;
+
+  @Override
+  public Builder modify(Builder builder) {
+    return builder.deleteHistoryEventsOnTaskDeletionEnabled(false);
+  }
 
   @WithAccessId(user = "admin")
   @BeforeAll

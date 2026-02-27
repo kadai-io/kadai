@@ -30,7 +30,6 @@ import io.kadai.common.test.security.WithAccessId;
 import io.kadai.simplehistory.task.internal.TaskHistoryQueryImpl;
 import io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
-import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import java.sql.SQLException;
 import java.util.List;
@@ -71,11 +70,7 @@ class DeleteHistoryEventsOnTaskDeletionAccTest extends AbstractAccTest {
                   taskHistoryQueryMapper.queryHistoryEvents(
                       (TaskHistoryQueryImpl)
                           taskHistoryService.createTaskHistoryQuery().taskIdIn(taskid));
-              assertThat(listEvents).hasSize(1);
-              assertThat(listEvents.get(0).getEventType())
-                  .isEqualTo(TaskHistoryEventType.DELETED.getName());
-              assertThat(listEvents.get(0).getUserId()).isEqualTo("user-1-1");
-              assertThat(listEvents.get(0).getProxyAccessId()).isEqualTo("admin");
+              assertThat(listEvents).isEmpty();
             }),
         "user-1-1");
   }
@@ -118,15 +113,7 @@ class DeleteHistoryEventsOnTaskDeletionAccTest extends AbstractAccTest {
                   taskHistoryQueryMapper.queryHistoryEvents(
                       (TaskHistoryQueryImpl)
                           taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId_1, taskId_2));
-              assertThat(listEvents).hasSize(2);
-              assertThat(listEvents.get(0).getEventType())
-                  .isEqualTo(TaskHistoryEventType.DELETED.getName());
-              assertThat(listEvents.get(0).getUserId()).isEqualTo("user-1-7");
-              assertThat(listEvents.get(0).getProxyAccessId()).isEqualTo("admin");
-              assertThat(listEvents.get(1).getEventType())
-                  .isEqualTo(TaskHistoryEventType.DELETED.getName());
-              assertThat(listEvents.get(1).getUserId()).isEqualTo("user-1-7");
-              assertThat(listEvents.get(0).getProxyAccessId()).isEqualTo("admin");
+              assertThat(listEvents).isEmpty();
             }),
         KadaiRole.ADMIN,
         "user-1-7");
