@@ -5,7 +5,7 @@
   <artifactId>kadai-test-api</artifactId>
   <name>${project.groupId}:${project.artifactId}</name>
   <description>The kadai test-api to include in your project.</description>
-  
+
   <parent>
     <groupId>io.kadai</groupId>
     <artifactId>kadai-lib-parent</artifactId>

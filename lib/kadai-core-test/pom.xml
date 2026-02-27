@@ -6,7 +6,7 @@
 
   <name>${project.groupId}:${project.artifactId}</name>
   <description>The tests for the kadai-core module</description>
-  
+
   <parent>
     <groupId>io.kadai</groupId>
     <artifactId>kadai-lib-parent</artifactId>
