@@ -118,7 +118,7 @@ jobs:
           ./mvnw -B dependency:go-offline -T 1C
           ./mvnw -B test -Dtest=GibtEsNet -Dsurefire.failIfNoSpecifiedTests=false -T 1C
       - name: Upload kadai artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_KADAI_JARS_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
@@ -202,7 +202,7 @@ jobs:
           pr-comment: false
         continue-on-error: true
       - name: Upload kadai-web dist artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_KADAI_WEB_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_WEB_PATH }}
@@ -368,7 +368,7 @@ jobs:
         continue-on-error: true
       - name: Upload Cypress tests
         if: failure()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_CYPRESS_TESTS_NAME }}
           path: ${{ env.ARTIFACTS_CYPRESS_TESTS_PATH }}
@@ -480,7 +480,7 @@ jobs:
         continue-on-error: true
       - name: Upload JaCoCo Report
         if: matrix.database == 'H2'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_JACOCO_REPORTS_NAME }}-${{ matrix.module }}
           path: ${{ env.ARTIFACTS_JACOCO_REPORTS_PATH }}
