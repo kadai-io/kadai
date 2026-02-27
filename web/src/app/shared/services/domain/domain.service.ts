@@ -19,7 +19,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, ReplaySubject } from 'rxjs';
-import { Router } from '@angular/router';
 import { RequestInProgressService } from '../request-in-progress/request-in-progress.service';
 import { SelectedRouteService } from '../selected-route/selected-route';
 import { StartupService } from '../startup/startup.service';
@@ -29,7 +28,6 @@ import { StartupService } from '../startup/startup.service';
 })
 export class DomainService {
   private httpClient = inject(HttpClient);
-  private router = inject(Router);
   private requestInProgressService = inject(RequestInProgressService);
   private selectedRouteService = inject(SelectedRouteService);
   private startupService = inject(StartupService);
@@ -124,15 +122,5 @@ export class DomainService {
     this.domainValue = Object.assign([], domains);
     this.domainValue.push('');
     return this.domainValue;
-  }
-
-  private getNavigationUrl(): string {
-    if (this.router.url.indexOf('workbaskets') !== -1) {
-      return 'kadai/administration/workbaskets';
-    }
-    if (this.router.url.indexOf('classifications') !== -1) {
-      return 'kadai/administration/classifications';
-    }
-    return '';
   }
 }

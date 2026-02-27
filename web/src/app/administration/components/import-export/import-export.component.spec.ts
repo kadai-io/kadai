@@ -19,19 +19,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement, NO_ERRORS_SCHEMA } from '@angular/core';
 import { ImportExportComponent } from './import-export.component';
-import { StartupService } from '../../../shared/services/startup/startup.service';
-import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
-import { WindowRefService } from '../../../shared/services/window/window.service';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { WorkbasketDefinitionService } from '../../services/workbasket-definition.service';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { ImportExportService } from '../../services/import-export.service';
-import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { ClassificationDefinitionService } from '../../services/classification-definition.service';
 import { KadaiType } from '../../../shared/models/kadai-type';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { HttpClient } from '@angular/common/http';
 import { HotToastService } from '@ngneat/hot-toast';
+import { StartupService } from '../../../shared/services/startup/startup.service';
+import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
+import { WindowRefService } from '../../../shared/services/window/window.service';
 
 describe('ImportExportComponent', () => {
   let fixture: ComponentFixture<ImportExportComponent>;
@@ -74,6 +74,8 @@ describe('ImportExportComponent', () => {
   } as Partial<HotToastService>;
 
   beforeEach(async () => {
+    vi.clearAllMocks();
+
     await TestBed.configureTestingModule({
       imports: [ImportExportComponent],
       declarations: [],
@@ -92,8 +94,6 @@ describe('ImportExportComponent', () => {
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
-    vi.clearAllMocks();
-
     fixture = TestBed.createComponent(ImportExportComponent);
     debugElement = fixture.debugElement;
     app = fixture.debugElement.componentInstance;
@@ -104,38 +104,70 @@ describe('ImportExportComponent', () => {
   it('should create component', () => {
     expect(app).toBeTruthy();
   });
-  it('should successfully upload a valid file', () => {
+
+  it('should initialize domains$ on ngOnInit', () => {
+    expect(domainServiceSpy.getDomains).toHaveBeenCalled();
+    expect(app.domains$).toBeDefined();
+  });
+
+  it('should call exportWorkbaskets when export is called with WORKBASKETS selection', () => {
+    app.currentSelection = KadaiType.WORKBASKETS;
+    app.export('DOMAIN_A');
+    expect(workbasketDefinitionServiceSpy.exportWorkbaskets).toHaveBeenCalledWith('DOMAIN_A');
+  });
+
+  it('should call exportClassifications when export is called with CLASSIFICATIONS selection', () => {
+    app.currentSelection = KadaiType.CLASSIFICATIONS;
+    app.export('DOMAIN_A');
+    expect(classificationDefinitionServiceSpy.exportClassifications).toHaveBeenCalledWith('DOMAIN_A');
+  });
+
+  it('should call exportWorkbaskets with empty domain by default', () => {
+    app.currentSelection = KadaiType.WORKBASKETS;
+    app.export();
+    expect(workbasketDefinitionServiceSpy.exportWorkbaskets).toHaveBeenCalledWith('');
+  });
+
+  it('should call exportClassifications with empty domain by default', () => {
+    app.currentSelection = KadaiType.CLASSIFICATIONS;
+    app.export();
+    expect(classificationDefinitionServiceSpy.exportClassifications).toHaveBeenCalledWith('');
+  });
+
+  it('should call importWorkbasket when uploading a valid JSON file with WORKBASKETS selection', () => {
+    app.currentSelection = KadaiType.WORKBASKETS;
+    const mockFile = new File(['{}'], 'workbaskets.json', { type: 'application/json' });
     app.selectedFileInput = {
       nativeElement: {
-        files: [
-          {
-            lastModified: 1599117374674,
-            name: 'Workbaskets_2020-09-03T09_16_14.1414Z.json',
-            size: 59368,
-            type: 'application/json',
-            webkitRelativePath: ''
-          }
-        ]
+        files: [mockFile],
+        value: ''
       }
     };
-    app.currentSelection = KadaiType.WORKBASKETS;
     app.uploadFile();
-    expect(workbasketDefinitionServiceSpy.importWorkbasket).toHaveBeenCalledTimes(1);
+    expect(workbasketDefinitionServiceSpy.importWorkbasket).toHaveBeenCalledWith(mockFile);
     expect(importExportServiceSpy.setImportingFinished).toHaveBeenCalledWith(true);
   });
 
-  it('should trigger an error when uploading an invalid file format', () => {
+  it('should call importClassification when uploading a valid JSON file with CLASSIFICATIONS selection', () => {
+    app.currentSelection = KadaiType.CLASSIFICATIONS;
+    const mockFile = new File(['{}'], 'classifications.json', { type: 'application/json' });
     app.selectedFileInput = {
       nativeElement: {
-        files: [
-          {
-            lastModified: 1599117374674,
-            name: 'Workbaskets_2020-09-03T09_16_14.1414Z.pdf',
-            size: 59368,
-            type: 'application/pdf',
-            webkitRelativePath: ''
-          }
-        ]
+        files: [mockFile],
+        value: ''
+      }
+    };
+    app.uploadFile();
+    expect(classificationDefinitionServiceSpy.importClassification).toHaveBeenCalledWith(mockFile);
+    expect(importExportServiceSpy.setImportingFinished).toHaveBeenCalledWith(true);
+  });
+
+  it('should show error notification when uploading a file with invalid format', () => {
+    const mockFile = new File(['{}'], 'workbaskets.pdf', { type: 'application/pdf' });
+    app.selectedFileInput = {
+      nativeElement: {
+        files: [mockFile],
+        value: ''
       }
     };
     app.uploadFile();
@@ -143,12 +175,38 @@ describe('ImportExportComponent', () => {
     expect(workbasketDefinitionServiceSpy.importWorkbasket).not.toHaveBeenCalled();
   });
 
+  it('should reset the file input after uploadFile', () => {
+    const nativeElement = { files: [new File(['{}'], 'workbaskets.json')], value: 'some-path' };
+    app.selectedFileInput = { nativeElement };
+    app.uploadFile();
+    expect(nativeElement.value).toBe('');
+  });
+
+  it('should complete destroy$ on ngOnDestroy', () => {
+    const nextSpy = vi.spyOn(app.destroy$, 'next');
+    const completeSpy = vi.spyOn(app.destroy$, 'complete');
+    app.ngOnDestroy();
+    expect(nextSpy).toHaveBeenCalled();
+    expect(completeSpy).toHaveBeenCalled();
+  });
   it('should export the workbaskets', () => {
     app.currentSelection = KadaiType.WORKBASKETS;
     app.export('A');
     expect(workbasketDefinitionServiceSpy.exportWorkbaskets).toHaveBeenCalledWith('A');
   });
 
+  it('should not call importWorkbasket when uploading an XML file', () => {
+    const mockFile = new File(['<xml/>'], 'workbaskets.xml', { type: 'application/xml' });
+    app.selectedFileInput = {
+      nativeElement: {
+        files: [mockFile],
+        value: ''
+      }
+    };
+    app.uploadFile();
+    expect(workbasketDefinitionServiceSpy.importWorkbasket).not.toHaveBeenCalled();
+    expect(notificationServiceSpy.showError).toHaveBeenCalledWith('IMPORT_EXPORT_UPLOAD_FILE_FORMAT');
+  });
   it('should export the classifications', () => {
     app.currentSelection = KadaiType.CLASSIFICATIONS;
     app.export('A');

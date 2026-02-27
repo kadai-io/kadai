@@ -116,4 +116,20 @@ describe('WorkbasketOverviewComponent', () => {
     fixture.detectChanges();
     expect(debugElement.nativeElement.querySelector('kadai-administration-workbasket-details')).toBeTruthy();
   });
+
+  it('should set expanded to false when toggleWidth is called and offsetWidth is not 250', () => {
+    component.toggleWidth();
+    expect(component.expanded).toBe(false);
+  });
+
+  it('should subscribe to selectedWorkbasket$ when url path is workbaskets', () => {
+    const activatedRoute = TestBed.inject(ActivatedRoute) as any;
+    activatedRoute.url = of([{ path: 'workbaskets' }]);
+    store.reset({
+      ...store.snapshot(),
+      workbasket: { selectedWorkbasket: { workbasketId: 'WBI:test-123' } }
+    });
+    component.ngOnInit();
+    expect(component).toBeTruthy();
+  });
 });

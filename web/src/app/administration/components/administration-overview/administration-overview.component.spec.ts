@@ -19,6 +19,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AdministrationOverviewComponent } from './administration-overview.component';
 import { DomainService } from '../../../shared/services/domain/domain.service';
+import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
 import { of } from 'rxjs';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -30,17 +31,21 @@ const domainServiceSpy: Partial<DomainService> = {
   switchDomain: vi.fn()
 };
 
+const kadaiEngineServiceSpy = {
+  isCustomRoutingRulesEnabled: vi.fn().mockReturnValue(of(false))
+};
+
 describe('AdministrationOverviewComponent', () => {
   let component: AdministrationOverviewComponent;
   let fixture: ComponentFixture<AdministrationOverviewComponent>;
+
   beforeEach(async () => {
+    vi.clearAllMocks();
     await TestBed.configureTestingModule({
       imports: [AdministrationOverviewComponent],
       providers: [
-        {
-          provide: DomainService,
-          useValue: domainServiceSpy
-        },
+        { provide: DomainService, useValue: domainServiceSpy },
+        { provide: KadaiEngineService, useValue: kadaiEngineServiceSpy },
         provideHttpClientTesting(),
         provideRouter([])
       ]
@@ -68,5 +73,33 @@ describe('AdministrationOverviewComponent', () => {
 
     fixture.detectChanges();
     expect(domainElem.textContent).toMatch('domain a');
+  });
+
+  it('should call getDomains on init and populate domains', () => {
+    expect(domainServiceSpy.getDomains).toHaveBeenCalled();
+    expect(component.domains).toEqual(['domain a', 'domain b']);
+  });
+
+  it('should call getSelectedDomain on init and set selectedDomain', () => {
+    expect(domainServiceSpy.getSelectedDomain).toHaveBeenCalled();
+    expect(component.selectedDomain).toBe('domain a');
+  });
+
+  it('should call isCustomRoutingRulesEnabled on init', () => {
+    expect(kadaiEngineServiceSpy.isCustomRoutingRulesEnabled).toHaveBeenCalled();
+    expect(component.routingAccess).toBe(false);
+  });
+
+  it('should call switchDomain when switchDomain is invoked', () => {
+    component.switchDomain('domain b');
+    expect(domainServiceSpy.switchDomain).toHaveBeenCalledWith('domain b');
+  });
+
+  it('should set routingAccess to true when routing rules enabled', async () => {
+    kadaiEngineServiceSpy.isCustomRoutingRulesEnabled.mockReturnValue(of(true));
+    fixture = TestBed.createComponent(AdministrationOverviewComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    expect(component.routingAccess).toBe(true);
   });
 });

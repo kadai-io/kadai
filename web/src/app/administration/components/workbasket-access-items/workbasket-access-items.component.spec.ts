@@ -87,7 +87,10 @@ describe('WorkbasketAccessItemsComponent', () => {
   });
 
   it("should discard initializing when accessItems don't exist", () => {
-    component.workbasket._links.accessItems = null;
+    component.workbasket = {
+      ...selectedWorkbasketMock,
+      _links: { ...selectedWorkbasketMock._links, accessItems: null }
+    };
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(GetWorkbasketAccessItems)).subscribe(() => (actionDispatched = true));
     component.init();
@@ -160,5 +163,104 @@ describe('WorkbasketAccessItemsComponent', () => {
     control?.updateValueAndValidity();
 
     expect(emitSpy).toHaveBeenCalledWith(false);
+  });
+
+  it('should set accessId and accessName on the form control for the given row when accessItemSelected is called', () => {
+    fixture.detectChanges();
+    component.accessItemSelected({ accessId: 'user-1', name: 'User One' }, 0);
+    expect(component.accessItemsGroups.controls[0].get('accessId').value).toBe('user-1');
+    expect(component.accessItemsGroups.controls[0].get('accessName').value).toBe('User One');
+  });
+
+  it('should handle null accessItem gracefully in accessItemSelected', () => {
+    fixture.detectChanges();
+    component.accessItemSelected(null, 0);
+    expect(component.accessItemsGroups.controls[0].get('accessId').value).toBeUndefined();
+    expect(component.accessItemsGroups.controls[0].get('accessName').value).toBeUndefined();
+  });
+
+  it('should return an array copy of access items when cloneAccessItems is called', () => {
+    fixture.detectChanges();
+    const clone = component.cloneAccessItems();
+    expect(Array.isArray(clone)).toBe(true);
+    expect(clone.length).toBe(component.accessItemsGroups.length);
+  });
+
+  it('should return a deep copy and not the same references when cloneAccessItems is called', () => {
+    fixture.detectChanges();
+    const clone = component.cloneAccessItems();
+    const original = component.AccessItemsForm.value.accessItemsGroups;
+    expect(clone[0]).not.toBe(original[0]);
+    expect(clone[0].accessId).toBe(original[0].accessId);
+  });
+
+  it('should return the correct permCustomN string for getAccessItemCustomProperty', () => {
+    expect(component.getAccessItemCustomProperty(1)).toBe('permCustom1');
+    expect(component.getAccessItemCustomProperty(5)).toBe('permCustom5');
+    expect(component.getAccessItemCustomProperty(12)).toBe('permCustom12');
+  });
+
+  it('should update workbasketId for all access items when setWorkbasketIdForCopy is called', () => {
+    fixture.detectChanges();
+    const newId = 'WBI:NEW-WORKBASKET-ID';
+    component.setWorkbasketIdForCopy(newId);
+    component.accessItemsGroups.value.forEach((item) => {
+      expect(item.workbasketId).toBe(newId);
+      expect('accessItemId' in item).toBe(false);
+    });
+  });
+
+  it('should add index to selectedRows when selectRow is called with checked true', () => {
+    component.selectedRows = [];
+    component.selectRow({ target: { checked: true } }, 0);
+    expect(component.selectedRows).toContain(0);
+  });
+
+  it('should remove index from selectedRows when selectRow is called with checked false', () => {
+    component.selectedRows = [0, 1];
+    component.selectRow({ target: { checked: false } }, 0);
+    expect(component.selectedRows).not.toContain(0);
+    expect(component.selectedRows).toContain(1);
+  });
+
+  it('should remove multiple rows in descending order when deleteAccessItems is called with multiple selectedRows', () => {
+    fixture.detectChanges();
+    const initialLength = component.accessItemsGroups.length;
+    component.selectedRows = [0, 1];
+    component.deleteAccessItems();
+    expect(component.accessItemsGroups.length).toBe(initialLength - 2);
+    expect(component.selectedRows).toEqual([]);
+  });
+
+  it('should set formSubmitAttempt to true and call validateFormAccess, onSave when onSubmit is called', async () => {
+    fixture.detectChanges();
+    const validateSpy = vi.spyOn(component.formsValidatorService, 'validateFormAccess').mockResolvedValue(true);
+    const onSaveSpy = vi.spyOn(component, 'onSave');
+    component.onSubmit();
+    expect(component.formsValidatorService.formSubmitAttempt).toBe(true);
+    expect(validateSpy).toHaveBeenCalledWith(component.accessItemsGroups, component.toggleValidationAccessIdMap);
+    expect(onSaveSpy).toHaveBeenCalled();
+  });
+
+  it('should set isNewAccessItemsFromStore and isAccessItemsTabSelected to false in ngAfterViewChecked when element exists', () => {
+    fixture.detectChanges();
+    component.isNewAccessItemsFromStore = true;
+    component.isAccessItemsTabSelected = true;
+    component.ngAfterViewChecked();
+    if (document.getElementById('checkbox-0-00')) {
+      expect(component.isNewAccessItemsFromStore).toBe(false);
+      expect(component.isAccessItemsTabSelected).toBe(false);
+    } else {
+      expect(component.isNewAccessItemsFromStore).toBe(true);
+    }
+  });
+
+  it('should not change flags in ngAfterViewChecked when neither isNewAccessItemsFromStore nor isAccessItemsTabSelected is true', () => {
+    fixture.detectChanges();
+    component.isNewAccessItemsFromStore = false;
+    component.isAccessItemsTabSelected = false;
+    component.ngAfterViewChecked();
+    expect(component.isNewAccessItemsFromStore).toBe(false);
+    expect(component.isAccessItemsTabSelected).toBe(false);
   });
 });

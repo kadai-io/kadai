@@ -82,7 +82,13 @@
           "options": {
             "buildTarget": "kadai-web:build",
             "coverage": true,
-            "coverageReporters": ["text-summary"]
+            "coverageReporters": ["text-summary"],
+            "coverageThresholds": {
+              "statements": 80,
+              "branches": 80,
+              "functions": 80,
+              "lines": 80
+            }
           }
         }
       }

@@ -31,6 +31,7 @@ import { WorkbasketQueryFilterParameter } from '../../../shared/models/workbaske
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ImportExportService } from '../../services/import-export.service';
 
 const workbasketServiceMock: Partial<WorkbasketService> = {
   workbasketSavedTriggered: vi.fn().mockReturnValue(of(1)),
@@ -128,5 +129,13 @@ describe('WorkbasketListComponent', () => {
     const performFilter = vi.spyOn(component, 'performFilter');
     component.ngOnInit();
     expect(performFilter).toHaveBeenCalled();
+  });
+
+  it('should refresh workbasket list when importExportService emits importing finished', () => {
+    const importExportService = TestBed.inject(ImportExportService);
+    const summarySpy = workbasketServiceMock.getWorkBasketsSummary as ReturnType<typeof vi.fn>;
+    summarySpy.mockClear();
+    importExportService.setImportingFinished(true);
+    expect(summarySpy).toHaveBeenCalled();
   });
 });
