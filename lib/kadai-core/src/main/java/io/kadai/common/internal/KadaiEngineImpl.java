@@ -80,7 +80,6 @@ import io.kadai.workbasket.internal.WorkbasketAccessMapper;
 import io.kadai.workbasket.internal.WorkbasketMapper;
 import io.kadai.workbasket.internal.WorkbasketQueryMapper;
 import io.kadai.workbasket.internal.WorkbasketServiceImpl;
-import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -399,7 +398,7 @@ public class KadaiEngineImpl implements KadaiEngine {
       subject.getPrincipals().add(new UserPrincipal(userId));
     }
 
-    return Subject.doAs(subject, (PrivilegedAction<T>) supplier::get);
+    return Subject.callAs(subject, supplier::get);
   }
 
   @Override
