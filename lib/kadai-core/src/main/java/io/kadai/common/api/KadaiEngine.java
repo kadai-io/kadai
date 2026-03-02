@@ -161,7 +161,7 @@ public interface KadaiEngine {
   WorkingTimeCalculator getWorkingTimeCalculator();
 
   /**
-   * Checks if the {@linkplain io.kadai.spi.history.api.KadaiHistory KadaiHistory} plugin is
+   * Checks if the {@linkplain io.kadai.spi.history.api.KadaiEventConsumer KadaiHistory} plugin is
    * enabled.
    *
    * @return true if the history is enabled; otherwise false

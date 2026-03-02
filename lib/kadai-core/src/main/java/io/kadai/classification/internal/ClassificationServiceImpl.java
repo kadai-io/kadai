@@ -40,10 +40,12 @@ import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.util.IdGenerator;
 import io.kadai.common.internal.util.LogSanitizer;
 import io.kadai.common.internal.util.ObjectAttributeChangeDetector;
+import io.kadai.spi.history.api.KadaiEventPublisher;
 import io.kadai.spi.history.api.events.classification.ClassificationCreatedEvent;
 import io.kadai.spi.history.api.events.classification.ClassificationDeletedEvent;
+import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent;
 import io.kadai.spi.history.api.events.classification.ClassificationUpdatedEvent;
-import io.kadai.spi.history.internal.HistoryEventManager;
+import io.kadai.spi.history.internal.SimpleKadaiEventPublisherImpl;
 import io.kadai.spi.priority.internal.PriorityServiceManager;
 import io.kadai.task.api.models.TaskSummary;
 import io.kadai.task.internal.TaskMapper;
@@ -64,7 +66,7 @@ import org.slf4j.LoggerFactory;
 public class ClassificationServiceImpl implements ClassificationService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ClassificationServiceImpl.class);
-  private final HistoryEventManager historyEventManager;
+  private final KadaiEventPublisher<ClassificationHistoryEvent> eventPublisher;
   private final PriorityServiceManager priorityServiceManager;
   private final ClassificationMapper classificationMapper;
   private final TaskMapper taskMapper;
@@ -79,7 +81,7 @@ public class ClassificationServiceImpl implements ClassificationService {
     this.priorityServiceManager = priorityServiceManager;
     this.classificationMapper = classificationMapper;
     this.taskMapper = taskMapper;
-    this.historyEventManager = kadaiEngine.getHistoryEventManager();
+    this.eventPublisher = new SimpleKadaiEventPublisherImpl<>(kadaiEngine.getKadaiEventBroker());
   }
 
   @Override
@@ -153,22 +155,19 @@ public class ClassificationServiceImpl implements ClassificationService {
 
       try {
         this.classificationMapper.deleteClassification(classificationId);
-
-        if (historyEventManager.isEnabled()) {
-          String details =
-              ObjectAttributeChangeDetector.determineChangesInAttributes(
-                  classification, newClassification("", MASTER_DOMAIN, ""));
-
-          historyEventManager.createEvent(
-              new ClassificationDeletedEvent(
+        eventPublisher.publishing(
+            () -> {
+              String details =
+                  ObjectAttributeChangeDetector.determineChangesInAttributes(
+                      classification, newClassification("", MASTER_DOMAIN, ""));
+              return new ClassificationDeletedEvent(
                   IdGenerator.generateWithPrefix(
                       IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
                   classification,
                   kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
                   kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
-                  details));
-        }
-
+                  details);
+            });
       } catch (PersistenceException e) {
         if (isReferentialIntegrityConstraintViolation(e)) {
           throw new ClassificationInUseException(classification, e);
@@ -228,19 +227,19 @@ public class ClassificationServiceImpl implements ClassificationService {
 
       classificationMapper.insert(classificationImpl);
 
-      if (historyEventManager.isEnabled()) {
-        String details =
-            ObjectAttributeChangeDetector.determineChangesInAttributes(
-                newClassification("", MASTER_DOMAIN, ""), classificationImpl);
+      eventPublisher.publishing(
+          () -> {
+            String details =
+                ObjectAttributeChangeDetector.determineChangesInAttributes(
+                    newClassification("", MASTER_DOMAIN, ""), classificationImpl);
 
-        historyEventManager.createEvent(
-            new ClassificationCreatedEvent(
+            return new ClassificationCreatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
                 classificationImpl,
                 kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
                 kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
-                details));
-      }
+                details);
+          });
 
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug(
@@ -292,19 +291,19 @@ public class ClassificationServiceImpl implements ClassificationService {
         this.createJobIfPriorityOrServiceLevelHasChanged(oldClassification, classificationImpl);
       }
 
-      if (historyEventManager.isEnabled()) {
-        String details =
-            ObjectAttributeChangeDetector.determineChangesInAttributes(
-                oldClassification, classificationImpl);
+      eventPublisher.publishing(
+          () -> {
+            String details =
+                ObjectAttributeChangeDetector.determineChangesInAttributes(
+                    oldClassification, classificationImpl);
 
-        historyEventManager.createEvent(
-            new ClassificationUpdatedEvent(
+            return new ClassificationUpdatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
                 classificationImpl,
                 kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
                 kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
-                details));
-      }
+                details);
+          });
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug(
             "Method updateClassification() updated the classification {}.",

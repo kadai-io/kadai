@@ -19,13 +19,14 @@
 package io.kadai.spi.history.api.events.task;
 
 import io.kadai.common.api.exceptions.SystemException;
+import io.kadai.spi.history.api.events.KadaiEvent;
 import io.kadai.task.api.models.TaskSummary;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 /** Super class for all task related events. */
-public class TaskHistoryEvent {
+public class TaskHistoryEvent implements KadaiEvent {
 
   protected String id;
   protected String businessProcessId;
@@ -245,10 +246,12 @@ public class TaskHistoryEvent {
     this.eventType = eventType;
   }
 
+  @Override
   public Instant getCreated() {
     return created != null ? created.truncatedTo(ChronoUnit.MILLIS) : null;
   }
 
+  @Override
   public void setCreated(Instant created) {
     this.created = created != null ? created.truncatedTo(ChronoUnit.MILLIS) : null;
   }

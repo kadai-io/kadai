@@ -18,25 +18,14 @@
 
 package io.kadai.spi.task.api;
 
-import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.api.KadaiInitializable;
 import io.kadai.task.api.models.Task;
 
 /**
  * The AfterRequestChangesProvider allows to implement customized behaviour after changes have been
  * requested on a given {@linkplain Task}.
  */
-public interface AfterRequestChangesProvider {
-
-  /**
-   * Provide the active {@linkplain KadaiEngine} which is initialized for this KADAI installation.
-   *
-   * <p>This method is called during KADAI startup and allows the service provider to store the
-   * active {@linkplain KadaiEngine} for later usage.
-   *
-   * @param kadaiEngine the active {@linkplain KadaiEngine} which is initialized for this
-   *     installation
-   */
-  void initialize(KadaiEngine kadaiEngine);
+public interface AfterRequestChangesProvider extends KadaiInitializable {
 
   /**
    * Perform any action after changes have been requested on a {@linkplain Task} through {@linkplain
