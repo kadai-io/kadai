@@ -6132,7 +6132,7 @@ __metadata:
     globals: "npm:17.3.0"
     jsdom: "npm:28.1.0"
     lodash-es: "npm:4.17.23"
-    ng2-charts: "npm:8.0.0"
+    ng2-charts: "npm:9.0.0"
     prettier: "npm:3.8.1"
     rxjs: "npm:7.8.2"
     sass: "npm:1.97.3"
@@ -6660,20 +6660,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ng2-charts@npm:8.0.0":
-  version: 8.0.0
-  resolution: "ng2-charts@npm:8.0.0"
+"ng2-charts@npm:9.0.0":
+  version: 9.0.0
+  resolution: "ng2-charts@npm:9.0.0"
   dependencies:
     lodash-es: "npm:^4.17.15"
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/cdk": ">=19.0.0"
-    "@angular/common": ">=19.0.0"
-    "@angular/core": ">=19.0.0"
-    "@angular/platform-browser": ">=19.0.0"
+    "@angular/cdk": ">=20.0.0"
+    "@angular/common": ">=20.0.0"
+    "@angular/core": ">=20.0.0"
+    "@angular/platform-browser": ">=20.0.0"
     chart.js: ^3.4.0 || ^4.0.0
     rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/15b3a9d382017e9db3dfdbfd28230f4702dd7d60180bfb998de2a3d1752c33aaed79f2e9270a9056cdaf406f5f2dabb3549ca3db365bb82fea815706f5f437be
+  checksum: 10c0/02986fffa79b166ea580979e98a323e9201e9047e379753909361f4ec836f9290e0b5648266981ddb3f2f86af3e07463d6ff73b1b8bb4c9da9e8478a9e0c37d6
   languageName: node
   linkType: hard
 
