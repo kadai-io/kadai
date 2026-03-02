@@ -378,7 +378,7 @@ jobs:
 
   test_backend:
     runs-on: ubuntu-22.04
-    name: Test ${{ matrix.module }} with Java ${{ env.JAVA_VERSION }} on ${{ matrix.database }}
+    name: Test ${{ matrix.module }} on ${{ matrix.database }}
     needs: [compile_backend ]
     if: needs.detect_changes.outputs.backend_changed == 'true' || startsWith(github.ref, 'refs/tags/')
     strategy:
