@@ -40,9 +40,9 @@ import io.kadai.workbasket.rest.assembler.WorkbasketSummaryRepresentationModelAs
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 /** EntityModel assembler for {@link TaskRepresentationModel}. */
@@ -222,21 +222,6 @@ public class TaskRepresentationModelAssembler
     return task;
   }
 
-  private void verifyCorrectCustomAttributesFormat(List<CustomAttribute> customAttributes)
-      throws InvalidArgumentException {
-
-    if (customAttributes.stream()
-        .anyMatch(
-            customAttribute ->
-                customAttribute.getKey() == null
-                    || customAttribute.getKey().isEmpty()
-                    || customAttribute.getValue() == null)) {
-      throw new InvalidArgumentException(
-          "Format of custom attributes is not valid. Please provide the following format: "
-              + "\"customAttributes\": [{\"key\": \"someKey\",\"value\": \"someValue\"},{...}])");
-    }
-  }
-
   public TaskPatch toPatch(TaskPatchRepresentationModel repModel) {
     if (repModel.getCustomAttributes() != null) {
       verifyCorrectCustomAttributesFormat(repModel.getCustomAttributes());
@@ -308,5 +293,20 @@ public class TaskRepresentationModelAssembler
     }
 
     return builder.build();
+  }
+
+  private void verifyCorrectCustomAttributesFormat(List<CustomAttribute> customAttributes)
+      throws InvalidArgumentException {
+
+    if (customAttributes.stream()
+        .anyMatch(
+            customAttribute ->
+                customAttribute.getKey() == null
+                    || customAttribute.getKey().isEmpty()
+                    || customAttribute.getValue() == null)) {
+      throw new InvalidArgumentException(
+          "Format of custom attributes is not valid. Please provide the following format: "
+              + "\"customAttributes\": [{\"key\": \"someKey\",\"value\": \"someValue\"},{...}])");
+    }
   }
 }

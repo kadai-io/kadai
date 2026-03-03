@@ -31,9 +31,9 @@ import io.kadai.workbasket.api.models.Workbasket;
 import io.kadai.workbasket.internal.models.WorkbasketImpl;
 import io.kadai.workbasket.rest.WorkbasketController;
 import io.kadai.workbasket.rest.models.WorkbasketRepresentationModel;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 /**
