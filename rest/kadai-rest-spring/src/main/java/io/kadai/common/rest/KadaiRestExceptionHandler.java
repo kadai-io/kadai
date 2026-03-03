@@ -174,7 +174,7 @@ public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(ServiceLevelViolationException.class)
   public ResponseEntity<Object> handleServiceLevelViolationException(
       ServiceLevelViolationException ex, WebRequest req) {
-    return handle(ex.getErrorCode(), ex, req, HttpStatus.UNPROCESSABLE_ENTITY);
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.UNPROCESSABLE_CONTENT);
   }
 
   @ExceptionHandler(ClassificationNotFoundException.class)

@@ -236,7 +236,7 @@ import org.springframework.context.annotation.Configuration;
                     + "<td></td>"
                     + "</tr>"
                     + "<tr>"
-                    + "<td>**422 UNPROCESSABLE_ENTITY**</td>"
+                    + "<td>**422 UNPROCESSABLE_CONTENT**</td>"
                     + "<td>SERVICE_LEVEL_VIOLATION</td>"
                     + "<td>planned, due, serviceLevel</td>"
                     + "</tr>"
