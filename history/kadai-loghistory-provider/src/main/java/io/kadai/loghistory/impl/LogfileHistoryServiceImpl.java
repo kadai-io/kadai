@@ -18,8 +18,6 @@
 
 package io.kadai.loghistory.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.spi.history.api.KadaiHistory;
@@ -29,6 +27,8 @@ import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 public class LogfileHistoryServiceImpl implements KadaiHistory {
 
@@ -62,7 +62,7 @@ public class LogfileHistoryServiceImpl implements KadaiHistory {
       if (historyLogger.isInfoEnabled()) {
         historyLogger.info(jsonMapper.writeValueAsString(event));
       }
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       throw new SystemException("Caught exception while serializing history event to JSON ", e);
     }
   }
@@ -74,7 +74,7 @@ public class LogfileHistoryServiceImpl implements KadaiHistory {
       if (historyLogger.isInfoEnabled()) {
         historyLogger.info(jsonMapper.writeValueAsString(event));
       }
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       throw new SystemException("Caught exception while serializing history event to JSON ", e);
     }
   }
@@ -86,7 +86,7 @@ public class LogfileHistoryServiceImpl implements KadaiHistory {
       if (historyLogger.isInfoEnabled()) {
         historyLogger.info(jsonMapper.writeValueAsString(event));
       }
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       throw new SystemException("Caught exception while serializing history event to JSON ", e);
     }
   }
