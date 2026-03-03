@@ -19,8 +19,7 @@
 package io.kadai.loghistory.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.spi.history.api.KadaiHistory;
@@ -34,13 +33,13 @@ import org.slf4j.LoggerFactory;
 public class LogfileHistoryServiceImpl implements KadaiHistory {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LogfileHistoryServiceImpl.class);
-  private ObjectMapper objectMapper;
+  private JsonMapper jsonMapper;
   private Logger historyLogger;
 
   @Override
   public void initialize(KadaiEngine kadaiEngine) {
 
-    objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    jsonMapper = new JsonMapper();
 
     String historyLoggerName = kadaiEngine.getConfiguration().getLogHistoryLoggerName();
 
@@ -61,7 +60,7 @@ public class LogfileHistoryServiceImpl implements KadaiHistory {
 
     try {
       if (historyLogger.isInfoEnabled()) {
-        historyLogger.info(objectMapper.writeValueAsString(event));
+        historyLogger.info(jsonMapper.writeValueAsString(event));
       }
     } catch (JsonProcessingException e) {
       throw new SystemException("Caught exception while serializing history event to JSON ", e);
@@ -73,7 +72,7 @@ public class LogfileHistoryServiceImpl implements KadaiHistory {
 
     try {
       if (historyLogger.isInfoEnabled()) {
-        historyLogger.info(objectMapper.writeValueAsString(event));
+        historyLogger.info(jsonMapper.writeValueAsString(event));
       }
     } catch (JsonProcessingException e) {
       throw new SystemException("Caught exception while serializing history event to JSON ", e);
@@ -85,7 +84,7 @@ public class LogfileHistoryServiceImpl implements KadaiHistory {
 
     try {
       if (historyLogger.isInfoEnabled()) {
-        historyLogger.info(objectMapper.writeValueAsString(event));
+        historyLogger.info(jsonMapper.writeValueAsString(event));
       }
     } catch (JsonProcessingException e) {
       throw new SystemException("Caught exception while serializing history event to JSON ", e);

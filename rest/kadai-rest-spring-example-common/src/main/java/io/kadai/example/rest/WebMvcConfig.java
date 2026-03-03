@@ -18,17 +18,12 @@
 
 package io.kadai.example.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import jakarta.annotation.PostConstruct;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import tools.jackson.databind.json.JsonMapper;
 
 /** The Web MVC Configuration. */
 @Configuration
@@ -43,11 +38,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
     "classpath:/templates/"
   };
 
-  private final ObjectMapper objectMapper;
+  private final JsonMapper jsonMapper;
 
   @Autowired
-  public WebMvcConfig(ObjectMapper objectMapper) {
-    this.objectMapper = objectMapper;
+  public WebMvcConfig(JsonMapper jsonMapper) {
+    this.jsonMapper = jsonMapper;
   }
 
   @Override
@@ -62,19 +57,19 @@ public class WebMvcConfig implements WebMvcConfigurer {
     }
   }
 
-  @Override
-  public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-    for (HttpMessageConverter<?> converter : converters) {
-      if (converter instanceof MappingJackson2HttpMessageConverter) {
-        MappingJackson2HttpMessageConverter jacksonConverter =
-            (MappingJackson2HttpMessageConverter) converter;
-        jacksonConverter.setPrettyPrint(true);
-      }
-    }
-  }
-
-  @PostConstruct
-  public void enableObjectIndent() {
-    objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-  }
+  //  @Override
+  //  public void configureMessageConverters(ServerBuilder builder) {
+  //    builder.configureMessageConverters(converter -> {
+  //      if (converter instanceof JacksonJsonHttpMessageConverter) {
+  //        JacksonJsonHttpMessageConverter jacksonConverter =
+  //            (JacksonJsonHttpMessageConverter) converter;
+  //        jacksonConverter.setPrettyPrint(true);
+  //      }
+  //    });
+  //  }
+  //
+  //  @PostConstruct
+  //  public void enableObjectIndent() {
+  //    jsonMapper.(SerializationFeature.INDENT_OUTPUT);
+  //  }
 }

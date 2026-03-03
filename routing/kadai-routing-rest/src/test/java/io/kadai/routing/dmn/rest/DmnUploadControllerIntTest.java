@@ -18,8 +18,6 @@
 
 package io.kadai.routing.dmn.rest;
 
-import static io.kadai.rest.test.RestHelper.CLIENT;
-
 import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
 import java.io.File;
@@ -33,6 +31,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClient;
 
 /** Test DmnUploadController. */
 @KadaiSpringBootTest
@@ -40,11 +39,14 @@ class DmnUploadControllerIntTest {
 
   private static final String EXCEL_NAME = "testExcelRouting.xlsx";
   private static final String HTTP_BODY_FILE_NAME = "excelRoutingFile";
+
   private final RestHelper restHelper;
+  private final RestClient restClient;
 
   @Autowired
-  DmnUploadControllerIntTest(RestHelper restHelper) {
+  DmnUploadControllerIntTest(RestHelper restHelper, RestClient restClient) {
     this.restHelper = restHelper;
+    this.restClient = restClient;
   }
 
   @Test
@@ -61,7 +63,7 @@ class DmnUploadControllerIntTest {
     String url = restHelper.toUrl(RoutingRestEndpoints.URL_ROUTING_RULES_DEFAULT);
 
     ResponseEntity<RoutingUploadResultRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .put()
             .uri(url)
             .headers(httpHeaders -> httpHeaders.addAll(headers))

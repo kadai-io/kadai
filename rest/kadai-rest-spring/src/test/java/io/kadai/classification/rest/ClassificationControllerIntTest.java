@@ -19,7 +19,6 @@
 package io.kadai.classification.rest;
 
 import static io.kadai.common.api.SharedConstants.MASTER_DOMAIN;
-import static io.kadai.rest.test.RestHelper.CLIENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -38,16 +37,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
 
 /** Test {@link ClassificationController}. */
 @KadaiSpringBootTest
 class ClassificationControllerIntTest {
 
   private final RestHelper restHelper;
+  private final RestClient restClient;
 
   @Autowired
-  ClassificationControllerIntTest(RestHelper restHelper) {
+  ClassificationControllerIntTest(RestHelper restHelper, RestClient restClient) {
     this.restHelper = restHelper;
+    this.restClient = restClient;
   }
 
   @Test
@@ -55,7 +57,7 @@ class ClassificationControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS) + "?domain=";
 
     ResponseEntity<ClassificationSummaryPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -75,7 +77,7 @@ class ClassificationControllerIntTest {
             RestEndpoints.URL_CLASSIFICATIONS_ID, "CLI:100000000000000000000000000000000002");
 
     ResponseEntity<ClassificationRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -92,7 +94,7 @@ class ClassificationControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS);
 
     ResponseEntity<ClassificationSummaryPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -109,7 +111,7 @@ class ClassificationControllerIntTest {
         restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS) + "?domain=DOMAIN_A&custom-1-like=RVNR";
 
     ResponseEntity<ClassificationSummaryPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -128,7 +130,7 @@ class ClassificationControllerIntTest {
             + "?domain=DOMAIN_A&sort-by=KEY&order=ASCENDING";
 
     ResponseEntity<ClassificationSummaryPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -150,7 +152,7 @@ class ClassificationControllerIntTest {
             + "?domain=DOMAIN_A&sort-by=KEY&order=ASCENDING&page-size=5&page=2";
 
     ResponseEntity<ClassificationSummaryPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -184,7 +186,7 @@ class ClassificationControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS);
 
     ResponseEntity<ClassificationRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .post()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -197,7 +199,7 @@ class ClassificationControllerIntTest {
     newClassification.setKey("NEW_CLASS_2");
 
     responseEntity =
-        CLIENT
+        restClient
             .post()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -221,7 +223,7 @@ class ClassificationControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .post()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -250,7 +252,7 @@ class ClassificationControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS);
 
     ResponseEntity<ClassificationRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .post()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -276,7 +278,7 @@ class ClassificationControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS);
 
     ResponseEntity<ClassificationRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .post()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -302,7 +304,7 @@ class ClassificationControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS);
 
     ResponseEntity<ClassificationRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .post()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -313,7 +315,7 @@ class ClassificationControllerIntTest {
     assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
     ResponseEntity<ClassificationSummaryPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -348,7 +350,7 @@ class ClassificationControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .post()
                 .uri(url)
                 .headers(
@@ -375,7 +377,7 @@ class ClassificationControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .post()
                 .uri(url)
                 .headers(
@@ -398,7 +400,7 @@ class ClassificationControllerIntTest {
             RestEndpoints.URL_CLASSIFICATIONS_ID, "CLI:100000000000000000000000000000000009");
 
     ResponseEntity<ClassificationSummaryRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -417,7 +419,7 @@ class ClassificationControllerIntTest {
             RestEndpoints.URL_CLASSIFICATIONS_ID, "CLI:200000000000000000000000000000000004");
 
     ResponseEntity<ClassificationSummaryRepresentationModel> response =
-        CLIENT
+        restClient
             .delete()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("businessadmin")))
@@ -427,7 +429,7 @@ class ClassificationControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(
@@ -450,7 +452,7 @@ class ClassificationControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .delete()
                 .uri(url)
                 .headers(
@@ -475,7 +477,7 @@ class ClassificationControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -497,7 +499,7 @@ class ClassificationControllerIntTest {
         restHelper.toUrl(
             RestEndpoints.URL_CLASSIFICATIONS_ID, "CLI:000000000000000000000000000000000004");
     ResponseEntity<ClassificationRepresentationModel> responseGet =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -508,7 +510,7 @@ class ClassificationControllerIntTest {
     originalClassification.setName("new name");
 
     ResponseEntity<ClassificationRepresentationModel> responseUpdate =
-        CLIENT
+        restClient
             .put()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))

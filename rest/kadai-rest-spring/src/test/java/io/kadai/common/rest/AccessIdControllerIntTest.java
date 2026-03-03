@@ -18,7 +18,7 @@
 
 package io.kadai.common.rest;
 
-import static io.kadai.rest.test.RestHelper.CLIENT;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -40,6 +40,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
 
 @KadaiSpringBootTest
 class AccessIdControllerIntTest {
@@ -48,10 +49,12 @@ class AccessIdControllerIntTest {
       ACCESS_ID_LIST_TYPE = new ParameterizedTypeReference<>() {};
 
   private final RestHelper restHelper;
+  private final RestClient restClient;
 
   @Autowired
-  AccessIdControllerIntTest(RestHelper restHelper) {
+  AccessIdControllerIntTest(RestHelper restHelper, RestClient restClient) {
     this.restHelper = restHelper;
+    this.restClient = restClient;
   }
 
   @TestFactory
@@ -73,7 +76,7 @@ class AccessIdControllerIntTest {
               restHelper.toUrl(RestEndpoints.URL_ACCESS_ID) + "?search-for=" + pair.getLeft();
 
           ResponseEntity<List<AccessIdRepresentationModel>> response =
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(
@@ -96,7 +99,7 @@ class AccessIdControllerIntTest {
         restHelper.toUrl(RestEndpoints.URL_ACCESS_ID) + "?search-for=ksc-teamleads,cn=groups";
 
     ResponseEntity<List<AccessIdRepresentationModel>> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -111,7 +114,7 @@ class AccessIdControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_ACCESS_ID) + "?search-for=rig";
 
     ResponseEntity<List<AccessIdRepresentationModel>> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -129,7 +132,7 @@ class AccessIdControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_ACCESS_ID) + "?search-for=läf";
 
     ResponseEntity<List<AccessIdRepresentationModel>> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -148,7 +151,7 @@ class AccessIdControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -168,7 +171,7 @@ class AccessIdControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_GROUPS) + "?access-id=teamlead-2";
 
     ResponseEntity<List<AccessIdRepresentationModel>> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -192,7 +195,7 @@ class AccessIdControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_PERMISSIONS) + "?access-id=user-1-2";
 
     ResponseEntity<List<AccessIdRepresentationModel>> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -212,7 +215,7 @@ class AccessIdControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_GROUPS) + "?access-id=user-2-1";
 
     ResponseEntity<List<AccessIdRepresentationModel>> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -234,7 +237,7 @@ class AccessIdControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_PERMISSIONS) + "?access-id=user-2-1";
 
     ResponseEntity<List<AccessIdRepresentationModel>> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -255,7 +258,7 @@ class AccessIdControllerIntTest {
 
     ThrowingCallable call =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -278,7 +281,7 @@ class AccessIdControllerIntTest {
             + "cn=Organisationseinheit KSC,cn=organisation,OU=Test,O=KADAI";
 
     ResponseEntity<List<AccessIdRepresentationModel>> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -298,7 +301,7 @@ class AccessIdControllerIntTest {
 
     ThrowingCallable call =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -319,7 +322,7 @@ class AccessIdControllerIntTest {
 
     ThrowingCallable call =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -339,7 +342,7 @@ class AccessIdControllerIntTest {
 
     ThrowingCallable call =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -359,7 +362,7 @@ class AccessIdControllerIntTest {
         restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_WITH_NAME) + "?search-for=user-1&role=user";
 
     ResponseEntity<List<AccessIdRepresentationModel>> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -382,7 +385,7 @@ class AccessIdControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_ACCESS_ID) + "?search-for=" + validDn;
 
     ResponseEntity<List<AccessIdRepresentationModel>> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))

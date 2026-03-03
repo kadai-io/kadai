@@ -18,7 +18,6 @@
 
 package io.kadai.workbasket.rest;
 
-import static io.kadai.rest.test.RestHelper.CLIENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -48,16 +47,19 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
 
 /** Test WorkbasketController. */
 @KadaiSpringBootTest
 class WorkbasketControllerIntTest {
 
   private final RestHelper restHelper;
+  private final RestClient restClient;
 
   @Autowired
-  WorkbasketControllerIntTest(RestHelper restHelper) {
+  WorkbasketControllerIntTest(RestHelper restHelper, RestClient restClient) {
     this.restHelper = restHelper;
+    this.restClient = restClient;
   }
 
   @Test
@@ -67,7 +69,7 @@ class WorkbasketControllerIntTest {
             RestEndpoints.URL_WORKBASKET_ID, "WBI%3A100000000000000000000000000000000006");
 
     ResponseEntity<WorkbasketRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(URLDecoder.decode(url, StandardCharsets.UTF_8))
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -84,7 +86,7 @@ class WorkbasketControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET);
 
     ResponseEntity<WorkbasketSummaryPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -100,7 +102,7 @@ class WorkbasketControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET) + "?required-permission=OPEN";
 
     ResponseEntity<WorkbasketSummaryPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -118,7 +120,7 @@ class WorkbasketControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET) + parameters;
 
     ResponseEntity<WorkbasketSummaryPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -140,7 +142,7 @@ class WorkbasketControllerIntTest {
     HttpHeaders httpHeaders = RestHelper.generateHeadersForUser("teamlead-1");
 
     ResponseEntity<WorkbasketRepresentationModel> initialWorkbasketResourceRequestResponse =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(httpHeaders))
@@ -159,7 +161,7 @@ class WorkbasketControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .put()
                 .uri(url)
                 .headers(headers -> headers.addAll(httpHeaders))
@@ -180,7 +182,7 @@ class WorkbasketControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(
@@ -204,7 +206,7 @@ class WorkbasketControllerIntTest {
     HttpHeaders httpHeaders = RestHelper.generateHeadersForUser("admin");
 
     ResponseEntity<WorkbasketRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(URLDecoder.decode(url, StandardCharsets.UTF_8))
             .headers(headers -> headers.addAll(httpHeaders))
@@ -216,7 +218,7 @@ class WorkbasketControllerIntTest {
     workbasketToUpdate.setName("new name");
 
     ResponseEntity<WorkbasketRepresentationModel> responseUpdate =
-        CLIENT
+        restClient
             .put()
             .uri(url)
             .headers(headers -> headers.addAll(httpHeaders))
@@ -234,7 +236,7 @@ class WorkbasketControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET) + parameters;
 
     ResponseEntity<WorkbasketSummaryPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -260,7 +262,7 @@ class WorkbasketControllerIntTest {
             RestEndpoints.URL_WORKBASKET_ID, "WBI:100000000000000000000000000000000005");
 
     ResponseEntity<?> response =
-        CLIENT
+        restClient
             .delete()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("businessadmin")))
@@ -278,7 +280,7 @@ class WorkbasketControllerIntTest {
 
     ThrowingCallable call =
         () ->
-            CLIENT
+            restClient
                 .delete()
                 .uri(url)
                 .headers(
@@ -302,7 +304,7 @@ class WorkbasketControllerIntTest {
     HttpHeaders httpHeaders = RestHelper.generateHeadersForUser("teamlead-1");
 
     ResponseEntity<?> response =
-        CLIENT
+        restClient
             .delete()
             .uri(url)
             .headers(headers -> headers.addAll(httpHeaders))
@@ -315,7 +317,7 @@ class WorkbasketControllerIntTest {
             RestEndpoints.URL_WORKBASKET_ID_DISTRIBUTION,
             "WBI:100000000000000000000000000000000002");
     ResponseEntity<DistributionTargetsCollectionRepresentationModel> response2 =
-        CLIENT
+        restClient
             .get()
             .uri(url2)
             .headers(headers -> headers.addAll(httpHeaders))
@@ -337,7 +339,7 @@ class WorkbasketControllerIntTest {
             "WBI:100000000000000000000000000000000005");
 
     ResponseEntity<WorkbasketAccessItemCollectionRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -367,7 +369,7 @@ class WorkbasketControllerIntTest {
     HttpHeaders httpHeaders = RestHelper.generateHeadersForUser("admin");
 
     ResponseEntity<WorkbasketAccessItemCollectionRepresentationModel> response =
-        CLIENT
+        restClient
             .put()
             .uri(url)
             .headers(headers -> headers.addAll(httpHeaders))
@@ -378,7 +380,7 @@ class WorkbasketControllerIntTest {
     assertThat(response.getBody()).isNotNull();
 
     ResponseEntity<WorkbasketAccessItemCollectionRepresentationModel> responseGetAccessItems =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(httpHeaders))
@@ -415,7 +417,7 @@ class WorkbasketControllerIntTest {
 
     final ThrowingCallable call =
         () ->
-            CLIENT
+            restClient
                 .put()
                 .uri(url)
                 .headers(headers -> headers.addAll(httpHeaders))
@@ -438,7 +440,7 @@ class WorkbasketControllerIntTest {
             "WBI:100000000000000000000000000000000001");
 
     ResponseEntity<DistributionTargetsCollectionRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -464,7 +466,7 @@ class WorkbasketControllerIntTest {
     HttpHeaders httpHeaders = RestHelper.generateHeadersForUser("admin");
 
     ResponseEntity<DistributionTargetsCollectionRepresentationModel> response =
-        CLIENT
+        restClient
             .put()
             .uri(url)
             .headers(headers -> headers.addAll(httpHeaders))
@@ -476,7 +478,7 @@ class WorkbasketControllerIntTest {
 
     ResponseEntity<DistributionTargetsCollectionRepresentationModel>
         responseGetDistributionTargets =
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(headers -> headers.addAll(httpHeaders))
@@ -503,7 +505,7 @@ class WorkbasketControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -530,7 +532,7 @@ class WorkbasketControllerIntTest {
     workbasketToCreate.setName("this is a wonderful workbasket name");
 
     ResponseEntity<WorkbasketRepresentationModel> responseCreate =
-        CLIENT
+        restClient
             .post()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
