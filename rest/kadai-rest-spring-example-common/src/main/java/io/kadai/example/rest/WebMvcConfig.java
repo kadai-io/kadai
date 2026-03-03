@@ -19,10 +19,14 @@
 package io.kadai.example.rest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 
 /** The Web MVC Configuration. */
@@ -59,17 +63,22 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
   //  @Override
   //  public void configureMessageConverters(ServerBuilder builder) {
-  //    builder.configureMessageConverters(converter -> {
-  //      if (converter instanceof JacksonJsonHttpMessageConverter) {
-  //        JacksonJsonHttpMessageConverter jacksonConverter =
-  //            (JacksonJsonHttpMessageConverter) converter;
-  //        jacksonConverter.setPrettyPrint(true);
-  //      }
-  //    });
+  //    builder.configureMessageConverters(
+  //        converter -> {
+  //          if (converter instanceof JacksonJsonHttpMessageConverter) {
+  //            JacksonJsonHttpMessageConverter jacksonConverter =
+  //                (JacksonJsonHttpMessageConverter) converter;
+  //            jacksonConverter.setPrettyPrint(true);
+  //          }
+  //        });
   //  }
-  //
-  //  @PostConstruct
-  //  public void enableObjectIndent() {
-  //    jsonMapper.(SerializationFeature.INDENT_OUTPUT);
-  //  }
+
+  @Bean
+  JsonMapperBuilderCustomizer customizer() {
+    return builder ->
+        builder
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+            .enable(SerializationFeature.INDENT_OUTPUT);
+  }
 }
