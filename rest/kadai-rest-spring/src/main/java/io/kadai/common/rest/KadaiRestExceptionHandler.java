@@ -90,7 +90,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
 
   public static final String ERROR_KEY_QUERY_MALFORMED = "QUERY_PARAMETER_MALFORMED";
-  public static final String ERROR_KEY_PAYLOAD = "PAYLOAD_TOO_LARGE";
+  public static final String ERROR_KEY_PAYLOAD = "CONTENT_TOO_LARGE";
   public static final String ERROR_KEY_UNKNOWN_ERROR = "UNKNOWN_ERROR";
 
   @ExceptionHandler(MalformedServiceLevelException.class)
@@ -302,7 +302,7 @@ public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
       @NonNull HttpHeaders headers,
       @NonNull HttpStatusCode status,
       @NonNull WebRequest req) {
-    return handle(ErrorCode.of(ERROR_KEY_PAYLOAD), ex, req, HttpStatus.PAYLOAD_TOO_LARGE);
+    return handle(ErrorCode.of(ERROR_KEY_PAYLOAD), ex, req, HttpStatus.CONTENT_TOO_LARGE);
   }
 
   @ExceptionHandler(BeanInstantiationException.class)
