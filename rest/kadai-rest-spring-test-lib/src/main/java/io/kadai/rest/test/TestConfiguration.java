@@ -19,24 +19,15 @@
 package io.kadai.rest.test;
 
 import io.kadai.sampledata.SampleDataGenerator;
-import java.util.List;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.hateoas.MediaTypes;
-import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.security.jackson.SecurityJacksonModules;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.web.client.RestClient;
-import tools.jackson.databind.DeserializationFeature;
-import tools.jackson.databind.SerializationFeature;
-import tools.jackson.databind.json.JsonMapper;
 
 @SpringBootApplication
 @ComponentScan("io.kadai")
@@ -52,25 +43,5 @@ public class TestConfiguration {
   @Bean
   public PlatformTransactionManager txManager(DataSource dataSource) {
     return new DataSourceTransactionManager(dataSource);
-  }
-
-  @Bean
-  public RestClient restClient(@Autowired JsonMapper jsonMapper) {
-    JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter(jsonMapper);
-    converter.setSupportedMediaTypes(List.of(MediaTypes.HAL_JSON));
-
-    // Create RestClient with custom message converter
-    return RestClient.builder()
-        .configureMessageConverters(converters -> converters.addCustomConverter(converter))
-        .build();
-  }
-
-  @Bean
-  JsonMapperBuilderCustomizer customizer() {
-    return builder ->
-        builder
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-            .addModules(SecurityJacksonModules.getModules(getClass().getClassLoader()));
   }
 }

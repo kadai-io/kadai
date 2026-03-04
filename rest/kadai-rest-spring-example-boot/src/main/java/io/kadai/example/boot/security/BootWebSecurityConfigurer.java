@@ -37,11 +37,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.annotation.web.configurers.RequestCacheConfigurer;
-import org.springframework.security.config.ldap.LdapBindAuthenticationManagerFactory;
+import org.springframework.security.config.ldap.LdapPasswordComparisonAuthenticationManagerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
 import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
 import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
@@ -88,11 +89,12 @@ public class BootWebSecurityConfigurer {
   }
 
   @Bean
-  public SecurityFilterChain filterChain(
-      HttpSecurity http, AuthenticationManager ldapAuthenticationManager) throws Exception {
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests(
             authorizeHttpRequests ->
                 authorizeHttpRequests
+                    .requestMatchers("/api/v1/**")
+                    .permitAll()
                     .requestMatchers("/css/**", "/img/**")
                     .permitAll()
                     .requestMatchers(HttpMethod.GET, "/docs/**")
@@ -104,7 +106,6 @@ public class BootWebSecurityConfigurer {
                         "/swagger-ui",
                         "/swagger-ui/**")
                     .permitAll())
-        .authenticationManager(ldapAuthenticationManager)
         .cors(Customizer.withDefaults())
         .addFilter(jaasApiIntegrationFilter())
         .addFilterAfter(new SpringSecurityToJaasFilter(), JaasApiIntegrationFilter.class);
@@ -198,11 +199,13 @@ public class BootWebSecurityConfigurer {
   AuthenticationManager ldapAuthenticationManager(
       @Qualifier(KADAI_LDAP_CONTEXT_SOURCE) BaseLdapPathContextSource contextSource,
       LdapAuthoritiesPopulator authorities) {
-    LdapBindAuthenticationManagerFactory factory =
-        new LdapBindAuthenticationManagerFactory(contextSource);
+    @SuppressWarnings("deprecation")
+    LdapPasswordComparisonAuthenticationManagerFactory factory =
+        new LdapPasswordComparisonAuthenticationManagerFactory(
+            contextSource, NoOpPasswordEncoder.getInstance());
     factory.setUserDnPatterns(ldapUserDnPatterns);
     factory.setLdapAuthoritiesPopulator(authorities);
-    factory.setAuthoritiesMapper(grantedAuthoritiesMapper());
+    factory.setPasswordAttribute("userPassword");
     return factory.createAuthenticationManager();
   }
 }

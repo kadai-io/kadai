@@ -21,7 +21,7 @@ package io.kadai.example.rest;
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.jackson.SecurityJacksonModules;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import tools.jackson.databind.DeserializationFeature;
@@ -29,6 +29,7 @@ import tools.jackson.databind.SerializationFeature;
 
 /** The Web MVC Configuration. */
 @Configuration
+@EnableWebMvc
 public class WebMvcConfig implements WebMvcConfigurer {
 
   private static final String[] CLASSPATH_RESOURCE_LOCATIONS = {
@@ -57,7 +58,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
         builder
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-            .enable(SerializationFeature.INDENT_OUTPUT)
-            .addModules(SecurityJacksonModules.getModules(getClass().getClassLoader()));
+            .enable(SerializationFeature.INDENT_OUTPUT);
   }
 }
