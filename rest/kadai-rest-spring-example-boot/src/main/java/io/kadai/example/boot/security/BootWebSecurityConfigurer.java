@@ -205,6 +205,7 @@ public class BootWebSecurityConfigurer {
             contextSource, NoOpPasswordEncoder.getInstance());
     factory.setUserDnPatterns(ldapUserDnPatterns);
     factory.setLdapAuthoritiesPopulator(authorities);
+    factory.setAuthoritiesMapper(grantedAuthoritiesMapper());
     factory.setPasswordAttribute("userPassword");
     return factory.createAuthenticationManager();
   }
