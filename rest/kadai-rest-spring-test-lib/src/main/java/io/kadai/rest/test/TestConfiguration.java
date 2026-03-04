@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.DependsOn;
@@ -32,6 +33,8 @@ import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 
 @SpringBootApplication
@@ -51,22 +54,21 @@ public class TestConfiguration {
   }
 
   @Bean
-  public RestClient restClient(@Autowired JsonMapper jsonMapper) {
+  public RestClient restClient(RestClient.Builder builder, JsonMapper jsonMapper) {
     JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter(jsonMapper);
     converter.setSupportedMediaTypes(List.of(MediaTypes.HAL_JSON));
 
-    // Create RestClient with custom message converter
-    return RestClient.builder()
+    return builder
         .configureMessageConverters(converters -> converters.addCustomConverter(converter))
         .build();
   }
 
-  //  @Bean
-  //  JsonMapperBuilderCustomizer customizer() {
-  //    return builder ->
-  //        builder
-  //            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-  //            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-  //            .addModules(SecurityJacksonModules.getModules(getClass().getClassLoader()));
-  //  }
+  @Bean
+  JsonMapperBuilderCustomizer customizer() {
+    return builder ->
+        builder
+            .deactivateDefaultTyping()
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+  }
 }
