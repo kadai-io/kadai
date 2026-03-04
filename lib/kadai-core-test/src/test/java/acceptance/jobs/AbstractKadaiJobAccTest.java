@@ -32,7 +32,7 @@ import io.kadai.common.internal.jobs.AbstractKadaiJob;
 import io.kadai.common.internal.jobs.JobRunner;
 import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import io.kadai.common.internal.util.Pair;
-import io.kadai.simplehistory.impl.jobs.HistoryCleanupJob;
+import io.kadai.simplehistory.jobs.TaskHistoryCleanupJob;
 import io.kadai.task.internal.jobs.TaskCleanupJob;
 import io.kadai.task.internal.jobs.TaskRefreshJob;
 import io.kadai.testapi.KadaiConfigurationModifier;
@@ -76,7 +76,7 @@ class AbstractKadaiJobAccTest {
     jobMapper.deleteMultiple(TaskCleanupJob.class.getName());
     jobMapper.deleteMultiple(TaskRefreshJob.class.getName());
     jobMapper.deleteMultiple(ClassificationChangedJob.class.getName());
-    jobMapper.deleteMultiple(HistoryCleanupJob.class.getName());
+    jobMapper.deleteMultiple(TaskHistoryCleanupJob.class.getName());
     jobMapper.deleteMultiple(WorkbasketCleanupJob.class.getName());
   }
 
@@ -110,7 +110,7 @@ class AbstractKadaiJobAccTest {
     List<Pair<String, Class<?>>> testCases =
         List.of(
             Pair.of("Delete Old Task Cleanup Jobs", TaskCleanupJob.class),
-            Pair.of("Delete Old History Cleanup Jobs", HistoryCleanupJob.class),
+            Pair.of("Delete Old History Cleanup Jobs", TaskHistoryCleanupJob.class),
             Pair.of("Delete Old Workbasket Cleanup Jobs", WorkbasketCleanupJob.class));
 
     ThrowingConsumer<Pair<String, Class<?>>> test =

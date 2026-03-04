@@ -19,6 +19,7 @@
 package io.kadai.task.internal;
 
 import static java.util.Map.entry;
+import static java.util.stream.Collectors.toList;
 
 import io.kadai.common.api.BulkOperationResults;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
@@ -27,8 +28,9 @@ import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.util.EnumUtil;
 import io.kadai.common.internal.util.IdGenerator;
 import io.kadai.common.internal.util.ObjectAttributeChangeDetector;
+import io.kadai.spi.history.api.KadaiEventPublisher;
 import io.kadai.spi.history.api.events.task.TaskTransferredEvent;
-import io.kadai.spi.history.internal.HistoryEventManager;
+import io.kadai.spi.history.internal.SimpleKadaiEventPublisherImpl;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
@@ -60,7 +62,7 @@ final class TaskTransferrer {
   private final WorkbasketService workbasketService;
   private final TaskServiceImpl taskService;
   private final TaskMapper taskMapper;
-  private final HistoryEventManager historyEventManager;
+  private final KadaiEventPublisher<TaskTransferredEvent> eventPublisher;
 
   TaskTransferrer(
       InternalKadaiEngine kadaiEngine, TaskMapper taskMapper, TaskServiceImpl taskService) {
@@ -68,7 +70,7 @@ final class TaskTransferrer {
     this.taskService = taskService;
     this.taskMapper = taskMapper;
     this.workbasketService = kadaiEngine.getEngine().getWorkbasketService();
-    this.historyEventManager = kadaiEngine.getHistoryEventManager();
+    this.eventPublisher = new SimpleKadaiEventPublisherImpl<>(kadaiEngine.getKadaiEventBroker());
   }
 
   Task transfer(String taskId, String destinationWorkbasketId, boolean setTransferFlag)
@@ -194,11 +196,20 @@ final class TaskTransferrer {
 
       applyTransferValuesForTask(task, destinationWorkbasket, owner, setTransferFlag);
       taskMapper.update(task);
-      if (historyEventManager.isEnabled()) {
-        createTransferredEvent(
-            oldTask, task, originWorkbasket.getId(), destinationWorkbasket.getId());
-      }
 
+      eventPublisher.publishing(
+          () -> {
+            String details =
+                ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task);
+            return new TaskTransferredEvent(
+                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                task,
+                originWorkbasket.getId(),
+                destinationWorkbasket.getId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
+                details);
+          });
       return task;
     } finally {
       kadaiEngine.returnConnection();
@@ -343,22 +354,31 @@ final class TaskTransferrer {
                 .collect(Collectors.toSet()),
             updateObject);
 
-        if (historyEventManager.isEnabled()) {
-          taskSummaries.forEach(
-              oldSummary -> {
-                TaskSummaryImpl newSummary = (TaskSummaryImpl) oldSummary.copy();
-                newSummary.setId(oldSummary.getId());
-                newSummary.setExternalId(oldSummary.getExternalId());
-                applyTransferValuesForTask(
-                    newSummary, destinationWorkbasket, owner, setTransferFlag);
+        eventPublisher.publishingAll(
+            () ->
+                taskSummaries.stream()
+                    .map(
+                        oldSummary -> {
+                          TaskSummaryImpl newSummary = (TaskSummaryImpl) oldSummary.copy();
+                          newSummary.setId(oldSummary.getId());
+                          newSummary.setExternalId(oldSummary.getExternalId());
+                          applyTransferValuesForTask(
+                              newSummary, destinationWorkbasket, owner, setTransferFlag);
 
-                createTransferredEvent(
-                    oldSummary,
-                    newSummary,
-                    oldSummary.getWorkbasketSummary().getId(),
-                    newSummary.getWorkbasketSummary().getId());
-              });
-        }
+                          String details =
+                              ObjectAttributeChangeDetector.determineChangesInAttributes(
+                                  oldSummary, newSummary);
+                          return new TaskTransferredEvent(
+                              IdGenerator.generateWithPrefix(
+                                  IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                              newSummary,
+                              oldSummary.getWorkbasketSummary().getId(),
+                              newSummary.getWorkbasketSummary().getId(),
+                              kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                              kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
+                              details);
+                        })
+                    .collect(toList()));
       }
     }
   }
@@ -372,23 +392,6 @@ final class TaskTransferrer {
     task.setWorkbasketSummary(workbasket);
     task.setDomain(workbasket.getDomain());
     task.setModified(Instant.now());
-  }
-
-  private void createTransferredEvent(
-      TaskSummary oldTask,
-      TaskSummary newTask,
-      String originWorkbasketId,
-      String destinationWorkbasketId) {
-    String details = ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, newTask);
-    historyEventManager.createEvent(
-        new TaskTransferredEvent(
-            IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-            newTask,
-            originWorkbasketId,
-            destinationWorkbasketId,
-            kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-            kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
-            details));
   }
 
   private TaskState getStateAfterTransfer(TaskSummary taskSummary) {
