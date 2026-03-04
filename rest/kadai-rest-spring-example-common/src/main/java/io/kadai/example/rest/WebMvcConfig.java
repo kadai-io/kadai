@@ -18,20 +18,17 @@
 
 package io.kadai.example.rest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.security.jackson.SecurityJacksonModules;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.SerializationFeature;
-import tools.jackson.databind.json.JsonMapper;
 
 /** The Web MVC Configuration. */
 @Configuration
-@EnableWebMvc
 public class WebMvcConfig implements WebMvcConfigurer {
 
   private static final String[] CLASSPATH_RESOURCE_LOCATIONS = {
@@ -41,13 +38,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
     "classpath:/public/",
     "classpath:/templates/"
   };
-
-  private final JsonMapper jsonMapper;
-
-  @Autowired
-  public WebMvcConfig(JsonMapper jsonMapper) {
-    this.jsonMapper = jsonMapper;
-  }
 
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -61,24 +51,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
     }
   }
 
-  //  @Override
-  //  public void configureMessageConverters(ServerBuilder builder) {
-  //    builder.configureMessageConverters(
-  //        converter -> {
-  //          if (converter instanceof JacksonJsonHttpMessageConverter) {
-  //            JacksonJsonHttpMessageConverter jacksonConverter =
-  //                (JacksonJsonHttpMessageConverter) converter;
-  //            jacksonConverter.setPrettyPrint(true);
-  //          }
-  //        });
-  //  }
-
   @Bean
   JsonMapperBuilderCustomizer customizer() {
     return builder ->
         builder
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-            .enable(SerializationFeature.INDENT_OUTPUT);
+            .enable(SerializationFeature.INDENT_OUTPUT)
+            .addModules(SecurityJacksonModules.getModules(getClass().getClassLoader()));
   }
 }

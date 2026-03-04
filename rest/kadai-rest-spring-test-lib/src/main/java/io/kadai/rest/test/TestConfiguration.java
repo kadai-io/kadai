@@ -19,7 +19,7 @@
 package io.kadai.rest.test;
 
 import io.kadai.sampledata.SampleDataGenerator;
-import java.util.Collections;
+import java.util.List;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +31,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.security.jackson.SecurityJacksonModules;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.client.RestClient;
 import tools.jackson.databind.DeserializationFeature;
@@ -56,7 +57,7 @@ public class TestConfiguration {
   @Bean
   public RestClient restClient(@Autowired JsonMapper jsonMapper) {
     JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter(jsonMapper);
-    converter.setSupportedMediaTypes(Collections.singletonList(MediaTypes.HAL_JSON));
+    converter.setSupportedMediaTypes(List.of(MediaTypes.HAL_JSON));
 
     // Create RestClient with custom message converter
     return RestClient.builder()
@@ -69,6 +70,7 @@ public class TestConfiguration {
     return builder ->
         builder
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+            .addModules(SecurityJacksonModules.getModules(getClass().getClassLoader()));
   }
 }
