@@ -23,9 +23,9 @@ import io.kadai.task.api.TaskService;
 import io.kadai.task.api.models.AttachmentSummary;
 import io.kadai.task.internal.models.AttachmentSummaryImpl;
 import io.kadai.task.rest.models.AttachmentSummaryRepresentationModel;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 /** EntityModel assembler for {@link AttachmentSummaryRepresentationModel}. */

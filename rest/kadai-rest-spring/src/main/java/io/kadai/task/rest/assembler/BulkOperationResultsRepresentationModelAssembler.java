@@ -24,8 +24,8 @@ import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import java.util.HashMap;
 import java.util.Map;
+import org.jspecify.annotations.NonNull;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component

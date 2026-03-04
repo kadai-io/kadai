@@ -135,7 +135,7 @@ class ExceptionErrorKeyTest {
 
   @Test
   void should_ProvideConsistentErrorKey_For_RestExceptions() {
-    assertThat(KadaiRestExceptionHandler.ERROR_KEY_PAYLOAD).isEqualTo("PAYLOAD_TOO_LARGE");
+    assertThat(KadaiRestExceptionHandler.ERROR_KEY_PAYLOAD).isEqualTo("CONTENT_TOO_LARGE");
     assertThat(KadaiRestExceptionHandler.ERROR_KEY_QUERY_MALFORMED)
         .isEqualTo("QUERY_PARAMETER_MALFORMED");
   }

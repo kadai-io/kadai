@@ -20,8 +20,6 @@ package io.kadai.workbasket.rest;
 
 import static io.kadai.common.internal.util.CheckedFunction.wrapping;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
@@ -65,6 +63,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 
 /** Controller for all {@link WorkbasketDefinitionRepresentationModel} related endpoints. */
 @RestController
@@ -75,7 +75,7 @@ public class WorkbasketDefinitionController implements WorkbasketDefinitionApi {
   private final WorkbasketDefinitionRepresentationModelAssembler workbasketDefinitionAssembler;
   private final WorkbasketRepresentationModelAssembler workbasketAssembler;
   private final WorkbasketAccessItemRepresentationModelAssembler accessItemAssembler;
-  private final ObjectMapper mapper;
+  private final JsonMapper jsonMapper;
 
   @Autowired
   WorkbasketDefinitionController(
@@ -83,12 +83,12 @@ public class WorkbasketDefinitionController implements WorkbasketDefinitionApi {
       WorkbasketDefinitionRepresentationModelAssembler workbasketDefinitionAssembler,
       WorkbasketRepresentationModelAssembler workbasketAssembler,
       WorkbasketAccessItemRepresentationModelAssembler accessItemAssembler,
-      ObjectMapper mapper) {
+      JsonMapper jsonMapper) {
     this.workbasketService = workbasketService;
     this.workbasketDefinitionAssembler = workbasketDefinitionAssembler;
     this.workbasketAssembler = workbasketAssembler;
     this.accessItemAssembler = accessItemAssembler;
-    this.mapper = mapper;
+    this.jsonMapper = jsonMapper;
   }
 
   @GetMapping(path = RestEndpoints.URL_WORKBASKET_DEFINITIONS)
@@ -125,7 +125,7 @@ public class WorkbasketDefinitionController implements WorkbasketDefinitionApi {
           NotAuthorizedOnWorkbasketException,
           NotAuthorizedException {
     WorkbasketDefinitionCollectionRepresentationModel definitions =
-        mapper.readValue(file.getInputStream(), new TypeReference<>() {});
+        jsonMapper.readValue(file.getInputStream(), new TypeReference<>() {});
 
     // key: logical ID
     // value: system ID (in database)

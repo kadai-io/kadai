@@ -20,8 +20,6 @@ package io.kadai.loghistory.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import io.kadai.KadaiConfiguration;
@@ -37,17 +35,18 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import tools.jackson.databind.json.JsonMapper;
 
 class KadaiEventLoggerTest {
 
   static KadaiEngine kadaiEngineMock;
-  private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+  private final JsonMapper jsonMapper = new JsonMapper();
   private final KadaiEventLogger kadaiEventLogger =
       new KadaiEventLogger();
   private final TestLogger logger = TestLoggerFactory.getTestLogger("AUDIT");
 
   @BeforeAll
-  public static void setupObjectMapper() {
+  public static void setupJsonMapper() {
     KadaiConfiguration kadaiConfiguration = Mockito.mock(KadaiConfiguration.class);
     kadaiEngineMock = Mockito.mock(KadaiEngine.class);
     Mockito.when(kadaiEngineMock.getConfiguration()).thenReturn(kadaiConfiguration);
@@ -82,7 +81,7 @@ class KadaiEventLoggerTest {
     String logMessage = logger.getLoggingEvents().get(0).getMessage();
 
     TaskHistoryEvent deserializedEventFromLogMessage =
-        objectMapper.readValue(logMessage, TaskHistoryEvent.class);
+        jsonMapper.readValue(logMessage, TaskHistoryEvent.class);
 
     assertThat(eventToBeLogged).isEqualTo(deserializedEventFromLogMessage);
   }
@@ -104,7 +103,7 @@ class KadaiEventLoggerTest {
     String logMessage = logger.getLoggingEvents().get(0).getMessage();
 
     WorkbasketHistoryEvent deserializedEventFromLogMessage =
-        objectMapper.readValue(logMessage, WorkbasketHistoryEvent.class);
+        jsonMapper.readValue(logMessage, WorkbasketHistoryEvent.class);
 
     assertThat(eventToBeLogged).isEqualTo(deserializedEventFromLogMessage);
   }
@@ -127,7 +126,7 @@ class KadaiEventLoggerTest {
     String logMessage = logger.getLoggingEvents().get(0).getMessage();
 
     ClassificationHistoryEvent deserializedEventFromLogMessage =
-        objectMapper.readValue(logMessage, ClassificationHistoryEvent.class);
+        jsonMapper.readValue(logMessage, ClassificationHistoryEvent.class);
 
     assertThat(eventToBeLogged).isEqualTo(deserializedEventFromLogMessage);
   }

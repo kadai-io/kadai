@@ -18,7 +18,7 @@
 
 package io.kadai.simplehistory.rest;
 
-import static io.kadai.rest.test.RestHelper.CLIENT;
+
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -42,6 +42,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /** Controller for integration test. */
@@ -49,10 +50,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 class TaskHistoryEventControllerIntTest {
 
   private final RestHelper restHelper;
+  private final RestClient restClient;
 
   @Autowired
-  TaskHistoryEventControllerIntTest(RestHelper restHelper) {
+  TaskHistoryEventControllerIntTest(RestHelper restHelper, RestClient restClient) {
     this.restHelper = restHelper;
+    this.restClient = restClient;
   }
 
   // region Get Task History Events
@@ -60,7 +63,7 @@ class TaskHistoryEventControllerIntTest {
   @Test
   void should_GetAllHistoryEvents_When_UrlIsVisited() {
     ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS))
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -73,7 +76,7 @@ class TaskHistoryEventControllerIntTest {
   @Test
   void should_GenerateSelfLink_When_TaskHistoryEventsAreRequested() {
     ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS))
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -92,7 +95,7 @@ class TaskHistoryEventControllerIntTest {
   void should_ContainQueryParametersInComputedSelfLink_When_TaskHistoryEventsAreRequested() {
     String parameters = "?domain=DOMAIN_A&domain=DOMAIN_B";
     ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -111,7 +114,7 @@ class TaskHistoryEventControllerIntTest {
   void should_SortEventsByBusinessProcessIdDesc_When_SortByAndOrderQueryParametersAreDeclared() {
     String parameters = "?sort-by=BUSINESS_PROCESS_ID&order=DESCENDING";
     ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -127,7 +130,7 @@ class TaskHistoryEventControllerIntTest {
   void should_ApplyBusinessProcessIdFilter_When_QueryParameterIsProvided() {
     String parameters = "?business-process-id=BPI:01";
     ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -143,7 +146,7 @@ class TaskHistoryEventControllerIntTest {
   void should_SortEventsByProxyAccessId_When_SortByAndOrderQueryParametersAreDeclared() {
     String parameters = "?sort-by=PROXY_ACCESS_ID&order=ASCENDING";
     ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -160,7 +163,7 @@ class TaskHistoryEventControllerIntTest {
   void should_ApplyProxyAccessIdFilter_When_QueryParameterIsProvided() {
     String parameters = "?proxy-access-id=monitor";
     ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -178,7 +181,7 @@ class TaskHistoryEventControllerIntTest {
     String currentTime = "wrong format";
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(
                     restHelper.toUrl(
@@ -198,7 +201,7 @@ class TaskHistoryEventControllerIntTest {
   void should_ApplyCreatedFilter_When_QueryParametersAreProvided() {
     Instant now = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant();
     ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(
                 restHelper.toUrl(
@@ -221,7 +224,7 @@ class TaskHistoryEventControllerIntTest {
     String parameters = "?sort-by=TASK_HISTORY_EVENT_ID&page-size=3&page=3";
 
     ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -277,7 +280,7 @@ class TaskHistoryEventControllerIntTest {
             .toUriString();
 
     ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS_ID, id))
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -295,7 +298,7 @@ class TaskHistoryEventControllerIntTest {
   @Test
   void should_GetSpecificTaskHistoryEventWithDetails_When_SingleEventIsQueried() {
     ResponseEntity<TaskHistoryEventRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(
                 restHelper.toUrl(
@@ -314,7 +317,7 @@ class TaskHistoryEventControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(
                     restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS)

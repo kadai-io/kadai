@@ -93,6 +93,8 @@ public class BootWebSecurityConfigurer {
     http.authorizeHttpRequests(
             authorizeHttpRequests ->
                 authorizeHttpRequests
+                    .requestMatchers("/api/v1/**")
+                    .permitAll()
                     .requestMatchers("/css/**", "/img/**")
                     .permitAll()
                     .requestMatchers(HttpMethod.GET, "/docs/**")

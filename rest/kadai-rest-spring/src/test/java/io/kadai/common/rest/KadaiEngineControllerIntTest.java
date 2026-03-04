@@ -18,7 +18,7 @@
 
 package io.kadai.common.rest;
 
-import static io.kadai.rest.test.RestHelper.CLIENT;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.kadai.common.api.KadaiRole;
@@ -35,16 +35,19 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClient;
 
 /** Test KadaiEngineController. */
 @KadaiSpringBootTest
 class KadaiEngineControllerIntTest {
 
   private final RestHelper restHelper;
+  private final RestClient restClient;
 
   @Autowired
-  KadaiEngineControllerIntTest(RestHelper restHelper) {
+  KadaiEngineControllerIntTest(RestHelper restHelper, RestClient restClient) {
     this.restHelper = restHelper;
+    this.restClient = restClient;
   }
 
   @Test
@@ -52,7 +55,7 @@ class KadaiEngineControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_DOMAIN);
 
     ResponseEntity<List<String>> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -66,7 +69,7 @@ class KadaiEngineControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATION_TYPES);
 
     ResponseEntity<List<String>> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -80,7 +83,7 @@ class KadaiEngineControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATION_CATEGORIES);
 
     ResponseEntity<List<String>> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -95,7 +98,7 @@ class KadaiEngineControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATION_CATEGORIES) + "?type=TASK";
 
     ResponseEntity<List<String>> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -109,7 +112,7 @@ class KadaiEngineControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATION_CATEGORIES) + "?type=DOCUMENT";
 
     ResponseEntity<List<String>> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -123,7 +126,7 @@ class KadaiEngineControllerIntTest {
     HttpHeaders headers = RestHelper.generateHeadersForUser("user-2-1");
     headers.add("userid", "user-1-1");
     ResponseEntity<KadaiUserInfoRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(restHelper.toUrl(RestEndpoints.URL_CURRENT_USER))
             .headers(httpHeaders -> httpHeaders.addAll(headers))
@@ -143,7 +146,7 @@ class KadaiEngineControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_CURRENT_USER);
 
     ResponseEntity<KadaiUserInfoRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -163,7 +166,7 @@ class KadaiEngineControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_CURRENT_USER);
 
     ResponseEntity<KadaiUserInfoRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -188,7 +191,7 @@ class KadaiEngineControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_CUSTOM_ATTRIBUTES);
 
     ResponseEntity<CustomAttributesRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -203,7 +206,7 @@ class KadaiEngineControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_HISTORY_ENABLED);
 
     ResponseEntity<Boolean> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -217,7 +220,7 @@ class KadaiEngineControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_VERSION);
 
     ResponseEntity<VersionRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -247,7 +250,7 @@ class KadaiEngineControllerIntTest {
                             Map.of("displayName", "Filter values", "type", "json", "min", "1"))))));
 
     ResponseEntity<CustomAttributesRepresentationModel> response =
-        CLIENT
+        restClient
             .put()
             .uri(url)
             .headers(httpHeaders -> httpHeaders.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -262,7 +265,7 @@ class KadaiEngineControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATION_CATEGORIES_BY_TYPES);
 
     ResponseEntity<Map<String, List<String>>> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))

@@ -18,25 +18,24 @@
 
 package io.kadai.loghistory.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.spi.history.api.KadaiEventConsumer;
 import io.kadai.spi.history.api.events.KadaiEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 public class KadaiEventLogger implements KadaiEventConsumer<KadaiEvent> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(KadaiEventLogger.class);
-  private ObjectMapper objectMapper;
+  private JsonMapper jsonMapper;
   private Logger historyLogger;
 
   @Override
   public void initialize(KadaiEngine kadaiEngine) {
-    objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    jsonMapper = new JsonMapper();
 
     String historyLoggerName = kadaiEngine.getConfiguration().getLogHistoryLoggerName();
 
@@ -56,9 +55,9 @@ public class KadaiEventLogger implements KadaiEventConsumer<KadaiEvent> {
   public void consume(KadaiEvent event) {
     try {
       if (historyLogger.isInfoEnabled()) {
-        historyLogger.info(objectMapper.writeValueAsString(event));
+        historyLogger.info(jsonMapper.writeValueAsString(event));
       }
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       throw new SystemException("Caught exception while serializing history event to JSON ", e);
     }
   }
