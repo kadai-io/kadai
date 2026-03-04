@@ -47,7 +47,7 @@ public class RestHelper {
   public static HttpHeaders generateHeadersForUser(String user) {
     HttpHeaders headers = new HttpHeaders();
     headers.add("Authorization", encodeUserAndPasswordAsBasicAuth(user));
-    headers.add("Content-Type", MediaTypes.HAL_JSON_VALUE);
+    headers.add("Accept", MediaTypes.HAL_JSON_VALUE);
     return headers;
   }
 
