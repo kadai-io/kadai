@@ -37,7 +37,7 @@ context('KADAI Classifications', () => {
     cy.get('button[mattooltip="Filter Category"]')
       .click({ force: true })
       .then(() => {
-        cy.get('.mat-menu-content').contains('MANUAL').click();
+        cy.get('.mat-mdc-menu-content').contains('MANUAL').click();
         cy.get('tree-node-collection').find('tree-node').should('have.length', 8);
       });
   });
