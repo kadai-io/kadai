@@ -29,8 +29,8 @@ context('KADAI Workbaskets', () => {
     cy.verifyPageLoad('/workbaskets');
 
     cy.get('input[mattooltip="Type to filter by name"]')
-      .type(Cypress.env('testValueWorkbasketSelectionName'))
-      .type('{enter}')
+      .type(Cypress.env('testValueWorkbasketSelectionName'), { force: true })
+      .type('{enter}', { force: true })
       .then(() => {
         cy.get('mat-selection-list[role="listbox"]').should('have.length', 1);
       });
@@ -39,7 +39,7 @@ context('KADAI Workbaskets', () => {
   it('should be possible to edit workbasket custom information', () => {
     cy.visitTestWorkbasket();
 
-    cy.get('#wb-custom-1').clear().type(Cypress.env('testValueWorkbaskets'));
+    cy.get('#wb-custom-1').clear({ force: true }).type(Cypress.env('testValueWorkbaskets'), { force: true });
 
     cy.saveWorkbaskets();
     cy.get('#wb-custom-1').should('have.value', Cypress.env('testValueWorkbaskets'));
@@ -48,7 +48,9 @@ context('KADAI Workbaskets', () => {
   it('should be possible to edit workbasket information orgLevel', () => {
     cy.visitTestWorkbasket();
 
-    cy.get('input[name="workbasket.orgLevel1"]').clear().type(Cypress.env('testValueWorkbaskets'));
+    cy.get('input[name="workbasket.orgLevel1"]')
+      .clear({ force: true })
+      .type(Cypress.env('testValueWorkbaskets'), { force: true });
 
     cy.saveWorkbaskets();
     cy.get('input[name="workbasket.orgLevel1"]').should('have.value', Cypress.env('testValueWorkbaskets'));
@@ -58,8 +60,8 @@ context('KADAI Workbaskets', () => {
     cy.visitTestWorkbasket();
 
     cy.get('#workbasket-description')
-      .clear()
-      .type(Cypress.env('testValueWorkbaskets'))
+      .clear({ force: true })
+      .type(Cypress.env('testValueWorkbaskets'), { force: true })
       .then(() => {
         cy.saveWorkbaskets();
         cy.get('#workbasket-description').should('have.value', Cypress.env('testValueWorkbaskets'));
@@ -97,7 +99,7 @@ context('KADAI Workbaskets', () => {
           .contains('mat-form-field', 'Access id')
           .find('input')
           .type('teamlead-2', { force: true });
-        cy.get('input[aria-label="checkAll"]:first').click();
+        cy.get('input[aria-label="checkAll"]:first').click({ force: true });
         cy.saveWorkbaskets();
       });
 
@@ -111,7 +113,6 @@ context('KADAI Workbaskets', () => {
 
     cy.get('kadai-administration-workbasket-distribution-targets-list[header="Available distribution targets"]')
       .find('mat-list-option:first')
-      .find('mat-pseudo-checkbox')
       .click();
     cy.get('button').contains('Add selected distribution targets').click();
 
@@ -125,7 +126,6 @@ context('KADAI Workbaskets', () => {
     // undo changes
     cy.get('kadai-administration-workbasket-distribution-targets-list[header="Selected distribution targets"]')
       .find('mat-list-option:first')
-      .find('mat-pseudo-checkbox')
       .click();
     cy.get('button').contains('Remove selected distribution target').click();
 
@@ -135,12 +135,12 @@ context('KADAI Workbaskets', () => {
   it('should be possible to change the name of a workbasket and switch tabs and transfer workbaskets without loosing changes', () => {
     cy.visitTestWorkbasket();
 
-    cy.get('#workbasket-name').clear().type(Cypress.env('testValueWorkbaskets'));
+    cy.get('#workbasket-name').clear({ force: true }).type(Cypress.env('testValueWorkbaskets'), { force: true });
 
     cy.visitWorkbasketsDistributionTargetsPage();
 
     cy.get(
-      '#dual-list-Left > .distribution-targets-list > .mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper > :nth-child(1)'
+      '#dual-list-Left > .distribution-targets-list > mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper > :nth-child(1)'
     )
       .should('contain.text', 'Basxet1')
       .click();
@@ -155,7 +155,7 @@ context('KADAI Workbaskets', () => {
     cy.visitWorkbasketsDistributionTargetsPage();
 
     cy.get(
-      '#dual-list-Left > .distribution-targets-list > .mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper > :nth-child(1)'
+      '#dual-list-Left > .distribution-targets-list > mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper > :nth-child(1)'
     )
       .should('contain.text', 'Basxet1')
       .click();
@@ -166,12 +166,12 @@ context('KADAI Workbaskets', () => {
     cy.visitWorkbasketsDistributionTargetsPage();
 
     cy.get(
-      '#dual-list-Right > .distribution-targets-list > .mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper > :nth-child(2)'
+      '#dual-list-Right > .distribution-targets-list > mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper > :nth-child(2)'
     ).should('contain.text', 'Basxet1');
 
     cy.undoWorkbaskets();
     cy.get(
-      '#dual-list-Right > .distribution-targets-list > .mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper'
+      '#dual-list-Right > .distribution-targets-list > mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper'
     )
       .children()
       .should('have.length', 1);
@@ -182,7 +182,7 @@ context('KADAI Workbaskets', () => {
     cy.visitWorkbasketsDistributionTargetsPage();
 
     cy.get(
-      '#dual-list-Left > .distribution-targets-list > .mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper > :nth-child(1)'
+      '#dual-list-Left > .distribution-targets-list > mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper > :nth-child(1)'
     )
       .should('contain.text', 'Basxet1')
       .click();
@@ -194,7 +194,7 @@ context('KADAI Workbaskets', () => {
     cy.visitWorkbasketsDistributionTargetsPage();
 
     cy.get(
-      '#dual-list-Right > .distribution-targets-list > .mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper > :nth-child(2)'
+      '#dual-list-Right > .distribution-targets-list > mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper > :nth-child(2)'
     )
       .should('contain.text', 'Basxet1')
       .click();
@@ -206,7 +206,7 @@ context('KADAI Workbaskets', () => {
   it('should be possible to change workbasket information and save changes from another tab', () => {
     cy.visitTestWorkbasket();
 
-    cy.get('#wb-custom-4').clear().type(Cypress.env('testValueWorkbaskets'));
+    cy.get('#wb-custom-4').clear({ force: true }).type(Cypress.env('testValueWorkbaskets'), { force: true });
 
     cy.visitWorkbasketsDistributionTargetsPage();
     cy.saveWorkbaskets();
@@ -223,7 +223,7 @@ context('KADAI Workbaskets', () => {
     cy.get('.distribution-targets-list__action-buttons--selected').click();
 
     cy.get(
-      '#dual-list-Right > .distribution-targets-list > .mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper'
+      '#dual-list-Right > .distribution-targets-list > mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper'
     )
       .children()
       .should('have.length', 0);
@@ -236,21 +236,20 @@ context('KADAI Workbaskets', () => {
     cy.visitWorkbasketsDistributionTargetsPage();
 
     cy.get('#dual-list-Right > .distribution-targets-list > .mat-toolbar > :nth-child(2)').click();
-    cy.get(
-      '#dual-list-Right > .distribution-targets-list > kadai-shared-workbasket-filter > .filter > .filter__expanded-filter > .filter__text-input > :nth-child(1) > :nth-child(2) > .mat-form-field-wrapper > .mat-form-field-flex > .mat-form-field-infix > .mat-input-element'
-    )
-      .clear()
-      .type('002');
+    cy.get('#dual-list-Right')
+      .find('input[mattooltip="Type to filter by name"]')
+      .clear({ force: true })
+      .type('002', { force: true });
     cy.get('.filter__action-buttons > .filter__search-button').click();
 
     cy.get(
-      '#dual-list-Right > .distribution-targets-list > .mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper > :nth-child(1)'
+      '#dual-list-Right > .distribution-targets-list > mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper > :nth-child(1)'
     ).should('contain.text', 'Basxet1');
 
     cy.get('.filter__action-buttons > [mattooltip="Clear Workbasket filter"]').click();
 
     cy.get(
-      '#dual-list-Right > .distribution-targets-list > .mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper'
+      '#dual-list-Right > .distribution-targets-list > mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper'
     )
       .children()
       .should('have.length', 2);
@@ -261,22 +260,21 @@ context('KADAI Workbaskets', () => {
     cy.visitWorkbasketsDistributionTargetsPage();
 
     cy.get('#dual-list-Left > .distribution-targets-list > .mat-toolbar > :nth-child(2)').click();
-    cy.get(
-      '#dual-list-Left > .distribution-targets-list > kadai-shared-workbasket-filter > .filter > .filter__expanded-filter > .filter__text-input > :nth-child(1) > :nth-child(2) > .mat-form-field-wrapper > .mat-form-field-flex > .mat-form-field-infix > .mat-input-element'
-    )
-      .clear()
-      .type('008');
+    cy.get('#dual-list-Left')
+      .find('input[mattooltip="Type to filter by name"]')
+      .clear({ force: true })
+      .type('008', { force: true });
 
     cy.get('.filter__action-buttons > .filter__search-button').click();
 
     cy.get(
-      '#dual-list-Left > .distribution-targets-list > .mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper'
+      '#dual-list-Left > .distribution-targets-list > mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper'
     )
       .children()
       .should('have.length', 1);
 
     cy.get(
-      '#dual-list-Left > .distribution-targets-list > .mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper > :nth-child(1)'
+      '#dual-list-Left > .distribution-targets-list > mat-selection-list > .cdk-virtual-scroll-viewport > .cdk-virtual-scroll-content-wrapper > :nth-child(1)'
     ).should('contain.text', 'BAsxet7');
   });
 });
