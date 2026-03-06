@@ -4356,6 +4356,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"es-toolkit@npm:^1.39.7":
+  version: 1.45.1
+  resolution: "es-toolkit@npm:1.45.1"
+  dependenciesMeta:
+    "@trivago/prettier-plugin-sort-imports@4.3.0":
+      unplugged: true
+    prettier-plugin-sort-re-exports@0.0.1:
+      unplugged: true
+  checksum: 10c0/b19180c778af8fe2fb450e8e05a5793166c91e0aa66b87d9fcfcc5618bd33e6ceec9c103e074458d32b2044972dc4fc63631b3b615834fde261917e9561f6f59
+  languageName: node
+  linkType: hard
+
 "esbuild@npm:0.27.3, esbuild@npm:^0.27.0":
   version: 0.27.3
   resolution: "esbuild@npm:0.27.3"
@@ -6132,7 +6144,7 @@ __metadata:
     globals: "npm:17.4.0"
     jsdom: "npm:28.1.0"
     lodash-es: "npm:4.17.23"
-    ng2-charts: "npm:9.0.0"
+    ng2-charts: "npm:10.0.0"
     prettier: "npm:3.8.1"
     rxjs: "npm:7.8.2"
     sass: "npm:1.97.3"
@@ -6245,7 +6257,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash-es@npm:4.17.23, lodash-es@npm:^4.17.15":
+"lodash-es@npm:4.17.23":
   version: 4.17.23
   resolution: "lodash-es@npm:4.17.23"
   checksum: 10c0/3150fb6660c14c7a6b5f23bd11597d884b140c0e862a17fdb415aaa5ef7741523182904a6b7929f04e5f60a11edb5a79499eb448734381c99ffb3c4734beeddd
@@ -6660,20 +6672,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ng2-charts@npm:9.0.0":
-  version: 9.0.0
-  resolution: "ng2-charts@npm:9.0.0"
+"ng2-charts@npm:10.0.0":
+  version: 10.0.0
+  resolution: "ng2-charts@npm:10.0.0"
   dependencies:
-    lodash-es: "npm:^4.17.15"
+    es-toolkit: "npm:^1.39.7"
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/cdk": ">=20.0.0"
-    "@angular/common": ">=20.0.0"
-    "@angular/core": ">=20.0.0"
-    "@angular/platform-browser": ">=20.0.0"
+    "@angular/cdk": ">=21.0.0"
+    "@angular/common": ">=21.0.0"
+    "@angular/core": ">=21.0.0"
+    "@angular/platform-browser": ">=21.0.0"
     chart.js: ^3.4.0 || ^4.0.0
     rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/02986fffa79b166ea580979e98a323e9201e9047e379753909361f4ec836f9290e0b5648266981ddb3f2f86af3e07463d6ff73b1b8bb4c9da9e8478a9e0c37d6
+  checksum: 10c0/c39a9350fd31c4517f486d38b7c70009236fcb4c824ff531cd903c2fb1e8fd3ed65017a2b00376742a682704e5e27523ce6377c843ce86a6cbfdba00910a4477
   languageName: node
   linkType: hard
 
