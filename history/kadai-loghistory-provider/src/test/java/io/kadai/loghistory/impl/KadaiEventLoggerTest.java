@@ -46,7 +46,7 @@ class KadaiEventLoggerTest {
   private final TestLogger logger = TestLoggerFactory.getTestLogger("AUDIT");
 
   @AfterEach
-  public void clearLoggers() {
+  void clearLoggers() {
     TestLoggerFactory.clear();
   }
 
