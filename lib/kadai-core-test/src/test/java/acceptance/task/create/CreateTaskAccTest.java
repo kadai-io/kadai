@@ -824,7 +824,6 @@ class CreateTaskAccTest {
     task.setClassificationKey(defaultClassificationSummary.getKey());
     task.setPrimaryObjRef(defaultObjectReference);
     task.setOwner("user-1-2");
-
     return task;
   }
 
