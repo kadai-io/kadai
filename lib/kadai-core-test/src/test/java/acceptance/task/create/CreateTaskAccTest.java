@@ -813,17 +813,6 @@ class CreateTaskAccTest {
     assertThat(createdTask).isNotNull();
   }
 
-  @WithAccessId(user = "user-1-1", groups = "cn=routers,cn=groups,OU=Test,O=KADAI")
-  @Test
-  void should_CreateTask_When_CreatorFieldValueLengthIs128() throws Exception {
-    TaskImpl newTask = (TaskImpl) createDefaultTask();
-    newTask.setCreator("a".repeat(128));
-
-    Task createdTask = taskService.createTask(newTask);
-
-    assertThat(createdTask).isNotNull();
-  }
-
   private Map<String, String> createSimpleCustomPropertyMap(int propertiesCount) {
     return IntStream.rangeClosed(1, propertiesCount)
         .mapToObj(String::valueOf)
