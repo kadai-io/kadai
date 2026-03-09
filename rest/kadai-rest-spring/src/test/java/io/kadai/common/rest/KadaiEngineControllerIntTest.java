@@ -137,7 +137,7 @@ class KadaiEngineControllerIntTest {
     KadaiUserInfoRepresentationModel currentUser = response.getBody();
     assertThat(currentUser).isNotNull();
     assertThat(currentUser.getUserId()).isEqualTo("user-2-1");
-    assertThat(currentUser.getGroupIds()).hasSize(3);
+    assertThat(currentUser.getGroupIds()).hasSize(4);
     assertThat(currentUser.getRoles()).hasSize(1);
   }
 
@@ -178,6 +178,7 @@ class KadaiEngineControllerIntTest {
         .containsExactlyInAnyOrder(
             "cn=organisationseinheit ksc 1,cn=organisationseinheit "
                 + "ksc,cn=organisation,ou=test,o=kadai",
+            "factor_password",
             "cn=ksc-users,cn=groups,ou=test,o=kadai",
             "cn=g02,cn=groups,ou=test,o=kadai",
             "cn=g01,cn=groups,ou=test,o=kadai");
