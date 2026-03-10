@@ -30,7 +30,7 @@ import io.kadai.simplehistory.rest.models.TaskHistoryEventRepresentationModel;
 import io.kadai.spi.history.api.events.task.TaskHistoryCustomField;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import java.util.Collection;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component

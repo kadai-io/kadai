@@ -18,7 +18,6 @@
 
 package io.kadai.workbasket.rest;
 
-import static io.kadai.rest.test.RestHelper.CLIENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -41,6 +40,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
 
 /** Test WorkbasketAccessItemController. */
 @TestMethodOrder(MethodOrderer.MethodName.class)
@@ -48,10 +48,12 @@ import org.springframework.web.client.HttpStatusCodeException;
 class WorkbasketAccessItemControllerIntTest {
 
   private final RestHelper restHelper;
+  private final RestClient restClient;
 
   @Autowired
-  WorkbasketAccessItemControllerIntTest(RestHelper restHelper) {
+  WorkbasketAccessItemControllerIntTest(RestHelper restHelper, RestClient restClient) {
     this.restHelper = restHelper;
+    this.restClient = restClient;
   }
 
   @Test
@@ -59,7 +61,7 @@ class WorkbasketAccessItemControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET_ACCESS_ITEMS);
 
     ResponseEntity<WorkbasketAccessItemPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -76,7 +78,7 @@ class WorkbasketAccessItemControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET_ACCESS_ITEMS) + parameters;
 
     ResponseEntity<WorkbasketAccessItemPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -98,7 +100,7 @@ class WorkbasketAccessItemControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET_ACCESS_ITEMS) + parameters;
 
     ResponseEntity<WorkbasketAccessItemPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -129,7 +131,7 @@ class WorkbasketAccessItemControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET_ACCESS_ITEMS) + parameters;
 
     ResponseEntity<WorkbasketAccessItemPagedRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -149,7 +151,7 @@ class WorkbasketAccessItemControllerIntTest {
         restHelper.toUrl(RestEndpoints.URL_WORKBASKET_ACCESS_ITEMS) + "?access-id=teamlead-2";
 
     ResponseEntity<Void> response =
-        CLIENT
+        restClient
             .delete()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -170,7 +172,7 @@ class WorkbasketAccessItemControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -202,7 +204,7 @@ class WorkbasketAccessItemControllerIntTest {
 
           ThrowingCallable httpCall =
               () ->
-                  CLIENT
+                  restClient
                       .delete()
                       .uri(url)
                       .headers(

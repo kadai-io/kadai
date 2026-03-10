@@ -18,11 +18,10 @@
 
 package io.kadai.monitor.rest;
 
-import static io.kadai.rest.test.RestHelper.CLIENT;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.monitor.rest.models.PriorityColumnHeaderRepresentationModel;
 import io.kadai.monitor.rest.models.ReportRepresentationModel;
@@ -37,18 +36,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException.BadRequest;
+import org.springframework.web.client.RestClient;
+import tools.jackson.databind.json.JsonMapper;
 
 /** Test MonitorController. */
 @KadaiSpringBootTest
 class MonitorControllerIntTest {
 
   private final RestHelper restHelper;
-  private final ObjectMapper objectMapper;
+  private final JsonMapper jsonMapper;
+  private final RestClient restClient;
 
   @Autowired
-  MonitorControllerIntTest(RestHelper restHelper, ObjectMapper objectMapper) {
+  MonitorControllerIntTest(RestHelper restHelper, JsonMapper jsonMapper, RestClient restClient) {
     this.restHelper = restHelper;
-    this.objectMapper = objectMapper;
+    this.jsonMapper = jsonMapper;
+    this.restClient = restClient;
   }
 
   @Test
@@ -59,7 +62,7 @@ class MonitorControllerIntTest {
             + "&state=READY&state=CLAIMED";
 
     ResponseEntity<ReportRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -84,7 +87,7 @@ class MonitorControllerIntTest {
             + "100000000000000000000000000000000007&state=READY&priority-minimum=1";
 
     ResponseEntity<ReportRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -110,7 +113,7 @@ class MonitorControllerIntTest {
             + "&custom-5=important";
 
     ResponseEntity<ReportRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
@@ -135,7 +138,7 @@ class MonitorControllerIntTest {
             + "&state=CLAIMED";
 
     ResponseEntity<ReportRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
@@ -157,7 +160,7 @@ class MonitorControllerIntTest {
             + "?workbasket-type=TOPIC&workbasket-type=GROUP";
 
     ResponseEntity<ReportRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
@@ -181,7 +184,7 @@ class MonitorControllerIntTest {
             + "&custom-7-not-in=20";
 
     ResponseEntity<ReportRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
@@ -204,10 +207,10 @@ class MonitorControllerIntTest {
         restHelper.toUrl(RestEndpoints.URL_MONITOR_WORKBASKET_PRIORITY_REPORT)
             + "?columnHeader="
             + URLEncoder.encode(
-                objectMapper.writeValueAsString(columnHeader), StandardCharsets.UTF_8);
+                jsonMapper.writeValueAsString(columnHeader), StandardCharsets.UTF_8);
 
     ResponseEntity<ReportRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
@@ -227,7 +230,7 @@ class MonitorControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
@@ -244,7 +247,7 @@ class MonitorControllerIntTest {
             + "?workbasket-type=TOPIC&workbasket-type=GROUP";
 
     ResponseEntity<ReportRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
@@ -270,7 +273,7 @@ class MonitorControllerIntTest {
             + "&custom-7-not-in=20";
 
     ResponseEntity<ReportRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
@@ -297,10 +300,10 @@ class MonitorControllerIntTest {
         restHelper.toUrl(RestEndpoints.URL_MONITOR_DETAILED_WORKBASKET_PRIORITY_REPORT)
             + "?columnHeader="
             + URLEncoder.encode(
-                objectMapper.writeValueAsString(columnHeader), StandardCharsets.UTF_8);
+                jsonMapper.writeValueAsString(columnHeader), StandardCharsets.UTF_8);
 
     ResponseEntity<ReportRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
@@ -320,12 +323,12 @@ class MonitorControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-        CLIENT
-            .get()
-            .uri(url)
-            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
-            .retrieve()
-            .toEntity(ReportRepresentationModel.class);
+            restClient
+                .get()
+                .uri(url)
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("monitor")))
+                .retrieve()
+                .toEntity(ReportRepresentationModel.class);
 
     assertThatThrownBy(httpCall).isInstanceOf(BadRequest.class);
   }
@@ -335,7 +338,7 @@ class MonitorControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_MONITOR_CLASSIFICATION_CATEGORY_REPORT);
 
     ResponseEntity<ReportRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -354,7 +357,7 @@ class MonitorControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_MONITOR_CLASSIFICATION_REPORT);
 
     ResponseEntity<ReportRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -371,7 +374,7 @@ class MonitorControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_MONITOR_DETAILED_CLASSIFICATION_REPORT);
 
     ResponseEntity<ReportRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -386,7 +389,7 @@ class MonitorControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_MONITOR_TASK_STATUS_REPORT);
 
     ResponseEntity<ReportRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -401,7 +404,7 @@ class MonitorControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_MONITOR_TIMESTAMP_REPORT);
 
     ResponseEntity<ReportRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -418,7 +421,7 @@ class MonitorControllerIntTest {
             RestEndpoints.URL_MONITOR_TASK_CUSTOM_FIELD_VALUE_REPORT + "?custom-field=CUSTOM_14");
 
     ResponseEntity<ReportRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))

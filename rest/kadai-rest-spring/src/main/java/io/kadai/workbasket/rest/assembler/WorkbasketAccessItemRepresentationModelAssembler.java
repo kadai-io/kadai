@@ -36,8 +36,8 @@ import io.kadai.workbasket.rest.models.WorkbasketAccessItemPagedRepresentationMo
 import io.kadai.workbasket.rest.models.WorkbasketAccessItemRepresentationModel;
 import java.util.Collection;
 import java.util.List;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 /**

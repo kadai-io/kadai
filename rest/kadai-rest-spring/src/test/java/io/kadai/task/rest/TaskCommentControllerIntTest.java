@@ -18,7 +18,7 @@
 
 package io.kadai.task.rest;
 
-import static io.kadai.rest.test.RestHelper.CLIENT;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -44,16 +44,19 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
 
 /** Test TaskCommentController. */
 @KadaiSpringBootTest
 class TaskCommentControllerIntTest {
 
   private final RestHelper restHelper;
+  private final RestClient restClient;
 
   @Autowired
-  TaskCommentControllerIntTest(RestHelper restHelper) {
+  TaskCommentControllerIntTest(RestHelper restHelper, RestClient restClient) {
     this.restHelper = restHelper;
+    this.restClient = restClient;
   }
 
   @Test
@@ -63,7 +66,7 @@ class TaskCommentControllerIntTest {
             RestEndpoints.URL_TASK_COMMENT, "TCI:000000000000000000000000000000000000");
 
     ResponseEntity<TaskCommentRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -79,7 +82,7 @@ class TaskCommentControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -100,7 +103,7 @@ class TaskCommentControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -124,7 +127,7 @@ class TaskCommentControllerIntTest {
     String url1 = url + "?sort-by=MODIFIED&order=DESCENDING";
     ResponseEntity<TaskCommentCollectionRepresentationModel>
         getTaskCommentsSortedByModifiedOrderedByDescendingResponse =
-            CLIENT
+            restClient
                 .get()
                 .uri(url1)
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
@@ -139,7 +142,7 @@ class TaskCommentControllerIntTest {
     String url2 = url + "?sort-by=MODIFIED";
     ResponseEntity<TaskCommentCollectionRepresentationModel>
         getTaskCommentsSortedByModifiedOrderedByAscendingResponse =
-            CLIENT
+            restClient
                 .get()
                 .uri(url2)
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
@@ -154,7 +157,7 @@ class TaskCommentControllerIntTest {
     String url3 = url + "?sort-by=CREATED&order=DESCENDING";
     ResponseEntity<TaskCommentCollectionRepresentationModel>
         getTaskCommentsSortedByCreatedOrderedByDescendingResponse =
-            CLIENT
+            restClient
                 .get()
                 .uri(url3)
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
@@ -169,7 +172,7 @@ class TaskCommentControllerIntTest {
     String url4 = url + "?sort-by=CREATED";
     ResponseEntity<TaskCommentCollectionRepresentationModel>
         getTaskCommentsSortedByCreatedOrderedByAscendingResponse =
-            CLIENT
+            restClient
                 .get()
                 .uri(url4)
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
@@ -190,7 +193,7 @@ class TaskCommentControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url + "?sort-by=invalidSortParam")
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -211,7 +214,7 @@ class TaskCommentControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -235,7 +238,7 @@ class TaskCommentControllerIntTest {
             RestEndpoints.URL_TASK_COMMENTS, "TKI:000000000000000000000000000000000004");
 
     ResponseEntity<TaskCommentRepresentationModel> response =
-        CLIENT
+        restClient
             .post()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -266,7 +269,7 @@ class TaskCommentControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .post()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-b-1")))
@@ -290,7 +293,7 @@ class TaskCommentControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .post()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -317,7 +320,8 @@ class TaskCommentControllerIntTest {
 
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENTS);
 
-    ResponseEntity<BulkOperationResultsRepresentationModel> response = CLIENT
+    ResponseEntity<BulkOperationResultsRepresentationModel> response =
+        restClient
             .post()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -335,7 +339,8 @@ class TaskCommentControllerIntTest {
     for (String taskId : taskIds) {
       String commentUrl = restHelper.toUrl(RestEndpoints.URL_TASK_COMMENTS, taskId);
 
-      ResponseEntity<TaskCommentCollectionRepresentationModel> getResponse = CLIENT
+      ResponseEntity<TaskCommentCollectionRepresentationModel> getResponse =
+          restClient
               .get()
               .uri(commentUrl)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -367,13 +372,13 @@ class TaskCommentControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENTS);
 
     ResponseEntity<Map> response =
-            CLIENT
-                    .post()
-                    .uri(url)
-                    .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
-                    .body(request)
-                    .retrieve()
-                    .toEntity(Map.class);
+        restClient
+            .post()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .body(request)
+            .retrieve()
+            .toEntity(Map.class);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -395,7 +400,8 @@ class TaskCommentControllerIntTest {
     String taskId = "TKI:000000000000000000000000000000000001";
     String commentUrl = restHelper.toUrl(RestEndpoints.URL_TASK_COMMENTS, taskId);
 
-    ResponseEntity<TaskCommentCollectionRepresentationModel> getResponse = CLIENT
+    ResponseEntity<TaskCommentCollectionRepresentationModel> getResponse =
+        restClient
             .get()
             .uri(commentUrl)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -420,13 +426,15 @@ class TaskCommentControllerIntTest {
 
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENTS);
 
-    ThrowingCallable httpCall = () ->
-            CLIENT.post()
-                    .uri(url)
-                    .headers(h -> h.addAll(RestHelper.generateHeadersForUser("admin")))
-                    .body(request)
-                    .retrieve()
-                    .toEntity(BulkOperationResultsRepresentationModel.class);
+    ThrowingCallable httpCall =
+        () ->
+            restClient
+                .post()
+                .uri(url)
+                .headers(h -> h.addAll(RestHelper.generateHeadersForUser("admin")))
+                .body(request)
+                .retrieve()
+                .toEntity(BulkOperationResultsRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
             .isInstanceOf(HttpStatusCodeException.class)
@@ -445,13 +453,15 @@ class TaskCommentControllerIntTest {
 
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENTS);
 
-    ThrowingCallable httpCall = () ->
-            CLIENT.post()
-                    .uri(url)
-                    .headers(h -> h.addAll(RestHelper.generateHeadersForUser("admin")))
-                    .body(request)
-                    .retrieve()
-                    .toEntity(BulkOperationResultsRepresentationModel.class);
+    ThrowingCallable httpCall =
+        () ->
+            restClient
+                .post()
+                .uri(url)
+                .headers(h -> h.addAll(RestHelper.generateHeadersForUser("admin")))
+                .body(request)
+                .retrieve()
+                .toEntity(BulkOperationResultsRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
             .isInstanceOf(HttpStatusCodeException.class)
@@ -471,13 +481,15 @@ class TaskCommentControllerIntTest {
 
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENTS);
 
-    ThrowingCallable httpCall = () ->
-            CLIENT.post()
-                    .uri(url)
-                    .headers(h -> h.addAll(RestHelper.generateHeadersForUser("admin")))
-                    .body(request)
-                    .retrieve()
-                    .toEntity(BulkOperationResultsRepresentationModel.class);
+    ThrowingCallable httpCall =
+        () ->
+            restClient
+                .post()
+                .uri(url)
+                .headers(h -> h.addAll(RestHelper.generateHeadersForUser("admin")))
+                .body(request)
+                .retrieve()
+                .toEntity(BulkOperationResultsRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
             .isInstanceOf(HttpStatusCodeException.class)
@@ -494,7 +506,7 @@ class TaskCommentControllerIntTest {
     HttpHeaders headers = RestHelper.generateHeadersForUser("admin");
 
     ResponseEntity<TaskCommentRepresentationModel> getTaskCommentResponse =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(httpHeaders -> httpHeaders.addAll(headers))
@@ -509,7 +521,7 @@ class TaskCommentControllerIntTest {
     taskCommentToUpdate.setTextField("updated text in textfield");
 
     ResponseEntity<TaskCommentRepresentationModel> responseUpdate =
-        CLIENT
+        restClient
             .put()
             .uri(url)
             .headers(httpHeaders -> httpHeaders.addAll(headers))
@@ -528,7 +540,7 @@ class TaskCommentControllerIntTest {
             RestEndpoints.URL_TASK_COMMENT, "TCI:000000000000000000000000000000000000");
 
     ResponseEntity<TaskCommentRepresentationModel> getTaskCommentResponse =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -544,7 +556,7 @@ class TaskCommentControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .put()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -565,7 +577,7 @@ class TaskCommentControllerIntTest {
             RestEndpoints.URL_TASK_COMMENT, "TCI:000000000000000000000000000000000000");
 
     ResponseEntity<TaskCommentRepresentationModel> getTaskCommentResponse =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -581,7 +593,7 @@ class TaskCommentControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .put()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -602,7 +614,7 @@ class TaskCommentControllerIntTest {
             RestEndpoints.URL_TASK_COMMENT, "TCI:000000000000000000000000000000000000");
 
     ResponseEntity<TaskCommentRepresentationModel> getTaskCommentResponse =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -620,7 +632,7 @@ class TaskCommentControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .put()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -643,7 +655,7 @@ class TaskCommentControllerIntTest {
     HttpHeaders headers = RestHelper.generateHeadersForUser("admin");
 
     ResponseEntity<TaskCommentRepresentationModel> response =
-        CLIENT
+        restClient
             .delete()
             .uri(url)
             .headers(httpHeaders -> httpHeaders.addAll(headers))
@@ -654,7 +666,7 @@ class TaskCommentControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
@@ -679,7 +691,7 @@ class TaskCommentControllerIntTest {
 
     ResponseEntity<TaskCommentCollectionRepresentationModel>
         getTaskCommentsBeforeDeleteionResponse =
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
@@ -694,7 +706,7 @@ class TaskCommentControllerIntTest {
             RestEndpoints.URL_TASK_COMMENT, "TCI:000000000000000000000000000000000004");
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .delete()
                 .uri(url2)
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
@@ -716,7 +728,7 @@ class TaskCommentControllerIntTest {
 
     ThrowingCallable httpCall =
         () -> {
-          CLIENT
+          restClient
               .delete()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))

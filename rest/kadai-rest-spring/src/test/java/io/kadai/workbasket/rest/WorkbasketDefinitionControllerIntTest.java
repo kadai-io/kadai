@@ -18,12 +18,10 @@
 
 package io.kadai.workbasket.rest;
 
-import static io.kadai.rest.test.RestHelper.CLIENT;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
@@ -55,13 +53,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
+import tools.jackson.databind.json.JsonMapper;
 
 /** Integration tests for WorkbasketDefinitionController. */
 @KadaiSpringBootTest
 class WorkbasketDefinitionControllerIntTest {
 
-  private final ObjectMapper objMapper;
+  private final JsonMapper jsonMapper;
   private final RestHelper restHelper;
+  private final RestClient restClient;
   private final DataSource dataSource;
 
   @Value("${kadai.schemaName:KADAI}")
@@ -69,9 +70,10 @@ class WorkbasketDefinitionControllerIntTest {
 
   @Autowired
   WorkbasketDefinitionControllerIntTest(
-      ObjectMapper objMapper, RestHelper restHelper, DataSource dataSource) {
-    this.objMapper = objMapper;
+      JsonMapper jsonMapper, RestHelper restHelper, RestClient restClient, DataSource dataSource) {
+    this.jsonMapper = jsonMapper;
     this.restHelper = restHelper;
+    this.restClient = restClient;
     this.dataSource = dataSource;
   }
 
@@ -286,7 +288,7 @@ class WorkbasketDefinitionControllerIntTest {
       executeExportRequestForDomain(String domain) {
     String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET_DEFINITIONS) + "?domain=" + domain;
 
-    return CLIENT
+    return restClient
         .get()
         .uri(url)
         .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -308,7 +310,7 @@ class WorkbasketDefinitionControllerIntTest {
     File tmpFile = File.createTempFile("test", ".tmp");
     try (FileOutputStream out = new FileOutputStream(tmpFile);
         OutputStreamWriter writer = new OutputStreamWriter(out, UTF_8)) {
-      objMapper.writeValue(writer, pageModel);
+      jsonMapper.writeValue(writer, pageModel);
     }
 
     MultiValueMap<String, FileSystemResource> body = new LinkedMultiValueMap<>();
@@ -320,7 +322,7 @@ class WorkbasketDefinitionControllerIntTest {
     String serverUrl = restHelper.toUrl(RestEndpoints.URL_WORKBASKET_DEFINITIONS);
 
     ResponseEntity<Void> responseImport =
-        CLIENT
+        restClient
             .post()
             .uri(serverUrl)
             .headers(httpHeaders -> httpHeaders.addAll(headers))

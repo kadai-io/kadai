@@ -68,6 +68,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.Ordered;
@@ -77,7 +78,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -92,7 +92,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
 
   public static final String ERROR_KEY_QUERY_MALFORMED = "QUERY_PARAMETER_MALFORMED";
-  public static final String ERROR_KEY_PAYLOAD = "PAYLOAD_TOO_LARGE";
+  public static final String ERROR_KEY_PAYLOAD = "CONTENT_TOO_LARGE";
   public static final String ERROR_KEY_UNKNOWN_ERROR = "UNKNOWN_ERROR";
 
   @ExceptionHandler(MalformedServiceLevelException.class)
@@ -176,7 +176,7 @@ public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(ServiceLevelViolationException.class)
   public ResponseEntity<Object> handleServiceLevelViolationException(
       ServiceLevelViolationException ex, WebRequest req) {
-    return handle(ex.getErrorCode(), ex, req, HttpStatus.UNPROCESSABLE_ENTITY);
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.UNPROCESSABLE_CONTENT);
   }
 
   @ExceptionHandler(ClassificationNotFoundException.class)
@@ -316,7 +316,7 @@ public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
       @NonNull HttpHeaders headers,
       @NonNull HttpStatusCode status,
       @NonNull WebRequest req) {
-    return handle(ErrorCode.of(ERROR_KEY_PAYLOAD), ex, req, HttpStatus.PAYLOAD_TOO_LARGE);
+    return handle(ErrorCode.of(ERROR_KEY_PAYLOAD), ex, req, HttpStatus.CONTENT_TOO_LARGE);
   }
 
   @ExceptionHandler(BeanInstantiationException.class)

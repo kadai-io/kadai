@@ -19,12 +19,10 @@
 package io.kadai.classification.rest;
 
 import static io.kadai.common.api.SharedConstants.MASTER_DOMAIN;
-import static io.kadai.rest.test.RestHelper.CLIENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.exceptions.ClassificationNotFoundException;
 import io.kadai.classification.rest.assembler.ClassificationDefinitionCollectionRepresentationModel;
@@ -58,6 +56,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
+import tools.jackson.databind.json.JsonMapper;
 
 /** Test classification definitions. */
 @KadaiSpringBootTest
@@ -67,18 +67,21 @@ class ClassificationDefinitionControllerIntTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(ClassificationController.class);
 
   private final RestHelper restHelper;
-  private final ObjectMapper mapper;
+  private final RestClient restClient;
+  private final JsonMapper jsonMapper;
   private final ClassificationService classificationService;
   private final ClassificationRepresentationModelAssembler classificationAssembler;
 
   @Autowired
   ClassificationDefinitionControllerIntTest(
       RestHelper restHelper,
-      ObjectMapper mapper,
+      RestClient restClient,
+      JsonMapper jsonMapper,
       ClassificationService classificationService,
       ClassificationRepresentationModelAssembler classificationAssembler) {
     this.restHelper = restHelper;
-    this.mapper = mapper;
+    this.restClient = restClient;
+    this.jsonMapper = jsonMapper;
     this.classificationService = classificationService;
     this.classificationAssembler = classificationAssembler;
   }
@@ -90,7 +93,7 @@ class ClassificationDefinitionControllerIntTest {
         restHelper.toUrl(RestEndpoints.URL_CLASSIFICATION_DEFINITIONS) + "?domain=DOMAIN_B";
 
     ResponseEntity<ClassificationDefinitionCollectionRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -116,7 +119,7 @@ class ClassificationDefinitionControllerIntTest {
         restHelper.toUrl(RestEndpoints.URL_CLASSIFICATION_DEFINITIONS) + "?domain=DOMAIN_B";
 
     ResponseEntity<ClassificationDefinitionCollectionRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -138,7 +141,7 @@ class ClassificationDefinitionControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATION_DEFINITIONS) + "?domain=ADdfe";
 
     ResponseEntity<ClassificationDefinitionCollectionRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -444,7 +447,7 @@ class ClassificationDefinitionControllerIntTest {
     File tmpFile = File.createTempFile("test", ".tmp");
     try (FileOutputStream out = new FileOutputStream(tmpFile);
         OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
-      mapper.writeValue(writer, clList);
+      jsonMapper.writeValue(writer, clList);
     }
     MultiValueMap<String, FileSystemResource> body = new LinkedMultiValueMap<>();
     body.add("file", new FileSystemResource(tmpFile));
@@ -454,7 +457,7 @@ class ClassificationDefinitionControllerIntTest {
 
     String serverUrl = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATION_DEFINITIONS);
 
-    return CLIENT
+    return restClient
         .post()
         .uri(serverUrl)
         .headers(httpHeaders -> httpHeaders.addAll(headers))

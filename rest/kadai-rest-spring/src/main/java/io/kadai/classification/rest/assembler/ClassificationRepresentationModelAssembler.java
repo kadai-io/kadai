@@ -31,9 +31,9 @@ import io.kadai.classification.rest.models.ClassificationRepresentationModel;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.rest.assembler.CollectionRepresentationModelAssembler;
 import java.util.List;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 /**

@@ -22,8 +22,8 @@ import io.kadai.common.api.KadaiRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
+import org.jspecify.annotations.NonNull;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.lang.NonNull;
 
 @Schema(description = "EntityModel class for user information")
 public class KadaiUserInfoRepresentationModel
