@@ -18,7 +18,7 @@
 
 package io.kadai.user.rest;
 
-import static io.kadai.rest.test.RestHelper.CLIENT;
+
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -49,15 +49,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.MethodMode;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
 
 /** Tests the endpoints of the UserController. */
 @KadaiSpringBootTest
 class UserControllerIntTest {
+  
   private final RestHelper restHelper;
+  private final RestClient restClient;
 
   @Autowired
-  UserControllerIntTest(RestHelper restHelper) {
+  UserControllerIntTest(RestHelper restHelper, RestClient restClient) {
     this.restHelper = restHelper;
+    this.restClient = restClient;
   }
 
   @Test
@@ -65,7 +69,7 @@ class UserControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_USERS_ID, "TEAMLEAD-1");
 
     ResponseEntity<UserRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -79,7 +83,7 @@ class UserControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?user-id=user-1-1&user-id=USER-1-2";
 
     ResponseEntity<UserCollectionRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -100,7 +104,7 @@ class UserControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?current-user" + value;
 
     ResponseEntity<UserCollectionRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -118,7 +122,7 @@ class UserControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -136,7 +140,7 @@ class UserControllerIntTest {
     String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?current-user&user-id=teamlead-1";
 
     ResponseEntity<UserCollectionRepresentationModel> response =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -154,7 +158,7 @@ class UserControllerIntTest {
             + "?user-id=user-1-1&user-id=USER-1-2&current-user";
 
     ResponseEntity<UserCollectionRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -183,7 +187,7 @@ class UserControllerIntTest {
             + "&user-id=AnotherNonExistingId";
 
     ResponseEntity<UserCollectionRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -204,7 +208,7 @@ class UserControllerIntTest {
             + String.format("?orgLevel%d=%s", level, orgLevel);
 
     ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -238,7 +242,7 @@ class UserControllerIntTest {
             + String.format("?orgLevel%d=%s", level, orgLevel);
 
     ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -264,7 +268,7 @@ class UserControllerIntTest {
             + String.format("&orgLevel%d=%s", level, orgLevel2);
 
     ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -305,7 +309,7 @@ class UserControllerIntTest {
             + String.format("&orgLevel%d=%s", level2, orgLevel2);
 
     ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -333,7 +337,7 @@ class UserControllerIntTest {
             + String.format("&orgLevel%d=%s", level2, orgLevel2);
 
     ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -354,7 +358,7 @@ class UserControllerIntTest {
             + "&user-id=user-2-1";
 
     ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -395,7 +399,7 @@ class UserControllerIntTest {
             + "&current-user";
 
     ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -437,7 +441,7 @@ class UserControllerIntTest {
             + "&user-id=teamlead-1";
 
     ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -493,7 +497,7 @@ class UserControllerIntTest {
                 "?sort-by=%s&order=%s&page=%d&page-size=%d", sortBy, order, page, pageSize);
 
     ResponseEntity<UserSummaryPagedRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -518,20 +522,6 @@ class UserControllerIntTest {
                 : CASE_INSENSITIVE_ORDER.reversed());
   }
 
-  private static Function<UserSummaryRepresentationModel, String>
-      getUserRepresentationModelStringFunction(String sortBy) {
-    Map<String, Function<UserSummaryRepresentationModel, String>> sortByMap =
-        Map.of(
-            "FIRST_NAME", UserSummaryRepresentationModel::getFirstName,
-            "LAST_NAME", UserSummaryRepresentationModel::getLastName,
-            "ORG_LEVEL_1", UserSummaryRepresentationModel::getOrgLevel1,
-            "ORG_LEVEL_2", UserSummaryRepresentationModel::getOrgLevel2,
-            "ORG_LEVEL_3", UserSummaryRepresentationModel::getOrgLevel3,
-            "ORG_LEVEL_4", UserSummaryRepresentationModel::getOrgLevel4);
-
-    return sortByMap.get(sortBy);
-  }
-
   @Test
   void should_ReturnBadRequest_When_InvalidSortByParameter() {
     String url =
@@ -540,7 +530,7 @@ class UserControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -579,7 +569,7 @@ class UserControllerIntTest {
     HttpHeaders httpHeaders = RestHelper.generateHeadersForUser("teamlead-1");
 
     ResponseEntity<UserRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .post()
             .uri(url)
             .headers(headers -> headers.addAll(httpHeaders))
@@ -593,7 +583,7 @@ class UserControllerIntTest {
     url = restHelper.toUrl(RestEndpoints.URL_USERS_ID, "12345");
 
     responseEntity =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(httpHeaders))
@@ -620,7 +610,7 @@ class UserControllerIntTest {
     HttpHeaders httpHeaders = RestHelper.generateHeadersForUser("teamlead-1");
 
     ResponseEntity<UserRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .post()
             .uri(url)
             .headers(headers -> headers.addAll(httpHeaders))
@@ -634,7 +624,7 @@ class UserControllerIntTest {
     url = restHelper.toUrl(RestEndpoints.URL_USERS_ID, "123456");
 
     responseEntity =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(httpHeaders))
@@ -652,7 +642,7 @@ class UserControllerIntTest {
     HttpHeaders httpHeaders = RestHelper.generateHeadersForUser("teamlead-1");
 
     ResponseEntity<UserRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(httpHeaders))
@@ -665,7 +655,7 @@ class UserControllerIntTest {
     model.setLastName("Mueller");
 
     responseEntity =
-        CLIENT
+        restClient
             .put()
             .uri(url)
             .headers(headers -> headers.addAll(httpHeaders))
@@ -685,7 +675,7 @@ class UserControllerIntTest {
     HttpHeaders httpHeaders = RestHelper.generateHeadersForUser("teamlead-1");
 
     ResponseEntity<UserRepresentationModel> responseEntity =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(httpHeaders))
@@ -696,7 +686,7 @@ class UserControllerIntTest {
     assertThat(responseEntity.getBody().getUserId()).isEqualTo("user-1-3");
 
     responseEntity =
-        CLIENT
+        restClient
             .delete()
             .uri(url)
             .headers(headers -> headers.addAll(httpHeaders))
@@ -707,7 +697,7 @@ class UserControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(headers -> headers.addAll(httpHeaders))
@@ -719,5 +709,19 @@ class UserControllerIntTest {
         .extracting(HttpStatusCodeException.class::cast)
         .extracting(HttpStatusCodeException::getStatusCode)
         .isEqualTo(HttpStatus.NOT_FOUND);
+  }
+
+  private static Function<UserSummaryRepresentationModel, String>
+      getUserRepresentationModelStringFunction(String sortBy) {
+    Map<String, Function<UserSummaryRepresentationModel, String>> sortByMap =
+        Map.of(
+            "FIRST_NAME", UserSummaryRepresentationModel::getFirstName,
+            "LAST_NAME", UserSummaryRepresentationModel::getLastName,
+            "ORG_LEVEL_1", UserSummaryRepresentationModel::getOrgLevel1,
+            "ORG_LEVEL_2", UserSummaryRepresentationModel::getOrgLevel2,
+            "ORG_LEVEL_3", UserSummaryRepresentationModel::getOrgLevel3,
+            "ORG_LEVEL_4", UserSummaryRepresentationModel::getOrgLevel4);
+
+    return sortByMap.get(sortBy);
   }
 }

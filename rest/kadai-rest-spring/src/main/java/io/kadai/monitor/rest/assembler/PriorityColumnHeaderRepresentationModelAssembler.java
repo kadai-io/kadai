@@ -20,8 +20,8 @@ package io.kadai.monitor.rest.assembler;
 
 import io.kadai.monitor.api.reports.header.PriorityColumnHeader;
 import io.kadai.monitor.rest.models.PriorityColumnHeaderRepresentationModel;
+import org.jspecify.annotations.NonNull;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component

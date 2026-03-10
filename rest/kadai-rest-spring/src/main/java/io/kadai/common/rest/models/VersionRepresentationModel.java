@@ -20,8 +20,8 @@ package io.kadai.common.rest.models;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.lang.NonNull;
 
 @Schema(description = "EntityModel class for version information.")
 public class VersionRepresentationModel extends RepresentationModel<VersionRepresentationModel> {

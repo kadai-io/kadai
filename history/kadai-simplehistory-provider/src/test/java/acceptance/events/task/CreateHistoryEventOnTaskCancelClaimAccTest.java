@@ -24,9 +24,8 @@ import acceptance.AbstractAccTest;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.internal.util.CheckedRunnable;
 import io.kadai.common.internal.util.Triplet;
-import io.kadai.simplehistory.impl.SimpleHistoryServiceImpl;
-import io.kadai.simplehistory.impl.TaskHistoryQueryImpl;
-import io.kadai.simplehistory.impl.task.TaskHistoryQueryMapper;
+import io.kadai.simplehistory.task.internal.TaskHistoryQueryImpl;
+import io.kadai.simplehistory.task.internal.TaskHistoryQueryMapper;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
 import io.kadai.task.api.TaskService;
@@ -44,7 +43,6 @@ import org.junit.jupiter.api.function.ThrowingConsumer;
 class CreateHistoryEventOnTaskCancelClaimAccTest extends AbstractAccTest {
 
   private final TaskService taskService = kadaiEngine.getTaskService();
-  private final SimpleHistoryServiceImpl historyService = getHistoryService();
 
   @TestFactory
   Stream<DynamicTest> should_CreateCancelClaimedHistoryEvent_When_TaskIsCancelClaimed() {
@@ -73,7 +71,7 @@ class CreateHistoryEventOnTaskCancelClaimAccTest extends AbstractAccTest {
                       List<TaskHistoryEvent> events =
                           taskHistoryQueryMapper.queryHistoryEvents(
                               (TaskHistoryQueryImpl)
-                                  historyService.createTaskHistoryQuery().taskIdIn(taskId));
+                                  taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
 
                       assertThat(events).isEmpty();
 
@@ -84,7 +82,7 @@ class CreateHistoryEventOnTaskCancelClaimAccTest extends AbstractAccTest {
                       events =
                           taskHistoryQueryMapper.queryHistoryEvents(
                               (TaskHistoryQueryImpl)
-                                  historyService.createTaskHistoryQuery().taskIdIn(taskId));
+                                  taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
 
                       assertThat(events).hasSize(1);
 
@@ -95,7 +93,7 @@ class CreateHistoryEventOnTaskCancelClaimAccTest extends AbstractAccTest {
                       assertThat(event.getUserId()).isEqualTo("user-1-1");
                       assertThat(event.getProxyAccessId()).isEqualTo("admin");
 
-                      event = historyService.getTaskHistoryEvent(event.getId());
+                      event = taskHistoryService.getTaskHistoryEvent(event.getId());
 
                       assertThat(event.getDetails()).isNotNull();
 

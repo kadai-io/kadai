@@ -30,8 +30,8 @@ import io.kadai.task.rest.TaskCommentController;
 import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
 import java.util.List;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 /** EntityModel assembler for {@link TaskCommentRepresentationModel}. */

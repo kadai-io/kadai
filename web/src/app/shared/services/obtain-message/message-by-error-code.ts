@@ -30,7 +30,7 @@ export const messageByErrorCode = {
     DOMAIN_NOT_FOUND: 'Domain {domain} cannot be found',
     NOT_AUTHORIZED: 'Current user {currentUserId} is not authorized. User must be member of role(s) {roles}.',
     HISTORY_EVENT_NOT_FOUND: 'History Event with id {historyEventId} cannot be found',
-    PAYLOAD_TOO_LARGE: 'Maximum upload size was exceeded',
+    CONTENT_TOO_LARGE: 'Maximum upload size was exceeded',
     CLASSIFICATION_SERVICE_LEVEL_MALFORMED:
       'Service level {serviceLevel} of Classification with key {classificationKey} and domain {domain} is invalid. ' +
       'The service level has to be a positive ISO-8601 duration format and only whole days are supported. ' +

@@ -19,8 +19,8 @@
 package io.kadai.common.rest.models;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.jspecify.annotations.NonNull;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.lang.NonNull;
 
 /** EntityModel for Access Id. */
 public class AccessIdRepresentationModel extends RepresentationModel<AccessIdRepresentationModel> {

@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 env:
-  JAVA_VERSION: 17
+  JAVA_VERSION: 25
   NODE_VERSION: 24
 
   ARTIFACTS_CYPRESS_TESTS_NAME: cypress-tests
@@ -281,13 +281,13 @@ jobs:
   test_e2e:
     runs-on: ubuntu-22.04
     name: Test E2E
-    needs: [test_frontend, test_backend_17, test_backend_21]
+    needs: [test_frontend, test_backend]
     if: |
       (always() &&
       needs.detect_changes.outputs.code_changed == 'true' &&
       needs.test_frontend.result != 'failure' &&
-      needs.test_backend_17.result != 'failure' &&
-      needs.test_backend_21.result != 'failure') || startsWith(github.ref, 'refs/tags/')
+      needs.test_backend.result != 'failure') 
+      || startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -376,9 +376,9 @@ jobs:
         if: failure()
         uses: andymckay/cancel-action@0.5
 
-  test_backend_17:
+  test_backend:
     runs-on: ubuntu-22.04
-    name: Test ${{ matrix.module }} with JDK 17 on ${{ matrix.database }}
+    name: Test ${{ matrix.module }} on ${{ matrix.database }}
     needs: [compile_backend ]
     if: needs.detect_changes.outputs.backend_changed == 'true' || startsWith(github.ref, 'refs/tags/')
     strategy:
@@ -468,7 +468,7 @@ jobs:
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
         with:
           task: get-measurement
-          label: "test_backend_17: ${{ matrix.module }} (H2)"
+          label: "test_backend: ${{ matrix.module }} (H2)"
         continue-on-error: true
       - name: Show Eco CI Results
         if: matrix.database == 'H2'
@@ -485,72 +485,6 @@ jobs:
           name: ${{ env.ARTIFACTS_JACOCO_REPORTS_NAME }}-${{ matrix.module }}
           path: ${{ env.ARTIFACTS_JACOCO_REPORTS_PATH }}
           if-no-files-found: ignore
-      - name: Cancel workflow
-        if: failure()
-        uses: andymckay/cancel-action@0.5
-
-  test_backend_21:
-    runs-on: ubuntu-22.04
-    name: Test ${{ matrix.module }} with JDK 21 on ${{ matrix.database }}
-    needs: [compile_backend ]
-    if: needs.detect_changes.outputs.backend_changed == 'true' || startsWith(github.ref, 'refs/tags/')
-    strategy:
-      matrix:
-        module:
-          - kadai-routing-rest
-          - kadai-rest-spring-example-boot
-          - kadai-simplehistory-rest-spring
-          - kadai-rest-spring-example-common
-        database:
-          - DB2
-    steps:
-      - name: Start Eco CI Measurement
-        uses: green-coding-solutions/eco-ci-energy-estimation@v5
-        with:
-          task: start-measurement
-          project: "KADAI"
-          tags: "CI/CD, Test Backend (JDK21/DB2)"
-        continue-on-error: true
-      - name: Git checkout
-        uses: actions/checkout@v6
-      - name: Set up JDK 21
-        uses: actions/setup-java@v5
-        with:
-          distribution: adopt
-          java-version: 21
-      - name: Cache maven dependencies
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.m2
-            !~/.m2/repository/io/kadai
-          key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
-      - name: Download kadai artifacts
-        uses: actions/download-artifact@v8
-        with:
-          name: ${{ env.ARTIFACTS_KADAI_JARS_NAME }}
-          path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
-      - name: Change versions to match tag
-        run: |
-          ci/change_version.sh -m .
-      - name: Test
-        run: ./mvnw -B test -pl :${{matrix.module}} -Dcheckstyle.skip -D"java.version=21" -T 1C
-        env:
-          DB: ${{ matrix.database }}
-      - name: Eco CI Measurement of ${{ matrix.module }} (JDK21/DB2)
-        uses: green-coding-solutions/eco-ci-energy-estimation@v5
-        with:
-          task: get-measurement
-          label: "test_backend_21: ${{ matrix.module }} (DB2)"
-        continue-on-error: true
-      - name: Show Eco CI Results
-        uses: green-coding-solutions/eco-ci-energy-estimation@v5
-        with:
-          task: display-results
-          display-badge: true
-          pr-comment: false
-        continue-on-error: true
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
@@ -612,7 +546,7 @@ jobs:
   release_artifacts:
     runs-on: ubuntu-22.04
     name: Release artifacts to Sonatype-Central
-    needs: [ test_frontend, test_e2e, test_backend_17, test_backend_21 ]
+    needs: [ test_frontend, test_e2e, test_backend ]
     if: |
       always() &&
       github.repository == 'kadai-io/kadai' &&
@@ -621,8 +555,7 @@ jobs:
       (needs.detect_changes.outputs.code_changed == 'true' || startsWith(github.ref, 'refs/tags/v')) &&
       needs.test_frontend.result != 'failure' &&
       needs.test_e2e.result != 'failure' &&
-      needs.test_backend_17.result != 'failure' &&
-      needs.test_backend_21.result != 'failure'
+      needs.test_backend.result != 'failure'
 
     # as documented in the gpg manual (https://www.gnupg.org/documentation/manuals/gnupg/Invoking-GPG_002dAGENT.html)
     # we should execute this command before interacting with gpg (otherwise gpg won't work)
@@ -763,7 +696,7 @@ jobs:
   deploy_to_azure:
     runs-on: ubuntu-22.04
     name: Deploy demo app to Microsoft Azure
-    needs: [ test_frontend, test_e2e, test_backend_17, test_backend_21 ]
+    needs: [ test_frontend, test_e2e, test_backend ]
     if: |
       always() &&
       github.repository == 'kadai-io/kadai' &&
@@ -772,8 +705,7 @@ jobs:
       needs.detect_changes.outputs.code_changed == 'true' &&
       needs.test_frontend.result != 'failure' &&
       needs.test_e2e.result != 'failure' &&
-      needs.test_backend_17.result != 'failure' &&
-      needs.test_backend_21.result != 'failure'
+      needs.test_backend.result != 'failure'
     steps:
       - name: Git checkout
         uses: actions/checkout@v6
@@ -830,7 +762,7 @@ jobs:
   upload_to_sonar:
     runs-on: ubuntu-22.04
     name: Upload SonarQube analysis to sonarcloud
-    needs: [ test_frontend, test_e2e, test_backend_17, test_backend_21 ]
+    needs: [ test_frontend, test_e2e, test_backend ]
     # Runs on every push to main and on PRs originating from kadai-io/kadai (not forks).
     # Skipped for release tags, dependabot PRs, and if any test job failed.
     if: |
@@ -843,8 +775,7 @@ jobs:
       needs.detect_changes.outputs.code_changed == 'true' &&
       needs.test_frontend.result != 'failure' &&
       needs.test_e2e.result != 'failure' &&
-      needs.test_backend_17.result != 'failure' &&
-      needs.test_backend_21.result != 'failure'
+      needs.test_backend.result != 'failure'
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5

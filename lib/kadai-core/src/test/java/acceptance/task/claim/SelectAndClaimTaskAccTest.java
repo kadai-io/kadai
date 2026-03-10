@@ -39,12 +39,12 @@ import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.WorkbasketType;
 import io.kadai.workbasket.api.models.Workbasket;
 import io.kadai.workbasket.api.models.WorkbasketAccessItem;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import javax.security.auth.Subject;
@@ -147,12 +147,12 @@ class SelectAndClaimTaskAccTest extends AbstractAccTest {
                       taskService
                           .selectAndClaim(getTaskQuery())
                           .ifPresent(selectedAndClaimedTasks::add));
-          PrivilegedAction<Void> action =
+          Callable<Void> action =
               () -> {
                 consumer.accept(kadaiEngine.getTaskService());
                 return null;
               };
-          Subject.doAs(subject, action);
+          Subject.callAs(subject, action);
         });
   }
 
