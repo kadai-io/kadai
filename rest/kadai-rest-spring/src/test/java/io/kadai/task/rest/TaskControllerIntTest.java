@@ -37,6 +37,7 @@ import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
 import io.kadai.task.rest.models.ObjectReferenceRepresentationModel;
 import io.kadai.task.rest.models.TaskIdListRepresentationModel;
+import io.kadai.task.rest.models.TaskIdPagedRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel.CustomAttribute;
 import io.kadai.task.rest.models.TaskSummaryCollectionRepresentationModel;
@@ -1886,6 +1887,130 @@ class TaskControllerIntTest {
           .isNotNull()
           .extracting(TaskSummaryRepresentationModel::getReceived)
           .isNotNull();
+    }
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  class GetTaskIds {
+
+    @Test
+    void should_GetAllTaskIds() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS);
+
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(63);
+    }
+
+    @Test
+    void should_GetAllTaskIds_For_SpecifiedWorkbasketId() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + "?workbasket-id=WBI:100000000000000000000000000000000001";
+
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(22);
+    }
+
+    @Test
+    void should_ReturnConsistentResultsWithGetTasks() {
+      String filterParams = "?workbasket-id=WBI:100000000000000000000000000000000001";
+
+      ResponseEntity<TaskSummaryPagedRepresentationModel> tasksResponse =
+          CLIENT
+              .get()
+              .uri(restHelper.toUrl(RestEndpoints.URL_TASKS) + filterParams)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
+
+      ResponseEntity<TaskIdPagedRepresentationModel> idsResponse =
+          CLIENT
+              .get()
+              .uri(restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + filterParams)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(tasksResponse.getBody()).isNotNull();
+      assertThat(idsResponse.getBody()).isNotNull();
+
+      List<String> idsFromTasks =
+          tasksResponse.getBody().getContent().stream()
+              .map(TaskSummaryRepresentationModel::getTaskId)
+              .toList();
+      assertThat(idsResponse.getBody().getTaskIds())
+          .containsExactlyInAnyOrderElementsOf(idsFromTasks);
+    }
+
+    @Test
+    void should_ReturnPagedTaskIds_When_PagingIsApplied() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?page=1&page-size=5";
+
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(5);
+      assertThat(response.getBody().getPageMetadata()).isNotNull();
+      assertThat(response.getBody().getPageMetadata().getSize()).isEqualTo(5);
+    }
+
+    @Test
+    void should_GetTaskIds_For_SpecifiedStateFilter() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?state=CLAIMED";
+
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).isNotEmpty();
+    }
+
+    @Test
+    void should_ReturnOnlyIds_When_TaskIdsEndpointIsCalled() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + "?workbasket-id=WBI:100000000000000000000000000000000001";
+
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds())
+          .isNotEmpty()
+          .allMatch(id -> id.startsWith("TKI:"));
     }
   }
 
