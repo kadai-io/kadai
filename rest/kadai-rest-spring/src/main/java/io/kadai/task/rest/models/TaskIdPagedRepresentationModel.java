@@ -23,6 +23,7 @@ import io.kadai.common.rest.models.PageMetadata;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.beans.ConstructorProperties;
 import java.util.Collection;
+import java.util.Objects;
 import org.springframework.hateoas.RepresentationModel;
 
 /**
@@ -53,5 +54,29 @@ public class TaskIdPagedRepresentationModel
 
   public PageMetadata getPageMetadata() {
     return pageMetadata;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), taskIds, pageMetadata);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    if (!super.equals(obj)) {
+      return false;
+    }
+    TaskIdPagedRepresentationModel other = (TaskIdPagedRepresentationModel) obj;
+    return Objects.equals(taskIds, other.taskIds)
+        && Objects.equals(pageMetadata, other.pageMetadata);
   }
 }
