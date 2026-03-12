@@ -2087,8 +2087,7 @@ class TaskControllerIntTest {
     }
 
     @Test
-    void
-        should_ThrowException_When_GettingTaskIdsByWorkbasketIdWithInvalidPlannedParamsCombination() {
+    void should_ThrowException_When_GettingTaskIdsByWorkbasketIdWithInvalidPlannedParamsCombi() {
       String url =
           restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
               + "?workbasket-id=WBI:100000000000000000000000000000000001"
@@ -2550,7 +2549,7 @@ class TaskControllerIntTest {
 
     @TestFactory
     Stream<DynamicTest>
-        should_ThrowException_For_SpecifiedWorkbasketIdAndCustomIntFieldWithinIncorrectInterval_ForTaskIds() {
+        should_ThrowException_For_SpecifiedWorkbasketIdAndCustomIntFieldWithinIncorrectInterval() {
       List<Integer> customIntValues = List.of(1, 2, 3, 4, 5, 6, 7, 8);
       ThrowingConsumer<Integer> test =
           i -> {
@@ -2590,7 +2589,7 @@ class TaskControllerIntTest {
 
     @TestFactory
     Stream<DynamicTest>
-        should_ThrowException_For_SpecifiedWorkbasketIdAndCustomIntFieldWithinNullInterval_ForTaskIds() {
+        should_ThrowException_For_SpecifiedWorkbasketIdAndCustomIntFieldWithinNullInterval() {
       List<Integer> customIntValues = List.of(1, 2, 3, 4, 5, 6, 7, 8);
       ThrowingConsumer<Integer> test =
           i -> {
