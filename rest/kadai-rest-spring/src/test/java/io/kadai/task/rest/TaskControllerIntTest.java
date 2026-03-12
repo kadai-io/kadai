@@ -21,6 +21,7 @@ package io.kadai.task.rest;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -3903,16 +3904,17 @@ class TaskControllerIntTest {
 
       TaskIdListRepresentationModel request = new TaskIdListRepresentationModel(taskIds);
 
-      assertThatThrownBy(
-              () ->
-                  restClient
-                      .patch()
-                      .uri(url)
-                      .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
-                      .body(request)
-                      .retrieve()
-                      .toEntity(BulkOperationResultsRepresentationModel.class))
-          .isInstanceOf(HttpClientErrorException.class)
+      final ThrowingCallable call =
+          () ->
+              restClient
+                  .patch()
+                  .uri(url)
+                  .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
+                  .body(request)
+                  .retrieve()
+                  .toEntity(BulkOperationResultsRepresentationModel.class);
+      assertThatExceptionOfType(HttpClientErrorException.class)
+          .isThrownBy(call)
           .extracting("statusCode")
           .isEqualTo(HttpStatus.FORBIDDEN);
     }
