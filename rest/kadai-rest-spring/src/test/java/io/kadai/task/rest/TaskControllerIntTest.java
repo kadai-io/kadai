@@ -2012,6 +2012,1224 @@ class TaskControllerIntTest {
           .isNotEmpty()
           .allMatch(id -> id.startsWith("TKI:"));
     }
+
+    @Test
+    void should_GetAllTaskIds_For_SpecifiedWorkbasketIdWithinMultiplePlannedTimeIntervals() {
+      Instant firstInstant = Instant.now().minus(7, ChronoUnit.DAYS);
+      Instant secondInstant = Instant.now().minus(10, ChronoUnit.DAYS);
+      Instant thirdInstant = Instant.now().minus(10, ChronoUnit.DAYS);
+      Instant fourthInstant = Instant.now().minus(11, ChronoUnit.DAYS);
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + String.format(
+                  "?workbasket-id=WBI:100000000000000000000000000000000001"
+                      + "&planned=%s&planned="
+                      + "&planned=%s&planned=%s"
+                      + "&planned=&planned=%s"
+                      + "&sort-by=PLANNED",
+                  firstInstant, secondInstant, thirdInstant, fourthInstant);
+
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(6);
+    }
+
+    @Test
+    void should_GetAllTaskIds_For_SpecifiesWorkbasketIdWithinSinglePlannedTimeInterval() {
+      Instant plannedFromInstant = Instant.now().minus(6, ChronoUnit.DAYS);
+      Instant plannedToInstant = Instant.now().minus(3, ChronoUnit.DAYS);
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + "?workbasket-id=WBI:100000000000000000000000000000000001"
+              + "&planned-from="
+              + plannedFromInstant
+              + "&planned-until="
+              + plannedToInstant
+              + "&sort-by=PLANNED";
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(3);
+    }
+
+    @Test
+    void should_GetAllTaskIds_For_SpecifiedWorkbasketIdWithinSingleIndefinitePlannedTimeInterval() {
+      Instant plannedFromInstant = Instant.now().minus(6, ChronoUnit.DAYS);
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + "?workbasket-id=WBI:100000000000000000000000000000000001"
+              + "&planned-from="
+              + plannedFromInstant
+              + "&sort-by=PLANNED";
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(4);
+    }
+
+    @Test
+    void
+        should_ThrowException_When_GettingTaskIdsByWorkbasketIdWithInvalidPlannedParamsCombination() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + "?workbasket-id=WBI:100000000000000000000000000000000001"
+              + "&planned=2020-01-22T09:44:47.453Z,,"
+              + "2020-01-19T07:44:47.453Z,2020-01-19T19:44:47.453Z,"
+              + ",2020-01-18T09:44:47.453Z"
+              + "&planned-from=2020-01-19T07:44:47.453Z"
+              + "&sort-by=planned";
+      ThrowingCallable httpCall =
+          () ->
+              CLIENT
+                  .get()
+                  .uri(url)
+                  .headers(
+                      headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                  .retrieve()
+                  .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThatThrownBy(httpCall)
+          .isInstanceOf(HttpStatusCodeException.class)
+          .extracting(HttpStatusCodeException.class::cast)
+          .extracting(HttpStatusCodeException::getStatusCode)
+          .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void should_GetAllTaskIds_For_SpecifiedWorkbasketIdWithinMultipleDueTimeIntervals() {
+      Instant firstInstant = Instant.now().minus(7, ChronoUnit.DAYS);
+      Instant secondInstant = Instant.now().minus(10, ChronoUnit.DAYS);
+      Instant thirdInstant = Instant.now().minus(10, ChronoUnit.DAYS);
+      Instant fourthInstant = Instant.now().minus(11, ChronoUnit.DAYS);
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + String.format(
+                  "?workbasket-id=WBI:100000000000000000000000000000000001"
+                      + "&due=%s&due="
+                      + "&due=%s&due=%s"
+                      + "&due=&due=%s"
+                      + "&sort-by=DUE",
+                  firstInstant, secondInstant, thirdInstant, fourthInstant);
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(22);
+    }
+
+    @Test
+    void should_GetAllTaskIds_For_SpecifiedWorkbasketIdWithinSingleDueTimeInterval() {
+      Instant dueFromInstant = Instant.now().minus(8, ChronoUnit.DAYS);
+      Instant dueToInstant = Instant.now().minus(3, ChronoUnit.DAYS);
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + "?workbasket-id=WBI:100000000000000000000000000000000001"
+              + "&due-from="
+              + dueFromInstant
+              + "&due-until="
+              + dueToInstant
+              + "&sort-by=DUE";
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(1);
+    }
+
+    @Test
+    void should_GetAllTaskIds_For_SpecifiedWorkbasketIdWithinSingleIndefiniteDueTimeInterval() {
+      Instant dueToInstant = Instant.now().minus(1, ChronoUnit.DAYS);
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + "?workbasket-id=WBI:100000000000000000000000000000000001"
+              + "&due-until="
+              + dueToInstant
+              + "&sort-by=DUE";
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(6);
+    }
+
+    @Test
+    void should_ThrowException_When_GettingTaskIdsByWorkbasketIdWithInvalidDueParamsCombination() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + "?workbasket-id=WBI:100000000000000000000000000000000001"
+              + "&due=2020-01-22T09:44:47.453Z,,"
+              + "2020-01-19T07:44:47.453Z,2020-01-19T19:44:47.453Z,"
+              + ",2020-01-18T09:44:47.453Z"
+              + "&due-from=2020-01-19T07:44:47.453Z"
+              + "&sort-by=planned";
+      ThrowingCallable httpCall =
+          () ->
+              CLIENT
+                  .get()
+                  .uri(url)
+                  .headers(
+                      headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                  .retrieve()
+                  .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThatThrownBy(httpCall)
+          .isInstanceOf(HttpStatusCodeException.class)
+          .extracting(HttpStatusCodeException.class::cast)
+          .extracting(HttpStatusCodeException::getStatusCode)
+          .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void should_GetAllTaskIds_For_SpecifiedWorkbasketIdAndPriorityFromAndUntil() {
+      Integer priorityFrom = 2;
+      Integer priorityTo = 3;
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + String.format(
+                  "?workbasket-id=WBI:100000000000000000000000000000000006"
+                      + "&priority-from=%s&priority-until=%s",
+                  priorityFrom, priorityTo);
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(2);
+    }
+
+    @Test
+    void should_GetAllTaskIds_For_SpecifiedWorkbasketIdAndMultiplePriorityWithinIntervals() {
+      Integer priorityFrom1 = 2;
+      Integer priorityFrom2 = 0;
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + String.format(
+                  "?workbasket-id=WBI:100000000000000000000000000000000006"
+                      + "&priority-within=%s&priority-within=&priority-within=%s&priority-within=",
+                  priorityFrom1, priorityFrom2);
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(3);
+    }
+
+    @Test
+    void should_GetAllTaskIds_For_SpecifiedWorkbasketIdAndPriorityNotFromAndNotUntil() {
+      Integer priorityFrom = 2;
+      Integer priorityTo = 3;
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + String.format(
+                  "?workbasket-id=WBI:100000000000000000000000000000000006"
+                      + "&priority-not-from=%s&priority-not-until=%s",
+                  priorityFrom, priorityTo);
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(1);
+    }
+
+    @Test
+    void should_GetAllTaskIds_For_SpecifiedWorkbasketIdAndMultiplePriorityNotWithinIntervals() {
+      Integer priorityFrom1 = 2;
+      Integer priorityFrom2 = 1;
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + String.format(
+                  "?workbasket-id=WBI:100000000000000000000000000000000006"
+                      + "&priority-not-within=%s&priority-not-within="
+                      + "&priority-not-within=%s&priority-not-within=",
+                  priorityFrom1, priorityFrom2);
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(1);
+    }
+
+    @Test
+    void should_ThrowException_When_GettingTaskIdsByWorkbasketIdWithPriorityNotWithinAndNotFrom() {
+      Integer priorityFrom1 = 2;
+      Integer priorityFrom2 = 1;
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + String.format(
+                  "?workbasket-id=WBI:100000000000000000000000000000000006"
+                      + "&priority-not-within=%s&priority-not-within="
+                      + "&priority-not-from=%s&priority-not-until=",
+                  priorityFrom1, priorityFrom2);
+
+      ThrowingCallable httpCall =
+          () ->
+              CLIENT
+                  .get()
+                  .uri(url)
+                  .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+                  .retrieve()
+                  .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThatThrownBy(httpCall)
+          .isInstanceOf(HttpStatusCodeException.class)
+          .extracting(HttpStatusCodeException.class::cast)
+          .extracting(HttpStatusCodeException::getStatusCode)
+          .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void
+        should_ThrowException_When_GettingTaskIdsByWorkbasketIdWithPriorityWithinAndPriorityFrom() {
+      Integer priorityFrom1 = 2;
+      Integer priorityFrom2 = 1;
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + String.format(
+                  "?workbasket-id=WBI:100000000000000000000000000000000006"
+                      + "&priority-within=%s&priority-within=&priority-from=%s&priority-until=",
+                  priorityFrom1, priorityFrom2);
+
+      ThrowingCallable httpCall =
+          () ->
+              CLIENT
+                  .get()
+                  .uri(url)
+                  .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+                  .retrieve()
+                  .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThatThrownBy(httpCall)
+          .isInstanceOf(HttpStatusCodeException.class)
+          .extracting(HttpStatusCodeException.class::cast)
+          .extracting(HttpStatusCodeException::getStatusCode)
+          .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void should_ThrowException_When_GettingTaskIdsByWorkbasketIdWithEvenNumberOfPriorityWithin() {
+      Integer priorityFrom1 = 2;
+      Integer priorityFrom2 = 1;
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + String.format(
+                  "?workbasket-id=WBI:100000000000000000000000000000000006"
+                      + "&priority-within=%s&priority-within=&priority-within=%s",
+                  priorityFrom1, priorityFrom2);
+
+      ThrowingCallable httpCall =
+          () ->
+              CLIENT
+                  .get()
+                  .uri(url)
+                  .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+                  .retrieve()
+                  .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThatThrownBy(httpCall)
+          .isInstanceOf(HttpStatusCodeException.class)
+          .extracting(HttpStatusCodeException.class::cast)
+          .extracting(HttpStatusCodeException::getStatusCode)
+          .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void
+        should_ThrowException_When_GettingTaskIdsByWorkbasketIdWithEvenNumberOfPriorityNotWithin() {
+      Integer priorityFrom1 = 2;
+      Integer priorityFrom2 = 1;
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + String.format(
+                  "?workbasket-id=WBI:100000000000000000000000000000000006"
+                      + "&priority-not-within=%s&priority-not-within=&priority-not-within=%s",
+                  priorityFrom1, priorityFrom2);
+
+      ThrowingCallable httpCall =
+          () ->
+              CLIENT
+                  .get()
+                  .uri(url)
+                  .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+                  .retrieve()
+                  .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThatThrownBy(httpCall)
+          .isInstanceOf(HttpStatusCodeException.class)
+          .extracting(HttpStatusCodeException.class::cast)
+          .extracting(HttpStatusCodeException::getStatusCode)
+          .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @TestFactory
+    Stream<DynamicTest> should_GetAllTaskIds_For_SpecifiedWorkbasketIdAndCustomIntFieldIn() {
+      List<Integer> customIntValues = List.of(1, 2, 3, 4, 5, 6, 7, 8);
+      ThrowingConsumer<Integer> test =
+          i -> {
+            String url =
+                restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+                    + String.format(
+                        "?workbasket-id=WBI:100000000000000000000000000000000001"
+                            + "&custom-int-%s=%s",
+                        i, i);
+            ResponseEntity<TaskIdPagedRepresentationModel> response =
+                CLIENT
+                    .get()
+                    .uri(url)
+                    .headers(
+                        headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                    .retrieve()
+                    .toEntity(TaskIdPagedRepresentationModel.class);
+
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().getTaskIds()).hasSize(22);
+          };
+
+      return DynamicTest.stream(customIntValues.iterator(), c -> "customInt" + c, test);
+    }
+
+    @TestFactory
+    Stream<DynamicTest> should_GetAllTaskIds_For_SpecifiedWorkbasketIdAndCustomIntFieldFrom() {
+      List<Integer> customIntValues = List.of(1, 2, 3, 4, 5, 6, 7, 8);
+      ThrowingConsumer<Integer> test =
+          i -> {
+            String url =
+                restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+                    + String.format(
+                        "?workbasket-id=WBI:100000000000000000000000000000000001"
+                            + "&custom-int-%s-from=%s",
+                        i, i);
+            ResponseEntity<TaskIdPagedRepresentationModel> response =
+                CLIENT
+                    .get()
+                    .uri(url)
+                    .headers(
+                        headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                    .retrieve()
+                    .toEntity(TaskIdPagedRepresentationModel.class);
+
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().getTaskIds()).hasSize(22);
+          };
+
+      return DynamicTest.stream(customIntValues.iterator(), c -> "customInt" + c, test);
+    }
+
+    @TestFactory
+    Stream<DynamicTest> should_GetAllTaskIds_For_SpecifiedWorkbasketIdAndCustomIntFieldFromAndTo() {
+      List<Integer> customIntValues = List.of(1, 2, 3, 4, 5, 6, 7, 8);
+      ThrowingConsumer<Integer> test =
+          i -> {
+            String url =
+                restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+                    + String.format(
+                        "?workbasket-id=WBI:100000000000000000000000000000000001"
+                            + "&custom-int-%s-from=-1&custom-int-%s-to=123",
+                        i, i);
+            ResponseEntity<TaskIdPagedRepresentationModel> response =
+                CLIENT
+                    .get()
+                    .uri(url)
+                    .headers(
+                        headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                    .retrieve()
+                    .toEntity(TaskIdPagedRepresentationModel.class);
+
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().getTaskIds()).hasSize(22);
+          };
+
+      return DynamicTest.stream(customIntValues.iterator(), c -> "customInt" + c, test);
+    }
+
+    @TestFactory
+    Stream<DynamicTest> should_GetAllTaskIds_For_SpecifiedWorkbasketIdAndCustomIntFieldTo() {
+      List<Integer> customIntValues = List.of(1, 2, 3, 4, 5, 6, 7, 8);
+      ThrowingConsumer<Integer> test =
+          i -> {
+            String url =
+                restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+                    + String.format(
+                        "?workbasket-id=WBI:100000000000000000000000000000000001"
+                            + "&custom-int-%s-to=%s",
+                        i, i);
+            ResponseEntity<TaskIdPagedRepresentationModel> response =
+                CLIENT
+                    .get()
+                    .uri(url)
+                    .headers(
+                        headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                    .retrieve()
+                    .toEntity(TaskIdPagedRepresentationModel.class);
+
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().getTaskIds()).hasSize(22);
+          };
+
+      return DynamicTest.stream(customIntValues.iterator(), c -> "customInt" + c, test);
+    }
+
+    @TestFactory
+    Stream<DynamicTest> should_GetAllTaskIds_For_SpecifiedWorkbasketIdAndCustomIntFieldNotIn() {
+      List<Integer> customIntValues = List.of(1, 2, 3, 4, 5, 6, 7, 8);
+      ThrowingConsumer<Integer> test =
+          i -> {
+            String url =
+                restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+                    + String.format(
+                        "?workbasket-id=WBI:100000000000000000000000000000000001"
+                            + "&custom-int-%s-not=25",
+                        i);
+            ResponseEntity<TaskIdPagedRepresentationModel> response =
+                CLIENT
+                    .get()
+                    .uri(url)
+                    .headers(
+                        headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                    .retrieve()
+                    .toEntity(TaskIdPagedRepresentationModel.class);
+
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().getTaskIds()).hasSize(22);
+          };
+
+      return DynamicTest.stream(customIntValues.iterator(), c -> "customInt" + c, test);
+    }
+
+    @TestFactory
+    Stream<DynamicTest>
+        should_ThrowException_For_SpecifiedWorkbasketIdAndCustomIntFieldWithinIncorrectInterval_ForTaskIds() {
+      List<Integer> customIntValues = List.of(1, 2, 3, 4, 5, 6, 7, 8);
+      ThrowingConsumer<Integer> test =
+          i -> {
+            String url =
+                restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+                    + String.format(
+                        "?workbasket-id=WBI:100000000000000000000000000000000001"
+                            + "&custom-int-%s-within=%s"
+                            + "&custom-int-%s-within=23"
+                            + "&custom-int-%s-within=15",
+                        i, i, i, i);
+            ThrowingCallable httpCall =
+                () ->
+                    CLIENT
+                        .get()
+                        .uri(url)
+                        .headers(
+                            headers ->
+                                headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                        .retrieve()
+                        .toEntity(TaskIdPagedRepresentationModel.class);
+
+            assertThatThrownBy(httpCall)
+                .isInstanceOf(HttpStatusCodeException.class)
+                .hasMessageContaining(
+                    String.format(
+                        "provided length of the property 'custom-int-%s-within' is not dividable by"
+                            + " 2",
+                        i))
+                .extracting(HttpStatusCodeException.class::cast)
+                .extracting(HttpStatusCodeException::getStatusCode)
+                .isEqualTo(HttpStatus.BAD_REQUEST);
+          };
+
+      return DynamicTest.stream(customIntValues.iterator(), c -> "customInt" + c, test);
+    }
+
+    @TestFactory
+    Stream<DynamicTest>
+        should_ThrowException_For_SpecifiedWorkbasketIdAndCustomIntFieldWithinNullInterval_ForTaskIds() {
+      List<Integer> customIntValues = List.of(1, 2, 3, 4, 5, 6, 7, 8);
+      ThrowingConsumer<Integer> test =
+          i -> {
+            String url =
+                restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+                    + String.format(
+                        "?workbasket-id=WBI:100000000000000000000000000000000001"
+                            + "&custom-int-%s-within="
+                            + "&custom-int-%s-within=",
+                        i, i, i);
+            ThrowingCallable httpCall =
+                () ->
+                    CLIENT
+                        .get()
+                        .uri(url)
+                        .headers(
+                            headers ->
+                                headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                        .retrieve()
+                        .toEntity(TaskIdPagedRepresentationModel.class);
+
+            assertThatThrownBy(httpCall)
+                .isInstanceOf(HttpStatusCodeException.class)
+                .hasMessageContaining(
+                    String.format(
+                        """
+                            Each interval in 'custom-int-%s-within' \
+                            shouldn't consist of two 'null' values""",
+                        i))
+                .extracting(HttpStatusCodeException.class::cast)
+                .extracting(HttpStatusCodeException::getStatusCode)
+                .isEqualTo(HttpStatus.BAD_REQUEST);
+          };
+
+      return DynamicTest.stream(customIntValues.iterator(), c -> "customInt" + c, test);
+    }
+
+    @TestFactory
+    Stream<DynamicTest> should_GetAllTaskIds_For_SpecifiedWorkbasketIdAndCustomIntFieldWithin() {
+      List<Integer> customIntValues = List.of(1, 2, 3, 4, 5, 6, 7, 8);
+      ThrowingConsumer<Integer> test =
+          i -> {
+            String url =
+                restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+                    + String.format(
+                        "?workbasket-id=WBI:100000000000000000000000000000000001"
+                            + "&custom-int-%s-within=%s"
+                            + "&custom-int-%s-within=15",
+                        i, i, i);
+            ResponseEntity<TaskIdPagedRepresentationModel> response =
+                CLIENT
+                    .get()
+                    .uri(url)
+                    .headers(
+                        headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                    .retrieve()
+                    .toEntity(TaskIdPagedRepresentationModel.class);
+
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().getTaskIds()).hasSize(22);
+          };
+
+      return DynamicTest.stream(customIntValues.iterator(), c -> "customInt" + c, test);
+    }
+
+    @TestFactory
+    Stream<DynamicTest>
+        should_GetAllTaskIds_For_SpecifiedWorkbasketIdAndCustomIntFieldWithinOpenLowerBound() {
+      List<Integer> customIntValues = List.of(1, 2, 3, 4, 5, 6, 7, 8);
+      ThrowingConsumer<Integer> test =
+          i -> {
+            String url =
+                restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+                    + String.format(
+                        "?workbasket-id=WBI:100000000000000000000000000000000001"
+                            + "&custom-int-%s-within="
+                            + "&custom-int-%s-within=%s",
+                        i, i, i);
+            ResponseEntity<TaskIdPagedRepresentationModel> response =
+                CLIENT
+                    .get()
+                    .uri(url)
+                    .headers(
+                        headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                    .retrieve()
+                    .toEntity(TaskIdPagedRepresentationModel.class);
+
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().getTaskIds()).hasSize(22);
+          };
+
+      return DynamicTest.stream(customIntValues.iterator(), c -> "customInt" + c, test);
+    }
+
+    @TestFactory
+    Stream<DynamicTest>
+        should_GetAllTaskIds_For_SpecifiedWorkbasketIdAndCustomIntFieldNotWithinOpenUpperBound() {
+      List<Integer> customIntValues = List.of(1, 2, 3, 4, 5, 6, 7, 8);
+      ThrowingConsumer<Integer> test =
+          i -> {
+            String url =
+                restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+                    + String.format(
+                        "?workbasket-id=WBI:100000000000000000000000000000000001"
+                            + "&custom-int-%s-not-within=%s"
+                            + "&custom-int-%s-not-within=",
+                        i, i, i);
+            ResponseEntity<TaskIdPagedRepresentationModel> response =
+                CLIENT
+                    .get()
+                    .uri(url)
+                    .headers(
+                        headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                    .retrieve()
+                    .toEntity(TaskIdPagedRepresentationModel.class);
+
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().getTaskIds()).isEmpty();
+          };
+
+      return DynamicTest.stream(customIntValues.iterator(), c -> "customInt" + c, test);
+    }
+
+    @Test
+    void should_ReturnAllTaskIds_For_SpecifiedWorkbasketIdAndClassificationParentKeyIn() {
+      String parentKey = "L11010";
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + String.format(
+                  "?workbasket-id=WBI:100000000000000000000000000000000006"
+                      + "&classification-parent-key=%s",
+                  parentKey);
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody().getTaskIds()).hasSize(1);
+    }
+
+    @Test
+    void should_ReturnAllTaskIds_For_SpecifiedWorkbasketIdAndClassificationParentKeyNotIn() {
+      String parentKey = "L11010";
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + String.format(
+                  "?workbasket-id=WBI:100000000000000000000000000000000006"
+                      + "&classification-parent-key-not=%s",
+                  parentKey);
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody().getTaskIds()).hasSize(2);
+    }
+
+    @Test
+    void should_ReturnAllTaskIds_For_ClassificationParentKeyLike() {
+      String parentKey = "L%";
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + String.format("?classification-parent-key-like=%s", parentKey);
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody().getTaskIds()).hasSize(3);
+    }
+
+    @Test
+    void should_ReturnAllTaskIds_For_ClassificationParentKeyNotLike() {
+      String parentKey = "L%";
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + String.format("?classification-parent-key-not-like=%s", parentKey);
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody().getTaskIds()).hasSize(95);
+    }
+
+    @Test
+    void should_ReturnAllTaskIds_For_ProvidedPrimaryObjectReference() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + "?por="
+              + URLEncoder.encode(
+                  "{\"systemInstance\":\"MyInstance1\",\"type\":\"MyType1\"}", UTF_8);
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody().getTaskIds()).hasSize(5);
+    }
+
+    @Test
+    void should_ReturnAllTaskIds_For_ProvidedSecondaryObjectReferenceByTypeAndValue() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + "?sor="
+              + URLEncoder.encode("{\"type\":\"Type2\",\"value\":\"Value2\"}", UTF_8);
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody().getTaskIds()).hasSize(2);
+    }
+
+    @Test
+    void should_ReturnAllTaskIds_For_ProvidedSecondaryObjectReferenceByCompany() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + "?sor="
+              + URLEncoder.encode("{\"company\":\"Company3\"}", UTF_8);
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody().getTaskIds()).hasSize(1);
+    }
+
+    @Test
+    void should_ReturnNoTaskIds_For_ProvidedNonexistentSecondaryObjectReference() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + "?sor="
+              + URLEncoder.encode("{\"type\":\"Type2\",\"value\":\"Quatsch\"}", UTF_8);
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody().getTaskIds()).isEmpty();
+    }
+
+    @Test
+    void should_ReturnAllTaskIdsByWildcardSearch_For_ProvidedSearchValue() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + "?wildcard-search-value=99"
+              + "&wildcard-search-fields=NAME"
+              + "&wildcard-search-fields=CUSTOM_3"
+              + "&wildcard-search-fields=CUSTOM_4";
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(4);
+    }
+
+    @Test
+    void should_ThrowException_When_ProvidingInvalidWildcardSearchParameters_ForTaskIds() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?wildcard-search-value=%rt%";
+      ThrowingCallable httpCall =
+          () ->
+              CLIENT
+                  .get()
+                  .uri(url)
+                  .headers(
+                      headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                  .retrieve()
+                  .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThatThrownBy(httpCall)
+          .isInstanceOf(HttpStatusCodeException.class)
+          .extracting(HttpStatusCodeException.class::cast)
+          .extracting(HttpStatusCodeException::getStatusCode)
+          .isEqualTo(HttpStatus.BAD_REQUEST);
+
+      String url2 =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + "?wildcard-search-fields=NAME,CUSTOM_3,CUSTOM_4";
+      ThrowingCallable httpCall2 =
+          () ->
+              CLIENT
+                  .get()
+                  .uri(url2)
+                  .headers(
+                      headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                  .retrieve()
+                  .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThatThrownBy(httpCall2)
+          .isInstanceOf(HttpStatusCodeException.class)
+          .extracting(HttpStatusCodeException.class::cast)
+          .extracting(HttpStatusCodeException::getStatusCode)
+          .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void should_ThrowException_When_ProvidingInvalidFilterParams_ForTaskIds() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + "?workbasket-id=WBI:100000000000000000000000000000000001"
+              + "&illegalParam=illegal"
+              + "&anotherIllegalParam=stillIllegal"
+              + "&sort-by=NAME&order=DESCENDING&page-size=5&page=2";
+      ThrowingCallable httpCall =
+          () ->
+              CLIENT
+                  .get()
+                  .uri(url)
+                  .headers(
+                      headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                  .retrieve()
+                  .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThatThrownBy(httpCall)
+          .isInstanceOf(HttpStatusCodeException.class)
+          .hasMessageContaining(
+              "Unknown request parameters found: [anotherIllegalParam, illegalParam]")
+          .extracting(HttpStatusCodeException.class::cast)
+          .extracting(HttpStatusCodeException::getStatusCode)
+          .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void should_ThrowException_When_ProvidingInvalidOrder_ForTaskIds() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + "?workbasket-id=WBI:100000000000000000000000000000000001"
+              + "&sort-by=NAME&order=WRONG";
+      ThrowingCallable httpCall =
+          () ->
+              CLIENT
+                  .get()
+                  .uri(url)
+                  .headers(
+                      headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                  .retrieve()
+                  .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThatThrownBy(httpCall)
+          .isInstanceOf(HttpStatusCodeException.class)
+          .hasMessageContaining("\"expectedValues\":[\"ASCENDING\",\"DESCENDING\"]")
+          .extracting(HttpStatusCodeException.class::cast)
+          .extracting(HttpStatusCodeException::getStatusCode)
+          .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void should_GetAllTaskIdsWithAdminRole() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS);
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(98);
+    }
+
+    @Test
+    void should_GetAllTaskIds_For_SpecifiedWorkbasketKeyAndDomain() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + "?workbasket-key=USER-1-2&domain=DOMAIN_A";
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(23);
+    }
+
+    @Test
+    void should_GetAllTaskIds_For_SpecifiedExternalId() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + "?external-id=ETI:000000000000000000000000000000000003"
+              + "&external-id=ETI:000000000000000000000000000000000004";
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(2);
+    }
+
+    @Test
+    void should_ThrowException_When_KeyIsSetButDomainIsMissing_ForTaskIds() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?workbasket-key=USER-1-2";
+      ThrowingCallable httpCall =
+          () ->
+              CLIENT
+                  .get()
+                  .uri(url)
+                  .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
+                  .retrieve()
+                  .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThatThrownBy(httpCall)
+          .isInstanceOf(HttpStatusCodeException.class)
+          .extracting(HttpStatusCodeException.class::cast)
+          .extracting(HttpStatusCodeException::getStatusCode)
+          .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+      "owner=user-1-1, 10",
+      "owner-is-null, 69",
+      "owner-is-null=true, 69",
+      "owner-is-null&owner=user-1-1, 79",
+      "owner-is-null=TRUE&owner=user-1-1, 79",
+      "state=READY&owner-is-null&owner=user-1-1, 58",
+      "state=READY&owner-is-null=TrUe&owner=user-1-1, 58",
+    })
+    void should_ReturnTaskIdsWithVariousOwnerParameters(String queryParams, int expectedSize) {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?" + queryParams;
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(expectedSize);
+    }
+
+    @ParameterizedTest
+    @EmptySource
+    @ValueSource(strings = {"=true", "=TRUE", "="})
+    void should_TreatOwnerIsNullTrue_For_Value_ForTaskIds(String value) {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?owner-is-null" + value;
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(69);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"foo", "bar", "false"})
+    void should_ReturnException_For_OwnerIsNullWithBadValue_ForTaskIds(String badValue) {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?owner-is-null=" + badValue;
+
+      ThrowingCallable httpCall =
+          () ->
+              CLIENT
+                  .get()
+                  .uri(url)
+                  .headers(
+                      headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                  .retrieve()
+                  .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThatThrownBy(httpCall)
+          .isInstanceOf(HttpStatusCodeException.class)
+          .extracting(HttpStatusCodeException.class::cast)
+          .extracting(HttpStatusCodeException::getStatusCode)
+          .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void should_ReturnFilteredTaskIds_When_GettingTasksByIsReopenedFalse() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?is-reopened=false";
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(62);
+    }
+
+    @Test
+    void should_ReturnFilteredTaskIds_When_GettingTasksByIsReopenedTrue() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?is-reopened=true";
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(1);
+    }
+
+    @Test
+    void should_ReturnFilteredTaskIds_When_GettingTasksBySecondaryObjectReferenceValue() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?sor-value=Value2";
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(3);
+    }
+
+    @Test
+    void should_ReturnFilteredTaskIds_When_GettingTasksBySecondaryObjectReferenceTypeLike() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?sor-type-like=Type";
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(3);
+    }
+
+    @Test
+    void should_GetTaskIds_SortedByDue() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + "?sort-by=DUE&sort-by=TASK_ID&order=DESCENDING&order=ASCENDING";
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(63);
+    }
+
+    @Test
+    void should_GetTaskIds_For_GettingPageSortedByPorValue() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
+              + "?state=READY&state=CLAIMED"
+              + "&sort-by=POR_VALUE&order=DESCENDING"
+              + "&sort-by=TASK_ID&order=ASCENDING"
+              + "&page-size=5&page=16";
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(5);
+      assertThat(response.getBody().getPageMetadata()).isNotNull();
+      assertThat(response.getBody().getTaskIds())
+          .contains("TKI:000000000000000000000000000000000048");
+    }
+
+    @Test
+    void should_ReturnFilteredTaskIds_When_GettingTasksBySecondaryObjectReferenceValueAndCompany() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?sor-value=Value2&sor-company=Company1";
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          CLIENT
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getTaskIds()).hasSize(1);
+    }
   }
 
   @Nested
