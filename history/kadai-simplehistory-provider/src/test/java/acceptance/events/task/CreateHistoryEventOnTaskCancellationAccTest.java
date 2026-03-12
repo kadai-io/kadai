@@ -23,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import acceptance.AbstractAccTest;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.internal.util.CheckedRunnable;
-import io.kadai.simplehistory.impl.SimpleHistoryServiceImpl;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
 import io.kadai.task.api.TaskService;
@@ -33,7 +32,6 @@ import org.junit.jupiter.api.Test;
 class CreateHistoryEventOnTaskCancellationAccTest extends AbstractAccTest {
 
   private final TaskService taskService = kadaiEngine.getTaskService();
-  private final SimpleHistoryServiceImpl historyService = getHistoryService();
 
   @Test
   void should_CreateCancelledHistoryEvent_When_CancelTaskInStateClaimed() throws Exception {
@@ -43,13 +41,13 @@ class CreateHistoryEventOnTaskCancellationAccTest extends AbstractAccTest {
               final String taskId = "TKI:000000000000000000000000000000000001";
 
               List<TaskHistoryEvent> listEvents =
-                  historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
+                  taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
               assertThat(listEvents).isEmpty();
 
               taskService.cancelTask(taskId);
 
-              listEvents = historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
+              listEvents = taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
               assertThat(listEvents).hasSize(1);
 
@@ -71,13 +69,13 @@ class CreateHistoryEventOnTaskCancellationAccTest extends AbstractAccTest {
               final String taskId = "TKI:000000000000000000000000000000000003";
 
               List<TaskHistoryEvent> events =
-                  historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
+                  taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
               assertThat(events).isEmpty();
 
               taskService.cancelTask(taskId);
 
-              events = historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
+              events = taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
               assertThat(events).hasSize(1);
 

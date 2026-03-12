@@ -55,11 +55,11 @@ import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
 import java.security.Principal;
-import java.security.PrivilegedExceptionAction;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.OptionalInt;
+import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import javax.security.auth.Subject;
@@ -284,8 +284,8 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
     Subject subject = new Subject();
     Principal thatPrincipal = new UserPrincipal("user-1-3");
     subject.getPrincipals().add(thatPrincipal);
-    PrivilegedExceptionAction<Task> reopenAction = () -> taskService.reopen(task.getId());
-    Task reopenedTask = Subject.doAs(subject, reopenAction);
+    Callable<Task> reopenAction = () -> taskService.reopen(task.getId());
+    Task reopenedTask = Subject.callAs(subject, reopenAction);
 
     assertThat(reopenedTask).isNotNull().extracting(Task::getState).isEqualTo(TaskState.CLAIMED);
     assertThat(reopenedTask).extracting(TaskSummary::getOwner).isEqualTo(thatPrincipal.getName());
@@ -427,6 +427,37 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
     assertThat(retrievedTask).isNotNull();
   }
 
+  private static Stream<Arguments> provideNonFinalEndStates() {
+    return Arrays.stream(TaskState.END_STATES)
+        .filter(Predicate.not(TaskState::isFinalState))
+        .map(Arguments::of);
+  }
+
+  private static Stream<Arguments> provideFinalStates() {
+    return Arrays.stream(TaskState.FINAL_STATES).map(Arguments::of);
+  }
+
+  private static Stream<Arguments> provideNonEndStates() {
+    return Arrays.stream(EnumUtil.allValuesExceptFor(TaskState.END_STATES)).map(Arguments::of);
+  }
+
+  private static Stream<Arguments> provideInvalidStates() {
+    return Stream.concat(provideFinalStates(), provideNonEndStates());
+  }
+
+  private static Stream<Arguments> provideActualCallbackStates() {
+    return Arrays.stream(EnumUtil.allValuesExceptFor(CallbackState.NONE)).map(Arguments::of);
+  }
+
+  static class DummyPriorityServiceProvider implements PriorityServiceProvider {
+    static final int SPI_PRIORITY = 10;
+
+    @Override
+    public OptionalInt calculatePriority(TaskSummary taskSummary) {
+      return OptionalInt.of(SPI_PRIORITY);
+    }
+  }
+
   @Nested
   @TestInstance(Lifecycle.PER_CLASS)
   class PermissionsTest {
@@ -452,36 +483,5 @@ public class ReopenTaskAccTest implements KadaiConfigurationModifier {
 
       assertThatExceptionOfType(NotAuthorizedOnWorkbasketException.class).isThrownBy(call);
     }
-  }
-
-  static class DummyPriorityServiceProvider implements PriorityServiceProvider {
-    static final int SPI_PRIORITY = 10;
-
-    @Override
-    public OptionalInt calculatePriority(TaskSummary taskSummary) {
-      return OptionalInt.of(SPI_PRIORITY);
-    }
-  }
-
-  private static Stream<Arguments> provideNonFinalEndStates() {
-    return Arrays.stream(TaskState.END_STATES)
-        .filter(Predicate.not(TaskState::isFinalState))
-        .map(Arguments::of);
-  }
-
-  private static Stream<Arguments> provideFinalStates() {
-    return Arrays.stream(TaskState.FINAL_STATES).map(Arguments::of);
-  }
-
-  private static Stream<Arguments> provideNonEndStates() {
-    return Arrays.stream(EnumUtil.allValuesExceptFor(TaskState.END_STATES)).map(Arguments::of);
-  }
-
-  private static Stream<Arguments> provideInvalidStates() {
-    return Stream.concat(provideFinalStates(), provideNonEndStates());
-  }
-
-  private static Stream<Arguments> provideActualCallbackStates() {
-    return Arrays.stream(EnumUtil.allValuesExceptFor(CallbackState.NONE)).map(Arguments::of);
   }
 }

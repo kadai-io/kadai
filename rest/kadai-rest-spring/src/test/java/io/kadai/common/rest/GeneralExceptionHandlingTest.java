@@ -18,10 +18,9 @@
 
 package io.kadai.common.rest;
 
-import static io.kadai.rest.test.RestHelper.CLIENT;
+
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kadai.classification.rest.models.ClassificationSummaryPagedRepresentationModel;
 import io.kadai.common.api.exceptions.ErrorCode;
 import io.kadai.common.rest.KadaiRestExceptionHandler.MalformedQueryParameter;
@@ -38,18 +37,23 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.HttpClientErrorException.BadRequest;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
+import tools.jackson.databind.json.JsonMapper;
 
 /** Test general Exception Handling. */
 @KadaiSpringBootTest
 class GeneralExceptionHandlingTest {
 
   private final RestHelper restHelper;
-  private final ObjectMapper objectMapper;
+  private final JsonMapper jsonMapper;
+  private final RestClient restClient;
 
   @Autowired
-  GeneralExceptionHandlingTest(RestHelper restHelper, ObjectMapper objectMapper) {
+  GeneralExceptionHandlingTest(
+      RestHelper restHelper, JsonMapper jsonMapper, RestClient restClient) {
     this.restHelper = restHelper;
-    this.objectMapper = objectMapper;
+    this.jsonMapper = jsonMapper;
+    this.restClient = restClient;
   }
 
   @Test
@@ -58,7 +62,7 @@ class GeneralExceptionHandlingTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .delete()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -76,7 +80,7 @@ class GeneralExceptionHandlingTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -98,7 +102,7 @@ class GeneralExceptionHandlingTest {
         .extracting(BadRequest.class::cast)
         .extracting(BadRequest::getResponseBodyAsString)
         .asString()
-        .contains(objectMapper.writeValueAsString(errorCode));
+        .contains(jsonMapper.writeValueAsString(errorCode));
   }
 
   @Test
@@ -108,7 +112,7 @@ class GeneralExceptionHandlingTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -134,7 +138,7 @@ class GeneralExceptionHandlingTest {
         .extracting(BadRequest.class::cast)
         .extracting(BadRequest::getResponseBodyAsString)
         .asString()
-        .contains(objectMapper.writeValueAsString(errorCode));
+        .contains(jsonMapper.writeValueAsString(errorCode));
   }
 
   @Test
@@ -144,7 +148,7 @@ class GeneralExceptionHandlingTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -168,7 +172,7 @@ class GeneralExceptionHandlingTest {
         .extracting(BadRequest.class::cast)
         .extracting(BadRequest::getResponseBodyAsString)
         .asString()
-        .contains(objectMapper.writeValueAsString(errorCode));
+        .contains(jsonMapper.writeValueAsString(errorCode));
   }
 
   @Test
@@ -178,7 +182,7 @@ class GeneralExceptionHandlingTest {
 
     ThrowingCallable httpCall =
         () ->
-            CLIENT
+            restClient
                 .get()
                 .uri(url)
                 .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -208,6 +212,6 @@ class GeneralExceptionHandlingTest {
         .extracting(BadRequest.class::cast)
         .extracting(BadRequest::getResponseBodyAsString)
         .asString()
-        .contains(objectMapper.writeValueAsString(errorCode));
+        .contains(jsonMapper.writeValueAsString(errorCode));
   }
 }

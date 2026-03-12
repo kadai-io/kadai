@@ -22,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import acceptance.AbstractAccTest;
 import io.kadai.common.internal.util.CheckedRunnable;
-import io.kadai.simplehistory.impl.SimpleHistoryServiceImpl;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEventType;
 import io.kadai.task.api.TaskService;
@@ -32,7 +31,6 @@ import org.junit.jupiter.api.Test;
 class CreateHistoryEventOnTaskTerminationAccTest extends AbstractAccTest {
 
   private final TaskService taskService = kadaiEngine.getTaskService();
-  private final SimpleHistoryServiceImpl historyService = getHistoryService();
 
   @Test
   void should_CreateTerminatedHistoryEvent_When_TerminatingTaskInStateClaimed() throws Exception {
@@ -42,13 +40,13 @@ class CreateHistoryEventOnTaskTerminationAccTest extends AbstractAccTest {
               final String taskId = "TKI:000000000000000000000000000000000001";
 
               List<TaskHistoryEvent> events =
-                  historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
+                  taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
               assertThat(events).isEmpty();
 
               taskService.terminateTask(taskId);
 
-              events = historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
+              events = taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
               assertThat(events).hasSize(1);
 
@@ -69,13 +67,13 @@ class CreateHistoryEventOnTaskTerminationAccTest extends AbstractAccTest {
               final String taskId = "TKI:000000000000000000000000000000000003";
 
               List<TaskHistoryEvent> events =
-                  historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
+                  taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
               assertThat(events).isEmpty();
 
               taskService.terminateTask(taskId);
 
-              events = historyService.createTaskHistoryQuery().taskIdIn(taskId).list();
+              events = taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
               assertThat(events).hasSize(1);
 

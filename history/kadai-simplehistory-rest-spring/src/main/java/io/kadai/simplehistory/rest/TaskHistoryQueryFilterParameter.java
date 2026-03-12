@@ -23,7 +23,7 @@ import static java.util.Optional.ofNullable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.rest.QueryParameter;
-import io.kadai.simplehistory.impl.task.TaskHistoryQuery;
+import io.kadai.simplehistory.task.api.TaskHistoryQuery;
 import io.kadai.spi.history.api.events.task.TaskHistoryCustomField;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.beans.ConstructorProperties;

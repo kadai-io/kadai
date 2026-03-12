@@ -37,7 +37,7 @@ import org.apache.ibatis.transaction.TransactionFactory;
 
 /** The KadaiEngine represents an overall set of all needed services. */
 public interface KadaiEngine {
-  String MINIMAL_KADAI_SCHEMA_VERSION = "11.0.0";
+  String MINIMAL_KADAI_SCHEMA_VERSION = "12.0.0";
 
   /**
    * This method creates the {@linkplain KadaiEngine} with {@linkplain
@@ -161,7 +161,7 @@ public interface KadaiEngine {
   WorkingTimeCalculator getWorkingTimeCalculator();
 
   /**
-   * Checks if the {@linkplain io.kadai.spi.history.api.KadaiHistory KadaiHistory} plugin is
+   * Checks if the {@linkplain io.kadai.spi.history.api.KadaiEventConsumer KadaiHistory} plugin is
    * enabled.
    *
    * @return true if the history is enabled; otherwise false

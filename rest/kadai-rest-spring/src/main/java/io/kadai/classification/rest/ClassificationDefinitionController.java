@@ -25,7 +25,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kadai.classification.api.ClassificationCustomField;
 import io.kadai.classification.api.ClassificationQuery;
 import io.kadai.classification.api.ClassificationService;
@@ -61,22 +60,23 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import tools.jackson.databind.json.JsonMapper;
 
 /** Controller for Importing / Exporting classifications. */
 @RestController
 @EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
 public class ClassificationDefinitionController implements ClassificationDefinitionApi {
 
-  private final ObjectMapper mapper;
+  private final JsonMapper jsonMapper;
   private final ClassificationService classificationService;
   private final ClassificationDefinitionRepresentationModelAssembler assembler;
 
   @Autowired
   ClassificationDefinitionController(
-      ObjectMapper mapper,
+      JsonMapper jsonMapper,
       ClassificationService classificationService,
       ClassificationDefinitionRepresentationModelAssembler assembler) {
-    this.mapper = mapper;
+    this.jsonMapper = jsonMapper;
     this.classificationService = classificationService;
     this.assembler = assembler;
   }
@@ -123,6 +123,26 @@ public class ClassificationDefinitionController implements ClassificationDefinit
     return ResponseEntity.noContent().build();
   }
 
+  ClassificationRepresentationModel normalizeNullValues(ClassificationRepresentationModel cl) {
+    if (cl.getParentKey() == null) {
+      cl.setParentKey("");
+    }
+    if (cl.getParentId() == null) {
+      cl.setParentId("");
+    }
+    return cl;
+  }
+
+  Boolean hasResolvableParent(
+      ClassificationRepresentationModel cl,
+      Set<String> keysWithDomain,
+      Map<String, String> systemIds) {
+    String parentKeyAndDomain = logicalId(cl);
+    return !cl.getParentKey().isEmpty()
+        && (keysWithDomain.contains(parentKeyAndDomain)
+            || systemIds.containsKey(parentKeyAndDomain));
+  }
+
   private Map<String, String> getSystemIds() {
     return classificationService.createClassificationQuery().list().stream()
         .collect(toMap(i -> logicalId(i.getKey(), i.getDomain()), ClassificationSummary::getId));
@@ -130,7 +150,7 @@ public class ClassificationDefinitionController implements ClassificationDefinit
 
   private ClassificationDefinitionCollectionRepresentationModel
       extractClassificationResourcesFromFile(MultipartFile file) throws IOException {
-    return mapper.readValue(
+    return jsonMapper.readValue(
         file.getInputStream(), ClassificationDefinitionCollectionRepresentationModel.class);
   }
 
@@ -188,26 +208,6 @@ public class ClassificationDefinitionController implements ClassificationDefinit
             toMap(
                 defClassEntry -> assembler.toEntityModel(defClassEntry.getKey()),
                 defClassEntry -> defClassEntry.getValue().getParentKey()));
-  }
-
-  ClassificationRepresentationModel normalizeNullValues(ClassificationRepresentationModel cl) {
-    if (cl.getParentKey() == null) {
-      cl.setParentKey("");
-    }
-    if (cl.getParentId() == null) {
-      cl.setParentId("");
-    }
-    return cl;
-  }
-
-  Boolean hasResolvableParent(
-      ClassificationRepresentationModel cl,
-      Set<String> keysWithDomain,
-      Map<String, String> systemIds) {
-    String parentKeyAndDomain = logicalId(cl);
-    return !cl.getParentKey().isEmpty()
-        && (keysWithDomain.contains(parentKeyAndDomain)
-            || systemIds.containsKey(parentKeyAndDomain));
   }
 
   private void insertOrUpdateClassificationsWithoutParent(

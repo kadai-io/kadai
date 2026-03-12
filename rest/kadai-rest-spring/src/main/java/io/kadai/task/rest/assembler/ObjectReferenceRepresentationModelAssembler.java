@@ -21,8 +21,8 @@ package io.kadai.task.rest.assembler;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.internal.models.ObjectReferenceImpl;
 import io.kadai.task.rest.models.ObjectReferenceRepresentationModel;
+import org.jspecify.annotations.NonNull;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Controller;
 
 @Controller

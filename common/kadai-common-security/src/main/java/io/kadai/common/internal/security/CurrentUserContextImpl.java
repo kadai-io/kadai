@@ -24,7 +24,6 @@ import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.api.security.GroupPrincipal;
 import io.kadai.common.api.security.ProxyPrincipal;
 import io.kadai.common.api.security.UserPrincipal;
-import java.security.AccessController;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.HashSet;
@@ -42,10 +41,8 @@ public class CurrentUserContextImpl implements CurrentUserContext {
   public CurrentUserContextImpl() {}
 
   @Override
-  @SuppressWarnings("removal")
   public String getUserId() {
-    // TODO replace with Subject.current() when migrating to newer Version than 17
-    Subject subject = Subject.getSubject(AccessController.getContext());
+    Subject subject = Subject.current();
     LOGGER.trace("Subject of caller: {}", subject);
     if (subject != null) {
       final Set<Principal> principals = subject.getPrincipals();
@@ -63,10 +60,8 @@ public class CurrentUserContextImpl implements CurrentUserContext {
   }
 
   @Override
-  @SuppressWarnings("removal")
   public String getProxyAccessId() {
-    // TODO replace with Subject.current() when migrating to newer Version than 17
-    Subject subject = Subject.getSubject(AccessController.getContext());
+    Subject subject = Subject.current();
     LOGGER.trace("Subject of caller: {}", subject);
     if (subject != null) {
       final Set<Principal> principals = subject.getPrincipals();
@@ -84,10 +79,8 @@ public class CurrentUserContextImpl implements CurrentUserContext {
   }
 
   @Override
-  @SuppressWarnings("removal")
   public List<String> getGroupIds() {
-    // TODO replace with Subject.current() when migrating to newer Version than 17
-    Subject subject = Subject.getSubject(AccessController.getContext());
+    Subject subject = Subject.current();
     LOGGER.trace("Subject of caller: {}", subject);
     if (subject != null) {
       Set<GroupPrincipal> groups = subject.getPrincipals(GroupPrincipal.class);

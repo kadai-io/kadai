@@ -18,17 +18,17 @@
 
 package io.kadai.common.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.beans.PropertyEditorSupport;
 import java.net.URLDecoder;
+import tools.jackson.databind.json.JsonMapper;
 
 public class JsonPropertyEditor extends PropertyEditorSupport {
 
-  private final ObjectMapper objectMapper;
+  private final JsonMapper jsonMapper;
   private final Class<?> requiredType;
 
-  public JsonPropertyEditor(ObjectMapper objectMapper, Class<?> requiredType) {
-    this.objectMapper = objectMapper;
+  public JsonPropertyEditor(JsonMapper jsonMapper, Class<?> requiredType) {
+    this.jsonMapper = jsonMapper;
     this.requiredType = requiredType;
   }
 
@@ -36,7 +36,7 @@ public class JsonPropertyEditor extends PropertyEditorSupport {
   public void setAsText(String text) throws IllegalArgumentException {
     if (text != null && !text.isEmpty()) {
       try {
-        setValue(objectMapper.readValue(URLDecoder.decode(text, "UTF-8"), requiredType));
+        setValue(jsonMapper.readValue(URLDecoder.decode(text, "UTF-8"), requiredType));
       } catch (Exception e) {
         throw new IllegalArgumentException(e);
       }

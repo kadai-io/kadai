@@ -21,12 +21,13 @@ package io.kadai.spi.history.api.events.classification;
 import io.kadai.classification.api.ClassificationCustomField;
 import io.kadai.classification.api.models.ClassificationSummary;
 import io.kadai.common.api.exceptions.SystemException;
+import io.kadai.spi.history.api.events.KadaiEvent;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 /** Super class for all classification related events. */
-public class ClassificationHistoryEvent {
+public class ClassificationHistoryEvent implements KadaiEvent {
 
   protected String id;
   protected String eventType;
@@ -152,10 +153,12 @@ public class ClassificationHistoryEvent {
     this.eventType = eventType;
   }
 
+  @Override
   public Instant getCreated() {
     return created != null ? created.truncatedTo(ChronoUnit.MILLIS) : null;
   }
 
+  @Override
   public void setCreated(Instant created) {
     this.created = created != null ? created.truncatedTo(ChronoUnit.MILLIS) : null;
   }

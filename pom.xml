@@ -34,7 +34,7 @@
   </licenses>
 
   <properties>
-    <java.version>17</java.version>
+    <java.version>25</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -64,8 +64,8 @@
 
     <!-- spring dependencies -->
     <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
-    <version.spring.boot>3.5.10</version.spring.boot>
-    <version.spring.mybatis>3.0.5</version.spring.mybatis>
+    <version.spring.boot>4.0.3</version.spring.boot>
+    <version.spring.mybatis>4.0.0</version.spring.mybatis>
 
     <!-- camunda dependencies -->
     <version.camunda.dmn>7.24.0</version.camunda.dmn>
@@ -78,9 +78,8 @@
     <version.jacoco>0.8.14</version.jacoco>
     <version.slf4j-test>3.0.3</version.slf4j-test>
     <version.testcontainers>1.21.4</version.testcontainers>
-    <version.spring-openapi>2.8.5</version.spring-openapi>
     <version.jakarta.servlet>6.1.0</version.jakarta.servlet>
-    <version.spring-openapi>2.8.14</version.spring-openapi>
+    <version.spring-openapi>3.0.2</version.spring-openapi>
 
     <!-- AspectJ dependencies -->
     <version.aspectj-maven-plugin>1.16.0</version.aspectj-maven-plugin>
@@ -367,7 +366,7 @@
         </dependencies>
         <configuration>
           <complianceLevel>${java.version}</complianceLevel>
-          <source>17</source>
+          <source>25</source>
           <target>8</target>
           <showWeaveInfo>false</showWeaveInfo>
           <verbose>true</verbose>
