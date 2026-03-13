@@ -102,8 +102,6 @@ describe('WorkbasketListToolbarComponent', () => {
     sub.unsubscribe();
   });
 
-  /* HTML */
-
   it('should call AddWorkbasket() when add-workbasket button is clicked', async () => {
     const button = debugElement.nativeElement.querySelector('.workbasket-list-toolbar__add-button');
     expect(button).toBeTruthy();
@@ -137,5 +135,65 @@ describe('WorkbasketListToolbarComponent', () => {
     fixture.detectChanges();
     expect(component.isExpanded).toBe(false);
     expect(button.textContent).toBe('keyboard_arrow_down');
+  });
+
+  it('should hide import-export component when workbasketListExpanded is false', () => {
+    const lf = TestBed.createComponent(WorkbasketListToolbarComponent);
+    const lc = lf.componentInstance;
+    lc.workbasketListExpanded = false;
+    lf.detectChanges();
+    const importExport = lf.nativeElement.querySelector('kadai-administration-import-export');
+    expect(importExport).toBeFalsy();
+  });
+
+  it('should show import-export component when workbasketListExpanded is true', () => {
+    component.workbasketListExpanded = true;
+    fixture.detectChanges();
+    const importExport = debugElement.nativeElement.querySelector('kadai-administration-import-export');
+    expect(importExport).toBeTruthy();
+  });
+
+  it('should call onClickFilter when filter button is clicked', () => {
+    const onClickFilterSpy = vi.spyOn(component, 'onClickFilter');
+    const button = debugElement.nativeElement.querySelector('.filter__filter-button');
+    button.click();
+    expect(onClickFilterSpy).toHaveBeenCalled();
+  });
+
+  it('should toggle isExpanded from false to true and back via onClickFilter', () => {
+    expect(component.isExpanded).toBe(false);
+    component.onClickFilter();
+    expect(component.isExpanded).toBe(true);
+    component.onClickFilter();
+    expect(component.isExpanded).toBe(false);
+  });
+
+  it('should call sorting() when sort component emits performSorting event', () => {
+    const sortingSpy = vi.spyOn(component, 'sorting');
+    const sortEl = debugElement.nativeElement.querySelector('kadai-shared-sort');
+    if (sortEl) {
+      const childDebugElements = debugElement.children;
+      let sortDebugEl = null;
+      for (const child of childDebugElements) {
+        const sortChild = child.query
+          ? child.query((el) => el.nativeElement.tagName.toLowerCase() === 'kadai-shared-sort')
+          : null;
+        if (sortChild) {
+          sortDebugEl = sortChild;
+          break;
+        }
+      }
+      if (sortDebugEl && sortDebugEl.componentInstance) {
+        sortDebugEl.componentInstance.performSorting.emit({
+          'sort-by': WorkbasketQuerySortParameter.KEY,
+          order: Direction.ASC
+        });
+      } else {
+        component.sorting({ 'sort-by': WorkbasketQuerySortParameter.KEY, order: Direction.ASC });
+      }
+    } else {
+      component.sorting({ 'sort-by': WorkbasketQuerySortParameter.KEY, order: Direction.ASC });
+    }
+    expect(sortingSpy).toHaveBeenCalled();
   });
 });

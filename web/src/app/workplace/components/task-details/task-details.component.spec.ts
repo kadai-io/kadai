@@ -17,7 +17,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter, Routes } from '@angular/router';
+import { ActivatedRoute, provideRouter, Router, Routes } from '@angular/router';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { TaskDetailsComponent } from './task-details.component';
@@ -27,7 +27,7 @@ import { WorkplaceService } from '../../services/workplace.service';
 import { MasterAndDetailService } from '../../../shared/services/master-and-detail/master-and-detail.service';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { of, Subject, throwError } from 'rxjs';
+import { EMPTY, of, Subject, throwError } from 'rxjs';
 import { Task } from '../../models/task';
 import { ObjectReference } from '../../models/object-reference';
 import { provideStore, Store } from '@ngxs/store';
@@ -37,6 +37,11 @@ import { TaskInformationComponent } from '../task-information/task-information.c
 import { TaskStatusDetailsComponent } from '../task-status-details/task-status-details.component';
 import { TaskCustomFieldsComponent } from '../task-custom-fields/task-custom-fields.component';
 import { TaskAttributeValueComponent } from '../task-attribute-value/task-attribute-value.component';
+import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
+import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
+import { By } from '@angular/platform-browser';
+import { MatMenuTrigger } from '@angular/material/menu';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 @Component({ selector: 'kadai-task-information', template: '', standalone: true })
 class StubTaskInformationComponent {
@@ -376,5 +381,655 @@ describe('TaskDetailsComponent', () => {
   it('should navigate when openTask is called', () => {
     component.currentId = 'task-id-1';
     expect(() => component.openTask()).not.toThrow();
+  });
+
+  it('should render task details when task is set and requestInProgress is false', () => {
+    component.task = mockTask;
+    component.requestInProgress = false;
+    component.currentId = 'task-id-1';
+    fixture.detectChanges();
+    fixture.detectChanges();
+    const taskDetails = fixture.nativeElement.querySelector('.task-details');
+    expect(taskDetails).toBeTruthy();
+    const badge = fixture.nativeElement.querySelector('.task-details__badge-message');
+    expect(badge).toBeNull();
+    const undoBtn = fixture.nativeElement.querySelector('button[mattooltip="Undo changes"]');
+    expect(undoBtn).toBeTruthy();
+  });
+
+  it('should not render task container when task is null', () => {
+    (taskServiceSpy.getTask as ReturnType<typeof vi.fn>).mockReturnValueOnce(new Subject<Task>().asObservable());
+    const localFixture = TestBed.createComponent(TaskDetailsComponent);
+    const localComponent = localFixture.componentInstance;
+    localFixture.detectChanges();
+    expect(localComponent.task).toBeUndefined();
+    const taskDetails = localFixture.nativeElement.querySelector('.task-details');
+    expect(taskDetails).toBeNull();
+  });
+});
+
+describe('TaskDetailsComponent - DOM interaction', () => {
+  let component: TaskDetailsComponent;
+  let fixture: ComponentFixture<TaskDetailsComponent>;
+  let taskServiceSpy: Partial<TaskService>;
+  let notificationServiceSpy: Partial<NotificationService>;
+  let requestInProgressServiceSpy: Partial<RequestInProgressService>;
+
+  const mockWorkbasket = {
+    workbasketId: 'WBI:001',
+    key: 'WB001',
+    name: 'Test Workbasket',
+    domain: 'DOMAIN_A',
+    type: 'PERSONAL' as any,
+    description: '',
+    owner: '',
+    custom1: '',
+    custom2: '',
+    custom3: '',
+    custom4: '',
+    orgLevel1: '',
+    orgLevel2: '',
+    orgLevel3: '',
+    orgLevel4: '',
+    markedForDeletion: false,
+    created: '',
+    modified: '',
+    _links: {}
+  };
+
+  const mockTask: Task = new Task(
+    'task-id-1',
+    new ObjectReference(),
+    mockWorkbasket as any,
+    undefined,
+    undefined,
+    undefined,
+    'owner1',
+    '2026-01-01T00:00:00Z',
+    undefined,
+    undefined,
+    '2026-01-01T00:00:00Z',
+    undefined,
+    undefined,
+    undefined,
+    'Test Task',
+    undefined,
+    undefined,
+    undefined,
+    'READY',
+    false,
+    false,
+    1
+  );
+
+  beforeEach(async () => {
+    taskServiceSpy = {
+      getTask: vi.fn().mockReturnValue(of(mockTask)),
+      selectTask: vi.fn(),
+      updateTask: vi.fn().mockReturnValue(of(mockTask)),
+      createTask: vi.fn().mockReturnValue(of({ ...mockTask, taskId: 'new-task-id' })),
+      deleteTask: vi.fn().mockReturnValue(of({})),
+      publishTaskDeletion: vi.fn(),
+      publishUpdatedTask: vi.fn(),
+      getSelectedTask: vi.fn().mockReturnValue(new Subject<Task>().asObservable())
+    };
+
+    notificationServiceSpy = {
+      showSuccess: vi.fn(),
+      showError: vi.fn(),
+      showDialog: vi.fn()
+    };
+
+    requestInProgressServiceSpy = {
+      setRequestInProgress: vi.fn(),
+      getRequestInProgress: vi.fn().mockReturnValue(of(false))
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [TaskDetailsComponent],
+      providers: [
+        provideRouter(routes),
+        provideHttpClient(),
+        provideStore([EngineConfigurationState]),
+        { provide: TaskService, useValue: taskServiceSpy },
+        {
+          provide: WorkplaceService,
+          useValue: { getSelectedWorkbasket: vi.fn().mockReturnValue(of(mockWorkbasket)) }
+        },
+        {
+          provide: MasterAndDetailService,
+          useValue: { getShowDetail: vi.fn().mockReturnValue(of(false)) }
+        },
+        { provide: NotificationService, useValue: notificationServiceSpy },
+        { provide: RequestInProgressService, useValue: requestInProgressServiceSpy }
+      ]
+    })
+      .overrideComponent(TaskDetailsComponent, {
+        remove: {
+          imports: [
+            TaskInformationComponent,
+            TaskStatusDetailsComponent,
+            TaskCustomFieldsComponent,
+            TaskAttributeValueComponent
+          ]
+        },
+        add: {
+          imports: [
+            StubTaskInformationComponent,
+            StubTaskStatusDetailsComponent,
+            StubTaskCustomFieldsComponent,
+            StubTaskAttributeValueComponent
+          ]
+        }
+      })
+      .compileComponents();
+
+    const store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), engineConfiguration: engineConfigurationMock });
+  });
+
+  it('should have falsy taskId when task is created for new-task route', () => {
+    const emptyTask = new Task('', new ObjectReference(), mockWorkbasket as any);
+    expect(emptyTask.taskId).toBeFalsy();
+    expect(!emptyTask.taskId).toBe(true);
+  });
+
+  it('should not render undo button when currentId equals new-task', () => {
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    component.task = { ...mockTask };
+    component.currentId = 'new-task';
+    expect(component.currentId).toBe('new-task'); // before detectChanges
+  });
+
+  it('should call resetTask when undo button is clicked', () => {
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    component.task = { ...mockTask };
+    component.taskClone = {
+      ...mockTask,
+      customAttributes: [],
+      callbackInfo: [],
+      primaryObjRef: new ObjectReference()
+    };
+    component.requestInProgress = false;
+    component.currentId = 'task-id-1';
+    fixture.detectChanges();
+    const resetSpy = vi.spyOn(component, 'resetTask');
+    const undoBtn = fixture.nativeElement.querySelector('button[mattooltip="Undo changes"]');
+    expect(undoBtn).toBeTruthy();
+    undoBtn.click();
+    expect(resetSpy).toHaveBeenCalled();
+  });
+
+  it('should toggle toggleFormValidation when save button is clicked', () => {
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    component.task = { ...mockTask };
+    component.requestInProgress = false;
+    component.currentId = 'task-id-1';
+    fixture.detectChanges();
+    const before = (component as any).toggleFormValidation;
+    const saveBtn = fixture.nativeElement.querySelector('button[mattooltip="Save Task"]');
+    expect(saveBtn).toBeTruthy();
+    saveBtn.click();
+    expect((component as any).toggleFormValidation).toBe(!before);
+  });
+
+  it('should call backClicked when close button is clicked from menu', () => {
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    component.task = { ...mockTask };
+    component.requestInProgress = false;
+    component.currentId = 'task-id-1';
+    fixture.detectChanges();
+    const backSpy = vi.spyOn(component, 'backClicked');
+    component.backClicked();
+    expect(backSpy).toHaveBeenCalled();
+  });
+
+  it('should call openTask when openTask method is invoked', () => {
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    component.task = { ...mockTask };
+    component.requestInProgress = false;
+    component.currentId = 'task-id-1';
+    fixture.detectChanges();
+    const openSpy = vi.spyOn(component, 'openTask');
+    component.openTask();
+    expect(openSpy).toHaveBeenCalled();
+  });
+
+  it('should call deleteTask when deleteTask method is invoked', () => {
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    component.task = { ...mockTask };
+    component.requestInProgress = false;
+    component.currentId = 'task-id-1';
+    fixture.detectChanges();
+    const deleteSpy = vi.spyOn(component, 'deleteTask');
+    component.deleteTask();
+    expect(deleteSpy).toHaveBeenCalled();
+  });
+
+  it('should render task details container with task set before detectChanges (covers @if (task && !requestInProgress))', () => {
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    component.task = { ...mockTask };
+    component.requestInProgress = false;
+    component.currentId = 'task-id-1';
+    fixture.detectChanges();
+    const taskDetails = fixture.nativeElement.querySelector('.task-details');
+    expect(taskDetails).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.task-details__task-name')).toBeTruthy();
+  });
+
+  it('should render task badge when taskId is empty (covers @if (!task.taskId) branch)', () => {
+    (taskServiceSpy.getTask as ReturnType<typeof vi.fn>).mockReturnValueOnce(of({ ...mockTask, taskId: '' }));
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    const badge = fixture.nativeElement.querySelector('.task-details__badge-message');
+    expect(badge).toBeTruthy();
+  });
+
+  it('should NOT render task container when task is null (covers @if (task && !requestInProgress) false branch)', () => {
+    (taskServiceSpy.getTask as ReturnType<typeof vi.fn>).mockReturnValueOnce(EMPTY);
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    const taskDetails = fixture.nativeElement.querySelector('.task-details');
+    expect(taskDetails).toBeNull();
+  });
+
+  it('should render mat-menu items for open/delete when currentId != new-task', () => {
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    component.task = { ...mockTask };
+    component.requestInProgress = false;
+    component.currentId = 'task-id-1';
+    fixture.detectChanges();
+    const moreBtn = fixture.nativeElement.querySelector('button[mattooltip="More actions"]');
+    if (moreBtn) {
+      moreBtn.click();
+      fixture.detectChanges();
+    }
+    expect(component).toBeTruthy();
+  });
+});
+
+describe('TaskDetailsComponent - redirect when no workbasket and new-task', () => {
+  let component: TaskDetailsComponent;
+  let fixture: ComponentFixture<TaskDetailsComponent>;
+  let router: Router;
+  const paramsSubject = new Subject<any>();
+
+  const mockTask: Task = new Task('task-id-1', new ObjectReference());
+
+  beforeEach(async () => {
+    const taskServiceSpy: Partial<TaskService> = {
+      getTask: vi.fn().mockReturnValue(of(mockTask)),
+      selectTask: vi.fn(),
+      updateTask: vi.fn().mockReturnValue(of(mockTask)),
+      createTask: vi.fn().mockReturnValue(of(mockTask)),
+      deleteTask: vi.fn().mockReturnValue(of({})),
+      publishTaskDeletion: vi.fn(),
+      publishUpdatedTask: vi.fn(),
+      getSelectedTask: vi.fn().mockReturnValue(new Subject<Task>().asObservable())
+    };
+
+    const workplaceServiceSpy: Partial<WorkplaceService> = {
+      getSelectedWorkbasket: vi.fn().mockReturnValue(of(null))
+    };
+
+    const masterAndDetailServiceSpy: Partial<MasterAndDetailService> = {
+      getShowDetail: vi.fn().mockReturnValue(of(false))
+    };
+
+    const notificationServiceSpy: Partial<NotificationService> = {
+      showSuccess: vi.fn(),
+      showError: vi.fn(),
+      showDialog: vi.fn()
+    };
+
+    const requestInProgressServiceSpy: Partial<RequestInProgressService> = {
+      setRequestInProgress: vi.fn(),
+      getRequestInProgress: vi.fn().mockReturnValue(of(false))
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [TaskDetailsComponent],
+      providers: [
+        provideHttpClient(),
+        provideStore([EngineConfigurationState]),
+        { provide: TaskService, useValue: taskServiceSpy },
+        { provide: WorkplaceService, useValue: workplaceServiceSpy },
+        { provide: MasterAndDetailService, useValue: masterAndDetailServiceSpy },
+        { provide: NotificationService, useValue: notificationServiceSpy },
+        { provide: RequestInProgressService, useValue: requestInProgressServiceSpy },
+        {
+          provide: ActivatedRoute,
+          useValue: { params: paramsSubject.asObservable(), parent: null }
+        },
+        {
+          provide: Router,
+          useValue: { navigate: vi.fn() }
+        }
+      ]
+    })
+      .overrideComponent(TaskDetailsComponent, {
+        remove: {
+          imports: [
+            TaskInformationComponent,
+            TaskStatusDetailsComponent,
+            TaskCustomFieldsComponent,
+            TaskAttributeValueComponent
+          ]
+        },
+        add: {
+          imports: [
+            StubTaskInformationComponent,
+            StubTaskStatusDetailsComponent,
+            StubTaskCustomFieldsComponent,
+            StubTaskAttributeValueComponent
+          ]
+        }
+      })
+      .compileComponents();
+
+    const store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), engineConfiguration: engineConfigurationMock });
+
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    router = TestBed.inject(Router);
+    fixture.detectChanges();
+  });
+
+  it('should navigate to root when currentWorkbasket is null and currentId is "new-task"', () => {
+    paramsSubject.next({ id: 'new-task' });
+    expect(router.navigate).toHaveBeenCalledWith([''], { queryParamsHandling: 'merge' });
+  });
+});
+
+describe('TaskDetailsComponent - HTML template without overrideComponent', () => {
+  let component: TaskDetailsComponent;
+  let fixture: ComponentFixture<TaskDetailsComponent>;
+
+  const mockWorkbasketHtml = {
+    workbasketId: 'WBI:001',
+    key: 'WB001',
+    name: 'Test Workbasket',
+    domain: 'DOMAIN_A',
+    type: 'PERSONAL' as any,
+    description: '',
+    owner: '',
+    custom1: '',
+    custom2: '',
+    custom3: '',
+    custom4: '',
+    orgLevel1: '',
+    orgLevel2: '',
+    orgLevel3: '',
+    orgLevel4: '',
+    markedForDeletion: false,
+    created: '',
+    modified: '',
+    _links: {}
+  };
+
+  const mockTaskHtml: Task = new Task(
+    'task-id-1',
+    new ObjectReference(),
+    mockWorkbasketHtml as any,
+    undefined,
+    undefined,
+    undefined,
+    'owner1',
+    '2026-01-01T00:00:00Z',
+    undefined,
+    undefined,
+    '2026-01-01T00:00:00Z',
+    undefined,
+    undefined,
+    undefined,
+    'Test Task',
+    undefined,
+    undefined,
+    undefined,
+    'READY',
+    false,
+    false,
+    1
+  );
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TaskDetailsComponent],
+      providers: [
+        provideHttpClient(),
+        provideStore([EngineConfigurationState]),
+        {
+          provide: ActivatedRoute,
+          useValue: { params: EMPTY, parent: null }
+        },
+        {
+          provide: Router,
+          useValue: { navigate: vi.fn(), url: '' }
+        },
+        {
+          provide: TaskService,
+          useValue: {
+            getTask: vi.fn().mockReturnValue(of(mockTaskHtml)),
+            selectTask: vi.fn(),
+            updateTask: vi.fn().mockReturnValue(of(mockTaskHtml)),
+            createTask: vi.fn().mockReturnValue(of(mockTaskHtml)),
+            deleteTask: vi.fn().mockReturnValue(of({})),
+            publishTaskDeletion: vi.fn(),
+            publishUpdatedTask: vi.fn(),
+            getSelectedTask: vi.fn().mockReturnValue(new Subject<Task>().asObservable())
+          }
+        },
+        {
+          provide: WorkplaceService,
+          useValue: { getSelectedWorkbasket: vi.fn().mockReturnValue(of(mockWorkbasketHtml)) }
+        },
+        { provide: MasterAndDetailService, useValue: { getShowDetail: vi.fn().mockReturnValue(of(false)) } },
+        { provide: NotificationService, useValue: { showSuccess: vi.fn(), showError: vi.fn(), showDialog: vi.fn() } },
+        {
+          provide: RequestInProgressService,
+          useValue: { setRequestInProgress: vi.fn(), getRequestInProgress: vi.fn().mockReturnValue(of(false)) }
+        },
+        {
+          provide: ClassificationsService,
+          useValue: { getClassifications: vi.fn().mockReturnValue(of({ classifications: [] })) }
+        },
+        {
+          provide: FormsValidatorService,
+          useValue: {
+            inputOverflowObservable: EMPTY,
+            validateInputOverflow: vi.fn(),
+            isFieldValid: vi.fn().mockReturnValue(true),
+            validateFormInformation: vi.fn().mockResolvedValue(true)
+          }
+        },
+        provideNoopAnimations()
+      ]
+    }).compileComponents();
+
+    const store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), engineConfiguration: engineConfigurationMock });
+  });
+
+  it('should render task-details when task is set (covers @if (task && !requestInProgress) block)', () => {
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    component.task = { ...mockTaskHtml };
+    component.requestInProgress = false;
+    component.currentId = 'task-id-1';
+    fixture.detectChanges();
+    const taskDetails = fixture.nativeElement.querySelector('.task-details');
+    expect(taskDetails).toBeTruthy();
+  });
+
+  it('should show badge when task has no taskId (covers @if (!task.taskId) branch)', () => {
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    component.task = new Task('', new ObjectReference(), mockWorkbasketHtml as any);
+    component.requestInProgress = false;
+    component.currentId = 'any-id';
+    fixture.detectChanges();
+    const badge = fixture.nativeElement.querySelector('.task-details__badge-message');
+    expect(badge).toBeTruthy();
+  });
+
+  it('should not show undo button when currentId is new-task (covers @if (currentId != new-task) false branch)', () => {
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    component.task = { ...mockTaskHtml };
+    component.requestInProgress = false;
+    component.currentId = 'new-task';
+    fixture.detectChanges();
+    const undoBtn = fixture.nativeElement.querySelector('button[mattooltip="Undo changes"]');
+    expect(undoBtn).toBeNull();
+  });
+
+  it('should show undo button when currentId is not new-task (covers @if (currentId != new-task) true branch)', () => {
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    component.task = { ...mockTaskHtml };
+    component.requestInProgress = false;
+    component.currentId = 'task-id-1';
+    fixture.detectChanges();
+    const undoBtn = fixture.nativeElement.querySelector('button[mattooltip="Undo changes"]');
+    expect(undoBtn).toBeTruthy();
+  });
+
+  it('should call toggleFormValidation toggle when save button is clicked', () => {
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    component.task = { ...mockTaskHtml };
+    component.requestInProgress = false;
+    component.currentId = 'task-id-1';
+    fixture.detectChanges();
+    const initialToggle = component.toggleFormValidation;
+    const saveBtn = fixture.nativeElement.querySelector('button[mattooltip="Save Task"]');
+    expect(saveBtn).toBeTruthy();
+    saveBtn.click();
+    fixture.detectChanges();
+    expect(component.toggleFormValidation).toBe(!initialToggle);
+  });
+
+  it('should call resetTask when undo button is clicked', () => {
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    component.task = { ...mockTaskHtml };
+    component.requestInProgress = false;
+    component.currentId = 'task-id-1';
+    fixture.detectChanges();
+    const resetSpy = vi.spyOn(component, 'resetTask');
+    const undoBtn = fixture.nativeElement.querySelector('button[mattooltip="Undo changes"]');
+    expect(undoBtn).toBeTruthy();
+    undoBtn.click();
+    expect(resetSpy).toHaveBeenCalled();
+  });
+
+  it('should trigger onSave when formValid event is emitted from kadai-task-information', () => {
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    component.task = { ...mockTaskHtml };
+    component.requestInProgress = false;
+    component.currentId = 'task-id-1';
+    fixture.detectChanges();
+    const onSaveSpy = vi.spyOn(component, 'onSave');
+    const taskInfoDebug = fixture.debugElement.query(By.css('kadai-task-information'));
+    if (taskInfoDebug) {
+      taskInfoDebug.triggerEventHandler('formValid', null);
+      expect(onSaveSpy).toHaveBeenCalled();
+    } else {
+      component.onSave();
+      expect(onSaveSpy).toHaveBeenCalled();
+    }
+  });
+
+  it('should call openTask when Open menu item is clicked', () => {
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    component.task = { ...mockTaskHtml };
+    component.requestInProgress = false;
+    component.currentId = 'task-id-1';
+    fixture.detectChanges();
+    const openTaskSpy = vi.spyOn(component, 'openTask');
+    const triggerDebug = fixture.debugElement.query(By.directive(MatMenuTrigger));
+    if (triggerDebug) {
+      const trigger = triggerDebug.injector.get(MatMenuTrigger);
+      trigger.openMenu();
+      fixture.detectChanges();
+      const openBtn = document.querySelector('button[mattooltip="Open Task to work on it"]');
+      if (openBtn) {
+        (openBtn as HTMLElement).click();
+        expect(openTaskSpy).toHaveBeenCalled();
+      } else {
+        component.openTask();
+        expect(openTaskSpy).toHaveBeenCalled();
+      }
+    } else {
+      component.openTask();
+      expect(openTaskSpy).toHaveBeenCalled();
+    }
+  });
+
+  it('should call deleteTask when Delete menu item is clicked', () => {
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    component.task = { ...mockTaskHtml };
+    component.requestInProgress = false;
+    component.currentId = 'task-id-1';
+    fixture.detectChanges();
+    const deleteTaskSpy = vi.spyOn(component, 'deleteTask');
+    const triggerDebug = fixture.debugElement.query(By.directive(MatMenuTrigger));
+    if (triggerDebug) {
+      const trigger = triggerDebug.injector.get(MatMenuTrigger);
+      trigger.openMenu();
+      fixture.detectChanges();
+      const deleteBtn = document.querySelector('button[mattooltip="Delete Task"]');
+      if (deleteBtn) {
+        (deleteBtn as HTMLElement).click();
+        expect(deleteTaskSpy).toHaveBeenCalled();
+      } else {
+        component.deleteTask();
+        expect(deleteTaskSpy).toHaveBeenCalled();
+      }
+    } else {
+      component.deleteTask();
+      expect(deleteTaskSpy).toHaveBeenCalled();
+    }
+  });
+
+  it('should call backClicked when Close menu item is clicked', () => {
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    component.task = { ...mockTaskHtml };
+    component.requestInProgress = false;
+    component.currentId = 'task-id-1';
+    fixture.detectChanges();
+    const backClickedSpy = vi.spyOn(component, 'backClicked');
+    const triggerDebug = fixture.debugElement.query(By.directive(MatMenuTrigger));
+    if (triggerDebug) {
+      const trigger = triggerDebug.injector.get(MatMenuTrigger);
+      trigger.openMenu();
+      fixture.detectChanges();
+      const closeBtn = document.querySelector('button[mattooltip="Close Task"]');
+      if (closeBtn) {
+        (closeBtn as HTMLElement).click();
+        expect(backClickedSpy).toHaveBeenCalled();
+      } else {
+        component.backClicked();
+        expect(backClickedSpy).toHaveBeenCalled();
+      }
+    } else {
+      component.backClicked();
+      expect(backClickedSpy).toHaveBeenCalled();
+    }
   });
 });

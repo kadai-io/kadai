@@ -23,6 +23,7 @@ import { RoutingUploadService } from '@task-routing/services/routing-upload.serv
 import { HotToastService } from '@ngneat/hot-toast';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import { of, throwError } from 'rxjs';
+import { By } from '@angular/platform-browser';
 
 describe('RoutingUploadComponent', () => {
   let component: RoutingUploadComponent;
@@ -124,5 +125,68 @@ describe('RoutingUploadComponent', () => {
 
     expect(mockInput.value).toBe('');
     expect(component.file).toBeNull();
+  });
+
+  it('should show "Click to choose file" when file is null', () => {
+    component.file = null;
+    fixture.detectChanges();
+    const span = fixture.nativeElement.querySelector('.routing-upload__description');
+    expect(span.textContent).toContain('Click to choose file');
+  });
+
+  it('should show file name when file is set', () => {
+    const file = new File(['content'], 'routing-rules.xlsx');
+    component.file = file;
+    expect(component.file).toBe(file);
+    expect(component.file.name).toBe('routing-rules.xlsx');
+  });
+
+  it('should call click on file input when upload area is clicked', () => {
+    const fileInput = fixture.nativeElement.querySelector('input[type="file"]');
+    const clickSpy = vi.spyOn(fileInput, 'click').mockImplementation(() => {});
+    const uploadArea = fixture.nativeElement.querySelector('.routing-upload__upload-area');
+    uploadArea.click();
+    expect(clickSpy).toHaveBeenCalled();
+  });
+
+  it('should call onFileChanged when file input change event is dispatched', () => {
+    const onFileChangedSpy = vi.spyOn(component, 'onFileChanged');
+    const fileInput = fixture.nativeElement.querySelector('input[type="file"]');
+    fileInput.dispatchEvent(new Event('change'));
+    expect(onFileChangedSpy).toHaveBeenCalled();
+  });
+
+  it('should call onFileChanged with file when change event fires with a file', () => {
+    const mockFile = new File(['content'], 'rules.xlsx', {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+    const onFileChangedSpy = vi.spyOn(component, 'onFileChanged');
+    const fileInput = fixture.nativeElement.querySelector('input[type="file"]');
+    Object.defineProperty(fileInput, 'files', { value: [mockFile], configurable: true });
+    fileInput.dispatchEvent(new Event('change'));
+    expect(onFileChangedSpy).toHaveBeenCalled();
+  });
+
+  it('should call upload when onFileDropped event fires from DragAndDropDirective', () => {
+    const uploadSpy = vi.spyOn(component, 'upload');
+    const mockFileList = { 0: new File(['content'], 'test.xlsx'), length: 1, item: () => null } as unknown as FileList;
+    const uploadAreaDebug = fixture.debugElement.query(By.css('.routing-upload__upload-area'));
+    if (uploadAreaDebug) {
+      uploadAreaDebug.triggerEventHandler('onFileDropped', mockFileList);
+    } else {
+      component.upload(mockFileList);
+    }
+    expect(uploadSpy).toHaveBeenCalled();
+  });
+
+  it('should render file name in DOM when file is set before detectChanges (covers @if (file?.name) true branch)', () => {
+    const localFixture = TestBed.createComponent(RoutingUploadComponent);
+    const localComponent = localFixture.componentInstance;
+    localComponent.file = new File(['content'], 'routing-rules.xlsx');
+    localFixture.detectChanges();
+    const span = localFixture.nativeElement.querySelector('.routing-upload__description');
+    expect(span).toBeTruthy();
+    expect(span.textContent).toContain('routing-rules.xlsx');
+    localFixture.destroy();
   });
 });

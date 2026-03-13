@@ -115,8 +115,8 @@ export class AccessItemsManagementComponent implements OnInit {
   accessIdName: string;
   accessItemsForm: FormGroup;
   accessId: AccessId;
-  groups: AccessId[];
-  permissions: AccessId[];
+  groups: AccessId[] = [];
+  permissions: AccessId[] = [];
   defaultSortBy: WorkbasketAccessItemQuerySortParameter = WorkbasketAccessItemQuerySortParameter.ACCESS_ID;
   sortingFields: Map<WorkbasketAccessItemQuerySortParameter, string> = WORKBASKET_ACCESS_ITEM_SORT_PARAMETER_NAMING;
   sortModel: Sorting<WorkbasketAccessItemQuerySortParameter> = {
@@ -148,11 +148,11 @@ export class AccessItemsManagementComponent implements OnInit {
 
   ngOnInit() {
     this.groups$.pipe(takeUntil(this.destroy$)).subscribe((groups) => {
-      this.groups = groups;
+      this.groups = groups || [];
     });
 
     this.permissions$.pipe(takeUntil(this.destroy$)).subscribe((permissions) => {
-      this.permissions = permissions;
+      this.permissions = permissions || [];
     });
 
     this.requestInProgressService.setRequestInProgress(false);
@@ -192,10 +192,10 @@ export class AccessItemsManagementComponent implements OnInit {
       this.store
         .dispatch(new GetAccessItems(filterParameter, this.sortModel))
         .pipe(takeUntil(this.destroy$))
-        .subscribe((state) => {
+        .subscribe((state: any) => {
           this.setAccessItemsGroups(
-            state['accessItemsManagement'].accessItemsResource
-              ? state['accessItemsManagement'].accessItemsResource.accessItems
+            state?.accessItemsManagement?.accessItemsResource
+              ? state.accessItemsManagement.accessItemsResource.accessItems
               : []
           );
         });
@@ -206,15 +206,15 @@ export class AccessItemsManagementComponent implements OnInit {
       this.store
         .dispatch(new GetAccessItems(filterParameter, this.sortModel))
         .pipe(takeUntil(this.destroy$))
-        .subscribe((state) => {
+        .subscribe((state: any) => {
           this.setAccessItemsPermissions(
-            state['accessItemsManagement'].accessItemsResource
-              ? state['accessItemsManagement'].accessItemsResource.accessItems
+            state?.accessItemsManagement?.accessItemsResource
+              ? state.accessItemsManagement.accessItemsResource.accessItems
               : []
           );
           this.setAccessItemsGroups(
-            state['accessItemsManagement'].accessItemsResource
-              ? state['accessItemsManagement'].accessItemsResource.accessItems
+            state?.accessItemsManagement?.accessItemsResource
+              ? state.accessItemsManagement.accessItemsResource.accessItems
               : []
           );
         });
