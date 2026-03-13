@@ -197,6 +197,14 @@ public interface TaskMapper {
 
   @Update(
       "<script>"
+          + " UPDATE TASK SET COMPLETED = #{referenceTask.completed}, MODIFIED = #{referenceTask.modified}, STATE = #{referenceTask.state}"
+          + " WHERE ID IN <foreach item='taskId' index='index' separator=',' open='(' close=')' collection='taskIds'>#{taskId}</foreach>"
+          + "</script>")
+  void updateTerminated(
+      @Param("taskIds") List<String> taskIds, @Param("referenceTask") TaskSummary referenceTask);
+
+  @Update(
+      "<script>"
           + " UPDATE TASK SET CLAIMED = #{referenceTask.claimed}, MODIFIED = #{referenceTask.modified}, STATE = #{referenceTask.state}, OWNER = #{referenceTask.owner}, IS_READ = #{referenceTask.isRead}"
           + " WHERE ID IN <foreach item='taskId' index='index' separator=',' open='(' close=')' collection='taskIds'>#{taskId}</foreach>"
           + "</script>")

@@ -21,6 +21,7 @@ package io.kadai.task.rest;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -3860,6 +3861,62 @@ class TaskControllerIntTest {
 
       assertThat(terminateResponse.getBody()).isNotNull();
       assertThat(terminateResponse.getBody().getState()).isEqualTo(TaskState.TERMINATED);
+    }
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  class BulkForceTerminateTasks {
+
+    @Test
+    void should_ForceTerminateAllTasks_When_CurrentUserIsAdmin() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_BULK_TERMINATE_FORCE);
+
+      List<String> taskIds =
+          List.of(
+              "TKI:000000000000000000000000000000000030",
+              "TKI:000000000000000000000000000000000031");
+
+      TaskIdListRepresentationModel request = new TaskIdListRepresentationModel(taskIds);
+
+      ResponseEntity<BulkOperationResultsRepresentationModel> response =
+          restClient
+              .patch()
+              .uri(url)
+              .headers(h -> h.addAll(RestHelper.generateHeadersForUser("admin")))
+              .body(request)
+              .retrieve()
+              .toEntity(BulkOperationResultsRepresentationModel.class);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      BulkOperationResultsRepresentationModel body = response.getBody();
+      assertThat(body).isNotNull();
+
+      assertThat(body.getTasksWithErrors()).isEmpty();
+    }
+
+    @Test
+    void should_ReturnForbidden_When_CurrentUserIsNotAdmin() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_BULK_TERMINATE_FORCE);
+
+      List<String> taskIds =
+          List.of("TKI:000000000000000000000000000000000032");
+
+      TaskIdListRepresentationModel request = new TaskIdListRepresentationModel(taskIds);
+
+      final ThrowingCallable call =
+          () ->
+              restClient
+                  .patch()
+                  .uri(url)
+                  .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
+                  .body(request)
+                  .retrieve()
+                  .toEntity(BulkOperationResultsRepresentationModel.class);
+      assertThatExceptionOfType(HttpClientErrorException.class)
+          .isThrownBy(call)
+          .extracting("statusCode")
+          .isEqualTo(HttpStatus.FORBIDDEN);
     }
   }
 
