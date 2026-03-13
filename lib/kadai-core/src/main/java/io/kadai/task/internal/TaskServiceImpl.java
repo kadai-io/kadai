@@ -972,7 +972,39 @@ public class TaskServiceImpl implements TaskService {
   @Override
   public BulkOperationResults<String, KadaiException> forceTerminateTasks(List<String> taskIds)
       throws InvalidArgumentException, NotAuthorizedException {
-    return terminateTasks(taskIds);
+    kadaiEngine.getEngine().checkRoleMembership(KadaiRole.ADMIN, KadaiRole.TASK_ADMIN);
+    try {
+      kadaiEngine.openConnection();
+      if (taskIds == null) {
+        throw new InvalidArgumentException("TaskIds can't be used as NULL-Parameter.");
+      }
+      BulkOperationResults<String, KadaiException> bulkLog = new BulkOperationResults<>();
+
+      if (taskIds.isEmpty()) {
+        return bulkLog;
+      }
+
+      Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+      Stream<TaskSummaryImpl> filteredSummaries =
+          filterNotExistingTaskIds(taskIds, bulkLog)
+              .filter(
+                  addErrorToBulkLog(
+                      summary -> {
+                        if (summary.getState().isEndState()) {
+                          throw new InvalidTaskStateException(
+                              summary.getId(),
+                              summary.getState(),
+                              EnumUtil.allValuesExceptFor(END_STATES));
+                        }
+                      },
+                      bulkLog));
+
+      updateTasksToBeTerminated(filteredSummaries, now);
+
+      return bulkLog;
+    } finally {
+      kadaiEngine.returnConnection();
+    }
   }
 
   @Override
@@ -2415,39 +2447,6 @@ public class TaskServiceImpl implements TaskService {
         taskMapper.updateClaimed(updateClaimedTaskIds, claimedReference);
       }
       createTasksCompletedEvents(taskSummaryList);
-    }
-  }
-
-  private BulkOperationResults<String, KadaiException> terminateTasks(List<String> taskIds)
-      throws InvalidArgumentException, NotAuthorizedException {
-    kadaiEngine.getEngine().checkRoleMembership(KadaiRole.ADMIN, KadaiRole.TASK_ADMIN);
-    try {
-      kadaiEngine.openConnection();
-      if (taskIds == null) {
-        throw new InvalidArgumentException("TaskIds can't be used as NULL-Parameter.");
-      }
-      BulkOperationResults<String, KadaiException> bulkLog = new BulkOperationResults<>();
-
-      Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-      Stream<TaskSummaryImpl> filteredSummaries =
-          filterNotExistingTaskIds(taskIds, bulkLog)
-              .filter(
-                  addErrorToBulkLog(
-                      summary -> {
-                        if (summary.getState().isEndState()) {
-                          throw new InvalidTaskStateException(
-                              summary.getId(),
-                              summary.getState(),
-                              EnumUtil.allValuesExceptFor(END_STATES));
-                        }
-                      },
-                      bulkLog));
-
-      updateTasksToBeTerminated(filteredSummaries, now);
-
-      return bulkLog;
-    } finally {
-      kadaiEngine.returnConnection();
     }
   }
 
