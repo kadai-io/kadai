@@ -19,8 +19,8 @@
 @if (reportData) {
   <div class="task-priority-report">
     <!-- HEADER -->
-    <h4 class="task-priority-report__headline"> {{ reportData?.meta.name }} ({{
-        reportData?.meta.date | date: 'medium'
+    <h4 class="task-priority-report__headline"> {{ reportData.meta.name }} ({{
+        reportData.meta.date | date: 'medium'
       }})
     </h4>
     <mat-divider class="task-priority-report__divider"></mat-divider>
@@ -64,13 +64,13 @@
         <div>No filters defined.</div>
       }
     </div>
-    @if (reportData?.rows.length == 0) {
+    @if (reportData.rows.length == 0) {
       <div> Could not find any tasks which fulfill the current
         filter criteria.
       </div>
     }
     <div class="task-priority-report__workbaskets">
-      @for (row of reportData?.rows; track row; let i = $index) {
+      @for (row of reportData.rows; track row; let i = $index) {
         <div
           class="task-priority-report__workbasket">
           <!-- WORKBASKET NAME -->

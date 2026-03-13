@@ -174,8 +174,6 @@ describe('ClassificationDetailsComponent', () => {
     expect(isActionDispatched).toBe(true);
   });
 
-  /* HTML */
-
   it('should not show details when spinner is running', () => {
     component.requestInProgress = true;
     component.classification = {};
@@ -197,7 +195,6 @@ describe('ClassificationDetailsComponent', () => {
     expect(debugElement.nativeElement.querySelector('.detailed-fields')).toBeTruthy();
   });
 
-  /* HTML: TITLE + ACTION BUTTONS */
   it('should display headline with badge message when a new classification is created', () => {
     component.classification = { name: 'Recommendation', type: 'DOCUMENT' };
     component.isCreatingNewClassification = true;
@@ -298,7 +295,6 @@ describe('ClassificationDetailsComponent', () => {
     expect(component.onCloseClassification).toHaveBeenCalled();
   });
 
-  /* DETAILED FIELDS */
   it('should display field-error-display component', () => {
     expect(debugElement.nativeElement.querySelector('kadai-shared-field-error-display')).toBeTruthy();
   });
@@ -360,5 +356,149 @@ describe('ClassificationDetailsComponent', () => {
 
     expect(component.classification['custom3']).toBe(undefined);
     expect(component.classification['custom4']).toBe(newValue);
+  });
+
+  it('should hide Valid-in-Domain checkbox when masterDomainSelected returns true', () => {
+    (domainServiceSpy.getSelectedDomainValue as any).mockReturnValue('');
+    const lf = TestBed.createComponent(ClassificationDetailsComponent);
+    lf.detectChanges();
+    const checkbox = lf.nativeElement.querySelector('.detailed-fields__domain-checkbox');
+    expect(checkbox).toBeFalsy();
+  });
+
+  it('should show Valid-in-Domain checkbox when masterDomainSelected returns false', () => {
+    (domainServiceSpy.getSelectedDomainValue as any).mockReturnValue('A');
+    const lf = TestBed.createComponent(ClassificationDetailsComponent);
+    lf.detectChanges();
+    const checkbox = lf.nativeElement.querySelector('.detailed-fields__domain-checkbox');
+    expect(checkbox).toBeTruthy();
+  });
+
+  it('should show badge message span when isCreatingNewClassification is true', () => {
+    const lf = TestBed.createComponent(ClassificationDetailsComponent);
+    const lc = lf.componentInstance;
+    store.reset({
+      ...store.snapshot(),
+      classification: { ...classificationStateMock, selectedClassification: { name: 'New', type: 'TASK' } },
+      engineConfiguration: engineConfigurationMock
+    });
+    lc.isCreatingNewClassification = true;
+    lf.detectChanges();
+    const badge = lf.nativeElement.querySelector('.action-toolbar__badge-message');
+    expect(badge).toBeTruthy();
+  });
+
+  it('should not show badge message span when isCreatingNewClassification is false', () => {
+    const lf = TestBed.createComponent(ClassificationDetailsComponent);
+    const lc = lf.componentInstance;
+    lc.isCreatingNewClassification = false;
+    lf.detectChanges();
+    const badge = lf.nativeElement.querySelector('.action-toolbar__badge-message');
+    expect(badge).toBeFalsy();
+  });
+
+  it('should call validateInputOverflow when key input fires input event', () => {
+    const keyInput = debugElement.nativeElement.querySelector('#classification-key');
+    expect(keyInput).toBeTruthy();
+    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+    keyInput.dispatchEvent(new Event('input'));
+    expect(validateSpy).toHaveBeenCalled();
+  });
+
+  it('should call validateInputOverflow when name input fires input event', () => {
+    const nameInput = debugElement.nativeElement.querySelector('#classification-name');
+    expect(nameInput).toBeTruthy();
+    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+    nameInput.dispatchEvent(new Event('input'));
+    expect(validateSpy).toHaveBeenCalled();
+  });
+
+  it('should call validateInputOverflow when description textarea fires input event', () => {
+    const descInput = debugElement.nativeElement.querySelector('#classification-description');
+    expect(descInput).toBeTruthy();
+    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+    descInput.dispatchEvent(new Event('input'));
+    expect(validateSpy).toHaveBeenCalled();
+  });
+
+  it('should call validateInputOverflow when service level input fires input event', () => {
+    const slInput = debugElement.nativeElement.querySelector('#classification-service-level');
+    expect(slInput).toBeTruthy();
+    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+    slInput.dispatchEvent(new Event('input'));
+    expect(validateSpy).toHaveBeenCalled();
+  });
+
+  it('should call validateInputOverflow when app entry point input fires input event', () => {
+    const aepInput = debugElement.nativeElement.querySelector('#classification-application-entry-point');
+    expect(aepInput).toBeTruthy();
+    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+    aepInput.dispatchEvent(new Event('input'));
+    expect(validateSpy).toHaveBeenCalled();
+  });
+
+  it('should call validChanged when valid-in-domain icon is clicked', () => {
+    const validChangedSpy = vi.spyOn(component, 'validChanged');
+    const iconAnchor = debugElement.nativeElement.querySelector('.detailed-fields__domain-checkbox-icon').parentNode;
+    expect(iconAnchor).toBeTruthy();
+    iconAnchor.click();
+    expect(validChangedSpy).toHaveBeenCalled();
+  });
+
+  it('should complete destroy$ on ngOnDestroy', () => {
+    const nextSpy = vi.spyOn(component.destroy$, 'next');
+    const completeSpy = vi.spyOn(component.destroy$, 'complete');
+    component.ngOnDestroy();
+    expect(nextSpy).toHaveBeenCalled();
+    expect(completeSpy).toHaveBeenCalled();
+  });
+
+  it('should display error div for key input when inputOverflowMap has key entry true', () => {
+    component.inputOverflowMap = new Map<string, boolean>([['classification.key', true]]);
+    fixture.detectChanges();
+    const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
+    expect(errorDivs.length).toBeGreaterThan(0);
+  });
+
+  it('should display error div for name input when inputOverflowMap has name entry true', () => {
+    component.inputOverflowMap = new Map<string, boolean>([['classification.name', true]]);
+    fixture.detectChanges();
+    const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
+    expect(errorDivs.length).toBeGreaterThan(0);
+  });
+
+  it('should display error div for description when inputOverflowMap has description entry true', () => {
+    component.inputOverflowMap = new Map<string, boolean>([['classification.description', true]]);
+    fixture.detectChanges();
+    const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
+    expect(errorDivs.length).toBeGreaterThan(0);
+  });
+
+  it('should display error div for serviceLevel when inputOverflowMap has serviceLevel entry true', () => {
+    component.inputOverflowMap = new Map<string, boolean>([['classification.serviceLevel', true]]);
+    fixture.detectChanges();
+    const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
+    expect(errorDivs.length).toBeGreaterThan(0);
+  });
+
+  it('should display error div for appEntryPoint when inputOverflowMap has appEntryPoint entry true', () => {
+    component.inputOverflowMap = new Map<string, boolean>([['classification.applicationEntryPoint', true]]);
+    fixture.detectChanges();
+    const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
+    expect(errorDivs.length).toBeGreaterThan(0);
+  });
+
+  it('should display error div for custom field when inputOverflowMap has custom field entry true', () => {
+    component.inputOverflowMap = new Map<string, boolean>([['classification.custom1', true]]);
+    fixture.detectChanges();
+    const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
+    expect(errorDivs.length).toBeGreaterThan(0);
+  });
+
+  it('should not display any error divs when inputOverflowMap is empty', () => {
+    component.inputOverflowMap = new Map<string, boolean>();
+    fixture.detectChanges();
+    const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
+    expect(errorDivs.length).toBe(0);
   });
 });

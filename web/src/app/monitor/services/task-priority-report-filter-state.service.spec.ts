@@ -16,7 +16,7 @@
  *
  */
 
-import { describe, expect, it, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { TaskPriorityReportFilterStateService } from './task-priority-report-filter-state.service';
 
@@ -24,7 +24,9 @@ describe('TaskPriorityReportFilterStateService', () => {
   let service: TaskPriorityReportFilterStateService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [TaskPriorityReportFilterStateService]
+    });
     service = TestBed.inject(TaskPriorityReportFilterStateService);
   });
 
@@ -64,5 +66,98 @@ describe('TaskPriorityReportFilterStateService', () => {
 
     service.activeFilters.set(['x']);
     expect(service.currentFilter()).toEqual({ x: 1 });
+  });
+
+  it('should update currentFilter using .update()', () => {
+    service.currentFilter.set({ priority: 'LOW' });
+    service.currentFilter.update((prev) => ({ ...prev, domain: 'DOMAIN_A' }));
+    expect(service.currentFilter()).toEqual({ priority: 'LOW', domain: 'DOMAIN_A' });
+  });
+
+  it('should update activeFilters using .update()', () => {
+    service.activeFilters.set(['priority']);
+    service.activeFilters.update((prev) => [...prev, 'domain']);
+    expect(service.activeFilters()).toEqual(['priority', 'domain']);
+  });
+
+  it('should remove a filter from activeFilters using .update()', () => {
+    service.activeFilters.set(['priority', 'domain', 'state']);
+    service.activeFilters.update((prev) => prev.filter((f) => f !== 'domain'));
+    expect(service.activeFilters()).toEqual(['priority', 'state']);
+  });
+
+  it('should overwrite all fields in currentFilter using .update()', () => {
+    service.currentFilter.set({ priority: 'LOW', domain: 'DOMAIN_A' });
+    service.currentFilter.update(() => ({ priority: 'HIGH' }));
+    expect(service.currentFilter()).toEqual({ priority: 'HIGH' });
+  });
+
+  it('should handle update on empty activeFilters gracefully', () => {
+    service.activeFilters.update((prev) => [...prev, 'newFilter']);
+    expect(service.activeFilters()).toEqual(['newFilter']);
+  });
+
+  it('should handle update on empty currentFilter gracefully', () => {
+    service.currentFilter.update((prev) => ({ ...prev, extra: 'value' }));
+    expect(service.currentFilter()).toEqual({ extra: 'value' });
+  });
+
+  it('should inject the same service instance (singleton) when injected twice', () => {
+    const service2 = TestBed.inject(TaskPriorityReportFilterStateService);
+    expect(service2).toBe(service);
+  });
+
+  it('should keep currentFilter state across multiple reads', () => {
+    service.currentFilter.set({ a: 1, b: 2 });
+    expect(service.currentFilter()).toEqual({ a: 1, b: 2 });
+    expect(service.currentFilter()).toEqual({ a: 1, b: 2 });
+  });
+
+  it('should keep activeFilters state across multiple reads', () => {
+    service.activeFilters.set(['x', 'y', 'z']);
+    expect(service.activeFilters()).toEqual(['x', 'y', 'z']);
+    expect(service.activeFilters()).toEqual(['x', 'y', 'z']);
+  });
+
+  it('should support setting complex objects in currentFilter', () => {
+    const complexFilter = {
+      state: ['READY', 'CLAIMED'],
+      priority: [1, 2, 3],
+      nested: { key: 'value' }
+    };
+    service.currentFilter.set(complexFilter);
+    expect(service.currentFilter()).toEqual(complexFilter);
+  });
+
+  it('should allow setting currentFilter to null and back to valid object', () => {
+    service.currentFilter.set(null as any);
+    expect(service.currentFilter()).toBeNull();
+    service.currentFilter.set({ restored: true });
+    expect(service.currentFilter()).toEqual({ restored: true });
+  });
+
+  it('should allow setting activeFilters to null and back to valid array', () => {
+    service.activeFilters.set(null as any);
+    expect(service.activeFilters()).toBeNull();
+    service.activeFilters.set(['restored']);
+    expect(service.activeFilters()).toEqual(['restored']);
+  });
+
+  it('should handle update() with function that returns null for currentFilter', () => {
+    service.currentFilter.set({ priority: 'LOW' });
+    service.currentFilter.update(() => null as any);
+    expect(service.currentFilter()).toBeNull();
+  });
+
+  it('should handle update() with function that returns empty array for activeFilters', () => {
+    service.activeFilters.set(['filter1', 'filter2', 'filter3']);
+    service.activeFilters.update(() => []);
+    expect(service.activeFilters()).toEqual([]);
+  });
+
+  it('should preserve reference equality for same signal value', () => {
+    const val = { key: 'same' };
+    service.currentFilter.set(val);
+    expect(service.currentFilter()).toEqual({ key: 'same' });
   });
 });

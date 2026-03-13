@@ -20,7 +20,7 @@ import { TestBed } from '@angular/core/testing';
 import { AccessIdsService } from './access-ids.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { beforeEach, describe, expect, it, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { StartupService } from '../startup/startup.service';
 import { firstValueFrom } from 'rxjs';
 

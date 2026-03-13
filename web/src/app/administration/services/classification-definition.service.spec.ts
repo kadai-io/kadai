@@ -16,7 +16,7 @@
  *
  */
 
-import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -55,18 +55,12 @@ describe('ClassificationDefinitionService', () => {
     expect(service.url).toBe(BASE_URL);
   });
 
-  it('exportClassifications("") should make a GET request without query parameters', () => {
+  it('exportClassifications("") should make a GET request and save the file', () => {
+    const mockData = [{ classificationId: 'CL1' }];
     service.exportClassifications('');
     const reqs = httpTesting.match(BASE_URL);
     expect(reqs.length).toBe(1);
     expect(reqs[0].request.method).toBe('GET');
-    reqs[0].flush([]);
-  });
-
-  it('exportClassifications("") should call BlobGenerator.saveFile with the response data', () => {
-    const mockData = [{ classificationId: 'CL1' }];
-    service.exportClassifications('');
-    const reqs = httpTesting.match(BASE_URL);
     reqs[0].flush(mockData);
     expect(saveFileSpy).toHaveBeenCalledOnce();
     const [dataArg, fileNameArg] = saveFileSpy.mock.calls[0];
@@ -74,18 +68,12 @@ describe('ClassificationDefinitionService', () => {
     expect(fileNameArg).toMatch(/^Classifications_.*\.json$/);
   });
 
-  it('exportClassifications("DOMAIN_A") should make a GET request with ?domain=DOMAIN_A', () => {
+  it('exportClassifications("DOMAIN_A") should make a GET request with ?domain=DOMAIN_A and save domain-filtered data', () => {
+    const mockData = [{ classificationId: 'CL2', domain: 'DOMAIN_A' }];
     service.exportClassifications('DOMAIN_A');
     const reqs = httpTesting.match(`${BASE_URL}?domain=DOMAIN_A`);
     expect(reqs.length).toBe(1);
     expect(reqs[0].request.method).toBe('GET');
-    reqs[0].flush([]);
-  });
-
-  it('exportClassifications("DOMAIN_A") should call BlobGenerator.saveFile with domain-filtered data', () => {
-    const mockData = [{ classificationId: 'CL2', domain: 'DOMAIN_A' }];
-    service.exportClassifications('DOMAIN_A');
-    const reqs = httpTesting.match(`${BASE_URL}?domain=DOMAIN_A`);
     reqs[0].flush(mockData);
     expect(saveFileSpy).toHaveBeenCalledOnce();
     const [dataArg] = saveFileSpy.mock.calls[0];
