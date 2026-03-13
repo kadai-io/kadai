@@ -305,7 +305,7 @@ class TerminateTaskAccTest {
   @WithAccessId(user = "admin")
   @WithAccessId(user = "taskadmin")
   @TestTemplate
-  void should_ThrowInvalidArgumentException_When_BulkForceTerminatingTasks_ForNullTaskIds() {
+  void should_ThrowInvalidArgumentException_When_BulkForceTerminatingTasksForNullTaskIds() {
     final ThrowingCallable call = () -> taskService.forceTerminateTasks(null);
 
     assertThatExceptionOfType(InvalidArgumentException.class)
@@ -317,7 +317,7 @@ class TerminateTaskAccTest {
   @WithAccessId(user = "admin")
   @WithAccessId(user = "taskadmin")
   @TestTemplate
-  void should_ShortCircuit_When_BulkForceTerminatingTasks_ForEmptyTaskIds() throws Exception {
+  void should_ShortCircuit_When_BulkForceTerminatingTasksForEmptyTaskIds() throws Exception {
     BulkOperationResults<String, KadaiException> results =
         taskService.forceTerminateTasks(Collections.emptyList());
 
