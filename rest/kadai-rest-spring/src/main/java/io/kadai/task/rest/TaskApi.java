@@ -1172,6 +1172,58 @@ public interface TaskApi {
           NotAuthorizedOnWorkbasketException;
 
   /**
+   * This endpoint force terminates multiple Tasks. Requires ADMIN or TASK_ADMIN role.
+   *
+   * @param terminateTasksRepresentationModel Containing the list of task IDs that are to be
+   *     terminated.
+   * @return BulkOperationResultsRepresentationModel containing the list of failed task IDs with
+   *     error codes.
+   * @throws InvalidArgumentException if the taskIds parameter is NULL
+   * @throws NotAuthorizedException if the current user is not ADMIN or TASK_ADMIN
+   */
+  @Operation(
+      summary = "Bulk force terminate Tasks",
+      description =
+          "This endpoint force‑terminates multiple Tasks in one call. "
+              + "Requires ADMIN or TASK_ADMIN role.",
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              description = "List with the IDs of the tasks to be terminated",
+              required = true,
+              content =
+                  @Content(
+                      schema = @Schema(implementation = TaskIdListRepresentationModel.class),
+                      examples =
+                          @ExampleObject(
+                              value =
+                                  """
+                              {
+                                "taskIds": [
+                                  "TKI:000000000000000000000000000000000003",
+                                  "TKI:000000000000000000000000000000000002"
+                                ]
+                              }
+                              """))),
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "List of failed IDs with their error codes",
+            content =
+                @Content(
+                    schema =
+                        @Schema(implementation = BulkOperationResultsRepresentationModel.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "NOT_AUTHORIZED",
+            content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
+      })
+  @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_TERMINATE_FORCE)
+  @Transactional(rollbackFor = Exception.class)
+  ResponseEntity<BulkOperationResultsRepresentationModel> bulkForceTerminate(
+      @RequestBody TaskIdListRepresentationModel terminateTasksRepresentationModel)
+      throws InvalidArgumentException, NotAuthorizedException;
+
+  /**
    * This endpoint transfers a given Task to a given Workbasket, if possible.
    *
    * @title Transfer a Task to another Workbasket

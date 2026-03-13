@@ -18,14 +18,15 @@
 
 package io.kadai.spi.history.api.events.task;
 
-import io.kadai.task.api.models.Task;
+import io.kadai.task.api.models.TaskSummary;
 
 /** Event fired if a task is terminated. */
 public class TaskTerminatedEvent extends TaskHistoryEvent {
 
-  public TaskTerminatedEvent(String id, Task task, String userId, String proxyAccessId) {
-    super(id, task, userId, proxyAccessId, null);
+  public TaskTerminatedEvent(
+      String id, TaskSummary terminatedTask, String userId, String proxyAccessId) {
+    super(id, terminatedTask, userId, proxyAccessId, null);
     eventType = TaskHistoryEventType.TERMINATED.getName();
-    created = task.getCompleted();
+    created = terminatedTask.getCompleted();
   }
 }

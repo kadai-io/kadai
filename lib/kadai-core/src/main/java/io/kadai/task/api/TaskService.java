@@ -542,6 +542,28 @@ public interface TaskService {
           InvalidTaskStateException;
 
   /**
+   * Force terminates each existing {@linkplain Task} in the given List, independent of the
+   * {@linkplain Task#getOwner() owner} or {@linkplain Task#getState() state} of the {@linkplain
+   * Task}.
+   *
+   * <p>If the {@linkplain Task} is already in an end state ({@linkplain TaskState#TERMINATED},
+   * {@linkplain TaskState#CANCELLED}, or {@linkplain TaskState#COMPLETED}), the error is logged in
+   * the result.
+   *
+   * <p>Requires {@linkplain KadaiRole#ADMIN} or {@linkplain KadaiRole#TASK_ADMIN}.
+   *
+   * @param taskIds {@linkplain Task#getId() ids} of the {@linkplain Task Tasks} which should be
+   *     terminated
+   * @return the result of the operations with {@linkplain Task#getId() ids} and Exception for each
+   *     failed termination
+   * @throws InvalidArgumentException If the taskIds parameter is NULL
+   * @throws NotAuthorizedException if the current user isn't member of {@linkplain KadaiRole#ADMIN}
+   *     or {@linkplain KadaiRole#TASK_ADMIN}
+   */
+  BulkOperationResults<String, KadaiException> forceTerminateTasks(List<String> taskIds)
+      throws InvalidArgumentException, NotAuthorizedException;
+
+  /**
    * Transfers a {@linkplain Task} to another {@linkplain Workbasket} while always setting
    * {@linkplain Task#isTransferred() isTransferred} to true.
    *

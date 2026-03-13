@@ -419,6 +419,21 @@ public class TaskController implements TaskApi {
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(terminatedTask));
   }
 
+  @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_TERMINATE_FORCE)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<BulkOperationResultsRepresentationModel> bulkForceTerminate(
+      @RequestBody TaskIdListRepresentationModel terminateTasksRepresentationModel)
+      throws InvalidArgumentException, NotAuthorizedException {
+
+    BulkOperationResults<String, KadaiException> errors =
+        taskService.forceTerminateTasks(terminateTasksRepresentationModel.getTaskIds());
+
+    BulkOperationResultsRepresentationModel model =
+        bulkOperationResultsRepresentationModelAssembler.toModel(errors);
+
+    return ResponseEntity.ok(model);
+  }
+
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_TRANSFER_WORKBASKET_ID)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<TaskRepresentationModel> transferTask(

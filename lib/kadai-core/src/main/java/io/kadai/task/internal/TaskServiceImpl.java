@@ -27,6 +27,7 @@ import static io.kadai.task.api.TaskState.READY;
 import static io.kadai.task.api.TaskState.READY_FOR_REVIEW;
 import static io.kadai.task.api.TaskState.TERMINATED;
 import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.toList;
 
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.exceptions.ClassificationNotFoundException;
@@ -55,6 +56,7 @@ import io.kadai.spi.history.api.events.task.TaskClaimedReviewEvent;
 import io.kadai.spi.history.api.events.task.TaskCompletedEvent;
 import io.kadai.spi.history.api.events.task.TaskCreatedEvent;
 import io.kadai.spi.history.api.events.task.TaskDeletedEvent;
+import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.api.events.task.TaskReopenedEvent;
 import io.kadai.spi.history.api.events.task.TaskRequestChangesEvent;
 import io.kadai.spi.history.api.events.task.TaskRequestReviewEvent;
@@ -1020,6 +1022,44 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
+  public BulkOperationResults<String, KadaiException> forceTerminateTasks(List<String> taskIds)
+      throws InvalidArgumentException, NotAuthorizedException {
+    kadaiEngine.getEngine().checkRoleMembership(KadaiRole.ADMIN, KadaiRole.TASK_ADMIN);
+    try {
+      kadaiEngine.openConnection();
+      if (taskIds == null) {
+        throw new InvalidArgumentException("TaskIds can't be used as NULL-Parameter.");
+      }
+      BulkOperationResults<String, KadaiException> bulkLog = new BulkOperationResults<>();
+
+      if (taskIds.isEmpty()) {
+        return bulkLog;
+      }
+
+      Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+      Stream<TaskSummaryImpl> filteredSummaries =
+          filterNotExistingTaskIds(taskIds, bulkLog)
+              .filter(
+                  addErrorToBulkLog(
+                      summary -> {
+                        if (summary.getState().isEndState()) {
+                          throw new InvalidTaskStateException(
+                              summary.getId(),
+                              summary.getState(),
+                              EnumUtil.allValuesExceptFor(END_STATES));
+                        }
+                      },
+                      bulkLog));
+
+      updateTasksToBeTerminated(filteredSummaries, now);
+
+      return bulkLog;
+    } finally {
+      kadaiEngine.returnConnection();
+    }
+  }
+
+  @Override
   @Deprecated(forRemoval = true, since = "11.0.0")
   @SuppressWarnings({"deprecation", "removal"})
   public List<String> updateTasks(
@@ -1296,7 +1336,7 @@ public class TaskServiceImpl implements TaskService {
     List<Pair<String, Instant>> affectedPairs =
         tasksAffectedDirectly.stream()
             .map(t -> Pair.of(t.getId(), t.getPlanned()))
-            .collect(Collectors.toList());
+            .collect(toList());
     // tasks indirectly affected via attachments
     List<Pair<String, Instant>> taskIdsAndPlannedFromAttachments =
         attachmentMapper.findTaskIdsAndPlannedAffectedByClassificationChange(classificationId);
@@ -1414,9 +1454,7 @@ public class TaskServiceImpl implements TaskService {
     }
     if (patch.secondaryObjectReferences() != null) {
       task.setSecondaryObjectReferences(
-          patch.secondaryObjectReferences().stream()
-              .map(ObjectReference::copy)
-              .collect(Collectors.toList()));
+          patch.secondaryObjectReferences().stream().map(ObjectReference::copy).collect(toList()));
     }
 
     // Custom string fields
@@ -1567,7 +1605,7 @@ public class TaskServiceImpl implements TaskService {
     return CollectionUtil.partitionBasedOnSize(taskSummaries, 32000).stream()
         .map(this::appendComplexAttributesToTaskSummariesWithoutPartitioning)
         .flatMap(Collection::stream)
-        .collect(Collectors.toList());
+        .collect(toList());
   }
 
   private static Predicate<TaskSummaryImpl> addErrorToBulkLog(
@@ -2472,6 +2510,40 @@ public class TaskServiceImpl implements TaskService {
       }
       if (historyEventManager.isEnabled()) {
         createTasksCompletedEvents(taskSummaryList);
+      }
+    }
+  }
+
+  private void updateTasksToBeTerminated(Stream<TaskSummaryImpl> taskSummaries, Instant now) {
+    List<TaskSummary> taskSummaryList =
+        taskSummaries
+            .map(
+                summary -> {
+                  summary.setModified(now);
+                  summary.setCompleted(now);
+                  summary.setState(TERMINATED);
+                  return (TaskSummary) summary;
+                })
+            .toList();
+
+    List<String> taskIds = taskSummaryList.stream().map(TaskSummary::getId).toList();
+
+    if (!taskSummaryList.isEmpty()) {
+      taskMapper.updateTerminated(taskIds, taskSummaryList.get(0));
+      createTasksTerminatedEvents(taskSummaryList);
+    }
+  }
+
+  private void createTasksTerminatedEvents(List<? extends TaskSummary> taskSummaries) {
+    if (historyEventManager.isEnabled()) {
+      for (TaskSummary taskSummary : taskSummaries) {
+        final TaskHistoryEvent event =
+            new TaskTerminatedEvent(
+                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                taskSummary,
+                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId());
+        historyEventManager.createEvent(event);
       }
     }
   }
