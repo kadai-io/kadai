@@ -21,6 +21,7 @@ package acceptance.task.complete;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestClassification;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestWorkbasket;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 import acceptance.task.complete.CompleteTaskWithSpiAccTest.SetCustomAttributeToEndstate;
@@ -28,6 +29,7 @@ import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.models.ClassificationSummary;
 import io.kadai.common.api.BulkOperationResults;
 import io.kadai.common.api.KadaiRole;
+import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.security.CurrentUserContext;
@@ -48,6 +50,7 @@ import io.kadai.testapi.security.WithAccessId;
 import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
@@ -297,6 +300,28 @@ class TerminateTaskAccTest {
     NotAuthorizedException e = catchThrowableOfType(NotAuthorizedException.class, call);
     assertThat(e.getCurrentUserId()).isEqualTo(currentUserContext.getUserId());
     assertThat(e.getRoles()).containsExactlyInAnyOrder(KadaiRole.ADMIN, KadaiRole.TASK_ADMIN);
+  }
+
+  @WithAccessId(user = "admin")
+  @WithAccessId(user = "taskadmin")
+  @TestTemplate
+  void should_ThrowInvalidArgumentException_When_BulkForceTerminatingTasks_ForNullTaskIds() {
+    final ThrowingCallable call = () -> taskService.forceTerminateTasks(null);
+
+    assertThatExceptionOfType(InvalidArgumentException.class)
+        .isThrownBy(call)
+        .extracting(Throwable::getMessage)
+        .isEqualTo("TaskIds can't be used as NULL-Parameter.");
+  }
+
+  @WithAccessId(user = "admin")
+  @WithAccessId(user = "taskadmin")
+  @TestTemplate
+  void should_ShortCircuit_When_BulkForceTerminatingTasks_ForEmptyTaskIds() throws Exception {
+    BulkOperationResults<String, KadaiException> results =
+        taskService.forceTerminateTasks(Collections.emptyList());
+
+    assertThat(results.containsErrors()).isFalse();
   }
 
   @Nested
