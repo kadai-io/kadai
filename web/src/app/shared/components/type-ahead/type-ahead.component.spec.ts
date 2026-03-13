@@ -117,4 +117,97 @@ describe('TypeAheadComponent with AccessId input', () => {
 
     expect(markAsTouchedSpy).toHaveBeenCalled();
   });
+
+  it('should not emit accessIdEventEmitter when placeHolderMessage is "Search for AccessId"', () => {
+    const accessIdEmitSpy = vi.spyOn(component.accessIdEventEmitter, 'emit');
+    component.placeHolderMessage = 'Search for AccessId';
+    component.handleEmptyAccessId();
+    expect(accessIdEmitSpy).not.toHaveBeenCalled();
+  });
+
+  it('should emit accessIdEventEmitter with emptyAccessId when placeHolderMessage is not "Search for AccessId"', () => {
+    const accessIdEmitSpy = vi.spyOn(component.accessIdEventEmitter, 'emit');
+    component.placeHolderMessage = 'Some other message';
+    component.handleEmptyAccessId();
+    expect(accessIdEmitSpy).toHaveBeenCalledWith(component.emptyAccessId);
+  });
+
+  it('should set errors on accessId control and emit false when isRequired is true in handleEmptyAccessId', () => {
+    component.isRequired = true;
+    const control = component.accessIdForm.get('accessId');
+    const setErrorsSpy = vi.spyOn(control!, 'setErrors');
+    const emitSpy = vi.spyOn(component.isFormValid, 'emit');
+    component.handleEmptyAccessId();
+    expect(setErrorsSpy).toHaveBeenCalledWith({ incorrect: true });
+    expect(emitSpy).toHaveBeenCalledWith(false);
+  });
+
+  it('should not set errors and emit true when isRequired is false in handleEmptyAccessId', () => {
+    component.isRequired = false;
+    const control = component.accessIdForm.get('accessId');
+    const setErrorsSpy = vi.spyOn(control!, 'setErrors');
+    const emitSpy = vi.spyOn(component.isFormValid, 'emit');
+    component.handleEmptyAccessId();
+    expect(setErrorsSpy).not.toHaveBeenCalled();
+    expect(emitSpy).toHaveBeenCalledWith(true);
+  });
+
+  it('should call setAccessIdFromInput when ngOnChanges is called with an entityId change', () => {
+    const setAccessIdSpy = vi.spyOn(component, 'setAccessIdFromInput');
+    component.ngOnChanges({
+      entityId: { currentValue: 'new-id', previousValue: 'old-id', firstChange: false, isFirstChange: () => false }
+    });
+    expect(setAccessIdSpy).toHaveBeenCalled();
+  });
+
+  it('should not call setAccessIdFromInput when ngOnChanges is called without an entityId change', () => {
+    const setAccessIdSpy = vi.spyOn(component, 'setAccessIdFromInput');
+    setAccessIdSpy.mockClear();
+    component.ngOnChanges({
+      someOtherInput: { currentValue: 'value', previousValue: undefined, firstChange: true, isFirstChange: () => true }
+    });
+    expect(setAccessIdSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe('TypeAheadComponent without debounceTime configured', () => {
+  let fixture: ComponentFixture<TypeAheadComponent>;
+  let component: TypeAheadComponent;
+  let store: Store;
+  let httpMock: HttpTestingController;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TypeAheadComponent],
+      providers: [
+        provideStore([EngineConfigurationState]),
+        { provide: AccessIdsService, useValue: accessIdService },
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
+    }).compileComponents();
+
+    httpMock = TestBed.inject(HttpTestingController);
+    store = TestBed.inject(Store);
+
+    const configWithoutDebounce = {
+      ...engineConfigurationMock,
+      customisation: {
+        ...engineConfigurationMock.customisation,
+        EN: {
+          ...engineConfigurationMock.customisation.EN,
+          global: {}
+        }
+      }
+    };
+    store.reset({ engineConfiguration: configWithoutDebounce });
+    fixture = TestBed.createComponent(TypeAheadComponent);
+    component = fixture.componentInstance;
+    httpMock.expectOne('environments/data-sources/kadai-customization.json').flush(configWithoutDebounce.customisation);
+    fixture.detectChanges();
+  });
+
+  it('should keep default debounce time of 750 when debounceTimeLookupField is not configured', () => {
+    expect(component.debounceTime).toBe(750);
+  });
 });

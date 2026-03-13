@@ -16,7 +16,7 @@
  *
  */
 
-import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -55,18 +55,12 @@ describe('WorkbasketDefinitionService', () => {
     expect(service.url).toBe(BASE_URL);
   });
 
-  it('exportWorkbaskets("") should make a GET request without query parameters', () => {
+  it('exportWorkbaskets("") should make a GET request and save the file', () => {
+    const mockData = [{ workbasketId: 'WB1' }];
     service.exportWorkbaskets('');
     const reqs = httpTesting.match(BASE_URL);
     expect(reqs.length).toBe(1);
     expect(reqs[0].request.method).toBe('GET');
-    reqs[0].flush([]);
-  });
-
-  it('exportWorkbaskets("") should call BlobGenerator.saveFile with the response data', () => {
-    const mockData = [{ workbasketId: 'WB1' }];
-    service.exportWorkbaskets('');
-    const reqs = httpTesting.match(BASE_URL);
     reqs[0].flush(mockData);
     expect(saveFileSpy).toHaveBeenCalledOnce();
     const [dataArg, fileNameArg] = saveFileSpy.mock.calls[0];
@@ -74,18 +68,12 @@ describe('WorkbasketDefinitionService', () => {
     expect(fileNameArg).toMatch(/^Workbaskets_.*\.json$/);
   });
 
-  it('exportWorkbaskets("DOMAIN_X") should make a GET request with ?domain=DOMAIN_X', () => {
+  it('exportWorkbaskets("DOMAIN_X") should make a GET request with ?domain=DOMAIN_X and save domain-filtered data', () => {
+    const mockData = [{ workbasketId: 'WB2', domain: 'DOMAIN_X' }];
     service.exportWorkbaskets('DOMAIN_X');
     const reqs = httpTesting.match(`${BASE_URL}?domain=DOMAIN_X`);
     expect(reqs.length).toBe(1);
     expect(reqs[0].request.method).toBe('GET');
-    reqs[0].flush([]);
-  });
-
-  it('exportWorkbaskets("DOMAIN_X") should call BlobGenerator.saveFile with domain-filtered data', () => {
-    const mockData = [{ workbasketId: 'WB2', domain: 'DOMAIN_X' }];
-    service.exportWorkbaskets('DOMAIN_X');
-    const reqs = httpTesting.match(`${BASE_URL}?domain=DOMAIN_X`);
     reqs[0].flush(mockData);
     expect(saveFileSpy).toHaveBeenCalledOnce();
     const [dataArg] = saveFileSpy.mock.calls[0];

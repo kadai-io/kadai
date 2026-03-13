@@ -27,6 +27,7 @@ import { environment } from 'environments/environment';
 import { Workbasket } from '../../models/workbasket';
 import { WorkbasketAccessItems } from '../../models/workbasket-access-items';
 import { WorkbasketAccessItemsRepresentation } from '../../models/workbasket-access-items-representation';
+import { Direction, WorkbasketQuerySortParameter } from '../../models/sorting';
 
 describe('WorkbasketService', () => {
   let service: WorkbasketService;
@@ -297,6 +298,146 @@ describe('WorkbasketService', () => {
 
       expect(mockDomainService.getSelectedDomain).toHaveBeenCalled();
       expect(mockDomainService.domainChangedComplete).toHaveBeenCalled();
+    });
+
+    it('should return cached observable when forceRequest is false and cache exists', () => {
+      service.getWorkBasketsSummary(true).subscribe();
+      httpMock.expectOne((r) => r.url.includes('/v1/workbaskets')).flush({ workbaskets: [] });
+
+      const result = service.getWorkBasketsSummary(false);
+      httpMock.expectNone((r) => r.url.includes('/v1/workbaskets'));
+      expect(result).toBeDefined();
+    });
+
+    it('should return cached observable when forceRequest defaults to false', () => {
+      const result = service.getWorkBasketsSummary();
+      expect(result).toBeDefined();
+      httpMock.expectNone((r) => r.url.includes('/v1/workbaskets'));
+    });
+
+    it('should include query string parameters when filterParameter is provided', () => {
+      service.getWorkBasketsSummary(true, { name: ['TestWB'] }).subscribe();
+
+      const req = httpMock.expectOne((r) => r.url.includes('/v1/workbaskets'));
+      expect(req.request.method).toBe('GET');
+      expect(req.request.url).toContain('name=TestWB');
+      req.flush({ workbaskets: [] });
+    });
+
+    it('should include sort parameter in query string when sortParameter is provided', () => {
+      service
+        .getWorkBasketsSummary(true, undefined, {
+          'sort-by': WorkbasketQuerySortParameter.NAME,
+          order: Direction.ASC
+        })
+        .subscribe();
+
+      const req = httpMock.expectOne((r) => r.url.includes('/v1/workbaskets'));
+      expect(req.request.method).toBe('GET');
+      expect(req.request.url).toContain('sort-by=NAME');
+      req.flush({ workbaskets: [] });
+    });
+
+    it('should include paging parameter in query string when pagingParameter is provided', () => {
+      service.getWorkBasketsSummary(true, undefined, undefined, { page: 2, 'page-size': 10 }).subscribe();
+
+      const req = httpMock.expectOne((r) => r.url.includes('/v1/workbaskets'));
+      expect(req.request.method).toBe('GET');
+      expect(req.request.url).toContain('page=2');
+      req.flush({ workbaskets: [] });
+    });
+  });
+
+  describe('getWorkBasketsDistributionTargets with parameters', () => {
+    it('should include filter parameters in the URL', () => {
+      const url = 'http://test/v1/workbaskets/wb-1/distribution-targets';
+      service.getWorkBasketsDistributionTargets(url, { name: ['Target'] }).subscribe();
+
+      const req = httpMock.expectOne((r) => r.url.includes('distribution-targets'));
+      expect(req.request.method).toBe('GET');
+      expect(req.request.url).toContain('name=Target');
+      req.flush({ distributionTargets: [] });
+    });
+
+    it('should include sort and paging parameters in the URL', () => {
+      const url = 'http://test/v1/workbaskets/wb-1/distribution-targets';
+      service
+        .getWorkBasketsDistributionTargets(
+          url,
+          undefined,
+          { 'sort-by': WorkbasketQuerySortParameter.NAME, order: Direction.DESC },
+          { page: 1, 'page-size': 5 }
+        )
+        .subscribe();
+
+      const req = httpMock.expectOne((r) => r.url.includes('distribution-targets'));
+      expect(req.request.method).toBe('GET');
+      expect(req.request.url).toContain('sort-by=NAME');
+      expect(req.request.url).toContain('page=1');
+      req.flush({ distributionTargets: [] });
+    });
+  });
+
+  describe('handleError (via updateWorkbasket)', () => {
+    it('should propagate error message from plain Error object', () => {
+      const url = 'http://test/v1/workbaskets/wb-err2';
+      const workbasket: Workbasket = { workbasketId: 'wb-err2', name: 'Error WB' };
+      let errorReceived: any;
+
+      service.updateWorkbasket(url, workbasket).subscribe({ error: (err) => (errorReceived = err) });
+
+      const req = httpMock.expectOne(url);
+      req.flush({ message: 'Something went wrong' }, { status: 400, statusText: 'Bad Request' });
+
+      expect(errorReceived).toBeDefined();
+    });
+
+    it('should use error.message when available in the non-Response error branch', () => {
+      const url = 'http://test/v1/workbaskets/wb-msg-err';
+      const workbasket: Workbasket = { workbasketId: 'wb-msg-err', name: 'Msg Error WB' };
+      let errorReceived: any;
+
+      service.updateWorkbasket(url, workbasket).subscribe({ error: (err) => (errorReceived = err) });
+
+      const req = httpMock.expectOne(url);
+      req.flush(null, { status: 503, statusText: 'Service Unavailable' });
+
+      expect(errorReceived).toBeDefined();
+      expect(typeof errorReceived).toBe('string');
+    });
+
+    it('should call error.toString() when error has no message property', () => {
+      const url = 'http://test/v1/workbaskets/wb-tostring-err';
+      const workbasket: Workbasket = { workbasketId: 'wb-tostring-err', name: 'ToString Error WB' };
+      let errorReceived: any;
+
+      const { throwError } = require('rxjs');
+      const httpClient = (service as any).httpClient;
+      vi.spyOn(httpClient, 'put').mockReturnValueOnce(throwError(() => ({ toString: () => 'plain error string' })));
+
+      service.updateWorkbasket(url, workbasket).subscribe({ error: (err) => (errorReceived = err) });
+
+      expect(errorReceived).toBe('plain error string');
+    });
+
+    it('should handle error instanceof Response — status and statusText branch', () => {
+      const url = 'http://test/v1/workbaskets/wb-resp-err';
+      const workbasket: Workbasket = { workbasketId: 'wb-resp-err', name: 'Response Error WB' };
+      let errorReceived: any;
+
+      const httpClient = (service as any).httpClient;
+      const mockResponse = new Response(JSON.stringify({ detail: 'error' }), {
+        status: 422,
+        statusText: 'Unprocessable Entity'
+      });
+      const { throwError } = require('rxjs');
+      vi.spyOn(httpClient, 'put').mockReturnValueOnce(throwError(() => mockResponse));
+
+      service.updateWorkbasket(url, workbasket).subscribe({ error: (err) => (errorReceived = err) });
+
+      expect(errorReceived).toBeDefined();
+      expect(typeof errorReceived).toBe('string');
+      expect(errorReceived).toContain('422');
     });
   });
 });
