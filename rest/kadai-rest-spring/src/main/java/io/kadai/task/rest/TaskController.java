@@ -52,6 +52,7 @@ import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
 import io.kadai.task.rest.models.TaskBulkUpdateRepresentationModel;
 import io.kadai.task.rest.models.TaskIdListRepresentationModel;
+import io.kadai.task.rest.models.TaskIdPagedRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryPagedRepresentationModel;
@@ -175,6 +176,37 @@ public class TaskController implements TaskApi {
         taskSummaryRepresentationModelAssembler.toPagedModel(
             taskSummaries, pagingParameter.getPageMetadata());
     return ResponseEntity.ok(pagedModels);
+  }
+
+  @GetMapping(path = RestEndpoints.URL_TASKS_IDS)
+  public ResponseEntity<TaskIdPagedRepresentationModel> getTaskIds(
+      HttpServletRequest request,
+      @ParameterObject TaskQueryFilterParameter filterParameter,
+      @ParameterObject TaskQueryFilterCustomFields filterCustomFields,
+      @ParameterObject TaskQueryFilterCustomIntFields filterCustomIntFields,
+      @ParameterObject TaskQuerySortParameter sortParameter,
+      @ParameterObject QueryPagingParameter<TaskSummary, TaskQuery> pagingParameter) {
+    QueryParamsValidator.validateParams(
+        request,
+        TaskQueryFilterParameter.class,
+        TaskQueryFilterCustomFields.class,
+        TaskQueryFilterCustomIntFields.class,
+        QuerySortParameter.class,
+        QueryPagingParameter.class);
+
+    TaskQuery query = taskService.createTaskQuery();
+
+    filterParameter.apply(query);
+    filterCustomFields.apply(query);
+    filterCustomIntFields.apply(query);
+    sortParameter.apply(query);
+
+    List<TaskSummary> taskSummaries = pagingParameter.apply(query);
+    List<String> taskIds = taskSummaries.stream().map(TaskSummary::getId).toList();
+
+    TaskIdPagedRepresentationModel pagedModel =
+        new TaskIdPagedRepresentationModel(taskIds, pagingParameter.getPageMetadata());
+    return ResponseEntity.ok(pagedModel);
   }
 
   @GetMapping(path = RestEndpoints.URL_TASKS_ID)

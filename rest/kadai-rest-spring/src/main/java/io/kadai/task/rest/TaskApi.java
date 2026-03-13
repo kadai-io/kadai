@@ -40,6 +40,7 @@ import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
 import io.kadai.task.rest.models.TaskBulkUpdateRepresentationModel;
 import io.kadai.task.rest.models.TaskIdListRepresentationModel;
+import io.kadai.task.rest.models.TaskIdPagedRepresentationModel;
 import io.kadai.task.rest.models.TaskPatchRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryCollectionRepresentationModel;
@@ -245,6 +246,50 @@ public interface TaskApi {
       @ParameterObject TaskQueryFilterCustomFields filterCustomFields,
       @ParameterObject TaskQueryFilterCustomIntFields filterCustomIntFields,
       @ParameterObject TaskQueryGroupByParameter groupByParameter,
+      @ParameterObject TaskQuerySortParameter sortParameter,
+      @ParameterObject QueryPagingParameter<TaskSummary, TaskQuery> pagingParameter);
+
+  /**
+   * This endpoint retrieves a paged list of Task IDs matching the given filters. This is a
+   * lightweight alternative to {@linkplain #getTasks} that only returns Task IDs instead of full
+   * Task summaries.
+   *
+   * @title Get a paged list of all Task IDs
+   * @param request the HTTP request
+   * @param filterParameter the filter parameters
+   * @param filterCustomFields the filter parameters regarding TaskCustomFields
+   * @param filterCustomIntFields the filter parameters regarding TaskCustomIntFields
+   * @param sortParameter the sort parameters
+   * @param pagingParameter the paging parameters
+   * @return the Task IDs with the given filter, sort and paging options.
+   */
+  @Operation(
+      summary = "Get a paged list of all Task IDs",
+      description =
+          "This endpoint retrieves a paged list of Task IDs matching the given filters. "
+              + "This is a lightweight alternative to the getTasks endpoint that only returns "
+              + "Task IDs instead of full Task summaries.",
+      parameters = {
+        @Parameter(name = "por-type", example = "VNR"),
+        @Parameter(name = "por-value", example = "22334455"),
+        @Parameter(name = "sort-by", example = "NAME")
+      },
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "the Task IDs with the given filter, sort and paging options.",
+            content = {
+              @Content(
+                  mediaType = MediaType.APPLICATION_JSON_VALUE,
+                  schema = @Schema(implementation = TaskIdPagedRepresentationModel.class))
+            })
+      })
+  @GetMapping(path = RestEndpoints.URL_TASKS_IDS)
+  ResponseEntity<TaskIdPagedRepresentationModel> getTaskIds(
+      HttpServletRequest request,
+      @ParameterObject TaskQueryFilterParameter filterParameter,
+      @ParameterObject TaskQueryFilterCustomFields filterCustomFields,
+      @ParameterObject TaskQueryFilterCustomIntFields filterCustomIntFields,
       @ParameterObject TaskQuerySortParameter sortParameter,
       @ParameterObject QueryPagingParameter<TaskSummary, TaskQuery> pagingParameter);
 
