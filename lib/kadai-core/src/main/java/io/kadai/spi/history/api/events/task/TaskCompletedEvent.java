@@ -23,9 +23,8 @@ import io.kadai.task.api.models.TaskSummary;
 /** Event fired if a task is completed. */
 public class TaskCompletedEvent extends TaskHistoryEvent {
 
-  public TaskCompletedEvent(
-      String id, TaskSummary completedTask, String userId, String proxyAccessId) {
-    super(id, completedTask, userId, proxyAccessId, null);
+  public TaskCompletedEvent(String id, TaskSummary completedTask) {
+    super(id, completedTask, null);
     eventType = TaskHistoryEventType.COMPLETED.getName();
     created = completedTask.getCompleted();
   }

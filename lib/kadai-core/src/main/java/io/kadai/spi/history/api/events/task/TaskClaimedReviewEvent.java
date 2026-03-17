@@ -23,9 +23,8 @@ import io.kadai.task.api.models.Task;
 /** Event fired if a task is claimed for a review. */
 public class TaskClaimedReviewEvent extends TaskHistoryEvent {
 
-  public TaskClaimedReviewEvent(
-      String id, Task task, String userId, String proxyAccessId, String details) {
-    super(id, task, userId, proxyAccessId, details);
+  public TaskClaimedReviewEvent(String id, Task task, String details) {
+    super(id, task, details);
     eventType = (TaskHistoryEventType.CLAIMED_REVIEW.getName());
     created = task.getClaimed();
   }
