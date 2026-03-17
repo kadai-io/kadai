@@ -27,7 +27,9 @@ import static org.mockito.Mockito.verify;
 
 import acceptance.AbstractAccTest;
 import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.api.KadaiRole;
 import io.kadai.spi.history.api.KadaiEventConsumer;
+import io.kadai.spi.history.api.events.KadaiEvent;
 import io.kadai.spi.history.api.events.task.TaskCreatedEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.internal.KadaiEventBus;
@@ -164,6 +166,17 @@ class KadaiEventBusTest extends AbstractAccTest {
     eventBus.dispatch(new TaskHistoryEvent());
 
     verify(taskConsumer, times(1)).consume(any());
+  }
+
+  @Test
+  void should_EnrichUserAndProxyAccessId_For_Dispatch() {
+    final KadaiEventBus eventBus = new KadaiEventBus(kadaiEngine);
+    final KadaiEvent event = new TaskHistoryEvent();
+
+    kadaiEngine.runAs(() -> eventBus.dispatch(event), KadaiRole.ADMIN, "roberto");
+
+    assertThat(event.getUserId()).isEqualTo("roberto");
+    assertThat(event.getProxyAccessId()).isEqualTo("uid=admin,cn=users,ou=test,o=kadai");
   }
 
   private static class TaskHistoryEventConsumer implements KadaiEventConsumer<TaskHistoryEvent> {
