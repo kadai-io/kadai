@@ -30,13 +30,13 @@ import io.kadai.common.api.KadaiEngine;
 import io.kadai.spi.history.api.KadaiEventConsumer;
 import io.kadai.spi.history.api.events.task.TaskCreatedEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
-import io.kadai.spi.history.internal.KadaiEventBroker;
+import io.kadai.spi.history.internal.KadaiEventBus;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-/** Acceptance test for KadaiEventBroker class. */
-class KadaiEventBrokerTest extends AbstractAccTest {
+/** Acceptance test for KadaiEventBus class. */
+class KadaiEventBusTest extends AbstractAccTest {
 
   @Test
   void testKadaiEventBrokerIsNotEnabled() {
@@ -45,123 +45,123 @@ class KadaiEventBrokerTest extends AbstractAccTest {
 
   @Test
   void should_AddConsumer_When_Subscribes() {
-    final KadaiEventBroker eventBroker = new KadaiEventBroker(kadaiEngine);
+    final KadaiEventBus eventBus = new KadaiEventBus(kadaiEngine);
     final var taskConsumer = new TaskHistoryEventConsumer();
 
-    eventBroker.subscribes(taskConsumer);
-    final var consumers = eventBroker.getConsumers(TaskHistoryEvent.class);
+    eventBus.subscribes(taskConsumer);
+    final var consumers = eventBus.getConsumers(TaskHistoryEvent.class);
 
     assertThat(consumers).containsExactly(taskConsumer);
   }
 
   @Test
   void should_SetIsEnabledTrue_When_Subscribes() {
-    final KadaiEventBroker eventBroker = new KadaiEventBroker(kadaiEngine);
+    final KadaiEventBus eventBus = new KadaiEventBus(kadaiEngine);
     final var taskConsumer = new TaskHistoryEventConsumer();
 
-    eventBroker.subscribes(taskConsumer);
+    eventBus.subscribes(taskConsumer);
 
-    assertThat(eventBroker.isEnabled()).isTrue();
+    assertThat(eventBus.isEnabled()).isTrue();
   }
 
   @Test
   void should_RemoveConsumer_When_Unsubscribes() {
-    final KadaiEventBroker eventBroker = new KadaiEventBroker(kadaiEngine);
+    final KadaiEventBus eventBus = new KadaiEventBus(kadaiEngine);
     final var taskConsumer = new TaskHistoryEventConsumer();
-    eventBroker.subscribes(taskConsumer);
+    eventBus.subscribes(taskConsumer);
 
-    eventBroker.unsubscribes(taskConsumer);
-    final var consumers = eventBroker.getConsumers(TaskHistoryEvent.class);
+    eventBus.unsubscribes(taskConsumer);
+    final var consumers = eventBus.getConsumers(TaskHistoryEvent.class);
 
     assertThat(consumers).isEmpty();
   }
 
   @Test
   void should_SetIsEnabledFalse_When_LastConsumerUnsubscribes() {
-    final KadaiEventBroker eventBroker = new KadaiEventBroker(kadaiEngine);
+    final KadaiEventBus eventBus = new KadaiEventBus(kadaiEngine);
     final var taskConsumer = new TaskHistoryEventConsumer();
-    eventBroker.subscribes(taskConsumer);
+    eventBus.subscribes(taskConsumer);
 
-    eventBroker.unsubscribes(taskConsumer);
+    eventBus.unsubscribes(taskConsumer);
 
-    assertThat(eventBroker.isEnabled()).isFalse();
+    assertThat(eventBus.isEnabled()).isFalse();
   }
 
   @Test
   void should_KeepIsEnabledTrue_When_ConsumerUnsubscribesAndOtherConsumersRemain() {
-    final KadaiEventBroker eventBroker = new KadaiEventBroker(kadaiEngine);
+    final KadaiEventBus eventBus = new KadaiEventBus(kadaiEngine);
     final var taskConsumer = new TaskHistoryEventConsumer();
-    eventBroker.subscribes(taskConsumer);
-    eventBroker.subscribes(new TaskCreatedEventConsumer());
+    eventBus.subscribes(taskConsumer);
+    eventBus.subscribes(new TaskCreatedEventConsumer());
 
-    eventBroker.unsubscribes(taskConsumer);
+    eventBus.unsubscribes(taskConsumer);
 
-    assertThat(eventBroker.isEnabled()).isTrue();
+    assertThat(eventBus.isEnabled()).isTrue();
   }
 
   @Test
   void should_ReturnAllMostSpecificAndMoreGeneralConsumers_For_SpecializedEvent() {
-    final KadaiEventBroker eventBroker = new KadaiEventBroker(kadaiEngine);
+    final KadaiEventBus eventBus = new KadaiEventBus(kadaiEngine);
     final var taskConsumer = new TaskHistoryEventConsumer();
     final var taskCreatedConsumer = new TaskCreatedEventConsumer();
-    eventBroker.subscribes(taskConsumer);
-    eventBroker.subscribes(taskCreatedConsumer);
+    eventBus.subscribes(taskConsumer);
+    eventBus.subscribes(taskCreatedConsumer);
 
     final List<KadaiEventConsumer<? super TaskCreatedEvent>> retrieved =
-        eventBroker.getConsumers(TaskCreatedEvent.class);
+        eventBus.getConsumers(TaskCreatedEvent.class);
 
     assertThat(retrieved).containsExactlyInAnyOrder(taskCreatedConsumer, taskConsumer);
   }
 
   @Test
   void should_OnlyReturnMostSpecificAndMoreGeneralConsumers_For_GeneralEvent() {
-    final KadaiEventBroker eventBroker = new KadaiEventBroker(kadaiEngine);
+    final KadaiEventBus eventBus = new KadaiEventBus(kadaiEngine);
     final var taskConsumer = new TaskHistoryEventConsumer();
     final var taskCreatedConsumer = new TaskCreatedEventConsumer();
-    eventBroker.subscribes(taskConsumer);
-    eventBroker.subscribes(taskCreatedConsumer);
+    eventBus.subscribes(taskConsumer);
+    eventBus.subscribes(taskCreatedConsumer);
 
     final List<KadaiEventConsumer<? super TaskHistoryEvent>> retrieved =
-        eventBroker.getConsumers(TaskHistoryEvent.class);
+        eventBus.getConsumers(TaskHistoryEvent.class);
 
     assertThat(retrieved).containsExactly(taskConsumer);
   }
 
   @Test
-  void should_ForwardToMostSpecificAndMoreGeneralConsumers_For_SpecializedEvent() {
-    final KadaiEventBroker eventBroker = new KadaiEventBroker(kadaiEngine);
+  void should_dispatchToMostSpecificAndMoreGeneralConsumers_For_SpecializedEvent() {
+    final KadaiEventBus eventBus = new KadaiEventBus(kadaiEngine);
     final var taskConsumer = Mockito.spy(new TaskHistoryEventConsumer());
     final var taskCreatedConsumer = Mockito.spy(new TaskCreatedEventConsumer());
-    eventBroker.subscribes(taskConsumer);
-    eventBroker.subscribes(taskCreatedConsumer);
+    eventBus.subscribes(taskConsumer);
+    eventBus.subscribes(taskCreatedConsumer);
 
-    eventBroker.forward(mock(TaskCreatedEvent.class));
+    eventBus.dispatch(mock(TaskCreatedEvent.class));
 
     verify(taskConsumer, times(1)).consume(any());
     verify(taskCreatedConsumer, times(1)).consume(any());
   }
 
   @Test
-  void should_OnlyForwardToMostSpecificAndMoreGeneralConsumers_For_GeneralEvent() {
-    final KadaiEventBroker eventBroker = new KadaiEventBroker(kadaiEngine);
+  void should_OnlyDispatchToMostSpecificAndMoreGeneralConsumers_For_GeneralEvent() {
+    final KadaiEventBus eventBus = new KadaiEventBus(kadaiEngine);
     final var taskConsumer = Mockito.spy(new TaskHistoryEventConsumer());
     final var taskCreatedConsumer = Mockito.spy(new TaskCreatedEventConsumer());
-    eventBroker.subscribes(taskConsumer);
-    eventBroker.subscribes(taskCreatedConsumer);
+    eventBus.subscribes(taskConsumer);
+    eventBus.subscribes(taskCreatedConsumer);
 
-    eventBroker.forward(new TaskHistoryEvent());
+    eventBus.dispatch(new TaskHistoryEvent());
 
     verify(taskConsumer, times(1)).consume(any());
     verify(taskCreatedConsumer, never()).consume(any());
   }
 
   @Test
-  void should_ForwardEventExactlyOnceToEveryEligibleConsumer() {
-    final KadaiEventBroker eventBroker = new KadaiEventBroker(kadaiEngine);
+  void should_dispatchEventExactlyOnceToEveryEligibleConsumer() {
+    final KadaiEventBus eventBus = new KadaiEventBus(kadaiEngine);
     final var taskConsumer = Mockito.spy(new TaskHistoryEventConsumer());
-    eventBroker.subscribes(taskConsumer);
+    eventBus.subscribes(taskConsumer);
 
-    eventBroker.forward(new TaskHistoryEvent());
+    eventBus.dispatch(new TaskHistoryEvent());
 
     verify(taskConsumer, times(1)).consume(any());
   }

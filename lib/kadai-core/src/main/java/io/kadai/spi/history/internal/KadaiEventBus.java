@@ -36,9 +36,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class KadaiEventBroker {
+public final class KadaiEventBus {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(KadaiEventBroker.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(KadaiEventBus.class);
 
   // As per construction this is a dependent map:
   // forall (k: Class<T>, v : List<KadaiEventConsumer<T'>>) in consumers: T == T'
@@ -51,7 +51,7 @@ public final class KadaiEventBroker {
     "rawtypes", // loading generic SPIs is only possible raw
     "unchecked" // Safe cast by specification of 'Reifiable::reify'
   })
-  public KadaiEventBroker(KadaiEngine kadaiEngine) {
+  public KadaiEventBus(KadaiEngine kadaiEngine) {
     this.kadaiEngine = kadaiEngine;
     final List<KadaiEventConsumer> rawConsumers = SpiLoader.load(KadaiEventConsumer.class);
     this.enabled = !rawConsumers.isEmpty();
@@ -85,7 +85,7 @@ public final class KadaiEventBroker {
    * @param event the event to forward
    */
   @SuppressWarnings("unchecked") // Safe cast by definition of 'Object::getClass'
-  public <T extends KadaiEvent> void forward(T event) {
+  public <T extends KadaiEvent> void dispatch(T event) {
     event.setUserId(kadaiEngine.getCurrentUserContext().getUserId());
     event.setProxyAccessId(kadaiEngine.getCurrentUserContext().getProxyAccessId());
 

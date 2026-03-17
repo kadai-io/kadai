@@ -147,18 +147,22 @@ public class WorkbasketHistoryEvent implements KadaiEvent {
     this.created = created != null ? created.truncatedTo(ChronoUnit.MILLIS) : null;
   }
 
+  @Override
   public String getUserId() {
     return userId;
   }
 
+  @Override
   public void setUserId(String userId) {
     this.userId = userId;
   }
 
+  @Override
   public String getProxyAccessId() {
     return proxyAccessId;
   }
 
+  @Override
   public void setProxyAccessId(String proxyAccessId) {
     this.proxyAccessId = proxyAccessId;
   }

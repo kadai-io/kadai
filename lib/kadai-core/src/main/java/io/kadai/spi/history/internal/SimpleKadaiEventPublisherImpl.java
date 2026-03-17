@@ -30,35 +30,35 @@ public class SimpleKadaiEventPublisherImpl<T extends KadaiEvent> implements Kada
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SimpleKadaiEventPublisherImpl.class);
 
-  private final KadaiEventBroker kadaiEventBroker;
+  private final KadaiEventBus kadaiEventBus;
 
-  public SimpleKadaiEventPublisherImpl(KadaiEventBroker kadaiEventBroker) {
-    this.kadaiEventBroker = kadaiEventBroker;
+  public SimpleKadaiEventPublisherImpl(KadaiEventBus kadaiEventBus) {
+    this.kadaiEventBus = kadaiEventBus;
   }
 
   @Override
   public void publish(T event) {
-    kadaiEventBroker.forward(event);
+    kadaiEventBus.dispatch(event);
     LOGGER.info("Published event {}", event);
   }
 
   @Override
   public void publishing(Supplier<T> supplyEvent) {
-    if (kadaiEventBroker.isEnabled()) {
+    if (kadaiEventBus.isEnabled()) {
       publish(supplyEvent.get());
     }
   }
 
   @Override
   public void tryPublishing(Supplier<Optional<T>> trySupplyEvent) {
-    if (kadaiEventBroker.isEnabled()) {
+    if (kadaiEventBus.isEnabled()) {
       trySupplyEvent.get().ifPresent(this::publish);
     }
   }
 
   @Override
   public void publishingAll(Supplier<Collection<T>> supplyEvents) {
-    if (kadaiEventBroker.isEnabled()) {
+    if (kadaiEventBus.isEnabled()) {
       supplyEvents.get().forEach(this::publish);
     }
   }
