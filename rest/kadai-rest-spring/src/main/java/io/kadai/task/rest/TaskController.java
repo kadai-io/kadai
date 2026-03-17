@@ -56,6 +56,7 @@ import io.kadai.task.rest.models.TaskIdPagedRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryPagedRepresentationModel;
+import io.kadai.task.rest.models.TransferTaskOwnerRepresentationModel;
 import io.kadai.task.rest.models.TransferTaskRepresentationModel;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import io.kadai.workbasket.api.exceptions.WorkbasketNotFoundException;
@@ -504,6 +505,22 @@ public class TaskController implements TaskApi {
             taskIds,
             transferTaskRepresentationModel.getOwner(),
             transferTaskRepresentationModel.getSetTransferFlag());
+
+    BulkOperationResultsRepresentationModel repModel =
+        bulkOperationResultsRepresentationModelAssembler.toModel(result);
+
+    return ResponseEntity.ok(repModel);
+  }
+
+  @PostMapping(path = RestEndpoints.URL_TRANSFER_TO_OWNER)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<BulkOperationResultsRepresentationModel> transferTasksToOwner(
+      @PathVariable("ownerId") String ownerId,
+      @RequestBody TransferTaskOwnerRepresentationModel transferTaskOwnerRepresentationModel)
+      throws InvalidArgumentException {
+    List<String> taskIds = transferTaskOwnerRepresentationModel.getTaskIds();
+    BulkOperationResults<String, KadaiException> result =
+        taskService.transferTasksToOwner(ownerId, taskIds);
 
     BulkOperationResultsRepresentationModel repModel =
         bulkOperationResultsRepresentationModelAssembler.toModel(result);
