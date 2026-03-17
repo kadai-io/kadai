@@ -22,9 +22,8 @@ import io.kadai.workbasket.api.models.Workbasket;
 
 public class WorkbasketDeletedEvent extends WorkbasketHistoryEvent {
 
-  public WorkbasketDeletedEvent(
-      String id, Workbasket workbasket, String userId, String proxyAccessId, String details) {
-    super(id, workbasket, userId, proxyAccessId, details);
+  public WorkbasketDeletedEvent(String id, Workbasket workbasket, String details) {
+    super(id, workbasket, details);
     eventType = WorkbasketHistoryEventType.DELETED.getName();
     created = workbasket.getModified();
   }
