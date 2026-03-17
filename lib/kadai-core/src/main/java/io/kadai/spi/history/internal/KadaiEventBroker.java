@@ -86,6 +86,9 @@ public final class KadaiEventBroker {
    */
   @SuppressWarnings("unchecked") // Safe cast by definition of 'Object::getClass'
   public <T extends KadaiEvent> void forward(T event) {
+    event.setUserId(kadaiEngine.getCurrentUserContext().getUserId());
+    event.setProxyAccessId(kadaiEngine.getCurrentUserContext().getProxyAccessId());
+
     getConsumers((Class<T>) event.getClass())
         .forEach(
             consumer -> {
