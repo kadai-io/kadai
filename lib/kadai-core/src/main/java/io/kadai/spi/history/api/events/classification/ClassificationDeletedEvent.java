@@ -23,13 +23,8 @@ import java.time.Instant;
 
 public class ClassificationDeletedEvent extends ClassificationHistoryEvent {
 
-  public ClassificationDeletedEvent(
-      String id,
-      Classification classification,
-      String userId,
-      String proxyAccessId,
-      String details) {
-    super(id, classification, userId, proxyAccessId, details);
+  public ClassificationDeletedEvent(String id, Classification classification, String details) {
+    super(id, classification, details);
     eventType = ClassificationHistoryEventType.DELETED.getName();
     created = Instant.now();
   }
