@@ -46,6 +46,7 @@ import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
+import io.kadai.task.api.exceptions.TransferCheckException;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
@@ -113,6 +114,7 @@ class ExceptionErrorKeyTest {
     assertThat(TaskAlreadyExistException.ERROR_KEY).isEqualTo("TASK_ALREADY_EXISTS");
     assertThat(TaskCommentNotFoundException.ERROR_KEY).isEqualTo("TASK_COMMENT_NOT_FOUND");
     assertThat(TaskNotFoundException.ERROR_KEY).isEqualTo("TASK_NOT_FOUND");
+    assertThat(TransferCheckException.ERROR_KEY).isEqualTo("TASK_TRANSFER_CHECK_FAILED");
     assertThat(ReopenTaskWithCallbackException.ERROR_KEY).isEqualTo("REOPEN_TASK_WITH_CALLBACK");
   }
 
