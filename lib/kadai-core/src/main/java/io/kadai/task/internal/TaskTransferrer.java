@@ -299,8 +299,6 @@ final class TaskTransferrer {
         beforeTransferTaskManager.checkTransferAllowed(task, destinationWorkbasketFull);
       } catch (KadaiException e) {
         spiErrors.addError(taskSummary.getId(), e);
-      } catch (Exception e) {
-        LOGGER.error("Error loading task '{}' for SPI check", taskSummary.getId(), e);
       }
     }
     return spiErrors;
