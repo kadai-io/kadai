@@ -257,6 +257,7 @@ public class TransferWithBeforeTransferSpiAccTest {
       assertThat(ex.getReason()).isEqualTo("Transfer always denied by Test-SPI");
     }
 
+    @SuppressWarnings("checkstyle:CatchParameterName")
     @WithAccessId(user = "user-1-1")
     @Test
     void should_NotTransferTask_When_SpiDeniesTransfer() throws Exception {
@@ -264,7 +265,7 @@ public class TransferWithBeforeTransferSpiAccTest {
 
       try {
         taskService.transfer(task.getId(), destinationWorkbasketSummary.getId());
-      } catch (TransferCheckException e) {
+      } catch (TransferCheckException _) {
         // expected
       }
 
