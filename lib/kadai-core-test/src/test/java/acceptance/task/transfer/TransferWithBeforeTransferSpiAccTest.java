@@ -237,7 +237,7 @@ public class TransferWithBeforeTransferSpiAccTest {
 
       TransferCheckException ex = catchThrowableOfType(TransferCheckException.class, call);
       assertThat(ex).isNotNull();
-      assertThat(ex.getReason()).isEqualTo("Transfer always denied by SPI");
+      assertThat(ex.getReason()).isEqualTo("Transfer always denied by Test-SPI");
       assertThat(ex.getSourceWorkbasketId()).isEqualTo(defaultWorkbasketSummary.getId());
       assertThat(ex.getDestinationWorkbasketId()).isEqualTo(destinationWorkbasketSummary.getId());
     }
@@ -254,7 +254,7 @@ public class TransferWithBeforeTransferSpiAccTest {
 
       TransferCheckException ex = catchThrowableOfType(TransferCheckException.class, call);
       assertThat(ex).isNotNull();
-      assertThat(ex.getReason()).isEqualTo("Transfer always denied by SPI");
+      assertThat(ex.getReason()).isEqualTo("Transfer always denied by Test-SPI");
     }
 
     @WithAccessId(user = "user-1-1")
@@ -329,7 +329,7 @@ public class TransferWithBeforeTransferSpiAccTest {
       TransferCheckException ex = catchThrowableOfType(TransferCheckException.class, call);
       assertThat(ex.getErrorCode().getKey()).isEqualTo("TASK_TRANSFER_CHECK_FAILED");
       assertThat(ex.getErrorCode().getMessageVariables())
-          .containsEntry("reason", "Transfer always denied by SPI")
+          .containsEntry("reason", "Transfer always denied by Test-SPI")
           .containsEntry("sourceWorkbasketId", defaultWorkbasketSummary.getId())
           .containsEntry("destinationWorkbasketId", destinationWorkbasketSummary.getId());
     }
