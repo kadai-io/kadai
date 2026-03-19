@@ -657,10 +657,14 @@ jobs:
             local jar="${M2_REPO}/${artifact_id}/${VERSION}/${artifact_id}-${VERSION}.jar"
             if [[ -f "${jar}" ]]; then
               mkdir -p "${module_dir}/target/classes"
-              (cd "${module_dir}/target/classes" && jar xf "$(realpath "${jar}")")
+              # Extract classes and then remove META-INF to prevent manifest conflicts
+              # with the metadata that maven-jar-plugin generates during packaging.
+              (cd "${module_dir}/target/classes" && jar xf "$(realpath "${jar}")" && rm -rf META-INF)
               echo "Restored ${artifact_id} to ${module_dir}/target/classes/"
             else
-              echo "WARNING: Pre-built JAR not found: ${jar}"
+              echo "ERROR: Pre-built JAR not found: ${jar}"
+              echo "       This means the compile_backend artifact is missing or incomplete."
+              exit 1
             fi
           }
 
@@ -692,7 +696,7 @@ jobs:
           fi
 
           echo "Using Maven profile: $DEPLOY_PROFILE"
-          ./mvnw -B deploy -P deploy-prebuilt,$DEPLOY_PROFILE \
+          ./mvnw -B deploy -P "deploy-prebuilt,${DEPLOY_PROFILE}" \
           --settings ci/mvnsettings.xml \
           -Dmaven.test.skip=true -Dcheckstyle.skip -Djacoco.skip \
           $SKIP_JAVADOC \
@@ -714,7 +718,7 @@ jobs:
         if: needs.detect_changes.outputs.frontend_changed == 'true' || startsWith(github.ref, 'refs/tags/v')
         run: |
           echo "Using Maven profile: $DEPLOY_PROFILE"
-          ./mvnw -B deploy -P $DEPLOY_PROFILE \
+          ./mvnw -B deploy -P "${DEPLOY_PROFILE}" \
           --settings ci/mvnsettings.xml \
           -Dmaven.test.skip=true -Dcheckstyle.skip -Djacoco.skip \
           -pl :kadai-web
