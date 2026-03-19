@@ -140,6 +140,30 @@
 
   <profiles>
     <profile>
+      <!-- Activated during the release_artifacts CI job to skip recompilation.
+           Pre-built classes from the compile_backend job are extracted into target/classes/
+           before the deploy step, so compilation can be safely skipped here. -->
+      <id>deploy-prebuilt</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+              <skip>true</skip>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>dev.aspectj</groupId>
+            <artifactId>aspectj-maven-plugin</artifactId>
+            <configuration>
+              <skip>true</skip>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
       <id>snapshot</id>
       <build>
         <plugins>
