@@ -16,8 +16,8 @@
  *
  */
 
-context('KADAI Login', () => {
+describe('KADAI Login', () => {
   it('should login depending on current configuration', () => {
-    cy.loginAs('admin');
+    cy.loginAsAdmin();
   });
 });

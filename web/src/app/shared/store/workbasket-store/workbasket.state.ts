@@ -426,8 +426,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
     ctx: StateContext<WorkbasketStateModel>,
     action: FetchWorkbasketDistributionTargets
   ): Observable<any> {
-    const { selectedWorkbasket, distributionTargetsPage, workbasketDistributionTargets, availableDistributionTargets } =
-      ctx.getState();
+    const { selectedWorkbasket, distributionTargetsPage, workbasketDistributionTargets } = ctx.getState();
     const { filterParameter, sortParameter, refetchAll } = action;
     const nextDistributionTargetsPage = refetchAll ? 1 : distributionTargetsPage + 1;
     return this.workbasketService
@@ -446,7 +445,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
             wbt.distributionTargets = idArrayNoDupe.map((id) => completeArray.find((wb) => wb.workbasketId === id));
           }
           const distributionTargetSet = new Set(wbt.distributionTargets.map((wb) => wb.workbasketId));
-          let availableTargets = cloneDeep(availableDistributionTargets);
+          let availableTargets = cloneDeep(ctx.getState().availableDistributionTargets);
           availableTargets.workbaskets = availableTargets.workbaskets.filter((wb) => {
             return !distributionTargetSet.has(wb.workbasketId);
           });
