@@ -642,54 +642,12 @@ jobs:
             echo "     - Tag (vx.x.x) + RELEASE version (x.x.x)"
             exit 1
           fi
-      # Pre-populate target/classes/ for each backend module from the pre-built JARs downloaded
-      # from the compile_backend job. This allows the deploy-prebuilt Maven profile to skip
-      # recompilation entirely, as the jar plugin will package from the pre-populated classes.
-      - name: Restore pre-built artifacts to target directories to skip recompilation
-        if: needs.detect_changes.outputs.backend_changed == 'true' || startsWith(github.ref, 'refs/tags/v')
-        run: |
-          VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
-          M2_REPO="${HOME}/.m2/repository/io/kadai"
-
-          extract_classes() {
-            local module_dir="$1"
-            local artifact_id="$2"
-            local jar="${M2_REPO}/${artifact_id}/${VERSION}/${artifact_id}-${VERSION}.jar"
-            if [[ -f "${jar}" ]]; then
-              mkdir -p "${module_dir}/target/classes"
-              # Extract classes and then remove META-INF to prevent manifest conflicts
-              # with the metadata that maven-jar-plugin generates during packaging.
-              (cd "${module_dir}/target/classes" && jar xf "$(realpath "${jar}")" && rm -rf META-INF)
-              echo "Restored ${artifact_id} to ${module_dir}/target/classes/"
-            else
-              echo "ERROR: Pre-built JAR not found: ${jar}"
-              echo "       This means the compile_backend artifact is missing or incomplete."
-              exit 1
-            fi
-          }
-
-          extract_classes "common/kadai-common-logging" "kadai-common-logging"
-          extract_classes "common/kadai-common" "kadai-common"
-          extract_classes "common/kadai-common-security" "kadai-common-security"
-          extract_classes "common/kadai-common-data" "kadai-common-data"
-          extract_classes "common/kadai-common-test" "kadai-common-test"
-          extract_classes "lib/kadai-test-api" "kadai-test-api"
-          extract_classes "lib/kadai-core" "kadai-core"
-          extract_classes "lib/kadai-spring" "kadai-spring"
-          extract_classes "rest/kadai-rest-spring" "kadai-rest-spring"
-          extract_classes "history/kadai-simplehistory-provider" "kadai-simplehistory-provider"
-          extract_classes "history/kadai-simplehistory-rest-spring" "kadai-simplehistory-rest-spring"
-          extract_classes "history/kadai-loghistory-provider" "kadai-loghistory-provider"
-          extract_classes "routing/kadai-spi-routing-dmn-router" "kadai-spi-routing-dmn-router"
-          extract_classes "routing/kadai-routing-rest" "kadai-routing-rest"
       # Deploy backend modules only when backend code changed or a release tag is pushed.
-      # Uses the deploy-prebuilt profile to skip Java/AspectJ recompilation since classes
-      # are pre-populated above
       - name: Release backend artifacts to Sonatype-Central
         if: needs.detect_changes.outputs.backend_changed == 'true' || startsWith(github.ref, 'refs/tags/v')
         run: |
           echo "Using Maven profile: $DEPLOY_PROFILE"
-          ./mvnw -B deploy -P "deploy-prebuilt,${DEPLOY_PROFILE}" \
+          ./mvnw -B deploy -P "${DEPLOY_PROFILE}" \
           --settings ci/mvnsettings.xml \
           -Dmaven.test.skip=true -Dcheckstyle.skip -Djacoco.skip \
           -pl :kadai-parent,\
