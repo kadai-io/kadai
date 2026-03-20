@@ -89,6 +89,7 @@ public final class RestEndpoints {
       API_V1 + "tasks/distribute/{workbasketId}";
   public static final String URL_TASKS_IDS = API_V1 + "tasks/ids";
   public static final String URL_TASKS_BULK_UPDATE = API_V1 + "tasks/bulkupdate";
+  public static final String URL_TRANSFER_TO_OWNER = API_V1 + "tasks/transfer-to-owner/{ownerId}";
 
   // task comment endpoints
   public static final String URL_TASKS_COMMENTS = API_V1 + "tasks/comments";
