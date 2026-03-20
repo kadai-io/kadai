@@ -71,6 +71,7 @@ import io.kadai.spi.task.internal.AfterRequestReviewManager;
 import io.kadai.spi.task.internal.BeforeRequestChangesManager;
 import io.kadai.spi.task.internal.BeforeRequestReviewManager;
 import io.kadai.spi.task.internal.CreateTaskPreprocessorManager;
+import io.kadai.spi.task.internal.CreateTaskPostprocessorManager;
 import io.kadai.spi.task.internal.ReviewRequiredManager;
 import io.kadai.spi.task.internal.TaskEndstatePreprocessorManager;
 import io.kadai.task.api.CallbackState;
@@ -159,6 +160,7 @@ public class TaskServiceImpl implements TaskService {
   private final UserMapper userMapper;
   private final KadaiEventPublisher<TaskHistoryEvent> eventPublisher;
   private final CreateTaskPreprocessorManager createTaskPreprocessorManager;
+  private final CreateTaskPostprocessorManager createTaskPostProcessorManager;
   private final PriorityServiceManager priorityServiceManager;
   private final ReviewRequiredManager reviewRequiredManager;
   private final BeforeRequestReviewManager beforeRequestReviewManager;
@@ -183,6 +185,7 @@ public class TaskServiceImpl implements TaskService {
     this.classificationService = kadaiEngine.getEngine().getClassificationService();
     this.eventPublisher = new SimpleKadaiEventPublisherImpl<>(kadaiEngine.getKadaiEventBroker());
     this.createTaskPreprocessorManager = kadaiEngine.getCreateTaskPreprocessorManager();
+    this.createTaskPostProcessorManager = kadaiEngine.getCreateTaskPostprocessorManager();
     this.priorityServiceManager = kadaiEngine.getPriorityServiceManager();
     this.reviewRequiredManager = kadaiEngine.getReviewRequiredManager();
     this.beforeRequestReviewManager = kadaiEngine.getBeforeRequestReviewManager();
@@ -415,10 +418,10 @@ public class TaskServiceImpl implements TaskService {
 
       createTaskCreatedHistoryEvent(task);
 
-      return task;
     } finally {
       kadaiEngine.returnConnection();
     }
+    return postprocessTaskCreation(task);
   }
 
   @Override
@@ -1664,6 +1667,18 @@ public class TaskServiceImpl implements TaskService {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Task {} cannot be found, so it can be created.", task.getId());
     }
+    return task;
+  }
+
+  private TaskImpl postprocessTaskCreation(TaskImpl task) {
+    if (createTaskPostProcessorManager.isEnabled()) {
+      task = (TaskImpl) createTaskPostProcessorManager.processTaskAfterCreation(task);
+    }
+
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Method postprocessTaskCreation() post-processed Task '{}'.", task.getId());
+    }
+
     return task;
   }
 
