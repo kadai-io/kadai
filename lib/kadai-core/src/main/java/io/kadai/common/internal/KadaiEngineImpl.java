@@ -59,6 +59,7 @@ import io.kadai.spi.task.internal.AfterRequestReviewManager;
 import io.kadai.spi.task.internal.BeforeRequestChangesManager;
 import io.kadai.spi.task.internal.BeforeRequestReviewManager;
 import io.kadai.spi.task.internal.CreateTaskPreprocessorManager;
+import io.kadai.spi.task.internal.CreateTaskPostprocessorManager;
 import io.kadai.spi.task.internal.ReviewRequiredManager;
 import io.kadai.spi.task.internal.TaskDistributionManager;
 import io.kadai.spi.task.internal.TaskEndstatePreprocessorManager;
@@ -114,6 +115,7 @@ public class KadaiEngineImpl implements KadaiEngine {
   private final TaskRoutingManager taskRoutingManager;
   private final TaskDistributionManager taskDistributionManager;
   private final CreateTaskPreprocessorManager createTaskPreprocessorManager;
+  private final CreateTaskPostprocessorManager createTaskPostprocessorManager;
   private final PriorityServiceManager priorityServiceManager;
   private final ReviewRequiredManager reviewRequiredManager;
   private final BeforeRequestReviewManager beforeRequestReviewManager;
@@ -198,6 +200,7 @@ public class KadaiEngineImpl implements KadaiEngine {
     // IMPORTANT: SPI has to be initialized last (and in this order) in order
     // to provide a fully initialized KadaiEngine instance during the SPI initialization!
     createTaskPreprocessorManager = new CreateTaskPreprocessorManager();
+    createTaskPostprocessorManager = new CreateTaskPostprocessorManager();
     priorityServiceManager = new PriorityServiceManager(this);
     kadaiEventBroker = new KadaiEventBroker(this);
     taskRoutingManager = new TaskRoutingManager(this);
@@ -626,6 +629,11 @@ public class KadaiEngineImpl implements KadaiEngine {
     @Override
     public CreateTaskPreprocessorManager getCreateTaskPreprocessorManager() {
       return createTaskPreprocessorManager;
+    }
+
+    @Override
+    public CreateTaskPostprocessorManager getCreateTaskPostprocessorManager() {
+      return createTaskPostprocessorManager;
     }
 
     @Override
