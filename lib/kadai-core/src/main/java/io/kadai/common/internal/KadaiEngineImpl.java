@@ -58,6 +58,7 @@ import io.kadai.spi.task.internal.AfterRequestChangesManager;
 import io.kadai.spi.task.internal.AfterRequestReviewManager;
 import io.kadai.spi.task.internal.BeforeRequestChangesManager;
 import io.kadai.spi.task.internal.BeforeRequestReviewManager;
+import io.kadai.spi.task.internal.BeforeTransferTaskManager;
 import io.kadai.spi.task.internal.CreateTaskPreprocessorManager;
 import io.kadai.spi.task.internal.ReviewRequiredManager;
 import io.kadai.spi.task.internal.TaskDistributionManager;
@@ -121,6 +122,7 @@ public class KadaiEngineImpl implements KadaiEngine {
   private final BeforeRequestChangesManager beforeRequestChangesManager;
   private final AfterRequestChangesManager afterRequestChangesManager;
   private final TaskEndstatePreprocessorManager taskEndstatePreprocessorManager;
+  private final BeforeTransferTaskManager beforeTransferTaskManager;
 
   private final InternalKadaiEngineImpl internalKadaiEngineImpl;
   private final WorkingTimeCalculator workingTimeCalculator;
@@ -208,6 +210,7 @@ public class KadaiEngineImpl implements KadaiEngine {
     beforeRequestChangesManager = new BeforeRequestChangesManager(this);
     afterRequestChangesManager = new AfterRequestChangesManager(this);
     taskEndstatePreprocessorManager = new TaskEndstatePreprocessorManager();
+    beforeTransferTaskManager = new BeforeTransferTaskManager(this);
 
     // don't remove, to reset possible explicit mode
     this.mode = connectionManagementMode;
@@ -661,6 +664,11 @@ public class KadaiEngineImpl implements KadaiEngine {
     @Override
     public TaskEndstatePreprocessorManager getTaskEndstatePreprocessorManager() {
       return taskEndstatePreprocessorManager;
+    }
+
+    @Override
+    public BeforeTransferTaskManager getBeforeTransferTaskManager() {
+      return beforeTransferTaskManager;
     }
   }
 }

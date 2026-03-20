@@ -42,6 +42,7 @@ import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
 import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
+import io.kadai.task.api.exceptions.TransferCheckException;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.api.models.TaskSummary;
 import io.kadai.task.rest.assembler.BulkOperationResultsRepresentationModelAssembler;
@@ -475,7 +476,8 @@ public class TaskController implements TaskApi {
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          TransferCheckException {
     Task updatedTask;
     if (transferTaskRepresentationModel == null) {
       updatedTask = taskService.transfer(taskId, workbasketId);

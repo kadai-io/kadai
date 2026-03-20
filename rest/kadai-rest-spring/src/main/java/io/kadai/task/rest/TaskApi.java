@@ -34,6 +34,7 @@ import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
 import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
+import io.kadai.task.api.exceptions.TransferCheckException;
 import io.kadai.task.api.models.TaskSummary;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
@@ -1281,6 +1282,7 @@ public interface TaskApi {
    * @throws NotAuthorizedOnWorkbasketException if the current user has no authorization to transfer
    *     the Task.
    * @throws InvalidTaskStateException if the Task is in a state which does not allow transferring.
+   * @throws TransferCheckException if the transfer is denied
    */
   @Operation(
       summary = "Transfer a Task to another Workbasket",
@@ -1344,6 +1346,12 @@ public interface TaskApi {
                   schema =
                       @Schema(
                           anyOf = {WorkbasketNotFoundException.class, TaskNotFoundException.class}))
+            }),
+        @ApiResponse(
+            responseCode = "412",
+            description = "TASK_TRANSFER_CHECK_FAILED",
+            content = {
+              @Content(schema = @Schema(implementation = TransferCheckException.class))
             })
       })
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_TRANSFER_WORKBASKET_ID)
@@ -1356,7 +1364,8 @@ public interface TaskApi {
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException;
+          InvalidTaskStateException,
+          TransferCheckException;
 
   /**
    * This endpoint transfers a list of Tasks listed in the body to a given Workbasket, if possible.
