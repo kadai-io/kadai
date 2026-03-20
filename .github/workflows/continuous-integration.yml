@@ -684,22 +684,14 @@ jobs:
           extract_classes "routing/kadai-routing-rest" "kadai-routing-rest"
       # Deploy backend modules only when backend code changed or a release tag is pushed.
       # Uses the deploy-prebuilt profile to skip Java/AspectJ recompilation since classes
-      # are pre-populated above. For SNAPSHOTs, javadoc generation is also skipped as it
-      # is not required by Sonatype Central for snapshot deployments.
+      # are pre-populated above
       - name: Release backend artifacts to Sonatype-Central
         if: needs.detect_changes.outputs.backend_changed == 'true' || startsWith(github.ref, 'refs/tags/v')
         run: |
-          # Skip javadoc generation for snapshots (not required by Sonatype Central)
-          SKIP_JAVADOC=""
-          if [[ "$DEPLOY_PROFILE" == "snapshot" ]]; then
-            SKIP_JAVADOC="-Dmaven.javadoc.skip=true"
-          fi
-
           echo "Using Maven profile: $DEPLOY_PROFILE"
           ./mvnw -B deploy -P "deploy-prebuilt,${DEPLOY_PROFILE}" \
           --settings ci/mvnsettings.xml \
           -Dmaven.test.skip=true -Dcheckstyle.skip -Djacoco.skip \
-          $SKIP_JAVADOC \
           -pl :kadai-parent,\
           :kadai-common-parent,:kadai-common-logging,:kadai-common,:kadai-common-security,\
           :kadai-common-data,:kadai-common-test,:kadai-test-api,\
