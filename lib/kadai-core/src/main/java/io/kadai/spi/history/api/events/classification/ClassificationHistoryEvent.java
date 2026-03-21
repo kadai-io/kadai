@@ -58,9 +58,8 @@ public class ClassificationHistoryEvent implements KadaiEvent {
   public ClassificationHistoryEvent() {}
 
   public ClassificationHistoryEvent(
-      String id, ClassificationSummary classification, String userId, String details) {
+      String id, ClassificationSummary classification, String details) {
     this.id = id;
-    this.userId = userId;
     classificationId = classification.getId();
     applicationEntryPoint = classification.getApplicationEntryPoint();
     category = classification.getCategory();
@@ -81,16 +80,6 @@ public class ClassificationHistoryEvent implements KadaiEvent {
     custom7 = classification.getCustomField(ClassificationCustomField.CUSTOM_7);
     custom8 = classification.getCustomField(ClassificationCustomField.CUSTOM_8);
     this.details = details;
-  }
-
-  public ClassificationHistoryEvent(
-      String id,
-      ClassificationSummary classification,
-      String userId,
-      String proxyAccessId,
-      String details) {
-    this(id, classification, userId, details);
-    this.proxyAccessId = proxyAccessId;
   }
 
   public void setCustomAttribute(ClassificationCustomField customField, String value) {
@@ -163,18 +152,22 @@ public class ClassificationHistoryEvent implements KadaiEvent {
     this.created = created != null ? created.truncatedTo(ChronoUnit.MILLIS) : null;
   }
 
+  @Override
   public String getUserId() {
     return userId;
   }
 
+  @Override
   public void setUserId(String userId) {
     this.userId = userId;
   }
 
+  @Override
   public String getProxyAccessId() {
     return proxyAccessId;
   }
 
+  @Override
   public void setProxyAccessId(String proxyAccessId) {
     this.proxyAccessId = proxyAccessId;
   }
