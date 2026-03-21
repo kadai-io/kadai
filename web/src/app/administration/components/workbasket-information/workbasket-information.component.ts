@@ -16,7 +16,18 @@
  *
  */
 
-import { Component, inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  inject,
+  input,
+  model,
+  OnDestroy,
+  OnInit,
+  untracked,
+  viewChild
+} from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Store } from '@ngxs/store';
@@ -54,11 +65,13 @@ import { MatOption } from '@angular/material/core';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MapValuesPipe } from '../../../shared/pipes/map-values.pipe';
 import { RemoveNoneTypePipe } from '../../../shared/pipes/remove-empty-type.pipe';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'kadai-administration-workbasket-information',
   templateUrl: './workbasket-information.component.html',
   styleUrls: ['./workbasket-information.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     MatDivider,
@@ -78,20 +91,18 @@ import { RemoveNoneTypePipe } from '../../../shared/pipes/remove-empty-type.pipe
     RemoveNoneTypePipe
   ]
 })
-export class WorkbasketInformationComponent implements OnInit, OnChanges, OnDestroy {
-  @Input()
-  workbasket: Workbasket;
-  @Input()
-  action: ACTION;
-  @ViewChild('WorkbasketForm')
-  workbasketForm: NgForm;
+export class WorkbasketInformationComponent implements OnInit, OnDestroy {
+  workbasket = model<Workbasket>();
+  action = input<ACTION>();
+  workbasketForm = viewChild<NgForm>('WorkbasketForm');
   workbasketClone: Workbasket;
   allTypes: Map<string, string>;
   toggleValidationMap = new Map<string, boolean>();
-  lookupField = false;
   isOwnerValid: boolean = true;
   readonly lengthError = 'You have reached the maximum length for this field';
-  inputOverflowMap = new Map<string, boolean>();
+  inputOverflowMap = toSignal(inject(FormsValidatorService).inputOverflowObservable, {
+    initialValue: new Map<string, boolean>()
+  });
   validateInputOverflow: Function;
   customFields$: Observable<CustomField[]>;
   destroy$ = new Subject<void>();
@@ -99,11 +110,24 @@ export class WorkbasketInformationComponent implements OnInit, OnChanges, OnDest
   workbasketsCustomisation$: Observable<WorkbasketsCustomisation> = this.store.select(
     EngineConfigurationSelectors.workbasketsCustomisation
   );
+  lookupField = toSignal(
+    this.workbasketsCustomisation$.pipe(map((c) => c.information.owner?.lookupField ?? false)),
+    { requireSync: true }
+  );
   buttonAction$: Observable<ButtonAction> = this.store.select(WorkbasketSelectors.buttonAction);
   private workbasketService = inject(WorkbasketService);
   private requestInProgressService = inject(RequestInProgressService);
   private formsValidatorService = inject(FormsValidatorService);
   private notificationService = inject(NotificationService);
+
+  constructor() {
+    effect(() => {
+      const wb = this.workbasket();
+      untracked(() => {
+        this.workbasketClone = { ...wb };
+      });
+    });
+  }
 
   ngOnInit() {
     this.allTypes = new Map([
@@ -117,14 +141,6 @@ export class WorkbasketInformationComponent implements OnInit, OnChanges, OnDest
       map((customisation) => customisation.information),
       getCustomFields(customFieldCount)
     );
-    this.workbasketsCustomisation$.pipe(takeUntil(this.destroy$)).subscribe((workbasketsCustomization) => {
-      if (workbasketsCustomization.information.owner) {
-        this.lookupField = workbasketsCustomization.information.owner.lookupField;
-      }
-    });
-    this.formsValidatorService.inputOverflowObservable.pipe(takeUntil(this.destroy$)).subscribe((inputOverflowMap) => {
-      this.inputOverflowMap = inputOverflowMap;
-    });
     this.validateInputOverflow = (inputFieldModel, maxLength) => {
       if (typeof inputFieldModel.value !== 'undefined') {
         this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
@@ -154,52 +170,51 @@ export class WorkbasketInformationComponent implements OnInit, OnChanges, OnDest
       });
   }
 
-  ngOnChanges(changes?: SimpleChanges) {
-    this.workbasketClone = { ...this.workbasket };
-  }
-
   onSubmit() {
     this.formsValidatorService.formSubmitAttempt = true;
-    trimForm(this.workbasketForm);
-    this.formsValidatorService.validateFormInformation(this.workbasketForm, this.toggleValidationMap).then((value) => {
-      if (value && this.isOwnerValid) {
-        this.onSave();
-      } else {
-        this.notificationService.showError('WORKBASKET_SAVE');
-      }
-    });
+    trimForm(this.workbasketForm());
+    this.formsValidatorService
+      .validateFormInformation(this.workbasketForm(), this.toggleValidationMap)
+      .then((value) => {
+        if (value && this.isOwnerValid) {
+          this.onSave();
+        } else {
+          this.notificationService.showError('WORKBASKET_SAVE');
+        }
+      });
   }
 
   isFieldValid(field: string): boolean {
-    return this.formsValidatorService.isFieldValid(this.workbasketForm, field);
+    return this.formsValidatorService.isFieldValid(this.workbasketForm(), field);
   }
 
   onUndo() {
     this.formsValidatorService.formSubmitAttempt = false;
     this.notificationService.showSuccess('WORKBASKET_RESTORE');
-    this.workbasket = { ...this.workbasketClone };
+    this.workbasket.set({ ...this.workbasketClone });
   }
 
   removeWorkbasket() {
     this.notificationService.showDialog(
       'WORKBASKET_DELETE',
-      { workbasketKey: this.workbasket.key },
+      { workbasketKey: this.workbasket().key },
       this.onRemoveConfirmed.bind(this)
     );
   }
 
   removeDistributionTargets() {
-    this.store.dispatch(new RemoveDistributionTarget(this.workbasket._links.removeDistributionTargets.href));
+    this.store.dispatch(new RemoveDistributionTarget(this.workbasket()._links.removeDistributionTargets.href));
   }
 
   onSave() {
     this.beforeRequest();
-    if (!this.workbasket.workbasketId) {
+    const workbasket = this.workbasket();
+    if (!workbasket.workbasketId) {
       this.postNewWorkbasket();
     } else {
-      this.store.dispatch(new UpdateWorkbasket(this.workbasket._links.self.href, this.workbasket)).subscribe(() => {
+      this.store.dispatch(new UpdateWorkbasket(workbasket._links.self.href, workbasket)).subscribe(() => {
         this.requestInProgressService.setRequestInProgress(false);
-        this.workbasketClone = cloneDeep(this.workbasket);
+        this.workbasketClone = cloneDeep(workbasket);
       });
     }
   }
@@ -215,26 +230,26 @@ export class WorkbasketInformationComponent implements OnInit, OnChanges, OnDest
 
   postNewWorkbasket() {
     this.addDateToWorkbasket();
-    this.store.dispatch(new SaveNewWorkbasket(this.workbasket)).subscribe(() => {
+    this.store.dispatch(new SaveNewWorkbasket(this.workbasket())).subscribe(() => {
       this.afterRequest();
     });
   }
 
   addDateToWorkbasket() {
     const date = KadaiDate.getDate();
-    this.workbasket.created = date;
-    this.workbasket.modified = date;
+    this.workbasket().created = date;
+    this.workbasket().modified = date;
   }
 
   onRemoveConfirmed() {
     this.beforeRequest();
-    this.store.dispatch(new MarkWorkbasketForDeletion(this.workbasket._links.self.href)).subscribe(() => {
+    this.store.dispatch(new MarkWorkbasketForDeletion(this.workbasket()._links.self.href)).subscribe(() => {
       this.afterRequest();
     });
   }
 
   onSelectedOwner(owner: AccessId) {
-    this.workbasket.owner = owner.accessId;
+    this.workbasket().owner = owner.accessId;
   }
 
   getWorkbasketCustomProperty(custom: number) {

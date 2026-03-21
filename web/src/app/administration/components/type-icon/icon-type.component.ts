@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { WorkbasketType } from 'app/shared/models/workbasket-type';
 import { SvgIconComponent } from 'angular-svg-icon';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -25,34 +25,18 @@ import { MatTooltip } from '@angular/material/tooltip';
   selector: 'kadai-administration-icon-type',
   templateUrl: './icon-type.component.html',
   styleUrls: ['./icon-type.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SvgIconComponent, MatTooltip]
 })
-export class IconTypeComponent implements OnInit, OnChanges {
-  @Input()
-  type: WorkbasketType;
+export class IconTypeComponent {
+  type = input<WorkbasketType>();
+  selected = input(false);
+  tooltip = input(false);
+  text = input<string>();
+  size = input('small');
 
-  @Input()
-  selected = false;
-
-  @Input()
-  tooltip = false;
-
-  @Input()
-  text: string;
-
-  @Input()
-  size = 'small';
-
-  iconSize: string;
-  iconColor: string;
-
-  ngOnInit() {
-    this.iconSize = this.size === 'large' ? '24' : '16';
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    this.iconColor = changes['selected']?.currentValue ? 'white' : '#555';
-  }
+  iconSize = computed(() => (this.size() === 'large' ? '24' : '16'));
+  iconColor = computed(() => (this.selected() ? 'white' : '#555'));
 
   getIconPath(type: WorkbasketType) {
     switch (type) {

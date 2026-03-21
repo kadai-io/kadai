@@ -35,6 +35,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ImportExportService } from '../../services/import-export.service';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { provideHttpClient } from '@angular/common/http';
+import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 
 const workbasketServiceMock: Partial<WorkbasketService> = {
   workbasketSavedTriggered: vi.fn().mockReturnValue(of(1)),
@@ -90,7 +91,7 @@ describe('WorkbasketListComponent', () => {
   });
 
   it('should dispatch SelectWorkbasket when selecting a workbasket', async () => {
-    component.selectedId = undefined;
+    component.selectedId.set(undefined);
     fixture.detectChanges();
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(SelectWorkbasket)).subscribe(() => (actionDispatched = true));
@@ -99,14 +100,14 @@ describe('WorkbasketListComponent', () => {
   });
 
   it('should dispatch DeselectWorkbasket when selecting a workbasket again', async () => {
-    component.selectedId = '123';
+    component.selectedId.set('123');
     fixture.detectChanges();
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(DeselectWorkbasket)).subscribe(() => (actionDispatched = true));
     const mockId = '123';
     component.selectWorkbasket(mockId);
     expect(actionDispatched).toBe(true);
-    expect(component.selectedId).toEqual(undefined); //because Deselect action sets selectedId to undefined
+    expect(component.selectedId()).toEqual(undefined); //because Deselect action sets selectedId to undefined
   });
 
   it('should set sort value when performSorting is called', () => {
@@ -170,8 +171,8 @@ describe('WorkbasketListComponent', () => {
         paginatedWorkbasketsSummary: { workbaskets: [], _links: {} }
       }
     });
-    component.requestInProgress = false;
-    component.requestInProgressLocal = false;
+    TestBed.inject(RequestInProgressService).setRequestInProgress(false);
+    component.requestInProgressLocal.set(false);
     fixture.detectChanges();
     const noItems = fixture.nativeElement.querySelector('.workbasket-list__no-items');
     expect(noItems).toBeTruthy();
@@ -205,7 +206,7 @@ describe('WorkbasketListComponent', () => {
         paginatedWorkbasketsSummary: { workbaskets: mockWorkbaskets, _links: {} }
       }
     });
-    component.expanded = true;
+    fixture.componentRef.setInput('expanded', true);
     fixture.detectChanges();
     const iconEl = fixture.nativeElement.querySelector('.workbasket-list__list-item--icon');
     expect(iconEl).toBeTruthy();
@@ -222,7 +223,7 @@ describe('WorkbasketListComponent', () => {
         paginatedWorkbasketsSummary: { workbaskets: mockWorkbaskets, _links: {} }
       }
     });
-    component.expanded = false;
+    fixture.componentRef.setInput('expanded', false);
     fixture.detectChanges();
     const iconEl = fixture.nativeElement.querySelector('.workbasket-list__list-item--icon');
     expect(iconEl).toBeNull();
@@ -280,8 +281,8 @@ describe('WorkbasketListComponent', () => {
         paginatedWorkbasketsSummary: { workbaskets: [], _links: {} }
       }
     });
-    component.requestInProgress = true;
-    component.requestInProgressLocal = false;
+    TestBed.inject(RequestInProgressService).setRequestInProgress(true);
+    component.requestInProgressLocal.set(false);
     fixture.detectChanges();
     const noItems = fixture.nativeElement.querySelector('.workbasket-list__no-items');
     expect(noItems).toBeFalsy();
@@ -295,8 +296,8 @@ describe('WorkbasketListComponent', () => {
         paginatedWorkbasketsSummary: { workbaskets: [], _links: {} }
       }
     });
-    component.requestInProgress = false;
-    component.requestInProgressLocal = true;
+    TestBed.inject(RequestInProgressService).setRequestInProgress(false);
+    component.requestInProgressLocal.set(true);
     fixture.detectChanges();
     const noItems = fixture.nativeElement.querySelector('.workbasket-list__no-items');
     expect(noItems).toBeFalsy();

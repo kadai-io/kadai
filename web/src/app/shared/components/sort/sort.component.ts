@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, OnInit, output } from '@angular/core';
 import { Direction, Sorting } from 'app/shared/models/sorting';
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -29,14 +29,15 @@ import { MapValuesPipe } from '../../pipes/map-values.pipe';
   selector: 'kadai-shared-sort',
   templateUrl: './sort.component.html',
   styleUrls: ['./sort.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MapValuesPipe]
 })
 export class SortComponent<T> implements OnInit {
-  @Input() sortingFields: Map<T, string>;
-  @Input() menuPosition = 'right';
-  @Input() defaultSortBy: T;
+  sortingFields = input.required<Map<T, string>>();
+  menuPosition = input('right');
+  defaultSortBy = input<T>();
 
-  @Output() performSorting = new EventEmitter<Sorting<T>>();
+  performSorting = output<Sorting<T>>();
 
   sort: Sorting<T> = {
     'sort-by': undefined,
@@ -47,7 +48,7 @@ export class SortComponent<T> implements OnInit {
   sortDirectionEnum = Direction;
 
   ngOnInit() {
-    this.sort['sort-by'] = this.defaultSortBy;
+    this.sort['sort-by'] = this.defaultSortBy();
   }
 
   changeOrder(sortDirection: Direction) {

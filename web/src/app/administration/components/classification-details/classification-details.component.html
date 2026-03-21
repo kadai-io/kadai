@@ -18,18 +18,18 @@
 
 <div class="classification-details">
 
-  @if (classification && !requestInProgress) {
+  @if (classification() && !requestInProgress()) {
     <div class="classification-details-wrapper"
          id="classification-details">
       <!-- TITLE + ACTION BUTTONS -->
       <mat-toolbar class="action-toolbar">
         <h4 class="action-toolbar__headline">
           <span
-            class="{{isCreatingNewClassification? 'action-toolbar__title-badge' : 'action-toolbar__title'}}"
-            matTooltip="{{classification.name}}&nbsp; [{{classification.type}}]">
-            {{ classification.name }}&nbsp; [{{ classification.type }}]
+            class="{{isCreatingNewClassification()? 'action-toolbar__title-badge' : 'action-toolbar__title'}}"
+            matTooltip="{{classification()?.name}}&nbsp; [{{classification()?.type}}]">
+            {{ classification()?.name }}&nbsp; [{{ classification()?.type }}]
           </span>
-          @if (isCreatingNewClassification) {
+          @if (isCreatingNewClassification()) {
             <span
               class="action-toolbar__badge-message"
               matTooltip="{{badgeMessage$ | async}}">
@@ -59,7 +59,7 @@
               <mat-icon class="action-toolbar__aquamarine-button">content_copy</mat-icon>
               <span>Copy</span>
             </button>
-            @if (classification?.classificationId) {
+            @if (classification()?.classificationId) {
               <button (click)="onRemoveClassification()"
                       class="action-toolbar__dropdown"
                       mat-menu-item matTooltip="Delete this classification">
@@ -91,13 +91,13 @@
                   <mat-label>Key</mat-label>
                   <label for="classification-key"></label>
                   <input #key="ngModel" (input)="validateInputOverflow(key, 32)"
-                         [(ngModel)]="classification.key"
-                         [disabled]="!isCreatingNewClassification" id="classification-key"
+                         [(ngModel)]="classification()!.key"
+                         [disabled]="!isCreatingNewClassification()" id="classification-key"
                          matInput
                          maxlength="32" name="classification.key" placeholder="Key"
                          required type="text">
                 </mat-form-field>
-                @if (inputOverflowMap.get(key.name)) {
+                @if (inputOverflowMap()?.get(key.name)) {
                   <div class="error">{{ lengthError }}</div>
                 }
                 <!-- <kadai-shared-field-error-display [displayError]="key.invalid && key.dirty"
@@ -108,13 +108,13 @@
                   <mat-label>Name</mat-label>
                   <label for="classification-name"></label>
                   <input #name="ngModel" (input)="validateInputOverflow(name, 255)"
-                         [(ngModel)]="classification.name"
+                         [(ngModel)]="classification()!.name"
                          id="classification-name" matInput
                          maxlength="255" name="classification.name"
                          placeholder="Name" required
                          type="text">
                 </mat-form-field>
-                @if (inputOverflowMap.get(name.name)) {
+                @if (inputOverflowMap()?.get(name.name)) {
                   <div class="error">{{ lengthError }}</div>
                 }
                 <!--
@@ -127,7 +127,7 @@
                   <label for="classification-description"></label>
                   <textarea #description="ngModel"
                             (input)="validateInputOverflow(description, 255)"
-                            [(ngModel)]="classification.description"
+                            [(ngModel)]="classification()!.description"
                             cdkAutosizeMaxRows="6"
                             cdkAutosizeMinRows="6"
                             cdkTextareaAutosize id="classification-description"
@@ -135,7 +135,7 @@
                             maxlength="255" name="classification.description"
                             placeholder="Description"></textarea>
                 </mat-form-field>
-                @if (inputOverflowMap.get(description.name)) {
+                @if (inputOverflowMap()?.get(description.name)) {
                   <div class="error">{{ lengthError }}
                   </div>
                 }
@@ -147,7 +147,7 @@
                 <mat-form-field appearance="outline">
                   <mat-label>Domain</mat-label>
                   <label for="classification-domain"></label>
-                  <input [(ngModel)]="classification.domain" disabled id="classification-domain"
+                  <input [(ngModel)]="classification()!.domain" disabled id="classification-domain"
                          matInput
                          name="classification.domain" placeholder="Domain"
                          type="text">
@@ -157,7 +157,7 @@
                     Valid in Domain
                     <a (click)="validChanged()" title="Valid in Domain">
                       <mat-icon class="detailed-fields__domain-checkbox-icon">{{
-                          classification.isValidInDomain ? 'check_box'
+                          classification()?.isValidInDomain ? 'check_box'
                             : 'check_box_outline_blank'
                         }}
                       </mat-icon>
@@ -173,13 +173,13 @@
                       <label for="classification-service-level"></label>
                       <input #serviceLevel="ngModel"
                              (input)="validateInputOverflow(serviceLevel, 255)"
-                             [(ngModel)]="classification.serviceLevel"
+                             [(ngModel)]="classification()!.serviceLevel"
                              id="classification-service-level"
                              matInput maxlength="255"
                              name="classification.serviceLevel" placeholder="Service Level"
                              required type="text">
                     </mat-form-field>
-                    @if (inputOverflowMap.get(serviceLevel.name)) {
+                    @if (inputOverflowMap()?.get(serviceLevel.name)) {
                       <div
                         class="error">{{ lengthError }}
                       </div>
@@ -190,7 +190,7 @@
                     <mat-form-field appearance="outline" style="width: 100%">
                       <mat-label>Priority</mat-label>
                       <label for="classification-priority"></label>
-                      <input [(ngModel)]="classification.priority" id="classification-priority"
+                      <input [(ngModel)]="classification()!.priority" id="classification-priority"
                              matInput
                              min="0" name="classification.priority" required type="number">
                     </mat-form-field>
@@ -207,7 +207,7 @@
                   <label for="classification-application-entry-point"></label>
                   <input #appEntryPoint="ngModel"
                          (input)="validateInputOverflow(appEntryPoint, 255)"
-                         [(ngModel)]="classification.applicationEntryPoint"
+                         [(ngModel)]="classification()!.applicationEntryPoint"
                          id="classification-application-entry-point"
                          matInput
                          maxlength="255"
@@ -215,7 +215,7 @@
                          placeholder="Application entry point"
                          type="text">
                 </mat-form-field>
-                @if (inputOverflowMap.get(appEntryPoint.name)) {
+                @if (inputOverflowMap()?.get(appEntryPoint.name)) {
                   <div
                     class="error">{{ lengthError }}
                   </div>
@@ -223,13 +223,13 @@
                 <!-- CATEGORY -->
                 <mat-form-field appearance="outline">
                   <mat-label>Category</mat-label>
-                  <mat-select [(value)]="classification.category" required>
+                  <mat-select [(value)]="classification()!.category" required>
                     <mat-select-trigger>
                       <svg-icon
-                        [src]="(getCategoryIcon(classification.category) | async)?.left"
+                        [src]="(getCategoryIcon(classification()!.category) | async)?.left"
                         class="detailed-fields__category-icon">
                       </svg-icon>
-                      {{ classification.category }}
+                      {{ classification()!.category }}
                     </mat-select-trigger>
                     @for (category of categories$ | async; track category) {
                       <mat-option value="{{category}}">
@@ -253,14 +253,14 @@
                       <mat-label>{{ customField.field }}</mat-label>
                       <label for="classification-custom-{{i + 1}}"></label>
                       <input #custom="ngModel" (input)="validateInputOverflow(custom, 255)"
-                             [(ngModel)]="classification[getClassificationCustom(i + 1)]"
+                             [(ngModel)]="classification()![getClassificationCustom(i + 1)]"
                              id="classification-custom-{{i + 1}}" matInput
                              maxlength="255"
                              name="classification.custom{{i + 1}}"
                              placeholder="{{customField.field}}"
                              type="text">
                     </mat-form-field>
-                    @if (inputOverflowMap.get(custom.name)) {
+                    @if (inputOverflowMap()?.get(custom.name)) {
                       <div class="error">{{ lengthError }}</div>
                     }
                   </div>

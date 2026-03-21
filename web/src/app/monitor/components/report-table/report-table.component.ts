@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, Input, OnChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, input, signal, untracked } from '@angular/core';
 import { ReportData } from 'app/monitor/models/report-data';
 import { ReportRow } from '../../models/report-row';
 import { NgClass } from '@angular/common';
@@ -26,19 +26,80 @@ import { MatButton } from '@angular/material/button';
   selector: 'kadai-monitor-report-table',
   templateUrl: './report-table.component.html',
   styleUrls: ['./report-table.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgClass, MatButton]
 })
-export class ReportTableComponent implements OnChanges {
-  @Input()
-  reportData: ReportData;
+export class ReportTableComponent {
+  // Use alias so parent can still bind with [reportData]="..."
+  reportDataInput = input<ReportData>(undefined, { alias: 'reportData' });
 
+  // Local mutable copy used by the template and mutation methods
+  reportData = signal<ReportData>(undefined);
   fullReportData: ReportData;
-  fullRowsData: ReportRow[][];
-  currentExpHeaders = 0;
+  fullRowsData = signal<ReportRow[][]>(undefined);
+  currentExpHeaders = signal(0);
 
-  ngOnChanges() {
-    this.fullReportData = { ...this.reportData };
-    this.fullRowsData = this.fullReportData.rows?.reduce((resultArray: ReportRow[][], item, index) => {
+  constructor() {
+    effect(() => {
+      const data = this.reportDataInput();
+      untracked(() => {
+        if (data) {
+          this.processReportData(data);
+        }
+      });
+    });
+  }
+
+  showMoreRows() {
+    if (this.hasMoreRows()) {
+      this.reportData.update((rd) => ({ ...rd, rows: [...rd.rows, ...this.fullRowsData()![0]] }));
+      this.fullRowsData.update((frd) => {
+        const r = [...frd];
+        r.splice(0, 1);
+        return r;
+      });
+    }
+  }
+
+  hasMoreRows() {
+    return this.fullRowsData() != null && this.fullRowsData()![0] != null;
+  }
+
+  toggleFold(index: number, sumRow: boolean = false) {
+    const rd = this.reportData()!;
+    let rows = sumRow ? rd.sumRow : rd.rows;
+    const toggleRow = rows[index];
+    if (toggleRow.depth < rd.meta.rowDesc.length - 1) {
+      const firstChildRow = rows[index + 1];
+      firstChildRow.display = !firstChildRow.display;
+
+      const endIndex = rows.findIndex((row) => row.depth <= toggleRow.depth);
+      rows = endIndex >= 0 ? rows.slice(0, endIndex) : rows;
+      rows.forEach((row) => {
+        row.display = firstChildRow.display && row.depth === firstChildRow.depth;
+      });
+
+      this.currentExpHeaders.set(
+        Math.max(
+          ...this.reportData()!.rows.filter((r) => r.display).map((r) => r.depth),
+          ...this.reportData()!.sumRow.filter((r) => r.display).map((r) => r.depth)
+        )
+      );
+      // Force signal update to re-render after in-place mutations
+      this.reportData.update((r) => ({ ...r }));
+    }
+  }
+
+  canRowCollapse(index: number, sumRow: boolean = false) {
+    const rd = this.reportData()!;
+    const rows = sumRow ? rd.sumRow : rd.rows;
+    return rows[index + 1] ? !rows[index + 1].display : false;
+  }
+
+  private processReportData(data: ReportData) {
+    this.fullReportData = { ...data };
+    this.reportData.set({ ...data });
+    const computed = this.fullReportData.rows?.reduce((resultArray: ReportRow[][], item, index) => {
       const itemsPerChunk = 20;
       if (this.fullReportData.rows.length > itemsPerChunk) {
         const chunkIndex = Math.floor(index / itemsPerChunk);
@@ -53,45 +114,14 @@ export class ReportTableComponent implements OnChanges {
       }
       return resultArray;
     }, []);
-    if (this.fullRowsData) {
-      this.reportData.rows = this.fullRowsData[0];
-      this.fullRowsData.splice(0, 1);
-    }
-  }
-
-  showMoreRows() {
-    if (this.hasMoreRows()) {
-      this.reportData.rows = [...this.reportData.rows, ...this.fullRowsData[0]];
-      this.fullRowsData.splice(0, 1);
-    }
-  }
-
-  hasMoreRows() {
-    return typeof this.fullRowsData !== 'undefined' && this.fullRowsData[0];
-  }
-
-  toggleFold(index: number, sumRow: boolean = false) {
-    let rows = sumRow ? this.reportData.sumRow : this.reportData.rows;
-    const toggleRow = rows[index];
-    if (toggleRow.depth < this.reportData.meta.rowDesc.length - 1) {
-      const firstChildRow = rows[index + 1];
-      firstChildRow.display = !firstChildRow.display;
-
-      const endIndex = rows.findIndex((row) => row.depth <= toggleRow.depth);
-      rows = endIndex >= 0 ? rows.slice(0, endIndex) : rows;
-      rows.forEach((row) => {
-        row.display = firstChildRow.display && row.depth === firstChildRow.depth;
+    this.fullRowsData.set(computed);
+    if (this.fullRowsData()) {
+      this.reportData.update((rd) => ({ ...rd, rows: this.fullRowsData()![0] }));
+      this.fullRowsData.update((frd) => {
+        const r = [...frd];
+        r.splice(0, 1);
+        return r;
       });
-
-      this.currentExpHeaders = Math.max(
-        ...this.reportData.rows.filter((r) => r.display).map((r) => r.depth),
-        ...this.reportData.sumRow.filter((r) => r.display).map((r) => r.depth)
-      );
     }
-  }
-
-  canRowCollapse(index: number, sumRow: boolean = false) {
-    const rows = sumRow ? this.reportData.sumRow : this.reportData.rows;
-    return !rows[index + 1].display;
   }
 }

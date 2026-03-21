@@ -96,7 +96,7 @@ describe('WorkbasketOverviewComponent', () => {
   });
 
   it('should not display workbasket-details', () => {
-    component.showDetail = false;
+    component.showDetail.set(false);
     fixture.detectChanges();
     expect(debugElement.nativeElement.querySelector('kadai-administration-workbasket-details')).toBeNull();
   });
@@ -112,7 +112,7 @@ describe('WorkbasketOverviewComponent', () => {
       }
     });
 
-    component.showDetail = true;
+    component.showDetail.set(true);
     fixture.detectChanges();
     expect(debugElement.nativeElement.querySelector('kadai-administration-workbasket-details')).toBeTruthy();
   });
@@ -123,7 +123,7 @@ describe('WorkbasketOverviewComponent', () => {
   });
 
   it('should set expanded to true when toggleWidth is called and offsetWidth is 250', () => {
-    Object.defineProperty(component.workbasketList.nativeElement, 'offsetWidth', { value: 250, configurable: true });
+    Object.defineProperty(component.workbasketList().nativeElement, 'offsetWidth', { value: 250, configurable: true });
     component.toggleWidth();
     expect(component.expanded).toBe(true);
   });
@@ -139,7 +139,7 @@ describe('WorkbasketOverviewComponent', () => {
   });
 
   it('should trigger toggleWidth a second time and restore expanded to true when offsetWidth is 250', () => {
-    Object.defineProperty(component.workbasketList.nativeElement, 'offsetWidth', { value: 250, configurable: true });
+    Object.defineProperty(component.workbasketList().nativeElement, 'offsetWidth', { value: 250, configurable: true });
     const toggleButton: HTMLElement = debugElement.nativeElement.querySelector(
       '.workbasket-overview__toggle-view-button'
     );
@@ -165,7 +165,7 @@ describe('WorkbasketOverviewComponent', () => {
   });
 
   it('should display empty page with "Select a workbasket" when showDetail is false', () => {
-    component.showDetail = false;
+    component.showDetail.set(false);
     fixture.detectChanges();
     const emptyPage = debugElement.nativeElement.querySelector('.workbasket-overview__empty-page');
     expect(emptyPage).toBeTruthy();
@@ -182,7 +182,7 @@ describe('WorkbasketOverviewComponent', () => {
         }
       }
     });
-    component.showDetail = true;
+    component.showDetail.set(true);
     fixture.detectChanges();
     const emptyPage = debugElement.nativeElement.querySelector('.workbasket-overview__empty-page');
     expect(emptyPage).toBeNull();

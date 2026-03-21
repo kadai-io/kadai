@@ -16,14 +16,12 @@
  *
  */
 
-import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { Sorting, WORKBASKET_SORT_PARAMETER_NAMING, WorkbasketQuerySortParameter } from 'app/shared/models/sorting';
 import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
 import { KadaiType } from 'app/shared/models/kadai-type';
 import { expandDown } from 'app/shared/animations/expand.animation';
 import { Store } from '@ngxs/store';
-import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 import { ACTION } from '../../../shared/models/action';
 import { CreateWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
@@ -35,41 +33,35 @@ import { MatIcon } from '@angular/material/icon';
 import { ImportExportComponent } from '../import-export/import-export.component';
 import { SortComponent } from '../../../shared/components/sort/sort.component';
 import { WorkbasketFilterComponent } from '../../../shared/components/workbasket-filter/workbasket-filter.component';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'kadai-administration-workbasket-list-toolbar',
   animations: [expandDown],
   templateUrl: './workbasket-list-toolbar.component.html',
   styleUrls: ['./workbasket-list-toolbar.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatButton, MatTooltip, MatIcon, ImportExportComponent, SortComponent, WorkbasketFilterComponent]
 })
-export class WorkbasketListToolbarComponent implements OnInit {
-  @Input() workbasketListExpanded: boolean = true;
-  @Input() workbaskets: WorkbasketSummary[];
-  @Input() workbasketDefaultSortBy: WorkbasketQuerySortParameter;
-  @Output() performSorting = new EventEmitter<Sorting<WorkbasketQuerySortParameter>>();
+export class WorkbasketListToolbarComponent {
+  workbasketListExpanded = input(true);
+  workbaskets = input<WorkbasketSummary[]>();
+  workbasketDefaultSortBy = input<WorkbasketQuerySortParameter>();
+  performSorting = output<Sorting<WorkbasketQuerySortParameter>>();
   selectionToImport = KadaiType.WORKBASKETS;
   sortingFields: Map<WorkbasketQuerySortParameter, string> = WORKBASKET_SORT_PARAMETER_NAMING;
   isExpanded = false;
   showFilter = false;
-  workbasketActiveAction$: Observable<ACTION> = inject(Store).select(WorkbasketSelectors.workbasketActiveAction);
-  destroy$ = new Subject<void>();
-  action: ACTION;
+  action = toSignal(inject(Store).select(WorkbasketSelectors.workbasketActiveAction), { requireSync: true });
   private store = inject(Store);
   private workbasketService = inject(WorkbasketService);
-
-  ngOnInit() {
-    this.workbasketActiveAction$.pipe(takeUntil(this.destroy$)).subscribe((action) => {
-      this.action = action;
-    });
-  }
 
   sorting(sort: Sorting<WorkbasketQuerySortParameter>) {
     this.performSorting.emit(sort);
   }
 
   addWorkbasket() {
-    if (this.action !== ACTION.CREATE) {
+    if (this.action() !== ACTION.CREATE) {
       this.store.dispatch(new CreateWorkbasket());
     }
   }
@@ -77,10 +69,5 @@ export class WorkbasketListToolbarComponent implements OnInit {
   onClickFilter() {
     this.isExpanded = !this.isExpanded;
     this.workbasketService.expandWorkbasketActionToolbar(this.isExpanded);
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

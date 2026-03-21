@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { CustomAttribute } from 'app/workplace/models/task';
 
 import { MatDivider } from '@angular/material/divider';
@@ -31,17 +31,18 @@ import { FormsModule } from '@angular/forms';
   selector: 'kadai-task-attribute-value',
   templateUrl: './task-attribute-value.component.html',
   styleUrls: ['./task-attribute-value.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatDivider, MatButton, MatTooltip, MatIcon, MatFormField, MatInput, FormsModule]
 })
 export class TaskAttributeValueComponent {
-  @Input() callbackInfo = false;
-  @Input() attributes: CustomAttribute[] = [];
+  callbackInfo = input(false);
+  attributes = model<CustomAttribute[]>([]);
 
   addAttribute(): void {
-    this.attributes.push({ key: '', value: '' });
+    this.attributes.update((attrs) => [...attrs, { key: '', value: '' }]);
   }
 
   removeAttribute(idx: number): void {
-    this.attributes.splice(idx, 1);
+    this.attributes.update((attrs) => attrs.filter((_, i) => i !== idx));
   }
 }

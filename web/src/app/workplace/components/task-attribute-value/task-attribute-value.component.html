@@ -19,7 +19,7 @@
 <div class="task-attribute-value">
 
   <!-- ATTRIBUTE VALUE TABLE -->
-  @if (attributes.length > 0) {
+  @if (attributes().length > 0) {
     <div class="task-attribute-value__table">
       <!-- HEADER -->
       <div class="task-attribute-value__row">
@@ -28,7 +28,7 @@
       </div>
       <mat-divider></mat-divider>
       <!-- ENTRIES -->
-      @for (entry of attributes; track entry; let i = $index) {
+      @for (entry of attributes(); track entry; let i = $index) {
         <div>
           <div
             class="task-attribute-value__row {{(i % 2 === 0)? 'task-attribute-value__background-grey' : 'task-attribute-value__background-white'}}">
@@ -44,7 +44,7 @@
             <div class="task-attribute-value__column--inputs">
               <mat-form-field appearance="outline" style="width: 100%">
                 <input [(ngModel)]="entry.key" matInput
-                       name="{{callbackInfo ? 'callback-info' : 'custom-attribute'}}-{{i}}"
+                       name="{{callbackInfo() ? 'callback-info' : 'custom-attribute'}}-{{i}}"
                        type="text">
               </mat-form-field>
             </div>
@@ -52,7 +52,7 @@
             <div class="task-attribute-value__column--inputs">
               <mat-form-field appearance="outline" style="width: 100%">
                 <input [(ngModel)]="entry.value" matInput
-                       name="{{callbackInfo ? 'callback-info' : 'custom-attribute'}}-{{i}}-val"
+                       name="{{callbackInfo() ? 'callback-info' : 'custom-attribute'}}-{{i}}-val"
                        type="text">
               </mat-form-field>
             </div>
@@ -61,7 +61,7 @@
       }
     </div>
   } @else {
-    <div> There is currently no {{ callbackInfo ? 'callback information' : 'custom attribute' }}.
+    <div> There is currently no {{ callbackInfo() ? 'callback information' : 'custom attribute' }}.
     </div>
   }
 
@@ -72,7 +72,7 @@
   <!-- ADD BUTTON -->
   <button (click)="addAttribute()" class="task-attribute-value__button--primary"
           mat-flat-button>
-    <span> Add {{ callbackInfo ? 'callback information' : 'custom attribute' }} </span>
+    <span> Add {{ callbackInfo() ? 'callback information' : 'custom attribute' }} </span>
     <mat-icon>add</mat-icon>
   </button>
 

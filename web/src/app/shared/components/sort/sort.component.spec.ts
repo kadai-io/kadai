@@ -38,11 +38,11 @@ describe('SortComponent', () => {
     fixture = TestBed.createComponent(SortComponent<string>);
     component = fixture.componentInstance;
 
-    component.sortingFields = new Map<string, string>([
+    fixture.componentRef.setInput('sortingFields', new Map<string, string>([
       ['name', 'Name'],
       ['priority', 'Priority']
-    ]);
-    component.defaultSortBy = 'name';
+    ]));
+    fixture.componentRef.setInput('defaultSortBy', 'name');
 
     overlayContainer = TestBed.inject(OverlayContainer);
     overlayContainerElement = overlayContainer.getContainerElement();
@@ -211,10 +211,10 @@ describe('SortComponent', () => {
     const localFixture = TestBed.createComponent(SortComponent);
     const localComponent = localFixture.componentInstance;
     localComponent.sort = { 'sort-by': 'name', order: Direction.DESC };
-    localComponent.sortingFields = new Map<string, string>([
+    localFixture.componentRef.setInput('sortingFields', new Map<string, string>([
       ['name', 'Name'],
       ['priority', 'Priority']
-    ]);
+    ]));
     localFixture.detectChanges();
 
     const sortButton = localFixture.nativeElement.querySelector('.sort__button');
@@ -250,11 +250,11 @@ describe('SortComponent', () => {
   it('should not show sort__selected-value on inactive sort field', () => {
     const localFixture = TestBed.createComponent(SortComponent);
     const localComponent = localFixture.componentInstance;
-    localComponent.defaultSortBy = 'priority';
-    localComponent.sortingFields = new Map<string, string>([
+    localFixture.componentRef.setInput('defaultSortBy', 'priority');
+    localFixture.componentRef.setInput('sortingFields', new Map<string, string>([
       ['name', 'Name'],
       ['priority', 'Priority']
-    ]);
+    ]));
     localFixture.detectChanges();
 
     expect(localComponent.sort['sort-by']).toBe('priority');

@@ -81,7 +81,7 @@ describe('TaskCustomFieldsComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TaskCustomFieldsComponent);
     component = fixture.componentInstance;
-    component.task = createTask();
+    fixture.componentRef.setInput('task', createTask());
     fixture.detectChanges();
   });
 
@@ -107,7 +107,7 @@ describe('TaskCustomFieldsComponent', () => {
 
       inputOverflowSubject.next(testMap);
 
-      expect(component.inputOverflowMap).toBe(testMap);
+      expect(component.inputOverflowMap()).toBe(testMap);
     });
 
     it('should set validateKeypress to a function', () => {
@@ -138,7 +138,7 @@ describe('TaskCustomFieldsComponent', () => {
     });
 
     it('should return custom fields even when task custom values are empty strings', () => {
-      component.task = new Task(
+      component.task.set(new Task(
         'task-id-2',
         undefined,
         undefined,
@@ -166,7 +166,7 @@ describe('TaskCustomFieldsComponent', () => {
         '',
         '',
         ''
-      );
+      ));
       component.ngOnInit();
 
       expect(component.customFields).toContain('custom1');
@@ -175,35 +175,12 @@ describe('TaskCustomFieldsComponent', () => {
     });
   });
 
-  describe('ngOnDestroy()', () => {
-    it('should call next and complete on destroy$', () => {
-      const completeSpy = vi.spyOn(component.destroy$, 'complete');
-      const nextSpy = vi.spyOn(component.destroy$, 'next');
-
-      component.ngOnDestroy();
-
-      expect(nextSpy).toHaveBeenCalled();
-      expect(completeSpy).toHaveBeenCalled();
-    });
-
-    it('should unsubscribe from inputOverflowObservable after destroy', () => {
-      component.ngOnDestroy();
-
-      const mapAfterDestroy = component.inputOverflowMap;
-      const newMap = new Map<string, boolean>([['custom1', true]]);
-
-      inputOverflowSubject.next(newMap);
-
-      expect(component.inputOverflowMap).toBe(mapAfterDestroy);
-    });
-  });
-
   describe('inputOverflowMap', () => {
     it('should start as an empty Map before first emission', () => {
       const freshFixture = TestBed.createComponent(TaskCustomFieldsComponent);
       const freshComponent = freshFixture.componentInstance;
       expect(freshComponent.inputOverflowMap).toBeDefined();
-      expect(freshComponent.inputOverflowMap.size).toBe(0);
+      expect(freshComponent.inputOverflowMap().size).toBe(0);
     });
 
     it('should be updated each time inputOverflowObservable emits', () => {
@@ -211,16 +188,16 @@ describe('TaskCustomFieldsComponent', () => {
       const secondMap = new Map<string, boolean>([['custom2', false]]);
 
       inputOverflowSubject.next(firstMap);
-      expect(component.inputOverflowMap).toBe(firstMap);
+      expect(component.inputOverflowMap()).toBe(firstMap);
 
       inputOverflowSubject.next(secondMap);
-      expect(component.inputOverflowMap).toBe(secondMap);
+      expect(component.inputOverflowMap()).toBe(secondMap);
     });
   });
 
   describe('template rendering', () => {
     it('should not render anything when task is null', () => {
-      component.task = null;
+      fixture.componentRef.setInput('task', null);
       fixture.detectChanges();
       const container = fixture.nativeElement.querySelector('.task-custom-fields');
       expect(container).toBeNull();

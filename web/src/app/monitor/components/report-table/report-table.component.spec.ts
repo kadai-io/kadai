@@ -57,78 +57,78 @@ describe('ReportTableComponent', () => {
   });
 
   it('should create', () => {
-    component.reportData = {
+    fixture.componentRef.setInput('reportData', {
       meta: { header: ['H1'], rowDesc: ['Desc1'], sumRowDesc: 'Total', name: 'report', date: '2024' },
       rows: [{ desc: ['row0'], cells: [0], total: 0, depth: 0, display: true }],
       sumRow: [{ desc: ['Total'], cells: [10], total: 10, depth: 0, display: true }]
-    };
+    });
     fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
   describe('ngOnChanges', () => {
     it('should return single chunk when rows < 20', () => {
-      component.reportData = { ...mockSmallReportData, rows: [...mockSmallReportData.rows] };
-      component.ngOnChanges();
+      fixture.componentRef.setInput('reportData', { ...mockSmallReportData, rows: [...mockSmallReportData.rows] });
+      fixture.detectChanges();
 
-      expect(component.reportData.rows.length).toBe(5);
-      expect(component.fullRowsData).toBeTruthy();
+      expect(component.reportData().rows.length).toBe(5);
+      expect(component.fullRowsData()).toBeTruthy();
     });
 
     it('should create multiple chunks when rows > 20', () => {
-      component.reportData = {
+      fixture.componentRef.setInput('reportData', {
         ...mockLargeReportData,
         rows: [...mockLargeReportData.rows]
-      };
-      component.ngOnChanges();
+      });
+      fixture.detectChanges();
 
-      expect(component.reportData.rows.length).toBe(20);
-      expect(component.fullRowsData.length).toBeGreaterThan(0);
-      expect(component.fullRowsData[0].length).toBe(5);
+      expect(component.reportData().rows.length).toBe(20);
+      expect(component.fullRowsData().length).toBeGreaterThan(0);
+      expect(component.fullRowsData()[0].length).toBe(5);
     });
   });
 
   describe('showMoreRows', () => {
     it('should append more rows when hasMoreRows is true', () => {
-      component.reportData = {
+      fixture.componentRef.setInput('reportData', {
         ...mockLargeReportData,
         rows: [...mockLargeReportData.rows]
-      };
-      component.ngOnChanges();
+      });
+      fixture.detectChanges();
 
-      const initialLength = component.reportData.rows.length;
+      const initialLength = component.reportData().rows.length;
       component.showMoreRows();
 
-      expect(component.reportData.rows.length).toBeGreaterThan(initialLength);
+      expect(component.reportData().rows.length).toBeGreaterThan(initialLength);
     });
 
     it('should not change rows when hasMoreRows is false', () => {
-      component.reportData = { ...mockSmallReportData, rows: [...mockSmallReportData.rows] };
-      component.ngOnChanges();
+      fixture.componentRef.setInput('reportData', { ...mockSmallReportData, rows: [...mockSmallReportData.rows] });
+      fixture.detectChanges();
 
-      const initialLength = component.reportData.rows.length;
-      component.fullRowsData = [];
+      const initialLength = component.reportData().rows.length;
+      component.fullRowsData.set([]);
       component.showMoreRows();
 
-      expect(component.reportData.rows.length).toBe(initialLength);
+      expect(component.reportData().rows.length).toBe(initialLength);
     });
   });
 
   describe('hasMoreRows', () => {
     it('should return undefined/false when fullRowsData is empty', () => {
-      component.reportData = { ...mockSmallReportData, rows: [...mockSmallReportData.rows] };
-      component.ngOnChanges();
-      component.fullRowsData = [];
+      fixture.componentRef.setInput('reportData', { ...mockSmallReportData, rows: [...mockSmallReportData.rows] });
+      fixture.detectChanges();
+      component.fullRowsData.set([]);
 
       expect(component.hasMoreRows()).toBeFalsy();
     });
 
     it('should return truthy when there are more rows in fullRowsData', () => {
-      component.reportData = {
+      fixture.componentRef.setInput('reportData', {
         ...mockLargeReportData,
         rows: [...mockLargeReportData.rows]
-      };
-      component.ngOnChanges();
+      });
+      fixture.detectChanges();
 
       expect(component.hasMoreRows()).toBeTruthy();
     });
@@ -140,11 +140,11 @@ describe('ReportTableComponent', () => {
         { desc: ['parent'], cells: [1], total: 1, depth: 0, display: true },
         { desc: ['child'], cells: [1], total: 1, depth: 1, display: true }
       ];
-      component.reportData = {
+      component.reportData.set({
         meta: { header: ['H1'], rowDesc: ['Desc1', 'Desc2'], sumRowDesc: 'Total', name: 'report', date: '2024' },
         rows: rows,
         sumRow: [{ desc: ['Total'], cells: [2], total: 2, depth: 0, display: true }]
-      };
+      });
       const initialDisplay = rows[1].display;
       component.toggleFold(0);
 
@@ -154,28 +154,28 @@ describe('ReportTableComponent', () => {
 
   describe('canRowCollapse', () => {
     it('should return true when next row is not displayed', () => {
-      component.reportData = {
+      component.reportData.set({
         meta: { header: ['H1'], rowDesc: ['Desc1', 'Desc2'], sumRowDesc: 'Total', name: 'report', date: '2024' },
         rows: [
           { desc: ['row0'], cells: [0], total: 0, depth: 0, display: true },
           { desc: ['row1'], cells: [1], total: 1, depth: 1, display: false }
         ],
         sumRow: []
-      };
+      });
       fixture.detectChanges();
 
       expect(component.canRowCollapse(0)).toBe(true);
     });
 
     it('should return false when next row is displayed', () => {
-      component.reportData = {
+      component.reportData.set({
         meta: { header: ['H1'], rowDesc: ['Desc1', 'Desc2'], sumRowDesc: 'Total', name: 'report', date: '2024' },
         rows: [
           { desc: ['row0'], cells: [0], total: 0, depth: 0, display: true },
           { desc: ['row1'], cells: [1], total: 1, depth: 1, display: true }
         ],
         sumRow: []
-      };
+      });
       fixture.detectChanges();
 
       expect(component.canRowCollapse(0)).toBe(false);
@@ -184,7 +184,7 @@ describe('ReportTableComponent', () => {
 
   describe('template rendering with expanded headers', () => {
     it('should render table with currentExpHeaders > 0 to exercise depth branches', () => {
-      component.reportData = {
+      component.reportData.set({
         meta: { header: ['H1', 'H2'], rowDesc: ['Desc1', 'Desc2'], sumRowDesc: 'Total', name: 'report', date: '2024' },
         rows: [
           { desc: ['parent', 'child-desc'], cells: [1, 2], total: 3, depth: 0, display: true },
@@ -194,28 +194,28 @@ describe('ReportTableComponent', () => {
           { desc: ['Total', 'Sub'], cells: [2, 2], total: 4, depth: 0, display: true },
           { desc: ['SubTotal'], cells: [2], total: 2, depth: 1, display: true }
         ]
-      };
-      component.currentExpHeaders = 1;
+      });
+      component.currentExpHeaders.set(1);
       fixture.detectChanges();
       const table = fixture.nativeElement.querySelector('.report');
       expect(table).toBeTruthy();
     });
 
     it('should render rows with display=false hidden', () => {
-      component.reportData = {
+      component.reportData.set({
         meta: { header: ['H1'], rowDesc: ['Desc1'], sumRowDesc: 'Total', name: 'report', date: '2024' },
         rows: [
           { desc: ['visible'], cells: [1], total: 1, depth: 0, display: true },
           { desc: ['hidden'], cells: [2], total: 2, depth: 1, display: false }
         ],
         sumRow: [{ desc: ['Total'], cells: [3], total: 3, depth: 0, display: true }]
-      };
+      });
       fixture.detectChanges();
       expect(component).toBeTruthy();
     });
 
     it('should render sumRow correctly', () => {
-      component.reportData = {
+      component.reportData.set({
         meta: { header: ['H1', 'H2'], rowDesc: ['Desc1', 'Desc2'], sumRowDesc: 'Sum', name: 'report', date: '2024' },
         rows: [
           { desc: ['row1'], cells: [5, 3], total: 8, depth: 0, display: true },
@@ -225,14 +225,14 @@ describe('ReportTableComponent', () => {
           { desc: ['Sum', 'Sub'], cells: [5, 3], total: 8, depth: 0, display: true },
           { desc: ['SubSum'], cells: [2], total: 2, depth: 1, display: true }
         ]
-      };
-      component.currentExpHeaders = 1;
+      });
+      component.currentExpHeaders.set(1);
       fixture.detectChanges();
       expect(component).toBeTruthy();
     });
 
     it('should not render anything when reportData is null', () => {
-      component.reportData = null;
+      component.reportData.set(null);
       fixture.detectChanges();
       const table = fixture.nativeElement.querySelector('.report');
       expect(table).toBeNull();
@@ -243,12 +243,12 @@ describe('ReportTableComponent', () => {
         { desc: ['parent'], cells: [1], total: 1, depth: 0, display: true },
         { desc: ['child'], cells: [1], total: 1, depth: 1, display: true }
       ];
-      component.reportData = {
+      component.reportData.set({
         meta: { header: ['H1'], rowDesc: ['Desc1', 'Desc2'], sumRowDesc: 'Total', name: 'report', date: '2024' },
         rows,
         sumRow: []
-      };
-      component.currentExpHeaders = 1;
+      });
+      component.currentExpHeaders.set(1);
       fixture.detectChanges();
       const cells = fixture.nativeElement.querySelectorAll('.table-cell--justify');
       expect(cells.length).toBeGreaterThan(0);
@@ -264,15 +264,15 @@ describe('ReportTableComponent', () => {
         { desc: ['parent'], cells: [1], total: 1, depth: 0, display: true },
         { desc: ['child'], cells: [2], total: 2, depth: 1, display: true }
       ];
-      component.reportData = {
+      component.reportData.set({
         meta: { header: ['H1'], rowDesc: ['Desc1', 'Desc2'], sumRowDesc: 'Total', name: 'report', date: '2024' },
         rows,
         sumRow: [
           { desc: ['Total'], cells: [3], total: 3, depth: 0, display: true },
           { desc: ['SubTotal'], cells: [1], total: 1, depth: 1, display: true }
         ]
-      };
-      component.currentExpHeaders = 1;
+      });
+      component.currentExpHeaders.set(1);
       fixture.detectChanges();
 
       const initialDisplay = rows[1].display;
@@ -289,15 +289,15 @@ describe('ReportTableComponent', () => {
         { desc: ['Total'], cells: [3], total: 3, depth: 0, display: true },
         { desc: ['SubTotal'], cells: [1], total: 1, depth: 1, display: true }
       ];
-      component.reportData = {
+      component.reportData.set({
         meta: { header: ['H1'], rowDesc: ['Desc1', 'Desc2'], sumRowDesc: 'Total', name: 'report', date: '2024' },
         rows: [
           { desc: ['row1'], cells: [3], total: 3, depth: 0, display: true },
           { desc: ['child'], cells: [1], total: 1, depth: 1, display: true }
         ],
         sumRow: sumRows
-      };
-      component.currentExpHeaders = 1;
+      });
+      component.currentExpHeaders.set(1);
       fixture.detectChanges();
 
       const initialDisplay = sumRows[1].display;
@@ -310,21 +310,20 @@ describe('ReportTableComponent', () => {
     });
 
     it('should call showMoreRows when "Show more rows" button is clicked and there are more rows', () => {
-      component.reportData = {
+      fixture.componentRef.setInput('reportData', {
         ...mockLargeReportData,
         rows: [...mockLargeReportData.rows]
-      };
-      component.ngOnChanges();
+      });
       fixture.detectChanges();
 
-      const initialRowCount = component.reportData.rows.length;
+      const initialRowCount = component.reportData().rows.length;
       const button: HTMLButtonElement = fixture.nativeElement.querySelector('button[mat-flat-button]');
       expect(button).toBeTruthy();
       expect(button.disabled).toBe(false);
       button.click();
       fixture.detectChanges();
 
-      expect(component.reportData.rows.length).toBeGreaterThan(initialRowCount);
+      expect(component.reportData().rows.length).toBeGreaterThan(initialRowCount);
     });
 
     it('should disable "Show more rows" button when there are no more rows', () => {
@@ -339,8 +338,7 @@ describe('ReportTableComponent', () => {
         })),
         sumRow: [{ desc: ['Total'], cells: [10], total: 10, depth: 0, display: true }]
       };
-      component.reportData = { ...smallData, rows: [...smallData.rows] };
-      component.ngOnChanges();
+      fixture.componentRef.setInput('reportData', { ...smallData, rows: [...smallData.rows] });
       fixture.detectChanges();
 
       const button: HTMLButtonElement = fixture.nativeElement.querySelector('button[mat-flat-button]');
@@ -360,28 +358,27 @@ describe('ReportTableComponent', () => {
         })),
         sumRow: [{ desc: ['Total'], cells: [10], total: 10, depth: 0, display: true }]
       };
-      component.reportData = { ...smallData, rows: [...smallData.rows] };
-      component.ngOnChanges();
+      fixture.componentRef.setInput('reportData', { ...smallData, rows: [...smallData.rows] });
       fixture.detectChanges();
 
-      const initialRowCount = component.reportData.rows.length;
+      const initialRowCount = component.reportData().rows.length;
       const button: HTMLButtonElement = fixture.nativeElement.querySelector('button[mat-flat-button]');
       button.click();
       fixture.detectChanges();
 
-      expect(component.reportData.rows.length).toBe(initialRowCount);
+      expect(component.reportData().rows.length).toBe(initialRowCount);
     });
 
     it('should render expand_less icon when child row is visible (canRowCollapse returns false)', () => {
-      component.reportData = {
+      component.reportData.set({
         meta: { header: ['H1'], rowDesc: ['Desc1', 'Desc2'], sumRowDesc: 'Total', name: 'report', date: '2024' },
         rows: [
           { desc: ['parent'], cells: [1], total: 1, depth: 0, display: true },
           { desc: ['child'], cells: [1], total: 1, depth: 1, display: true }
         ],
         sumRow: []
-      };
-      component.currentExpHeaders = 1;
+      });
+      component.currentExpHeaders.set(1);
       fixture.detectChanges();
 
       const icons = fixture.nativeElement.querySelectorAll('.material-icons');
@@ -390,15 +387,15 @@ describe('ReportTableComponent', () => {
     });
 
     it('should render expand_more icon when child row is hidden (canRowCollapse returns true)', () => {
-      component.reportData = {
+      component.reportData.set({
         meta: { header: ['H1'], rowDesc: ['Desc1', 'Desc2'], sumRowDesc: 'Total', name: 'report', date: '2024' },
         rows: [
           { desc: ['parent'], cells: [1], total: 1, depth: 0, display: true },
           { desc: ['child'], cells: [1], total: 1, depth: 1, display: false }
         ],
         sumRow: []
-      };
-      component.currentExpHeaders = 1;
+      });
+      component.currentExpHeaders.set(1);
       fixture.detectChanges();
 
       const icons = fixture.nativeElement.querySelectorAll('.material-icons');
@@ -407,7 +404,7 @@ describe('ReportTableComponent', () => {
     });
 
     it('should render expand_less icon in sumRow footer when child sumRow is visible', () => {
-      component.reportData = {
+      component.reportData.set({
         meta: { header: ['H1'], rowDesc: ['Desc1', 'Desc2'], sumRowDesc: 'Total', name: 'report', date: '2024' },
         rows: [
           { desc: ['row1'], cells: [3], total: 3, depth: 0, display: true },
@@ -417,8 +414,8 @@ describe('ReportTableComponent', () => {
           { desc: ['Total'], cells: [3], total: 3, depth: 0, display: true },
           { desc: ['SubTotal'], cells: [1], total: 1, depth: 1, display: true }
         ]
-      };
-      component.currentExpHeaders = 1;
+      });
+      component.currentExpHeaders.set(1);
       fixture.detectChanges();
 
       const footerIcons = fixture.nativeElement.querySelectorAll('.table-footer .material-icons');
@@ -427,7 +424,7 @@ describe('ReportTableComponent', () => {
     });
 
     it('should render expand_more icon in sumRow footer when child sumRow is hidden', () => {
-      component.reportData = {
+      component.reportData.set({
         meta: { header: ['H1'], rowDesc: ['Desc1', 'Desc2'], sumRowDesc: 'Total', name: 'report', date: '2024' },
         rows: [
           { desc: ['row1'], cells: [3], total: 3, depth: 0, display: true },
@@ -437,8 +434,8 @@ describe('ReportTableComponent', () => {
           { desc: ['Total'], cells: [3], total: 3, depth: 0, display: true },
           { desc: ['SubTotal'], cells: [1], total: 1, depth: 1, display: false }
         ]
-      };
-      component.currentExpHeaders = 1;
+      });
+      component.currentExpHeaders.set(1);
       fixture.detectChanges();
 
       const footerIcons = fixture.nativeElement.querySelectorAll('.table-footer .material-icons');

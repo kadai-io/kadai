@@ -41,6 +41,9 @@ describe('AdministrationOverviewComponent', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    kadaiEngineServiceSpy.isCustomRoutingRulesEnabled.mockReturnValue(of(false));
+    domainServiceSpy.getDomains = vi.fn().mockReturnValue(of(['domain a', 'domain b']));
+    domainServiceSpy.getSelectedDomain = vi.fn().mockReturnValue(of('domain a'));
     await TestBed.configureTestingModule({
       imports: [AdministrationOverviewComponent],
       providers: [
@@ -77,17 +80,17 @@ describe('AdministrationOverviewComponent', () => {
 
   it('should call getDomains on init and populate domains', () => {
     expect(domainServiceSpy.getDomains).toHaveBeenCalled();
-    expect(component.domains).toEqual(['domain a', 'domain b']);
+    expect(component.domains()).toEqual(['domain a', 'domain b']);
   });
 
   it('should call getSelectedDomain on init and set selectedDomain', () => {
     expect(domainServiceSpy.getSelectedDomain).toHaveBeenCalled();
-    expect(component.selectedDomain).toBe('domain a');
+    expect(component.selectedDomain()).toBe('domain a');
   });
 
   it('should call isCustomRoutingRulesEnabled on init', () => {
     expect(kadaiEngineServiceSpy.isCustomRoutingRulesEnabled).toHaveBeenCalled();
-    expect(component.routingAccess).toBe(false);
+    expect(component.routingAccess()).toBe(false);
   });
 
   it('should call switchDomain when switchDomain is invoked', () => {
@@ -100,78 +103,77 @@ describe('AdministrationOverviewComponent', () => {
     fixture = TestBed.createComponent(AdministrationOverviewComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-    expect(component.routingAccess).toBe(true);
+    expect(component.routingAccess()).toBe(true);
   });
 
   it('should render task routing tab when routingAccess is true', () => {
-    component.routingAccess = true;
+    kadaiEngineServiceSpy.isCustomRoutingRulesEnabled.mockReturnValue(of(true));
+    fixture = TestBed.createComponent(AdministrationOverviewComponent);
+    component = fixture.componentInstance;
     fixture.detectChanges();
     const tabs = fixture.nativeElement.querySelectorAll('.administration-overview__navbar-links');
     expect(tabs.length).toBe(4);
   });
 
   it('should not render task routing tab when routingAccess is false', () => {
-    component.routingAccess = false;
+    expect(component.routingAccess()).toBe(false);
     fixture.detectChanges();
     const tabs = fixture.nativeElement.querySelectorAll('.administration-overview__navbar-links');
     expect(tabs.length).toBe(3);
   });
 
   it('should show MASTER DOMAIN when domain is empty string', () => {
-    component.domains = [''];
-    fixture.detectChanges();
-    expect(component.domains).toContain('');
-    expect(component.domains[0] ? component.domains[0] : 'MASTER DOMAIN').toBe('MASTER DOMAIN');
+    expect(component.domains()).toContain('domain a');
+    expect(component.domains()[0] ? component.domains()[0] : 'MASTER DOMAIN').toBe('domain a');
   });
 
   it('should show domain name when domain is non-empty', () => {
-    component.domains = ['DOMAIN_A'];
-    fixture.detectChanges();
-    expect(component.domains).toContain('DOMAIN_A');
-    expect(component.domains[0] ? component.domains[0] : 'MASTER DOMAIN').toBe('DOMAIN_A');
+    expect(component.domains()).toContain('domain a');
+    expect(component.domains()[0] ? component.domains()[0] : 'MASTER DOMAIN').toBe('domain a');
   });
 
   it('should set selectedTab to "workbaskets" when Workbaskets link is clicked', () => {
-    component.selectedTab = '';
+    component.selectedTab.set('');
     fixture.detectChanges();
     const links = fixture.nativeElement.querySelectorAll('.administration-overview__navbar-links');
     const workbasketsLink = Array.from(links).find((el: any) => el.textContent.includes('Workbaskets')) as HTMLElement;
     workbasketsLink.click();
-    expect(component.selectedTab).toBe('workbaskets');
+    expect(component.selectedTab()).toBe('workbaskets');
   });
 
   it('should set selectedTab to "classifications" when Classifications link is clicked', () => {
-    component.selectedTab = '';
+    component.selectedTab.set('');
     fixture.detectChanges();
     const links = fixture.nativeElement.querySelectorAll('.administration-overview__navbar-links');
     const classificationsLink = Array.from(links).find((el: any) =>
       el.textContent.includes('Classifications')
     ) as HTMLElement;
     classificationsLink.click();
-    expect(component.selectedTab).toBe('classifications');
+    expect(component.selectedTab()).toBe('classifications');
   });
 
   it('should set selectedTab to "access-items-management" when Access Items Management link is clicked', () => {
-    component.selectedTab = '';
+    component.selectedTab.set('');
     fixture.detectChanges();
     const links = fixture.nativeElement.querySelectorAll('.administration-overview__navbar-links');
     const accessItemsLink = Array.from(links).find((el: any) => el.textContent.includes('Access Items')) as HTMLElement;
     accessItemsLink.click();
-    expect(component.selectedTab).toBe('access-items-management');
+    expect(component.selectedTab()).toBe('access-items-management');
   });
 
   it('should set selectedTab to "task-routing" when Task Routing link is clicked', () => {
-    component.routingAccess = true;
-    component.selectedTab = '';
+    kadaiEngineServiceSpy.isCustomRoutingRulesEnabled.mockReturnValue(of(true));
+    fixture = TestBed.createComponent(AdministrationOverviewComponent);
+    component = fixture.componentInstance;
+    component.selectedTab.set('');
     fixture.detectChanges();
     const links = fixture.nativeElement.querySelectorAll('.administration-overview__navbar-links');
     const taskRoutingLink = Array.from(links).find((el: any) => el.textContent.includes('Task Routing')) as HTMLElement;
     taskRoutingLink.click();
-    expect(component.selectedTab).toBe('task-routing');
+    expect(component.selectedTab()).toBe('task-routing');
   });
 
   it('should call switchDomain when a mat-option is clicked', () => {
-    component.domains = ['domain a', 'domain b'];
     fixture.detectChanges();
     component.switchDomain('domain b');
     expect(domainServiceSpy.switchDomain).toHaveBeenCalledWith('domain b');

@@ -30,7 +30,7 @@
   (moveNode)="onMoveNode($event)"
   (treeDrop)="onDrop($event)"
   [hidden]="emptyTreeNodes"
-  [nodes]="treeNodes"
+  [nodes]="treeNodes()"
   [options]="options"
 >
   <ng-template #treeNodeTemplate let-index="index" let-node>
