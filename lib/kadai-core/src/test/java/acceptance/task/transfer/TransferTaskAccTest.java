@@ -643,6 +643,8 @@ class TransferTaskAccTest extends AbstractAccTest {
     }
   }
 
+  // region transferTasksToOwner tests
+
   @WithAccessId(user = "admin")
   @Test
   void should_TransferTasksToOwner_When_ValidTaskIdsAndOwnerProvided() throws Exception {
@@ -661,8 +663,6 @@ class TransferTaskAccTest extends AbstractAccTest {
     assertThat(transferredTask2.getOwner()).isEqualTo("teamlead-1");
     assertThat(transferredTask2.isTransferred()).isTrue();
   }
-
-  // region transferTasksToOwner tests
 
   @WithAccessId(user = "admin")
   @Test
@@ -830,6 +830,35 @@ class TransferTaskAccTest extends AbstractAccTest {
     assertThat(results.containsErrors()).isFalse();
     Task transferredTask = taskService.getTask("TKI:000000000000000000000000000000000014");
     assertThat(transferredTask.isRead()).isFalse();
+    assertThat(transferredTask.getOwner()).isEqualTo("user-1-1");
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_TransitionFromClaimedToReady_When_TransferringTasksToOwner() throws Exception {
+    String claimed = "TKI:000000000000000000000000000000000027";
+
+    BulkOperationResults<String, KadaiException> results =
+        taskService.transferTasksToOwner("user-1-1", List.of(claimed));
+
+    assertThat(results.containsErrors()).isFalse();
+    Task transferredTask = taskService.getTask(claimed);
+    assertThat(transferredTask.getState()).isEqualTo(TaskState.READY);
+    assertThat(transferredTask.getOwner()).isEqualTo("user-1-1");
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_TransitionFromInReviewToReadyForReview_When_TransferringTasksToOwner()
+      throws Exception {
+    String inReview = "TKI:200000000000000000000000000000000028";
+
+    BulkOperationResults<String, KadaiException> results =
+        taskService.transferTasksToOwner("user-1-1", List.of(inReview));
+
+    assertThat(results.containsErrors()).isFalse();
+    Task transferredTask = taskService.getTask(inReview);
+    assertThat(transferredTask.getState()).isEqualTo(TaskState.READY_FOR_REVIEW);
     assertThat(transferredTask.getOwner()).isEqualTo("user-1-1");
   }
 
