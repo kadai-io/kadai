@@ -1379,7 +1379,7 @@ public interface TaskApi {
       summary = "Transfer Tasks to another Workbasket",
       description =
           "This endpoint transfers a list of Tasks listed in the body to a given Workbasket, if "
-              + "possible. Tasks that can be transfered without throwing an exception get "
+              + "possible. Tasks that can be transferred without throwing an exception get "
               + "transferred independent of other Tasks. If the transfer of a Task throws an "
               + "exception, then the Task will remain in the old Workbasket.",
       parameters = {
