@@ -1875,6 +1875,7 @@ public interface TaskApi {
                                       "modified": "2024-01-04T13:00:00.000Z",
                                       "planned": "2024-01-05T14:00:00.000Z",
                                       "received": "2024-01-06T15:00:00.000Z",
+                                      "due": "2024-01-06T16:00:00.000Z",
                                       "name": "Bulk Updated Task",
                                       "creator": "bulk-updater",
                                       "note": "Bulk update note",
