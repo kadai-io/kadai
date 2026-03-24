@@ -28,7 +28,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { Page } from 'app/shared/models/page';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { NgClass } from '@angular/common';
@@ -122,9 +122,9 @@ export class PaginationComponent implements OnInit, OnChanges {
     this.pageSelected = 1;
   }
 
-  changeToPage(event: any) {
+  changeToPage(event: PageEvent) {
     let currentPageIndex = event.pageIndex;
-    if (currentPageIndex > event.previousPageIndex) {
+    if (currentPageIndex > (event.previousPageIndex ?? 0)) {
       this.pageSelected += 1;
     } else {
       this.pageSelected -= 1;
@@ -145,7 +145,7 @@ export class PaginationComponent implements OnInit, OnChanges {
     this.changePage.emit(page);
   }
 
-  filter(filterValue: any) {
+  filter(filterValue: string | number) {
     const pageNumbers = this.pageNumbers.map(String);
     this.filteredPages = pageNumbers.filter((value) => value.includes(filterValue.toString()));
     if (this.filteredPages.length === 0) {
