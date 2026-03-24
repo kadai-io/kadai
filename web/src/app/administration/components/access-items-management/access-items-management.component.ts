@@ -273,7 +273,7 @@ export class AccessItemsManagementComponent implements OnInit {
     }
   }
 
-  private filterAccessItems() {
+  filterAccessItems() {
     if (!this.accessItemsForm) return;
     if (this.accessItemsForm.value.accessIdFilter) {
       this.accessItems = this.accessItems.filter((value) =>

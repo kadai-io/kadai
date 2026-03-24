@@ -340,7 +340,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
     this.store
       .dispatch(
         new UpdateWorkbasketAccessItems(
-          this.accessItemsRepresentation._links!['self'].href,
+          this.accessItemsRepresentation._links!.self.href,
           this.AccessItemsForm.value.accessItemsGroups!
         )
       )
