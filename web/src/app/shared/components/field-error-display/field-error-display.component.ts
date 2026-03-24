@@ -28,11 +28,11 @@ import { highlight } from 'app/shared/animations/validation.animation';
 })
 export class FieldErrorDisplayComponent {
   @Input()
-  displayError: boolean;
+  displayError!: boolean;
 
   @Input()
-  errorMessage: string;
+  errorMessage!: string;
 
   @Input()
-  validationTrigger: boolean;
+  validationTrigger!: boolean;
 }

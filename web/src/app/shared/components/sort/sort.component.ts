@@ -32,14 +32,14 @@ import { MapValuesPipe } from '../../pipes/map-values.pipe';
   imports: [MatButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MapValuesPipe]
 })
 export class SortComponent<T> implements OnInit {
-  @Input() sortingFields: Map<T, string>;
+  @Input() sortingFields!: Map<T, string>;
   @Input() menuPosition = 'right';
-  @Input() defaultSortBy: T;
+  @Input() defaultSortBy!: T;
 
   @Output() performSorting = new EventEmitter<Sorting<T>>();
 
   sort: Sorting<T> = {
-    'sort-by': undefined,
+    'sort-by': undefined as unknown as T,
     order: Direction.ASC
   };
 

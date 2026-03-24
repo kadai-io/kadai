@@ -62,9 +62,9 @@ import { MatOption } from '@angular/material/core';
   ]
 })
 export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
-  @Input() savedAccessId;
-  @Input() placeHolderMessage;
-  @Input() entityId;
+  @Input() savedAccessId: any;
+  @Input() placeHolderMessage: any;
+  @Input() entityId: any;
   @Input() isRequired = false;
   @Input() isDisabled = false;
   @Input() displayError = false;
@@ -123,7 +123,7 @@ export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
           this.handleEmptyAccessId();
           return;
         }
-        this.searchForAccessId(value);
+        this.searchForAccessId(value!);
       });
 
     this.setAccessIdFromInput();
@@ -146,10 +146,10 @@ export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
       .pipe(take(1))
       .subscribe((accessIds) => {
         this.filteredAccessIds = accessIds;
-        const accessId = accessIds.find((accessId) => accessId.accessId.toLowerCase() === value.toLowerCase());
+        const accessId = accessIds.find((accessId) => accessId.accessId?.toLowerCase() === value.toLowerCase());
 
         if (typeof accessId !== 'undefined') {
-          this.name = accessId?.name;
+          this.name = accessId?.name ?? '';
           this.isFormValid.emit(true);
           this.accessIdEventEmitter.emit(accessId);
         } else if (this.displayError) {

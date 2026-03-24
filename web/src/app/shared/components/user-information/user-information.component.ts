@@ -31,7 +31,7 @@ import { MatButton } from '@angular/material/button';
   imports: [SvgIconComponent, MatButton]
 })
 export class UserInformationComponent implements OnInit {
-  userInformation: UserInfo;
+  userInformation!: UserInfo;
   roles = '';
   showRoles = false;
   private kadaiEngineService = inject(KadaiEngineService);

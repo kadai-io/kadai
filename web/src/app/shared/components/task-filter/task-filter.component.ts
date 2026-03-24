@@ -39,7 +39,7 @@ import { MapValuesPipe } from '../../pipes/map-values.pipe';
   imports: [MatFormField, MatTooltip, MatLabel, MatInput, FormsModule, MatSelect, MatOption, MapValuesPipe]
 })
 export class TaskFilterComponent implements OnInit, OnDestroy {
-  filter: TaskQueryFilterParameter;
+  filter!: TaskQueryFilterParameter;
   destroy$ = new Subject<void>();
   allStates: Map<TaskState, string> = ALL_STATES;
   private store = inject(Store);

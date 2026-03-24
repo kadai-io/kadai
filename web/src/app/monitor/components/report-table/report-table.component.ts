@@ -30,10 +30,10 @@ import { MatButton } from '@angular/material/button';
 })
 export class ReportTableComponent implements OnChanges {
   @Input()
-  reportData: ReportData;
+  reportData!: ReportData;
 
-  fullReportData: ReportData;
-  fullRowsData: ReportRow[][];
+  fullReportData!: ReportData;
+  fullRowsData!: ReportRow[][];
   currentExpHeaders = 0;
 
   ngOnChanges() {

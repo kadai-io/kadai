@@ -43,8 +43,8 @@ import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 })
 export class SettingsComponent implements OnInit, OnDestroy {
   settingTypes = SettingTypes;
-  settings: Settings;
-  oldSettings: Settings;
+  settings!: Settings;
+  oldSettings!: Settings;
   invalidMembers: string[] = [];
   destroy$ = new Subject<void>();
   settings$: Observable<Settings> = inject(Store).select(SettingsSelectors.getSettings);

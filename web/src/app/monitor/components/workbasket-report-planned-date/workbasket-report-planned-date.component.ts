@@ -37,11 +37,11 @@ import { BaseChartDirective } from 'ng2-charts';
 export class WorkbasketReportPlannedDateComponent implements OnInit {
   @Output()
   metaInformation = new EventEmitter<MetaInfoData>();
-  reportData: ReportData;
-  lineChartLabels: Array<any>;
+  reportData!: ReportData;
+  lineChartLabels!: Array<any>;
   lineChartLegend = true;
   lineChartType = 'line';
-  lineChartData: Array<ChartData>;
+  lineChartData!: Array<ChartData>;
   lineChartOptions: ChartConfiguration['options'] = {
     responsive: true,
     maintainAspectRatio: true,

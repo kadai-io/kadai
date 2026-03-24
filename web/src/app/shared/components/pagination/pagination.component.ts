@@ -54,27 +54,27 @@ import { MatOption } from '@angular/material/core';
   ]
 })
 export class PaginationComponent implements OnInit, OnChanges {
-  @Input() page: Page;
+  @Input() page!: Page;
 
-  @Input() type: String;
+  @Input() type!: String;
 
-  @Input() numberOfItems: number;
+  @Input() numberOfItems!: number;
 
   @Input() expanded: boolean = true;
 
-  @Input() resetPaging: Observable<null>;
+  @Input() resetPaging!: Observable<null>;
 
   @Output() changePage = new EventEmitter<number>();
 
-  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
+  @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
 
-  @ViewChild('pagination') paginationWrapper: ElementRef;
+  @ViewChild('pagination') paginationWrapper!: ElementRef;
 
   destroy$ = new Subject<void>();
 
   hasItems = true;
   pageSelected = 1;
-  pageNumbers: number[];
+  pageNumbers!: number[];
   filteredPages: string[] = [];
 
   ngOnInit() {
@@ -122,7 +122,7 @@ export class PaginationComponent implements OnInit, OnChanges {
     this.pageSelected = 1;
   }
 
-  changeToPage(event) {
+  changeToPage(event: any) {
     let currentPageIndex = event.pageIndex;
     if (currentPageIndex > event.previousPageIndex) {
       this.pageSelected += 1;
@@ -134,7 +134,7 @@ export class PaginationComponent implements OnInit, OnChanges {
 
   updateGoto() {
     this.pageNumbers = [];
-    for (let i = 1; i <= this.page?.totalPages; i++) {
+    for (let i = 1; i <= (this.page?.totalPages ?? 0); i++) {
       this.pageNumbers.push(i);
     }
   }
@@ -145,7 +145,7 @@ export class PaginationComponent implements OnInit, OnChanges {
     this.changePage.emit(page);
   }
 
-  filter(filterValue) {
+  filter(filterValue: any) {
     const pageNumbers = this.pageNumbers.map(String);
     this.filteredPages = pageNumbers.filter((value) => value.includes(filterValue.toString()));
     if (this.filteredPages.length === 0) {

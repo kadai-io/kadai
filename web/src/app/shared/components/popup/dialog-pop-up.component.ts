@@ -29,9 +29,9 @@ import { MatButton } from '@angular/material/button';
   imports: [MatDialogContent, MatDialogActions, MatButton, MatDialogClose]
 })
 export class DialogPopUpComponent implements OnInit {
-  message: string;
-  callback: Function;
-  isDataSpecified: boolean;
+  message!: string;
+  callback!: Function;
+  isDataSpecified!: boolean;
   private data = inject(MAT_DIALOG_DATA);
   private obtainMessageService = inject(ObtainMessageService);
 

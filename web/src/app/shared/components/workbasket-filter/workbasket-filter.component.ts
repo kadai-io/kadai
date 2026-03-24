@@ -56,8 +56,8 @@ import { MapValuesPipe } from '../../pipes/map-values.pipe';
 })
 export class WorkbasketFilterComponent implements OnInit, OnDestroy {
   allTypes: Map<WorkbasketType, string> = ALL_TYPES;
-  @Input() component: string;
-  @Input() isExpanded: boolean;
+  @Input() component!: string;
+  @Input() isExpanded!: boolean;
   availableDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter> = inject(Store).select(
     FilterSelectors.getAvailableDistributionTargetsFilter
   );
@@ -68,7 +68,7 @@ export class WorkbasketFilterComponent implements OnInit, OnDestroy {
     FilterSelectors.getWorkbasketListFilter
   );
   destroy$ = new Subject<void>();
-  filter: WorkbasketQueryFilterParameter;
+  filter!: WorkbasketQueryFilterParameter;
   private store = inject(Store);
 
   ngOnInit(): void {
@@ -89,11 +89,11 @@ export class WorkbasketFilterComponent implements OnInit, OnDestroy {
 
   setFilter(filter: WorkbasketQueryFilterParameter) {
     this.filter = {
-      'description-like': [...filter['description-like']],
-      'key-like': [...filter['key-like']],
-      'name-like': [...filter['name-like']],
-      'owner-like': [...filter['owner-like']],
-      type: [...filter['type']]
+      'description-like': [...(filter['description-like'] ?? [])],
+      'key-like': [...(filter['key-like'] ?? [])],
+      'name-like': [...(filter['name-like'] ?? [])],
+      'owner-like': [...(filter['owner-like'] ?? [])],
+      type: [...(filter['type'] ?? [])]
     };
   }
 

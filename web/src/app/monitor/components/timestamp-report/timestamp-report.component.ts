@@ -31,7 +31,7 @@ import { DatePipe } from '@angular/common';
   providers: [MonitorService]
 })
 export class TimestampReportComponent implements OnInit {
-  reportData: ReportData;
+  reportData!: ReportData;
   private restConnectorService = inject(MonitorService);
   private requestInProgressService = inject(RequestInProgressService);
 

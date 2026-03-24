@@ -86,22 +86,22 @@ import { TaskPriorityReportFilterStateService } from '../../services/task-priori
 })
 export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, OnDestroy {
   columns: string[] = ['priority', 'number'];
-  reportData: ReportData;
+  reportData!: ReportData;
   tableDataArray: { priority: string; number: number }[][] = [];
   colorShouldChange = true;
-  priority = [];
-  nameHighPriority: string;
-  nameMediumPriority: string;
-  nameLowPriority: string;
-  colorHighPriority: string;
-  colorMediumPriority: string;
-  colorLowPriority: string;
+  priority: any[] = [];
+  nameHighPriority!: string;
+  nameMediumPriority!: string;
+  nameLowPriority!: string;
+  colorHighPriority!: string;
+  colorMediumPriority!: string;
+  colorLowPriority!: string;
   destroy$ = new Subject<void>();
   settings$: Observable<Settings> = inject(Store).select(SettingsSelectors.getSettings);
-  workbasketKey = signal<string>(undefined);
+  workbasketKey = signal<string | undefined>(undefined);
   isPanelOpen = false;
-  filters: {}[];
-  keys: string[];
+  filters!: {}[];
+  keys!: string[];
   filtersAreSpecified = false;
   private readonly monitorService = inject(MonitorService);
   private readonly requestInProgressService = inject(RequestInProgressService);
@@ -112,7 +112,7 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
   private readonly domain = toSignal(this.domainService.getSelectedDomain(), {
     initialValue: this.domainService.getSelectedDomainValue?.()
   });
-  private readonly settings = toSignal(this.settings$, { initialValue: undefined as Settings });
+  private readonly settings = toSignal(this.settings$, { initialValue: undefined as unknown as Settings });
   private readonly currentFilter = this.filterState.currentFilter;
 
   constructor() {
