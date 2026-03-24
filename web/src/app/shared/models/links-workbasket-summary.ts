@@ -19,9 +19,9 @@
 // Remnant from old design, needs to be removed, type reference should instead => models/Links.ts
 export class LinksWorkbasketSummary {
   constructor(
-    self?,
-    distributionTargets?,
-    accessItems?,
+    self?: any,
+    distributionTargets?: any,
+    accessItems?: any,
     public allWorkbaskets?: { href: string }
   ) {}
 }

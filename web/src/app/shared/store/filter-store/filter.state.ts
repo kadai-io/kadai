@@ -85,7 +85,7 @@ export class FilterState implements NgxsOnInit {
     let filter = { ...ctx.getState().tasks };
 
     Object.keys(param).forEach((key) => {
-      filter[key] = [...param[key]];
+      (filter as any)[key] = [...(param as any)[key]];
     });
 
     const isWildcardSearch =

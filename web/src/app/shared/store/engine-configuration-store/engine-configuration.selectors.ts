@@ -30,33 +30,33 @@ import { EngineConfigurationState, EngineConfigurationStateModel } from './engin
 export class EngineConfigurationSelectors {
   @Selector([EngineConfigurationState])
   static globalCustomisation(state: EngineConfigurationStateModel): GlobalCustomisation {
-    return state.customisation[state.language].global;
+    return (state.customisation[state.language] as any).global;
   }
 
   @Selector([EngineConfigurationState])
   static workbasketsCustomisation(state: EngineConfigurationStateModel): WorkbasketsCustomisation {
-    return state.customisation[state.language].workbaskets;
+    return (state.customisation[state.language] as any).workbaskets;
   }
 
   @Selector([EngineConfigurationState])
   static classificationsCustomisation(state: EngineConfigurationStateModel): ClassificationsCustomisation {
-    return state.customisation[state.language].classifications;
+    return (state.customisation[state.language] as any).classifications;
   }
 
   @Selector([EngineConfigurationState])
   static accessItemsCustomisation(state: EngineConfigurationStateModel): AccessItemsCustomisation {
-    return state.customisation[state.language].workbaskets['access-items'];
+    return (state.customisation[state.language] as any).workbaskets['access-items'];
   }
 
   @Selector([EngineConfigurationState])
   static tasksCustomisation(state: EngineConfigurationStateModel): TasksCustomisation {
-    return state.customisation[state.language].tasks;
+    return (state.customisation[state.language] as any).tasks;
   }
 
   @Selector([EngineConfigurationState])
   static selectCategoryIcons(state: EngineConfigurationStateModel): ClassificationCategoryImages {
     return {
-      ...state.customisation[state.language].classifications.categories
+      ...(state.customisation[state.language] as any).classifications.categories
     };
   }
 }

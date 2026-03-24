@@ -28,7 +28,7 @@ import { map } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class KadaiEngineService {
-  currentUserInfo: UserInfo;
+  currentUserInfo!: UserInfo;
   private httpClient = inject(HttpClient);
 
   // GET

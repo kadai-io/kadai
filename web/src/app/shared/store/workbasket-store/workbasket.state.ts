@@ -442,7 +442,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
           if (!refetchAll && workbasketDistributionTargets) {
             const completeArray = workbasketDistributionTargets.distributionTargets.concat(wbt.distributionTargets);
             const idArrayNoDupe = [...new Set(completeArray.map((wb) => wb.workbasketId))];
-            wbt.distributionTargets = idArrayNoDupe.map((id) => completeArray.find((wb) => wb.workbasketId === id));
+            wbt.distributionTargets = idArrayNoDupe.map((id) => completeArray.find((wb) => wb.workbasketId === id)!);
           }
           const distributionTargetSet = new Set(wbt.distributionTargets.map((wb) => wb.workbasketId));
           let availableTargets = cloneDeep(ctx.getState().availableDistributionTargets);

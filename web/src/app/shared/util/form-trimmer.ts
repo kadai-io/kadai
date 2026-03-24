@@ -29,9 +29,9 @@ export function trimForm(form: NgForm) {
 
 export function trimObject(object: Object) {
   Object.keys(object).forEach((controlName) => {
-    let prop = object[controlName];
+    let prop = (object as any)[controlName];
     if (typeof prop === 'string') {
-      object[controlName] = prop.trim();
+      (object as any)[controlName] = prop.trim();
     } else if (typeof prop === 'object' && prop !== null) {
       trimObject(prop);
     }

@@ -49,7 +49,7 @@ export class SettingsState implements NgxsAfterBootstrap {
   }
 
   ngxsAfterBootstrap(ctx?: StateContext<any>): void {
-    ctx.dispatch(new RetrieveSettings());
+    ctx?.dispatch(new RetrieveSettings());
   }
 
   @Action(SetSettings)

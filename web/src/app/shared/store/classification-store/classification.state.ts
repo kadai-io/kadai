@@ -228,7 +228,7 @@ export class ClassificationState implements NgxsAfterBootstrap {
   @Action(CopyClassification)
   newCopyClassification(ctx: StateContext<ClassificationStateModel>): Observable<null> {
     const copy = { ...ctx.getState().selectedClassification };
-    copy.key = null;
+    copy.key = undefined;
     copy.classificationId = undefined;
     ctx.patchState({
       selectedClassification: copy,

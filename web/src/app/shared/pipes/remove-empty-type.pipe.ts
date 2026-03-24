@@ -21,8 +21,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 @Pipe({ name: 'removeEmptyType' })
 export class RemoveNoneTypePipe implements PipeTransform {
   transform(value: any): Object[] {
-    const returnArray = [];
-    value.forEach((entry) => {
+    const returnArray: Object[] = [];
+    value.forEach((entry: any) => {
       if (entry.key !== '') {
         returnArray.push({
           key: entry.key,

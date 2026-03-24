@@ -22,6 +22,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 export class OrderBy implements PipeTransform {
   transform(records: Object[], sortKeys?: string[]): any {
     return records.sort((a, b) => {
+      if (!sortKeys) { return 0; }
       for (let i = 0; i < sortKeys.length; i++) {
         let sortKey = sortKeys[i];
         let direction = 1;
@@ -29,8 +30,8 @@ export class OrderBy implements PipeTransform {
           direction = -1;
           sortKey = sortKey.substring(1);
         }
-        const objectA = a[sortKey] ? a[sortKey].toLowerCase() : '';
-        const objectB = b[sortKey] ? b[sortKey].toLowerCase() : '';
+        const objectA = (a as any)[sortKey] ? (a as any)[sortKey].toLowerCase() : '';
+        const objectB = (b as any)[sortKey] ? (b as any)[sortKey].toLowerCase() : '';
         if (objectA < objectB) {
           return -1 * direction;
         }

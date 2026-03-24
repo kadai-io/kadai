@@ -167,7 +167,7 @@ export class FormsValidatorService {
   }
 }
 
-function ResponseOwner(owner) {
+function ResponseOwner(this: { valid: boolean; field: string }, owner: any) {
   this.valid = owner.valid;
   this.field = owner.field;
 }
