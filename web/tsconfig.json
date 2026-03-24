@@ -4,7 +4,6 @@
     "skipLibCheck": true,
     "module": "es2020",
     "outDir": "./dist/out-tsc",
-    "baseUrl": "src",
     "esModuleInterop": true,
     "sourceMap": true,
     "declaration": false,
@@ -14,10 +13,11 @@
     "target": "ES2022",
     "typeRoots": ["node_modules/@types"],
     "paths": {
-      "@task-routing/*": ["app/v2/task-routing/*"]
+      "app/*": ["./src/app/*"],
+      "environments/*": ["./src/environments/*"],
+      "@task-routing/*": ["./src/app/v2/task-routing/*"]
     },
-    "useDefineForClassFields": false,
-    "ignoreDeprecations": "6.0"
+    "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
     "strictStandalone": true
