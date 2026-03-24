@@ -16,7 +16,8 @@
     "paths": {
       "@task-routing/*": ["app/v2/task-routing/*"]
     },
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "ignoreDeprecations": "6.0"
   },
   "angularCompilerOptions": {
     "strictStandalone": true

@@ -45,11 +45,11 @@ import { AsyncPipe } from '@angular/common';
   imports: [MatButton, MatTooltip, MatIcon, FormsModule, MatMenuTrigger, MatMenu, MatMenuItem, AsyncPipe]
 })
 export class ImportExportComponent implements OnInit, OnDestroy {
-  @Input() currentSelection: KadaiType;
-  @Input() parentComponent: string;
+  @Input() currentSelection!: KadaiType;
+  @Input() parentComponent!: string;
   @ViewChild('selectedFile', { static: true })
-  selectedFileInput;
-  domains$: Observable<string[]>;
+  selectedFileInput: any;
+  domains$!: Observable<string[]>;
   destroy$ = new Subject<void>();
   private domainService = inject(DomainService);
   private workbasketDefinitionService = inject(WorkbasketDefinitionService);
@@ -115,7 +115,7 @@ export class ImportExportComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private checkFormatFile(file): boolean {
+  private checkFormatFile(file: any): boolean {
     const ending = file.name.match(/\.([^.]+)$/)[1];
     let check = false;
     if (ending === 'json') {

@@ -47,7 +47,7 @@ import { MatOption } from '@angular/material/core';
 export class AdministrationOverviewComponent implements OnInit {
   @Input() selectedTab = '';
   domains: Array<string> = [];
-  selectedDomain: string;
+  selectedDomain!: string;
   destroy$ = new Subject<void>();
   routingAccess = false;
   private router = inject(Router);

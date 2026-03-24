@@ -62,7 +62,7 @@ import { PaginationComponent } from '../../../shared/components/pagination/pagin
   ]
 })
 export class WorkbasketListComponent implements OnInit, OnDestroy {
-  selectedId = '';
+  selectedId: string | undefined = '';
   type = 'workbaskets';
   workbasketDefaultSortBy: WorkbasketQuerySortParameter = WorkbasketQuerySortParameter.NAME;
   sort: Sorting<WorkbasketQuerySortParameter> = {
@@ -74,10 +74,10 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
     page: 1,
     'page-size': 9
   };
-  requestInProgress: boolean;
+  requestInProgress!: boolean;
   requestInProgressLocal = false;
   resetPagingSubject = new Subject<null>();
-  @Input() expanded: boolean;
+  @Input() expanded!: boolean;
   workbasketsSummary$: Observable<WorkbasketSummary[]> = inject(Store).select(WorkbasketSelectors.workbasketsSummary);
   workbasketsSummaryRepresentation$: Observable<WorkbasketSummaryRepresentation> = inject(Store).select(
     WorkbasketSelectors.workbasketsSummaryRepresentation
@@ -87,7 +87,7 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
     FilterSelectors.getWorkbasketListFilter
   );
   destroy$ = new Subject<void>();
-  @ViewChild('workbasket') workbasketList: MatSelectionList;
+  @ViewChild('workbasket') workbasketList!: MatSelectionList;
   private store = inject(Store);
   private workbasketService = inject(WorkbasketService);
   private orientationService = inject(OrientationService);
@@ -96,7 +96,7 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   private requestInProgressService = inject(RequestInProgressService);
   private ngxsActions$ = inject(Actions);
   @ViewChild('wbToolbar', { static: true })
-  private toolbarElement: ElementRef;
+  private toolbarElement!: ElementRef;
 
   constructor() {
     this.ngxsActions$.pipe(ofActionDispatched(GetWorkbasketsSummary), takeUntil(this.destroy$)).subscribe(() => {
@@ -199,7 +199,7 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
     this.resetPagingSubject.next(null);
   }
 
-  changePage(page) {
+  changePage(page: number) {
     this.pageParameter.page = page;
     this.performRequest();
   }

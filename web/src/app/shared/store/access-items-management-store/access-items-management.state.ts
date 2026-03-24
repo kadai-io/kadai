@@ -139,7 +139,7 @@ export class AccessItemsManagementState implements NgxsAfterBootstrap {
   }
 
   ngxsAfterBootstrap(ctx?: StateContext<any>): void {
-    ctx.dispatch(new InitializeStore());
+    ctx?.dispatch(new InitializeStore());
   }
 }
 

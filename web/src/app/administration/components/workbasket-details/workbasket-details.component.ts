@@ -78,7 +78,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
     WorkbasketSelectors.selectedWorkbasketAndComponentAndAction
   );
   destroy$ = new Subject<void>();
-  @Input() expanded: boolean;
+  @Input() expanded!: boolean;
   areAllAccessItemsValid = true;
   protected readonly ACTION = ACTION;
   private store = inject(Store);

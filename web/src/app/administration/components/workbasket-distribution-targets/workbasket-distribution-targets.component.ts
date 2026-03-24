@@ -55,7 +55,7 @@ export class WorkbasketDistributionTargetsComponent implements OnInit, OnDestroy
   destroy$ = new Subject<void>();
   private notificationsService = inject(NotificationService);
   private store = inject(Store);
-  private selectedWorkbasket: WorkbasketSummary;
+  private selectedWorkbasket: WorkbasketSummary | undefined;
 
   /**
    * Rework with modification based on old components,

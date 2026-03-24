@@ -90,7 +90,7 @@ import { MatOption } from '@angular/material/core';
   ]
 })
 export class ClassificationDetailsComponent implements OnInit, OnDestroy {
-  classification: Classification;
+  classification!: Classification;
   categories$: Observable<string[]> = inject(Store).select(ClassificationSelectors.selectCategories);
   categoryIcons$: Observable<ClassificationCategoryImages> = inject(Store).select(
     EngineConfigurationSelectors.selectCategoryIcons
@@ -99,13 +99,13 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
     ClassificationSelectors.selectedClassification
   );
   badgeMessage$: Observable<string> = inject(Store).select(ClassificationSelectors.getBadgeMessage);
-  customFields$: Observable<CustomField[]>;
+  customFields$!: Observable<CustomField[]>;
   isCreatingNewClassification: boolean = false;
   readonly lengthError = 'You have reached the maximum length for this field';
   inputOverflowMap = new Map<string, boolean>();
-  validateInputOverflow: Function;
-  requestInProgress: boolean;
-  @ViewChild('ClassificationForm') classificationForm: NgForm;
+  validateInputOverflow!: Function;
+  requestInProgress!: boolean;
+  @ViewChild('ClassificationForm') classificationForm!: NgForm;
   toggleValidationMap = new Map<string, boolean>();
   destroy$ = new Subject<void>();
   private location = inject(Location);
@@ -118,7 +118,7 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.customFields$ = this.store.select(EngineConfigurationSelectors.classificationsCustomisation).pipe(
-      map((customisation) => customisation.information),
+      map((customisation) => customisation.information!),
       getCustomFields(customFieldCount)
     );
 
@@ -131,7 +131,7 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
       .getImportingFinished()
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        this.store.dispatch(new SelectClassification(this.classification.classificationId));
+        this.store.dispatch(new SelectClassification(this.classification.classificationId!));
       });
 
     this.requestInProgressService
@@ -144,7 +144,7 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
     this.formsValidatorService.inputOverflowObservable.pipe(takeUntil(this.destroy$)).subscribe((inputOverflowMap) => {
       this.inputOverflowMap = inputOverflowMap;
     });
-    this.validateInputOverflow = (inputFieldModel, maxLength) => {
+    this.validateInputOverflow = (inputFieldModel: any, maxLength: any) => {
       this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
     };
   }
@@ -168,7 +168,7 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   onRestore() {
     this.formsValidatorService.formSubmitAttempt = false;
     this.store
-      .dispatch(new RestoreSelectedClassification(this.classification.classificationId))
+      .dispatch(new RestoreSelectedClassification(this.classification.classificationId!))
       .pipe(take(1))
       .subscribe(() => {
         this.notificationsService.showSuccess('CLASSIFICATION_RESTORE');

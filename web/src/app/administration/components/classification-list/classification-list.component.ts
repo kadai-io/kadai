@@ -74,7 +74,7 @@ import { KadaiTreeComponent } from '../tree/tree.component';
 export class ClassificationListComponent implements OnInit, OnDestroy {
   kadaiType = KadaiType;
   requestInProgress = true;
-  inputValue: string;
+  inputValue!: string;
   selectedCategory = '';
   classificationTypes$: Observable<string[]> = inject(Store).select(ClassificationSelectors.classificationTypes);
   classificationTypeSelected$: Observable<string> = inject(Store).select(
@@ -86,7 +86,7 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
     EngineConfigurationSelectors.selectCategoryIcons
   );
   destroy$ = new Subject<void>();
-  classifications: ClassificationSummary[];
+  classifications!: ClassificationSummary[];
   private location = inject(Location);
   private importExportService = inject(ImportExportService);
   private domainService = inject(DomainService);

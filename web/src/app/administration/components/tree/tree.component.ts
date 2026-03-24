@@ -61,13 +61,13 @@ import { MatTooltip } from '@angular/material/tooltip';
   imports: [TreeModule, SvgIconComponent, MatTooltip]
 })
 export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
-  treeNodes: TreeNodeModel[];
-  categoryIcons: ClassificationCategoryImages;
+  treeNodes!: TreeNodeModel[];
+  categoryIcons!: ClassificationCategoryImages;
   emptyTreeNodes = false;
-  filter: string;
-  category: string;
-  @Input() selectNodeId: string;
-  @Input() filterText: string;
+  filter!: string;
+  category!: string;
+  @Input() selectNodeId?: string;
+  @Input() filterText!: string;
   @Input() filterIcon = '';
   @Output() switchKadaiSpinnerEmit = new EventEmitter<boolean>();
   categoryIcons$: Observable<ClassificationCategoryImages> = inject(Store).select(
@@ -103,14 +103,14 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
   private classificationTreeService = inject(ClassificationTreeService);
   private requestInProgressService = inject(RequestInProgressService);
   @ViewChild('tree', { static: true })
-  private tree: TreeComponent;
+  private tree!: TreeComponent;
 
-  private filterTextOld: string;
+  private filterTextOld!: string;
   private filterIconOld = '';
   private destroy$ = new Subject<void>();
 
   @HostListener('document:click', ['$event'])
-  onDocumentClick(event) {
+  onDocumentClick(event: any) {
     if (this.checkValidElements(event) && this.tree.treeModel.getActiveNode()) {
       this.deselectActiveNode();
     }
@@ -132,7 +132,7 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
           if (this.tree.treeModel.getActiveNode().data.classificationId !== this.selectNodeId) {
             // wait for angular's two-way binding to convert the treeNodes to the internal tree structure.
             // after that conversion the new treeNodes are available
-            setTimeout(() => this.selectNode(this.selectNodeId), 0);
+            setTimeout(() => this.selectNode(this.selectNodeId!), 0);
           }
         }
       });
@@ -182,7 +182,7 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
     }
   }
 
-  async onMoveNode($event) {
+  async onMoveNode($event: any) {
     this.switchKadaiSpinner(true);
     const classification = await this.getClassification($event.node.classificationId);
     classification.parentId = $event.to.parent.classificationId;
@@ -191,7 +191,7 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.updateClassification(classification);
   }
 
-  async onDrop($event) {
+  async onDrop($event: any) {
     if ($event.event.target.tagName === 'TREE-VIEWPORT') {
       this.switchKadaiSpinner(true);
       const classification = await this.getClassification($event.element.data.classificationId);
@@ -239,7 +239,7 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   private deselectActiveNode() {
     const activeNode = this.tree.treeModel.getActiveNode();
-    delete this.selectNodeId;
+    this.selectNodeId = undefined;
     activeNode.setIsActive(false);
     activeNode.blur();
   }
@@ -248,8 +248,8 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
     return this.tree.treeModel.getNodeById(nodeId);
   }
 
-  private filterNodes(filterText, category) {
-    this.tree.treeModel.filterNodes((node) => this.checkNameAndKey(node, filterText) && this.checkIcon(node, category));
+  private filterNodes(filterText: string, category: string) {
+    this.tree.treeModel.filterNodes((node: any) => this.checkNameAndKey(node, filterText) && this.checkIcon(node, category));
     this.filter = filterText;
     this.category = category || 'ALL';
     this.emptyTreeNodes = !this.tree.treeModel.getVisibleRoots().length;
@@ -262,7 +262,7 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
     }
   }
 
-  private checkValidElements(event): boolean {
+  private checkValidElements(event: any): boolean {
     return (
       (this.elementRef.nativeElement.contains(event.target) || this.elementRef.nativeElement === event.target) &&
       (event.target.localName === 'tree-viewport' || event.target.localName === 'kadai-tree')
@@ -270,12 +270,12 @@ export class KadaiTreeComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   private getClassification(classificationId: string): Promise<Classification> {
-    return this.classificationsService.getClassification(classificationId).toPromise();
+    return this.classificationsService.getClassification(classificationId).toPromise() as Promise<Classification>;
   }
 
   private updateClassification(classification: Classification) {
     this.store.dispatch(new UpdateClassification(classification)).subscribe(() => {
-      this.notificationsService.showSuccess('CLASSIFICATION_MOVE', { classificationKey: classification.key });
+      this.notificationsService.showSuccess('CLASSIFICATION_MOVE', { classificationKey: classification.key! });
       this.switchKadaiSpinner(false);
     });
   }

@@ -46,8 +46,8 @@ export class WorkbasketOverviewComponent implements OnInit {
   destroy$ = new Subject<void>();
   routerParams: any;
   expanded = true;
-  @ViewChild('workbasketList') workbasketList: ElementRef;
-  @ViewChild('toggleButton') toggleButton: ElementRef;
+  @ViewChild('workbasketList') workbasketList!: ElementRef;
+  @ViewChild('toggleButton') toggleButton!: ElementRef;
   private route = inject(ActivatedRoute);
   private store = inject(Store);
 

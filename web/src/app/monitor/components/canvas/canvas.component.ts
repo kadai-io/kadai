@@ -32,11 +32,11 @@ import { SettingMembers } from '../../../settings/components/Settings/expected-m
   styleUrls: ['./canvas.component.scss']
 })
 export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
-  @Input() row: ReportRow;
-  @Input() id: string;
+  @Input() row!: ReportRow;
+  @Input() id!: string;
 
-  labels: string[];
-  colors: string[];
+  labels!: string[];
+  colors!: string[];
   destroy$ = new Subject<void>();
 
   settings$: Observable<Settings> = inject(Store).select(SettingsSelectors.getSettings);
@@ -104,7 +104,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    document.getElementById(this.id).outerHTML = ''; // destroy HTML element
+    document.getElementById(this.id)!.outerHTML = ''; // destroy HTML element
     this.destroy$.next();
     this.destroy$.complete();
   }

@@ -80,11 +80,11 @@ import { OrderBy } from '../../../shared/pipes/order-by.pipe';
 export class WorkbasketDistributionTargetsListComponent
   implements AfterContentChecked, OnChanges, OnInit, AfterViewInit
 {
-  @Input() side: Side;
-  @Input() header: string;
-  allSelected;
-  @Input() component;
-  @Input() transferDistributionTargetObservable: Observable<Side>;
+  @Input() side!: Side;
+  @Input() header!: string;
+  allSelected: boolean = false;
+  @Input() component: any;
+  @Input() transferDistributionTargetObservable!: Observable<Side>;
   workbasketDistributionTargets$: Observable<WorkbasketSummary[]> = inject(Store).select(
     WorkbasketSelectors.workbasketDistributionTargets
   );
@@ -98,15 +98,15 @@ export class WorkbasketDistributionTargetsListComponent
     FilterSelectors.getSelectedDistributionTargetsFilter
   );
   toolbarState = false;
-  distributionTargets: WorkbasketDistributionTarget[];
-  distributionTargetsClone: WorkbasketDistributionTarget[];
-  @ViewChild('workbasket') distributionTargetsList: MatSelectionList;
-  @ViewChild('scroller') workbasketList: CdkVirtualScrollViewport;
-  requestInProgress: number;
+  distributionTargets!: WorkbasketDistributionTarget[];
+  distributionTargetsClone!: WorkbasketDistributionTarget[];
+  @ViewChild('workbasket') distributionTargetsList!: MatSelectionList;
+  @ViewChild('scroller') workbasketList!: CdkVirtualScrollViewport;
+  requestInProgress!: number;
   private changeDetector = inject(ChangeDetectorRef);
   private store = inject(Store);
   private destroy$ = new Subject<void>();
-  private filter: WorkbasketQueryFilterParameter;
+  private filter!: WorkbasketQueryFilterParameter;
   private allSelectedDiff = 0;
 
   ngOnInit(): void {
@@ -211,18 +211,18 @@ export class WorkbasketDistributionTargetsListComponent
   }
 
   private applyFilter() {
-    function filterExact(target: WorkbasketDistributionTarget, filterStrings: string[], attribute: string) {
+    function filterExact(target: WorkbasketDistributionTarget, filterStrings: string[] | undefined, attribute: string) {
       if (!!filterStrings && filterStrings?.length !== 0) {
-        return filterStrings.map((str) => str.toLowerCase()).includes(target[attribute].toLowerCase());
+        return filterStrings.map((str) => str.toLowerCase()).includes((target as any)[attribute].toLowerCase());
       }
       return true;
     }
 
-    function filterLike(target: WorkbasketDistributionTarget, filterStrings: string[], attribute: string) {
+    function filterLike(target: WorkbasketDistributionTarget, filterStrings: string[] | undefined, attribute: string) {
       if (!!filterStrings && filterStrings?.length !== 0) {
         let ret = true;
         filterStrings.forEach((filterElement) => {
-          ret = ret && target[attribute].toLowerCase().includes(filterElement.toLowerCase());
+          ret = ret && (target as any)[attribute].toLowerCase().includes(filterElement.toLowerCase());
         });
         return ret;
       }

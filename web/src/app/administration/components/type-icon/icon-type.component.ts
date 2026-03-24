@@ -28,8 +28,7 @@ import { MatTooltip } from '@angular/material/tooltip';
   imports: [SvgIconComponent, MatTooltip]
 })
 export class IconTypeComponent implements OnInit, OnChanges {
-  @Input()
-  type: WorkbasketType;
+  @Input() type!: WorkbasketType;
 
   @Input()
   selected = false;
@@ -38,13 +37,13 @@ export class IconTypeComponent implements OnInit, OnChanges {
   tooltip = false;
 
   @Input()
-  text: string;
+  text!: string;
 
   @Input()
   size = 'small';
 
-  iconSize: string;
-  iconColor: string;
+  iconSize!: string;
+  iconColor!: string;
 
   ngOnInit() {
     this.iconSize = this.size === 'large' ? '24' : '16';

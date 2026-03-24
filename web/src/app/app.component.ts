@@ -58,10 +58,10 @@ export class AppComponent implements OnInit, OnDestroy {
   workbasketsRoute = true;
   selectedRoute = '';
   requestInProgress = false;
-  version: string;
+  version!: string;
   toggle: boolean = false;
   destroy$ = new Subject<void>();
-  @ViewChild('sidenav') public sidenav: MatSidenav;
+  @ViewChild('sidenav') public sidenav!: MatSidenav;
   private router = inject(Router);
   private requestInProgressService = inject(RequestInProgressService);
   private orientationService = inject(OrientationService);

@@ -45,8 +45,8 @@ import { WorkbasketFilterComponent } from '../../../shared/components/workbasket
 })
 export class WorkbasketListToolbarComponent implements OnInit {
   @Input() workbasketListExpanded: boolean = true;
-  @Input() workbaskets: WorkbasketSummary[];
-  @Input() workbasketDefaultSortBy: WorkbasketQuerySortParameter;
+  @Input() workbaskets!: WorkbasketSummary[];
+  @Input() workbasketDefaultSortBy!: WorkbasketQuerySortParameter;
   @Output() performSorting = new EventEmitter<Sorting<WorkbasketQuerySortParameter>>();
   selectionToImport = KadaiType.WORKBASKETS;
   sortingFields: Map<WorkbasketQuerySortParameter, string> = WORKBASKET_SORT_PARAMETER_NAMING;
@@ -54,7 +54,7 @@ export class WorkbasketListToolbarComponent implements OnInit {
   showFilter = false;
   workbasketActiveAction$: Observable<ACTION> = inject(Store).select(WorkbasketSelectors.workbasketActiveAction);
   destroy$ = new Subject<void>();
-  action: ACTION;
+  action!: ACTION;
   private store = inject(Store);
   private workbasketService = inject(WorkbasketService);
 

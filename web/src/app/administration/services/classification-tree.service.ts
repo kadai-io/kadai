@@ -30,9 +30,9 @@ export class ClassificationTreeService {
         ...c,
         children: []
       }))
-      .sort((a: TreeNodeModel, b: TreeNodeModel) => a.key.localeCompare(b.key));
+      .sort((a: TreeNodeModel, b: TreeNodeModel) => (a.key ?? '').localeCompare(b.key ?? ''));
     const roots: TreeNodeModel[] = [];
-    const children: TreeNodeModel[] = [];
+    const children: { [key: string]: TreeNodeModel[] } = {};
     classificationsAsTree.forEach((item) => {
       const parent = item.parentId;
       const target = !parent ? roots : children[parent] || (children[parent] = []);
@@ -42,9 +42,9 @@ export class ClassificationTreeService {
     return roots;
   }
 
-  private findChildren(parent: TreeNodeModel, children: TreeNodeModel[]) {
-    if (children[parent.classificationId]) {
-      parent.children = children[parent.classificationId];
+  private findChildren(parent: TreeNodeModel, children: { [key: string]: TreeNodeModel[] }) {
+    if (children[parent.classificationId!]) {
+      parent.children = children[parent.classificationId!];
       parent.children.forEach((child) => this.findChildren(child, children));
     }
   }
