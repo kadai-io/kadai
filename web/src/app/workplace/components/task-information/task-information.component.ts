@@ -81,21 +81,21 @@ import { Store } from '@ngxs/store';
 })
 export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
   @Input()
-  task: Task;
+  task!: Task;
   @Output() taskChange: EventEmitter<Task> = new EventEmitter<Task>();
   @Input()
-  saveToggleTriggered: boolean;
+  saveToggleTriggered!: boolean;
   @Output() formValid: EventEmitter<boolean> = new EventEmitter<boolean>();
   @ViewChild('TaskForm')
-  taskForm: NgForm;
+  taskForm!: NgForm;
   toggleValidationMap = new Map<string, boolean>();
   requestInProgress = false;
-  classifications: Classification[];
-  isClassificationEmpty: boolean;
+  classifications!: Classification[];
+  isClassificationEmpty!: boolean;
   isOwnerValid: boolean = true;
   readonly lengthError = 'You have reached the maximum length';
   inputOverflowMap = new Map<string, boolean>();
-  validateInputOverflow: Function;
+  validateInputOverflow!: Function;
   tasksCustomisation$: Observable<TasksCustomisation> = inject(Store).select(
     EngineConfigurationSelectors.tasksCustomisation
   );
@@ -108,7 +108,7 @@ export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
     this.formsValidatorService.inputOverflowObservable.pipe(takeUntil(this.destroy$)).subscribe((inputOverflowMap) => {
       this.inputOverflowMap = inputOverflowMap;
     });
-    this.validateInputOverflow = (inputFieldModel, maxLength) => {
+    this.validateInputOverflow = (inputFieldModel: any, maxLength: any) => {
       this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
     };
   }
@@ -126,11 +126,11 @@ export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
     return this.formsValidatorService.isFieldValid(this.taskForm, field);
   }
 
-  updateDate($event) {
+  updateDate($event: any) {
     const newDate = $event.value;
     if (typeof newDate !== 'undefined' && newDate !== null) {
       const newDateISOString = newDate.toISOString();
-      const currentDate = new Date(this.task.due);
+      const currentDate = new Date(this.task.due!);
       if (typeof currentDate === 'undefined' || currentDate !== newDate) {
         this.task.due = newDateISOString;
       }
@@ -167,7 +167,7 @@ export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
   private getClassificationByDomain() {
     this.requestInProgress = true;
     this.classificationService
-      .getClassifications({ domain: [this.task.workbasketSummary.domain] })
+      .getClassifications({ domain: [this.task.workbasketSummary!.domain!] })
       .pipe(takeUntil(this.destroy$))
       .subscribe((classificationPagingList) => {
         this.classifications = classificationPagingList.classifications;

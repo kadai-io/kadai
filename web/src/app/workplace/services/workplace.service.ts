@@ -25,13 +25,13 @@ import { ObjectReference } from '../models/object-reference';
   providedIn: 'root'
 })
 export class WorkplaceService {
-  private workbasketSelected = new BehaviorSubject<Workbasket>(undefined);
+  private workbasketSelected = new BehaviorSubject<Workbasket | undefined>(undefined);
 
   selectWorkbasket(workbasket?: Workbasket): void {
     this.workbasketSelected.next(workbasket);
   }
 
-  getSelectedWorkbasket(): Observable<Workbasket> {
+  getSelectedWorkbasket(): Observable<Workbasket | undefined> {
     return this.workbasketSelected.asObservable();
   }
 }

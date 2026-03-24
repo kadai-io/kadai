@@ -94,7 +94,7 @@ export const httpClientInterceptor: HttpInterceptorFn = (request: HttpRequest<un
         requestInProgressService.setRequestInProgress(false);
         if (
           error.status !== 404 &&
-          (!(error instanceof HttpErrorResponse) || error.url.indexOf('environment-information.json') === -1)
+          (!(error instanceof HttpErrorResponse) || error.url?.indexOf('environment-information.json') === -1)
         ) {
           const { key, messageVariables } = error.error.error || {
             key: 'FALLBACK',
