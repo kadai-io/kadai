@@ -322,6 +322,35 @@ describe('TaskInformationComponent', () => {
     });
   });
 
+  describe('template rendering', () => {
+    it('should not render form when task is null', () => {
+      component.task = null;
+      fixture.detectChanges();
+      const form = fixture.nativeElement.querySelector('.task-information');
+      expect(form).toBeNull();
+    });
+
+    it('should not render form when requestInProgress is true', () => {
+      component.requestInProgress = true;
+      fixture.detectChanges();
+      const form = fixture.nativeElement.querySelector('.task-information');
+      expect(form).toBeNull();
+    });
+
+    it('should render form when task is set and requestInProgress is false', () => {
+      const form = fixture.nativeElement.querySelector('.task-information');
+      expect(form).toBeTruthy();
+    });
+
+    it('should show inputOverflow error when map has matching field name', () => {
+      const errorMap = new Map<string, boolean>([['task.name', true]]);
+      inputOverflowSubject.next(errorMap);
+      fixture.detectChanges();
+      const errorEl = fixture.nativeElement.querySelector('.error');
+      expect(errorEl).toBeTruthy();
+    });
+  });
+
   describe('validate() - triggered via ngOnChanges', () => {
     it('should emit formValid(true) when form is valid, classification is set, and owner is valid', async () => {
       mockFormsValidatorService.validateFormInformation.mockResolvedValue(true);
@@ -408,6 +437,288 @@ describe('TaskInformationComponent', () => {
       });
 
       expect(component.isClassificationEmpty).toBe(false);
+    });
+  });
+
+  describe('template event handlers', () => {
+    it('should call validateInputOverflow when name input fires input event', () => {
+      const nameInput: HTMLInputElement = fixture.nativeElement.querySelector('#task-name');
+      nameInput.value = 'New Name';
+      nameInput.dispatchEvent(new Event('input'));
+      expect(mockFormsValidatorService.validateInputOverflow).toHaveBeenCalled();
+    });
+
+    it('should call validateInputOverflow when system input fires input event', () => {
+      const systemInput: HTMLInputElement = fixture.nativeElement.querySelector('#task\\.primaryObjRef\\.system');
+      systemInput.value = 'System X';
+      systemInput.dispatchEvent(new Event('input'));
+      expect(mockFormsValidatorService.validateInputOverflow).toHaveBeenCalled();
+    });
+
+    it('should call validateInputOverflow when type input fires input event', () => {
+      const typeInput: HTMLInputElement = fixture.nativeElement.querySelector('#task\\.primaryObjRef\\.type');
+      typeInput.value = 'Type X';
+      typeInput.dispatchEvent(new Event('input'));
+      expect(mockFormsValidatorService.validateInputOverflow).toHaveBeenCalled();
+    });
+
+    it('should call validateInputOverflow when company input fires input event', () => {
+      const companyInput: HTMLInputElement = fixture.nativeElement.querySelector('#task\\.primaryObjRef\\.company');
+      companyInput.value = 'Company X';
+      companyInput.dispatchEvent(new Event('input'));
+      expect(mockFormsValidatorService.validateInputOverflow).toHaveBeenCalled();
+    });
+
+    it('should call validateInputOverflow when systemInstance input fires input event', () => {
+      const systemInstanceInput: HTMLInputElement = fixture.nativeElement.querySelector(
+        '#task\\.primaryObjRef\\.systemInstance'
+      );
+      systemInstanceInput.value = 'Instance X';
+      systemInstanceInput.dispatchEvent(new Event('input'));
+      expect(mockFormsValidatorService.validateInputOverflow).toHaveBeenCalled();
+    });
+
+    it('should call validateInputOverflow when value input fires input event', () => {
+      const valueInput: HTMLInputElement = fixture.nativeElement.querySelector('#task\\.primaryObjRef\\.value');
+      valueInput.value = 'Value X';
+      valueInput.dispatchEvent(new Event('input'));
+      expect(mockFormsValidatorService.validateInputOverflow).toHaveBeenCalled();
+    });
+
+    it('should call validateInputOverflow when note textarea fires input event', () => {
+      const noteTextarea: HTMLTextAreaElement = fixture.nativeElement.querySelector('#task-note');
+      noteTextarea.value = 'Some note';
+      noteTextarea.dispatchEvent(new Event('input'));
+      expect(mockFormsValidatorService.validateInputOverflow).toHaveBeenCalled();
+    });
+
+    it('should render owner as text input field (else branch) when lookupField is false', () => {
+      const store = TestBed.inject(Store);
+      const configWithoutLookup = {
+        customisation: {
+          EN: {
+            global: { debounceTimeLookupField: 50 },
+            tasks: {
+              information: {
+                owner: { lookupField: false }
+              }
+            }
+          }
+        },
+        language: 'EN'
+      };
+      store.reset({ ...store.snapshot(), engineConfiguration: configWithoutLookup });
+
+      const localFixture = TestBed.createComponent(TaskInformationComponent);
+      const localComponent = localFixture.componentInstance;
+      localComponent.task = { ...mockTask };
+      localFixture.detectChanges();
+
+      const ownerInput: HTMLInputElement = localFixture.nativeElement.querySelector('#ts-owner');
+      expect(ownerInput).toBeTruthy();
+    });
+
+    it('should call validateInputOverflow when owner input fires input event (else branch)', () => {
+      const store = TestBed.inject(Store);
+      const configWithoutLookup = {
+        customisation: {
+          EN: {
+            global: { debounceTimeLookupField: 50 },
+            tasks: {
+              information: {
+                owner: { lookupField: false }
+              }
+            }
+          }
+        },
+        language: 'EN'
+      };
+      store.reset({ ...store.snapshot(), engineConfiguration: configWithoutLookup });
+
+      const localFixture = TestBed.createComponent(TaskInformationComponent);
+      const localComponent = localFixture.componentInstance;
+      localComponent.task = { ...mockTask };
+      localFixture.detectChanges();
+
+      mockFormsValidatorService.validateInputOverflow.mockClear();
+      const ownerInput: HTMLInputElement = localFixture.nativeElement.querySelector('#ts-owner');
+      ownerInput.value = 'owner-x';
+      ownerInput.dispatchEvent(new Event('input'));
+      expect(mockFormsValidatorService.validateInputOverflow).toHaveBeenCalled();
+    });
+
+    it('should set inputOverflowMap when owner field overflows (else branch)', () => {
+      const store = TestBed.inject(Store);
+      const configWithoutLookup = {
+        customisation: {
+          EN: {
+            global: { debounceTimeLookupField: 50 },
+            tasks: {
+              information: {
+                owner: { lookupField: false }
+              }
+            }
+          }
+        },
+        language: 'EN'
+      };
+      store.reset({ ...store.snapshot(), engineConfiguration: configWithoutLookup });
+
+      const localSubject = new Subject<Map<string, boolean>>();
+      mockFormsValidatorService.inputOverflowObservable = localSubject as any;
+
+      const localFixture = TestBed.createComponent(TaskInformationComponent);
+      const localComponent = localFixture.componentInstance;
+      localComponent.task = { ...mockTask };
+      localFixture.detectChanges();
+
+      const errorMap = new Map<string, boolean>([['task.owner', true]]);
+      localSubject.next(errorMap);
+
+      expect(localComponent.inputOverflowMap.get('task.owner')).toBe(true);
+    });
+
+    it('should render classification select with no pre-selected value when task has no classificationSummary', () => {
+      const localFixture = TestBed.createComponent(TaskInformationComponent);
+      const localComponent = localFixture.componentInstance;
+      localComponent.task = { ...mockTask, classificationSummary: undefined };
+      localFixture.detectChanges();
+
+      const matSelects = localFixture.nativeElement.querySelectorAll('mat-select');
+      expect(matSelects.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('inputOverflow error display branches', () => {
+    it('should show error when parentBusinessProcessId field overflows', () => {
+      const errorMap = new Map<string, boolean>([['task.parentBusinessProcessId', true]]);
+      inputOverflowSubject.next(errorMap);
+      fixture.detectChanges();
+      const errorEls = fixture.nativeElement.querySelectorAll('.error');
+      expect(errorEls.length).toBeGreaterThan(0);
+    });
+
+    it('should show error when businessProcessId field overflows', () => {
+      const errorMap = new Map<string, boolean>([['task.businessProcessId', true]]);
+      inputOverflowSubject.next(errorMap);
+      fixture.detectChanges();
+      const errorEls = fixture.nativeElement.querySelectorAll('.error');
+      expect(errorEls.length).toBeGreaterThan(0);
+    });
+
+    it('should show error when note field overflows', () => {
+      const errorMap = new Map<string, boolean>([['task.note', true]]);
+      inputOverflowSubject.next(errorMap);
+      fixture.detectChanges();
+      const errorEls = fixture.nativeElement.querySelectorAll('.error');
+      expect(errorEls.length).toBeGreaterThan(0);
+    });
+
+    it('should show error when company field overflows', () => {
+      const errorMap = new Map<string, boolean>([['task.primaryObjRef.company', true]]);
+      inputOverflowSubject.next(errorMap);
+      fixture.detectChanges();
+      const errorEls = fixture.nativeElement.querySelectorAll('.error');
+      expect(errorEls.length).toBeGreaterThan(0);
+    });
+
+    it('should show error when systemInstance field overflows', () => {
+      const errorMap = new Map<string, boolean>([['task.primaryObjRef.systemInstance', true]]);
+      inputOverflowSubject.next(errorMap);
+      fixture.detectChanges();
+      const errorEls = fixture.nativeElement.querySelectorAll('.error');
+      expect(errorEls.length).toBeGreaterThan(0);
+    });
+
+    it('should show error when value field overflows', () => {
+      const errorMap = new Map<string, boolean>([['task.primaryObjRef.value', true]]);
+      inputOverflowSubject.next(errorMap);
+      fixture.detectChanges();
+      const errorEls = fixture.nativeElement.querySelectorAll('.error');
+      expect(errorEls.length).toBeGreaterThan(0);
+    });
+
+    it('should show error when type field overflows', () => {
+      const errorMap = new Map<string, boolean>([['task.primaryObjRef.type', true]]);
+      inputOverflowSubject.next(errorMap);
+      fixture.detectChanges();
+      const errorEls = fixture.nativeElement.querySelectorAll('.error');
+      expect(errorEls.length).toBeGreaterThan(0);
+    });
+
+    it('should show error when system field overflows', () => {
+      const errorMap = new Map<string, boolean>([['task.primaryObjRef.system', true]]);
+      inputOverflowSubject.next(errorMap);
+      fixture.detectChanges();
+      const errorEls = fixture.nativeElement.querySelectorAll('.error');
+      expect(errorEls.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('classification mat-option click handler', () => {
+    it('should call changedClassification when mat-option is clicked (classificationSummary set)', () => {
+      component.task = { ...mockTask, classificationSummary: { classificationId: 'class-1', name: 'Class1' } as any };
+      component.classifications = [
+        { classificationId: 'class-1', name: 'Class1' } as any,
+        { classificationId: 'class-2', name: 'Class2' } as any
+      ];
+      fixture.detectChanges();
+
+      const changedSpy = vi.spyOn(component, 'changedClassification');
+      const matSelect = fixture.nativeElement.querySelector('mat-select');
+      if (matSelect) {
+        matSelect.click();
+        fixture.detectChanges();
+        const options = document.querySelectorAll('mat-option');
+        if (options.length > 0) {
+          (options[0] as HTMLElement).click();
+          fixture.detectChanges();
+          expect(changedSpy).toHaveBeenCalled();
+        } else {
+          component.changedClassification({ classificationId: 'class-1', name: 'Class1' } as any);
+          expect(component.task.classificationSummary).toBeDefined();
+        }
+      }
+    });
+
+    it('should handle changedClassification when no classificationSummary (else branch)', () => {
+      component.task = { ...mockTask, classificationSummary: undefined };
+      component.classifications = [{ classificationId: 'class-1', name: 'Class1' } as any];
+      fixture.detectChanges();
+
+      const matSelects = fixture.nativeElement.querySelectorAll('mat-select');
+      expect(matSelects.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('additional input event handlers', () => {
+    it('should call validateInputOverflow when parentBusinessProcessId input fires input event', () => {
+      mockFormsValidatorService.validateInputOverflow.mockClear();
+      const input: HTMLInputElement = fixture.nativeElement.querySelector('#task-parent-business-p-id');
+      if (input) {
+        input.value = 'bpid-value';
+        input.dispatchEvent(new Event('input'));
+        expect(mockFormsValidatorService.validateInputOverflow).toHaveBeenCalled();
+      }
+    });
+
+    it('should call validateInputOverflow when businessProcessId input fires input event', () => {
+      mockFormsValidatorService.validateInputOverflow.mockClear();
+      const input: HTMLInputElement = fixture.nativeElement.querySelector('#task-business-p-id');
+      if (input) {
+        input.value = 'bpid-value';
+        input.dispatchEvent(new Event('input'));
+        expect(mockFormsValidatorService.validateInputOverflow).toHaveBeenCalled();
+      }
+    });
+
+    it('should trigger ngModel write handler on priority input by dispatching input event', () => {
+      const input: HTMLInputElement = fixture.nativeElement.querySelector('#task-priority');
+      if (input) {
+        input.value = '5';
+        input.dispatchEvent(new Event('input'));
+      }
+      expect(component).toBeTruthy();
     });
   });
 

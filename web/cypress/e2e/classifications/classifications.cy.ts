@@ -16,8 +16,8 @@
  *
  */
 
-context('KADAI Classifications', () => {
-  beforeEach(() => cy.loginAs('admin'));
+describe('KADAI Classifications', () => {
+  beforeEach(() => cy.loginAsAdmin());
 
   it('should be possible to edit the service level of a classification', () => {
     const editedValue = 'P99D';
@@ -25,19 +25,19 @@ context('KADAI Classifications', () => {
     cy.visitTestClassification();
 
     cy.get('#classification-service-level').clear({ force: true }).type(editedValue);
-    cy.get('button').contains('Save').click({ force: true });
+    cy.get('button').contains('Save').click();
 
     cy.get('#classification-service-level').should('have.value', editedValue);
   });
 
   it('should be able to visit classifications and filter by manual', () => {
-    cy.visit(Cypress.env('appUrl') + Cypress.env('adminUrl') + '/classifications');
+    cy.visit(Cypress.expose('appUrl') + Cypress.expose('adminUrl') + '/classifications');
     cy.verifyPageLoad('/classifications');
 
     cy.get('button[mattooltip="Filter Category"]')
-      .click({ force: true })
+      .click()
       .then(() => {
-        cy.get('.mat-menu-content').contains('MANUAL').click();
+        cy.get('.mat-mdc-menu-content').contains('MANUAL').click();
         cy.get('tree-node-collection').find('tree-node').should('have.length', 8);
       });
   });
@@ -57,19 +57,17 @@ context('KADAI Classifications', () => {
     cy.visitTestClassification();
 
     cy.get('ng-form').find('mat-form-field mat-select[required]').click({ force: true });
-    cy.wait(Cypress.env('dropdownWait'));
-    cy.get('mat-option').contains('PROCESS').click({ force: true });
-    cy.get('button').contains('Save').click({ force: true });
+    cy.wait(Cypress.expose('dropdownWait'));
+    cy.get('mat-option').contains('PROCESS').click();
+    cy.get('button').contains('Save').click();
 
-    // assure that its process now
     cy.get('ng-form').find('mat-form-field mat-select[required]').contains('PROCESS').should('be.visible');
 
-    // change back to external
     cy.get('ng-form').find('mat-form-field mat-select[required]').click({ force: true });
-    cy.wait(Cypress.env('dropdownWait'));
-    cy.get('mat-option').contains('EXTERNAL').should('be.visible').click({ force: true });
+    cy.wait(Cypress.expose('dropdownWait'));
+    cy.get('mat-option').contains('EXTERNAL').should('be.visible').click();
 
-    cy.get('button').contains('Save').click({ force: true });
+    cy.get('button').contains('Save').click();
   });
 
   it('should be possible to edit the description of a classification', () => {
@@ -78,7 +76,7 @@ context('KADAI Classifications', () => {
     cy.visitTestClassification();
 
     cy.get('#classification-description').clear({ force: true }).type(editedValue);
-    cy.get('button').contains('Save').click({ force: true });
+    cy.get('button').contains('Save').click();
 
     cy.get('#classification-description').should('have.value', editedValue);
   });
@@ -86,11 +84,11 @@ context('KADAI Classifications', () => {
   it('should be possible to edit the custom classification', () => {
     cy.visitTestClassification();
 
-    cy.get('#classification-custom-1').clear({ force: true }).type(Cypress.env('testValueClassifications'));
+    cy.get('#classification-custom-1').clear({ force: true }).type(Cypress.expose('testValueClassifications'));
 
-    cy.get('button').contains('Save').click({ force: true });
+    cy.get('button').contains('Save').click();
 
-    cy.get('#classification-custom-1').should('have.value', Cypress.env('testValueClassifications'));
+    cy.get('#classification-custom-1').should('have.value', Cypress.expose('testValueClassifications'));
   });
 
   it('should be possible to edit the application entry point', () => {
@@ -98,9 +96,9 @@ context('KADAI Classifications', () => {
 
     cy.get('#classification-application-entry-point')
       .clear({ force: true })
-      .type(Cypress.env('testValueClassifications'));
-    cy.get('button').contains('Save').click({ force: true });
+      .type(Cypress.expose('testValueClassifications'));
+    cy.get('button').contains('Save').click();
 
-    cy.get('#classification-application-entry-point').should('have.value', Cypress.env('testValueClassifications'));
+    cy.get('#classification-application-entry-point').should('have.value', Cypress.expose('testValueClassifications'));
   });
 });

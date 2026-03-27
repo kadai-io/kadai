@@ -64,7 +64,7 @@
 
     <!-- spring dependencies -->
     <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
-    <version.spring.boot>4.0.3</version.spring.boot>
+    <version.spring.boot>4.0.5</version.spring.boot>
     <version.spring.mybatis>4.0.0</version.spring.mybatis>
 
     <!-- camunda dependencies -->
@@ -88,8 +88,8 @@
     <!-- Excel to DMN converter dependencies -->
     <version.docx4j>11.5.11</version.docx4j>
     <version.jakarta.xml.bind-api>4.0.5</version.jakarta.xml.bind-api>
-    <version.jaxb-core>4.0.6</version.jaxb-core>
-    <version.jaxb-impl>4.0.6</version.jaxb-impl>
+    <version.jaxb-core>4.0.7</version.jaxb-core>
+    <version.jaxb-impl>4.0.7</version.jaxb-impl>
     <version.jakarta.activation>2.1.4</version.jakarta.activation>
 
     <!-- database driver versions -->

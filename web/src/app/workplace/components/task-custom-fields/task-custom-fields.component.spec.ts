@@ -217,4 +217,46 @@ describe('TaskCustomFieldsComponent', () => {
       expect(component.inputOverflowMap).toBe(secondMap);
     });
   });
+
+  describe('template rendering', () => {
+    it('should not render anything when task is null', () => {
+      component.task = null;
+      fixture.detectChanges();
+      const container = fixture.nativeElement.querySelector('.task-custom-fields');
+      expect(container).toBeNull();
+    });
+
+    it('should render custom field inputs when task is set', () => {
+      const inputs = fixture.nativeElement.querySelectorAll('input[id^="task-custom-"]');
+      expect(inputs.length).toBeGreaterThan(0);
+    });
+
+    it('should show error div when inputOverflowMap has matching field name', () => {
+      const errorMap = new Map<string, boolean>([['task.custom1', true]]);
+      inputOverflowSubject.next(errorMap);
+      fixture.detectChanges();
+      const errorEl = fixture.nativeElement.querySelector('.error');
+      expect(errorEl).toBeTruthy();
+    });
+
+    it('should not show error div when inputOverflowMap has no matching field name', () => {
+      const errorMap = new Map<string, boolean>([['task.custom1', false]]);
+      inputOverflowSubject.next(errorMap);
+      fixture.detectChanges();
+      const errorEl = fixture.nativeElement.querySelector('.error');
+      expect(errorEl).toBeNull();
+    });
+
+    it('should render spacer elements for even-index custom fields', () => {
+      const spacers = fixture.nativeElement.querySelectorAll('.task-custom-fields__spacer');
+      expect(spacers.length).toBeGreaterThan(0);
+    });
+
+    it('should call formsValidatorService.validateInputOverflow when input event is triggered on a custom field', () => {
+      const input: HTMLInputElement = fixture.nativeElement.querySelector('#task-custom-1');
+      expect(input).toBeTruthy();
+      input.dispatchEvent(new Event('input'));
+      expect(mockFormsValidatorService.validateInputOverflow).toHaveBeenCalled();
+    });
+  });
 });

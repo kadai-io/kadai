@@ -105,4 +105,60 @@ describe('ClassificationTypesSelectorComponent', () => {
     expect(storeSpy).toHaveBeenCalled();
     expect(locationSpy).toHaveBeenCalled();
   });
+
+  it('should call select() with the correct classification type when a mat-option is clicked', () => {
+    const selectSpy = vi.spyOn(component, 'select');
+
+    const dropdownButton = debugElement.nativeElement.querySelector('.types-selector__selected-type');
+    dropdownButton.click();
+    fixture.detectChanges();
+
+    const options = debugElement.queryAll(By.css('.types-selector__options'));
+    expect(options.length).toBeGreaterThan(0);
+    options[0].nativeElement.click();
+    fixture.detectChanges();
+
+    expect(selectSpy).toHaveBeenCalledWith('TASK');
+  });
+
+  it('should call select() with DOCUMENT classification type when the second option is clicked', () => {
+    const selectSpy = vi.spyOn(component, 'select');
+
+    const dropdownButton = debugElement.nativeElement.querySelector('.types-selector__selected-type');
+    dropdownButton.click();
+    fixture.detectChanges();
+
+    const options = debugElement.queryAll(By.css('.types-selector__options'));
+    expect(options.length).toBe(2);
+    options[1].nativeElement.click();
+    fixture.detectChanges();
+
+    expect(selectSpy).toHaveBeenCalledWith('DOCUMENT');
+  });
+
+  it('should dispatch store action and navigate when mat-option is clicked via DOM', () => {
+    const storeSpy = vi.spyOn(store, 'dispatch');
+    const location = TestBed.inject(Location);
+    const locationSpy = vi.spyOn(location, 'go');
+
+    const dropdownButton = debugElement.nativeElement.querySelector('.types-selector__selected-type');
+    dropdownButton.click();
+    fixture.detectChanges();
+
+    const options = debugElement.queryAll(By.css('.types-selector__options'));
+    options[0].nativeElement.click();
+    fixture.detectChanges();
+
+    expect(storeSpy).toHaveBeenCalled();
+    expect(locationSpy).toHaveBeenCalled();
+  });
+
+  it('should render one mat-option for each classification type from the store', () => {
+    const dropdownButton = debugElement.nativeElement.querySelector('.types-selector__selected-type');
+    dropdownButton.click();
+    fixture.detectChanges();
+
+    const options = debugElement.queryAll(By.css('.types-selector__options'));
+    expect(options.length).toBe(2);
+  });
 });

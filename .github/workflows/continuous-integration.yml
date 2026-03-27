@@ -352,7 +352,7 @@ jobs:
         working-directory: web
         run: |
           ../mvnw -B spring-boot:run -P history.plugin -f .. -pl :kadai-rest-spring-example-boot &> /dev/null &
-          npx wait-port -t 30000 localhost:8080 && yarn run e2e-standalone --spec "cypress/e2e/monitor/**"
+          npx wait-port -t 30000 localhost:8080 && yarn run e2e-standalone
       - name: Eco CI Measurement of cypress e2e
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
         with:
@@ -741,7 +741,7 @@ jobs:
       - name: Verify Example Application contains documentation
         run: ci/verify_docs_jar.sh
       - name: Login to Microsoft Azure
-        uses: Azure/login@v2
+        uses: Azure/login@v3
         with:
           creds: '{"clientId":"${{ secrets.CLIENT_ID }}","clientSecret":"${{ secrets.CLIENT_SECRET }}","subscriptionId":"${{ secrets.SUBSCRIPTION_ID }}","tenantId":"${{ secrets.TENANT_ID }}"}'
       - name: Deploy to Microsoft Azure

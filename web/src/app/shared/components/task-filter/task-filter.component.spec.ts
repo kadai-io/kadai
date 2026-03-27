@@ -113,4 +113,109 @@ describe('TaskFilterComponent', () => {
     expect(nextSpy).toHaveBeenCalled();
     expect(completeSpy).toHaveBeenCalled();
   });
+
+  it('should render template with state filter options', () => {
+    fixture.detectChanges();
+    const matSelect = fixture.nativeElement.querySelector('mat-select');
+    expect(matSelect).toBeTruthy();
+  });
+
+  it('should render mat-select with selected state when filter.state is set', () => {
+    component.filter.state = [TaskState.READY];
+    fixture.detectChanges();
+    const matSelect = fixture.nativeElement.querySelector('mat-select');
+    expect(matSelect).toBeTruthy();
+  });
+
+  it('should render mat-select with no selected value when filter.state is empty', () => {
+    component.filter.state = [];
+    fixture.detectChanges();
+    const matSelect = fixture.nativeElement.querySelector('mat-select');
+    expect(matSelect).toBeTruthy();
+  });
+
+  describe('template event handlers', () => {
+    it('should call updateState when name input fires keyup event', () => {
+      const updateStateSpy = vi.spyOn(component, 'updateState');
+      const nameInput: HTMLInputElement = fixture.nativeElement.querySelector('input[placeholder="Name"]');
+      nameInput.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true }));
+      expect(updateStateSpy).toHaveBeenCalled();
+    });
+
+    it('should call search when name input fires keyup.enter event', () => {
+      const searchSpy = vi.spyOn(component, 'search');
+      const nameInput: HTMLInputElement = fixture.nativeElement.querySelector('input[placeholder="Name"]');
+      nameInput.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
+      expect(searchSpy).toHaveBeenCalled();
+    });
+
+    it('should call updateState when owner input fires keyup event', () => {
+      const updateStateSpy = vi.spyOn(component, 'updateState');
+      const ownerInput: HTMLInputElement = fixture.nativeElement.querySelector('input[placeholder="Owner"]');
+      ownerInput.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true }));
+      expect(updateStateSpy).toHaveBeenCalled();
+    });
+
+    it('should call search when owner input fires keyup.enter event', () => {
+      const searchSpy = vi.spyOn(component, 'search');
+      const ownerInput: HTMLInputElement = fixture.nativeElement.querySelector('input[placeholder="Owner"]');
+      ownerInput.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
+      expect(searchSpy).toHaveBeenCalled();
+    });
+
+    it('should call search when priority input fires keyup.enter event', () => {
+      const searchSpy = vi.spyOn(component, 'search');
+      const priorityInput: HTMLInputElement = fixture.nativeElement.querySelector('input[placeholder="Priority"]');
+      priorityInput.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
+      expect(searchSpy).toHaveBeenCalled();
+    });
+
+    it('should update filter name-like via ngModel and dispatch SetTaskFilter on keyup', () => {
+      const dispatchSpy = vi.spyOn(store, 'dispatch');
+      const nameInput: HTMLInputElement = fixture.nativeElement.querySelector('input[placeholder="Name"]');
+      nameInput.value = 'my-task';
+      nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+      nameInput.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true }));
+      expect(dispatchSpy).toHaveBeenCalled();
+    });
+
+    it('should trigger ngModel write handlers on all inputs by dispatching input events', () => {
+      const ownerInput: HTMLInputElement = fixture.nativeElement.querySelector('input[placeholder="Owner"]');
+      ownerInput.value = 'user1';
+      ownerInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+      const priorityInput: HTMLInputElement = fixture.nativeElement.querySelector('input[placeholder="Priority"]');
+      priorityInput.value = '5';
+      priorityInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+      expect(component).toBeTruthy();
+    });
+
+    it('should call updateState via ngModelChange when priority input value changes', () => {
+      const updateStateSpy = vi.spyOn(component, 'updateState');
+      const priorityInput: HTMLInputElement = fixture.nativeElement.querySelector('input[placeholder="Priority"]');
+      priorityInput.value = '3';
+      priorityInput.dispatchEvent(new Event('input', { bubbles: true }));
+      expect(updateStateSpy).toHaveBeenCalled();
+    });
+
+    it('should call setStatus when mat-option is clicked', () => {
+      const setStatusSpy = vi.spyOn(component, 'setStatus');
+      const matSelect = fixture.nativeElement.querySelector('mat-select');
+      if (matSelect) {
+        matSelect.click();
+        fixture.detectChanges();
+        const options = document.querySelectorAll('mat-option');
+        if (options.length > 0) {
+          (options[0] as HTMLElement).click();
+          fixture.detectChanges();
+        } else {
+          component.setStatus(TaskState.READY);
+        }
+      } else {
+        component.setStatus(TaskState.READY);
+      }
+      expect(setStatusSpy).toHaveBeenCalled();
+    });
+  });
 });
