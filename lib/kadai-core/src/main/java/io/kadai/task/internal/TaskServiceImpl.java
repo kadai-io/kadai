@@ -119,6 +119,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -701,6 +702,55 @@ public class TaskServiceImpl implements TaskService {
           NotAuthorizedOnWorkbasketException {
     return taskTransferrer.transferWithOwner(
         taskIds, destinationWorkbasketKey, destinationWorkbasketDomain, owner, setTransferFlag);
+  }
+
+  @SuppressWarnings("checkstyle:LambdaParameterName")
+  @Override
+  public BulkOperationResults<String, KadaiException> transferTasksToOwner(
+      String ownerId, List<String> taskIds) throws InvalidArgumentException {
+    if (taskIds == null || taskIds.isEmpty()) {
+      throw new InvalidArgumentException("TaskIds must not be null or empty.");
+    }
+    if (ownerId == null || ownerId.isEmpty()) {
+      throw new InvalidArgumentException("OwnerId must not be null or empty.");
+    }
+
+    // Group task IDs by their current workbasket ID
+    Map<String, List<String>> taskIdsByWorkbasketId = new HashMap<>();
+    BulkOperationResults<String, KadaiException> aggregatedResults =
+        new BulkOperationResults<>();
+
+    for (String taskId : taskIds) {
+      if (taskId == null || taskId.isEmpty()) {
+        aggregatedResults.addError(
+            taskId, new TaskNotFoundException(taskId));
+        continue;
+      }
+      try {
+        Task task = getTask(taskId);
+        String workbasketId = task.getWorkbasketSummary().getId();
+        taskIdsByWorkbasketId.computeIfAbsent(workbasketId, k -> new ArrayList<>()).add(taskId);
+      } catch (TaskNotFoundException | NotAuthorizedOnWorkbasketException e) {
+        aggregatedResults.addError(taskId, e);
+      }
+    }
+
+    // Transfer tasks per workbasket
+    for (Map.Entry<String, List<String>> entry : taskIdsByWorkbasketId.entrySet()) {
+      String workbasketId = entry.getKey();
+      List<String> wbTaskIds = entry.getValue();
+      try {
+        BulkOperationResults<String, KadaiException> result =
+            transferTasksWithOwner(workbasketId, wbTaskIds, ownerId, true);
+        aggregatedResults.addAllErrors(result);
+      } catch (WorkbasketNotFoundException | NotAuthorizedOnWorkbasketException e) {
+        for (String taskId : wbTaskIds) {
+          aggregatedResults.addError(taskId, e);
+        }
+      }
+    }
+
+    return aggregatedResults;
   }
 
   @Override

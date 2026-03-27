@@ -948,6 +948,24 @@ public interface TaskService {
           NotAuthorizedOnWorkbasketException;
 
   /**
+   * Transfers a List of {@linkplain Task Tasks} to the {@linkplain Workbasket Workbaskets} they
+   * currently belong to, setting the owner to the specified ownerId. The {@linkplain
+   * Task#isTransferred() isTransferred} flag is always set to true.
+   *
+   * <p>For each {@linkplain Task}, the method reads the current {@linkplain Workbasket} and then
+   * transfers the task to that same workbasket using {@link #transferTasksWithOwner(String, List,
+   * String)} with the given owner. Results from all workbaskets are aggregated.
+   *
+   * @param ownerId the new owner for the {@linkplain Task Tasks}
+   * @param taskIds List of {@linkplain Task#getId() ids} of the {@linkplain Task Tasks} to be
+   *     updated
+   * @return BulkResult with {@linkplain Task#getId() ids} and Error for each failed transaction
+   * @throws InvalidArgumentException if the method parameters are empty or NULL
+   */
+  BulkOperationResults<String, KadaiException> transferTasksToOwner(
+      String ownerId, List<String> taskIds) throws InvalidArgumentException;
+
+  /**
    * Distributes {@linkplain Task} instances from a source {@linkplain Workbasket} to one or more
    * destination {@linkplain Workbasket}s based on a custom distribution strategy specified by its
    * name.
