@@ -29,9 +29,11 @@ import io.kadai.common.internal.util.IdGenerator;
 import io.kadai.common.internal.util.ObjectAttributeChangeDetector;
 import io.kadai.spi.history.api.events.task.TaskTransferredEvent;
 import io.kadai.spi.history.internal.HistoryEventManager;
+import io.kadai.spi.task.internal.BeforeTransferTaskManager;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
+import io.kadai.task.api.exceptions.TransferCheckException;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.api.models.TaskSummary;
 import io.kadai.task.internal.models.TaskImpl;
@@ -40,6 +42,7 @@ import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import io.kadai.workbasket.api.exceptions.WorkbasketNotFoundException;
+import io.kadai.workbasket.api.models.Workbasket;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
 import io.kadai.workbasket.internal.WorkbasketQueryImpl;
 import java.time.Instant;
@@ -52,15 +55,20 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** This class is responsible for the transfer of Tasks to another Workbasket. */
 final class TaskTransferrer {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(TaskTransferrer.class);
 
   private final InternalKadaiEngine kadaiEngine;
   private final WorkbasketService workbasketService;
   private final TaskServiceImpl taskService;
   private final TaskMapper taskMapper;
   private final HistoryEventManager historyEventManager;
+  private final BeforeTransferTaskManager beforeTransferTaskManager;
 
   TaskTransferrer(
       InternalKadaiEngine kadaiEngine, TaskMapper taskMapper, TaskServiceImpl taskService) {
@@ -69,13 +77,15 @@ final class TaskTransferrer {
     this.taskMapper = taskMapper;
     this.workbasketService = kadaiEngine.getEngine().getWorkbasketService();
     this.historyEventManager = kadaiEngine.getHistoryEventManager();
+    this.beforeTransferTaskManager = kadaiEngine.getBeforeTransferTaskManager();
   }
 
   Task transfer(String taskId, String destinationWorkbasketId, boolean setTransferFlag)
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          TransferCheckException {
     WorkbasketSummary destinationWorkbasket =
         workbasketService.getWorkbasket(destinationWorkbasketId).asSummary();
     return transferSingleTask(taskId, destinationWorkbasket, null, setTransferFlag);
@@ -89,7 +99,8 @@ final class TaskTransferrer {
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          TransferCheckException {
     WorkbasketSummary destinationWorkbasket =
         workbasketService.getWorkbasket(destinationWorkbasketKey, destinationDomain).asSummary();
     return transferSingleTask(taskId, destinationWorkbasket, null, setTransferFlag);
@@ -155,7 +166,8 @@ final class TaskTransferrer {
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          TransferCheckException {
     WorkbasketSummary destinationWorkbasket =
         workbasketService.getWorkbasket(destinationWorkbasketId).asSummary();
     return transferSingleTask(taskId, destinationWorkbasket, owner, setTransferFlag);
@@ -170,7 +182,8 @@ final class TaskTransferrer {
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          TransferCheckException {
     WorkbasketSummary destinationWorkbasket =
         workbasketService.getWorkbasket(destinationWorkbasketKey, destinationDomain).asSummary();
     return transferSingleTask(taskId, destinationWorkbasket, owner, setTransferFlag);
@@ -181,7 +194,8 @@ final class TaskTransferrer {
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          TransferCheckException {
     try {
       kadaiEngine.openConnection();
       TaskImpl task = (TaskImpl) taskService.getTask(taskId);
@@ -191,6 +205,12 @@ final class TaskTransferrer {
 
       WorkbasketSummary originWorkbasket = task.getWorkbasketSummary();
       checkPreconditionsForTransferTask(task, destinationWorkbasket, originWorkbasket);
+
+      if (beforeTransferTaskManager.isEnabled()) {
+        Workbasket destinationWorkbasketFull =
+            workbasketService.getWorkbasket(destinationWorkbasket.getId());
+        beforeTransferTaskManager.checkTransferAllowed(task, destinationWorkbasketFull);
+      }
 
       applyTransferValuesForTask(task, destinationWorkbasket, owner, setTransferFlag);
       taskMapper.update(task);
@@ -227,12 +247,50 @@ final class TaskTransferrer {
                   () -> taskService.createTaskQuery().idIn(taskIds.toArray(new String[0])).list());
       taskSummaries =
           filterOutTasksWhichDoNotMatchTransferCriteria(taskIds, taskSummaries, bulkLog);
+
+      if (beforeTransferTaskManager.isEnabled()) {
+        BulkOperationResults<String, KadaiException> spiErrors =
+            checkTransferAllowedForBulk(taskSummaries, destinationWorkbasket);
+        if (spiErrors.containsErrors()) {
+          LOGGER.warn(
+              "BeforeTransferTaskProvider denied transfer for {} task(s). "
+                  + "No tasks will be transferred.",
+              spiErrors.getFailedIds().size());
+          bulkLog.addAllErrors(spiErrors);
+          return bulkLog;
+        }
+      }
+
       updateTransferableTasks(taskSummaries, destinationWorkbasket, owner, setTransferFlag);
 
       return bulkLog;
     } finally {
       kadaiEngine.returnConnection();
     }
+  }
+
+  private BulkOperationResults<String, KadaiException> checkTransferAllowedForBulk(
+      List<TaskSummary> taskSummaries, WorkbasketSummary destinationWorkbasket) {
+    BulkOperationResults<String, KadaiException> spiErrors = new BulkOperationResults<>();
+    Workbasket destinationWorkbasketFull;
+    try {
+      destinationWorkbasketFull = workbasketService.getWorkbasket(destinationWorkbasket.getId());
+    } catch (KadaiException e) {
+      LOGGER.warn("Could not load destination workbasket for SPI check", e);
+      for (TaskSummary taskSummary : taskSummaries) {
+        spiErrors.addError(taskSummary.getId(), e);
+      }
+      return spiErrors;
+    }
+    for (TaskSummary taskSummary : taskSummaries) {
+      try {
+        Task task = taskService.getTask(taskSummary.getId());
+        beforeTransferTaskManager.checkTransferAllowed(task, destinationWorkbasketFull);
+      } catch (KadaiException e) {
+        spiErrors.addError(taskSummary.getId(), e);
+      }
+    }
+    return spiErrors;
   }
 
   private void checkPreconditionsForTransferTask(
