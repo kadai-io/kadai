@@ -10,7 +10,8 @@ import org.slf4j.LoggerFactory;
 
 public class CreateTaskPostprocessorManager {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CreateTaskPostprocessorManager.class);
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(CreateTaskPostprocessorManager.class);
   private final List<CreateTaskPostprocessor> createTaskPostProcessors;
 
   public CreateTaskPostprocessorManager() {
