@@ -103,11 +103,11 @@ public interface InternalKadaiEngine {
   KadaiEngine getEngine();
 
   /**
-   * Retrieve HistoryEventProducer.
+   * Retrieve KadaiEventBus.
    *
-   * @return the HistoryEventProducer instance.
+   * @return the KadaiEventBus instance.
    */
-  KadaiEventBus getKadaiEventBroker();
+  KadaiEventBus getKadaiEventBus();
 
   /**
    * Retrieve TaskRoutingProducer.

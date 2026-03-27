@@ -609,7 +609,7 @@ public class KadaiEngineImpl implements KadaiEngine {
     }
 
     @Override
-    public KadaiEventBus getKadaiEventBroker() {
+    public KadaiEventBus getKadaiEventBus() {
       return kadaiEventBus;
     }
 

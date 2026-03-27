@@ -70,7 +70,7 @@ final class TaskTransferrer {
     this.taskService = taskService;
     this.taskMapper = taskMapper;
     this.workbasketService = kadaiEngine.getEngine().getWorkbasketService();
-    this.eventPublisher = new SimpleKadaiEventPublisherImpl<>(kadaiEngine.getKadaiEventBroker());
+    this.eventPublisher = new SimpleKadaiEventPublisherImpl<>(kadaiEngine.getKadaiEventBus());
   }
 
   Task transfer(String taskId, String destinationWorkbasketId, boolean setTransferFlag)
