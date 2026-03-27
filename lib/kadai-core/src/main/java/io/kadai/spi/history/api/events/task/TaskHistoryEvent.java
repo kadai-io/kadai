@@ -58,9 +58,8 @@ public class TaskHistoryEvent implements KadaiEvent {
 
   public TaskHistoryEvent() {}
 
-  public TaskHistoryEvent(String id, TaskSummary task, String userId, String details) {
+  public TaskHistoryEvent(String id, TaskSummary task, String details) {
     this.id = id;
-    this.userId = userId;
     this.details = details;
     taskId = task.getId();
     businessProcessId = task.getBusinessProcessId();
@@ -82,12 +81,6 @@ public class TaskHistoryEvent implements KadaiEvent {
       porType = task.getPrimaryObjRef().getType();
       porValue = task.getPrimaryObjRef().getValue();
     }
-  }
-
-  public TaskHistoryEvent(
-      String id, TaskSummary task, String userId, String proxyAccessId, String details) {
-    this(id, task, userId, details);
-    this.proxyAccessId = proxyAccessId;
   }
 
   public void setCustomAttribute(TaskHistoryCustomField customField, String value) {
@@ -256,18 +249,22 @@ public class TaskHistoryEvent implements KadaiEvent {
     this.created = created != null ? created.truncatedTo(ChronoUnit.MILLIS) : null;
   }
 
+  @Override
   public String getUserId() {
     return userId;
   }
 
+  @Override
   public void setUserId(String userId) {
     this.userId = userId;
   }
 
+  @Override
   public String getProxyAccessId() {
-    return proxyAccessId;
+    return this.proxyAccessId;
   }
 
+  @Override
   public void setProxyAccessId(String proxyAccessId) {
     this.proxyAccessId = proxyAccessId;
   }

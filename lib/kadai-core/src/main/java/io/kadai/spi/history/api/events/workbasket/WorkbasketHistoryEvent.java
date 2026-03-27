@@ -55,10 +55,8 @@ public class WorkbasketHistoryEvent implements KadaiEvent {
 
   public WorkbasketHistoryEvent() {}
 
-  public WorkbasketHistoryEvent(
-      String id, WorkbasketSummary workbasket, String userId, String details) {
+  public WorkbasketHistoryEvent(String id, WorkbasketSummary workbasket, String details) {
     this.id = id;
-    this.userId = userId;
     this.details = details;
     workbasketId = workbasket.getId();
     domain = workbasket.getDomain();
@@ -77,16 +75,6 @@ public class WorkbasketHistoryEvent implements KadaiEvent {
     orgLevel2 = workbasket.getOrgLevel2();
     orgLevel3 = workbasket.getOrgLevel3();
     orgLevel4 = workbasket.getOrgLevel4();
-  }
-
-  public WorkbasketHistoryEvent(
-      String id,
-      WorkbasketSummary workbasket,
-      String userId,
-      String proxyAccessId,
-      String details) {
-    this(id, workbasket, userId, details);
-    this.proxyAccessId = proxyAccessId;
   }
 
   public void setCustomAttribute(WorkbasketCustomField customField, String value) {
@@ -159,18 +147,22 @@ public class WorkbasketHistoryEvent implements KadaiEvent {
     this.created = created != null ? created.truncatedTo(ChronoUnit.MILLIS) : null;
   }
 
+  @Override
   public String getUserId() {
     return userId;
   }
 
+  @Override
   public void setUserId(String userId) {
     this.userId = userId;
   }
 
+  @Override
   public String getProxyAccessId() {
     return proxyAccessId;
   }
 
+  @Override
   public void setProxyAccessId(String proxyAccessId) {
     this.proxyAccessId = proxyAccessId;
   }

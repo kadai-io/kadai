@@ -22,9 +22,8 @@ import io.kadai.workbasket.api.models.Workbasket;
 
 public class WorkbasketUpdatedEvent extends WorkbasketHistoryEvent {
 
-  public WorkbasketUpdatedEvent(
-      String id, Workbasket workbasket, String userId, String proxyAccessId, String details) {
-    super(id, workbasket, userId, proxyAccessId, details);
+  public WorkbasketUpdatedEvent(String id, Workbasket workbasket, String details) {
+    super(id, workbasket, details);
     eventType = WorkbasketHistoryEventType.UPDATED.getName();
     created = workbasket.getModified();
   }

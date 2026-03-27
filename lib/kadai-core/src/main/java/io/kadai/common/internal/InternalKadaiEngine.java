@@ -19,7 +19,7 @@
 package io.kadai.common.internal;
 
 import io.kadai.common.api.KadaiEngine;
-import io.kadai.spi.history.internal.KadaiEventBroker;
+import io.kadai.spi.history.internal.KadaiEventBus;
 import io.kadai.spi.priority.internal.PriorityServiceManager;
 import io.kadai.spi.routing.internal.TaskRoutingManager;
 import io.kadai.spi.task.internal.AfterRequestChangesManager;
@@ -104,11 +104,11 @@ public interface InternalKadaiEngine {
   KadaiEngine getEngine();
 
   /**
-   * Retrieve HistoryEventProducer.
+   * Retrieve KadaiEventBus.
    *
-   * @return the HistoryEventProducer instance.
+   * @return the KadaiEventBus instance.
    */
-  KadaiEventBroker getKadaiEventBroker();
+  KadaiEventBus getKadaiEventBus();
 
   /**
    * Retrieve TaskRoutingProducer.

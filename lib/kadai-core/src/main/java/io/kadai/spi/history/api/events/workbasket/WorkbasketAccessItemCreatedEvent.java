@@ -23,9 +23,8 @@ import java.time.Instant;
 
 public class WorkbasketAccessItemCreatedEvent extends WorkbasketHistoryEvent {
 
-  public WorkbasketAccessItemCreatedEvent(
-      String id, Workbasket workbasket, String userId, String proxyAccessId, String details) {
-    super(id, workbasket, userId, proxyAccessId, details);
+  public WorkbasketAccessItemCreatedEvent(String id, Workbasket workbasket, String details) {
+    super(id, workbasket, details);
     eventType = WorkbasketHistoryEventType.ACCESS_ITEM_CREATED.getName();
     created = Instant.now();
   }

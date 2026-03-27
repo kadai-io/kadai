@@ -22,9 +22,8 @@ import io.kadai.task.api.models.Task;
 
 public class TaskUpdatedEvent extends TaskHistoryEvent {
 
-  public TaskUpdatedEvent(
-      String id, Task updatedTask, String userId, String proxyAccessId, String details) {
-    super(id, updatedTask, userId, proxyAccessId, details);
+  public TaskUpdatedEvent(String id, Task updatedTask, String details) {
+    super(id, updatedTask, details);
     eventType = TaskHistoryEventType.UPDATED.getName();
     created = updatedTask.getModified();
   }
