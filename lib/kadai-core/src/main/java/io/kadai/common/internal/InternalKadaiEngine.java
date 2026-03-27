@@ -26,6 +26,7 @@ import io.kadai.spi.task.internal.AfterRequestChangesManager;
 import io.kadai.spi.task.internal.AfterRequestReviewManager;
 import io.kadai.spi.task.internal.BeforeRequestChangesManager;
 import io.kadai.spi.task.internal.BeforeRequestReviewManager;
+import io.kadai.spi.task.internal.BeforeTransferTaskManager;
 import io.kadai.spi.task.internal.CreateTaskPostprocessorManager;
 import io.kadai.spi.task.internal.CreateTaskPreprocessorManager;
 import io.kadai.spi.task.internal.ReviewRequiredManager;
@@ -186,4 +187,11 @@ public interface InternalKadaiEngine {
    * @return the {@linkplain io.kadai.spi.task.internal.TaskEndstatePreprocessorManager} instance
    */
   TaskEndstatePreprocessorManager getTaskEndstatePreprocessorManager();
+
+  /**
+   * Retrieves the {@linkplain BeforeTransferTaskManager}.
+   *
+   * @return the {@linkplain BeforeTransferTaskManager} instance
+   */
+  BeforeTransferTaskManager getBeforeTransferTaskManager();
 }

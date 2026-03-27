@@ -93,6 +93,7 @@ import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
+import io.kadai.task.api.exceptions.TransferCheckException;
 import io.kadai.task.api.models.Attachment;
 import io.kadai.task.api.models.AttachmentSummary;
 import io.kadai.task.api.models.ObjectReference;
@@ -493,7 +494,8 @@ public class TaskServiceImpl implements TaskService {
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          TransferCheckException {
     return taskTransferrer.transfer(taskId, destinationWorkbasketId, setTransferFlag);
   }
 
@@ -502,7 +504,8 @@ public class TaskServiceImpl implements TaskService {
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          TransferCheckException {
     return taskTransferrer.transfer(taskId, workbasketKey, domain, setTransferFlag);
   }
 
@@ -512,7 +515,8 @@ public class TaskServiceImpl implements TaskService {
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          TransferCheckException {
     return taskTransferrer.transferWithOwner(
         taskId, destinationWorkbasketId, owner, setTransferFlag);
   }
@@ -523,7 +527,8 @@ public class TaskServiceImpl implements TaskService {
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          TransferCheckException {
     return taskTransferrer.transferWithOwner(taskId, workbasketKey, domain, owner, setTransferFlag);
   }
 

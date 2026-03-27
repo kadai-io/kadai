@@ -49,6 +49,7 @@ import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
+import io.kadai.task.api.exceptions.TransferCheckException;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
@@ -141,6 +142,12 @@ public class KadaiRestExceptionHandler extends ResponseEntityExceptionHandler {
   public ResponseEntity<Object> handleInvalidTaskStateException(
       InvalidTaskStateException ex, WebRequest req) {
     return handle(ex.getErrorCode(), ex, req, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(TransferCheckException.class)
+  public ResponseEntity<Object> handleTransferCheckException(
+      TransferCheckException ex, WebRequest req) {
+    return handle(ex.getErrorCode(), ex, req, HttpStatus.PRECONDITION_FAILED);
   }
 
   @ExceptionHandler(LogicalDuplicateInPayloadException.class)

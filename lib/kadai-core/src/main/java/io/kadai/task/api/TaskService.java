@@ -38,6 +38,7 @@ import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
+import io.kadai.task.api.exceptions.TransferCheckException;
 import io.kadai.task.api.models.Attachment;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.Task;
@@ -579,7 +580,8 @@ public interface TaskService {
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          TransferCheckException {
     return transfer(taskId, destinationWorkbasketId, true);
   }
 
@@ -603,12 +605,15 @@ public interface TaskService {
    *     WorkbasketPermission#TRANSFER} for the target {@linkplain Workbasket}
    * @throws InvalidTaskStateException if the {@linkplain Task} is in one of the {@linkplain
    *     TaskState#END_STATES}
+   * @throws TransferCheckException if a {@linkplain
+   *     io.kadai.spi.task.api.BeforeTransferTaskProvider} denies the transfer
    */
   Task transfer(String taskId, String destinationWorkbasketId, boolean setTransferFlag)
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException;
+          InvalidTaskStateException,
+          TransferCheckException;
 
   /**
    * Transfers a {@linkplain Task} to another {@linkplain Workbasket} while always setting
@@ -628,7 +633,8 @@ public interface TaskService {
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          TransferCheckException {
     return transfer(taskId, workbasketKey, domain, true);
   }
 
@@ -654,12 +660,15 @@ public interface TaskService {
    *     WorkbasketPermission#TRANSFER} for the target {@linkplain Workbasket}
    * @throws InvalidTaskStateException if the {@linkplain Task} is in one of the {@linkplain
    *     TaskState#END_STATES}
+   * @throws TransferCheckException if a {@link io.kadai.spi.task.api.BeforeTransferTaskProvider
+   *     BeforeTransferTaskProvider} denies the transfer
    */
   Task transfer(String taskId, String workbasketKey, String domain, boolean setTransferFlag)
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException;
+          InvalidTaskStateException,
+          TransferCheckException;
 
   /**
    * Transfers a {@linkplain Task} to another {@linkplain Workbasket} and sets the owner of the
@@ -679,7 +688,8 @@ public interface TaskService {
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          TransferCheckException {
     return transferWithOwner(taskId, destinationWorkbasketId, owner, true);
   }
 
@@ -705,13 +715,16 @@ public interface TaskService {
    *     WorkbasketPermission#TRANSFER} for the target {@linkplain Workbasket}
    * @throws InvalidTaskStateException if the {@linkplain Task} is in one of the {@linkplain
    *     TaskState#END_STATES}
+   * @throws TransferCheckException if a {@link io.kadai.spi.task.api.BeforeTransferTaskProvider
+   *     BeforeTransferTaskProvider} denies the transfer
    */
   Task transferWithOwner(
       String taskId, String destinationWorkbasketId, String owner, boolean setTransferFlag)
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException;
+          InvalidTaskStateException,
+          TransferCheckException;
 
   /**
    * Transfers a {@linkplain Task} to another {@linkplain Workbasket} and sets the owner of the
@@ -733,7 +746,8 @@ public interface TaskService {
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          TransferCheckException {
     return transferWithOwner(taskId, workbasketKey, domain, owner, true);
   }
 
@@ -761,13 +775,16 @@ public interface TaskService {
    *     WorkbasketPermission#TRANSFER} for the target {@linkplain Workbasket}
    * @throws InvalidTaskStateException if the {@linkplain Task} is in one of the {@linkplain
    *     TaskState#END_STATES}
+   * @throws TransferCheckException if a {@link io.kadai.spi.task.api.BeforeTransferTaskProvider
+   *     BeforeTransferTaskProvider} denies the transfer
    */
   Task transferWithOwner(
       String taskId, String workbasketKey, String domain, String owner, boolean setTransferFlag)
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException;
+          InvalidTaskStateException,
+          TransferCheckException;
 
   /**
    * Transfers a List of {@linkplain Task Tasks} to another {@linkplain Workbasket} while always
