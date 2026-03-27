@@ -53,4 +53,28 @@ describe('WorkbasketReportPlannedDateComponent', () => {
     httpMock.match(() => true).forEach((req) => req.flush(mockReport));
     expect(component).toBeTruthy();
   });
+
+  it('should not show chart when reportData is null', () => {
+    const mockReport = {
+      meta: { header: ['H1', 'H2'], rowDesc: [], sumRowDesc: 'Total', name: 'report', date: '2024' },
+      rows: [{ desc: ['row1'], cells: [1, 2], total: 3, depth: 0, display: true }],
+      sumRow: []
+    };
+    component.reportData = null;
+    fixture.detectChanges();
+    const row = fixture.nativeElement.querySelector('.row');
+    expect(row).toBeNull();
+    httpMock.match(() => true).forEach((req) => req.flush(mockReport));
+  });
+
+  it('should show chart container when reportData is set', () => {
+    const mockReport = {
+      meta: { header: ['H1', 'H2'], rowDesc: [], sumRowDesc: 'Total', name: 'Planned Date Report', date: '2024-01-01' },
+      rows: [{ desc: ['row1'], cells: [1, 2], total: 3, depth: 0, display: true }],
+      sumRow: []
+    };
+    fixture.detectChanges();
+    httpMock.match(() => true).forEach((req) => req.flush(mockReport));
+    expect(component.reportData).toBeTruthy();
+  });
 });

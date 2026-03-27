@@ -30,10 +30,12 @@ import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { OrientationService } from './shared/services/orientation/orientation.service';
 import { WindowRefService } from './shared/services/window/window.service';
 import { Router } from '@angular/router';
+import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 
 describe('AppComponent', () => {
   let component: AppComponent;
   let fixture: ComponentFixture<AppComponent>;
+  let httpController: HttpTestingController;
 
   const kadaiEngineServiceMock = {
     getVersion: vi.fn().mockReturnValue(of({ version: '1.0.0' })),
@@ -83,16 +85,20 @@ describe('AppComponent', () => {
         { provide: OrientationService, useValue: orientationServiceMock },
         { provide: WindowRefService, useValue: windowRefServiceMock },
         provideAngularSvgIcon(),
-        provideNoopAnimations()
+        provideNoopAnimations(),
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 
+    httpController = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(AppComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+    httpController.match(() => true).forEach((req) => req.flush(''));
   });
 
   afterEach(() => {
+    httpController.match(() => true).forEach((req) => req.flush(''));
     vi.restoreAllMocks();
   });
 
@@ -151,5 +157,51 @@ describe('AppComponent', () => {
     const router = TestBed.inject(Router);
     await router.navigateByUrl('/');
     expect(selectedRouteServiceMock.selectRoute).toHaveBeenCalled();
+  });
+
+  it('should show progress bar when requestInProgress is true', () => {
+    const localFixture = TestBed.createComponent(AppComponent);
+    const localComponent = localFixture.componentInstance;
+    localComponent.requestInProgress = true;
+    localFixture.detectChanges();
+    httpController.match(() => true).forEach((req) => req.flush(''));
+    const progressBar = localFixture.nativeElement.querySelector('mat-progress-bar');
+    expect(progressBar).toBeTruthy();
+  });
+
+  it('should not show progress bar when requestInProgress is false', () => {
+    const localFixture = TestBed.createComponent(AppComponent);
+    const localComponent = localFixture.componentInstance;
+    localComponent.requestInProgress = false;
+    localFixture.detectChanges();
+    httpController.match(() => true).forEach((req) => req.flush(''));
+    const progressBar = localFixture.nativeElement.querySelector('mat-progress-bar');
+    expect(progressBar).toBeNull();
+  });
+
+  it('should call toggleSidenav when menu button inside sidenav drawer is clicked', async () => {
+    sidenavServiceMock.toggleSidenav.mockClear();
+    await component.sidenav.open();
+    fixture.detectChanges();
+    httpController.match(() => true).forEach((req) => req.flush(''));
+    const menuButton = fixture.nativeElement.querySelector('.navbar_button-toggle');
+    expect(menuButton).toBeTruthy();
+    menuButton.click();
+    fixture.detectChanges();
+    httpController.match(() => true).forEach((req) => req.flush(''));
+    expect(sidenavServiceMock.toggleSidenav).toHaveBeenCalled();
+  });
+
+  it('should call logout when logout button inside sidenav drawer is clicked', async () => {
+    kadaiEngineServiceMock.logout.mockClear();
+    await component.sidenav.open();
+    fixture.detectChanges();
+    httpController.match(() => true).forEach((req) => req.flush(''));
+    const logoutButton = fixture.nativeElement.querySelector('[aria-controls="logout"]');
+    expect(logoutButton).toBeTruthy();
+    logoutButton.click();
+    fixture.detectChanges();
+    httpController.match(() => true).forEach((req) => req.flush(''));
+    expect(kadaiEngineServiceMock.logout).toHaveBeenCalled();
   });
 });

@@ -18,7 +18,6 @@
 
 package io.kadai.task.rest;
 
-
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -44,6 +43,7 @@ import io.kadai.task.rest.models.TaskRepresentationModel.CustomAttribute;
 import io.kadai.task.rest.models.TaskSummaryCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryPagedRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryRepresentationModel;
+import io.kadai.task.rest.models.TransferTaskOwnerRepresentationModel;
 import io.kadai.task.rest.models.TransferTaskRepresentationModel;
 import io.kadai.task.rest.routing.IntegrationTestTaskRouter;
 import io.kadai.workbasket.rest.models.WorkbasketSummaryRepresentationModel;
@@ -4293,6 +4293,198 @@ class TaskControllerIntTest {
 
   @Nested
   @TestInstance(Lifecycle.PER_CLASS)
+  class TransferTasksToOwner {
+
+    @Test
+    void should_TransferTasksToOwner_When_ValidTaskIdsProvided() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TRANSFER_TO_OWNER, "user-1-1");
+
+      TransferTaskOwnerRepresentationModel requestBody =
+          new TransferTaskOwnerRepresentationModel(
+              List.of(
+                  "TKI:000000000000000000000000000000000003",
+                  "TKI:000000000000000000000000000000000004"));
+
+      ResponseEntity<Map<String, Object>> response =
+          restClient
+              .post()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .body(requestBody)
+              .retrieve()
+              .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody()).isNotNull();
+      Map<String, LinkedHashMap> failedTasks =
+          (Map<String, LinkedHashMap>) response.getBody().get("tasksWithErrors");
+      assertThat(failedTasks).isEmpty();
+    }
+
+    @Test
+    void should_ReturnErrors_When_SomeTaskIdsAreInvalid() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TRANSFER_TO_OWNER, "user-1-1");
+
+      TransferTaskOwnerRepresentationModel requestBody =
+          new TransferTaskOwnerRepresentationModel(
+              Arrays.asList(
+                  "TKI:000000000000000000000000000000000005",
+                  "TKI:000000000000000000000000000000000099",
+                  "TKI:000000000000000000000000000000000039"));
+
+      ResponseEntity<Map<String, Object>> response =
+          restClient
+              .post()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .body(requestBody)
+              .retrieve()
+              .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody()).isNotNull();
+      Map<String, LinkedHashMap> failedTasks =
+          (Map<String, LinkedHashMap>) response.getBody().get("tasksWithErrors");
+      assertThat(failedTasks).hasSize(2);
+      assertThat(failedTasks).containsKey("TKI:000000000000000000000000000000000099");
+      assertThat(failedTasks).containsKey("TKI:000000000000000000000000000000000039");
+    }
+
+    @Test
+    void should_SetOwnerCorrectly_When_TransferringTasksToOwner() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TRANSFER_TO_OWNER, "teamlead-1");
+
+      TransferTaskOwnerRepresentationModel requestBody =
+          new TransferTaskOwnerRepresentationModel(
+              List.of("TKI:000000000000000000000000000000000006"));
+
+      restClient
+          .post()
+          .uri(url)
+          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+          .body(requestBody)
+          .retrieve()
+          .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
+
+      // Verify the task has the new owner
+      String getUrl =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000006");
+      ResponseEntity<TaskRepresentationModel> getResponse =
+          restClient
+              .get()
+              .uri(getUrl)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class);
+
+      assertThat(getResponse.getBody()).isNotNull();
+      assertThat(getResponse.getBody().getOwner()).isEqualTo("teamlead-1");
+      assertThat(getResponse.getBody().isTransferred()).isTrue();
+    }
+
+    @Test
+    void should_KeepTaskInSameWorkbasket_When_TransferringToOwner() {
+      // First, get the current workbasket
+      String getUrl =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000007");
+      ResponseEntity<TaskRepresentationModel> getResponseBefore =
+          restClient
+              .get()
+              .uri(getUrl)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class);
+      String workbasketIdBefore =
+          getResponseBefore.getBody().getWorkbasketSummary().getWorkbasketId();
+
+      String url = restHelper.toUrl(RestEndpoints.URL_TRANSFER_TO_OWNER, "user-1-1");
+
+      TransferTaskOwnerRepresentationModel requestBody =
+          new TransferTaskOwnerRepresentationModel(
+              List.of("TKI:000000000000000000000000000000000007"));
+
+      restClient
+          .post()
+          .uri(url)
+          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+          .body(requestBody)
+          .retrieve()
+          .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
+
+      // Verify the task is still in the same workbasket
+      ResponseEntity<TaskRepresentationModel> getResponseAfter =
+          restClient
+              .get()
+              .uri(getUrl)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class);
+
+      assertThat(getResponseAfter.getBody()).isNotNull();
+      assertThat(getResponseAfter.getBody().getWorkbasketSummary().getWorkbasketId())
+          .isEqualTo(workbasketIdBefore);
+      assertThat(getResponseAfter.getBody().getOwner()).isEqualTo("user-1-1");
+    }
+
+    @Test
+    void should_SetTransferFlagToTrue_When_TransferringToOwner() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TRANSFER_TO_OWNER, "user-1-1");
+
+      TransferTaskOwnerRepresentationModel requestBody =
+          new TransferTaskOwnerRepresentationModel(
+              List.of("TKI:000000000000000000000000000000000008"));
+
+      restClient
+          .post()
+          .uri(url)
+          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+          .body(requestBody)
+          .retrieve()
+          .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
+
+      String getUrl =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000008");
+      ResponseEntity<TaskRepresentationModel> getResponse =
+          restClient
+              .get()
+              .uri(getUrl)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class);
+
+      assertThat(getResponse.getBody()).isNotNull();
+      assertThat(getResponse.getBody().isTransferred()).isTrue();
+    }
+
+    @Test
+    void should_ReturnOkWithNoErrors_When_AllTasksAreValid() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TRANSFER_TO_OWNER, "user-1-1");
+
+      TransferTaskOwnerRepresentationModel requestBody =
+          new TransferTaskOwnerRepresentationModel(
+              List.of(
+                  "TKI:000000000000000000000000000000000009",
+                  "TKI:000000000000000000000000000000000010"));
+
+      ResponseEntity<Map<String, Object>> response =
+          restClient
+              .post()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .body(requestBody)
+              .retrieve()
+              .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody()).isNotNull();
+      Map<String, LinkedHashMap> failedTasks =
+          (Map<String, LinkedHashMap>) response.getBody().get("tasksWithErrors");
+      assertThat(failedTasks).isEmpty();
+    }
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
   class DistributeTasks {
 
     @Test
@@ -5241,8 +5433,7 @@ class TaskControllerIntTest {
     void should_ReturnForbidden_When_CurrentUserIsNotAdmin() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_BULK_TERMINATE_FORCE);
 
-      List<String> taskIds =
-          List.of("TKI:000000000000000000000000000000000032");
+      List<String> taskIds = List.of("TKI:000000000000000000000000000000000032");
 
       TaskIdListRepresentationModel request = new TaskIdListRepresentationModel(taskIds);
 

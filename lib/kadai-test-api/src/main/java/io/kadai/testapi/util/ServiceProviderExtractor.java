@@ -27,6 +27,7 @@ import io.kadai.spi.task.api.AfterRequestChangesProvider;
 import io.kadai.spi.task.api.AfterRequestReviewProvider;
 import io.kadai.spi.task.api.BeforeRequestChangesProvider;
 import io.kadai.spi.task.api.BeforeRequestReviewProvider;
+import io.kadai.spi.task.api.BeforeTransferTaskProvider;
 import io.kadai.spi.task.api.CreateTaskPreprocessor;
 import io.kadai.spi.task.api.ReviewRequiredProvider;
 import io.kadai.spi.task.api.TaskDistributionProvider;
@@ -56,6 +57,7 @@ public class ServiceProviderExtractor {
           AfterRequestReviewProvider.class,
           BeforeRequestChangesProvider.class,
           AfterRequestChangesProvider.class,
+          BeforeTransferTaskProvider.class,
           TaskEndstatePreprocessor.class);
 
   private ServiceProviderExtractor() {

@@ -44,8 +44,71 @@ describe('TimestampReportComponent', () => {
   });
 
   it('should create', () => {
+    const mockReport = {
+      meta: { header: ['H1', 'H2'], rowDesc: [], sumRowDesc: 'Total', name: 'Timestamp Report', date: '2024-01-01' },
+      rows: [{ desc: ['row1'], cells: [1, 2], total: 3, depth: 0, display: true }],
+      sumRow: []
+    };
     fixture.detectChanges();
-    httpMock.match(() => true).forEach((req) => req.flush({}));
+    httpMock.match(() => true).forEach((req) => req.flush(mockReport));
     expect(component).toBeTruthy();
+  });
+
+  it('should not show report content when reportData is null — covers @if (reportData) false branch', () => {
+    const mockReport = {
+      meta: { header: ['H1'], rowDesc: [], sumRowDesc: 'Total', name: 'Timestamp Report', date: '2024-01-01' },
+      rows: [{ desc: ['Created'], cells: [5], total: 5, depth: 0, display: true }],
+      sumRow: []
+    };
+    component.reportData = null;
+    fixture.detectChanges();
+    const panel = fixture.nativeElement.querySelector('.panel-default');
+    expect(panel).toBeNull();
+    httpMock.match(() => true).forEach((req) => req.flush(mockReport));
+  });
+
+  it('should show report content after data is loaded — covers @if (reportData) true branch', () => {
+    const mockReport = {
+      meta: { header: ['H1'], rowDesc: [], sumRowDesc: 'Total', name: 'Timestamp Report', date: '2024-01-01' },
+      rows: [{ desc: ['Created'], cells: [5], total: 5, depth: 0, display: true }],
+      sumRow: []
+    };
+    component.reportData = mockReport as any;
+    fixture.detectChanges();
+    httpMock.match(() => true).forEach((req) => req.flush(mockReport));
+    expect(component.reportData).toBeTruthy();
+    expect(component.reportData.meta.name).toBe('Timestamp Report');
+    const panel = fixture.nativeElement.querySelector('.panel-default');
+    expect(panel).toBeTruthy();
+  });
+
+  it('should render the panel heading with report name after data is loaded', () => {
+    const mockReport = {
+      meta: { header: ['H1'], rowDesc: [], sumRowDesc: 'Total', name: 'My Report', date: '2024-06-15T10:00:00' },
+      rows: [{ desc: ['Created'], cells: [5], total: 5, depth: 0, display: true }],
+      sumRow: []
+    };
+    component.reportData = mockReport as any;
+    fixture.detectChanges();
+    httpMock.match(() => true).forEach((req) => req.flush(mockReport));
+    expect(component.reportData).toBeTruthy();
+    expect(component.reportData.meta.name).toBe('My Report');
+    const heading = fixture.nativeElement.querySelector('h4');
+    expect(heading).toBeTruthy();
+    expect(heading.textContent).toContain('My Report');
+  });
+
+  it('should not render panel heading when reportData is absent before HTTP completes', () => {
+    const mockReport = {
+      meta: { header: ['H1'], rowDesc: [], sumRowDesc: 'Total', name: 'Timestamp Report', date: '2024-01-01' },
+      rows: [],
+      sumRow: []
+    };
+    fixture.detectChanges();
+    expect(component.reportData).toBeUndefined();
+    const panelBefore = fixture.nativeElement.querySelector('.panel-default');
+    expect(panelBefore).toBeNull();
+    httpMock.match(() => true).forEach((req) => req.flush(mockReport));
+    expect(component.reportData).toBeTruthy();
   });
 });

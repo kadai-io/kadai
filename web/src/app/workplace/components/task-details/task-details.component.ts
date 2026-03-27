@@ -69,6 +69,7 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   currentWorkbasket: Workbasket;
   currentId: string;
   showDetail = false;
+  toggleFormValidation = false;
   destroy$ = new Subject<void>();
   private route = inject(ActivatedRoute);
   private taskService = inject(TaskService);
@@ -109,10 +110,13 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   }
 
   resetTask(): void {
+    if (!this.taskClone) {
+      return;
+    }
     this.task = { ...this.taskClone };
-    this.task.customAttributes = this.taskClone.customAttributes.slice(0);
-    this.task.callbackInfo = this.taskClone.callbackInfo.slice(0);
-    this.task.primaryObjRef = { ...this.taskClone.primaryObjRef };
+    this.task.customAttributes = this.taskClone.customAttributes?.slice(0) || [];
+    this.task.callbackInfo = this.taskClone.callbackInfo?.slice(0) || [];
+    this.task.primaryObjRef = this.taskClone.primaryObjRef ? { ...this.taskClone.primaryObjRef } : undefined;
     this.notificationService.showSuccess('TASK_RESTORE');
   }
 
@@ -246,8 +250,8 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
 
   private cloneTask() {
     this.taskClone = { ...this.task };
-    this.taskClone.customAttributes = this.task.customAttributes.slice(0);
-    this.taskClone.callbackInfo = this.task.callbackInfo.slice(0);
-    this.taskClone.primaryObjRef = { ...this.task.primaryObjRef };
+    this.taskClone.customAttributes = this.task.customAttributes?.slice(0) || [];
+    this.taskClone.callbackInfo = this.task.callbackInfo?.slice(0) || [];
+    this.taskClone.primaryObjRef = this.task.primaryObjRef ? { ...this.task.primaryObjRef } : undefined;
   }
 }

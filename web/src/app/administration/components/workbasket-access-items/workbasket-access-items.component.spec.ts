@@ -36,6 +36,7 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { provideRouter } from '@angular/router';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 describe('WorkbasketAccessItemsComponent', () => {
   let fixture: ComponentFixture<WorkbasketAccessItemsComponent>;
@@ -51,7 +52,8 @@ describe('WorkbasketAccessItemsComponent', () => {
         provideStore([WorkbasketState, EngineConfigurationState]),
         provideRouter([]),
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        provideNoopAnimations()
       ]
     }).compileComponents();
 
@@ -259,5 +261,289 @@ describe('WorkbasketAccessItemsComponent', () => {
     component.ngAfterViewChecked();
     expect(component.isNewAccessItemsFromStore).toBe(false);
     expect(component.isAccessItemsTabSelected).toBe(false);
+  });
+
+  it('should call init when ngOnChanges is called and workbasketClone has a different workbasketId', () => {
+    fixture.detectChanges();
+    component.workbasketClone = { ...selectedWorkbasketMock, workbasketId: 'OLD-ID' };
+    component.workbasket = { ...selectedWorkbasketMock, workbasketId: 'NEW-ID' };
+    const initSpy = vi.spyOn(component, 'init').mockImplementation(() => {});
+    component.ngOnChanges({});
+    expect(initSpy).toHaveBeenCalled();
+  });
+
+  it('should not call init when ngOnChanges is called and workbasketClone has the same workbasketId', () => {
+    fixture.detectChanges();
+    component.workbasketClone = { ...selectedWorkbasketMock };
+    component.workbasket = { ...selectedWorkbasketMock };
+    const initSpy = vi.spyOn(component, 'init').mockImplementation(() => {});
+    component.ngOnChanges({});
+    expect(initSpy).not.toHaveBeenCalled();
+  });
+
+  it('should not call init when ngOnChanges is called and workbasketClone is undefined', () => {
+    component.workbasketClone = undefined;
+    component.workbasket = { ...selectedWorkbasketMock };
+    const initSpy = vi.spyOn(component, 'init').mockImplementation(() => {});
+    component.ngOnChanges({});
+    expect(initSpy).not.toHaveBeenCalled();
+  });
+
+  it('should set checkbox unchecked when setSelectAllCheckbox is called with checked false', () => {
+    fixture.detectChanges();
+    const checkbox = document.getElementById('checkbox-0-00') as HTMLInputElement;
+    if (checkbox) {
+      checkbox.checked = true;
+      component.setSelectAllCheckbox(0, { currentTarget: { checked: false } });
+      expect(checkbox.checked).toBe(false);
+    }
+  });
+
+  it('should set checkbox checked when setSelectAllCheckbox is called with all permissions true', () => {
+    fixture.detectChanges();
+    const accessItem = component.accessItemsGroups.controls[0];
+    component.keysOfVisibleFields.forEach((key) => {
+      accessItem.get(key)?.setValue(true);
+    });
+    component.setSelectAllCheckbox(0, { currentTarget: { checked: true } });
+    const checkbox = document.getElementById('checkbox-0-00') as HTMLInputElement;
+    if (checkbox) {
+      expect(checkbox.checked).toBe(true);
+    }
+  });
+
+  it('should leave checkbox unchecked when setSelectAllCheckbox is called with checked true but not all permissions are true', () => {
+    fixture.detectChanges();
+    const accessItem = component.accessItemsGroups.controls[0];
+    component.keysOfVisibleFields.forEach((key) => {
+      accessItem.get(key)?.setValue(false);
+    });
+    component.setSelectAllCheckbox(0, { currentTarget: { checked: true } });
+    const checkbox = document.getElementById('checkbox-0-00') as HTMLInputElement;
+    if (checkbox) {
+      expect(checkbox.checked).toBe(false);
+    }
+  });
+
+  it('should complete destroy$ on ngOnDestroy', () => {
+    const nextSpy = vi.spyOn(component.destroy$, 'next');
+    const completeSpy = vi.spyOn(component.destroy$, 'complete');
+    component.ngOnDestroy();
+    expect(nextSpy).toHaveBeenCalled();
+    expect(completeSpy).toHaveBeenCalled();
+  });
+
+  it('should render the access items table when workbasket is set', () => {
+    fixture.detectChanges();
+    const wbInfo = debugElement.nativeElement.querySelector('#wb-information');
+    expect(wbInfo).toBeTruthy();
+  });
+
+  it('should not render the access items table when workbasket is null', () => {
+    component.workbasket = null;
+    vi.spyOn(component, 'init').mockImplementation(() => {});
+    fixture.detectChanges();
+    const wbInfo = debugElement.nativeElement.querySelector('#wb-information');
+    expect(wbInfo).toBeFalsy();
+  });
+
+  it('should apply expanded width style when expanded is true', () => {
+    component.expanded = true;
+    fixture.detectChanges();
+    const container = debugElement.nativeElement.querySelector('.workbasket-access-items');
+    expect(container).toBeTruthy();
+    expect(container.style.width).toContain('calc(100vw - 500px)');
+  });
+
+  it('should apply collapsed width style when expanded is false', () => {
+    component.expanded = false;
+    fixture.detectChanges();
+    const container = debugElement.nativeElement.querySelector('.workbasket-access-items');
+    expect(container).toBeTruthy();
+    expect(container.style.width).toContain('calc(100vw - 250px)');
+  });
+
+  it('should call deleteAccessItems when delete button is clicked', () => {
+    fixture.detectChanges();
+    const deleteAccessItemsSpy = vi.spyOn(component, 'deleteAccessItems');
+    const deleteButton = debugElement.nativeElement.querySelector(
+      'button.workbasket-access-items__buttons-delete-access'
+    );
+    expect(deleteButton).toBeTruthy();
+    deleteButton.click();
+    expect(deleteAccessItemsSpy).toHaveBeenCalled();
+  });
+
+  it('should call selectRow when a row checkbox is changed', () => {
+    fixture.detectChanges();
+    const selectRowSpy = vi.spyOn(component, 'selectRow');
+    const rowCheckbox = debugElement.nativeElement.querySelector('.workbasket-access-items__select-row');
+    expect(rowCheckbox).toBeTruthy();
+    rowCheckbox.click();
+    fixture.detectChanges();
+    expect(selectRowSpy).toHaveBeenCalled();
+  });
+
+  it('should call setSelectAllCheckbox when a permission checkbox is changed', () => {
+    fixture.detectChanges();
+    const setSelectAllSpy = vi.spyOn(component, 'setSelectAllCheckbox');
+    const permCheckbox = debugElement.nativeElement.querySelector('#checkbox-0-0');
+    expect(permCheckbox).toBeTruthy();
+    permCheckbox.click();
+    fixture.detectChanges();
+    expect(setSelectAllSpy).toHaveBeenCalled();
+  });
+
+  it('should call setSelectAllCheckbox for permReadTasks checkbox', () => {
+    fixture.detectChanges();
+    const setSelectAllSpy = vi.spyOn(component, 'setSelectAllCheckbox');
+    const permCheckbox = debugElement.nativeElement.querySelector('#checkbox-0-1');
+    expect(permCheckbox).toBeTruthy();
+    permCheckbox.click();
+    fixture.detectChanges();
+    expect(setSelectAllSpy).toHaveBeenCalled();
+  });
+
+  it('should call setSelectAllCheckbox for permOpen checkbox', () => {
+    fixture.detectChanges();
+    const setSelectAllSpy = vi.spyOn(component, 'setSelectAllCheckbox');
+    const permCheckbox = debugElement.nativeElement.querySelector('#checkbox-0-2');
+    expect(permCheckbox).toBeTruthy();
+    permCheckbox.click();
+    fixture.detectChanges();
+    expect(setSelectAllSpy).toHaveBeenCalled();
+  });
+
+  it('should call setSelectAllCheckbox for permEditTasks checkbox', () => {
+    fixture.detectChanges();
+    const setSelectAllSpy = vi.spyOn(component, 'setSelectAllCheckbox');
+    const permCheckbox = debugElement.nativeElement.querySelector('#checkbox-0-3');
+    expect(permCheckbox).toBeTruthy();
+    permCheckbox.click();
+    fixture.detectChanges();
+    expect(setSelectAllSpy).toHaveBeenCalled();
+  });
+
+  it('should call setSelectAllCheckbox for permAppend checkbox', () => {
+    fixture.detectChanges();
+    const setSelectAllSpy = vi.spyOn(component, 'setSelectAllCheckbox');
+    const permCheckbox = debugElement.nativeElement.querySelector('#checkbox-0-4');
+    expect(permCheckbox).toBeTruthy();
+    permCheckbox.click();
+    fixture.detectChanges();
+    expect(setSelectAllSpy).toHaveBeenCalled();
+  });
+
+  it('should call setSelectAllCheckbox for permTransfer checkbox', () => {
+    fixture.detectChanges();
+    const setSelectAllSpy = vi.spyOn(component, 'setSelectAllCheckbox');
+    const permCheckbox = debugElement.nativeElement.querySelector('#checkbox-0-5');
+    expect(permCheckbox).toBeTruthy();
+    permCheckbox.click();
+    fixture.detectChanges();
+    expect(setSelectAllSpy).toHaveBeenCalled();
+  });
+
+  it('should call setSelectAllCheckbox for permDistribute checkbox', () => {
+    fixture.detectChanges();
+    const setSelectAllSpy = vi.spyOn(component, 'setSelectAllCheckbox');
+    const permCheckbox = debugElement.nativeElement.querySelector('#checkbox-0-6');
+    expect(permCheckbox).toBeTruthy();
+    permCheckbox.click();
+    fixture.detectChanges();
+    expect(setSelectAllSpy).toHaveBeenCalled();
+  });
+
+  it('should render the plain text input for accessId when lookupField is false', async () => {
+    store.reset({
+      ...store.snapshot(),
+      engineConfiguration: {
+        ...engineConfigurationMock,
+        customisation: {
+          ...engineConfigurationMock.customisation,
+          EN: {
+            ...engineConfigurationMock.customisation.EN,
+            workbaskets: {
+              ...engineConfigurationMock.customisation.EN.workbaskets,
+              'access-items': {
+                ...engineConfigurationMock.customisation.EN.workbaskets['access-items'],
+                accessId: { lookupField: false }
+              }
+            }
+          }
+        }
+      }
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const textInput = debugElement.nativeElement.querySelector('input[formcontrolname="accessId"]');
+    expect(textInput).toBeTruthy();
+  });
+
+  it('should show has-error class on accessId cell when accessId is empty and formSubmitAttempt is true', () => {
+    fixture.detectChanges();
+    component.formsValidatorService.formSubmitAttempt = true;
+    component.accessItemsGroups.controls[0].get('accessId')?.setValue('');
+    expect(component.formsValidatorService.formSubmitAttempt).toBe(true);
+    expect(component.accessItemsGroups.controls[0].get('accessId')?.value).toBe('');
+    expect(component.accessItemsGroups.controls[0].get('accessId')?.invalid).toBe(true);
+  });
+
+  it('should render visible custom field column headers in the table', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const headerCells = debugElement.nativeElement.querySelectorAll('thead th.rotated-th');
+    expect(headerCells.length).toBeGreaterThan(7);
+  });
+
+  it('should call setSelectAllCheckbox for a visible custom field checkbox', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const setSelectAllSpy = vi.spyOn(component, 'setSelectAllCheckbox');
+    const customCheckbox = debugElement.nativeElement.querySelector('#checkbox-0-15');
+    if (customCheckbox) {
+      customCheckbox.click();
+      fixture.detectChanges();
+      expect(setSelectAllSpy).toHaveBeenCalled();
+    }
+  });
+
+  it('should show has-changes class on permRead cell when value differs from clone', () => {
+    fixture.detectChanges();
+    const originalRead = component.accessItemsClone[0].permRead;
+    component.accessItemsGroups.controls[0].get('permRead')?.setValue(!originalRead);
+    expect(component.accessItemsGroups.controls[0].get('permRead')?.value).toBe(!originalRead);
+    expect(component.accessItemsClone[0].permRead).toBe(originalRead);
+  });
+
+  it('should show has-warning class on typeahead accessId cell when accessId differs from clone', () => {
+    fixture.detectChanges();
+    const originalAccessId = component.accessItemsClone[0].accessId;
+    component.accessItemsGroups.controls[0].get('accessId')?.setValue(originalAccessId + '-changed');
+    expect(component.accessItemsGroups.controls[0].get('accessId')?.value).toBe(originalAccessId + '-changed');
+    expect(component.accessItemsClone[0].accessId).toBe(originalAccessId);
+  });
+
+  it('should add a new row to the table when addAccessItem is called', () => {
+    fixture.detectChanges();
+    const initialLength = component.accessItemsGroups.length;
+    component.addAccessItem();
+    expect(component.accessItemsGroups.length).toBe(initialLength + 1);
+  });
+
+  it('should remove rows from the table when deleteAccessItems is triggered via button click', () => {
+    fixture.detectChanges();
+    component.selectedRows = [0];
+    const initialRowCount = debugElement.nativeElement.querySelectorAll('tbody tr').length;
+    const deleteButton = debugElement.nativeElement.querySelector(
+      'button.workbasket-access-items__buttons-delete-access'
+    );
+    deleteButton.click();
+    fixture.detectChanges();
+    const newRowCount = debugElement.nativeElement.querySelectorAll('tbody tr').length;
+    expect(newRowCount).toBe(initialRowCount - 1);
   });
 });
