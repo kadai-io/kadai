@@ -45,6 +45,7 @@ import io.kadai.task.rest.models.TaskPatchRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryPagedRepresentationModel;
+import io.kadai.task.rest.models.TransferTaskOwnerRepresentationModel;
 import io.kadai.task.rest.models.TransferTaskRepresentationModel;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import io.kadai.workbasket.api.exceptions.WorkbasketNotFoundException;
@@ -1378,7 +1379,7 @@ public interface TaskApi {
       summary = "Transfer Tasks to another Workbasket",
       description =
           "This endpoint transfers a list of Tasks listed in the body to a given Workbasket, if "
-              + "possible. Tasks that can be transfered without throwing an exception get "
+              + "possible. Tasks that can be transferred without throwing an exception get "
               + "transferred independent of other Tasks. If the transfer of a Task throws an "
               + "exception, then the Task will remain in the old Workbasket.",
       parameters = {
@@ -1439,6 +1440,73 @@ public interface TaskApi {
       @PathVariable("workbasketId") String workbasketId,
       @RequestBody TransferTaskRepresentationModel transferTaskRepresentationModel)
       throws NotAuthorizedOnWorkbasketException, WorkbasketNotFoundException;
+
+  /**
+   * This endpoint transfers a list of Tasks to their current Workbaskets while setting the owner to
+   * the specified ownerId. The isTransferred flag is always set to true.
+   *
+   * @title Transfer Tasks to Owner
+   * @param ownerId the new owner for the Tasks
+   * @param transferTaskOwnerRepresentationModel the request body containing the list of task ids
+   * @return BulkOperationResults with task ids and errors for each failed transaction
+   * @throws InvalidArgumentException if the method parameters are empty or NULL
+   */
+  @Operation(
+      summary = "Transfer Tasks to Owner",
+      description =
+          "This endpoint transfers a list of Tasks to their current Workbaskets while setting "
+              + "the owner to the specified ownerId. The isTransferred flag is always set to true. "
+              + "For each Task, the current Workbasket is read and then the task is transferred to "
+              + "that same Workbasket with the given owner.",
+      parameters = {
+        @Parameter(
+            name = "ownerId",
+            description = "the new owner for the Tasks",
+            example = "user-1-1",
+            required = true)
+      },
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              description =
+                  "JSON formatted request body containing the TaskIds to be transferred",
+              content =
+                  @Content(
+                      schema =
+                          @Schema(
+                              implementation = TransferTaskOwnerRepresentationModel.class),
+                      examples =
+                          @ExampleObject(
+                              value =
+                                  """
+                          {
+                            "taskIds": ["TKI:000000000000000000000000000000000001", \
+                            "TKI:000000000000000000000000000000000002"]
+                          }
+                      """))),
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description =
+                "the taskIds and corresponding ErrorCode of tasks failed to be transferred",
+            content =
+                @Content(
+                    mediaType = MediaTypes.HAL_JSON_VALUE,
+                    schema =
+                        @Schema(
+                            implementation = BulkOperationResultsRepresentationModel.class))),
+        @ApiResponse(
+            responseCode = "400",
+            description = "INVALID_ARGUMENT",
+            content = {
+              @Content(schema = @Schema(implementation = InvalidArgumentException.class))
+            })
+      })
+  @PostMapping(path = RestEndpoints.URL_TRANSFER_TO_OWNER)
+  @Transactional(rollbackFor = Exception.class)
+  ResponseEntity<BulkOperationResultsRepresentationModel> transferTasksToOwner(
+      @PathVariable("ownerId") String ownerId,
+      @RequestBody TransferTaskOwnerRepresentationModel transferTaskOwnerRepresentationModel)
+      throws InvalidArgumentException;
 
   /**
    * This endpoint reopens the requested Task.

@@ -643,6 +643,225 @@ class TransferTaskAccTest extends AbstractAccTest {
     }
   }
 
+  // region transferTasksToOwner tests
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_TransferTasksToOwner_When_ValidTaskIdsAndOwnerProvided() throws Exception {
+    List<String> taskIdList =
+        List.of(
+            "TKI:000000000000000000000000000000000003", "TKI:000000000000000000000000000000000004");
+
+    BulkOperationResults<String, KadaiException> results =
+        taskService.transferTasksToOwner("teamlead-1", taskIdList);
+
+    assertThat(results.containsErrors()).isFalse();
+    Task transferredTask1 = taskService.getTask("TKI:000000000000000000000000000000000003");
+    assertThat(transferredTask1.getOwner()).isEqualTo("teamlead-1");
+    assertThat(transferredTask1.isTransferred()).isTrue();
+    Task transferredTask2 = taskService.getTask("TKI:000000000000000000000000000000000004");
+    assertThat(transferredTask2.getOwner()).isEqualTo("teamlead-1");
+    assertThat(transferredTask2.isTransferred()).isTrue();
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_SetTransferFlagToTrue_When_TransferringTasksToOwner() throws Exception {
+    List<String> taskIdList = List.of("TKI:000000000000000000000000000000000005");
+
+    BulkOperationResults<String, KadaiException> results =
+        taskService.transferTasksToOwner("user-1-1", taskIdList);
+
+    assertThat(results.containsErrors()).isFalse();
+    Task transferredTask = taskService.getTask("TKI:000000000000000000000000000000000005");
+    assertThat(transferredTask.isTransferred()).isTrue();
+    assertThat(transferredTask.getOwner()).isEqualTo("user-1-1");
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_KeepTaskInSameWorkbasket_When_TransferringTasksToOwner() throws Exception {
+    Task taskBefore = taskService.getTask("TKI:000000000000000000000000000000000006");
+    String workbasketIdBefore = taskBefore.getWorkbasketSummary().getId();
+
+    List<String> taskIdList = List.of("TKI:000000000000000000000000000000000006");
+
+    BulkOperationResults<String, KadaiException> results =
+        taskService.transferTasksToOwner("user-1-1", taskIdList);
+
+    assertThat(results.containsErrors()).isFalse();
+    Task transferredTask = taskService.getTask("TKI:000000000000000000000000000000000006");
+    assertThat(transferredTask.getWorkbasketSummary().getId()).isEqualTo(workbasketIdBefore);
+    assertThat(transferredTask.getOwner()).isEqualTo("user-1-1");
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_HandleTasksFromMultipleWorkbaskets_When_TransferringTasksToOwner() throws Exception {
+    // These tasks are in different workbaskets
+    List<String> taskIdList =
+        List.of(
+            "TKI:000000000000000000000000000000000010", "TKI:000000000000000000000000000000000025");
+
+    BulkOperationResults<String, KadaiException> results =
+        taskService.transferTasksToOwner("teamlead-1", taskIdList);
+
+    assertThat(results.containsErrors()).isFalse();
+    Task task1 = taskService.getTask("TKI:000000000000000000000000000000000010");
+    assertThat(task1.getOwner()).isEqualTo("teamlead-1");
+    assertThat(task1.isTransferred()).isTrue();
+    Task task2 = taskService.getTask("TKI:000000000000000000000000000000000025");
+    assertThat(task2.getOwner()).isEqualTo("teamlead-1");
+    assertThat(task2.isTransferred()).isTrue();
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_ReturnErrors_When_SomeTasksToTransferToOwnerAreInvalid() throws Exception {
+    List<String> taskIdList =
+        Arrays.asList(
+            "TKI:000000000000000000000000000000000011", // working
+            "TKI:000000000000000000000000000000000099", // not existing
+            "TKI:100000000000000000000000000000000006"); // already completed
+
+    BulkOperationResults<String, KadaiException> results =
+        taskService.transferTasksToOwner("teamlead-1", taskIdList);
+
+    assertThat(results.containsErrors()).isTrue();
+    assertThat(results.getErrorForId("TKI:000000000000000000000000000000000099"))
+        .isInstanceOf(TaskNotFoundException.class);
+    assertThat(results.getErrorForId("TKI:100000000000000000000000000000000006"))
+        .isInstanceOf(InvalidTaskStateException.class);
+
+    Task transferredTask = taskService.getTask("TKI:000000000000000000000000000000000011");
+    assertThat(transferredTask.getOwner()).isEqualTo("teamlead-1");
+    assertThat(transferredTask.isTransferred()).isTrue();
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_HandleNullAndEmptyTaskIds_When_TransferringTasksToOwner() throws Exception {
+    List<String> taskIdList =
+        Arrays.asList(
+            "TKI:000000000000000000000000000000000012", // working
+            null,
+            "");
+
+    BulkOperationResults<String, KadaiException> results =
+        taskService.transferTasksToOwner("teamlead-1", taskIdList);
+
+    assertThat(results.containsErrors()).isTrue();
+    assertThat(results.getErrorForId(null)).isInstanceOf(TaskNotFoundException.class);
+    assertThat(results.getErrorForId("")).isInstanceOf(TaskNotFoundException.class);
+
+    Task transferredTask = taskService.getTask("TKI:000000000000000000000000000000000012");
+    assertThat(transferredTask.getOwner()).isEqualTo("teamlead-1");
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_ThrowException_When_TaskIdListIsNull() {
+    ThrowingCallable call = () -> taskService.transferTasksToOwner("teamlead-1", null);
+    assertThatThrownBy(call)
+        .isInstanceOf(InvalidArgumentException.class)
+        .hasMessage("TaskIds must not be null or empty.");
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_ThrowException_When_TaskIdListIsEmpty() {
+    ThrowingCallable call =
+        () -> taskService.transferTasksToOwner("teamlead-1", Collections.emptyList());
+    assertThatThrownBy(call)
+        .isInstanceOf(InvalidArgumentException.class)
+        .hasMessage("TaskIds must not be null or empty.");
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_ThrowException_When_OwnerIdIsNull() {
+    ThrowingCallable call =
+        () ->
+            taskService.transferTasksToOwner(
+                null, List.of("TKI:000000000000000000000000000000000003"));
+    assertThatThrownBy(call)
+        .isInstanceOf(InvalidArgumentException.class)
+        .hasMessage("OwnerId must not be null or empty.");
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_ThrowException_When_OwnerIdIsEmpty() {
+    ThrowingCallable call =
+        () ->
+            taskService.transferTasksToOwner(
+                "", List.of("TKI:000000000000000000000000000000000003"));
+    assertThatThrownBy(call)
+        .isInstanceOf(InvalidArgumentException.class)
+        .hasMessage("OwnerId must not be null or empty.");
+  }
+
+  @WithAccessId(user = "teamlead-1", groups = GROUP_1_DN)
+  @Test
+  void should_TransferTasksToOwner_When_UserHasCorrectPermissions() throws Exception {
+    List<String> taskIdList = List.of("TKI:000000000000000000000000000000000013");
+
+    BulkOperationResults<String, KadaiException> results =
+        taskService.transferTasksToOwner("user-1-1", taskIdList);
+
+    assertThat(results.containsErrors()).isFalse();
+    Task transferredTask = taskService.getTask("TKI:000000000000000000000000000000000013");
+    assertThat(transferredTask.getOwner()).isEqualTo("user-1-1");
+    assertThat(transferredTask.isTransferred()).isTrue();
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_ResetReadFlag_When_TransferringTasksToOwner() throws Exception {
+    taskService.setTaskRead("TKI:000000000000000000000000000000000014", true);
+    Task taskBefore = taskService.getTask("TKI:000000000000000000000000000000000014");
+    assertThat(taskBefore.isRead()).isTrue();
+
+    List<String> taskIdList = List.of("TKI:000000000000000000000000000000000014");
+
+    BulkOperationResults<String, KadaiException> results =
+        taskService.transferTasksToOwner("user-1-1", taskIdList);
+
+    assertThat(results.containsErrors()).isFalse();
+    Task transferredTask = taskService.getTask("TKI:000000000000000000000000000000000014");
+    assertThat(transferredTask.isRead()).isFalse();
+    assertThat(transferredTask.getOwner()).isEqualTo("user-1-1");
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_TransitionFromClaimedToReady_When_TransferringTasksToOwner() throws Exception {
+    String claimed = "TKI:000000000000000000000000000000000027";
+
+    BulkOperationResults<String, KadaiException> results =
+        taskService.transferTasksToOwner("user-1-1", List.of(claimed));
+
+    assertThat(results.containsErrors()).isFalse();
+    Task transferredTask = taskService.getTask(claimed);
+    assertThat(transferredTask.getState()).isEqualTo(TaskState.READY);
+    assertThat(transferredTask.getOwner()).isEqualTo("user-1-1");
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_TransitionFromInReviewToReadyForReview_When_TransferringTasksToOwner()
+      throws Exception {
+    String inReview = "TKI:200000000000000000000000000000000028";
+
+    BulkOperationResults<String, KadaiException> results =
+        taskService.transferTasksToOwner("user-1-1", List.of(inReview));
+
+    assertThat(results.containsErrors()).isFalse();
+    Task transferredTask = taskService.getTask(inReview);
+    assertThat(transferredTask.getState()).isEqualTo(TaskState.READY_FOR_REVIEW);
+    assertThat(transferredTask.getOwner()).isEqualTo("user-1-1");
+  }
+
   private void assertTaskIsTransferred(
       TaskSummary transferredTask,
       Workbasket wb,
@@ -658,4 +877,6 @@ class TransferTaskAccTest extends AbstractAccTest {
     assertThat(transferredTask.getModified().isBefore(before)).isFalse();
     assertThat(transferredTask.getOwner()).isEqualTo(owner);
   }
+
+  // endregion
 }
