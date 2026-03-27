@@ -70,8 +70,8 @@ import io.kadai.spi.task.internal.AfterRequestChangesManager;
 import io.kadai.spi.task.internal.AfterRequestReviewManager;
 import io.kadai.spi.task.internal.BeforeRequestChangesManager;
 import io.kadai.spi.task.internal.BeforeRequestReviewManager;
-import io.kadai.spi.task.internal.CreateTaskPreprocessorManager;
 import io.kadai.spi.task.internal.CreateTaskPostprocessorManager;
+import io.kadai.spi.task.internal.CreateTaskPreprocessorManager;
 import io.kadai.spi.task.internal.ReviewRequiredManager;
 import io.kadai.spi.task.internal.TaskEndstatePreprocessorManager;
 import io.kadai.task.api.CallbackState;
@@ -719,21 +719,17 @@ public class TaskServiceImpl implements TaskService {
 
     // Group task IDs by their current workbasket ID
     Map<String, List<String>> taskIdsByWorkbasketId = new HashMap<>();
-    BulkOperationResults<String, KadaiException> aggregatedResults =
-        new BulkOperationResults<>();
+    BulkOperationResults<String, KadaiException> aggregatedResults = new BulkOperationResults<>();
 
     for (String taskId : taskIds) {
       if (taskId == null || taskId.isEmpty()) {
-        aggregatedResults.addError(
-            taskId, new TaskNotFoundException(taskId));
+        aggregatedResults.addError(taskId, new TaskNotFoundException(taskId));
         continue;
       }
       try {
         Task task = getTask(taskId);
         String workbasketId = task.getWorkbasketSummary().getId();
-        taskIdsByWorkbasketId
-            .computeIfAbsent(workbasketId, _ -> new ArrayList<>())
-            .add(taskId);
+        taskIdsByWorkbasketId.computeIfAbsent(workbasketId, _ -> new ArrayList<>()).add(taskId);
       } catch (TaskNotFoundException | NotAuthorizedOnWorkbasketException e) {
         aggregatedResults.addError(taskId, e);
       }
