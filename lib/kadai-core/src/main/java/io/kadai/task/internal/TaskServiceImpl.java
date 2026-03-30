@@ -1723,9 +1723,10 @@ public class TaskServiceImpl implements TaskService {
     return task;
   }
 
-  private TaskImpl postprocessTaskCreation(TaskImpl task) {
+  private Task postprocessTaskCreation(TaskImpl task) {
+    Task task = task;
     if (createTaskPostProcessorManager.isEnabled()) {
-      task = (TaskImpl) createTaskPostProcessorManager.processTaskAfterCreation(task);
+      task = createTaskPostProcessorManager.processTaskAfterCreation(task);
     }
 
     if (LOGGER.isDebugEnabled()) {
