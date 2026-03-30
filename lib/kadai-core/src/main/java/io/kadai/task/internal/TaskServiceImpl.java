@@ -420,10 +420,11 @@ public class TaskServiceImpl implements TaskService {
 
       createTaskCreatedHistoryEvent(task);
 
+      task = (TaskImpl) postprocessTaskCreation(task);
     } finally {
       kadaiEngine.returnConnection();
     }
-    return postprocessTaskCreation(task);
+    return task;
   }
 
   @Override
@@ -1723,8 +1724,7 @@ public class TaskServiceImpl implements TaskService {
     return task;
   }
 
-  private Task postprocessTaskCreation(TaskImpl task) {
-    Task task = task;
+  private Task postprocessTaskCreation(Task task) {
     if (createTaskPostProcessorManager.isEnabled()) {
       task = createTaskPostProcessorManager.processTaskAfterCreation(task);
     }
