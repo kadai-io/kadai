@@ -69,6 +69,7 @@ import io.kadai.spi.task.internal.AfterRequestChangesManager;
 import io.kadai.spi.task.internal.AfterRequestReviewManager;
 import io.kadai.spi.task.internal.BeforeRequestChangesManager;
 import io.kadai.spi.task.internal.BeforeRequestReviewManager;
+import io.kadai.spi.task.internal.CreateTaskPostprocessorManager;
 import io.kadai.spi.task.internal.CreateTaskPreprocessorManager;
 import io.kadai.spi.task.internal.ReviewRequiredManager;
 import io.kadai.spi.task.internal.TaskEndstatePreprocessorManager;
@@ -160,6 +161,7 @@ public class TaskServiceImpl implements TaskService {
   private final UserMapper userMapper;
   private final HistoryEventManager historyEventManager;
   private final CreateTaskPreprocessorManager createTaskPreprocessorManager;
+  private final CreateTaskPostprocessorManager createTaskPostProcessorManager;
   private final PriorityServiceManager priorityServiceManager;
   private final ReviewRequiredManager reviewRequiredManager;
   private final BeforeRequestReviewManager beforeRequestReviewManager;
@@ -184,6 +186,7 @@ public class TaskServiceImpl implements TaskService {
     this.classificationService = kadaiEngine.getEngine().getClassificationService();
     this.historyEventManager = kadaiEngine.getHistoryEventManager();
     this.createTaskPreprocessorManager = kadaiEngine.getCreateTaskPreprocessorManager();
+    this.createTaskPostProcessorManager = kadaiEngine.getCreateTaskPostprocessorManager();
     this.priorityServiceManager = kadaiEngine.getPriorityServiceManager();
     this.reviewRequiredManager = kadaiEngine.getReviewRequiredManager();
     this.beforeRequestReviewManager = kadaiEngine.getBeforeRequestReviewManager();
@@ -416,10 +419,11 @@ public class TaskServiceImpl implements TaskService {
 
       createTaskCreatedHistoryEvent(task);
 
-      return task;
+      task = (TaskImpl) postprocessTaskCreation(task);
     } finally {
       kadaiEngine.returnConnection();
     }
+    return task;
   }
 
   @Override
@@ -724,13 +728,11 @@ public class TaskServiceImpl implements TaskService {
 
     // Group task IDs by their current workbasket ID
     Map<String, List<String>> taskIdsByWorkbasketId = new HashMap<>();
-    BulkOperationResults<String, KadaiException> aggregatedResults =
-        new BulkOperationResults<>();
+    BulkOperationResults<String, KadaiException> aggregatedResults = new BulkOperationResults<>();
 
     for (String taskId : taskIds) {
       if (taskId == null || taskId.isEmpty()) {
-        aggregatedResults.addError(
-            taskId, new TaskNotFoundException(taskId));
+        aggregatedResults.addError(taskId, new TaskNotFoundException(taskId));
         continue;
       }
       try {
@@ -1707,6 +1709,18 @@ public class TaskServiceImpl implements TaskService {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Task {} cannot be found, so it can be created.", task.getId());
     }
+    return task;
+  }
+
+  private Task postprocessTaskCreation(Task task) {
+    if (createTaskPostProcessorManager.isEnabled()) {
+      task = createTaskPostProcessorManager.processTaskAfterCreation(task);
+    }
+
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Method postprocessTaskCreation() post-processed Task '{}'.", task.getId());
+    }
+
     return task;
   }
 

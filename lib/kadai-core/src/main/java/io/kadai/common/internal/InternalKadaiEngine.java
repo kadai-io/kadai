@@ -27,6 +27,7 @@ import io.kadai.spi.task.internal.AfterRequestReviewManager;
 import io.kadai.spi.task.internal.BeforeRequestChangesManager;
 import io.kadai.spi.task.internal.BeforeRequestReviewManager;
 import io.kadai.spi.task.internal.BeforeTransferTaskManager;
+import io.kadai.spi.task.internal.CreateTaskPostprocessorManager;
 import io.kadai.spi.task.internal.CreateTaskPreprocessorManager;
 import io.kadai.spi.task.internal.ReviewRequiredManager;
 import io.kadai.spi.task.internal.TaskDistributionManager;
@@ -130,6 +131,13 @@ public interface InternalKadaiEngine {
    * @return the CreateTaskPreprocessorManager instance.
    */
   CreateTaskPreprocessorManager getCreateTaskPreprocessorManager();
+
+  /**
+   * Retrieve CreateTaskPostprocessorManager.
+   *
+   * @return the CreateTaskPostprocessorManager instance.
+   */
+  CreateTaskPostprocessorManager getCreateTaskPostprocessorManager();
 
   /**
    * Retrieves the {@linkplain PriorityServiceManager}.
