@@ -82,7 +82,7 @@ class CreateTaskPostProcessingTransactionAccTest {
     newTaskToCreate.setPrimaryObjRef(DefaultTestEntities.defaultTestObjectReference().build());
 
     assertThatThrownBy(() -> taskService.createTask(newTaskToCreate))
-            .isInstanceOf(RuntimeException.class)
+            .isInstanceOf(UnsupportedOperationException.class)
             .hasMessageContaining(ThrowingCreateTaskPostProcessorProvider.ERROR_MESSAGE);
   }
 
@@ -92,7 +92,7 @@ class CreateTaskPostProcessingTransactionAccTest {
 
     @Override
     public Task processTaskAfterCreation(Task taskToProcess) {
-      throw new RuntimeException(ERROR_MESSAGE);
+      throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
   }
 }
