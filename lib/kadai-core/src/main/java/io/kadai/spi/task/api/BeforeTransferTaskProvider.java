@@ -18,29 +18,20 @@
 
 package io.kadai.spi.task.api;
 
-import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.api.KadaiInitializable;
 import io.kadai.task.api.exceptions.TransferCheckException;
 import io.kadai.task.api.models.Task;
 import io.kadai.workbasket.api.models.Workbasket;
 
 /**
- * The BeforeTransferTaskProvider allows to implement customized validation logic before a
- * {@linkplain Task} is transferred to a destination {@linkplain Workbasket}.
+ * The BeforeTransferTaskProvider allows to implement customized validation
+ * logic before a {@linkplain Task} is transferred to a destination
+ * {@linkplain Workbasket}.
  *
- * <p>Implementations can deny the transfer by throwing a {@linkplain TransferCheckException}.
+ * <p>Implementations can deny the transfer by throwing a
+ * {@linkplain TransferCheckException}.
  */
-public interface BeforeTransferTaskProvider {
-
-  /**
-   * Provide the active {@linkplain KadaiEngine} which is initialized for this KADAI installation.
-   *
-   * <p>This method is called during KADAI startup and allows the service provider to store the
-   * active {@linkplain KadaiEngine} for later usage.
-   *
-   * @param kadaiEngine the active {@linkplain KadaiEngine} which is initialized for this
-   *     installation
-   */
-  void initialize(KadaiEngine kadaiEngine);
+public interface BeforeTransferTaskProvider extends KadaiInitializable {
 
   /**
    * Validate whether the transfer of a {@linkplain Task} to the given destination {@linkplain
@@ -61,3 +52,5 @@ public interface BeforeTransferTaskProvider {
   void checkTransferAllowed(Task task, Workbasket destinationWorkbasket)
       throws TransferCheckException;
 }
+
+

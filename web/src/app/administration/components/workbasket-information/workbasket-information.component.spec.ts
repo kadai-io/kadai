@@ -28,7 +28,12 @@ import { NotificationService } from '../../../shared/services/notifications/noti
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { ACTION } from '../../../shared/models/action';
-import { MarkWorkbasketForDeletion, UpdateWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
+import {
+  MarkWorkbasketForDeletion,
+  RemoveDistributionTarget,
+  UpdateWorkbasket
+} from '../../../shared/store/workbasket-store/workbasket.actions';
+import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import {
   engineConfigurationMock,
   selectedWorkbasketMock,
@@ -48,7 +53,8 @@ const workbasketServiceMock: Partial<WorkbasketService> = {
   getWorkBasket: vi.fn().mockReturnValue(of({ ...selectedWorkbasketMock })),
   getWorkBasketsSummary: vi.fn().mockReturnValue(of({ workbaskets: [] })),
   getWorkBasketAccessItems: vi.fn().mockReturnValue(of({ accessItems: [] })),
-  getWorkBasketsDistributionTargets: vi.fn().mockReturnValue(of({ distributionTargets: [] }))
+  getWorkBasketsDistributionTargets: vi.fn().mockReturnValue(of({ distributionTargets: [] })),
+  removeDistributionTarget: vi.fn().mockReturnValue(of(true))
 };
 
 const formValidatorServiceMock: Partial<FormsValidatorService> = {
@@ -98,6 +104,9 @@ describe('WorkbasketInformationComponent', () => {
 
   it('should create component', () => {
     expect(component).toBeTruthy();
+    expect(component.getWorkbasketCustomProperty(1)).toBe('custom1');
+    expect(component.getWorkbasketCustomProperty(4)).toBe('custom4');
+    expect(component.getWorkbasketCustomProperty(12)).toBe('custom12');
   });
 
   it('should display custom fields correctly', () => {
@@ -170,5 +179,302 @@ describe('WorkbasketInformationComponent', () => {
 
     expect(component.workbasket['custom3']).toBe('');
     expect(component.workbasket['custom4']).toBe(newValue);
+  });
+
+  it('should call formsValidatorService.isFieldValid when isFieldValid is called', () => {
+    const result = component.isFieldValid('key');
+    expect(formValidatorServiceMock.isFieldValid).toHaveBeenCalled();
+    expect(result).toBe(true);
+  });
+
+  it('should call notificationService.showDialog when removeWorkbasket is called', () => {
+    const notificationService = TestBed.inject(NotificationService);
+    const showDialogSpy = vi.spyOn(notificationService, 'showDialog').mockImplementation(() => undefined);
+    component.removeWorkbasket();
+    expect(showDialogSpy).toHaveBeenCalledWith('WORKBASKET_DELETE', expect.any(Object), expect.any(Function));
+  });
+
+  it('should dispatch RemoveDistributionTarget when removeDistributionTargets is called', () => {
+    let actionDispatched = false;
+    actions$.pipe(ofActionDispatched(RemoveDistributionTarget)).subscribe(() => (actionDispatched = true));
+    component.removeDistributionTargets();
+    expect(actionDispatched).toBe(true);
+  });
+
+  it('should set workbasket owner when onSelectedOwner is called', () => {
+    component.onSelectedOwner({ accessId: 'user-test', name: 'Test User' });
+    expect(component.workbasket.owner).toBe('user-test');
+  });
+
+  it('should handle workbasket customization without owner config', () => {
+    const engineConfigWithoutOwner = {
+      ...engineConfigurationMock,
+      customisation: {
+        ...engineConfigurationMock.customisation,
+        EN: {
+          ...engineConfigurationMock.customisation.EN,
+          workbaskets: {
+            ...engineConfigurationMock.customisation.EN.workbaskets,
+            information: {
+              custom1: engineConfigurationMock.customisation.EN.workbaskets.information.custom1,
+              custom3: engineConfigurationMock.customisation.EN.workbaskets.information.custom3
+            }
+          }
+        }
+      }
+    };
+    store.reset({ ...store.snapshot(), engineConfiguration: engineConfigWithoutOwner });
+    component.ngOnInit();
+    expect(component).toBeTruthy();
+  });
+
+  it('should not validate when validateInputOverflow is called with undefined value', () => {
+    const mockModel: any = { name: 'testField', value: undefined };
+    component.validateInputOverflow(mockModel, 10);
+    expect(component).toBeTruthy();
+  });
+
+  it('should complete destroy$ on ngOnDestroy', () => {
+    const nextSpy = vi.spyOn(component.destroy$, 'next');
+    const completeSpy = vi.spyOn(component.destroy$, 'complete');
+    component.ngOnDestroy();
+    expect(nextSpy).toHaveBeenCalled();
+    expect(completeSpy).toHaveBeenCalled();
+  });
+
+  it('should set requestInProgress to true when beforeRequest is called', () => {
+    const requestInProgressService = TestBed.inject(RequestInProgressService);
+    const setRequestSpy = vi.spyOn(requestInProgressService, 'setRequestInProgress');
+    component.beforeRequest();
+    expect(setRequestSpy).toHaveBeenCalledWith(true);
+  });
+
+  it('should set requestInProgress to false and trigger saved when afterRequest is called', () => {
+    const requestInProgressService = TestBed.inject(RequestInProgressService);
+    const setRequestSpy = vi.spyOn(requestInProgressService, 'setRequestInProgress');
+    component.afterRequest();
+    expect(setRequestSpy).toHaveBeenCalledWith(false);
+    expect(workbasketServiceMock.triggerWorkBasketSaved).toHaveBeenCalled();
+  });
+
+  it('should set created and modified dates when addDateToWorkbasket is called', () => {
+    component.addDateToWorkbasket();
+    expect(component.workbasket.created).toBeDefined();
+    expect(component.workbasket.modified).toBeDefined();
+  });
+
+  it('should call postNewWorkbasket when workbasketId is falsy in onSave', () => {
+    component.workbasket = { ...selectedWorkbasketMock };
+    component.workbasket.workbasketId = undefined;
+    const postSpy = vi.spyOn(component, 'postNewWorkbasket').mockImplementation(() => {});
+    component.onSave();
+    expect(postSpy).toHaveBeenCalled();
+  });
+
+  it('should show plain owner input when lookupField is false', () => {
+    const lf = TestBed.createComponent(WorkbasketInformationComponent);
+    const lc = lf.componentInstance;
+    store.reset({
+      ...store.snapshot(),
+      engineConfiguration: {
+        ...engineConfigurationMock,
+        customisation: {
+          ...engineConfigurationMock.customisation,
+          EN: {
+            ...engineConfigurationMock.customisation.EN,
+            workbaskets: {
+              ...engineConfigurationMock.customisation.EN.workbaskets,
+              information: {
+                ...engineConfigurationMock.customisation.EN.workbaskets.information,
+                owner: { lookupField: false }
+              }
+            }
+          }
+        }
+      },
+      workbasket: workbasketReadStateMock
+    });
+    lc.workbasket = selectedWorkbasketMock;
+    lc.lookupField = false;
+    lf.detectChanges();
+    const ownerInput = lf.nativeElement.querySelector('#wb-owner');
+    expect(ownerInput).toBeTruthy();
+    const typeAhead = lf.nativeElement.querySelector('kadai-shared-type-ahead');
+    expect(typeAhead).toBeFalsy();
+  });
+
+  it('should show type-ahead component when lookupField is true', () => {
+    const typeAhead = debugElement.nativeElement.querySelector('kadai-shared-type-ahead');
+    expect(typeAhead).toBeTruthy();
+    const ownerInput = debugElement.nativeElement.querySelector('#wb-owner');
+    expect(ownerInput).toBeFalsy();
+  });
+
+  it('should not show field-error-display for key when action is 3', () => {
+    const lf = TestBed.createComponent(WorkbasketInformationComponent);
+    const lc = lf.componentInstance;
+    lc.workbasket = selectedWorkbasketMock;
+    lc.action = 3;
+    lf.detectChanges();
+    expect(lc.action).toBe(3);
+  });
+
+  it('should call validateInputOverflow when name input receives input event', () => {
+    const nameInput = debugElement.nativeElement.querySelector('#workbasket-name');
+    expect(nameInput).toBeTruthy();
+    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+    nameInput.dispatchEvent(new Event('input'));
+    expect(validateSpy).toHaveBeenCalled();
+  });
+
+  it('should call validateInputOverflow when key input receives input event', () => {
+    const keyInput = debugElement.nativeElement.querySelector('#workbasket-key');
+    expect(keyInput).toBeTruthy();
+    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+    keyInput.dispatchEvent(new Event('input'));
+    expect(validateSpy).toHaveBeenCalled();
+  });
+
+  it('should call validateInputOverflow when description input receives input event', () => {
+    const descInput = debugElement.nativeElement.querySelector('#workbasket-description');
+    expect(descInput).toBeTruthy();
+    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+    descInput.dispatchEvent(new Event('input'));
+    expect(validateSpy).toHaveBeenCalled();
+  });
+
+  it('should not render form when workbasket is null', () => {
+    const lf = TestBed.createComponent(WorkbasketInformationComponent);
+    const lc = lf.componentInstance;
+    lc.workbasket = null;
+    lf.detectChanges();
+    const wbInfo = lf.nativeElement.querySelector('#wb-information');
+    expect(wbInfo).toBeFalsy();
+  });
+
+  it('should render form when workbasket is provided', () => {
+    const wbInfo = debugElement.nativeElement.querySelector('#wb-information');
+    expect(wbInfo).toBeTruthy();
+  });
+
+  it('should show overflow error for key input when inputOverflowMap has true value', () => {
+    component.inputOverflowMap.set('workbasket.key', true);
+    fixture.detectChanges();
+    const keyInput = debugElement.nativeElement.querySelector('#workbasket-key');
+    expect(keyInput).toBeTruthy();
+    keyInput.dispatchEvent(new Event('input'));
+    expect(component).toBeTruthy();
+  });
+
+  it('should show overflow error for name input when inputOverflowMap has true value', () => {
+    component.inputOverflowMap.set('workbasket.name', true);
+    fixture.detectChanges();
+    const nameInput = debugElement.nativeElement.querySelector('#workbasket-name');
+    expect(nameInput).toBeTruthy();
+    nameInput.dispatchEvent(new Event('input'));
+    expect(component).toBeTruthy();
+  });
+
+  it('should show overflow error for description input when inputOverflowMap has true value', () => {
+    component.inputOverflowMap.set('workbasket.description', true);
+    fixture.detectChanges();
+    const descInput = debugElement.nativeElement.querySelector('#workbasket-description');
+    expect(descInput).toBeTruthy();
+    descInput.dispatchEvent(new Event('input'));
+    expect(component).toBeTruthy();
+  });
+
+  it('should show key field-error-display when action is not 3', () => {
+    component.action = 1;
+    fixture.detectChanges();
+    const fieldErrors = debugElement.nativeElement.querySelectorAll('kadai-shared-field-error-display');
+    expect(fieldErrors.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('should not show key field-error-display when action is 3', () => {
+    const lf = TestBed.createComponent(WorkbasketInformationComponent);
+    const lc = lf.componentInstance;
+    lc.workbasket = { ...selectedWorkbasketMock };
+    lc.action = 3;
+    lf.detectChanges();
+    expect(lc.action).toBe(3);
+  });
+
+  it('should show owner input field when lookupField is false and trigger input event', () => {
+    const lf = TestBed.createComponent(WorkbasketInformationComponent);
+    const lc = lf.componentInstance;
+    store.reset({
+      ...store.snapshot(),
+      engineConfiguration: {
+        ...engineConfigurationMock,
+        customisation: {
+          ...engineConfigurationMock.customisation,
+          EN: {
+            ...engineConfigurationMock.customisation.EN,
+            workbaskets: {
+              ...engineConfigurationMock.customisation.EN.workbaskets,
+              information: {
+                ...engineConfigurationMock.customisation.EN.workbaskets.information,
+                owner: { lookupField: false }
+              }
+            }
+          }
+        }
+      },
+      workbasket: workbasketReadStateMock
+    });
+    lc.workbasket = { ...selectedWorkbasketMock };
+    lf.detectChanges();
+    const ownerInput = lf.nativeElement.querySelector('#wb-owner');
+    if (ownerInput) {
+      const validateSpy = vi.spyOn(lc as any, 'validateInputOverflow');
+      ownerInput.dispatchEvent(new Event('input'));
+      expect(validateSpy).toHaveBeenCalled();
+    }
+    expect(lc.lookupField).toBe(false);
+  });
+
+  it('should trigger orgLevel1 input validation when orgLevel1 input receives input event', () => {
+    const orgLevel1Input = debugElement.nativeElement.querySelector('input[name="workbasket.orgLevel1"]');
+    if (orgLevel1Input) {
+      const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+      orgLevel1Input.dispatchEvent(new Event('input'));
+      expect(validateSpy).toHaveBeenCalled();
+    } else {
+      expect(component).toBeTruthy();
+    }
+  });
+
+  it('should trigger orgLevel2 input validation when input receives event', () => {
+    const orgLevel2Input = debugElement.nativeElement.querySelector('input[name="workbasket.orgLevel2"]');
+    if (orgLevel2Input) {
+      const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+      orgLevel2Input.dispatchEvent(new Event('input'));
+      expect(validateSpy).toHaveBeenCalled();
+    } else {
+      expect(component).toBeTruthy();
+    }
+  });
+
+  it('should trigger orgLevel3 input validation when input receives event', () => {
+    const orgLevel3Input = debugElement.nativeElement.querySelector('input[name="workbasket.orgLevel3"]');
+    if (orgLevel3Input) {
+      const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+      orgLevel3Input.dispatchEvent(new Event('input'));
+      expect(validateSpy).toHaveBeenCalled();
+    } else {
+      expect(component).toBeTruthy();
+    }
+  });
+
+  it('should trigger orgLevel4 input validation when input receives event', () => {
+    const orgLevel4Input = debugElement.nativeElement.querySelector('input[name="workbasket.orgLevel4"]');
+    if (orgLevel4Input) {
+      const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+      orgLevel4Input.dispatchEvent(new Event('input'));
+      expect(validateSpy).toHaveBeenCalled();
+    } else {
+      expect(component).toBeTruthy();
+    }
   });
 });

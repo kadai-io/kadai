@@ -91,4 +91,104 @@ describe('SettingsComponent', () => {
     component.onSave();
     expect(isActionDispatched).toBe(true);
   });
+
+  it('should restore settings to oldSettings when onReset is called', () => {
+    const originalSettings = component.deepCopy(component.oldSettings);
+    component.onReset();
+    expect(component.settings).toEqual(originalSettings);
+  });
+
+  it('should update settings value from DOM input when onColorChange is called', () => {
+    const input = document.createElement('input');
+    input.id = 'testColorKey';
+    input.value = '#ABCDEF';
+    document.body.appendChild(input);
+    component.onColorChange('testColorKey');
+    expect(component.settings['testColorKey']).toBe('#ABCDEF');
+    document.body.removeChild(input);
+  });
+
+  it('should call onSave when Save button is clicked via DOM event', () => {
+    const saveSpy = vi.spyOn(component, 'onSave');
+    const saveButton = fixture.nativeElement.querySelector('.settings__button--primary');
+    saveButton.click();
+    expect(saveSpy).toHaveBeenCalled();
+  });
+
+  it('should call onReset when Undo changes button is clicked via DOM event', () => {
+    const resetSpy = vi.spyOn(component, 'onReset');
+    const resetButton = fixture.nativeElement.querySelector('.settings__button--secondary');
+    resetButton.click();
+    expect(resetSpy).toHaveBeenCalled();
+  });
+
+  it('should render text input fields for members of type text', () => {
+    const textInputs = fixture.nativeElement.querySelectorAll('input[type="text"]');
+    expect(textInputs.length).toBeGreaterThan(0);
+  });
+
+  it('should render number input fields for members of type interval', () => {
+    const numberInputs = fixture.nativeElement.querySelectorAll('input[type="number"]');
+    expect(numberInputs.length).toBeGreaterThan(0);
+  });
+
+  it('should render color input fields for members of type color', () => {
+    const colorInputs = fixture.nativeElement.querySelectorAll('input[type="color"]');
+    expect(colorInputs.length).toBeGreaterThan(0);
+  });
+
+  it('should render textarea fields for members of type json', () => {
+    const textareas = fixture.nativeElement.querySelectorAll('textarea');
+    expect(textareas.length).toBeGreaterThan(0);
+  });
+
+  it('should call onColorChange when a color input change event fires', () => {
+    const colorChangeSpy = vi.spyOn(component, 'onColorChange');
+    const colorInput = fixture.nativeElement.querySelector('input[type="color"]') as HTMLInputElement;
+    colorInput.value = '#123456';
+    colorInput.dispatchEvent(new Event('change'));
+    expect(colorChangeSpy).toHaveBeenCalled();
+  });
+
+  it('should render group display names from settings schema', () => {
+    const headings = fixture.nativeElement.querySelectorAll('.settings__domain-name');
+    expect(headings.length).toBeGreaterThan(0);
+    const headingTexts = Array.from(headings).map((el: any) => el.textContent.trim());
+    expect(headingTexts).toContain('Priority Report');
+  });
+
+  it('should reset settings to old values when Undo changes button is clicked', () => {
+    const originalSettings = component.deepCopy(component.oldSettings);
+    component.settings['nameHighPriority'] = 'Modified Value';
+    const resetButton = fixture.nativeElement.querySelector('.settings__button--secondary');
+    resetButton.click();
+    expect(component.settings['nameHighPriority']).toEqual(originalSettings['nameHighPriority']);
+  });
+
+  it('should trigger ngModel write function on text inputs by dispatching input events', () => {
+    const textInputs = fixture.nativeElement.querySelectorAll('input[type="text"]');
+    textInputs.forEach((input: HTMLInputElement) => {
+      input.value = 'Test Value';
+      input.dispatchEvent(new Event('input'));
+    });
+    expect(component).toBeTruthy();
+  });
+
+  it('should trigger ngModel write function on number inputs by dispatching input events', () => {
+    const numberInputs = fixture.nativeElement.querySelectorAll('input[type="number"]');
+    numberInputs.forEach((input: HTMLInputElement) => {
+      input.value = '5';
+      input.dispatchEvent(new Event('input'));
+    });
+    expect(component).toBeTruthy();
+  });
+
+  it('should trigger ngModel write function on textarea by dispatching input event', () => {
+    const textarea = fixture.nativeElement.querySelector('textarea');
+    if (textarea) {
+      textarea.value = '{"test": "value"}';
+      textarea.dispatchEvent(new Event('input'));
+    }
+    expect(component).toBeTruthy();
+  });
 });

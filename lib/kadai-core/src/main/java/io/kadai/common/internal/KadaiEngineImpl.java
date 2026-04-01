@@ -51,7 +51,7 @@ import io.kadai.common.internal.workingtime.WorkingTimeCalculatorImpl;
 import io.kadai.monitor.api.MonitorService;
 import io.kadai.monitor.internal.MonitorMapper;
 import io.kadai.monitor.internal.MonitorServiceImpl;
-import io.kadai.spi.history.internal.HistoryEventManager;
+import io.kadai.spi.history.internal.KadaiEventBroker;
 import io.kadai.spi.priority.internal.PriorityServiceManager;
 import io.kadai.spi.routing.internal.TaskRoutingManager;
 import io.kadai.spi.task.internal.AfterRequestChangesManager;
@@ -82,7 +82,6 @@ import io.kadai.workbasket.internal.WorkbasketAccessMapper;
 import io.kadai.workbasket.internal.WorkbasketMapper;
 import io.kadai.workbasket.internal.WorkbasketQueryMapper;
 import io.kadai.workbasket.internal.WorkbasketServiceImpl;
-import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -129,7 +128,7 @@ public class KadaiEngineImpl implements KadaiEngine {
 
   private final InternalKadaiEngineImpl internalKadaiEngineImpl;
   private final WorkingTimeCalculator workingTimeCalculator;
-  private final HistoryEventManager historyEventManager;
+  private final KadaiEventBroker kadaiEventBroker;
   private final CurrentUserContext currentUserContext;
   private final JobScheduler jobScheduler;
   protected ConnectionManagementMode mode;
@@ -205,7 +204,7 @@ public class KadaiEngineImpl implements KadaiEngine {
     createTaskPreprocessorManager = new CreateTaskPreprocessorManager();
     createTaskPostprocessorManager = new CreateTaskPostprocessorManager();
     priorityServiceManager = new PriorityServiceManager(this);
-    historyEventManager = new HistoryEventManager(this);
+    kadaiEventBroker = new KadaiEventBroker(this);
     taskRoutingManager = new TaskRoutingManager(this);
     taskDistributionManager = new TaskDistributionManager(this);
     reviewRequiredManager = new ReviewRequiredManager(this);
@@ -255,7 +254,7 @@ public class KadaiEngineImpl implements KadaiEngine {
   public WorkbasketService getWorkbasketService() {
     return new WorkbasketServiceImpl(
         internalKadaiEngineImpl,
-        historyEventManager,
+        kadaiEventBroker,
         sessionManager.getMapper(WorkbasketMapper.class),
         sessionManager.getMapper(DistributionTargetMapper.class),
         sessionManager.getMapper(WorkbasketAccessMapper.class));
@@ -326,7 +325,7 @@ public class KadaiEngineImpl implements KadaiEngine {
 
   @Override
   public boolean isHistoryEnabled() {
-    return historyEventManager.isEnabled();
+    return kadaiEventBroker.isEnabled();
   }
 
   @Override
@@ -405,7 +404,7 @@ public class KadaiEngineImpl implements KadaiEngine {
       subject.getPrincipals().add(new UserPrincipal(userId));
     }
 
-    return Subject.doAs(subject, (PrivilegedAction<T>) supplier::get);
+    return Subject.callAs(subject, supplier::get);
   }
 
   @Override
@@ -616,8 +615,8 @@ public class KadaiEngineImpl implements KadaiEngine {
     }
 
     @Override
-    public HistoryEventManager getHistoryEventManager() {
-      return historyEventManager;
+    public KadaiEventBroker getKadaiEventBroker() {
+      return kadaiEventBroker;
     }
 
     @Override

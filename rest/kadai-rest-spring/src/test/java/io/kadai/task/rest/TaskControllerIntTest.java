@@ -18,7 +18,6 @@
 
 package io.kadai.task.rest;
 
-import static io.kadai.rest.test.RestHelper.CLIENT;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -52,6 +51,7 @@ import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.time.Instant;
@@ -86,6 +86,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpClientErrorException.NotFound;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
 import org.testcontainers.shaded.com.google.common.collect.Lists;
 
 /** Test Task Controller. */
@@ -97,11 +98,13 @@ class TaskControllerIntTest {
       BULK_RESULT_TASKS_MODEL_TYPE = new ParameterizedTypeReference<>() {};
 
   private final RestHelper restHelper;
+  private final RestClient restClient;
   @Autowired KadaiConfiguration kadaiConfiguration;
 
   @Autowired
-  TaskControllerIntTest(RestHelper restHelper) {
+  TaskControllerIntTest(RestHelper restHelper, RestClient restClient) {
     this.restHelper = restHelper;
+    this.restClient = restClient;
   }
 
   @Test
@@ -109,7 +112,7 @@ class TaskControllerIntTest {
     final String url = restHelper.toUrl("/api/v1/tasks/TKI:000000000000000000000000000000000104");
 
     ResponseEntity<TaskRepresentationModel> responseGet =
-        CLIENT
+        restClient
             .get()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -125,7 +128,7 @@ class TaskControllerIntTest {
     theTaskRepresentationModel.setOwner("dummyUser");
 
     ResponseEntity<TaskRepresentationModel> responseUpdate =
-        CLIENT
+        restClient
             .put()
             .uri(url)
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -205,7 +208,7 @@ class TaskControllerIntTest {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS);
 
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -224,7 +227,7 @@ class TaskControllerIntTest {
               + "?workbasket-id=WBI:100000000000000000000000000000000001";
 
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -253,7 +256,7 @@ class TaskControllerIntTest {
                   firstInstant, secondInstant, thirdInstant, fourthInstant);
 
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -270,7 +273,7 @@ class TaskControllerIntTest {
       String url =
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000025");
       ResponseEntity<TaskRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -301,7 +304,7 @@ class TaskControllerIntTest {
                             + "&custom-int-%s=%s",
                         i, i);
             ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-                CLIENT
+                restClient
                     .get()
                     .uri(url)
                     .headers(
@@ -329,7 +332,7 @@ class TaskControllerIntTest {
                             + "&custom-int-%s-from=%s",
                         i, i);
             ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-                CLIENT
+                restClient
                     .get()
                     .uri(url)
                     .headers(
@@ -357,7 +360,7 @@ class TaskControllerIntTest {
                             + "&custom-int-%s-from=-1&custom-int-%s-to=123",
                         i, i);
             ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-                CLIENT
+                restClient
                     .get()
                     .uri(url)
                     .headers(
@@ -385,7 +388,7 @@ class TaskControllerIntTest {
                             + "&custom-int-%s-to=%s",
                         i, i);
             ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-                CLIENT
+                restClient
                     .get()
                     .uri(url)
                     .headers(
@@ -413,7 +416,7 @@ class TaskControllerIntTest {
                             + "&custom-int-%s-not=25",
                         i);
             ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-                CLIENT
+                restClient
                     .get()
                     .uri(url)
                     .headers(
@@ -445,7 +448,7 @@ class TaskControllerIntTest {
                         i, i, i, i);
             ThrowingCallable httpCall =
                 () ->
-                    CLIENT
+                    restClient
                         .get()
                         .uri(url)
                         .headers(
@@ -484,7 +487,7 @@ class TaskControllerIntTest {
                         i, i, i);
             ThrowingCallable httpCall =
                 () ->
-                    CLIENT
+                    restClient
                         .get()
                         .uri(url)
                         .headers(
@@ -522,7 +525,7 @@ class TaskControllerIntTest {
                             + "&custom-int-%s-within=15",
                         i, i, i);
             ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-                CLIENT
+                restClient
                     .get()
                     .uri(url)
                     .headers(
@@ -552,7 +555,7 @@ class TaskControllerIntTest {
                             + "&custom-int-%s-within=%s",
                         i, i, i);
             ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-                CLIENT
+                restClient
                     .get()
                     .uri(url)
                     .headers(
@@ -582,7 +585,7 @@ class TaskControllerIntTest {
                             + "&custom-int-%s-not-within=",
                         i, i, i);
             ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-                CLIENT
+                restClient
                     .get()
                     .uri(url)
                     .headers(
@@ -611,7 +614,7 @@ class TaskControllerIntTest {
               + plannedToInstant
               + "&sort-by=PLANNED";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -633,7 +636,7 @@ class TaskControllerIntTest {
               + plannedFromInstant
               + "&sort-by=PLANNED";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -658,7 +661,7 @@ class TaskControllerIntTest {
               + "&sort-by=planned";
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(
@@ -689,7 +692,7 @@ class TaskControllerIntTest {
                       + "&sort-by=DUE",
                   firstInstant, secondInstant, thirdInstant, fourthInstant);
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -712,7 +715,7 @@ class TaskControllerIntTest {
                       + "&priority-from=%s&priority-until=%s",
                   priorityFrom, priorityTo);
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -735,7 +738,7 @@ class TaskControllerIntTest {
                       + "&priority-within=%s&priority-within=&priority-within=%s&priority-within=",
                   priorityFrom1, priorityFrom2);
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -758,7 +761,7 @@ class TaskControllerIntTest {
                       + "&priority-not-from=%s&priority-not-until=%s",
                   priorityFrom, priorityTo);
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -782,7 +785,7 @@ class TaskControllerIntTest {
                       + "&priority-not-within=%s&priority-not-within=",
                   priorityFrom1, priorityFrom2);
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -808,7 +811,7 @@ class TaskControllerIntTest {
 
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -835,7 +838,7 @@ class TaskControllerIntTest {
 
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -862,7 +865,7 @@ class TaskControllerIntTest {
 
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -889,7 +892,7 @@ class TaskControllerIntTest {
 
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -913,7 +916,7 @@ class TaskControllerIntTest {
                       + "&classification-parent-key=%s",
                   parentKey);
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -935,7 +938,7 @@ class TaskControllerIntTest {
                       + "&classification-parent-key-not=%s",
                   parentKey);
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -954,7 +957,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(RestEndpoints.URL_TASKS)
               + String.format("?classification-parent-key-like=%s", parentKey);
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -973,7 +976,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(RestEndpoints.URL_TASKS)
               + String.format("?classification-parent-key-not-like=%s", parentKey);
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -993,7 +996,7 @@ class TaskControllerIntTest {
               + URLEncoder.encode(
                   "{\"systemInstance\":\"MyInstance1\",\"type\":\"MyType1\"}", UTF_8);
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1012,7 +1015,7 @@ class TaskControllerIntTest {
               + "?sor="
               + URLEncoder.encode("{\"type\":\"Type2\",\"value\":\"Value2\"}", UTF_8);
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1031,7 +1034,7 @@ class TaskControllerIntTest {
               + "?sor="
               + URLEncoder.encode("{\"company\":\"Company3\"}", UTF_8);
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1050,7 +1053,7 @@ class TaskControllerIntTest {
               + "?sor="
               + URLEncoder.encode("{\"type\":\"Type2\",\"value\":\"Quatsch\"}", UTF_8);
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1071,7 +1074,7 @@ class TaskControllerIntTest {
               + "&wildcard-search-fields=CUSTOM_3"
               + "&wildcard-search-fields=CUSTOM_4";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -1099,7 +1102,7 @@ class TaskControllerIntTest {
             String url = restHelper.toUrl(RestEndpoints.URL_TASKS);
             ThrowingCallable httpCall =
                 () ->
-                    CLIENT
+                    restClient
                         .post()
                         .uri(url)
                         .headers(
@@ -1129,7 +1132,7 @@ class TaskControllerIntTest {
               + "&sort-by=NAME&order=DESCENDING&page-size=5&page=2";
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(
@@ -1154,7 +1157,7 @@ class TaskControllerIntTest {
               + "&sort-by=NAME&order=WRONG";
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(
@@ -1176,7 +1179,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000000");
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-b-1")))
@@ -1194,7 +1197,7 @@ class TaskControllerIntTest {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?wildcard-search-value=%rt%";
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(
@@ -1213,7 +1216,7 @@ class TaskControllerIntTest {
               + "?wildcard-search-fields=NAME,CUSTOM_3,CUSTOM_4";
       ThrowingCallable httpCall2 =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url2)
                   .headers(
@@ -1241,7 +1244,7 @@ class TaskControllerIntTest {
               + dueToInstant
               + "&sort-by=DUE";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1263,7 +1266,7 @@ class TaskControllerIntTest {
               + dueToInstant
               + "&sort-by=DUE";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1287,7 +1290,7 @@ class TaskControllerIntTest {
               + "&sort-by=planned";
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(
@@ -1308,7 +1311,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(RestEndpoints.URL_TASKS) + "?workbasket-key=USER-1-2&domain=DOMAIN_A";
 
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -1327,7 +1330,7 @@ class TaskControllerIntTest {
               + "?external-id=ETI:000000000000000000000000000000000003"
               + "&external-id=ETI:000000000000000000000000000000000004";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1344,7 +1347,7 @@ class TaskControllerIntTest {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?workbasket-key=USER-1-2";
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -1362,7 +1365,7 @@ class TaskControllerIntTest {
     void should_GetAllTasksWithAdminRole() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS);
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -1380,7 +1383,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(RestEndpoints.URL_TASKS)
               + "?por-type=VNR&por-value=22334455&sort-by=POR_VALUE&order=DESCENDING";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1409,7 +1412,7 @@ class TaskControllerIntTest {
         String queryParams, int expectedSize) {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?" + queryParams;
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -1427,7 +1430,7 @@ class TaskControllerIntTest {
     void should_TreatOwnerIsNullTrue_For_Value(String value) {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?owner-is-null" + value;
       ResponseEntity<TaskSummaryCollectionRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -1447,7 +1450,7 @@ class TaskControllerIntTest {
 
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(
@@ -1470,7 +1473,7 @@ class TaskControllerIntTest {
               + "&sort-by=TASK_ID&order=ASCENDING"
               + "&page-size=5&page=16";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -1503,7 +1506,7 @@ class TaskControllerIntTest {
               + "?sort-by=OWNER_LONG_NAME"
               + "&order=DESCENDING";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -1523,7 +1526,7 @@ class TaskControllerIntTest {
 
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?group-by=POR_VALUE";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -1552,7 +1555,7 @@ class TaskControllerIntTest {
 
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?group-by-sor=Type2";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -1578,7 +1581,7 @@ class TaskControllerIntTest {
               + "?sort-by=DUE&sort-by=TASK_ID&"
               + "order=DESCENDING&order=ASCENDING";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1594,7 +1597,7 @@ class TaskControllerIntTest {
               + "order=DESCENDING&order=ASCENDING&"
               + "page-size=5&page=5";
       response =
-          CLIENT
+          restClient
               .get()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1629,7 +1632,7 @@ class TaskControllerIntTest {
               + "order=ASCENDING&order=ASCENDING&"
               + "page-size=5&page=2";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1657,7 +1660,7 @@ class TaskControllerIntTest {
     void should_GetAllTasksWithComments_When_FilteringByHasCommentsIsSetToTrue() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?has-comments=true";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1681,7 +1684,7 @@ class TaskControllerIntTest {
     void should_GetAllTasksWithoutComments_When_FilteringByHasCommentsIsSetToFalse() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?has-comments=false";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1707,7 +1710,7 @@ class TaskControllerIntTest {
       String url =
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000002");
       ResponseEntity<TaskRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -1723,7 +1726,7 @@ class TaskControllerIntTest {
     void should_ReturnFilteredTasks_When_GettingTaskWithoutAttachments() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?without-attachment=true";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -1741,7 +1744,7 @@ class TaskControllerIntTest {
 
       assertThatThrownBy(
               () ->
-                  CLIENT
+                  restClient
                       .get()
                       .uri(url)
                       .headers(
@@ -1758,7 +1761,7 @@ class TaskControllerIntTest {
       String url =
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000001");
       ResponseEntity<TaskRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -1774,7 +1777,7 @@ class TaskControllerIntTest {
     void should_ReturnFilteredTasks_When_GettingTasksBySecondaryObjectReferenceValue() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?sor-value=Value2";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1790,7 +1793,7 @@ class TaskControllerIntTest {
     void should_ReturnFilteredTasks_When_GettingTasksBySecondaryObjectReferenceTypeLike() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?sor-type-like=Type";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1807,7 +1810,7 @@ class TaskControllerIntTest {
       String url =
           restHelper.toUrl(RestEndpoints.URL_TASKS) + "?sor-value=Value2&sor-company=Company1";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1823,7 +1826,7 @@ class TaskControllerIntTest {
     void should_ReturnFilteredTasks_When_GettingTasksByIsReopenedFalse() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?is-reopened=false";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1841,7 +1844,7 @@ class TaskControllerIntTest {
     void should_ReturnFilteredTasks_When_GettingTasksByIsReopenedTrue() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?is-reopened=true";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1860,7 +1863,7 @@ class TaskControllerIntTest {
       String url =
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000070000000000000079");
       ResponseEntity<TaskRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1878,7 +1881,7 @@ class TaskControllerIntTest {
       String url =
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000024");
       ResponseEntity<TaskRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -1901,7 +1904,7 @@ class TaskControllerIntTest {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS);
 
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1919,7 +1922,7 @@ class TaskControllerIntTest {
               + "?workbasket-id=WBI:100000000000000000000000000000000001";
 
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1935,7 +1938,7 @@ class TaskControllerIntTest {
       String filterParams = "?workbasket-id=WBI:100000000000000000000000000000000001";
 
       ResponseEntity<TaskSummaryPagedRepresentationModel> tasksResponse =
-          CLIENT
+          restClient
               .get()
               .uri(restHelper.toUrl(RestEndpoints.URL_TASKS) + filterParams)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1943,7 +1946,7 @@ class TaskControllerIntTest {
               .toEntity(TaskSummaryPagedRepresentationModel.class);
 
       ResponseEntity<TaskIdPagedRepresentationModel> idsResponse =
-          CLIENT
+          restClient
               .get()
               .uri(restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + filterParams)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1966,7 +1969,7 @@ class TaskControllerIntTest {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?page=1&page-size=5";
 
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -1984,7 +1987,7 @@ class TaskControllerIntTest {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?state=CLAIMED";
 
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -2002,7 +2005,7 @@ class TaskControllerIntTest {
               + "?workbasket-id=WBI:100000000000000000000000000000000001";
 
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -2032,7 +2035,7 @@ class TaskControllerIntTest {
                   firstInstant, secondInstant, thirdInstant, fourthInstant);
 
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -2056,7 +2059,7 @@ class TaskControllerIntTest {
               + plannedToInstant
               + "&sort-by=PLANNED";
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -2077,7 +2080,7 @@ class TaskControllerIntTest {
               + plannedFromInstant
               + "&sort-by=PLANNED";
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -2100,7 +2103,7 @@ class TaskControllerIntTest {
               + "&sort-by=planned";
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(
@@ -2131,7 +2134,7 @@ class TaskControllerIntTest {
                       + "&sort-by=DUE",
                   firstInstant, secondInstant, thirdInstant, fourthInstant);
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -2155,7 +2158,7 @@ class TaskControllerIntTest {
               + dueToInstant
               + "&sort-by=DUE";
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -2176,7 +2179,7 @@ class TaskControllerIntTest {
               + dueToInstant
               + "&sort-by=DUE";
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -2199,7 +2202,7 @@ class TaskControllerIntTest {
               + "&sort-by=planned";
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(
@@ -2225,7 +2228,7 @@ class TaskControllerIntTest {
                       + "&priority-from=%s&priority-until=%s",
                   priorityFrom, priorityTo);
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -2247,7 +2250,7 @@ class TaskControllerIntTest {
                       + "&priority-within=%s&priority-within=&priority-within=%s&priority-within=",
                   priorityFrom1, priorityFrom2);
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -2269,7 +2272,7 @@ class TaskControllerIntTest {
                       + "&priority-not-from=%s&priority-not-until=%s",
                   priorityFrom, priorityTo);
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -2292,7 +2295,7 @@ class TaskControllerIntTest {
                       + "&priority-not-within=%s&priority-not-within=",
                   priorityFrom1, priorityFrom2);
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -2317,7 +2320,7 @@ class TaskControllerIntTest {
 
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -2345,7 +2348,7 @@ class TaskControllerIntTest {
 
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -2372,7 +2375,7 @@ class TaskControllerIntTest {
 
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -2400,7 +2403,7 @@ class TaskControllerIntTest {
 
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -2426,7 +2429,7 @@ class TaskControllerIntTest {
                             + "&custom-int-%s=%s",
                         i, i);
             ResponseEntity<TaskIdPagedRepresentationModel> response =
-                CLIENT
+                restClient
                     .get()
                     .uri(url)
                     .headers(
@@ -2453,7 +2456,7 @@ class TaskControllerIntTest {
                             + "&custom-int-%s-from=%s",
                         i, i);
             ResponseEntity<TaskIdPagedRepresentationModel> response =
-                CLIENT
+                restClient
                     .get()
                     .uri(url)
                     .headers(
@@ -2480,7 +2483,7 @@ class TaskControllerIntTest {
                             + "&custom-int-%s-from=-1&custom-int-%s-to=123",
                         i, i);
             ResponseEntity<TaskIdPagedRepresentationModel> response =
-                CLIENT
+                restClient
                     .get()
                     .uri(url)
                     .headers(
@@ -2507,7 +2510,7 @@ class TaskControllerIntTest {
                             + "&custom-int-%s-to=%s",
                         i, i);
             ResponseEntity<TaskIdPagedRepresentationModel> response =
-                CLIENT
+                restClient
                     .get()
                     .uri(url)
                     .headers(
@@ -2534,7 +2537,7 @@ class TaskControllerIntTest {
                             + "&custom-int-%s-not=25",
                         i);
             ResponseEntity<TaskIdPagedRepresentationModel> response =
-                CLIENT
+                restClient
                     .get()
                     .uri(url)
                     .headers(
@@ -2565,7 +2568,7 @@ class TaskControllerIntTest {
                         i, i, i, i);
             ThrowingCallable httpCall =
                 () ->
-                    CLIENT
+                    restClient
                         .get()
                         .uri(url)
                         .headers(
@@ -2604,7 +2607,7 @@ class TaskControllerIntTest {
                         i, i, i);
             ThrowingCallable httpCall =
                 () ->
-                    CLIENT
+                    restClient
                         .get()
                         .uri(url)
                         .headers(
@@ -2642,7 +2645,7 @@ class TaskControllerIntTest {
                             + "&custom-int-%s-within=15",
                         i, i, i);
             ResponseEntity<TaskIdPagedRepresentationModel> response =
-                CLIENT
+                restClient
                     .get()
                     .uri(url)
                     .headers(
@@ -2671,7 +2674,7 @@ class TaskControllerIntTest {
                             + "&custom-int-%s-within=%s",
                         i, i, i);
             ResponseEntity<TaskIdPagedRepresentationModel> response =
-                CLIENT
+                restClient
                     .get()
                     .uri(url)
                     .headers(
@@ -2700,7 +2703,7 @@ class TaskControllerIntTest {
                             + "&custom-int-%s-not-within=",
                         i, i, i);
             ResponseEntity<TaskIdPagedRepresentationModel> response =
-                CLIENT
+                restClient
                     .get()
                     .uri(url)
                     .headers(
@@ -2725,7 +2728,7 @@ class TaskControllerIntTest {
                       + "&classification-parent-key=%s",
                   parentKey);
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -2747,7 +2750,7 @@ class TaskControllerIntTest {
                       + "&classification-parent-key-not=%s",
                   parentKey);
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -2766,7 +2769,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
               + String.format("?classification-parent-key-like=%s", parentKey);
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -2785,7 +2788,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
               + String.format("?classification-parent-key-not-like=%s", parentKey);
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -2805,7 +2808,7 @@ class TaskControllerIntTest {
               + URLEncoder.encode(
                   "{\"systemInstance\":\"MyInstance1\",\"type\":\"MyType1\"}", UTF_8);
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -2824,7 +2827,7 @@ class TaskControllerIntTest {
               + "?sor="
               + URLEncoder.encode("{\"type\":\"Type2\",\"value\":\"Value2\"}", UTF_8);
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -2843,7 +2846,7 @@ class TaskControllerIntTest {
               + "?sor="
               + URLEncoder.encode("{\"company\":\"Company3\"}", UTF_8);
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -2862,7 +2865,7 @@ class TaskControllerIntTest {
               + "?sor="
               + URLEncoder.encode("{\"type\":\"Type2\",\"value\":\"Quatsch\"}", UTF_8);
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -2883,7 +2886,7 @@ class TaskControllerIntTest {
               + "&wildcard-search-fields=CUSTOM_3"
               + "&wildcard-search-fields=CUSTOM_4";
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -2899,7 +2902,7 @@ class TaskControllerIntTest {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?wildcard-search-value=%rt%";
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(
@@ -2918,7 +2921,7 @@ class TaskControllerIntTest {
               + "?wildcard-search-fields=NAME,CUSTOM_3,CUSTOM_4";
       ThrowingCallable httpCall2 =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url2)
                   .headers(
@@ -2943,7 +2946,7 @@ class TaskControllerIntTest {
               + "&sort-by=NAME&order=DESCENDING&page-size=5&page=2";
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(
@@ -2968,7 +2971,7 @@ class TaskControllerIntTest {
               + "&sort-by=NAME&order=WRONG";
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(
@@ -2988,7 +2991,7 @@ class TaskControllerIntTest {
     void should_GetAllTaskIdsWithAdminRole() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS);
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -3005,7 +3008,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
               + "?workbasket-key=USER-1-2&domain=DOMAIN_A";
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -3023,7 +3026,7 @@ class TaskControllerIntTest {
               + "?external-id=ETI:000000000000000000000000000000000003"
               + "&external-id=ETI:000000000000000000000000000000000004";
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -3039,7 +3042,7 @@ class TaskControllerIntTest {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?workbasket-key=USER-1-2";
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -3066,7 +3069,7 @@ class TaskControllerIntTest {
     void should_ReturnTaskIdsWithVariousOwnerParameters(String queryParams, int expectedSize) {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?" + queryParams;
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -3083,7 +3086,7 @@ class TaskControllerIntTest {
     void should_TreatOwnerIsNullTrue_For_Value_ForTaskIds(String value) {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?owner-is-null" + value;
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -3101,7 +3104,7 @@ class TaskControllerIntTest {
 
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(
@@ -3120,7 +3123,7 @@ class TaskControllerIntTest {
     void should_ReturnFilteredTaskIds_When_GettingTasksByIsReopenedFalse() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?is-reopened=false";
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -3135,7 +3138,7 @@ class TaskControllerIntTest {
     void should_ReturnFilteredTaskIds_When_GettingTasksByIsReopenedTrue() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?is-reopened=true";
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -3150,7 +3153,7 @@ class TaskControllerIntTest {
     void should_ReturnFilteredTaskIds_When_GettingTasksBySecondaryObjectReferenceValue() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?sor-value=Value2";
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -3165,7 +3168,7 @@ class TaskControllerIntTest {
     void should_ReturnFilteredTaskIds_When_GettingTasksBySecondaryObjectReferenceTypeLike() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?sor-type-like=Type";
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -3182,7 +3185,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(RestEndpoints.URL_TASKS_IDS)
               + "?sort-by=DUE&sort-by=TASK_ID&order=DESCENDING&order=ASCENDING";
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -3202,7 +3205,7 @@ class TaskControllerIntTest {
               + "&sort-by=TASK_ID&order=ASCENDING"
               + "&page-size=5&page=16";
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -3221,7 +3224,7 @@ class TaskControllerIntTest {
       String url =
           restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + "?sor-value=Value2&sor-company=Company1";
       ResponseEntity<TaskIdPagedRepresentationModel> response =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -3242,7 +3245,7 @@ class TaskControllerIntTest {
       TaskRepresentationModel taskRepresentationModel = getTaskResourceSample();
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS);
       ResponseEntity<TaskRepresentationModel> responseCreate =
-          CLIENT
+          restClient
               .post()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -3257,7 +3260,7 @@ class TaskControllerIntTest {
 
       String url2 = restHelper.toUrl(RestEndpoints.URL_TASKS_ID_FORCE, taskIdOfCreatedTask);
       ResponseEntity<TaskRepresentationModel> responseDeleted =
-          CLIENT
+          restClient
               .delete()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -3276,7 +3279,7 @@ class TaskControllerIntTest {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS);
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .post()
                   .uri(url)
                   .headers(
@@ -3303,7 +3306,7 @@ class TaskControllerIntTest {
 
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS);
       ResponseEntity<TaskRepresentationModel> responseCreate =
-          CLIENT
+          restClient
               .post()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -3316,7 +3319,7 @@ class TaskControllerIntTest {
 
       String url2 = restHelper.toUrl(RestEndpoints.URL_TASKS_ID_FORCE, taskIdOfCreatedTask);
       ResponseEntity<TaskRepresentationModel> responseDeleted =
-          CLIENT
+          restClient
               .delete()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -3332,7 +3335,7 @@ class TaskControllerIntTest {
 
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS);
       ResponseEntity<TaskRepresentationModel> responseCreate =
-          CLIENT
+          restClient
               .post()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -3348,7 +3351,7 @@ class TaskControllerIntTest {
       String taskIdOfCreatedTask = responseCreate.getBody().getTaskId();
       String url2 = restHelper.toUrl(RestEndpoints.URL_TASKS_ID_FORCE, taskIdOfCreatedTask);
       ResponseEntity<TaskRepresentationModel> responseDeleted =
-          CLIENT
+          restClient
               .delete()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -3363,7 +3366,7 @@ class TaskControllerIntTest {
 
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS);
       ResponseEntity<TaskRepresentationModel> responseCreate =
-          CLIENT
+          restClient
               .post()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -3379,7 +3382,7 @@ class TaskControllerIntTest {
       String taskIdOfCreatedTask = responseCreate.getBody().getTaskId();
       String url2 = restHelper.toUrl(RestEndpoints.URL_TASKS_ID_FORCE, taskIdOfCreatedTask);
       ResponseEntity<TaskRepresentationModel> responseDeleted =
-          CLIENT
+          restClient
               .delete()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -3401,7 +3404,7 @@ class TaskControllerIntTest {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS);
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .post()
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -3419,7 +3422,7 @@ class TaskControllerIntTest {
 
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS);
       ResponseEntity<TaskRepresentationModel> responseCreate =
-          CLIENT
+          restClient
               .post()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -3433,7 +3436,7 @@ class TaskControllerIntTest {
       String url2 =
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID_FORCE, responseCreate.getBody().getTaskId());
       ResponseEntity<TaskRepresentationModel> responseDeleted =
-          CLIENT
+          restClient
               .delete()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -3451,7 +3454,7 @@ class TaskControllerIntTest {
               + "\"primaryObjRef\":{\"company\":\"MyCompany1\",\"system\":\"MySystem1\","
               + "\"systemInstance\":\"MyInstance1\",\"type\":\"MyType1\",\"value\":\"00000001\"}}";
 
-      URL url = new URL(restHelper.toUrl(RestEndpoints.URL_TASKS));
+      URL url = URI.create(restHelper.toUrl(RestEndpoints.URL_TASKS)).toURL();
       HttpURLConnection con = (HttpURLConnection) url.openConnection();
       con.setRequestMethod("POST");
       con.setDoOutput(true);
@@ -3471,7 +3474,7 @@ class TaskControllerIntTest {
               + "\"primaryObjRef\":{\"company\":\"MyCompany1\",\"system\":\"MySystem1\","
               + "\"systemInstance\":\"MyInstance1\",\"type\":\"MyType1\",\"value\":\"00000001\"}}";
 
-      url = new URL(restHelper.toUrl(RestEndpoints.URL_TASKS));
+      url = URI.create(restHelper.toUrl(RestEndpoints.URL_TASKS)).toURL();
       con = (HttpURLConnection) url.openConnection();
       con.setRequestMethod("POST");
       con.setDoOutput(true);
@@ -3496,7 +3499,7 @@ class TaskControllerIntTest {
       String url =
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:100000000000000000000000000000000000");
       ResponseEntity<TaskRepresentationModel> responseGet =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -3507,7 +3510,7 @@ class TaskControllerIntTest {
       Instant expectedReceived = Instant.parse("2019-09-13T08:44:17.588Z");
       originalTask.setReceived(expectedReceived);
       ResponseEntity<TaskRepresentationModel> responseUpdate =
-          CLIENT
+          restClient
               .put()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -3525,7 +3528,7 @@ class TaskControllerIntTest {
       String url =
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:100000000000000000000000000000000000");
       ResponseEntity<TaskRepresentationModel> responseGet =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -3535,7 +3538,7 @@ class TaskControllerIntTest {
       final TaskRepresentationModel originalTask = responseGet.getBody();
       assertThat(originalTask).isNotNull();
       ResponseEntity<TaskRepresentationModel> responseUpdate =
-          CLIENT
+          restClient
               .put()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -3553,7 +3556,7 @@ class TaskControllerIntTest {
       String url =
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:100000000000000000000000000000000000");
       ResponseEntity<TaskRepresentationModel> responseGet =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -3569,7 +3572,7 @@ class TaskControllerIntTest {
 
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .put()
                   .uri(url)
                   .headers(
@@ -3684,7 +3687,7 @@ class TaskControllerIntTest {
 
       // When: Performing bulk update
       ResponseEntity<Map<String, Object>> response =
-          CLIENT
+          restClient
               .patch()
               .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -3710,7 +3713,7 @@ class TaskControllerIntTest {
       // Verify that one of the tasks was actually updated by fetching it
       String firstTaskId = taskIds.get(0);
       ResponseEntity<TaskRepresentationModel> getResponse =
-          CLIENT
+          restClient
               .get()
               .uri(restHelper.toUrl("/api/v1/tasks/" + firstTaskId))
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -3847,7 +3850,7 @@ class TaskControllerIntTest {
 
       // When: Performing bulk update
       ResponseEntity<Map<String, Object>> response =
-          CLIENT
+          restClient
               .patch()
               .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -3890,7 +3893,7 @@ class TaskControllerIntTest {
 
       // Verify that the successful task was actually updated
       ResponseEntity<TaskRepresentationModel> taskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(restHelper.toUrl("/api/v1/tasks/TKI:000000000000000000000000000000000003"))
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -3913,7 +3916,7 @@ class TaskControllerIntTest {
           assertThrows(
               HttpClientErrorException.BadRequest.class,
               () ->
-                  CLIENT
+                  restClient
                       .patch()
                       .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
                       .headers(
@@ -3934,7 +3937,7 @@ class TaskControllerIntTest {
       requestBody.put("taskIds", List.of());
 
       ResponseEntity<Map<String, Object>> response =
-          CLIENT
+          restClient
               .patch()
               .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -3956,7 +3959,7 @@ class TaskControllerIntTest {
           assertThrows(
               HttpClientErrorException.BadRequest.class,
               () ->
-                  CLIENT
+                  restClient
                       .patch()
                       .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
                       .headers(
@@ -3977,7 +3980,7 @@ class TaskControllerIntTest {
       requestBody.put("fieldsToUpdate", Map.of());
 
       ResponseEntity<Map<String, Object>> response =
-          CLIENT
+          restClient
               .patch()
               .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -3999,7 +4002,7 @@ class TaskControllerIntTest {
       String url =
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000039");
       ResponseEntity<TaskRepresentationModel> responseGet =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4009,7 +4012,7 @@ class TaskControllerIntTest {
       assertThat(responseGet.getBody().getState()).isEqualTo(TaskState.COMPLETED);
 
       ResponseEntity<TaskRepresentationModel> responseDelete =
-          CLIENT
+          restClient
               .delete()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4020,7 +4023,7 @@ class TaskControllerIntTest {
 
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4044,7 +4047,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(
               RestEndpoints.URL_TASKS_ID_FORCE, "TKI:000000000000000000000000000000000026");
       ResponseEntity<TaskRepresentationModel> responseGet =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4054,7 +4057,7 @@ class TaskControllerIntTest {
       assertThat(responseGet.getBody().getState()).isEqualTo(TaskState.CLAIMED);
 
       ResponseEntity<TaskRepresentationModel> responseDelete =
-          CLIENT
+          restClient
               .delete()
               .uri(urlForce)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4065,7 +4068,7 @@ class TaskControllerIntTest {
 
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .get()
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4091,7 +4094,7 @@ class TaskControllerIntTest {
               + "&custom14=abc";
 
       ResponseEntity<TaskSummaryCollectionRepresentationModel> response =
-          CLIENT
+          restClient
               .delete()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4114,7 +4117,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> responseGet =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -4129,7 +4132,7 @@ class TaskControllerIntTest {
       // set Owner and update Task
       taskRepresentationModel.setOwner("dummyUser");
       ResponseEntity<TaskRepresentationModel> responseUpdate =
-          CLIENT
+          restClient
               .put()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -4149,7 +4152,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> responseGet =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -4166,7 +4169,7 @@ class TaskControllerIntTest {
 
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .put()
                   .uri(url)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -4196,7 +4199,7 @@ class TaskControllerIntTest {
       ThrowingConsumer<Pair<Boolean, String>> test =
           pair -> {
             ResponseEntity<TaskRepresentationModel> response =
-                CLIENT
+                restClient
                     .post()
                     .uri(url)
                     .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4223,7 +4226,7 @@ class TaskControllerIntTest {
               "TKI:000000000000000000000000000000000003",
               "WBI:100000000000000000000000000000000006");
       ResponseEntity<TaskRepresentationModel> response =
-          CLIENT
+          restClient
               .post()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4255,7 +4258,7 @@ class TaskControllerIntTest {
       ThrowingConsumer<Pair<Boolean, String>> test =
           pair -> {
             ResponseEntity<Map<String, Object>> response =
-                CLIENT
+                restClient
                     .post()
                     .uri(url)
                     .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4303,7 +4306,7 @@ class TaskControllerIntTest {
                   "TKI:000000000000000000000000000000000004"));
 
       ResponseEntity<Map<String, Object>> response =
-          CLIENT
+          restClient
               .post()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4330,7 +4333,7 @@ class TaskControllerIntTest {
                   "TKI:000000000000000000000000000000000039"));
 
       ResponseEntity<Map<String, Object>> response =
-          CLIENT
+          restClient
               .post()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4355,7 +4358,7 @@ class TaskControllerIntTest {
           new TransferTaskOwnerRepresentationModel(
               List.of("TKI:000000000000000000000000000000000006"));
 
-      CLIENT
+      restClient
           .post()
           .uri(url)
           .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4367,7 +4370,7 @@ class TaskControllerIntTest {
       String getUrl =
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000006");
       ResponseEntity<TaskRepresentationModel> getResponse =
-          CLIENT
+          restClient
               .get()
               .uri(getUrl)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4385,7 +4388,7 @@ class TaskControllerIntTest {
       String getUrl =
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000007");
       ResponseEntity<TaskRepresentationModel> getResponseBefore =
-          CLIENT
+          restClient
               .get()
               .uri(getUrl)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4400,7 +4403,7 @@ class TaskControllerIntTest {
           new TransferTaskOwnerRepresentationModel(
               List.of("TKI:000000000000000000000000000000000007"));
 
-      CLIENT
+      restClient
           .post()
           .uri(url)
           .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4410,7 +4413,7 @@ class TaskControllerIntTest {
 
       // Verify the task is still in the same workbasket
       ResponseEntity<TaskRepresentationModel> getResponseAfter =
-          CLIENT
+          restClient
               .get()
               .uri(getUrl)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4431,7 +4434,7 @@ class TaskControllerIntTest {
           new TransferTaskOwnerRepresentationModel(
               List.of("TKI:000000000000000000000000000000000008"));
 
-      CLIENT
+      restClient
           .post()
           .uri(url)
           .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4442,7 +4445,7 @@ class TaskControllerIntTest {
       String getUrl =
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000008");
       ResponseEntity<TaskRepresentationModel> getResponse =
-          CLIENT
+          restClient
               .get()
               .uri(getUrl)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4464,7 +4467,7 @@ class TaskControllerIntTest {
                   "TKI:000000000000000000000000000000000010"));
 
       ResponseEntity<Map<String, Object>> response =
-          CLIENT
+          restClient
               .post()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4494,7 +4497,7 @@ class TaskControllerIntTest {
 
       assertThatThrownBy(
               () ->
-                  CLIENT
+                  restClient
                       .post()
                       .uri(url)
                       .headers(
@@ -4519,7 +4522,7 @@ class TaskControllerIntTest {
               RestEndpoints.URL_DISTRIBUTE, "WBI:100000000000000000000000000000000006");
 
       ResponseEntity<Map<String, Object>> response =
-          CLIENT
+          restClient
               .post()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4573,7 +4576,7 @@ class TaskControllerIntTest {
               RestEndpoints.URL_DISTRIBUTE, "WBI:100000000000000000000000000000000006");
 
       ResponseEntity<Map<String, Object>> response =
-          CLIENT
+          restClient
               .post()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4612,7 +4615,7 @@ class TaskControllerIntTest {
               RestEndpoints.URL_DISTRIBUTE, "WBI:100000000000000000000000000000000006");
 
       ResponseEntity<Map<String, Object>> response =
-          CLIENT
+          restClient
               .post()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4660,7 +4663,7 @@ class TaskControllerIntTest {
 
       assertThatThrownBy(
               () ->
-                  CLIENT
+                  restClient
                       .post()
                       .uri(url)
                       .headers(
@@ -4675,7 +4678,7 @@ class TaskControllerIntTest {
 
       assertThatThrownBy(
               () ->
-                  CLIENT
+                  restClient
                       .post()
                       .uri(url)
                       .headers(
@@ -4700,7 +4703,7 @@ class TaskControllerIntTest {
 
       ThrowingCallable response =
           () ->
-              CLIENT
+              restClient
                   .post()
                   .uri(url)
                   .headers(headersInt -> headersInt.addAll(headers))
@@ -4719,7 +4722,7 @@ class TaskControllerIntTest {
 
       String url = restHelper.toUrl(RestEndpoints.URL_DISTRIBUTE, sourceWorkbasketId);
       ResponseEntity<BulkOperationResultsRepresentationModel> response =
-          CLIENT
+          restClient
               .post()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4741,7 +4744,7 @@ class TaskControllerIntTest {
 
       String url = restHelper.toUrl(RestEndpoints.URL_DISTRIBUTE, sourceWorkbasketId);
       ResponseEntity<BulkOperationResultsRepresentationModel> response =
-          CLIENT
+          restClient
               .post()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4765,7 +4768,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -4782,7 +4785,7 @@ class TaskControllerIntTest {
               RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES,
               "TKI:000000000000000000000000000000000136");
       ResponseEntity<TaskRepresentationModel> requestedChangesResponse =
-          CLIENT
+          restClient
               .post()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -4803,7 +4806,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -4820,7 +4823,7 @@ class TaskControllerIntTest {
               RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES_FORCE,
               "TKI:000000000000000000000000000000000100");
       ResponseEntity<TaskRepresentationModel> requestedChangesResponse =
-          CLIENT
+          restClient
               .post()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -4845,7 +4848,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -4866,7 +4869,7 @@ class TaskControllerIntTest {
               RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES,
               "TKI:000000000000000000000000000000000136");
       ResponseEntity<TaskRepresentationModel> requestedChangesResponse =
-          CLIENT
+          restClient
               .post()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -4890,7 +4893,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4912,7 +4915,7 @@ class TaskControllerIntTest {
               RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES,
               "TKI:000000000000000000000000000000000236");
       ResponseEntity<TaskRepresentationModel> requestedChangesResponse =
-          CLIENT
+          restClient
               .post()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -4936,7 +4939,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -4956,7 +4959,7 @@ class TaskControllerIntTest {
               "TKI:000000000000000000000000000000000136");
       ThrowingCallable requestChangesResponse =
           () ->
-              CLIENT
+              restClient
                   .post()
                   .uri(url2)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -4981,7 +4984,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -4998,7 +5001,7 @@ class TaskControllerIntTest {
               RestEndpoints.URL_TASKS_ID_REQUEST_REVIEW,
               "TKI:000000000000000000000000000000000035");
       ResponseEntity<TaskRepresentationModel> requestReviewResponse =
-          CLIENT
+          restClient
               .post()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -5019,7 +5022,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -5036,7 +5039,7 @@ class TaskControllerIntTest {
               RestEndpoints.URL_TASKS_ID_REQUEST_REVIEW_FORCE,
               "TKI:000000000000000000000000000000000101");
       ResponseEntity<TaskRepresentationModel> requestReviewResponse =
-          CLIENT
+          restClient
               .post()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -5061,7 +5064,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -5082,7 +5085,7 @@ class TaskControllerIntTest {
               RestEndpoints.URL_TASKS_ID_REQUEST_REVIEW,
               "TKI:000000000000000000000000000000000035");
       ResponseEntity<TaskRepresentationModel> requestReviewResponse =
-          CLIENT
+          restClient
               .post()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -5104,7 +5107,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5126,7 +5129,7 @@ class TaskControllerIntTest {
               RestEndpoints.URL_TASKS_ID_REQUEST_REVIEW,
               "TKI:000000000000000000000000000000000100");
       ResponseEntity<TaskRepresentationModel> requestReviewResponse =
-          CLIENT
+          restClient
               .post()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5148,7 +5151,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -5168,7 +5171,7 @@ class TaskControllerIntTest {
               "TKI:000000000000000000000000000000000035");
       ThrowingCallable requestReviewResponse =
           () ->
-              CLIENT
+              restClient
                   .post()
                   .uri(url2)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -5192,7 +5195,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5208,7 +5211,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(
               RestEndpoints.URL_TASKS_ID_COMPLETE, "TKI:000000000000000000000000000000000102");
       ResponseEntity<TaskRepresentationModel> completeResponse =
-          CLIENT
+          restClient
               .post()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5234,7 +5237,7 @@ class TaskControllerIntTest {
       TaskIdListRepresentationModel request = new TaskIdListRepresentationModel(taskIds);
 
       ResponseEntity<Map> response =
-          CLIENT
+          restClient
               .patch()
               .uri(url)
               .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5259,7 +5262,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5276,7 +5279,7 @@ class TaskControllerIntTest {
               RestEndpoints.URL_TASKS_ID_COMPLETE_FORCE,
               "TKI:000000000000000000000000000000000028");
       ResponseEntity<TaskRepresentationModel> forceCompleteResponse =
-          CLIENT
+          restClient
               .post()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5302,7 +5305,7 @@ class TaskControllerIntTest {
       TaskIdListRepresentationModel request = new TaskIdListRepresentationModel(taskIds);
 
       ResponseEntity<BulkOperationResultsRepresentationModel> response =
-          CLIENT
+          restClient
               .patch()
               .uri(url)
               .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5329,7 +5332,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> responseGet =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5345,7 +5348,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(
               RestEndpoints.URL_TASKS_ID_CANCEL, "TKI:000000000000000000000000000000000103");
       ResponseEntity<TaskRepresentationModel> cancelResponse =
-          CLIENT
+          restClient
               .post()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5367,7 +5370,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> responseGet =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -5383,7 +5386,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(
               RestEndpoints.URL_TASKS_ID_TERMINATE, "TKI:000000000000000000000000000000000103");
       ResponseEntity<TaskRepresentationModel> terminateResponse =
-          CLIENT
+          restClient
               .post()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -5411,7 +5414,7 @@ class TaskControllerIntTest {
       TaskIdListRepresentationModel request = new TaskIdListRepresentationModel(taskIds);
 
       ResponseEntity<BulkOperationResultsRepresentationModel> response =
-          CLIENT
+          restClient
               .patch()
               .uri(url)
               .headers(h -> h.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -5436,7 +5439,7 @@ class TaskControllerIntTest {
 
       final ThrowingCallable call =
           () ->
-              CLIENT
+              restClient
                   .patch()
                   .uri(url)
                   .headers(h -> h.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5461,7 +5464,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5477,7 +5480,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(
               RestEndpoints.URL_TASKS_ID_CLAIM, "TKI:000000000000000000000000000000000033");
       ResponseEntity<TaskRepresentationModel> claimResponse =
-          CLIENT
+          restClient
               .post()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5498,7 +5501,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -5514,7 +5517,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(
               RestEndpoints.URL_TASKS_ID_CLAIM_FORCE, "TKI:000000000000000000000000000000000029");
       ResponseEntity<TaskRepresentationModel> claimResponse =
-          CLIENT
+          restClient
               .post()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -5532,7 +5535,7 @@ class TaskControllerIntTest {
     void should_SelectAndClaimTasks() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_ID_SELECT_AND_CLAIM + "?custom14=abc");
       ResponseEntity<TaskRepresentationModel> response =
-          CLIENT
+          restClient
               .post()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -5543,7 +5546,7 @@ class TaskControllerIntTest {
 
       String url2 = restHelper.toUrl(RestEndpoints.URL_TASKS_ID, response.getBody().getTaskId());
       ResponseEntity<TaskRepresentationModel> responseGetTask =
-          CLIENT
+          restClient
               .get()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -5564,7 +5567,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5580,7 +5583,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(
               RestEndpoints.URL_TASKS_ID_CLAIM, "TKI:000000000000000000000000000000000032");
       ResponseEntity<TaskRepresentationModel> cancelClaimResponse =
-          CLIENT
+          restClient
               .delete()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5602,7 +5605,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -5619,7 +5622,7 @@ class TaskControllerIntTest {
               RestEndpoints.URL_TASKS_ID_CLAIM + "?keepOwner=true",
               "TKI:000000000000000000000000000000000000");
       ResponseEntity<TaskRepresentationModel> cancelClaimResponse =
-          CLIENT
+          restClient
               .delete()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -5643,7 +5646,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -5660,7 +5663,7 @@ class TaskControllerIntTest {
               RestEndpoints.URL_TASKS_ID_CLAIM_FORCE + "?keepOwner=true",
               "TKI:000000000000000000000000000000000001");
       ResponseEntity<TaskRepresentationModel> cancelClaimResponse =
-          CLIENT
+          restClient
               .delete()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -5684,7 +5687,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -5700,7 +5703,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(
               RestEndpoints.URL_TASKS_ID_CLAIM_FORCE, "TKI:000000000000000000000000000000000027");
       ResponseEntity<TaskRepresentationModel> cancelClaimResponse =
-          CLIENT
+          restClient
               .delete()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
@@ -5721,7 +5724,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:000000000000000000000000000000000026");
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> responseGet =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5739,7 +5742,7 @@ class TaskControllerIntTest {
               RestEndpoints.URL_TASKS_ID_CLAIM, "TKI:000000000000000000000000000000000026");
       ThrowingCallable httpCall =
           () ->
-              CLIENT
+              restClient
                   .delete()
                   .uri(url2)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5763,7 +5766,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5778,7 +5781,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(
               RestEndpoints.URL_TASKS_ID_SET_READ, "TKI:000000000000000000000000000000000025");
       ResponseEntity<TaskRepresentationModel> setReadResponse =
-          CLIENT
+          restClient
               .post()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5799,7 +5802,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5814,7 +5817,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(
               RestEndpoints.URL_TASKS_ID_SET_READ, "TKI:000000000000000000000000000000000027");
       ResponseEntity<TaskRepresentationModel> setUnreadResponse =
-          CLIENT
+          restClient
               .post()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5840,7 +5843,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5855,7 +5858,7 @@ class TaskControllerIntTest {
           restHelper.toUrl(
               RestEndpoints.URL_TASKS_ID_REOPEN, "TKI:000000000000000000000000000000000075");
       ResponseEntity<TaskRepresentationModel> reopenResponse =
-          CLIENT
+          restClient
               .post()
               .uri(url2)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-2")))
@@ -5875,7 +5878,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-2-2")))
@@ -5892,7 +5895,7 @@ class TaskControllerIntTest {
 
       ThrowingCallable call =
           () ->
-              CLIENT
+              restClient
                   .post()
                   .uri(url2)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-2-2")))
@@ -5912,7 +5915,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
@@ -5929,7 +5932,7 @@ class TaskControllerIntTest {
 
       ThrowingCallable call =
           () ->
-              CLIENT
+              restClient
                   .post()
                   .uri(url2)
                   .headers(
@@ -5950,7 +5953,7 @@ class TaskControllerIntTest {
 
       // retrieve task from Rest Api
       ResponseEntity<TaskRepresentationModel> getTaskResponse =
-          CLIENT
+          restClient
               .get()
               .uri(url)
               .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
@@ -5967,7 +5970,7 @@ class TaskControllerIntTest {
 
       ThrowingCallable call =
           () ->
-              CLIENT
+              restClient
                   .post()
                   .uri(url2)
                   .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))

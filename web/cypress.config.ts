@@ -23,18 +23,6 @@ export default defineConfig({
   viewportWidth: 1280,
   viewportHeight: 720,
 
-  env: {
-    appUrl: 'http://localhost:4200/#/kadai',
-    adminUrl: '/administration',
-    dropdownWait: 80,
-    testValueClassificationSelectionName: 'L10303',
-    testValueClassifications: 'CY-TEST-CLASSIFICATIONS',
-    testValueWorkbasketSelectionName: 'basxet0',
-    testValueWorkbaskets: 'CY-TEST-WORKBASKETS',
-    isLocal: true,
-    isHistoryEnabled: false
-  },
-
   component: {
     devServer: {
       framework: 'angular',
@@ -44,8 +32,19 @@ export default defineConfig({
   },
 
   e2e: {
-    setupNodeEvents(on, config) {
-      // implement node event listeners here
+    allowCypressEnv: false,
+    baseUrl: 'http://localhost:8080/kadai',
+    expose: {
+      appUrl: 'http://localhost:8080/kadai/#/kadai',
+      adminUrl: '/administration',
+      loginUrl: 'http://localhost:8080/kadai',
+      apiUrl: 'http://localhost:8080',
+      apiAuth: 'Basic YWRtaW46YWRtaW4=',
+      dropdownWait: 80,
+      testValueClassificationSelectionName: 'L10303',
+      testValueClassifications: 'CY-TEST-CLASSIFICATIONS',
+      testValueWorkbasketSelectionName: 'basxet0',
+      testValueWorkbaskets: 'CY-TEST-WORKBASKETS'
     }
   }
 });

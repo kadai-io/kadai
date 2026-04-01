@@ -23,9 +23,9 @@ import io.kadai.task.api.TaskService;
 import io.kadai.task.api.models.Attachment;
 import io.kadai.task.internal.models.AttachmentImpl;
 import io.kadai.task.rest.models.AttachmentRepresentationModel;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 /** EntityModel assembler for {@link AttachmentRepresentationModel}. */

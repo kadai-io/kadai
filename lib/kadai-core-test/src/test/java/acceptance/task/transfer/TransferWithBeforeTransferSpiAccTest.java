@@ -265,7 +265,7 @@ public class TransferWithBeforeTransferSpiAccTest {
 
       try {
         taskService.transfer(task.getId(), destinationWorkbasketSummary.getId());
-      } catch (TransferCheckException ignore) {
+      } catch (TransferCheckException _) {
         // expected
       }
 

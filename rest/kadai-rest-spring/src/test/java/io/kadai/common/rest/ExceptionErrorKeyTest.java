@@ -34,7 +34,9 @@ import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.api.exceptions.UnsupportedDatabaseException;
 import io.kadai.common.api.exceptions.WrongCustomHolidayFormatException;
-import io.kadai.spi.history.api.exceptions.KadaiHistoryEventNotFoundException;
+import io.kadai.spi.history.api.exceptions.ClassificationHistoryEventNotFoundException;
+import io.kadai.spi.history.api.exceptions.TaskHistoryEventNotFoundException;
+import io.kadai.spi.history.api.exceptions.WorkbasketHistoryEventNotFoundException;
 import io.kadai.task.api.exceptions.AttachmentPersistenceException;
 import io.kadai.task.api.exceptions.InvalidCallbackStateException;
 import io.kadai.task.api.exceptions.InvalidOwnerException;
@@ -93,7 +95,12 @@ class ExceptionErrorKeyTest {
 
   @Test
   void should_ProvideConsistentErrorKey_For_SpiExceptions() {
-    assertThat(KadaiHistoryEventNotFoundException.ERROR_KEY).isEqualTo("HISTORY_EVENT_NOT_FOUND");
+    assertThat(TaskHistoryEventNotFoundException.ERROR_KEY)
+        .isEqualTo("TASK_HISTORY_EVENT_NOT_FOUND");
+    assertThat(ClassificationHistoryEventNotFoundException.ERROR_KEY)
+        .isEqualTo("CLASSIFICATION_HISTORY_EVENT_NOT_FOUND");
+    assertThat(WorkbasketHistoryEventNotFoundException.ERROR_KEY)
+        .isEqualTo("WORKBASKET_HISTORY_EVENT_NOT_FOUND");
   }
 
   @Test
@@ -130,7 +137,7 @@ class ExceptionErrorKeyTest {
 
   @Test
   void should_ProvideConsistentErrorKey_For_RestExceptions() {
-    assertThat(KadaiRestExceptionHandler.ERROR_KEY_PAYLOAD).isEqualTo("PAYLOAD_TOO_LARGE");
+    assertThat(KadaiRestExceptionHandler.ERROR_KEY_PAYLOAD).isEqualTo("CONTENT_TOO_LARGE");
     assertThat(KadaiRestExceptionHandler.ERROR_KEY_QUERY_MALFORMED)
         .isEqualTo("QUERY_PARAMETER_MALFORMED");
   }

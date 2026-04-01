@@ -49,6 +49,7 @@ import io.kadai.common.internal.util.EnumUtil;
 import io.kadai.common.internal.util.IdGenerator;
 import io.kadai.common.internal.util.ObjectAttributeChangeDetector;
 import io.kadai.common.internal.util.Pair;
+import io.kadai.spi.history.api.KadaiEventPublisher;
 import io.kadai.spi.history.api.events.task.TaskCancelledEvent;
 import io.kadai.spi.history.api.events.task.TaskClaimCancelledEvent;
 import io.kadai.spi.history.api.events.task.TaskClaimedEvent;
@@ -62,7 +63,7 @@ import io.kadai.spi.history.api.events.task.TaskRequestChangesEvent;
 import io.kadai.spi.history.api.events.task.TaskRequestReviewEvent;
 import io.kadai.spi.history.api.events.task.TaskTerminatedEvent;
 import io.kadai.spi.history.api.events.task.TaskUpdatedEvent;
-import io.kadai.spi.history.internal.HistoryEventManager;
+import io.kadai.spi.history.internal.SimpleKadaiEventPublisherImpl;
 import io.kadai.spi.priority.internal.PriorityServiceManager;
 import io.kadai.spi.routing.api.RoutingTarget;
 import io.kadai.spi.task.internal.AfterRequestChangesManager;
@@ -159,7 +160,7 @@ public class TaskServiceImpl implements TaskService {
   private final ObjectReferenceMapper objectReferenceMapper;
   private final ObjectReferenceHandler objectReferenceHandler;
   private final UserMapper userMapper;
-  private final HistoryEventManager historyEventManager;
+  private final KadaiEventPublisher<TaskHistoryEvent> eventPublisher;
   private final CreateTaskPreprocessorManager createTaskPreprocessorManager;
   private final CreateTaskPostprocessorManager createTaskPostProcessorManager;
   private final PriorityServiceManager priorityServiceManager;
@@ -184,7 +185,7 @@ public class TaskServiceImpl implements TaskService {
     this.objectReferenceMapper = objectReferenceMapper;
     this.userMapper = userMapper;
     this.classificationService = kadaiEngine.getEngine().getClassificationService();
-    this.historyEventManager = kadaiEngine.getHistoryEventManager();
+    this.eventPublisher = new SimpleKadaiEventPublisherImpl<>(kadaiEngine.getKadaiEventBroker());
     this.createTaskPreprocessorManager = kadaiEngine.getCreateTaskPreprocessorManager();
     this.createTaskPostProcessorManager = kadaiEngine.getCreateTaskPostprocessorManager();
     this.priorityServiceManager = kadaiEngine.getPriorityServiceManager();
@@ -649,19 +650,15 @@ public class TaskServiceImpl implements TaskService {
         LOGGER.debug("Method updateTask() updated task '{}' for user '{}'.", task.getId(), userId);
       }
 
-      if (historyEventManager.isEnabled()) {
-
-        String changeDetails =
-            ObjectAttributeChangeDetector.determineChangesInAttributes(oldTaskImpl, newTaskImpl);
-
-        historyEventManager.createEvent(
-            new TaskUpdatedEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                task,
-                userId,
-                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
-                changeDetails));
-      }
+      eventPublisher.publishing(
+          () ->
+              new TaskUpdatedEvent(
+                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                  task,
+                  userId,
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
+                  ObjectAttributeChangeDetector.determineChangesInAttributes(
+                      oldTaskImpl, newTaskImpl)));
 
     } finally {
       kadaiEngine.returnConnection();
@@ -738,7 +735,7 @@ public class TaskServiceImpl implements TaskService {
       try {
         Task task = getTask(taskId);
         String workbasketId = task.getWorkbasketSummary().getId();
-        taskIdsByWorkbasketId.computeIfAbsent(workbasketId, k -> new ArrayList<>()).add(taskId);
+        taskIdsByWorkbasketId.computeIfAbsent(workbasketId, _ -> new ArrayList<>()).add(taskId);
       } catch (TaskNotFoundException | NotAuthorizedOnWorkbasketException e) {
         aggregatedResults.addError(taskId, e);
       }
@@ -805,17 +802,14 @@ public class TaskServiceImpl implements TaskService {
         LOGGER.debug("Task '{}' reopened by user '{}'.", task.getId(), userId);
       }
 
-      if (historyEventManager.isEnabled()) {
-        String changeDetails =
-            ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task);
-        historyEventManager.createEvent(
-            new TaskReopenedEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                task,
-                userId,
-                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
-                changeDetails));
-      }
+      eventPublisher.publishing(
+          () ->
+              new TaskReopenedEvent(
+                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                  task,
+                  userId,
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
+                  ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task)));
     } finally {
       kadaiEngine.returnConnection();
     }
@@ -999,16 +993,20 @@ public class TaskServiceImpl implements TaskService {
         objectReferenceMapper.deleteMultipleByTaskIds(taskIds);
         taskMapper.deleteMultiple(taskIds);
 
-        if (kadaiEngine.getEngine().isHistoryEnabled()
-            && kadaiEngine
-                .getEngine()
-                .getConfiguration()
-                .isDeleteHistoryEventsOnTaskDeletionEnabled()) {
-          historyEventManager.deleteEvents(taskIds);
-        }
-        if (historyEventManager.isEnabled()) {
-          taskIds.forEach(this::createTaskDeletedEvent);
-        }
+        final List<String> finalTaskIds = taskIds;
+        eventPublisher.publishingAll(
+            () ->
+                finalTaskIds.stream()
+                    .map(
+                        taskId ->
+                            new TaskDeletedEvent(
+                                IdGenerator.generateWithPrefix(
+                                    IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                                newTask().asSummary(),
+                                taskId,
+                                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId()))
+                    .collect(toList()));
       }
       return bulkLog;
     } finally {
@@ -1136,14 +1134,14 @@ public class TaskServiceImpl implements TaskService {
             cancelledTask.getId(),
             kadaiEngine.getEngine().getCurrentUserContext().getUserId());
       }
-      if (historyEventManager.isEnabled()) {
-        historyEventManager.createEvent(
-            new TaskCancelledEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                cancelledTask,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId()));
-      }
+      final TaskImpl finalCancelledTask = cancelledTask;
+      eventPublisher.publishing(
+          () ->
+              new TaskCancelledEvent(
+                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                  finalCancelledTask,
+                  kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId()));
     } finally {
       kadaiEngine.returnConnection();
     }
@@ -1319,14 +1317,14 @@ public class TaskServiceImpl implements TaskService {
             terminatedTask.getId(),
             kadaiEngine.getEngine().getCurrentUserContext().getUserId());
       }
-      if (historyEventManager.isEnabled()) {
-        historyEventManager.createEvent(
-            new TaskTerminatedEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                terminatedTask,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId()));
-      }
+      final TaskImpl finalTerminatedTask = terminatedTask;
+      eventPublisher.publishing(
+          () ->
+              new TaskTerminatedEvent(
+                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                  finalTerminatedTask,
+                  kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId()));
 
     } finally {
       kadaiEngine.returnConnection();
@@ -1461,7 +1459,9 @@ public class TaskServiceImpl implements TaskService {
     }
     if (patch.secondaryObjectReferences() != null) {
       task.setSecondaryObjectReferences(
-          patch.secondaryObjectReferences().stream().map(ObjectReference::copy).collect(toList()));
+          patch.secondaryObjectReferences().stream()
+              .map(ObjectReference::copy)
+              .collect(Collectors.toList()));
     }
 
     // Custom string fields
@@ -1613,6 +1613,18 @@ public class TaskServiceImpl implements TaskService {
         .map(this::appendComplexAttributesToTaskSummariesWithoutPartitioning)
         .flatMap(Collection::stream)
         .collect(toList());
+  }
+
+  private void createTaskCreatedHistoryEvent(TaskImpl createdTask) {
+    eventPublisher.publishing(
+        () ->
+            new TaskCreatedEvent(
+                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                createdTask,
+                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
+                ObjectAttributeChangeDetector.determineChangesInAttributes(
+                    newTask(), createdTask)));
   }
 
   private static Predicate<TaskSummaryImpl> addErrorToBulkLog(
@@ -1792,20 +1804,6 @@ public class TaskServiceImpl implements TaskService {
     }
   }
 
-  private void createTaskCreatedHistoryEvent(TaskImpl createdTask) {
-    if (historyEventManager.isEnabled()) {
-      String details =
-          ObjectAttributeChangeDetector.determineChangesInAttributes(newTask(), createdTask);
-      historyEventManager.createEvent(
-          new TaskCreatedEvent(
-              IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-              createdTask,
-              kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-              kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
-              details));
-    }
-  }
-
   private static boolean taskIsNotClaimed(TaskSummary task) {
     return task.getClaimed() == null || !task.getState().isClaimedState();
   }
@@ -1977,27 +1975,25 @@ public class TaskServiceImpl implements TaskService {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Task '{}' claimed by user '{}'.", task.getId(), userId);
       }
-      if (historyEventManager.isEnabled()) {
-        String changeDetails =
-            ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task);
 
-        if (Set.of(READY_FOR_REVIEW, IN_REVIEW).contains(task.getState())) {
-          historyEventManager.createEvent(
-              new TaskClaimedReviewEvent(
-                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                  task,
-                  userId,
-                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
-                  changeDetails));
-        } else {
-          historyEventManager.createEvent(
-              new TaskClaimedEvent(
-                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                  task,
-                  userId,
-                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
-                  changeDetails));
-        }
+      if (Set.of(READY_FOR_REVIEW, IN_REVIEW).contains(task.getState())) {
+        eventPublisher.publishing(
+            () ->
+                new TaskClaimedReviewEvent(
+                    IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                    task,
+                    userId,
+                    kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
+                    ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task)));
+      } else {
+        eventPublisher.publishing(
+            () ->
+                new TaskClaimedEvent(
+                    IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                    task,
+                    userId,
+                    kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
+                    ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task)));
       }
     } finally {
       kadaiEngine.returnConnection();
@@ -2036,18 +2032,16 @@ public class TaskServiceImpl implements TaskService {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Requested review for Task '{}' by user '{}'.", task.getId(), userId);
       }
-      if (historyEventManager.isEnabled()) {
-        String changeDetails =
-            ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task);
 
-        historyEventManager.createEvent(
-            new TaskRequestReviewEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                task,
-                userId,
-                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
-                changeDetails));
-      }
+      final TaskImpl eventTask = task;
+      eventPublisher.publishing(
+          () ->
+              new TaskRequestReviewEvent(
+                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                  eventTask,
+                  userId,
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
+                  ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, eventTask)));
 
       task = (TaskImpl) afterRequestReviewManager.afterRequestReview(task, workbasketId, ownerId);
     } finally {
@@ -2089,18 +2083,17 @@ public class TaskServiceImpl implements TaskService {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Requested changes for Task '{}' by user '{}'.", task.getId(), userId);
       }
-      if (historyEventManager.isEnabled()) {
-        String changeDetails =
-            ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task);
 
-        historyEventManager.createEvent(
-            new TaskRequestChangesEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                task,
-                userId,
-                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
-                changeDetails));
-      }
+      final TaskImpl eventTask = task;
+      eventPublisher.publishing(
+          () ->
+              new TaskRequestChangesEvent(
+                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                  eventTask,
+                  userId,
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
+                  ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, eventTask)));
+
       task = (TaskImpl) afterRequestChangesManager.afterRequestChanges(task, workbasketId, ownerId);
     } finally {
       kadaiEngine.returnConnection();
@@ -2180,18 +2173,15 @@ public class TaskServiceImpl implements TaskService {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Task '{}' unclaimed by user '{}'.", task.getId(), userId);
       }
-      if (historyEventManager.isEnabled()) {
-        String changeDetails =
-            ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task);
 
-        historyEventManager.createEvent(
-            new TaskClaimCancelledEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                task,
-                userId,
-                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
-                changeDetails));
-      }
+      eventPublisher.publishing(
+          () ->
+              new TaskClaimCancelledEvent(
+                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                  task,
+                  userId,
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
+                  ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task)));
     } finally {
       kadaiEngine.returnConnection();
     }
@@ -2231,14 +2221,15 @@ public class TaskServiceImpl implements TaskService {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Task '{}' completed by user '{}'.", task.getId(), userId);
       }
-      if (historyEventManager.isEnabled()) {
-        historyEventManager.createEvent(
-            new TaskCompletedEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                task,
-                userId,
-                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId()));
-      }
+      final TaskImpl finalTask = task;
+      eventPublisher.publishing(
+          () ->
+              new TaskCompletedEvent(
+                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                  finalTask,
+                  userId,
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId()));
+
     } finally {
       kadaiEngine.returnConnection();
     }
@@ -2272,17 +2263,14 @@ public class TaskServiceImpl implements TaskService {
       objectReferenceMapper.deleteMultipleByTaskIds(Collections.singletonList(taskId));
       taskMapper.delete(taskId);
 
-      if (kadaiEngine.getEngine().isHistoryEnabled()
-          && kadaiEngine
-              .getEngine()
-              .getConfiguration()
-              .isDeleteHistoryEventsOnTaskDeletionEnabled()) {
-        historyEventManager.deleteEvents(Collections.singletonList(taskId));
-      }
-
-      if (historyEventManager.isEnabled()) {
-        createTaskDeletedEvent(taskId);
-      }
+      eventPublisher.publishing(
+          () ->
+              new TaskDeletedEvent(
+                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                  newTask().asSummary(),
+                  taskId,
+                  kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId()));
 
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Task {} deleted.", task.getId());
@@ -2527,9 +2515,7 @@ public class TaskServiceImpl implements TaskService {
       if (!updateClaimedTaskIds.isEmpty()) {
         taskMapper.updateClaimed(updateClaimedTaskIds, claimedReference);
       }
-      if (historyEventManager.isEnabled()) {
-        createTasksCompletedEvents(taskSummaryList);
-      }
+      createTasksCompletedEvents(taskSummaryList);
     }
   }
 
@@ -2554,17 +2540,18 @@ public class TaskServiceImpl implements TaskService {
   }
 
   private void createTasksTerminatedEvents(List<? extends TaskSummary> taskSummaries) {
-    if (historyEventManager.isEnabled()) {
-      for (TaskSummary taskSummary : taskSummaries) {
-        final TaskHistoryEvent event =
-            new TaskTerminatedEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                taskSummary,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId());
-        historyEventManager.createEvent(event);
-      }
-    }
+    eventPublisher.publishingAll(
+        () ->
+            taskSummaries.stream()
+                .map(
+                    task ->
+                        new TaskTerminatedEvent(
+                            IdGenerator.generateWithPrefix(
+                                IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                            task,
+                            kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                            kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId()))
+                .collect(toList()));
   }
 
   private RoutingTarget calculateWorkbasketDuringTaskCreation(TaskImpl task) {
@@ -2870,24 +2857,18 @@ public class TaskServiceImpl implements TaskService {
   }
 
   private void createTasksCompletedEvents(List<? extends TaskSummary> taskSummaries) {
-    taskSummaries.forEach(
-        task ->
-            historyEventManager.createEvent(
-                new TaskCompletedEvent(
-                    IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                    task,
-                    kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                    kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId())));
-  }
-
-  private void createTaskDeletedEvent(String taskId) {
-    historyEventManager.createEvent(
-        new TaskDeletedEvent(
-            IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-            newTask().asSummary(),
-            taskId,
-            kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-            kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId()));
+    eventPublisher.publishingAll(
+        () ->
+            taskSummaries.stream()
+                .map(
+                    task ->
+                        new TaskCompletedEvent(
+                            IdGenerator.generateWithPrefix(
+                                IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                            task,
+                            kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
+                            kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId()))
+                .collect(toList()));
   }
 
   private TaskImpl duplicateTaskExactly(TaskImpl task) {

@@ -1,9 +1,10 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Start Demo App" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <module name="kadai-rest-spring-example-boot" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="io.kadai.example.boot.ExampleRestApplication" />
+  <configuration default="false" name="Start Demo App" type="SpringBootApplicationConfigurationType"
+                 factoryName="Spring Boot">
+    <module name="kadai-rest-spring-example-boot"/>
+    <option name="SPRING_BOOT_MAIN_CLASS" value="io.kadai.example.boot.ExampleRestApplication"/>
     <method v="2">
-      <option name="Make" enabled="true" />
+      <option name="Make" enabled="true"/>
     </method>
   </configuration>
 </component>
