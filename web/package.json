@@ -32,7 +32,7 @@
     "@angular/platform-browser-dynamic": "21.2.6",
     "@angular/router": "21.2.6",
     "@ngneat/hot-toast": "7.0.0",
-    "@ngneat/overview": "8.0.0",
+    "@ngneat/overview": "8.0.1",
     "@ngxs/router-plugin": "21.0.0",
     "@ngxs/store": "21.0.0",
     "angular-svg-icon": "19.1.1",
