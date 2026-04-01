@@ -41,4 +41,32 @@ public interface KadaiEvent {
   default void setCreatedNow() {
     setCreated(Instant.now());
   }
+
+  /**
+   * Returns the user-id associated with this event.
+   *
+   * @return user-id for this event
+   */
+  String getUserId();
+
+  /**
+   * Sets the user-id associated with this event to the given one.
+   *
+   * @param userId user-id to associate with this event
+   */
+  void setUserId(String userId);
+
+  /**
+   * Returns the proxy-access-id associated with this event.
+   *
+   * @return proxy-access-id for this event
+   */
+  String getProxyAccessId();
+
+  /**
+   * Sets the proxy-access-id associated with this event.
+   *
+   * @param proxyUserId proxy-access-id to associate with this event
+   */
+  void setProxyAccessId(String proxyUserId);
 }

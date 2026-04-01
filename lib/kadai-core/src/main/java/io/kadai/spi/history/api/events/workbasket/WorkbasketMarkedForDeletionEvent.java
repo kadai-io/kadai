@@ -22,9 +22,8 @@ import io.kadai.workbasket.api.models.Workbasket;
 
 public class WorkbasketMarkedForDeletionEvent extends WorkbasketHistoryEvent {
 
-  public WorkbasketMarkedForDeletionEvent(
-      String id, Workbasket workbasket, String userId, String proxyAccessId, String details) {
-    super(id, workbasket, userId, proxyAccessId, details);
+  public WorkbasketMarkedForDeletionEvent(String id, Workbasket workbasket, String details) {
+    super(id, workbasket, details);
     eventType = WorkbasketHistoryEventType.MARKED_FOR_DELETION.getName();
     created = workbasket.getModified();
   }

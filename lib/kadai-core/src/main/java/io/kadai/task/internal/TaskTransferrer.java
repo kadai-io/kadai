@@ -78,7 +78,7 @@ final class TaskTransferrer {
     this.taskService = taskService;
     this.taskMapper = taskMapper;
     this.workbasketService = kadaiEngine.getEngine().getWorkbasketService();
-    this.eventPublisher = new SimpleKadaiEventPublisherImpl<>(kadaiEngine.getKadaiEventBroker());
+    this.eventPublisher = new SimpleKadaiEventPublisherImpl<>(kadaiEngine.getKadaiEventBus());
     this.beforeTransferTaskManager = kadaiEngine.getBeforeTransferTaskManager();
   }
 
@@ -226,8 +226,6 @@ final class TaskTransferrer {
                 task,
                 originWorkbasket.getId(),
                 destinationWorkbasket.getId(),
-                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 details);
           });
       return task;
@@ -432,8 +430,6 @@ final class TaskTransferrer {
                               newSummary,
                               oldSummary.getWorkbasketSummary().getId(),
                               newSummary.getWorkbasketSummary().getId(),
-                              kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                              kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                               details);
                         })
                     .collect(toList()));

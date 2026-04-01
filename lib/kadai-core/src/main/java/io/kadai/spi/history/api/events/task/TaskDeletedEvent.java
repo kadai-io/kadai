@@ -23,9 +23,8 @@ import java.time.Instant;
 
 public class TaskDeletedEvent extends TaskHistoryEvent {
 
-  public TaskDeletedEvent(
-      String id, TaskSummary taskSummary, String taskId, String userId, String proxyAccessId) {
-    super(id, taskSummary, userId, proxyAccessId, null);
+  public TaskDeletedEvent(String id, TaskSummary taskSummary, String taskId) {
+    super(id, taskSummary, null);
     eventType = TaskHistoryEventType.DELETED.getName();
     created = Instant.now();
     super.taskId = taskId;

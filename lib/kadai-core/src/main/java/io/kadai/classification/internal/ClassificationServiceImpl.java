@@ -81,7 +81,7 @@ public class ClassificationServiceImpl implements ClassificationService {
     this.priorityServiceManager = priorityServiceManager;
     this.classificationMapper = classificationMapper;
     this.taskMapper = taskMapper;
-    this.eventPublisher = new SimpleKadaiEventPublisherImpl<>(kadaiEngine.getKadaiEventBroker());
+    this.eventPublisher = new SimpleKadaiEventPublisherImpl<>(kadaiEngine.getKadaiEventBus());
   }
 
   @Override
@@ -164,8 +164,6 @@ public class ClassificationServiceImpl implements ClassificationService {
                   IdGenerator.generateWithPrefix(
                       IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
                   classification,
-                  kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                  kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                   details);
             });
       } catch (PersistenceException e) {
@@ -236,8 +234,6 @@ public class ClassificationServiceImpl implements ClassificationService {
             return new ClassificationCreatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
                 classificationImpl,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 details);
           });
 
@@ -300,8 +296,6 @@ public class ClassificationServiceImpl implements ClassificationService {
             return new ClassificationUpdatedEvent(
                 IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
                 classificationImpl,
-                kadaiEngine.getEngine().getCurrentUserContext().getUserId(),
-                kadaiEngine.getEngine().getCurrentUserContext().getProxyAccessId(),
                 details);
           });
       if (LOGGER.isDebugEnabled()) {

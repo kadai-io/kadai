@@ -22,13 +22,8 @@ import io.kadai.classification.api.models.Classification;
 
 public class ClassificationUpdatedEvent extends ClassificationHistoryEvent {
 
-  public ClassificationUpdatedEvent(
-      String id,
-      Classification classification,
-      String userId,
-      String proxyAccessId,
-      String details) {
-    super(id, classification, userId, proxyAccessId, details);
+  public ClassificationUpdatedEvent(String id, Classification classification, String details) {
+    super(id, classification, details);
     eventType = ClassificationHistoryEventType.UPDATED.getName();
     created = classification.getModified();
   }
