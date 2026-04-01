@@ -242,6 +242,7 @@ Currently, KADAI provides the following SPIs:
 * [`io.kadai.spi.task.api.BeforeRequestReviewProvider`](https://github.com/kadai-io/kadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/task/api/BeforeRequestReviewProvider.java)
 * [`io.kadai.spi.task.api.BeforeTransferTaskProvider`](https://github.com/kadai-io/kadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/task/api/BeforeTransferTaskProvider.java)
 * [`io.kadai.spi.task.api.CreateTaskPreprocessor`](https://github.com/kadai-io/kadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/task/api/CreateTaskPreprocessor.java)
+* [`io.kadai.spi.task.api.CreateTaskPostprocessor`](https://github.com/kadai-io/kadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/task/api/CreateTaskPostprocessor.java)
 * [`io.kadai.spi.task.api.ReviewRequiredProvider`](https://github.com/kadai-io/kadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/task/api/ReviewRequiredProvider.java)
 * [`io.kadai.spi.user.api.RefreshUserPostprocessor`](https://github.com/kadai-io/kadai/blob/master/lib/kadai-core/src/main/java/io/kadai/spi/user/api/RefreshUserPostprocessor.java)
 
