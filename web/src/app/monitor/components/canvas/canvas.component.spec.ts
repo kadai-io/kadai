@@ -42,7 +42,7 @@ describe('CanvasComponent', () => {
     fixture = TestBed.createComponent(CanvasComponent);
     debugElement = fixture.debugElement;
     component = fixture.debugElement.componentInstance;
-    component.id = '1';
+    fixture.componentRef.setInput('id', '1');
     const store: Store = TestBed.inject(Store);
     store.reset({
       ...store.snapshot(),
@@ -63,7 +63,7 @@ describe('CanvasComponent', () => {
   it('should call generateChart()', () => {
     component.generateChart = vi.fn();
     const reportRow = workbasketReportMock.rows[1];
-    component.row = reportRow;
+    fixture.componentRef.setInput('row', reportRow);
     fixture.detectChanges();
     component.ngAfterViewInit();
     expect(component.generateChart).toHaveBeenCalledWith('1', reportRow);

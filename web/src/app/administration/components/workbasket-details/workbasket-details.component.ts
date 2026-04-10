@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, input, OnDestroy, OnInit, signal } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { ACTION } from 'app/shared/models/action';
@@ -70,15 +70,15 @@ import { WorkbasketDistributionTargetsComponent } from '../workbasket-distributi
   ]
 })
 export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
-  workbasket: Workbasket = {} as Workbasket;
-  action: ACTION = ACTION.READ;
+  workbasket = signal<Workbasket>({} as Workbasket);
+  action = signal<ACTION>(ACTION.READ);
   selectedTab$: Observable<number> = inject(Store).select(WorkbasketSelectors.selectedComponent);
   badgeMessage$: Observable<string> = inject(Store).select(WorkbasketSelectors.badgeMessage);
   selectedWorkbasketAndComponentAndAction$: Observable<WorkbasketAndComponentAndAction> = inject(Store).select(
     WorkbasketSelectors.selectedWorkbasketAndComponentAndAction
   );
+  expanded = input<boolean>();
   destroy$ = new Subject<void>();
-  @Input() expanded: boolean;
   areAllAccessItemsValid = true;
   protected readonly ACTION = ACTION;
   private store = inject(Store);
@@ -89,10 +89,10 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
       WorkbasketSelectors.selectedWorkbasketAndComponentAndAction
     );
     if (workbasketAndComponentAndAction?.selectedWorkbasket) {
-      this.workbasket = cloneDeep(workbasketAndComponentAndAction.selectedWorkbasket);
+      this.workbasket.set(cloneDeep(workbasketAndComponentAndAction.selectedWorkbasket));
     }
     if (workbasketAndComponentAndAction?.action) {
-      this.action = workbasketAndComponentAndAction.action;
+      this.action.set(workbasketAndComponentAndAction.action);
     }
 
     this.getWorkbasketFromStore();
@@ -108,13 +108,13 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
       const selectedWorkbasket = object.selectedWorkbasket;
       const action = object.action;
 
-      const isAnotherId = this.workbasket?.workbasketId !== selectedWorkbasket?.workbasketId;
-      const isCreation = action !== this.action && action === ACTION.CREATE;
+      const isAnotherId = this.workbasket()?.workbasketId !== selectedWorkbasket?.workbasketId;
+      const isCreation = action !== this.action() && action === ACTION.CREATE;
       if ((isAnotherId || isCreation) && selectedWorkbasket) {
-        this.workbasket = cloneDeep(selectedWorkbasket);
+        this.workbasket.set(cloneDeep(selectedWorkbasket));
       }
 
-      this.action = action;
+      this.action.set(action);
     });
 
     // c) saving the workbasket
@@ -125,7 +125,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
         .subscribe(() => {
           const workbasket = this.store.selectSnapshot(WorkbasketSelectors.selectedWorkbasket);
           if (workbasket) {
-            this.workbasket = workbasket;
+            this.workbasket.set(workbasket);
           }
         });
     });
@@ -137,7 +137,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
         .subscribe(() => {
           const workbasket = this.store.selectSnapshot(WorkbasketSelectors.selectedWorkbasket);
           if (workbasket) {
-            this.workbasket = workbasket;
+            this.workbasket.set(workbasket);
           }
         });
     });
@@ -161,7 +161,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
 
   onCopy() {
     this.store.dispatch(new OnButtonPressed(ButtonAction.COPY));
-    this.store.dispatch(new CopyWorkbasket(this.workbasket));
+    this.store.dispatch(new CopyWorkbasket(this.workbasket()));
   }
 
   onRemoveAsDistributionTarget() {

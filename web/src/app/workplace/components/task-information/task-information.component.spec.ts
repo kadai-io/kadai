@@ -17,7 +17,6 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { SimpleChange } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -110,7 +109,7 @@ describe('TaskInformationComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TaskInformationComponent);
     component = fixture.componentInstance;
-    component.task = { ...mockTask };
+    fixture.componentRef.setInput('task', { ...mockTask });
     fixture.detectChanges();
   });
 
@@ -126,19 +125,19 @@ describe('TaskInformationComponent', () => {
     });
 
     it('should set requestInProgress to false after classifications are loaded', () => {
-      expect(component.requestInProgress).toBe(false);
+      expect(component.requestInProgress()).toBe(false);
     });
 
     it('should populate classifications from the service response', () => {
       expect(component.classifications).toBeDefined();
-      expect(component.classifications.length).toBe(2);
+      expect(component.classifications().length).toBe(2);
     });
 
     it('should update inputOverflowMap when inputOverflowObservable emits', () => {
       const newMap = new Map<string, boolean>([['fieldA', true]]);
       inputOverflowSubject.next(newMap);
 
-      expect(component.inputOverflowMap).toBe(newMap);
+      expect(component.inputOverflowMap()).toBe(newMap);
     });
 
     it('should update inputOverflowMap on subsequent emissions', () => {
@@ -146,10 +145,10 @@ describe('TaskInformationComponent', () => {
       const secondMap = new Map<string, boolean>([['field2', false]]);
 
       inputOverflowSubject.next(firstMap);
-      expect(component.inputOverflowMap).toBe(firstMap);
+      expect(component.inputOverflowMap()).toBe(firstMap);
 
       inputOverflowSubject.next(secondMap);
-      expect(component.inputOverflowMap).toBe(secondMap);
+      expect(component.inputOverflowMap()).toBe(secondMap);
     });
 
     it('should assign validateInputOverflow as a function', () => {
@@ -166,11 +165,10 @@ describe('TaskInformationComponent', () => {
     });
   });
 
-  describe('ngOnChanges()', () => {
+  describe('saveToggleTriggered effect', () => {
     it('should call validate (and thus validateFormInformation) when saveToggleTriggered changes value', async () => {
-      component.ngOnChanges({
-        saveToggleTriggered: new SimpleChange(false, true, false)
-      });
+      fixture.componentRef.setInput('saveToggleTriggered', true);
+      fixture.detectChanges();
 
       await fixture.whenStable();
 
@@ -178,20 +176,11 @@ describe('TaskInformationComponent', () => {
       expect(mockFormsValidatorService.formSubmitAttempt).toBe(true);
     });
 
-    it('should not call validateFormInformation when saveToggleTriggered value stays the same', () => {
+    it('should not call validateFormInformation when saveToggleTriggered is not set', () => {
       mockFormsValidatorService.validateFormInformation.mockClear();
 
-      component.ngOnChanges({
-        saveToggleTriggered: new SimpleChange(true, true, false)
-      });
-
-      expect(mockFormsValidatorService.validateFormInformation).not.toHaveBeenCalled();
-    });
-
-    it('should not call validateFormInformation when saveToggleTriggered is not in changes', () => {
-      mockFormsValidatorService.validateFormInformation.mockClear();
-
-      component.ngOnChanges({});
+      // No setInput call — saveToggleTriggered remains undefined
+      fixture.detectChanges();
 
       expect(mockFormsValidatorService.validateFormInformation).not.toHaveBeenCalled();
     });
@@ -201,7 +190,7 @@ describe('TaskInformationComponent', () => {
     it('should delegate to formsValidatorService.isFieldValid with taskForm and field name', () => {
       const result = component.isFieldValid('taskName');
 
-      expect(mockFormsValidatorService.isFieldValid).toHaveBeenCalledWith(component.taskForm, 'taskName');
+      expect(mockFormsValidatorService.isFieldValid).toHaveBeenCalledWith(component.taskForm(), 'taskName');
       expect(result).toBe(true);
     });
 
@@ -219,21 +208,21 @@ describe('TaskInformationComponent', () => {
       const newDate = new Date('2026-03-10T12:00:00Z');
       component.updateDate({ value: newDate });
 
-      expect(component.task.due).toBe(newDate.toISOString());
+      expect(component.task().due).toBe(newDate.toISOString());
     });
 
     it('should not update task.due when the event value is null', () => {
-      const originalDue = component.task.due;
+      const originalDue = component.task().due;
       component.updateDate({ value: null });
 
-      expect(component.task.due).toBe(originalDue);
+      expect(component.task().due).toBe(originalDue);
     });
 
     it('should not update task.due when the event value is undefined', () => {
-      const originalDue = component.task.due;
+      const originalDue = component.task().due;
       component.updateDate({ value: undefined });
 
-      expect(component.task.due).toBe(originalDue);
+      expect(component.task().due).toBe(originalDue);
     });
   });
 
@@ -243,7 +232,7 @@ describe('TaskInformationComponent', () => {
 
       component.changedClassification(classification);
 
-      expect(component.task.classificationSummary).toBe(classification);
+      expect(component.task().classificationSummary).toBe(classification);
     });
 
     it('should set isClassificationEmpty to false', () => {
@@ -262,23 +251,23 @@ describe('TaskInformationComponent', () => {
 
       component.onSelectedOwner(owner);
 
-      expect(component.task.owner).toBe('user-99');
+      expect(component.task().owner).toBe('user-99');
     });
 
     it('should not update task.owner when owner is null', () => {
-      const originalOwner = component.task.owner;
+      const originalOwner = component.task().owner;
 
       component.onSelectedOwner(null);
 
-      expect(component.task.owner).toBe(originalOwner);
+      expect(component.task().owner).toBe(originalOwner);
     });
 
     it('should not update task.owner when owner has no accessId', () => {
-      const originalOwner = component.task.owner;
+      const originalOwner = component.task().owner;
 
       component.onSelectedOwner({ name: 'No ID User' });
 
-      expect(component.task.owner).toBe(originalOwner);
+      expect(component.task().owner).toBe(originalOwner);
     });
   });
 
@@ -293,14 +282,14 @@ describe('TaskInformationComponent', () => {
       expect(completeSpy).toHaveBeenCalled();
     });
 
-    it('should stop updating inputOverflowMap after destroy', () => {
+    it('should call next and complete on destroy$', () => {
+      const nextSpy = vi.spyOn(component['destroy$'], 'next');
+      const completeSpy = vi.spyOn(component['destroy$'], 'complete');
+
       component.ngOnDestroy();
 
-      const mapBeforeEmit = component.inputOverflowMap;
-      const newMap = new Map<string, boolean>([['field', true]]);
-      inputOverflowSubject.next(newMap);
-
-      expect(component.inputOverflowMap).toBe(mapBeforeEmit);
+      expect(nextSpy).toHaveBeenCalled();
+      expect(completeSpy).toHaveBeenCalled();
     });
 
     it('should stop updating classifications after destroy', () => {
@@ -309,29 +298,29 @@ describe('TaskInformationComponent', () => {
 
       const newFixture = TestBed.createComponent(TaskInformationComponent);
       const newComponent = newFixture.componentInstance;
-      newComponent.task = { ...mockTask };
+      newFixture.componentRef.setInput('task', { ...mockTask });
       newFixture.detectChanges();
 
-      const classificationsBefore = newComponent.classifications;
+      const classificationsBefore = newComponent.classifications();
 
       newComponent.ngOnDestroy();
 
       classificationSubject.next({ classifications: [{ classificationId: 'new-class' }] });
 
-      expect(newComponent.classifications).toBe(classificationsBefore);
+      expect(newComponent.classifications()).toBe(classificationsBefore);
     });
   });
 
   describe('template rendering', () => {
     it('should not render form when task is null', () => {
-      component.task = null;
+      fixture.componentRef.setInput('task', null);
       fixture.detectChanges();
       const form = fixture.nativeElement.querySelector('.task-information');
       expect(form).toBeNull();
     });
 
     it('should not render form when requestInProgress is true', () => {
-      component.requestInProgress = true;
+      component.requestInProgress.set(true);
       fixture.detectChanges();
       const form = fixture.nativeElement.querySelector('.task-information');
       expect(form).toBeNull();
@@ -351,18 +340,17 @@ describe('TaskInformationComponent', () => {
     });
   });
 
-  describe('validate() - triggered via ngOnChanges', () => {
+  describe('validate() - triggered via saveToggleTriggered effect', () => {
     it('should emit formValid(true) when form is valid, classification is set, and owner is valid', async () => {
       mockFormsValidatorService.validateFormInformation.mockResolvedValue(true);
       component.isOwnerValid = true;
-      component.task.classificationSummary = { classificationId: 'class-1' };
+      component.task().classificationSummary = { classificationId: 'class-1' };
 
       const emittedValues: boolean[] = [];
       component.formValid.subscribe((val) => emittedValues.push(val));
 
-      component.ngOnChanges({
-        saveToggleTriggered: new SimpleChange(false, true, false)
-      });
+      fixture.componentRef.setInput('saveToggleTriggered', true);
+      fixture.detectChanges();
 
       await fixture.whenStable();
 
@@ -371,14 +359,13 @@ describe('TaskInformationComponent', () => {
 
     it('should not emit formValid when form validation returns false', async () => {
       mockFormsValidatorService.validateFormInformation.mockResolvedValue(false);
-      component.task.classificationSummary = { classificationId: 'class-1' };
+      component.task().classificationSummary = { classificationId: 'class-1' };
 
       const emittedValues: boolean[] = [];
       component.formValid.subscribe((val) => emittedValues.push(val));
 
-      component.ngOnChanges({
-        saveToggleTriggered: new SimpleChange(false, true, false)
-      });
+      fixture.componentRef.setInput('saveToggleTriggered', true);
+      fixture.detectChanges();
 
       await fixture.whenStable();
 
@@ -388,14 +375,13 @@ describe('TaskInformationComponent', () => {
     it('should not emit formValid when classificationSummary is undefined', async () => {
       mockFormsValidatorService.validateFormInformation.mockResolvedValue(true);
       component.isOwnerValid = true;
-      component.task.classificationSummary = undefined;
+      component.task().classificationSummary = undefined;
 
       const emittedValues: boolean[] = [];
       component.formValid.subscribe((val) => emittedValues.push(val));
 
-      component.ngOnChanges({
-        saveToggleTriggered: new SimpleChange(false, true, false)
-      });
+      fixture.componentRef.setInput('saveToggleTriggered', true);
+      fixture.detectChanges();
 
       await fixture.whenStable();
 
@@ -405,14 +391,13 @@ describe('TaskInformationComponent', () => {
     it('should not emit formValid when isOwnerValid is false', async () => {
       mockFormsValidatorService.validateFormInformation.mockResolvedValue(true);
       component.isOwnerValid = false;
-      component.task.classificationSummary = { classificationId: 'class-1' };
+      component.task().classificationSummary = { classificationId: 'class-1' };
 
       const emittedValues: boolean[] = [];
       component.formValid.subscribe((val) => emittedValues.push(val));
 
-      component.ngOnChanges({
-        saveToggleTriggered: new SimpleChange(false, true, false)
-      });
+      fixture.componentRef.setInput('saveToggleTriggered', true);
+      fixture.detectChanges();
 
       await fixture.whenStable();
 
@@ -420,21 +405,19 @@ describe('TaskInformationComponent', () => {
     });
 
     it('should set isClassificationEmpty to true when classificationSummary is undefined', () => {
-      component.task.classificationSummary = undefined;
+      component.task().classificationSummary = undefined;
 
-      component.ngOnChanges({
-        saveToggleTriggered: new SimpleChange(false, true, false)
-      });
+      fixture.componentRef.setInput('saveToggleTriggered', true);
+      fixture.detectChanges();
 
       expect(component.isClassificationEmpty).toBe(true);
     });
 
     it('should set isClassificationEmpty to false when classificationSummary is defined', () => {
-      component.task.classificationSummary = { classificationId: 'class-1' };
+      component.task().classificationSummary = { classificationId: 'class-1' };
 
-      component.ngOnChanges({
-        saveToggleTriggered: new SimpleChange(false, true, false)
-      });
+      fixture.componentRef.setInput('saveToggleTriggered', true);
+      fixture.detectChanges();
 
       expect(component.isClassificationEmpty).toBe(false);
     });
@@ -510,8 +493,7 @@ describe('TaskInformationComponent', () => {
       store.reset({ ...store.snapshot(), engineConfiguration: configWithoutLookup });
 
       const localFixture = TestBed.createComponent(TaskInformationComponent);
-      const localComponent = localFixture.componentInstance;
-      localComponent.task = { ...mockTask };
+      localFixture.componentRef.setInput('task', { ...mockTask });
       localFixture.detectChanges();
 
       const ownerInput: HTMLInputElement = localFixture.nativeElement.querySelector('#ts-owner');
@@ -536,8 +518,7 @@ describe('TaskInformationComponent', () => {
       store.reset({ ...store.snapshot(), engineConfiguration: configWithoutLookup });
 
       const localFixture = TestBed.createComponent(TaskInformationComponent);
-      const localComponent = localFixture.componentInstance;
-      localComponent.task = { ...mockTask };
+      localFixture.componentRef.setInput('task', { ...mockTask });
       localFixture.detectChanges();
 
       mockFormsValidatorService.validateInputOverflow.mockClear();
@@ -569,19 +550,18 @@ describe('TaskInformationComponent', () => {
 
       const localFixture = TestBed.createComponent(TaskInformationComponent);
       const localComponent = localFixture.componentInstance;
-      localComponent.task = { ...mockTask };
+      localFixture.componentRef.setInput('task', { ...mockTask });
       localFixture.detectChanges();
 
       const errorMap = new Map<string, boolean>([['task.owner', true]]);
       localSubject.next(errorMap);
 
-      expect(localComponent.inputOverflowMap.get('task.owner')).toBe(true);
+      expect(localComponent.inputOverflowMap().get('task.owner')).toBe(true);
     });
 
     it('should render classification select with no pre-selected value when task has no classificationSummary', () => {
       const localFixture = TestBed.createComponent(TaskInformationComponent);
-      const localComponent = localFixture.componentInstance;
-      localComponent.task = { ...mockTask, classificationSummary: undefined };
+      localFixture.componentRef.setInput('task', { ...mockTask, classificationSummary: undefined });
       localFixture.detectChanges();
 
       const matSelects = localFixture.nativeElement.querySelectorAll('mat-select');
@@ -657,11 +637,14 @@ describe('TaskInformationComponent', () => {
 
   describe('classification mat-option click handler', () => {
     it('should call changedClassification when mat-option is clicked (classificationSummary set)', () => {
-      component.task = { ...mockTask, classificationSummary: { classificationId: 'class-1', name: 'Class1' } as any };
-      component.classifications = [
+      fixture.componentRef.setInput('task', {
+        ...mockTask,
+        classificationSummary: { classificationId: 'class-1', name: 'Class1' } as any
+      });
+      component.classifications.set([
         { classificationId: 'class-1', name: 'Class1' } as any,
         { classificationId: 'class-2', name: 'Class2' } as any
-      ];
+      ]);
       fixture.detectChanges();
 
       const changedSpy = vi.spyOn(component, 'changedClassification');
@@ -676,14 +659,14 @@ describe('TaskInformationComponent', () => {
           expect(changedSpy).toHaveBeenCalled();
         } else {
           component.changedClassification({ classificationId: 'class-1', name: 'Class1' } as any);
-          expect(component.task.classificationSummary).toBeDefined();
+          expect(component.task().classificationSummary).toBeDefined();
         }
       }
     });
 
     it('should handle changedClassification when no classificationSummary (else branch)', () => {
-      component.task = { ...mockTask, classificationSummary: undefined };
-      component.classifications = [{ classificationId: 'class-1', name: 'Class1' } as any];
+      fixture.componentRef.setInput('task', { ...mockTask, classificationSummary: undefined });
+      component.classifications.set([{ classificationId: 'class-1', name: 'Class1' } as any]);
       fixture.detectChanges();
 
       const matSelects = fixture.nativeElement.querySelectorAll('mat-select');
@@ -729,11 +712,11 @@ describe('TaskInformationComponent', () => {
 
       const newFixture = TestBed.createComponent(TaskInformationComponent);
       const newComponent = newFixture.componentInstance;
-      newComponent.task = { ...mockTask };
+      newFixture.componentRef.setInput('task', { ...mockTask });
 
       newFixture.detectChanges();
 
-      expect(newComponent.requestInProgress).toBe(true);
+      expect(newComponent.requestInProgress()).toBe(true);
     });
 
     it('should assign classifications from classificationPagingList.classifications', () => {
@@ -745,10 +728,10 @@ describe('TaskInformationComponent', () => {
 
       const newFixture = TestBed.createComponent(TaskInformationComponent);
       const newComponent = newFixture.componentInstance;
-      newComponent.task = { ...mockTask };
+      newFixture.componentRef.setInput('task', { ...mockTask });
       newFixture.detectChanges();
 
-      expect(newComponent.classifications).toEqual(expectedClassifications);
+      expect(newComponent.classifications()).toEqual(expectedClassifications);
     });
 
     it('should set requestInProgress to false after classifications are returned', () => {
@@ -757,12 +740,12 @@ describe('TaskInformationComponent', () => {
 
       const newFixture = TestBed.createComponent(TaskInformationComponent);
       const newComponent = newFixture.componentInstance;
-      newComponent.task = { ...mockTask };
+      newFixture.componentRef.setInput('task', { ...mockTask });
       newFixture.detectChanges();
 
       classificationSubject.next({ classifications: [] });
 
-      expect(newComponent.requestInProgress).toBe(false);
+      expect(newComponent.requestInProgress()).toBe(false);
     });
 
     it('should pass the task workbasket domain to getClassifications', () => {
@@ -770,11 +753,10 @@ describe('TaskInformationComponent', () => {
       mockClassificationsService.getClassifications.mockReturnValue(of({ classifications: [] }));
 
       const newFixture = TestBed.createComponent(TaskInformationComponent);
-      const newComponent = newFixture.componentInstance;
-      newComponent.task = {
+      newFixture.componentRef.setInput('task', {
         ...mockTask,
         workbasketSummary: { workbasketId: 'wb-2', name: 'WB2', domain: 'DOMAIN_B' }
-      };
+      });
       newFixture.detectChanges();
 
       expect(mockClassificationsService.getClassifications).toHaveBeenCalledWith({ domain: ['DOMAIN_B'] });

@@ -100,6 +100,7 @@ describe('KadaiTreeComponent', () => {
   });
 
   afterEach(() => {
+    fixture.destroy();
     httpController.match(() => true).forEach((req) => req.flush(''));
   });
 
@@ -135,19 +136,19 @@ describe('KadaiTreeComponent', () => {
   });
 
   it('getCategoryIcon should return category icon when category exists in categoryIcons', () => {
-    component.categoryIcons = {
+    (component as any).categoryIcons = () => ({
       EXTERNAL: 'path/to/icon.svg',
       missing: 'path/to/missing.svg'
-    } as any;
+    });
     const result = component.getCategoryIcon('EXTERNAL');
     expect(result.left).toBe('path/to/icon.svg');
     expect(result.right).toBe('EXTERNAL');
   });
 
   it('getCategoryIcon should return missing icon when category does not exist', () => {
-    component.categoryIcons = {
+    (component as any).categoryIcons = () => ({
       missing: 'path/to/missing.svg'
-    } as any;
+    });
     const result = component.getCategoryIcon('NONEXISTENT');
     expect(result.left).toBe('path/to/missing.svg');
     expect(result.right).toBe('Category does not match with the configuration');
@@ -175,7 +176,7 @@ describe('KadaiTreeComponent', () => {
     expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(true);
     expect(dispatchSpy).toHaveBeenCalled();
     expect(locationMock.go).toHaveBeenCalled();
-    expect(component.selectNodeId).toBe('CLF:01');
+    expect(component.selectNodeId()).toBe('CLF:01');
   });
 
   it('should dispatch deselect and go to classifications on onDeactivate with empty activeNodes', () => {
@@ -264,26 +265,26 @@ describe('KadaiTreeComponent', () => {
   });
 
   it('should handle ngAfterViewChecked when selectNodeId is set', () => {
-    component.selectNodeId = 'CLF:NONEXISTENT';
+    component.selectNodeId.set('CLF:NONEXISTENT');
     expect(() => component.ngAfterViewChecked()).not.toThrow();
   });
 
   it('should handle ngAfterViewChecked when filterText changes', () => {
-    component.filterText = 'newFilter';
-    expect(() => component.ngAfterViewChecked()).not.toThrow();
+    fixture.componentRef.setInput('filterText', 'newFilter');
+    fixture.detectChanges();
     expect(component.emptyTreeNodes).toBeDefined();
   });
 
   it('should handle ngAfterViewChecked when filterIcon changes', () => {
-    component.filterIcon = 'EXTERNAL';
-    expect(() => component.ngAfterViewChecked()).not.toThrow();
+    fixture.componentRef.setInput('filterIcon', 'EXTERNAL');
+    fixture.detectChanges();
   });
 
   it('should handle ngAfterViewChecked when filterText is empty string', () => {
-    component.filterText = 'prev';
-    component.ngAfterViewChecked();
-    component.filterText = '';
-    expect(() => component.ngAfterViewChecked()).not.toThrow();
+    fixture.componentRef.setInput('filterText', 'prev');
+    fixture.detectChanges();
+    fixture.componentRef.setInput('filterText', '');
+    expect(() => fixture.detectChanges()).not.toThrow();
   });
 
   it('should show "no classifications" message when emptyTreeNodes is true in separate fixture', () => {
@@ -331,20 +332,20 @@ describe('KadaiTreeComponent', () => {
   });
 
   it('getCategoryIcon should return correct icon for known category with different key', () => {
-    component.categoryIcons = {
+    (component as any).categoryIcons = () => ({
       MANUAL: 'path/to/manual.svg',
       missing: 'path/to/missing.svg'
-    } as any;
+    });
     const result = component.getCategoryIcon('MANUAL');
     expect(result.left).toBe('path/to/manual.svg');
     expect(result.right).toBe('MANUAL');
   });
 
   it('getCategoryIcon should return missing icon for unknown category', () => {
-    component.categoryIcons = {
+    (component as any).categoryIcons = () => ({
       EXTERNAL: 'path/to/external.svg',
       missing: 'path/to/missing-icon.svg'
-    } as any;
+    });
     const result = component.getCategoryIcon('UNKNOWN_CATEGORY');
     expect(result.left).toBe('path/to/missing-icon.svg');
     expect(result.right).toBe('Category does not match with the configuration');
@@ -366,17 +367,17 @@ describe('KadaiTreeComponent', () => {
   });
 
   it('should update filter state when filterIcon and filterText both change', () => {
-    component.filterText = 'test';
-    component.filterIcon = 'MANUAL';
-    component.ngAfterViewChecked();
+    fixture.componentRef.setInput('filterText', 'test');
+    fixture.componentRef.setInput('filterIcon', 'MANUAL');
+    fixture.detectChanges();
     expect(component.filter).toBe('test');
     expect(component.category).toBe('MANUAL');
   });
 
   it('should set category to ALL when filterIcon is empty string', () => {
-    component.filterText = 'something';
-    component.filterIcon = '';
-    component.ngAfterViewChecked();
+    fixture.componentRef.setInput('filterText', 'something');
+    fixture.componentRef.setInput('filterIcon', '');
+    fixture.detectChanges();
     expect(component.category).toBe('ALL');
   });
 
@@ -410,7 +411,7 @@ describe('KadaiTreeComponent', () => {
     await localFixture.whenStable();
     httpController.match(() => true).forEach((req) => req.flush(''));
 
-    expect(localComponent.treeNodes).toBeDefined();
+    expect(localComponent.treeNodes()).toBeDefined();
     const result = localComponent.getCategoryIcon('EXTERNAL');
     expect(result.right).toBe('EXTERNAL');
   });
@@ -445,7 +446,7 @@ describe('KadaiTreeComponent', () => {
     await localFixture.whenStable();
     httpController.match(() => true).forEach((req) => req.flush(''));
 
-    expect(localComponent.treeNodes).toBeDefined();
+    expect(localComponent.treeNodes()).toBeDefined();
     const result = localComponent.getCategoryIcon('UNKNOWN_CATEGORY');
     expect(result.right).toBe('Category does not match with the configuration');
   });
@@ -480,10 +481,10 @@ describe('KadaiTreeComponent', () => {
       }
     ];
 
-    localComponent.categoryIcons = {
+    (localComponent as any).categoryIcons = () => ({
       MANUAL: 'path/to/manual.svg',
       missing: 'path/to/missing.svg'
-    } as any;
+    });
 
     classificationTreeServiceMock.transformToTreeNode.mockReturnValueOnce(treeNodes);
 
@@ -494,28 +495,122 @@ describe('KadaiTreeComponent', () => {
     await localFixture.whenStable();
     httpController.match(() => true).forEach((req) => req.flush(''));
 
-    expect(localComponent.treeNodes).toBeDefined();
-    expect(localComponent.treeNodes.length).toBe(2);
+    expect(localComponent.treeNodes()).toBeDefined();
+    expect(localComponent.treeNodes().length).toBe(2);
+  });
+
+  it('filterNodes should call checkNameAndKey and checkIcon for each node when tree has nodes', async () => {
+    const treeNodes = [
+      {
+        classificationId: 'CLF:FILTER1',
+        key: 'FKEY1',
+        name: 'Filterable Node',
+        category: 'EXTERNAL',
+        parentId: '',
+        parentKey: '',
+        children: []
+      },
+      {
+        classificationId: 'CLF:FILTER2',
+        key: 'FKEY2',
+        name: 'Another Node',
+        category: 'MANUAL',
+        parentId: '',
+        parentKey: '',
+        children: []
+      }
+    ];
+    classificationTreeServiceMock.transformToTreeNode.mockReturnValueOnce(treeNodes);
+
+    const localFixture = TestBed.createComponent(KadaiTreeComponent);
+    const localComponent = localFixture.componentInstance;
+    localComponent.options = { ...localComponent.options, useVirtualScroll: false };
+    localFixture.detectChanges();
+    httpController.match(() => true).forEach((req) => req.flush(''));
+
+    localFixture.detectChanges();
+    await localFixture.whenStable();
+    httpController.match(() => true).forEach((req) => req.flush(''));
+
+    localFixture.componentRef.setInput('filterText', 'Filterable');
+    localFixture.componentRef.setInput('filterIcon', 'EXTERNAL');
+    localFixture.detectChanges();
+
+    expect(localComponent.filter).toBe('Filterable');
+    expect(localComponent.category).toBe('EXTERNAL');
+    localFixture.destroy();
+  });
+
+  it('collapseParentNodeIfItIsTheLastChild: parent with exactly 1 child should collapse', async () => {
+    vi.spyOn(store, 'dispatch').mockReturnValue(of(undefined as any));
+
+    const treeNodes = [
+      {
+        classificationId: 'CLF:SOLO_PARENT',
+        key: 'SOLO_PARENT',
+        name: 'Parent With One Child',
+        category: 'EXTERNAL',
+        parentId: '',
+        parentKey: '',
+        children: [
+          {
+            classificationId: 'CLF:SOLO_CHILD',
+            key: 'SOLO_CHILD',
+            name: 'Only Child',
+            category: 'EXTERNAL',
+            parentId: 'CLF:SOLO_PARENT',
+            parentKey: 'SOLO_PARENT',
+            children: []
+          }
+        ]
+      }
+    ];
+    classificationTreeServiceMock.transformToTreeNode.mockReturnValueOnce(treeNodes);
+
+    const localFixture = TestBed.createComponent(KadaiTreeComponent);
+    const localComponent = localFixture.componentInstance;
+    localComponent.options = { ...localComponent.options, useVirtualScroll: false };
+    localFixture.detectChanges();
+    httpController.match(() => true).forEach((req) => req.flush(''));
+
+    localFixture.detectChanges();
+    await localFixture.whenStable();
+    httpController.match(() => true).forEach((req) => req.flush(''));
+
+    const parentNode = (localComponent as any).getNode('CLF:SOLO_PARENT');
+    if (parentNode) {
+      parentNode.expand();
+    }
+
+    const mockClassification = { classificationId: 'CLF:SOLO_CHILD', key: 'SOLO_CHILD', parentId: 'CLF:SOLO_PARENT' };
+    classificationsServiceMock.getClassification.mockReturnValueOnce(of(mockClassification));
+
+    const mockEvent = {
+      node: { classificationId: 'CLF:SOLO_CHILD', parentId: 'CLF:SOLO_PARENT' },
+      to: { parent: { classificationId: 'CLF:ELSEWHERE', key: 'ELSEWHERE' } }
+    };
+    await localComponent.onMoveNode(mockEvent);
+    localFixture.destroy();
   });
 
   it('selectNode private method: should handle falsy nodeId', () => {
-    component.selectNodeId = undefined;
+    component.selectNodeId.set(undefined);
     expect(() => component.ngAfterViewChecked()).not.toThrow();
   });
 
   it('ngOnInit: selectedClassificationId defined — selectNodeId gets set to the id', () => {
-    expect(component.selectNodeId).toBeDefined();
+    expect(component.selectNodeId()).toBeDefined();
   });
 
   it('ngAfterViewChecked: selectNodeId defined but node not found — no error', () => {
-    component.selectNodeId = 'DOES_NOT_EXIST';
+    component.selectNodeId.set('DOES_NOT_EXIST');
     expect(() => component.ngAfterViewChecked()).not.toThrow();
   });
 
   it('ngAfterViewChecked: filterText is undefined and filterIcon changes — covers filterText ternary false', () => {
-    component.filterText = undefined;
-    component.filterIcon = 'SOME_ICON';
-    expect(() => component.ngAfterViewChecked()).not.toThrow();
+    fixture.componentRef.setInput('filterText', undefined);
+    fixture.componentRef.setInput('filterIcon', 'SOME_ICON');
+    fixture.detectChanges();
     expect(component.filter).toBe('');
   });
 
@@ -584,7 +679,8 @@ describe('KadaiTreeComponent', () => {
     const treeEl = fixture.debugElement.query(By.css('tree-root'));
     if (treeEl) {
       treeEl.triggerEventHandler('treeDrop', {
-        event: { target: { tagName: 'TREE-VIEWPORT' } }
+        event: { target: { tagName: 'TREE-VIEWPORT' } },
+        element: { data: { classificationId: 'CLF:01', parentId: '' } }
       });
     }
     expect(component).toBeTruthy();
@@ -684,7 +780,7 @@ describe('KadaiTreeComponent', () => {
     const localComponent = localFixture.componentInstance;
     localFixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
-    expect(localComponent.selectNodeId).toBeUndefined();
+    expect(localComponent.selectNodeId()).toBeUndefined();
     localFixture.destroy();
   });
 

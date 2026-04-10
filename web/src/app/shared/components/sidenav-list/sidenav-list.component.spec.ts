@@ -20,7 +20,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { SidenavListComponent } from './sidenav-list.component';
 import { By } from '@angular/platform-browser';
-import { provideRouter, Router } from '@angular/router';
+import { provideRouter, Router, UrlTree } from '@angular/router';
 import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.service';
 import { SidenavService } from '../../services/sidenav/sidenav.service';
 import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
@@ -28,7 +28,7 @@ import { of } from 'rxjs';
 import { MonitorRoles } from '../../roles/monitor.roles';
 import { UserRoles } from '../../roles/user.roles';
 import { BusinessAdminRoles } from '../../roles/business-admin.roles';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('SidenavListComponent', () => {
@@ -57,7 +57,7 @@ describe('SidenavListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [SidenavListComponent],
       providers: [
-        provideRouter([]),
+        provideRouter([{ path: '**', children: [] }]),
         provideHttpClientTesting(),
         {
           provide: KadaiEngineService,
@@ -79,6 +79,10 @@ describe('SidenavListComponent', () => {
     fixture = TestBed.createComponent(SidenavListComponent);
     debugElement = fixture.debugElement;
     component = fixture.debugElement.componentInstance;
+  });
+
+  afterEach(() => {
+    fixture.destroy();
   });
 
   it('should create', () => {

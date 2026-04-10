@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { MatCheckbox } from '@angular/material/checkbox';
@@ -40,8 +40,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
   standalone: true
 })
 class MockSvgIconComponent {
-  @Input() src: string;
-  @Input() applyClass: boolean;
+  src = input<string>();
+  applyClass = input<boolean>();
 }
 
 const mockReportData = {

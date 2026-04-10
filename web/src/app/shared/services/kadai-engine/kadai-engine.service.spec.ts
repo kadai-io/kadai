@@ -126,6 +126,16 @@ describe('KadaiEngineService', () => {
       expect(req.request.method).toBe('GET');
       req.flush(true);
     });
+
+    it('should return false when the endpoint returns an error', () => {
+      let result: boolean;
+      service.isCustomRoutingRulesEnabled().subscribe((value) => (result = value));
+
+      const req = httpMock.expectOne((r) => r.url.includes('routing-rest-enabled'));
+      req.flush('Not Found', { status: 404, statusText: 'Not Found' });
+
+      expect(result).toBe(false);
+    });
   });
 
   describe('isHistoryProviderEnabled', () => {

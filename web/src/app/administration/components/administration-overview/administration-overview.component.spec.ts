@@ -22,7 +22,7 @@ import { DomainService } from '../../../shared/services/domain/domain.service';
 import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
 import { of } from 'rxjs';
 import { provideRouter } from '@angular/router';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 const domainServiceSpy: Partial<DomainService> = {
@@ -41,13 +41,16 @@ describe('AdministrationOverviewComponent', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    kadaiEngineServiceSpy.isCustomRoutingRulesEnabled.mockReturnValue(of(false));
+    domainServiceSpy.getDomains = vi.fn().mockReturnValue(of(['domain a', 'domain b']));
+    domainServiceSpy.getSelectedDomain = vi.fn().mockReturnValue(of('domain a'));
     await TestBed.configureTestingModule({
       imports: [AdministrationOverviewComponent],
       providers: [
         { provide: DomainService, useValue: domainServiceSpy },
         { provide: KadaiEngineService, useValue: kadaiEngineServiceSpy },
         provideHttpClientTesting(),
-        provideRouter([])
+        provideRouter([{ path: '**', children: [] }])
       ]
     }).compileComponents();
   });
@@ -56,6 +59,10 @@ describe('AdministrationOverviewComponent', () => {
     fixture = TestBed.createComponent(AdministrationOverviewComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    fixture.destroy();
   });
 
   it('should create component', () => {

@@ -20,7 +20,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketInformationComponent } from './workbasket-information.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
@@ -57,12 +57,14 @@ const workbasketServiceMock: Partial<WorkbasketService> = {
   removeDistributionTarget: vi.fn().mockReturnValue(of(true))
 };
 
+const inputOverflowSubject = new Subject<Map<string, boolean>>();
+
 const formValidatorServiceMock: Partial<FormsValidatorService> = {
   isFieldValid: vi.fn().mockReturnValue(true),
   validateInputOverflow: vi.fn(),
   validateFormInformation: vi.fn().mockImplementation((): Promise<any> => Promise.resolve(true)),
   get inputOverflowObservable(): Observable<Map<string, boolean>> {
-    return of(new Map<string, boolean>());
+    return inputOverflowSubject.asObservable();
   }
 };
 
@@ -87,9 +89,6 @@ describe('WorkbasketInformationComponent', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(WorkbasketInformationComponent);
-    debugElement = fixture.debugElement;
-    component = fixture.componentInstance;
     store = TestBed.inject(Store);
     actions$ = TestBed.inject(Actions);
     store.reset({
@@ -97,7 +96,11 @@ describe('WorkbasketInformationComponent', () => {
       engineConfiguration: engineConfigurationMock,
       workbasket: workbasketReadStateMock
     });
-    component.workbasket = selectedWorkbasketMock;
+
+    fixture = TestBed.createComponent(WorkbasketInformationComponent);
+    debugElement = fixture.debugElement;
+    component = fixture.componentInstance;
+    fixture.componentRef.setInput('workbasket', selectedWorkbasketMock);
 
     fixture.detectChanges();
   });
@@ -115,9 +118,9 @@ describe('WorkbasketInformationComponent', () => {
   });
 
   it('should create clone of workbasket when workbasket value changes', () => {
-    component.action = ACTION.READ;
-    component.ngOnChanges();
-    expect(component.workbasketClone).toMatchObject(component.workbasket);
+    fixture.componentRef.setInput('action', ACTION.READ);
+    fixture.detectChanges();
+    expect(component.workbasketClone).toMatchObject(component.workbasket());
   });
 
   it('should submit when validatorService is true', () => {
@@ -132,18 +135,18 @@ describe('WorkbasketInformationComponent', () => {
     const showSuccessSpy = vi.spyOn(notificationService, 'showSuccess');
     component.onUndo();
     expect(showSuccessSpy).toHaveBeenCalled();
-    expect(component.workbasket).toMatchObject(component.workbasketClone);
+    expect(component.workbasket()).toMatchObject(component.workbasketClone);
   });
 
   it('should save workbasket when workbasketId there', async () => {
-    component.workbasket = { ...selectedWorkbasketMock };
-    component.workbasket.workbasketId = '1';
-    component.action = ACTION.COPY;
+    fixture.componentRef.setInput('workbasket', { ...selectedWorkbasketMock, workbasketId: '1' });
+    fixture.componentRef.setInput('action', ACTION.COPY);
+    fixture.detectChanges();
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(UpdateWorkbasket)).subscribe(() => (actionDispatched = true));
     component.onSave();
     expect(actionDispatched).toBe(true);
-    expect(component.workbasketClone).toMatchObject(component.workbasket);
+    expect(component.workbasketClone).toMatchObject(component.workbasket());
   });
 
   it('should dispatch MarkWorkbasketforDeletion action when onRemoveConfirmed is called', async () => {
@@ -154,7 +157,8 @@ describe('WorkbasketInformationComponent', () => {
   });
 
   it('should create new workbasket when workbasketId is undefined', () => {
-    component.workbasket.workbasketId = undefined;
+    fixture.componentRef.setInput('workbasket', { ...selectedWorkbasketMock, workbasketId: undefined });
+    fixture.detectChanges();
     const postNewWorkbasketSpy = vi.spyOn(component, 'postNewWorkbasket');
     component.onSave();
     expect(postNewWorkbasketSpy).toHaveBeenCalled();
@@ -177,8 +181,8 @@ describe('WorkbasketInformationComponent', () => {
 
     await fixture.whenStable();
 
-    expect(component.workbasket['custom3']).toBe('');
-    expect(component.workbasket['custom4']).toBe(newValue);
+    expect(component.workbasket()['custom3']).toBe('');
+    expect(component.workbasket()['custom4']).toBe(newValue);
   });
 
   it('should call formsValidatorService.isFieldValid when isFieldValid is called', () => {
@@ -203,7 +207,7 @@ describe('WorkbasketInformationComponent', () => {
 
   it('should set workbasket owner when onSelectedOwner is called', () => {
     component.onSelectedOwner({ accessId: 'user-test', name: 'Test User' });
-    expect(component.workbasket.owner).toBe('user-test');
+    expect(component.workbasket().owner).toBe('user-test');
   });
 
   it('should handle workbasket customization without owner config', () => {
@@ -259,21 +263,19 @@ describe('WorkbasketInformationComponent', () => {
 
   it('should set created and modified dates when addDateToWorkbasket is called', () => {
     component.addDateToWorkbasket();
-    expect(component.workbasket.created).toBeDefined();
-    expect(component.workbasket.modified).toBeDefined();
+    expect(component.workbasket().created).toBeDefined();
+    expect(component.workbasket().modified).toBeDefined();
   });
 
   it('should call postNewWorkbasket when workbasketId is falsy in onSave', () => {
-    component.workbasket = { ...selectedWorkbasketMock };
-    component.workbasket.workbasketId = undefined;
+    fixture.componentRef.setInput('workbasket', { ...selectedWorkbasketMock, workbasketId: undefined });
+    fixture.detectChanges();
     const postSpy = vi.spyOn(component, 'postNewWorkbasket').mockImplementation(() => {});
     component.onSave();
     expect(postSpy).toHaveBeenCalled();
   });
 
   it('should show plain owner input when lookupField is false', () => {
-    const lf = TestBed.createComponent(WorkbasketInformationComponent);
-    const lc = lf.componentInstance;
     store.reset({
       ...store.snapshot(),
       engineConfiguration: {
@@ -294,8 +296,8 @@ describe('WorkbasketInformationComponent', () => {
       },
       workbasket: workbasketReadStateMock
     });
-    lc.workbasket = selectedWorkbasketMock;
-    lc.lookupField = false;
+    const lf = TestBed.createComponent(WorkbasketInformationComponent);
+    lf.componentRef.setInput('workbasket', selectedWorkbasketMock);
     lf.detectChanges();
     const ownerInput = lf.nativeElement.querySelector('#wb-owner');
     expect(ownerInput).toBeTruthy();
@@ -313,10 +315,10 @@ describe('WorkbasketInformationComponent', () => {
   it('should not show field-error-display for key when action is 3', () => {
     const lf = TestBed.createComponent(WorkbasketInformationComponent);
     const lc = lf.componentInstance;
-    lc.workbasket = selectedWorkbasketMock;
-    lc.action = 3;
+    lf.componentRef.setInput('workbasket', selectedWorkbasketMock);
+    lf.componentRef.setInput('action', 3);
     lf.detectChanges();
-    expect(lc.action).toBe(3);
+    expect(lc.action()).toBe(3);
   });
 
   it('should call validateInputOverflow when name input receives input event', () => {
@@ -345,8 +347,7 @@ describe('WorkbasketInformationComponent', () => {
 
   it('should not render form when workbasket is null', () => {
     const lf = TestBed.createComponent(WorkbasketInformationComponent);
-    const lc = lf.componentInstance;
-    lc.workbasket = null;
+    lf.componentRef.setInput('workbasket', null);
     lf.detectChanges();
     const wbInfo = lf.nativeElement.querySelector('#wb-information');
     expect(wbInfo).toBeFalsy();
@@ -358,7 +359,7 @@ describe('WorkbasketInformationComponent', () => {
   });
 
   it('should show overflow error for key input when inputOverflowMap has true value', () => {
-    component.inputOverflowMap.set('workbasket.key', true);
+    inputOverflowSubject.next(new Map([['workbasket.key', true]]));
     fixture.detectChanges();
     const keyInput = debugElement.nativeElement.querySelector('#workbasket-key');
     expect(keyInput).toBeTruthy();
@@ -367,7 +368,7 @@ describe('WorkbasketInformationComponent', () => {
   });
 
   it('should show overflow error for name input when inputOverflowMap has true value', () => {
-    component.inputOverflowMap.set('workbasket.name', true);
+    inputOverflowSubject.next(new Map([['workbasket.name', true]]));
     fixture.detectChanges();
     const nameInput = debugElement.nativeElement.querySelector('#workbasket-name');
     expect(nameInput).toBeTruthy();
@@ -376,7 +377,7 @@ describe('WorkbasketInformationComponent', () => {
   });
 
   it('should show overflow error for description input when inputOverflowMap has true value', () => {
-    component.inputOverflowMap.set('workbasket.description', true);
+    inputOverflowSubject.next(new Map([['workbasket.description', true]]));
     fixture.detectChanges();
     const descInput = debugElement.nativeElement.querySelector('#workbasket-description');
     expect(descInput).toBeTruthy();
@@ -385,7 +386,7 @@ describe('WorkbasketInformationComponent', () => {
   });
 
   it('should show key field-error-display when action is not 3', () => {
-    component.action = 1;
+    fixture.componentRef.setInput('action', 1);
     fixture.detectChanges();
     const fieldErrors = debugElement.nativeElement.querySelectorAll('kadai-shared-field-error-display');
     expect(fieldErrors.length).toBeGreaterThanOrEqual(1);
@@ -394,15 +395,13 @@ describe('WorkbasketInformationComponent', () => {
   it('should not show key field-error-display when action is 3', () => {
     const lf = TestBed.createComponent(WorkbasketInformationComponent);
     const lc = lf.componentInstance;
-    lc.workbasket = { ...selectedWorkbasketMock };
-    lc.action = 3;
+    lf.componentRef.setInput('workbasket', { ...selectedWorkbasketMock });
+    lf.componentRef.setInput('action', 3);
     lf.detectChanges();
-    expect(lc.action).toBe(3);
+    expect(lc.action()).toBe(3);
   });
 
   it('should show owner input field when lookupField is false and trigger input event', () => {
-    const lf = TestBed.createComponent(WorkbasketInformationComponent);
-    const lc = lf.componentInstance;
     store.reset({
       ...store.snapshot(),
       engineConfiguration: {
@@ -423,7 +422,9 @@ describe('WorkbasketInformationComponent', () => {
       },
       workbasket: workbasketReadStateMock
     });
-    lc.workbasket = { ...selectedWorkbasketMock };
+    const lf = TestBed.createComponent(WorkbasketInformationComponent);
+    const lc = lf.componentInstance;
+    lf.componentRef.setInput('workbasket', { ...selectedWorkbasketMock });
     lf.detectChanges();
     const ownerInput = lf.nativeElement.querySelector('#wb-owner');
     if (ownerInput) {
@@ -431,7 +432,7 @@ describe('WorkbasketInformationComponent', () => {
       ownerInput.dispatchEvent(new Event('input'));
       expect(validateSpy).toHaveBeenCalled();
     }
-    expect(lc.lookupField).toBe(false);
+    expect(lc.lookupField()).toBe(false);
   });
 
   it('should trigger orgLevel1 input validation when orgLevel1 input receives input event', () => {

@@ -17,7 +17,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, DebugElement, Input } from '@angular/core';
+import { Component, DebugElement, input } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { ImportExportService } from '../../services/import-export.service';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
@@ -42,7 +42,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
   standalone: true
 })
 class MockSvgIconComponent {
-  @Input() src: string;
+  src = input<string>();
 }
 
 const domainServiceSpy: Partial<DomainService> = {

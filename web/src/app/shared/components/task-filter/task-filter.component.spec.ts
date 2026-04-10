@@ -45,43 +45,43 @@ describe('TaskFilterComponent', () => {
   it('should create the component', () => {
     expect(component).toBeTruthy();
     expect(component.filter).toBeDefined();
-    expect(component.filter.priority).toEqual([]);
-    expect(component.filter['name-like']).toEqual([]);
-    expect(component.filter['owner-like']).toEqual([]);
+    expect(component.filter().priority).toEqual([]);
+    expect(component.filter()['name-like']).toEqual([]);
+    expect(component.filter()['owner-like']).toEqual([]);
   });
 
   it('clear() should set filter with empty priority, name-like, and owner-like arrays', () => {
-    component.filter = { priority: [1], 'name-like': ['test'], 'owner-like': ['user'] };
+    component.filter.set({ priority: [1], 'name-like': ['test'], 'owner-like': ['user'] });
     component.clear();
 
-    expect(component.filter.priority).toEqual([]);
-    expect(component.filter['name-like']).toEqual([]);
-    expect(component.filter['owner-like']).toEqual([]);
+    expect(component.filter().priority).toEqual([]);
+    expect(component.filter()['name-like']).toEqual([]);
+    expect(component.filter()['owner-like']).toEqual([]);
   });
 
   it('should set filter.state to [READY] when setStatus is called with TaskState.READY', () => {
     component.setStatus(TaskState.READY);
-    expect(component.filter.state).toEqual([TaskState.READY]);
+    expect(component.filter().state).toEqual([TaskState.READY]);
   });
 
   it('should set filter.state to [] when setStatus is called with TaskState.ALL', () => {
     component.setStatus(TaskState.READY);
     component.setStatus(TaskState.ALL);
-    expect(component.filter.state).toEqual([]);
+    expect(component.filter().state).toEqual([]);
   });
 
   it('should set filter.state to [CLAIMED] when setStatus is called with TaskState.CLAIMED', () => {
     component.setStatus(TaskState.CLAIMED);
-    expect(component.filter.state).toEqual([TaskState.CLAIMED]);
+    expect(component.filter().state).toEqual([TaskState.CLAIMED]);
   });
 
   it('updateState() should dispatch SetTaskFilter with current filter', () => {
     const dispatchSpy = vi.spyOn(store, 'dispatch');
-    component.filter = { priority: [], 'name-like': ['myTask'], 'owner-like': [] };
+    component.filter.set({ priority: [], 'name-like': ['myTask'], 'owner-like': [] });
 
     component.updateState();
 
-    expect(dispatchSpy).toHaveBeenCalledWith(new SetTaskFilter(component.filter));
+    expect(dispatchSpy).toHaveBeenCalledWith(new SetTaskFilter(component.filter()));
   });
 
   it('setStatus() should call updateState() which dispatches SetTaskFilter', () => {
@@ -93,15 +93,15 @@ describe('TaskFilterComponent', () => {
   });
 
   it('should clear filter when ClearTaskFilter action is dispatched to store', () => {
-    component.filter = { priority: [1], 'name-like': ['test'], 'owner-like': ['user'] };
+    component.filter.set({ priority: [1], 'name-like': ['test'], 'owner-like': ['user'] });
 
     store.dispatch(new ClearTaskFilter());
 
     fixture.detectChanges();
 
-    expect(component.filter.priority).toEqual([]);
-    expect(component.filter['name-like']).toEqual([]);
-    expect(component.filter['owner-like']).toEqual([]);
+    expect(component.filter().priority).toEqual([]);
+    expect(component.filter()['name-like']).toEqual([]);
+    expect(component.filter()['owner-like']).toEqual([]);
   });
 
   it('ngOnDestroy() should complete destroy$', () => {
@@ -121,14 +121,14 @@ describe('TaskFilterComponent', () => {
   });
 
   it('should render mat-select with selected state when filter.state is set', () => {
-    component.filter.state = [TaskState.READY];
+    component.filter.update((f) => ({ ...f, state: [TaskState.READY] }));
     fixture.detectChanges();
     const matSelect = fixture.nativeElement.querySelector('mat-select');
     expect(matSelect).toBeTruthy();
   });
 
   it('should render mat-select with no selected value when filter.state is empty', () => {
-    component.filter.state = [];
+    component.filter.update((f) => ({ ...f, state: [] }));
     fixture.detectChanges();
     const matSelect = fixture.nativeElement.querySelector('mat-select');
     expect(matSelect).toBeTruthy();
