@@ -41,6 +41,9 @@ describe('AdministrationOverviewComponent', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    kadaiEngineServiceSpy.isCustomRoutingRulesEnabled.mockReturnValue(of(false));
+    domainServiceSpy.getDomains = vi.fn().mockReturnValue(of(['domain a', 'domain b']));
+    domainServiceSpy.getSelectedDomain = vi.fn().mockReturnValue(of('domain a'));
     await TestBed.configureTestingModule({
       imports: [AdministrationOverviewComponent],
       providers: [

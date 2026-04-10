@@ -71,39 +71,37 @@ describe('TaskListComponent', () => {
   });
 
   it('should show empty state when tasks is null', () => {
-    component.tasks = null;
+    fixture.componentRef.setInput('tasks', null);
     fixture.detectChanges();
     const emptyEl = fixture.nativeElement.querySelector('.container-no-items');
     expect(emptyEl).toBeTruthy();
   });
 
   it('should show empty state when tasks array is empty', () => {
-    component.tasks = [];
+    fixture.componentRef.setInput('tasks', []);
     fixture.detectChanges();
     const emptyEl = fixture.nativeElement.querySelector('.container-no-items');
     expect(emptyEl).toBeTruthy();
   });
 
   it('should show task list when tasks are provided', () => {
-    component.tasks = [mockTask];
+    fixture.componentRef.setInput('tasks', [mockTask]);
     fixture.detectChanges();
     const listEl = fixture.nativeElement.querySelector('mat-selection-list');
     expect(listEl).toBeTruthy();
   });
 
   it('should render multiple tasks', () => {
-    component.tasks = [mockTask, mockTaskNoOwner];
+    fixture.componentRef.setInput('tasks', [mockTask, mockTaskNoOwner]);
     fixture.detectChanges();
     const options = fixture.nativeElement.querySelectorAll('mat-list-option');
     expect(options.length).toBe(2);
   });
 
-  it('selectTask should update selectedId and emit event', () => {
+  it('selectTask should update selectedId', () => {
     fixture.detectChanges();
-    const emitSpy = vi.spyOn(component.selectedIdChange, 'emit');
     component.selectTask('task-1');
-    expect(component.selectedId).toBe('task-1');
-    expect(emitSpy).toHaveBeenCalledWith('task-1');
+    expect(component.selectedId()).toBe('task-1');
   });
 
   it('selectTask should navigate to task detail', () => {
@@ -114,15 +112,15 @@ describe('TaskListComponent', () => {
   });
 
   it('should mark selected task with selectedId', () => {
-    component.tasks = [mockTask, mockTaskNoOwner];
-    component.selectedId = 'task-1';
+    fixture.componentRef.setInput('tasks', [mockTask, mockTaskNoOwner]);
+    fixture.componentRef.setInput('selectedId', 'task-1');
     fixture.detectChanges();
     const options = fixture.nativeElement.querySelectorAll('mat-list-option');
     expect(options.length).toBe(2);
   });
 
   it('should render task owner when owner is set', () => {
-    component.tasks = [mockTask];
+    fixture.componentRef.setInput('tasks', [mockTask]);
     fixture.detectChanges();
     const ownerEl = fixture.nativeElement.querySelector('i');
     expect(ownerEl).toBeTruthy();
@@ -130,14 +128,14 @@ describe('TaskListComponent', () => {
   });
 
   it('should not render owner element when task has no owner', () => {
-    component.tasks = [mockTaskNoOwner];
+    fixture.componentRef.setInput('tasks', [mockTaskNoOwner]);
     fixture.detectChanges();
     const ownerEl = fixture.nativeElement.querySelector('i');
     expect(ownerEl).toBeNull();
   });
 
   it('should call selectTask when a list option is clicked', () => {
-    component.tasks = [mockTask];
+    fixture.componentRef.setInput('tasks', [mockTask]);
     fixture.detectChanges();
     const selectSpy = vi.spyOn(component, 'selectTask');
     const listOption = fixture.nativeElement.querySelector('mat-list-option');
@@ -146,17 +144,16 @@ describe('TaskListComponent', () => {
     expect(selectSpy).toHaveBeenCalledWith('task-1');
   });
 
-  it('should emit selectedIdChange when a list option is clicked', () => {
-    component.tasks = [mockTask, mockTaskNoOwner];
+  it('should update selectedId when a list option is clicked', () => {
+    fixture.componentRef.setInput('tasks', [mockTask, mockTaskNoOwner]);
     fixture.detectChanges();
-    const emitSpy = vi.spyOn(component.selectedIdChange, 'emit');
     const listOptions = fixture.nativeElement.querySelectorAll('mat-list-option');
     listOptions[0].click();
-    expect(emitSpy).toHaveBeenCalledWith('task-1');
+    expect(component.selectedId()).toBe('task-1');
   });
 
   it('should navigate when a list option is clicked', () => {
-    component.tasks = [mockTask];
+    fixture.componentRef.setInput('tasks', [mockTask]);
     fixture.detectChanges();
     const navigateSpy = vi.spyOn(router, 'navigate');
     const listOption = fixture.nativeElement.querySelector('mat-list-option');

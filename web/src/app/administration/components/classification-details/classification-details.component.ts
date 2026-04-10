@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, computed, inject, OnDestroy, OnInit, signal, viewChild } from '@angular/core';
 import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 
@@ -61,6 +61,7 @@ import { FieldErrorDisplayComponent } from '../../../shared/components/field-err
 import { MatSelect, MatSelectTrigger } from '@angular/material/select';
 import { SvgIconComponent } from 'angular-svg-icon';
 import { MatOption } from '@angular/material/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'kadai-administration-classification-details',
@@ -90,7 +91,8 @@ import { MatOption } from '@angular/material/core';
   ]
 })
 export class ClassificationDetailsComponent implements OnInit, OnDestroy {
-  classification: Classification;
+  classification = signal<Classification>(undefined);
+  isCreatingNewClassification = computed(() => typeof this.classification()?.classificationId === 'undefined');
   categories$: Observable<string[]> = inject(Store).select(ClassificationSelectors.selectCategories);
   categoryIcons$: Observable<ClassificationCategoryImages> = inject(Store).select(
     EngineConfigurationSelectors.selectCategoryIcons
@@ -100,12 +102,13 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   );
   badgeMessage$: Observable<string> = inject(Store).select(ClassificationSelectors.getBadgeMessage);
   customFields$: Observable<CustomField[]>;
-  isCreatingNewClassification: boolean = false;
   readonly lengthError = 'You have reached the maximum length for this field';
-  inputOverflowMap = new Map<string, boolean>();
+  inputOverflowMap = toSignal(inject(FormsValidatorService).inputOverflowObservable, {
+    initialValue: new Map<string, boolean>()
+  });
   validateInputOverflow: Function;
-  requestInProgress: boolean;
-  @ViewChild('ClassificationForm') classificationForm: NgForm;
+  requestInProgress = toSignal(inject(RequestInProgressService).getRequestInProgress(), { initialValue: false });
+  classificationForm = viewChild<NgForm>('ClassificationForm');
   toggleValidationMap = new Map<string, boolean>();
   destroy$ = new Subject<void>();
   private location = inject(Location);
@@ -123,41 +126,30 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
     );
 
     this.selectedClassification$.pipe(takeUntil(this.destroy$)).subscribe((classification) => {
-      this.classification = { ...classification };
-      this.isCreatingNewClassification = typeof this.classification.classificationId === 'undefined';
+      this.classification.set({ ...classification });
     });
 
     this.importExportService
       .getImportingFinished()
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        this.store.dispatch(new SelectClassification(this.classification.classificationId));
+        this.store.dispatch(new SelectClassification(this.classification()!.classificationId));
       });
 
-    this.requestInProgressService
-      .getRequestInProgress()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((value) => {
-        this.requestInProgress = value;
-      });
-
-    this.formsValidatorService.inputOverflowObservable.pipe(takeUntil(this.destroy$)).subscribe((inputOverflowMap) => {
-      this.inputOverflowMap = inputOverflowMap;
-    });
     this.validateInputOverflow = (inputFieldModel, maxLength) => {
       this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
     };
   }
 
   isFieldValid(field: string): boolean {
-    return this.formsValidatorService.isFieldValid(this.classificationForm, field);
+    return this.formsValidatorService.isFieldValid(this.classificationForm(), field);
   }
 
   onSubmit() {
     this.formsValidatorService.formSubmitAttempt = true;
-    trimForm(this.classificationForm);
+    trimForm(this.classificationForm());
     this.formsValidatorService
-      .validateFormInformation(this.classificationForm, this.toggleValidationMap)
+      .validateFormInformation(this.classificationForm(), this.toggleValidationMap)
       .then((value) => {
         if (value) {
           this.onSave();
@@ -168,7 +160,7 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   onRestore() {
     this.formsValidatorService.formSubmitAttempt = false;
     this.store
-      .dispatch(new RestoreSelectedClassification(this.classification.classificationId))
+      .dispatch(new RestoreSelectedClassification(this.classification()!.classificationId))
       .pipe(take(1))
       .subscribe(() => {
         this.notificationsService.showSuccess('CLASSIFICATION_RESTORE');
@@ -176,7 +168,7 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   }
 
   onCopy() {
-    if (this.isCreatingNewClassification) {
+    if (this.isCreatingNewClassification()) {
       this.notificationsService.showError('CLASSIFICATION_COPY_NOT_CREATED');
     } else {
       this.store.dispatch(new CopyClassification());
@@ -198,7 +190,7 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   }
 
   validChanged(): void {
-    this.classification.isValidInDomain = !this.classification.isValidInDomain;
+    this.classification.update((c) => ({ ...c, isValidInDomain: !c.isValidInDomain }));
   }
 
   masterDomainSelected(): boolean {
@@ -211,9 +203,9 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
 
   async onSave() {
     this.requestInProgressService.setRequestInProgress(true);
-    if (typeof this.classification.classificationId === 'undefined') {
+    if (typeof this.classification()!.classificationId === 'undefined') {
       this.store
-        .dispatch(new SaveCreatedClassification(this.classification))
+        .dispatch(new SaveCreatedClassification(this.classification()!))
         .pipe(take(1))
         .subscribe(() => {
           this.selectedClassification$.pipe(take(1)).subscribe((classification) => {
@@ -231,17 +223,17 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
     } else {
       try {
         this.store
-          .dispatch(new SaveModifiedClassification(this.classification))
+          .dispatch(new SaveModifiedClassification(this.classification()!))
           .pipe(take(1))
           .subscribe(() => {
             this.afterRequest();
             this.notificationsService.showSuccess('CLASSIFICATION_UPDATE', {
-              classificationKey: this.classification.key
+              classificationKey: this.classification()!.key
             });
           });
       } catch (error) {
         console.error(
-          `Exception while saving modified classification! [classification=${this.classification}, error=${error}`
+          `Exception while saving modified classification! [classification=${this.classification()}, error=${error}`
         );
         this.afterRequest();
       }
@@ -251,7 +243,7 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   onRemoveClassification() {
     this.notificationsService.showDialog(
       'CLASSIFICATION_DELETE',
-      { classificationKey: this.classification.key },
+      { classificationKey: this.classification()!.key },
       this.removeClassificationConfirmation.bind(this)
     );
   }
@@ -263,7 +255,9 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
       .dispatch(new RemoveSelectedClassification())
       .pipe(take(1))
       .subscribe(() => {
-        this.notificationsService.showSuccess('CLASSIFICATION_REMOVE', { classificationKey: this.classification.key });
+        this.notificationsService.showSuccess('CLASSIFICATION_REMOVE', {
+          classificationKey: this.classification()!.key
+        });
         this.afterRequest();
       });
     this.location.go(this.location.path().replace(/(classifications).*/g, 'classifications'));

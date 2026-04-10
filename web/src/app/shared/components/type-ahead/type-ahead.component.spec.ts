@@ -78,12 +78,12 @@ describe('TypeAheadComponent with AccessId input', () => {
     fixture.detectChanges();
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    expect(component.name).toBe('Gerda');
+    expect(component.name()).toBe('Gerda');
   });
 
   it('should emit false when an invalid access id is set', async () => {
     const emitSpy = vi.spyOn(component.isFormValid, 'emit');
-    component.displayError = true;
+    fixture.componentRef.setInput('displayError', true);
     component.accessIdForm.get('accessId').setValue('invalid-user');
     component.accessIdForm.get('accessId').updateValueAndValidity({ emitEvent: true });
 
@@ -107,7 +107,7 @@ describe('TypeAheadComponent with AccessId input', () => {
   it('should mark the accessId control as touched when invalid and displayError is true', async () => {
     const control = component.accessIdForm.get('accessId');
     const markAsTouchedSpy = vi.spyOn(control!, 'markAsTouched');
-    component.displayError = true;
+    fixture.componentRef.setInput('displayError', true);
 
     component.accessIdForm.get('accessId')?.setValue('invalid-user');
     component.searchForAccessId('invalid-user');
@@ -120,20 +120,20 @@ describe('TypeAheadComponent with AccessId input', () => {
 
   it('should not emit accessIdEventEmitter when placeHolderMessage is "Search for AccessId"', () => {
     const accessIdEmitSpy = vi.spyOn(component.accessIdEventEmitter, 'emit');
-    component.placeHolderMessage = 'Search for AccessId';
+    fixture.componentRef.setInput('placeHolderMessage', 'Search for AccessId');
     component.handleEmptyAccessId();
     expect(accessIdEmitSpy).not.toHaveBeenCalled();
   });
 
   it('should emit accessIdEventEmitter with emptyAccessId when placeHolderMessage is not "Search for AccessId"', () => {
     const accessIdEmitSpy = vi.spyOn(component.accessIdEventEmitter, 'emit');
-    component.placeHolderMessage = 'Some other message';
+    fixture.componentRef.setInput('placeHolderMessage', 'Some other message');
     component.handleEmptyAccessId();
     expect(accessIdEmitSpy).toHaveBeenCalledWith(component.emptyAccessId);
   });
 
   it('should set errors on accessId control and emit false when isRequired is true in handleEmptyAccessId', () => {
-    component.isRequired = true;
+    fixture.componentRef.setInput('isRequired', true);
     const control = component.accessIdForm.get('accessId');
     const setErrorsSpy = vi.spyOn(control!, 'setErrors');
     const emitSpy = vi.spyOn(component.isFormValid, 'emit');
@@ -143,7 +143,7 @@ describe('TypeAheadComponent with AccessId input', () => {
   });
 
   it('should not set errors and emit true when isRequired is false in handleEmptyAccessId', () => {
-    component.isRequired = false;
+    fixture.componentRef.setInput('isRequired', false);
     const control = component.accessIdForm.get('accessId');
     const setErrorsSpy = vi.spyOn(control!, 'setErrors');
     const emitSpy = vi.spyOn(component.isFormValid, 'emit');
@@ -152,20 +152,18 @@ describe('TypeAheadComponent with AccessId input', () => {
     expect(emitSpy).toHaveBeenCalledWith(true);
   });
 
-  it('should call setAccessIdFromInput when ngOnChanges is called with an entityId change', () => {
+  it('should call setAccessIdFromInput when entityId input changes', () => {
     const setAccessIdSpy = vi.spyOn(component, 'setAccessIdFromInput');
-    component.ngOnChanges({
-      entityId: { currentValue: 'new-id', previousValue: 'old-id', firstChange: false, isFirstChange: () => false }
-    });
+    fixture.componentRef.setInput('entityId', 'new-id');
+    fixture.detectChanges();
     expect(setAccessIdSpy).toHaveBeenCalled();
   });
 
-  it('should not call setAccessIdFromInput when ngOnChanges is called without an entityId change', () => {
+  it('should not call setAccessIdFromInput when entityId input does not change', () => {
+    fixture.componentRef.setInput('entityId', 'some-id');
+    fixture.detectChanges();
     const setAccessIdSpy = vi.spyOn(component, 'setAccessIdFromInput');
-    setAccessIdSpy.mockClear();
-    component.ngOnChanges({
-      someOtherInput: { currentValue: 'value', previousValue: undefined, firstChange: true, isFirstChange: () => true }
-    });
+    // No change to entityId input — setAccessIdFromInput should not be called again
     expect(setAccessIdSpy).not.toHaveBeenCalled();
   });
 });

@@ -18,20 +18,18 @@
 
 import {
   AfterViewChecked,
-  AfterViewInit,
   Component,
+  effect,
   ElementRef,
-  EventEmitter,
   inject,
-  Input,
-  OnChanges,
+  input,
   OnDestroy,
   OnInit,
-  Output,
-  QueryList,
-  SimpleChanges,
-  ViewChildren
+  output,
+  untracked,
+  viewChildren
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged, Observable, Subject } from 'rxjs';
 import { Actions, ofActionCompleted, Store } from '@ngxs/store';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -55,7 +53,6 @@ import {
   UpdateWorkbasketAccessItems
 } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
-import { WorkbasketComponent } from '../../models/workbasket-component';
 import { ButtonAction } from '../../models/button-action';
 import { AsyncPipe, NgClass, NgStyle } from '@angular/common';
 import { MatButton } from '@angular/material/button';
@@ -83,12 +80,12 @@ import { MatInput } from '@angular/material/input';
     ReactiveFormsModule
   ]
 })
-export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit, AfterViewChecked {
+export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterViewChecked {
   formsValidatorService = inject(FormsValidatorService);
-  @Input() workbasket: Workbasket;
-  @Input() expanded: boolean;
-  @Output() accessItemsValidityChanged = new EventEmitter<boolean>();
-  @ViewChildren('htmlInputElement') inputs: QueryList<ElementRef>;
+  workbasket = input<Workbasket>();
+  expanded = input<boolean>();
+  accessItemsValidityChanged = output<boolean>();
+  inputs = viewChildren<ElementRef>('htmlInputElement');
   selectedRows: number[] = [];
   workbasketClone: Workbasket;
   customFields$: Observable<CustomField[]>;
@@ -105,11 +102,9 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
   accessItemsCustomization$: Observable<AccessItemsCustomisation> = inject(Store).select(
     EngineConfigurationSelectors.accessItemsCustomisation
   );
-  accessItemsRepresentation$: Observable<WorkbasketAccessItemsRepresentation> = inject(Store).select(
-    WorkbasketSelectors.workbasketAccessItems
-  );
   buttonAction$: Observable<ButtonAction> = inject(Store).select(WorkbasketSelectors.buttonAction);
-  selectedComponent$: Observable<WorkbasketComponent> = inject(Store).select(WorkbasketSelectors.selectedComponent);
+  private selectedComponentSig = toSignal(inject(Store).select(WorkbasketSelectors.selectedComponent));
+  private accessItemsRepresentationSig = toSignal(inject(Store).select(WorkbasketSelectors.workbasketAccessItems));
   private requestInProgressService = inject(RequestInProgressService);
   private formBuilder = inject(FormBuilder);
   AccessItemsForm = this.formBuilder.group({
@@ -119,18 +114,75 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
   private store = inject(Store);
   private ngxsActions$ = inject(Actions);
 
+  constructor() {
+    effect(() => {
+      const wb = this.workbasket();
+      untracked(() => {
+        if (this.workbasketClone && wb && this.workbasketClone.workbasketId !== wb.workbasketId) {
+          this.init();
+        }
+        if (wb) this.workbasketClone = wb;
+      });
+    });
+
+    effect(() => {
+      const inputs = this.inputs();
+      untracked(() => {
+        if (inputs.length > 0 && this.added) {
+          inputs[inputs.length - 1].nativeElement.focus();
+        }
+      });
+    });
+
+    effect(() => {
+      const component = this.selectedComponentSig();
+      untracked(() => {
+        if (component === 1) {
+          this.isAccessItemsTabSelected = true;
+        }
+      });
+    });
+
+    effect(() => {
+      const accessItemsRepresentation = this.accessItemsRepresentationSig();
+      untracked(() => {
+        if (typeof accessItemsRepresentation !== 'undefined') {
+          let accessItems = [...accessItemsRepresentation.accessItems];
+          accessItems = this.sortAccessItems(accessItems, 'accessId');
+
+          this.accessItemsRepresentation = {
+            accessItems: accessItems,
+            _links: accessItemsRepresentation._links
+          };
+          this.setAccessItemsGroups(accessItems);
+
+          this.AccessItemsForm.get('accessItemsGroups')
+            ?.statusChanges.pipe(
+              startWith(null),
+              map(() => this.AccessItemsForm.get('accessItemsGroups')?.valid ?? false),
+              distinctUntilChanged(),
+              takeUntil(this.destroy$)
+            )
+            .subscribe((isValid) => {
+              this.accessItemsValidityChanged.emit(isValid);
+            });
+
+          this.accessItemsClone = this.cloneAccessItems();
+          this.accessItemsResetClone = this.cloneAccessItems();
+
+          this.isNewAccessItemsFromStore = true;
+        }
+      });
+    });
+  }
+
   get accessItemsGroups(): FormArray {
     return this.AccessItemsForm.get('accessItemsGroups') as FormArray;
   }
 
   ngOnInit() {
+    this.workbasketClone = this.workbasket();
     this.init();
-
-    this.selectedComponent$.pipe(takeUntil(this.destroy$)).subscribe((component) => {
-      if (component === 1) {
-        this.isAccessItemsTabSelected = true;
-      }
-    });
 
     this.customFields$ = this.accessItemsCustomization$.pipe(
       getCustomFields(customFieldCount),
@@ -152,35 +204,6 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
         }
       })
     );
-
-    this.accessItemsRepresentation$.pipe(takeUntil(this.destroy$)).subscribe((accessItemsRepresentation) => {
-      if (typeof accessItemsRepresentation !== 'undefined') {
-        let accessItems = [...accessItemsRepresentation.accessItems];
-        accessItems = this.sortAccessItems(accessItems, 'accessId');
-
-        this.accessItemsRepresentation = {
-          accessItems: accessItems,
-          _links: accessItemsRepresentation._links
-        };
-        this.setAccessItemsGroups(accessItems);
-
-        this.AccessItemsForm.get('accessItemsGroups')
-          ?.statusChanges.pipe(
-            startWith(null),
-            map(() => this.AccessItemsForm.get('accessItemsGroups')?.valid ?? false),
-            distinctUntilChanged(),
-            takeUntil(this.destroy$)
-          )
-          .subscribe((isValid) => {
-            this.accessItemsValidityChanged.emit(isValid);
-          });
-
-        this.accessItemsClone = this.cloneAccessItems();
-        this.accessItemsResetClone = this.cloneAccessItems();
-
-        this.isNewAccessItemsFromStore = true;
-      }
-    });
 
     // saving workbasket access items when workbasket already exists
     this.ngxsActions$.pipe(ofActionCompleted(UpdateWorkbasket), takeUntil(this.destroy$)).subscribe(() => {
@@ -210,14 +233,6 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
       });
   }
 
-  ngAfterViewInit() {
-    this.inputs.changes.pipe(takeUntil(this.destroy$)).subscribe((next) => {
-      if (typeof next.last !== 'undefined') {
-        if (this.added) next.last.nativeElement.focus();
-      }
-    });
-  }
-
   ngAfterViewChecked() {
     if (this.isNewAccessItemsFromStore || this.isAccessItemsTabSelected) {
       if (document.getElementById(`checkbox-0-00`)) {
@@ -233,19 +248,11 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
     }
   }
 
-  ngOnChanges(changes?: SimpleChanges) {
-    if (this.workbasketClone) {
-      if (this.workbasketClone.workbasketId != this.workbasket.workbasketId) {
-        this.init();
-      }
-    }
-    this.workbasketClone = this.workbasket;
-  }
-
   init() {
-    if (this.workbasket._links?.accessItems) {
+    const wb = this.workbasket();
+    if (wb?._links?.accessItems) {
       this.requestInProgressService.setRequestInProgress(true);
-      this.store.dispatch(new GetWorkbasketAccessItems(this.workbasket._links.accessItems.href)).subscribe(() => {
+      this.store.dispatch(new GetWorkbasketAccessItems(wb._links.accessItems.href)).subscribe(() => {
         this.requestInProgressService.setRequestInProgress(false);
       });
     }
@@ -305,7 +312,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnChanges, OnDest
 
   addAccessItem() {
     const workbasketAccessItems: WorkbasketAccessItems = this.createWorkbasketAccessItems();
-    workbasketAccessItems.workbasketId = this.workbasket.workbasketId;
+    workbasketAccessItems.workbasketId = this.workbasket()!.workbasketId;
     workbasketAccessItems.permRead = true;
     const newForm = this.formBuilder.group(workbasketAccessItems);
     newForm.controls.accessId.setValidators(Validators.required);

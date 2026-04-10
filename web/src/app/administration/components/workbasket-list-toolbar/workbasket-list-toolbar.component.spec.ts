@@ -64,7 +64,7 @@ describe('WorkbasketListToolbarComponent', () => {
     component = fixture.debugElement.componentInstance;
     store = TestBed.inject(Store);
     actions$ = TestBed.inject(Actions);
-    component.action = ACTION.COPY;
+    store.reset({ ...store.snapshot(), workbasket: { ...store.snapshot().workbasket, action: ACTION.COPY } });
     fixture.detectChanges();
   });
 
@@ -73,7 +73,7 @@ describe('WorkbasketListToolbarComponent', () => {
   });
 
   it('should dispatch CreateWorkbasket when addWorkbasket is called', async () => {
-    component.action = ACTION.COPY;
+    store.reset({ ...store.snapshot(), workbasket: { ...store.snapshot().workbasket, action: ACTION.COPY } });
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(CreateWorkbasket)).subscribe(() => (actionDispatched = true));
     component.addWorkbasket();
@@ -81,7 +81,7 @@ describe('WorkbasketListToolbarComponent', () => {
   });
 
   it('should not dispatch action in addWorkbasket when action is CREATE', async () => {
-    component.action = ACTION.CREATE;
+    store.reset({ ...store.snapshot(), workbasket: { ...store.snapshot().workbasket, action: ACTION.CREATE } });
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(CreateWorkbasket)).subscribe(() => (actionDispatched = true));
     component.addWorkbasket();
@@ -140,14 +140,14 @@ describe('WorkbasketListToolbarComponent', () => {
   it('should hide import-export component when workbasketListExpanded is false', () => {
     const lf = TestBed.createComponent(WorkbasketListToolbarComponent);
     const lc = lf.componentInstance;
-    lc.workbasketListExpanded = false;
+    lf.componentRef.setInput('workbasketListExpanded', false);
     lf.detectChanges();
     const importExport = lf.nativeElement.querySelector('kadai-administration-import-export');
     expect(importExport).toBeFalsy();
   });
 
   it('should show import-export component when workbasketListExpanded is true', () => {
-    component.workbasketListExpanded = true;
+    fixture.componentRef.setInput('workbasketListExpanded', true);
     fixture.detectChanges();
     const importExport = debugElement.nativeElement.querySelector('kadai-administration-import-export');
     expect(importExport).toBeTruthy();

@@ -16,17 +16,7 @@
  *
  */
 
-import {
-  Component,
-  EventEmitter,
-  inject,
-  Input,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  Output,
-  SimpleChanges
-} from '@angular/core';
+import { Component, effect, inject, input, OnDestroy, OnInit, output, signal, untracked } from '@angular/core';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
 import { debounceTime, distinctUntilChanged, Observable, Subject } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -61,22 +51,22 @@ import { MatOption } from '@angular/material/core';
     MatOption
   ]
 })
-export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
-  @Input() savedAccessId;
-  @Input() placeHolderMessage;
-  @Input() entityId;
-  @Input() isRequired = false;
-  @Input() isDisabled = false;
-  @Input() displayError = false;
-  @Output() accessIdEventEmitter = new EventEmitter<AccessId>();
-  @Output() isFormValid = new EventEmitter<boolean>();
+export class TypeAheadComponent implements OnInit, OnDestroy {
+  savedAccessId = input<any>();
+  placeHolderMessage = input<string>();
+  entityId = input<any>();
+  isRequired = input(false);
+  isDisabled = input(false);
+  displayError = input(false);
+  accessIdEventEmitter = output<AccessId>();
+  isFormValid = output<boolean>();
   globalCustomisation$: Observable<GlobalCustomisation> = inject(Store).select(
     EngineConfigurationSelectors.globalCustomisation
   );
   buttonAction$: Observable<ButtonAction> = inject(Store).select(WorkbasketSelectors.buttonAction);
-  name: string = '';
+  name = signal('');
   lastSavedAccessId: string = '';
-  filteredAccessIds: AccessId[] = [];
+  filteredAccessIds = signal<AccessId[]>([]);
   debounceTime: number = 750;
   destroy$ = new Subject<void>();
   accessIdForm = new FormGroup({
@@ -85,15 +75,15 @@ export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
   emptyAccessId: AccessId = { accessId: '', name: '' };
   private accessIdService = inject(AccessIdsService);
 
-  ngOnChanges(changes: SimpleChanges) {
-    // currently needed because when saving, workbasket-details components sends old workbasket which reverts changes in this component
-    if (changes.entityId) {
-      this.setAccessIdFromInput();
-    }
+  constructor() {
+    effect(() => {
+      this.entityId(); // track entityId changes
+      untracked(() => this.setAccessIdFromInput());
+    });
   }
 
   ngOnInit() {
-    if (this.isDisabled) {
+    if (this.isDisabled()) {
       this.accessIdForm.controls['accessId'].disable();
     }
 
@@ -125,17 +115,15 @@ export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
         }
         this.searchForAccessId(value);
       });
-
-    this.setAccessIdFromInput();
   }
 
   handleEmptyAccessId() {
-    this.name = '';
-    this.isFormValid.emit(!this.isRequired);
-    if (this.placeHolderMessage !== 'Search for AccessId') {
+    this.name.set('');
+    this.isFormValid.emit(!this.isRequired());
+    if (this.placeHolderMessage() !== 'Search for AccessId') {
       this.accessIdEventEmitter.emit(this.emptyAccessId);
     }
-    if (this.isRequired) {
+    if (this.isRequired()) {
       this.accessIdForm.controls['accessId'].setErrors({ incorrect: true });
     }
   }
@@ -145,14 +133,14 @@ export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
       .searchForAccessId(value)
       .pipe(take(1))
       .subscribe((accessIds) => {
-        this.filteredAccessIds = accessIds;
+        this.filteredAccessIds.set(accessIds);
         const accessId = accessIds.find((accessId) => accessId.accessId.toLowerCase() === value.toLowerCase());
 
         if (typeof accessId !== 'undefined') {
-          this.name = accessId?.name;
+          this.name.set(accessId?.name ?? '');
           this.isFormValid.emit(true);
           this.accessIdEventEmitter.emit(accessId);
-        } else if (this.displayError) {
+        } else if (this.displayError()) {
           this.isFormValid.emit(false);
           this.accessIdEventEmitter.emit(this.emptyAccessId);
           this.accessIdForm.controls['accessId'].setErrors({ incorrect: true });
@@ -162,11 +150,11 @@ export class TypeAheadComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   setAccessIdFromInput() {
-    const accessId = this.savedAccessId?.value;
-    const access = accessId?.accessId || accessId?.accessId == '' ? accessId.accessId : this.savedAccessId || '';
+    const accessId = this.savedAccessId()?.value;
+    const access = accessId?.accessId || accessId?.accessId == '' ? accessId.accessId : this.savedAccessId() || '';
     this.accessIdForm.controls['accessId'].setValue(access);
     this.lastSavedAccessId = access;
-    this.name = accessId?.accessName || '';
+    this.name.set(accessId?.accessName || '');
   }
 
   ngOnDestroy() {
