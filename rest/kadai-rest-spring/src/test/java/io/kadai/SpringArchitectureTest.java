@@ -36,6 +36,10 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 
 class SpringArchitectureTest {
   private static JavaClasses importedClasses;
@@ -52,6 +56,54 @@ class SpringArchitectureTest {
         classes().that().implement(QueryParameter.class).should(shouldOnlyHaveAnnotatedFields());
 
     myRule.check(importedClasses);
+  }
+
+  @Test
+  void should_ResideInRestPackage_When_AnnotatedWithRestController() {
+    classes()
+        .that()
+        .areAnnotatedWith(RestController.class)
+        .should()
+        .resideInAPackage("..rest..")
+        .check(importedClasses);
+  }
+
+  @Test
+  void should_BeAnnotatedWithRestController_When_ClassNameEndsWithController() {
+    classes()
+        .that()
+        .haveSimpleNameEndingWith("Controller")
+        .and()
+        .resideInAPackage("io.kadai..")
+        .should()
+        .beAnnotatedWith(RestController.class)
+        .check(importedClasses);
+  }
+
+  @Test
+  void should_BeASpringBean_When_ImplementingRepresentationModelAssembler() {
+    classes()
+        .that()
+        .implement(RepresentationModelAssembler.class)
+        .and()
+        .areNotInterfaces()
+        .should()
+        .beAnnotatedWith(Component.class)
+        .orShould()
+        .beAnnotatedWith(Controller.class)
+        .check(importedClasses);
+  }
+
+  @Test
+  void should_BeInterface_When_ClassNameEndsWithApi() {
+    classes()
+        .that()
+        .haveSimpleNameEndingWith("Api")
+        .and()
+        .resideInAPackage("io.kadai..")
+        .should()
+        .beInterfaces()
+        .check(importedClasses);
   }
 
   private ArchCondition<JavaClass> shouldOnlyHaveAnnotatedFields() {
