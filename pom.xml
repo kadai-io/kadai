@@ -79,7 +79,7 @@
     <version.slf4j-test>3.0.3</version.slf4j-test>
     <version.testcontainers>1.21.4</version.testcontainers>
     <version.jakarta.servlet>6.1.0</version.jakarta.servlet>
-    <version.spring-openapi>3.0.2</version.spring-openapi>
+    <version.spring-openapi>3.0.3</version.spring-openapi>
 
     <!-- AspectJ dependencies -->
     <version.aspectj-maven-plugin>1.16.0</version.aspectj-maven-plugin>
