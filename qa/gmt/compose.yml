@@ -1,0 +1,45 @@
+name: 'kadai'
+
+services:
+
+  app:
+    container_name: kadai-example-app
+    image: registry.gitlab.com/envite-consulting/sustainable-software-architecture/kadai/kadai-example-spring-boot:kadai-10.1.0
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://kadai-postgres:5432/postgres
+      LOGGING_LEVEL_IO_KADAI: INFO
+      GENERATESAMPLEDATA: false
+      THC_PATH: /actuator/health
+      THC_PORT: 9000 # management port
+    healthcheck:
+      test: "/workspace/health-check"
+      start_period: "30s"
+      start_interval: "1s"
+      interval: "24h" # only the start is relevant for us
+      timeout: "1s"
+
+  postgres:
+    container_name: kadai-postgres
+    # image: postgres:14.7 # original postgres container image
+    image: registry.gitlab.com/envite-consulting/sustainable-software-architecture/kadai/kadai-databases:postgres-14.7-100k-tasks
+    # image: registry.gitlab.com/envite-consulting/sustainable-software-architecture/kadai/kadai-databases:postgres-14.7-300k-tasks-schema-10.0.0 # 300 k tasks
+    # build: postgres_14 # with German localization
+    restart: always
+    shm_size: 128mb # default: 64 MB
+    ports:
+      - "5102:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    healthcheck:
+      test: "pg_isready -h localhost -p 5432 -U postgres"
+      start_period: "20s"
+      start_interval: "1s"
+      interval: "24h" # only the start is relevant for us
+      timeout: "1s"
