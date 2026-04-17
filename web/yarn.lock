@@ -317,9 +317,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/cdk@npm:21.2.6":
-  version: 21.2.6
-  resolution: "@angular/cdk@npm:21.2.6"
+"@angular/cdk@npm:21.2.7":
+  version: 21.2.7
+  resolution: "@angular/cdk@npm:21.2.7"
   dependencies:
     parse5: "npm:^8.0.0"
     tslib: "npm:^2.3.0"
@@ -328,7 +328,7 @@ __metadata:
     "@angular/core": ^21.0.0 || ^22.0.0
     "@angular/platform-browser": ^21.0.0 || ^22.0.0
     rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/ca74b69ee5d3baac51892b44fbd7cd03cb6e6925502ff22ed62c6388f665de9ffbdedfad8c215407c439a440f00124c3ae7915654dcbbf5b73cb66a0af0840d5
+  checksum: 10c0/cfaab5b06d50882652ce6b34a1ffd93bc4519999755eff3a55b8995a18ad0b61eef7b06f98026758f7ed20ac4b254910a4dd9b3467b73307833acc10ef46b56a
   languageName: node
   linkType: hard
 
@@ -439,19 +439,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/material@npm:21.2.6":
-  version: 21.2.6
-  resolution: "@angular/material@npm:21.2.6"
+"@angular/material@npm:21.2.7":
+  version: 21.2.7
+  resolution: "@angular/material@npm:21.2.7"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/cdk": 21.2.6
+    "@angular/cdk": 21.2.7
     "@angular/common": ^21.0.0 || ^22.0.0
     "@angular/core": ^21.0.0 || ^22.0.0
     "@angular/forms": ^21.0.0 || ^22.0.0
     "@angular/platform-browser": ^21.0.0 || ^22.0.0
     rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/1b0326c4c11ffa0aa8f95435ecc6deba1e076be760be0883d09537a3fc8c2f4dd172c05b83f58c4bb0b24065871dc9deac68241612f929fccdce91008f779adb
+  checksum: 10c0/9e336441e8f2e18ce8515ff8233336468434d7827b75a4ea245f03c44fb5777687ed6f0ebc772005593caa6d3881099a9e59154ed4705c7d033faf288ce85824
   languageName: node
   linkType: hard
 
@@ -6238,14 +6238,14 @@ __metadata:
     "@ali-hm/angular-tree-component": "npm:21.0.3"
     "@angular/animations": "npm:21.2.9"
     "@angular/build": "npm:21.2.7"
-    "@angular/cdk": "npm:21.2.6"
+    "@angular/cdk": "npm:21.2.7"
     "@angular/cli": "npm:21.2.7"
     "@angular/common": "npm:21.2.9"
     "@angular/compiler": "npm:21.2.9"
     "@angular/compiler-cli": "npm:21.2.9"
     "@angular/core": "npm:21.2.9"
     "@angular/forms": "npm:21.2.9"
-    "@angular/material": "npm:21.2.6"
+    "@angular/material": "npm:21.2.7"
     "@angular/platform-browser": "npm:21.2.9"
     "@angular/platform-browser-dynamic": "npm:21.2.9"
     "@angular/router": "npm:21.2.9"
