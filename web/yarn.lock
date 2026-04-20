@@ -159,15 +159,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ali-hm/angular-tree-component@npm:21.0.3":
-  version: 21.0.3
-  resolution: "@ali-hm/angular-tree-component@npm:21.0.3"
+"@ali-hm/angular-tree-component@npm:21.0.4":
+  version: 21.0.4
+  resolution: "@ali-hm/angular-tree-component@npm:21.0.4"
   dependencies:
     tslib: "npm:^2.5.0"
   peerDependencies:
     "@angular/common": ">=21.0"
     "@angular/core": ">=21.0"
-  checksum: 10c0/dc153759b3442e1a184fec34d967f79e973e6c5ec0c3a6bbeff92d3eb4525cad288898fb96457bfd359cbe5e412a8025256224cc82730bf1de2db05e15734ffb
+  checksum: 10c0/cccdfa5f5d51c27ea1a38b158a8bb9f4a33621794293b74d4ce5cc26a6b70acce67e9c095bcbe8fc8378d14cfa41c1692e50752b269915783806247df012d31a
   languageName: node
   linkType: hard
 
@@ -6235,7 +6235,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "kadai@workspace:."
   dependencies:
-    "@ali-hm/angular-tree-component": "npm:21.0.3"
+    "@ali-hm/angular-tree-component": "npm:21.0.4"
     "@angular/animations": "npm:21.2.9"
     "@angular/build": "npm:21.2.7"
     "@angular/cdk": "npm:21.2.7"

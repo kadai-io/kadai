@@ -21,7 +21,7 @@
   },
   "private": true,
   "dependencies": {
-    "@ali-hm/angular-tree-component": "21.0.3",
+    "@ali-hm/angular-tree-component": "21.0.4",
     "@angular/animations": "21.2.9",
     "@angular/cdk": "21.2.7",
     "@angular/common": "21.2.9",
