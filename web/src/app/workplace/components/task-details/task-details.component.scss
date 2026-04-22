@@ -54,8 +54,8 @@
   }
 
   &__button--primary {
-    background-color: colors.$aquamarine;
-    color: white;
+    background-color: colors.$primary;
+    color: colors.$white;
     margin-right: 4px;
     min-width: 1%;
   }
@@ -63,15 +63,15 @@
   &__button--secondary {
     margin-right: 4px;
     min-width: 1%;
-    color: #555;
+    color: colors.$text-muted;
   }
 
   &__icon--aquamarine {
-    color: colors.$aquamarine;
+    color: colors.$primary;
   }
 
   &__icon--red {
-    color: colors.$invalid;
+    color: colors.$danger;
   }
 
   &__task-name {

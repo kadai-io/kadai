@@ -16,15 +16,37 @@
  *
  */
 
-$blue-green: #11c584;
-$blue: #2e9eca;
-$green: #246972;
-$dark-green: #175263;
-$grey: grey;
-$light-grey: #f5f5f5;
-$brown: #f0ad4e;
-$invalid: #d82626;
-$aquamarine: #22a39f;
-$palette-blue: #36bcee;
-$palette-green: #5fbca1;
-$transparent-grey: rgba(192, 192, 192, 0.65);
+@use 'sass:color';
+
+$primary: #0066b3;
+$secondary: #ff6600;
+$success: #28a745;
+$info: #17a2b8;
+$warning: #ffc107;
+$danger: #dc3545;
+$light: #f8f9fa;
+$dark: #343a40;
+$white: #fff;
+
+$text-primary: $dark;
+$text-muted: color.mix($dark, $white, 72%);
+$border-subtle: color.mix($dark, $white, 14%);
+$border-strong: color.mix($dark, $white, 22%);
+$surface-hover: color.mix($primary, $white, 6%);
+$surface-selected: color.mix($primary, $light, 14%);
+$surface-warning: color.mix($warning, $light, 16%);
+$surface-danger: color.mix($danger, $light, 12%);
+$shadow-color: color.change($dark, $alpha: 0.25);
+$transparent-grey: color.change($dark, $alpha: 0.18);
+
+$blue-green: $info;
+$blue: $primary;
+$green: $primary;
+$dark-green: $dark;
+$grey: color.mix($dark, $white, 45%);
+$light-grey: $light;
+$brown: $warning;
+$invalid: $danger;
+$aquamarine: $primary;
+$palette-blue: $primary;
+$palette-green: $success;

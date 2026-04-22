@@ -41,8 +41,8 @@
   }
 
   &__add-button {
-    background-color: colors.$aquamarine;
-    color: white;
+    background-color: colors.$primary;
+    color: colors.$white;
     height: 36px;
   }
 
@@ -56,7 +56,7 @@
 .filter {
   &__filter-button {
     padding: 0 5px;
-    color: #555;
+    color: colors.$text-muted;
     height: 36px;
   }
 

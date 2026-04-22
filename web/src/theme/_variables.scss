@@ -22,6 +22,6 @@
   display: block;
   width: $width;
   height: $height;
-  background-image: linear-gradient(to $direction, colors.$palette-blue 30%, colors.$palette-green 50%);
+  background-image: linear-gradient(to $direction, colors.$primary 30%, colors.$secondary 100%);
   content: ' ';
 }

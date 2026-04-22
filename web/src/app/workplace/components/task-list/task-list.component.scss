@@ -35,13 +35,13 @@
     border-radius: 50%;
     text-align: center;
     margin-right: 16px;
-    color: white;
-    background-color: colors.$green;
+    color: colors.$white;
+    background-color: colors.$primary;
   }
 
   &__task-priority-badge_selected {
-    color: colors.$green;
-    background-color: white;
+    color: colors.$primary;
+    background-color: colors.$white;
   }
 }
 
@@ -58,9 +58,9 @@ p {
 }
 
 .mdc-list-item--selected {
-  background-color: colors.$green !important;
+  background-color: colors.$primary !important;
 }
 
 .mdc-list-item--selected * .task-list__task-info {
-  color: white;
+  color: colors.$white;
 }

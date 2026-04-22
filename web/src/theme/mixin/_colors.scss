@@ -20,13 +20,13 @@
 
 @mixin colors {
   &-red {
-    background-color: colors.$invalid;
+    background-color: colors.$danger;
   }
   &-green {
-    background-color: colors.$palette-green;
+    background-color: colors.$success;
   }
   &-orange {
-    background-color: colors.$brown;
+    background-color: colors.$secondary;
   }
 }
 

@@ -25,25 +25,25 @@
 }
 
 .active {
-  border-left: 5px solid colors.$aquamarine;
+  border-left: 5px solid colors.$secondary;
 }
 
 .active__sub {
-  border-left: 5px solid colors.$aquamarine;
+  border-left: 5px solid colors.$secondary;
 }
 
 :host ::ng-deep .navlist__item.active__sub * .mdc-list-item__primary-text {
-  color: colors.$aquamarine;
+  color: colors.$secondary;
 }
 
 :host ::ng-deep .navlist__item.active * .mdc-list-item__primary-text {
-  color: colors.$aquamarine;
+  color: colors.$secondary;
 }
 
 :host ::ng-deep .navlist * .mdc-list-item__primary-text {
-  color: #ddd;
+  color: colors.$light;
 }
 
 ::ng-deep .mat-drawer-container {
-  background-color: white;
+  background-color: colors.$white;
 }

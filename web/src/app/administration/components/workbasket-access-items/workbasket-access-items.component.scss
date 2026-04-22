@@ -55,7 +55,7 @@
       left: 40px;
       height: 100%;
       transform: skew(-45deg, 0deg);
-      border-right: 1px solid #dee2e6;
+      border-right: 1px solid colors.$border-subtle;
     }
 
     .rotated-th span {
@@ -76,11 +76,11 @@
     & td {
       min-width: 40px;
       vertical-align: center;
-      border: 1px solid #dee2e6;
+      border: 1px solid colors.$border-subtle;
     }
 
     & tr:first-child > td {
-      border-top: 2px solid #dddddd;
+      border-top: 2px solid colors.$border-subtle;
     }
 
     & td > input[type='checkbox'] {
@@ -97,15 +97,15 @@
   }
 
   &__buttons-add-access {
-    color: white;
+    color: colors.$white;
     border: none;
-    background: colors.$aquamarine;
+    background: colors.$primary;
     margin: 10px 3px 0 6px;
     outline: none;
   }
 
   &__buttons-delete-access {
-    color: red;
+    color: colors.$danger;
     margin: 10px 3px 0 6px;
     outline: none;
   }
@@ -139,7 +139,7 @@
 
 .required-header:after {
   content: ' *';
-  color: red;
+  color: colors.$danger;
 }
 
 ::ng-deep .workbasket-access-items__typeahead .type-ahead__form-field .mat-mdc-form-field-infix {

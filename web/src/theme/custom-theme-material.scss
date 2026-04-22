@@ -17,21 +17,65 @@
  */
 
 @use '@angular/material' as mat;
+@use 'sass:color';
+@use 'sass:map';
+@use 'colors';
+
+@function create-palette($base-color, $default-contrast: colors.$white) {
+  $palette: (
+    50: color.mix(colors.$white, $base-color, 92%),
+    100: color.mix(colors.$white, $base-color, 84%),
+    200: color.mix(colors.$white, $base-color, 70%),
+    300: color.mix(colors.$white, $base-color, 56%),
+    400: color.mix(colors.$white, $base-color, 34%),
+    500: $base-color,
+    600: color.scale($base-color, $lightness: -6%),
+    700: color.scale($base-color, $lightness: -12%),
+    800: color.scale($base-color, $lightness: -18%),
+    900: color.scale($base-color, $lightness: -24%),
+    A100: color.mix(colors.$white, $base-color, 68%),
+    A200: color.mix(colors.$white, $base-color, 44%),
+    A400: color.mix(colors.$white, $base-color, 18%),
+    A700: color.scale($base-color, $lightness: -20%)
+  );
+  $contrast: (
+    50: colors.$dark,
+    100: colors.$dark,
+    200: colors.$dark,
+    300: colors.$dark,
+    400: colors.$dark,
+    500: $default-contrast,
+    600: $default-contrast,
+    700: colors.$white,
+    800: colors.$white,
+    900: colors.$white,
+    A100: colors.$dark,
+    A200: colors.$dark,
+    A400: $default-contrast,
+    A700: colors.$white
+  );
+
+  @return map.merge($palette, (contrast: $contrast));
+}
+
+$kadai-primary-palette: create-palette(colors.$primary);
+$kadai-secondary-palette: create-palette(colors.$secondary, colors.$dark);
+$kadai-danger-palette: create-palette(colors.$danger);
+
+$kadai-theme: mat.m2-define-light-theme(
+  (
+    color: (
+      primary: mat.m2-define-palette($kadai-primary-palette, 500, 200, 700),
+      accent: mat.m2-define-palette($kadai-secondary-palette, 500, 200, 700),
+      warn: mat.m2-define-palette($kadai-danger-palette, 500)
+    ),
+    typography: mat.m2-define-typography-config(),
+    density: 0
+  )
+);
 
 @include mat.all-component-typographies();
 @include mat.elevation-classes();
 @include mat.app-background();
+@include mat.all-component-themes($kadai-theme);
 
-@include mat.all-component-themes(
-  mat.m2-define-light-theme(
-    (
-      color: (
-        primary: mat.m2-define-palette(mat.$m2-blue-grey-palette),
-        accent: mat.m2-define-palette(mat.$m2-teal-palette, 500, 900, A100),
-        warn: mat.m2-define-palette(mat.$m2-red-palette, 600)
-      ),
-      typography: mat.m2-define-typography-config(),
-      density: 0
-    )
-  )
-);

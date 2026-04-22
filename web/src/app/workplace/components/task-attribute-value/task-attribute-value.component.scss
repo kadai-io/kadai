@@ -22,8 +22,8 @@
   line-height: 1.5;
 
   &__button--primary {
-    background-color: colors.$aquamarine;
-    color: white;
+    background-color: colors.$primary;
+    color: colors.$white;
     margin-top: 16px;
   }
 
@@ -56,11 +56,11 @@
   }
 
   &__background-grey {
-    background-color: colors.$light-grey;
+    background-color: colors.$light;
   }
 
   &__background-white {
-    background-color: white;
+    background-color: colors.$white;
   }
 
   &__mat-icon {

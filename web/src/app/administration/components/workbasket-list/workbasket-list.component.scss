@@ -73,9 +73,9 @@ p {
 }
 
 .mdc-list-item--selected {
-  background-color: colors.$green !important;
+  background-color: colors.$primary !important;
 }
 
 .mdc-list-item--selected * .workbasket-list__list-item--info {
-  color: white;
+  color: colors.$white;
 }

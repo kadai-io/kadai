@@ -44,8 +44,8 @@
   }
 
   &__search-button {
-    background: colors.$aquamarine;
-    color: white;
+    background: colors.$primary;
+    color: colors.$white;
     margin-left: 4px;
   }
 
@@ -63,6 +63,10 @@
 
   &__mat-icon {
     margin-left: 8px;
+
+    &--neutral {
+      color: colors.$text-muted;
+    }
   }
 
   &__input-field-left {

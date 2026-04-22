@@ -29,12 +29,12 @@
   }
 
   &__button-icon {
-    color: #555;
+    color: colors.$text-muted;
   }
 
   &__lists {
     padding: 0 16px 16px 16px;
-    background-color: colors.$light-grey;
+    background-color: colors.$light;
 
     &--side {
       display: flex;

@@ -23,8 +23,8 @@
   flex-direction: column;
 
   &__button--primary {
-    background: colors.$aquamarine;
-    color: white;
+    background: colors.$primary;
+    color: colors.$white;
 
     position: relative;
     top: 30px;

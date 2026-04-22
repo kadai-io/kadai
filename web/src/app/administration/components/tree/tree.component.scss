@@ -16,8 +16,10 @@
  *
  */
 
+@use 'colors';
+
 .tree__svg-icon {
   vertical-align: text-top;
   padding-right: 4px;
-  fill: #555;
+  fill: colors.$text-muted;
 }

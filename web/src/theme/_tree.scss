@@ -38,7 +38,7 @@ tree-node-expander {
     top: 2px;
     @extend .blue;
     background: white none;
-    color: colors.$blue-green;
+    color: colors.$info;
     padding-left: 3px;
   }
 }
@@ -87,10 +87,10 @@ tree-node-expander .toggle-children-wrapper-expanded {
 .node-content-wrapper-active,
 .node-content-wrapper.node-content-wrapper-active:hover,
 .node-content-wrapper-active.node-content-wrapper-focused {
-  background-color: colors.$blue;
+  background-color: colors.$primary;
 
   & > tree-node-content {
-    color: white;
+    color: colors.$white;
 
     & > span > svg-icon {
       @extend .white;
@@ -100,8 +100,8 @@ tree-node-expander .toggle-children-wrapper-expanded {
 
 /* START Children branch lines*/
 .node-content-wrapper::before {
-  border-bottom: 1px dotted colors.$blue-green;
-  border-left: 1px dotted colors.$blue-green;
+  border-bottom: 1px dotted colors.$info;
+  border-left: 1px dotted colors.$info;
   height: 28px;
   top: -17px;
   width: 20px;
@@ -117,7 +117,7 @@ tree-node-expander .toggle-children-wrapper-expanded {
 }
 
 .tree-children::after {
-  border-left: 1px dotted colors.$blue-green;
+  border-left: 1px dotted colors.$info;
 
   height: 100%;
   top: -15px;

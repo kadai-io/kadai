@@ -23,11 +23,11 @@ typeahead-container > ul.dropdown-menu {
 
   & > li.active {
     & > a {
-      background-color: colors.$blue;
+      background-color: colors.$primary;
     }
 
     & > a:hover {
-      background-color: colors.$blue;
+      background-color: colors.$primary;
     }
   }
 }

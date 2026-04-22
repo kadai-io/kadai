@@ -22,6 +22,18 @@
   font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
+:root {
+  --kadai-primary: #{colors.$primary};
+  --kadai-secondary: #{colors.$secondary};
+  --kadai-success: #{colors.$success};
+  --kadai-info: #{colors.$info};
+  --kadai-warning: #{colors.$warning};
+  --kadai-danger: #{colors.$danger};
+  --kadai-light: #{colors.$light};
+  --kadai-dark: #{colors.$dark};
+  --kadai-white: #{colors.$white};
+}
+
 .placeholder img {
   display: inline-block;
   border-radius: 50%;
@@ -82,83 +94,77 @@
 /*
     Colors
 */
-.white {
-  color: white;
+.white,
+.light {
+  color: colors.$white;
 
   & svg {
-    fill: white;
+    fill: colors.$white;
   }
 }
 
-.blue {
-  color: colors.$blue;
-
-  & svg {
-    fill: colors.$blue;
-  }
-}
-
-.blue-green {
-  color: colors.$blue-green;
-
-  & svg {
-    fill: colors.$blue-green;
-  }
-}
-
-.green {
-  color: colors.$green;
-
-  & svg {
-    fill: colors.$green;
-  }
-}
-
-.dark-green {
-  color: colors.$dark-green;
-
-  & svg {
-    fill: colors.$dark-green;
-  }
-}
-
-.grey {
-  color: colors.$grey;
-
-  & svg {
-    fill: colors.$grey;
-  }
-}
-
-.brown {
-  color: colors.$brown;
-
-  & svg {
-    fill: colors.$brown;
-  }
-}
-
-.red {
-  color: colors.$invalid;
-
-  & svg {
-    fill: colors.$invalid;
-  }
-}
-
-.green-blue {
-  color: colors.$blue-green;
-
-  & svg {
-    fill: colors.$blue-green;
-  }
-}
-
+.primary,
+.blue,
 .aquamarine {
-  color: colors.$aquamarine;
+  color: colors.$primary;
 
   & svg {
-    fill: colors.$aquamarine;
+    fill: colors.$primary;
+  }
+}
+
+.secondary {
+  color: colors.$secondary;
+
+  & svg {
+    fill: colors.$secondary;
+  }
+}
+
+.success,
+.green {
+  color: colors.$success;
+
+  & svg {
+    fill: colors.$success;
+  }
+}
+
+.info,
+.blue-green,
+.green-blue {
+  color: colors.$info;
+
+  & svg {
+    fill: colors.$info;
+  }
+}
+
+.warning,
+.brown {
+  color: colors.$warning;
+
+  & svg {
+    fill: colors.$warning;
+  }
+}
+
+.danger,
+.red {
+  color: colors.$danger;
+
+  & svg {
+    fill: colors.$danger;
+  }
+}
+
+.dark,
+.dark-green,
+.grey {
+  color: colors.$text-muted;
+
+  & svg {
+    fill: colors.$text-muted;
   }
 }
 
@@ -173,15 +179,15 @@ svg-icon {
 }
 
 .panel-default > .panel-heading .badge.warning {
-  background-color: colors.$brown;
+  background-color: colors.$warning;
 }
 
 .badge.priority {
-  background-color: #e1e1e1;
+  background-color: colors.$surface-hover;
 }
 
 div.error {
-  color: colors.$invalid;
+  color: colors.$danger;
 }
 
 /*
@@ -218,13 +224,13 @@ div.error {
 
 .selected {
   z-index: 2;
-  background-color: #f5f5f5;
-  border-color: #f5f5f5;
+  background-color: colors.$surface-selected;
+  border-color: colors.$surface-selected;
 }
 
 .form-group.required .control-label:after {
   content: ' *';
-  color: colors.$invalid;
+  color: colors.$danger;
 }
 
 .user-select {
@@ -247,6 +253,8 @@ div.error {
 
 body {
   overflow-y: hidden;
+  background-color: colors.$light;
+  color: colors.$text-primary;
 }
 
 .table-center > tbody > tr > td {
@@ -399,35 +407,35 @@ kadai-monitor-classification-report,
 kadai-administration-access-items-management {
   & .panel {
     & > .panel-heading {
-      border-left: 1px solid #ddd;
-      border-right: 1px solid #ddd;
+      border-left: 1px solid colors.$border-subtle;
+      border-right: 1px solid colors.$border-subtle;
     }
   }
 }
 
 li.list-group-item.active:hover {
-  color: #fff;
-  background-color: colors.$green;
-  border-color: colors.$green;
+  color: colors.$white;
+  background-color: colors.$primary;
+  border-color: colors.$primary;
 }
 
 .list-group-item.active {
-  background-color: colors.$green;
+  background-color: colors.$primary;
 }
 
 li.list-group-item:hover {
-  color: #555;
+  color: colors.$text-primary;
   text-decoration: none;
-  background-color: #f5f5f5;
+  background-color: colors.$surface-hover;
 }
 
 .vertical-right-divider {
-  border-right: 1px solid #ccc;
+  border-right: 1px solid colors.$border-strong;
   height: calc(100vh - 55px);
 }
 
 .horizontal-bottom-divider {
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid colors.$border-strong;
 }
 
 .center-block > span.empty-icon,
@@ -435,8 +443,8 @@ li.list-group-item:hover {
   display: block;
   width: 150px;
   height: 150px;
-  fill: grey;
-  color: grey;
+  fill: colors.$grey;
+  color: colors.$grey;
   margin: 20px auto;
   font-size: 100px;
 }
@@ -488,7 +496,7 @@ li.list-group-item:hover {
   bottom: 0;
   top: 0;
   z-index: 990;
-  background-color: rgba(180, 180, 180, 0.7);
+  background-color: colors.$transparent-grey;
   opacity: 0.8;
 }
 
@@ -499,20 +507,20 @@ li.list-group-item:hover {
   bottom: 0;
   top: 0;
   z-index: 2000;
-  background-color: white;
+  background-color: colors.$white;
   opacity: 0.8;
 }
 
 .background-darkgreen {
-  background-color: colors.$dark-green;
+  background-color: colors.$dark;
 }
 
 .background-bluegreen {
-  background-color: colors.$blue-green;
+  background-color: colors.$primary;
 }
 
 .background-white {
-  background-color: white;
+  background-color: colors.$white;
 }
 
 .node-content-wrapper {
@@ -531,7 +539,7 @@ li.list-group-item:hover {
 }
 
 .mat-mdc-select-value-text {
-  color: #4a5568 !important;
+  color: colors.$text-muted !important;
 }
 
 .hot-toast-icon {

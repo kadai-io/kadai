@@ -26,7 +26,7 @@ table {
 }
 
 ::ng-deep .mat-mdc-header-cell {
-  color: black;
+  color: colors.$dark;
   font-weight: bold;
 }
 
@@ -38,11 +38,11 @@ th {
 }
 
 td {
-  border-top: 1px solid #dddddd;
+  border-top: 1px solid colors.$border-subtle;
 }
 
 tr:first-child > th {
-  border-bottom: 2px solid #dddddd;
+  border-bottom: 2px solid colors.$border-subtle;
   height: 40px;
 }
 

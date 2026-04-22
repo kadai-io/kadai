@@ -29,7 +29,7 @@
       <!-- CLEAR BUTTON -->
       <button (click)="clear()" class="filter__undo-button" mat-stroked-button
               matTooltip="Clear Workbasket filter">
-        <mat-icon class="filter__mat-icon" style="color: #555">undo</mat-icon>
+        <mat-icon class="filter__mat-icon filter__mat-icon--neutral">undo</mat-icon>
       </button>
       <!-- SEARCH BUTTON -->
       <button (click)="search()" class="filter__search-button" mat-stroked-button
@@ -77,7 +77,7 @@
                 matTooltip="Filter Workbaskets by type">
           Filter by type
           @if (filter.type.length == 0) {
-            <mat-icon style="color: #555">filter_list</mat-icon>
+            <mat-icon class="filter__mat-icon--neutral">filter_list</mat-icon>
           }
           @if (filter.type[0]) {
             <kadai-administration-icon-type
@@ -89,8 +89,7 @@
             <button (click)="selectType(type.key)"
                     mat-menu-item>
               @if (type.value === 'All') {
-                <span> <mat-icon class="filter__all-icon"
-                                 style="color: #555">filter_list</mat-icon> All </span>
+                <span> <mat-icon class="filter__all-icon filter__mat-icon--neutral">filter_list</mat-icon> All </span>
               }
               @if (type.value !== 'All') {
                 <kadai-administration-icon-type [text]="type.value"
@@ -102,7 +101,7 @@
         <!-- CLEAR BUTTON -->
         <button (click)="clear()" mat-stroked-button matTooltip="Clear Workbasket filter">
           Reset
-          <mat-icon style="color: #555">undo</mat-icon>
+          <mat-icon class="filter__mat-icon--neutral">undo</mat-icon>
         </button>
         <!-- SEARCH BUTTON -->
         <button (click)="search()" class="filter__search-button" mat-stroked-button

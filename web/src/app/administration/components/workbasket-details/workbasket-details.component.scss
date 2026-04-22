@@ -20,7 +20,7 @@
 
 .workbasket-details {
   &__toolbar {
-    background-color: white;
+    background-color: colors.$white;
     padding: 16px 36px 12px 24px;
   }
 
@@ -56,8 +56,8 @@
   }
 
   &__save-button {
-    background-color: colors.$aquamarine;
-    color: white;
+    background-color: colors.$primary;
+    color: colors.$white;
   }
 
   &__save-button[disabled] {
@@ -65,11 +65,11 @@
   }
 
   &__button-aquamarine {
-    color: colors.$aquamarine;
+    color: colors.$primary;
   }
 
   &__button-red {
-    color: colors.$invalid;
+    color: colors.$danger;
   }
 
   &__mat-icon {
@@ -82,9 +82,9 @@
     gap: 4px;
     margin-right: 5px;
     padding: 6px 8px;
-    background-color: #fcebea;
-    border: 1px solid #f5c6cb;
-    color: colors.$invalid;
+    background-color: colors.$surface-danger;
+    border: 1px solid colors.$danger;
+    color: colors.$danger;
     border-radius: 4px;
   }
 

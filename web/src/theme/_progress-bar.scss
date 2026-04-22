@@ -25,8 +25,8 @@
   width: 113px;
   height: 113px;
   border-radius: 50%;
-  border: 1px solid #fff;
-  background-color: #fff;
+  border: 1px solid colors.$white;
+  background-color: colors.$white;
   float: left;
   margin-right: 20px;
 }
@@ -37,7 +37,7 @@
   height: 100px;
   top: 5px;
   left: 5px;
-  background: #fff;
+  background: colors.$white;
   position: absolute;
 
   > h1 {
@@ -54,13 +54,13 @@ $half: math.round(math.div($loops, 2));
     @if $i < 50 {
       $nextdeg: 90deg + ($increment * $i);
       background-image:
-        linear-gradient(90deg, #fff 50%, transparent 50%, transparent),
-        linear-gradient($nextdeg, colors.$palette-green 51%, #fff 50%, #fff);
+        linear-gradient(90deg, colors.$white 50%, transparent 50%, transparent),
+        linear-gradient($nextdeg, colors.$success 51%, colors.$white 50%, colors.$white);
     } @else {
       $nextdeg: -90deg + ($increment * ($i - $half));
       background-image:
-        linear-gradient($nextdeg, colors.$palette-green 51%, transparent 50%, transparent),
-        linear-gradient(270deg, colors.$palette-green 50%, #fff 50%, #fff);
+        linear-gradient($nextdeg, colors.$success 51%, transparent 50%, transparent),
+        linear-gradient(270deg, colors.$success 50%, colors.$white 50%, colors.$white);
     }
   }
 }

@@ -45,14 +45,14 @@
   }
 
   &__button--primary {
-    background-color: colors.$aquamarine;
-    color: white;
+    background-color: colors.$primary;
+    color: colors.$white;
     margin-right: 4px;
   }
 
   &__button--secondary {
     top: 12px;
-    color: #555;
+    color: colors.$text-muted;
   }
 
   &__mat-icon {
@@ -61,7 +61,7 @@
 }
 
 ::ng-deep .task-list-toolbar * .mat-mdc-tab-labels {
-  background-color: colors.$light-grey;
+  background-color: colors.$light;
 }
 
 ::ng-deep .task-list-toolbar__filter-input .mat-mdc-text-field-wrapper {

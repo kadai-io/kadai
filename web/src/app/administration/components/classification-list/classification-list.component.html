@@ -62,7 +62,7 @@
         <mat-menu #menu="matMenu">
           <button (click)="selectCategory('')" class="classification-list__all-button"
                   mat-menu-item>
-            <span> <mat-icon class="classification-list__filter-all-icon" style="color: #555">filter_list</mat-icon> All </span>
+            <span> <mat-icon class="classification-list__filter-all-icon">filter_list</mat-icon> All </span>
           </button>
           @for (category of categories$ | async; track category) {
             <button (click)="selectCategory(category)"

@@ -16,13 +16,15 @@
  *
  */
 
+@use 'colors';
+
 .pagination {
   display: flex;
   max-width: 100%;
-  background-color: #fafafa;
+  background-color: colors.$light;
 
   &__mat-paginator {
-    background-color: #fafafa;
+    background-color: colors.$light;
     font-feature-settings: 'tnum';
     font-variant-numeric: tabular-nums;
 

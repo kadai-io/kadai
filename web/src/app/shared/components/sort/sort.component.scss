@@ -20,13 +20,13 @@
 
 .sort {
   &__selected-value {
-    color: colors.$aquamarine;
+    color: colors.$primary;
     font-weight: bold;
   }
 
   &__button {
     outline: none;
-    color: #555;
+    color: colors.$text-muted;
   }
 
   &__mat-icon {

@@ -25,7 +25,7 @@
 
 .table-striped .table-body .table-row:nth-of-type(odd),
 .table-body-striped .table-body:nth-of-type(odd) {
-  background-color: #f9f9f9;
+  background-color: colors.$surface-hover;
 }
 
 .table-caption {
@@ -38,11 +38,11 @@
 }
 
 .table-header > .table-row:last-child > .table-cell {
-  border-bottom: 2px solid #ddd;
+  border-bottom: 2px solid colors.$border-subtle;
 }
 
 .table-footer > .table-row:first-child > .table-cell {
-  border-top: 1px solid #ddd;
+  border-top: 1px solid colors.$border-subtle;
 }
 
 .table-footer > .table-row:last-of-type > .table-cell,
@@ -65,7 +65,7 @@
   min-width: 50px;
   vertical-align: middle;
   text-align: center;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid colors.$border-subtle;
   cursor: default;
 }
 
@@ -78,9 +78,9 @@
 }
 
 .table-cell--separator {
-  border-left: 2px solid #ddd;
-  border-right: 2px solid #ddd;
-  background-color: colors.$light-grey;
+  border-left: 2px solid colors.$border-subtle;
+  border-right: 2px solid colors.$border-subtle;
+  background-color: colors.$light;
 
   &.zoom-in {
     cursor: zoom-in;
@@ -94,9 +94,9 @@
 }
 
 .table-cell--border-right {
-  border-right: 2px solid #ddd;
+  border-right: 2px solid colors.$border-subtle;
 }
 
 .table-cell--border-left {
-  border-left: 2px solid #ddd;
+  border-left: 2px solid colors.$border-subtle;
 }

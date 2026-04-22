@@ -21,14 +21,14 @@
 .administration-overview {
   &__navbar-container {
     display: flex;
-    background-color: colors.$light-grey;
+    background-color: colors.$light;
     justify-content: space-between;
     align-items: flex-end;
   }
 
   &__navbar {
     position: relative;
-    background-color: colors.$light-grey;
+    background-color: colors.$light;
     flex-grow: 2;
   }
 
@@ -45,7 +45,7 @@
 }
 
 .mat-mdc-tab-link {
-  color: #1a202c !important;
+  color: colors.$dark !important;
 }
 
 .mdc-tab--active {

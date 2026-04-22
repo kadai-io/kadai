@@ -16,6 +16,8 @@
  *
  */
 
+@use 'colors';
+
 .report {
   margin-top: 20px;
 }
@@ -26,13 +28,13 @@
 
 .table-row--highlight,
 .table-row--hover:hover {
-  background-color: #f9f9f9;
+  background-color: colors.$surface-hover;
 }
 
 .table-row--highlight > .table-cell {
-  border-bottom: 2px solid #ddd;
+  border-bottom: 2px solid colors.$border-subtle;
 }
 
 .table-row--white {
-  background-color: white !important;
+  background-color: colors.$white !important;
 }

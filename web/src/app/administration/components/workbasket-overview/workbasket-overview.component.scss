@@ -16,6 +16,8 @@
  *
  */
 
+@use 'colors';
+
 .workbasket-overview {
   display: flex;
   width: 100%;
@@ -28,8 +30,8 @@
     width: 40px;
     height: 40px;
     border-radius: 999px;
-    border: 1px solid #cecece;
-    background-color: white;
+    border: 1px solid colors.$border-strong;
+    background-color: colors.$white;
     position: absolute;
     cursor: pointer;
     top: 50%;

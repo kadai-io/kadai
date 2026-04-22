@@ -16,6 +16,7 @@
  *
  */
 
+@use 'colors';
 @use 'variables';
 
 .big {
@@ -46,21 +47,21 @@
 
   & > .icon__wrap {
     border-radius: 50%;
-    border: solid 2px #22a39f;
+    border: solid 2px colors.$secondary;
     width: 72px;
     height: 72px;
     left: 35%;
     //overflow: hidden;
-    background-color: #175263;
+    background-color: colors.$dark;
     position: absolute;
-    -webkit-box-shadow: 0 3px 3px #416b6a;
-    -moz-box-shadow: 0 3px 3px #416b6a;
-    box-shadow: 0 3px 3px #416b6a;
+    -webkit-box-shadow: 0 3px 3px colors.$shadow-color;
+    -moz-box-shadow: 0 3px 3px colors.$shadow-color;
+    box-shadow: 0 3px 3px colors.$shadow-color;
 
     & > svg-icon {
       border-radius: 50%;
       overflow: hidden;
-      background-color: white;
+      background-color: colors.$white;
       position: absolute;
       margin: 7px -0px 0px 2px;
     }
@@ -74,9 +75,9 @@
   width: 100%;
   height: 2px;
   transform: translateY(33px);
-  -webkit-box-shadow: 0 3px 3px #416b6a;
-  -moz-box-shadow: 0 3px 3px #416b6a;
-  box-shadow: 0 3px 3px #416b6a;
+  -webkit-box-shadow: 0 3px 3px colors.$shadow-color;
+  -moz-box-shadow: 0 3px 3px colors.$shadow-color;
+  box-shadow: 0 3px 3px colors.$shadow-color;
 }
 
 .user-info_roles {
@@ -91,7 +92,7 @@ button.transparent {
   &:hover {
     border: none;
     background-color: transparent;
-    color: #22a39f;
+    color: colors.$secondary;
   }
 
   &:focus {

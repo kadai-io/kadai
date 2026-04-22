@@ -16,19 +16,21 @@
  *
  */
 
+@use 'colors';
+
 .theme-green .bs-datepicker-head {
-  background-color: #246972;
+  background-color: colors.$primary;
 }
 
 .theme-green .bs-datepicker-body table td span.selected,
 .theme-green .bs-datepicker-body table td.selected span,
 .theme-green .bs-datepicker-body table td span[class*='select-']:after,
 .theme-green .bs-datepicker-body table td[class*='select-'] span:after {
-  background-color: #246972;
+  background-color: colors.$primary;
 }
 
 .theme-green .bs-datepicker-body table td.week span {
-  color: #175263;
+  color: colors.$dark;
 }
 
 .bs-datepicker-container {

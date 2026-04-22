@@ -31,7 +31,7 @@
     z-index: 999;
     box-shadow: none;
     width: 350px;
-    background-color: colors.$dark-green;
+    background-color: colors.$dark;
 
     &__container {
       display: flex;
@@ -85,7 +85,7 @@
 
 .kadai-main__progress-bar {
   height: 8px;
-  background-color: colors.$light-grey;
+  background-color: colors.$light;
   margin-bottom: 2px;
 }
 

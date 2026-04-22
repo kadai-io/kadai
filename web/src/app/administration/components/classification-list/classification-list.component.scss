@@ -43,8 +43,8 @@
   }
 
   &__add-button {
-    background-color: colors.$aquamarine;
-    color: white;
+    background-color: colors.$primary;
+    color: colors.$white;
   }
 
   &__import-export {
@@ -61,21 +61,22 @@
   }
 
   &__icons {
-    fill: #555;
+    fill: colors.$text-muted;
   }
 
   &__filter-all-icon {
     margin-right: 0 !important;
+    color: colors.$text-muted;
   }
 
   &__categories {
-    fill: #555;
+    fill: colors.$text-muted;
     margin: 0;
     top: -2px;
   }
 
   &__filter-button {
-    color: #555;
+    color: colors.$text-muted;
     top: 3px;
     margin-right: 12px;
   }

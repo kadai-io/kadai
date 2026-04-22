@@ -38,13 +38,13 @@
   }
 
   &__button--primary {
-    background-color: colors.$aquamarine;
-    color: white;
+    background-color: colors.$primary;
+    color: colors.$white;
     margin: 4px;
   }
 
   &__button--secondary {
-    background-color: #fff;
+    background-color: colors.$white;
     margin: 4px;
   }
 
@@ -81,7 +81,7 @@
   }
 
   &__icon {
-    color: colors.$aquamarine;
+    color: colors.$primary;
   }
 }
 
