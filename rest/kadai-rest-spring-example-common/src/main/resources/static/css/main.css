@@ -1,45 +1,136 @@
-body, html {
+:root {
+    --kadai-primary: #0066b3;
+    --kadai-secondary: #ff6600;
+    --kadai-success: #28a745;
+    --kadai-info: #17a2b8;
+    --kadai-warning: #ffc107;
+    --kadai-danger: #dc3545;
+    --kadai-light: #f8f9fa;
+    --kadai-dark: #343a40;
+    --kadai-white: #fff;
+    --kadai-border: rgba(52, 58, 64, 0.14);
+    --kadai-shadow: rgba(52, 58, 64, 0.16);
+}
+
+html,
+body {
     height: 100%;
 }
 
-h1 {
-    margin-top: 20px;
-    color: #5fbca1;
+body.login-page {
+    margin: 0;
+    color: var(--kadai-dark);
+    background:
+        linear-gradient(135deg, rgba(0, 102, 179, 0.14), rgba(23, 162, 184, 0.08)),
+        var(--kadai-light);
 }
 
-body:before {
+body.login-page:before {
     display: block;
     width: 100%;
-    height: 3px;
-    background-image: linear-gradient(to right, #36bcee 30%, #5fbca1 50%);
-    content: ' ';
+    height: 4px;
+    background-image: linear-gradient(to right, var(--kadai-primary) 35%, var(--kadai-secondary) 100%);
+    content: '';
+}
+
+.login-page__container {
+    position: relative;
+}
+
+.login-card {
+    padding: 2.5rem 2.25rem;
+    background: var(--kadai-white);
+    border: 1px solid var(--kadai-border);
+    border-radius: 1rem;
+    box-shadow: 0 1rem 2.5rem var(--kadai-shadow);
+}
+
+.login-card__title {
+    margin: 1rem 0 0.5rem;
+    color: var(--kadai-primary);
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.login-card__subtitle {
+    margin-bottom: 2rem;
+    color: rgba(52, 58, 64, 0.75);
 }
 
 .logo {
-    margin-top: 20px;
-    width: 100px;
-    height: 100px;
+    width: 96px;
+    height: 96px;
 }
 
-div > form {
-    margin-top: 150px;
+.login-card__alert {
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
 }
 
-/*Override btn-info properties from bootstrap.css*/
-.btn-info {
-    background-color: #5fbca1;
-    border-color: #5fbca1;
+.login-card .alert-danger {
+    color: #7f1d1d;
+    background-color: rgba(220, 53, 69, 0.12);
+    border-color: rgba(220, 53, 69, 0.2);
 }
 
-/*Override btn-info properties from bootstrap.css*/
-.btn-info:hover {
-    background-color: #5d9e90;
-    border-color: #5d9e90
+.login-card .alert-info {
+    color: #0b5563;
+    background-color: rgba(23, 162, 184, 0.12);
+    border-color: rgba(23, 162, 184, 0.2);
+}
+
+.login-card__form-group {
+    margin-bottom: 1.25rem;
+}
+
+.login-card__label {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--kadai-dark);
+}
+
+.login-card__input {
+    height: 3rem;
+    border: 1px solid rgba(52, 58, 64, 0.18);
+    border-radius: 0.75rem;
+    padding: 0.75rem 0.9rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-card__input:focus {
+    border-color: rgba(0, 102, 179, 0.5);
+    box-shadow: 0 0 0 0.2rem rgba(0, 102, 179, 0.18);
+}
+
+.login-card__submit,
+.login-card__submit:focus,
+.login-card__submit:active {
+    height: 3rem;
+    border: none;
+    border-radius: 999px;
+    background-color: var(--kadai-primary);
+    color: var(--kadai-white);
+    font-weight: 600;
+    box-shadow: none;
+}
+
+.login-card__submit:hover {
+    background-color: #005999;
+    color: var(--kadai-white);
+}
+
+.login-card__submit:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 102, 179, 0.2);
 }
 
 @media screen and (max-width: 768px) {
-    div > form {
-        margin-top: 75px;
+    .login-card {
+        padding: 2rem 1.25rem;
+        border-radius: 0.875rem;
+    }
+
+    .login-card__title {
+        font-size: 1.75rem;
     }
 }
 

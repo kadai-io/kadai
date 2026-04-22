@@ -19,62 +19,66 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <link rel="icon" th:href="@{/img/logo.png}" type="image/x-icon">
     <title>Kadai login</title>
     <link rel="stylesheet" th:href="@{/css/bootstrap/4.1.3/bootstrap.min.css}" type="text/css"/>
     <link rel="stylesheet" th:href="@{/css/main.css}" type="text/css"/>
 </head>
-<body>
+<body class="login-page">
 
-<div class="container">
-    <h1 class="row justify-content-center">Welcome to KADAI</h1>
-    <div class="row justify-content-center">
-        <div>
-            <img alt="memorynotfound logo" class="logo" th:src="@{/img/logo.png}"/>
-        </div>
-    </div>
-    <div class="row justify-content-center align-items-center">
-        <div class="col-xs-12 col-md-6">
-            <form method="post" th:action="@{/login}">
-                <div th:if="${param.error}">
-                    <div class="alert alert-danger">
+<div class="container login-page__container">
+    <div class="row justify-content-center align-items-center min-vh-100 py-4">
+        <div class="col-12 col-md-9 col-lg-6 col-xl-5">
+            <section class="login-card">
+                <div class="text-center">
+                    <img alt="KADAI logo" class="logo" th:src="@{/img/logo.png}"/>
+                    <h1 class="login-card__title">Welcome to KADAI</h1>
+                    <p class="login-card__subtitle">Sign in to continue to your task management workspace.</p>
+                </div>
+
+                <form method="post" th:action="@{/login}">
+                    <div th:if="${param.error}">
+                        <div class="alert alert-danger login-card__alert" role="alert">
                         Invalid username or password.
-                    </div>
-                </div>
-                <div th:if="${param.logout}">
-                    <div class="alert alert-info">
-                        You have been logged out.
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="username">Username</label>:
-                    <input autofocus="autofocus"
-                           class="form-control"
-                           id="username"
-                           name="username"
-                           placeholder="Username"
-                           type="text">
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>:
-                    <input class="form-control"
-                           id="password"
-                           name="password"
-                           placeholder="Password"
-                           type="password">
-                </div>
-                <div class="form-group">
-                    <div class="row justify-content-center">
-                        <div class="col-sm-6 col-sm-offset-3">
-                            <input class="form-control btn btn-info"
-                                   id="login-submit"
-                                   name="login-submit"
-                                   type="submit"
-                                   value="Log In">
                         </div>
                     </div>
-                </div>
-            </form>
+                    <div th:if="${param.logout}">
+                        <div class="alert alert-info login-card__alert" role="alert">
+                        You have been logged out.
+                        </div>
+                    </div>
+                    <div class="form-group login-card__form-group">
+                        <label class="login-card__label" for="username">Username</label>
+                        <input autofocus="autofocus"
+                               class="form-control login-card__input"
+                               id="username"
+                               name="username"
+                               placeholder="Username"
+                               type="text">
+                    </div>
+                    <div class="form-group login-card__form-group">
+                        <label class="login-card__label" for="password">Password</label>
+                        <input class="form-control login-card__input"
+                               id="password"
+                               name="password"
+                               placeholder="Password"
+                               type="password">
+                    </div>
+                    <div class="form-group mb-0">
+                        <div class="row justify-content-center">
+                            <div class="col-12 col-sm-8 col-lg-7">
+                                <input class="form-control btn btn-primary login-card__submit"
+                                       id="login-submit"
+                                       name="login-submit"
+                                       type="submit"
+                                       value="Log In">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </section>
         </div>
     </div>
 </div>
