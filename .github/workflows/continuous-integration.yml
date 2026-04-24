@@ -840,7 +840,28 @@ jobs:
       - name: Install kadai
         run: ./mvnw -B install -DskipTests -Dcheckstyle.skip -Dmaven.javadoc.skip
       - name: Upload SonarQube analysis
-        run: ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} -DskipTests
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Collect all compiled main-class directories from this multi-module build.
+          # Sonar requires these for Java analysis, and the Maven scanner no longer
+          # accepts '**/target/classes' as a valid value (since sonar-maven-plugin 5.6.x).
+          BIN_DIRS="$(find . -type d -path "*/target/classes" \
+            -not -path "./**/node_modules/**" \
+            -print | sed 's|^\./||' | paste -sd, -)"
+
+          if [[ -z "${BIN_DIRS}" ]]; then
+            echo "ERROR: No */target/classes directories found. Ensure 'Install kadai' compiled the project."
+            exit 1
+          fi
+
+          echo "Using sonar.java.binaries=${BIN_DIRS}"
+
+          ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            -Dsonar.projectKey="${{ secrets.SONAR_PROJECT_KEY }}" \
+            -DskipTests \
+            -Dsonar.java.binaries="${BIN_DIRS}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
