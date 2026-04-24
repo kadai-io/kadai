@@ -47,7 +47,7 @@ describe('AdministrationOverviewComponent', () => {
         { provide: DomainService, useValue: domainServiceSpy },
         { provide: KadaiEngineService, useValue: kadaiEngineServiceSpy },
         provideHttpClientTesting(),
-        provideRouter([])
+        provideRouter([{ path: '**', children: [] }])
       ]
     }).compileComponents();
   });

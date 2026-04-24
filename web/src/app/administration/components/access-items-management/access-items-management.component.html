@@ -20,14 +20,12 @@
 
   <!-- SEARCH -->
   <div class="access-items__typeahead">
-    <kadai-shared-type-ahead
-      (accessIdEventEmitter)="onSelectAccessId($event)" placeHolderMessage="Search for AccessId">
-    </kadai-shared-type-ahead>
+    <kadai-shared-type-ahead (accessIdEventEmitter)="onSelectAccessId($event)" placeHolderMessage="Search for AccessId" />
   </div>
   @if (!accessItemsForm) {
     <div class="access-items__icon">
       <h3>Select an access id</h3>
-      <svg-icon class="empty-icon" src="./assets/icons/users.svg"></svg-icon>
+      <svg-icon class="empty-icon" src="./assets/icons/users.svg" />
     </div>
   }
 
@@ -133,8 +131,7 @@
                 <th class="align-left">
                   <kadai-shared-sort (performSorting)="sorting($event)"
                                      [defaultSortBy]="defaultSortBy"
-                                     [sortingFields]="sortingFields" menuPosition="left">
-                  </kadai-shared-sort>
+                                     [sortingFields]="sortingFields" menuPosition="left" />
                 </th>
                 <th>
                   <mat-form-field appearance="outline"
@@ -176,37 +173,37 @@
                     }
                     <td>
                       <mat-checkbox formControlName="permRead"
-                                    id="checkbox-{{index}}-0"></mat-checkbox>
+                                    id="checkbox-{{index}}-0" />
                     </td>
                     <td>
                       <mat-checkbox formControlName="permReadTasks"
-                                    id="checkbox-{{index}}-1"></mat-checkbox>
+                                    id="checkbox-{{index}}-1" />
                     </td>
                     <td>
                       <mat-checkbox formControlName="permOpen"
-                                    id="checkbox-{{index}}-2"></mat-checkbox>
+                                    id="checkbox-{{index}}-2" />
                     </td>
                     <td>
                       <mat-checkbox formControlName="permEditTasks"
-                                    id="checkbox-{{index}}-3"></mat-checkbox>
+                                    id="checkbox-{{index}}-3" />
                     </td>
                     <td>
                       <mat-checkbox formControlName="permAppend"
-                                    id="checkbox-{{index}}-4"></mat-checkbox>
+                                    id="checkbox-{{index}}-4" />
                     </td>
                     <td>
                       <mat-checkbox formControlName="permTransfer"
-                                    id="checkbox-{{index}}-5"></mat-checkbox>
+                                    id="checkbox-{{index}}-5" />
                     </td>
                     <td>
                       <mat-checkbox formControlName="permDistribute"
-                                    id="checkbox-{{index}}-6"></mat-checkbox>
+                                    id="checkbox-{{index}}-6" />
                     </td>
                     @for (customField of customFields$ | async; track customField; let customIndex = $index) {
                       @if (customField.visible) {
                         <td>
                           <mat-checkbox formControlName="permCustom{{customIndex + 1}}"
-                                        id="checkbox-{{index}}-{{customIndex + 7}}"></mat-checkbox>
+                                        id="checkbox-{{index}}-{{customIndex + 7}}" />
                         </td>
                       }
                     }

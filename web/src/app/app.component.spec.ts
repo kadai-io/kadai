@@ -134,7 +134,7 @@ describe('AppComponent', () => {
   });
 
   it('should set version from getVersion response', () => {
-    expect(component.version).toBe('1.0.0');
+    expect(component.version()).toBe('1.0.0');
   });
 
   it('should call orientationService.onResize when onResize is called', () => {
@@ -162,7 +162,7 @@ describe('AppComponent', () => {
   it('should show progress bar when requestInProgress is true', () => {
     const localFixture = TestBed.createComponent(AppComponent);
     const localComponent = localFixture.componentInstance;
-    localComponent.requestInProgress = true;
+    (localComponent as any).requestInProgress = () => true;
     localFixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
     const progressBar = localFixture.nativeElement.querySelector('mat-progress-bar');
@@ -172,7 +172,7 @@ describe('AppComponent', () => {
   it('should not show progress bar when requestInProgress is false', () => {
     const localFixture = TestBed.createComponent(AppComponent);
     const localComponent = localFixture.componentInstance;
-    localComponent.requestInProgress = false;
+    (localComponent as any).requestInProgress = () => false;
     localFixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
     const progressBar = localFixture.nativeElement.querySelector('mat-progress-bar');
@@ -181,7 +181,7 @@ describe('AppComponent', () => {
 
   it('should call toggleSidenav when menu button inside sidenav drawer is clicked', async () => {
     sidenavServiceMock.toggleSidenav.mockClear();
-    await component.sidenav.open();
+    await component.sidenav().open();
     fixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
     const menuButton = fixture.nativeElement.querySelector('.navbar_button-toggle');
@@ -194,7 +194,7 @@ describe('AppComponent', () => {
 
   it('should call logout when logout button inside sidenav drawer is clicked', async () => {
     kadaiEngineServiceMock.logout.mockClear();
-    await component.sidenav.open();
+    await component.sidenav().open();
     fixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
     const logoutButton = fixture.nativeElement.querySelector('[aria-controls="logout"]');

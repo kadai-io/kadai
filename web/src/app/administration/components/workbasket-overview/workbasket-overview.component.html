@@ -19,8 +19,7 @@
 <div class="workbasket-overview">
 
   <div #workbasketList class="workbasket-overview__list">
-    <kadai-administration-workbasket-list
-      [expanded]="expanded"></kadai-administration-workbasket-list>
+    <kadai-administration-workbasket-list [expanded]="expanded" />
   </div>
 
   <div class="vertical-right-divider">
@@ -36,16 +35,15 @@
     </span>
   </div>
 
-  @if (showDetail) {
+  @if (showDetail()) {
     <div class="workbasket-overview__details">
-      <kadai-administration-workbasket-details
-        [expanded]="expanded"></kadai-administration-workbasket-details>
+      <kadai-administration-workbasket-details [expanded]="expanded" />
     </div>
   } @else {
     <div class="workbasket-overview__empty-page">
       <div class="center-block no-detail">
         <h3 class="grey">Select a workbasket</h3>
-        <svg-icon class="img-responsive empty-icon" src="./assets/icons/wb-empty.svg"></svg-icon>
+        <svg-icon class="img-responsive empty-icon" src="./assets/icons/wb-empty.svg" />
       </div>
     </div>
   }

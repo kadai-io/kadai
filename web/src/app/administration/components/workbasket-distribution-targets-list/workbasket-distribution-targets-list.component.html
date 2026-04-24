@@ -18,7 +18,7 @@
 
 <div class="distribution-targets-list">
   <mat-toolbar>
-    <span class="distribution-targets-list__header" matTooltip="{{header}}">{{ header }}</span>
+    <span class="distribution-targets-list__header" matTooltip="{{header()}}">{{ header() }}</span>
 
     <!-- FILTER BUTTON -->
     <button (click)="changeToolbarState(!toolbarState)"
@@ -59,8 +59,8 @@
 
   <!-- FILTER COMPONENT -->
   @if (toolbarState) {
-    <kadai-shared-workbasket-filter [component]="component"
-                                    isExpanded="true"></kadai-shared-workbasket-filter>
+    <kadai-shared-workbasket-filter [component]="component()"
+                                    isExpanded="true" />
   }
 
   <!-- EMPTY LIST -->
@@ -68,13 +68,13 @@
     <div
       class="distribution-targets-list__empty-list">
       <!-- AVAILABLE SIDE -->
-      @if (side === 0) {
+      @if (side() === 0) {
         <div style="padding: 0 16px;">
           There are currently no Workbaskets for distribution
         </div>
       }
       <!-- SELECTED SIDE -->
-      @if (side === 1) {
+      @if (side() === 1) {
         <div style="padding: 0 16px;">
           There is currently no distributed Workbasket
         </div>
@@ -99,7 +99,7 @@
           <!-- ICON -->
           <div class="distribution-targets-list__item-icon">
             <kadai-administration-icon-type [type]="workbasket.type" size="large"
-                                            tooltip="true"></kadai-administration-icon-type>
+                                            tooltip="true" />
           </div>
 
           <!-- INFO -->
@@ -122,7 +122,7 @@
           }
         </div>
 
-        <mat-divider></mat-divider>
+        <mat-divider />
 
       </mat-list-option>
     </cdk-virtual-scroll-viewport>

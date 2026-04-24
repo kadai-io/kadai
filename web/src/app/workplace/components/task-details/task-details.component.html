@@ -85,29 +85,28 @@
           <div class="task-details__tab-wrapper">
             <kadai-task-information (formValid)="onSave()"
                                     [saveToggleTriggered]="toggleFormValidation"
-                                    [task]="task"></kadai-task-information>
+                                    [task]="task" />
           </div>
         </mat-tab>
         <mat-tab label="Status Details">
           <div class="task-details__tab-wrapper">
-            <kadai-task-status-details [task]="task"></kadai-task-status-details>
+            <kadai-task-status-details [task]="task" />
           </div>
         </mat-tab>
         <mat-tab label="Custom Fields">
           <div class="task-details__tab-wrapper">
-            <kadai-task-custom-fields [task]="task"></kadai-task-custom-fields>
+            <kadai-task-custom-fields [task]="task" />
           </div>
         </mat-tab>
         <mat-tab label="Custom Attributes">
           <div class="task-details__tab-wrapper">
-            <kadai-task-attribute-value
-              [attributes]="task.customAttributes"></kadai-task-attribute-value>
+            <kadai-task-attribute-value [attributes]="task.customAttributes" />
           </div>
         </mat-tab>
         <mat-tab label="Callback Information">
           <div class="task-details__tab-wrapper">
             <kadai-task-attribute-value [attributes]="task.callbackInfo"
-                                        [callbackInfo]="true"></kadai-task-attribute-value>
+                                        [callbackInfo]="true" />
           </div>
         </mat-tab>
       </mat-tab-group>

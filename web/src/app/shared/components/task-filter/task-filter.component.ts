@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ALL_STATES, TaskState } from '../../models/task-state';
 import { TaskQueryFilterParameter } from '../../models/task-query-filter-parameter';
 import { Actions, ofActionCompleted, Store } from '@ngxs/store';
@@ -39,7 +39,7 @@ import { MapValuesPipe } from '../../pipes/map-values.pipe';
   imports: [MatFormField, MatTooltip, MatLabel, MatInput, FormsModule, MatSelect, MatOption, MapValuesPipe]
 })
 export class TaskFilterComponent implements OnInit, OnDestroy {
-  filter: TaskQueryFilterParameter;
+  filter = signal<TaskQueryFilterParameter>(null);
   destroy$ = new Subject<void>();
   allStates: Map<TaskState, string> = ALL_STATES;
   private store = inject(Store);
@@ -47,11 +47,13 @@ export class TaskFilterComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.clear();
-    this.ngxsActions$.pipe(ofActionCompleted(ClearTaskFilter), takeUntil(this.destroy$)).subscribe(() => this.clear());
+    this.ngxsActions$.pipe(ofActionCompleted(ClearTaskFilter), takeUntil(this.destroy$)).subscribe(() => {
+      this.clear();
+    });
   }
 
   setStatus(state: TaskState) {
-    this.filter.state = state !== TaskState.ALL ? [state] : [];
+    this.filter.update((filter) => ({ ...filter, state: state !== TaskState.ALL ? [state] : [] }));
     this.updateState();
   }
 
@@ -59,15 +61,15 @@ export class TaskFilterComponent implements OnInit, OnDestroy {
   search() {}
 
   updateState() {
-    this.store.dispatch(new SetTaskFilter(this.filter));
+    this.store.dispatch(new SetTaskFilter(this.filter()));
   }
 
   clear() {
-    this.filter = {
+    this.filter.set({
       priority: [],
       'name-like': [],
       'owner-like': []
-    };
+    });
   }
 
   ngOnDestroy() {

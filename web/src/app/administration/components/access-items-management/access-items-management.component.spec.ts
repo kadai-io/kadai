@@ -20,7 +20,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { AccessItemsManagementComponent } from './access-items-management.component';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
-import { Component, DebugElement, Input } from '@angular/core';
+import { Component, DebugElement, input } from '@angular/core';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { AccessItemsManagementState } from '../../../shared/store/access-items-management-store/access-items-management.state';
@@ -40,7 +40,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
   standalone: true
 })
 class MockSvgIconComponent {
-  @Input() src: string;
+  src = input<string>();
 }
 
 const mockAccessItem = {

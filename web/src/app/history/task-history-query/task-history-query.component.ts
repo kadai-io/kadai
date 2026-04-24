@@ -16,7 +16,8 @@
  *
  */
 
-import { Component, inject, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, inject, signal, viewChild } from '@angular/core';
+import { outputToObservable } from '@angular/core/rxjs-interop';
 import { Direction, Sorting, TaskHistoryQuerySortParameter } from 'app/shared/models/sorting';
 import { TaskHistoryEventData } from '../../shared/models/task-history-event';
 import { TaskHistoryQueryService } from '../services/task-history-query/task-history-query.service';
@@ -63,8 +64,8 @@ import { DatePipe } from '@angular/common';
     DatePipe
   ]
 })
-export class TaskHistoryQueryComponent {
-  data: TaskHistoryEventData[] = [];
+export class TaskHistoryQueryComponent implements AfterViewInit {
+  data = signal<TaskHistoryEventData[]>([]);
   displayedColumns: Pair<string, TaskHistoryQuerySortParameter>[] = [
     {
       left: 'parentBusinessProcessId',
@@ -101,7 +102,7 @@ export class TaskHistoryQueryComponent {
     { left: 'oldData', right: undefined },
     { left: 'newData', right: undefined }
   ];
-  pageInformation: Page;
+  pageInformation = signal<Page>(undefined);
   pageParameter: QueryPagingParameter = {
     page: 1,
     'page-size': 9
@@ -111,18 +112,20 @@ export class TaskHistoryQueryComponent {
     'sort-by': TaskHistoryQuerySortParameter.CREATED,
     order: Direction.ASC
   };
-  @ViewChild(MatSort) sort: MatSort;
-  @ViewChild(PaginationComponent) pagination: PaginationComponent;
+  sort = viewChild.required<MatSort>(MatSort);
+  pagination = viewChild.required<PaginationComponent>(PaginationComponent);
   private taskHistoryQueryService = inject(TaskHistoryQueryService);
   private requestInProgressService = inject(RequestInProgressService);
 
   ngAfterViewInit() {
-    const sortChange$ = this.sort.sortChange.pipe(
+    const sortChange$ = this.sort().sortChange.pipe(
       tap((sort) => this.updateSortParameter(sort)),
       tap(() => (this.pageParameter.page = 1))
     );
 
-    const pageChange$ = this.pagination.changePage.pipe(tap((newPage) => (this.pageParameter.page = newPage)));
+    const pageChange$ = outputToObservable(this.pagination().changePage).pipe(
+      tap((newPage) => (this.pageParameter.page = newPage))
+    );
 
     merge(sortChange$, pageChange$)
       .pipe(
@@ -134,8 +137,8 @@ export class TaskHistoryQueryComponent {
         })
       )
       .subscribe((data) => {
-        this.data = data.taskHistoryEvents;
-        this.pageInformation = data.page;
+        this.data.set(data.taskHistoryEvents);
+        this.pageInformation.set(data.page);
         this.requestInProgressService.setRequestInProgress(false);
       });
   }

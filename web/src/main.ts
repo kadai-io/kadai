@@ -16,7 +16,13 @@
  *
  */
 
-import { enableProdMode, inject, LOCALE_ID, provideAppInitializer, provideZoneChangeDetection } from '@angular/core';
+import {
+  enableProdMode,
+  inject,
+  LOCALE_ID,
+  provideAppInitializer,
+  provideZonelessChangeDetection
+} from '@angular/core';
 import { environment } from 'environments/environment';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { StartupService } from 'app/shared/services/startup/startup.service';
@@ -126,7 +132,7 @@ bootstrapApplication(AppComponent, {
       maxAge: 25
     }),
     withNgxsRouterPlugin(),
-    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideZonelessChangeDetection(),
     provideAngularSvgIcon(),
     provideAppInitializer(() => {
       const startupService = inject(StartupService);

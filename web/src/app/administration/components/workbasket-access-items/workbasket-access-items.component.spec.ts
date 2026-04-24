@@ -62,7 +62,7 @@ describe('WorkbasketAccessItemsComponent', () => {
     component = fixture.componentInstance;
     store = TestBed.inject(Store);
     actions$ = TestBed.inject(Actions);
-    component.workbasket = { ...selectedWorkbasketMock };
+    fixture.componentRef.setInput('workbasket', { ...selectedWorkbasketMock });
     component.accessItemsRepresentation = workbasketAccessItemsMock;
     store.reset({
       ...store.snapshot(),
@@ -74,7 +74,7 @@ describe('WorkbasketAccessItemsComponent', () => {
   });
 
   afterEach(async () => {
-    component.workbasket = { ...selectedWorkbasketMock };
+    fixture.componentRef.setInput('workbasket', { ...selectedWorkbasketMock });
   });
 
   it('should create component', () => {
@@ -92,10 +92,11 @@ describe('WorkbasketAccessItemsComponent', () => {
   });
 
   it("should discard initializing when accessItems don't exist", () => {
-    component.workbasket = {
+    fixture.componentRef.setInput('workbasket', {
       ...selectedWorkbasketMock,
       _links: { ...selectedWorkbasketMock._links, accessItems: null }
-    };
+    });
+    fixture.detectChanges();
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(GetWorkbasketAccessItems)).subscribe(() => (actionDispatched = true));
     component.init();
@@ -104,7 +105,11 @@ describe('WorkbasketAccessItemsComponent', () => {
 
   it('should call access items sorting when access items are obtained from store', () => {
     const sortSpy = vi.spyOn(component, 'sortAccessItems');
-    component.ngOnInit();
+    store.reset({
+      ...store.snapshot(),
+      workbasket: { workbasketAccessItems: { ...workbasketAccessItemsMock } }
+    });
+    fixture.detectChanges();
     expect(sortSpy).toHaveBeenCalled();
   });
 
@@ -263,29 +268,30 @@ describe('WorkbasketAccessItemsComponent', () => {
     expect(component.isAccessItemsTabSelected).toBe(false);
   });
 
-  it('should call init when ngOnChanges is called and workbasketClone has a different workbasketId', () => {
+  it('should call init when workbasket input changes to a different workbasketId', () => {
     fixture.detectChanges();
     component.workbasketClone = { ...selectedWorkbasketMock, workbasketId: 'OLD-ID' };
-    component.workbasket = { ...selectedWorkbasketMock, workbasketId: 'NEW-ID' };
     const initSpy = vi.spyOn(component, 'init').mockImplementation(() => {});
-    component.ngOnChanges({});
+    fixture.componentRef.setInput('workbasket', { ...selectedWorkbasketMock, workbasketId: 'NEW-ID' });
+    fixture.detectChanges();
     expect(initSpy).toHaveBeenCalled();
   });
 
-  it('should not call init when ngOnChanges is called and workbasketClone has the same workbasketId', () => {
+  it('should not call init when workbasket input does not change workbasketId', () => {
     fixture.detectChanges();
     component.workbasketClone = { ...selectedWorkbasketMock };
-    component.workbasket = { ...selectedWorkbasketMock };
     const initSpy = vi.spyOn(component, 'init').mockImplementation(() => {});
-    component.ngOnChanges({});
+    fixture.componentRef.setInput('workbasket', { ...selectedWorkbasketMock });
+    fixture.detectChanges();
     expect(initSpy).not.toHaveBeenCalled();
   });
 
-  it('should not call init when ngOnChanges is called and workbasketClone is undefined', () => {
+  it('should not call init when workbasketClone is undefined', () => {
+    fixture.detectChanges();
     component.workbasketClone = undefined;
-    component.workbasket = { ...selectedWorkbasketMock };
     const initSpy = vi.spyOn(component, 'init').mockImplementation(() => {});
-    component.ngOnChanges({});
+    fixture.componentRef.setInput('workbasket', { ...selectedWorkbasketMock });
+    fixture.detectChanges();
     expect(initSpy).not.toHaveBeenCalled();
   });
 
@@ -340,7 +346,7 @@ describe('WorkbasketAccessItemsComponent', () => {
   });
 
   it('should not render the access items table when workbasket is null', () => {
-    component.workbasket = null;
+    fixture.componentRef.setInput('workbasket', null);
     vi.spyOn(component, 'init').mockImplementation(() => {});
     fixture.detectChanges();
     const wbInfo = debugElement.nativeElement.querySelector('#wb-information');
@@ -348,7 +354,7 @@ describe('WorkbasketAccessItemsComponent', () => {
   });
 
   it('should apply expanded width style when expanded is true', () => {
-    component.expanded = true;
+    fixture.componentRef.setInput('expanded', true);
     fixture.detectChanges();
     const container = debugElement.nativeElement.querySelector('.workbasket-access-items');
     expect(container).toBeTruthy();
@@ -356,7 +362,7 @@ describe('WorkbasketAccessItemsComponent', () => {
   });
 
   it('should apply collapsed width style when expanded is false', () => {
-    component.expanded = false;
+    fixture.componentRef.setInput('expanded', false);
     fixture.detectChanges();
     const container = debugElement.nativeElement.querySelector('.workbasket-access-items');
     expect(container).toBeTruthy();

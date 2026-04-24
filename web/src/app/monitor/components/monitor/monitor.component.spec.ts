@@ -21,8 +21,7 @@ import { DebugElement } from '@angular/core';
 import { MonitorComponent } from './monitor.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterModule } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -42,8 +41,9 @@ describe('MonitorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MatTabsModule, RouterModule, RouterTestingModule, NoopAnimationsModule, MonitorComponent],
+      imports: [MatTabsModule, NoopAnimationsModule, MonitorComponent],
       providers: [
+        provideRouter([{ path: '**', children: [] }]),
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),
         { provide: DomainService, useValue: domainServiceMock }
