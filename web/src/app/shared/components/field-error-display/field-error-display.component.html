@@ -16,8 +16,8 @@
 ~
 -->
 
-@if (displayError) {
-  <div [@validation]="validationTrigger" class="required-text">
-    {{ errorMessage }}
+@if (displayError()) {
+  <div [@validation]="validationTrigger()" class="required-text">
+    {{ errorMessage() }}
   </div>
 }

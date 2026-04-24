@@ -21,12 +21,11 @@
     <kadai-task-list-toolbar (performFilter)="performFilter()"
                              (performSorting)="performSorting($event)"
                              (selectSearchType)="selectSearchType($event)"
-                             [taskDefaultSortBy]="taskDefaultSortBy">
-    </kadai-task-list-toolbar>
+                             [taskDefaultSortBy]="taskDefaultSortBy" />
   </div>
   @if (!requestInProgress) {
     <kadai-task-list [(selectedId)]="selectedId"
-                     [tasks]="tasks"></kadai-task-list>
+                     [tasks]="tasks" />
   }
 </div>
 @if (tasks && tasks.length > 0) {

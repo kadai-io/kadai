@@ -38,45 +38,45 @@ describe('FieldErrorDisplayComponent', () => {
   it('should create the component', () => {
     fixture.detectChanges();
     expect(component).toBeTruthy();
-    expect(component.displayError).toBeUndefined();
-    expect(component.errorMessage).toBeUndefined();
-    expect(component.validationTrigger).toBeUndefined();
+    expect(component.displayError()).toBeUndefined();
+    expect(component.errorMessage()).toBeUndefined();
+    expect(component.validationTrigger()).toBeUndefined();
   });
 
   it('should accept displayError input set to true', () => {
-    component.displayError = true;
-    component.validationTrigger = false;
+    fixture.componentRef.setInput('displayError', true);
+    fixture.componentRef.setInput('validationTrigger', false);
     fixture.detectChanges();
-    expect(component.displayError).toBe(true);
+    expect(component.displayError()).toBe(true);
   });
 
   it('should accept displayError input set to false', () => {
-    component.displayError = false;
+    fixture.componentRef.setInput('displayError', false);
     fixture.detectChanges();
-    expect(component.displayError).toBe(false);
+    expect(component.displayError()).toBe(false);
   });
 
   it('should accept errorMessage input', () => {
-    component.errorMessage = 'Field is required';
+    fixture.componentRef.setInput('errorMessage', 'Field is required');
     fixture.detectChanges();
-    expect(component.errorMessage).toBe('Field is required');
+    expect(component.errorMessage()).toBe('Field is required');
   });
 
   it('should accept validationTrigger input', () => {
-    component.validationTrigger = true;
-    component.displayError = false;
+    fixture.componentRef.setInput('validationTrigger', true);
+    fixture.componentRef.setInput('displayError', false);
     fixture.detectChanges();
-    expect(component.validationTrigger).toBe(true);
+    expect(component.validationTrigger()).toBe(true);
   });
 
   it('should hold all three input values simultaneously when displayError is true', () => {
-    component.displayError = true;
-    component.errorMessage = 'This field is required';
-    component.validationTrigger = false;
+    fixture.componentRef.setInput('displayError', true);
+    fixture.componentRef.setInput('errorMessage', 'This field is required');
+    fixture.componentRef.setInput('validationTrigger', false);
     fixture.detectChanges();
 
-    expect(component.displayError).toBe(true);
-    expect(component.errorMessage).toBe('This field is required');
-    expect(component.validationTrigger).toBe(false);
+    expect(component.displayError()).toBe(true);
+    expect(component.errorMessage()).toBe('This field is required');
+    expect(component.validationTrigger()).toBe(false);
   });
 });

@@ -18,7 +18,7 @@
 
 import { DebugElement } from '@angular/core';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
-import { EMPTY, firstValueFrom, Observable, of } from 'rxjs';
+import { EMPTY, firstValueFrom, Observable, of, Subject } from 'rxjs';
 import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -59,12 +59,14 @@ const domainServiceSpy: Partial<DomainService> = {
   getSelectedDomain: vi.fn().mockReturnValue(of('A'))
 };
 
+const inputOverflowSubject = new Subject<Map<string, boolean>>();
+
 const formsValidatorServiceSpy: Partial<FormsValidatorService> = {
   isFieldValid: vi.fn().mockReturnValue(true),
   validateInputOverflow: vi.fn(),
   validateFormInformation: vi.fn().mockImplementation((): Promise<any> => Promise.resolve(true)),
   get inputOverflowObservable(): Observable<Map<string, boolean>> {
-    return of(new Map<string, boolean>());
+    return inputOverflowSubject.asObservable();
   }
 };
 
@@ -121,7 +123,7 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should show warning when onCopy() is called and isCreatingNewClassification is true', () => {
-    component.isCreatingNewClassification = true;
+    component.classification.set({ name: 'Test', type: 'TASK' });
     const notificationService = TestBed.inject(NotificationService);
     const showErrorSpy = vi.spyOn(notificationService, 'showError');
     component.onCopy();
@@ -129,7 +131,7 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should dispatch action when onCopy() is called and isCreatingNewClassification is false', async () => {
-    component.isCreatingNewClassification = false;
+    component.classification.set({ classificationId: 'ID01' });
     let isActionDispatched = false;
     actions$.pipe(ofActionDispatched(CopyClassification)).subscribe(() => (isActionDispatched = true));
     component.onCopy();
@@ -148,7 +150,7 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should dispatch SaveCreatedClassification action in onSave() when classificationId is undefined', async () => {
-    component.classification = {};
+    component.classification.set({});
     let isActionDispatched = false;
     actions$.pipe(ofActionDispatched(SaveCreatedClassification)).subscribe(() => (isActionDispatched = true));
     await component.onSave();
@@ -156,7 +158,7 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should dispatch SaveModifiedClassification action in onSave() when classificationId is defined', async () => {
-    component.classification = { classificationId: 'ID01' };
+    component.classification.set({ classificationId: 'ID01' });
     let isActionDispatched = false;
     actions$.pipe(ofActionDispatched(SaveModifiedClassification)).subscribe(() => (isActionDispatched = true));
     await component.onSave();
@@ -164,7 +166,7 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should dispatch action in removeClassificationConfirmation() when classification and classificationId exist', () => {
-    component.classification = { classificationId: 'ID01' };
+    component.classification.set({ classificationId: 'ID01' });
     const requestInProgressService = TestBed.inject(RequestInProgressService);
     const setRequestInProgressSpy = vi.spyOn(requestInProgressService, 'setRequestInProgress');
     let isActionDispatched = false;
@@ -175,16 +177,18 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should not show details when spinner is running', () => {
-    component.requestInProgress = true;
-    component.classification = {};
-    fixture.detectChanges();
-    expect(debugElement.nativeElement.querySelector('.action-toolbar')).toBeFalsy();
-    expect(debugElement.nativeElement.querySelector('.detailed-fields')).toBeFalsy();
+    const requestInProgressService = TestBed.inject(RequestInProgressService);
+    vi.spyOn(requestInProgressService, 'getRequestInProgress').mockReturnValue(of(true));
+    const componentFixture = TestBed.createComponent(ClassificationDetailsComponent);
+    const componentInstance = componentFixture.componentInstance;
+    componentInstance.classification.set({});
+    componentFixture.detectChanges();
+    expect(componentFixture.debugElement.nativeElement.querySelector('.action-toolbar')).toBeFalsy();
+    expect(componentFixture.debugElement.nativeElement.querySelector('.detailed-fields')).toBeFalsy();
   });
 
   it('should not show details when classification does not exist', () => {
-    component.requestInProgress = false;
-    component.classification = null;
+    component.classification.set(null);
     fixture.detectChanges();
     expect(debugElement.nativeElement.querySelector('.action-toolbar')).toBeFalsy();
     expect(debugElement.nativeElement.querySelector('.detailed-fields')).toBeFalsy();
@@ -196,8 +200,7 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should display headline with badge message when a new classification is created', () => {
-    component.classification = { name: 'Recommendation', type: 'DOCUMENT' };
-    component.isCreatingNewClassification = true;
+    component.classification.set({ name: 'Recommendation', type: 'DOCUMENT' }); // no classificationId → isCreatingNewClassification = true
     fixture.detectChanges();
     const headline = debugElement.nativeElement.querySelector('.action-toolbar__headline');
     expect(headline).toBeTruthy();
@@ -240,7 +243,7 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should not show delete button when creating or copying a Classification', () => {
-    component.classification.classificationId = null;
+    component.classification.update((classification) => ({ ...classification, classificationId: null }));
     const button = debugElement.nativeElement.querySelector('#action-toolbar__more-buttons');
     expect(button).toBeTruthy();
     button.click();
@@ -330,11 +333,11 @@ describe('ClassificationDetailsComponent', () => {
   it('should change isValidInDomain when button is clicked', () => {
     const button = debugElement.nativeElement.querySelector('.detailed-fields__domain-checkbox-icon').parentNode;
     expect(button).toBeTruthy();
-    component.classification.isValidInDomain = false;
+    component.classification.update((classification) => ({ ...classification, isValidInDomain: false }));
     button.click();
-    expect(component.classification.isValidInDomain).toBe(true);
+    expect(component.classification().isValidInDomain).toBe(true);
     button.click();
-    expect(component.classification.isValidInDomain).toBe(false);
+    expect(component.classification().isValidInDomain).toBe(false);
   });
 
   it('should not show custom fields with attribute visible = false', () => {
@@ -354,8 +357,8 @@ describe('ClassificationDetailsComponent', () => {
 
     await fixture.whenStable();
 
-    expect(component.classification['custom3']).toBe(undefined);
-    expect(component.classification['custom4']).toBe(newValue);
+    expect(component.classification()['custom3']).toBe(undefined);
+    expect(component.classification()['custom4']).toBe(newValue);
   });
 
   it('should hide Valid-in-Domain checkbox when masterDomainSelected returns true', () => {
@@ -382,7 +385,7 @@ describe('ClassificationDetailsComponent', () => {
       classification: { ...classificationStateMock, selectedClassification: { name: 'New', type: 'TASK' } },
       engineConfiguration: engineConfigurationMock
     });
-    lc.isCreatingNewClassification = true;
+    lc.classification.set({ name: 'New', type: 'TASK' });
     lf.detectChanges();
     const badge = lf.nativeElement.querySelector('.action-toolbar__badge-message');
     expect(badge).toBeTruthy();
@@ -391,7 +394,7 @@ describe('ClassificationDetailsComponent', () => {
   it('should not show badge message span when isCreatingNewClassification is false', () => {
     const lf = TestBed.createComponent(ClassificationDetailsComponent);
     const lc = lf.componentInstance;
-    lc.isCreatingNewClassification = false;
+    lc.classification.set({ classificationId: 'ID01' });
     lf.detectChanges();
     const badge = lf.nativeElement.querySelector('.action-toolbar__badge-message');
     expect(badge).toBeFalsy();
@@ -454,49 +457,49 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should display error div for key input when inputOverflowMap has key entry true', () => {
-    component.inputOverflowMap = new Map<string, boolean>([['classification.key', true]]);
+    inputOverflowSubject.next(new Map<string, boolean>([['classification.key', true]]));
     fixture.detectChanges();
     const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
     expect(errorDivs.length).toBeGreaterThan(0);
   });
 
   it('should display error div for name input when inputOverflowMap has name entry true', () => {
-    component.inputOverflowMap = new Map<string, boolean>([['classification.name', true]]);
+    inputOverflowSubject.next(new Map<string, boolean>([['classification.name', true]]));
     fixture.detectChanges();
     const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
     expect(errorDivs.length).toBeGreaterThan(0);
   });
 
   it('should display error div for description when inputOverflowMap has description entry true', () => {
-    component.inputOverflowMap = new Map<string, boolean>([['classification.description', true]]);
+    inputOverflowSubject.next(new Map<string, boolean>([['classification.description', true]]));
     fixture.detectChanges();
     const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
     expect(errorDivs.length).toBeGreaterThan(0);
   });
 
   it('should display error div for serviceLevel when inputOverflowMap has serviceLevel entry true', () => {
-    component.inputOverflowMap = new Map<string, boolean>([['classification.serviceLevel', true]]);
+    inputOverflowSubject.next(new Map<string, boolean>([['classification.serviceLevel', true]]));
     fixture.detectChanges();
     const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
     expect(errorDivs.length).toBeGreaterThan(0);
   });
 
   it('should display error div for appEntryPoint when inputOverflowMap has appEntryPoint entry true', () => {
-    component.inputOverflowMap = new Map<string, boolean>([['classification.applicationEntryPoint', true]]);
+    inputOverflowSubject.next(new Map<string, boolean>([['classification.applicationEntryPoint', true]]));
     fixture.detectChanges();
     const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
     expect(errorDivs.length).toBeGreaterThan(0);
   });
 
   it('should display error div for custom field when inputOverflowMap has custom field entry true', () => {
-    component.inputOverflowMap = new Map<string, boolean>([['classification.custom1', true]]);
+    inputOverflowSubject.next(new Map<string, boolean>([['classification.custom1', true]]));
     fixture.detectChanges();
     const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
     expect(errorDivs.length).toBeGreaterThan(0);
   });
 
   it('should not display any error divs when inputOverflowMap is empty', () => {
-    component.inputOverflowMap = new Map<string, boolean>();
+    inputOverflowSubject.next(new Map<string, boolean>());
     fixture.detectChanges();
     const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
     expect(errorDivs.length).toBe(0);

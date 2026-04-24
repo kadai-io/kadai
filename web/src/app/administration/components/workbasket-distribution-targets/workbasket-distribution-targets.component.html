@@ -113,25 +113,21 @@
 
     <!-- DISTRIBUTION TABLE-->
     @if (displayingDistributionTargetsPicker) {
-      <kadai-administration-workbasket-distribution-targets-list
-        [component]="'availableDistributionTargets'"
+      <kadai-administration-workbasket-distribution-targets-list [component]="'availableDistributionTargets'"
         [ngClass]="sideBySide ? 'distribution-targets-list__lists--left-side' : ''"
         [side]="sideEnum.AVAILABLE"
         [transferDistributionTargetObservable]="transferDistributionTargetObservable"
         header="Available distribution targets"
         id="dual-list-Left"
-      >
-      </kadai-administration-workbasket-distribution-targets-list>
+       />
     }
 
-    <kadai-administration-workbasket-distribution-targets-list
-      [component]="'selectedDistributionTargets'"
+    <kadai-administration-workbasket-distribution-targets-list [component]="'selectedDistributionTargets'"
       [hidden]="displayingDistributionTargetsPicker && !sideBySide"
       [side]="sideEnum.SELECTED"
       [transferDistributionTargetObservable]="transferDistributionTargetObservable"
       header="Selected distribution targets"
       id="dual-list-Right"
-    >
-    </kadai-administration-workbasket-distribution-targets-list>
+     />
   </div>
 </div>
