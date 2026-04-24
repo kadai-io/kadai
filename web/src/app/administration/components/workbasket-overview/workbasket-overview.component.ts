@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, signal, viewChild } from '@angular/core';
 import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
@@ -38,7 +38,7 @@ import { SvgIconComponent } from 'angular-svg-icon';
   imports: [WorkbasketListComponent, MatIcon, WorkbasketDetailsComponent, SvgIconComponent]
 })
 export class WorkbasketOverviewComponent implements OnInit {
-  showDetail = false;
+  showDetail = signal(false);
   selectedWorkbasketAndAction$: Observable<WorkbasketAndAction> = inject(Store).select(
     WorkbasketSelectors.selectedWorkbasketAndAction
   );
@@ -46,8 +46,8 @@ export class WorkbasketOverviewComponent implements OnInit {
   destroy$ = new Subject<void>();
   routerParams: any;
   expanded = true;
-  @ViewChild('workbasketList') workbasketList: ElementRef;
-  @ViewChild('toggleButton') toggleButton: ElementRef;
+  workbasketList = viewChild<ElementRef>('workbasketList');
+  toggleButton = viewChild<ElementRef>('toggleButton');
   private route = inject(ActivatedRoute);
   private store = inject(Store);
 
@@ -65,7 +65,7 @@ export class WorkbasketOverviewComponent implements OnInit {
       this.route.firstChild.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
         this.routerParams = params;
         if (this.routerParams.id) {
-          this.showDetail = true;
+          this.showDetail.set(true);
           if (this.routerParams.id === 'new-workbasket') {
             this.store.dispatch(new CreateWorkbasket());
           } else {
@@ -75,21 +75,21 @@ export class WorkbasketOverviewComponent implements OnInit {
       });
     }
     this.selectedWorkbasketAndAction$.pipe(takeUntil(this.destroy$)).subscribe((state) => {
-      this.showDetail = !!state.selectedWorkbasket || state.action === 1;
+      this.showDetail.set(!!state.selectedWorkbasket || state.action === 1);
     });
   }
 
   toggleWidth() {
-    if (this.workbasketList.nativeElement.offsetWidth === 250) {
+    if (this.workbasketList()?.nativeElement.offsetWidth === 250) {
       this.expanded = true;
-      this.workbasketList.nativeElement.style.width = '500px';
-      this.workbasketList.nativeElement.style.minWidth = '500px';
-      this.toggleButton.nativeElement.style.left = '480px';
+      this.workbasketList()!.nativeElement.style.width = '500px';
+      this.workbasketList()!.nativeElement.style.minWidth = '500px';
+      this.toggleButton()!.nativeElement.style.left = '480px';
     } else {
       this.expanded = false;
-      this.workbasketList.nativeElement.style.width = '250px';
-      this.workbasketList.nativeElement.style.minWidth = '250px';
-      this.toggleButton.nativeElement.style.left = '230px';
+      this.workbasketList()!.nativeElement.style.width = '250px';
+      this.workbasketList()!.nativeElement.style.minWidth = '250px';
+      this.toggleButton()!.nativeElement.style.left = '230px';
     }
   }
 }

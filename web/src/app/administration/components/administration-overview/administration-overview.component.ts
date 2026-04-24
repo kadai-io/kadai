@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, Input, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Subject } from 'rxjs';
 import { DomainService } from '../../../shared/services/domain/domain.service';
@@ -45,7 +45,7 @@ import { MatOption } from '@angular/material/core';
   ]
 })
 export class AdministrationOverviewComponent implements OnInit {
-  @Input() selectedTab = '';
+  selectedTab = '';
   domains: Array<string> = [];
   selectedDomain: string;
   destroy$ = new Subject<void>();

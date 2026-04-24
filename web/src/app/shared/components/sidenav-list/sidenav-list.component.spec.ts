@@ -57,7 +57,7 @@ describe('SidenavListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [SidenavListComponent],
       providers: [
-        provideRouter([]),
+        provideRouter([{ path: '**', children: [] }]),
         provideHttpClientTesting(),
         {
           provide: KadaiEngineService,
