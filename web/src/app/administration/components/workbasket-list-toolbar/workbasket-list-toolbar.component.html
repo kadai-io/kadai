@@ -29,20 +29,17 @@
     </button>
 
     <!-- IMPORT EXPORT -->
-    @if (workbasketListExpanded) {
-      <kadai-administration-import-export
-        [currentSelection]="selectionToImport"
-        [parentComponent]="'workbaskets'"></kadai-administration-import-export>
+    @if (workbasketListExpanded()) {
+      <kadai-administration-import-export [currentSelection]="selectionToImport"
+        [parentComponent]="'workbaskets'" />
     }
 
     <span class="workbasket-details__spacer" style="flex: 1 1 auto"> </span>
 
     <!-- SORTING -->
-    <kadai-shared-sort
-      (performSorting)="sorting($event)" [defaultSortBy]="workbasketDefaultSortBy"
+    <kadai-shared-sort (performSorting)="sorting($event)" [defaultSortBy]="workbasketDefaultSortBy()"
       [sortingFields]="sortingFields"
-      style="margin-right: 4px;">
-    </kadai-shared-sort>
+      style="margin-right: 4px;" />
 
   </div>
 
@@ -60,7 +57,7 @@
 
     <div class="filter__filter-component-wrapper">
       <kadai-shared-workbasket-filter [isExpanded]="isExpanded"
-                                      component="workbasketList"></kadai-shared-workbasket-filter>
+                                      component="workbasketList" />
     </div>
   </div>
 </div>

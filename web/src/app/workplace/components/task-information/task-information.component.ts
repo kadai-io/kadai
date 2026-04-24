@@ -18,15 +18,16 @@
 
 import {
   Component,
-  EventEmitter,
+  effect,
   inject,
-  Input,
-  OnChanges,
+  input,
+  model,
   OnDestroy,
   OnInit,
-  Output,
-  SimpleChanges,
-  ViewChild
+  output,
+  signal,
+  untracked,
+  viewChild
 } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
@@ -54,6 +55,7 @@ import {
   MatDatepickerToggle
 } from '@angular/material/datepicker';
 import { Store } from '@ngxs/store';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'kadai-task-information',
@@ -79,22 +81,20 @@ import { Store } from '@ngxs/store';
     MatNativeDateModule
   ]
 })
-export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
-  @Input()
-  task: Task;
-  @Output() taskChange: EventEmitter<Task> = new EventEmitter<Task>();
-  @Input()
-  saveToggleTriggered: boolean;
-  @Output() formValid: EventEmitter<boolean> = new EventEmitter<boolean>();
-  @ViewChild('TaskForm')
-  taskForm: NgForm;
+export class TaskInformationComponent implements OnInit, OnDestroy {
+  task = model<Task>();
+  saveToggleTriggered = input<boolean>();
+  formValid = output<boolean>();
+  taskForm = viewChild<NgForm>('TaskForm');
   toggleValidationMap = new Map<string, boolean>();
-  requestInProgress = false;
-  classifications: Classification[];
+  requestInProgress = signal(false);
+  classifications = signal<Classification[]>([]);
   isClassificationEmpty: boolean;
   isOwnerValid: boolean = true;
   readonly lengthError = 'You have reached the maximum length';
-  inputOverflowMap = new Map<string, boolean>();
+  inputOverflowMap = toSignal(inject(FormsValidatorService).inputOverflowObservable, {
+    initialValue: new Map<string, boolean>()
+  });
   validateInputOverflow: Function;
   tasksCustomisation$: Observable<TasksCustomisation> = inject(Store).select(
     EngineConfigurationSelectors.tasksCustomisation
@@ -103,48 +103,46 @@ export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
   private formsValidatorService = inject(FormsValidatorService);
   private destroy$ = new Subject<void>();
 
+  constructor() {
+    effect(() => {
+      const saveToggle = this.saveToggleTriggered();
+      if (saveToggle !== undefined) {
+        untracked(() => this.validate());
+      }
+    });
+  }
+
   ngOnInit() {
     this.getClassificationByDomain();
-    this.formsValidatorService.inputOverflowObservable.pipe(takeUntil(this.destroy$)).subscribe((inputOverflowMap) => {
-      this.inputOverflowMap = inputOverflowMap;
-    });
     this.validateInputOverflow = (inputFieldModel, maxLength) => {
       this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
     };
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (
-      changes.saveToggleTriggered &&
-      changes.saveToggleTriggered.currentValue !== changes.saveToggleTriggered.previousValue
-    ) {
-      this.validate();
-    }
-  }
-
   isFieldValid(field: string): boolean {
-    return this.formsValidatorService.isFieldValid(this.taskForm, field);
+    return this.formsValidatorService.isFieldValid(this.taskForm(), field);
   }
 
   updateDate($event) {
     const newDate = $event.value;
     if (typeof newDate !== 'undefined' && newDate !== null) {
       const newDateISOString = newDate.toISOString();
-      const currentDate = new Date(this.task.due);
+      const task = this.task();
+      const currentDate = new Date(task.due);
       if (typeof currentDate === 'undefined' || currentDate !== newDate) {
-        this.task.due = newDateISOString;
+        task.due = newDateISOString;
       }
     }
   }
 
   changedClassification(itemSelected: Classification) {
-    this.task.classificationSummary = itemSelected;
+    this.task().classificationSummary = itemSelected;
     this.isClassificationEmpty = false;
   }
 
   onSelectedOwner(owner: AccessId) {
     if (owner?.accessId) {
-      this.task.owner = owner.accessId;
+      this.task().owner = owner.accessId;
     }
   }
 
@@ -154,9 +152,10 @@ export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private validate() {
-    this.isClassificationEmpty = typeof this.task.classificationSummary === 'undefined';
+    const task = this.task();
+    this.isClassificationEmpty = typeof task.classificationSummary === 'undefined';
     this.formsValidatorService.formSubmitAttempt = true;
-    this.formsValidatorService.validateFormInformation(this.taskForm, this.toggleValidationMap).then((value) => {
+    this.formsValidatorService.validateFormInformation(this.taskForm(), this.toggleValidationMap).then((value) => {
       if (value && !this.isClassificationEmpty && this.isOwnerValid) {
         this.formValid.emit(true);
       }
@@ -165,13 +164,13 @@ export class TaskInformationComponent implements OnInit, OnChanges, OnDestroy {
 
   // TODO: this is currently called for every selected task and is only necessary when we switch the workbasket -> can be optimized.
   private getClassificationByDomain() {
-    this.requestInProgress = true;
+    this.requestInProgress.set(true);
     this.classificationService
-      .getClassifications({ domain: [this.task.workbasketSummary.domain] })
+      .getClassifications({ domain: [this.task().workbasketSummary.domain] })
       .pipe(takeUntil(this.destroy$))
       .subscribe((classificationPagingList) => {
-        this.classifications = classificationPagingList.classifications;
-        this.requestInProgress = false;
+        this.classifications.set(classificationPagingList.classifications);
+        this.requestInProgress.set(false);
       });
   }
 }

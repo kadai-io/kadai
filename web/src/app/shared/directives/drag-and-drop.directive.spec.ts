@@ -34,11 +34,6 @@ class TestHostComponent {
 }
 
 describe('DragAndDropDirective', () => {
-  it('should create an instance', () => {
-    const directive = new DragAndDropDirective();
-    expect(directive).toBeTruthy();
-  });
-
   describe('with TestBed', () => {
     let fixture: ComponentFixture<TestHostComponent>;
     let directiveEl: HTMLElement;
@@ -55,6 +50,10 @@ describe('DragAndDropDirective', () => {
       const debugEl = fixture.debugElement.query(By.directive(DragAndDropDirective));
       directiveEl = debugEl.nativeElement;
       directive = debugEl.injector.get(DragAndDropDirective);
+    });
+
+    it('should create an instance', () => {
+      expect(directive).toBeTruthy();
     });
 
     it('onDragOver should set fileOver to true and prevent/stop event', () => {

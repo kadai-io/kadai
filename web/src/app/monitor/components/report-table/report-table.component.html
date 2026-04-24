@@ -16,43 +16,43 @@
 ~
 -->
 
-@if (reportData) {
+@if (reportData()) {
   <div class="report table table-striped">
     <div class="table-header">
       <div class="table-row">
-        @for (header of reportData.meta.rowDesc; track header; let i = $index) {
-          @if (i <= currentExpHeaders) {
+        @for (header of reportData().meta.rowDesc; track header; let i = $index) {
+          @if (i <= currentExpHeaders()) {
             <div
-              [ngClass]="{'table-cell--border-right': currentExpHeaders === i}"
+              [class.table-cell--border-right]="currentExpHeaders() === i"
               class="table-cell table-cell--bold table-cell--justify">{{ header }}
             </div>
           }
         }
-        @for (header of reportData.meta.header; track header) {
+        @for (header of reportData().meta.header; track header) {
           <div
             class="table-cell table-cell--bold">{{ header }}
           </div>
         }
         <div
-          class="table-cell table-cell--bold table-cell--border-left">{{ reportData.meta.sumRowDesc }}
+          class="table-cell table-cell--bold table-cell--border-left">{{ reportData().meta.sumRowDesc }}
         </div>
       </div>
     </div>
     <div class="table-body">
-      @for (row of reportData.rows; track row; let i = $index) {
+      @for (row of reportData().rows; track row; let i = $index) {
         @if (row.display) {
-          <div [ngClass]="{'table-row--highlight': row.depth === 0 && currentExpHeaders > 0,
-             'table-row--hover': row.depth > 0 && currentExpHeaders > 0,
-             'table-row--white': row.depth > 0 && currentExpHeaders > 0}" class="table-row">
+          <div [class]="{'table-row--highlight': row.depth === 0 && currentExpHeaders() > 0,
+             'table-row--hover': row.depth > 0 && currentExpHeaders() > 0,
+             'table-row--white': row.depth > 0 && currentExpHeaders() > 0}" class="table-row">
             @for (header of row.desc; track header; let idx = $index) {
 
-              @if (idx <= currentExpHeaders) {
+              @if (idx <= currentExpHeaders()) {
                 <div (click)="toggleFold(i)"
-                     [ngClass]="{'table-cell--border-right': currentExpHeaders === idx,
-                         'table-cell--bold': row.depth === 0 && currentExpHeaders > 0,
-                         'table-cell--clickable': reportData.meta.rowDesc.length - 1 > row.depth}"
+                     [class]="{'table-cell--border-right': currentExpHeaders() === idx,
+                         'table-cell--bold': row.depth === 0 && currentExpHeaders() > 0,
+                         'table-cell--clickable': reportData().meta.rowDesc.length - 1 > row.depth}"
                      class="table-cell table-cell--justify">
-                  @if (reportData.meta.rowDesc.length - 1 > row.depth && idx === row.depth) {
+                  @if (reportData().meta.rowDesc.length - 1 > row.depth && idx === row.depth) {
                     <span
                       class="material-icons md-18">{{
                         canRowCollapse(i) ? "expand_more" : "expand_less"
@@ -64,7 +64,7 @@
             }
             @for (val of row.cells; track val) {
               <div
-                [ngClass]="{'table-cell--bold': row.depth === 0 && currentExpHeaders > 0}"
+                [class.table-cell--bold]="row.depth === 0 && currentExpHeaders() > 0"
                 class="table-cell">
                 {{ val }}
               </div>
@@ -81,19 +81,19 @@
       </button>
     </div>
     <div class="table-footer">
-      @for (row of reportData.sumRow; track row; let i = $index) {
+      @for (row of reportData().sumRow; track row; let i = $index) {
         @if (row.display) {
-          <div [ngClass]="{'table-row--highlight': row.depth === 0 && currentExpHeaders > 0,
-             'table-row--hover': row.depth > 0 && currentExpHeaders > 0,
-             'table-row--white': row.depth > 0 && currentExpHeaders > 0}" class="table-row">
+          <div [class]="{'table-row--highlight': row.depth === 0 && currentExpHeaders() > 0,
+             'table-row--hover': row.depth > 0 && currentExpHeaders() > 0,
+             'table-row--white': row.depth > 0 && currentExpHeaders() > 0}" class="table-row">
             @for (header of row.desc; track header; let idx = $index) {
 
-              @if (idx <= currentExpHeaders) {
+              @if (idx <= currentExpHeaders()) {
                 <div (click)="toggleFold(i, true)"
-                     [ngClass]="{'table-cell--border-right': currentExpHeaders === idx,
-                         'table-cell--clickable': reportData.meta.rowDesc.length - 1 > row.depth}"
+                     [class]="{'table-cell--border-right': currentExpHeaders() === idx,
+                         'table-cell--clickable': reportData().meta.rowDesc.length - 1 > row.depth}"
                      class="table-cell table-cell--bold table-cell--justify">
-                  @if (reportData.meta.rowDesc.length - 1 > row.depth && idx === row.depth) {
+                  @if (reportData().meta.rowDesc.length - 1 > row.depth && idx === row.depth) {
                     <span
                       class="material-icons md-18">{{
                         canRowCollapse(i, true) ? "expand_more" : "expand_less"

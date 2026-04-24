@@ -50,7 +50,7 @@ describe('WorkbasketFilterComponent', () => {
     store = TestBed.inject(Store);
     fixture = TestBed.createComponent(WorkbasketFilterComponent);
     component = fixture.componentInstance;
-    component.component = 'workbasketList';
+    fixture.componentRef.setInput('component', 'workbasketList');
     fixture.detectChanges();
   });
 
@@ -71,11 +71,11 @@ describe('WorkbasketFilterComponent', () => {
 
     component.setFilter(inputFilter);
 
-    expect(component.filter['description-like']).toEqual(['desc1']);
-    expect(component.filter['key-like']).toEqual(['key1']);
-    expect(component.filter['name-like']).toEqual(['name1']);
-    expect(component.filter['owner-like']).toEqual(['owner1']);
-    expect(component.filter.type).toEqual([WorkbasketType.PERSONAL]);
+    expect(component.filter()['description-like']).toEqual(['desc1']);
+    expect(component.filter()['key-like']).toEqual(['key1']);
+    expect(component.filter()['name-like']).toEqual(['name1']);
+    expect(component.filter()['owner-like']).toEqual(['owner1']);
+    expect(component.filter().type).toEqual([WorkbasketType.PERSONAL]);
   });
 
   it('setFilter() should create independent copies of arrays (spreading)', () => {
@@ -90,28 +90,28 @@ describe('WorkbasketFilterComponent', () => {
     component.setFilter(inputFilter);
 
     inputFilter['description-like'].push('desc2');
-    expect(component.filter['description-like']).toEqual(['desc1']);
+    expect(component.filter()['description-like']).toEqual(['desc1']);
   });
 
   it('selectType() should set filter.type to [type] for non-ALL type', () => {
     component.setFilter(emptyFilter);
 
     component.selectType(WorkbasketType.PERSONAL);
-    expect(component.filter.type).toEqual([WorkbasketType.PERSONAL]);
+    expect(component.filter().type).toEqual([WorkbasketType.PERSONAL]);
   });
 
   it('selectType() should set filter.type to [] when WorkbasketType.ALL is passed', () => {
     component.setFilter({ ...emptyFilter, type: [WorkbasketType.PERSONAL] });
 
     component.selectType(WorkbasketType.ALL);
-    expect(component.filter.type).toEqual([]);
+    expect(component.filter().type).toEqual([]);
   });
 
   it('selectType() should set filter.type to [GROUP] for WorkbasketType.GROUP', () => {
     component.setFilter(emptyFilter);
 
     component.selectType(WorkbasketType.GROUP);
-    expect(component.filter.type).toEqual([WorkbasketType.GROUP]);
+    expect(component.filter().type).toEqual([WorkbasketType.GROUP]);
   });
 
   it('search() should dispatch SetWorkbasketFilter with current filter and component', () => {
@@ -120,7 +120,7 @@ describe('WorkbasketFilterComponent', () => {
 
     component.search();
 
-    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter, component.component));
+    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter(), component.component()));
   });
 
   it('clear() should dispatch ClearWorkbasketFilter for the current component', () => {
@@ -131,18 +131,8 @@ describe('WorkbasketFilterComponent', () => {
     expect(dispatchSpy).toHaveBeenCalled();
   });
 
-  it('ngOnDestroy() should complete destroy$', () => {
-    const completeSpy = vi.spyOn(component.destroy$, 'complete');
-    const nextSpy = vi.spyOn(component.destroy$, 'next');
-
-    component.ngOnDestroy();
-
-    expect(nextSpy).toHaveBeenCalled();
-    expect(completeSpy).toHaveBeenCalled();
-  });
-
   it('should render collapsed filter when isExpanded is false', () => {
-    component.isExpanded = false;
+    fixture.componentRef.setInput('isExpanded', false);
     fixture.detectChanges();
     const collapsed = fixture.nativeElement.querySelector('.filter__collapsed-filter');
     expect(collapsed).toBeTruthy();
@@ -151,7 +141,7 @@ describe('WorkbasketFilterComponent', () => {
   });
 
   it('should render expanded filter when isExpanded is true', () => {
-    component.isExpanded = true;
+    fixture.componentRef.setInput('isExpanded', true);
     fixture.detectChanges();
     const expanded = fixture.nativeElement.querySelector('.filter__expanded-filter');
     expect(expanded).toBeTruthy();
@@ -160,23 +150,23 @@ describe('WorkbasketFilterComponent', () => {
   });
 
   it('should show filter_list icon when filter.type is empty', () => {
-    component.isExpanded = true;
-    component.filter.type = [];
+    fixture.componentRef.setInput('isExpanded', true);
+    component.filter.update((f) => ({ ...f, type: [] }));
     fixture.detectChanges();
     const icon = fixture.nativeElement.querySelector('mat-icon');
     expect(icon).toBeTruthy();
   });
 
   it('should show type icon when filter.type[0] is set', () => {
-    component.isExpanded = true;
-    component.filter.type = [WorkbasketType.PERSONAL];
+    fixture.componentRef.setInput('isExpanded', true);
+    component.filter.update((f) => ({ ...f, type: [WorkbasketType.PERSONAL] }));
     fixture.detectChanges();
     const typeIcon = fixture.nativeElement.querySelector('kadai-administration-icon-type');
     expect(typeIcon).toBeTruthy();
   });
 
   it('should call search() when search button is clicked in collapsed mode', () => {
-    component.isExpanded = false;
+    fixture.componentRef.setInput('isExpanded', false);
     fixture.detectChanges();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
@@ -185,11 +175,11 @@ describe('WorkbasketFilterComponent', () => {
     searchButton.click();
     fixture.detectChanges();
 
-    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter, component.component));
+    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter(), component.component()));
   });
 
   it('should call clear() when undo button is clicked in collapsed mode', () => {
-    component.isExpanded = false;
+    fixture.componentRef.setInput('isExpanded', false);
     fixture.detectChanges();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
@@ -202,7 +192,7 @@ describe('WorkbasketFilterComponent', () => {
   });
 
   it('should call search() when Enter key is pressed on name filter input in expanded mode', () => {
-    component.isExpanded = true;
+    fixture.componentRef.setInput('isExpanded', true);
     fixture.detectChanges();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
@@ -213,11 +203,11 @@ describe('WorkbasketFilterComponent', () => {
     nameInput.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
     fixture.detectChanges();
 
-    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter, component.component));
+    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter(), component.component()));
   });
 
   it('should call search() when Apply button is clicked in expanded mode', () => {
-    component.isExpanded = true;
+    fixture.componentRef.setInput('isExpanded', true);
     fixture.detectChanges();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
@@ -228,11 +218,11 @@ describe('WorkbasketFilterComponent', () => {
     applyButton.click();
     fixture.detectChanges();
 
-    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter, component.component));
+    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter(), component.component()));
   });
 
   it('should call selectType() when a menu item is clicked in expanded mode', () => {
-    component.isExpanded = true;
+    fixture.componentRef.setInput('isExpanded', true);
     fixture.detectChanges();
     const selectTypeSpy = vi.spyOn(component, 'selectType');
 
@@ -255,7 +245,7 @@ describe('WorkbasketFilterComponent', () => {
   });
 
   it('should call search() when Enter key is pressed on name input in collapsed mode', () => {
-    component.isExpanded = false;
+    fixture.componentRef.setInput('isExpanded', false);
     fixture.detectChanges();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
@@ -264,11 +254,11 @@ describe('WorkbasketFilterComponent', () => {
     nameInput.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
     fixture.detectChanges();
 
-    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter, component.component));
+    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter(), component.component()));
   });
 
   it('should call search() when Enter key is pressed on key input in expanded mode', () => {
-    component.isExpanded = true;
+    fixture.componentRef.setInput('isExpanded', true);
     fixture.detectChanges();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
@@ -279,11 +269,11 @@ describe('WorkbasketFilterComponent', () => {
     keyInputs[0].dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
     fixture.detectChanges();
 
-    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter, component.component));
+    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter(), component.component()));
   });
 
   it('should call search() when Enter key is pressed on description input in expanded mode', () => {
-    component.isExpanded = true;
+    fixture.componentRef.setInput('isExpanded', true);
     fixture.detectChanges();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
@@ -294,11 +284,11 @@ describe('WorkbasketFilterComponent', () => {
     descriptionInputs[1].dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
     fixture.detectChanges();
 
-    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter, component.component));
+    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter(), component.component()));
   });
 
   it('should call search() when Enter key is pressed on owner input in expanded mode', () => {
-    component.isExpanded = true;
+    fixture.componentRef.setInput('isExpanded', true);
     fixture.detectChanges();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
@@ -309,11 +299,11 @@ describe('WorkbasketFilterComponent', () => {
     ownerInputs[1].dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
     fixture.detectChanges();
 
-    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter, component.component));
+    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter(), component.component()));
   });
 
   it('should call clear() when Reset button is clicked in expanded mode', () => {
-    component.isExpanded = true;
+    fixture.componentRef.setInput('isExpanded', true);
     fixture.detectChanges();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
@@ -328,8 +318,8 @@ describe('WorkbasketFilterComponent', () => {
   });
 
   it('should show filter_list mat-icon when filter.type is empty in expanded mode', () => {
-    component.isExpanded = true;
-    component.filter.type = [];
+    fixture.componentRef.setInput('isExpanded', true);
+    component.filter.update((f) => ({ ...f, type: [] }));
     fixture.detectChanges();
 
     const filterListIcon = fixture.nativeElement.querySelector(
@@ -340,8 +330,8 @@ describe('WorkbasketFilterComponent', () => {
   });
 
   it('should show kadai-administration-icon-type when filter.type[0] is set in expanded mode', () => {
-    component.isExpanded = true;
-    component.filter.type = [WorkbasketType.GROUP];
+    fixture.componentRef.setInput('isExpanded', true);
+    component.filter.update((f) => ({ ...f, type: [WorkbasketType.GROUP] }));
     fixture.detectChanges();
 
     const typeIcon = fixture.nativeElement.querySelector('.filter__expanded-filter kadai-administration-icon-type');
@@ -351,27 +341,25 @@ describe('WorkbasketFilterComponent', () => {
   it('ngOnInit() should subscribe to availableDistributionTargetsFilter$ when component is availableDistributionTargets', async () => {
     const newFixture = TestBed.createComponent(WorkbasketFilterComponent);
     const newComponent = newFixture.componentInstance;
-    newComponent.component = 'availableDistributionTargets';
-    newComponent.isExpanded = false;
+    newFixture.componentRef.setInput('component', 'availableDistributionTargets');
+    newFixture.componentRef.setInput('isExpanded', false);
     newFixture.detectChanges();
 
     expect(newComponent.filter).toBeDefined();
-    newComponent.ngOnDestroy();
   });
 
   it('ngOnInit() should subscribe to selectedDistributionTargetsFilter$ when component is selectedDistributionTargets', async () => {
     const newFixture = TestBed.createComponent(WorkbasketFilterComponent);
     const newComponent = newFixture.componentInstance;
-    newComponent.component = 'selectedDistributionTargets';
-    newComponent.isExpanded = false;
+    newFixture.componentRef.setInput('component', 'selectedDistributionTargets');
+    newFixture.componentRef.setInput('isExpanded', false);
     newFixture.detectChanges();
 
     expect(newComponent.filter).toBeDefined();
-    newComponent.ngOnDestroy();
   });
 
   it('should render all type menu items including All type when menu is opened', () => {
-    component.isExpanded = true;
+    fixture.componentRef.setInput('isExpanded', true);
     fixture.detectChanges();
 
     const menuTriggerButton: HTMLButtonElement = fixture.nativeElement.querySelector(
@@ -392,14 +380,14 @@ describe('WorkbasketFilterComponent', () => {
 
   it('selectType() should cover ALL branch: setting filter.type to [] via ALL_TYPES map', () => {
     component.selectType(WorkbasketType.PERSONAL);
-    expect(component.filter.type).toEqual([WorkbasketType.PERSONAL]);
+    expect(component.filter().type).toEqual([WorkbasketType.PERSONAL]);
 
     component.selectType(WorkbasketType.ALL);
-    expect(component.filter.type).toEqual([]);
+    expect(component.filter().type).toEqual([]);
   });
 
   it('should render menu items covering @for loop and both @if(value === All) and @if(value !== All) branches when menu is open', () => {
-    component.isExpanded = true;
+    fixture.componentRef.setInput('isExpanded', true);
     fixture.detectChanges();
 
     const menuTriggerButton: HTMLButtonElement = fixture.nativeElement.querySelector(
@@ -423,8 +411,8 @@ describe('WorkbasketFilterComponent', () => {
   });
 
   it('should render type icon in button when filter.type[0] is set (covers @if (filter.type[0]) branch)', () => {
-    component.isExpanded = true;
-    component.filter.type = [WorkbasketType.GROUP];
+    fixture.componentRef.setInput('isExpanded', true);
+    component.filter.update((f) => ({ ...f, type: [WorkbasketType.GROUP] }));
     fixture.detectChanges();
 
     const typeIconInButton = fixture.nativeElement.querySelector(
@@ -434,8 +422,8 @@ describe('WorkbasketFilterComponent', () => {
   });
 
   it('should NOT render type icon in button when filter.type is empty (covers @if (filter.type[0]) false branch)', () => {
-    component.isExpanded = true;
-    component.filter.type = [];
+    fixture.componentRef.setInput('isExpanded', true);
+    component.filter.update((f) => ({ ...f, type: [] }));
     fixture.detectChanges();
 
     const filterListIcon = fixture.nativeElement.querySelector(
@@ -448,8 +436,8 @@ describe('WorkbasketFilterComponent', () => {
   it('should handle availableDistributionTargets component with search and clear', () => {
     const newFixture = TestBed.createComponent(WorkbasketFilterComponent);
     const newComponent = newFixture.componentInstance;
-    newComponent.component = 'availableDistributionTargets';
-    newComponent.isExpanded = false;
+    newFixture.componentRef.setInput('component', 'availableDistributionTargets');
+    newFixture.componentRef.setInput('isExpanded', false);
     newFixture.detectChanges();
 
     const searchButton: HTMLButtonElement = newFixture.nativeElement.querySelector('.filter__search-button');
@@ -466,14 +454,13 @@ describe('WorkbasketFilterComponent', () => {
     }
 
     expect(newComponent.filter).toBeDefined();
-    newComponent.ngOnDestroy();
   });
 
   it('should handle selectedDistributionTargets component with expanded filter', () => {
     const newFixture = TestBed.createComponent(WorkbasketFilterComponent);
     const newComponent = newFixture.componentInstance;
-    newComponent.component = 'selectedDistributionTargets';
-    newComponent.isExpanded = true;
+    newFixture.componentRef.setInput('component', 'selectedDistributionTargets');
+    newFixture.componentRef.setInput('isExpanded', true);
     newFixture.detectChanges();
 
     const applyButton: HTMLButtonElement = newFixture.nativeElement.querySelector('.filter__search-button');
@@ -483,11 +470,10 @@ describe('WorkbasketFilterComponent', () => {
     }
 
     expect(newComponent.filter).toBeDefined();
-    newComponent.ngOnDestroy();
   });
 
   it('should trigger ngModel write handler on collapsed name input by dispatching input event', () => {
-    component.isExpanded = false;
+    fixture.componentRef.setInput('isExpanded', false);
     fixture.detectChanges();
     const nameInput: HTMLInputElement = fixture.nativeElement.querySelector('.filter__collapsed-filter input');
     if (nameInput) {
@@ -498,7 +484,7 @@ describe('WorkbasketFilterComponent', () => {
   });
 
   it('should trigger ngModel write handlers on all expanded filter inputs by dispatching input events', () => {
-    component.isExpanded = true;
+    fixture.componentRef.setInput('isExpanded', true);
     fixture.detectChanges();
     const inputs: NodeListOf<HTMLInputElement> = fixture.nativeElement.querySelectorAll(
       '.filter__expanded-filter input'

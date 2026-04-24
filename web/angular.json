@@ -21,7 +21,6 @@
             },
             "index": "src/index.html",
             "tsConfig": "src/tsconfig.app.json",
-            "polyfills": ["src/polyfills.ts"],
             "assets": ["src/assets", "src/environments/data-sources"],
             "styles": [
               "./node_modules/@ngneat/hot-toast/src/styles/styles.css",

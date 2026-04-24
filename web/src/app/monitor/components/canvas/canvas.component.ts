@@ -16,7 +16,7 @@
  *
  */
 
-import { AfterViewInit, Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, inject, input, OnDestroy, OnInit } from '@angular/core';
 import { ArcElement, Chart, DoughnutController, Legend, Title, Tooltip } from 'chart.js';
 import { ReportRow } from '../../models/report-row';
 import { Store } from '@ngxs/store';
@@ -32,8 +32,8 @@ import { SettingMembers } from '../../../settings/components/Settings/expected-m
   styleUrls: ['./canvas.component.scss']
 })
 export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
-  @Input() row: ReportRow;
-  @Input() id: string;
+  row = input<ReportRow>();
+  id = input<string>();
 
   labels: string[];
   colors: string[];
@@ -65,9 +65,9 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    const canvas = document.getElementById(this.id) as HTMLCanvasElement;
-    if (canvas && this.id && this.row) {
-      this.generateChart(this.id, this.row);
+    const canvas = document.getElementById(this.id()) as HTMLCanvasElement;
+    if (canvas && this.id() && this.row()) {
+      this.generateChart(this.id(), this.row());
     }
   }
 
@@ -104,7 +104,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    document.getElementById(this.id).outerHTML = ''; // destroy HTML element
+    document.getElementById(this.id()).outerHTML = '';
     this.destroy$.next();
     this.destroy$.complete();
   }

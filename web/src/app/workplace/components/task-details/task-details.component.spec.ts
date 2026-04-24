@@ -18,7 +18,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter, Router, Routes } from '@angular/router';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { TaskDetailsComponent } from './task-details.component';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -45,26 +45,26 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 @Component({ selector: 'kadai-task-information', template: '', standalone: true })
 class StubTaskInformationComponent {
-  @Input() task: any;
-  @Input() saveToggleTriggered: any;
-  @Output() formValid = new EventEmitter<boolean>();
-  @Output() taskChange = new EventEmitter<any>();
+  task = input<any>();
+  saveToggleTriggered = input<any>();
+  formValid = output<boolean>();
+  taskChange = output<any>();
 }
 
 @Component({ selector: 'kadai-task-status-details', template: '', standalone: true })
 class StubTaskStatusDetailsComponent {
-  @Input() task: any;
+  task = input<any>();
 }
 
 @Component({ selector: 'kadai-task-custom-fields', template: '', standalone: true })
 class StubTaskCustomFieldsComponent {
-  @Input() task: any;
+  task = input<any>();
 }
 
 @Component({ selector: 'kadai-task-attribute-value', template: '', standalone: true })
 class StubTaskAttributeValueComponent {
-  @Input() attributes: any;
-  @Input() callbackInfo: any;
+  attributes = input<any>();
+  callbackInfo = input<any>();
 }
 
 @Component({

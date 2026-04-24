@@ -16,11 +16,11 @@
 ~
 -->
 
-@if (workbasket) {
+@if (workbasket()) {
   <div id="wb-information">
     <!-- ACCESS ITEMS -->
     <div
-      [ngStyle]="{'width': expanded ? 'calc(' + 100 + 'vw - 500px)' : 'calc(' + 100 + 'vw - 250px)'}"
+      [style.width]="expanded() ? 'calc(' + 100 + 'vw - 500px)' : 'calc(' + 100 + 'vw - 250px)'"
       class="workbasket-access-items">
       <div class=" workbasket-access-items__buttons">
         <button (click)="addAccessItem()" class="workbasket-access-items__buttons-add-access"
@@ -90,20 +90,18 @@
                 <!-- ACCESS ID -->
                 @if ((accessItemsCustomization$ | async)?.accessId.lookupField) {
                   <td
-                    [ngClass]="{	'has-warning': (accessItemsClone[index].accessId !== accessItem.value.accessId),
+                    [class]="{	'has-warning': (accessItemsClone[index].accessId !== accessItem.value.accessId),
                 							'has-error': !accessItem.value.accessId || accessItemsGroups.controls[index].get('accessId')?.invalid }"
                     class="workbasket-access-items__typeahead">
-                    <kadai-shared-type-ahead
-                      (accessIdEventEmitter)="accessItemSelected($event, index)"
+                    <kadai-shared-type-ahead (accessIdEventEmitter)="accessItemSelected($event, index)"
                       [displayError]="true"
                       [isRequired]="true"
                       [savedAccessId]="accessItem"
-                      placeHolderMessage="Access id">
-                    </kadai-shared-type-ahead>
+                      placeHolderMessage="Access id" />
                   </td>
                 } @else {
                   <td>
-                    <div [ngClass]="{ 'has-warning': (accessItemsClone[index].accessId !== accessItem.value.accessId),
+                    <div [class]="{ 'has-warning': (accessItemsClone[index].accessId !== accessItem.value.accessId),
 																  'has-error': !accessItem.value.accessId && formsValidatorService.formSubmitAttempt}">
                       <input #htmlInputElement
                              [@validation]="toggleValidationAccessIdMap.get(index)"
@@ -123,7 +121,7 @@
                 </td>
                 <!-- READ -->
                 <td
-                  [ngClass]="{ 'has-changes': (accessItemsClone[index].permRead !== accessItem.value.permRead)}">
+                  [class.has-changes]="(accessItemsClone[index].permRead !== accessItem.value.permRead)">
                   <input (change)="setSelectAllCheckbox(index, $event)" aria-label="permRead"
                          aria-labelledby="permRead"
                          class="workbasket-access-items__permission-checkbox"
@@ -132,7 +130,7 @@
                 </td>
                 <!-- READ TASKS -->
                 <td
-                  [ngClass]="{ 'has-changes': (accessItemsClone[index].permReadTasks !== accessItem.value.permReadTasks)}">
+                  [class.has-changes]="(accessItemsClone[index].permReadTasks !== accessItem.value.permReadTasks)">
                   <input (change)="setSelectAllCheckbox(index, $event)" aria-label="permReadTasks"
                          aria-labelledby="permReadTasks"
                          class="workbasket-access-items__permission-checkbox"
@@ -141,7 +139,7 @@
                 </td>
                 <!-- OPEN -->
                 <td
-                  [ngClass]="{ 'has-changes': (accessItemsClone[index].permOpen !== accessItem.value.permOpen)}">
+                  [class.has-changes]="(accessItemsClone[index].permOpen !== accessItem.value.permOpen)">
                   <input (change)="setSelectAllCheckbox(index, $event)" aria-label="permOpen"
                          aria-labelledby="permOpen"
                          class="workbasket-access-items__permission-checkbox"
@@ -150,7 +148,7 @@
                 </td>
                 <!-- EDIT TASKS -->
                 <td
-                  [ngClass]="{ 'has-changes': (accessItemsClone[index].permEditTasks !== accessItem.value.permEditTasks)}">
+                  [class.has-changes]="(accessItemsClone[index].permEditTasks !== accessItem.value.permEditTasks)">
                   <input (change)="setSelectAllCheckbox(index, $event)" aria-label="permEditTasks"
                          aria-labelledby="permEditTasks"
                          class="workbasket-access-items__permission-checkbox"
@@ -159,7 +157,7 @@
                 </td>
                 <!-- APPEND -->
                 <td
-                  [ngClass]="{ 'has-changes': (accessItemsClone[index].permAppend !== accessItem.value.permAppend)}">
+                  [class.has-changes]="(accessItemsClone[index].permAppend !== accessItem.value.permAppend)">
                   <input (change)="setSelectAllCheckbox(index, $event)" aria-label="permAppend"
                          aria-labelledby="permAppend"
                          class="workbasket-access-items__permission-checkbox"
@@ -168,7 +166,7 @@
                 </td>
                 <!-- TRANSFER -->
                 <td
-                  [ngClass]="{ 'has-changes': (accessItemsClone[index].permTransfer !== accessItem.value.permTransfer)}">
+                  [class.has-changes]="(accessItemsClone[index].permTransfer !== accessItem.value.permTransfer)">
                   <input (change)="setSelectAllCheckbox(index, $event)" aria-label="permTransfer"
                          aria-labelledby="permTransfer"
                          class="workbasket-access-items__permission-checkbox"
@@ -177,7 +175,7 @@
                 </td>
                 <!-- DISTRIBUTE -->
                 <td
-                  [ngClass]="{ 'has-changes': (accessItemsClone[index].permDistribute !== accessItem.value.permDistribute)}">
+                  [class.has-changes]="(accessItemsClone[index].permDistribute !== accessItem.value.permDistribute)">
                   <input (change)="setSelectAllCheckbox(index, $event)" aria-label="permDistribute"
                          aria-labelledby="permDistribute"
                          class="workbasket-access-items__permission-checkbox"
@@ -188,7 +186,7 @@
                 @for (customField of customFields$ | async; track customField; let customIndex = $index) {
                   @if (customField.visible) {
                     <td
-                      [ngClass]="{ 'has-changes': accessItemsClone[index][getAccessItemCustomProperty(customIndex + 1)] !== accessItem.value[getAccessItemCustomProperty(customIndex+1)] }">
+                      [class.has-changes]="accessItemsClone[index][getAccessItemCustomProperty(customIndex + 1)] !== accessItem.value[getAccessItemCustomProperty(customIndex+1)]">
                       <input (change)="setSelectAllCheckbox(index, $event)" aria-label="customField"
                              aria-labelledby="customField"
                              class="workbasket-access-items__permission-checkbox"
