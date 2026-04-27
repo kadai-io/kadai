@@ -293,6 +293,13 @@ public class KadaiEngineImpl implements KadaiEngine {
     return priorityServiceManager;
   }
 
+  // This should be part of the InternalKadaiEngine. Unfortunately the jobs don't have access to
+  // that engine.
+  // Therefore, this getter exits and will be removed as soon as our jobs will be refactored.
+  public TaskMapper getTaskMapper() {
+    return sessionManager.getMapper(TaskMapper.class);
+  }
+
   @Override
   public JobService getJobService() {
     return new JobServiceImpl(internalKadaiEngineImpl, sessionManager.getMapper(JobMapper.class));

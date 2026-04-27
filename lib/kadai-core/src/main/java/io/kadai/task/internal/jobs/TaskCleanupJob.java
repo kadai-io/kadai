@@ -22,11 +22,9 @@ import static java.util.Objects.nonNull;
 import static java.util.function.Predicate.not;
 
 import io.kadai.KadaiConfiguration;
-import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.BulkOperationResults;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.ScheduledJob;
-import io.kadai.common.api.TimeInterval;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
@@ -35,7 +33,8 @@ import io.kadai.common.internal.jobs.AbstractKadaiJob;
 import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import io.kadai.common.internal.util.CollectionUtil;
 import io.kadai.common.internal.util.LogSanitizer;
-import io.kadai.task.api.models.TaskSummary;
+import io.kadai.task.internal.TaskMapper;
+import io.kadai.task.internal.models.TaskCleanupSummary;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
@@ -71,7 +70,7 @@ public class TaskCleanupJob extends AbstractKadaiJob {
     Instant completedBefore = Instant.now().minus(minimumAge);
     LOGGER.info("Running job to delete all tasks completed before ({})", completedBefore);
     try {
-      List<TaskSummary> tasksCompletedBefore = getTasksCompletedBefore(completedBefore);
+      List<TaskCleanupSummary> tasksCompletedBefore = getTasksCompletedBefore(completedBefore);
 
       int totalNumberOfTasksDeleted =
           CollectionUtil.partitionBasedOnSize(tasksCompletedBefore, batchSize).stream()
@@ -89,15 +88,11 @@ public class TaskCleanupJob extends AbstractKadaiJob {
     return TaskCleanupJob.class.getName();
   }
 
-  private List<TaskSummary> getTasksCompletedBefore(Instant untilDate) {
+  private List<TaskCleanupSummary> getTasksCompletedBefore(Instant untilDate) {
+    TaskMapper taskMapper = kadaiEngineImpl.getTaskMapper();
 
-    List<TaskSummary> tasksToDelete =
-        kadaiEngineImpl
-            .getTaskService()
-            .createTaskQuery()
-            .completedWithin(new TimeInterval(null, untilDate))
-            .orderByBusinessProcessId(SortDirection.ASCENDING)
-            .list();
+    List<TaskCleanupSummary> tasksToDelete =
+        taskMapper.findCompletedTasksCompletedBefore(untilDate);
 
     if (allCompletedSameParentBusiness) {
       Map<String, Long> numberParentTasksShouldHave = new HashMap<>();
@@ -106,13 +101,9 @@ public class TaskCleanupJob extends AbstractKadaiJob {
       tasksToDelete.forEach(
           task -> {
             if (!numberParentTasksShouldHave.containsKey(task.getParentBusinessProcessId())) {
-              numberParentTasksShouldHave.put(
-                  task.getParentBusinessProcessId(),
-                  kadaiEngineImpl
-                      .getTaskService()
-                      .createTaskQuery()
-                      .parentBusinessProcessIdIn(task.getParentBusinessProcessId())
-                      .count());
+              long count =
+                  taskMapper.countTasksByParentBusinessProcessId(task.getParentBusinessProcessId());
+              numberParentTasksShouldHave.put(task.getParentBusinessProcessId(), count);
             }
             countParentTask.merge(task.getParentBusinessProcessId(), 1L, Long::sum);
           });
@@ -137,7 +128,7 @@ public class TaskCleanupJob extends AbstractKadaiJob {
     return tasksToDelete;
   }
 
-  private int deleteTasksTransactionally(List<TaskSummary> tasksToBeDeleted) {
+  private int deleteTasksTransactionally(List<TaskCleanupSummary> tasksToBeDeleted) {
     return KadaiTransactionProvider.executeInTransactionIfPossible(
         txProvider,
         () -> {
@@ -150,10 +141,11 @@ public class TaskCleanupJob extends AbstractKadaiJob {
         });
   }
 
-  private int deleteTasks(List<TaskSummary> tasksToBeDeleted)
+  private int deleteTasks(List<TaskCleanupSummary> tasksToBeDeleted)
       throws InvalidArgumentException, NotAuthorizedException {
 
-    List<String> tasksIdsToBeDeleted = tasksToBeDeleted.stream().map(TaskSummary::getId).toList();
+    List<String> tasksIdsToBeDeleted =
+        tasksToBeDeleted.stream().map(TaskCleanupSummary::getTaskId).toList();
     BulkOperationResults<String, KadaiException> results =
         kadaiEngineImpl.getTaskService().deleteTasks(tasksIdsToBeDeleted);
     if (LOGGER.isDebugEnabled()) {

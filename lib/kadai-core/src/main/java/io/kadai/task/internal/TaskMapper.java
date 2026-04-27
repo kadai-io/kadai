@@ -24,6 +24,7 @@ import io.kadai.common.internal.util.Pair;
 import io.kadai.task.api.CallbackState;
 import io.kadai.task.api.models.TaskSummary;
 import io.kadai.task.internal.models.MinimalTaskSummary;
+import io.kadai.task.internal.models.TaskCleanupSummary;
 import io.kadai.task.internal.models.TaskImpl;
 import java.time.Instant;
 import java.util.Collection;
@@ -332,4 +333,21 @@ public interface TaskMapper {
   @Update(
       "UPDATE TASK SET MODIFIED = #{modified}, NUMBER_OF_COMMENTS = NUMBER_OF_COMMENTS-1 WHERE ID = #{id}")
   void decrementNumberOfComments(@Param("id") String id, @Param("modified") Instant modified);
+
+  @Select(
+      "<script>SELECT ID, PARENT_BUSINESS_PROCESS_ID FROM TASK "
+          + "WHERE COMPLETED &lt;= #{completedBefore} "
+          + "<if test=\"_databaseId == 'db2'\">with UR </if>"
+          + "</script>")
+  @Result(property = "taskId", column = "ID")
+  @Result(property = "parentBusinessProcessId", column = "PARENT_BUSINESS_PROCESS_ID")
+  List<TaskCleanupSummary> findCompletedTasksCompletedBefore(
+      @Param("completedBefore") Instant completedBefore);
+
+  @Select(
+      "<script>SELECT COUNT(*) FROM TASK "
+          + "WHERE PARENT_BUSINESS_PROCESS_ID = #{parentBpi} "
+          + "<if test=\"_databaseId == 'db2'\">with UR </if>"
+          + "</script>")
+  long countTasksByParentBusinessProcessId(@Param("parentBpi") String parentBpi);
 }
