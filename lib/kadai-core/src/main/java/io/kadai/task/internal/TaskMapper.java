@@ -341,7 +341,7 @@ public interface TaskMapper {
           + "</script>")
   @Result(property = "taskId", column = "ID")
   @Result(property = "parentBusinessProcessId", column = "PARENT_BUSINESS_PROCESS_ID")
-  List<TaskCleanupSummary> findCompletedTasksCompletedBefore(
+  List<TaskCleanupSummary> findTasksCompletedBefore(
       @Param("completedBefore") Instant completedBefore);
 
   @Select(

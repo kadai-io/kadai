@@ -91,8 +91,7 @@ public class TaskCleanupJob extends AbstractKadaiJob {
   private List<TaskCleanupSummary> getTasksCompletedBefore(Instant untilDate) {
     TaskMapper taskMapper = kadaiEngineImpl.getTaskMapper();
 
-    List<TaskCleanupSummary> tasksToDelete =
-        taskMapper.findCompletedTasksCompletedBefore(untilDate);
+    List<TaskCleanupSummary> tasksToDelete = taskMapper.findTasksCompletedBefore(untilDate);
 
     if (allCompletedSameParentBusiness) {
       Map<String, Long> numberParentTasksShouldHave = new HashMap<>();
