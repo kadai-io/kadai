@@ -26,7 +26,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
@@ -55,13 +54,11 @@ public class ActuatorSecurityConfiguration {
    *
    * @param http the {@link HttpSecurity} to configure
    * @return the configured {@link SecurityFilterChain}
-   * @throws Exception if an error occurs during configuration
    */
   @Bean
   @Order(1)
-  public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) throws Exception {
+  public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) {
     http.securityMatcher(EndpointRequest.toAnyEndpoint())
-        .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
             auth ->
                 auth.requestMatchers(EndpointRequest.to(HealthEndpoint.class))

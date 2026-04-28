@@ -63,8 +63,7 @@ class ActuatorIntTest {
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody()).isNotNull();
-    assertThat(response.getBody()).containsKey("status");
-    assertThat(response.getBody().get("status")).isEqualTo("UP");
+    assertThat(response.getBody()).containsEntry("status", "UP");
   }
 
   @Test
@@ -80,8 +79,7 @@ class ActuatorIntTest {
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody()).isNotNull();
-    assertThat(response.getBody()).containsKey("status");
-    assertThat(response.getBody().get("status")).isEqualTo("UP");
+    assertThat(response.getBody()).containsEntry("status", "UP");
     assertThat(response.getBody()).containsKey("components");
   }
 
@@ -96,8 +94,7 @@ class ActuatorIntTest {
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody()).isNotNull();
-    assertThat(response.getBody()).containsKey("status");
-    assertThat(response.getBody().get("status")).isEqualTo("UP");
+    assertThat(response.getBody()).containsEntry("status", "UP");
   }
 
   @Test
