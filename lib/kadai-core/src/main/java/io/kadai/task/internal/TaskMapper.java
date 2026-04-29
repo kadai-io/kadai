@@ -345,9 +345,32 @@ public interface TaskMapper {
       @Param("completedBefore") Instant completedBefore);
 
   @Select(
-      "<script>SELECT COUNT(*) FROM TASK "
-          + "WHERE PARENT_BUSINESS_PROCESS_ID = #{parentBpi} "
+      "<script>"
+          + "WITH ELIGIBLE_PARENT_BUSINESS_PROCESS_IDS AS ("
+          + "SELECT candidate.PARENT_BUSINESS_PROCESS_ID "
+          + "FROM ("
+          + "SELECT DISTINCT PARENT_BUSINESS_PROCESS_ID "
+          + "FROM TASK "
+          + "WHERE COMPLETED &lt;= #{completedBefore} "
+          + "AND PARENT_BUSINESS_PROCESS_ID IS NOT NULL "
+          + "AND PARENT_BUSINESS_PROCESS_ID &lt;&gt; ''"
+          + ") candidate "
+          + "LEFT JOIN TASK blocker "
+          + "ON blocker.PARENT_BUSINESS_PROCESS_ID = candidate.PARENT_BUSINESS_PROCESS_ID "
+          + "AND (blocker.COMPLETED IS NULL OR blocker.COMPLETED &gt; #{completedBefore}) "
+          + "WHERE blocker.ID IS NULL"
+          + ") "
+          + "SELECT t.ID, t.PARENT_BUSINESS_PROCESS_ID FROM TASK t "
+          + "LEFT JOIN ELIGIBLE_PARENT_BUSINESS_PROCESS_IDS eligible "
+          + "ON eligible.PARENT_BUSINESS_PROCESS_ID = t.PARENT_BUSINESS_PROCESS_ID "
+          + "WHERE t.COMPLETED &lt;= #{completedBefore} "
+          + "AND (t.PARENT_BUSINESS_PROCESS_ID IS NULL "
+          + "OR t.PARENT_BUSINESS_PROCESS_ID = '' "
+          + "OR eligible.PARENT_BUSINESS_PROCESS_ID IS NOT NULL) "
           + "<if test=\"_databaseId == 'db2'\">with UR </if>"
           + "</script>")
-  long countTasksByParentBusinessProcessId(@Param("parentBpi") String parentBpi);
+  @Result(property = "taskId", column = "ID")
+  @Result(property = "parentBusinessProcessId", column = "PARENT_BUSINESS_PROCESS_ID")
+  List<TaskCleanupSummary> findTasksCompletedBeforeWithParentBusinessProcessConstraint(
+      @Param("completedBefore") Instant completedBefore);
 }

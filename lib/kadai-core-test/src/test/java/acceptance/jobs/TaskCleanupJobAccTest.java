@@ -266,6 +266,36 @@ class TaskCleanupJobAccTest {
     }
 
     @WithAccessId(user = "admin")
+    @Test
+    void should_NotCleanCompletedTasksWithSameParentBusiness_When_OneSubTaskIsNotOldEnough()
+        throws Exception {
+      WorkbasketSummary workbasket =
+          DefaultTestEntities.defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
+      TaskBuilder taskBuilder =
+          TaskBuilder.newTask()
+              .workbasketSummary(workbasket)
+              .classificationSummary(classification)
+              .primaryObjRef(primaryObjRef)
+              .state(TaskState.COMPLETED)
+              .completed(Instant.now().minus(10, ChronoUnit.DAYS))
+              .parentBusinessProcessId("ParentProcessId_5");
+
+      TaskSummary taskSummaryOldEnough = taskBuilder.buildAndStoreAsSummary(taskService);
+      TaskSummary taskSummaryNotOldEnough =
+          taskBuilder
+              .completed(Instant.now().minus(3, ChronoUnit.DAYS))
+              .buildAndStoreAsSummary(taskService);
+
+      TaskCleanupJob job = new TaskCleanupJob(kadaiEngine, null, null);
+      job.run();
+
+      List<TaskSummary> taskSummaries = taskService.createTaskQuery().list();
+      assertThat(taskSummaries)
+          .filteredOn(t -> t.getWorkbasketSummary().equals(workbasket))
+          .containsExactlyInAnyOrder(taskSummaryOldEnough, taskSummaryNotOldEnough);
+    }
+
+    @WithAccessId(user = "admin")
     @TestFactory
     Stream<DynamicTest>
         should_DeleteCompletedTaskWithParentBusinessEmptyOrNull_When_RunningCleanupJob() {

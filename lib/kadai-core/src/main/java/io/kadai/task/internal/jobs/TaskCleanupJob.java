@@ -18,10 +18,6 @@
 
 package io.kadai.task.internal.jobs;
 
-import static java.util.Objects.nonNull;
-import static java.util.function.Predicate.not;
-
-import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.BulkOperationResults;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.ScheduledJob;
@@ -33,17 +29,14 @@ import io.kadai.common.internal.jobs.AbstractKadaiJob;
 import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import io.kadai.common.internal.util.CollectionUtil;
 import io.kadai.common.internal.util.LogSanitizer;
-import io.kadai.task.internal.TaskMapper;
 import io.kadai.task.internal.jobs.models.TaskCleanupSummary;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Job to cleanup completed tasks after a period of time. */
+/** Job to clean up completed tasks after a period of time. */
 public class TaskCleanupJob extends AbstractKadaiJob {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(TaskCleanupJob.class);
@@ -59,10 +52,6 @@ public class TaskCleanupJob extends AbstractKadaiJob {
     batchSize = kadaiEngine.getConfiguration().getJobBatchSize();
     allCompletedSameParentBusiness =
         kadaiEngine.getConfiguration().isTaskCleanupJobAllCompletedSameParentBusiness();
-  }
-
-  public static Duration getLockExpirationPeriod(KadaiConfiguration kadaiConfiguration) {
-    return kadaiConfiguration.getTaskCleanupJobLockExpirationPeriod();
   }
 
   @Override
@@ -89,42 +78,11 @@ public class TaskCleanupJob extends AbstractKadaiJob {
   }
 
   private List<TaskCleanupSummary> getTasksCompletedBefore(Instant untilDate) {
-    TaskMapper taskMapper = kadaiEngineImpl.getTaskMapper();
-
-    List<TaskCleanupSummary> tasksToDelete = taskMapper.findTasksCompletedBefore(untilDate);
-
-    if (allCompletedSameParentBusiness) {
-      Map<String, Long> numberParentTasksShouldHave = new HashMap<>();
-      Map<String, Long> countParentTask = new HashMap<>();
-
-      tasksToDelete.forEach(
-          task -> {
-            if (!numberParentTasksShouldHave.containsKey(task.getParentBusinessProcessId())) {
-              long count =
-                  taskMapper.countTasksByParentBusinessProcessId(task.getParentBusinessProcessId());
-              numberParentTasksShouldHave.put(task.getParentBusinessProcessId(), count);
-            }
-            countParentTask.merge(task.getParentBusinessProcessId(), 1L, Long::sum);
-          });
-
-      List<String> taskIdsNotAllCompletedSameParentBusiness =
-          numberParentTasksShouldHave.entrySet().stream()
-              .filter(entry -> nonNull(entry.getKey()))
-              .filter(not(entry -> entry.getKey().isEmpty()))
-              .filter(not(entry -> entry.getValue().equals(countParentTask.get(entry.getKey()))))
-              .map(Map.Entry::getKey)
-              .toList();
-
-      tasksToDelete =
-          tasksToDelete.stream()
-              .filter(
-                  taskSummary ->
-                      !taskIdsNotAllCompletedSameParentBusiness.contains(
-                          taskSummary.getParentBusinessProcessId()))
-              .toList();
-    }
-
-    return tasksToDelete;
+    return allCompletedSameParentBusiness
+        ? kadaiEngineImpl
+            .getTaskMapper()
+            .findTasksCompletedBeforeWithParentBusinessProcessConstraint(untilDate)
+        : kadaiEngineImpl.getTaskMapper().findTasksCompletedBefore(untilDate);
   }
 
   private int deleteTasksTransactionally(List<TaskCleanupSummary> tasksToBeDeleted) {
