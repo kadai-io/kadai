@@ -73,6 +73,23 @@ class TaskCleanupJobAccTest {
     primaryObjRef = DefaultTestEntities.defaultTestObjectReference().build();
   }
 
+  private TaskBuilder newTaskBuilder(WorkbasketSummary workbasket) {
+    return TaskBuilder.newTask()
+        .workbasketSummary(workbasket)
+        .classificationSummary(classification)
+        .primaryObjRef(primaryObjRef);
+  }
+
+  private List<TaskSummary> tasksForWorkbasket(WorkbasketSummary workbasket) throws Exception {
+    return taskService.createTaskQuery().list().stream()
+        .filter(t -> t.getWorkbasketSummary().equals(workbasket))
+        .toList();
+  }
+
+  private void runTaskCleanupJob(KadaiEngine kadaiEngine) throws Exception {
+    new TaskCleanupJob(kadaiEngine, null, null).run();
+  }
+
   @Nested
   @TestInstance(Lifecycle.PER_CLASS)
   class CleanCompletedTasks implements KadaiConfigurationModifier {
@@ -87,7 +104,8 @@ class TaskCleanupJobAccTest {
           .taskCleanupJobEnabled(true)
           .jobFirstRun(Instant.now().minus(10, ChronoUnit.MILLIS))
           .jobRunEvery(Duration.ofMillis(1))
-          .taskCleanupJobMinimumAge(Duration.ofDays(5));
+          .taskCleanupJobMinimumAge(Duration.ofDays(5))
+          .taskCleanupJobAllCompletedSameParentBusiness(false);
     }
 
     @WithAccessId(user = "businessadmin")
@@ -131,7 +149,8 @@ class TaskCleanupJobAccTest {
           .taskCleanupJobEnabled(true)
           .jobFirstRun(Instant.now().minus(10, ChronoUnit.MILLIS))
           .jobRunEvery(Duration.ofMillis(1))
-          .taskCleanupJobMinimumAge(Duration.ofDays(5));
+          .taskCleanupJobMinimumAge(Duration.ofDays(5))
+          .taskCleanupJobAllCompletedSameParentBusiness(false);
     }
 
     @WithAccessId(user = "admin")
@@ -183,6 +202,32 @@ class TaskCleanupJobAccTest {
           .containsExactlyInAnyOrder(taskSummary1)
           .doesNotContain(taskSummary2);
     }
+
+    @WithAccessId(user = "admin")
+    @Test
+    void should_CleanOldCompletedTask_When_GroupConstraintIsDisabled() throws Exception {
+      WorkbasketSummary workbasket =
+          DefaultTestEntities.defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
+
+      TaskSummary taskSummaryCompleted =
+          newTaskBuilder(workbasket)
+              .state(TaskState.COMPLETED)
+              .completed(Instant.now().minus(10, ChronoUnit.DAYS))
+              .parentBusinessProcessId("ParentProcessId_withoutConstraint")
+              .buildAndStoreAsSummary(taskService);
+      TaskSummary taskSummaryClaimed =
+          newTaskBuilder(workbasket)
+              .state(TaskState.CLAIMED)
+              .completed(null)
+              .parentBusinessProcessId("ParentProcessId_withoutConstraint")
+              .buildAndStoreAsSummary(taskService);
+
+      runTaskCleanupJob(kadaiEngine);
+
+      assertThat(tasksForWorkbasket(workbasket))
+          .containsExactlyInAnyOrder(taskSummaryClaimed)
+          .doesNotContain(taskSummaryCompleted);
+    }
   }
 
   @Nested
@@ -207,23 +252,52 @@ class TaskCleanupJobAccTest {
       WorkbasketSummary workbasket =
           DefaultTestEntities.defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
       TaskBuilder taskBuilder =
-          TaskBuilder.newTask()
-              .workbasketSummary(workbasket)
-              .classificationSummary(classification)
-              .primaryObjRef(primaryObjRef)
+          newTaskBuilder(workbasket)
               .state(TaskState.COMPLETED)
               .completed(Instant.now().minus(10, ChronoUnit.DAYS))
               .parentBusinessProcessId("ParentProcessId_1");
       taskBuilder.buildAndStoreAsSummary(taskService);
       taskBuilder.buildAndStoreAsSummary(taskService);
 
-      TaskCleanupJob job = new TaskCleanupJob(kadaiEngine, null, null);
-      job.run();
+      runTaskCleanupJob(kadaiEngine);
 
-      List<TaskSummary> taskSummaries = taskService.createTaskQuery().list();
-      assertThat(taskSummaries)
-          .filteredOn(t -> t.getWorkbasketSummary().equals(workbasket))
-          .isEmpty();
+      assertThat(tasksForWorkbasket(workbasket)).isEmpty();
+    }
+
+    @WithAccessId(user = "admin")
+    @Test
+    void should_CleanSingleCompletedTaskWithParentBusinessProcessId_When_NoSiblingExists()
+        throws Exception {
+      WorkbasketSummary workbasket =
+          DefaultTestEntities.defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
+
+      newTaskBuilder(workbasket)
+          .state(TaskState.COMPLETED)
+          .completed(Instant.now().minus(10, ChronoUnit.DAYS))
+          .parentBusinessProcessId("ParentProcessId_single_oldEnough")
+          .buildAndStoreAsSummary(taskService);
+
+      runTaskCleanupJob(kadaiEngine);
+
+      assertThat(tasksForWorkbasket(workbasket)).isEmpty();
+    }
+
+    @WithAccessId(user = "admin")
+    @Test
+    void should_NotCleanSingleParentBusinessTask_When_NotOldEnough() throws Exception {
+      WorkbasketSummary workbasket =
+          DefaultTestEntities.defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
+
+      TaskSummary taskSummary =
+          newTaskBuilder(workbasket)
+              .state(TaskState.COMPLETED)
+              .completed(Instant.now().minus(3, ChronoUnit.DAYS))
+              .parentBusinessProcessId("ParentProcessId_single_notOldEnough")
+              .buildAndStoreAsSummary(taskService);
+
+      runTaskCleanupJob(kadaiEngine);
+
+      assertThat(tasksForWorkbasket(workbasket)).containsExactlyInAnyOrder(taskSummary);
     }
 
     @WithAccessId(user = "admin")
@@ -233,10 +307,7 @@ class TaskCleanupJobAccTest {
       WorkbasketSummary workbasket =
           DefaultTestEntities.defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
       TaskBuilder taskBuilder =
-          TaskBuilder.newTask()
-              .workbasketSummary(workbasket)
-              .classificationSummary(classification)
-              .primaryObjRef(primaryObjRef)
+          newTaskBuilder(workbasket)
               .state(TaskState.COMPLETED)
               .completed(Instant.now().minus(10, ChronoUnit.DAYS))
               .parentBusinessProcessId("ParentProcessId_3");
@@ -255,12 +326,9 @@ class TaskCleanupJobAccTest {
               .completed(null)
               .buildAndStoreAsSummary(taskService);
 
-      TaskCleanupJob job = new TaskCleanupJob(kadaiEngine, null, null);
-      job.run();
+      runTaskCleanupJob(kadaiEngine);
 
-      List<TaskSummary> taskSummaries = taskService.createTaskQuery().list();
-      assertThat(taskSummaries)
-          .filteredOn(t -> t.getWorkbasketSummary().equals(workbasket))
+      assertThat(tasksForWorkbasket(workbasket))
           .containsExactlyInAnyOrder(taskSummaryCompleted, taskSummaryClaimed)
           .doesNotContain(taskSummaryCompleted1, taskSummaryCompleted2);
     }
@@ -272,10 +340,7 @@ class TaskCleanupJobAccTest {
       WorkbasketSummary workbasket =
           DefaultTestEntities.defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
       TaskBuilder taskBuilder =
-          TaskBuilder.newTask()
-              .workbasketSummary(workbasket)
-              .classificationSummary(classification)
-              .primaryObjRef(primaryObjRef)
+          newTaskBuilder(workbasket)
               .state(TaskState.COMPLETED)
               .completed(Instant.now().minus(10, ChronoUnit.DAYS))
               .parentBusinessProcessId("ParentProcessId_5");
@@ -286,13 +351,155 @@ class TaskCleanupJobAccTest {
               .completed(Instant.now().minus(3, ChronoUnit.DAYS))
               .buildAndStoreAsSummary(taskService);
 
-      TaskCleanupJob job = new TaskCleanupJob(kadaiEngine, null, null);
-      job.run();
+      runTaskCleanupJob(kadaiEngine);
 
-      List<TaskSummary> taskSummaries = taskService.createTaskQuery().list();
-      assertThat(taskSummaries)
-          .filteredOn(t -> t.getWorkbasketSummary().equals(workbasket))
+      assertThat(tasksForWorkbasket(workbasket))
           .containsExactlyInAnyOrder(taskSummaryOldEnough, taskSummaryNotOldEnough);
+    }
+
+    @WithAccessId(user = "admin")
+    @Test
+    void should_CleanCompletedTasksWithSameParentBusinessAcrossWorkbaskets_When_AllAreOldEnough()
+        throws Exception {
+      WorkbasketSummary workbasket1 =
+          DefaultTestEntities.defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
+      WorkbasketSummary workbasket2 =
+          DefaultTestEntities.defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
+
+      newTaskBuilder(workbasket1)
+          .state(TaskState.COMPLETED)
+          .completed(Instant.now().minus(10, ChronoUnit.DAYS))
+          .parentBusinessProcessId("ParentProcessId_acrossWorkbaskets_oldEnough")
+          .buildAndStoreAsSummary(taskService);
+      newTaskBuilder(workbasket2)
+          .state(TaskState.COMPLETED)
+          .completed(Instant.now().minus(8, ChronoUnit.DAYS))
+          .parentBusinessProcessId("ParentProcessId_acrossWorkbaskets_oldEnough")
+          .buildAndStoreAsSummary(taskService);
+
+      runTaskCleanupJob(kadaiEngine);
+
+      assertThat(tasksForWorkbasket(workbasket1)).isEmpty();
+      assertThat(tasksForWorkbasket(workbasket2)).isEmpty();
+    }
+
+    @WithAccessId(user = "admin")
+    @Test
+    void should_NotCleanParentBusinessGroupAcrossWorkbaskets_When_OtherTaskIsIncomplete()
+        throws Exception {
+      WorkbasketSummary workbasket1 =
+          DefaultTestEntities.defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
+      WorkbasketSummary workbasket2 =
+          DefaultTestEntities.defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
+
+      TaskSummary taskSummaryCompleted =
+          newTaskBuilder(workbasket1)
+              .state(TaskState.COMPLETED)
+              .completed(Instant.now().minus(10, ChronoUnit.DAYS))
+              .parentBusinessProcessId("ParentProcessId_acrossWorkbaskets_incomplete")
+              .buildAndStoreAsSummary(taskService);
+      TaskSummary taskSummaryClaimed =
+          newTaskBuilder(workbasket2)
+              .state(TaskState.CLAIMED)
+              .completed(null)
+              .parentBusinessProcessId("ParentProcessId_acrossWorkbaskets_incomplete")
+              .buildAndStoreAsSummary(taskService);
+
+      runTaskCleanupJob(kadaiEngine);
+
+      assertThat(tasksForWorkbasket(workbasket1)).containsExactlyInAnyOrder(taskSummaryCompleted);
+      assertThat(tasksForWorkbasket(workbasket2)).containsExactlyInAnyOrder(taskSummaryClaimed);
+    }
+
+    @WithAccessId(user = "admin")
+    @Test
+    void should_CleanOnlyEligibleTaskGroups_When_MixingGroupedAndUngroupedTasks() throws Exception {
+      WorkbasketSummary workbasket =
+          DefaultTestEntities.defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
+
+      TaskSummary eligibleGroupedTask1 =
+          newTaskBuilder(workbasket)
+              .state(TaskState.COMPLETED)
+              .completed(Instant.now().minus(10, ChronoUnit.DAYS))
+              .parentBusinessProcessId("ParentProcessId_mixed_eligible")
+              .buildAndStoreAsSummary(taskService);
+      TaskSummary eligibleGroupedTask2 =
+          newTaskBuilder(workbasket)
+              .state(TaskState.COMPLETED)
+              .completed(Instant.now().minus(7, ChronoUnit.DAYS))
+              .parentBusinessProcessId("ParentProcessId_mixed_eligible")
+              .buildAndStoreAsSummary(taskService);
+      TaskSummary blockedByIncompleteCompleted =
+          newTaskBuilder(workbasket)
+              .state(TaskState.COMPLETED)
+              .completed(Instant.now().minus(10, ChronoUnit.DAYS))
+              .parentBusinessProcessId("ParentProcessId_mixed_incomplete")
+              .buildAndStoreAsSummary(taskService);
+      TaskSummary blockedByIncompleteClaimed =
+          newTaskBuilder(workbasket)
+              .state(TaskState.CLAIMED)
+              .completed(null)
+              .parentBusinessProcessId("ParentProcessId_mixed_incomplete")
+              .buildAndStoreAsSummary(taskService);
+      TaskSummary blockedByRecentOldEnough =
+          newTaskBuilder(workbasket)
+              .state(TaskState.COMPLETED)
+              .completed(Instant.now().minus(10, ChronoUnit.DAYS))
+              .parentBusinessProcessId("ParentProcessId_mixed_recent")
+              .buildAndStoreAsSummary(taskService);
+      TaskSummary blockedByRecentNotOldEnough =
+          newTaskBuilder(workbasket)
+              .state(TaskState.COMPLETED)
+              .completed(Instant.now().minus(3, ChronoUnit.DAYS))
+              .parentBusinessProcessId("ParentProcessId_mixed_recent")
+              .buildAndStoreAsSummary(taskService);
+      TaskSummary nullParentCompleted =
+          newTaskBuilder(workbasket)
+              .state(TaskState.COMPLETED)
+              .completed(Instant.now().minus(10, ChronoUnit.DAYS))
+              .parentBusinessProcessId(null)
+              .buildAndStoreAsSummary(taskService);
+      TaskSummary nullParentClaimed =
+          newTaskBuilder(workbasket)
+              .state(TaskState.CLAIMED)
+              .completed(null)
+              .parentBusinessProcessId(null)
+              .buildAndStoreAsSummary(taskService);
+      TaskSummary emptyParentCompleted =
+          newTaskBuilder(workbasket)
+              .state(TaskState.COMPLETED)
+              .completed(Instant.now().minus(10, ChronoUnit.DAYS))
+              .parentBusinessProcessId("")
+              .buildAndStoreAsSummary(taskService);
+      TaskSummary emptyParentNotOldEnough =
+          newTaskBuilder(workbasket)
+              .state(TaskState.COMPLETED)
+              .completed(Instant.now().minus(3, ChronoUnit.DAYS))
+              .parentBusinessProcessId("")
+              .buildAndStoreAsSummary(taskService);
+      TaskSummary singleGroupedOldEnough =
+          newTaskBuilder(workbasket)
+              .state(TaskState.COMPLETED)
+              .completed(Instant.now().minus(10, ChronoUnit.DAYS))
+              .parentBusinessProcessId("ParentProcessId_mixed_single")
+              .buildAndStoreAsSummary(taskService);
+
+      runTaskCleanupJob(kadaiEngine);
+
+      assertThat(tasksForWorkbasket(workbasket))
+          .containsExactlyInAnyOrder(
+              blockedByIncompleteCompleted,
+              blockedByIncompleteClaimed,
+              blockedByRecentOldEnough,
+              blockedByRecentNotOldEnough,
+              nullParentClaimed,
+              emptyParentNotOldEnough)
+          .doesNotContain(
+              eligibleGroupedTask1,
+              eligibleGroupedTask2,
+              nullParentCompleted,
+              emptyParentCompleted,
+              singleGroupedOldEnough);
     }
 
     @WithAccessId(user = "admin")
@@ -307,10 +514,7 @@ class TaskCleanupJobAccTest {
                 DefaultTestEntities.defaultTestWorkbasket()
                     .buildAndStoreAsSummary(workbasketService);
             TaskBuilder taskBuilder =
-                TaskBuilder.newTask()
-                    .workbasketSummary(workbasket)
-                    .classificationSummary(classification)
-                    .primaryObjRef(primaryObjRef)
+                newTaskBuilder(workbasket)
                     .state(TaskState.COMPLETED)
                     .completed(Instant.now().minus(10, ChronoUnit.DAYS))
                     .parentBusinessProcessId(parentBusinessId);
@@ -322,13 +526,43 @@ class TaskCleanupJobAccTest {
                     .completed(null)
                     .buildAndStoreAsSummary(taskService);
 
-            TaskCleanupJob job = new TaskCleanupJob(kadaiEngine, null, null);
-            job.run();
+            runTaskCleanupJob(kadaiEngine);
 
-            List<TaskSummary> taskSummaries = taskService.createTaskQuery().list();
-            assertThat(taskSummaries)
-                .filteredOn(t -> t.getWorkbasketSummary().equals(workbasket))
+            assertThat(tasksForWorkbasket(workbasket))
                 .containsExactlyInAnyOrder(taskSummaryClaimed)
+                .doesNotContain(taskSummaryCompleted);
+          };
+      return DynamicTest.stream(iterator, c -> "for parentBusinessProcessId = '" + c + "'", test);
+    }
+
+    @WithAccessId(user = "admin")
+    @TestFactory
+    Stream<DynamicTest>
+        should_DeleteCompletedTaskWithParentBusinessEmptyOrNull_When_SiblingIsNotOldEnough() {
+      Iterator<String> iterator = Arrays.asList("", null).iterator();
+
+      ThrowingConsumer<String> test =
+          parentBusinessId -> {
+            WorkbasketSummary workbasket =
+                DefaultTestEntities.defaultTestWorkbasket()
+                    .buildAndStoreAsSummary(workbasketService);
+            TaskSummary taskSummaryCompleted =
+                newTaskBuilder(workbasket)
+                    .state(TaskState.COMPLETED)
+                    .completed(Instant.now().minus(10, ChronoUnit.DAYS))
+                    .parentBusinessProcessId(parentBusinessId)
+                    .buildAndStoreAsSummary(taskService);
+            TaskSummary taskSummaryNotOldEnough =
+                newTaskBuilder(workbasket)
+                    .state(TaskState.COMPLETED)
+                    .completed(Instant.now().minus(3, ChronoUnit.DAYS))
+                    .parentBusinessProcessId(parentBusinessId)
+                    .buildAndStoreAsSummary(taskService);
+
+            runTaskCleanupJob(kadaiEngine);
+
+            assertThat(tasksForWorkbasket(workbasket))
+                .containsExactlyInAnyOrder(taskSummaryNotOldEnough)
                 .doesNotContain(taskSummaryCompleted);
           };
       return DynamicTest.stream(iterator, c -> "for parentBusinessProcessId = '" + c + "'", test);
