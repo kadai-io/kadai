@@ -353,7 +353,7 @@ public interface TaskMapper {
           + "FROM TASK "
           + "WHERE COMPLETED &lt;= #{completedBefore} "
           + "AND PARENT_BUSINESS_PROCESS_ID IS NOT NULL "
-          + "AND PARENT_BUSINESS_PROCESS_ID &lt;&gt; ''"
+          + "AND CHARACTER_LENGTH(PARENT_BUSINESS_PROCESS_ID) &gt; 0"
           + ") candidate "
           + "LEFT JOIN TASK blocker "
           + "ON blocker.PARENT_BUSINESS_PROCESS_ID = candidate.PARENT_BUSINESS_PROCESS_ID "
@@ -365,7 +365,7 @@ public interface TaskMapper {
           + "ON eligible.PARENT_BUSINESS_PROCESS_ID = t.PARENT_BUSINESS_PROCESS_ID "
           + "WHERE t.COMPLETED &lt;= #{completedBefore} "
           + "AND (t.PARENT_BUSINESS_PROCESS_ID IS NULL "
-          + "OR t.PARENT_BUSINESS_PROCESS_ID = '' "
+          + "OR CHARACTER_LENGTH(t.PARENT_BUSINESS_PROCESS_ID) = 0 "
           + "OR eligible.PARENT_BUSINESS_PROCESS_ID IS NOT NULL) "
           + "<if test=\"_databaseId == 'db2'\">with UR </if>"
           + "</script>")
