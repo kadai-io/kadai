@@ -34,7 +34,7 @@ import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import io.kadai.common.internal.util.CollectionUtil;
 import io.kadai.common.internal.util.LogSanitizer;
 import io.kadai.task.internal.TaskMapper;
-import io.kadai.task.internal.models.TaskCleanupSummary;
+import io.kadai.task.internal.jobs.models.TaskCleanupSummary;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;

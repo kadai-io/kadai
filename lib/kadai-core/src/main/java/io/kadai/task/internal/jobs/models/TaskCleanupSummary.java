@@ -16,7 +16,7 @@
  *
  */
 
-package io.kadai.task.internal.models;
+package io.kadai.task.internal.jobs.models;
 
 import java.util.Objects;
 
