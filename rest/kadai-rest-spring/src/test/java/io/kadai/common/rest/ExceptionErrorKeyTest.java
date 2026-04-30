@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -29,19 +29,24 @@ import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.ConnectionNotSetException;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.api.exceptions.LogicalDuplicateInPayloadException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.api.exceptions.UnsupportedDatabaseException;
 import io.kadai.common.api.exceptions.WrongCustomHolidayFormatException;
-import io.kadai.spi.history.api.exceptions.KadaiHistoryEventNotFoundException;
+import io.kadai.spi.history.api.exceptions.ClassificationHistoryEventNotFoundException;
+import io.kadai.spi.history.api.exceptions.TaskHistoryEventNotFoundException;
+import io.kadai.spi.history.api.exceptions.WorkbasketHistoryEventNotFoundException;
 import io.kadai.task.api.exceptions.AttachmentPersistenceException;
 import io.kadai.task.api.exceptions.InvalidCallbackStateException;
 import io.kadai.task.api.exceptions.InvalidOwnerException;
 import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.NotAuthorizedOnTaskCommentException;
+import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
+import io.kadai.task.api.exceptions.TransferCheckException;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
@@ -84,11 +89,18 @@ class ExceptionErrorKeyTest {
     assertThat(WrongCustomHolidayFormatException.ERROR_KEY)
         .isEqualTo("CUSTOM_HOLIDAY_WRONG_FORMAT");
     assertThat(InvalidArgumentException.ERROR_KEY).isEqualTo("INVALID_ARGUMENT");
+    assertThat(LogicalDuplicateInPayloadException.ERROR_KEY)
+        .isEqualTo("LOGICAL_DUPLICATE_IN_PAYLOAD");
   }
 
   @Test
   void should_ProvideConsistentErrorKey_For_SpiExceptions() {
-    assertThat(KadaiHistoryEventNotFoundException.ERROR_KEY).isEqualTo("HISTORY_EVENT_NOT_FOUND");
+    assertThat(TaskHistoryEventNotFoundException.ERROR_KEY)
+        .isEqualTo("TASK_HISTORY_EVENT_NOT_FOUND");
+    assertThat(ClassificationHistoryEventNotFoundException.ERROR_KEY)
+        .isEqualTo("CLASSIFICATION_HISTORY_EVENT_NOT_FOUND");
+    assertThat(WorkbasketHistoryEventNotFoundException.ERROR_KEY)
+        .isEqualTo("WORKBASKET_HISTORY_EVENT_NOT_FOUND");
   }
 
   @Test
@@ -102,6 +114,8 @@ class ExceptionErrorKeyTest {
     assertThat(TaskAlreadyExistException.ERROR_KEY).isEqualTo("TASK_ALREADY_EXISTS");
     assertThat(TaskCommentNotFoundException.ERROR_KEY).isEqualTo("TASK_COMMENT_NOT_FOUND");
     assertThat(TaskNotFoundException.ERROR_KEY).isEqualTo("TASK_NOT_FOUND");
+    assertThat(TransferCheckException.ERROR_KEY).isEqualTo("TASK_TRANSFER_CHECK_FAILED");
+    assertThat(ReopenTaskWithCallbackException.ERROR_KEY).isEqualTo("REOPEN_TASK_WITH_CALLBACK");
   }
 
   @Test
@@ -123,7 +137,7 @@ class ExceptionErrorKeyTest {
 
   @Test
   void should_ProvideConsistentErrorKey_For_RestExceptions() {
-    assertThat(KadaiRestExceptionHandler.ERROR_KEY_PAYLOAD).isEqualTo("PAYLOAD_TOO_LARGE");
+    assertThat(KadaiRestExceptionHandler.ERROR_KEY_PAYLOAD).isEqualTo("CONTENT_TOO_LARGE");
     assertThat(KadaiRestExceptionHandler.ERROR_KEY_QUERY_MALFORMED)
         .isEqualTo("QUERY_PARAMETER_MALFORMED");
   }

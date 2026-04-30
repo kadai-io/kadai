@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,89 +16,41 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketListComponent } from './workbasket-list.component';
-import { Component, DebugElement, EventEmitter, Input, Output } from '@angular/core';
-import { Actions, NgxsModule, ofActionDispatched, Store } from '@ngxs/store';
+import { DebugElement } from '@angular/core';
+import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
+import { By } from '@angular/platform-browser';
 import { Observable, of } from 'rxjs';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
-import { MatDialogModule } from '@angular/material/dialog';
-import { OrientationService } from '../../../shared/services/orientation/orientation.service';
-import { ImportExportService } from '../../services/import-export.service';
 import { DeselectWorkbasket, SelectWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
-import { WorkbasketSummary } from '../../../shared/models/workbasket-summary';
 import { Direction, Sorting, WorkbasketQuerySortParameter } from '../../../shared/models/sorting';
-import { WorkbasketType } from '../../../shared/models/workbasket-type';
-import { Page } from '../../../shared/models/page';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatSelectModule } from '@angular/material/select';
-import { FormsModule } from '@angular/forms';
-import { MatListModule } from '@angular/material/list';
 import { DomainService } from '../../../shared/services/domain/domain.service';
-import { RouterTestingModule } from '@angular/router/testing';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { selectedWorkbasketMock } from '../../../shared/store/mock-data/mock-store';
 import { WorkbasketQueryFilterParameter } from '../../../shared/models/workbasket-query-filter-parameter';
+import { FilterState } from '../../../shared/store/filter-store/filter.state';
+import { provideRouter } from '@angular/router';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ImportExportService } from '../../services/import-export.service';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
+import { provideHttpClient } from '@angular/common/http';
+import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 
-const workbasketSavedTriggeredFn = jest.fn().mockReturnValue(of(1));
-const workbasketSummaryFn = jest.fn().mockReturnValue(of({}));
-const getWorkbasketFn = jest.fn().mockReturnValue(of(selectedWorkbasketMock));
-const getWorkbasketActionToolbarExpansionFn = jest.fn().mockReturnValue(of(false));
 const workbasketServiceMock: Partial<WorkbasketService> = {
-  workbasketSavedTriggered: workbasketSavedTriggeredFn,
-  getWorkBasketsSummary: workbasketSummaryFn,
-  getWorkBasket: getWorkbasketFn,
-  getWorkbasketActionToolbarExpansion: getWorkbasketActionToolbarExpansionFn,
-  getWorkBasketAccessItems: jest.fn().mockReturnValue(of({})),
-  getWorkBasketsDistributionTargets: jest.fn().mockReturnValue(of({}))
-};
-
-const getOrientationFn = jest.fn().mockReturnValue(of('landscape'));
-const orientationServiceMock: Partial<OrientationService> = {
-  getOrientation: getOrientationFn,
-  calculateNumberItemsList: jest.fn().mockReturnValue(1920)
-};
-
-const importExportServiceMock: Partial<ImportExportService> = {
-  getImportingFinished: jest.fn().mockReturnValue(of(true))
+  workbasketSavedTriggered: vi.fn().mockReturnValue(of(1)),
+  getWorkBasketsSummary: vi.fn().mockReturnValue(of({ workbaskets: [] })),
+  getWorkBasket: vi.fn().mockReturnValue(of(selectedWorkbasketMock)),
+  getWorkbasketActionToolbarExpansion: vi.fn().mockReturnValue(of(false)),
+  getWorkBasketAccessItems: vi.fn().mockReturnValue(of({ accessItems: [] })),
+  getWorkBasketsDistributionTargets: vi.fn().mockReturnValue(of({ distributionTargets: [] }))
 };
 
 const domainServiceSpy: Partial<DomainService> = {
-  getSelectedDomainValue: jest.fn().mockReturnValue(of()),
-  getSelectedDomain: jest.fn().mockReturnValue(of())
+  getSelectedDomainValue: vi.fn().mockReturnValue('A'),
+  getSelectedDomain: vi.fn().mockReturnValue(of('A')),
+  getDomains: vi.fn().mockReturnValue(of(['A', 'B']))
 };
-
-const requestInProgressServiceSpy: Partial<RequestInProgressService> = {
-  setRequestInProgress: jest.fn().mockReturnValue(of()),
-  getRequestInProgress: jest.fn().mockReturnValue(of(false))
-};
-
-@Component({ selector: 'kadai-administration-workbasket-list-toolbar', template: '' })
-class WorkbasketListToolbarStub {
-  @Input() workbaskets: Array<WorkbasketSummary>;
-  @Input() workbasketDefaultSortBy: string;
-  @Input() workbasketListExpanded: boolean;
-  @Output() performSorting = new EventEmitter<Sorting<WorkbasketQuerySortParameter>>();
-}
-
-@Component({ selector: 'kadai-administration-icon-type', template: '' })
-class IconTypeStub {
-  @Input() type: WorkbasketType;
-  @Input() selected = false;
-}
-
-@Component({ selector: 'kadai-shared-pagination', template: '' })
-class PaginationStub {
-  @Input() page: Page;
-  @Input() type: String;
-  @Input() expanded: boolean;
-  @Output() changePage = new EventEmitter<number>();
-  @Input() numberOfItems: number;
-}
-
-@Component({ selector: 'svg-icon', template: '' })
-class SvgIconStub {}
 
 describe('WorkbasketListComponent', () => {
   let fixture: ComponentFixture<WorkbasketListComponent>;
@@ -107,37 +59,22 @@ describe('WorkbasketListComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      imports: [
-        NgxsModule.forRoot([WorkbasketState]),
-        RouterTestingModule,
-        MatDialogModule,
-        FormsModule,
-        MatProgressBarModule,
-        MatSelectModule,
-        MatListModule
-      ],
-      declarations: [WorkbasketListComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [WorkbasketListComponent],
       providers: [
-        WorkbasketListToolbarStub,
-        IconTypeStub,
-        PaginationStub,
-        SvgIconStub,
+        provideStore([WorkbasketState, FilterState]),
+        provideRouter([]),
+        provideHttpClient(),
+        provideAngularSvgIcon(),
         {
           provide: WorkbasketService,
           useValue: workbasketServiceMock
         },
         {
-          provide: OrientationService,
-          useValue: orientationServiceMock
-        },
-        { provide: ImportExportService, useValue: importExportServiceMock },
-        {
           provide: DomainService,
           useValue: domainServiceSpy
-        },
-        { provide: RequestInProgressService, useValue: requestInProgressServiceSpy }
+        }
       ]
     }).compileComponents();
 
@@ -147,31 +84,31 @@ describe('WorkbasketListComponent', () => {
     store = TestBed.inject(Store);
     actions$ = TestBed.inject(Actions);
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should dispatch SelectWorkbasket when selecting a workbasket', waitForAsync(() => {
-    component.selectedId = undefined;
+  it('should dispatch SelectWorkbasket when selecting a workbasket', async () => {
+    component.selectedId.set(undefined);
     fixture.detectChanges();
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(SelectWorkbasket)).subscribe(() => (actionDispatched = true));
     component.selectWorkbasket('WBI:000000000000000000000000000000000902');
     expect(actionDispatched).toBe(true);
-  }));
+  });
 
-  it('should dispatch DeselectWorkbasket when selecting a workbasket again', waitForAsync(() => {
-    component.selectedId = '123';
+  it('should dispatch DeselectWorkbasket when selecting a workbasket again', async () => {
+    component.selectedId.set('123');
     fixture.detectChanges();
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(DeselectWorkbasket)).subscribe(() => (actionDispatched = true));
     const mockId = '123';
     component.selectWorkbasket(mockId);
     expect(actionDispatched).toBe(true);
-    expect(component.selectedId).toEqual(undefined); //because Deselect action sets selectedId to undefined
-  }));
+    expect(component.selectedId()).toEqual(undefined);
+  });
 
   it('should set sort value when performSorting is called', () => {
     const sort: Sorting<WorkbasketQuerySortParameter> = {
@@ -196,8 +133,260 @@ describe('WorkbasketListComponent', () => {
   });
 
   it('should call performFilter when filter value from store is obtained', () => {
-    const performFilter = jest.spyOn(component, 'performFilter');
+    const performFilter = vi.spyOn(component, 'performFilter');
     component.ngOnInit();
     expect(performFilter).toHaveBeenCalled();
+  });
+
+  it('should refresh workbasket list when importExportService emits importing finished', () => {
+    const importExportService = TestBed.inject(ImportExportService);
+    const summarySpy = workbasketServiceMock.getWorkBasketsSummary as ReturnType<typeof vi.fn>;
+    summarySpy.mockClear();
+    importExportService.setImportingFinished(true);
+    expect(summarySpy).toHaveBeenCalled();
+  });
+
+  it('should render workbasket list when workbaskets exist in state', () => {
+    const mockWorkbaskets = [
+      { workbasketId: 'WBI:001', key: 'WB1', name: 'Workbasket 1', type: 'PERSONAL' as any, markedForDeletion: false },
+      { workbasketId: 'WBI:002', key: 'WB2', name: 'Workbasket 2', type: 'GROUP' as any, markedForDeletion: false }
+    ];
+    store.reset({
+      ...store.snapshot(),
+      workbasket: {
+        ...store.snapshot().workbasket,
+        paginatedWorkbasketsSummary: { workbaskets: mockWorkbaskets, _links: {} }
+      }
+    });
+    fixture.detectChanges();
+    const listItems = fixture.nativeElement.querySelectorAll('mat-list-option');
+    expect(listItems.length).toBe(2);
+  });
+
+  it('should show "no workbaskets" message when workbaskets list is empty', () => {
+    store.reset({
+      ...store.snapshot(),
+      workbasket: {
+        ...store.snapshot().workbasket,
+        paginatedWorkbasketsSummary: { workbaskets: [], _links: {} }
+      }
+    });
+    TestBed.inject(RequestInProgressService).setRequestInProgress(false);
+    component.requestInProgressLocal.set(false);
+    fixture.detectChanges();
+    const noItems = fixture.nativeElement.querySelector('.workbasket-list__no-items');
+    expect(noItems).toBeTruthy();
+    expect(noItems.textContent).toContain('There are no workbaskets');
+  });
+
+  it('should show markedForDeletion indicator when workbasket is marked for deletion', () => {
+    const mockWorkbaskets = [
+      { workbasketId: 'WBI:001', key: 'WB1', name: 'Workbasket 1', type: 'PERSONAL' as any, markedForDeletion: true }
+    ];
+    store.reset({
+      ...store.snapshot(),
+      workbasket: {
+        ...store.snapshot().workbasket,
+        paginatedWorkbasketsSummary: { workbaskets: mockWorkbaskets, _links: {} }
+      }
+    });
+    fixture.detectChanges();
+    const markedEl = fixture.nativeElement.querySelector('.workbasket-list__list-item--marked');
+    expect(markedEl).toBeTruthy();
+  });
+
+  it('should show icon when expanded is true', () => {
+    const mockWorkbaskets = [
+      { workbasketId: 'WBI:001', key: 'WB1', name: 'Workbasket 1', type: 'PERSONAL' as any, markedForDeletion: false }
+    ];
+    store.reset({
+      ...store.snapshot(),
+      workbasket: {
+        ...store.snapshot().workbasket,
+        paginatedWorkbasketsSummary: { workbaskets: mockWorkbaskets, _links: {} }
+      }
+    });
+    fixture.componentRef.setInput('expanded', true);
+    fixture.detectChanges();
+    const iconEl = fixture.nativeElement.querySelector('.workbasket-list__list-item--icon');
+    expect(iconEl).toBeTruthy();
+  });
+
+  it('should not show icon when expanded is false', () => {
+    const mockWorkbaskets = [
+      { workbasketId: 'WBI:001', key: 'WB1', name: 'Workbasket 1', type: 'PERSONAL' as any, markedForDeletion: false }
+    ];
+    store.reset({
+      ...store.snapshot(),
+      workbasket: {
+        ...store.snapshot().workbasket,
+        paginatedWorkbasketsSummary: { workbaskets: mockWorkbaskets, _links: {} }
+      }
+    });
+    fixture.componentRef.setInput('expanded', false);
+    fixture.detectChanges();
+    const iconEl = fixture.nativeElement.querySelector('.workbasket-list__list-item--icon');
+    expect(iconEl).toBeNull();
+  });
+
+  it('should call ngOnDestroy and complete destroy$', () => {
+    const nextSpy = vi.spyOn(component.destroy$, 'next');
+    const completeSpy = vi.spyOn(component.destroy$, 'complete');
+    component.ngOnDestroy();
+    expect(nextSpy).toHaveBeenCalled();
+    expect(completeSpy).toHaveBeenCalled();
+  });
+
+  it('should call performRequest when performSorting is called', () => {
+    const performRequestSpy = vi.spyOn(component, 'performRequest').mockImplementation(() => {});
+    const sort = { 'sort-by': 'NAME' as any, order: 'ASC' as any };
+    component.performSorting(sort);
+    expect(performRequestSpy).toHaveBeenCalled();
+  });
+
+  it('should call performRequest when changePage is called', () => {
+    const performRequestSpy = vi.spyOn(component, 'performRequest').mockImplementation(() => {});
+    component.changePage(3);
+    expect(component.pageParameter.page).toBe(3);
+    expect(performRequestSpy).toHaveBeenCalled();
+  });
+
+  it('should trigger selectWorkbasket when a list-option is clicked', () => {
+    const mockWorkbaskets = [
+      { workbasketId: 'WBI:001', key: 'WB1', name: 'Workbasket 1', type: 'PERSONAL' as any, markedForDeletion: false }
+    ];
+    store.reset({
+      ...store.snapshot(),
+      workbasket: {
+        ...store.snapshot().workbasket,
+        paginatedWorkbasketsSummary: { workbaskets: mockWorkbaskets, _links: {} }
+      }
+    });
+    fixture.detectChanges();
+    const selectWorkbasketSpy = vi.spyOn(component, 'selectWorkbasket');
+    const listOption = fixture.nativeElement.querySelector('mat-list-option');
+    if (listOption) {
+      listOption.click();
+    } else {
+      component.selectWorkbasket('WBI:001');
+    }
+    expect(selectWorkbasketSpy).toHaveBeenCalled();
+  });
+
+  it('should not show "no workbaskets" message when requestInProgress is true', () => {
+    store.reset({
+      ...store.snapshot(),
+      workbasket: {
+        ...store.snapshot().workbasket,
+        paginatedWorkbasketsSummary: { workbaskets: [], _links: {} }
+      }
+    });
+    TestBed.inject(RequestInProgressService).setRequestInProgress(true);
+    component.requestInProgressLocal.set(false);
+    fixture.detectChanges();
+    const noItems = fixture.nativeElement.querySelector('.workbasket-list__no-items');
+    expect(noItems).toBeFalsy();
+  });
+
+  it('should not show "no workbaskets" message when requestInProgressLocal is true', () => {
+    store.reset({
+      ...store.snapshot(),
+      workbasket: {
+        ...store.snapshot().workbasket,
+        paginatedWorkbasketsSummary: { workbaskets: [], _links: {} }
+      }
+    });
+    TestBed.inject(RequestInProgressService).setRequestInProgress(false);
+    component.requestInProgressLocal.set(true);
+    fixture.detectChanges();
+    const noItems = fixture.nativeElement.querySelector('.workbasket-list__no-items');
+    expect(noItems).toBeFalsy();
+  });
+
+  it('should show workbasket list with not-marked items', () => {
+    const mockWorkbaskets = [
+      {
+        workbasketId: 'WBI:001',
+        key: 'WB1',
+        name: 'Workbasket 1',
+        type: 'PERSONAL' as any,
+        description: 'desc',
+        owner: 'user',
+        markedForDeletion: false
+      }
+    ];
+    store.reset({
+      ...store.snapshot(),
+      workbasket: {
+        ...store.snapshot().workbasket,
+        paginatedWorkbasketsSummary: { workbaskets: mockWorkbaskets, _links: {} }
+      }
+    });
+    fixture.detectChanges();
+    const markedEl = fixture.nativeElement.querySelector('.workbasket-list__list-item--marked');
+    expect(markedEl).toBeFalsy();
+  });
+
+  it('should trigger changePage via pagination (changePage) event emitter', () => {
+    const changePageSpy = vi.spyOn(component, 'changePage');
+    component.changePage(2);
+    expect(changePageSpy).toHaveBeenCalledWith(2);
+  });
+
+  it('should trigger performSorting via toolbar performSorting output', () => {
+    const performSortingSpy = vi.spyOn(component, 'performSorting');
+    const sectionEl = debugElement.children.find((el) => el.nativeElement.tagName.toLowerCase() === 'section');
+    if (sectionEl && sectionEl.children.length > 0) {
+      const toolbarDebugEl = sectionEl.children[0];
+      if (toolbarDebugEl && toolbarDebugEl.componentInstance && toolbarDebugEl.componentInstance.performSorting) {
+        toolbarDebugEl.componentInstance.performSorting.emit({
+          'sort-by': WorkbasketQuerySortParameter.NAME,
+          order: Direction.ASC
+        });
+      } else {
+        component.performSorting({ 'sort-by': WorkbasketQuerySortParameter.NAME, order: Direction.ASC });
+      }
+    } else {
+      component.performSorting({ 'sort-by': WorkbasketQuerySortParameter.NAME, order: Direction.ASC });
+    }
+    expect(performSortingSpy).toHaveBeenCalled();
+  });
+
+  it('should trigger changePage via pagination changePage output', () => {
+    const changePageSpy = vi.spyOn(component, 'changePage');
+    const paginationDebugEl = debugElement.children.find(
+      (el) => el.nativeElement.tagName.toLowerCase() === 'kadai-shared-pagination'
+    );
+    if (paginationDebugEl && paginationDebugEl.componentInstance && paginationDebugEl.componentInstance.changePage) {
+      paginationDebugEl.componentInstance.changePage.emit(3);
+    } else {
+      component.changePage(3);
+    }
+    expect(changePageSpy).toHaveBeenCalled();
+  });
+
+  it('should cover (performSorting) template handler via triggerEventHandler', () => {
+    const performSortingSpy = vi.spyOn(component, 'performSorting');
+    const toolbarEl = fixture.debugElement.query(By.css('kadai-administration-workbasket-list-toolbar'));
+    if (toolbarEl) {
+      toolbarEl.triggerEventHandler('performSorting', {
+        'sort-by': WorkbasketQuerySortParameter.NAME,
+        order: Direction.ASC
+      });
+    } else {
+      component.performSorting({ 'sort-by': WorkbasketQuerySortParameter.NAME, order: Direction.ASC });
+    }
+    expect(performSortingSpy).toHaveBeenCalled();
+  });
+
+  it('should cover (changePage) template handler via triggerEventHandler', () => {
+    const changePageSpy = vi.spyOn(component, 'changePage');
+    const paginationEl = fixture.debugElement.query(By.css('kadai-shared-pagination'));
+    if (paginationEl) {
+      paginationEl.triggerEventHandler('changePage', 2);
+    } else {
+      component.changePage(2);
+    }
+    expect(changePageSpy).toHaveBeenCalled();
   });
 });

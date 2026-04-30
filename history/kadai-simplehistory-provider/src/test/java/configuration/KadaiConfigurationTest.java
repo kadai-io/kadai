@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -45,13 +45,12 @@ class KadaiConfigurationTest extends AbstractAccTest {
   @Test
   void testCreateKadaiHistoryEventWithNonDefaultSchemaName() throws Exception {
     resetDb("SOMECUSTOMSCHEMANAME");
-    long count = getHistoryService().createTaskHistoryQuery().workbasketKeyIn("wbKey1").count();
+    long count = taskHistoryService.createTaskHistoryQuery().workbasketKeyIn("wbKey1").count();
     assertThat(count).isZero();
-    getHistoryService()
-        .create(
-            AbstractAccTest.createTaskHistoryEvent(
-                "wbKey1", "taskId1", "type1", "Some comment", "wbKey2", "someUserId"));
-    count = getHistoryService().createTaskHistoryQuery().workbasketKeyIn("wbKey1").count();
+    taskHistoryService.createTaskHistoryEvent(
+        AbstractAccTest.createTaskHistoryEvent(
+            "wbKey1", "taskId1", "type1", "Some comment", "wbKey2", "someUserId"));
+    count = taskHistoryService.createTaskHistoryQuery().workbasketKeyIn("wbKey1").count();
     assertThat(count).isOne();
   }
 }

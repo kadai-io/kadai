@@ -1,19 +1,36 @@
+/*
+ * Copyright [2026] [envite consulting GmbH]
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
+ *
+ */
+
 package io.kadai.workbasket.rest;
 
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.api.exceptions.LogicalDuplicateInPayloadException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.QueryPagingParameter;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.workbasket.api.WorkbasketQuery;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
-import io.kadai.workbasket.api.exceptions.WorkbasketAccessItemAlreadyExistException;
 import io.kadai.workbasket.api.exceptions.WorkbasketAlreadyExistException;
 import io.kadai.workbasket.api.exceptions.WorkbasketInUseException;
 import io.kadai.workbasket.api.exceptions.WorkbasketNotFoundException;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
-import io.kadai.workbasket.rest.WorkbasketController.WorkbasketQuerySortParameter;
 import io.kadai.workbasket.rest.models.DistributionTargetsCollectionRepresentationModel;
 import io.kadai.workbasket.rest.models.WorkbasketAccessItemCollectionRepresentationModel;
 import io.kadai.workbasket.rest.models.WorkbasketRepresentationModel;
@@ -67,7 +84,6 @@ public interface WorkbasketApi {
             })
       })
   @GetMapping(path = RestEndpoints.URL_WORKBASKET)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<WorkbasketSummaryPagedRepresentationModel> getWorkbaskets(
       HttpServletRequest request,
       @ParameterObject WorkbasketQueryFilterParameter filterParameter,
@@ -119,7 +135,6 @@ public interface WorkbasketApi {
             })
       })
   @GetMapping(path = RestEndpoints.URL_WORKBASKET_ID, produces = MediaTypes.HAL_JSON_VALUE)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<WorkbasketRepresentationModel> getWorkbasket(
       @PathVariable("workbasketId") String workbasketId)
       throws WorkbasketNotFoundException, NotAuthorizedOnWorkbasketException;
@@ -449,7 +464,6 @@ public interface WorkbasketApi {
   @GetMapping(
       path = RestEndpoints.URL_WORKBASKET_ID_ACCESS_ITEMS,
       produces = MediaTypes.HAL_JSON_VALUE)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<WorkbasketAccessItemCollectionRepresentationModel> getWorkbasketAccessItems(
       @PathVariable("workbasketId") String workbasketId)
       throws WorkbasketNotFoundException,
@@ -468,8 +482,8 @@ public interface WorkbasketApi {
    *     ADMIN
    * @throws InvalidArgumentException if the new Workbasket Access Items are not provided.
    * @throws WorkbasketNotFoundException TODO: this is never thrown.
-   * @throws WorkbasketAccessItemAlreadyExistException if a duplicate Workbasket Access Item exists
-   *     in the provided list.
+   * @throws LogicalDuplicateInPayloadException if a duplicate Workbasket Access Item exists in the
+   *     provided list.
    * @throws NotAuthorizedOnWorkbasketException if the current user has not correct permissions
    */
   @Operation(
@@ -537,23 +551,21 @@ public interface WorkbasketApi {
             }),
         @ApiResponse(
             responseCode = "400",
-            description = "INVALID_ARGUMENT",
+            description = "INVALID_ARGUMENT, LOGICAL_DUPLICATE_IN_PAYLOAD",
             content = {
-              @Content(schema = @Schema(implementation = InvalidArgumentException.class))
+              @Content(
+                  schema =
+                      @Schema(
+                          anyOf = {
+                            InvalidArgumentException.class,
+                            LogicalDuplicateInPayloadException.class
+                          }))
             }),
         @ApiResponse(
             responseCode = "404",
             description = "WORKBASKET_WITH_ID_NOT_FOUND, WORKBASKET_WITH_KEY_NOT_FOUND",
             content = {
               @Content(schema = @Schema(implementation = WorkbasketNotFoundException.class))
-            }),
-        @ApiResponse(
-            responseCode = "409",
-            description = "WORKBASKET_ACCESS_ITEM_ALREADY_EXISTS",
-            content = {
-              @Content(
-                  schema =
-                      @Schema(implementation = WorkbasketAccessItemAlreadyExistException.class))
             }),
         @ApiResponse(
             responseCode = "403",
@@ -577,7 +589,7 @@ public interface WorkbasketApi {
       @RequestBody WorkbasketAccessItemCollectionRepresentationModel workbasketAccessItemRepModels)
       throws InvalidArgumentException,
           WorkbasketNotFoundException,
-          WorkbasketAccessItemAlreadyExistException,
+          LogicalDuplicateInPayloadException,
           NotAuthorizedException,
           NotAuthorizedOnWorkbasketException;
 
@@ -630,7 +642,6 @@ public interface WorkbasketApi {
   @GetMapping(
       path = RestEndpoints.URL_WORKBASKET_ID_DISTRIBUTION,
       produces = MediaTypes.HAL_JSON_VALUE)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<DistributionTargetsCollectionRepresentationModel> getDistributionTargets(
       @PathVariable("workbasketId") String workbasketId)
       throws WorkbasketNotFoundException, NotAuthorizedOnWorkbasketException;

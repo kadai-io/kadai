@@ -1,20 +1,20 @@
 <!--
-  ~ Copyright [2024] [envite consulting GmbH]
-  ~
-  ~    Licensed under the Apache License, Version 2.0 (the "License");
-  ~    you may not use this file except in compliance with the License.
-  ~    You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~    Unless required by applicable law or agreed to in writing, software
-  ~    distributed under the License is distributed on an "AS IS" BASIS,
-  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~    See the License for the specific language governing permissions and
-  ~    limitations under the License.
-  ~
-  ~
-  -->
+~ Copyright [2026] [envite consulting GmbH]
+~
+~    Licensed under the Apache License, Version 2.0 (the "License");
+~    you may not use this file except in compliance with the License.
+~    You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~    Unless required by applicable law or agreed to in writing, software
+~    distributed under the License is distributed on an "AS IS" BASIS,
+~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~    See the License for the specific language governing permissions and
+~    limitations under the License.
+~
+~
+-->
 
 <div class="classification-list">
 
@@ -31,10 +31,8 @@
       </button>
 
       <!-- IMPORT EXPORT BUTTONS -->
-      <kadai-administration-import-export
-          [currentSelection]="kadaiType.CLASSIFICATIONS" [parentComponent]="'classifications'"
-          class="classification-list__import-export">
-      </kadai-administration-import-export>
+      <kadai-administration-import-export [currentSelection]="kadaiType.CLASSIFICATIONS" [parentComponent]="'classifications'"
+        class="classification-list__import-export" />
     </div>
 
     <!-- FILTER -->
@@ -46,13 +44,15 @@
                 mat-stroked-button
                 matTooltip="Filter Category">
 
-          <mat-icon *ngIf="selectedCategory == ''" class="classification-list__mat-icon">
-            filter_list
-          </mat-icon>
-          <svg-icon *ngIf="selectedCategory != ''"
-                    [src]="(getCategoryIcon(selectedCategory) | async)?.left"
-                    class="classification-list__icons">
-          </svg-icon>
+          @if (selectedCategory == '') {
+            <mat-icon class="classification-list__mat-icon">
+              filter_list
+            </mat-icon>
+          }
+          @if (selectedCategory != '') {
+            <svg-icon [src]="(getCategoryIcon(selectedCategory) | async)?.left"
+              class="classification-list__icons" />
+          }
         </button>
 
         <mat-menu #menu="matMenu">
@@ -60,13 +60,15 @@
                   mat-menu-item>
             <span> <mat-icon class="classification-list__filter-all-icon" style="color: #555">filter_list</mat-icon> All </span>
           </button>
-          <button (click)="selectCategory(category)" *ngFor="let category of categories$ | async"
-                  mat-menu-item>
-            <svg-icon [src]="(getCategoryIcon(category) | async)?.left"
-                      class="classification-list__categories"
-                      matTooltip="{{(getCategoryIcon(category) | async)?.right}}"></svg-icon>
-            <span> {{ category }} </span>
-          </button>
+          @for (category of categories$ | async; track category) {
+            <button (click)="selectCategory(category)"
+                    mat-menu-item>
+              <svg-icon [src]="(getCategoryIcon(category) | async)?.left"
+                        class="classification-list__categories"
+                        matTooltip="{{(getCategoryIcon(category) | async)?.right}}" />
+              <span> {{ category }} </span>
+            </button>
+          }
         </mat-menu>
       </div>
 
@@ -80,22 +82,22 @@
       </div>
 
       <!-- TYPE FILTER -->
-      <kadai-administration-classification-types-selector
-          class="pull-right">
-      </kadai-administration-classification-types-selector>
+      <kadai-administration-classification-types-selector class="pull-right" />
 
     </div>
   </section>
 
 
   <!-- CLASSIFICATION TREE -->
-  <kadai-administration-tree (switchKadaiSpinnerEmit)="setRequestInProgress($event)"
-                             *ngIf="(classifications && classifications.length) else empty_classifications"
-                             [filterIcon]="selectedCategory"
-                             [filterText]="inputValue"></kadai-administration-tree>
-  <ng-template #empty_classifications>
-    <div *ngIf="!requestInProgress" class="classification-list__no-items">
-      <h3 class="grey">There are no classifications</h3>
-    </div>
-  </ng-template>
+  @if ((classifications && classifications.length)) {
+    <kadai-administration-tree (switchKadaiSpinnerEmit)="setRequestInProgress($event)"
+                               [filterIcon]="selectedCategory"
+                               [filterText]="inputValue" />
+  } @else {
+    @if (!requestInProgress) {
+      <div class="classification-list__no-items">
+        <h3 class="grey">There are no classifications</h3>
+      </div>
+    }
+  }
 </div>

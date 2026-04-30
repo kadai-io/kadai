@@ -1,5 +1,5 @@
 /*!
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 .type-ahead {
   min-height: 0;
@@ -29,13 +29,9 @@
     white-space: pre;
   }
 
-  &__input-field {
-    left: 50%;
-  }
-
   &__error--accessId {
     white-space: nowrap;
-    padding-top: 8px;
+    margin-left: -16px;
   }
 }
 
@@ -44,7 +40,7 @@
 }
 
 .invalid {
-  color: $invalid;
+  color: colors.$invalid;
 }
 
 mat-label.type-ahead__label {

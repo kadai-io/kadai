@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { NgxsModule, Store } from '@ngxs/store';
 import { CanvasComponent } from './canvas.component';
@@ -26,14 +26,15 @@ import { settingsStateMock } from '../../../shared/store/mock-data/mock-store';
 import { MatDialogModule } from '@angular/material/dialog';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('CanvasComponent', () => {
   let fixture: ComponentFixture<CanvasComponent>;
   let debugElement: DebugElement;
   let component: CanvasComponent;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [NgxsModule.forRoot([SettingsState]), MatDialogModule],
       providers: [CanvasComponent, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
     }).compileComponents();
@@ -41,14 +42,14 @@ describe('CanvasComponent', () => {
     fixture = TestBed.createComponent(CanvasComponent);
     debugElement = fixture.debugElement;
     component = fixture.debugElement.componentInstance;
-    component.id = '1';
+    fixture.componentRef.setInput('id', '1');
     const store: Store = TestBed.inject(Store);
     store.reset({
       ...store.snapshot(),
       settings: settingsStateMock
     });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create the component', () => {
     expect(component).toBeTruthy();
@@ -60,9 +61,9 @@ describe('CanvasComponent', () => {
   });
 
   it('should call generateChart()', () => {
-    component.generateChart = jest.fn();
+    component.generateChart = vi.fn();
     const reportRow = workbasketReportMock.rows[1];
-    component.row = reportRow;
+    fixture.componentRef.setInput('row', reportRow);
     fixture.detectChanges();
     component.ngAfterViewInit();
     expect(component.generateChart).toHaveBeenCalledWith('1', reportRow);

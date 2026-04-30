@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import { ClassificationTreeService } from './classification-tree.service';
 import { TestBed } from '@angular/core/testing';
 import { Classification } from '../../shared/models/classification';
 import { TreeNodeModel } from '../models/tree-node';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('ClassificationTreeService', () => {
   let service: ClassificationTreeService;
@@ -60,7 +61,15 @@ describe('ClassificationTreeService', () => {
             key: 'KEY3',
             parentId: 'ID1',
             parentKey: 'KEY1',
-            children: [{ classificationId: 'ID2', key: 'KEY2', parentId: 'ID3', parentKey: 'KEY3', children: [] }]
+            children: [
+              {
+                classificationId: 'ID2',
+                key: 'KEY2',
+                parentId: 'ID3',
+                parentKey: 'KEY3',
+                children: []
+              }
+            ]
           }
         ]
       },

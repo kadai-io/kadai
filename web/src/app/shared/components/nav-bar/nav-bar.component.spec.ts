@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,30 +16,13 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Component, DebugElement } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { DebugElement } from '@angular/core';
 import { NavBarComponent } from './nav-bar.component';
-import { SelectedRouteService } from '../../services/selected-route/selected-route';
-import { SidenavService } from '../../services/sidenav/sidenav.service';
 import { By } from '@angular/platform-browser';
-import { MatIconModule } from '@angular/material/icon';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { EMPTY } from 'rxjs';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-
-jest.mock('angular-svg-icon');
-
-const SidenavServiceSpy: Partial<SidenavService> = {
-  toggleSidenav: jest.fn().mockReturnValue(EMPTY)
-};
-
-const SelectedRouteServiceSpy: Partial<SelectedRouteService> = {
-  getSelectedRoute: jest.fn().mockReturnValue(EMPTY)
-};
-
-@Component({ selector: 'svg-icon', template: '' })
-class SvgIconStub {}
+import { SidenavService } from '../../services/sidenav/sidenav.service';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 describe('NavBarComponent', () => {
   let component: NavBarComponent;
@@ -47,19 +30,16 @@ describe('NavBarComponent', () => {
   let debugElement: DebugElement;
   let route = '';
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [NavBarComponent],
-      imports: [MatIconModule, MatToolbarModule],
-      providers: [
-        SvgIconStub,
-        { provide: SidenavService, useValue: SidenavServiceSpy },
-        { provide: SelectedRouteService, useValue: SelectedRouteServiceSpy },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-      ]
+  const SidenavServiceSpy: Partial<SidenavService> = {
+    toggleSidenav: vi.fn()
+  };
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [NavBarComponent],
+      providers: [provideAngularSvgIcon(), { provide: SidenavService, useValue: SidenavServiceSpy }]
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(NavBarComponent);

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -33,9 +33,12 @@ import io.kadai.task.api.exceptions.InvalidOwnerException;
 import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.NotAuthorizedOnTaskCommentException;
 import io.kadai.task.api.exceptions.ObjectReferencePersistenceException;
+import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
+import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
+import io.kadai.task.api.exceptions.TransferCheckException;
 import io.kadai.task.api.models.Attachment;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.Task;
@@ -141,6 +144,8 @@ public interface TaskService {
    * @throws ObjectReferencePersistenceException if an {@linkplain ObjectReference} with the same
    *     {@linkplain ObjectReference#getId() id} was added to the {@linkplain Task} multiple times
    *     without using {@linkplain Task#addSecondaryObjectReference(ObjectReference)}
+   * @throws ServiceLevelViolationException if the {@linkplain Task#getDue() due} and {@linkplain
+   *     Task#getPlanned() planned} do not match service level
    */
   Task createTask(Task taskToCreate)
       throws WorkbasketNotFoundException,
@@ -149,7 +154,8 @@ public interface TaskService {
           InvalidArgumentException,
           AttachmentPersistenceException,
           ObjectReferencePersistenceException,
-          NotAuthorizedOnWorkbasketException;
+          NotAuthorizedOnWorkbasketException,
+          ServiceLevelViolationException;
 
   // endregion
 
@@ -537,6 +543,28 @@ public interface TaskService {
           InvalidTaskStateException;
 
   /**
+   * Force terminates each existing {@linkplain Task} in the given List, independent of the
+   * {@linkplain Task#getOwner() owner} or {@linkplain Task#getState() state} of the {@linkplain
+   * Task}.
+   *
+   * <p>If the {@linkplain Task} is already in an end state ({@linkplain TaskState#TERMINATED},
+   * {@linkplain TaskState#CANCELLED}, or {@linkplain TaskState#COMPLETED}), the error is logged in
+   * the result.
+   *
+   * <p>Requires {@linkplain KadaiRole#ADMIN} or {@linkplain KadaiRole#TASK_ADMIN}.
+   *
+   * @param taskIds {@linkplain Task#getId() ids} of the {@linkplain Task Tasks} which should be
+   *     terminated
+   * @return the result of the operations with {@linkplain Task#getId() ids} and Exception for each
+   *     failed termination
+   * @throws InvalidArgumentException If the taskIds parameter is NULL
+   * @throws NotAuthorizedException if the current user isn't member of {@linkplain KadaiRole#ADMIN}
+   *     or {@linkplain KadaiRole#TASK_ADMIN}
+   */
+  BulkOperationResults<String, KadaiException> forceTerminateTasks(List<String> taskIds)
+      throws InvalidArgumentException, NotAuthorizedException;
+
+  /**
    * Transfers a {@linkplain Task} to another {@linkplain Workbasket} while always setting
    * {@linkplain Task#isTransferred() isTransferred} to true.
    *
@@ -552,7 +580,8 @@ public interface TaskService {
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          TransferCheckException {
     return transfer(taskId, destinationWorkbasketId, true);
   }
 
@@ -576,12 +605,15 @@ public interface TaskService {
    *     WorkbasketPermission#TRANSFER} for the target {@linkplain Workbasket}
    * @throws InvalidTaskStateException if the {@linkplain Task} is in one of the {@linkplain
    *     TaskState#END_STATES}
+   * @throws TransferCheckException if a {@linkplain
+   *     io.kadai.spi.task.api.BeforeTransferTaskProvider} denies the transfer
    */
   Task transfer(String taskId, String destinationWorkbasketId, boolean setTransferFlag)
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException;
+          InvalidTaskStateException,
+          TransferCheckException;
 
   /**
    * Transfers a {@linkplain Task} to another {@linkplain Workbasket} while always setting
@@ -601,7 +633,8 @@ public interface TaskService {
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          TransferCheckException {
     return transfer(taskId, workbasketKey, domain, true);
   }
 
@@ -627,12 +660,15 @@ public interface TaskService {
    *     WorkbasketPermission#TRANSFER} for the target {@linkplain Workbasket}
    * @throws InvalidTaskStateException if the {@linkplain Task} is in one of the {@linkplain
    *     TaskState#END_STATES}
+   * @throws TransferCheckException if a {@link io.kadai.spi.task.api.BeforeTransferTaskProvider
+   *     BeforeTransferTaskProvider} denies the transfer
    */
   Task transfer(String taskId, String workbasketKey, String domain, boolean setTransferFlag)
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException;
+          InvalidTaskStateException,
+          TransferCheckException;
 
   /**
    * Transfers a {@linkplain Task} to another {@linkplain Workbasket} and sets the owner of the
@@ -652,7 +688,8 @@ public interface TaskService {
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          TransferCheckException {
     return transferWithOwner(taskId, destinationWorkbasketId, owner, true);
   }
 
@@ -678,13 +715,16 @@ public interface TaskService {
    *     WorkbasketPermission#TRANSFER} for the target {@linkplain Workbasket}
    * @throws InvalidTaskStateException if the {@linkplain Task} is in one of the {@linkplain
    *     TaskState#END_STATES}
+   * @throws TransferCheckException if a {@link io.kadai.spi.task.api.BeforeTransferTaskProvider
+   *     BeforeTransferTaskProvider} denies the transfer
    */
   Task transferWithOwner(
       String taskId, String destinationWorkbasketId, String owner, boolean setTransferFlag)
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException;
+          InvalidTaskStateException,
+          TransferCheckException;
 
   /**
    * Transfers a {@linkplain Task} to another {@linkplain Workbasket} and sets the owner of the
@@ -706,7 +746,8 @@ public interface TaskService {
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          TransferCheckException {
     return transferWithOwner(taskId, workbasketKey, domain, owner, true);
   }
 
@@ -734,13 +775,16 @@ public interface TaskService {
    *     WorkbasketPermission#TRANSFER} for the target {@linkplain Workbasket}
    * @throws InvalidTaskStateException if the {@linkplain Task} is in one of the {@linkplain
    *     TaskState#END_STATES}
+   * @throws TransferCheckException if a {@link io.kadai.spi.task.api.BeforeTransferTaskProvider
+   *     BeforeTransferTaskProvider} denies the transfer
    */
   Task transferWithOwner(
       String taskId, String workbasketKey, String domain, String owner, boolean setTransferFlag)
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException;
+          InvalidTaskStateException,
+          TransferCheckException;
 
   /**
    * Transfers a List of {@linkplain Task Tasks} to another {@linkplain Workbasket} while always
@@ -941,6 +985,24 @@ public interface TaskService {
       throws InvalidArgumentException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException;
+
+  /**
+   * Transfers a List of {@linkplain Task Tasks} to the {@linkplain Workbasket Workbaskets} they
+   * currently belong to, setting the owner to the specified ownerId. The {@linkplain
+   * Task#isTransferred() isTransferred} flag is always set to true.
+   *
+   * <p>For each {@linkplain Task}, the method reads the current {@linkplain Workbasket} and then
+   * transfers the task to that same workbasket using {@link #transferTasksWithOwner(String, List,
+   * String)} with the given owner. Results from all workbaskets are aggregated.
+   *
+   * @param ownerId the new owner for the {@linkplain Task Tasks}
+   * @param taskIds List of {@linkplain Task#getId() ids} of the {@linkplain Task Tasks} to be
+   *     updated
+   * @return BulkResult with {@linkplain Task#getId() ids} and Error for each failed transaction
+   * @throws InvalidArgumentException if the method parameters are empty or NULL
+   */
+  BulkOperationResults<String, KadaiException> transferTasksToOwner(
+      String ownerId, List<String> taskIds) throws InvalidArgumentException;
 
   /**
    * Distributes {@linkplain Task} instances from a source {@linkplain Workbasket} to one or more
@@ -1249,6 +1311,8 @@ public interface TaskService {
    * @throws InvalidTaskStateException if an attempt is made to change the {@linkplain
    *     Task#getOwner() owner} of the {@linkplain Task} that {@linkplain Task#getState() state}
    *     isn't {@linkplain TaskState#READY}
+   * @throws ServiceLevelViolationException if the {@linkplain Task#getDue() due} and {@linkplain
+   *     Task#getPlanned() planned} do not match service level
    */
   Task updateTask(Task task)
       throws InvalidArgumentException,
@@ -1258,7 +1322,8 @@ public interface TaskService {
           AttachmentPersistenceException,
           ObjectReferencePersistenceException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException;
+          InvalidTaskStateException,
+          ServiceLevelViolationException;
 
   /**
    * Updates specified {@linkplain TaskCustomField TaskCustomFields} of {@linkplain Task Tasks}
@@ -1291,7 +1356,10 @@ public interface TaskService {
    * @return a list of the {@linkplain Task#getId() ids} of all modified {@linkplain Task Tasks}
    * @throws InvalidArgumentException if the given customFieldsToUpdate are NULL or empty
    * @see #updateTasks(ObjectReference, Map)
+   * @deprecated forRemoval = "11.0.0" — Use {@link #bulkUpdateTasks(List, TaskPatch)} instead.
    */
+  @Deprecated(forRemoval = true, since = "11.0.0")
+  @SuppressWarnings({"deprecation", "removal"})
   List<String> updateTasks(List<String> taskIds, Map<TaskCustomField, String> customFieldsToUpdate)
       throws InvalidArgumentException;
 
@@ -1354,6 +1422,24 @@ public interface TaskService {
    */
   BulkOperationResults<String, KadaiException> setPlannedPropertyOfTasks(
       Instant planned, List<String> taskIds);
+
+  /**
+   * Reopens the {@linkplain Task} with the given {@linkplain Task#getId() id}.
+   *
+   * @param taskId The {@linkplain Task#getId() id} of the {@linkplain Task} to reopen
+   * @return the reopened {@linkplain Task}
+   * @throws TaskNotFoundException if the {@linkplain Task} isn't found in the database by its
+   *     {@linkplain Task#getId() id}
+   * @throws NotAuthorizedOnWorkbasketException If the current user doesn't have correct permission
+   * @throws InvalidTaskStateException If the {@linkplain Task#getState() state} of the referenced
+   *     {@linkplain Task} isn't one of the non-final end states
+   * @throws ReopenTaskWithCallbackException if the {@linkplain Task} has a callback registered
+   */
+  Task reopen(String taskId)
+      throws TaskNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          InvalidTaskStateException,
+          ReopenTaskWithCallbackException;
 
   // endregion
 
@@ -1444,6 +1530,19 @@ public interface TaskService {
    */
   TaskComment createTaskComment(TaskComment taskComment)
       throws TaskNotFoundException, InvalidArgumentException, NotAuthorizedOnWorkbasketException;
+
+  /**
+   * Adds the given comment text to all {@linkplain Task Tasks} identified by the provided ids.
+   *
+   * @param taskIds {@linkplain Task#getId() ids} of the {@linkplain Task Tasks} that should receive
+   *     the comment.
+   * @param text the comment text to add to each task.
+   * @return the result of the operation with each {@linkplain Task#getId() id} mapped to a {@link
+   *     KadaiException} if adding the comment failed (empty if all succeeded).
+   * @throws InvalidArgumentException if {@code taskIds} or {@code text} is {@code null}.
+   */
+  BulkOperationResults<String, KadaiException> createTaskCommentsBulk(
+      List<String> taskIds, String text) throws InvalidArgumentException;
 
   // endregion
 
@@ -1598,4 +1697,17 @@ public interface TaskService {
    * @return a {@linkplain TaskCommentQuery}
    */
   TaskCommentQuery createTaskCommentQuery();
+
+  /**
+   * Bulk updates multiple tasks by their IDs.
+   *
+   * <p>Updates only the specified fields for each task. If a task fails to be updated, e.g. due to
+   * missing permission of the user, an error is reported for it, but other tasks are still updated.
+   *
+   * @param taskIds list of task Ids to be updated
+   * @param taskPatch contains the fields and values to be updated
+   * @return the result of the operation for each task ID (success or error)
+   */
+  BulkOperationResults<String, KadaiException> bulkUpdateTasks(
+      List<String> taskIds, TaskPatch taskPatch);
 }

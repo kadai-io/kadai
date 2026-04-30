@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
  *
  */
 
-import { TestBed, inject, getTestBed } from '@angular/core/testing';
+import { getTestBed, TestBed } from '@angular/core/testing';
 
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { StartupService } from './startup.service';
-import { KadaiEngineService } from '../kadai-engine/kadai-engine.service';
-import { WindowRefService } from '../window/window.service';
 import { environment } from '../../../../environments/environment';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { provideRouter } from '@angular/router';
+import { KadaiEngineService } from '../kadai-engine/kadai-engine.service';
 
 describe('StartupService', () => {
   const environmentFile = 'environments/data-sources/environment-information.json';
@@ -39,52 +40,109 @@ describe('StartupService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        StartupService,
-        KadaiEngineService,
-        WindowRefService,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-      ]
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])]
     });
   });
 
   beforeEach(() => {
     const injector = getTestBed();
     httpMock = injector.inject(HttpTestingController);
-    // UserService provided to the TestBed
     service = injector.inject(StartupService);
   });
 
-  it('should be created', inject([StartupService], () => {
+  it('should be created', () => {
     expect(service).toBeTruthy();
-  }));
+  });
 
-  it('should initialize rest and logout url from external file', (done) => {
+  it('should initialize rest and logout url from external file', async () => {
     environment.kadaiRestUrl = '';
     environment.kadaiLogoutUrl = '';
-    service.getEnvironmentFilePromise().then((res) => {
-      expect(environment.kadaiRestUrl).toBe(someRestUrl);
-      expect(environment.kadaiLogoutUrl).toBe(someLogoutUrl);
-      done();
-    });
+
+    const promise = service.getEnvironmentFilePromise();
+
     const req = httpMock.expectOne(environmentFile);
     expect(req.request.method).toBe('GET');
     req.flush(dummyEnvironmentInformation);
+
+    await promise;
+
+    expect(environment.kadaiRestUrl).toBe(someRestUrl);
+    expect(environment.kadaiLogoutUrl).toBe(someLogoutUrl);
+
     httpMock.verify();
   });
 
-  it('should initialize rest and logout url from external file and override previous config', (done) => {
+  it('should initialize rest and logout url from external file and override previous config', async () => {
     environment.kadaiRestUrl = 'oldRestUrl';
     environment.kadaiLogoutUrl = 'oldLogoutUrl';
-    service.getEnvironmentFilePromise().then(() => {
-      expect(environment.kadaiRestUrl).toBe(someRestUrl);
-      expect(environment.kadaiLogoutUrl).toBe(someLogoutUrl);
-      done();
-    });
+
+    const promise = service.getEnvironmentFilePromise();
+
     const req = httpMock.expectOne(environmentFile);
     expect(req.request.method).toBe('GET');
     req.flush(dummyEnvironmentInformation);
+
+    await promise;
+
+    expect(environment.kadaiRestUrl).toBe(someRestUrl);
+    expect(environment.kadaiLogoutUrl).toBe(someLogoutUrl);
+
     httpMock.verify();
+  });
+
+  describe('getKadaiRestUrl', () => {
+    it('should return the environment kadaiRestUrl', () => {
+      environment.kadaiRestUrl = 'http://expected-rest-url';
+      expect(service.getKadaiRestUrl()).toBe('http://expected-rest-url');
+    });
+  });
+
+  describe('getKadaiLogoutUrl', () => {
+    it('should return the environment kadaiLogoutUrl', () => {
+      environment.kadaiLogoutUrl = 'http://expected-logout-url';
+      expect(service.getKadaiLogoutUrl()).toBe('http://expected-logout-url');
+    });
+  });
+
+  describe('router getter', () => {
+    it('should return the injected Router instance', () => {
+      const router = service.router;
+      expect(router).toBeDefined();
+      expect(router).toBeTruthy();
+    });
+
+    it('should return the same Router instance on multiple calls', () => {
+      const router1 = service.router;
+      const router2 = service.router;
+      expect(router1).toBe(router2);
+    });
+  });
+
+  describe('load', () => {
+    it('should return a Promise', async () => {
+      const kadaiEngineService = TestBed.inject(KadaiEngineService);
+      const getUserInfoSpy = vi.spyOn(kadaiEngineService, 'getUserInformation').mockResolvedValue(undefined);
+
+      const promise = service.load();
+      const envReq = httpMock.expectOne(environmentFile);
+      envReq.flush(dummyEnvironmentInformation);
+
+      expect(promise).toBeInstanceOf(Promise);
+      await promise;
+      expect(getUserInfoSpy).toHaveBeenCalled();
+      httpMock.verify();
+    });
+
+    it('should resolve even when environment file request fails', async () => {
+      const kadaiEngineService = TestBed.inject(KadaiEngineService);
+      vi.spyOn(kadaiEngineService, 'getUserInformation').mockResolvedValue(undefined);
+
+      const promise = service.load();
+      const envReq = httpMock.expectOne(environmentFile);
+      envReq.flush('not found', { status: 404, statusText: 'Not Found' });
+
+      await expect(promise).resolves.not.toThrow();
+      httpMock.verify();
+    });
   });
 });

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@
 package io.kadai.common.rest.models;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.jspecify.annotations.NonNull;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.lang.NonNull;
 
 /** EntityModel for Access Id. */
 public class AccessIdRepresentationModel extends RepresentationModel<AccessIdRepresentationModel> {

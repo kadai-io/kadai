@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import io.kadai.simplehistory.rest.models.TaskHistoryEventRepresentationModel;
 import io.kadai.spi.history.api.events.task.TaskHistoryCustomField;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import java.util.Collection;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -51,6 +51,7 @@ public class TaskHistoryEventRepresentationModelAssembler
     repModel.setEventType(historyEvent.getEventType());
     repModel.setCreated(historyEvent.getCreated());
     repModel.setUserId(historyEvent.getUserId());
+    repModel.setProxyAccessId(historyEvent.getProxyAccessId());
     repModel.setUserLongName(historyEvent.getUserLongName());
     repModel.setDomain(historyEvent.getDomain());
     repModel.setWorkbasketKey(historyEvent.getWorkbasketKey());

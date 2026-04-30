@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 package io.kadai.common.rest;
 
-import static io.kadai.rest.test.RestHelper.TEMPLATE;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -33,25 +33,28 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.ThrowingConsumer;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
 
 @KadaiSpringBootTest
 class AccessIdControllerIntTest {
 
   private static final ParameterizedTypeReference<List<AccessIdRepresentationModel>>
-      ACCESS_ID_LIST_TYPE = new ParameterizedTypeReference<List<AccessIdRepresentationModel>>() {};
+      ACCESS_ID_LIST_TYPE = new ParameterizedTypeReference<>() {};
 
   private final RestHelper restHelper;
+  private final RestClient restClient;
 
   @Autowired
-  AccessIdControllerIntTest(RestHelper restHelper) {
+  AccessIdControllerIntTest(RestHelper restHelper, RestClient restClient) {
     this.restHelper = restHelper;
+    this.restClient = restClient;
   }
 
   @TestFactory
@@ -71,11 +74,15 @@ class AccessIdControllerIntTest {
         pair -> {
           String url =
               restHelper.toUrl(RestEndpoints.URL_ACCESS_ID) + "?search-for=" + pair.getLeft();
-          HttpEntity<Object> auth =
-              new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
           ResponseEntity<List<AccessIdRepresentationModel>> response =
-              TEMPLATE.exchange(url, HttpMethod.GET, auth, ACCESS_ID_LIST_TYPE);
+              restClient
+                  .get()
+                  .uri(url)
+                  .headers(
+                      headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                  .retrieve()
+                  .toEntity(ACCESS_ID_LIST_TYPE);
 
           assertThat(response.getBody())
               .isNotNull()
@@ -90,10 +97,14 @@ class AccessIdControllerIntTest {
   void should_ReturnEmptyResults_ifInvalidCharacterIsUsedInCondition() {
     String url =
         restHelper.toUrl(RestEndpoints.URL_ACCESS_ID) + "?search-for=ksc-teamleads,cn=groups";
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<List<AccessIdRepresentationModel>> response =
-        TEMPLATE.exchange(url, HttpMethod.GET, auth, ACCESS_ID_LIST_TYPE);
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ACCESS_ID_LIST_TYPE);
 
     assertThat(response.getBody()).isNotNull().isEmpty();
   }
@@ -101,10 +112,14 @@ class AccessIdControllerIntTest {
   @Test
   void testGetMatches() {
     String url = restHelper.toUrl(RestEndpoints.URL_ACCESS_ID) + "?search-for=rig";
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<List<AccessIdRepresentationModel>> response =
-        TEMPLATE.exchange(url, HttpMethod.GET, auth, ACCESS_ID_LIST_TYPE);
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ACCESS_ID_LIST_TYPE);
 
     assertThat(response.getBody())
         .isNotNull()
@@ -115,10 +130,14 @@ class AccessIdControllerIntTest {
   @Test
   void should_ReturnAccessIdWithUmlauten_ifBased64EncodedUserIsLookedUp() {
     String url = restHelper.toUrl(RestEndpoints.URL_ACCESS_ID) + "?search-for=läf";
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<List<AccessIdRepresentationModel>> response =
-        TEMPLATE.exchange(url, HttpMethod.GET, auth, ACCESS_ID_LIST_TYPE);
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ACCESS_ID_LIST_TYPE);
 
     assertThat(response.getBody())
         .isNotNull()
@@ -129,13 +148,15 @@ class AccessIdControllerIntTest {
   @Test
   void should_ThrowException_When_SearchForIsTooShort() {
     String url = restHelper.toUrl(RestEndpoints.URL_ACCESS_ID) + "?search-for=al";
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ThrowingCallable httpCall =
-        () -> {
-          TEMPLATE.exchange(
-              url, HttpMethod.GET, auth, ParameterizedTypeReference.forType(List.class));
-        };
+        () ->
+            restClient
+                .get()
+                .uri(url)
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                .retrieve()
+                .toEntity(ACCESS_ID_LIST_TYPE);
 
     assertThatThrownBy(httpCall)
         .isInstanceOf(HttpStatusCodeException.class)
@@ -148,10 +169,14 @@ class AccessIdControllerIntTest {
   @Test
   void should_ReturnAccessIdsOfGroupsTheAccessIdIsMemberOf_ifAccessIdOfUserIsGiven() {
     String url = restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_GROUPS) + "?access-id=teamlead-2";
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<List<AccessIdRepresentationModel>> response =
-        TEMPLATE.exchange(url, HttpMethod.GET, auth, ACCESS_ID_LIST_TYPE);
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ACCESS_ID_LIST_TYPE);
 
     assertThat(response.getBody())
         .isNotNull()
@@ -168,10 +193,14 @@ class AccessIdControllerIntTest {
   @Test
   void should_ReturnAccessIdsOfPermissionsTheAccessIdIsMemberOf_ifAccessIdOfUserIsGiven() {
     String url = restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_PERMISSIONS) + "?access-id=user-1-2";
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<List<AccessIdRepresentationModel>> response =
-        TEMPLATE.exchange(url, HttpMethod.GET, auth, ACCESS_ID_LIST_TYPE);
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ACCESS_ID_LIST_TYPE);
 
     assertThat(response.getBody())
         .isNotNull()
@@ -184,10 +213,14 @@ class AccessIdControllerIntTest {
   @Test
   void should_ValidateAccessIdWithEqualsFilterAndReturnAccessIdsOfGroupsTheAccessIdIsMemberOf() {
     String url = restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_GROUPS) + "?access-id=user-2-1";
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<List<AccessIdRepresentationModel>> response =
-        TEMPLATE.exchange(url, HttpMethod.GET, auth, ACCESS_ID_LIST_TYPE);
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ACCESS_ID_LIST_TYPE);
 
     assertThat(response.getBody())
         .isNotNull()
@@ -202,10 +235,14 @@ class AccessIdControllerIntTest {
   @Test
   void should_ValidateAccessIdWithEqualsFilterAndReturnAccessIdsOfPermissionsAccessIdIsMemberOf() {
     String url = restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_PERMISSIONS) + "?access-id=user-2-1";
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<List<AccessIdRepresentationModel>> response =
-        TEMPLATE.exchange(url, HttpMethod.GET, auth, ACCESS_ID_LIST_TYPE);
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ACCESS_ID_LIST_TYPE);
 
     assertThat(response.getBody())
         .isNotNull()
@@ -218,9 +255,15 @@ class AccessIdControllerIntTest {
   void should_ReturnBadRequest_ifAccessIdOfUserContainsInvalidCharacter() {
     String url =
         restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_GROUPS) + "?access-id=teamlead-2,cn=users";
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
-    ThrowingCallable call = () -> TEMPLATE.exchange(url, HttpMethod.GET, auth, ACCESS_ID_LIST_TYPE);
+    ThrowingCallable call =
+        () ->
+            restClient
+                .get()
+                .uri(url)
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                .retrieve()
+                .toEntity(ACCESS_ID_LIST_TYPE);
 
     assertThatThrownBy(call)
         .isInstanceOf(HttpStatusCodeException.class)
@@ -236,10 +279,14 @@ class AccessIdControllerIntTest {
         restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_GROUPS)
             + "?access-id=cn=Organisationseinheit KSC 1,"
             + "cn=Organisationseinheit KSC,cn=organisation,OU=Test,O=KADAI";
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<List<AccessIdRepresentationModel>> response =
-        TEMPLATE.exchange(url, HttpMethod.GET, auth, ACCESS_ID_LIST_TYPE);
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ACCESS_ID_LIST_TYPE);
 
     assertThat(response.getBody())
         .isNotNull()
@@ -251,9 +298,15 @@ class AccessIdControllerIntTest {
   @Test
   void should_ThrowNotAuthorizedException_ifCallerOfGroupRetrievalIsNotAdminOrBusinessAdmin() {
     String url = restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_GROUPS) + "?access-id=teamlead-2";
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("user-1-1"));
 
-    ThrowingCallable call = () -> TEMPLATE.exchange(url, HttpMethod.GET, auth, ACCESS_ID_LIST_TYPE);
+    ThrowingCallable call =
+        () ->
+            restClient
+                .get()
+                .uri(url)
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+                .retrieve()
+                .toEntity(ACCESS_ID_LIST_TYPE);
 
     assertThatThrownBy(call)
         .isInstanceOf(HttpStatusCodeException.class)
@@ -266,9 +319,15 @@ class AccessIdControllerIntTest {
   void should_ThrowNotAuthorizedException_ifCallerOfPermissionRetrievalIsNotAdminOrBusinessAdmin() {
     String url =
         restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_PERMISSIONS) + "?access-id=teamlead-2";
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("user-1-1"));
 
-    ThrowingCallable call = () -> TEMPLATE.exchange(url, HttpMethod.GET, auth, ACCESS_ID_LIST_TYPE);
+    ThrowingCallable call =
+        () ->
+            restClient
+                .get()
+                .uri(url)
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+                .retrieve()
+                .toEntity(ACCESS_ID_LIST_TYPE);
 
     assertThatThrownBy(call)
         .isInstanceOf(HttpStatusCodeException.class)
@@ -280,9 +339,15 @@ class AccessIdControllerIntTest {
   @Test
   void should_ThrowNotAuthorizedException_ifCallerOfValidationIsNotAdminOrBusinessAdmin() {
     String url = restHelper.toUrl(RestEndpoints.URL_ACCESS_ID) + "?search-for=al";
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("user-1-1"));
 
-    ThrowingCallable call = () -> TEMPLATE.exchange(url, HttpMethod.GET, auth, ACCESS_ID_LIST_TYPE);
+    ThrowingCallable call =
+        () ->
+            restClient
+                .get()
+                .uri(url)
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+                .retrieve()
+                .toEntity(ACCESS_ID_LIST_TYPE);
 
     assertThatThrownBy(call)
         .isInstanceOf(HttpStatusCodeException.class)
@@ -295,14 +360,39 @@ class AccessIdControllerIntTest {
   void should_ReturnAccessIds_When_SearchingUsersByNameOrAccessId() {
     String url =
         restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_WITH_NAME) + "?search-for=user-1&role=user";
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
 
     ResponseEntity<List<AccessIdRepresentationModel>> response =
-        TEMPLATE.exchange(url, HttpMethod.GET, auth, ACCESS_ID_LIST_TYPE);
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(ACCESS_ID_LIST_TYPE);
 
     assertThat(response.getBody())
         .isNotNull()
         .extracting(AccessIdRepresentationModel::getAccessId)
         .containsExactlyInAnyOrder("user-1-1", "user-1-2");
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "cn=invalid-cn,cn=groups,OU=Test,O=KADAI",
+        "cn=invalid-cn,cn=boop,OU=Test,O=KADAI"
+      })
+  void should_ReturnEmptyList_When_SearchedForValueIsAValidDnButDoesNotExist(String validDn) {
+    String url = restHelper.toUrl(RestEndpoints.URL_ACCESS_ID) + "?search-for=" + validDn;
+
+    ResponseEntity<List<AccessIdRepresentationModel>> response =
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(ACCESS_ID_LIST_TYPE);
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody()).isEmpty();
   }
 }

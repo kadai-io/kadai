@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import java.time.Instant;
 
 public class TaskDeletedEvent extends TaskHistoryEvent {
 
-  public TaskDeletedEvent(String id, TaskSummary taskSummary, String taskId, String userId) {
-    super(id, taskSummary, userId, null);
+  public TaskDeletedEvent(String id, TaskSummary taskSummary, String taskId) {
+    super(id, taskSummary, null);
     eventType = TaskHistoryEventType.DELETED.getName();
     created = Instant.now();
     super.taskId = taskId;

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,9 +22,8 @@ import io.kadai.classification.api.models.Classification;
 
 public class ClassificationUpdatedEvent extends ClassificationHistoryEvent {
 
-  public ClassificationUpdatedEvent(
-      String id, Classification classification, String userId, String details) {
-    super(id, classification, userId, details);
+  public ClassificationUpdatedEvent(String id, Classification classification, String details) {
+    super(id, classification, details);
     eventType = ClassificationHistoryEventType.UPDATED.getName();
     created = classification.getModified();
   }

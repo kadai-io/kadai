@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@
 
 package io.kadai.task.rest;
 
-import io.kadai.common.api.BaseQuery.SortDirection;
+import io.kadai.common.api.BulkOperationResults;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.QueryPagingParameter;
-import io.kadai.common.rest.QuerySortBy;
 import io.kadai.common.rest.QuerySortParameter;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.common.rest.util.QueryParamsValidator;
@@ -33,14 +33,15 @@ import io.kadai.task.api.exceptions.NotAuthorizedOnTaskCommentException;
 import io.kadai.task.api.exceptions.TaskCommentNotFoundException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.TaskComment;
+import io.kadai.task.rest.assembler.BulkOperationResultsRepresentationModelAssembler;
 import io.kadai.task.rest.assembler.TaskCommentRepresentationModelAssembler;
+import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskCommentRepresentationModel;
+import io.kadai.task.rest.models.TasksCommentBatchRepresentationModel;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import jakarta.servlet.http.HttpServletRequest;
-import java.beans.ConstructorProperties;
 import java.util.List;
-import java.util.function.BiConsumer;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
@@ -60,20 +61,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @EnableHypermediaSupport(type = HypermediaType.HAL)
 public class TaskCommentController implements TaskCommentApi {
-
   private final TaskService taskService;
   private final TaskCommentRepresentationModelAssembler taskCommentRepresentationModelAssembler;
+  private final BulkOperationResultsRepresentationModelAssembler
+          bulkOperationResultsRepresentationModelAssembler;
 
   @Autowired
   TaskCommentController(
-      TaskService taskService,
-      TaskCommentRepresentationModelAssembler taskCommentRepresentationModelAssembler) {
+          TaskService taskService,
+          TaskCommentRepresentationModelAssembler taskCommentRepresentationModelAssembler,
+          BulkOperationResultsRepresentationModelAssembler bulkOperationResultsRepModelAssembler) {
     this.taskService = taskService;
     this.taskCommentRepresentationModelAssembler = taskCommentRepresentationModelAssembler;
+    this.bulkOperationResultsRepresentationModelAssembler = bulkOperationResultsRepModelAssembler;
   }
 
   @GetMapping(path = RestEndpoints.URL_TASK_COMMENT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<TaskCommentRepresentationModel> getTaskComment(
       @PathVariable("taskCommentId") String taskCommentId)
       throws TaskNotFoundException,
@@ -89,7 +92,6 @@ public class TaskCommentController implements TaskCommentApi {
   }
 
   @GetMapping(path = RestEndpoints.URL_TASK_COMMENTS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<TaskCommentCollectionRepresentationModel> getTaskComments(
       @PathVariable("taskId") String taskId,
       HttpServletRequest request,
@@ -176,36 +178,19 @@ public class TaskCommentController implements TaskCommentApi {
         .body(taskCommentRepresentationModelAssembler.toModel(createdTaskComment));
   }
 
-  public enum TaskCommentQuerySortBy implements QuerySortBy<TaskCommentQuery> {
-    CREATED(TaskCommentQuery::orderByCreated),
-    MODIFIED(TaskCommentQuery::orderByModified);
+  @PostMapping(path = RestEndpoints.URL_TASKS_COMMENTS)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<BulkOperationResultsRepresentationModel> createTaskCommentsBatch(
+          @RequestBody TasksCommentBatchRepresentationModel requestModel)
+          throws InvalidArgumentException {
 
-    private final BiConsumer<TaskCommentQuery, SortDirection> consumer;
+    BulkOperationResults<String, KadaiException> errors =
+            taskService.createTaskCommentsBulk(requestModel.getTaskIds(),
+                    requestModel.getTextField());
 
-    TaskCommentQuerySortBy(BiConsumer<TaskCommentQuery, SortDirection> consumer) {
-      this.consumer = consumer;
-    }
+    BulkOperationResultsRepresentationModel model =
+            bulkOperationResultsRepresentationModelAssembler.toModel(errors);
 
-    @Override
-    public void applySortByForQuery(TaskCommentQuery query, SortDirection sortDirection) {
-      consumer.accept(query, sortDirection);
-    }
-  }
-
-  public static class TaskCommentQuerySortParameter
-      extends QuerySortParameter<TaskCommentQuery, TaskCommentQuerySortBy> {
-
-    @ConstructorProperties({"sort-by", "order"})
-    public TaskCommentQuerySortParameter(
-        List<TaskCommentQuerySortBy> sortBy, List<SortDirection> order)
-        throws InvalidArgumentException {
-      super(sortBy, order);
-    }
-
-    // this getter is necessary for the documentation!
-    @Override
-    public List<TaskCommentQuerySortBy> getSortBy() {
-      return super.getSortBy();
-    }
+    return ResponseEntity.ok(model);
   }
 }

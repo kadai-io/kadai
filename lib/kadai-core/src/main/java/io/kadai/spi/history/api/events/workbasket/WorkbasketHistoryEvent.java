@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 package io.kadai.spi.history.api.events.workbasket;
 
 import io.kadai.common.api.exceptions.SystemException;
+import io.kadai.spi.history.api.events.KadaiEvent;
 import io.kadai.workbasket.api.WorkbasketCustomField;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
 import java.time.Instant;
@@ -26,12 +27,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 /** Super class for all workbasket related events. */
-public class WorkbasketHistoryEvent {
+public class WorkbasketHistoryEvent implements KadaiEvent {
 
   protected String id;
   protected String eventType;
   protected Instant created;
   protected String userId;
+  protected String proxyAccessId;
   protected String domain;
   protected String workbasketId;
   protected String key;
@@ -53,10 +55,8 @@ public class WorkbasketHistoryEvent {
 
   public WorkbasketHistoryEvent() {}
 
-  public WorkbasketHistoryEvent(
-      String id, WorkbasketSummary workbasket, String userId, String details) {
+  public WorkbasketHistoryEvent(String id, WorkbasketSummary workbasket, String details) {
     this.id = id;
-    this.userId = userId;
     this.details = details;
     workbasketId = workbasket.getId();
     domain = workbasket.getDomain();
@@ -109,26 +109,16 @@ public class WorkbasketHistoryEvent {
   }
 
   public String getCustomAttribute(WorkbasketCustomField customField) {
-    switch (customField) {
-      case CUSTOM_1:
-        return custom1;
-      case CUSTOM_2:
-        return custom2;
-      case CUSTOM_3:
-        return custom3;
-      case CUSTOM_4:
-        return custom4;
-      case CUSTOM_5:
-        return custom5;
-      case CUSTOM_6:
-        return custom6;
-      case CUSTOM_7:
-        return custom7;
-      case CUSTOM_8:
-        return custom8;
-      default:
-        throw new SystemException("Unknown customField '" + customField + "'");
-    }
+    return switch (customField) {
+      case CUSTOM_1 -> custom1;
+      case CUSTOM_2 -> custom2;
+      case CUSTOM_3 -> custom3;
+      case CUSTOM_4 -> custom4;
+      case CUSTOM_5 -> custom5;
+      case CUSTOM_6 -> custom6;
+      case CUSTOM_7 -> custom7;
+      case CUSTOM_8 -> custom8;
+    };
   }
 
   public String getId() {
@@ -147,20 +137,34 @@ public class WorkbasketHistoryEvent {
     this.eventType = eventType;
   }
 
+  @Override
   public Instant getCreated() {
     return created != null ? created.truncatedTo(ChronoUnit.MILLIS) : null;
   }
 
+  @Override
   public void setCreated(Instant created) {
     this.created = created != null ? created.truncatedTo(ChronoUnit.MILLIS) : null;
   }
 
+  @Override
   public String getUserId() {
     return userId;
   }
 
+  @Override
   public void setUserId(String userId) {
     this.userId = userId;
+  }
+
+  @Override
+  public String getProxyAccessId() {
+    return proxyAccessId;
+  }
+
+  @Override
+  public void setProxyAccessId(String proxyAccessId) {
+    this.proxyAccessId = proxyAccessId;
   }
 
   public String getDomain() {
@@ -250,6 +254,7 @@ public class WorkbasketHistoryEvent {
         getEventType(),
         getCreated(),
         getUserId(),
+        getProxyAccessId(),
         getDomain(),
         getWorkbasketId(),
         getKey(),
@@ -283,6 +288,7 @@ public class WorkbasketHistoryEvent {
         && Objects.equals(getEventType(), other.getEventType())
         && Objects.equals(getCreated(), other.getCreated())
         && Objects.equals(getUserId(), other.getUserId())
+        && Objects.equals(getProxyAccessId(), other.getProxyAccessId())
         && Objects.equals(getDomain(), other.getDomain())
         && Objects.equals(getWorkbasketId(), other.getWorkbasketId())
         && Objects.equals(getKey(), other.getKey())
@@ -313,6 +319,8 @@ public class WorkbasketHistoryEvent {
         + created
         + ", userId="
         + userId
+        + ", proxyAccessId="
+        + proxyAccessId
         + ", domain="
         + domain
         + ", workbasketId="

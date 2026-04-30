@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,27 +16,22 @@
  *
  */
 
-import { Directive, HostListener, Renderer2, ElementRef } from '@angular/core';
+import { Directive, ElementRef, HostListener, inject, Renderer2 } from '@angular/core';
 
-@Directive({
-  selector: '[kadaiResizableWidth]',
-  standalone: false
-})
+@Directive({ selector: '[kadaiResizableWidth]' })
 export class ResizableWidthDirective {
+  private renderer = inject(Renderer2);
+  private el = inject(ElementRef);
+
   private startX: number;
 
-  constructor(
-    private renderer: Renderer2,
-    private el: ElementRef
-  ) {}
-
-  @HostListener('mouseover', ['$event'])
+  @HostListener('mouseover')
   onMouseover() {
     this.renderer.setStyle(document.body, 'cursor', 'col-resize');
     this.renderer.setStyle(this.el.nativeElement, 'user-select', 'none');
   }
 
-  @HostListener('mouseout', ['$event'])
+  @HostListener('mouseout')
   onMouseout() {
     this.renderer.setStyle(document.body, 'cursor', '');
     this.renderer.setStyle(this.el.nativeElement, 'user-select', '');

@@ -1,12 +1,29 @@
+/*
+ * Copyright [2026] [envite consulting GmbH]
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
+ *
+ */
+
 package io.kadai.simplehistory.rest;
 
 import io.kadai.common.rest.QueryPagingParameter;
-import io.kadai.simplehistory.impl.task.TaskHistoryQuery;
-import io.kadai.simplehistory.rest.TaskHistoryEventController.TaskHistoryQuerySortParameter;
 import io.kadai.simplehistory.rest.models.TaskHistoryEventPagedRepresentationModel;
 import io.kadai.simplehistory.rest.models.TaskHistoryEventRepresentationModel;
+import io.kadai.simplehistory.task.api.TaskHistoryQuery;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
-import io.kadai.spi.history.api.exceptions.KadaiHistoryEventNotFoundException;
+import io.kadai.spi.history.api.exceptions.TaskHistoryEventNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,7 +33,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -51,7 +67,6 @@ public interface TaskHistoryEventApi {
             })
       })
   @GetMapping(path = HistoryRestEndpoints.URL_HISTORY_EVENTS, produces = MediaTypes.HAL_JSON_VALUE)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<TaskHistoryEventPagedRepresentationModel> getTaskHistoryEvents(
       HttpServletRequest request,
       @ParameterObject TaskHistoryQueryFilterParameter filterParameter,
@@ -64,7 +79,7 @@ public interface TaskHistoryEventApi {
    * @title Get a single Task History Event
    * @param historyEventId the Id of the requested Task History Event.
    * @return the requested Task History Event
-   * @throws KadaiHistoryEventNotFoundException If a Task History Event can't be found by the
+   * @throws TaskHistoryEventNotFoundException If a Task History Event can't be found by the
    *     provided historyEventId
    */
   @Operation(
@@ -90,12 +105,11 @@ public interface TaskHistoryEventApi {
             responseCode = "404",
             description = "HISTORY_EVENT_NOT_FOUND",
             content = {
-              @Content(schema = @Schema(implementation = KadaiHistoryEventNotFoundException.class))
+              @Content(schema = @Schema(implementation = TaskHistoryEventNotFoundException.class))
             }),
       })
   @GetMapping(path = HistoryRestEndpoints.URL_HISTORY_EVENTS_ID)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<TaskHistoryEventRepresentationModel> getTaskHistoryEvent(
       @PathVariable("historyEventId") String historyEventId)
-      throws KadaiHistoryEventNotFoundException;
+      throws TaskHistoryEventNotFoundException;
 }

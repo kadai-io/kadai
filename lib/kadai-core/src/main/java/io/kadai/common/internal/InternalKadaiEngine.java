@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,13 +19,15 @@
 package io.kadai.common.internal;
 
 import io.kadai.common.api.KadaiEngine;
-import io.kadai.spi.history.internal.HistoryEventManager;
+import io.kadai.spi.history.internal.KadaiEventBus;
 import io.kadai.spi.priority.internal.PriorityServiceManager;
 import io.kadai.spi.routing.internal.TaskRoutingManager;
 import io.kadai.spi.task.internal.AfterRequestChangesManager;
 import io.kadai.spi.task.internal.AfterRequestReviewManager;
 import io.kadai.spi.task.internal.BeforeRequestChangesManager;
 import io.kadai.spi.task.internal.BeforeRequestReviewManager;
+import io.kadai.spi.task.internal.BeforeTransferTaskManager;
+import io.kadai.spi.task.internal.CreateTaskPostprocessorManager;
 import io.kadai.spi.task.internal.CreateTaskPreprocessorManager;
 import io.kadai.spi.task.internal.ReviewRequiredManager;
 import io.kadai.spi.task.internal.TaskDistributionManager;
@@ -103,11 +105,11 @@ public interface InternalKadaiEngine {
   KadaiEngine getEngine();
 
   /**
-   * Retrieve HistoryEventProducer.
+   * Retrieve KadaiEventBus.
    *
-   * @return the HistoryEventProducer instance.
+   * @return the KadaiEventBus instance.
    */
-  HistoryEventManager getHistoryEventManager();
+  KadaiEventBus getKadaiEventBus();
 
   /**
    * Retrieve TaskRoutingProducer.
@@ -129,6 +131,13 @@ public interface InternalKadaiEngine {
    * @return the CreateTaskPreprocessorManager instance.
    */
   CreateTaskPreprocessorManager getCreateTaskPreprocessorManager();
+
+  /**
+   * Retrieve CreateTaskPostprocessorManager.
+   *
+   * @return the CreateTaskPostprocessorManager instance.
+   */
+  CreateTaskPostprocessorManager getCreateTaskPostprocessorManager();
 
   /**
    * Retrieves the {@linkplain PriorityServiceManager}.
@@ -178,4 +187,11 @@ public interface InternalKadaiEngine {
    * @return the {@linkplain io.kadai.spi.task.internal.TaskEndstatePreprocessorManager} instance
    */
   TaskEndstatePreprocessorManager getTaskEndstatePreprocessorManager();
+
+  /**
+   * Retrieves the {@linkplain BeforeTransferTaskManager}.
+   *
+   * @return the {@linkplain BeforeTransferTaskManager} instance
+   */
+  BeforeTransferTaskManager getBeforeTransferTaskManager();
 }

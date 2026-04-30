@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ package io.kadai.monitor.rest.assembler;
 
 import io.kadai.monitor.api.reports.header.PriorityColumnHeader;
 import io.kadai.monitor.rest.models.PriorityColumnHeaderRepresentationModel;
+import org.jspecify.annotations.NonNull;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component

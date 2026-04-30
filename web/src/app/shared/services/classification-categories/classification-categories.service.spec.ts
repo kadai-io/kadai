@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
  *
  */
 
-import { TestBed, waitForAsync } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Customisation, CustomisationContent } from 'app/shared/models/customisation';
 import { asteriskIcon, ClassificationCategoriesService, missingIcon } from './classification-categories.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('ClassificationCategoriesService', () => {
   let categoryService: ClassificationCategoriesService;
@@ -28,18 +29,14 @@ describe('ClassificationCategoriesService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        ClassificationCategoriesService,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-      ]
+      providers: [ClassificationCategoriesService, provideHttpClient(), provideHttpClientTesting()]
     });
 
     categoryService = TestBed.inject(ClassificationCategoriesService);
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  it('should insert missing icon into customisation', waitForAsync(() => {
+  it('should insert missing icon into customisation', async () => {
     const expectedCustomisationContent: CustomisationContent = {
       classifications: { categories: { all: asteriskIcon, missing: missingIcon } }
     };
@@ -67,5 +64,5 @@ describe('ClassificationCategoriesService', () => {
 
       httpMock.verify();
     });
-  }));
+  });
 });

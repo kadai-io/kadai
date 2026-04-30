@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,43 +17,43 @@
  */
 
 import {
+  AfterViewInit,
   Component,
+  effect,
   ElementRef,
-  EventEmitter,
-  Input,
-  OnChanges,
+  input,
+  OnDestroy,
   OnInit,
-  Output,
-  SimpleChanges,
-  ViewChild
+  output,
+  untracked,
+  viewChild
 } from '@angular/core';
 import { Page } from 'app/shared/models/page';
 import { MatPaginator } from '@angular/material/paginator';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { MatFormField } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import { MatOption } from '@angular/material/core';
 
 @Component({
   selector: 'kadai-shared-pagination',
   templateUrl: './pagination.component.html',
   styleUrls: ['./pagination.component.scss'],
-  standalone: false
+  imports: [MatPaginator, MatFormField, MatInput, FormsModule, MatAutocompleteTrigger, MatAutocomplete, MatOption]
 })
-export class PaginationComponent implements OnInit, OnChanges {
-  @Input() page: Page;
+export class PaginationComponent implements OnInit, AfterViewInit, OnDestroy {
+  page = input<Page>();
+  type = input<String>();
+  numberOfItems = input<number>();
+  expanded = input(true);
+  resetPaging = input<Observable<null>>();
+  changePage = output<number>();
 
-  @Input() type: String;
-
-  @Input() numberOfItems: number;
-
-  @Input() expanded: boolean = true;
-
-  @Input() resetPaging: Observable<null>;
-
-  @Output() changePage = new EventEmitter<number>();
-
-  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
-
-  @ViewChild('pagination') paginationWrapper: ElementRef;
+  paginator = viewChild<MatPaginator>(MatPaginator);
+  paginationWrapper = viewChild<ElementRef>('pagination');
 
   destroy$ = new Subject<void>();
 
@@ -62,39 +62,50 @@ export class PaginationComponent implements OnInit, OnChanges {
   pageNumbers: number[];
   filteredPages: string[] = [];
 
-  ngOnInit() {
-    this.changeLabel();
-    if (this.resetPaging) this.resetPaging.pipe(takeUntil(this.destroy$)).subscribe(() => this.goToPage(1));
+  constructor() {
+    effect(() => {
+      const expanded = this.expanded();
+      const paginationWrapper = this.paginationWrapper();
+      const rangeLabel = paginationWrapper?.nativeElement?.querySelector('.mat-mdc-paginator-range-label');
+      const container = paginationWrapper?.nativeElement?.querySelector('.mat-mdc-paginator-container');
+      if (rangeLabel && container) {
+        if (!expanded) {
+          container.style.justifyContent = 'center';
+          rangeLabel.style.display = 'none';
+        } else {
+          container.style.justifyContent = 'flex-end';
+          rangeLabel.style.display = 'block';
+        }
+      }
+    });
+
+    effect(() => {
+      const page = this.page();
+      const numberOfItems = this.numberOfItems();
+      untracked(() => {
+        this.hasItems = (numberOfItems ?? 0) > 0;
+        if (page) {
+          this.pageSelected = page.number;
+          this.updateGoto();
+        }
+      });
+    });
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    const rangeLabel = this.paginationWrapper?.nativeElement?.querySelector('.mat-mdc-paginator-range-label');
-    const container = this.paginationWrapper?.nativeElement?.querySelector('.mat-mdc-paginator-container');
-    if (rangeLabel && container) {
-      if (!this.expanded) {
-        container.style.justifyContent = 'center';
-        rangeLabel.style.display = 'none';
-      } else {
-        container.style.justifyContent = 'flex-end';
-        rangeLabel.style.display = 'block';
-      }
-    }
+  ngOnInit() {
+    const resetPaging = this.resetPaging();
+    if (resetPaging) resetPaging.pipe(takeUntil(this.destroy$)).subscribe(() => this.goToPage(1));
+  }
 
-    if (changes.page && changes.page.currentValue) {
-      this.pageSelected = changes.page.currentValue.number;
-    }
-    this.hasItems = this.numberOfItems > 0;
-    if (changes.page) {
-      this.updateGoto();
-    }
+  ngAfterViewInit() {
+    this.changeLabel();
   }
 
   changeLabel() {
-    // Custom label: EG. "1-7 of 21 workbaskets"
-    // return `${start} - ${end} of ${length} workbaskets`;
-
-    this.paginator._intl.itemsPerPageLabel = 'Per page';
-    this.paginator._intl.getRangeLabel = (page: number, pageSize: number, length: number) => {
+    const paginator = this.paginator();
+    if (!paginator) return;
+    paginator._intl.itemsPerPageLabel = 'Per page';
+    paginator._intl.getRangeLabel = (page: number, pageSize: number, length: number) => {
       page += 1;
       const start = pageSize * (page - 1) + 1;
       const end = pageSize * page < length ? pageSize * page : length;
@@ -119,13 +130,14 @@ export class PaginationComponent implements OnInit, OnChanges {
 
   updateGoto() {
     this.pageNumbers = [];
-    for (let i = 1; i <= this.page?.totalPages; i++) {
+    for (let i = 1; i <= this.page()?.totalPages; i++) {
       this.pageNumbers.push(i);
     }
   }
 
   goToPage(page: number) {
-    this.paginator.pageIndex = page - 1;
+    const paginator = this.paginator();
+    if (paginator) paginator.pageIndex = page - 1;
     this.pageSelected = page;
     this.changePage.emit(page);
   }
@@ -142,5 +154,10 @@ export class PaginationComponent implements OnInit, OnChanges {
     const input = document.getElementById('inputTypeAhead') as HTMLInputElement;
     input.focus();
     input.select();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

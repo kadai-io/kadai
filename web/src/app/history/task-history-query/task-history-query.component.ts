@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,29 +16,61 @@
  *
  */
 
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, inject, signal, viewChild } from '@angular/core';
+import { outputToObservable } from '@angular/core/rxjs-interop';
 import { Direction, Sorting, TaskHistoryQuerySortParameter } from 'app/shared/models/sorting';
 import { TaskHistoryEventData } from '../../shared/models/task-history-event';
 import { TaskHistoryQueryService } from '../services/task-history-query/task-history-query.service';
 import { Page } from '../../shared/models/page';
-import { MatSort, Sort } from '@angular/material/sort';
+import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
 import { QueryPagingParameter } from '../../shared/models/query-paging-parameter';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 import { merge } from 'rxjs';
 import { startWith, switchMap, tap } from 'rxjs/operators';
 import { RequestInProgressService } from '../../shared/services/request-in-progress/request-in-progress.service';
 import { Pair } from '../../shared/models/pair';
+import {
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable
+} from '@angular/material/table';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'kadai-task-query',
   templateUrl: './task-history-query.component.html',
   styleUrls: ['./task-history-query.component.scss'],
-  standalone: false
+  imports: [
+    MatTable,
+    MatSort,
+    MatColumnDef,
+    MatHeaderCellDef,
+    MatHeaderCell,
+    MatSortHeader,
+    MatCellDef,
+    MatCell,
+    MatHeaderRowDef,
+    MatHeaderRow,
+    MatRowDef,
+    MatRow,
+    PaginationComponent,
+    DatePipe
+  ]
 })
-export class TaskHistoryQueryComponent implements OnInit {
-  data: TaskHistoryEventData[] = [];
+export class TaskHistoryQueryComponent implements AfterViewInit {
+  data = signal<TaskHistoryEventData[]>([]);
   displayedColumns: Pair<string, TaskHistoryQuerySortParameter>[] = [
-    { left: 'parentBusinessProcessId', right: TaskHistoryQuerySortParameter.PARENT_BUSINESS_PROCESS_ID },
+    {
+      left: 'parentBusinessProcessId',
+      right: TaskHistoryQuerySortParameter.PARENT_BUSINESS_PROCESS_ID
+    },
     { left: 'businessProcessId', right: TaskHistoryQuerySortParameter.BUSINESS_PROCESS_ID },
     { left: 'created', right: TaskHistoryQuerySortParameter.CREATED },
     { left: 'userId', right: TaskHistoryQuerySortParameter.USER_ID },
@@ -52,8 +84,14 @@ export class TaskHistoryQueryComponent implements OnInit {
     { left: 'porSystem', right: TaskHistoryQuerySortParameter.POR_SYSTEM },
     { left: 'porInstance', right: TaskHistoryQuerySortParameter.POR_INSTANCE },
     { left: 'taskClassificationKey', right: TaskHistoryQuerySortParameter.TASK_CLASSIFICATION_KEY },
-    { left: 'taskClassificationCategory', right: TaskHistoryQuerySortParameter.TASK_CLASSIFICATION_CATEGORY },
-    { left: 'attachmentClassificationKey', right: TaskHistoryQuerySortParameter.ATTACHMENT_CLASSIFICATION_KEY },
+    {
+      left: 'taskClassificationCategory',
+      right: TaskHistoryQuerySortParameter.TASK_CLASSIFICATION_CATEGORY
+    },
+    {
+      left: 'attachmentClassificationKey',
+      right: TaskHistoryQuerySortParameter.ATTACHMENT_CLASSIFICATION_KEY
+    },
     { left: 'custom1', right: TaskHistoryQuerySortParameter.CUSTOM_1 },
     { left: 'custom2', right: TaskHistoryQuerySortParameter.CUSTOM_2 },
     { left: 'custom3', right: TaskHistoryQuerySortParameter.CUSTOM_3 },
@@ -64,36 +102,30 @@ export class TaskHistoryQueryComponent implements OnInit {
     { left: 'oldData', right: undefined },
     { left: 'newData', right: undefined }
   ];
-  pageInformation: Page;
-
+  pageInformation = signal<Page>(undefined);
   pageParameter: QueryPagingParameter = {
     page: 1,
     'page-size': 9
   };
-
   // IMPORTANT: Please make sure that material table default matches with this entity.
   sortParameter: Sorting<TaskHistoryQuerySortParameter> = {
     'sort-by': TaskHistoryQuerySortParameter.CREATED,
     order: Direction.ASC
   };
-
-  @ViewChild(MatSort) sort: MatSort;
-  @ViewChild(PaginationComponent) pagination: PaginationComponent;
-
-  constructor(
-    private taskHistoryQueryService: TaskHistoryQueryService,
-    private requestInProgressService: RequestInProgressService
-  ) {}
-
-  ngOnInit() {}
+  sort = viewChild.required<MatSort>(MatSort);
+  pagination = viewChild.required<PaginationComponent>(PaginationComponent);
+  private taskHistoryQueryService = inject(TaskHistoryQueryService);
+  private requestInProgressService = inject(RequestInProgressService);
 
   ngAfterViewInit() {
-    const sortChange$ = this.sort.sortChange.pipe(
+    const sortChange$ = this.sort().sortChange.pipe(
       tap((sort) => this.updateSortParameter(sort)),
       tap(() => (this.pageParameter.page = 1))
     );
 
-    const pageChange$ = this.pagination.changePage.pipe(tap((newPage) => (this.pageParameter.page = newPage)));
+    const pageChange$ = outputToObservable(this.pagination().changePage).pipe(
+      tap((newPage) => (this.pageParameter.page = newPage))
+    );
 
     merge(sortChange$, pageChange$)
       .pipe(
@@ -105,8 +137,8 @@ export class TaskHistoryQueryComponent implements OnInit {
         })
       )
       .subscribe((data) => {
-        this.data = data.taskHistoryEvents;
-        this.pageInformation = data.page;
+        this.data.set(data.taskHistoryEvents);
+        this.pageInformation.set(data.page);
         this.requestInProgressService.setRequestInProgress(false);
       });
   }

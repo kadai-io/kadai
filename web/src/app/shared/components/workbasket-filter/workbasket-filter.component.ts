@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,82 +16,97 @@
  *
  */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, effect, inject, input, signal, untracked } from '@angular/core';
 import { ALL_TYPES, WorkbasketType } from '../../models/workbasket-type';
 import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-filter-parameter';
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { ClearWorkbasketFilter, SetWorkbasketFilter } from '../../store/filter-store/filter.actions';
 import { FilterSelectors } from '../../store/filter-store/filter.selectors';
-import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { IconTypeComponent } from '../../../administration/components/type-icon/icon-type.component';
+import { MapValuesPipe } from '../../pipes/map-values.pipe';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'kadai-shared-workbasket-filter',
   templateUrl: './workbasket-filter.component.html',
   styleUrls: ['./workbasket-filter.component.scss'],
-  standalone: false
+  imports: [
+    MatFormField,
+    MatLabel,
+    MatInput,
+    FormsModule,
+    MatTooltip,
+    MatButton,
+    MatIcon,
+    MatMenuTrigger,
+    IconTypeComponent,
+    MatMenu,
+    MatMenuItem,
+    MapValuesPipe
+  ]
 })
-export class WorkbasketFilterComponent implements OnInit, OnDestroy {
+export class WorkbasketFilterComponent {
   allTypes: Map<WorkbasketType, string> = ALL_TYPES;
+  component = input<string>();
+  isExpanded = input<boolean>();
+  private availableFilter = toSignal(inject(Store).select(FilterSelectors.getAvailableDistributionTargetsFilter), {
+    requireSync: true
+  });
+  private selectedFilter = toSignal(inject(Store).select(FilterSelectors.getSelectedDistributionTargetsFilter), {
+    requireSync: true
+  });
+  private workbasketListFilter = toSignal(inject(Store).select(FilterSelectors.getWorkbasketListFilter), {
+    requireSync: true
+  });
+  filter = signal<WorkbasketQueryFilterParameter>(null);
+  private store = inject(Store);
 
-  @Input() component: string;
-  @Input() isExpanded: boolean;
-
-  @Select(FilterSelectors.getAvailableDistributionTargetsFilter)
-  availableDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter>;
-
-  @Select(FilterSelectors.getSelectedDistributionTargetsFilter)
-  selectedDistributionTargetsFilter$: Observable<WorkbasketQueryFilterParameter>;
-
-  @Select(FilterSelectors.getWorkbasketListFilter)
-  workbasketListFilter$: Observable<WorkbasketQueryFilterParameter>;
-
-  destroy$ = new Subject<void>();
-
-  filter: WorkbasketQueryFilterParameter;
-
-  constructor(private store: Store) {}
-
-  ngOnInit(): void {
-    if (this.component === 'availableDistributionTargets') {
-      this.availableDistributionTargetsFilter$.pipe(takeUntil(this.destroy$)).subscribe((filter) => {
-        this.setFilter(filter);
+  constructor() {
+    effect(() => {
+      const comp = this.component();
+      let f: WorkbasketQueryFilterParameter;
+      if (comp === 'availableDistributionTargets') {
+        f = this.availableFilter();
+      } else if (comp === 'selectedDistributionTargets') {
+        f = this.selectedFilter();
+      } else {
+        f = this.workbasketListFilter();
+      }
+      untracked(() => {
+        if (f) {
+          this.setFilter(f);
+        }
       });
-    } else if (this.component === 'selectedDistributionTargets') {
-      this.selectedDistributionTargetsFilter$.pipe(takeUntil(this.destroy$)).subscribe((filter) => {
-        this.setFilter(filter);
-      });
-    } else if (this.component === 'workbasketList') {
-      this.workbasketListFilter$.pipe(takeUntil(this.destroy$)).subscribe((filter) => {
-        this.setFilter(filter);
-      });
-    }
+    });
   }
 
   setFilter(filter: WorkbasketQueryFilterParameter) {
-    this.filter = {
+    this.filter.set({
       'description-like': [...filter['description-like']],
       'key-like': [...filter['key-like']],
       'name-like': [...filter['name-like']],
       'owner-like': [...filter['owner-like']],
       type: [...filter['type']]
-    };
+    });
   }
 
   clear() {
-    this.store.dispatch(new ClearWorkbasketFilter(this.component));
+    this.store.dispatch(new ClearWorkbasketFilter(this.component()));
   }
 
   selectType(type: WorkbasketType) {
-    this.filter.type = type !== WorkbasketType.ALL ? [type] : [];
+    this.filter.update((f) => ({ ...f, type: type !== WorkbasketType.ALL ? [type] : [] }));
   }
 
   search() {
-    this.store.dispatch(new SetWorkbasketFilter(this.filter, this.component));
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this.store.dispatch(new SetWorkbasketFilter(this.filter(), this.component()));
   }
 }

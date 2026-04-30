@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 package io.kadai.simplehistory.rest;
 
-import static io.kadai.rest.test.RestHelper.TEMPLATE;
+
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -33,37 +33,29 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Objects;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /** Controller for integration test. */
 @KadaiSpringBootTest
 class TaskHistoryEventControllerIntTest {
 
-  private static final ParameterizedTypeReference<TaskHistoryEventPagedRepresentationModel>
-      TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE =
-          new ParameterizedTypeReference<>() {};
-
-  private static final ParameterizedTypeReference<TaskHistoryEventRepresentationModel>
-      TASK_HISTORY_EVENT_REPRESENTATION_MODEL_TYPE =
-          new ParameterizedTypeReference<>() {};
-
   private final RestHelper restHelper;
+  private final RestClient restClient;
 
   @Autowired
-  TaskHistoryEventControllerIntTest(RestHelper restHelper) {
+  TaskHistoryEventControllerIntTest(RestHelper restHelper, RestClient restClient) {
     this.restHelper = restHelper;
+    this.restClient = restClient;
   }
 
   // region Get Task History Events
@@ -71,11 +63,12 @@ class TaskHistoryEventControllerIntTest {
   @Test
   void should_GetAllHistoryEvents_When_UrlIsVisited() {
     ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
-        TEMPLATE.exchange(
-            restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS),
-            HttpMethod.GET,
-            new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1")),
-            TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE);
+        restClient
+            .get()
+            .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS))
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getContent()).hasSize(45);
   }
@@ -83,11 +76,12 @@ class TaskHistoryEventControllerIntTest {
   @Test
   void should_GenerateSelfLink_When_TaskHistoryEventsAreRequested() {
     ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
-        TEMPLATE.exchange(
-            restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS),
-            HttpMethod.GET,
-            new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1")),
-            TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE);
+        restClient
+            .get()
+            .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS))
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getLink(IanaLinkRelations.SELF))
         .isPresent()
@@ -101,11 +95,12 @@ class TaskHistoryEventControllerIntTest {
   void should_ContainQueryParametersInComputedSelfLink_When_TaskHistoryEventsAreRequested() {
     String parameters = "?domain=DOMAIN_A&domain=DOMAIN_B";
     ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
-        TEMPLATE.exchange(
-            restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters),
-            HttpMethod.GET,
-            new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1")),
-            TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE);
+        restClient
+            .get()
+            .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getLink(IanaLinkRelations.SELF))
         .isPresent()
@@ -119,11 +114,12 @@ class TaskHistoryEventControllerIntTest {
   void should_SortEventsByBusinessProcessIdDesc_When_SortByAndOrderQueryParametersAreDeclared() {
     String parameters = "?sort-by=BUSINESS_PROCESS_ID&order=DESCENDING";
     ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
-        TEMPLATE.exchange(
-            restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters),
-            HttpMethod.GET,
-            new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1")),
-            TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE);
+        restClient
+            .get()
+            .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getContent())
         .extracting(TaskHistoryEventRepresentationModel::getBusinessProcessId)
@@ -134,11 +130,12 @@ class TaskHistoryEventControllerIntTest {
   void should_ApplyBusinessProcessIdFilter_When_QueryParameterIsProvided() {
     String parameters = "?business-process-id=BPI:01";
     ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
-        TEMPLATE.exchange(
-            restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters),
-            HttpMethod.GET,
-            new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1")),
-            TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE);
+        restClient
+            .get()
+            .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getContent())
         .extracting(TaskHistoryEventRepresentationModel::getTaskHistoryId)
@@ -146,17 +143,52 @@ class TaskHistoryEventControllerIntTest {
   }
 
   @Test
-  @Disabled("Jörg pls fix this")
+  void should_SortEventsByProxyAccessId_When_SortByAndOrderQueryParametersAreDeclared() {
+    String parameters = "?sort-by=PROXY_ACCESS_ID&order=ASCENDING";
+    ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
+        restClient
+            .get()
+            .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
+    assertThat(response.getBody()).isNotNull();
+    assertThat(response.getBody().getContent())
+        .extracting(TaskHistoryEventRepresentationModel::getProxyAccessId)
+        .filteredOn(Objects::nonNull)
+        .isSortedAccordingTo(CASE_INSENSITIVE_ORDER);
+  }
+
+  @Test
+  void should_ApplyProxyAccessIdFilter_When_QueryParameterIsProvided() {
+    String parameters = "?proxy-access-id=monitor";
+    ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
+        restClient
+            .get()
+            .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
+    assertThat(response.getBody()).isNotNull();
+    assertThat(response.getBody().getContent())
+        .extracting(TaskHistoryEventRepresentationModel::getTaskHistoryId)
+        .containsExactlyInAnyOrder(
+            "THI:000000000000000000000000000000000027", "THI:000000000000000000000000000000000026");
+  }
+
+  @Test
   void should_ReturnBadStatusErrorCode_When_CreatedQueryParameterIsWrongFormatted() {
     String currentTime = "wrong format";
     ThrowingCallable httpCall =
         () ->
-            TEMPLATE.exchange(
-                restHelper.toUrl(
-                    HistoryRestEndpoints.URL_HISTORY_EVENTS + "?created=" + currentTime),
-                HttpMethod.GET,
-                new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1")),
-                TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE);
+            restClient
+                .get()
+                .uri(
+                    restHelper.toUrl(
+                        HistoryRestEndpoints.URL_HISTORY_EVENTS + "?created=" + currentTime))
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                .retrieve()
+                .toEntity(TaskHistoryEventPagedRepresentationModel.class);
     assertThatThrownBy(httpCall)
         .isInstanceOf(HttpStatusCodeException.class)
         .hasMessageContaining(currentTime)
@@ -169,12 +201,14 @@ class TaskHistoryEventControllerIntTest {
   void should_ApplyCreatedFilter_When_QueryParametersAreProvided() {
     Instant now = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant();
     ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
-        TEMPLATE.exchange(
-            restHelper.toUrl(
-                HistoryRestEndpoints.URL_HISTORY_EVENTS + "?created=" + now + "&created="),
-            HttpMethod.GET,
-            new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1")),
-            TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE);
+        restClient
+            .get()
+            .uri(
+                restHelper.toUrl(
+                    HistoryRestEndpoints.URL_HISTORY_EVENTS + "?created=" + now + "&created="))
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getLink(IanaLinkRelations.SELF)).isNotNull();
     assertThat(response.getBody().getContent()).hasSize(23);
@@ -190,11 +224,12 @@ class TaskHistoryEventControllerIntTest {
     String parameters = "?sort-by=TASK_HISTORY_EVENT_ID&page-size=3&page=3";
 
     ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
-        TEMPLATE.exchange(
-            restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters),
-            HttpMethod.GET,
-            new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1")),
-            TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE);
+        restClient
+            .get()
+            .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getContent())
@@ -245,11 +280,12 @@ class TaskHistoryEventControllerIntTest {
             .toUriString();
 
     ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
-        TEMPLATE.exchange(
-            restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS_ID, id),
-            HttpMethod.GET,
-            new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1")),
-            TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE);
+        restClient
+            .get()
+            .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS_ID, id))
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getLink(IanaLinkRelations.SELF))
         .isPresent()
@@ -262,13 +298,15 @@ class TaskHistoryEventControllerIntTest {
   @Test
   void should_GetSpecificTaskHistoryEventWithDetails_When_SingleEventIsQueried() {
     ResponseEntity<TaskHistoryEventRepresentationModel> response =
-        TEMPLATE.exchange(
-            restHelper.toUrl(
-                HistoryRestEndpoints.URL_HISTORY_EVENTS_ID,
-                "THI:000000000000000000000000000000000000"),
-            HttpMethod.GET,
-            new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1")),
-            TASK_HISTORY_EVENT_REPRESENTATION_MODEL_TYPE);
+        restClient
+            .get()
+            .uri(
+                restHelper.toUrl(
+                    HistoryRestEndpoints.URL_HISTORY_EVENTS_ID,
+                    "THI:000000000000000000000000000000000000"))
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(TaskHistoryEventRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getDetails()).isNotNull();
@@ -279,15 +317,17 @@ class TaskHistoryEventControllerIntTest {
 
     ThrowingCallable httpCall =
         () ->
-            TEMPLATE.exchange(
-                restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS)
-                    + "?domain=DOMAIN_A"
-                    + "&illegalParam=illegal"
-                    + "&anotherIllegalParam=stillIllegal"
-                    + "&sort-by=TASK_ID&order=DESCENDING&page-size=5&page=2",
-                HttpMethod.GET,
-                new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1")),
-                TASK_HISTORY_EVENT_PAGED_REPRESENTATION_MODEL_TYPE);
+            restClient
+                .get()
+                .uri(
+                    restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS)
+                        + "?domain=DOMAIN_A"
+                        + "&illegalParam=illegal"
+                        + "&anotherIllegalParam=stillIllegal"
+                        + "&sort-by=TASK_ID&order=DESCENDING&page-size=5&page=2")
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                .retrieve()
+                .toEntity(TaskHistoryEventPagedRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
         .isInstanceOf(HttpStatusCodeException.class)

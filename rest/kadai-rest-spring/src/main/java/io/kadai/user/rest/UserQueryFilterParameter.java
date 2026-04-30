@@ -1,10 +1,30 @@
+/*
+ * Copyright [2026] [envite consulting GmbH]
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
+ *
+ */
+
 package io.kadai.user.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.security.CurrentUserContext;
+import io.kadai.common.internal.util.LogSanitizer;
 import io.kadai.common.rest.QueryParameter;
 import io.kadai.user.api.UserQuery;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.beans.ConstructorProperties;
 import java.util.Optional;
 import org.apache.commons.lang3.ArrayUtils;
@@ -17,33 +37,38 @@ public class UserQueryFilterParameter implements QueryParameter<UserQuery, Void>
 
   // region id
 
-  @Schema(name = "current-user", description = "Filter by the current user.")
+  @Parameter(
+      name = "current-user",
+      description =
+          "Filter by the current user. Either use it as a Query-Flag without any value, "
+              + "with the empty value \"\" or with the value \"true\".",
+      allowEmptyValue = true)
   @JsonProperty("current-user")
   private final String currentUser;
 
   // endregion
 
   // region current-user
-  @Schema(name = "orgLevel1", description = "Filter by the org-level 1. This is an exact match.")
+  @Parameter(name = "orgLevel1", description = "Filter by the org-level 1. This is an exact match.")
   @JsonProperty("orgLevel1")
   private final String[] orgLevel1;
 
   // endregion
 
   // region org-level
-  @Schema(name = "orgLevel2", description = "Filter by the org-level 2. This is an exact match.")
+  @Parameter(name = "orgLevel2", description = "Filter by the org-level 2. This is an exact match.")
   @JsonProperty("orgLevel2")
   private final String[] orgLevel2;
 
-  @Schema(name = "orgLevel3", description = "Filter by the org-level 3. This is an exact match.")
+  @Parameter(name = "orgLevel3", description = "Filter by the org-level 3. This is an exact match.")
   @JsonProperty("orgLevel3")
   private final String[] orgLevel3;
 
-  @Schema(name = "orgLevel4", description = "Filter by the org-level 4. This is an exact match.")
+  @Parameter(name = "orgLevel4", description = "Filter by the org-level 4. This is an exact match.")
   @JsonProperty("orgLevel4")
   private final String[] orgLevel4;
 
-  @Schema(name = "user-id", description = "Filter by the users ids. This is an exact match.")
+  @Parameter(name = "user-id", description = "Filter by the users ids. This is an exact match.")
   @JsonProperty("user-id")
   private String[] userIds;
 
@@ -78,11 +103,24 @@ public class UserQueryFilterParameter implements QueryParameter<UserQuery, Void>
    *
    * @param currentUserContext the context this {@linkplain
    *     org.springdoc.core.annotations.ParameterObject @ParameterObject} is served from.
+   * @throws InvalidArgumentException if {@linkplain #getCurrentUser() current-user} has any
+   *     non-blank value other than 'true'
    */
-  public void addCurrentUserIdIfPresentWithContext(CurrentUserContext currentUserContext) {
-    if (currentUser != null) {
-      final String currentUserId = currentUserContext.getUserid();
-      this.userIds = ArrayUtils.add(this.userIds, currentUserId);
+  public void addCurrentUserIdIfPresentWithContext(CurrentUserContext currentUserContext)
+      throws InvalidArgumentException {
+    if (currentUser == null) {
+      return;
+    }
+    if (currentUser.isBlank() || currentUser.equalsIgnoreCase("true")) {
+      final String currentUserId = currentUserContext.getUserId();
+      if (currentUserId != null) {
+        this.userIds = ArrayUtils.add(this.userIds, currentUserId);
+      }
+    } else {
+      throw new InvalidArgumentException(
+          String.format(
+              "current-user parameter '%s' with value is invalid.",
+              LogSanitizer.stripLineBreakingChars(currentUser)));
     }
   }
 

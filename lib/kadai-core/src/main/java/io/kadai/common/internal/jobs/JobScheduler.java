@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public class JobScheduler {
             initJobByClassName("io.kadai.user.jobs.UserInfoRefreshJob");
           }
           if (kadaiEngine.getConfiguration().isSimpleHistoryCleanupJobEnabled()) {
-            initJobByClassName("io.kadai.simplehistory.impl.jobs.HistoryCleanupJob");
+            initJobByClassName("io.kadai.simplehistory.jobs.TaskHistoryCleanupJob");
           }
           kadaiEngine.getConfiguration().getCustomJobs().forEach(this::initJobByClassName);
 

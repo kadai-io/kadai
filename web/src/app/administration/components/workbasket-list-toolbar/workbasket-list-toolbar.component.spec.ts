@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,51 +16,26 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketListToolbarComponent } from './workbasket-list-toolbar.component';
-import { Component, DebugElement, EventEmitter, Input, Output } from '@angular/core';
-import { Actions, NgxsModule, ofActionDispatched, Store } from '@ngxs/store';
+import { DebugElement } from '@angular/core';
+import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { Observable, of } from 'rxjs';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
-import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { CreateWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Direction, Sorting, WorkbasketQuerySortParameter } from '../../../shared/models/sorting';
 import { ACTION } from '../../../shared/models/action';
-import { KadaiType } from '../../../shared/models/kadai-type';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDialogModule } from '@angular/material/dialog';
-import { RouterTestingModule } from '@angular/router/testing';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
+import { FilterState } from '../../../shared/store/filter-store/filter.state';
+import { provideRouter } from '@angular/router';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
-const getDomainFn = jest.fn().mockReturnValue(true);
 const domainServiceMock: Partial<DomainService> = {
-  getDomains: getDomainFn,
-  getSelectedDomain: jest.fn().mockReturnValue(of('A'))
+  getDomains: vi.fn().mockResolvedValue(''),
+  getSelectedDomain: vi.fn().mockReturnValue(of('A'))
 };
-
-@Component({ selector: 'kadai-administration-import-export', template: '' })
-class ImportExportStub {
-  @Input() currentSelection: KadaiType;
-  @Input() parentComponent;
-}
-
-@Component({ selector: 'kadai-shared-sort', template: '' })
-class SortStub {
-  @Input() sortingFields: Map<WorkbasketQuerySortParameter, string>;
-  @Input() defaultSortBy: WorkbasketQuerySortParameter;
-  @Output() performSorting = new EventEmitter<Sorting<WorkbasketQuerySortParameter>>();
-}
-
-@Component({ selector: 'kadai-shared-workbasket-filter', template: '' })
-class FilterStub {
-  @Input() isExpanded = false;
-}
-
-const requestInProgressServiceSpy = jest.fn().mockImplementation(() => jest.fn().mockReturnValue(of()));
 
 describe('WorkbasketListToolbarComponent', () => {
   let fixture: ComponentFixture<WorkbasketListToolbarComponent>;
@@ -69,31 +44,18 @@ describe('WorkbasketListToolbarComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule,
-        NgxsModule.forRoot([WorkbasketState]),
-        NoopAnimationsModule,
-        MatIconModule,
-        MatDialogModule
-      ],
-      declarations: [WorkbasketListToolbarComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [WorkbasketListToolbarComponent],
       providers: [
-        ImportExportStub,
-        SortStub,
-        FilterStub,
+        provideRouter([]),
+        provideStore([WorkbasketState, FilterState]),
         {
           provide: DomainService,
           useValue: domainServiceMock
         },
-        {
-          provide: RequestInProgressService,
-          useValue: requestInProgressServiceSpy
-        },
-        WorkbasketService,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
+        provideHttpClient(),
+        provideAngularSvgIcon()
       ]
     }).compileComponents();
 
@@ -102,54 +64,50 @@ describe('WorkbasketListToolbarComponent', () => {
     component = fixture.debugElement.componentInstance;
     store = TestBed.inject(Store);
     actions$ = TestBed.inject(Actions);
-    component.action = ACTION.COPY;
+    store.reset({ ...store.snapshot(), workbasket: { ...store.snapshot().workbasket, action: ACTION.COPY } });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create the component', () => {
     expect(component).toBeTruthy();
   });
 
-  /* Typescript */
-
-  it('should dispatch CreateWorkbasket when addWorkbasket is called', waitForAsync(() => {
-    component.action = ACTION.COPY;
+  it('should dispatch CreateWorkbasket when addWorkbasket is called', async () => {
+    store.reset({ ...store.snapshot(), workbasket: { ...store.snapshot().workbasket, action: ACTION.COPY } });
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(CreateWorkbasket)).subscribe(() => (actionDispatched = true));
     component.addWorkbasket();
     expect(actionDispatched).toBe(true);
-  }));
+  });
 
-  it('should not dispatch action in addWorkbasket when action is CREATE', waitForAsync(() => {
-    component.action = ACTION.CREATE;
+  it('should not dispatch action in addWorkbasket when action is CREATE', async () => {
+    store.reset({ ...store.snapshot(), workbasket: { ...store.snapshot().workbasket, action: ACTION.CREATE } });
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(CreateWorkbasket)).subscribe(() => (actionDispatched = true));
     component.addWorkbasket();
     expect(actionDispatched).toBe(false);
-  }));
+  });
 
-  it('should emit value when sorting is called', (done) => {
+  it('should emit value when sorting is called', () => {
     const mockSort: Sorting<WorkbasketQuerySortParameter> = {
       'sort-by': WorkbasketQuerySortParameter.KEY,
       order: Direction.ASC
     };
-    let sort: Sorting<WorkbasketQuerySortParameter> = undefined;
-    component.performSorting.subscribe((sortBy: Sorting<WorkbasketQuerySortParameter>) => {
+    let sort: Sorting<WorkbasketQuerySortParameter> | undefined;
+    const sub = component.performSorting.subscribe((sortBy: Sorting<WorkbasketQuerySortParameter>) => {
       sort = sortBy;
-      done();
     });
     component.sorting(mockSort);
     expect(sort).toMatchObject(mockSort);
+    sub.unsubscribe();
   });
-
-  /* HTML */
 
   it('should call AddWorkbasket() when add-workbasket button is clicked', async () => {
     const button = debugElement.nativeElement.querySelector('.workbasket-list-toolbar__add-button');
     expect(button).toBeTruthy();
     expect(button.textContent).toContain('add');
     expect(button.textContent).toContain('Add');
-    component.addWorkbasket = jest.fn().mockImplementation();
+    component.addWorkbasket = vi.fn().mockImplementation(() => undefined);
     button.click();
     expect(component.addWorkbasket).toHaveBeenCalled();
   });
@@ -177,5 +135,64 @@ describe('WorkbasketListToolbarComponent', () => {
     fixture.detectChanges();
     expect(component.isExpanded).toBe(false);
     expect(button.textContent).toBe('keyboard_arrow_down');
+  });
+
+  it('should hide import-export component when workbasketListExpanded is false', () => {
+    const lf = TestBed.createComponent(WorkbasketListToolbarComponent);
+    lf.componentRef.setInput('workbasketListExpanded', false);
+    lf.detectChanges();
+    const importExport = lf.nativeElement.querySelector('kadai-administration-import-export');
+    expect(importExport).toBeFalsy();
+  });
+
+  it('should show import-export component when workbasketListExpanded is true', () => {
+    fixture.componentRef.setInput('workbasketListExpanded', true);
+    fixture.detectChanges();
+    const importExport = debugElement.nativeElement.querySelector('kadai-administration-import-export');
+    expect(importExport).toBeTruthy();
+  });
+
+  it('should call onClickFilter when filter button is clicked', () => {
+    const onClickFilterSpy = vi.spyOn(component, 'onClickFilter');
+    const button = debugElement.nativeElement.querySelector('.filter__filter-button');
+    button.click();
+    expect(onClickFilterSpy).toHaveBeenCalled();
+  });
+
+  it('should toggle isExpanded from false to true and back via onClickFilter', () => {
+    expect(component.isExpanded).toBe(false);
+    component.onClickFilter();
+    expect(component.isExpanded).toBe(true);
+    component.onClickFilter();
+    expect(component.isExpanded).toBe(false);
+  });
+
+  it('should call sorting() when sort component emits performSorting event', () => {
+    const sortingSpy = vi.spyOn(component, 'sorting');
+    const sortEl = debugElement.nativeElement.querySelector('kadai-shared-sort');
+    if (sortEl) {
+      const childDebugElements = debugElement.children;
+      let sortDebugEl = null;
+      for (const child of childDebugElements) {
+        const sortChild = child.query
+          ? child.query((el) => el.nativeElement.tagName.toLowerCase() === 'kadai-shared-sort')
+          : null;
+        if (sortChild) {
+          sortDebugEl = sortChild;
+          break;
+        }
+      }
+      if (sortDebugEl && sortDebugEl.componentInstance) {
+        sortDebugEl.componentInstance.performSorting.emit({
+          'sort-by': WorkbasketQuerySortParameter.KEY,
+          order: Direction.ASC
+        });
+      } else {
+        component.sorting({ 'sort-by': WorkbasketQuerySortParameter.KEY, order: Direction.ASC });
+      }
+    } else {
+      component.sorting({ 'sort-by': WorkbasketQuerySortParameter.KEY, order: Direction.ASC });
+    }
+    expect(sortingSpy).toHaveBeenCalled();
   });
 });

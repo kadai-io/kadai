@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
  *
  */
 
-import { AfterViewInit, Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { Chart, DoughnutController, ArcElement, Tooltip, Legend, Title } from 'chart.js';
+import { AfterViewInit, Component, inject, input, OnDestroy, OnInit } from '@angular/core';
+import { ArcElement, Chart, DoughnutController, Legend, Title, Tooltip } from 'chart.js';
 import { ReportRow } from '../../models/report-row';
-import { Select } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { SettingsSelectors } from '../../../shared/store/settings-store/settings.selectors';
 import { Observable, Subject } from 'rxjs';
 import { Settings } from '../../../settings/models/settings';
@@ -32,14 +32,18 @@ import { SettingMembers } from '../../../settings/components/Settings/expected-m
   styleUrls: ['./canvas.component.scss']
 })
 export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
-  @Input() row: ReportRow;
-  @Input() id: string;
+  row = input<ReportRow>();
+  id = input<string>();
 
   labels: string[];
   colors: string[];
   destroy$ = new Subject<void>();
 
-  @Select(SettingsSelectors.getSettings) settings$: Observable<Settings>;
+  settings$: Observable<Settings> = inject(Store).select(SettingsSelectors.getSettings);
+
+  constructor() {
+    Chart.register(DoughnutController, ArcElement, Tooltip, Legend, Title);
+  }
 
   ngOnInit() {
     this.settings$.pipe(takeUntil(this.destroy$)).subscribe((settings) => {
@@ -61,9 +65,9 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    const canvas = document.getElementById(this.id) as HTMLCanvasElement;
-    if (canvas && this.id && this.row) {
-      this.generateChart(this.id, this.row);
+    const canvas = document.getElementById(this.id()) as HTMLCanvasElement;
+    if (canvas && this.id() && this.row()) {
+      this.generateChart(this.id(), this.row());
     }
   }
 
@@ -100,12 +104,8 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    document.getElementById(this.id).outerHTML = ''; // destroy HTML element
+    document.getElementById(this.id()).outerHTML = '';
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  constructor() {
-    Chart.register(DoughnutController, ArcElement, Tooltip, Legend, Title);
   }
 }

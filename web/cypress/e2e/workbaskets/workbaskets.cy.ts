@@ -1,0 +1,267 @@
+/*
+ * Copyright [2024] [envite consulting GmbH]
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
+ *
+ */
+
+describe('KADAI Workbaskets', () => {
+  beforeEach(() => cy.loginAsAdmin());
+
+  it('should be able to see all workbaskets', () => {
+    cy.visit(Cypress.expose('appUrl') + Cypress.expose('adminUrl') + '/workbaskets');
+    cy.verifyPageLoad('/workbaskets');
+  });
+
+  it('should be able to filter workbaskets by name', () => {
+    cy.visit(Cypress.expose('appUrl') + Cypress.expose('adminUrl') + '/workbaskets');
+    cy.verifyPageLoad('/workbaskets');
+
+    cy.get('input[mattooltip="Type to filter by name"]')
+      .type(Cypress.expose('testValueWorkbasketSelectionName'), { force: true })
+      .type('{enter}', { force: true });
+
+    cy.get('mat-selection-list[role="listbox"]').should('have.length', 1);
+  });
+
+  it('should be possible to edit workbasket custom information', () => {
+    cy.visitTestWorkbasket();
+
+    cy.get('#wb-custom-1').clear({ force: true }).type(Cypress.expose('testValueWorkbaskets'), { force: true });
+
+    cy.saveWorkbaskets();
+    cy.get('#wb-custom-1').should('have.value', Cypress.expose('testValueWorkbaskets'));
+  });
+
+  it('should be possible to edit workbasket information orgLevel', () => {
+    cy.visitTestWorkbasket();
+
+    cy.get('input[name="workbasket.orgLevel1"]')
+      .clear({ force: true })
+      .type(Cypress.expose('testValueWorkbaskets'), { force: true });
+
+    cy.saveWorkbaskets();
+    cy.get('input[name="workbasket.orgLevel1"]').should('have.value', Cypress.expose('testValueWorkbaskets'));
+  });
+
+  it('should be possible to edit workbasket description', () => {
+    cy.visitTestWorkbasket();
+
+    cy.get('#workbasket-description')
+      .clear({ force: true })
+      .type(Cypress.expose('testValueWorkbaskets'), { force: true });
+
+    cy.saveWorkbaskets();
+    cy.get('#workbasket-description').should('have.value', Cypress.expose('testValueWorkbaskets'));
+  });
+
+  it('should be possible to edit the type of a workbasket', () => {
+    cy.visitTestWorkbasket();
+
+    cy.get('mat-form-field').contains('mat-form-field', 'Type').find('mat-select').click();
+    cy.wait(Cypress.expose('dropdownWait'));
+    cy.get('mat-option').contains('Clearance').click();
+    cy.saveWorkbaskets();
+
+    cy.get('mat-form-field').contains('mat-form-field', 'Type').contains('Clearance').should('be.visible');
+
+    cy.get('mat-form-field').contains('mat-form-field', 'Type').find('mat-select').click();
+    cy.wait(Cypress.expose('dropdownWait'));
+    cy.get('mat-option').contains('Group').should('be.visible').click();
+
+    cy.saveWorkbaskets();
+  });
+
+  it('should be possible to add new access', () => {
+    const apiUrl = Cypress.expose('apiUrl');
+    const apiAuth = Cypress.expose('apiAuth');
+
+    cy.request({
+      method: 'GET',
+      url: `${apiUrl}/kadai/api/v1/workbaskets/WBI:000000000000000000000000000000000900/workbasketAccessItems`,
+      headers: { Authorization: apiAuth }
+    }).then((resp) => {
+      const items = resp.body.accessItems.filter((item: { accessId: string }) => item.accessId === 'user-b-1');
+      cy.request({
+        method: 'PUT',
+        url: `${apiUrl}/kadai/api/v1/workbaskets/WBI:000000000000000000000000000000000900/workbasketAccessItems`,
+        headers: { 'Content-Type': 'application/hal+json', Authorization: apiAuth },
+        body: { accessItems: items }
+      });
+    });
+
+    cy.visitTestWorkbasket();
+    cy.visitWorkbasketsAccessPage();
+
+    cy.get('button[mattooltip="Add new access"]').click();
+
+    cy.get('#table-access-items tbody tr:first-child input[type="text"]:first')
+      .focus()
+      .type('teamlead-1', { force: true });
+    cy.get('mat-option', { timeout: 5000 }).contains('teamlead-1').click();
+    cy.get('#table-access-items input[aria-label="checkAll"]').should('exist');
+    cy.get('#table-access-items input[aria-label="checkAll"]:first').click({ force: true });
+    cy.saveWorkbaskets();
+
+    cy.visitWorkbasketsAccessPage();
+    cy.get('table#table-access-items > tbody > tr').should('have.length', 2);
+  });
+
+  describe('distribution targets', () => {
+    beforeEach(() => {
+      const apiUrl = Cypress.expose('apiUrl');
+      const apiAuth = Cypress.expose('apiAuth');
+
+      cy.request({
+        method: 'PUT',
+        url: `${apiUrl}/kadai/api/v1/workbaskets/WBI:000000000000000000000000000000000900/distribution-targets`,
+        headers: { 'Content-Type': 'application/hal+json', Authorization: apiAuth },
+        body: [
+          'WBI:000000000000000000000000000000000900',
+          'WBI:000000000000000000000000000000000901',
+          'WBI:000000000000000000000000000000000902',
+          'WBI:000000000000000000000000000000000903',
+          'WBI:000000000000000000000000000000000904',
+          'WBI:000000000000000000000000000000000905'
+        ]
+      });
+    });
+
+    it('should be possible to add a distribution target', () => {
+      cy.visitTestWorkbasket();
+      cy.visitWorkbasketsDistributionTargetsPage();
+
+      cy.get('kadai-administration-workbasket-distribution-targets-list[header="Available distribution targets"]')
+        .find('mat-list-option')
+        .first()
+        .click();
+      cy.get('button').contains('Add selected distribution targets').click();
+
+      cy.saveWorkbaskets();
+
+      cy.visitWorkbasketsDistributionTargetsPage();
+      cy.get('kadai-administration-workbasket-distribution-targets-list[header="Selected distribution targets"]')
+        .find('mat-selection-list')
+        .should('not.be.empty');
+    });
+
+    it('should be possible to change the name of a workbasket and switch tabs and transfer workbaskets without loosing changes', () => {
+      cy.visitTestWorkbasket();
+
+      cy.get('#workbasket-name').clear({ force: true }).type(Cypress.expose('testValueWorkbaskets'), { force: true });
+
+      cy.visitWorkbasketsDistributionTargetsPage();
+
+      cy.get('#dual-list-Left').find('mat-list-option').first().should('contain.text', 'basxeT6').click();
+
+      cy.get('.distribution-targets-list__action-buttons--chooser').click();
+
+      cy.get('.workbasket-details__title-name').should('contain.text', Cypress.expose('testValueWorkbaskets'));
+    });
+
+    it('should be possible to transfer distribution targets and switch tabs without loosing changes', () => {
+      cy.visitTestWorkbasket();
+      cy.visitWorkbasketsDistributionTargetsPage();
+
+      cy.get('#dual-list-Left').find('mat-list-option').first().should('contain.text', 'basxeT6').click();
+
+      cy.get('.distribution-targets-list__action-buttons--chooser').click();
+
+      cy.visitWorkbasketsInformationPage();
+      cy.visitWorkbasketsDistributionTargetsPage();
+
+      cy.get('#dual-list-Right').find('mat-list-option').eq(1).should('contain.text', 'Basxet1');
+
+      cy.undoWorkbaskets();
+      cy.get('#dual-list-Right').find('mat-list-option').should('have.length.gte', 1);
+    });
+
+    it('should be possible to transfer distribution targets and save changes from another tab', () => {
+      cy.visitTestWorkbasket();
+      cy.visitWorkbasketsDistributionTargetsPage();
+
+      cy.get('#dual-list-Left').find('mat-list-option').first().should('contain.text', 'basxeT6').click();
+
+      cy.get('.distribution-targets-list__action-buttons--chooser').click();
+
+      cy.visitWorkbasketsInformationPage();
+      cy.saveWorkbaskets();
+      cy.visitWorkbasketsDistributionTargetsPage();
+
+      cy.get('#dual-list-Right').find('mat-list-option').eq(1).should('contain.text', 'Basxet1').click();
+
+      cy.get('.distribution-targets-list__action-buttons--selected').click();
+      cy.saveWorkbaskets();
+    });
+
+    it('should be possible to change workbasket information and save changes from another tab', () => {
+      cy.visitTestWorkbasket();
+
+      cy.get('#wb-custom-4').clear({ force: true }).type(Cypress.expose('testValueWorkbaskets'), { force: true });
+
+      cy.visitWorkbasketsDistributionTargetsPage();
+      cy.saveWorkbaskets();
+
+      cy.visitWorkbasketsInformationPage();
+      cy.get('#wb-custom-4').should('have.value', Cypress.expose('testValueWorkbaskets'));
+    });
+
+    it('should be possible to remove all distribution targets', () => {
+      cy.visitTestWorkbasket();
+      cy.visitWorkbasketsDistributionTargetsPage();
+
+      cy.get('#dual-list-Right > .distribution-targets-list > .mat-toolbar > :nth-child(4)').click();
+      cy.get('.distribution-targets-list__action-buttons--selected').click();
+
+      cy.get('#dual-list-Right').find('mat-list-option').should('have.length', 0);
+
+      cy.undoWorkbaskets();
+    });
+
+    it('should filter selected distribution targets including newly transferred targets', () => {
+      cy.visitTestWorkbasket();
+      cy.visitWorkbasketsDistributionTargetsPage();
+
+      cy.get('#dual-list-Right > .distribution-targets-list > .mat-toolbar > :nth-child(2)').click();
+      cy.get('#dual-list-Right')
+        .find('input[mattooltip="Type to filter by key"]', { timeout: 10000 })
+        .clear({ force: true })
+        .type('002', { force: true });
+      cy.get('.filter__action-buttons > .filter__search-button').click();
+
+      cy.get('#dual-list-Right').find('mat-list-option').first().should('contain.text', 'Basxet1');
+
+      cy.get('.filter__action-buttons > [mattooltip="Clear Workbasket filter"]').click();
+
+      cy.get('#dual-list-Right').find('mat-list-option').should('have.length.gte', 1);
+    });
+
+    it('should filter available distribution targets', () => {
+      cy.visitTestWorkbasket();
+      cy.visitWorkbasketsDistributionTargetsPage();
+
+      cy.get('#dual-list-Left > .distribution-targets-list > .mat-toolbar > :nth-child(2)').click();
+      cy.get('#dual-list-Left')
+        .find('input[mattooltip="Type to filter by key"]', { timeout: 10000 })
+        .clear({ force: true })
+        .type('008', { force: true });
+
+      cy.get('.filter__action-buttons > .filter__search-button').click();
+
+      cy.get('#dual-list-Left').find('mat-list-option').should('have.length', 1);
+
+      cy.get('#dual-list-Left').find('mat-list-option').first().should('contain.text', 'BAsxet7');
+    });
+  });
+});

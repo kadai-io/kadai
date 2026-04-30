@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -57,8 +57,9 @@ import org.springframework.context.annotation.Configuration;
                     + "</p>"
                     + "<p>"
                     + "Whenever a parameter is a value-less type (e.g owner-is-null and "
-                    + "current-user) it is expected to be defined without a value, i.e., it should"
-                    + " be specified as ?parameter and not ?parameter= or ?parameter=someValue"
+                    + "current-user) it is expected to be defined without a value "
+                    + " (?parameter), the empty value (?parameter=) or with the value \"true\" "
+                    + "(?parameter=true)"
                     + "</p>"
                     + "<h1>Hypermedia Support</h1>"
                     + "<p>"
@@ -230,9 +231,14 @@ import org.springframework.context.annotation.Configuration;
                     + "<td>workbasketId</td>"
                     + "</tr>"
                     + "<tr>"
-                    + "<td>**413 PAYLOAD_TOO_LARGE**</td>"
-                    + "<td>PAYLOAD_TOO_LARGE</td>"
+                    + "<td>**413 CONTENT_TOO_LARGE**</td>"
+                    + "<td>CONTENT_TOO_LARGE</td>"
                     + "<td></td>"
+                    + "</tr>"
+                    + "<tr>"
+                    + "<td>**422 UNPROCESSABLE_CONTENT**</td>"
+                    + "<td>SERVICE_LEVEL_VIOLATION</td>"
+                    + "<td>planned, due, serviceLevel</td>"
                     + "</tr>"
                     + "<tr>"
                     + "<td>**423 LOCKED**</td>"
@@ -363,6 +369,18 @@ import org.springframework.context.annotation.Configuration;
                     + "<tr>"
                     + "<td>workbasketKey</td>"
                     + "<td>String</td>"
+                    + "</tr>"
+                    + "<tr>"
+                    + "<td>planned</td>"
+                    + "<td>Instant</td>"
+                    + "</tr>"
+                    + "<tr>"
+                    + "<td>due</td>"
+                    + "<td>Instant</td>"
+                    + "</tr>"
+                    + "<tr>"
+                    + "<td>serviceLevel</td>"
+                    + "<td>Duration</td>"
                     + "</tr>"
                     + "</tbody>"
                     + "</table>"),

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,13 +18,12 @@
 
 package io.kadai.workbasket.rest;
 
-import static io.kadai.common.internal.util.CheckedFunction.wrap;
+import static io.kadai.common.internal.util.CheckedFunction.wrapping;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.api.exceptions.LogicalDuplicateInPayloadException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.workbasket.api.WorkbasketQuery;
@@ -64,6 +63,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 
 /** Controller for all {@link WorkbasketDefinitionRepresentationModel} related endpoints. */
 @RestController
@@ -74,7 +75,7 @@ public class WorkbasketDefinitionController implements WorkbasketDefinitionApi {
   private final WorkbasketDefinitionRepresentationModelAssembler workbasketDefinitionAssembler;
   private final WorkbasketRepresentationModelAssembler workbasketAssembler;
   private final WorkbasketAccessItemRepresentationModelAssembler accessItemAssembler;
-  private final ObjectMapper mapper;
+  private final JsonMapper jsonMapper;
 
   @Autowired
   WorkbasketDefinitionController(
@@ -82,16 +83,15 @@ public class WorkbasketDefinitionController implements WorkbasketDefinitionApi {
       WorkbasketDefinitionRepresentationModelAssembler workbasketDefinitionAssembler,
       WorkbasketRepresentationModelAssembler workbasketAssembler,
       WorkbasketAccessItemRepresentationModelAssembler accessItemAssembler,
-      ObjectMapper mapper) {
+      JsonMapper jsonMapper) {
     this.workbasketService = workbasketService;
     this.workbasketDefinitionAssembler = workbasketDefinitionAssembler;
     this.workbasketAssembler = workbasketAssembler;
     this.accessItemAssembler = accessItemAssembler;
-    this.mapper = mapper;
+    this.jsonMapper = jsonMapper;
   }
 
   @GetMapping(path = RestEndpoints.URL_WORKBASKET_DEFINITIONS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<WorkbasketDefinitionCollectionRepresentationModel> exportWorkbaskets(
       @RequestParam(value = "domain", required = false) String[] domain) {
     WorkbasketQuery query = workbasketService.createWorkbasketQuery();
@@ -102,7 +102,7 @@ public class WorkbasketDefinitionController implements WorkbasketDefinitionApi {
     WorkbasketDefinitionCollectionRepresentationModel pageModel =
         workbasketSummaryList.stream()
             .map(WorkbasketSummary::getId)
-            .map(wrap(workbasketService::getWorkbasket))
+            .map(wrapping(workbasketService::getWorkbasket))
             .collect(
                 Collectors.collectingAndThen(
                     Collectors.toList(), workbasketDefinitionAssembler::toKadaiCollectionModel));
@@ -118,16 +118,14 @@ public class WorkbasketDefinitionController implements WorkbasketDefinitionApi {
       throws IOException,
           DomainNotFoundException,
           InvalidArgumentException,
-          WorkbasketAlreadyExistException,
+          LogicalDuplicateInPayloadException,
           WorkbasketNotFoundException,
           WorkbasketAccessItemAlreadyExistException,
           ConcurrencyException,
           NotAuthorizedOnWorkbasketException,
           NotAuthorizedException {
     WorkbasketDefinitionCollectionRepresentationModel definitions =
-        mapper.readValue(
-            file.getInputStream(),
-            new TypeReference<WorkbasketDefinitionCollectionRepresentationModel>() {});
+        jsonMapper.readValue(file.getInputStream(), new TypeReference<>() {});
 
     // key: logical ID
     // value: system ID (in database)
@@ -153,7 +151,12 @@ public class WorkbasketDefinitionController implements WorkbasketDefinitionApi {
 
         newId = systemIds.get(logicalId(importedWb));
       } else {
-        newId = workbasketService.createWorkbasket(wbWithoutId).getId();
+        try {
+          newId = workbasketService.createWorkbasket(wbWithoutId).getId();
+        } catch (WorkbasketAlreadyExistException ignore) {
+          // Cannot exist because we previously checked and then updated
+          newId = null; // required to appease compilers non-initialized error
+        }
       }
 
       // Since we would have a n² runtime when doing a lookup and updating the access items we
@@ -214,13 +217,13 @@ public class WorkbasketDefinitionController implements WorkbasketDefinitionApi {
   }
 
   private void checkForDuplicates(Collection<WorkbasketDefinitionRepresentationModel> definitions)
-      throws WorkbasketAlreadyExistException {
+      throws LogicalDuplicateInPayloadException {
     Set<String> identifiers = new HashSet<>();
     for (WorkbasketDefinitionRepresentationModel definition : definitions) {
       String identifier = logicalId(workbasketAssembler.toEntityModel(definition.getWorkbasket()));
       if (identifiers.contains(identifier)) {
-        throw new WorkbasketAlreadyExistException(
-            definition.getWorkbasket().getKey(), definition.getWorkbasket().getDomain());
+        throw new LogicalDuplicateInPayloadException(
+            logicalId(definition.getWorkbasket().getKey(), definition.getWorkbasket().getDomain()));
       }
       identifiers.add(identifier);
     }

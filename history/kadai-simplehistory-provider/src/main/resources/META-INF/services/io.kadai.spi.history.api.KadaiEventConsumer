@@ -1,0 +1,3 @@
+io.kadai.simplehistory.task.internal.TaskHistoryEventConsumer
+io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryEventPersister
+io.kadai.simplehistory.classification.internal.ClassificationHistoryEventPersister

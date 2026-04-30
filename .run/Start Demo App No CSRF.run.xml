@@ -1,16 +1,17 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Start Demo App No CSRF" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+  <configuration default="false" name="Start Demo App No CSRF"
+                 type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <additionalParameters>
       <param>
-        <option name="enabled" value="true" />
-        <option name="name" value="enableCsrf" />
-        <option name="value" value="false" />
+        <option name="enabled" value="true"/>
+        <option name="name" value="enableCsrf"/>
+        <option name="value" value="false"/>
       </param>
     </additionalParameters>
-    <module name="kadai-rest-spring-example-boot" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="io.kadai.example.boot.ExampleRestApplication" />
+    <module name="kadai-rest-spring-example-boot"/>
+    <option name="SPRING_BOOT_MAIN_CLASS" value="io.kadai.example.boot.ExampleRestApplication"/>
     <method v="2">
-      <option name="Make" enabled="true" />
+      <option name="Make" enabled="true"/>
     </method>
   </configuration>
 </component>

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
  *
  */
 
-import { Component, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
+import { Component, HostListener, inject, OnDestroy, OnInit, viewChild } from '@angular/core';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Subject } from 'rxjs';
 import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
 import { SidenavService } from './shared/services/sidenav/sidenav.service';
@@ -27,39 +27,55 @@ import { SelectedRouteService } from './shared/services/selected-route/selected-
 import { KadaiEngineService } from './shared/services/kadai-engine/kadai-engine.service';
 import { WindowRefService } from 'app/shared/services/window/window.service';
 import { environment } from 'environments/environment';
-import { MatSidenav } from '@angular/material/sidenav';
-import { takeUntil } from 'rxjs/operators';
+import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
+import { takeUntil, map } from 'rxjs/operators';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { UserInformationComponent } from './shared/components/user-information/user-information.component';
+import { SidenavListComponent } from './shared/components/sidenav-list/sidenav-list.component';
+import { NavBarComponent } from './shared/components/nav-bar/nav-bar.component';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'kadai-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  standalone: false
+  imports: [
+    MatSidenavContainer,
+    MatSidenav,
+    MatIconButton,
+    MatIcon,
+    UserInformationComponent,
+    SidenavListComponent,
+    MatSidenavContent,
+    NavBarComponent,
+    MatProgressBar,
+    RouterOutlet
+  ]
 })
 export class AppComponent implements OnInit, OnDestroy {
-  workbasketsRoute = true;
-  selectedRoute = '';
-
-  requestInProgress = false;
-
-  version: string;
+  requestInProgress = toSignal(inject(RequestInProgressService).getRequestInProgress(), { initialValue: false });
+  version = toSignal(
+    inject(KadaiEngineService)
+      .getVersion()
+      .pipe(map((r) => r.version)),
+    {
+      initialValue: undefined as string
+    }
+  );
   toggle: boolean = false;
-
   destroy$ = new Subject<void>();
-  @ViewChild('sidenav') public sidenav: MatSidenav;
+  public sidenav = viewChild<MatSidenav>('sidenav');
+  private router = inject(Router);
+  private orientationService = inject(OrientationService);
+  private formsValidatorService = inject(FormsValidatorService);
+  private sidenavService = inject(SidenavService);
+  private kadaiEngineService = inject(KadaiEngineService);
+  private selectedRouteService = inject(SelectedRouteService);
+  private window = inject(WindowRefService);
 
-  constructor(
-    private router: Router,
-    private requestInProgressService: RequestInProgressService,
-    private orientationService: OrientationService,
-    private selectedRouteService: SelectedRouteService,
-    private formsValidatorService: FormsValidatorService,
-    private sidenavService: SidenavService,
-    private kadaiEngineService: KadaiEngineService,
-    private window: WindowRefService
-  ) {}
-
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onResize() {
     this.orientationService.onResize();
   }
@@ -71,32 +87,6 @@ export class AppComponent implements OnInit, OnDestroy {
         this.formsValidatorService.formSubmitAttempt = false;
       }
     });
-
-    this.requestInProgressService
-      .getRequestInProgress()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((value: boolean) => {
-        setTimeout(() => {
-          this.requestInProgress = value;
-        });
-      });
-
-    this.selectedRouteService
-      .getSelectedRoute()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((value: string) => {
-        if (value.indexOf('classifications') !== -1) {
-          this.workbasketsRoute = false;
-        }
-        this.selectedRoute = value;
-      });
-
-    this.kadaiEngineService
-      .getVersion()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((restVersion) => {
-        this.version = restVersion.version;
-      });
   }
 
   logout() {
@@ -110,7 +100,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.sidenavService.setSidenav(this.sidenav);
+    this.sidenavService.setSidenav(this.sidenav()!);
   }
 
   ngOnDestroy() {

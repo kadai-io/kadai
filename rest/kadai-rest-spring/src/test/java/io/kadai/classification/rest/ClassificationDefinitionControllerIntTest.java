@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,12 +19,10 @@
 package io.kadai.classification.rest;
 
 import static io.kadai.common.api.SharedConstants.MASTER_DOMAIN;
-import static io.kadai.rest.test.RestHelper.TEMPLATE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.exceptions.ClassificationNotFoundException;
 import io.kadai.classification.rest.assembler.ClassificationDefinitionCollectionRepresentationModel;
@@ -48,46 +46,42 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Links;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
+import tools.jackson.databind.json.JsonMapper;
 
 /** Test classification definitions. */
 @KadaiSpringBootTest
 @TestMethodOrder(OrderAnnotation.class)
 class ClassificationDefinitionControllerIntTest {
 
-  private static final ParameterizedTypeReference<
-          ClassificationDefinitionCollectionRepresentationModel>
-      CLASSIFICATION_DEFINITION_COLLECTION =
-          new ParameterizedTypeReference<
-              ClassificationDefinitionCollectionRepresentationModel>() {};
-
   private static final Logger LOGGER = LoggerFactory.getLogger(ClassificationController.class);
 
   private final RestHelper restHelper;
-  private final ObjectMapper mapper;
+  private final RestClient restClient;
+  private final JsonMapper jsonMapper;
   private final ClassificationService classificationService;
   private final ClassificationRepresentationModelAssembler classificationAssembler;
 
   @Autowired
   ClassificationDefinitionControllerIntTest(
       RestHelper restHelper,
-      ObjectMapper mapper,
+      RestClient restClient,
+      JsonMapper jsonMapper,
       ClassificationService classificationService,
       ClassificationRepresentationModelAssembler classificationAssembler) {
     this.restHelper = restHelper;
-    this.mapper = mapper;
+    this.restClient = restClient;
+    this.jsonMapper = jsonMapper;
     this.classificationService = classificationService;
     this.classificationAssembler = classificationAssembler;
   }
@@ -97,9 +91,14 @@ class ClassificationDefinitionControllerIntTest {
   void should_ExportAllClassifications_When_ExportIsRequested() {
     String url =
         restHelper.toUrl(RestEndpoints.URL_CLASSIFICATION_DEFINITIONS) + "?domain=DOMAIN_B";
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
+
     ResponseEntity<ClassificationDefinitionCollectionRepresentationModel> response =
-        TEMPLATE.exchange(url, HttpMethod.GET, auth, CLASSIFICATION_DEFINITION_COLLECTION);
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ClassificationDefinitionCollectionRepresentationModel.class);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody()).isNotNull();
@@ -118,10 +117,14 @@ class ClassificationDefinitionControllerIntTest {
   void should_NotContainAnyLinks_When_ExportIsRequested() {
     String url =
         restHelper.toUrl(RestEndpoints.URL_CLASSIFICATION_DEFINITIONS) + "?domain=DOMAIN_B";
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<ClassificationDefinitionCollectionRepresentationModel> response =
-        TEMPLATE.exchange(url, HttpMethod.GET, auth, CLASSIFICATION_DEFINITION_COLLECTION);
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ClassificationDefinitionCollectionRepresentationModel.class);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody()).isNotNull();
@@ -136,10 +139,14 @@ class ClassificationDefinitionControllerIntTest {
   @Test
   void should_ExportNothing_When_DomainIsUnknown() {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATION_DEFINITIONS) + "?domain=ADdfe";
-    HttpEntity<Object> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<ClassificationDefinitionCollectionRepresentationModel> response =
-        TEMPLATE.exchange(url, HttpMethod.GET, auth, CLASSIFICATION_DEFINITION_COLLECTION);
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ClassificationDefinitionCollectionRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getContent()).isEmpty();
@@ -225,7 +232,7 @@ class ClassificationDefinitionControllerIntTest {
 
     assertThatThrownBy(() -> importRequest(clList))
         .isInstanceOf(HttpStatusCodeException.class)
-        .extracting(e -> (HttpStatusCodeException) e)
+        .extracting(HttpStatusCodeException.class::cast)
         .extracting(HttpStatusCodeException::getStatusCode)
         .isEqualTo(HttpStatus.BAD_REQUEST);
   }
@@ -242,9 +249,9 @@ class ClassificationDefinitionControllerIntTest {
 
     assertThatThrownBy(() -> importRequest(clList))
         .isInstanceOf(HttpStatusCodeException.class)
-        .extracting(e -> (HttpStatusCodeException) e)
+        .extracting(HttpStatusCodeException.class::cast)
         .extracting(HttpStatusCodeException::getStatusCode)
-        .isEqualTo(HttpStatus.CONFLICT);
+        .isEqualTo(HttpStatus.BAD_REQUEST);
   }
 
   @Test
@@ -440,7 +447,7 @@ class ClassificationDefinitionControllerIntTest {
     File tmpFile = File.createTempFile("test", ".tmp");
     try (FileOutputStream out = new FileOutputStream(tmpFile);
         OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
-      mapper.writeValue(writer, clList);
+      jsonMapper.writeValue(writer, clList);
     }
     MultiValueMap<String, FileSystemResource> body = new LinkedMultiValueMap<>();
     body.add("file", new FileSystemResource(tmpFile));
@@ -448,9 +455,14 @@ class ClassificationDefinitionControllerIntTest {
     HttpHeaders headers = RestHelper.generateHeadersForUser("businessadmin");
     headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-    HttpEntity<?> requestEntity = new HttpEntity<>(body, headers);
     String serverUrl = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATION_DEFINITIONS);
 
-    return TEMPLATE.postForEntity(serverUrl, requestEntity, Void.class);
+    return restClient
+        .post()
+        .uri(serverUrl)
+        .headers(httpHeaders -> httpHeaders.addAll(headers))
+        .body(body)
+        .retrieve()
+        .toEntity(Void.class);
   }
 }

@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright [2024] [envite consulting GmbH]
+  ~ Copyright [2026] [envite consulting GmbH]
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -22,15 +22,29 @@
     <!-- TITLE -->
     <h4 class="workbasket-details__title">
       <span class="workbasket-details__title-name"
-            matTooltip="{{workbasket.name}}">{{ workbasket.name }}</span>
+            matTooltip="{{workbasket()!.name}}">{{ workbasket()!.name }}</span>
       <span class="workbasket-details__title-badge"
             matTooltip="{{ badgeMessage$ | async }}"> {{ badgeMessage$ | async }}</span>
     </h4>
     <span class="workbasket-details__spacer"></span>
 
+    <!-- ACCESS ITEM VALIDATION -->
+    @if (!areAllAccessItemsValid) {
+      <div class="workbasket-details__access-item-warning">
+        <mat-icon class="workbasket-details__access-item-warning-icon" color="warn">
+          error_outline
+        </mat-icon>
+        <div class="workbasket-details__access-item-warning-text">
+          Invalid<br>Access ID
+        </div>
+      </div>
+    }
     <!-- SAVE -->
-    <button (click)="onSubmit()" class="workbasket-details__button workbasket-details__save-button"
-            mat-button matTooltip="Save changes in current workbasket">
+    <button (click)="onSubmit()"
+            [disabled]="action() === ACTION.CREATE && !areAllAccessItemsValid"
+            class="workbasket-details__button workbasket-details__save-button"
+            mat-button
+            matTooltip="Save changes in current workbasket">
       Save
       <mat-icon class="md-20">save</mat-icon>
     </button>
@@ -86,17 +100,15 @@
                  [selectedIndex]="selectedTab$ | async"
                  animationDuration="0ms" mat-stretch-tabs="false">
     <mat-tab label="Information">
-      <kadai-administration-workbasket-information [action]="action" [workbasket]="workbasket">
-      </kadai-administration-workbasket-information>
+      <kadai-administration-workbasket-information [action]="action()" [workbasket]="workbasket()" />
     </mat-tab>
     <mat-tab label="Access">
-      <kadai-administration-workbasket-access-items [expanded]="expanded"
-                                                    [workbasket]="workbasket">
-      </kadai-administration-workbasket-access-items>
+      <kadai-administration-workbasket-access-items (accessItemsValidityChanged)="handleAccessItemsValidityChanged($event)"
+                                                    [expanded]="expanded()"
+                                                    [workbasket]="workbasket()" />
     </mat-tab>
     <mat-tab label="Distribution Targets">
-      <kadai-administration-workbasket-distribution-targets *matTabContent>
-      </kadai-administration-workbasket-distribution-targets>
+      <kadai-administration-workbasket-distribution-targets *matTabContent />
     </mat-tab>
   </mat-tab-group>
 </div>

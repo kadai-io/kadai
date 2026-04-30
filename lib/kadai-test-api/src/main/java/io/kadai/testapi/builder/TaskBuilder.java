@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ package io.kadai.testapi.builder;
 
 import io.kadai.classification.api.exceptions.ClassificationNotFoundException;
 import io.kadai.classification.api.models.ClassificationSummary;
-import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.task.api.CallbackState;
 import io.kadai.task.api.TaskCustomField;
 import io.kadai.task.api.TaskCustomIntField;
@@ -28,13 +27,13 @@ import io.kadai.task.api.TaskService;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.api.exceptions.AttachmentPersistenceException;
 import io.kadai.task.api.exceptions.ObjectReferencePersistenceException;
+import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.Attachment;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.api.models.TaskSummary;
-import io.kadai.testapi.builder.EntityBuilder.SummaryEntityBuilder;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import io.kadai.workbasket.api.exceptions.WorkbasketNotFoundException;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
@@ -184,6 +183,18 @@ public class TaskBuilder implements SummaryEntityBuilder<TaskSummary, Task, Task
     return this;
   }
 
+  public TaskBuilder reopened(Boolean reopened) {
+    if (reopened != null) {
+      testTask.setReopenedIgnoreFreeze(reopened);
+      if (reopened) {
+        testTask.freezeReopened();
+      }
+    } else {
+      testTask.unfreezeReopened();
+    }
+    return this;
+  }
+
   public TaskBuilder numberOfComments(Integer numberOfComments) {
     testTask.setNumberOfComments(numberOfComments);
     return this;
@@ -247,7 +258,7 @@ public class TaskBuilder implements SummaryEntityBuilder<TaskSummary, Task, Task
   @Override
   public Task buildAndStore(TaskService taskService)
       throws TaskAlreadyExistException,
-          InvalidArgumentException,
+          ServiceLevelViolationException,
           WorkbasketNotFoundException,
           ClassificationNotFoundException,
           AttachmentPersistenceException,
@@ -261,5 +272,10 @@ public class TaskBuilder implements SummaryEntityBuilder<TaskSummary, Task, Task
       testTask.setId(null);
       testTask.setExternalId(null);
     }
+  }
+
+  @Override
+  public Task build() {
+    return testTask.copy();
   }
 }

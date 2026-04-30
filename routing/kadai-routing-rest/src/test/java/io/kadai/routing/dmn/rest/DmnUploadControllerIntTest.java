@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@
 
 package io.kadai.routing.dmn.rest;
 
-import static io.kadai.rest.test.RestHelper.TEMPLATE;
-
 import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
 import java.io.File;
@@ -28,13 +26,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClient;
 
 /** Test DmnUploadController. */
 @KadaiSpringBootTest
@@ -42,12 +39,14 @@ class DmnUploadControllerIntTest {
 
   private static final String EXCEL_NAME = "testExcelRouting.xlsx";
   private static final String HTTP_BODY_FILE_NAME = "excelRoutingFile";
+
   private final RestHelper restHelper;
+  private final RestClient restClient;
 
   @Autowired
-  DmnUploadControllerIntTest(
-      RestHelper restHelper) {
+  DmnUploadControllerIntTest(RestHelper restHelper, RestClient restClient) {
     this.restHelper = restHelper;
+    this.restClient = restClient;
   }
 
   @Test
@@ -61,11 +60,16 @@ class DmnUploadControllerIntTest {
     HttpHeaders headers = RestHelper.generateHeadersForUser("admin");
     headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-    HttpEntity<Object> auth = new HttpEntity<>(body, headers);
     String url = restHelper.toUrl(RoutingRestEndpoints.URL_ROUTING_RULES_DEFAULT);
 
     ResponseEntity<RoutingUploadResultRepresentationModel> responseEntity =
-        TEMPLATE.exchange(url, HttpMethod.PUT, auth, RoutingUploadResultRepresentationModel.class);
+        restClient
+            .put()
+            .uri(url)
+            .headers(httpHeaders -> httpHeaders.addAll(headers))
+            .body(body)
+            .retrieve()
+            .toEntity(RoutingUploadResultRepresentationModel.class);
 
     SoftAssertions softly = new SoftAssertions();
 

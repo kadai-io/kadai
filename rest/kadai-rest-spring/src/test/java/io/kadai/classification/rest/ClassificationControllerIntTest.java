@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
 package io.kadai.classification.rest;
 
 import static io.kadai.common.api.SharedConstants.MASTER_DOMAIN;
-import static io.kadai.rest.test.RestHelper.TEMPLATE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -32,39 +31,38 @@ import io.kadai.rest.test.RestHelper;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
 
 /** Test {@link ClassificationController}. */
 @KadaiSpringBootTest
 class ClassificationControllerIntTest {
 
   private final RestHelper restHelper;
+  private final RestClient restClient;
 
   @Autowired
-  ClassificationControllerIntTest(RestHelper restHelper) {
+  ClassificationControllerIntTest(RestHelper restHelper, RestClient restClient) {
     this.restHelper = restHelper;
+    this.restClient = restClient;
   }
 
   @Test
   void should_ReturnAllMasterClassifications_When_DomainIsSetWithEmptyString() {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS) + "?domain=";
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<ClassificationSummaryPagedRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(
-                ClassificationSummaryPagedRepresentationModel.class));
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ClassificationSummaryPagedRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getContent())
@@ -77,14 +75,14 @@ class ClassificationControllerIntTest {
     String url =
         restHelper.toUrl(
             RestEndpoints.URL_CLASSIFICATIONS_ID, "CLI:100000000000000000000000000000000002");
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<ClassificationRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(ClassificationRepresentationModel.class));
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ClassificationRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -94,15 +92,14 @@ class ClassificationControllerIntTest {
   @Test
   void testGetAllClassifications() {
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS);
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<ClassificationSummaryPagedRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(
-                ClassificationSummaryPagedRepresentationModel.class));
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ClassificationSummaryPagedRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -112,15 +109,14 @@ class ClassificationControllerIntTest {
   void testGetAllClassificationsFilterByCustomAttribute() {
     String url =
         restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS) + "?domain=DOMAIN_A&custom-1-like=RVNR";
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<ClassificationSummaryPagedRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(
-                ClassificationSummaryPagedRepresentationModel.class));
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ClassificationSummaryPagedRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -132,15 +128,14 @@ class ClassificationControllerIntTest {
     String url =
         restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS)
             + "?domain=DOMAIN_A&sort-by=KEY&order=ASCENDING";
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<ClassificationSummaryPagedRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(
-                ClassificationSummaryPagedRepresentationModel.class));
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ClassificationSummaryPagedRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -155,15 +150,14 @@ class ClassificationControllerIntTest {
     String url =
         restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS)
             + "?domain=DOMAIN_A&sort-by=KEY&order=ASCENDING&page-size=5&page=2";
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<ClassificationSummaryPagedRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(
-                ClassificationSummaryPagedRepresentationModel.class));
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ClassificationSummaryPagedRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getContent()).hasSize(5);
@@ -190,28 +184,28 @@ class ClassificationControllerIntTest {
     newClassification.setServiceLevel("P1D");
     newClassification.setName("new classification");
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS);
-    HttpEntity<?> auth =
-        new HttpEntity<>(newClassification, RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<ClassificationRepresentationModel> responseEntity =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.POST,
-            auth,
-            ParameterizedTypeReference.forType(ClassificationRepresentationModel.class));
+        restClient
+            .post()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .body(newClassification)
+            .retrieve()
+            .toEntity(ClassificationRepresentationModel.class);
     assertThat(responseEntity).isNotNull();
     assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
     newClassification.setKey("NEW_CLASS_2");
-    HttpEntity<?> auth2 =
-        new HttpEntity<>(newClassification, RestHelper.generateHeadersForUser("teamlead-1"));
 
     responseEntity =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.POST,
-            auth2,
-            ParameterizedTypeReference.forType(ClassificationRepresentationModel.class));
+        restClient
+            .post()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .body(newClassification)
+            .retrieve()
+            .toEntity(ClassificationRepresentationModel.class);
     assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
   }
 
@@ -226,17 +220,16 @@ class ClassificationControllerIntTest {
     newClassification.setName("new classification");
 
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS);
-    HttpEntity<?> auth =
-        new HttpEntity<>(newClassification, RestHelper.generateHeadersForUser("user-1-1"));
 
     ThrowingCallable httpCall =
         () ->
-            TEMPLATE.exchange(
-                url,
-                HttpMethod.POST,
-                auth,
-                ParameterizedTypeReference.<ClassificationRepresentationModel>forType(
-                    ClassificationRepresentationModel.class));
+            restClient
+                .post()
+                .uri(url)
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+                .body(newClassification)
+                .retrieve()
+                .toEntity(ClassificationRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
         .isInstanceOf(HttpStatusCodeException.class)
@@ -257,15 +250,15 @@ class ClassificationControllerIntTest {
     newClassification.setServiceLevel("P1D");
     newClassification.setParentId("CLI:200000000000000000000000000000000015");
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS);
-    HttpEntity<?> auth =
-        new HttpEntity<>(newClassification, RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<ClassificationRepresentationModel> responseEntity =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.POST,
-            auth,
-            ParameterizedTypeReference.forType(ClassificationRepresentationModel.class));
+        restClient
+            .post()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .body(newClassification)
+            .retrieve()
+            .toEntity(ClassificationRepresentationModel.class);
 
     assertThat(responseEntity).isNotNull();
     assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -283,15 +276,15 @@ class ClassificationControllerIntTest {
     newClassification.setParentKey("T2100");
     newClassification.setServiceLevel("P1D");
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS);
-    HttpEntity<?> auth =
-        new HttpEntity<>(newClassification, RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<ClassificationRepresentationModel> responseEntity =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.POST,
-            auth,
-            ParameterizedTypeReference.forType(ClassificationRepresentationModel.class));
+        restClient
+            .post()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .body(newClassification)
+            .retrieve()
+            .toEntity(ClassificationRepresentationModel.class);
 
     assertThat(responseEntity).isNotNull();
     assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -309,26 +302,25 @@ class ClassificationControllerIntTest {
     newClassification.setParentKey("T2100");
     newClassification.setServiceLevel("P1D");
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS);
-    HttpEntity<?> auth =
-        new HttpEntity<>(newClassification, RestHelper.generateHeadersForUser("teamlead-1"));
 
     ResponseEntity<ClassificationRepresentationModel> responseEntity =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.POST,
-            auth,
-            ParameterizedTypeReference.forType(ClassificationRepresentationModel.class));
+        restClient
+            .post()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .body(newClassification)
+            .retrieve()
+            .toEntity(ClassificationRepresentationModel.class);
     assertThat(responseEntity).isNotNull();
     assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
-    HttpEntity<?> auth2 = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
     ResponseEntity<ClassificationSummaryPagedRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth2,
-            ParameterizedTypeReference.forType(
-                ClassificationSummaryPagedRepresentationModel.class));
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(ClassificationSummaryPagedRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getLink(IanaLinkRelations.SELF)).isNotNull();
@@ -355,17 +347,17 @@ class ClassificationControllerIntTest {
             + "\"type\":\"TASK\",\"parentId\":\"CLI:200000000000000000000000000000000015\","
             + "\"parentKey\":\"T2000\",\"serviceLevel\":\"P1D\"}";
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS);
-    HttpEntity<String> auth =
-        new HttpEntity<>(newClassification, RestHelper.generateHeadersForUser("businessadmin"));
 
     ThrowingCallable httpCall =
         () ->
-            TEMPLATE.exchange(
-                url,
-                HttpMethod.POST,
-                auth,
-                ParameterizedTypeReference.<ClassificationRepresentationModel>forType(
-                    ClassificationRepresentationModel.class));
+            restClient
+                .post()
+                .uri(url)
+                .headers(
+                    headers -> headers.addAll(RestHelper.generateHeadersForUser("businessadmin")))
+                .body(newClassification)
+                .retrieve()
+                .toEntity(ClassificationRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
         .isInstanceOf(HttpStatusCodeException.class)
@@ -382,17 +374,17 @@ class ClassificationControllerIntTest {
             + "\"domain\":\"DOMAIN_A\",\"key\":\"NEW_CLASS\","
             + "\"name\":\"new classification\",\"type\":\"TASK\",\"serviceLevel\":\"P1D\"}";
     String url = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS);
-    HttpEntity<String> auth =
-        new HttpEntity<>(newClassification, RestHelper.generateHeadersForUser("businessadmin"));
 
     ThrowingCallable httpCall =
         () ->
-            TEMPLATE.exchange(
-                url,
-                HttpMethod.POST,
-                auth,
-                ParameterizedTypeReference.<ClassificationRepresentationModel>forType(
-                    ClassificationRepresentationModel.class));
+            restClient
+                .post()
+                .uri(url)
+                .headers(
+                    headers -> headers.addAll(RestHelper.generateHeadersForUser("businessadmin")))
+                .body(newClassification)
+                .retrieve()
+                .toEntity(ClassificationRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
         .isInstanceOf(HttpStatusCodeException.class)
@@ -406,14 +398,14 @@ class ClassificationControllerIntTest {
     String url =
         restHelper.toUrl(
             RestEndpoints.URL_CLASSIFICATIONS_ID, "CLI:100000000000000000000000000000000009");
-    HttpEntity<String> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
 
     ResponseEntity<ClassificationSummaryRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(ClassificationSummaryRepresentationModel.class));
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(ClassificationSummaryRepresentationModel.class);
 
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getName()).isEqualTo("Zustimmungserklärung");
@@ -425,24 +417,25 @@ class ClassificationControllerIntTest {
     String url =
         restHelper.toUrl(
             RestEndpoints.URL_CLASSIFICATIONS_ID, "CLI:200000000000000000000000000000000004");
-    HttpEntity<String> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("businessadmin"));
 
     ResponseEntity<ClassificationSummaryRepresentationModel> response =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.DELETE,
-            auth,
-            ParameterizedTypeReference.forType(ClassificationSummaryRepresentationModel.class));
+        restClient
+            .delete()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("businessadmin")))
+            .retrieve()
+            .toEntity(ClassificationSummaryRepresentationModel.class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     ThrowingCallable httpCall =
         () ->
-            TEMPLATE.exchange(
-                url,
-                HttpMethod.GET,
-                auth,
-                ParameterizedTypeReference.<ClassificationSummaryRepresentationModel>forType(
-                    ClassificationSummaryRepresentationModel.class));
+            restClient
+                .get()
+                .uri(url)
+                .headers(
+                    headers -> headers.addAll(RestHelper.generateHeadersForUser("businessadmin")))
+                .retrieve()
+                .toEntity(ClassificationSummaryRepresentationModel.class);
     assertThatThrownBy(httpCall)
         .isInstanceOf(HttpStatusCodeException.class)
         .extracting(HttpStatusCodeException.class::cast)
@@ -456,15 +449,16 @@ class ClassificationControllerIntTest {
     String url =
         restHelper.toUrl(
             RestEndpoints.URL_CLASSIFICATIONS_ID, "CLI:000000000000000000000000000000000003");
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("businessadmin"));
 
     ThrowingCallable httpCall =
         () ->
-            TEMPLATE.exchange(
-                url,
-                HttpMethod.DELETE,
-                auth,
-                ParameterizedTypeReference.forType(ClassificationSummaryRepresentationModel.class));
+            restClient
+                .delete()
+                .uri(url)
+                .headers(
+                    headers -> headers.addAll(RestHelper.generateHeadersForUser("businessadmin")))
+                .retrieve()
+                .toEntity(ClassificationSummaryRepresentationModel.class);
     assertThatThrownBy(httpCall)
         .isInstanceOf(HttpStatusCodeException.class)
         .extracting(HttpStatusCodeException.class::cast)
@@ -480,16 +474,15 @@ class ClassificationControllerIntTest {
             + "&illegalParam=illegal"
             + "&anotherIllegalParam=stillIllegal"
             + "&sort-by=NAME&order=DESCENDING&page-size=5&page=2";
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("teamlead-1"));
 
     ThrowingCallable httpCall =
         () ->
-            TEMPLATE.exchange(
-                url,
-                HttpMethod.GET,
-                auth,
-                ParameterizedTypeReference.<ClassificationSummaryPagedRepresentationModel>forType(
-                    ClassificationSummaryPagedRepresentationModel.class));
+            restClient
+                .get()
+                .uri(url)
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                .retrieve()
+                .toEntity(ClassificationSummaryRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
         .isInstanceOf(HttpStatusCodeException.class)
@@ -505,25 +498,25 @@ class ClassificationControllerIntTest {
     String url =
         restHelper.toUrl(
             RestEndpoints.URL_CLASSIFICATIONS_ID, "CLI:000000000000000000000000000000000004");
-    HttpEntity<?> auth = new HttpEntity<>(RestHelper.generateHeadersForUser("admin"));
     ResponseEntity<ClassificationRepresentationModel> responseGet =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.GET,
-            auth,
-            ParameterizedTypeReference.forType(ClassificationRepresentationModel.class));
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(ClassificationRepresentationModel.class);
 
     final ClassificationRepresentationModel originalClassification = responseGet.getBody();
     originalClassification.setName("new name");
-    HttpEntity<ClassificationRepresentationModel> httpEntity =
-        new HttpEntity<>(originalClassification, RestHelper.generateHeadersForUser("admin"));
 
     ResponseEntity<ClassificationRepresentationModel> responseUpdate =
-        TEMPLATE.exchange(
-            url,
-            HttpMethod.PUT,
-            httpEntity,
-            ParameterizedTypeReference.forType(ClassificationRepresentationModel.class));
+        restClient
+            .put()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .body(originalClassification)
+            .retrieve()
+            .toEntity(ClassificationRepresentationModel.class);
 
     ClassificationRepresentationModel updatedClassification = responseUpdate.getBody();
     assertThat(updatedClassification).isNotNull();

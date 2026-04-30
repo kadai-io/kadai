@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -31,10 +31,15 @@ import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
 import io.kadai.common.rest.QueryParameter;
+import java.lang.reflect.Modifier;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 
 class SpringArchitectureTest {
   private static JavaClasses importedClasses;
@@ -53,12 +58,64 @@ class SpringArchitectureTest {
     myRule.check(importedClasses);
   }
 
+  @Test
+  void should_ResideInRestPackage_When_AnnotatedWithRestController() {
+    classes()
+        .that()
+        .areAnnotatedWith(RestController.class)
+        .should()
+        .resideInAPackage("..rest..")
+        .check(importedClasses);
+  }
+
+  @Test
+  void should_BeAnnotatedWithRestController_When_ClassNameEndsWithController() {
+    classes()
+        .that()
+        .haveSimpleNameEndingWith("Controller")
+        .and()
+        .resideInAPackage("io.kadai..")
+        .should()
+        .beAnnotatedWith(RestController.class)
+        .check(importedClasses);
+  }
+
+  @Test
+  void should_BeASpringBean_When_ImplementingRepresentationModelAssembler() {
+    classes()
+        .that()
+        .implement(RepresentationModelAssembler.class)
+        .and()
+        .areNotInterfaces()
+        .should()
+        .beAnnotatedWith(Component.class)
+        .orShould()
+        .beAnnotatedWith(Controller.class)
+        .check(importedClasses);
+  }
+
+  @Test
+  void should_BeInterface_When_ClassNameEndsWithApi() {
+    classes()
+        .that()
+        .haveSimpleNameEndingWith("Api")
+        .and()
+        .resideInAPackage("io.kadai..")
+        .should()
+        .beInterfaces()
+        .check(importedClasses);
+  }
+
   private ArchCondition<JavaClass> shouldOnlyHaveAnnotatedFields() {
     return new ArchCondition<>("all fields should have a @JsonProperty or @JsonIgnore annotation") {
       @Override
       public void check(JavaClass javaClass, ConditionEvents events) {
         javaClass.getAllFields().stream()
-            .filter(not(field -> field.reflect().isSynthetic()))
+            .filter(
+                not(
+                    field ->
+                        field.reflect().isSynthetic()
+                            || Modifier.isStatic(field.reflect().getModifiers())))
             .filter(
                 field ->
                     Stream.of(JsonProperty.class, JsonIgnore.class)

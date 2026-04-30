@@ -1,5 +1,5 @@
 /*!
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,13 +16,12 @@
  *
  */
 
-@import 'colors';
-@import 'mixin/colors';
+@use 'colors';
 
 @mixin degraded-bar($direction, $width, $height) {
   display: block;
   width: $width;
   height: $height;
-  background-image: linear-gradient(to $direction, $pallete-blue 30%, $pallete-green 50%);
+  background-image: linear-gradient(to $direction, colors.$palette-blue 30%, colors.$palette-green 50%);
   content: ' ';
 }

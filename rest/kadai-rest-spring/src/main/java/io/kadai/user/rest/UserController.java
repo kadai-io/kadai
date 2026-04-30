@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ package io.kadai.user.rest;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.security.CurrentUserContext;
+import io.kadai.common.rest.QueryPagingParameter;
+import io.kadai.common.rest.QuerySortParameter;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.common.rest.util.QueryParamsValidator;
 import io.kadai.user.api.UserQuery;
@@ -28,10 +30,13 @@ import io.kadai.user.api.UserService;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
 import io.kadai.user.api.models.User;
+import io.kadai.user.api.models.UserSummary;
 import io.kadai.user.rest.assembler.UserRepresentationModelAssembler;
-import io.kadai.user.rest.models.UserCollectionRepresentationModel;
+import io.kadai.user.rest.assembler.UserSummaryRepresentationModelAssembler;
 import io.kadai.user.rest.models.UserRepresentationModel;
+import io.kadai.user.rest.models.UserSummaryPagedRepresentationModel;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
@@ -53,6 +58,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController implements UserApi {
   private final UserService userService;
   private final UserRepresentationModelAssembler userAssembler;
+  private final UserSummaryRepresentationModelAssembler userSummaryAssembler;
 
   private final CurrentUserContext currentUserContext;
 
@@ -60,14 +66,15 @@ public class UserController implements UserApi {
   UserController(
       UserService userService,
       UserRepresentationModelAssembler userAssembler,
+      UserSummaryRepresentationModelAssembler userSummaryAssembler,
       CurrentUserContext currentUserContext) {
     this.userService = userService;
     this.userAssembler = userAssembler;
+    this.userSummaryAssembler = userSummaryAssembler;
     this.currentUserContext = currentUserContext;
   }
 
   @GetMapping(RestEndpoints.URL_USERS_ID)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<UserRepresentationModel> getUser(@PathVariable("userId") String userId)
       throws UserNotFoundException, InvalidArgumentException {
     User user = userService.getUser(userId);
@@ -75,21 +82,31 @@ public class UserController implements UserApi {
   }
 
   @GetMapping(RestEndpoints.URL_USERS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
-  public ResponseEntity<UserCollectionRepresentationModel> getUsers(
-      HttpServletRequest request, @ParameterObject UserQueryFilterParameter filterParameter)
+  public ResponseEntity<UserSummaryPagedRepresentationModel> getUsers(
+      HttpServletRequest request,
+      @ParameterObject UserQueryFilterParameter filterParameter,
+      @ParameterObject UserQuerySortParameter sortParameter,
+      @ParameterObject QueryPagingParameter<UserSummary, UserQuery> pagingParameter)
       throws InvalidArgumentException {
-    if (filterParameter.getCurrentUser() != null
-        && QueryParamsValidator.hasQueryParameterValues(request, "current-user")) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param current-user with values.");
-    }
+
+    QueryParamsValidator.validateParams(
+        request,
+        UserQueryFilterParameter.class,
+        QuerySortParameter.class,
+        QueryPagingParameter.class);
+
     filterParameter.addCurrentUserIdIfPresentWithContext(currentUserContext);
 
     UserQuery query = userService.createUserQuery();
     filterParameter.apply(query);
+    sortParameter.apply(query);
 
-    return ResponseEntity.ok(userAssembler.toKadaiCollectionModel(query.list()));
+    List<UserSummary> users = pagingParameter.apply(query);
+
+    UserSummaryPagedRepresentationModel pagedModels =
+        userSummaryAssembler.toPagedModel(users, pagingParameter.getPageMetadata());
+
+    return ResponseEntity.ok(pagedModels);
   }
 
   @PostMapping(RestEndpoints.URL_USERS)
@@ -122,7 +139,7 @@ public class UserController implements UserApi {
   }
 
   @DeleteMapping(RestEndpoints.URL_USERS_ID)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
+  @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<UserRepresentationModel> deleteUser(@PathVariable("userId") String userId)
       throws UserNotFoundException, NotAuthorizedException, InvalidArgumentException {
     userService.deleteUser(userId);

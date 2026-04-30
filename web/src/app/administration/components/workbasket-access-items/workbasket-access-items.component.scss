@@ -1,5 +1,5 @@
 /*!
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  */
 
-@import 'colors';
+@use 'colors';
 
 .workbasket-access-items {
   height: calc(100vh - 213px);
@@ -99,7 +99,7 @@
   &__buttons-add-access {
     color: white;
     border: none;
-    background: $aquamarine;
+    background: colors.$aquamarine;
     margin: 10px 3px 0 6px;
     outline: none;
   }

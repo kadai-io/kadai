@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,12 +21,16 @@ package acceptance.task.complete;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestClassification;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestWorkbasket;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 import acceptance.task.complete.CompleteTaskWithSpiAccTest.SetCustomAttributeToEndstate;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.models.ClassificationSummary;
+import io.kadai.common.api.BulkOperationResults;
 import io.kadai.common.api.KadaiRole;
+import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.internal.util.Triplet;
@@ -34,6 +38,7 @@ import io.kadai.spi.task.api.TaskEndstatePreprocessor;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.api.exceptions.InvalidTaskStateException;
+import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.Task;
 import io.kadai.testapi.DefaultTestEntities;
 import io.kadai.testapi.KadaiInject;
@@ -45,6 +50,7 @@ import io.kadai.testapi.security.WithAccessId;
 import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
@@ -63,7 +69,8 @@ class TerminateTaskAccTest {
   @KadaiInject TaskService taskService;
   @KadaiInject ClassificationService classificationService;
   @KadaiInject WorkbasketService workbasketService;
-  @KadaiInject CurrentUserContext currentUserContext;
+  @KadaiInject
+  CurrentUserContext currentUserContext;
 
   ClassificationSummary defaultClassificationSummary;
   WorkbasketSummary defaultWorkbasketSummary;
@@ -132,7 +139,7 @@ class TerminateTaskAccTest {
     ThrowingCallable call = () -> taskService.terminateTask(task.getId());
 
     NotAuthorizedException e = catchThrowableOfType(NotAuthorizedException.class, call);
-    assertThat(e.getCurrentUserId()).isEqualTo(currentUserContext.getUserid());
+    assertThat(e.getCurrentUserId()).isEqualTo(currentUserContext.getUserId());
     assertThat(e.getRoles()).containsExactlyInAnyOrder(KadaiRole.ADMIN, KadaiRole.TASK_ADMIN);
   }
 
@@ -181,6 +188,140 @@ class TerminateTaskAccTest {
         };
 
     return DynamicTest.stream(testValues.iterator(), Triplet::getLeft, test);
+  }
+
+  @WithAccessId(user = "admin")
+  @WithAccessId(user = "taskadmin")
+  @TestTemplate
+  void should_TerminateAllTasks_When_BulkForceTerminatingTasks() throws Exception {
+    Task task1 =
+        TaskBuilder.newTask()
+            .classificationSummary(defaultClassificationSummary)
+            .workbasketSummary(defaultWorkbasketSummary)
+            .state(TaskState.CLAIMED)
+            .primaryObjRef(DefaultTestEntities.defaultTestObjectReference().build())
+            .buildAndStore(taskService);
+    Task task2 =
+        TaskBuilder.newTask()
+            .classificationSummary(defaultClassificationSummary)
+            .workbasketSummary(defaultWorkbasketSummary)
+            .state(TaskState.READY)
+            .primaryObjRef(DefaultTestEntities.defaultTestObjectReference().build())
+            .buildAndStore(taskService);
+    List<String> taskIdList = List.of(task1.getId(), task2.getId());
+
+    BulkOperationResults<String, KadaiException> results =
+        taskService.forceTerminateTasks(taskIdList);
+
+    assertThat(results.containsErrors()).isFalse();
+    Task terminatedTask1 = taskService.getTask(task1.getId());
+    assertThat(terminatedTask1.getState()).isEqualTo(TaskState.TERMINATED);
+    assertThat(terminatedTask1.getCompleted()).isNotNull();
+    Task terminatedTask2 = taskService.getTask(task2.getId());
+    assertThat(terminatedTask2.getState()).isEqualTo(TaskState.TERMINATED);
+    assertThat(terminatedTask2.getCompleted()).isNotNull();
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_TerminateValidTasksEvenIfErrorsExist_When_BulkForceTerminatingTasks()
+      throws Exception {
+    Task task =
+        TaskBuilder.newTask()
+            .classificationSummary(defaultClassificationSummary)
+            .workbasketSummary(defaultWorkbasketSummary)
+            .state(TaskState.CLAIMED)
+            .primaryObjRef(DefaultTestEntities.defaultTestObjectReference().build())
+            .buildAndStore(taskService);
+    List<String> taskIdList = List.of("invalid-id", task.getId());
+
+    BulkOperationResults<String, KadaiException> results =
+        taskService.forceTerminateTasks(taskIdList);
+
+    assertThat(results.containsErrors()).isTrue();
+    assertThat(results.getErrorMap()).hasSize(1);
+    assertThat(results.getErrorForId("invalid-id")).isOfAnyClassIn(TaskNotFoundException.class);
+    Task terminatedTask = taskService.getTask(task.getId());
+    assertThat(terminatedTask.getState()).isEqualTo(TaskState.TERMINATED);
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_AddErrorForTasksInEndState_When_BulkForceTerminatingTasks() throws Exception {
+    Task taskCancelled =
+        TaskBuilder.newTask()
+            .classificationSummary(defaultClassificationSummary)
+            .workbasketSummary(defaultWorkbasketSummary)
+            .state(TaskState.CANCELLED)
+            .primaryObjRef(DefaultTestEntities.defaultTestObjectReference().build())
+            .buildAndStore(taskService);
+    Task taskTerminated =
+        TaskBuilder.newTask()
+            .classificationSummary(defaultClassificationSummary)
+            .workbasketSummary(defaultWorkbasketSummary)
+            .state(TaskState.TERMINATED)
+            .primaryObjRef(DefaultTestEntities.defaultTestObjectReference().build())
+            .buildAndStore(taskService);
+    Task taskCompleted =
+        TaskBuilder.newTask()
+            .classificationSummary(defaultClassificationSummary)
+            .workbasketSummary(defaultWorkbasketSummary)
+            .state(TaskState.COMPLETED)
+            .primaryObjRef(DefaultTestEntities.defaultTestObjectReference().build())
+            .buildAndStore(taskService);
+    List<String> taskIdList =
+        List.of(taskCancelled.getId(), taskTerminated.getId(), taskCompleted.getId());
+
+    BulkOperationResults<String, KadaiException> results =
+        taskService.forceTerminateTasks(taskIdList);
+
+    assertThat(results.containsErrors()).isTrue();
+    assertThat(results.getFailedIds())
+        .containsExactlyInAnyOrder(
+            taskCancelled.getId(), taskTerminated.getId(), taskCompleted.getId());
+    assertThat(results.getErrorMap().values())
+        .hasOnlyElementsOfType(InvalidTaskStateException.class);
+  }
+
+  @WithAccessId(user = "user-1-2")
+  @Test
+  void should_ThrowException_When_BulkForceTerminatingWithoutAdminRole() throws Exception {
+    Task task =
+        TaskBuilder.newTask()
+            .classificationSummary(defaultClassificationSummary)
+            .workbasketSummary(defaultWorkbasketSummary)
+            .state(TaskState.READY)
+            .primaryObjRef(DefaultTestEntities.defaultTestObjectReference().build())
+            .buildAndStore(taskService, "admin");
+    List<String> taskIdList = List.of(task.getId());
+
+    ThrowingCallable call = () -> taskService.forceTerminateTasks(taskIdList);
+
+    NotAuthorizedException e = catchThrowableOfType(NotAuthorizedException.class, call);
+    assertThat(e.getCurrentUserId()).isEqualTo(currentUserContext.getUserId());
+    assertThat(e.getRoles()).containsExactlyInAnyOrder(KadaiRole.ADMIN, KadaiRole.TASK_ADMIN);
+  }
+
+  @WithAccessId(user = "admin")
+  @WithAccessId(user = "taskadmin")
+  @TestTemplate
+  void should_ThrowInvalidArgumentException_When_BulkForceTerminatingTasksForNullTaskIds() {
+    final ThrowingCallable call = () -> taskService.forceTerminateTasks(null);
+
+    assertThatExceptionOfType(InvalidArgumentException.class)
+        .isThrownBy(call)
+        .extracting(Throwable::getMessage)
+        .isEqualTo("TaskIds can't be used as NULL-Parameter.");
+  }
+
+  @WithAccessId(user = "admin")
+  @WithAccessId(user = "taskadmin")
+  @TestTemplate
+  void should_ShortCircuit_When_BulkForceTerminatingTasksForEmptyTaskIds() throws Exception {
+    BulkOperationResults<String, KadaiException> results =
+        taskService.forceTerminateTasks(Collections.emptyList());
+
+    assertThat(results.containsErrors()).isFalse();
   }
 
   @Nested

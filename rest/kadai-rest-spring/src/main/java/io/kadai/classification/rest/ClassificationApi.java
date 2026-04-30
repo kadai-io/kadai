@@ -1,3 +1,21 @@
+/*
+ * Copyright [2026] [envite consulting GmbH]
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
+ *
+ */
+
 package io.kadai.classification.rest;
 
 import io.kadai.classification.api.ClassificationQuery;
@@ -6,7 +24,6 @@ import io.kadai.classification.api.exceptions.ClassificationInUseException;
 import io.kadai.classification.api.exceptions.ClassificationNotFoundException;
 import io.kadai.classification.api.exceptions.MalformedServiceLevelException;
 import io.kadai.classification.api.models.ClassificationSummary;
-import io.kadai.classification.rest.ClassificationController.ClassificationQuerySortParameter;
 import io.kadai.classification.rest.models.ClassificationRepresentationModel;
 import io.kadai.classification.rest.models.ClassificationSummaryPagedRepresentationModel;
 import io.kadai.common.api.exceptions.ConcurrencyException;
@@ -61,7 +78,6 @@ public interface ClassificationApi {
             })
       })
   @GetMapping(path = RestEndpoints.URL_CLASSIFICATIONS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<ClassificationSummaryPagedRepresentationModel> getClassifications(
       HttpServletRequest request,
       @ParameterObject final ClassificationQueryFilterParameter filterParameter,
@@ -104,7 +120,6 @@ public interface ClassificationApi {
             })
       })
   @GetMapping(path = RestEndpoints.URL_CLASSIFICATIONS_ID, produces = MediaTypes.HAL_JSON_VALUE)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<ClassificationRepresentationModel> getClassification(
       @PathVariable("classificationId") String classificationId)
       throws ClassificationNotFoundException;
@@ -154,12 +169,6 @@ public interface ClassificationApi {
                   schema = @Schema(implementation = ClassificationRepresentationModel.class))
             }),
         @ApiResponse(
-            responseCode = "403",
-            description = "CLASSIFICATION_ALREADY_EXISTS",
-            content = {
-              @Content(schema = @Schema(implementation = ClassificationAlreadyExistException.class))
-            }),
-        @ApiResponse(
             responseCode = "400",
             description =
                 "DOMAIN_NOT_FOUND, INVALID_ARGUMENT, CLASSIFICATION_SERVICE_LEVEL_MALFORMED",
@@ -176,7 +185,13 @@ public interface ClassificationApi {
         @ApiResponse(
             responseCode = "403",
             description = "NOT_AUTHORIZED",
-            content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
+            content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))}),
+        @ApiResponse(
+            responseCode = "409",
+            description = "CLASSIFICATION_ALREADY_EXISTS",
+            content = {
+              @Content(schema = @Schema(implementation = ClassificationAlreadyExistException.class))
+            }),
       })
   @PostMapping(path = RestEndpoints.URL_CLASSIFICATIONS)
   @Transactional(rollbackFor = Exception.class)

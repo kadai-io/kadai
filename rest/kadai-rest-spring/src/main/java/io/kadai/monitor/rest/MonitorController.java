@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -46,7 +46,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -75,7 +74,6 @@ public class MonitorController implements MonitorApi {
   }
 
   @GetMapping(path = RestEndpoints.URL_MONITOR_WORKBASKET_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<ReportRepresentationModel> computeWorkbasketReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
@@ -95,7 +93,6 @@ public class MonitorController implements MonitorApi {
   }
 
   @GetMapping(path = RestEndpoints.URL_MONITOR_WORKBASKET_PRIORITY_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<ReportRepresentationModel> computePriorityWorkbasketReport(
       @ParameterObject PriorityReportFilterParameter filterParameter,
       @RequestParam(name = "workbasket-type", required = false) WorkbasketType[] workbasketTypes,
@@ -122,8 +119,34 @@ public class MonitorController implements MonitorApi {
     return ResponseEntity.status(HttpStatus.OK).body(report);
   }
 
+  @GetMapping(path = RestEndpoints.URL_MONITOR_DETAILED_WORKBASKET_PRIORITY_REPORT)
+  public ResponseEntity<ReportRepresentationModel> computeDetailedWorkbasketPriorityReport(
+      @ParameterObject PriorityReportFilterParameter filterParameter,
+      @RequestParam(name = "workbasket-type", required = false) WorkbasketType[] workbasketTypes,
+      @RequestParam(name = "columnHeader", required = false)
+          PriorityColumnHeaderRepresentationModel[] columnHeaders)
+      throws NotAuthorizedException, InvalidArgumentException {
+
+    WorkbasketPriorityReport.Builder builder =
+        monitorService.createWorkbasketPriorityReportBuilder().workbasketTypeIn(workbasketTypes);
+    filterParameter.apply(builder);
+
+    if (columnHeaders != null) {
+      List<PriorityColumnHeader> priorityColumnHeaders =
+          Arrays.stream(columnHeaders)
+              .map(priorityColumnHeaderRepresentationModelAssembler::toEntityModel)
+              .toList();
+      builder.withColumnHeaders(priorityColumnHeaders);
+    }
+
+    ReportRepresentationModel report =
+        reportRepresentationModelAssembler.toModel(
+            builder.buildDetailedReport(), filterParameter, workbasketTypes, columnHeaders);
+
+    return ResponseEntity.status(HttpStatus.OK).body(report);
+  }
+
   @GetMapping(path = RestEndpoints.URL_MONITOR_CLASSIFICATION_CATEGORY_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<ReportRepresentationModel> computeClassificationCategoryReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
@@ -144,7 +167,6 @@ public class MonitorController implements MonitorApi {
   }
 
   @GetMapping(path = RestEndpoints.URL_MONITOR_CLASSIFICATION_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<ReportRepresentationModel> computeClassificationReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
@@ -164,7 +186,6 @@ public class MonitorController implements MonitorApi {
   }
 
   @GetMapping(path = RestEndpoints.URL_MONITOR_DETAILED_CLASSIFICATION_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<ReportRepresentationModel> computeDetailedClassificationReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
@@ -184,7 +205,6 @@ public class MonitorController implements MonitorApi {
   }
 
   @GetMapping(path = RestEndpoints.URL_MONITOR_TASK_CUSTOM_FIELD_VALUE_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<ReportRepresentationModel> computeTaskCustomFieldValueReport(
       @RequestParam(name = "custom-field") TaskCustomField customField,
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
@@ -206,7 +226,6 @@ public class MonitorController implements MonitorApi {
   }
 
   @GetMapping(path = RestEndpoints.URL_MONITOR_TASK_STATUS_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<ReportRepresentationModel> computeTaskStatusReport(
       @RequestParam(name = "domain", required = false) List<String> domains,
       @RequestParam(name = "state", required = false) List<TaskState> states,
@@ -234,7 +253,6 @@ public class MonitorController implements MonitorApi {
   }
 
   @GetMapping(path = RestEndpoints.URL_MONITOR_TIMESTAMP_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<ReportRepresentationModel> computeTimestampReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp[] timestamps)

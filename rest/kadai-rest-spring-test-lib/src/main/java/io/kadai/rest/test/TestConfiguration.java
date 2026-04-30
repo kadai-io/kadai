@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,14 +20,21 @@ package io.kadai.rest.test;
 
 import io.kadai.sampledata.SampleDataGenerator;
 import javax.sql.DataSource;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.hateoas.config.HypermediaMappingInformation;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.web.client.RestClient;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 @SpringBootApplication
 @ComponentScan("io.kadai")
@@ -43,5 +50,23 @@ public class TestConfiguration {
   @Bean
   public PlatformTransactionManager txManager(DataSource dataSource) {
     return new DataSourceTransactionManager(dataSource);
+  }
+
+  @Bean
+  public RestClient restClient(RestClient.Builder builder, JsonMapper jsonMapper) {
+    return builder.build();
+  }
+
+  @Bean
+  JsonMapperBuilderCustomizer customizer(ObjectProvider<HypermediaMappingInformation> hypermedia) {
+    return builder -> {
+      hypermedia.ifAvailable(
+          hypermediaMappingInformation ->
+              hypermediaMappingInformation.configureJsonMapper(builder));
+      builder
+          .deactivateDefaultTyping()
+          .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+          .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+    };
   }
 }

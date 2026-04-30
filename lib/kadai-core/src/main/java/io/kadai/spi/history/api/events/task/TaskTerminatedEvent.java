@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,14 +18,14 @@
 
 package io.kadai.spi.history.api.events.task;
 
-import io.kadai.task.api.models.Task;
+import io.kadai.task.api.models.TaskSummary;
 
 /** Event fired if a task is terminated. */
 public class TaskTerminatedEvent extends TaskHistoryEvent {
 
-  public TaskTerminatedEvent(String id, Task task, String userId) {
-    super(id, task, userId, null);
+  public TaskTerminatedEvent(String id, TaskSummary terminatedTask) {
+    super(id, terminatedTask, null);
     eventType = TaskHistoryEventType.TERMINATED.getName();
-    created = task.getCompleted();
+    created = terminatedTask.getCompleted();
   }
 }

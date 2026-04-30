@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,8 +22,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import acceptance.AbstractAccTest;
 import io.kadai.common.api.BaseQuery.SortDirection;
+import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.api.security.UserPrincipal;
 import io.kadai.common.internal.util.CheckedConsumer;
+import io.kadai.common.internal.util.CheckedRunnable;
 import io.kadai.common.internal.util.Pair;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
@@ -37,12 +39,12 @@ import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.WorkbasketType;
 import io.kadai.workbasket.api.models.Workbasket;
 import io.kadai.workbasket.api.models.WorkbasketAccessItem;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import javax.security.auth.Subject;
@@ -132,24 +134,26 @@ class SelectAndClaimTaskAccTest extends AbstractAccTest {
     assertThat(task).isEmpty();
   }
 
-  private Runnable getRunnableTest(List<Task> selectedAndClaimedTasks, List<String> accessIds) {
-    return () -> {
-      Subject subject = new Subject();
-      subject.getPrincipals().add(new UserPrincipal(accessIds.remove(0)));
+  private Runnable getRunnableTest(List<Task> selectedAndClaimedTasks, List<String> accessIds)
+      throws KadaiException {
+    return CheckedRunnable.rethrowing(
+        () -> {
+          Subject subject = new Subject();
+          subject.getPrincipals().add(new UserPrincipal(accessIds.remove(0)));
 
-      Consumer<TaskService> consumer =
-          CheckedConsumer.wrap(
-              taskService ->
-                  taskService
-                      .selectAndClaim(getTaskQuery())
-                      .ifPresent(selectedAndClaimedTasks::add));
-      PrivilegedAction<Void> action =
-          () -> {
-            consumer.accept(kadaiEngine.getTaskService());
-            return null;
-          };
-      Subject.doAs(subject, action);
-    };
+          Consumer<TaskService> consumer =
+              CheckedConsumer.rethrowing(
+                  taskService ->
+                      taskService
+                          .selectAndClaim(getTaskQuery())
+                          .ifPresent(selectedAndClaimedTasks::add));
+          Callable<Void> action =
+              () -> {
+                consumer.accept(kadaiEngine.getTaskService());
+                return null;
+              };
+          Subject.callAs(subject, action);
+        });
   }
 
   private TaskQuery getTaskQuery() {

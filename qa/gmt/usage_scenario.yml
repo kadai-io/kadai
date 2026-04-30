@@ -1,0 +1,40 @@
+name: KADAI - PostgreSQL - Standard Usage
+author: envite consulting GmbH
+description: Messung eines realistischen KADAI-Nutzungsszenarios mit hundert API-Nutzern und Pausen von vier Sekunden zwischen den einzelnen Aktivitäten. Nach einer Aufwärmphase zur Stabilisierung von JIT folgt die Messung des Standard-Workflows -- Tasks (Aufgaben) erstellen, bearbeiten, zuweisen und abschließen; Workbaskets (Postkörbe) suchen und öffnen; Kommentare lesen, schreiben und löschen; Task-Status-Report abrufen.
+
+compose-file: !include compose.yml
+
+services:
+  k6:
+    container_name: k6
+    image: grafana/k6:1.1.0
+    depends_on:
+      app:
+        condition: service_healthy # wait until the service is ready before starting with the flow
+    entrypoint: "" # ignore default entrypoint
+    command: sleep infinity # wait for commands in the flow
+    environment:
+      TARGET_HOSTNAME: "kadai-example-app"
+      TARGET_PORT: "8080"
+      K6_NO_USAGE_REPORT: "true" # disables k6 usage reporting (creates multiple connections to a Google server)
+
+flow:
+  - name: Warm-up
+    container: k6
+    commands:
+      - type: console
+        command: k6 run /tmp/repo/qa/gmt/phases/1_warm_up.js
+  - name: Pause
+    container: k6
+    commands:
+      - type: console
+        command: k6 run --log-format=raw --log-output=stdout /tmp/repo/qa/gmt/phases/2_pause.js
+        log-stdout: true
+        read-notes-stdout: true
+  - name: Standard Usage Scenario
+    container: k6
+    commands:
+      - type: console
+        command: k6 run --log-format=raw --log-output=stdout /tmp/repo/qa/gmt/phases/3_blue_angel_standard_usage_scenario.js
+        log-stdout: true
+        read-notes-stdout: true

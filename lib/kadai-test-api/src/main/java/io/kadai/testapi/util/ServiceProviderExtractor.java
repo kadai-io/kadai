@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,13 +20,15 @@ package io.kadai.testapi.util;
 
 import static org.junit.platform.commons.support.AnnotationSupport.findRepeatableAnnotations;
 
-import io.kadai.spi.history.api.KadaiHistory;
+import io.kadai.spi.history.api.KadaiEventConsumer;
 import io.kadai.spi.priority.api.PriorityServiceProvider;
 import io.kadai.spi.routing.api.TaskRoutingProvider;
 import io.kadai.spi.task.api.AfterRequestChangesProvider;
 import io.kadai.spi.task.api.AfterRequestReviewProvider;
 import io.kadai.spi.task.api.BeforeRequestChangesProvider;
 import io.kadai.spi.task.api.BeforeRequestReviewProvider;
+import io.kadai.spi.task.api.BeforeTransferTaskProvider;
+import io.kadai.spi.task.api.CreateTaskPostprocessor;
 import io.kadai.spi.task.api.CreateTaskPreprocessor;
 import io.kadai.spi.task.api.ReviewRequiredProvider;
 import io.kadai.spi.task.api.TaskDistributionProvider;
@@ -46,16 +48,18 @@ public class ServiceProviderExtractor {
 
   private static final Set<Class<?>> KADAI_SERVICE_PROVIDER_INTERFACES =
       Set.of(
-          KadaiHistory.class,
+          KadaiEventConsumer.class,
           PriorityServiceProvider.class,
           TaskRoutingProvider.class,
           TaskDistributionProvider.class,
           CreateTaskPreprocessor.class,
+          CreateTaskPostprocessor.class,
           ReviewRequiredProvider.class,
           BeforeRequestReviewProvider.class,
           AfterRequestReviewProvider.class,
           BeforeRequestChangesProvider.class,
           AfterRequestChangesProvider.class,
+          BeforeTransferTaskProvider.class,
           TaskEndstatePreprocessor.class);
 
   private ServiceProviderExtractor() {

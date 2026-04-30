@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,25 +18,14 @@
 
 package io.kadai.spi.task.api;
 
-import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.api.KadaiInitializable;
 import io.kadai.task.api.models.Task;
 
 /**
  * The BeforeRequestReviewProvider allows to implement customized behaviour before a review has been
  * requested on a given {@linkplain Task}.
  */
-public interface BeforeRequestReviewProvider {
-
-  /**
-   * Provide the active {@linkplain KadaiEngine} which is initialized for this KADAI installation.
-   *
-   * <p>This method is called during KADAI startup and allows the service provider to store the
-   * active {@linkplain KadaiEngine} for later usage.
-   *
-   * @param kadaiEngine the active {@linkplain KadaiEngine} which is initialized for this
-   *     installation
-   */
-  void initialize(KadaiEngine kadaiEngine);
+public interface BeforeRequestReviewProvider extends KadaiInitializable {
 
   /**
    * Perform any action before a review has been requested on a {@linkplain Task} through

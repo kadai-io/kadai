@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -188,6 +188,7 @@ public class TaskQueryImpl implements TaskQuery {
   private String[] porValueNotLike;
   private Boolean isRead;
   private Boolean isTransferred;
+  private Boolean isReopened;
   private String[] attachmentClassificationIdIn;
   private String[] attachmentClassificationIdNotIn;
   private String[] attachmentClassificationNameIn;
@@ -1137,6 +1138,12 @@ public class TaskQueryImpl implements TaskQuery {
   @Override
   public TaskQuery transferredEquals(Boolean isTransferred) {
     this.isTransferred = isTransferred;
+    return this;
+  }
+
+  @Override
+  public TaskQuery reopenedEquals(Boolean isReopened) {
+    this.isReopened = isReopened;
     return this;
   }
 
@@ -2193,6 +2200,11 @@ public class TaskQueryImpl implements TaskQuery {
       throw new IllegalArgumentException(
           "The params \"lockResultsEquals\" and \"selectAndClaim\"" + " cannot be used together!");
     }
+    if (joinWithUserInfo && lockResults != null && lockResults != 0) {
+      throw new IllegalArgumentException(
+          "The params \"lockResultsEquals\" and \"joinWithUserInfo\""
+              + " cannot be used together!");
+    }
     if (withoutAttachment
         && (attachmentChannelIn != null
             || attachmentChannelLike != null
@@ -2580,6 +2592,8 @@ public class TaskQueryImpl implements TaskQuery {
         + isRead
         + ", isTransferred="
         + isTransferred
+        + ", isReopened="
+        + isReopened
         + ", attachmentClassificationIdIn="
         + Arrays.toString(attachmentClassificationIdIn)
         + ", attachmentClassificationIdNotIn="

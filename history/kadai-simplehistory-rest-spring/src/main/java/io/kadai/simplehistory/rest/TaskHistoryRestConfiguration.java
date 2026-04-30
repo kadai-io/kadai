@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 package io.kadai.simplehistory.rest;
 
-import io.kadai.simplehistory.impl.SimpleHistoryServiceImpl;
+import io.kadai.simplehistory.task.internal.TaskHistoryServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class TaskHistoryRestConfiguration {
 
   @Bean
-  public SimpleHistoryServiceImpl getSimpleHistoryService() {
-    return new SimpleHistoryServiceImpl();
+  public TaskHistoryServiceImpl getTaskHistoryService() {
+    return new TaskHistoryServiceImpl();
   }
 }

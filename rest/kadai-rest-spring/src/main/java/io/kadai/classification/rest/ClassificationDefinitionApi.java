@@ -1,12 +1,30 @@
+/*
+ * Copyright [2026] [envite consulting GmbH]
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
+ *
+ */
+
 package io.kadai.classification.rest;
 
-import io.kadai.classification.api.exceptions.ClassificationAlreadyExistException;
 import io.kadai.classification.api.exceptions.ClassificationNotFoundException;
 import io.kadai.classification.api.exceptions.MalformedServiceLevelException;
 import io.kadai.classification.rest.assembler.ClassificationDefinitionCollectionRepresentationModel;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.api.exceptions.LogicalDuplicateInPayloadException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.RestEndpoints;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,7 +61,6 @@ public interface ClassificationDefinitionApi {
                                 ClassificationDefinitionCollectionRepresentationModel.class)))
       })
   @GetMapping(path = RestEndpoints.URL_CLASSIFICATION_DEFINITIONS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<ClassificationDefinitionCollectionRepresentationModel> exportClassifications(
       @RequestParam(value = "domain", required = false) String[] domain);
 
@@ -67,14 +84,17 @@ public interface ClassificationDefinitionApi {
             content = {@Content(schema = @Schema())}),
         @ApiResponse(
             responseCode = "400",
-            description = "INVALID_ARGUMENT, CLASSIFICATION_SERVICE_LEVEL_MALFORMED",
+            description =
+                "INVALID_ARGUMENT, CLASSIFICATION_SERVICE_LEVEL_MALFORMED,"
+                    + " LOGICAL_DUPLICATE_IN_PAYLOAD",
             content = {
               @Content(
                   schema =
                       @Schema(
                           anyOf = {
                             InvalidArgumentException.class,
-                            MalformedServiceLevelException.class
+                            MalformedServiceLevelException.class,
+                            LogicalDuplicateInPayloadException.class
                           }))
             }),
         @ApiResponse(
@@ -97,14 +117,13 @@ public interface ClassificationDefinitionApi {
             }),
         @ApiResponse(
             responseCode = "409",
-            description = "ENTITY_NOT_UP_TO_DATE, CLASSIFICATION_ALREADY_EXISTS",
+            description = "ENTITY_NOT_UP_TO_DATE",
             content = {
               @Content(
                   schema =
                       @Schema(
                           anyOf = {
                             ConcurrencyException.class,
-                            ClassificationAlreadyExistException.class
                           }))
             }),
       })
@@ -116,7 +135,7 @@ public interface ClassificationDefinitionApi {
       throws InvalidArgumentException,
           ConcurrencyException,
           ClassificationNotFoundException,
-          ClassificationAlreadyExistException,
+          LogicalDuplicateInPayloadException,
           DomainNotFoundException,
           IOException,
           MalformedServiceLevelException,

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -35,11 +35,13 @@ import io.kadai.common.api.exceptions.ConnectionNotSetException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.api.security.CurrentUserContext;
+import io.kadai.common.api.security.ProxyPrincipal;
 import io.kadai.common.api.security.UserPrincipal;
 import io.kadai.common.internal.configuration.DB;
 import io.kadai.common.internal.configuration.DbSchemaCreator;
 import io.kadai.common.internal.jobs.JobScheduler;
 import io.kadai.common.internal.jobs.RealClock;
+import io.kadai.common.internal.pagination.PageInterceptor;
 import io.kadai.common.internal.persistence.InstantTypeHandler;
 import io.kadai.common.internal.persistence.MapTypeHandler;
 import io.kadai.common.internal.security.CurrentUserContextImpl;
@@ -49,13 +51,15 @@ import io.kadai.common.internal.workingtime.WorkingTimeCalculatorImpl;
 import io.kadai.monitor.api.MonitorService;
 import io.kadai.monitor.internal.MonitorMapper;
 import io.kadai.monitor.internal.MonitorServiceImpl;
-import io.kadai.spi.history.internal.HistoryEventManager;
+import io.kadai.spi.history.internal.KadaiEventBus;
 import io.kadai.spi.priority.internal.PriorityServiceManager;
 import io.kadai.spi.routing.internal.TaskRoutingManager;
 import io.kadai.spi.task.internal.AfterRequestChangesManager;
 import io.kadai.spi.task.internal.AfterRequestReviewManager;
 import io.kadai.spi.task.internal.BeforeRequestChangesManager;
 import io.kadai.spi.task.internal.BeforeRequestReviewManager;
+import io.kadai.spi.task.internal.BeforeTransferTaskManager;
+import io.kadai.spi.task.internal.CreateTaskPostprocessorManager;
 import io.kadai.spi.task.internal.CreateTaskPreprocessorManager;
 import io.kadai.spi.task.internal.ReviewRequiredManager;
 import io.kadai.spi.task.internal.TaskDistributionManager;
@@ -78,7 +82,6 @@ import io.kadai.workbasket.internal.WorkbasketAccessMapper;
 import io.kadai.workbasket.internal.WorkbasketMapper;
 import io.kadai.workbasket.internal.WorkbasketQueryMapper;
 import io.kadai.workbasket.internal.WorkbasketServiceImpl;
-import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -113,6 +116,7 @@ public class KadaiEngineImpl implements KadaiEngine {
   private final TaskRoutingManager taskRoutingManager;
   private final TaskDistributionManager taskDistributionManager;
   private final CreateTaskPreprocessorManager createTaskPreprocessorManager;
+  private final CreateTaskPostprocessorManager createTaskPostprocessorManager;
   private final PriorityServiceManager priorityServiceManager;
   private final ReviewRequiredManager reviewRequiredManager;
   private final BeforeRequestReviewManager beforeRequestReviewManager;
@@ -120,10 +124,11 @@ public class KadaiEngineImpl implements KadaiEngine {
   private final BeforeRequestChangesManager beforeRequestChangesManager;
   private final AfterRequestChangesManager afterRequestChangesManager;
   private final TaskEndstatePreprocessorManager taskEndstatePreprocessorManager;
+  private final BeforeTransferTaskManager beforeTransferTaskManager;
 
   private final InternalKadaiEngineImpl internalKadaiEngineImpl;
   private final WorkingTimeCalculator workingTimeCalculator;
-  private final HistoryEventManager historyEventManager;
+  private final KadaiEventBus kadaiEventBus;
   private final CurrentUserContext currentUserContext;
   private final JobScheduler jobScheduler;
   protected ConnectionManagementMode mode;
@@ -166,8 +171,7 @@ public class KadaiEngineImpl implements KadaiEngine {
               holidaySchedule, kadaiConfiguration.getWorkingTimeScheduleTimeZone());
     }
 
-    currentUserContext =
-        new CurrentUserContextImpl(KadaiConfiguration.shouldUseLowerCaseForAccessIds());
+    currentUserContext = new CurrentUserContextImpl();
     if (transactionFactory == null) {
       createTransactionFactory(kadaiConfiguration.isUseManagedTransactions());
     } else {
@@ -198,8 +202,9 @@ public class KadaiEngineImpl implements KadaiEngine {
     // IMPORTANT: SPI has to be initialized last (and in this order) in order
     // to provide a fully initialized KadaiEngine instance during the SPI initialization!
     createTaskPreprocessorManager = new CreateTaskPreprocessorManager();
+    createTaskPostprocessorManager = new CreateTaskPostprocessorManager();
     priorityServiceManager = new PriorityServiceManager(this);
-    historyEventManager = new HistoryEventManager(this);
+    kadaiEventBus = new KadaiEventBus(this);
     taskRoutingManager = new TaskRoutingManager(this);
     taskDistributionManager = new TaskDistributionManager(this);
     reviewRequiredManager = new ReviewRequiredManager(this);
@@ -208,6 +213,7 @@ public class KadaiEngineImpl implements KadaiEngine {
     beforeRequestChangesManager = new BeforeRequestChangesManager(this);
     afterRequestChangesManager = new AfterRequestChangesManager(this);
     taskEndstatePreprocessorManager = new TaskEndstatePreprocessorManager();
+    beforeTransferTaskManager = new BeforeTransferTaskManager(this);
 
     // don't remove, to reset possible explicit mode
     this.mode = connectionManagementMode;
@@ -248,7 +254,7 @@ public class KadaiEngineImpl implements KadaiEngine {
   public WorkbasketService getWorkbasketService() {
     return new WorkbasketServiceImpl(
         internalKadaiEngineImpl,
-        historyEventManager,
+        kadaiEventBus,
         sessionManager.getMapper(WorkbasketMapper.class),
         sessionManager.getMapper(DistributionTargetMapper.class),
         sessionManager.getMapper(WorkbasketAccessMapper.class));
@@ -326,7 +332,7 @@ public class KadaiEngineImpl implements KadaiEngine {
 
   @Override
   public boolean isHistoryEnabled() {
-    return historyEventManager.isEnabled();
+    return kadaiEventBus.isEnabled();
   }
 
   @Override
@@ -386,24 +392,26 @@ public class KadaiEngineImpl implements KadaiEngine {
             currentUserContext.getAccessIds(),
             rolesAsString);
       }
-      throw new NotAuthorizedException(currentUserContext.getUserid(), roles);
+      throw new NotAuthorizedException(currentUserContext.getUserId(), roles);
     }
   }
 
-  public <T> T runAsAdmin(Supplier<T> supplier) {
-    if (isUserInRole(KadaiRole.ADMIN)) {
-      return supplier.get();
+  @Override
+  public <T> T runAs(Supplier<T> supplier, KadaiRole proxy, String userId) {
+    Subject subject = new Subject();
+    if (proxy != null) {
+      String proxyAccessId =
+          this.getConfiguration().getRoleMap().get(proxy).stream()
+              .findFirst()
+              .orElseThrow(
+                  () -> new SystemException(String.format("There is no %s configured", proxy)));
+      subject.getPrincipals().add(new ProxyPrincipal(proxyAccessId));
+    }
+    if (userId != null) {
+      subject.getPrincipals().add(new UserPrincipal(userId));
     }
 
-    String adminName =
-        this.getConfiguration().getRoleMap().get(KadaiRole.ADMIN).stream()
-            .findFirst()
-            .orElseThrow(() -> new SystemException("There is no admin configured"));
-
-    Subject subject = new Subject();
-    subject.getPrincipals().add(new UserPrincipal(adminName));
-
-    return Subject.doAs(subject, (PrivilegedAction<T>) supplier::get);
+    return Subject.callAs(subject, supplier::get);
   }
 
   @Override
@@ -463,6 +471,8 @@ public class KadaiEngineImpl implements KadaiEngine {
     configuration.addMapper(UserMapper.class);
     configuration.addMapper(UserQueryMapper.class);
     configuration.addMapper(ConfigurationMapper.class);
+
+    configuration.addInterceptor(new PageInterceptor());
 
     SqlSessionFactory localSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
     return SqlSessionManager.newInstance(localSessionFactory);
@@ -612,8 +622,8 @@ public class KadaiEngineImpl implements KadaiEngine {
     }
 
     @Override
-    public HistoryEventManager getHistoryEventManager() {
-      return historyEventManager;
+    public KadaiEventBus getKadaiEventBus() {
+      return kadaiEventBus;
     }
 
     @Override
@@ -629,6 +639,11 @@ public class KadaiEngineImpl implements KadaiEngine {
     @Override
     public CreateTaskPreprocessorManager getCreateTaskPreprocessorManager() {
       return createTaskPreprocessorManager;
+    }
+
+    @Override
+    public CreateTaskPostprocessorManager getCreateTaskPostprocessorManager() {
+      return createTaskPostprocessorManager;
     }
 
     @Override
@@ -664,6 +679,11 @@ public class KadaiEngineImpl implements KadaiEngine {
     @Override
     public TaskEndstatePreprocessorManager getTaskEndstatePreprocessorManager() {
       return taskEndstatePreprocessorManager;
+    }
+
+    @Override
+    public BeforeTransferTaskManager getBeforeTransferTaskManager() {
+      return beforeTransferTaskManager;
     }
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 
 package io.kadai.common.rest;
 
-import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
 import io.kadai.KadaiConfiguration;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.common.api.ConfigurationService;
@@ -38,7 +37,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.json.SpringHandlerInstantiator;
+import org.springframework.http.support.JacksonHandlerInstantiator;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /** Configuration for REST service. */
@@ -117,7 +116,7 @@ public class RestConfiguration {
 
   // Needed for injection into jackson deserializer.
   @Bean
-  public HandlerInstantiator handlerInstantiator(ApplicationContext context) {
-    return new SpringHandlerInstantiator(context.getAutowireCapableBeanFactory());
+  public JacksonHandlerInstantiator handlerInstantiator(ApplicationContext context) {
+    return new JacksonHandlerInstantiator(context.getAutowireCapableBeanFactory());
   }
 }

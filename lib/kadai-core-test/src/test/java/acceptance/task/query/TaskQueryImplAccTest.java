@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.api.security.UserPrincipal;
 import io.kadai.common.internal.InternalKadaiEngine;
-import io.kadai.common.internal.util.CheckedConsumer;
 import io.kadai.common.internal.util.Pair;
 import io.kadai.common.test.util.ParallelThreadHelper;
 import io.kadai.task.api.CallbackState;
@@ -59,12 +58,12 @@ import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedToQueryWorkbasketException;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
-import java.security.PrivilegedAction;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -120,7 +119,7 @@ class TaskQueryImplAccTest {
   private void persistPermission(WorkbasketSummary workbasketSummary) throws Exception {
     WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
         .workbasketId(workbasketSummary.getId())
-        .accessId(currentUserContext.getUserid())
+        .accessId(currentUserContext.getUserId())
         .permission(WorkbasketPermission.OPEN)
         .permission(WorkbasketPermission.READ)
         .permission(WorkbasketPermission.APPEND)
@@ -199,8 +198,8 @@ class TaskQueryImplAccTest {
         subject.getPrincipals().add(new UserPrincipal(accessIds.remove(0)));
 
         Consumer<TaskService> consumer =
-            CheckedConsumer.wrap(
-                taskService -> internalKadaiEngine.executeInDatabaseConnection(
+            taskService ->
+                internalKadaiEngine.executeInDatabaseConnection(
                     () -> {
                       List<TaskSummary> results =
                           taskService
@@ -217,14 +216,14 @@ class TaskQueryImplAccTest {
                           throw new SystemException(e.getMessage());
                         }
                       }
-                    }));
+                    });
 
-        PrivilegedAction<Void> action =
+        Callable<Void> action =
             () -> {
               consumer.accept(taskService);
               return null;
             };
-        Subject.doAs(subject, action);
+        Subject.callAs(subject, action);
       };
     }
   }
@@ -263,21 +262,21 @@ class TaskQueryImplAccTest {
 
       WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
           .workbasketId(wbWithoutReadTasksPerm.getId())
-          .accessId(currentUserContext.getUserid())
+          .accessId(currentUserContext.getUserId())
           .permission(WorkbasketPermission.OPEN)
           .permission(WorkbasketPermission.READ)
           .permission(WorkbasketPermission.APPEND)
           .buildAndStore(workbasketService, "businessadmin");
       WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
           .workbasketId(wbWithoutReadPerm.getId())
-          .accessId(currentUserContext.getUserid())
+          .accessId(currentUserContext.getUserId())
           .permission(WorkbasketPermission.OPEN)
           .permission(WorkbasketPermission.READTASKS)
           .permission(WorkbasketPermission.APPEND)
           .buildAndStore(workbasketService, "businessadmin");
       WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
           .workbasketId(wbWithoutOpenPerm.getId())
-          .accessId(currentUserContext.getUserid())
+          .accessId(currentUserContext.getUserId())
           .permission(WorkbasketPermission.READ)
           .permission(WorkbasketPermission.READTASKS)
           .permission(WorkbasketPermission.APPEND)
@@ -2569,6 +2568,41 @@ class TaskQueryImplAccTest {
                 .workbasketIdIn(wb.getId())
                 .transferredEquals(false)
                 .list();
+
+        assertThat(list).containsExactly(taskSummary2);
+      }
+    }
+
+    @Nested
+    @TestInstance(Lifecycle.PER_CLASS)
+    class Reopened {
+
+      WorkbasketSummary wb;
+      TaskSummary taskSummary1;
+      TaskSummary taskSummary2;
+
+      @WithAccessId(user = "user-1-1")
+      @BeforeAll
+      void setup() throws Exception {
+        wb = createWorkbasketWithPermission();
+        taskSummary1 = taskInWorkbasket(wb).reopened(true).buildAndStoreAsSummary(taskService);
+        taskSummary2 = taskInWorkbasket(wb).reopened(false).buildAndStoreAsSummary(taskService);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
+      void should_ApplyFilter_When_QueryingForReopenedEqualsTrue() {
+        List<TaskSummary> list =
+            taskService.createTaskQuery().workbasketIdIn(wb.getId()).reopenedEquals(true).list();
+
+        assertThat(list).containsExactly(taskSummary1);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
+      void should_ApplyFilter_When_QueryingForReopenedEqualsFalse() {
+        List<TaskSummary> list =
+            taskService.createTaskQuery().workbasketIdIn(wb.getId()).reopenedEquals(false).list();
 
         assertThat(list).containsExactly(taskSummary2);
       }

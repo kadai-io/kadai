@@ -1,14 +1,36 @@
+/*
+ * Copyright [2026] [envite consulting GmbH]
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
+ *
+ */
+
 package io.kadai.monitor.rest;
 
+import io.kadai.classification.api.models.Classification;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.monitor.api.TaskTimestamp;
+import io.kadai.monitor.api.reports.row.FoldableRow;
 import io.kadai.monitor.rest.models.PriorityColumnHeaderRepresentationModel;
 import io.kadai.monitor.rest.models.ReportRepresentationModel;
 import io.kadai.task.api.TaskCustomField;
 import io.kadai.task.api.TaskState;
+import io.kadai.task.api.models.Task;
 import io.kadai.workbasket.api.WorkbasketType;
+import io.kadai.workbasket.api.models.Workbasket;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,7 +41,6 @@ import java.util.List;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -76,14 +97,12 @@ public interface MonitorApi {
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
       })
   @GetMapping(path = RestEndpoints.URL_MONITOR_WORKBASKET_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<ReportRepresentationModel> computeWorkbasketReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
       throws NotAuthorizedException, InvalidArgumentException;
 
   @GetMapping(path = RestEndpoints.URL_MONITOR_WORKBASKET_PRIORITY_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<ReportRepresentationModel> computePriorityWorkbasketReport(
       @ParameterObject PriorityReportFilterParameter filterParameter,
       @RequestParam(name = "workbasket-type", required = false) WorkbasketType[] workbasketTypes,
@@ -92,7 +111,56 @@ public interface MonitorApi {
       throws NotAuthorizedException, InvalidArgumentException;
 
   /**
-   * This endpoint generates a Classification Category Report
+   * This endpoint generates a Detailed Workbasket Priority Report.
+   *
+   * <p>Each {@linkplain FoldableRow} represents a {@linkplain Workbasket} and can be expanded to
+   * display its {@linkplain Classification}s with a detailed view of the number of {@linkplain
+   * Task}s, grouped by their priorities.
+   *
+   * <p>Each Column Header represents a priority range.
+   *
+   * @title Compute a Workbasket Priority Report
+   * @param filterParameter the filter parameters
+   * @param workbasketTypes determine the WorkbasketTypes to include in the report
+   * @param columnHeaders the column headers for the report
+   * @return the computed Report
+   * @throws NotAuthorizedException if the current user is not authorized to compute the Report
+   * @throws InvalidArgumentException if topicWorkbaskets or useDefaultValues are false
+   */
+  @Operation(
+      summary = "Compute a Detailed Workbasket Priority Report",
+      description =
+          "This endpoint generates a Detailed Workbasket Priority Report.<p>Each "
+              + "{@linkplain FoldableRow} represents a {@linkplain Workbasket} and can be "
+              + "expanded to display its {@linkplain Classification}s with a detailed view of the "
+              + "number of {@linkplain Task}s, grouped by their priorities. "
+              + "<p>Each Column Header represents a priority range.",
+      parameters = {
+          @Parameter(
+              name = "workbasket-type",
+              description = "Determine the WorkbasketTypes to include in the report",
+              example = "GROUP"),
+          @Parameter(name = "columnHeader", description = "The column headers for the report")
+      },
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "The computed Report",
+              content =
+              @Content(
+                  mediaType = MediaTypes.HAL_JSON_VALUE,
+                  schema = @Schema(implementation = ReportRepresentationModel.class)))
+      })
+  @GetMapping(path = RestEndpoints.URL_MONITOR_DETAILED_WORKBASKET_PRIORITY_REPORT)
+  ResponseEntity<ReportRepresentationModel> computeDetailedWorkbasketPriorityReport(
+      @ParameterObject PriorityReportFilterParameter filterParameter,
+      @RequestParam(name = "workbasket-type", required = false) WorkbasketType[] workbasketTypes,
+      @RequestParam(name = "columnHeader", required = false)
+      PriorityColumnHeaderRepresentationModel[] columnHeaders)
+      throws NotAuthorizedException, InvalidArgumentException;
+
+  /**
+   * This endpoint generates a Classification Category Report.
    *
    * <p>Each Row represents a Classification category.
    *
@@ -135,7 +203,6 @@ public interface MonitorApi {
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
       })
   @GetMapping(path = RestEndpoints.URL_MONITOR_CLASSIFICATION_CATEGORY_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<ReportRepresentationModel> computeClassificationCategoryReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
@@ -185,7 +252,6 @@ public interface MonitorApi {
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
       })
   @GetMapping(path = RestEndpoints.URL_MONITOR_CLASSIFICATION_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<ReportRepresentationModel> computeClassificationReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
@@ -237,7 +303,6 @@ public interface MonitorApi {
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
       })
   @GetMapping(path = RestEndpoints.URL_MONITOR_DETAILED_CLASSIFICATION_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<ReportRepresentationModel> computeDetailedClassificationReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
@@ -294,7 +359,6 @@ public interface MonitorApi {
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
       })
   @GetMapping(path = RestEndpoints.URL_MONITOR_TASK_CUSTOM_FIELD_VALUE_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<ReportRepresentationModel> computeTaskCustomFieldValueReport(
       @RequestParam(name = "custom-field") TaskCustomField customField,
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
@@ -353,7 +417,6 @@ public interface MonitorApi {
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
       })
   @GetMapping(path = RestEndpoints.URL_MONITOR_TASK_STATUS_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<ReportRepresentationModel> computeTaskStatusReport(
       @RequestParam(name = "domain", required = false) List<String> domains,
       @RequestParam(name = "state", required = false) List<TaskState> states,
@@ -407,8 +470,7 @@ public interface MonitorApi {
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
       })
   @GetMapping(path = RestEndpoints.URL_MONITOR_TIMESTAMP_REPORT)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
-  public ResponseEntity<ReportRepresentationModel> computeTimestampReport(
+  ResponseEntity<ReportRepresentationModel> computeTimestampReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp[] timestamps)
       throws NotAuthorizedException, InvalidArgumentException;

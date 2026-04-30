@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 package io.kadai.spi.priority.api;
 
 import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.api.KadaiInitializable;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.api.models.TaskSummary;
 import java.util.OptionalInt;
@@ -27,17 +28,9 @@ import java.util.OptionalInt;
  * The PriorityServiceProvider allows to determine the priority of a {@linkplain Task} according to
  * custom logic.
  */
-public interface PriorityServiceProvider {
+public interface PriorityServiceProvider extends KadaiInitializable {
 
-  /**
-   * Provide the active {@linkplain KadaiEngine} which is initialized for this KADAI installation.
-   *
-   * <p>This method is called during KADAI startup and allows the service provider to store the
-   * active {@linkplain KadaiEngine} for later usage.
-   *
-   * @param kadaiEngine the active {@linkplain KadaiEngine} which is initialized for this
-   *     installation
-   */
+  @Override
   default void initialize(KadaiEngine kadaiEngine) {}
 
   /**

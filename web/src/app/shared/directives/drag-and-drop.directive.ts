@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,31 +16,25 @@
  *
  */
 
-import { Directive, HostListener, Output, EventEmitter, HostBinding } from '@angular/core';
+import { Directive, HostBinding, HostListener, output } from '@angular/core';
 
-@Directive({
-  selector: '[kadaiDragAndDrop]',
-  standalone: false
-})
+@Directive({ selector: '[kadaiDragAndDrop]' })
 export class DragAndDropDirective {
-  @Output() onFileDropped = new EventEmitter<any>();
+  onFileDropped = output<any>();
   @HostBinding('class.fileover') fileOver: boolean;
 
-  //Dragover listener
   @HostListener('dragover', ['$event']) onDragOver(evt) {
     evt.preventDefault();
     evt.stopPropagation();
     this.fileOver = true;
   }
 
-  //Dragleave listener
   @HostListener('dragleave', ['$event']) public onDragLeave(evt) {
     evt.preventDefault();
     evt.stopPropagation();
     this.fileOver = false;
   }
 
-  //Drop listener
   @HostListener('drop', ['$event']) public ondrop(evt) {
     evt.preventDefault();
     evt.stopPropagation();

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import io.kadai.task.api.TaskService;
 import io.kadai.task.api.models.Attachment;
 import io.kadai.task.internal.models.AttachmentImpl;
 import io.kadai.task.rest.models.AttachmentRepresentationModel;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 /** EntityModel assembler for {@link AttachmentRepresentationModel}. */

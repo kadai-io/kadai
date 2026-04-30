@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,21 +16,21 @@
  *
  */
 
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'environments/environment';
 import { UserInfo } from 'app/shared/models/user-info';
 import { Version } from 'app/shared/models/version';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KadaiEngineService {
   currentUserInfo: UserInfo;
+  private httpClient = inject(HttpClient);
 
-  constructor(private httpClient: HttpClient) {}
-
-  // GET
   getUserInformation(): Promise<any> {
     return this.httpClient
       .get<any>(`${environment.kadaiRestUrl}/v1/current-user-info`)
@@ -58,7 +58,9 @@ export class KadaiEngineService {
   }
 
   isCustomRoutingRulesEnabled(): Observable<boolean> {
-    return this.httpClient.get<boolean>(`${environment.kadaiRestUrl}/v1/routing-rules/routing-rest-enabled`);
+    return this.httpClient
+      .get<boolean>(`${environment.kadaiRestUrl}/v1/routing-rules/routing-rest-enabled`)
+      .pipe(catchError(() => of(false)));
   }
 
   isHistoryProviderEnabled(): Observable<boolean> {

@@ -1,3 +1,21 @@
+/*
+ * Copyright [2026] [envite consulting GmbH]
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
+ *
+ */
+
 package io.kadai.common.rest;
 
 import io.kadai.common.rest.models.CustomAttributesRepresentationModel;
@@ -32,7 +50,6 @@ public interface KadaiEngineApi {
                       mediaType = MediaTypes.HAL_JSON_VALUE,
                       schema = @Schema(implementation = String[].class))))
   @GetMapping(path = RestEndpoints.URL_DOMAIN)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<List<String>> getDomains();
 
   @Operation(
@@ -54,7 +71,6 @@ public interface KadaiEngineApi {
                       mediaType = MediaTypes.HAL_JSON_VALUE,
                       schema = @Schema(implementation = String[].class))))
   @GetMapping(path = RestEndpoints.URL_CLASSIFICATION_CATEGORIES)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<List<String>> getClassificationCategories(
       @RequestParam(value = "type", required = false) String type);
 
@@ -69,7 +85,6 @@ public interface KadaiEngineApi {
                       mediaType = MediaTypes.HAL_JSON_VALUE,
                       schema = @Schema(implementation = String[].class))))
   @GetMapping(path = RestEndpoints.URL_CLASSIFICATION_TYPES)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<List<String>> getClassificationTypes();
 
   @Operation(
@@ -85,7 +100,6 @@ public interface KadaiEngineApi {
                       mediaType = MediaTypes.HAL_JSON_VALUE,
                       schema = @Schema(ref = "#/components/schemas/TypeMapSchema"))))
   @GetMapping(path = RestEndpoints.URL_CLASSIFICATION_CATEGORIES_BY_TYPES)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<Map<String, List<String>>> getClassificationCategoriesByTypeMap();
 
   @Operation(
@@ -99,7 +113,6 @@ public interface KadaiEngineApi {
                       mediaType = MediaTypes.HAL_JSON_VALUE,
                       schema = @Schema(implementation = KadaiUserInfoRepresentationModel.class))))
   @GetMapping(path = RestEndpoints.URL_CURRENT_USER)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<KadaiUserInfoRepresentationModel> getCurrentUserInfo();
 
   @Operation(
@@ -113,7 +126,6 @@ public interface KadaiEngineApi {
                       mediaType = MediaTypes.HAL_JSON_VALUE,
                       schema = @Schema(implementation = Boolean.class))))
   @GetMapping(path = RestEndpoints.URL_HISTORY_ENABLED)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<Boolean> getIsHistoryProviderEnabled();
 
   @Operation(
@@ -129,7 +141,6 @@ public interface KadaiEngineApi {
                       schema =
                           @Schema(implementation = CustomAttributesRepresentationModel.class))))
   @GetMapping(path = RestEndpoints.URL_CUSTOM_ATTRIBUTES)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<CustomAttributesRepresentationModel> getCustomAttributes();
 
   @Operation(
@@ -190,6 +201,5 @@ public interface KadaiEngineApi {
                       mediaType = MediaTypes.HAL_JSON_VALUE,
                       schema = @Schema(implementation = VersionRepresentationModel.class))))
   @GetMapping(path = RestEndpoints.URL_VERSION)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   ResponseEntity<VersionRepresentationModel> currentVersion();
 }

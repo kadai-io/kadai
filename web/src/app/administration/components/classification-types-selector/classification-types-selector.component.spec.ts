@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,22 +17,22 @@
  */
 
 import { ClassificationTypesSelectorComponent } from './classification-types-selector.component';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
-import { NgxsModule, Store } from '@ngxs/store';
+import { Location } from '@angular/common';
+import { provideLocationMocks } from '@angular/common/testing';
+import { provideStore, Store } from '@ngxs/store';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
 import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { classificationStateMock } from '../../../shared/store/mock-data/mock-store';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { By } from '@angular/platform-browser';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const classificationServiceSpy = jest.fn();
-const classificationCategoriesServiceSpy = jest.fn();
-const domainServiceSpy = jest.fn();
+const classificationServiceSpy = vi.fn();
+const classificationCategoriesServiceSpy = vi.fn();
+const domainServiceSpy = vi.fn();
 
 describe('ClassificationTypesSelectorComponent', () => {
   let fixture: ComponentFixture<ClassificationTypesSelectorComponent>;
@@ -40,11 +40,12 @@ describe('ClassificationTypesSelectorComponent', () => {
   let component: ClassificationTypesSelectorComponent;
   let store: Store;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      imports: [NgxsModule.forRoot([ClassificationState]), MatFormFieldModule, MatSelectModule, NoopAnimationsModule],
-      declarations: [ClassificationTypesSelectorComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ClassificationTypesSelectorComponent],
       providers: [
+        provideLocationMocks(),
+        provideStore([ClassificationState]),
         {
           provide: ClassificationsService,
           useValue: classificationServiceSpy
@@ -66,7 +67,7 @@ describe('ClassificationTypesSelectorComponent', () => {
       classification: classificationStateMock
     });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create the app', () => {
     expect(component).toBeTruthy();
@@ -92,5 +93,72 @@ describe('ClassificationTypesSelectorComponent', () => {
     expect(options.length).toBe(2);
     expect(options[0].nativeElement.textContent.trim()).toBe('TASK');
     expect(options[1].nativeElement.textContent.trim()).toBe('DOCUMENT');
+  });
+
+  it('should dispatch SetSelectedClassificationType and update location when select is called', () => {
+    const storeSpy = vi.spyOn(store, 'dispatch');
+    const location = TestBed.inject(Location);
+    const locationSpy = vi.spyOn(location, 'go');
+
+    component.select('TASK');
+
+    expect(storeSpy).toHaveBeenCalled();
+    expect(locationSpy).toHaveBeenCalled();
+  });
+
+  it('should call select() with the correct classification type when a mat-option is clicked', () => {
+    const selectSpy = vi.spyOn(component, 'select');
+
+    const dropdownButton = debugElement.nativeElement.querySelector('.types-selector__selected-type');
+    dropdownButton.click();
+    fixture.detectChanges();
+
+    const options = debugElement.queryAll(By.css('.types-selector__options'));
+    expect(options.length).toBeGreaterThan(0);
+    options[0].nativeElement.click();
+    fixture.detectChanges();
+
+    expect(selectSpy).toHaveBeenCalledWith('TASK');
+  });
+
+  it('should call select() with DOCUMENT classification type when the second option is clicked', () => {
+    const selectSpy = vi.spyOn(component, 'select');
+
+    const dropdownButton = debugElement.nativeElement.querySelector('.types-selector__selected-type');
+    dropdownButton.click();
+    fixture.detectChanges();
+
+    const options = debugElement.queryAll(By.css('.types-selector__options'));
+    expect(options.length).toBe(2);
+    options[1].nativeElement.click();
+    fixture.detectChanges();
+
+    expect(selectSpy).toHaveBeenCalledWith('DOCUMENT');
+  });
+
+  it('should dispatch store action and navigate when mat-option is clicked via DOM', () => {
+    const storeSpy = vi.spyOn(store, 'dispatch');
+    const location = TestBed.inject(Location);
+    const locationSpy = vi.spyOn(location, 'go');
+
+    const dropdownButton = debugElement.nativeElement.querySelector('.types-selector__selected-type');
+    dropdownButton.click();
+    fixture.detectChanges();
+
+    const options = debugElement.queryAll(By.css('.types-selector__options'));
+    options[0].nativeElement.click();
+    fixture.detectChanges();
+
+    expect(storeSpy).toHaveBeenCalled();
+    expect(locationSpy).toHaveBeenCalled();
+  });
+
+  it('should render one mat-option for each classification type from the store', () => {
+    const dropdownButton = debugElement.nativeElement.querySelector('.types-selector__selected-type');
+    dropdownButton.click();
+    fixture.detectChanges();
+
+    const options = debugElement.queryAll(By.css('.types-selector__options'));
+    expect(options.length).toBe(2);
   });
 });

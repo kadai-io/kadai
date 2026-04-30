@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,19 +16,17 @@
  *
  */
 
-import { Component, DebugElement, Input } from '@angular/core';
+import { DebugElement } from '@angular/core';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
-import { EMPTY, Observable, of } from 'rxjs';
+import { EMPTY, firstValueFrom, Observable, of, Subject } from 'rxjs';
 import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
 import { DomainService } from '../../../shared/services/domain/domain.service';
-import { ImportExportService } from '../../services/import-export.service';
-import { ComponentFixture, fakeAsync, flush, TestBed, tick, waitForAsync } from '@angular/core/testing';
-import { Actions, NgxsModule, ofActionDispatched, Store } from '@ngxs/store';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { classificationStateMock, engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
 import { ClassificationDetailsComponent } from './classification-details.component';
-import { FormsModule } from '@angular/forms';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
@@ -39,80 +37,43 @@ import {
   SaveCreatedClassification,
   SaveModifiedClassification
 } from '../../../shared/store/classification-store/classification.actions';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatOptionModule } from '@angular/material/core';
-import { MatSelectModule } from '@angular/material/select';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatInputModule } from '@angular/material/input';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { By } from '@angular/platform-browser';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatTooltipModule } from '@angular/material/tooltip';
-
-@Component({ selector: 'kadai-shared-field-error-display', template: '' })
-class FieldErrorDisplayStub {
-  @Input() displayError;
-  @Input() validationTrigger;
-}
-
-@Component({ selector: 'svg-icon', template: '' })
-class SvgIconStub {
-  @Input() src;
-}
-
-@Component({ selector: 'input', template: '' })
-class InputStub {
-  @Input() ngModel;
-}
-
-@Component({ selector: 'textarea', template: '' })
-class TextareaStub {
-  @Input() ngModel;
-}
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 const classificationServiceSpy: Partial<ClassificationsService> = {
-  getClassification: jest.fn().mockReturnValue(EMPTY),
-  getClassifications: jest.fn().mockReturnValue(EMPTY),
-  postClassification: jest.fn().mockReturnValue(EMPTY),
-  putClassification: jest.fn().mockReturnValue(EMPTY),
-  deleteClassification: jest.fn().mockReturnValue(EMPTY)
+  getClassification: vi.fn().mockReturnValue(EMPTY),
+  getClassifications: vi.fn().mockReturnValue(EMPTY),
+  postClassification: vi.fn().mockReturnValue(EMPTY),
+  putClassification: vi.fn().mockReturnValue(EMPTY),
+  deleteClassification: vi.fn().mockReturnValue(EMPTY)
 };
 
 const classificationCategoriesServiceSpy: Partial<ClassificationCategoriesService> = {
-  getCustomisation: jest.fn().mockReturnValue(EMPTY)
+  getCustomisation: vi.fn().mockReturnValue(EMPTY)
 };
 
 const domainServiceSpy: Partial<DomainService> = {
-  getSelectedDomainValue: jest.fn().mockReturnValue(of('A')),
-  getSelectedDomain: jest.fn().mockReturnValue(EMPTY)
+  getSelectedDomainValue: vi.fn().mockReturnValue('A'),
+  getSelectedDomain: vi.fn().mockReturnValue(of('A'))
 };
 
-const importExportServiceSpy: Partial<ImportExportService> = {
-  getImportingFinished: jest.fn().mockReturnValue(of(true))
-};
+const inputOverflowSubject = new Subject<Map<string, boolean>>();
 
-const requestInProgressServiceSpy: Partial<RequestInProgressService> = {
-  setRequestInProgress: jest.fn(),
-  getRequestInProgress: jest.fn().mockReturnValue(of(false))
-};
-
-const validateFormInformationFn = jest.fn().mockImplementation((): Promise<any> => Promise.resolve(true));
 const formsValidatorServiceSpy: Partial<FormsValidatorService> = {
-  isFieldValid: jest.fn().mockReturnValue(true),
-  validateInputOverflow: jest.fn(),
-  validateFormInformation: validateFormInformationFn,
+  isFieldValid: vi.fn().mockReturnValue(true),
+  validateInputOverflow: vi.fn(),
+  validateFormInformation: vi.fn().mockImplementation((): Promise<any> => Promise.resolve(true)),
   get inputOverflowObservable(): Observable<Map<string, boolean>> {
-    return of(new Map<string, boolean>());
+    return inputOverflowSubject.asObservable();
   }
 };
 
 const notificationServiceSpy: Partial<NotificationService> = {
-  showError: jest.fn(),
-  showSuccess: jest.fn(),
-  showDialog: jest.fn()
+  showError: vi.fn(),
+  showSuccess: vi.fn(),
+  showDialog: vi.fn()
 };
 
 describe('ClassificationDetailsComponent', () => {
@@ -122,34 +83,16 @@ describe('ClassificationDetailsComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      imports: [
-        NgxsModule.forRoot([ClassificationState, EngineConfigurationState]),
-        FormsModule,
-        MatIconModule,
-        MatToolbarModule,
-        MatDividerModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatOptionModule,
-        MatSelectModule,
-        MatProgressBarModule,
-        MatMenuModule,
-        MatTooltipModule,
-        NoopAnimationsModule
-      ],
-      declarations: [ClassificationDetailsComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ClassificationDetailsComponent],
       providers: [
-        InputStub,
-        FieldErrorDisplayStub,
-        SvgIconStub,
-        TextareaStub,
+        provideStore([ClassificationState, EngineConfigurationState]),
+        provideHttpClientTesting(),
+        provideAngularSvgIcon(),
         { provide: ClassificationsService, useValue: classificationServiceSpy },
         { provide: ClassificationCategoriesService, useValue: classificationCategoriesServiceSpy },
         { provide: DomainService, useValue: domainServiceSpy },
-        { provide: ImportExportService, useValue: importExportServiceSpy },
-        { provide: RequestInProgressService, useValue: requestInProgressServiceSpy },
         { provide: FormsValidatorService, useValue: formsValidatorServiceSpy },
         { provide: NotificationService, useValue: notificationServiceSpy }
       ]
@@ -166,53 +109,48 @@ describe('ClassificationDetailsComponent', () => {
       engineConfiguration: engineConfigurationMock
     });
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();
   });
 
   it('should trigger onSave() when value exists and onSubmit() is called', async () => {
-    component.onSave = jest.fn().mockImplementation();
-    await component.onSubmit();
+    component.onSave = vi.fn().mockImplementation(() => undefined);
+    component.onSubmit();
+    await fixture.whenStable();
     expect(component.onSave).toHaveBeenCalled();
   });
 
   it('should show warning when onCopy() is called and isCreatingNewClassification is true', () => {
-    component.isCreatingNewClassification = true;
+    component.classification.set({ name: 'Test', type: 'TASK' });
     const notificationService = TestBed.inject(NotificationService);
-    const showErrorSpy = jest.spyOn(notificationService, 'showError');
+    const showErrorSpy = vi.spyOn(notificationService, 'showError');
     component.onCopy();
     expect(showErrorSpy).toHaveBeenCalled();
   });
 
   it('should dispatch action when onCopy() is called and isCreatingNewClassification is false', async () => {
-    component.isCreatingNewClassification = false;
+    component.classification.set({ classificationId: 'ID01' });
     let isActionDispatched = false;
     actions$.pipe(ofActionDispatched(CopyClassification)).subscribe(() => (isActionDispatched = true));
     component.onCopy();
     expect(isActionDispatched).toBe(true);
   });
 
-  it('should return icon for category when getCategoryIcon() is called and category exists', (done) => {
-    const categoryIcon = component.getCategoryIcon('AUTOMATIC');
-    categoryIcon.subscribe((iconPair) => {
-      expect(iconPair.left).toBe('assets/icons/categories/automatic.svg');
-      expect(iconPair.right).toBe('AUTOMATIC');
-      done();
-    });
+  it('should return icon for category when getCategoryIcon() is called and category exists', async () => {
+    const iconPair = await firstValueFrom(component.getCategoryIcon('AUTOMATIC'));
+    expect(iconPair.left).toBe('assets/icons/categories/automatic.svg');
+    expect(iconPair.right).toBe('AUTOMATIC');
   });
 
-  it('should return icon when getCategoryIcon() is called and category does not exist', (done) => {
-    const categoryIcon = component.getCategoryIcon('WATER');
-    categoryIcon.subscribe((iconPair) => {
-      expect(iconPair.left).toBe('assets/icons/categories/missing-icon.svg');
-      done();
-    });
+  it('should return icon when getCategoryIcon() is called and category does not exist', async () => {
+    const iconPair = await firstValueFrom(component.getCategoryIcon('WATER'));
+    expect(iconPair.left).toBe('assets/icons/categories/missing-icon.svg');
   });
 
   it('should dispatch SaveCreatedClassification action in onSave() when classificationId is undefined', async () => {
-    component.classification = {};
+    component.classification.set({});
     let isActionDispatched = false;
     actions$.pipe(ofActionDispatched(SaveCreatedClassification)).subscribe(() => (isActionDispatched = true));
     await component.onSave();
@@ -220,7 +158,7 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should dispatch SaveModifiedClassification action in onSave() when classificationId is defined', async () => {
-    component.classification = { classificationId: 'ID01' };
+    component.classification.set({ classificationId: 'ID01' });
     let isActionDispatched = false;
     actions$.pipe(ofActionDispatched(SaveModifiedClassification)).subscribe(() => (isActionDispatched = true));
     await component.onSave();
@@ -228,9 +166,9 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should dispatch action in removeClassificationConfirmation() when classification and classificationId exist', () => {
-    component.classification = { classificationId: 'ID01' };
+    component.classification.set({ classificationId: 'ID01' });
     const requestInProgressService = TestBed.inject(RequestInProgressService);
-    const setRequestInProgressSpy = jest.spyOn(requestInProgressService, 'setRequestInProgress');
+    const setRequestInProgressSpy = vi.spyOn(requestInProgressService, 'setRequestInProgress');
     let isActionDispatched = false;
     actions$.pipe(ofActionDispatched(RemoveSelectedClassification)).subscribe(() => (isActionDispatched = true));
     component.removeClassificationConfirmation();
@@ -238,19 +176,19 @@ describe('ClassificationDetailsComponent', () => {
     expect(isActionDispatched).toBe(true);
   });
 
-  /* HTML */
-
   it('should not show details when spinner is running', () => {
-    component.requestInProgress = true;
-    component.classification = {};
-    fixture.detectChanges();
-    expect(debugElement.nativeElement.querySelector('.action-toolbar')).toBeFalsy();
-    expect(debugElement.nativeElement.querySelector('.detailed-fields')).toBeFalsy();
+    const requestInProgressService = TestBed.inject(RequestInProgressService);
+    vi.spyOn(requestInProgressService, 'getRequestInProgress').mockReturnValue(of(true));
+    const componentFixture = TestBed.createComponent(ClassificationDetailsComponent);
+    const componentInstance = componentFixture.componentInstance;
+    componentInstance.classification.set({});
+    componentFixture.detectChanges();
+    expect(componentFixture.debugElement.nativeElement.querySelector('.action-toolbar')).toBeFalsy();
+    expect(componentFixture.debugElement.nativeElement.querySelector('.detailed-fields')).toBeFalsy();
   });
 
   it('should not show details when classification does not exist', () => {
-    component.requestInProgress = false;
-    component.classification = null;
+    component.classification.set(null);
     fixture.detectChanges();
     expect(debugElement.nativeElement.querySelector('.action-toolbar')).toBeFalsy();
     expect(debugElement.nativeElement.querySelector('.detailed-fields')).toBeFalsy();
@@ -261,10 +199,8 @@ describe('ClassificationDetailsComponent', () => {
     expect(debugElement.nativeElement.querySelector('.detailed-fields')).toBeTruthy();
   });
 
-  /* HTML: TITLE + ACTION BUTTONS */
   it('should display headline with badge message when a new classification is created', () => {
-    component.classification = { name: 'Recommendation', type: 'DOCUMENT' };
-    component.isCreatingNewClassification = true;
+    component.classification.set({ name: 'Recommendation', type: 'DOCUMENT' }); // no classificationId → isCreatingNewClassification = true
     fixture.detectChanges();
     const headline = debugElement.nativeElement.querySelector('.action-toolbar__headline');
     expect(headline).toBeTruthy();
@@ -280,7 +216,7 @@ describe('ClassificationDetailsComponent', () => {
     expect(button).toBeTruthy();
     expect(button.textContent).toContain('Save');
     expect(button.textContent).toContain('save');
-    component.onSubmit = jest.fn().mockImplementation();
+    component.onSubmit = vi.fn().mockImplementation(() => undefined);
     button.click();
     expect(component.onSubmit).toHaveBeenCalled();
   });
@@ -307,7 +243,7 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should not show delete button when creating or copying a Classification', () => {
-    component.classification.classificationId = null;
+    component.classification.update((classification) => ({ ...classification, classificationId: null }));
     const button = debugElement.nativeElement.querySelector('#action-toolbar__more-buttons');
     expect(button).toBeTruthy();
     button.click();
@@ -324,7 +260,7 @@ describe('ClassificationDetailsComponent', () => {
     const copyButton = debugElement.queryAll(By.css('.action-toolbar__dropdown'))[0];
     expect(copyButton.nativeElement.textContent).toContain('content_copy');
     expect(copyButton.nativeElement.textContent).toContain('Copy');
-    component.onCopy = jest.fn().mockImplementation();
+    component.onCopy = vi.fn().mockImplementation(() => undefined);
     copyButton.nativeElement.click();
     expect(component.onCopy).toHaveBeenCalled();
   });
@@ -338,13 +274,13 @@ describe('ClassificationDetailsComponent', () => {
     expect(deleteButton.nativeElement.textContent).toContain('delete');
     expect(deleteButton.nativeElement.textContent).toContain('Delete');
 
-    const onRemoveClassificationSpy = jest.spyOn(component, 'onRemoveClassification');
+    const onRemoveClassificationSpy = vi.spyOn(component, 'onRemoveClassification');
     deleteButton.nativeElement.click();
     expect(onRemoveClassificationSpy).toHaveBeenCalled();
     onRemoveClassificationSpy.mockReset();
 
     const notificationService = TestBed.inject(NotificationService);
-    const showDialogSpy = jest.spyOn(notificationService, 'showDialog');
+    const showDialogSpy = vi.spyOn(notificationService, 'showDialog');
     button.click();
     expect(showDialogSpy).toHaveBeenCalled();
   });
@@ -357,12 +293,11 @@ describe('ClassificationDetailsComponent', () => {
     const closeButton = debugElement.queryAll(By.css('.action-toolbar__dropdown'))[2];
     expect(closeButton.nativeElement.textContent).toContain('close');
     expect(closeButton.nativeElement.textContent).toContain('close');
-    component.onCloseClassification = jest.fn().mockImplementation();
+    component.onCloseClassification = vi.fn().mockImplementation(() => undefined);
     closeButton.nativeElement.click();
     expect(component.onCloseClassification).toHaveBeenCalled();
   });
 
-  /* DETAILED FIELDS */
   it('should display field-error-display component', () => {
     expect(debugElement.nativeElement.querySelector('kadai-shared-field-error-display')).toBeTruthy();
   });
@@ -398,11 +333,11 @@ describe('ClassificationDetailsComponent', () => {
   it('should change isValidInDomain when button is clicked', () => {
     const button = debugElement.nativeElement.querySelector('.detailed-fields__domain-checkbox-icon').parentNode;
     expect(button).toBeTruthy();
-    component.classification.isValidInDomain = false;
+    component.classification.update((classification) => ({ ...classification, isValidInDomain: false }));
     button.click();
-    expect(component.classification.isValidInDomain).toBe(true);
+    expect(component.classification().isValidInDomain).toBe(true);
     button.click();
-    expect(component.classification.isValidInDomain).toBe(false);
+    expect(component.classification().isValidInDomain).toBe(false);
   });
 
   it('should not show custom fields with attribute visible = false', () => {
@@ -410,7 +345,7 @@ describe('ClassificationDetailsComponent', () => {
     expect(inputCustoms).toHaveLength(7);
   });
 
-  it('should save custom field input at position 4 when custom field at position 3 is not visible', fakeAsync(() => {
+  it('should save custom field input at position 4 when custom field at position 3 is not visible', async () => {
     const newValue = 'New value';
 
     let inputCustom3 = debugElement.nativeElement.querySelector('#classification-custom-3');
@@ -420,11 +355,153 @@ describe('ClassificationDetailsComponent', () => {
     inputCustom4.value = newValue;
     inputCustom4.dispatchEvent(new Event('input'));
 
-    tick();
-    fixture.detectChanges();
-    flush();
+    await fixture.whenStable();
 
-    expect(component.classification['custom3']).toBe(undefined);
-    expect(component.classification['custom4']).toBe(newValue);
-  }));
+    expect(component.classification()['custom3']).toBe(undefined);
+    expect(component.classification()['custom4']).toBe(newValue);
+  });
+
+  it('should hide Valid-in-Domain checkbox when masterDomainSelected returns true', () => {
+    (domainServiceSpy.getSelectedDomainValue as any).mockReturnValue('');
+    const lf = TestBed.createComponent(ClassificationDetailsComponent);
+    lf.detectChanges();
+    const checkbox = lf.nativeElement.querySelector('.detailed-fields__domain-checkbox');
+    expect(checkbox).toBeFalsy();
+  });
+
+  it('should show Valid-in-Domain checkbox when masterDomainSelected returns false', () => {
+    (domainServiceSpy.getSelectedDomainValue as any).mockReturnValue('A');
+    const lf = TestBed.createComponent(ClassificationDetailsComponent);
+    lf.detectChanges();
+    const checkbox = lf.nativeElement.querySelector('.detailed-fields__domain-checkbox');
+    expect(checkbox).toBeTruthy();
+  });
+
+  it('should show badge message span when isCreatingNewClassification is true', () => {
+    const lf = TestBed.createComponent(ClassificationDetailsComponent);
+    const lc = lf.componentInstance;
+    store.reset({
+      ...store.snapshot(),
+      classification: { ...classificationStateMock, selectedClassification: { name: 'New', type: 'TASK' } },
+      engineConfiguration: engineConfigurationMock
+    });
+    lc.classification.set({ name: 'New', type: 'TASK' });
+    lf.detectChanges();
+    const badge = lf.nativeElement.querySelector('.action-toolbar__badge-message');
+    expect(badge).toBeTruthy();
+  });
+
+  it('should not show badge message span when isCreatingNewClassification is false', () => {
+    const lf = TestBed.createComponent(ClassificationDetailsComponent);
+    const lc = lf.componentInstance;
+    lc.classification.set({ classificationId: 'ID01' });
+    lf.detectChanges();
+    const badge = lf.nativeElement.querySelector('.action-toolbar__badge-message');
+    expect(badge).toBeFalsy();
+  });
+
+  it('should call validateInputOverflow when key input fires input event', () => {
+    const keyInput = debugElement.nativeElement.querySelector('#classification-key');
+    expect(keyInput).toBeTruthy();
+    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+    keyInput.dispatchEvent(new Event('input'));
+    expect(validateSpy).toHaveBeenCalled();
+  });
+
+  it('should call validateInputOverflow when name input fires input event', () => {
+    const nameInput = debugElement.nativeElement.querySelector('#classification-name');
+    expect(nameInput).toBeTruthy();
+    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+    nameInput.dispatchEvent(new Event('input'));
+    expect(validateSpy).toHaveBeenCalled();
+  });
+
+  it('should call validateInputOverflow when description textarea fires input event', () => {
+    const descInput = debugElement.nativeElement.querySelector('#classification-description');
+    expect(descInput).toBeTruthy();
+    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+    descInput.dispatchEvent(new Event('input'));
+    expect(validateSpy).toHaveBeenCalled();
+  });
+
+  it('should call validateInputOverflow when service level input fires input event', () => {
+    const slInput = debugElement.nativeElement.querySelector('#classification-service-level');
+    expect(slInput).toBeTruthy();
+    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+    slInput.dispatchEvent(new Event('input'));
+    expect(validateSpy).toHaveBeenCalled();
+  });
+
+  it('should call validateInputOverflow when app entry point input fires input event', () => {
+    const aepInput = debugElement.nativeElement.querySelector('#classification-application-entry-point');
+    expect(aepInput).toBeTruthy();
+    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+    aepInput.dispatchEvent(new Event('input'));
+    expect(validateSpy).toHaveBeenCalled();
+  });
+
+  it('should call validChanged when valid-in-domain icon is clicked', () => {
+    const validChangedSpy = vi.spyOn(component, 'validChanged');
+    const iconAnchor = debugElement.nativeElement.querySelector('.detailed-fields__domain-checkbox-icon').parentNode;
+    expect(iconAnchor).toBeTruthy();
+    iconAnchor.click();
+    expect(validChangedSpy).toHaveBeenCalled();
+  });
+
+  it('should complete destroy$ on ngOnDestroy', () => {
+    const nextSpy = vi.spyOn(component.destroy$, 'next');
+    const completeSpy = vi.spyOn(component.destroy$, 'complete');
+    component.ngOnDestroy();
+    expect(nextSpy).toHaveBeenCalled();
+    expect(completeSpy).toHaveBeenCalled();
+  });
+
+  it('should display error div for key input when inputOverflowMap has key entry true', () => {
+    inputOverflowSubject.next(new Map<string, boolean>([['classification.key', true]]));
+    fixture.detectChanges();
+    const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
+    expect(errorDivs.length).toBeGreaterThan(0);
+  });
+
+  it('should display error div for name input when inputOverflowMap has name entry true', () => {
+    inputOverflowSubject.next(new Map<string, boolean>([['classification.name', true]]));
+    fixture.detectChanges();
+    const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
+    expect(errorDivs.length).toBeGreaterThan(0);
+  });
+
+  it('should display error div for description when inputOverflowMap has description entry true', () => {
+    inputOverflowSubject.next(new Map<string, boolean>([['classification.description', true]]));
+    fixture.detectChanges();
+    const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
+    expect(errorDivs.length).toBeGreaterThan(0);
+  });
+
+  it('should display error div for serviceLevel when inputOverflowMap has serviceLevel entry true', () => {
+    inputOverflowSubject.next(new Map<string, boolean>([['classification.serviceLevel', true]]));
+    fixture.detectChanges();
+    const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
+    expect(errorDivs.length).toBeGreaterThan(0);
+  });
+
+  it('should display error div for appEntryPoint when inputOverflowMap has appEntryPoint entry true', () => {
+    inputOverflowSubject.next(new Map<string, boolean>([['classification.applicationEntryPoint', true]]));
+    fixture.detectChanges();
+    const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
+    expect(errorDivs.length).toBeGreaterThan(0);
+  });
+
+  it('should display error div for custom field when inputOverflowMap has custom field entry true', () => {
+    inputOverflowSubject.next(new Map<string, boolean>([['classification.custom1', true]]));
+    fixture.detectChanges();
+    const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
+    expect(errorDivs.length).toBeGreaterThan(0);
+  });
+
+  it('should not display any error divs when inputOverflowMap is empty', () => {
+    inputOverflowSubject.next(new Map<string, boolean>());
+    fixture.detectChanges();
+    const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
+    expect(errorDivs.length).toBe(0);
+  });
 });

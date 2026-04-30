@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,21 +16,27 @@
  *
  */
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, input, OnInit, output } from '@angular/core';
 import { Direction, Sorting } from 'app/shared/models/sorting';
+import { MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatIcon } from '@angular/material/icon';
+
+import { MapValuesPipe } from '../../pipes/map-values.pipe';
 
 @Component({
   selector: 'kadai-shared-sort',
   templateUrl: './sort.component.html',
   styleUrls: ['./sort.component.scss'],
-  standalone: false
+  imports: [MatButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MapValuesPipe]
 })
 export class SortComponent<T> implements OnInit {
-  @Input() sortingFields: Map<T, string>;
-  @Input() menuPosition = 'right';
-  @Input() defaultSortBy: T;
+  sortingFields = input.required<Map<T, string>>();
+  menuPosition = input('right');
+  defaultSortBy = input<T>();
 
-  @Output() performSorting = new EventEmitter<Sorting<T>>();
+  performSorting = output<Sorting<T>>();
 
   sort: Sorting<T> = {
     'sort-by': undefined,
@@ -41,7 +47,7 @@ export class SortComponent<T> implements OnInit {
   sortDirectionEnum = Direction;
 
   ngOnInit() {
-    this.sort['sort-by'] = this.defaultSortBy;
+    this.sort['sort-by'] = this.defaultSortBy();
   }
 
   changeOrder(sortDirection: Direction) {

@@ -1,5 +1,5 @@
 /*!
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,21 +20,26 @@ table {
   width: 100%;
 }
 
+mat-accordion {
+  position: relative;
+
+  mat-expansion-panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    min-width: 350px;
+    z-index: 1000;
+  }
+}
+
 .task-priority-report {
   padding: 8px;
   overflow-y: scroll;
   height: calc(100vh - 104px);
 
-  &__header {
-    display: grid;
-    grid-gap: 4px;
-    grid-template-columns: 2fr 1fr;
-  }
-
   &__headline {
     margin: 0 0 0 8px;
     position: relative;
-    top: 12px;
   }
 
   &__divider {
@@ -57,5 +62,20 @@ table {
   &__workbasket-headline {
     text-align: center;
     margin-bottom: 8px;
+  }
+
+  .breadcrumb-filter-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0 0 8px;
+    height: 60px;
+  }
+
+  .breadcrumb-item {
+    cursor: pointer;
+
+    :hover {
+      text-decoration: underline;
+    }
   }
 }

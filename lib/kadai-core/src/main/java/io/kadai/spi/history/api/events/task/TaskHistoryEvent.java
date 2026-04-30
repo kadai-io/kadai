@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,13 +19,14 @@
 package io.kadai.spi.history.api.events.task;
 
 import io.kadai.common.api.exceptions.SystemException;
+import io.kadai.spi.history.api.events.KadaiEvent;
 import io.kadai.task.api.models.TaskSummary;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 /** Super class for all task related events. */
-public class TaskHistoryEvent {
+public class TaskHistoryEvent implements KadaiEvent {
 
   protected String id;
   protected String businessProcessId;
@@ -34,6 +35,7 @@ public class TaskHistoryEvent {
   protected String eventType;
   protected Instant created;
   protected String userId;
+  protected String proxyAccessId;
   protected String userLongName;
   protected String domain;
   protected String workbasketKey;
@@ -56,9 +58,8 @@ public class TaskHistoryEvent {
 
   public TaskHistoryEvent() {}
 
-  public TaskHistoryEvent(String id, TaskSummary task, String userId, String details) {
+  public TaskHistoryEvent(String id, TaskSummary task, String details) {
     this.id = id;
-    this.userId = userId;
     this.details = details;
     taskId = task.getId();
     businessProcessId = task.getBusinessProcessId();
@@ -102,18 +103,12 @@ public class TaskHistoryEvent {
   }
 
   public String getCustomAttribute(TaskHistoryCustomField customField) {
-    switch (customField) {
-      case CUSTOM_1:
-        return custom1;
-      case CUSTOM_2:
-        return custom2;
-      case CUSTOM_3:
-        return custom3;
-      case CUSTOM_4:
-        return custom4;
-      default:
-        throw new SystemException("Unknown customField '" + customField + "'");
-    }
+    return switch (customField) {
+      case CUSTOM_1 -> custom1;
+      case CUSTOM_2 -> custom2;
+      case CUSTOM_3 -> custom3;
+      case CUSTOM_4 -> custom4;
+    };
   }
 
   public String getBusinessProcessId() {
@@ -244,20 +239,34 @@ public class TaskHistoryEvent {
     this.eventType = eventType;
   }
 
+  @Override
   public Instant getCreated() {
     return created != null ? created.truncatedTo(ChronoUnit.MILLIS) : null;
   }
 
+  @Override
   public void setCreated(Instant created) {
     this.created = created != null ? created.truncatedTo(ChronoUnit.MILLIS) : null;
   }
 
+  @Override
   public String getUserId() {
     return userId;
   }
 
+  @Override
   public void setUserId(String userId) {
     this.userId = userId;
+  }
+
+  @Override
+  public String getProxyAccessId() {
+    return this.proxyAccessId;
+  }
+
+  @Override
+  public void setProxyAccessId(String proxyAccessId) {
+    this.proxyAccessId = proxyAccessId;
   }
 
   public String getUserLongName() {
@@ -302,6 +311,7 @@ public class TaskHistoryEvent {
         getEventType(),
         getCreated(),
         getUserId(),
+        getProxyAccessId(),
         getDomain(),
         getWorkbasketKey(),
         getPorCompany(),
@@ -337,6 +347,7 @@ public class TaskHistoryEvent {
         && Objects.equals(getEventType(), other.getEventType())
         && Objects.equals(getCreated(), other.getCreated())
         && Objects.equals(getUserId(), other.getUserId())
+        && Objects.equals(getProxyAccessId(), other.getProxyAccessId())
         && Objects.equals(getDomain(), other.getDomain())
         && Objects.equals(getWorkbasketKey(), other.getWorkbasketKey())
         && Objects.equals(getPorCompany(), other.getPorCompany())
@@ -372,6 +383,8 @@ public class TaskHistoryEvent {
         + created
         + ", userId="
         + userId
+        + ", proxyAccessId="
+        + proxyAccessId
         + ", userLongName="
         + userLongName
         + ", taskOwnerLongName="

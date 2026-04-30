@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,18 +21,16 @@ package io.kadai.task.rest;
 import static java.util.function.Predicate.not;
 
 import io.kadai.classification.api.exceptions.ClassificationNotFoundException;
-import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.BulkOperationResults;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.QueryPagingParameter;
-import io.kadai.common.rest.QuerySortBy;
 import io.kadai.common.rest.QuerySortParameter;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.common.rest.util.QueryParamsValidator;
-import io.kadai.task.api.TaskCustomField;
+import io.kadai.task.api.TaskPatch;
 import io.kadai.task.api.TaskQuery;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.exceptions.AttachmentPersistenceException;
@@ -40,8 +38,11 @@ import io.kadai.task.api.exceptions.InvalidCallbackStateException;
 import io.kadai.task.api.exceptions.InvalidOwnerException;
 import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.ObjectReferencePersistenceException;
+import io.kadai.task.api.exceptions.ReopenTaskWithCallbackException;
+import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskAlreadyExistException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
+import io.kadai.task.api.exceptions.TransferCheckException;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.api.models.TaskSummary;
 import io.kadai.task.rest.assembler.BulkOperationResultsRepresentationModelAssembler;
@@ -50,21 +51,23 @@ import io.kadai.task.rest.assembler.TaskSummaryRepresentationModelAssembler;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
+import io.kadai.task.rest.models.TaskBulkUpdateRepresentationModel;
+import io.kadai.task.rest.models.TaskIdListRepresentationModel;
+import io.kadai.task.rest.models.TaskIdPagedRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryCollectionRepresentationModel;
 import io.kadai.task.rest.models.TaskSummaryPagedRepresentationModel;
+import io.kadai.task.rest.models.TransferTaskOwnerRepresentationModel;
 import io.kadai.task.rest.models.TransferTaskRepresentationModel;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import io.kadai.workbasket.api.exceptions.WorkbasketNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
-import java.beans.ConstructorProperties;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
@@ -74,6 +77,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -116,6 +120,7 @@ public class TaskController implements TaskApi {
           ClassificationNotFoundException,
           TaskAlreadyExistException,
           InvalidArgumentException,
+          ServiceLevelViolationException,
           AttachmentPersistenceException,
           ObjectReferencePersistenceException,
           NotAuthorizedOnWorkbasketException {
@@ -141,7 +146,6 @@ public class TaskController implements TaskApi {
   // region READ
 
   @GetMapping(path = RestEndpoints.URL_TASKS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<TaskSummaryPagedRepresentationModel> getTasks(
       HttpServletRequest request,
       @ParameterObject TaskQueryFilterParameter filterParameter,
@@ -159,11 +163,6 @@ public class TaskController implements TaskApi {
         QuerySortParameter.class,
         QueryPagingParameter.class);
 
-    if (QueryParamsValidator.hasQueryParameterValuesOrIsNotTrue(request, "owner-is-null")) {
-      throw new InvalidArgumentException(
-          "It is prohibited to use the param owner-is-null with values.");
-    }
-
     TaskQuery query = taskService.createTaskQuery();
 
     filterParameter.apply(query);
@@ -180,8 +179,38 @@ public class TaskController implements TaskApi {
     return ResponseEntity.ok(pagedModels);
   }
 
+  @GetMapping(path = RestEndpoints.URL_TASKS_IDS)
+  public ResponseEntity<TaskIdPagedRepresentationModel> getTaskIds(
+      HttpServletRequest request,
+      @ParameterObject TaskQueryFilterParameter filterParameter,
+      @ParameterObject TaskQueryFilterCustomFields filterCustomFields,
+      @ParameterObject TaskQueryFilterCustomIntFields filterCustomIntFields,
+      @ParameterObject TaskQuerySortParameter sortParameter,
+      @ParameterObject QueryPagingParameter<TaskSummary, TaskQuery> pagingParameter) {
+    QueryParamsValidator.validateParams(
+        request,
+        TaskQueryFilterParameter.class,
+        TaskQueryFilterCustomFields.class,
+        TaskQueryFilterCustomIntFields.class,
+        QuerySortParameter.class,
+        QueryPagingParameter.class);
+
+    TaskQuery query = taskService.createTaskQuery();
+
+    filterParameter.apply(query);
+    filterCustomFields.apply(query);
+    filterCustomIntFields.apply(query);
+    sortParameter.apply(query);
+
+    List<TaskSummary> taskSummaries = pagingParameter.apply(query);
+    List<String> taskIds = taskSummaries.stream().map(TaskSummary::getId).toList();
+
+    TaskIdPagedRepresentationModel pagedModel =
+        new TaskIdPagedRepresentationModel(taskIds, pagingParameter.getPageMetadata());
+    return ResponseEntity.ok(pagedModel);
+  }
+
   @GetMapping(path = RestEndpoints.URL_TASKS_ID)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
   public ResponseEntity<TaskRepresentationModel> getTask(@PathVariable("taskId") String taskId)
       throws TaskNotFoundException, NotAuthorizedOnWorkbasketException {
     Task task = taskService.getTask(taskId);
@@ -271,9 +300,9 @@ public class TaskController implements TaskApi {
       @PathVariable("taskId") String taskId,
       @RequestBody(required = false) Map<String, String> body)
       throws InvalidTaskStateException,
-      TaskNotFoundException,
-      InvalidOwnerException,
-      NotAuthorizedOnWorkbasketException {
+          TaskNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
 
     String workbasketId = null;
     String ownerId = null;
@@ -304,13 +333,15 @@ public class TaskController implements TaskApi {
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
   }
 
+  @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES)
+  @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<TaskRepresentationModel> requestChanges(
       @PathVariable("taskId") String taskId,
       @RequestBody(required = false) Map<String, String> body)
       throws InvalidTaskStateException,
-      TaskNotFoundException,
-      InvalidOwnerException,
-      NotAuthorizedOnWorkbasketException {
+          TaskNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
 
     String workbasketId = null;
     String ownerId = null;
@@ -353,6 +384,21 @@ public class TaskController implements TaskApi {
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(updatedTask));
   }
 
+  @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<BulkOperationResultsRepresentationModel> bulkComplete(
+      @RequestBody TaskIdListRepresentationModel completeTasksRepresentationModel)
+      throws InvalidArgumentException {
+
+    BulkOperationResults<String, KadaiException> errors =
+        taskService.completeTasks(completeTasksRepresentationModel.getTaskIds());
+
+    BulkOperationResultsRepresentationModel model =
+        bulkOperationResultsRepresentationModelAssembler.toModel(errors);
+
+    return ResponseEntity.ok(model);
+  }
+
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_COMPLETE_FORCE)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<TaskRepresentationModel> forceCompleteTask(
@@ -365,6 +411,21 @@ public class TaskController implements TaskApi {
     Task updatedTask = taskService.forceCompleteTask(taskId);
 
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(updatedTask));
+  }
+
+  @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_COMPLETE_FORCE)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<BulkOperationResultsRepresentationModel> bulkForceComplete(
+      @RequestBody TaskIdListRepresentationModel completeTasksRepresentationModel)
+      throws InvalidArgumentException {
+
+    BulkOperationResults<String, KadaiException> errors =
+        taskService.forceCompleteTasks(completeTasksRepresentationModel.getTaskIds());
+
+    BulkOperationResultsRepresentationModel model =
+        bulkOperationResultsRepresentationModelAssembler.toModel(errors);
+
+    return ResponseEntity.ok(model);
   }
 
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_CANCEL)
@@ -391,6 +452,21 @@ public class TaskController implements TaskApi {
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(terminatedTask));
   }
 
+  @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_TERMINATE_FORCE)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<BulkOperationResultsRepresentationModel> bulkForceTerminate(
+      @RequestBody TaskIdListRepresentationModel terminateTasksRepresentationModel)
+      throws InvalidArgumentException, NotAuthorizedException {
+
+    BulkOperationResults<String, KadaiException> errors =
+        taskService.forceTerminateTasks(terminateTasksRepresentationModel.getTaskIds());
+
+    BulkOperationResultsRepresentationModel model =
+        bulkOperationResultsRepresentationModelAssembler.toModel(errors);
+
+    return ResponseEntity.ok(model);
+  }
+
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_TRANSFER_WORKBASKET_ID)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<TaskRepresentationModel> transferTask(
@@ -401,7 +477,8 @@ public class TaskController implements TaskApi {
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          TransferCheckException {
     Task updatedTask;
     if (transferTaskRepresentationModel == null) {
       updatedTask = taskService.transfer(taskId, workbasketId);
@@ -437,6 +514,33 @@ public class TaskController implements TaskApi {
     return ResponseEntity.ok(repModel);
   }
 
+  @PostMapping(path = RestEndpoints.URL_TRANSFER_TO_OWNER)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<BulkOperationResultsRepresentationModel> transferTasksToOwner(
+      @PathVariable("ownerId") String ownerId,
+      @RequestBody TransferTaskOwnerRepresentationModel transferTaskOwnerRepresentationModel)
+      throws InvalidArgumentException {
+    List<String> taskIds = transferTaskOwnerRepresentationModel.getTaskIds();
+    BulkOperationResults<String, KadaiException> result =
+        taskService.transferTasksToOwner(ownerId, taskIds);
+
+    BulkOperationResultsRepresentationModel repModel =
+        bulkOperationResultsRepresentationModelAssembler.toModel(result);
+
+    return ResponseEntity.ok(repModel);
+  }
+
+  @PostMapping(path = RestEndpoints.URL_TASKS_ID_REOPEN)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<TaskRepresentationModel> reopenTask(@PathVariable("taskId") String taskId)
+      throws TaskNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          InvalidTaskStateException,
+          ReopenTaskWithCallbackException {
+    final Task task = taskService.reopen(taskId);
+    return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
+  }
+
   @PostMapping(path = RestEndpoints.URL_DISTRIBUTE)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<BulkOperationResultsRepresentationModel> distributeTasks(
@@ -460,6 +564,137 @@ public class TaskController implements TaskApi {
         bulkOperationResultsRepresentationModelAssembler.toModel(result);
 
     return ResponseEntity.ok(repModel);
+  }
+
+  @PutMapping(path = RestEndpoints.URL_TASKS_ID)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<TaskRepresentationModel> updateTask(
+      @PathVariable("taskId") String taskId,
+      @RequestBody TaskRepresentationModel taskRepresentationModel)
+      throws TaskNotFoundException,
+          ClassificationNotFoundException,
+          ServiceLevelViolationException,
+          ConcurrencyException,
+          NotAuthorizedOnWorkbasketException,
+          AttachmentPersistenceException,
+          InvalidTaskStateException,
+          ObjectReferencePersistenceException {
+    if (!taskId.equals(taskRepresentationModel.getTaskId())) {
+      throw new InvalidArgumentException(
+          String.format(
+              "TaskId ('%s') is not identical with the taskId of to "
+                  + "object in the payload which should be updated. ID=('%s')",
+              taskId, taskRepresentationModel.getTaskId()));
+    }
+
+    if (!taskRepresentationModel.getAttachments().stream()
+        .filter(att -> Objects.nonNull(att.getTaskId()))
+        .filter(att -> !att.getTaskId().equals(taskRepresentationModel.getTaskId()))
+        .toList()
+        .isEmpty()) {
+      throw new InvalidArgumentException(
+          "An attachments' taskId must be empty or equal to the id of the task it belongs to");
+    }
+
+    Task task = taskRepresentationModelAssembler.toEntityModel(taskRepresentationModel);
+    task = taskService.updateTask(task);
+    return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
+  }
+
+  @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_UPDATE)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<BulkOperationResultsRepresentationModel> bulkUpdateTasks(
+      @RequestBody TaskBulkUpdateRepresentationModel requestModel) {
+
+    if (requestModel.getTaskIds() == null) {
+      throw new InvalidArgumentException("taskIds must not be null");
+    }
+    if (requestModel.getFieldsToUpdate() == null) {
+      throw new InvalidArgumentException("fieldsToUpdate must not be null");
+    }
+    if (requestModel.getTaskIds().isEmpty() || requestModel.getFieldsToUpdate().isEmpty()) {
+      return ResponseEntity.ok().build();
+    }
+
+    TaskPatch taskPatchImpl =
+        taskRepresentationModelAssembler.toPatch(requestModel.getFieldsToUpdate());
+
+    BulkOperationResults<String, KadaiException> result =
+        taskService.bulkUpdateTasks(requestModel.getTaskIds(), taskPatchImpl);
+
+    BulkOperationResultsRepresentationModel repModel =
+        bulkOperationResultsRepresentationModelAssembler.toModel(result);
+
+    return ResponseEntity.ok(repModel);
+  }
+
+  @PostMapping(path = RestEndpoints.URL_TASKS_ID_SET_READ)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<TaskRepresentationModel> setTaskRead(
+      @PathVariable("taskId") String taskId, @RequestBody IsReadRepresentationModel isRead)
+      throws TaskNotFoundException, NotAuthorizedOnWorkbasketException {
+
+    Task updatedTask = taskService.setTaskRead(taskId, isRead.getIsRead());
+
+    return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(updatedTask));
+  }
+
+  @DeleteMapping(path = RestEndpoints.URL_TASKS_ID)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<TaskRepresentationModel> deleteTask(@PathVariable("taskId") String taskId)
+      throws TaskNotFoundException,
+          InvalidTaskStateException,
+          NotAuthorizedException,
+          NotAuthorizedOnWorkbasketException,
+          InvalidCallbackStateException {
+    taskService.deleteTask(taskId);
+
+    return ResponseEntity.noContent().build();
+  }
+
+  // endregion
+
+  // region DELETE
+
+  @DeleteMapping(path = RestEndpoints.URL_TASKS_ID_FORCE)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<TaskRepresentationModel> forceDeleteTask(
+      @PathVariable("taskId") String taskId)
+      throws TaskNotFoundException,
+          InvalidTaskStateException,
+          NotAuthorizedException,
+          NotAuthorizedOnWorkbasketException,
+          InvalidCallbackStateException {
+    taskService.forceDeleteTask(taskId);
+
+    return ResponseEntity.noContent().build();
+  }
+
+  @DeleteMapping(path = RestEndpoints.URL_TASKS)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<TaskSummaryCollectionRepresentationModel> deleteTasks(
+      @ParameterObject TaskQueryFilterParameter filterParameter,
+      @ParameterObject TaskQueryFilterCustomFields filterCustomFields,
+      @ParameterObject TaskQueryFilterCustomIntFields filterCustomIntFields)
+      throws InvalidArgumentException, NotAuthorizedException {
+    TaskQuery query = taskService.createTaskQuery();
+    filterParameter.apply(query);
+    filterCustomFields.apply(query);
+    filterCustomIntFields.apply(query);
+
+    List<TaskSummary> taskSummaries = query.list();
+
+    List<String> taskIdsToDelete = taskSummaries.stream().map(TaskSummary::getId).toList();
+
+    BulkOperationResults<String, KadaiException> result = taskService.deleteTasks(taskIdsToDelete);
+
+    Set<String> failedIds = new HashSet<>(result.getFailedIds());
+    List<TaskSummary> successfullyDeletedTaskSummaries =
+        taskSummaries.stream().filter(not(summary -> failedIds.contains(summary.getId()))).toList();
+
+    return ResponseEntity.ok(
+        taskSummaryRepresentationModelAssembler.toKadaiCollectionModel(
+            successfullyDeletedTaskSummaries));
   }
 
   private BulkOperationResults<String, KadaiException> distributeTasksInternal(
@@ -510,196 +745,5 @@ public class TaskController implements TaskApi {
     return taskService.distribute(workbasketId, taskIds);
   }
 
-  @PutMapping(path = RestEndpoints.URL_TASKS_ID)
-  @Transactional(rollbackFor = Exception.class)
-  public ResponseEntity<TaskRepresentationModel> updateTask(
-      @PathVariable("taskId") String taskId,
-      @RequestBody TaskRepresentationModel taskRepresentationModel)
-      throws TaskNotFoundException,
-          ClassificationNotFoundException,
-          InvalidArgumentException,
-          ConcurrencyException,
-          NotAuthorizedOnWorkbasketException,
-          AttachmentPersistenceException,
-          InvalidTaskStateException,
-          ObjectReferencePersistenceException {
-    if (!taskId.equals(taskRepresentationModel.getTaskId())) {
-      throw new InvalidArgumentException(
-          String.format(
-              "TaskId ('%s') is not identical with the taskId of to "
-                  + "object in the payload which should be updated. ID=('%s')",
-              taskId, taskRepresentationModel.getTaskId()));
-    }
-
-    if (!taskRepresentationModel.getAttachments().stream()
-        .filter(att -> Objects.nonNull(att.getTaskId()))
-        .filter(att -> !att.getTaskId().equals(taskRepresentationModel.getTaskId()))
-        .toList()
-        .isEmpty()) {
-      throw new InvalidArgumentException(
-          "An attachments' taskId must be empty or equal to the id of the task it belongs to");
-    }
-
-    Task task = taskRepresentationModelAssembler.toEntityModel(taskRepresentationModel);
-    task = taskService.updateTask(task);
-    return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
-  }
-
-  @PostMapping(path = RestEndpoints.URL_TASKS_ID_SET_READ)
-  @Transactional(rollbackFor = Exception.class)
-  public ResponseEntity<TaskRepresentationModel> setTaskRead(
-      @PathVariable("taskId") String taskId, @RequestBody IsReadRepresentationModel isRead)
-      throws TaskNotFoundException, NotAuthorizedOnWorkbasketException {
-
-    Task updatedTask = taskService.setTaskRead(taskId, isRead.getIsRead());
-
-    return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(updatedTask));
-  }
-
   // endregion
-
-  // region DELETE
-
-  @DeleteMapping(path = RestEndpoints.URL_TASKS_ID)
-  @Transactional(rollbackFor = Exception.class)
-  public ResponseEntity<TaskRepresentationModel> deleteTask(@PathVariable("taskId") String taskId)
-      throws TaskNotFoundException,
-          InvalidTaskStateException,
-          NotAuthorizedException,
-          NotAuthorizedOnWorkbasketException,
-          InvalidCallbackStateException {
-    taskService.deleteTask(taskId);
-
-    return ResponseEntity.noContent().build();
-  }
-
-  @DeleteMapping(path = RestEndpoints.URL_TASKS_ID_FORCE)
-  @Transactional(rollbackFor = Exception.class)
-  public ResponseEntity<TaskRepresentationModel> forceDeleteTask(
-      @PathVariable("taskId") String taskId)
-      throws TaskNotFoundException,
-          InvalidTaskStateException,
-          NotAuthorizedException,
-          NotAuthorizedOnWorkbasketException,
-          InvalidCallbackStateException {
-    taskService.forceDeleteTask(taskId);
-
-    return ResponseEntity.noContent().build();
-  }
-
-  @DeleteMapping(path = RestEndpoints.URL_TASKS)
-  @Transactional(readOnly = true, rollbackFor = Exception.class)
-  public ResponseEntity<TaskSummaryCollectionRepresentationModel> deleteTasks(
-      @ParameterObject TaskQueryFilterParameter filterParameter,
-      @ParameterObject TaskQueryFilterCustomFields filterCustomFields,
-      @ParameterObject TaskQueryFilterCustomIntFields filterCustomIntFields)
-      throws InvalidArgumentException, NotAuthorizedException {
-    TaskQuery query = taskService.createTaskQuery();
-    filterParameter.apply(query);
-    filterCustomFields.apply(query);
-    filterCustomIntFields.apply(query);
-
-    List<TaskSummary> taskSummaries = query.list();
-
-    List<String> taskIdsToDelete = taskSummaries.stream().map(TaskSummary::getId).toList();
-
-    BulkOperationResults<String, KadaiException> result = taskService.deleteTasks(taskIdsToDelete);
-
-    Set<String> failedIds = new HashSet<>(result.getFailedIds());
-    List<TaskSummary> successfullyDeletedTaskSummaries =
-        taskSummaries.stream().filter(not(summary -> failedIds.contains(summary.getId()))).toList();
-
-    return ResponseEntity.ok(
-        taskSummaryRepresentationModelAssembler.toKadaiCollectionModel(
-            successfullyDeletedTaskSummaries));
-  }
-
-  // endregion
-
-  // region TaskQuery
-
-  public enum TaskQuerySortBy implements QuerySortBy<TaskQuery> {
-    CLASSIFICATION_KEY(TaskQuery::orderByClassificationKey),
-    CLASSIFICATION_NAME(TaskQuery::orderByClassificationName),
-    POR_TYPE(TaskQuery::orderByPrimaryObjectReferenceType),
-    POR_VALUE(TaskQuery::orderByPrimaryObjectReferenceValue),
-    POR_COMPANY(TaskQuery::orderByPrimaryObjectReferenceCompany),
-    POR_SYSTEM(TaskQuery::orderByPrimaryObjectReferenceSystem),
-    POR_SYSTEM_INSTANCE(TaskQuery::orderByPrimaryObjectReferenceSystemInstance),
-    STATE(TaskQuery::orderByState),
-    NAME(TaskQuery::orderByName),
-    DUE(TaskQuery::orderByDue),
-    PLANNED(TaskQuery::orderByPlanned),
-    RECEIVED(TaskQuery::orderByReceived),
-    PRIORITY(TaskQuery::orderByPriority),
-    CREATED(TaskQuery::orderByCreated),
-    CLAIMED(TaskQuery::orderByClaimed),
-    DOMAIN(TaskQuery::orderByDomain),
-    TASK_ID(TaskQuery::orderByTaskId),
-    MODIFIED(TaskQuery::orderByModified),
-    CREATOR(TaskQuery::orderByCreator),
-    NOTE(TaskQuery::orderByNote),
-    OWNER(TaskQuery::orderByOwner),
-    OWNER_LONG_NAME(TaskQuery::orderByOwnerLongName),
-    BUSINESS_PROCESS_ID(TaskQuery::orderByBusinessProcessId),
-    PARENT_BUSINESS_PROCESS_ID(TaskQuery::orderByParentBusinessProcessId),
-    WORKBASKET_KEY(TaskQuery::orderByWorkbasketKey),
-    CUSTOM_1((query, sort) -> query.orderByCustomAttribute(TaskCustomField.CUSTOM_1, sort)),
-    CUSTOM_2((query, sort) -> query.orderByCustomAttribute(TaskCustomField.CUSTOM_2, sort)),
-    CUSTOM_3((query, sort) -> query.orderByCustomAttribute(TaskCustomField.CUSTOM_3, sort)),
-    CUSTOM_4((query, sort) -> query.orderByCustomAttribute(TaskCustomField.CUSTOM_4, sort)),
-    CUSTOM_5((query, sort) -> query.orderByCustomAttribute(TaskCustomField.CUSTOM_5, sort)),
-    CUSTOM_6((query, sort) -> query.orderByCustomAttribute(TaskCustomField.CUSTOM_6, sort)),
-    CUSTOM_7((query, sort) -> query.orderByCustomAttribute(TaskCustomField.CUSTOM_7, sort)),
-    CUSTOM_8((query, sort) -> query.orderByCustomAttribute(TaskCustomField.CUSTOM_8, sort)),
-    CUSTOM_9((query, sort) -> query.orderByCustomAttribute(TaskCustomField.CUSTOM_9, sort)),
-    CUSTOM_10((query, sort) -> query.orderByCustomAttribute(TaskCustomField.CUSTOM_10, sort)),
-    CUSTOM_11((query, sort) -> query.orderByCustomAttribute(TaskCustomField.CUSTOM_11, sort)),
-    CUSTOM_12((query, sort) -> query.orderByCustomAttribute(TaskCustomField.CUSTOM_12, sort)),
-    CUSTOM_13((query, sort) -> query.orderByCustomAttribute(TaskCustomField.CUSTOM_13, sort)),
-    CUSTOM_14((query, sort) -> query.orderByCustomAttribute(TaskCustomField.CUSTOM_14, sort)),
-    CUSTOM_15((query, sort) -> query.orderByCustomAttribute(TaskCustomField.CUSTOM_15, sort)),
-    CUSTOM_16((query, sort) -> query.orderByCustomAttribute(TaskCustomField.CUSTOM_16, sort)),
-    WORKBASKET_ID(TaskQuery::orderByWorkbasketId),
-    WORKBASKET_NAME(TaskQuery::orderByWorkbasketName),
-    ATTACHMENT_CLASSIFICATION_KEY(TaskQuery::orderByAttachmentClassificationKey),
-    ATTACHMENT_CLASSIFICATION_NAME(TaskQuery::orderByAttachmentClassificationName),
-    ATTACHMENT_CLASSIFICATION_ID(TaskQuery::orderByAttachmentClassificationId),
-    ATTACHMENT_CHANNEL(TaskQuery::orderByAttachmentChannel),
-    ATTACHMENT_REFERENCE(TaskQuery::orderByAttachmentReference),
-    ATTACHMENT_RECEIVED(TaskQuery::orderByAttachmentReceived),
-    COMPLETED(TaskQuery::orderByCompleted);
-
-    private final BiConsumer<TaskQuery, SortDirection> consumer;
-
-    TaskQuerySortBy(BiConsumer<TaskQuery, SortDirection> consumer) {
-      this.consumer = consumer;
-    }
-
-    @Override
-    public void applySortByForQuery(TaskQuery query, SortDirection sortDirection) {
-      consumer.accept(query, sortDirection);
-    }
-  }
-
-  // Unfortunately this class is necessary, since spring can not inject the generic 'sort-by'
-  // parameter from the super class.
-  public static class TaskQuerySortParameter
-      extends QuerySortParameter<TaskQuery, TaskQuerySortBy> {
-
-    @ConstructorProperties({"sort-by", "order"})
-    public TaskQuerySortParameter(List<TaskQuerySortBy> sortBy, List<SortDirection> order)
-        throws InvalidArgumentException {
-      super(sortBy, order);
-    }
-
-    // this getter is necessary for the documentation!
-    @Override
-    public List<TaskQuerySortBy> getSortBy() {
-      return super.getSortBy();
-    }
-  }
-
-  // endregion
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,35 +16,29 @@
  *
  */
 
-import { Component, DebugElement, Input } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { DebugElement } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { IconTypeComponent } from './icon-type.component';
 import { WorkbasketType } from '../../../shared/models/workbasket-type';
-
-@Component({ selector: 'svg-icon', template: '' })
-class SvgIconStub {
-  @Input() src;
-  @Input() svgStyle;
-  @Input() matTooltip;
-}
+import { beforeEach, describe, expect, it } from 'vitest';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 describe('IconTypeComponent', () => {
   let fixture: ComponentFixture<IconTypeComponent>;
   let debugElement: DebugElement;
   let component: IconTypeComponent;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      imports: [],
-      declarations: [IconTypeComponent],
-      providers: [SvgIconStub]
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [IconTypeComponent],
+      providers: [provideAngularSvgIcon()]
     }).compileComponents();
 
     fixture = TestBed.createComponent(IconTypeComponent);
     debugElement = fixture.debugElement;
     component = fixture.debugElement.componentInstance;
     fixture.detectChanges();
-  }));
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();

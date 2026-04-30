@@ -1,5 +1,5 @@
 /*
- * Copyright [2024] [envite consulting GmbH]
+ * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,41 +16,36 @@
  *
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Component, DebugElement, Input } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { DebugElement } from '@angular/core';
 import { UserInformationComponent } from './user-information.component';
-import { BrowserModule, By } from '@angular/platform-browser';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { By } from '@angular/platform-browser';
 import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.service';
 import { KadaiEngineServiceMock } from '../../services/kadai-engine/kadai-engine.mock.service';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-
-jest.mock('angular-svg-icon');
-
-@Component({ selector: 'svg-icon', template: '' })
-class SvgIconStub {
-  @Input() src;
-  @Input() matTooltip;
-}
+import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 describe('UserInformationComponent', () => {
   let component: UserInformationComponent;
   let fixture: ComponentFixture<UserInformationComponent>;
   let debugElement: DebugElement;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [UserInformationComponent],
-      imports: [BrowserModule, NoopAnimationsModule],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [UserInformationComponent],
       providers: [
-        SvgIconStub,
-        { provide: KadaiEngineService, useClass: KadaiEngineServiceMock },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
+        {
+          provide: KadaiEngineService,
+          useClass: KadaiEngineServiceMock
+        },
+        provideAnimationsAsync(),
+        provideHttpClientTesting(),
+        provideAngularSvgIcon()
       ]
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UserInformationComponent);

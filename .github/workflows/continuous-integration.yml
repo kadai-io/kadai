@@ -2,19 +2,19 @@ name: CI
 on:
   workflow_dispatch:
   push:
-    branches-ignore:
-      - dependabot/**
+    branches:
+      - master
     tags:
       - v[0-9]+\.[0-9]+\.[0-9]+
   pull_request:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.repository }}/${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 env:
-  JAVA_VERSION: 17
-  NODE_VERSION: 22.7.0
+  JAVA_VERSION: 25
+  NODE_VERSION: 24
 
   ARTIFACTS_CYPRESS_TESTS_NAME: cypress-tests
   ARTIFACTS_CYPRESS_TESTS_PATH: web/cypress
@@ -33,41 +33,96 @@ env:
   CACHE_SONAR_NAME: sonar
 
 jobs:
+  detect_changes:
+    name: Detect changed files and modules
+    runs-on: ubuntu-22.04
+    outputs:
+      # High-level triggers
+      backend_changed: ${{ steps.filter.outputs.backend }}
+      frontend_changed: ${{ steps.filter.outputs.frontend }} 
+      code_changed: ${{ steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' }}  
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          base: ${{ github.ref_name }}
+          filters: |
+            # ================================================================
+            # BACKEND & FRONTEND CHANGES
+            # ================================================================
+            backend:
+              - 'common/**'
+              - 'lib/**'
+              - 'history/**'
+              - 'rest/**'
+              - 'routing/**'
+              - 'ci/**'
+              - 'qa/checkstyle/checkstyle.xml'
+              - 'pom.xml'
+              - 'mvnw'
+              - '.mvn/**'
+            
+            frontend:
+              - 'web/**'
+
   compile_backend:
     name: Compile all maven modules
     runs-on: ubuntu-22.04
+    needs: [ detect_changes ]
+    if: needs.detect_changes.outputs.code_changed == 'true' || startsWith(github.ref, 'refs/tags/')
     steps:
+      - name: Start Eco CI Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: start-measurement
+          project: "KADAI"
+          tags: "CI/CD, Build Backend"
+        continue-on-error: true
       - name: Git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache maven dependencies
         id: cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
-          path: ~/.m2
+          path: |
+            ~/.m2
+            !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Change versions to match tag
         run: ci/change_version.sh -m .
       - name: Compile & build
-        run: ./mvnw -B install -DskipTests -Djacoco.skip
+        run: ./mvnw -B install -DskipTests -Djacoco.skip -T 1C
+      - name: Eco CI Measurement of mvn install
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: "compile_backend: mvn install"
+        continue-on-error: true
+      - name: Show Eco CI Results
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: display-results
+          display-badge: true
+          pr-comment: false
+        continue-on-error: true
       - name: Populate cache
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          ./mvnw -B dependency:go-offline
-          ./mvnw -B test -Dtest=GibtEsNet -Dsurefire.failIfNoSpecifiedTests=false
+          ./mvnw -B dependency:go-offline -T 1C
+          ./mvnw -B test -Dtest=GibtEsNet -Dsurefire.failIfNoSpecifiedTests=false -T 1C
       - name: Upload kadai artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_KADAI_JARS_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
           if-no-files-found: error
-      - name: Remove kadai artifacts from cache
-        run: rm -rf ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
@@ -75,55 +130,83 @@ jobs:
   compile_frontend:
     name: Compile kadai-web
     runs-on: ubuntu-22.04
+    needs: [ detect_changes ]
+    if: needs.detect_changes.outputs.code_changed == 'true' || startsWith(github.ref, 'refs/tags/')
     steps:
+      - name: Start Eco CI Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: start-measurement
+          project: "KADAI"
+          tags: "CI/CD, Build Frontend"
+        continue-on-error: true
       - name: Git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
       - name: Enable Corepack
         run: corepack enable
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4.2.0
+        uses: actions/setup-node@v6.4.0
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache web dependencies
         id: web-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: web/node_modules
           key: ${{ runner.OS }}-${{ env.CACHE_WEB_NAME }}-${{ hashFiles('**/yarn.lock') }}
       - name: Cache maven dependencies (for web)
         id: maven-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
-          path: ~/.m2
+          path: |
+            ~/.m2
+            !~/.m2/repository/io/kadai
           key: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}
       - name: Populate maven cache
-        run: ./mvnw -B dependency:go-offline -pl :kadai-web -am
+        run: ./mvnw -B dependency:go-offline -pl :kadai-web -am -T 1C
         if: steps.maven-cache.outputs.cache-hit != 'true'
       - name: Install Dependencies
         if: steps.web-cache.outputs.cache-hit != 'true'
         working-directory: web
-        run: yarn install && yarn ci
+        run: yarn install
       - name: Compile & build
         working-directory: web
         run: |
           yarn lint
           yarn build:prod
+      - name: Eco CI Measurement of yarn build
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: "compile_frontend: yarn build"
+        continue-on-error: true
       - name: Build maven artifact
-        run: ./mvnw -B install -pl :kadai-web -am
+        run: ./mvnw -B install -pl :kadai-web -am -T 1C
+      - name: Eco CI Measurement of mvn :kadai-web
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: "compile_frontend: mvn :kadai-web"
+        continue-on-error: true
+      - name: Show Eco CI Results
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: display-results
+          display-badge: true
+          pr-comment: false
+        continue-on-error: true
       - name: Upload kadai-web dist artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_KADAI_WEB_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_WEB_PATH }}
           if-no-files-found: error
-      - name: Remove kadai artifacts from cache
-        run: rm -rf ~/.m2/repository/io/kadai
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
@@ -131,19 +214,27 @@ jobs:
   test_frontend:
     runs-on: ubuntu-22.04
     name: Test kadai-web
-    needs: [ compile_frontend ]
+    needs: [compile_frontend ]
+    if: needs.detect_changes.outputs.frontend_changed == 'true' || startsWith(github.ref, 'refs/tags/')
     steps:
+      - name: Start Eco CI Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: start-measurement
+          project: "KADAI"
+          tags: "CI/CD, Test Frontend"
+        continue-on-error: true
       - name: Git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Enable Corepack
         run: corepack enable
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4.2.0
+        uses: actions/setup-node@v6.4.0
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache web dependencies
         id: web-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: web/node_modules
           key: ${{ runner.OS }}-${{ env.CACHE_WEB_NAME }}-${{ hashFiles('**/yarn.lock') }}
@@ -155,19 +246,34 @@ jobs:
         run: yarn ci
       - name: Cache maven dependencies (for web)
         id: maven-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
-          path: ~/.m2
+          path: |
+            ~/.m2
+            !~/.m2/repository/io/kadai
           key: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}
       # Theoretically this step below not necessary because we reuse the cache from the 'compile_frontend' job.
       # Sometimes the cache is not created, therefore this is a fallback.
       - name: Populate cache
-        run: ./mvnw -B dependency:go-offline -pl :kadai-web -am
+        run: ./mvnw -B dependency:go-offline -pl :kadai-web -am -T 1C
         if: steps.maven-cache.outputs.cache-hit != 'true'
       - name: Test
         working-directory: web
-        run: yarn run test --coverageReporters text-summary
+        run: yarn test
+      - name: Eco CI Measurement of web unit tests
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: "test_frontend: web unit tests"
+        continue-on-error: true
+      - name: Show Eco CI Results
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: display-results
+          display-badge: true
+          pr-comment: false
+        continue-on-error: true
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
@@ -175,24 +281,37 @@ jobs:
   test_e2e:
     runs-on: ubuntu-22.04
     name: Test E2E
-    needs: [ compile_frontend, compile_backend ]
+    needs: [test_frontend, test_backend]
+    if: |
+      (always() &&
+      needs.detect_changes.outputs.code_changed == 'true' &&
+      needs.test_frontend.result != 'failure' &&
+      needs.test_backend.result != 'failure') 
+      || startsWith(github.ref, 'refs/tags/')
     steps:
+      - name: Start Eco CI Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: start-measurement
+          project: "KADAI"
+          tags: "CI/CD, Test e2e"
+        continue-on-error: true
       - name: Git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
       - name: Enable Corepack
         run: corepack enable
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4.2.0
+        uses: actions/setup-node@v6.4.0
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache web dependencies
         id: web-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: web/node_modules
           key: ${{ runner.OS }}-${{ env.CACHE_WEB_NAME }}-${{ hashFiles('**/yarn.lock') }}
@@ -204,12 +323,14 @@ jobs:
         run: yarn ci
       - name: Cache maven dependencies
         id: maven-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
-          path: ~/.m2
+          path: |
+            ~/.m2
+            !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
       - name: Download kadai artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ${{ env.ARTIFACTS_KADAI_JARS_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
@@ -218,23 +339,36 @@ jobs:
         # Theoretically this step below not necessary because we reuse the cache from the 'compile_frontend' job.
         # Sometimes the cache is not created, therefore this is a fallback.
       - name: Populate cache
-        run: ./mvnw -B dependency:go-offline -pl :kadai-rest-spring-example-boot -am
+        run: ./mvnw -B dependency:go-offline -pl :kadai-rest-spring-example-boot -am -T 1C
         if: steps.maven-cache.outputs.cache-hit != 'true'
       - name: Download kadai-web dist artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ${{ env.ARTIFACTS_KADAI_WEB_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_WEB_PATH }}
       - name: Build frontend
-        run: ./mvnw install -pl :kadai-web
+        run: ./mvnw install -pl :kadai-web -T 1C
       - name: Cypress tests
         working-directory: web
         run: |
           ../mvnw -B spring-boot:run -P history.plugin -f .. -pl :kadai-rest-spring-example-boot &> /dev/null &
-          npx wait-port -t 30000 localhost:8080 && yarn run e2e-standalone --spec "cypress/e2e/monitor/**"
+          npx wait-port -t 30000 localhost:8080 && yarn run e2e-standalone
+      - name: Eco CI Measurement of cypress e2e
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: "test_e2e: cypress"
+        continue-on-error: true
+      - name: Show Eco CI Results
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: display-results
+          pr-comment: false
+          display-badge: true
+        continue-on-error: true
       - name: Upload Cypress tests
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_CYPRESS_TESTS_NAME }}
           path: ${{ env.ARTIFACTS_CYPRESS_TESTS_PATH }}
@@ -245,7 +379,8 @@ jobs:
   test_backend:
     runs-on: ubuntu-22.04
     name: Test ${{ matrix.module }} on ${{ matrix.database }}
-    needs: [ compile_backend ]
+    needs: [compile_backend ]
+    if: needs.detect_changes.outputs.backend_changed == 'true' || startsWith(github.ref, 'refs/tags/')
     strategy:
       matrix:
         module:
@@ -256,8 +391,6 @@ jobs:
           - kadai-common-test
           - kadai-core
           - kadai-core-test
-          - kadai-cdi
-          - kadai-cdi-example
           - kadai-test-api
           - kadai-spring
           - kadai-spring-example
@@ -290,38 +423,64 @@ jobs:
             database: POSTGRES
           - module: kadai-rest-spring-example-boot
             database: DB2
-          - module: kadai-rest-spring-example-wildfly
+          - module: kadai-rest-spring-example-boot  # ← ADD THIS
             database: POSTGRES
+          - module: kadai-rest-spring-example-boot  # ← ADD THIS
+            database: H2
     steps:
+      - name: Start Eco CI Measurement
+        if: matrix.database == 'H2'
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: start-measurement
+          project: "KADAI"
+          tags: "CI/CD, Test Backend (H2)"
+        continue-on-error: true
       - name: Git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache maven dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
-          path: ~/.m2
+          path: |
+            ~/.m2
+            !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download kadai artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ${{ env.ARTIFACTS_KADAI_JARS_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
       - name: Change versions to match tag
         run: |
           ci/change_version.sh -m .
-          ci/update_kadai_dependency_for_wildfly.sh
       - name: Test
-        run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip
+        run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip -T 1C
         env:
           DB: ${{ matrix.database }}
+      - name: Eco CI Measurement of ${{ matrix.module }} (H2)
+        if: matrix.database == 'H2'
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: "test_backend: ${{ matrix.module }} (H2)"
+        continue-on-error: true
+      - name: Show Eco CI Results
+        if: matrix.database == 'H2'
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: display-results
+          display-badge: true
+          pr-comment: false
+        continue-on-error: true
       - name: Upload JaCoCo Report
         if: matrix.database == 'H2'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_JACOCO_REPORTS_NAME }}-${{ matrix.module }}
           path: ${{ env.ARTIFACTS_JACOCO_REPORTS_PATH }}
@@ -330,43 +489,117 @@ jobs:
         if: failure()
         uses: andymckay/cancel-action@0.5
 
+  add-copyright:
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'push' && github.ref != 'refs/heads/master' && !startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Add Copyright Headers
+        run: |
+          YEAR=$(date +%Y)
+          LAST_YEAR=$((YEAR - 1))
+          for file in $(find . -type f \( -name '*.java' -o -name '*.ts' \)); do
+            if grep -q "Copyright \[$LAST_YEAR\] \[envite consulting GmbH\]" "$file"; then
+              echo "Updating copyright year in $file"
+              sed -i "s/Copyright \[$LAST_YEAR\] \[envite consulting GmbH\]/Copyright [$YEAR] [envite consulting GmbH]/" "$file"
+            elif ! grep -q -e "Copyright" -e "License" "$file"; then
+              echo "Adding copyright to $file"
+              cat LICENSE_HEADER.txt "$file" > temp_file
+              mv temp_file "$file"
+            fi
+          done
+          
+          for file in $(find . -type f -name '*.html'); do
+            if grep -q "Copyright \[$LAST_YEAR\] \[envite consulting GmbH\]" "$file"; then
+              echo "Updating copyright year in $file"
+              sed -i "s/Copyright \[$LAST_YEAR\] \[envite consulting GmbH\]/Copyright [$YEAR] [envite consulting GmbH]/" "$file"
+            elif ! grep -q -e "Copyright" -e "License" "$file"; then
+              echo "Adding copyright to $file"
+              cat LICENSE_HEADER_HTML.txt "$file" > temp_file
+              mv temp_file "$file"
+            fi
+          done
+          
+          for file in $(find . -type f -name '*.scss'); do
+            if grep -q "Copyright \[$LAST_YEAR\] \[envite consulting GmbH\]" "$file"; then
+              echo "Updating copyright year in $file"
+              sed -i "s/Copyright \[$LAST_YEAR\] \[envite consulting GmbH\]/Copyright [$YEAR] [envite consulting GmbH]/" "$file"
+            elif ! grep -q -e "Copyright" -e "License" "$file"; then
+              echo "Adding copyright to $file"
+              cat LICENSE_HEADER_SCSS.txt "$file" > temp_file
+              mv temp_file "$file"
+            fi
+          done
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Add/update copyright headers" || echo "No changes to commit"
+          git push
+
   release_artifacts:
     runs-on: ubuntu-22.04
     name: Release artifacts to Sonatype-Central
-    if: github.repository == 'kadai-io/kadai' && ( startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' ) && github.head_ref == ''
-    needs: [ test_frontend, test_e2e, test_backend ]
+    needs: [ detect_changes, test_frontend, test_e2e, test_backend ]
+    if: |
+      always() &&
+      github.repository == 'kadai-io/kadai' &&
+      ( startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' ) &&
+      github.head_ref == '' &&
+      (needs.detect_changes.outputs.code_changed == 'true' || startsWith(github.ref, 'refs/tags/v')) &&
+      needs.test_frontend.result != 'failure' &&
+      needs.test_e2e.result != 'failure' &&
+      needs.test_backend.result != 'failure'
+
     # as documented in the gpg manual (https://www.gnupg.org/documentation/manuals/gnupg/Invoking-GPG_002dAGENT.html)
     # we should execute this command before interacting with gpg (otherwise gpg won't work)
     env:
       GPG_TTY: $(tty)
     steps:
+      - name: Start Eco CI Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: start-measurement
+          project: "KADAI"
+          tags: "CI/CD, Release"
+        continue-on-error: true
       - name: Git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # necessary for push back
-          # NOTE @v2 uses the token as an auth http header. Set it to
-          # a Personal Access Token instead of secrets.GITHUB_TOKEN
-          # so that tag pushes trigger repo push events.
-          # source: https://github.community/t/action-does-not-trigger-another-on-push-tag-action/17148/7
-          token: ${{ secrets.ADMIN_PERSONAL_ACCESS_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache maven dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
-          path: ~/.m2
+          path: |
+            ~/.m2
+            !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
+      # Download backend artifacts only when backend code changed or a release tag is pushed.
+      # This avoids a wasteful download for frontend-only changes.
       - name: Download kadai artifacts
-        uses: actions/download-artifact@v4
+        if: needs.detect_changes.outputs.backend_changed == 'true' || startsWith(github.ref, 'refs/tags/v')
+        uses: actions/download-artifact@v8
         with:
           name: ${{ env.ARTIFACTS_KADAI_JARS_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
+      # Download frontend artifacts only when frontend code changed or a release tag is pushed.
+      # This avoids a wasteful download for backend-only changes.
       - name: Download kadai-web dist artifact
-        uses: actions/download-artifact@v4
+        if: needs.detect_changes.outputs.frontend_changed == 'true' || startsWith(github.ref, 'refs/tags/v')
+        uses: actions/download-artifact@v8
         with:
           name: ${{ env.ARTIFACTS_KADAI_WEB_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_WEB_PATH }}
@@ -376,15 +609,52 @@ jobs:
           GPG_KEY: ${{ secrets.GPG_KEY }}
       - name: Change versions to match tag
         run: ci/change_version.sh -m .
-      - name: Release artifacts to Sonatype-Central
+      - name: Determine deployment profile
         run: |
-          ./mvnw -B deploy -P $([[ "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo "release" || echo "snapshot") \
-          --settings ci/mvnsettings.xml -DskipTests -Dcheckstyle.skip -Djacoco.skip \
+          VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "Detected version: $VERSION"
+
+          # Validate version is not empty/null
+          if [[ -z "$VERSION" || "$VERSION" == "null" ]]; then
+            echo "CRITICAL ERROR: Version is empty or null!"
+            echo "   Detected version: '$VERSION'"
+            echo "   Expected:"
+            echo "     - Master branch: x.x.x-SNAPSHOT"
+            echo "     - Tag (vx.x.x): x.x.x"
+            echo "   Possible causes:"
+            echo "     - Incorrect tag format"
+            echo "     - Missing or invalid <version> in pom.xml"
+            exit 1
+          fi
+
+          if [[ "$GITHUB_REF" == "refs/heads/master" && "$VERSION" == *-SNAPSHOT ]]; then
+            echo "Deploying as SNAPSHOT"
+            echo "DEPLOY_PROFILE=snapshot" >> $GITHUB_ENV
+          elif [[ "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ && "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Deploying as RELEASE"
+            echo "DEPLOY_PROFILE=release" >> $GITHUB_ENV
+          else
+            echo "NOT ALLOWED: Invalid combination"
+            echo "   GITHUB_REF: $GITHUB_REF"
+            echo "   Version: $VERSION"
+            echo "   Expected:"
+            echo "     - Master branch + SNAPSHOT version (x.x.x-SNAPSHOT), OR"
+            echo "     - Tag (vx.x.x) + RELEASE version (x.x.x)"
+            exit 1
+          fi
+      # Deploy backend modules only when backend code changed or a release tag is pushed.
+      - name: Release backend artifacts to Sonatype-Central
+        if: needs.detect_changes.outputs.backend_changed == 'true' || startsWith(github.ref, 'refs/tags/v')
+        run: |
+          echo "Using Maven profile: $DEPLOY_PROFILE"
+          ./mvnw -B deploy -P "${DEPLOY_PROFILE}" \
+          --settings ci/mvnsettings.xml \
+          -Dmaven.test.skip=true -Dcheckstyle.skip -Djacoco.skip \
           -pl :kadai-parent,\
           :kadai-common-parent,:kadai-common-logging,:kadai-common,:kadai-common-security,\
-          :kadai-common-data,:kadai-common-test,\
-          :kadai-lib-parent,:kadai-core,:kadai-cdi,:kadai-spring,\
-          :kadai-rest-parent,:kadai-web,:kadai-rest-spring,\
+          :kadai-common-data,:kadai-common-test,:kadai-test-api,\
+          :kadai-lib-parent,:kadai-core,:kadai-spring,\
+          :kadai-rest-parent,:kadai-rest-spring,\
           :kadai-history-parent,:kadai-simplehistory-provider,:kadai-simplehistory-rest-spring,:kadai-loghistory-provider,\
           :kadai-routing-parent,:kadai-spi-routing-dmn-router,:kadai-routing-rest
         env:
@@ -392,6 +662,34 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+      # Deploy the frontend module (kadai-web) only when frontend code changed or a release
+      # tag is pushed. kadai-web has no Java dependencies, so no backend artifacts are needed.
+      - name: Release frontend artifact to Sonatype-Central
+        if: needs.detect_changes.outputs.frontend_changed == 'true' || startsWith(github.ref, 'refs/tags/v')
+        run: |
+          echo "Using Maven profile: $DEPLOY_PROFILE"
+          ./mvnw -B deploy -P "${DEPLOY_PROFILE}" \
+          --settings ci/mvnsettings.xml \
+          -Dmaven.test.skip=true -Dcheckstyle.skip -Djacoco.skip \
+          -pl :kadai-web
+        env:
+          GPG_KEY_NAME: ${{ secrets.GPG_KEY_NAME }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+      - name: Eco CI Measurement of release deploy
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: "release_artifacts: mvn deploy"
+        continue-on-error: true
+      - name: Show Eco CI Results
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: display-results
+          display-badge: true
+          pr-comment: false
+        continue-on-error: true
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
@@ -401,24 +699,21 @@ jobs:
     name: Update version to next snapshot and push back
     if: github.repository == 'kadai-io/kadai' && startsWith(github.ref, 'refs/tags/v') && github.head_ref == ''
     needs: [ release_artifacts ]
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # necessary for push back
-          # NOTE @v2 uses the token as an auth http header. Set it to
-          # a Personal Access Token instead of secrets.GITHUB_TOKEN
-          # so that tag pushes trigger repo push events.
-          # source: https://github.community/t/action-does-not-trigger-another-on-push-tag-action/17148/7
-          token: ${{ secrets.ADMIN_PERSONAL_ACCESS_TOKEN }}
-      - name: Update version to next snapshot and push back
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update version to next snapshot and create PR
         run: |
           ci/change_version.sh -i -m .
-          ci/update_kadai_dependency_for_wildfly.sh -i
-          ci/commitPoms.sh rest/kadai-rest-spring-example-wildfly/src/test/java/io/kadai/example/wildfly/AbstractAccTest.java
+          ci/commitPoms.sh
         env:
-          GH_EMAIL: ${{ secrets.GH_EMAIL }}
-          GH_USERNAME: ${{ secrets.GH_USERNAME }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
@@ -426,42 +721,52 @@ jobs:
   deploy_to_azure:
     runs-on: ubuntu-22.04
     name: Deploy demo app to Microsoft Azure
-    if: github.repository == 'kadai-io/kadai' && github.ref == 'refs/heads/master' && github.head_ref == ''
     needs: [ test_frontend, test_e2e, test_backend ]
+    if: |
+      always() &&
+      github.repository == 'kadai-io/kadai' &&
+      github.ref == 'refs/heads/master' &&
+      github.head_ref == '' &&
+      needs.detect_changes.outputs.code_changed == 'true' &&
+      needs.test_frontend.result != 'failure' &&
+      needs.test_e2e.result != 'failure' &&
+      needs.test_backend.result != 'failure'
     steps:
       - name: Git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache maven dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
-          path: ~/.m2
+          path: |
+            ~/.m2
+            !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download kadai artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ${{ env.ARTIFACTS_KADAI_JARS_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
       - name: Download kadai-web dist artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ${{ env.ARTIFACTS_KADAI_WEB_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_WEB_PATH }}
       - name: Build kadai-web
         run: ./mvnw -B install -pl :kadai-web
       - name: Generate Javadoc
-        run: ./mvnw -B clean javadoc:jar -pl :kadai-core,:kadai-cdi,:kadai-spring
+        run: ./mvnw -B clean javadoc:jar -pl :kadai-core,:kadai-spring
       - name: Build Example Application
         run: ./mvnw -B install -P history.plugin -pl :kadai-rest-spring-example-boot -DskipTests -Dcheckstyle.skip -Dmaven.javadoc.skip -Djacoco.skip
       - name: Verify Example Application contains documentation
         run: ci/verify_docs_jar.sh
       - name: Login to Microsoft Azure
-        uses: Azure/login@v2
+        uses: Azure/login@v3
         with:
           creds: '{"clientId":"${{ secrets.CLIENT_ID }}","clientSecret":"${{ secrets.CLIENT_SECRET }}","subscriptionId":"${{ secrets.SUBSCRIPTION_ID }}","tenantId":"${{ secrets.TENANT_ID }}"}'
       - name: Deploy to Microsoft Azure
@@ -478,47 +783,81 @@ jobs:
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
+
   upload_to_sonar:
     runs-on: ubuntu-22.04
     name: Upload SonarQube analysis to sonarcloud
-    # no pull request and not on release
-    if: github.head_ref == '' && !startsWith(github.ref, 'refs/tags')
     needs: [ test_frontend, test_e2e, test_backend ]
+    # Runs on every push to main and on PRs originating from kadai-io/kadai (not forks).
+    # Skipped for release tags, dependabot PRs, and if any test job failed.
+    if: |
+      always() &&
+      github.repository == 'kadai-io/kadai' &&
+      ( github.event_name != 'pull_request' ||
+        github.event.pull_request.head.repo.full_name == github.repository ) &&
+      !startsWith(github.ref, 'refs/tags') &&
+      !startsWith(github.head_ref || github.ref_name, 'dependabot/') &&
+      needs.detect_changes.outputs.code_changed == 'true' &&
+      needs.test_frontend.result != 'failure' &&
+      needs.test_e2e.result != 'failure' &&
+      needs.test_backend.result != 'failure'
     steps:
+      - name: Start Eco CI Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: start-measurement
+          project: "KADAI"
+          tags: "CI/CD, Sonar"
+        continue-on-error: true
       - name: Git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: adopt
           java-version: ${{ env.JAVA_VERSION }}
       - name: Cache SonarCloud packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-${{ env.CACHE_SONAR_NAME }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_SONAR_NAME }}
       - name: Cache maven dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
-          path: ~/.m2
+          path: |
+            ~/.m2
+            !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download JaCoCo reports
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: ${{ env.ARTIFACTS_JACOCO_REPORTS_NAME }}-*
           merge-multiple: true
       - name: Install kadai
         run: ./mvnw -B install -DskipTests -Dcheckstyle.skip -Dmaven.javadoc.skip
       - name: Upload SonarQube analysis
-        run: ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+        run: ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} -DskipTests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+      - name: Eco CI Measurement of sonar verify
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: get-measurement
+          label: "upload_to_sonar: mvn verify + sonar"
+        continue-on-error: true
+      - name: Show Eco CI Results
+        uses: green-coding-solutions/eco-ci-energy-estimation@v5
+        with:
+          task: display-results
+          display-badge: true
+          pr-comment: false
+        continue-on-error: true
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
