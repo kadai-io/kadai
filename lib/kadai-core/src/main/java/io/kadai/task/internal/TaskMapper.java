@@ -23,6 +23,7 @@ import io.kadai.common.internal.persistence.MapTypeHandler;
 import io.kadai.common.internal.util.Pair;
 import io.kadai.task.api.CallbackState;
 import io.kadai.task.api.models.TaskSummary;
+import io.kadai.task.internal.jobs.models.TaskCleanupSummary;
 import io.kadai.task.internal.models.MinimalTaskSummary;
 import io.kadai.task.internal.models.TaskImpl;
 import java.time.Instant;
@@ -332,4 +333,44 @@ public interface TaskMapper {
   @Update(
       "UPDATE TASK SET MODIFIED = #{modified}, NUMBER_OF_COMMENTS = NUMBER_OF_COMMENTS-1 WHERE ID = #{id}")
   void decrementNumberOfComments(@Param("id") String id, @Param("modified") Instant modified);
+
+  @Select(
+      "<script>SELECT ID, PARENT_BUSINESS_PROCESS_ID FROM TASK "
+          + "WHERE COMPLETED &lt;= #{completedBefore} "
+          + "<if test=\"_databaseId == 'db2'\">with UR </if>"
+          + "</script>")
+  @Result(property = "taskId", column = "ID")
+  @Result(property = "parentBusinessProcessId", column = "PARENT_BUSINESS_PROCESS_ID")
+  List<TaskCleanupSummary> findTasksCompletedBefore(
+      @Param("completedBefore") Instant completedBefore);
+
+  @Select(
+      "<script>"
+          + "WITH ELIGIBLE_PARENT_BUSINESS_PROCESS_IDS AS ("
+          + "SELECT candidate.PARENT_BUSINESS_PROCESS_ID "
+          + "FROM ("
+          + "SELECT DISTINCT PARENT_BUSINESS_PROCESS_ID "
+          + "FROM TASK "
+          + "WHERE COMPLETED &lt;= #{completedBefore} "
+          + "AND PARENT_BUSINESS_PROCESS_ID IS NOT NULL "
+          + "AND CHARACTER_LENGTH(PARENT_BUSINESS_PROCESS_ID) &gt; 0"
+          + ") candidate "
+          + "LEFT JOIN TASK blocker "
+          + "ON blocker.PARENT_BUSINESS_PROCESS_ID = candidate.PARENT_BUSINESS_PROCESS_ID "
+          + "AND (blocker.COMPLETED IS NULL OR blocker.COMPLETED &gt; #{completedBefore}) "
+          + "WHERE blocker.ID IS NULL"
+          + ") "
+          + "SELECT t.ID, t.PARENT_BUSINESS_PROCESS_ID FROM TASK t "
+          + "LEFT JOIN ELIGIBLE_PARENT_BUSINESS_PROCESS_IDS eligible "
+          + "ON eligible.PARENT_BUSINESS_PROCESS_ID = t.PARENT_BUSINESS_PROCESS_ID "
+          + "WHERE t.COMPLETED &lt;= #{completedBefore} "
+          + "AND (t.PARENT_BUSINESS_PROCESS_ID IS NULL "
+          + "OR CHARACTER_LENGTH(t.PARENT_BUSINESS_PROCESS_ID) = 0 "
+          + "OR eligible.PARENT_BUSINESS_PROCESS_ID IS NOT NULL) "
+          + "<if test=\"_databaseId == 'db2'\">with UR </if>"
+          + "</script>")
+  @Result(property = "taskId", column = "ID")
+  @Result(property = "parentBusinessProcessId", column = "PARENT_BUSINESS_PROCESS_ID")
+  List<TaskCleanupSummary> findTasksCompletedBeforeWithParentBusinessProcessConstraint(
+      @Param("completedBefore") Instant completedBefore);
 }
