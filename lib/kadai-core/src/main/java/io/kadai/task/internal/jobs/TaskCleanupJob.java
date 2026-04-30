@@ -18,15 +18,9 @@
 
 package io.kadai.task.internal.jobs;
 
-import static java.util.Objects.nonNull;
-import static java.util.function.Predicate.not;
-
-import io.kadai.KadaiConfiguration;
-import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.BulkOperationResults;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.ScheduledJob;
-import io.kadai.common.api.TimeInterval;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
@@ -35,16 +29,14 @@ import io.kadai.common.internal.jobs.AbstractKadaiJob;
 import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import io.kadai.common.internal.util.CollectionUtil;
 import io.kadai.common.internal.util.LogSanitizer;
-import io.kadai.task.api.models.TaskSummary;
+import io.kadai.task.internal.jobs.models.TaskCleanupSummary;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Job to cleanup completed tasks after a period of time. */
+/** Job to clean up completed tasks after a period of time. */
 public class TaskCleanupJob extends AbstractKadaiJob {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(TaskCleanupJob.class);
@@ -62,16 +54,12 @@ public class TaskCleanupJob extends AbstractKadaiJob {
         kadaiEngine.getConfiguration().isTaskCleanupJobAllCompletedSameParentBusiness();
   }
 
-  public static Duration getLockExpirationPeriod(KadaiConfiguration kadaiConfiguration) {
-    return kadaiConfiguration.getTaskCleanupJobLockExpirationPeriod();
-  }
-
   @Override
   public void execute() {
     Instant completedBefore = Instant.now().minus(minimumAge);
     LOGGER.info("Running job to delete all tasks completed before ({})", completedBefore);
     try {
-      List<TaskSummary> tasksCompletedBefore = getTasksCompletedBefore(completedBefore);
+      List<TaskCleanupSummary> tasksCompletedBefore = getTasksCompletedBefore(completedBefore);
 
       int totalNumberOfTasksDeleted =
           CollectionUtil.partitionBasedOnSize(tasksCompletedBefore, batchSize).stream()
@@ -89,55 +77,15 @@ public class TaskCleanupJob extends AbstractKadaiJob {
     return TaskCleanupJob.class.getName();
   }
 
-  private List<TaskSummary> getTasksCompletedBefore(Instant untilDate) {
-
-    List<TaskSummary> tasksToDelete =
-        kadaiEngineImpl
-            .getTaskService()
-            .createTaskQuery()
-            .completedWithin(new TimeInterval(null, untilDate))
-            .orderByBusinessProcessId(SortDirection.ASCENDING)
-            .list();
-
-    if (allCompletedSameParentBusiness) {
-      Map<String, Long> numberParentTasksShouldHave = new HashMap<>();
-      Map<String, Long> countParentTask = new HashMap<>();
-
-      tasksToDelete.forEach(
-          task -> {
-            if (!numberParentTasksShouldHave.containsKey(task.getParentBusinessProcessId())) {
-              numberParentTasksShouldHave.put(
-                  task.getParentBusinessProcessId(),
-                  kadaiEngineImpl
-                      .getTaskService()
-                      .createTaskQuery()
-                      .parentBusinessProcessIdIn(task.getParentBusinessProcessId())
-                      .count());
-            }
-            countParentTask.merge(task.getParentBusinessProcessId(), 1L, Long::sum);
-          });
-
-      List<String> taskIdsNotAllCompletedSameParentBusiness =
-          numberParentTasksShouldHave.entrySet().stream()
-              .filter(entry -> nonNull(entry.getKey()))
-              .filter(not(entry -> entry.getKey().isEmpty()))
-              .filter(not(entry -> entry.getValue().equals(countParentTask.get(entry.getKey()))))
-              .map(Map.Entry::getKey)
-              .toList();
-
-      tasksToDelete =
-          tasksToDelete.stream()
-              .filter(
-                  taskSummary ->
-                      !taskIdsNotAllCompletedSameParentBusiness.contains(
-                          taskSummary.getParentBusinessProcessId()))
-              .toList();
-    }
-
-    return tasksToDelete;
+  private List<TaskCleanupSummary> getTasksCompletedBefore(Instant untilDate) {
+    return allCompletedSameParentBusiness
+        ? kadaiEngineImpl
+            .getTaskMapper()
+            .findTasksCompletedBeforeWithParentBusinessProcessConstraint(untilDate)
+        : kadaiEngineImpl.getTaskMapper().findTasksCompletedBefore(untilDate);
   }
 
-  private int deleteTasksTransactionally(List<TaskSummary> tasksToBeDeleted) {
+  private int deleteTasksTransactionally(List<TaskCleanupSummary> tasksToBeDeleted) {
     return KadaiTransactionProvider.executeInTransactionIfPossible(
         txProvider,
         () -> {
@@ -150,10 +98,11 @@ public class TaskCleanupJob extends AbstractKadaiJob {
         });
   }
 
-  private int deleteTasks(List<TaskSummary> tasksToBeDeleted)
+  private int deleteTasks(List<TaskCleanupSummary> tasksToBeDeleted)
       throws InvalidArgumentException, NotAuthorizedException {
 
-    List<String> tasksIdsToBeDeleted = tasksToBeDeleted.stream().map(TaskSummary::getId).toList();
+    List<String> tasksIdsToBeDeleted =
+        tasksToBeDeleted.stream().map(TaskCleanupSummary::getTaskId).toList();
     BulkOperationResults<String, KadaiException> results =
         kadaiEngineImpl.getTaskService().deleteTasks(tasksIdsToBeDeleted);
     if (LOGGER.isDebugEnabled()) {
