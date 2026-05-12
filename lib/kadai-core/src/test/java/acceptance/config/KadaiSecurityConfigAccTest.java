@@ -27,6 +27,7 @@ import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.configuration.DbSchemaCreator;
 import io.kadai.common.test.config.DataSourceGenerator;
+import io.kadai.common.test.config.SchemaEnforcingDataSource;
 import io.kadai.sampledata.SampleDataGenerator;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -92,14 +93,20 @@ class KadaiSecurityConfigAccTest {
   }
 
   private void createKadaiEngine(boolean securityEnabled) throws SQLException {
+    SchemaEnforcingDataSource schemaEnforcingDataSource =
+        new SchemaEnforcingDataSource(
+            DataSourceGenerator.getDataSource(), DataSourceGenerator.getSchemaName());
+
     KadaiEngine.buildKadaiEngine(
         new KadaiConfiguration.Builder(
-                DataSourceGenerator.getDataSource(),
+                schemaEnforcingDataSource.asDataSource(),
                 false,
                 DataSourceGenerator.getSchemaName(),
                 securityEnabled)
             .initKadaiProperties()
             .build());
+
+    schemaEnforcingDataSource.enable();
   }
 
   private Boolean retrieveSecurityFlag() throws Exception {

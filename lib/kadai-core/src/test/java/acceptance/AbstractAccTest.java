@@ -27,6 +27,7 @@ import io.kadai.common.internal.JobMapper;
 import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.common.internal.jobs.JobScheduler;
 import io.kadai.common.test.config.DataSourceGenerator;
+import io.kadai.common.test.config.SchemaEnforcingDataSource;
 import io.kadai.sampledata.SampleDataGenerator;
 import io.kadai.task.api.models.Attachment;
 import io.kadai.task.api.models.ObjectReference;
@@ -88,9 +89,11 @@ public abstract class AbstractAccTest {
 
     DataSource dataSource = DataSourceGenerator.getDataSource();
     String schemaName = DataSourceGenerator.getSchemaName();
+    SchemaEnforcingDataSource schemaEnforcingDataSource =
+        new SchemaEnforcingDataSource(dataSource, schemaName);
 
     kadaiConfiguration =
-        new KadaiConfiguration.Builder(dataSource, false, schemaName)
+        new KadaiConfiguration.Builder(schemaEnforcingDataSource.asDataSource(), false, schemaName)
             .initKadaiProperties()
             .germanPublicHolidaysEnabled(true)
             .build();
@@ -101,6 +104,7 @@ public abstract class AbstractAccTest {
     }
     kadaiEngine =
         KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
+    schemaEnforcingDataSource.enable();
     workingTimeCalculator = kadaiEngine.getWorkingTimeCalculator();
     taskService = (TaskServiceImpl) kadaiEngine.getTaskService();
 

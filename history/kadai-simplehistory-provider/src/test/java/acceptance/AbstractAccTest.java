@@ -25,6 +25,7 @@ import io.kadai.common.internal.JobMapper;
 import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.common.internal.util.IdGenerator;
 import io.kadai.common.test.config.DataSourceGenerator;
+import io.kadai.common.test.config.SchemaEnforcingDataSource;
 import io.kadai.sampledata.SampleDataGenerator;
 import io.kadai.simplehistory.classification.internal.ClassificationHistoryEventMapper;
 import io.kadai.simplehistory.classification.internal.ClassificationHistoryServiceImpl;
@@ -124,11 +125,15 @@ public abstract class AbstractAccTest {
         schemaName != null && !schemaName.isEmpty()
             ? schemaName
             : DataSourceGenerator.getSchemaName();
+    SchemaEnforcingDataSource schemaEnforcingDataSource =
+        new SchemaEnforcingDataSource(dataSource, schemaNameTmp);
     KadaiConfiguration configuration =
-        new KadaiConfiguration.Builder(dataSource, false, schemaNameTmp)
+        new KadaiConfiguration.Builder(
+                schemaEnforcingDataSource.asDataSource(), false, schemaNameTmp)
             .initKadaiProperties()
             .build();
     initKadaiEngine(configuration);
+    schemaEnforcingDataSource.enable();
 
     SampleDataGenerator sampleDataGenerator =
         new SampleDataGenerator(dataSource, configuration.getSchemaName());
