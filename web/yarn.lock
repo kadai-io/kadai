@@ -2884,14 +2884,14 @@ __metadata:
   linkType: hard
 
 "@types/jsdom@npm:28":
-  version: 28.0.2
-  resolution: "@types/jsdom@npm:28.0.2"
+  version: 28.0.3
+  resolution: "@types/jsdom@npm:28.0.3"
   dependencies:
     "@types/node": "npm:*"
     "@types/tough-cookie": "npm:*"
     parse5: "npm:^8.0.0"
     undici-types: "npm:^7.21.0"
-  checksum: 10c0/c2ed63eedf494d714556b7b537e459f1339154489c1dbc7e0996b1fc94f981be590b2fa1c2122db11bf7818c8df9e212bf55a0efd7ce5d16a9751de6cc581220
+  checksum: 10c0/08b1cd61ee3e9610676be3c68a782a94667b86a5f73b8a262095d05f84c9e864fc11b25ae53450cd519a0abd46c202906a735bd61aa176257a981964bc5b1166
   languageName: node
   linkType: hard
 
