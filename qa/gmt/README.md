@@ -4,6 +4,13 @@ We are using the [Green Metrics Tool (GMT)](https://www.green-coding.io/products
 
 GMT Documentation: <https://docs.green-coding.io>
 
+## Setup
+
+* GMT for measuring the resource and energy consumption
+* [k6](https://k6.io/) for the automation (calls different API endpoints of the KADAI backend)
+* PostgreSQL as the database for KADAI
+* [KADAI Spring Example App](https://github.com/kadai-io/kadai/tree/master/lib/kadai-spring-example) (slightly modified) as the target subject
+
 ## Local Execution (Testing)
 
 Local execution is only relevant for testing purposes. To make representative measurements, use the [Measurement Cluster](#measurement-cluster-real-measurements) (see below).
@@ -20,7 +27,7 @@ You can either run a local measurement using a cloned KADAI repository on your l
 * using cloned repository (change the path "$HOME/kadai" if necessary):
   
   ```sh
-  python3 runner.py --name "KADAI REST Spring Example Application" --uri "$HOME/kadai" --filename "qa/gmt/usage_scenario.yml" --skip-unsafe --skip-optimizations --dev-no-system-checks --dev-no-sleeps
+  python3 runner.py --name "KADAI REST Spring Example Application" --uri "$HOME/kadai" --filename "qa/gmt/usage_scenario_quick.yml" --skip-unsafe --skip-optimizations --dev-no-system-checks --dev-no-sleeps
   ```
 
 * using remote URI:
@@ -49,19 +56,13 @@ To compare energy efficiency, we use the machine "CO2 Benchmarking (DVFS OFF, TB
 
 ## Blauer Engel Certification
 
-For the "Blauer Engel" certification we use the following setup:
-
-* GMT for measuring the resource and energy consumption
-* [k6](https://k6.io/) for the automation
-* PostgreSQL as the database for KADAI
-* [KADAI Spring Example App](https://github.com/kadai-io/kadai/tree/master/lib/kadai-spring-example) (slightly modified) as the target subject
 * Phases:
   * **Warm-up:** stabilizes JIT/caches.
   * **Pause:** creates a clean visual/temporal separation in GMT graphs.
   * **Standard Usage:** runs the measured scenario.
       `--log-format=raw`, `--log-output=stdout`, and `read-notes-stdout: true` enable timestamped notes so GMT can align k6 steps with energy/time series.
 
-The measurement setup is defined in a **GMT usage scenario file**: [usage_scenario.yml](./usage_scenario.yml). 
+The measurement setup is defined in a **GMT usage scenario file**: [usage_scenario_blue_angel.yml](./usage_scenario_blue_angel.yml). 
 
 ### Phases
 

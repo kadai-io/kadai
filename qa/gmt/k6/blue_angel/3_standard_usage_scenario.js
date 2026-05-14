@@ -23,6 +23,9 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 import encoding from 'k6/encoding';
 
+// Use custom summary
+export { handleSummary } from "../summary.js";
+
 const HOST = __ENV.TARGET_HOSTNAME || 'app';
 const PORT = __ENV.TARGET_PORT || '8080';
 const BASE_URL = `http://${HOST}:${PORT}/kadai/api/v1`;
