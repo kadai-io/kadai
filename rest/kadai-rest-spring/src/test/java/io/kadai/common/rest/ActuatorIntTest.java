@@ -64,6 +64,7 @@ class ActuatorIntTest {
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody()).containsEntry("status", "UP");
+    assertThat(response.getBody()).doesNotContainKey("components");
   }
 
   @Test
@@ -84,17 +85,15 @@ class ActuatorIntTest {
   }
 
   @Test
-  void should_ReturnStatusUp_When_HealthStatusSubEndpointIsCalledWithoutAuthentication() {
-    ResponseEntity<Map<String, Object>> response =
-        restClient
-            .get()
-            .uri(restHelper.toUrl(ACTUATOR_HEALTH + "/db"))
-            .retrieve()
-            .toEntity(new ParameterizedTypeReference<>() {});
-
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-    assertThat(response.getBody()).isNotNull();
-    assertThat(response.getBody()).containsEntry("status", "UP");
+  void should_Return404_When_HealthStatusSubEndpointIsCalledWithoutAuthentication() {
+    assertThatThrownBy(
+            () ->
+                restClient
+                    .get()
+                    .uri(restHelper.toUrl(ACTUATOR_HEALTH + "/db"))
+                    .retrieve()
+                    .toEntity(String.class))
+        .isInstanceOf(HttpClientErrorException.NotFound.class);
   }
 
   @Test
