@@ -8,16 +8,16 @@ compose-file: !include compose.yml
 
 custom_metrics:
   response_time_avg:
-    unit: ms
+    unit: us
     regex: ^(\d+) http_req_duration_avg\s+([\d\.]+)
   response_time_min:
-    unit: ms
+    unit: us
     regex: ^(\d+) http_req_duration_min\s+([\d\.]+)
   response_time_max:
-    unit: ms
+    unit: us
     regex: ^(\d+) http_req_duration_max\s+([\d\.]+)
   response_time_p95:
-    unit: ms
+    unit: us
     regex: ^(\d+) http_req_duration_p95\s+([\d\.]+)
   throughput:
     unit: "reqs per s"
