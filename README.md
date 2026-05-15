@@ -57,6 +57,7 @@ _We're not aware of all installations of our Open Source project. However, we lo
 * ⚙️ [Customize Behaviour](#customize-behaviour)
 * 📚 [Releases](#releases)
 * 🖼️ [Demo](#demo)
+* 🌱 [Sustainability](#-sustainability)
 * 📨 [Contact](#contact)
 
 # ✨Overview
@@ -304,7 +305,8 @@ These badges show the energy cost for this scenario (done by 100 virtual users):
   <img src="docs/images/Blauer_Engel_LEF_blau_D_UZ215.png" width="420" />
 </a>
 
-The full procedure for the measurement can be found [here](docs/Messungen-Blauer-Engel-KADAI.pdf).
+The full procedure for the measurement can be found [in this PDF file](docs/Messungen-Blauer-Engel-KADAI.pdf).
+The setup using the Green Metrics Tool is described [here](./qa/gmt/README.md).
 
 # 📨Contact
 
