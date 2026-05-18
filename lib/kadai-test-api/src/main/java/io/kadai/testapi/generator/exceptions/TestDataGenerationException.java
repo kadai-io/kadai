@@ -18,14 +18,17 @@
 
 package io.kadai.testapi.generator.exceptions;
 
+import io.kadai.common.api.exceptions.ErrorCode;
+import io.kadai.common.api.exceptions.KadaiRuntimeException;
+
 /** Runtime exception for generation or persistence failures. */
-public class TestDataGenerationException extends RuntimeException {
+public class TestDataGenerationException extends KadaiRuntimeException {
 
   public TestDataGenerationException(String message) {
-    super(message);
+    super(message, ErrorCode.of("TEST_DATA_GENERATION_ERROR"));
   }
 
   public TestDataGenerationException(String message, Throwable cause) {
-    super(message, cause);
+    super(message, ErrorCode.of("TEST_DATA_GENERATION_ERROR"), cause);
   }
 }
