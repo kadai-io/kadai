@@ -16,7 +16,7 @@
  *
  */
 
-package io.kadai.testapi.generator;
+package io.kadai.testapi.generator.exceptions;
 
 /** Runtime exception for generation or persistence failures. */
 public class TestDataGenerationException extends RuntimeException {

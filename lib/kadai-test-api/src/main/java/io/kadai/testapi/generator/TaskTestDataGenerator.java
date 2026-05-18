@@ -36,6 +36,7 @@ import io.kadai.task.api.TaskState;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.internal.models.ObjectReferenceImpl;
+import io.kadai.testapi.generator.exceptions.TestDataGenerationException;
 import io.kadai.workbasket.api.WorkbasketCustomField;
 import io.kadai.workbasket.api.WorkbasketQuery;
 import io.kadai.workbasket.api.WorkbasketService;
