@@ -152,10 +152,18 @@ final class GeneratedTaskImpl extends TaskImpl {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
-    if (!super.equals(obj)) return false;
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    if (!super.equals(obj)) {
+      return false;
+    }
     GeneratedTaskImpl other = (GeneratedTaskImpl) obj;
     return freezeState == other.freezeState
         && freezeCreated == other.freezeCreated
