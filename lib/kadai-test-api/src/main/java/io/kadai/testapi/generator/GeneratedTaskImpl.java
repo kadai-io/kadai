@@ -81,6 +81,34 @@ final class GeneratedTaskImpl extends TaskImpl {
     }
   }
 
+  public boolean isFreezeCreated() {
+    return freezeCreated;
+  }
+
+  public boolean isFreezeState() {
+    return freezeState;
+  }
+
+  public boolean isFreezeModified() {
+    return freezeModified;
+  }
+
+  public boolean isFreezeRead() {
+    return freezeRead;
+  }
+
+  public boolean isFreezeTransferred() {
+    return freezeTransferred;
+  }
+
+  public boolean isFreezeReopened() {
+    return freezeReopened;
+  }
+
+  public boolean isFreezePriority() {
+    return freezePriority;
+  }
+
   void setStateIgnoreFreeze(TaskState state) {
     super.setState(state);
   }
