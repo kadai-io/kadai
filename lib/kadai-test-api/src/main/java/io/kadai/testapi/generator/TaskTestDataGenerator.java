@@ -22,12 +22,16 @@ import io.kadai.KadaiConfiguration;
 import io.kadai.classification.api.ClassificationCustomField;
 import io.kadai.classification.api.ClassificationQuery;
 import io.kadai.classification.api.ClassificationService;
+import io.kadai.classification.api.exceptions.ClassificationAlreadyExistException;
+import io.kadai.classification.api.exceptions.MalformedServiceLevelException;
 import io.kadai.classification.api.models.Classification;
 import io.kadai.classification.api.models.ClassificationSummary;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.api.WorkingTimeCalculator;
+import io.kadai.common.api.exceptions.DomainNotFoundException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.task.api.CallbackState;
 import io.kadai.task.api.TaskCustomField;
 import io.kadai.task.api.TaskCustomIntField;
@@ -41,6 +45,7 @@ import io.kadai.workbasket.api.WorkbasketCustomField;
 import io.kadai.workbasket.api.WorkbasketQuery;
 import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.WorkbasketType;
+import io.kadai.workbasket.api.exceptions.WorkbasketAlreadyExistException;
 import io.kadai.workbasket.api.models.Workbasket;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
 import java.time.Clock;
@@ -73,6 +78,8 @@ import java.util.stream.Stream;
  */
 @SuppressWarnings({
   "checkstyle:JavadocMethod",
+  "checkstyle:CatchParameterName",
+  "checkstyle:LambdaParameterName"
 })
 public final class TaskTestDataGenerator {
 
@@ -220,7 +227,7 @@ public final class TaskTestDataGenerator {
       classifications.forEach(
           classification ->
               existingClassificationKeysByDomain
-                  .computeIfAbsent(classification.getDomain(), ignored -> new LinkedHashSet<>())
+                  .computeIfAbsent(classification.getDomain(), _ -> new LinkedHashSet<>())
                   .add(classification.getKey().toLowerCase(Locale.ROOT)));
 
       for (String domain : domains) {
@@ -252,7 +259,7 @@ public final class TaskTestDataGenerator {
       workbaskets.forEach(
           workbasket ->
               existingWorkbasketKeysByDomain
-                  .computeIfAbsent(workbasket.getDomain(), ignored -> new LinkedHashSet<>())
+                  .computeIfAbsent(workbasket.getDomain(), _ -> new LinkedHashSet<>())
                   .add(workbasket.getKey().toLowerCase(Locale.ROOT)));
 
       List<String> candidateUsers = extractCandidateUsers(configuration, workbaskets);
@@ -367,7 +374,7 @@ public final class TaskTestDataGenerator {
                   }
                   try {
                     kadaiEngine.clearSqlSessionCache();
-                  } catch (RuntimeException ignored) {
+                  } catch (RuntimeException _) {
                     // No managed SQL session is available in every execution mode.
                   }
                   return null;
@@ -646,7 +653,10 @@ public final class TaskTestDataGenerator {
       String category,
       int sequence,
       Map<String, Set<String>> existingClassificationKeysByDomain)
-      throws Exception {
+      throws ClassificationAlreadyExistException,
+          DomainNotFoundException,
+          MalformedServiceLevelException,
+          NotAuthorizedException {
     Classification classification =
         classificationService.newClassification(
             uniqueClassificationKey(domain, category, sequence, existingClassificationKeysByDomain),
@@ -672,7 +682,7 @@ public final class TaskTestDataGenerator {
       List<String> candidateUsers,
       List<WorkbasketSummary> existingWorkbaskets,
       Map<String, Set<String>> existingWorkbasketKeysByDomain)
-      throws Exception {
+      throws WorkbasketAlreadyExistException, DomainNotFoundException, NotAuthorizedException {
     List<WorkbasketSummary> created = new ArrayList<>();
     List<WorkbasketSummary> domainWorkbaskets =
         existingWorkbaskets.stream()
@@ -724,7 +734,7 @@ public final class TaskTestDataGenerator {
       int sequence,
       List<String> candidateUsers,
       Map<String, Set<String>> existingWorkbasketKeysByDomain)
-      throws Exception {
+      throws WorkbasketAlreadyExistException, DomainNotFoundException, NotAuthorizedException {
     String key = uniqueWorkbasketKey(domain, type, sequence, existingWorkbasketKeysByDomain);
     Workbasket workbasket = workbasketService.newWorkbasket(key, domain);
     String owner = determineGeneratedWorkbasketOwner(type, sequence, candidateUsers);
@@ -749,8 +759,7 @@ public final class TaskTestDataGenerator {
     String domainPrefix = sanitizeForKey(domain);
     String categoryPrefix = sanitizeForKey(category);
     Set<String> keys =
-        existingClassificationKeysByDomain.computeIfAbsent(
-            domain, ignored -> new LinkedHashSet<>());
+        existingClassificationKeysByDomain.computeIfAbsent(domain, _ -> new LinkedHashSet<>());
     int counter = sequence + 1;
     String candidate;
     do {
@@ -774,7 +783,7 @@ public final class TaskTestDataGenerator {
       Map<String, Set<String>> existingWorkbasketKeysByDomain) {
     String domainPrefix = sanitizeForKey(domain);
     Set<String> keys =
-        existingWorkbasketKeysByDomain.computeIfAbsent(domain, ignored -> new LinkedHashSet<>());
+        existingWorkbasketKeysByDomain.computeIfAbsent(domain, _ -> new LinkedHashSet<>());
     int counter = sequence + 1;
     String typePrefix =
         switch (type) {
@@ -966,7 +975,7 @@ public final class TaskTestDataGenerator {
     }
     try {
       return Duration.parse(serviceLevel);
-    } catch (RuntimeException ex) {
+    } catch (RuntimeException _) {
       return Duration.ofDays(1);
     }
   }
@@ -1048,7 +1057,7 @@ public final class TaskTestDataGenerator {
   }
 
   private static String formatIdentifier(String prefix, long sequence) {
-    return prefix + ":" + pad(sequence, 12);
+    return String.format("%s:%s", prefix, pad(sequence, 12));
   }
 
   private static String pad(long value, int length) {

@@ -21,6 +21,7 @@ package io.kadai.testapi.generator;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.internal.models.TaskImpl;
 import java.time.Instant;
+import java.util.Objects;
 
 final class GeneratedTaskImpl extends TaskImpl {
   private boolean freezeState;
@@ -134,5 +135,34 @@ final class GeneratedTaskImpl extends TaskImpl {
 
   void freezePriority() {
     freezePriority = true;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        super.hashCode(),
+        freezeState,
+        freezeCreated,
+        freezeModified,
+        freezeRead,
+        freezeTransferred,
+        freezeReopened,
+        freezePriority);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+    if (!super.equals(obj)) return false;
+    GeneratedTaskImpl other = (GeneratedTaskImpl) obj;
+    return freezeState == other.freezeState
+        && freezeCreated == other.freezeCreated
+        && freezeModified == other.freezeModified
+        && freezeRead == other.freezeRead
+        && freezeTransferred == other.freezeTransferred
+        && freezeReopened == other.freezeReopened
+        && freezePriority == other.freezePriority;
   }
 }

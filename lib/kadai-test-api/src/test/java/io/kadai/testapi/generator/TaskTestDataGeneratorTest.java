@@ -83,8 +83,8 @@ class TaskTestDataGeneratorTest {
 
     List<Task> tasks = generator.stream(250).toList();
 
-    assertThat(tasks).hasSize(250);
     assertThat(tasks)
+        .hasSize(250)
         .allSatisfy(
             task -> {
               assertThat(environment.domains()).contains(task.getDomain());
