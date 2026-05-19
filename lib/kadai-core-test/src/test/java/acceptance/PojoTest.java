@@ -30,7 +30,6 @@ import com.openpojo.validation.rule.impl.SetterMustExistRule;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
@@ -45,7 +44,6 @@ class PojoTest {
       new ClassFileImporter()
           .importPackages("io.kadai").stream()
               .filter(javaClass -> javaClass.tryGetMethod("equals", Object.class).isPresent())
-              .filter(Predicate.not(JavaClass::isRecord))
               .filter(
                   javaClass ->
                       !javaClass.getSimpleName().equals("TaskHistoryEvent")
@@ -56,11 +54,13 @@ class PojoTest {
                           && !javaClass.getSimpleName().equals("BigIntegerItem")
                           && !javaClass.getSimpleName().equals("IntItem")
                           && !javaClass.getSimpleName().equals("LongItem")
-                          // This is a record, it has a getter per definition
+                          // These are records, they have a getter per definition
                           && !javaClass.getSimpleName().equals("DurationPrioHolder")
-                          // This is a record, it has a getter per definition
                           && !javaClass.getSimpleName().equals("CustomHoliday")
-                          && !javaClass.getSimpleName().equals("TaskPatch"))
+                          && !javaClass.getSimpleName().equals("TaskPatch")
+                          && !javaClass.getSimpleName().equals("DomainFixtures")
+                          && !javaClass.getSimpleName().equals("GenerationSummary")
+                          && !javaClass.getSimpleName().equals("TaskGenerationEnvironment"))
               .map(JavaClass::reflect)
               .toList();
 
