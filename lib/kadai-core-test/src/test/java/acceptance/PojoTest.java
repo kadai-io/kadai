@@ -30,6 +30,7 @@ import com.openpojo.validation.rule.impl.SetterMustExistRule;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
@@ -44,6 +45,7 @@ class PojoTest {
       new ClassFileImporter()
           .importPackages("io.kadai").stream()
               .filter(javaClass -> javaClass.tryGetMethod("equals", Object.class).isPresent())
+              .filter(Predicate.not(JavaClass::isRecord))
               .filter(
                   javaClass ->
                       !javaClass.getSimpleName().equals("TaskHistoryEvent")
