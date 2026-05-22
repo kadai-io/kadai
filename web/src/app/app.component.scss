@@ -41,7 +41,7 @@
       margin-top: 5px;
     }
 
-    &__container * .mdc-icon-button {
+    &__container * .mat-mdc-icon-button {
       // Workaround to center the icon...
       font-size: 13px;
     }
@@ -89,10 +89,14 @@
   margin-bottom: 2px;
 }
 
-::ng-deep .mat-drawer-inner-container {
+:host ::ng-deep .mat-drawer-inner-container {
   overflow: visible !important;
 }
 
-::ng-deep .mat-drawer {
+:host ::ng-deep .mat-drawer {
   overflow-y: visible !important;
+}
+
+:host ::ng-deep .mat-drawer-container {
+  background-color: white;
 }

@@ -17,21 +17,137 @@
  */
 
 @use '@angular/material' as mat;
+@use 'palettes' as kadai-m3;
 
-@include mat.all-component-typographies();
-@include mat.elevation-classes();
-@include mat.app-background();
-
-@include mat.all-component-themes(
-  mat.m2-define-light-theme(
-    (
-      color: (
-        primary: mat.m2-define-palette(mat.$m2-blue-grey-palette),
-        accent: mat.m2-define-palette(mat.$m2-teal-palette, 500, 900, A100),
-        warn: mat.m2-define-palette(mat.$m2-red-palette, 600)
+$kadai-theme: mat.define-theme(
+  (
+    color: (
+      theme-type: light,
+      primary: kadai-m3.$primary-palette,
+      tertiary: kadai-m3.$tertiary-palette
+    ),
+    typography: (
+      plain-family: (
+        Roboto,
+        sans-serif
       ),
-      typography: mat.m2-define-typography-config(),
-      density: 0
+      brand-family: (
+        Roboto,
+        sans-serif
+      )
+    ),
+    density: (
+      scale: 0
     )
   )
 );
+
+html {
+  @include mat.elevation-classes();
+  @include mat.app-background();
+  @include mat.all-component-themes($kadai-theme);
+  @include mat.all-component-typographies($kadai-theme);
+
+  --mat-sys-corner-extra-small: 4px;
+  --mat-sys-corner-small: 4px;
+  --mat-sys-corner-medium: 4px;
+  --mat-sys-corner-large: 4px;
+  --mat-sys-corner-extra-large: 4px;
+
+  --mat-button-filled-container-shape: 4px;
+  --mat-button-outlined-container-shape: 4px;
+  --mat-button-text-container-shape: 4px;
+  --mat-button-protected-container-shape: 4px;
+  --mat-button-tonal-container-shape: 4px;
+  --mat-fab-container-shape: 50%;
+  --mat-fab-extended-container-shape: 24px;
+  --mat-fab-small-container-shape: 50%;
+  --mat-form-field-filled-container-shape: 4px 4px 0 0;
+  --mat-form-field-outlined-container-shape: 4px;
+  --mat-card-elevated-container-shape: 4px;
+  --mat-card-filled-container-shape: 4px;
+  --mat-card-outlined-container-shape: 4px;
+  --mat-dialog-container-shape: 4px;
+  --mat-menu-container-shape: 4px;
+  --mat-menu-container-color: #ffffff;
+  --mat-autocomplete-container-color: #ffffff;
+  --mat-dialog-container-color: #ffffff;
+  --mat-sidenav-container-shape: 0;
+  --mat-chip-container-shape-radius: 16px;
+  --mat-bottom-sheet-container-shape: 4px;
+  --mat-expansion-container-shape: 4px;
+  --mat-autocomplete-container-shape: 4px;
+  --mat-tooltip-container-shape: 4px;
+  --mat-list-list-item-container-shape: 0;
+  --mat-list-active-indicator-shape: 0;
+
+  --mat-dialog-container-elevation-shadow:
+    0 11px 15px -7px rgba(0, 0, 0, 0.2), 0 24px 38px 3px rgba(0, 0, 0, 0.14), 0 9px 46px 8px rgba(0, 0, 0, 0.12);
+  --mat-menu-container-elevation-shadow:
+    0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  --mat-autocomplete-container-elevation-shadow:
+    0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+
+  --mat-dialog-actions-alignment: start;
+  --mat-dialog-actions-padding: 8px;
+  --mat-dialog-with-actions-content-padding: 20px 24px;
+
+  --mat-toolbar-title-text-weight: 500;
+  --mat-toolbar-title-text-size: 20px;
+  --mat-toolbar-title-text-line-height: 32px;
+
+  --mat-sys-primary: #607d8b;
+  --mat-sys-on-primary: white;
+  --mat-sys-tertiary: #009688;
+  --mat-sys-on-tertiary: white;
+  --mat-sys-error: #e53935;
+  --mat-sys-on-error: white;
+
+  --mat-progress-bar-track-color: rgba(96, 125, 139, 0.25);
+
+  --mat-checkbox-selected-icon-color: var(--mat-sys-tertiary);
+  --mat-checkbox-selected-hover-icon-color: var(--mat-sys-tertiary);
+  --mat-checkbox-selected-focus-icon-color: var(--mat-sys-tertiary);
+  --mat-checkbox-selected-pressed-icon-color: var(--mat-sys-tertiary);
+  --mat-checkbox-selected-checkmark-color: var(--mat-sys-on-tertiary);
+  --mat-checkbox-selected-hover-state-layer-color: var(--mat-sys-tertiary);
+  --mat-checkbox-selected-focus-state-layer-color: var(--mat-sys-tertiary);
+  --mat-checkbox-selected-pressed-state-layer-color: var(--mat-sys-tertiary);
+
+  --mat-button-filled-container-color: #ffffff;
+  --mat-button-filled-label-text-color: rgba(0, 0, 0, 0.87);
+  --mat-button-protected-container-color: #ffffff;
+  --mat-button-protected-label-text-color: rgba(0, 0, 0, 0.87);
+
+  --mat-sys-display-large-size: 96px;
+  --mat-sys-display-large-line-height: 96px;
+  --mat-sys-display-large-weight: 300;
+
+  --mat-sys-headline-large-size: 24px;
+  --mat-sys-headline-large-line-height: 32px;
+  --mat-sys-headline-large-weight: 400;
+
+  --mat-sys-title-large-size: 20px;
+  --mat-sys-title-large-line-height: 32px;
+  --mat-sys-title-large-weight: 500;
+
+  --mat-sys-title-medium-size: 16px;
+  --mat-sys-title-medium-line-height: 28px;
+  --mat-sys-title-medium-weight: 400;
+
+  --mat-sys-body-large-size: 16px;
+  --mat-sys-body-large-line-height: 24px;
+  --mat-sys-body-large-weight: 400;
+
+  --mat-sys-body-medium-size: 14px;
+  --mat-sys-body-medium-line-height: 20px;
+  --mat-sys-body-medium-weight: 400;
+
+  --mat-sys-label-large-size: 14px;
+  --mat-sys-label-large-line-height: 14px;
+  --mat-sys-label-large-weight: 500;
+
+  --mat-sys-label-medium-size: 12px;
+  --mat-sys-label-medium-line-height: 16px;
+  --mat-sys-label-medium-weight: 500;
+}
