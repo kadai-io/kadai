@@ -97,14 +97,14 @@
   }
 }
 
-::ng-deep .distribution-targets-list * .cdk-virtual-scroll-content-wrapper {
-  width: 100%;
-}
-
 .mat-mdc-list-item {
   height: 90px !important;
 }
 
 p {
   margin: 0;
+}
+
+:host ::ng-deep .distribution-targets-list .cdk-virtual-scroll-content-wrapper {
+  width: 100%;
 }

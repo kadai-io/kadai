@@ -60,10 +60,10 @@
   }
 }
 
-::ng-deep .task-list-toolbar * .mat-mdc-tab-labels {
+:host ::ng-deep .task-list-toolbar .mat-mdc-tab-labels {
   background-color: colors.$light-grey;
 }
 
-::ng-deep .task-list-toolbar__filter-input .mat-mdc-text-field-wrapper {
+:host ::ng-deep .task-list-toolbar__filter-input .mat-mdc-text-field-wrapper {
   width: 240px;
 }

@@ -35,10 +35,6 @@
   }
 }
 
-::ng-deep .ng-invalid.ng-touched:not(form) {
-  box-shadow: unset;
-}
-
 .invalid {
   color: colors.$invalid;
 }

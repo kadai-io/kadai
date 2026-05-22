@@ -89,7 +89,7 @@
   }
 }
 
-::ng-deep .general__description-and-type > .mat-mdc-form-field {
+:host ::ng-deep .general__description-and-type > .mat-mdc-form-field {
   display: unset;
   flex-direction: unset;
 }
