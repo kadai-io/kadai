@@ -7,7 +7,7 @@ Features:
 - Submit software to /v1/software/add
 
 Env vars (optional):
-  GMT_API_URL        -> base API URL will defailt to https://api.green-coding.io/
+  GMT_API_URL        -> base API URL will default to https://api.green-coding.io/
   GMT_AUTH_TOKEN     -> token for X-Authentication
   GMT_REMOVE_IDLE    -> "true" to append ?remove_idle=true to GET requests
 
