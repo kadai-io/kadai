@@ -50,9 +50,12 @@ A new measurement on the measurement cluster can be triggered via:
 * the UI: <https://metrics.green-coding.io/request.html>
 * the API: <https://api.green-coding.io/docs#/default/software_add_v1_software_add_post>
 
-For easier use of the API a Python script can be used: [submit_software.py](https://github.com/green-coding-solutions/gmt-helpers/blob/main/api/submit_software.py)
+For easier use of the API you can use the script [./scripts/submit_software.py](./scripts/submit_software.py). See the [./scripts/README.md](./scripts/README.md) for more information.
 
-To compare energy efficiency, we use the machine "CO2 Benchmarking (DVFS OFF, TB OFF, HT OFF) - TX1330 M2" (details can be found in the [GMT documentation](https://docs.green-coding.io/docs/measuring/measurement-cluster/)).
+We use the machine "CO2 Benchmarking (DVFS OFF, TB OFF, HT OFF) - TX1330 M2 [PREMIUM]", because this machine is tuned for reproducability. Details about the machine can be found in the [GMT documentation](https://docs.green-coding.io/docs/measuring/measurement-cluster/).
+
+The results of the runs that we made public can be seen here:
+<https://metrics.green-coding.io/runs.html?name=KADAI&show_archived=false&show_other_users=true>
 
 ## Blauer Engel Certification
 
