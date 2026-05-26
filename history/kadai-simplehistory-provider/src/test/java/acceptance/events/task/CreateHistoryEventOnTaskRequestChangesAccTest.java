@@ -20,7 +20,7 @@ package acceptance.events.task;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import acceptance.AbstractAccTest;
+import acceptance.AbstractRawMapperAccTest;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
 import io.kadai.simplehistory.task.internal.TaskHistoryQueryImpl;
@@ -38,7 +38,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(JaasExtension.class)
-class CreateHistoryEventOnTaskRequestChangesAccTest extends AbstractAccTest {
+class CreateHistoryEventOnTaskRequestChangesAccTest extends AbstractRawMapperAccTest {
 
   private final TaskService taskService = kadaiEngine.getTaskService();
 

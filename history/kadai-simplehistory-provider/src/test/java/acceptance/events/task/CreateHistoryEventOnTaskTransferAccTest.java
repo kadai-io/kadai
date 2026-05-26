@@ -84,34 +84,40 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
         q -> {
           kadaiEngine.runAsAdmin(
               CheckedRunnable.rethrowing(
-                  () -> {
-                    String taskId = q.getSecond();
-                    Consumer<String> transferMethod = q.getFourth();
+                  () ->
+                      runWithRawMapperConnection(
+                          () -> {
+                            String taskId = q.getSecond();
+                            Consumer<String> transferMethod = q.getFourth();
 
-                    TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
+                            TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
 
-                    List<TaskHistoryEvent> events =
-                        taskHistoryQueryMapper.queryHistoryEvents(
-                            (TaskHistoryQueryImpl)
-                                taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
+                            List<TaskHistoryEvent> events =
+                                taskHistoryQueryMapper.queryHistoryEvents(
+                                    (TaskHistoryQueryImpl)
+                                        taskHistoryService
+                                            .createTaskHistoryQuery()
+                                            .taskIdIn(taskId));
 
-                    assertThat(events).isEmpty();
+                            assertThat(events).isEmpty();
 
-                    transferMethod.accept(taskId);
+                            transferMethod.accept(taskId);
 
-                    events =
-                        taskHistoryQueryMapper.queryHistoryEvents(
-                            (TaskHistoryQueryImpl)
-                                taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
+                            events =
+                                taskHistoryQueryMapper.queryHistoryEvents(
+                                    (TaskHistoryQueryImpl)
+                                        taskHistoryService
+                                            .createTaskHistoryQuery()
+                                            .taskIdIn(taskId));
 
-                    assertThat(events).hasSize(1);
-                    String sourceWorkbasketId = q.getThird();
-                    assertTransferHistoryEvent(
-                        events.get(0).getId(),
-                        sourceWorkbasketId,
-                        "WBI:100000000000000000000000000000000006",
-                        "user-1-4");
-                  }),
+                            assertThat(events).hasSize(1);
+                            String sourceWorkbasketId = q.getThird();
+                            assertTransferHistoryEvent(
+                                events.get(0).getId(),
+                                sourceWorkbasketId,
+                                "WBI:100000000000000000000000000000000006",
+                                "user-1-4");
+                          })),
               "user-1-4");
         };
 
@@ -165,42 +171,44 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
         t -> {
           kadaiEngine.runAsAdmin(
               CheckedRunnable.rethrowing(
-                  () -> {
-                    Map<String, String> taskIds = t.getMiddle();
-                    Consumer<List<String>> transferMethod = t.getRight();
+                  () ->
+                      runWithRawMapperConnection(
+                          () -> {
+                            Map<String, String> taskIds = t.getMiddle();
+                            Consumer<List<String>> transferMethod = t.getRight();
 
-                    TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
+                            TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
 
-                    List<TaskHistoryEvent> events =
-                        taskHistoryQueryMapper.queryHistoryEvents(
-                            (TaskHistoryQueryImpl)
-                                taskHistoryService
-                                    .createTaskHistoryQuery()
-                                    .taskIdIn(taskIds.keySet().toArray(new String[0])));
+                            List<TaskHistoryEvent> events =
+                                taskHistoryQueryMapper.queryHistoryEvents(
+                                    (TaskHistoryQueryImpl)
+                                        taskHistoryService
+                                            .createTaskHistoryQuery()
+                                            .taskIdIn(taskIds.keySet().toArray(new String[0])));
 
-                    assertThat(events).isEmpty();
+                            assertThat(events).isEmpty();
 
-                    transferMethod.accept(new ArrayList<>(taskIds.keySet()));
+                            transferMethod.accept(new ArrayList<>(taskIds.keySet()));
 
-                    events =
-                        taskHistoryQueryMapper.queryHistoryEvents(
-                            (TaskHistoryQueryImpl)
-                                taskHistoryService
-                                    .createTaskHistoryQuery()
-                                    .taskIdIn(taskIds.keySet().toArray(new String[0])));
+                            events =
+                                taskHistoryQueryMapper.queryHistoryEvents(
+                                    (TaskHistoryQueryImpl)
+                                        taskHistoryService
+                                            .createTaskHistoryQuery()
+                                            .taskIdIn(taskIds.keySet().toArray(new String[0])));
 
-                    assertThat(events)
-                        .extracting(TaskHistoryEvent::getTaskId)
-                        .containsExactlyInAnyOrderElementsOf(taskIds.keySet());
+                            assertThat(events)
+                                .extracting(TaskHistoryEvent::getTaskId)
+                                .containsExactlyInAnyOrderElementsOf(taskIds.keySet());
 
-                    for (TaskHistoryEvent event : events) {
-                      assertTransferHistoryEvent(
-                          event.getId(),
-                          taskIds.get(event.getTaskId()),
-                          "WBI:100000000000000000000000000000000007",
-                          "user-1-5");
-                    }
-                  }),
+                            for (TaskHistoryEvent event : events) {
+                              assertTransferHistoryEvent(
+                                  event.getId(),
+                                  taskIds.get(event.getTaskId()),
+                                  "WBI:100000000000000000000000000000000007",
+                                  "user-1-5");
+                            }
+                          })),
               "user-1-5");
         };
 
@@ -247,34 +255,40 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
         q -> {
           kadaiEngine.runAsAdmin(
               CheckedRunnable.rethrowing(
-                  () -> {
-                    String taskId = q.getSecond();
-                    Consumer<String> transferMethod = q.getFourth();
+                  () ->
+                      runWithRawMapperConnection(
+                          () -> {
+                            String taskId = q.getSecond();
+                            Consumer<String> transferMethod = q.getFourth();
 
-                    TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
+                            TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
 
-                    List<TaskHistoryEvent> events =
-                        taskHistoryQueryMapper.queryHistoryEvents(
-                            (TaskHistoryQueryImpl)
-                                taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
+                            List<TaskHistoryEvent> events =
+                                taskHistoryQueryMapper.queryHistoryEvents(
+                                    (TaskHistoryQueryImpl)
+                                        taskHistoryService
+                                            .createTaskHistoryQuery()
+                                            .taskIdIn(taskId));
 
-                    assertThat(events).isEmpty();
+                            assertThat(events).isEmpty();
 
-                    transferMethod.accept(taskId);
+                            transferMethod.accept(taskId);
 
-                    events =
-                        taskHistoryQueryMapper.queryHistoryEvents(
-                            (TaskHistoryQueryImpl)
-                                taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
+                            events =
+                                taskHistoryQueryMapper.queryHistoryEvents(
+                                    (TaskHistoryQueryImpl)
+                                        taskHistoryService
+                                            .createTaskHistoryQuery()
+                                            .taskIdIn(taskId));
 
-                    assertThat(events).hasSize(1);
-                    String sourceWorkbasketId = q.getThird();
-                    assertTransferHistoryEvent(
-                        events.get(0).getId(),
-                        sourceWorkbasketId,
-                        "WBI:100000000000000000000000000000000007",
-                        "teamlead-1");
-                  }),
+                            assertThat(events).hasSize(1);
+                            String sourceWorkbasketId = q.getThird();
+                            assertTransferHistoryEvent(
+                                events.get(0).getId(),
+                                sourceWorkbasketId,
+                                "WBI:100000000000000000000000000000000007",
+                                "teamlead-1");
+                          })),
               "teamlead-1");
         };
     return DynamicTest.stream(testCases.iterator(), Quadruple::getFirst, test);
@@ -327,42 +341,44 @@ class CreateHistoryEventOnTaskTransferAccTest extends AbstractAccTest {
         t -> {
           kadaiEngine.runAsAdmin(
               CheckedRunnable.rethrowing(
-                  () -> {
-                    Map<String, String> taskIds = t.getMiddle();
-                    Consumer<List<String>> transferMethod = t.getRight();
+                  () ->
+                      runWithRawMapperConnection(
+                          () -> {
+                            Map<String, String> taskIds = t.getMiddle();
+                            Consumer<List<String>> transferMethod = t.getRight();
 
-                    TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
+                            TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
 
-                    List<TaskHistoryEvent> events =
-                        taskHistoryQueryMapper.queryHistoryEvents(
-                            (TaskHistoryQueryImpl)
-                                taskHistoryService
-                                    .createTaskHistoryQuery()
-                                    .taskIdIn(taskIds.keySet().toArray(new String[0])));
+                            List<TaskHistoryEvent> events =
+                                taskHistoryQueryMapper.queryHistoryEvents(
+                                    (TaskHistoryQueryImpl)
+                                        taskHistoryService
+                                            .createTaskHistoryQuery()
+                                            .taskIdIn(taskIds.keySet().toArray(new String[0])));
 
-                    assertThat(events).isEmpty();
+                            assertThat(events).isEmpty();
 
-                    transferMethod.accept(new ArrayList<>(taskIds.keySet()));
+                            transferMethod.accept(new ArrayList<>(taskIds.keySet()));
 
-                    events =
-                        taskHistoryQueryMapper.queryHistoryEvents(
-                            (TaskHistoryQueryImpl)
-                                taskHistoryService
-                                    .createTaskHistoryQuery()
-                                    .taskIdIn(taskIds.keySet().toArray(new String[0])));
+                            events =
+                                taskHistoryQueryMapper.queryHistoryEvents(
+                                    (TaskHistoryQueryImpl)
+                                        taskHistoryService
+                                            .createTaskHistoryQuery()
+                                            .taskIdIn(taskIds.keySet().toArray(new String[0])));
 
-                    assertThat(events)
-                        .extracting(TaskHistoryEvent::getTaskId)
-                        .containsExactlyInAnyOrderElementsOf(taskIds.keySet());
+                            assertThat(events)
+                                .extracting(TaskHistoryEvent::getTaskId)
+                                .containsExactlyInAnyOrderElementsOf(taskIds.keySet());
 
-                    for (TaskHistoryEvent event : events) {
-                      assertTransferHistoryEvent(
-                          event.getId(),
-                          taskIds.get(event.getTaskId()),
-                          "WBI:100000000000000000000000000000000007",
-                          "user-5-5");
-                    }
-                  }),
+                            for (TaskHistoryEvent event : events) {
+                              assertTransferHistoryEvent(
+                                  event.getId(),
+                                  taskIds.get(event.getTaskId()),
+                                  "WBI:100000000000000000000000000000000007",
+                                  "user-5-5");
+                            }
+                          })),
               "user-5-5");
         };
 

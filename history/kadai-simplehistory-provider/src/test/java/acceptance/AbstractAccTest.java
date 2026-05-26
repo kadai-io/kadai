@@ -23,6 +23,7 @@ import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
 import io.kadai.common.internal.JobMapper;
 import io.kadai.common.internal.KadaiEngineImpl;
+import io.kadai.common.internal.util.CheckedRunnable;
 import io.kadai.common.internal.util.IdGenerator;
 import io.kadai.common.test.config.DataSourceGenerator;
 import io.kadai.common.test.config.SchemaEnforcingDataSource;
@@ -39,6 +40,7 @@ import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.internal.models.ObjectReferenceImpl;
+import io.kadai.testapi.KadaiEngineProxy;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import javax.sql.DataSource;
@@ -51,6 +53,7 @@ public abstract class AbstractAccTest {
 
   protected static KadaiConfiguration kadaiConfiguration;
   protected static KadaiEngine kadaiEngine;
+  protected static SchemaEnforcingDataSource schemaEnforcingDataSource;
   protected static TaskHistoryServiceImpl taskHistoryService;
   protected static WorkbasketHistoryServiceImpl workbasketHistoryService;
   protected static ClassificationHistoryServiceImpl classificationHistoryService;
@@ -125,15 +128,13 @@ public abstract class AbstractAccTest {
         schemaName != null && !schemaName.isEmpty()
             ? schemaName
             : DataSourceGenerator.getSchemaName();
-    SchemaEnforcingDataSource schemaEnforcingDataSource =
-        new SchemaEnforcingDataSource(dataSource, schemaNameTmp);
+    schemaEnforcingDataSource = new SchemaEnforcingDataSource(dataSource, schemaNameTmp);
     KadaiConfiguration configuration =
         new KadaiConfiguration.Builder(
                 schemaEnforcingDataSource.asDataSource(), false, schemaNameTmp)
             .initKadaiProperties()
             .build();
     initKadaiEngine(configuration);
-    schemaEnforcingDataSource.enable();
 
     SampleDataGenerator sampleDataGenerator =
         new SampleDataGenerator(dataSource, configuration.getSchemaName());
@@ -143,8 +144,18 @@ public abstract class AbstractAccTest {
 
   protected static void initKadaiEngine(KadaiConfiguration configuration) throws SQLException {
     kadaiConfiguration = configuration;
-    kadaiEngine =
-        KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
+    boolean enforceSchema = schemaEnforcingDataSource != null;
+    if (enforceSchema) {
+      schemaEnforcingDataSource.disable();
+    }
+    try {
+      kadaiEngine =
+          KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
+    } finally {
+      if (enforceSchema) {
+        schemaEnforcingDataSource.enable();
+      }
+    }
     taskService = kadaiEngine.getTaskService();
 
     taskHistoryService = new TaskHistoryServiceImpl();
@@ -205,6 +216,24 @@ public abstract class AbstractAccTest {
     SqlSessionManager sqlSessionManager = (SqlSessionManager) sessionManagerField.get(kadaiEngine);
 
     return sqlSessionManager.getMapper(JobMapper.class);
+  }
+
+  protected void openRawMapperConnection() throws Exception {
+    new KadaiEngineProxy(kadaiEngine).openConnection();
+  }
+
+  protected void closeRawMapperConnection() throws Exception {
+    new KadaiEngineProxy(kadaiEngine).returnConnection();
+  }
+
+  protected void runWithRawMapperConnection(CheckedRunnable<? extends Exception> runnable)
+      throws Exception {
+    openRawMapperConnection();
+    try {
+      runnable.run();
+    } finally {
+      closeRawMapperConnection();
+    }
   }
 
   protected ObjectReference createObjectRef(
