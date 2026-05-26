@@ -40,7 +40,7 @@ import io.kadai.spi.history.api.events.workbasket.WorkbasketHistoryEvent;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.internal.models.ObjectReferenceImpl;
-import io.kadai.testapi.KadaiEngineProxy;
+import io.kadai.testapi.RawMapperAccess;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import javax.sql.DataSource;
@@ -219,11 +219,11 @@ public abstract class AbstractAccTest {
   }
 
   protected void openRawMapperConnection() throws Exception {
-    new KadaiEngineProxy(kadaiEngine).openConnection();
+    RawMapperAccess.openConnection(kadaiEngine);
   }
 
   protected void closeRawMapperConnection() throws Exception {
-    new KadaiEngineProxy(kadaiEngine).returnConnection();
+    RawMapperAccess.closeConnection(kadaiEngine);
   }
 
   protected void runWithRawMapperConnection(CheckedRunnable<? extends Exception> runnable)

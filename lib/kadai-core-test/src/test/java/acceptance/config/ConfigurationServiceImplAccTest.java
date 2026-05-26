@@ -20,11 +20,13 @@ package acceptance.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.internal.ConfigurationMapper;
 import io.kadai.common.internal.ConfigurationServiceImpl;
 import io.kadai.common.internal.util.ResourceUtil;
 import io.kadai.testapi.KadaiInject;
 import io.kadai.testapi.KadaiIntegrationTest;
+import io.kadai.testapi.RawMapperAccess;
 import java.util.Map;
 import java.util.Optional;
 import org.json.JSONObject;
@@ -39,8 +41,8 @@ import org.junit.jupiter.api.TestMethodOrder;
 @KadaiIntegrationTest
 public class ConfigurationServiceImplAccTest {
 
+  @KadaiInject KadaiEngine kadaiEngine;
   @KadaiInject ConfigurationServiceImpl configurationService;
-  @KadaiInject ConfigurationMapper configurationMapper;
 
   @Nested
   @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -57,7 +59,11 @@ public class ConfigurationServiceImplAccTest {
                       ConfigurationServiceImpl.class, "defaultCustomAttributes.json"))
               .toMap();
 
-      Map<String, Object> allCustomAttributes = configurationMapper.getAllCustomAttributes(false);
+      Map<String, Object> allCustomAttributes =
+          RawMapperAccess.runWithMapper(
+              kadaiEngine,
+              ConfigurationMapper.class,
+              mapper -> mapper.getAllCustomAttributes(false));
 
       assertThat(allCustomAttributes).isEqualTo(expectedCustomAttributes);
     }
