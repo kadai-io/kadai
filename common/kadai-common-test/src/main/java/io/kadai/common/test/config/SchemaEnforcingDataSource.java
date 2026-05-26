@@ -32,21 +32,44 @@ import javax.sql.DataSource;
  */
 public final class SchemaEnforcingDataSource {
 
+  public interface DelegatingDataSource {
+
+    DataSource getDelegateDataSource();
+  }
+
   private final DataSource delegate;
   private final String expectedSchema;
+  private final DataSource proxiedDataSource;
   private volatile boolean enforcementEnabled;
 
   public SchemaEnforcingDataSource(DataSource delegate, String expectedSchema) {
     this.delegate = delegate;
     this.expectedSchema = expectedSchema;
+    this.proxiedDataSource = createProxy();
   }
 
   public DataSource asDataSource() {
+    return proxiedDataSource;
+  }
+
+  public static DataSource unwrap(DataSource dataSource) {
+    if (dataSource instanceof DelegatingDataSource delegatingDataSource) {
+      return delegatingDataSource.getDelegateDataSource();
+    }
+
+    return dataSource;
+  }
+
+  private DataSource createProxy() {
     return (DataSource)
         Proxy.newProxyInstance(
-            DataSource.class.getClassLoader(),
-            new Class<?>[] {DataSource.class},
+            SchemaEnforcingDataSource.class.getClassLoader(),
+            new Class<?>[] {DataSource.class, DelegatingDataSource.class},
             (proxy, method, args) -> {
+              if ("getDelegateDataSource".equals(method.getName())) {
+                return delegate;
+              }
+
               if ("getConnection".equals(method.getName())) {
                 Connection connection = (Connection) invoke(method, delegate, args);
                 return wrapConnection(connection);
