@@ -22,8 +22,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import acceptance.AbstractAccTest;
 import io.kadai.KadaiConfiguration;
-import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.configuration.DbSchemaCreator;
 import io.kadai.common.test.config.DataSourceGenerator;
@@ -97,7 +97,7 @@ class KadaiSecurityConfigAccTest {
         new SchemaEnforcingDataSource(
             DataSourceGenerator.getDataSource(), DataSourceGenerator.getSchemaName());
 
-    KadaiEngine.buildKadaiEngine(
+    AbstractAccTest.buildEngine(
         new KadaiConfiguration.Builder(
                 schemaEnforcingDataSource.asDataSource(),
                 false,
@@ -105,8 +105,6 @@ class KadaiSecurityConfigAccTest {
                 securityEnabled)
             .initKadaiProperties()
             .build());
-
-    schemaEnforcingDataSource.enable();
   }
 
   private Boolean retrieveSecurityFlag() throws Exception {

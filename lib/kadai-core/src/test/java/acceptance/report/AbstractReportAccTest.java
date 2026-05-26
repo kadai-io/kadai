@@ -18,6 +18,7 @@
 
 package acceptance.report;
 
+import acceptance.AbstractAccTest;
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.test.config.DataSourceGenerator;
@@ -42,9 +43,7 @@ public abstract class AbstractReportAccTest {
             .initKadaiProperties()
             .germanPublicHolidaysEnabled(false)
             .build();
-    kadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
-    schemaEnforcingDataSource.enable();
-    kadaiEngine.setConnectionManagementMode(KadaiEngine.ConnectionManagementMode.AUTOCOMMIT);
+    kadaiEngine = AbstractAccTest.buildEngine(kadaiConfiguration);
     SampleDataGenerator sampleDataGenerator = new SampleDataGenerator(dataSource, schemaName);
     sampleDataGenerator.clearDb();
     sampleDataGenerator.generateMonitorData();

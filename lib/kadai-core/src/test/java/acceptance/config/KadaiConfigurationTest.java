@@ -21,6 +21,7 @@ package acceptance.config;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import acceptance.AbstractAccTest;
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.CustomHoliday;
 import io.kadai.common.api.KadaiEngine;
@@ -46,8 +47,7 @@ class KadaiConfigurationTest {
             .initKadaiProperties()
             .build();
 
-    KadaiEngine te = KadaiEngine.buildKadaiEngine(configuration);
-    schemaEnforcingDataSource.enable();
+    KadaiEngine te = AbstractAccTest.buildEngine(configuration);
 
     assertThat(te).isNotNull();
   }

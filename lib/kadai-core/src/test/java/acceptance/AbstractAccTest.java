@@ -33,7 +33,6 @@ import io.kadai.task.api.models.Attachment;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.internal.TaskServiceImpl;
 import io.kadai.task.internal.models.ObjectReferenceImpl;
-import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
@@ -44,10 +43,10 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.sql.DataSource;
-import org.apache.ibatis.session.SqlSessionManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
@@ -66,6 +65,28 @@ public abstract class AbstractAccTest {
   protected static TaskServiceImpl taskService;
   protected static WorkingTimeCalculator workingTimeCalculator;
 
+  public static KadaiEngine buildEngine(KadaiConfiguration configuration) throws SQLException {
+    return buildEngine(configuration, ConnectionManagementMode.AUTOCOMMIT);
+  }
+
+  public static KadaiEngine buildEngine(
+      KadaiConfiguration configuration, ConnectionManagementMode connectionManagementMode)
+      throws SQLException {
+    SchemaEnforcingDataSource schemaEnforcingDataSource =
+        new SchemaEnforcingDataSource(
+            SchemaEnforcingDataSource.unwrap(configuration.getDataSource()),
+            configuration.getSchemaName());
+
+    KadaiConfiguration schemaSafeConfiguration =
+        new KadaiConfiguration.Builder(configuration, schemaEnforcingDataSource.asDataSource())
+            .build();
+
+    KadaiEngine engine =
+        KadaiEngine.buildKadaiEngine(schemaSafeConfiguration, connectionManagementMode);
+    schemaEnforcingDataSource.enable();
+    return engine;
+  }
+
   @BeforeAll
   protected static void setupTest() throws Exception {
     resetDb(false);
@@ -79,8 +100,7 @@ public abstract class AbstractAccTest {
 
   protected static void initKadaiEngine(KadaiConfiguration configuration) throws SQLException {
     kadaiConfiguration = configuration;
-    kadaiEngine =
-        KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
+    kadaiEngine = buildEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
     taskService = (TaskServiceImpl) kadaiEngine.getTaskService();
     workingTimeCalculator = kadaiEngine.getWorkingTimeCalculator();
   }
@@ -102,8 +122,7 @@ public abstract class AbstractAccTest {
     if (dropTables) {
       sampleDataGenerator.dropDb();
     }
-    kadaiEngine =
-        KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
+    kadaiEngine = buildEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
     schemaEnforcingDataSource.enable();
     workingTimeCalculator = kadaiEngine.getWorkingTimeCalculator();
     taskService = (TaskServiceImpl) kadaiEngine.getTaskService();
@@ -112,14 +131,16 @@ public abstract class AbstractAccTest {
     sampleDataGenerator.generateTestData();
   }
 
-  protected JobMapper getJobMapper(KadaiEngine kadaiEngine)
-      throws NoSuchFieldException, IllegalAccessException {
-
-    Field sessionManagerField = KadaiEngineImpl.class.getDeclaredField("sessionManager");
-    sessionManagerField.setAccessible(true);
-    SqlSessionManager sqlSessionManager = (SqlSessionManager) sessionManagerField.get(kadaiEngine);
-
-    return sqlSessionManager.getMapper(JobMapper.class);
+  protected <T> T runWithJobMapper(KadaiEngine kadaiEngine, Function<JobMapper, T> callback)
+      throws Exception {
+    KadaiEngineProxy engineProxy = new KadaiEngineProxy(kadaiEngine);
+    engineProxy.openConnection();
+    try {
+      JobMapper mapper = engineProxy.getSqlSession().getMapper(JobMapper.class);
+      return callback.apply(mapper);
+    } finally {
+      engineProxy.returnConnection();
+    }
   }
 
   protected ObjectReferenceImpl createObjectReference(

@@ -33,6 +33,7 @@ import io.kadai.task.internal.jobs.TaskUpdatePriorityJob;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,7 +54,7 @@ class TaskUpdatePriorityJobAccTest extends AbstractAccTest {
             .taskUpdatePriorityJobRunEvery(Duration.ofMinutes(30))
             .taskUpdatePriorityJobFirstRun(Instant.parse("2007-12-03T10:15:30.00Z"))
             .build();
-    kadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
+    kadaiEngine = buildEngine(kadaiConfiguration);
   }
 
   @Test
@@ -73,13 +74,15 @@ class TaskUpdatePriorityJobAccTest extends AbstractAccTest {
     final Instant someTimeInTheFuture = Instant.now().plus(10, ChronoUnit.DAYS);
     KadaiConfiguration kadaiConfiguration =
         new KadaiConfiguration.Builder(AbstractAccTest.kadaiConfiguration).build();
-    KadaiEngine kadaiEngine =
-        KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
+    KadaiEngine kadaiEngine = buildEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
     // when
     AbstractKadaiJob.initializeSchedule(kadaiEngine, TaskUpdatePriorityJob.class);
 
     // then
-    assertThat(getJobMapper(kadaiEngine).findJobsToRun(someTimeInTheFuture))
+    List<ScheduledJob> jobsToRun =
+        runWithJobMapper(kadaiEngine, mapper -> mapper.findJobsToRun(someTimeInTheFuture));
+
+    assertThat(jobsToRun)
         .isNotEmpty()
         .extracting(ScheduledJob::getType)
         .contains(TaskUpdatePriorityJob.class.getName());
@@ -95,8 +98,7 @@ class TaskUpdatePriorityJobAccTest extends AbstractAccTest {
             .build();
 
     // when
-    final TaskUpdatePriorityJob job =
-        new TaskUpdatePriorityJob(KadaiEngine.buildKadaiEngine(kadaiConfiguration));
+    final TaskUpdatePriorityJob job = new TaskUpdatePriorityJob(buildEngine(kadaiConfiguration));
 
     // then
     assertThat(job.getBatchSize()).isEqualTo(20);
@@ -116,8 +118,7 @@ class TaskUpdatePriorityJobAccTest extends AbstractAccTest {
             .build();
 
     // when
-    final TaskUpdatePriorityJob job =
-        new TaskUpdatePriorityJob(KadaiEngine.buildKadaiEngine(kadaiConfiguration));
+    final TaskUpdatePriorityJob job = new TaskUpdatePriorityJob(buildEngine(kadaiConfiguration));
 
     // then
     assertThat(job.getFirstRun()).isEqualTo(expectedFirstRun);
