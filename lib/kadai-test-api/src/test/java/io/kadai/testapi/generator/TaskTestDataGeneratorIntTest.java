@@ -24,6 +24,7 @@ import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.models.Task;
+import io.kadai.task.api.models.TaskSummary;
 import io.kadai.testapi.KadaiInject;
 import io.kadai.testapi.KadaiIntegrationTest;
 import io.kadai.testapi.security.WithAccessId;
@@ -71,16 +72,28 @@ class TaskTestDataGeneratorIntTest {
 
   @WithAccessId(user = "admin")
   @Test
-  void should_PersistRequestedNumberOfTasksInBatches() {
+  void should_PersistRequestedNumberOfTasksInBatches() throws Exception {
     long before = taskService.createTaskQuery().count();
     TaskTestDataGenerator generator = TaskTestDataGenerator.from(kadaiEngine);
+    List<String> externalIds = generator.stream(15).map(Task::getExternalId).toList();
 
     GenerationSummary summary = generator.persist(15, 4);
     long after = taskService.createTaskQuery().count();
+    List<TaskSummary> persistedTasks =
+        taskService.createTaskQuery().externalIdIn(externalIds.toArray(String[]::new)).list();
+    Task persistedTask = taskService.getTask(persistedTasks.get(0).getId());
 
     assertThat(summary.requestedTaskCount()).isEqualTo(15);
     assertThat(summary.processedTaskCount()).isEqualTo(15);
     assertThat(summary.batchCount()).isEqualTo(4);
     assertThat(after - before).isEqualTo(15);
+    assertThat(persistedTasks).hasSize(15);
+    assertThat(persistedTasks)
+        .extracting(TaskSummary::getExternalId)
+        .containsExactlyInAnyOrderElementsOf(externalIds);
+    assertThat(persistedTasks).allSatisfy(task -> assertThat(task.getId()).startsWith("TKI:"));
+    assertThat(persistedTask.getCustomField(io.kadai.task.api.TaskCustomField.CUSTOM_14))
+        .isEqualTo("abc");
+    assertThat(persistedTask.getPrimaryObjRef()).isNotNull();
   }
 }
