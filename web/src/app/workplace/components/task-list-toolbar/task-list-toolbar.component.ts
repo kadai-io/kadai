@@ -86,8 +86,8 @@ export class TaskListToolbarComponent implements OnInit {
   filteredWorkbasketNames: string[] = this.workbasketNames;
   resultName = signal('');
   resultId = signal('');
-  workbaskets = signal<Workbasket[]>(undefined);
-  currentBasket = signal<Workbasket>(undefined);
+  workbaskets = signal<Workbasket[] | undefined>(undefined);
+  currentBasket = signal<Workbasket | undefined>(undefined);
   workbasketSelected = signal(false);
   searched = signal(false);
   search = Search;
@@ -116,19 +116,21 @@ export class TaskListToolbarComponent implements OnInit {
       .pipe(takeUntil(this.destroy$))
       .subscribe((workbaskets) => {
         this.workbaskets.set(workbaskets.workbaskets);
-        this.workbaskets().forEach((workbasket) => {
-          this.workbasketNames.push(workbasket.name);
+        this.workbaskets()?.forEach((workbasket) => {
+          if (workbasket.name) {
+            this.workbasketNames.push(workbasket.name);
+          }
         });
 
         // get workbasket of current user
         const user = this.kadaiEngineService.currentUserInfo;
-        const filteredWorkbasketsByUser = this.workbaskets().filter(
+        const filteredWorkbasketsByUser = (this.workbaskets() ?? []).filter(
           (workbasket) => workbasket.key == user.userId || workbasket.key == user.userId.toUpperCase()
         );
         if (filteredWorkbasketsByUser.length > 0) {
           const workbasketOfUser = filteredWorkbasketsByUser[0];
-          this.resultName.set(workbasketOfUser.name);
-          this.resultId.set(workbasketOfUser.workbasketId);
+          this.resultName.set(workbasketOfUser.name ?? '');
+          this.resultId.set(workbasketOfUser.workbasketId ?? '');
           this.workplaceService.selectWorkbasket(workbasketOfUser);
           this.currentBasket.set(workbasketOfUser);
           this.workbasketSelected.set(true);
@@ -142,9 +144,13 @@ export class TaskListToolbarComponent implements OnInit {
       .subscribe((task) => {
         if (typeof task !== 'undefined') {
           const workbasketSummary = task.workbasketSummary;
-          if (this.searchSelected === this.search.byWorkbasket && this.resultName() !== workbasketSummary.name) {
-            this.resultName.set(workbasketSummary.name);
-            this.resultId.set(workbasketSummary.workbasketId);
+          if (
+            workbasketSummary &&
+            this.searchSelected === this.search.byWorkbasket &&
+            this.resultName() !== workbasketSummary.name
+          ) {
+            this.resultName.set(workbasketSummary.name ?? '');
+            this.resultId.set(workbasketSummary.workbasketId ?? '');
             this.currentBasket.set(workbasketSummary);
             this.workplaceService.selectWorkbasket(this.currentBasket());
             this.workbasketSelected.set(true);
@@ -156,9 +162,10 @@ export class TaskListToolbarComponent implements OnInit {
       const component = params.component;
       if (component == 'workbaskets') {
         this.activeTab.set(0);
-        if (this.currentBasket()) {
-          this.resultName.set(this.currentBasket().name);
-          this.resultId.set(this.currentBasket().workbasketId);
+        const basket = this.currentBasket();
+        if (basket) {
+          this.resultName.set(basket.name ?? '');
+          this.resultId.set(basket.workbasketId ?? '');
         }
         this.selectSearch(this.search.byWorkbasket);
       }
@@ -178,7 +185,7 @@ export class TaskListToolbarComponent implements OnInit {
     this.store.dispatch(new SetFilterExpansion());
   }
 
-  onTabChange(search) {
+  onTabChange(search: any) {
     const tab = search.target.innerText;
     this.requestInProgressService.setRequestInProgress(true);
     if (tab === 'Workbaskets') {
@@ -206,9 +213,9 @@ export class TaskListToolbarComponent implements OnInit {
     this.store.dispatch(new SetFilterExpansion(false));
     this.workbasketSelected.set(true);
     if (this.searchSelected === this.search.byWorkbasket && this.workbaskets()) {
-      this.workbaskets().forEach((workbasket) => {
+      this.workbaskets()?.forEach((workbasket) => {
         if (workbasket.name === this.resultName()) {
-          this.resultId.set(workbasket.workbasketId);
+          this.resultId.set(workbasket.workbasketId ?? '');
           this.currentBasket.set(workbasket);
           this.workplaceService.selectWorkbasket(this.currentBasket());
         }
@@ -249,7 +256,7 @@ export class TaskListToolbarComponent implements OnInit {
 
   selectSearch(type: Search) {
     this.searchSelected = type;
-    this.resultId.set(undefined);
+    this.resultId.set('');
     this.selectSearchType.emit(type);
     this.searchBasket();
     this.onClearFilter();

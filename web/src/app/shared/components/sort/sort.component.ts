@@ -39,7 +39,7 @@ export class SortComponent<T> implements OnInit {
   performSorting = output<Sorting<T>>();
 
   sort: Sorting<T> = {
-    'sort-by': undefined,
+    'sort-by': undefined as unknown as T,
     order: Direction.ASC
   };
 
@@ -47,7 +47,7 @@ export class SortComponent<T> implements OnInit {
   sortDirectionEnum = Direction;
 
   ngOnInit() {
-    this.sort['sort-by'] = this.defaultSortBy();
+    this.sort['sort-by'] = this.defaultSortBy()!;
   }
 
   changeOrder(sortDirection: Direction) {

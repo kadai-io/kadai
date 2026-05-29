@@ -60,7 +60,7 @@ describe('TaskReportComponent', () => {
       rows: [],
       sumRow: [{ desc: ['Total'], cells: [10], total: 10, depth: 0, display: true }]
     };
-    component.reportData = null;
+    component.reportData = null as any;
     fixture.detectChanges();
     const panel = fixture.nativeElement.querySelector('.panel-default');
     expect(panel).toBeNull();
@@ -110,8 +110,8 @@ describe('TaskReportComponent', () => {
     fixture.detectChanges();
     httpMock.match(() => true).forEach((req) => req.flush(mockReport));
     expect(component.pieChartType).toBe('pie');
-    expect(component.pieChartOptions.responsive).toBe(true);
-    expect(component.pieChartOptions.maintainAspectRatio).toBe(true);
+    expect(component.pieChartOptions!.responsive).toBe(true);
+    expect(component.pieChartOptions!.maintainAspectRatio).toBe(true);
   });
 
   it('should not render panel heading before HTTP completes — @if false branch on init', () => {

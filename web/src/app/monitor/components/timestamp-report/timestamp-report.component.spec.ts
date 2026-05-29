@@ -60,7 +60,7 @@ describe('TimestampReportComponent', () => {
       rows: [{ desc: ['Created'], cells: [5], total: 5, depth: 0, display: true }],
       sumRow: []
     };
-    component.reportData = null;
+    component.reportData = null as any;
     fixture.detectChanges();
     const panel = fixture.nativeElement.querySelector('.panel-default');
     expect(panel).toBeNull();

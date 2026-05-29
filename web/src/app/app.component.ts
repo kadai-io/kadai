@@ -61,7 +61,7 @@ export class AppComponent implements OnInit, OnDestroy {
       .getVersion()
       .pipe(map((r) => r.version)),
     {
-      initialValue: undefined as string
+      initialValue: undefined as unknown as string
     }
   );
   toggle: boolean = false;

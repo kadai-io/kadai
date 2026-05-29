@@ -172,7 +172,7 @@ describe('TaskAttributeValueComponent', () => {
       const buttons: HTMLButtonElement[] = Array.from(localFixture.nativeElement.querySelectorAll('button'));
       const addBtn = buttons.find((b) => b.textContent?.includes('Add'));
       expect(addBtn).toBeTruthy();
-      addBtn.click();
+      addBtn!.click();
       expect(addSpy).toHaveBeenCalled();
     });
 
@@ -181,7 +181,7 @@ describe('TaskAttributeValueComponent', () => {
       localFixture.detectChanges();
       const buttons: HTMLButtonElement[] = Array.from(localFixture.nativeElement.querySelectorAll('button'));
       const addBtn = buttons.find((b) => b.textContent?.includes('Add'));
-      addBtn.click();
+      addBtn!.click();
       localFixture.detectChanges();
       const table = localFixture.nativeElement.querySelector('.task-attribute-value__table');
       expect(table).toBeTruthy();

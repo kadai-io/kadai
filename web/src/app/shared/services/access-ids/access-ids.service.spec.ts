@@ -59,7 +59,7 @@ describe('AccessIdsService', () => {
 
   describe('searchForAccessId', () => {
     it('should return empty array when accessId is null', async () => {
-      const result = await firstValueFrom(service.searchForAccessId(null));
+      const result = await firstValueFrom(service.searchForAccessId(null as any));
       expect(result).toEqual([]);
     });
 
@@ -86,7 +86,7 @@ describe('AccessIdsService', () => {
 
   describe('getGroupsByAccessId', () => {
     it('should return empty array when accessId is null', async () => {
-      const result = await firstValueFrom(service.getGroupsByAccessId(null));
+      const result = await firstValueFrom(service.getGroupsByAccessId(null as any));
       expect(result).toEqual([]);
     });
 
@@ -108,7 +108,7 @@ describe('AccessIdsService', () => {
 
   describe('getPermissionsByAccessId', () => {
     it('should return empty array when accessId is null', async () => {
-      const result = await firstValueFrom(service.getPermissionsByAccessId(null));
+      const result = await firstValueFrom(service.getPermissionsByAccessId(null as any));
       expect(result).toEqual([]);
     });
 

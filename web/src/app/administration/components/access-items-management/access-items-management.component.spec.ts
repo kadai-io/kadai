@@ -139,7 +139,7 @@ describe('AccessItemsManagementComponent', () => {
     const groups = store.selectSnapshot((state) => state.accessItemsManagement);
     expect(selectedAccessId).not.toBeNull();
     expect(groups).not.toBeNull();
-    app.onSelectAccessId(null);
+    app.onSelectAccessId(null as any);
     expect(groups).toMatchObject({});
   });
 
@@ -153,7 +153,7 @@ describe('AccessItemsManagementComponent', () => {
     const permissions = store.selectSnapshot((state) => state.accessItemsManagement);
     expect(selectedAccessId).not.toBeNull();
     expect(permissions).not.toBeNull();
-    app.onSelectAccessId(null);
+    app.onSelectAccessId(null as any);
     expect(permissions).toMatchObject({});
   });
 
@@ -185,7 +185,7 @@ describe('AccessItemsManagementComponent', () => {
   it('should display a dialog when access is revoked', async () => {
     app.accessId = { accessId: 'xyz', name: 'xyz' };
     const notificationService = TestBed.inject(NotificationService);
-    const showDialogSpy = vi.spyOn(notificationService, 'showDialog').mockImplementation(() => undefined);
+    const showDialogSpy = vi.spyOn(notificationService, 'showDialog').mockImplementation(() => undefined as any);
     app.revokeAccess();
     fixture.detectChanges();
     expect(showDialogSpy).toHaveBeenCalled();
@@ -280,7 +280,7 @@ describe('AccessItemsManagementComponent', () => {
         permCustom12: false
       }
     ]);
-    app.accessItemsForm.patchValue({ accessIdFilter: 'alpha' });
+    app.accessItemsForm!.patchValue({ accessIdFilter: 'alpha' });
     app.filterAccessItems();
     expect(app.accessItems.length).toBe(1);
     expect(app.accessItems[0].accessName).toBe('User Alpha');
@@ -341,7 +341,7 @@ describe('AccessItemsManagementComponent', () => {
         permCustom12: false
       }
     ]);
-    app.accessItemsForm.patchValue({ workbasketKeyFilter: 'mykey' });
+    app.accessItemsForm!.patchValue({ workbasketKeyFilter: 'mykey' });
     app.filterAccessItems();
     expect(app.accessItems.length).toBe(1);
     expect(app.accessItems[0].workbasketKey).toBe('MYKEY1');
@@ -349,11 +349,11 @@ describe('AccessItemsManagementComponent', () => {
 
   it('should clear filters and call searchForAccessItemsWorkbaskets when clearFilter is called', () => {
     app.setAccessItemsGroups([]);
-    app.accessItemsForm.patchValue({ workbasketKeyFilter: 'something', accessIdFilter: 'another' });
+    app.accessItemsForm!.patchValue({ workbasketKeyFilter: 'something', accessIdFilter: 'another' });
     const searchSpy = vi.spyOn(app, 'searchForAccessItemsWorkbaskets').mockImplementation(() => {});
     app.clearFilter();
-    expect(app.accessItemsForm.value.workbasketKeyFilter).toBe('');
-    expect(app.accessItemsForm.value.accessIdFilter).toBe('');
+    expect(app.accessItemsForm!.value.workbasketKeyFilter).toBe('');
+    expect(app.accessItemsForm!.value.accessIdFilter).toBe('');
     expect(searchSpy).toHaveBeenCalled();
   });
 
@@ -377,7 +377,7 @@ describe('AccessItemsManagementComponent', () => {
   it('should set null accessItemsForm when onSelectAccessId is called with null', () => {
     app.setAccessItemsGroups([]);
     expect(app.accessItemsForm).not.toBeNull();
-    app.onSelectAccessId(null);
+    app.onSelectAccessId(null as any);
     expect(app.accessItemsForm).toBeNull();
   });
 
@@ -396,7 +396,7 @@ describe('AccessItemsManagementComponent', () => {
   it('should dispatch GetAccessItems using only accessId and groups when permissions is null', () => {
     app.accessId = { accessId: 'user1', name: 'User One' };
     app.groups = [{ accessId: 'group1', name: 'Group One' }];
-    app.permissions = null;
+    app.permissions = null as any;
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(GetAccessItems)).subscribe(() => {
       actionDispatched = true;
@@ -460,7 +460,7 @@ describe('AccessItemsManagementComponent', () => {
         permCustom12: false
       }
     ]);
-    app.accessItemsForm.patchValue({ accessIdFilter: 'alpha' });
+    app.accessItemsForm!.patchValue({ accessIdFilter: 'alpha' });
     app.setAccessItemsGroups(app.accessItems);
     expect(app.accessItems.length).toBe(1);
     expect(app.accessItems[0].accessName).toBe('Alpha User');
@@ -521,7 +521,7 @@ describe('AccessItemsManagementComponent', () => {
         permCustom12: false
       }
     ]);
-    app.accessItemsForm.patchValue({ workbasketKeyFilter: 'filterkey' });
+    app.accessItemsForm!.patchValue({ workbasketKeyFilter: 'filterkey' });
     app.setAccessItemsPermissions(app.accessItems);
     expect(app.accessItems.length).toBe(1);
     expect(app.accessItems[0].workbasketKey).toBe('FILTERKEY');
@@ -594,8 +594,8 @@ describe('AccessItemsManagementComponent', () => {
     app.setAccessItemsGroups([mockAccessItem]);
     vi.spyOn(app, 'searchForAccessItemsWorkbaskets').mockImplementation(() => {});
     expect(app.accessItemsForm).toBeTruthy();
-    expect(app.accessItemsForm.get('workbasketKeyFilter')).toBeTruthy();
-    expect(app.accessItemsForm.get('accessIdFilter')).toBeTruthy();
+    expect(app.accessItemsForm!.get('workbasketKeyFilter')).toBeTruthy();
+    expect(app.accessItemsForm!.get('accessIdFilter')).toBeTruthy();
   });
 
   it('should call sorting when sort component emits', () => {
@@ -615,7 +615,7 @@ describe('AccessItemsManagementComponent', () => {
   it('should cover subscribe callback in searchForAccessItemsWorkbaskets when permissions is null', () => {
     app.accessId = { accessId: 'user1', name: 'User One' };
     app.groups = [];
-    app.permissions = null;
+    app.permissions = null as any;
     const state = { accessItemsManagement: { accessItemsResource: { accessItems: [mockAccessItem] } } };
     vi.spyOn(store, 'dispatch').mockReturnValue(of(state) as any);
     app.searchForAccessItemsWorkbaskets();
@@ -637,7 +637,7 @@ describe('AccessItemsManagementComponent', () => {
   it('should cover searchForAccessItemsWorkbaskets when accessItemsResource is null', () => {
     app.accessId = { accessId: 'user1', name: 'User One' };
     app.groups = [];
-    app.permissions = null;
+    app.permissions = null as any;
     const state = { accessItemsManagement: { accessItemsResource: null } };
     vi.spyOn(store, 'dispatch').mockReturnValue(of(state) as any);
     app.searchForAccessItemsWorkbaskets();
@@ -738,7 +738,7 @@ describe('AccessItemsManagementComponent — with accessItemsForm pre-set before
 
   it('should call revokeAccess when revoke button is clicked', () => {
     const notificationService = TestBed.inject(NotificationService);
-    const showDialogSpy = vi.spyOn(notificationService, 'showDialog').mockImplementation(() => undefined);
+    const showDialogSpy = vi.spyOn(notificationService, 'showDialog').mockImplementation(() => undefined as any);
     const revokeBtn = fixture.nativeElement.querySelector('.access-items__revoke-button');
     expect(revokeBtn).toBeTruthy();
     revokeBtn.click();
@@ -758,7 +758,7 @@ describe('AccessItemsManagementComponent — with accessItemsForm pre-set before
       input.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
       expect(searchSpy).toHaveBeenCalled();
     } else {
-      expect(app.accessItemsForm.get('workbasketKeyFilter')).toBeTruthy();
+      expect(app.accessItemsForm!.get('workbasketKeyFilter')).toBeTruthy();
     }
   });
 
@@ -769,7 +769,7 @@ describe('AccessItemsManagementComponent — with accessItemsForm pre-set before
       input.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
       expect(searchSpy).toHaveBeenCalled();
     } else {
-      expect(app.accessItemsForm.get('accessIdFilter')).toBeTruthy();
+      expect(app.accessItemsForm!.get('accessIdFilter')).toBeTruthy();
     }
   });
 

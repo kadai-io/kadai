@@ -46,7 +46,7 @@ import { MatOption } from '@angular/material/core';
 export class MonitorComponent implements OnInit {
   selectedTab = '';
   domains: Array<string> = [];
-  selectedDomain: string;
+  selectedDomain!: string;
   destroy$ = new Subject<void>();
   private readonly domainService = inject(DomainService);
 

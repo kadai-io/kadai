@@ -23,7 +23,7 @@ export class ResizableWidthDirective {
   private renderer = inject(Renderer2);
   private el = inject(ElementRef);
 
-  private startX: number;
+  private startX: number | null = null;
 
   @HostListener('mouseover')
   onMouseover() {

@@ -34,7 +34,7 @@ export class DomainService {
 
   private domainRestValue: Array<string> = new Array<string>();
   private domainValue: Array<string> = new Array<string>();
-  private domainSelectedValue: string;
+  private domainSelectedValue!: string;
   private domainSelected = new ReplaySubject<string>(1);
   private dataObs$ = new ReplaySubject<Array<string>>(1);
   private hasMasterDomain = false;

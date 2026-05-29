@@ -3,8 +3,9 @@
   "compilerOptions": {
     "types": ["cypress", "node"],
     "lib": ["ES2020", "dom"],
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "isolatedModules": false,
+    "rootDir": ".",
     "noEmit": true
   },
   "include": ["**/*.ts"]

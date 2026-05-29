@@ -25,10 +25,9 @@ import { messageTypes } from './message-types';
 })
 export class ObtainMessageService {
   getMessage(key: string, messageVariables: object = {}, type: messageTypes): string {
+    const messages = messageByErrorCode[type] as Record<string, string>;
     let message =
-      messageByErrorCode[type][key] ||
-      messageByErrorCode[type]['FALLBACK'] ||
-      `The message with type '${type}' and key '${key}' is not configured`;
+      messages[key] || messages['FALLBACK'] || `The message with type '${type}' and key '${key}' is not configured`;
 
     for (const [replacementKey, value] of Object.entries(messageVariables)) {
       message = message.replace(`{${replacementKey}}`, `'${value}'`);

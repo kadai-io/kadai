@@ -18,7 +18,7 @@
 
 import { Action, NgxsAfterBootstrap, State, StateContext } from '@ngxs/store';
 import { catchError, concatMap, take, tap } from 'rxjs/operators';
-import { Observable, of, throwError } from 'rxjs';
+import { EMPTY, Observable, of, throwError } from 'rxjs';
 import { Location } from '@angular/common';
 import { WorkbasketService } from '../../services/workbasket/workbasket.service';
 import { Workbasket } from '../../models/workbasket';
@@ -154,7 +154,10 @@ export class WorkbasketState implements NgxsAfterBootstrap {
             badgeMessage: ''
           });
 
-          ctx.dispatch(new GetWorkbasketAccessItems(ctx.getState().selectedWorkbasket._links.accessItems.href));
+          const links = ctx.getState().selectedWorkbasket._links;
+          if (links) {
+            ctx.dispatch(new GetWorkbasketAccessItems(links.accessItems.href));
+          }
 
           this.location.go(
             this.location
@@ -223,7 +226,9 @@ export class WorkbasketState implements NgxsAfterBootstrap {
 
         this.location.go(this.location.path().replace(/(workbaskets).*/g, 'workbaskets'));
       }),
-      concatMap((workbasketUpdated) => ctx.dispatch(new SelectWorkbasket(workbasketUpdated.workbasketId)))
+      concatMap((workbasketUpdated) =>
+        workbasketUpdated.workbasketId ? ctx.dispatch(new SelectWorkbasket(workbasketUpdated.workbasketId)) : EMPTY
+      )
     );
   }
 
@@ -378,10 +383,17 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   @Action(UpdateWorkbasketDistributionTargets)
   updateWorkbasketDistributionTargets(ctx: StateContext<WorkbasketStateModel>): Observable<any> {
     this.requestInProgressService.setRequestInProgress(true);
+    const links = ctx.getState().selectedWorkbasket._links;
+    if (!links) return EMPTY;
     return this.workbasketService
       .updateWorkBasketsDistributionTargets(
-        ctx.getState().selectedWorkbasket._links.distributionTargets.href,
-        new Set(ctx.getState().workbasketDistributionTargets.distributionTargets.map((w) => w.workbasketId))
+        links.distributionTargets.href,
+        new Set(
+          ctx
+            .getState()
+            .workbasketDistributionTargets.distributionTargets.map((w) => w.workbasketId)
+            .filter((id): id is string => !!id)
+        )
       )
       .pipe(
         take(1),
@@ -429,9 +441,10 @@ export class WorkbasketState implements NgxsAfterBootstrap {
     const { selectedWorkbasket, distributionTargetsPage, workbasketDistributionTargets } = ctx.getState();
     const { filterParameter, sortParameter, refetchAll } = action;
     const nextDistributionTargetsPage = refetchAll ? 1 : distributionTargetsPage + 1;
+    if (!selectedWorkbasket._links) return EMPTY;
     return this.workbasketService
       .getWorkBasketsDistributionTargets(
-        selectedWorkbasket._links?.distributionTargets.href,
+        selectedWorkbasket._links.distributionTargets.href,
         filterParameter,
         sortParameter,
         new WorkbasketQueryPagingParameter(nextDistributionTargetsPage)
@@ -442,7 +455,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
           if (!refetchAll && workbasketDistributionTargets) {
             const completeArray = workbasketDistributionTargets.distributionTargets.concat(wbt.distributionTargets);
             const idArrayNoDupe = [...new Set(completeArray.map((wb) => wb.workbasketId))];
-            wbt.distributionTargets = idArrayNoDupe.map((id) => completeArray.find((wb) => wb.workbasketId === id));
+            wbt.distributionTargets = idArrayNoDupe.map((id) => completeArray.find((wb) => wb.workbasketId === id)!);
           }
           const distributionTargetSet = new Set(wbt.distributionTargets.map((wb) => wb.workbasketId));
           let availableTargets = cloneDeep(ctx.getState().availableDistributionTargets);
@@ -466,7 +479,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
     const { availableDistributionTargetsPage, availableDistributionTargets } = ctx.getState();
     const { filterParameter, sortParameter, refetchAll } = action;
     const nextAvailableDistributionTargetsPage = refetchAll ? 1 : availableDistributionTargetsPage + 1;
-    if (!refetchAll && nextAvailableDistributionTargetsPage > availableDistributionTargets.page?.totalPages) {
+    if (!refetchAll && nextAvailableDistributionTargetsPage > (availableDistributionTargets.page?.totalPages ?? 0)) {
       return of(null);
     }
     return this.workbasketService

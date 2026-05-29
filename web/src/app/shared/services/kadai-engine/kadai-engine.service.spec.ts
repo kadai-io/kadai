@@ -63,12 +63,12 @@ describe('KadaiEngineService', () => {
 
   describe('hasRole', () => {
     it('should return false when currentUserInfo is null', () => {
-      service.currentUserInfo = null;
+      service.currentUserInfo = null as any;
       expect(service.hasRole(['ADMIN'])).toBe(false);
     });
 
     it('should return false when currentUserInfo is undefined', () => {
-      service.currentUserInfo = undefined;
+      service.currentUserInfo = undefined as any;
       expect(service.hasRole(['ADMIN'])).toBe(false);
     });
 
@@ -128,7 +128,7 @@ describe('KadaiEngineService', () => {
     });
 
     it('should return false when the endpoint returns an error', () => {
-      let result: boolean;
+      let result = false;
       service.isCustomRoutingRulesEnabled().subscribe((value) => (result = value));
 
       const req = httpMock.expectOne((r) => r.url.includes('routing-rest-enabled'));

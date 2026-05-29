@@ -18,7 +18,7 @@
 
 import { Component, effect, inject, input, model, OnDestroy, OnInit, untracked, viewChild } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { FormsModule, NgForm } from '@angular/forms';
+import { FormsModule, NgForm, NgModel } from '@angular/forms';
 import { Store } from '@ngxs/store';
 import { ACTION } from 'app/shared/models/action';
 import { customFieldCount, Workbasket } from 'app/shared/models/workbasket';
@@ -29,7 +29,12 @@ import { FormsValidatorService } from 'app/shared/services/forms-validator/forms
 import { filter, map, takeUntil } from 'rxjs/operators';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { CustomField, getCustomFields, WorkbasketsCustomisation } from '../../../shared/models/customisation';
+import {
+  CustomField,
+  CustomFields,
+  getCustomFields,
+  WorkbasketsCustomisation
+} from '../../../shared/models/customisation';
 import {
   MarkWorkbasketForDeletion,
   OnButtonPressed,
@@ -83,25 +88,25 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
   workbasket = model<Workbasket>();
   action = input<ACTION>();
   workbasketForm = viewChild<NgForm>('WorkbasketForm');
-  workbasketClone: Workbasket;
-  allTypes: Map<string, string>;
+  workbasketClone!: Workbasket;
+  allTypes!: Map<string, string>;
   toggleValidationMap = new Map<string, boolean>();
   isOwnerValid: boolean = true;
   readonly lengthError = 'You have reached the maximum length for this field';
   inputOverflowMap = toSignal(inject(FormsValidatorService).inputOverflowObservable, {
     initialValue: new Map<string, boolean>()
   });
-  validateInputOverflow: Function;
-  customFields$: Observable<CustomField[]>;
+  validateInputOverflow!: Function;
+  customFields$!: Observable<CustomField[]>;
   destroy$ = new Subject<void>();
   private store = inject(Store);
-  workbasketsCustomisation$: Observable<WorkbasketsCustomisation> = this.store.select(
+  workbasketsCustomisation$: Observable<WorkbasketsCustomisation | undefined> = this.store.select(
     EngineConfigurationSelectors.workbasketsCustomisation
   );
-  lookupField = toSignal(this.workbasketsCustomisation$.pipe(map((c) => c.information.owner?.lookupField ?? false)), {
+  lookupField = toSignal(this.workbasketsCustomisation$.pipe(map((c) => c?.information?.owner?.lookupField ?? false)), {
     requireSync: true
   });
-  buttonAction$: Observable<ButtonAction> = this.store.select(WorkbasketSelectors.buttonAction);
+  buttonAction$: Observable<ButtonAction | undefined> = this.store.select(WorkbasketSelectors.buttonAction);
   private workbasketService = inject(WorkbasketService);
   private requestInProgressService = inject(RequestInProgressService);
   private formsValidatorService = inject(FormsValidatorService);
@@ -125,10 +130,10 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
     ]);
 
     this.customFields$ = this.workbasketsCustomisation$.pipe(
-      map((customisation) => customisation.information),
+      map((customisation) => customisation?.information ?? ({} as CustomFields)),
       getCustomFields(customFieldCount)
     );
-    this.validateInputOverflow = (inputFieldModel, maxLength) => {
+    this.validateInputOverflow = (inputFieldModel: NgModel, maxLength: number) => {
       if (typeof inputFieldModel.value !== 'undefined') {
         this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
       }
@@ -184,21 +189,27 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
   removeWorkbasket() {
     this.notificationService.showDialog(
       'WORKBASKET_DELETE',
-      { workbasketKey: this.workbasket().key },
+      { workbasketKey: this.workbasket()?.key },
       this.onRemoveConfirmed.bind(this)
     );
   }
 
   removeDistributionTargets() {
-    this.store.dispatch(new RemoveDistributionTarget(this.workbasket()._links.removeDistributionTargets.href));
+    const wb = this.workbasket();
+    if (!wb?._links) return;
+    this.store.dispatch(new RemoveDistributionTarget(wb._links.removeDistributionTargets.href));
   }
 
   onSave() {
     this.beforeRequest();
     const workbasket = this.workbasket();
+    if (!workbasket) {
+      return;
+    }
     if (!workbasket.workbasketId) {
       this.postNewWorkbasket();
     } else {
+      if (!workbasket._links) return;
       this.store.dispatch(new UpdateWorkbasket(workbasket._links.self.href, workbasket)).subscribe(() => {
         this.requestInProgressService.setRequestInProgress(false);
         this.workbasketClone = cloneDeep(workbasket);
@@ -217,26 +228,34 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
 
   postNewWorkbasket() {
     this.addDateToWorkbasket();
-    this.store.dispatch(new SaveNewWorkbasket(this.workbasket())).subscribe(() => {
+    const wb = this.workbasket();
+    if (!wb) return;
+    this.store.dispatch(new SaveNewWorkbasket(wb)).subscribe(() => {
       this.afterRequest();
     });
   }
 
   addDateToWorkbasket() {
+    const wb = this.workbasket();
+    if (!wb) return;
     const date = KadaiDate.getDate();
-    this.workbasket().created = date;
-    this.workbasket().modified = date;
+    wb.created = date;
+    wb.modified = date;
   }
 
   onRemoveConfirmed() {
     this.beforeRequest();
-    this.store.dispatch(new MarkWorkbasketForDeletion(this.workbasket()._links.self.href)).subscribe(() => {
+    const wb = this.workbasket();
+    if (!wb?._links) return;
+    this.store.dispatch(new MarkWorkbasketForDeletion(wb._links.self.href)).subscribe(() => {
       this.afterRequest();
     });
   }
 
   onSelectedOwner(owner: AccessId) {
-    this.workbasket().owner = owner.accessId;
+    const wb = this.workbasket();
+    if (!wb) return;
+    wb.owner = owner.accessId;
   }
 
   getWorkbasketCustomProperty(custom: number) {

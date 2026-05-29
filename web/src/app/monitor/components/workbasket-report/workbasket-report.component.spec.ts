@@ -220,7 +220,7 @@ describe('WorkbasketReportComponent', () => {
   });
 
   it('should have no heading rendered before metaInformation is set — covers false branch of @if (metaInformation)', () => {
-    component.metaInformation = undefined;
+    component.metaInformation = undefined as any;
     const heading = fixture.nativeElement.querySelector('h4');
     expect(heading).toBeNull();
     fixture.detectChanges();

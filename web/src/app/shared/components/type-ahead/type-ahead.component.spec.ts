@@ -73,7 +73,7 @@ describe('TypeAheadComponent with AccessId input', () => {
     expect(input).toBeTruthy();
     input.value = 'user-g-1';
     input.dispatchEvent(new Event('input'));
-    component.accessIdForm.get('accessId').updateValueAndValidity({ emitEvent: true });
+    component.accessIdForm.get('accessId')!.updateValueAndValidity({ emitEvent: true });
 
     fixture.detectChanges();
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -84,8 +84,8 @@ describe('TypeAheadComponent with AccessId input', () => {
   it('should emit false when an invalid access id is set', async () => {
     const emitSpy = vi.spyOn(component.isFormValid, 'emit');
     fixture.componentRef.setInput('displayError', true);
-    component.accessIdForm.get('accessId').setValue('invalid-user');
-    component.accessIdForm.get('accessId').updateValueAndValidity({ emitEvent: true });
+    component.accessIdForm.get('accessId')!.setValue('invalid-user');
+    component.accessIdForm.get('accessId')!.updateValueAndValidity({ emitEvent: true });
 
     fixture.detectChanges();
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -95,8 +95,8 @@ describe('TypeAheadComponent with AccessId input', () => {
 
   it('should emit true when a valid access id is set', async () => {
     const emitSpy = vi.spyOn(component.isFormValid, 'emit');
-    component.accessIdForm.get('accessId').setValue('user-g-1');
-    component.accessIdForm.get('accessId').updateValueAndValidity({ emitEvent: true });
+    component.accessIdForm.get('accessId')!.setValue('user-g-1');
+    component.accessIdForm.get('accessId')!.updateValueAndValidity({ emitEvent: true });
 
     fixture.detectChanges();
     await new Promise((resolve) => setTimeout(resolve, 100));

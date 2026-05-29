@@ -478,7 +478,7 @@ describe('KadaiTreeComponent', () => {
     httpController.match(() => true).forEach((req) => req.flush(''));
 
     expect(localComponent.treeNodes()).toBeDefined();
-    expect(localComponent.treeNodes().length).toBe(2);
+    expect(localComponent.treeNodes()!.length).toBe(2);
   });
 
   it('filterNodes should call checkNameAndKey and checkIcon for each node when tree has nodes', async () => {

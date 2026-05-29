@@ -46,10 +46,10 @@ import { PaginationComponent } from '../../../shared/components/pagination/pagin
   imports: [TaskListToolbarComponent, TaskListComponent, PaginationComponent]
 })
 export class TaskMasterComponent implements OnInit, OnDestroy {
-  tasks: Task[];
-  tasksPageInformation: Page;
+  tasks?: Task[];
+  tasksPageInformation!: Page;
   type = 'tasks';
-  currentBasket: Workbasket;
+  currentBasket?: Workbasket;
   selectedId = '';
   taskDefaultSortBy: TaskQuerySortParameter = TaskQuerySortParameter.PRIORITY;
   sort: Sorting<TaskQuerySortParameter> = {
@@ -79,15 +79,16 @@ export class TaskMasterComponent implements OnInit, OnDestroy {
       this.getTasks();
     });
 
-    this.taskService.taskSelectedStream.pipe(takeUntil(this.destroy$)).subscribe((task: Task) => {
+    this.taskService.taskSelectedStream.pipe(takeUntil(this.destroy$)).subscribe((task: Task | undefined) => {
       this.selectedId = task ? task.taskId : '';
-      if (!this.tasks) {
+      if (!this.tasks && task) {
         this.currentBasket = task.workbasketSummary;
         this.getTasks();
       }
     });
 
     this.taskService.taskChangedStream.pipe(takeUntil(this.destroy$)).subscribe((task) => {
+      if (!task) return;
       this.currentBasket = task.workbasketSummary;
       this.getTasks();
     });
@@ -133,7 +134,7 @@ export class TaskMasterComponent implements OnInit, OnDestroy {
     this.tasks = [];
   }
 
-  changePage(page) {
+  changePage(page: number) {
     this.paging.page = page;
     this.getTasks();
   }
@@ -151,7 +152,11 @@ export class TaskMasterComponent implements OnInit, OnDestroy {
       delete this.currentBasket;
     }
 
-    this.filterBy['workbasket-id'] = [this.currentBasket?.workbasketId];
+    if (this.currentBasket?.workbasketId) {
+      this.filterBy['workbasket-id'] = [this.currentBasket.workbasketId];
+    } else {
+      delete this.filterBy['workbasket-id'];
+    }
 
     if (this.selectedSearchType === Search.byWorkbasket && !this.currentBasket) {
       this.requestInProgress = false;

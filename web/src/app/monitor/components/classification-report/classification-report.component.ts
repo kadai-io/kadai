@@ -34,11 +34,11 @@ import { DatePipe } from '@angular/common';
   providers: [MonitorService]
 })
 export class ClassificationReportComponent implements OnInit {
-  reportData: ReportData;
-  lineChartLabels: Array<any>;
+  reportData!: ReportData;
+  lineChartLabels!: Array<any>;
   lineChartLegend = true;
   lineChartType = 'line';
-  lineChartData: Array<ChartData>;
+  lineChartData!: Array<ChartData>;
   lineChartOptions: ChartConfiguration['options'] = {
     responsive: true,
     maintainAspectRatio: true,

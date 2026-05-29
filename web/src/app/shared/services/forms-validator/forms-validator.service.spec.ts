@@ -56,7 +56,7 @@ describe('FormsValidatorService', () => {
 
   describe('isFieldValid', () => {
     it('should return false when form is null', () => {
-      expect(service.isFieldValid(null, 'field')).toBe(false);
+      expect(service.isFieldValid(null as any, 'field')).toBe(false);
     });
 
     it('should return false when controls are empty', () => {
@@ -115,7 +115,7 @@ describe('FormsValidatorService', () => {
 
   describe('validateFormInformation', () => {
     it('should return false when form is null', async () => {
-      const result = await service.validateFormInformation(null, new Map());
+      const result = await service.validateFormInformation(null as any, new Map());
       expect(result).toBe(false);
     });
 
@@ -178,7 +178,7 @@ describe('FormsValidatorService', () => {
 
   describe('validateFormAccess', () => {
     it('should resolve to true when FormArray is empty', async () => {
-      const emptyFormArray = new FormArray([]);
+      const emptyFormArray = new FormArray<any>([]);
       const result = await service.validateFormAccess(emptyFormArray, new Map());
       expect(result).toBe(true);
     });

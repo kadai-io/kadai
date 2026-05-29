@@ -188,7 +188,7 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should not show details when classification does not exist', () => {
-    component.classification.set(null);
+    component.classification.set(null as any);
     fixture.detectChanges();
     expect(debugElement.nativeElement.querySelector('.action-toolbar')).toBeFalsy();
     expect(debugElement.nativeElement.querySelector('.detailed-fields')).toBeFalsy();
@@ -243,7 +243,7 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should not show delete button when creating or copying a Classification', () => {
-    component.classification.update((classification) => ({ ...classification, classificationId: null }));
+    component.classification.update((classification) => ({ ...classification, classificationId: null as any }));
     const button = debugElement.nativeElement.querySelector('#action-toolbar__more-buttons');
     expect(button).toBeTruthy();
     button.click();
@@ -335,9 +335,9 @@ describe('ClassificationDetailsComponent', () => {
     expect(button).toBeTruthy();
     component.classification.update((classification) => ({ ...classification, isValidInDomain: false }));
     button.click();
-    expect(component.classification().isValidInDomain).toBe(true);
+    expect(component.classification()!.isValidInDomain).toBe(true);
     button.click();
-    expect(component.classification().isValidInDomain).toBe(false);
+    expect(component.classification()!.isValidInDomain).toBe(false);
   });
 
   it('should not show custom fields with attribute visible = false', () => {
@@ -357,8 +357,8 @@ describe('ClassificationDetailsComponent', () => {
 
     await fixture.whenStable();
 
-    expect(component.classification()['custom3']).toBe(undefined);
-    expect(component.classification()['custom4']).toBe(newValue);
+    expect(component.classification()!['custom3']).toBe(undefined);
+    expect(component.classification()!['custom4']).toBe(newValue);
   });
 
   it('should hide Valid-in-Domain checkbox when masterDomainSelected returns true', () => {

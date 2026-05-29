@@ -71,7 +71,7 @@ export class WorkbasketSelectors {
   }
 
   @Selector([WorkbasketState])
-  static buttonAction(state: WorkbasketStateModel): ButtonAction {
+  static buttonAction(state: WorkbasketStateModel): ButtonAction | undefined {
     return state?.button;
   }
 

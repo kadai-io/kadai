@@ -150,7 +150,7 @@ describe('WorkbasketAccessItemsComponent', () => {
   });
 
   it('should dispatch UpdateWorkbasketAccessItems action when save button is triggered', () => {
-    component.accessItemsRepresentation._links.self.href = 'https://link.mock';
+    component.accessItemsRepresentation._links!.self.href = 'https://link.mock';
     const onSaveSpy = vi.spyOn(component, 'onSave');
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(UpdateWorkbasketAccessItems)).subscribe(() => (actionDispatched = true));
@@ -178,15 +178,15 @@ describe('WorkbasketAccessItemsComponent', () => {
   it('should set accessId and accessName on the form control for the given row when accessItemSelected is called', () => {
     fixture.detectChanges();
     component.accessItemSelected({ accessId: 'user-1', name: 'User One' }, 0);
-    expect(component.accessItemsGroups.controls[0].get('accessId').value).toBe('user-1');
-    expect(component.accessItemsGroups.controls[0].get('accessName').value).toBe('User One');
+    expect(component.accessItemsGroups.controls[0].get('accessId')!.value).toBe('user-1');
+    expect(component.accessItemsGroups.controls[0].get('accessName')!.value).toBe('User One');
   });
 
   it('should handle null accessItem gracefully in accessItemSelected', () => {
     fixture.detectChanges();
-    component.accessItemSelected(null, 0);
-    expect(component.accessItemsGroups.controls[0].get('accessId').value).toBeUndefined();
-    expect(component.accessItemsGroups.controls[0].get('accessName').value).toBeUndefined();
+    component.accessItemSelected(null as any, 0);
+    expect(component.accessItemsGroups.controls[0].get('accessId')!.value).toBeUndefined();
+    expect(component.accessItemsGroups.controls[0].get('accessName')!.value).toBeUndefined();
   });
 
   it('should return an array copy of access items when cloneAccessItems is called', () => {
@@ -199,7 +199,7 @@ describe('WorkbasketAccessItemsComponent', () => {
   it('should return a deep copy and not the same references when cloneAccessItems is called', () => {
     fixture.detectChanges();
     const clone = component.cloneAccessItems();
-    const original = component.AccessItemsForm.value.accessItemsGroups;
+    const original = component.AccessItemsForm.value.accessItemsGroups!;
     expect(clone[0]).not.toBe(original[0]);
     expect(clone[0].accessId).toBe(original[0].accessId);
   });
@@ -208,7 +208,7 @@ describe('WorkbasketAccessItemsComponent', () => {
     fixture.detectChanges();
     const newId = 'WBI:NEW-WORKBASKET-ID';
     component.setWorkbasketIdForCopy(newId);
-    component.accessItemsGroups.value.forEach((item) => {
+    component.accessItemsGroups.value.forEach((item: any) => {
       expect(item.workbasketId).toBe(newId);
       expect('accessItemId' in item).toBe(false);
     });
@@ -240,7 +240,7 @@ describe('WorkbasketAccessItemsComponent', () => {
     fixture.detectChanges();
     const validateSpy = vi.spyOn(component.formsValidatorService, 'validateFormAccess').mockResolvedValue(true);
     const onSaveSpy = vi.spyOn(component, 'onSave');
-    component.onSubmit();
+    await component.onSubmit();
     expect(component.formsValidatorService.formSubmitAttempt).toBe(true);
     expect(validateSpy).toHaveBeenCalledWith(component.accessItemsGroups, component.toggleValidationAccessIdMap);
     expect(onSaveSpy).toHaveBeenCalled();

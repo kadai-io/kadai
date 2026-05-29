@@ -46,6 +46,7 @@ export class RoutingUploadComponent implements OnInit {
     if (typeof fileList !== 'undefined') {
       this.file = fileList[0];
     }
+    if (!this.file) return;
     this.routingUploadService.uploadRoutingRules(this.file).subscribe({
       next: (res: { amountOfImportedRow: number; result: string }) => this.toastService.success(res.result),
       error: (err) => {

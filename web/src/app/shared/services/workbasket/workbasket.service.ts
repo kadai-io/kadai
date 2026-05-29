@@ -38,7 +38,7 @@ import { asUrlQueryString } from '../../util/query-parameters-v2';
   providedIn: 'root'
 })
 export class WorkbasketService {
-  public workBasketSelected = new Subject<string>();
+  public workBasketSelected = new Subject<string | undefined>();
   public workBasketSaved = new Subject<number>();
   public workbasketActionToolbarExpanded = new Subject<boolean>();
   private httpClient = inject(HttpClient);
@@ -118,8 +118,8 @@ export class WorkbasketService {
   updateWorkBasketAccessItem(
     url: string,
     workbasketAccessItem: WorkbasketAccessItemsRepresentation
-  ): Observable<string> {
-    return this.httpClient.put<string>(url, workbasketAccessItem);
+  ): Observable<WorkbasketAccessItemsRepresentation> {
+    return this.httpClient.put<WorkbasketAccessItemsRepresentation>(url, workbasketAccessItem);
   }
 
   // GET
@@ -157,7 +157,7 @@ export class WorkbasketService {
     this.workBasketSelected.next(id);
   }
 
-  getSelectedWorkBasket(): Observable<string> {
+  getSelectedWorkBasket(): Observable<string | undefined> {
     return this.workBasketSelected.asObservable();
   }
 

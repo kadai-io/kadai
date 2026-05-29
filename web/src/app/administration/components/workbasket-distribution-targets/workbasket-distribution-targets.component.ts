@@ -50,12 +50,12 @@ export class WorkbasketDistributionTargetsComponent implements OnInit, OnDestroy
   sideBySide = true;
   displayingDistributionTargetsPicker = true;
   transferDistributionTargetObservable = new Subject<Side>();
-  buttonAction$: Observable<ButtonAction> = inject(Store).select(WorkbasketSelectors.buttonAction);
+  buttonAction$: Observable<ButtonAction | undefined> = inject(Store).select(WorkbasketSelectors.buttonAction);
   selectedWorkbasket$: Observable<Workbasket> = inject(Store).select(WorkbasketSelectors.selectedWorkbasket);
   destroy$ = new Subject<void>();
   private notificationsService = inject(NotificationService);
   private store = inject(Store);
-  private selectedWorkbasket: WorkbasketSummary;
+  private selectedWorkbasket?: WorkbasketSummary;
 
   /**
    * Rework with modification based on old components,

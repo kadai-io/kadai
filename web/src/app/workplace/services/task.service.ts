@@ -34,9 +34,9 @@ export class TaskService {
   private httpClient = inject(HttpClient);
   private startupService = inject(StartupService);
 
-  private taskChangedSource = new Subject<Task>();
+  private taskChangedSource = new Subject<Task | undefined>();
   taskChangedStream = this.taskChangedSource.asObservable();
-  private taskSelectedSource = new Subject<Task>();
+  private taskSelectedSource = new Subject<Task | undefined>();
   taskSelectedStream = this.taskSelectedSource.asObservable();
   private taskDeletedSource = new Subject<Task>();
   taskDeletedStream = this.taskDeletedSource.asObservable();
@@ -48,8 +48,8 @@ export class TaskService {
   private static convertTasksDatesToGMT(task: Task): Task {
     const timeAttributes = ['created', 'claimed', 'completed', 'modified', 'planned', 'due'];
     timeAttributes.forEach((attributeName) => {
-      if (task[attributeName]) {
-        task[attributeName] = new Date(task[attributeName]).toISOString();
+      if ((task as any)[attributeName]) {
+        (task as any)[attributeName] = new Date((task as any)[attributeName]).toISOString();
       }
     });
     return task;
@@ -60,14 +60,14 @@ export class TaskService {
   }
 
   publishTaskDeletion() {
-    this.taskDeletedSource.next(null);
+    this.taskDeletedSource.next(null as any);
   }
 
   selectTask(task?: Task) {
     this.taskSelectedSource.next(task);
   }
 
-  getSelectedTask(): Observable<Task> {
+  getSelectedTask(): Observable<Task | undefined> {
     return this.taskSelectedStream;
   }
 

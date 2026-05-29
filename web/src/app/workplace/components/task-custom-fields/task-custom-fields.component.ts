@@ -23,7 +23,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgModel } from '@angular/forms';
 
 @Component({
   selector: 'kadai-task-custom-fields',
@@ -37,16 +37,16 @@ export class TaskCustomFieldsComponent implements OnInit {
   inputOverflowMap = toSignal(inject(FormsValidatorService).inputOverflowObservable, {
     initialValue: new Map<string, boolean>()
   });
-  validateKeypress: Function;
-  customFields: string[];
+  validateKeypress!: Function;
+  customFields!: string[];
   private formsValidatorService = inject(FormsValidatorService);
 
   ngOnInit() {
-    this.validateKeypress = (inputFieldModel, maxLength) => {
+    this.validateKeypress = (inputFieldModel: NgModel, maxLength: number) => {
       this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
     };
 
-    this.customFields = Object.keys(this.task()).filter(
+    this.customFields = Object.keys(this.task() ?? {}).filter(
       (attribute) => attribute.startsWith('custom') && /\d/.test(attribute)
     );
   }

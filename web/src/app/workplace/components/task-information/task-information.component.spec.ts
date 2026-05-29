@@ -207,21 +207,21 @@ describe('TaskInformationComponent', () => {
       const newDate = new Date('2026-03-10T12:00:00Z');
       component.updateDate({ value: newDate });
 
-      expect(component.task().due).toBe(newDate.toISOString());
+      expect(component.task()!.due).toBe(newDate.toISOString());
     });
 
     it('should not update task.due when the event value is null', () => {
-      const originalDue = component.task().due;
+      const originalDue = component.task()!.due;
       component.updateDate({ value: null });
 
-      expect(component.task().due).toBe(originalDue);
+      expect(component.task()!.due).toBe(originalDue);
     });
 
     it('should not update task.due when the event value is undefined', () => {
-      const originalDue = component.task().due;
+      const originalDue = component.task()!.due;
       component.updateDate({ value: undefined });
 
-      expect(component.task().due).toBe(originalDue);
+      expect(component.task()!.due).toBe(originalDue);
     });
   });
 
@@ -231,7 +231,7 @@ describe('TaskInformationComponent', () => {
 
       component.changedClassification(classification);
 
-      expect(component.task().classificationSummary).toBe(classification);
+      expect(component.task()!.classificationSummary).toBe(classification);
     });
 
     it('should set isClassificationEmpty to false', () => {
@@ -250,23 +250,23 @@ describe('TaskInformationComponent', () => {
 
       component.onSelectedOwner(owner);
 
-      expect(component.task().owner).toBe('user-99');
+      expect(component.task()!.owner).toBe('user-99');
     });
 
     it('should not update task.owner when owner is null', () => {
-      const originalOwner = component.task().owner;
+      const originalOwner = component.task()!.owner;
 
-      component.onSelectedOwner(null);
+      component.onSelectedOwner(null as any);
 
-      expect(component.task().owner).toBe(originalOwner);
+      expect(component.task()!.owner).toBe(originalOwner);
     });
 
     it('should not update task.owner when owner has no accessId', () => {
-      const originalOwner = component.task().owner;
+      const originalOwner = component.task()!.owner;
 
       component.onSelectedOwner({ name: 'No ID User' });
 
-      expect(component.task().owner).toBe(originalOwner);
+      expect(component.task()!.owner).toBe(originalOwner);
     });
   });
 
@@ -343,7 +343,7 @@ describe('TaskInformationComponent', () => {
     it('should emit formValid(true) when form is valid, classification is set, and owner is valid', async () => {
       mockFormsValidatorService.validateFormInformation.mockResolvedValue(true);
       component.isOwnerValid = true;
-      component.task().classificationSummary = { classificationId: 'class-1' };
+      component.task()!.classificationSummary = { classificationId: 'class-1' };
 
       const emittedValues: boolean[] = [];
       component.formValid.subscribe((val) => emittedValues.push(val));
@@ -358,7 +358,7 @@ describe('TaskInformationComponent', () => {
 
     it('should not emit formValid when form validation returns false', async () => {
       mockFormsValidatorService.validateFormInformation.mockResolvedValue(false);
-      component.task().classificationSummary = { classificationId: 'class-1' };
+      component.task()!.classificationSummary = { classificationId: 'class-1' };
 
       const emittedValues: boolean[] = [];
       component.formValid.subscribe((val) => emittedValues.push(val));
@@ -374,7 +374,7 @@ describe('TaskInformationComponent', () => {
     it('should not emit formValid when classificationSummary is undefined', async () => {
       mockFormsValidatorService.validateFormInformation.mockResolvedValue(true);
       component.isOwnerValid = true;
-      component.task().classificationSummary = undefined;
+      component.task()!.classificationSummary = undefined;
 
       const emittedValues: boolean[] = [];
       component.formValid.subscribe((val) => emittedValues.push(val));
@@ -390,7 +390,7 @@ describe('TaskInformationComponent', () => {
     it('should not emit formValid when isOwnerValid is false', async () => {
       mockFormsValidatorService.validateFormInformation.mockResolvedValue(true);
       component.isOwnerValid = false;
-      component.task().classificationSummary = { classificationId: 'class-1' };
+      component.task()!.classificationSummary = { classificationId: 'class-1' };
 
       const emittedValues: boolean[] = [];
       component.formValid.subscribe((val) => emittedValues.push(val));
@@ -404,7 +404,7 @@ describe('TaskInformationComponent', () => {
     });
 
     it('should set isClassificationEmpty to true when classificationSummary is undefined', () => {
-      component.task().classificationSummary = undefined;
+      component.task()!.classificationSummary = undefined;
 
       fixture.componentRef.setInput('saveToggleTriggered', true);
       fixture.detectChanges();
@@ -413,7 +413,7 @@ describe('TaskInformationComponent', () => {
     });
 
     it('should set isClassificationEmpty to false when classificationSummary is defined', () => {
-      component.task().classificationSummary = { classificationId: 'class-1' };
+      component.task()!.classificationSummary = { classificationId: 'class-1' };
 
       fixture.componentRef.setInput('saveToggleTriggered', true);
       fixture.detectChanges();
@@ -658,7 +658,7 @@ describe('TaskInformationComponent', () => {
           expect(changedSpy).toHaveBeenCalled();
         } else {
           component.changedClassification({ classificationId: 'class-1', name: 'Class1' } as any);
-          expect(component.task().classificationSummary).toBeDefined();
+          expect(component.task()!.classificationSummary).toBeDefined();
         }
       }
     });

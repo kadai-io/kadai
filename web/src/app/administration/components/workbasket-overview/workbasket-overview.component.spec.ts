@@ -123,7 +123,7 @@ describe('WorkbasketOverviewComponent', () => {
   });
 
   it('should set expanded to true when toggleWidth is called and offsetWidth is 250', () => {
-    Object.defineProperty(component.workbasketList().nativeElement, 'offsetWidth', { value: 250, configurable: true });
+    Object.defineProperty(component.workbasketList()!.nativeElement, 'offsetWidth', { value: 250, configurable: true });
     component.toggleWidth();
     expect(component.expanded).toBe(true);
   });
@@ -139,7 +139,7 @@ describe('WorkbasketOverviewComponent', () => {
   });
 
   it('should trigger toggleWidth a second time and restore expanded to true when offsetWidth is 250', () => {
-    Object.defineProperty(component.workbasketList().nativeElement, 'offsetWidth', { value: 250, configurable: true });
+    Object.defineProperty(component.workbasketList()!.nativeElement, 'offsetWidth', { value: 250, configurable: true });
     const toggleButton: HTMLElement = debugElement.nativeElement.querySelector(
       '.workbasket-overview__toggle-view-button'
     );

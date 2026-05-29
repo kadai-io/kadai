@@ -19,7 +19,7 @@
 import { TestBed } from '@angular/core/testing';
 import { NgxsModule, Store } from '@ngxs/store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { Location } from '@angular/common';
 
 import { WorkbasketState } from './workbasket.state';
@@ -181,7 +181,7 @@ describe('WorkbasketState', () => {
     });
 
     it('should return of(null) when workbasketId is undefined', async () => {
-      await store.dispatch(new SelectWorkbasket(undefined)).toPromise();
+      await store.dispatch(new SelectWorkbasket(undefined as any)).toPromise();
 
       const state = store.snapshot().workbasket;
       // State should remain unchanged - selectedWorkbasket stays as initial
@@ -335,7 +335,7 @@ describe('WorkbasketState', () => {
     });
 
     it('should update workbasketAccessItems in state', async () => {
-      const url = mockWorkbasket._links.accessItems.href;
+      const url = mockWorkbasket._links!.accessItems.href;
       (workbasketServiceMock.getWorkBasketAccessItems as ReturnType<typeof vi.fn>).mockReturnValue(of(mockAccessItems));
 
       await store.dispatch(new GetWorkbasketAccessItems(url)).toPromise();
@@ -352,10 +352,10 @@ describe('WorkbasketState', () => {
       await store.dispatch(new TransferDistributionTargets(Side.AVAILABLE, [workbasketToTransfer])).toPromise();
 
       const state = store.snapshot().workbasket;
-      const dtIds = state.workbasketDistributionTargets.distributionTargets.map((wb) => wb.workbasketId);
+      const dtIds = state.workbasketDistributionTargets.distributionTargets.map((wb: any) => wb.workbasketId);
       expect(dtIds).not.toContain(workbasketToTransfer.workbasketId);
 
-      const availableIds = state.availableDistributionTargets.workbaskets.map((wb) => wb.workbasketId);
+      const availableIds = state.availableDistributionTargets.workbaskets.map((wb: any) => wb.workbasketId);
       expect(availableIds).toContain(workbasketToTransfer.workbasketId);
     });
 
@@ -365,10 +365,10 @@ describe('WorkbasketState', () => {
       await store.dispatch(new TransferDistributionTargets(Side.SELECTED, [workbasketToTransfer])).toPromise();
 
       const state = store.snapshot().workbasket;
-      const availableIds = state.availableDistributionTargets.workbaskets.map((wb) => wb.workbasketId);
+      const availableIds = state.availableDistributionTargets.workbaskets.map((wb: any) => wb.workbasketId);
       expect(availableIds).not.toContain(workbasketToTransfer.workbasketId);
 
-      const dtIds = state.workbasketDistributionTargets.distributionTargets.map((wb) => wb.workbasketId);
+      const dtIds = state.workbasketDistributionTargets.distributionTargets.map((wb: any) => wb.workbasketId);
       expect(dtIds).toContain(workbasketToTransfer.workbasketId);
     });
 
@@ -452,7 +452,7 @@ describe('WorkbasketState', () => {
 
   describe('UpdateWorkbasket', () => {
     it('should call updateWorkbasket service with url and workbasket', async () => {
-      const url = mockWorkbasket._links.self.href;
+      const url = mockWorkbasket._links!.self.href;
       const updatedWorkbasket = { ...mockWorkbasket, name: 'Updated Name' };
       (workbasketServiceMock.updateWorkbasket as ReturnType<typeof vi.fn>).mockReturnValue(of(updatedWorkbasket));
 
@@ -462,7 +462,7 @@ describe('WorkbasketState', () => {
     });
 
     it('should show success notification after updating', async () => {
-      const url = mockWorkbasket._links.self.href;
+      const url = mockWorkbasket._links!.self.href;
       (workbasketServiceMock.updateWorkbasket as ReturnType<typeof vi.fn>).mockReturnValue(of(mockWorkbasket));
 
       await store.dispatch(new UpdateWorkbasket(url, mockWorkbasket)).toPromise();
@@ -473,7 +473,7 @@ describe('WorkbasketState', () => {
     });
 
     it('should update selectedWorkbasket in state after success', async () => {
-      const url = mockWorkbasket._links.self.href;
+      const url = mockWorkbasket._links!.self.href;
       const updatedWorkbasket = { ...mockWorkbasket, name: 'Updated' };
       (workbasketServiceMock.updateWorkbasket as ReturnType<typeof vi.fn>).mockReturnValue(of(updatedWorkbasket));
 
@@ -484,7 +484,7 @@ describe('WorkbasketState', () => {
     });
 
     it('should call updateWorkbasketSummaryRepresentation to update workbaskets list', async () => {
-      const url = mockWorkbasket._links.self.href;
+      const url = mockWorkbasket._links!.self.href;
       store.reset({
         ...store.snapshot(),
         workbasket: {
@@ -508,7 +508,7 @@ describe('WorkbasketState', () => {
 
   describe('UpdateWorkbasketAccessItems', () => {
     it('should call updateWorkBasketAccessItem with url and access items', async () => {
-      const url = mockWorkbasket._links.accessItems.href;
+      const url = mockWorkbasket._links!.accessItems.href;
       const accessItems = mockAccessItems.accessItems;
 
       await store.dispatch(new UpdateWorkbasketAccessItems(url, accessItems)).toPromise();
@@ -517,7 +517,7 @@ describe('WorkbasketState', () => {
     });
 
     it('should show success notification after updating access items', async () => {
-      const url = mockWorkbasket._links.accessItems.href;
+      const url = mockWorkbasket._links!.accessItems.href;
 
       await store.dispatch(new UpdateWorkbasketAccessItems(url, mockAccessItems.accessItems)).toPromise();
 
@@ -532,7 +532,7 @@ describe('WorkbasketState', () => {
 
   describe('MarkWorkbasketForDeletion', () => {
     it('should call markWorkbasketForDeletion with the given url', async () => {
-      const url = mockWorkbasket._links.self.href;
+      const url = mockWorkbasket._links!.self.href;
       (workbasketServiceMock.markWorkbasketForDeletion as ReturnType<typeof vi.fn>).mockReturnValue(
         of({ status: 200 })
       );
@@ -544,7 +544,7 @@ describe('WorkbasketState', () => {
     });
 
     it('should not show success when status is 202', async () => {
-      const url = mockWorkbasket._links.self.href;
+      const url = mockWorkbasket._links!.self.href;
       (workbasketServiceMock.markWorkbasketForDeletion as ReturnType<typeof vi.fn>).mockReturnValue(
         of({ status: 202 })
       );
@@ -681,6 +681,217 @@ describe('WorkbasketState', () => {
         await store.dispatch(new UpdateWorkbasketDistributionTargets()).toPromise();
       } catch {}
       expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+    });
+
+    it('should return EMPTY when selectedWorkbasket has no _links', async () => {
+      store.reset({
+        ...store.snapshot(),
+        workbasket: {
+          ...initialWorkbasketState,
+          selectedWorkbasket: { ...mockWorkbasket, _links: undefined }
+        }
+      });
+
+      await store.dispatch(new UpdateWorkbasketDistributionTargets()).toPromise();
+
+      expect(workbasketServiceMock.updateWorkBasketsDistributionTargets).not.toHaveBeenCalled();
+    });
+
+    it('should not call getWorkBasket when selectedWorkbasket has no workbasketId', async () => {
+      const links = mockWorkbasket._links!;
+      store.reset({
+        ...store.snapshot(),
+        workbasket: {
+          ...initialWorkbasketState,
+          selectedWorkbasket: { ...mockWorkbasket, workbasketId: undefined, _links: links }
+        }
+      });
+      (workbasketServiceMock.getWorkBasket as ReturnType<typeof vi.fn>).mockClear();
+
+      await store.dispatch(new UpdateWorkbasketDistributionTargets()).toPromise();
+
+      expect(workbasketServiceMock.getWorkBasket).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('InitializeStore tab handling', () => {
+    let paramsSubject: Subject<any>;
+
+    beforeEach(async () => {
+      paramsSubject = new Subject<any>();
+
+      workbasketServiceMock = {
+        getWorkBasket: vi.fn().mockReturnValue(of(mockWorkbasket)),
+        getWorkBasketAccessItems: vi.fn().mockReturnValue(of(mockAccessItems)),
+        removeDistributionTarget: vi.fn().mockReturnValue(of({})),
+        getWorkBasketsDistributionTargets: vi.fn().mockReturnValue(of(mockDistributionTargets)),
+        getWorkBasketsSummary: vi.fn().mockReturnValue(of(mockAvailableDistributionTargets)),
+        updateWorkBasketsDistributionTargets: vi.fn().mockReturnValue(of(mockDistributionTargets)),
+        updateWorkBasketAccessItem: vi.fn().mockReturnValue(of(mockAccessItems)),
+        createWorkbasket: vi.fn().mockReturnValue(of(mockWorkbasket)),
+        updateWorkbasket: vi.fn().mockReturnValue(of(mockWorkbasket)),
+        markWorkbasketForDeletion: vi.fn().mockReturnValue(of({ status: 200 }))
+      };
+
+      notificationServiceMock = { showSuccess: vi.fn(), showError: vi.fn() };
+      requestInProgressServiceMock = { setRequestInProgress: vi.fn() };
+      domainServiceMock = {
+        getSelectedDomain: vi.fn().mockReturnValue(of('DOMAIN_A')),
+        getSelectedDomainValue: vi.fn().mockReturnValue('DOMAIN_A'),
+        domainChangedComplete: vi.fn()
+      };
+      locationMock = { path: vi.fn().mockReturnValue('/foo'), go: vi.fn() };
+
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({
+        imports: [NgxsModule.forRoot([WorkbasketState, FilterState])],
+        providers: [
+          { provide: WorkbasketService, useValue: workbasketServiceMock },
+          { provide: NotificationService, useValue: notificationServiceMock },
+          { provide: RequestInProgressService, useValue: requestInProgressServiceMock },
+          { provide: DomainService, useValue: domainServiceMock },
+          { provide: Location, useValue: locationMock },
+          {
+            provide: ActivatedRoute,
+            useValue: { queryParams: paramsSubject.asObservable() }
+          }
+        ]
+      }).compileComponents();
+
+      store = TestBed.inject(Store);
+      store.reset({ ...store.snapshot(), workbasket: { ...initialWorkbasketState } });
+    });
+
+    it('should select INFORMATION tab when params.tab is "information"', () => {
+      const workbasketState = TestBed.inject(WorkbasketState);
+      const dispatchSpy = vi.fn().mockReturnValue(of(null));
+      const mockCtx: any = {
+        dispatch: dispatchSpy,
+        patchState: vi.fn(),
+        getState: vi.fn().mockReturnValue(initialWorkbasketState)
+      };
+
+      workbasketState.initializeStore(mockCtx);
+      paramsSubject.next({ tab: 'information' });
+
+      const dispatchedComponent = dispatchSpy.mock.calls.find((c) => c[0]?.component !== undefined);
+      expect(dispatchedComponent?.[0].component).toBe(WorkbasketComponent.INFORMATION);
+    });
+
+    it('should select ACCESS_ITEMS tab when params.tab is "access-items"', () => {
+      const workbasketState = TestBed.inject(WorkbasketState);
+      const dispatchSpy = vi.fn().mockReturnValue(of(null));
+      const mockCtx: any = {
+        dispatch: dispatchSpy,
+        patchState: vi.fn(),
+        getState: vi.fn().mockReturnValue(initialWorkbasketState)
+      };
+
+      workbasketState.initializeStore(mockCtx);
+      paramsSubject.next({ tab: 'access-items' });
+
+      const dispatchedComponent = dispatchSpy.mock.calls.find((c) => c[0]?.component !== undefined);
+      expect(dispatchedComponent?.[0].component).toBe(WorkbasketComponent.ACCESS_ITEMS);
+    });
+
+    it('should select DISTRIBUTION_TARGETS tab when params.tab is "distribution-targets"', () => {
+      const workbasketState = TestBed.inject(WorkbasketState);
+      const dispatchSpy = vi.fn().mockReturnValue(of(null));
+      const mockCtx: any = {
+        dispatch: dispatchSpy,
+        patchState: vi.fn(),
+        getState: vi.fn().mockReturnValue(initialWorkbasketState)
+      };
+
+      workbasketState.initializeStore(mockCtx);
+      paramsSubject.next({ tab: 'distribution-targets' });
+
+      const dispatchedComponent = dispatchSpy.mock.calls.find((c) => c[0]?.component !== undefined);
+      expect(dispatchedComponent?.[0].component).toBe(WorkbasketComponent.DISTRIBUTION_TARGETS);
+    });
+  });
+
+  describe('SelectWorkbasket with different selectedComponent', () => {
+    it('should not crash when selectedWorkbasket fetched has no _links', async () => {
+      const newWorkbasket = { ...mockWorkbasket, workbasketId: 'WBI:NOLINKS', _links: undefined };
+      (workbasketServiceMock.getWorkBasket as ReturnType<typeof vi.fn>).mockReturnValue(of(newWorkbasket));
+
+      await store.dispatch(new SelectWorkbasket('WBI:NOLINKS')).toPromise();
+
+      const state = store.snapshot().workbasket;
+      expect(state.selectedWorkbasket).toEqual(newWorkbasket);
+    });
+
+    it('should set path to access-items when state.selectedComponent is ACCESS_ITEMS', async () => {
+      store.reset({
+        ...store.snapshot(),
+        workbasket: { ...initialWorkbasketState, selectedComponent: WorkbasketComponent.ACCESS_ITEMS }
+      });
+      const newWorkbasket = { ...mockWorkbasket, workbasketId: 'WBI:AI' };
+      (workbasketServiceMock.getWorkBasket as ReturnType<typeof vi.fn>).mockReturnValue(of(newWorkbasket));
+
+      await store.dispatch(new SelectWorkbasket('WBI:AI')).toPromise();
+
+      expect(locationMock.go).toHaveBeenCalled();
+    });
+
+    it('should set path to distribution-targets when state.selectedComponent is DISTRIBUTION_TARGETS', async () => {
+      store.reset({
+        ...store.snapshot(),
+        workbasket: { ...initialWorkbasketState, selectedComponent: WorkbasketComponent.DISTRIBUTION_TARGETS }
+      });
+      const newWorkbasket = { ...mockWorkbasket, workbasketId: 'WBI:DT' };
+      (workbasketServiceMock.getWorkBasket as ReturnType<typeof vi.fn>).mockReturnValue(of(newWorkbasket));
+
+      await store.dispatch(new SelectWorkbasket('WBI:DT')).toPromise();
+
+      expect(locationMock.go).toHaveBeenCalled();
+    });
+  });
+
+  describe('SaveNewWorkbasket EMPTY path', () => {
+    it('should not dispatch SelectWorkbasket when created workbasket has no workbasketId', async () => {
+      const workbasketWithoutId = { ...mockWorkbasket, workbasketId: undefined };
+      (workbasketServiceMock.createWorkbasket as ReturnType<typeof vi.fn>).mockReturnValue(of(workbasketWithoutId));
+      (workbasketServiceMock.getWorkBasket as ReturnType<typeof vi.fn>).mockClear();
+
+      await store.dispatch(new SaveNewWorkbasket(workbasketWithoutId)).toPromise();
+
+      expect(workbasketServiceMock.getWorkBasket).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('CreateWorkbasket when availableDistributionTargets empty', () => {
+    it('should dispatch FetchAvailableDistributionTargets when no available targets', async () => {
+      store.reset({
+        ...store.snapshot(),
+        workbasket: {
+          ...initialWorkbasketState,
+          availableDistributionTargets: { workbaskets: [], page: { totalPages: 1 }, _links: {} }
+        }
+      });
+      (workbasketServiceMock.getWorkBasketsSummary as ReturnType<typeof vi.fn>).mockClear();
+
+      await store.dispatch(new CreateWorkbasket()).toPromise();
+
+      expect(workbasketServiceMock.getWorkBasketsSummary).toHaveBeenCalled();
+    });
+  });
+
+  describe('FetchAvailableDistributionTargets when page is undefined', () => {
+    it('should call getWorkBasketsSummary when refetchAll is false and totalPages is undefined', async () => {
+      store.reset({
+        ...store.snapshot(),
+        workbasket: {
+          ...initialWorkbasketState,
+          availableDistributionTargets: { workbaskets: [], _links: {} },
+          availableDistributionTargetsPage: 0
+        }
+      });
+
+      await store.dispatch(new FetchAvailableDistributionTargets(false)).toPromise();
+
+      expect(workbasketServiceMock.getWorkBasketsSummary).not.toHaveBeenCalled();
     });
   });
 });

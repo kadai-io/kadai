@@ -43,9 +43,7 @@ describe('WorkplaceService', () => {
     });
 
     it('should initially emit undefined as BehaviorSubject default', () => {
-      let emitted: Workbasket = null;
-      service.getSelectedWorkbasket().subscribe((wb) => (emitted = wb));
-      expect(emitted).toBeUndefined();
+      service.getSelectedWorkbasket().subscribe((workbasket) => expect(workbasket).toBeUndefined());
     });
   });
 
@@ -54,7 +52,7 @@ describe('WorkplaceService', () => {
       const workbasket: Workbasket = { workbasketId: 'wb-1', name: 'Test WB', key: 'KEY1' };
       service.selectWorkbasket(workbasket);
 
-      let emitted: Workbasket = { workbasketId: 'some' } as Workbasket;
+      let emitted: any = { workbasketId: 'some' } as Workbasket;
       service.getSelectedWorkbasket().subscribe((wb) => (emitted = wb));
 
       service.selectWorkbasket();
@@ -66,7 +64,7 @@ describe('WorkplaceService', () => {
       const workbasket: Workbasket = { workbasketId: 'wb-2', name: 'Another WB', key: 'KEY2' };
       service.selectWorkbasket(workbasket);
 
-      let emitted: Workbasket;
+      let emitted: any = null;
       service.getSelectedWorkbasket().subscribe((wb) => (emitted = wb));
 
       expect(emitted).toBe(workbasket);
@@ -79,7 +77,7 @@ describe('WorkplaceService', () => {
       service.selectWorkbasket(wb1);
       service.selectWorkbasket(wb2);
 
-      let emitted: Workbasket;
+      let emitted: any = null;
       service.getSelectedWorkbasket().subscribe((wb) => (emitted = wb));
 
       expect(emitted).toBe(wb2);

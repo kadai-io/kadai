@@ -60,10 +60,10 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
   displayError = input(false);
   accessIdEventEmitter = output<AccessId>();
   isFormValid = output<boolean>();
-  globalCustomisation$: Observable<GlobalCustomisation> = inject(Store).select(
+  globalCustomisation$: Observable<GlobalCustomisation | undefined> = inject(Store).select(
     EngineConfigurationSelectors.globalCustomisation
   );
-  buttonAction$: Observable<ButtonAction> = inject(Store).select(WorkbasketSelectors.buttonAction);
+  buttonAction$: Observable<ButtonAction | undefined> = inject(Store).select(WorkbasketSelectors.buttonAction);
   name = signal('');
   lastSavedAccessId: string = '';
   filteredAccessIds = signal<AccessId[]>([]);
@@ -113,7 +113,7 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
           this.handleEmptyAccessId();
           return;
         }
-        this.searchForAccessId(value);
+        this.searchForAccessId(value!);
       });
   }
 
@@ -134,7 +134,7 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
       .pipe(take(1))
       .subscribe((accessIds) => {
         this.filteredAccessIds.set(accessIds);
-        const accessId = accessIds.find((accessId) => accessId.accessId.toLowerCase() === value.toLowerCase());
+        const accessId = accessIds.find((accessId) => accessId.accessId?.toLowerCase() === value.toLowerCase());
 
         if (typeof accessId !== 'undefined') {
           this.name.set(accessId?.name ?? '');

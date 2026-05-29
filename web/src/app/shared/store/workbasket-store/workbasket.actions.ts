@@ -69,7 +69,7 @@ export class SelectComponent {
 export class OnButtonPressed {
   static readonly type = '[Workbasket] Button pressed';
 
-  constructor(public button: ButtonAction) {}
+  constructor(public button: ButtonAction | undefined) {}
 }
 
 // Workbasket Information
