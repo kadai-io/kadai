@@ -41,12 +41,12 @@ import { MatDivider } from '@angular/material/divider';
   imports: [MatButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatDivider]
 })
 export class TaskProcessingComponent implements OnInit, OnDestroy {
-  routeSubscription: Subscription;
+  routeSubscription!: Subscription;
   regex = /\${(.*?)}/g;
   address = 'https://bing.com';
-  link: SafeResourceUrl;
-  task: Task = null;
-  workbaskets: Workbasket[];
+  link!: SafeResourceUrl;
+  task!: Task;
+  workbaskets!: Workbasket[];
   private taskService = inject(TaskService);
   private workbasketService = inject(WorkbasketService);
   private classificationService = inject(ClassificationsService);
@@ -74,12 +74,12 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
 
   async getTask(id: string) {
     this.requestInProgressService.setRequestInProgress(true);
-    this.task = await this.taskService.getTask(id).toPromise();
+    this.task = (await this.taskService.getTask(id).toPromise())!;
     this.taskService.selectTask(this.task);
-    const classification = await this.classificationService
-      .getClassification(this.task.classificationSummary.classificationId)
-      .toPromise();
-    this.address = this.extractUrl(classification.applicationEntryPoint) || `${this.address}?q=${this.task.name}`;
+    const classification = (await this.classificationService
+      .getClassification(this.task.classificationSummary!.classificationId!)
+      .toPromise())!;
+    this.address = this.extractUrl(classification.applicationEntryPoint!) || `${this.address}?q=${this.task.name}`;
     this.link = this.sanitizer.bypassSecurityTrustResourceUrl(this.address);
     this.getWorkbaskets();
     this.requestInProgressService.setRequestInProgress(false);
@@ -91,7 +91,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
       this.requestInProgressService.setRequestInProgress(false);
       this.workbaskets = workbaskets.workbaskets;
 
-      const index = this.workbaskets.findIndex((workbasket) => workbasket.name === this.task.workbasketSummary.name);
+      const index = this.workbaskets.findIndex((workbasket) => workbasket.name === this.task.workbasketSummary?.name);
       if (index !== -1) {
         this.workbaskets.splice(index, 1);
       }
@@ -100,7 +100,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
 
   transferTask(workbasket: Workbasket) {
     this.requestInProgressService.setRequestInProgress(true);
-    this.taskService.transferTask(this.task.taskId, workbasket.workbasketId).subscribe((task) => {
+    this.taskService.transferTask(this.task.taskId, workbasket.workbasketId!).subscribe((task) => {
       this.requestInProgressService.setRequestInProgress(false);
       this.task = task;
     });

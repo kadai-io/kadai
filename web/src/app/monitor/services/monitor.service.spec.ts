@@ -110,7 +110,7 @@ describe('MonitorService', () => {
   describe('getChartData', () => {
     it('should map report rows to ChartData objects', () => {
       const reportData: ReportData = {
-        meta: null,
+        meta: null as any,
         rows: [{ desc: ['label1'], cells: [1, 2, 3], total: 6, depth: 0, display: true }],
         sumRow: []
       };
@@ -124,7 +124,7 @@ describe('MonitorService', () => {
 
     it('should map multiple rows correctly', () => {
       const reportData: ReportData = {
-        meta: null,
+        meta: null as any,
         rows: [
           { desc: ['row1'], cells: [10, 20], total: 30, depth: 0, display: true },
           { desc: ['row2'], cells: [5, 15], total: 20, depth: 0, display: true }
@@ -142,14 +142,14 @@ describe('MonitorService', () => {
     });
 
     it('should return empty array when rows is empty', () => {
-      const reportData: ReportData = { meta: null, rows: [], sumRow: [] };
+      const reportData: ReportData = { meta: null as any, rows: [], sumRow: [] };
       const result = service.getChartData(reportData);
       expect(result).toEqual([]);
     });
 
     it('should use first element of desc as label', () => {
       const reportData: ReportData = {
-        meta: null,
+        meta: null as any,
         rows: [{ desc: ['first', 'second', 'third'], cells: [1], total: 1, depth: 0, display: true }],
         sumRow: []
       };

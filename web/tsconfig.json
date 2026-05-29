@@ -4,7 +4,6 @@
     "skipLibCheck": true,
     "module": "es2020",
     "outDir": "./dist/out-tsc",
-    "baseUrl": "src",
     "esModuleInterop": true,
     "sourceMap": true,
     "declaration": false,
@@ -12,9 +11,12 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "target": "ES2022",
+    "strict": true,
     "typeRoots": ["node_modules/@types"],
     "paths": {
-      "@task-routing/*": ["app/v2/task-routing/*"]
+      "@task-routing/*": ["./src/app/v2/task-routing/*"],
+      "app/*": ["./src/app/*"],
+      "environments/*": ["./src/environments/*"]
     },
     "useDefineForClassFields": false
   },

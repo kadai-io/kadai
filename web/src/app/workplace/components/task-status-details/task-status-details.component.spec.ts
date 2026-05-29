@@ -78,7 +78,7 @@ describe('TaskStatusDetailsComponent', () => {
     localFixture.detectChanges();
     const stateInput: HTMLInputElement = localFixture.nativeElement.querySelector('#task-state');
     expect(stateInput).toBeTruthy();
-    expect(localComponent.task().state).toBe('CLAIMED');
+    expect(localComponent.task()!.state).toBe('CLAIMED');
   });
 
   it('should display read and transferred values', () => {
@@ -120,7 +120,7 @@ describe('TaskStatusDetailsComponent', () => {
     localFixture.detectChanges();
     const receivedInput: HTMLInputElement = localFixture.nativeElement.querySelector('#task-received');
     expect(receivedInput).toBeTruthy();
-    expect(localComponent.task().received).toBe('2024-01-11T06:00:00Z');
+    expect(localComponent.task()!.received).toBe('2024-01-11T06:00:00Z');
   });
 
   it('should reflect ngModel bound state value when task state changes', () => {
@@ -130,7 +130,7 @@ describe('TaskStatusDetailsComponent', () => {
     task.state = 'COMPLETED';
     localFixture.componentRef.setInput('task', task);
     localFixture.detectChanges();
-    expect(localComponent.task().state).toBe('COMPLETED');
+    expect(localComponent.task()!.state).toBe('COMPLETED');
     const stateInput: HTMLInputElement = localFixture.nativeElement.querySelector('#task-state');
     expect(stateInput).toBeTruthy();
   });
@@ -171,8 +171,8 @@ describe('TaskStatusDetailsComponent', () => {
     task.transferred = false;
     localFixture.componentRef.setInput('task', task);
     localFixture.detectChanges();
-    expect(localComponent.task().read).toBe(false);
-    expect(localComponent.task().transferred).toBe(false);
+    expect(localComponent.task()!.read).toBe(false);
+    expect(localComponent.task()!.transferred).toBe(false);
     expect(localFixture.nativeElement.querySelector('#task-read')).toBeTruthy();
     expect(localFixture.nativeElement.querySelector('#task-transferred')).toBeTruthy();
   });

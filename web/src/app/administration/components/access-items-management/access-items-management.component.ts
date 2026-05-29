@@ -37,10 +37,15 @@ import {
   WorkbasketAccessItemQuerySortParameter
 } from 'app/shared/models/sorting';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
-import { takeUntil } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 import { AccessId } from '../../../shared/models/access-id';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { AccessItemsCustomisation, CustomField, getCustomFields } from '../../../shared/models/customisation';
+import {
+  AccessItemsCustomisation,
+  CustomField,
+  CustomFields,
+  getCustomFields
+} from '../../../shared/models/customisation';
 import { customFieldCount } from '../../../shared/models/workbasket-access-items';
 import {
   GetAccessItems,
@@ -111,10 +116,10 @@ import { MatIcon } from '@angular/material/icon';
 })
 export class AccessItemsManagementComponent implements OnInit {
   dialog = inject(MatDialog);
-  accessIdPrevious: string;
-  accessIdName: string;
-  accessItemsForm: FormGroup;
-  accessId: AccessId;
+  accessIdPrevious?: string;
+  accessIdName?: string;
+  accessItemsForm: FormGroup | null = null;
+  accessId!: AccessId;
   groups: AccessId[] = [];
   permissions: AccessId[] = [];
   defaultSortBy: WorkbasketAccessItemQuerySortParameter = WorkbasketAccessItemQuerySortParameter.ACCESS_ID;
@@ -123,13 +128,13 @@ export class AccessItemsManagementComponent implements OnInit {
     'sort-by': this.defaultSortBy,
     order: Direction.DESC
   };
-  accessItems: WorkbasketAccessItems[];
+  accessItems: WorkbasketAccessItems[] = [];
   isGroup: boolean = false;
-  accessItemsCustomization$: Observable<AccessItemsCustomisation> = inject(Store).select(
+  accessItemsCustomization$: Observable<AccessItemsCustomisation | undefined> = inject(Store).select(
     EngineConfigurationSelectors.accessItemsCustomisation
   );
   groups$: Observable<AccessId[]> = inject(Store).select(AccessItemsManagementSelector.groups);
-  customFields$: Observable<CustomField[]>;
+  customFields$!: Observable<CustomField[]>;
   permissions$: Observable<AccessId[]> = inject(Store).select(AccessItemsManagementSelector.permissions);
   destroy$ = new Subject<void>();
   private formBuilder = inject(FormBuilder);
@@ -138,11 +143,11 @@ export class AccessItemsManagementComponent implements OnInit {
   private store = inject(Store);
   private requestInProgressService = inject(RequestInProgressService);
 
-  get accessItemsGroups(): FormArray {
+  get accessItemsGroups(): FormArray | null {
     return this.accessItemsForm ? (this.accessItemsForm.get('accessItemsGroups') as FormArray) : null;
   }
 
-  get accessItemsPermissions(): FormArray {
+  get accessItemsPermissions(): FormArray | null {
     return this.accessItemsForm ? (this.accessItemsForm.get('accessItemsPermissions') as FormArray) : null;
   }
 
@@ -164,30 +169,36 @@ export class AccessItemsManagementComponent implements OnInit {
       if (this.accessIdPrevious !== selected.accessId) {
         this.accessIdPrevious = selected.accessId;
         this.accessIdName = selected.name;
-        this.store
-          .dispatch(new GetGroupsByAccessId(selected.accessId))
-          .pipe(takeUntil(this.destroy$))
-          .subscribe(() => {
-            this.searchForAccessItemsWorkbaskets();
-          });
-        this.store
-          .dispatch(new GetPermissionsByAccessId(selected.accessId))
-          .pipe(takeUntil(this.destroy$))
-          .subscribe(() => {
-            this.searchForAccessItemsWorkbaskets();
-          });
+        const accessId = selected.accessId;
+        if (accessId) {
+          this.store
+            .dispatch(new GetGroupsByAccessId(accessId))
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(() => {
+              this.searchForAccessItemsWorkbaskets();
+            });
+          this.store
+            .dispatch(new GetPermissionsByAccessId(accessId))
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(() => {
+              this.searchForAccessItemsWorkbaskets();
+            });
+        }
       }
     } else {
       this.accessItemsForm = null;
     }
-    this.customFields$ = this.accessItemsCustomization$.pipe(getCustomFields(customFieldCount));
+    this.customFields$ = this.accessItemsCustomization$.pipe(
+      map((c) => c ?? ({} as CustomFields)),
+      getCustomFields(customFieldCount)
+    );
   }
 
   searchForAccessItemsWorkbaskets() {
     this.removeFocus();
     if (this.permissions == null) {
       const filterParameter: WorkbasketAccessItemQueryFilterParameter = {
-        'access-id': [this.accessId, ...this.groups].map((a) => a.accessId)
+        'access-id': [this.accessId, ...this.groups].map((a) => a.accessId).filter((id): id is string => !!id)
       };
       this.store
         .dispatch(new GetAccessItems(filterParameter, this.sortModel))
@@ -201,7 +212,9 @@ export class AccessItemsManagementComponent implements OnInit {
         });
     } else {
       const filterParameter: WorkbasketAccessItemQueryFilterParameter = {
-        'access-id': [this.accessId, ...this.groups, ...this.permissions].map((a) => a.accessId)
+        'access-id': [this.accessId, ...this.groups, ...this.permissions]
+          .map((a) => a.accessId)
+          .filter((id): id is string => !!id)
       };
       this.store
         .dispatch(new GetAccessItems(filterParameter, this.sortModel))
@@ -226,7 +239,7 @@ export class AccessItemsManagementComponent implements OnInit {
     AccessItemsFormGroups.forEach((accessItemGroup) => {
       accessItemGroup.controls.accessId.setValidators(Validators.required);
       Object.keys(accessItemGroup.controls).forEach((key) => {
-        accessItemGroup.controls[key].disable();
+        accessItemGroup.get(key)?.disable();
       });
     });
 
@@ -252,7 +265,7 @@ export class AccessItemsManagementComponent implements OnInit {
     AccessItemsFormPermissions.forEach((accessItemPermission) => {
       accessItemPermission.controls.accessId.setValidators(Validators.required);
       Object.keys(accessItemPermission.controls).forEach((key) => {
-        accessItemPermission.controls[key].disable();
+        accessItemPermission.get(key)?.disable();
       });
     });
 
@@ -274,14 +287,18 @@ export class AccessItemsManagementComponent implements OnInit {
   }
 
   filterAccessItems() {
-    if (this.accessItemsForm.value.accessIdFilter) {
+    const form = this.accessItemsForm;
+    if (!form) {
+      return;
+    }
+    if (form.value.accessIdFilter) {
       this.accessItems = this.accessItems.filter((value) =>
-        value.accessName.toLowerCase().includes(this.accessItemsForm.value.accessIdFilter.toLowerCase())
+        value.accessName.toLowerCase().includes(form.value.accessIdFilter.toLowerCase())
       );
     }
-    if (this.accessItemsForm.value.workbasketKeyFilter) {
+    if (form.value.workbasketKeyFilter) {
       this.accessItems = this.accessItems.filter((value) =>
-        value.workbasketKey.toLowerCase().includes(this.accessItemsForm.value.workbasketKeyFilter.toLowerCase())
+        value.workbasketKey.toLowerCase().includes(form.value.workbasketKeyFilter.toLowerCase())
       );
     }
   }
@@ -291,6 +308,7 @@ export class AccessItemsManagementComponent implements OnInit {
       'ACCESS_ITEM_MANAGEMENT_REVOKE_ACCESS',
       { accessId: this.accessId.accessId },
       () => {
+        if (!this.accessId?.accessId) return;
         this.store
           .dispatch(new RemoveAccessItemsPermissions(this.accessId.accessId))
           .pipe(takeUntil(this.destroy$))
@@ -303,8 +321,8 @@ export class AccessItemsManagementComponent implements OnInit {
 
   isFieldValid(field: string, index: number): boolean {
     return (
-      this.formsValidatorService.isFieldValid(this.accessItemsGroups[index], field) ||
-      this.formsValidatorService.isFieldValid(this.accessItemsPermissions[index], field)
+      this.formsValidatorService.isFieldValid((this.accessItemsGroups as any)?.[index], field) ||
+      this.formsValidatorService.isFieldValid((this.accessItemsPermissions as any)?.[index], field)
     );
   }
 

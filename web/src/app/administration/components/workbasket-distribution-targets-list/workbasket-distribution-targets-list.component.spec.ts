@@ -402,7 +402,7 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
 
     it('should filter distribution targets by name-like after filter dispatch', () => {
       store.dispatch(new SetWorkbasketFilter({ 'name-like': ['Alpha'] }, 'selectedDistributionTargets'));
-      const allMatch = selectedComponent.distributionTargets.every((dt) => dt.name.toLowerCase().includes('alpha'));
+      const allMatch = selectedComponent.distributionTargets.every((dt) => dt.name!.toLowerCase().includes('alpha'));
       expect(allMatch).toBe(true);
       expect(selectedComponent.distributionTargets.length).toBe(1);
     });
@@ -622,9 +622,9 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
       component.distributionTargets = sampleDistributionTargets;
       fixture.detectChanges();
       if (component.workbasketList()) {
-        const viewportEl = component.workbasketList().elementRef.nativeElement;
+        const viewportEl = component.workbasketList()!.elementRef.nativeElement;
         Object.defineProperty(viewportEl, 'clientHeight', { get: () => 1000, configurable: true });
-        component.workbasketList().checkViewportSize();
+        component.workbasketList()!.checkViewportSize();
         fixture.detectChanges();
       }
       const option = debugElement.query(By.directive(MatListOption));
@@ -664,5 +664,147 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
 
     component.updateSelectAll(false);
     expect(component.allSelected).toBe(false);
+  });
+
+  it('should render the checked icon when allSelected is true', () => {
+    component.allSelected = true;
+    fixture.detectChanges();
+    const checkedIcon = debugElement.nativeElement.querySelector('mat-icon[mattooltip="Deselect all items"]');
+    expect(checkedIcon).toBeTruthy();
+  });
+
+  describe('empty list template rendering', () => {
+    it('should render AVAILABLE side empty message when list is empty and request finished', () => {
+      const lf = TestBed.createComponent(WorkbasketDistributionTargetsListComponent);
+      const lc = lf.componentInstance;
+      (lc as any).assignWbs = function () {
+        lc.distributionTargets = [];
+        lc.requestInProgress = -1;
+      };
+      lf.componentRef.setInput('side', Side.AVAILABLE);
+      lf.componentRef.setInput('transferDistributionTargetObservable', EMPTY);
+      lf.detectChanges();
+
+      const emptyMsg = lf.nativeElement.querySelector('.distribution-targets-list__empty-list');
+      expect(emptyMsg).toBeTruthy();
+      expect(emptyMsg.textContent).toContain('There are currently no Workbaskets for distribution');
+    });
+
+    it('should render SELECTED side empty message when list is empty and request finished', () => {
+      const lf = TestBed.createComponent(WorkbasketDistributionTargetsListComponent);
+      const lc = lf.componentInstance;
+      (lc as any).assignWbs = function () {
+        lc.distributionTargets = [];
+        lc.requestInProgress = -1;
+      };
+      lf.componentRef.setInput('side', Side.SELECTED);
+      lf.componentRef.setInput('transferDistributionTargetObservable', EMPTY);
+      lf.detectChanges();
+
+      const emptyMsg = lf.nativeElement.querySelector('.distribution-targets-list__empty-list');
+      expect(emptyMsg).toBeTruthy();
+      expect(emptyMsg.textContent).toContain('There is currently no distributed Workbasket');
+    });
+
+    it('should not render empty message while requestInProgress >= 0', () => {
+      component.distributionTargets = [];
+      component.requestInProgress = 0;
+      fixture.detectChanges();
+      const emptyMsg = debugElement.nativeElement.querySelector('.distribution-targets-list__empty-list');
+      expect(emptyMsg).toBeFalsy();
+    });
+  });
+
+  describe('markedForDeletion template rendering', () => {
+    it('should render markedForDeletion indicator when first sorted workbasket is marked', async () => {
+      const wbs: WorkbasketDistributionTarget[] = [
+        {
+          workbasketId: 'WBI:AAA-MARKED',
+          key: 'AAA_MARKED',
+          name: 'AAA Marked Workbasket',
+          domain: 'DOMAIN_A',
+          type: 'PERSONAL' as any,
+          description: 'Marked',
+          owner: 'owner-marked',
+          custom1: '',
+          custom2: '',
+          custom3: '',
+          custom4: '',
+          orgLevel1: '',
+          orgLevel2: '',
+          orgLevel3: '',
+          orgLevel4: '',
+          markedForDeletion: true,
+          selected: false
+        },
+        {
+          workbasketId: 'WBI:BBB-NORMAL-1',
+          key: 'BBB_NORMAL_1',
+          name: 'BBB Normal Workbasket 1',
+          domain: 'DOMAIN_A',
+          type: 'PERSONAL' as any,
+          description: 'Normal 1',
+          owner: 'owner-1',
+          custom1: '',
+          custom2: '',
+          custom3: '',
+          custom4: '',
+          orgLevel1: '',
+          orgLevel2: '',
+          orgLevel3: '',
+          orgLevel4: '',
+          markedForDeletion: false,
+          selected: false
+        },
+        {
+          workbasketId: 'WBI:CCC-NORMAL-2',
+          key: 'CCC_NORMAL_2',
+          name: 'CCC Normal Workbasket 2',
+          domain: 'DOMAIN_A',
+          type: 'PERSONAL' as any,
+          description: 'Normal 2',
+          owner: 'owner-2',
+          custom1: '',
+          custom2: '',
+          custom3: '',
+          custom4: '',
+          orgLevel1: '',
+          orgLevel2: '',
+          orgLevel3: '',
+          orgLevel4: '',
+          markedForDeletion: false,
+          selected: false
+        }
+      ];
+
+      const lf = TestBed.createComponent(WorkbasketDistributionTargetsListComponent);
+      const lc = lf.componentInstance;
+      (lc as any).assignWbs = function () {
+        lc.distributionTargets = wbs;
+        lc.requestInProgress = 0;
+      };
+      lf.componentRef.setInput('side', Side.AVAILABLE);
+      lf.componentRef.setInput('transferDistributionTargetObservable', EMPTY);
+      lf.detectChanges();
+      await lf.whenStable();
+
+      const viewport = lc.workbasketList();
+      if (viewport) {
+        const el = viewport.elementRef.nativeElement;
+        Object.defineProperty(el, 'clientHeight', { get: () => 600, configurable: true });
+        Object.defineProperty(el, 'offsetHeight', { get: () => 600, configurable: true });
+        Object.defineProperty(el, 'clientWidth', { get: () => 500, configurable: true });
+        Object.defineProperty(el, 'offsetWidth', { get: () => 500, configurable: true });
+        viewport.checkViewportSize();
+      }
+      lf.detectChanges();
+      await lf.whenStable();
+      lf.detectChanges();
+
+      expect(lc.distributionTargets[0].markedForDeletion).toBe(true);
+      const markedEl = lf.nativeElement.querySelector('.workbaskets-item__marked');
+      expect(markedEl).toBeTruthy();
+      expect(markedEl.textContent).toContain('error');
+    });
   });
 });

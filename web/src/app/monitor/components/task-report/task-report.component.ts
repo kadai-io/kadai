@@ -41,7 +41,7 @@ export class TaskReportComponent implements OnInit {
     responsive: true,
     maintainAspectRatio: true
   };
-  reportData: ReportData;
+  reportData!: ReportData;
   private monitorService = inject(MonitorService);
   private requestInProgressService = inject(RequestInProgressService);
   private destroy$ = new Subject<void>();

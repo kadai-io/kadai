@@ -48,7 +48,7 @@ export class ImportExportComponent implements OnInit, OnDestroy {
   currentSelection = input<KadaiType>();
   parentComponent = input<string>();
   selectedFileInput = viewChild<any>('selectedFile');
-  domains$: Observable<string[]>;
+  domains$!: Observable<string[]>;
   destroy$ = new Subject<void>();
   private domainService = inject(DomainService);
   private workbasketDefinitionService = inject(WorkbasketDefinitionService);
@@ -114,7 +114,7 @@ export class ImportExportComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private checkFormatFile(file): boolean {
+  private checkFormatFile(file: any): boolean {
     const ending = file.name.match(/\.([^.]+)$/)[1];
     let check = false;
     if (ending === 'json') {

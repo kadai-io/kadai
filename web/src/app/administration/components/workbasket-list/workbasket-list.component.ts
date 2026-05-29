@@ -64,7 +64,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 })
 export class WorkbasketListComponent implements OnInit, OnDestroy {
   expanded = input<boolean>();
-  selectedId = signal<string>(undefined);
+  selectedId = signal<string | undefined>(undefined);
   type = 'workbaskets';
   workbasketDefaultSortBy: WorkbasketQuerySortParameter = WorkbasketQuerySortParameter.NAME;
   sort: Sorting<WorkbasketQuerySortParameter> = {
@@ -191,7 +191,7 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
     this.resetPagingSubject.next(null);
   }
 
-  changePage(page) {
+  changePage(page: number) {
     this.pageParameter.page = page;
     this.performRequest();
   }

@@ -29,9 +29,9 @@ import { MatButton } from '@angular/material/button';
 })
 export class ReportTableComponent {
   reportDataInput = input<ReportData>(undefined, { alias: 'reportData' });
-  reportData = signal<ReportData>(undefined);
-  fullReportData: ReportData;
-  fullRowsData = signal<ReportRow[][]>(undefined);
+  reportData = signal<ReportData>(undefined as any);
+  fullReportData!: ReportData;
+  fullRowsData = signal<ReportRow[][]>(undefined as any);
   currentExpHeaders = signal(0);
 
   constructor() {

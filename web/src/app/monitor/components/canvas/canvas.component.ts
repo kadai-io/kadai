@@ -35,8 +35,8 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   row = input<ReportRow>();
   id = input<string>();
 
-  labels: string[];
-  colors: string[];
+  labels!: string[];
+  colors!: string[];
   destroy$ = new Subject<void>();
 
   settings$: Observable<Settings> = inject(Store).select(SettingsSelectors.getSettings);
@@ -65,9 +65,9 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    const canvas = document.getElementById(this.id()) as HTMLCanvasElement;
+    const canvas = document.getElementById(this.id()!) as HTMLCanvasElement;
     if (canvas && this.id() && this.row()) {
-      this.generateChart(this.id(), this.row());
+      this.generateChart(this.id()!, this.row()!);
     }
   }
 
@@ -104,7 +104,10 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    document.getElementById(this.id()).outerHTML = '';
+    const element = document.getElementById(this.id()!);
+    if (element) {
+      element.outerHTML = '';
+    }
     this.destroy$.next();
     this.destroy$.complete();
   }

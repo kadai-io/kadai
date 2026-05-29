@@ -83,14 +83,14 @@ describe('RoutingUploadComponent', () => {
     expect(hotToastServiceMock.success).toHaveBeenCalledWith('Upload successful');
   });
 
-  it('should call uploadRoutingRules with null when upload is called with undefined fileList', () => {
+  it('should not call uploadRoutingRules when upload is called without fileList and no file is set', () => {
     const mockInput = { value: '' };
     vi.spyOn(document, 'getElementById').mockReturnValue(mockInput as any);
 
     component.file = null;
     component.upload(undefined);
 
-    expect(routingUploadServiceMock.uploadRoutingRules).toHaveBeenCalledWith(null);
+    expect(routingUploadServiceMock.uploadRoutingRules).not.toHaveBeenCalled();
   });
 
   it('should call notificationService.showError on upload error', () => {
@@ -101,7 +101,7 @@ describe('RoutingUploadComponent', () => {
     const mockInput = { value: '' };
     vi.spyOn(document, 'getElementById').mockReturnValue(mockInput as any);
 
-    component.file = null;
+    component.file = new File(['content'], 'test.dmn');
     component.upload(undefined);
 
     expect(notificationServiceMock.showError).toHaveBeenCalledWith('SOME_ERROR');

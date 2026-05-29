@@ -35,6 +35,6 @@ export class RoutingUploadService {
     const formData = new FormData();
     formData.append('excelRoutingFile', file);
     const headers = new HttpHeaders().set('Content-Type', 'multipart/form-data');
-    return this.httpClient.put(this.url, formData, { headers });
+    return this.httpClient.put<{ amountOfImportedRow: number; result: string }>(this.url, formData, { headers });
   }
 }

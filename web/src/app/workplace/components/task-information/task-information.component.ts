@@ -31,7 +31,7 @@ import {
 } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
-import { FormsModule, NgForm } from '@angular/forms';
+import { FormsModule, NgForm, NgModel } from '@angular/forms';
 import { Observable, Subject } from 'rxjs';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
@@ -89,14 +89,14 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
   toggleValidationMap = new Map<string, boolean>();
   requestInProgress = signal(false);
   classifications = signal<Classification[]>([]);
-  isClassificationEmpty: boolean;
+  isClassificationEmpty!: boolean;
   isOwnerValid: boolean = true;
   readonly lengthError = 'You have reached the maximum length';
   inputOverflowMap = toSignal(inject(FormsValidatorService).inputOverflowObservable, {
     initialValue: new Map<string, boolean>()
   });
-  validateInputOverflow: Function;
-  tasksCustomisation$: Observable<TasksCustomisation> = inject(Store).select(
+  validateInputOverflow!: Function;
+  tasksCustomisation$: Observable<TasksCustomisation | undefined> = inject(Store).select(
     EngineConfigurationSelectors.tasksCustomisation
   );
   private classificationService = inject(ClassificationsService);
@@ -114,7 +114,7 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.getClassificationByDomain();
-    this.validateInputOverflow = (inputFieldModel, maxLength) => {
+    this.validateInputOverflow = (inputFieldModel: NgModel, maxLength: number) => {
       this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
     };
   }
@@ -123,12 +123,15 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
     return this.formsValidatorService.isFieldValid(this.taskForm(), field);
   }
 
-  updateDate($event) {
+  updateDate($event: any) {
     const newDate = $event.value;
     if (typeof newDate !== 'undefined' && newDate !== null) {
       const newDateISOString = newDate.toISOString();
       const task = this.task();
-      const currentDate = new Date(task.due);
+      if (!task) {
+        return;
+      }
+      const currentDate = new Date(task.due!);
       if (typeof currentDate === 'undefined' || currentDate !== newDate) {
         task.due = newDateISOString;
       }
@@ -136,13 +139,13 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
   }
 
   changedClassification(itemSelected: Classification) {
-    this.task().classificationSummary = itemSelected;
+    this.task()!.classificationSummary = itemSelected;
     this.isClassificationEmpty = false;
   }
 
   onSelectedOwner(owner: AccessId) {
     if (owner?.accessId) {
-      this.task().owner = owner.accessId;
+      this.task()!.owner = owner.accessId;
     }
   }
 
@@ -153,7 +156,7 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
 
   private validate() {
     const task = this.task();
-    this.isClassificationEmpty = typeof task.classificationSummary === 'undefined';
+    this.isClassificationEmpty = typeof task?.classificationSummary === 'undefined';
     this.formsValidatorService.formSubmitAttempt = true;
     this.formsValidatorService.validateFormInformation(this.taskForm(), this.toggleValidationMap).then((value) => {
       if (value && !this.isClassificationEmpty && this.isOwnerValid) {
@@ -166,7 +169,7 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
   private getClassificationByDomain() {
     this.requestInProgress.set(true);
     this.classificationService
-      .getClassifications({ domain: [this.task().workbasketSummary.domain] })
+      .getClassifications({ domain: [this.task()!.workbasketSummary!.domain!] })
       .pipe(takeUntil(this.destroy$))
       .subscribe((classificationPagingList) => {
         this.classifications.set(classificationPagingList.classifications);

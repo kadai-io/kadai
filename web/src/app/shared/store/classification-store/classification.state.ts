@@ -17,7 +17,7 @@
  */
 
 import { Action, NgxsAfterBootstrap, State, StateContext } from '@ngxs/store';
-import { Observable, of } from 'rxjs';
+import { EMPTY, Observable, of } from 'rxjs';
 import { mergeMap, take, tap } from 'rxjs/operators';
 import { KadaiDate } from 'app/shared/util/kadai.date';
 import {
@@ -228,7 +228,7 @@ export class ClassificationState implements NgxsAfterBootstrap {
   @Action(CopyClassification)
   newCopyClassification(ctx: StateContext<ClassificationStateModel>): Observable<null> {
     const copy = { ...ctx.getState().selectedClassification };
-    copy.key = null;
+    copy.key = undefined;
     copy.classificationId = undefined;
     ctx.patchState({
       selectedClassification: copy,
@@ -240,12 +240,12 @@ export class ClassificationState implements NgxsAfterBootstrap {
   @Action(RemoveSelectedClassification)
   removeSelectedClassification(ctx: StateContext<ClassificationStateModel>): Observable<any> {
     const sel = ctx.getState().selectedClassification;
-    return this.classificationsService.deleteClassification(sel.classificationId).pipe(
+    if (!sel?.classificationId) return EMPTY;
+    const classificationId = sel.classificationId;
+    return this.classificationsService.deleteClassification(classificationId).pipe(
       take(1),
       tap(() => {
-        const classifications = ctx
-          .getState()
-          .classifications.filter((el) => el.classificationId !== sel.classificationId);
+        const classifications = ctx.getState().classifications.filter((el) => el.classificationId !== classificationId);
         ctx.patchState({ selectedClassification: undefined, classifications });
       })
     );

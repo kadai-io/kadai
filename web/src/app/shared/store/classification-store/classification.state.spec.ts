@@ -119,7 +119,7 @@ describe('ClassificationState', () => {
     it('should return of(null) when classificationId is undefined', async () => {
       const stateBefore = store.snapshot().classification;
 
-      await store.dispatch(new SelectClassification(undefined)).toPromise();
+      await store.dispatch(new SelectClassification(undefined as any)).toPromise();
 
       const stateAfter = store.snapshot().classification;
       // State should remain unchanged when id is undefined
@@ -193,7 +193,7 @@ describe('ClassificationState', () => {
 
       const state = store.snapshot().classification;
       expect(state.selectedClassification.classificationId).toBeUndefined();
-      expect(state.selectedClassification.key).toBeNull();
+      expect(state.selectedClassification.key).toBeUndefined();
       expect(state.selectedClassification.name).toBe(mockClassification.name);
       expect(state.selectedClassification.type).toBe(mockClassification.type);
       expect(state.selectedClassification.domain).toBe(mockClassification.domain);
@@ -241,7 +241,7 @@ describe('ClassificationState', () => {
       await store.dispatch(new RemoveSelectedClassification()).toPromise();
 
       const state = store.snapshot().classification;
-      const remainingIds = state.classifications.map((c) => c.classificationId);
+      const remainingIds = state.classifications.map((c: any) => c.classificationId);
       expect(remainingIds).not.toContain('CLI:001');
       expect(remainingIds).toContain('CLI:002');
     });
@@ -314,7 +314,7 @@ describe('ClassificationState', () => {
       await store.dispatch(new SaveCreatedClassification(newClassification as any)).toPromise();
 
       const state = store.snapshot().classification;
-      const ids = state.classifications.map((c) => c.classificationId);
+      const ids = state.classifications.map((c: any) => c.classificationId);
       expect(ids).toContain('CLI:NEW');
       expect(ids).toContain('CLI:001');
       expect(ids).toContain('CLI:002');
@@ -360,9 +360,9 @@ describe('ClassificationState', () => {
       await store.dispatch(new SaveModifiedClassification(updatedClassification as any)).toPromise();
 
       const state = store.snapshot().classification;
-      const updated = state.classifications.find((c) => c.classificationId === 'CLI:001');
+      const updated = state.classifications.find((c: any) => c.classificationId === 'CLI:001');
       expect(updated.name).toBe('Updated Name');
-      const other = state.classifications.find((c) => c.classificationId === 'CLI:002');
+      const other = state.classifications.find((c: any) => c.classificationId === 'CLI:002');
       expect(other.name).toBe('Classification 2');
     });
 
@@ -462,7 +462,7 @@ describe('ClassificationState', () => {
       await store.dispatch(new UpdateClassification(updatedClassification as any)).toPromise();
 
       const state = store.snapshot().classification;
-      const updated = state.classifications.find((c) => c.classificationId === 'CLI:001');
+      const updated = state.classifications.find((c: any) => c.classificationId === 'CLI:001');
       expect(updated.name).toBe('Tree Updated Name');
     });
 
@@ -533,7 +533,7 @@ describe('ClassificationState', () => {
       await store.dispatch(new UpdateClassification(updatedClassification as any)).toPromise();
 
       const state = store.snapshot().classification;
-      const unchanged = state.classifications.find((c) => c.classificationId === 'CLI:002');
+      const unchanged = state.classifications.find((c: any) => c.classificationId === 'CLI:002');
       expect(unchanged.name).toBe('Unchanged');
     });
   });

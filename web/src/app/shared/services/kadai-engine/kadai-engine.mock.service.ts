@@ -25,7 +25,7 @@ import { Version } from '../../models/version';
   providedIn: 'root'
 })
 export class KadaiEngineServiceMock {
-  currentUserInfo: UserInfo;
+  currentUserInfo!: UserInfo;
 
   constructor() {
     this.getUserInformation();

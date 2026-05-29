@@ -30,8 +30,8 @@ import { DatePipe } from '@angular/common';
   imports: [MatTabGroup, MatTab, WorkbasketReportDueDateComponent, WorkbasketReportPlannedDateComponent, DatePipe]
 })
 export class WorkbasketReportComponent {
-  metaInformation: MetaInfoData;
-  selectedComponent: number;
+  metaInformation!: MetaInfoData;
+  selectedComponent!: number;
 
   getMetaInformation(metaInformation: MetaInfoData) {
     this.metaInformation = metaInformation;

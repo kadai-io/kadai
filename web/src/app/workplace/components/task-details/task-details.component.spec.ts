@@ -248,7 +248,7 @@ describe('TaskDetailsComponent', () => {
   });
 
   it('should call workOnTaskDisabled returns false when task is null', () => {
-    component.task = null;
+    component.task = undefined;
     expect(component.workOnTaskDisabled()).toBe(false);
   });
 
@@ -327,10 +327,10 @@ describe('TaskDetailsComponent', () => {
     expect(notificationServiceSpy.showSuccess).toHaveBeenCalledWith('TASK_DELETE', { taskName: mockTask.name });
   });
 
-  it('should set task to null after deleteTaskConfirmation', () => {
+  it('should set task to undefined after deleteTaskConfirmation', () => {
     component.task = mockTask;
     component.deleteTaskConfirmation();
-    expect(component.task).toBeNull();
+    expect(component.task).toBeUndefined();
   });
 
   it('should handle getTask for new-task correctly', () => {
@@ -405,6 +405,68 @@ describe('TaskDetailsComponent', () => {
     expect(localComponent.task).toBeUndefined();
     const taskDetails = localFixture.nativeElement.querySelector('.task-details');
     expect(taskDetails).toBeNull();
+  });
+
+  it('should fall back to [] for customAttributes/callbackInfo and undefined for primaryObjRef when taskClone has none', () => {
+    const cloneWithoutOptionals: Task = new Task('original-id', new ObjectReference());
+    (cloneWithoutOptionals as any).customAttributes = undefined;
+    (cloneWithoutOptionals as any).callbackInfo = undefined;
+    cloneWithoutOptionals.primaryObjRef = undefined;
+
+    component.task = { ...mockTask };
+    component.taskClone = cloneWithoutOptionals;
+
+    component.resetTask();
+
+    expect(component.task.customAttributes).toEqual([]);
+    expect(component.task.callbackInfo).toEqual([]);
+    expect(component.task.primaryObjRef).toBeUndefined();
+  });
+
+  it('should return early from deleteTaskConfirmation when task is undefined', () => {
+    component.task = undefined;
+    component.deleteTaskConfirmation();
+    expect(taskServiceSpy.deleteTask).not.toHaveBeenCalled();
+  });
+
+  it('should not call updateTask when task is undefined on onSave', () => {
+    component.task = undefined;
+    component.currentId = 'task-id-1';
+    (taskServiceSpy.updateTask as any).mockClear();
+    component.onSave();
+    expect(taskServiceSpy.updateTask).not.toHaveBeenCalled();
+  });
+
+  it('should not call createTask when task is undefined on onSave for new-task', () => {
+    component.task = undefined;
+    component.currentId = 'new-task';
+    (taskServiceSpy.createTask as any).mockClear();
+    component.onSave();
+    expect(taskServiceSpy.createTask).not.toHaveBeenCalled();
+  });
+
+  it('should not crash when cloneTask is invoked privately with undefined task', () => {
+    component.task = undefined;
+    expect(() => (component as any).cloneTask()).not.toThrow();
+  });
+
+  it('should not crash when addDateToTask is invoked privately with undefined task', () => {
+    component.task = undefined;
+    expect(() => (component as any).addDateToTask()).not.toThrow();
+  });
+
+  it('should fall back to [] and undefined when cloneTask is called with task lacking optional fields', () => {
+    const t = new Task('id-no-opts', new ObjectReference());
+    (t as any).customAttributes = undefined;
+    (t as any).callbackInfo = undefined;
+    t.primaryObjRef = undefined;
+    component.task = t;
+
+    (component as any).cloneTask();
+
+    expect(component.taskClone!.customAttributes).toEqual([]);
+    expect(component.taskClone!.callbackInfo).toEqual([]);
+    expect(component.taskClone!.primaryObjRef).toBeUndefined();
   });
 });
 

@@ -21,21 +21,21 @@ import { Directive, HostBinding, HostListener, output } from '@angular/core';
 @Directive({ selector: '[kadaiDragAndDrop]' })
 export class DragAndDropDirective {
   onFileDropped = output<any>();
-  @HostBinding('class.fileover') fileOver: boolean;
+  @HostBinding('class.fileover') fileOver!: boolean;
 
-  @HostListener('dragover', ['$event']) onDragOver(evt) {
+  @HostListener('dragover', ['$event']) onDragOver(evt: any) {
     evt.preventDefault();
     evt.stopPropagation();
     this.fileOver = true;
   }
 
-  @HostListener('dragleave', ['$event']) public onDragLeave(evt) {
+  @HostListener('dragleave', ['$event']) public onDragLeave(evt: any) {
     evt.preventDefault();
     evt.stopPropagation();
     this.fileOver = false;
   }
 
-  @HostListener('drop', ['$event']) public ondrop(evt) {
+  @HostListener('drop', ['$event']) public ondrop(evt: any) {
     evt.preventDefault();
     evt.stopPropagation();
     this.fileOver = false;

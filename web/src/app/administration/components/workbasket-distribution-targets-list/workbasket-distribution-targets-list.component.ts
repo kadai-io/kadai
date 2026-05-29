@@ -69,7 +69,7 @@ import { OrderBy } from '../../../shared/pipes/order-by.pipe';
 export class WorkbasketDistributionTargetsListComponent implements OnInit, AfterViewInit {
   side = input<Side>();
   header = input<string>();
-  allSelected;
+  allSelected!: boolean;
   component = input<any>();
   transferDistributionTargetObservable = input<Observable<Side>>();
   workbasketDistributionTargets$: Observable<WorkbasketSummary[]> = inject(Store).select(
@@ -85,15 +85,15 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
     FilterSelectors.getSelectedDistributionTargetsFilter
   );
   toolbarState = false;
-  distributionTargets: WorkbasketDistributionTarget[];
-  distributionTargetsClone: WorkbasketDistributionTarget[];
+  distributionTargets!: WorkbasketDistributionTarget[];
+  distributionTargetsClone!: WorkbasketDistributionTarget[];
   distributionTargetsList = viewChild<MatSelectionList>('workbasket');
   workbasketList = viewChild<CdkVirtualScrollViewport>('scroller');
-  requestInProgress: number;
+  requestInProgress!: number;
   private changeDetector = inject(ChangeDetectorRef);
   private store = inject(Store);
   private destroy$ = new Subject<void>();
-  private filterParam: WorkbasketQueryFilterParameter;
+  private filterParam!: WorkbasketQueryFilterParameter;
   private allSelectedDiff = 0;
 
   ngOnInit(): void {
@@ -134,7 +134,7 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
     this.workbasketList()
       ?.elementScrolled()
       .pipe(
-        map(() => this.workbasketList()?.measureScrollOffset('bottom')),
+        map(() => this.workbasketList()?.measureScrollOffset('bottom') ?? 0),
         pairwise(),
         filter(([y1, y2]) => y2 < y1 && y2 < 270),
         throttleTime(200)
@@ -190,18 +190,18 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
   }
 
   private applyFilter() {
-    function filterExact(target: WorkbasketDistributionTarget, filterStrings: string[], attribute: string) {
+    function filterExact(target: WorkbasketDistributionTarget, filterStrings: string[] | undefined, attribute: string) {
       if (!!filterStrings && filterStrings?.length !== 0) {
-        return filterStrings.map((str) => str.toLowerCase()).includes(target[attribute].toLowerCase());
+        return filterStrings.map((str) => str.toLowerCase()).includes((target as any)[attribute].toLowerCase());
       }
       return true;
     }
 
-    function filterLike(target: WorkbasketDistributionTarget, filterStrings: string[], attribute: string) {
+    function filterLike(target: WorkbasketDistributionTarget, filterStrings: string[] | undefined, attribute: string) {
       if (!!filterStrings && filterStrings?.length !== 0) {
         let ret = true;
         filterStrings.forEach((filterElement) => {
-          ret = ret && target[attribute].toLowerCase().includes(filterElement.toLowerCase());
+          ret = ret && (target as any)[attribute].toLowerCase().includes(filterElement.toLowerCase());
         });
         return ret;
       }

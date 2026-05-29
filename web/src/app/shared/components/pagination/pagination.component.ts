@@ -59,7 +59,7 @@ export class PaginationComponent implements OnInit, AfterViewInit, OnDestroy {
 
   hasItems = true;
   pageSelected = 1;
-  pageNumbers: number[];
+  pageNumbers: number[] = [];
   filteredPages: string[] = [];
 
   constructor() {
@@ -85,7 +85,7 @@ export class PaginationComponent implements OnInit, AfterViewInit, OnDestroy {
       untracked(() => {
         this.hasItems = (numberOfItems ?? 0) > 0;
         if (page) {
-          this.pageSelected = page.number;
+          this.pageSelected = page.number ?? 1;
           this.updateGoto();
         }
       });
@@ -118,7 +118,7 @@ export class PaginationComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pageSelected = 1;
   }
 
-  changeToPage(event) {
+  changeToPage(event: any) {
     let currentPageIndex = event.pageIndex;
     if (currentPageIndex > event.previousPageIndex) {
       this.pageSelected += 1;
@@ -130,7 +130,7 @@ export class PaginationComponent implements OnInit, AfterViewInit, OnDestroy {
 
   updateGoto() {
     this.pageNumbers = [];
-    for (let i = 1; i <= this.page()?.totalPages; i++) {
+    for (let i = 1; i <= (this.page()?.totalPages ?? 0); i++) {
       this.pageNumbers.push(i);
     }
   }
@@ -142,7 +142,7 @@ export class PaginationComponent implements OnInit, AfterViewInit, OnDestroy {
     this.changePage.emit(page);
   }
 
-  filter(filterValue) {
+  filter(filterValue: any) {
     const pageNumbers = this.pageNumbers.map(String);
     this.filteredPages = pageNumbers.filter((value) => value.includes(filterValue.toString()));
     if (this.filteredPages.length === 0) {

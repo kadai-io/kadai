@@ -43,7 +43,7 @@ describe('MasterAndDetailService', () => {
     });
 
     it('should initially emit false as the default BehaviorSubject value', () => {
-      let emitted: boolean = null;
+      let emitted: any = null;
       service.getShowDetail().subscribe((val) => (emitted = val));
       expect(emitted).toBe(false);
     });
@@ -84,7 +84,7 @@ describe('MasterAndDetailService', () => {
     it('should provide latest value to new subscribers immediately', () => {
       service.setShowDetail(true);
 
-      let lastEmitted: boolean;
+      let lastEmitted = false;
       service.getShowDetail().subscribe((val) => (lastEmitted = val));
 
       expect(lastEmitted).toBe(true);

@@ -232,7 +232,7 @@ describe('ReportTableComponent', () => {
     });
 
     it('should not render anything when reportData is null', () => {
-      component.reportData.set(null);
+      component.reportData.set(null as any);
       fixture.detectChanges();
       const table = fixture.nativeElement.querySelector('.report');
       expect(table).toBeNull();

@@ -456,7 +456,7 @@ describe('TaskProcessingComponent', () => {
     });
 
     it('should not throw if routeSubscription is undefined', () => {
-      component.routeSubscription = undefined;
+      component.routeSubscription = undefined as any;
 
       expect(() => component.ngOnDestroy()).not.toThrow();
     });
@@ -482,7 +482,7 @@ describe('TaskProcessingComponent', () => {
     });
 
     it('should not render iframe when link is not set', () => {
-      component.link = null;
+      component.link = null as any;
       fixture.detectChanges();
       const iframe = fixture.nativeElement.querySelector('iframe');
       expect(iframe).toBeNull();
@@ -570,7 +570,7 @@ describe('TaskProcessingComponent', () => {
       if (header) {
         expect(header.textContent.trim()).toBe('');
       }
-      expect(localComponent.task).toBeNull();
+      expect(localComponent.task).toBeUndefined();
       localFixture.destroy();
     });
   });
