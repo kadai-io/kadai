@@ -19,7 +19,6 @@
 import { TestBed } from '@angular/core/testing';
 
 import { RoutingUploadService } from './routing-upload.service';
-import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { StartupService } from 'app/shared/services/startup/startup.service';
@@ -33,7 +32,6 @@ describe('RoutingUploadService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(),
         provideHttpClientTesting(),
         {
           provide: StartupService,

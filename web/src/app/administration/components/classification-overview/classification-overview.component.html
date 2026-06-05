@@ -20,7 +20,7 @@
 
   <kadai-administration-classification-list />
   <div class="vertical-right-divider"></div>
-  @if (showDetail) {
+  @if (showDetail()) {
     <kadai-administration-classification-details />
   } @else {
     <div class="classification-overview__empty-page">

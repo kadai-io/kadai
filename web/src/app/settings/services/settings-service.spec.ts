@@ -16,9 +16,8 @@
  *
  */
 
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { SettingsService } from './settings-service';
 import { environment } from '../../../environments/environment';
@@ -32,7 +31,7 @@ describe('SettingsService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+      providers: [provideHttpClientTesting()]
     });
     service = TestBed.inject(SettingsService);
     httpTesting = TestBed.inject(HttpTestingController);

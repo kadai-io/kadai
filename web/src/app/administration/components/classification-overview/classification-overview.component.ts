@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { Store } from '@ngxs/store';
@@ -24,6 +24,7 @@ import { takeUntil } from 'rxjs/operators';
 import { ClassificationSelectors } from '../../../shared/store/classification-store/classification.selectors';
 import {
   CreateClassification,
+  DeselectClassification,
   GetClassifications,
   SelectClassification
 } from '../../../shared/store/classification-store/classification.actions';
@@ -40,7 +41,7 @@ import { SvgIconComponent } from 'angular-svg-icon';
   imports: [ClassificationListComponent, ClassificationDetailsComponent, SvgIconComponent]
 })
 export class ClassificationOverviewComponent implements OnInit, OnDestroy {
-  showDetail = false;
+  showDetail = signal(false);
   selectedClassification$: Observable<Classification> = inject(Store).select(
     ClassificationSelectors.selectedClassification
   );
@@ -55,10 +56,11 @@ export class ClassificationOverviewComponent implements OnInit, OnDestroy {
         this.routerParams = params;
 
         if (this.routerParams.id) {
-          this.showDetail = true;
           this.store
             .dispatch(new SelectClassification(this.routerParams.id))
             .subscribe(() => this.store.dispatch(new GetClassifications()));
+        } else {
+          this.store.dispatch(new DeselectClassification());
         }
         if (this.routerParams.id && this.routerParams.id.indexOf('new-classification') !== -1) {
           this.store.dispatch(new CreateClassification());
@@ -67,7 +69,7 @@ export class ClassificationOverviewComponent implements OnInit, OnDestroy {
     }
 
     this.selectedClassification$.pipe(takeUntil(this.destroy$)).subscribe((selectedClassification) => {
-      this.showDetail = !!selectedClassification;
+      this.showDetail.set(!!selectedClassification);
     });
   }
 

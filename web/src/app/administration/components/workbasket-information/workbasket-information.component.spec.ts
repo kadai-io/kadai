@@ -40,7 +40,6 @@ import {
   workbasketReadStateMock
 } from '../../../shared/store/mock-data/mock-store';
 import { By } from '@angular/platform-browser';
-import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
@@ -83,7 +82,7 @@ describe('WorkbasketInformationComponent', () => {
         provideRouter([]),
         { provide: WorkbasketService, useValue: workbasketServiceMock },
         { provide: FormsValidatorService, useValue: formValidatorServiceMock },
-        provideHttpClient(),
+
         provideHttpClientTesting(),
         provideAngularSvgIcon()
       ]

@@ -17,7 +17,6 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { of } from 'rxjs';
@@ -46,7 +45,7 @@ describe('WorkbasketService', () => {
     TestBed.configureTestingModule({
       providers: [
         WorkbasketService,
-        provideHttpClient(),
+
         provideHttpClientTesting(),
         { provide: DomainService, useValue: mockDomainService }
       ]

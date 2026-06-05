@@ -17,7 +17,6 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { KadaiEngineService } from './kadai-engine.service';
@@ -32,7 +31,7 @@ describe('KadaiEngineService', () => {
     environment.kadaiLogoutUrl = 'http://test/logout';
 
     TestBed.configureTestingModule({
-      providers: [KadaiEngineService, provideHttpClient(), provideHttpClientTesting()]
+      providers: [KadaiEngineService, provideHttpClientTesting()]
     });
 
     service = TestBed.inject(KadaiEngineService);

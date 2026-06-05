@@ -20,7 +20,8 @@
 
   <!-- SEARCH -->
   <div class="access-items__typeahead">
-    <kadai-shared-type-ahead (accessIdEventEmitter)="onSelectAccessId($event)" placeHolderMessage="Search for AccessId" />
+    <kadai-shared-type-ahead (accessIdEventEmitter)="onSelectAccessId($event)"
+                             placeHolderMessage="Search for AccessId" />
   </div>
   @if (!accessItemsForm) {
     <div class="access-items__icon">
@@ -38,8 +39,8 @@
         </mat-panel-title>
       </mat-expansion-panel-header>
       <!-- TABLE WITH GROUP NAMES AND ACCESS IDs -->
-      @if (groups && groups.length > 0) {
-        <table [dataSource]="groups" mat-table>
+      @if (groups().length > 0) {
+        <table [dataSource]="groups()" mat-table>
           <ng-container matColumnDef="Name">
             <th *matHeaderCellDef mat-header-cell> Name</th>
             <td *matCellDef="let element" class="access-items__group-table-cell"
@@ -70,9 +71,9 @@
         </mat-panel-title>
       </mat-expansion-panel-header>
       <!-- TABLE WITH PERMISSION NAMES AND ACCESS IDs -->
-      @if (permissions && permissions.length > 0) {
+      @if (permissions().length > 0) {
         <table
-          [dataSource]="permissions" mat-table>
+          [dataSource]="permissions()" mat-table>
           <ng-container matColumnDef="Name">
             <th *matHeaderCellDef mat-header-cell> Name</th>
             <td *matCellDef="let element" class="access-items__permission-table-cell"
@@ -156,7 +157,7 @@
               </tr>
               </thead>
               <tbody formArrayName="accessItemsGroups">
-                @for (accessItem of accessItems; track accessItem; let index = $index) {
+                @for (accessItem of accessItems(); track accessItem; let index = $index) {
                   <tr
                     [formGroupName]="index.toString()"
                     class="access-items__authorization-expansion-panel__content">
@@ -164,7 +165,7 @@
                     <td class="align-left">
                       <label class="wrap">{{ accessItem.workbasketKey }}</label>
                     </td>
-                    @if ((accessItemsCustomization$ | async)?.accessId.lookupField) {
+                    @if ((accessItemsCustomization$ | async)?.accessId?.lookupField) {
                       <td
                         class="align-left">
                         <label class="wrap"

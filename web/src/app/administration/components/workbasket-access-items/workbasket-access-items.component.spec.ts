@@ -32,7 +32,6 @@ import {
   GetWorkbasketAccessItems,
   UpdateWorkbasketAccessItems
 } from '../../../shared/store/workbasket-store/workbasket.actions';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -51,7 +50,6 @@ describe('WorkbasketAccessItemsComponent', () => {
       providers: [
         provideStore([WorkbasketState, EngineConfigurationState]),
         provideRouter([]),
-        provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),
         provideNoopAnimations()
       ]
@@ -519,18 +517,18 @@ describe('WorkbasketAccessItemsComponent', () => {
 
   it('should show has-changes class on permRead cell when value differs from clone', () => {
     fixture.detectChanges();
-    const originalRead = component.accessItemsClone[0].permRead;
+    const originalRead = component.accessItemsClone()[0].permRead;
     component.accessItemsGroups.controls[0].get('permRead')?.setValue(!originalRead);
     expect(component.accessItemsGroups.controls[0].get('permRead')?.value).toBe(!originalRead);
-    expect(component.accessItemsClone[0].permRead).toBe(originalRead);
+    expect(component.accessItemsClone()[0].permRead).toBe(originalRead);
   });
 
   it('should show has-warning class on typeahead accessId cell when accessId differs from clone', () => {
     fixture.detectChanges();
-    const originalAccessId = component.accessItemsClone[0].accessId;
+    const originalAccessId = component.accessItemsClone()[0].accessId;
     component.accessItemsGroups.controls[0].get('accessId')?.setValue(originalAccessId + '-changed');
     expect(component.accessItemsGroups.controls[0].get('accessId')?.value).toBe(originalAccessId + '-changed');
-    expect(component.accessItemsClone[0].accessId).toBe(originalAccessId);
+    expect(component.accessItemsClone()[0].accessId).toBe(originalAccessId);
   });
 
   it('should add a new row to the table when addAccessItem is called', () => {

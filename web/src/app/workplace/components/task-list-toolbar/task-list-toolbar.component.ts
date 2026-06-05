@@ -83,7 +83,7 @@ export class TaskListToolbarComponent implements OnInit {
   sortingFields: Map<TaskQuerySortParameter, string> = TASK_SORT_PARAMETER_NAMING;
   tasks: Task[] = [];
   workbasketNames: string[] = [];
-  filteredWorkbasketNames: string[] = this.workbasketNames;
+  filteredWorkbasketNames = signal<string[]>([]);
   resultName = signal('');
   resultId = signal('');
   workbaskets = signal<Workbasket[] | undefined>(undefined);
@@ -121,6 +121,7 @@ export class TaskListToolbarComponent implements OnInit {
             this.workbasketNames.push(workbasket.name);
           }
         });
+        this.filteredWorkbasketNames.set([...this.workbasketNames]);
 
         // get workbasket of current user
         const user = this.kadaiEngineService.currentUserInfo;
@@ -204,8 +205,8 @@ export class TaskListToolbarComponent implements OnInit {
   }
 
   filterWorkbasketNames() {
-    this.filteredWorkbasketNames = this.workbasketNames.filter((value) =>
-      value.toLowerCase().includes(this.resultName().toLowerCase())
+    this.filteredWorkbasketNames.set(
+      this.workbasketNames.filter((value) => value.toLowerCase().includes(this.resultName().toLowerCase()))
     );
   }
 

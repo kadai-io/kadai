@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { ReportData } from '../../models/report-data';
 import { MonitorService } from '../../services/monitor.service';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
@@ -31,14 +31,14 @@ import { DatePipe } from '@angular/common';
   providers: [MonitorService]
 })
 export class TimestampReportComponent implements OnInit {
-  reportData!: ReportData;
+  reportData = signal<ReportData | undefined>(undefined);
   private restConnectorService = inject(MonitorService);
   private requestInProgressService = inject(RequestInProgressService);
 
   ngOnInit() {
     this.requestInProgressService.setRequestInProgress(true);
     this.restConnectorService.getDailyEntryExitReport().subscribe((data: ReportData) => {
-      this.reportData = data;
+      this.reportData.set(data);
       this.requestInProgressService.setRequestInProgress(false);
     });
   }

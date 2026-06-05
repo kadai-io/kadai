@@ -17,7 +17,6 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { MonitorService } from './monitor.service';
@@ -32,7 +31,7 @@ describe('MonitorService', () => {
     environment.kadaiRestUrl = 'http://test';
 
     TestBed.configureTestingModule({
-      providers: [MonitorService, provideHttpClient(), provideHttpClientTesting()]
+      providers: [MonitorService, provideHttpClientTesting()]
     });
 
     service = TestBed.inject(MonitorService);

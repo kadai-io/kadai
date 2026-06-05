@@ -20,7 +20,7 @@ import { Directive, HostBinding, HostListener, output } from '@angular/core';
 
 @Directive({ selector: '[kadaiDragAndDrop]' })
 export class DragAndDropDirective {
-  onFileDropped = output<any>();
+  onFileDropped = output<FileList>();
   @HostBinding('class.fileover') fileOver!: boolean;
 
   @HostListener('dragover', ['$event']) onDragOver(evt: any) {

@@ -78,7 +78,7 @@
           </tr>
           </thead>
           <tbody>
-            @for (accessItem of accessItemsGroups?.controls; track accessItem; let index = $index) {
+            @for (accessItem of accessItemsGroups.controls; track accessItem; let index = $index) {
               <tr
                 [formGroupName]="index">
                 <!-- REMOVE BUTTON -->
@@ -88,12 +88,13 @@
                          class="workbasket-access-items__select-row" type="checkbox">
                 </td>
                 <!-- ACCESS ID -->
-                @if ((accessItemsCustomization$ | async)?.accessId.lookupField) {
+                @if ((accessItemsCustomization$ | async)?.accessId?.lookupField) {
                   <td
-                    [class]="{	'has-warning': (accessItemsClone[index].accessId !== accessItem.value.accessId),
+                    [class]="{	'has-warning': (accessItemsClone()[index].accessId !== accessItem.value.accessId),
                 							'has-error': !accessItem.value.accessId || accessItemsGroups.controls[index].get('accessId')?.invalid }"
                     class="workbasket-access-items__typeahead">
-                    <kadai-shared-type-ahead (accessIdEventEmitter)="accessItemSelected($event, index)"
+                    <kadai-shared-type-ahead
+                      (accessIdEventEmitter)="accessItemSelected($event, index)"
                       [displayError]="true"
                       [isRequired]="true"
                       [savedAccessId]="accessItem"
@@ -101,7 +102,7 @@
                   </td>
                 } @else {
                   <td>
-                    <div [class]="{ 'has-warning': (accessItemsClone[index].accessId !== accessItem.value.accessId),
+                    <div [class]="{ 'has-warning': (accessItemsClone()[index].accessId !== accessItem.value.accessId),
 																  'has-error': !accessItem.value.accessId && formsValidatorService.formSubmitAttempt}">
                       <input #htmlInputElement
                              [@validation]="toggleValidationAccessIdMap.get(index)"
@@ -121,7 +122,7 @@
                 </td>
                 <!-- READ -->
                 <td
-                  [class.has-changes]="(accessItemsClone[index].permRead !== accessItem.value.permRead)">
+                  [class.has-changes]="(accessItemsClone()[index].permRead !== accessItem.value.permRead)">
                   <input (change)="setSelectAllCheckbox(index, $event)" aria-label="permRead"
                          aria-labelledby="permRead"
                          class="workbasket-access-items__permission-checkbox"
@@ -130,7 +131,7 @@
                 </td>
                 <!-- READ TASKS -->
                 <td
-                  [class.has-changes]="(accessItemsClone[index].permReadTasks !== accessItem.value.permReadTasks)">
+                  [class.has-changes]="(accessItemsClone()[index].permReadTasks !== accessItem.value.permReadTasks)">
                   <input (change)="setSelectAllCheckbox(index, $event)" aria-label="permReadTasks"
                          aria-labelledby="permReadTasks"
                          class="workbasket-access-items__permission-checkbox"
@@ -139,7 +140,7 @@
                 </td>
                 <!-- OPEN -->
                 <td
-                  [class.has-changes]="(accessItemsClone[index].permOpen !== accessItem.value.permOpen)">
+                  [class.has-changes]="(accessItemsClone()[index].permOpen !== accessItem.value.permOpen)">
                   <input (change)="setSelectAllCheckbox(index, $event)" aria-label="permOpen"
                          aria-labelledby="permOpen"
                          class="workbasket-access-items__permission-checkbox"
@@ -148,7 +149,7 @@
                 </td>
                 <!-- EDIT TASKS -->
                 <td
-                  [class.has-changes]="(accessItemsClone[index].permEditTasks !== accessItem.value.permEditTasks)">
+                  [class.has-changes]="(accessItemsClone()[index].permEditTasks !== accessItem.value.permEditTasks)">
                   <input (change)="setSelectAllCheckbox(index, $event)" aria-label="permEditTasks"
                          aria-labelledby="permEditTasks"
                          class="workbasket-access-items__permission-checkbox"
@@ -157,7 +158,7 @@
                 </td>
                 <!-- APPEND -->
                 <td
-                  [class.has-changes]="(accessItemsClone[index].permAppend !== accessItem.value.permAppend)">
+                  [class.has-changes]="(accessItemsClone()[index].permAppend !== accessItem.value.permAppend)">
                   <input (change)="setSelectAllCheckbox(index, $event)" aria-label="permAppend"
                          aria-labelledby="permAppend"
                          class="workbasket-access-items__permission-checkbox"
@@ -166,7 +167,7 @@
                 </td>
                 <!-- TRANSFER -->
                 <td
-                  [class.has-changes]="(accessItemsClone[index].permTransfer !== accessItem.value.permTransfer)">
+                  [class.has-changes]="(accessItemsClone()[index].permTransfer !== accessItem.value.permTransfer)">
                   <input (change)="setSelectAllCheckbox(index, $event)" aria-label="permTransfer"
                          aria-labelledby="permTransfer"
                          class="workbasket-access-items__permission-checkbox"
@@ -175,7 +176,7 @@
                 </td>
                 <!-- DISTRIBUTE -->
                 <td
-                  [class.has-changes]="(accessItemsClone[index].permDistribute !== accessItem.value.permDistribute)">
+                  [class.has-changes]="(accessItemsClone()[index].permDistribute !== accessItem.value.permDistribute)">
                   <input (change)="setSelectAllCheckbox(index, $event)" aria-label="permDistribute"
                          aria-labelledby="permDistribute"
                          class="workbasket-access-items__permission-checkbox"
@@ -186,7 +187,7 @@
                 @for (customField of customFields$ | async; track customField; let customIndex = $index) {
                   @if (customField.visible) {
                     <td
-                      [class.has-changes]="accessItemsClone[index][getAccessItemCustomProperty(customIndex + 1)] !== accessItem.value[getAccessItemCustomProperty(customIndex+1)]">
+                      [class.has-changes]="accessItemsClone()[index][getAccessItemCustomProperty(customIndex + 1)] !== accessItem.value[getAccessItemCustomProperty(customIndex+1)]">
                       <input (change)="setSelectAllCheckbox(index, $event)" aria-label="customField"
                              aria-labelledby="customField"
                              class="workbasket-access-items__permission-checkbox"

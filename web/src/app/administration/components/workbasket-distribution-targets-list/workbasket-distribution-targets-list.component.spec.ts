@@ -102,7 +102,7 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
     fixture = TestBed.createComponent(WorkbasketDistributionTargetsListComponent);
     debugElement = fixture.debugElement;
     component = fixture.componentInstance;
-    component.distributionTargets = workbasketReadStateMock.paginatedWorkbasketsSummary.workbaskets;
+    component.distributionTargets.set(workbasketReadStateMock.paginatedWorkbasketsSummary.workbaskets);
     fixture.componentRef.setInput('side', Side.AVAILABLE);
     fixture.componentRef.setInput('transferDistributionTargetObservable', EMPTY);
     store = TestBed.inject(Store);
@@ -160,38 +160,38 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
   it('should call orderBy pipe', () => {
     const orderBySpy = vi.spyOn(OrderBy.prototype, 'transform');
     fixture.detectChanges();
-    expect(orderBySpy).toHaveBeenCalledWith(component.distributionTargets, ['name']);
+    expect(orderBySpy).toHaveBeenCalledWith(component.distributionTargets(), ['name']);
   });
 
   it('should select all workbaskets when selectAll is called with true', () => {
-    component.distributionTargets = [...sampleDistributionTargets];
+    component.distributionTargets.set([...sampleDistributionTargets]);
     fixture.detectChanges();
 
     component.selectAll(true);
 
     expect(component.allSelected).toBe(true);
-    component.distributionTargets.forEach((wb) => {
+    component.distributionTargets().forEach((wb) => {
       expect(wb.selected).toBe(true);
     });
   });
 
   it('should deselect all workbaskets when selectAll is called with false', () => {
-    component.distributionTargets = sampleDistributionTargets.map((wb) => ({ ...wb, selected: true }));
+    component.distributionTargets.set(sampleDistributionTargets.map((wb) => ({ ...wb, selected: true })));
     fixture.detectChanges();
 
     component.selectAll(false);
 
     expect(component.allSelected).toBe(false);
-    component.distributionTargets.forEach((wb) => {
+    component.distributionTargets().forEach((wb) => {
       expect(wb.selected).toBe(false);
     });
   });
 
   it('should update allSelected when updateSelectAll is called', () => {
-    component.distributionTargets = [...sampleDistributionTargets];
+    component.distributionTargets.set([...sampleDistributionTargets]);
     fixture.detectChanges();
 
-    component.distributionTargets.forEach((wb) => (wb.selected = false));
+    component.distributionTargets().forEach((wb) => (wb.selected = false));
 
     const result = component.updateSelectAll(true);
     expect(result).toBe(true);
@@ -200,14 +200,14 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
   it('should set allSelected to true when all items are individually selected', () => {
     fixture.detectChanges();
 
-    component.distributionTargets = [{ ...sampleDistributionTargets[0], selected: false }];
+    component.distributionTargets.set([{ ...sampleDistributionTargets[0], selected: false }]);
 
     component.updateSelectAll(true);
     expect(component.allSelected).toBe(true);
   });
 
   it('should set allSelected to false when an item is deselected', () => {
-    component.distributionTargets = [...sampleDistributionTargets];
+    component.distributionTargets.set([...sampleDistributionTargets]);
     component.allSelected = true;
     fixture.detectChanges();
 
@@ -243,7 +243,7 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
   it('should handle transferDistributionTargetObservable with different side', () => {
     const subject = new Subject<Side>();
     fixture.componentRef.setInput('side', Side.AVAILABLE);
-    component.distributionTargets = [...sampleDistributionTargets];
+    component.distributionTargets.set([...sampleDistributionTargets]);
     fixture.componentRef.setInput('transferDistributionTargetObservable', subject.asObservable());
     fixture.detectChanges();
 
@@ -253,9 +253,9 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
   });
 
   it('should set requestInProgress to 2 initially in ngOnInit', () => {
-    component.requestInProgress = 0;
+    component.requestInProgress.set(0);
     fixture.detectChanges();
-    expect(component.requestInProgress).toBeLessThanOrEqual(2);
+    expect(component.requestInProgress()).toBeLessThanOrEqual(2);
   });
 
   it('should toggle toolbar state via click on filter button', () => {
@@ -285,7 +285,7 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
   });
 
   it('should call selectAll when select-all button is clicked', () => {
-    component.distributionTargets = [...sampleDistributionTargets];
+    component.distributionTargets.set([...sampleDistributionTargets]);
     fixture.detectChanges();
     const selectAllSpy = vi.spyOn(component, 'selectAll');
     const selectAllBtn = debugElement.nativeElement.querySelectorAll('.distribution-targets-list__action-button')[1];
@@ -295,7 +295,7 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
   });
 
   it('should show check_box icon when allSelected is true', () => {
-    component.distributionTargets = [...sampleDistributionTargets];
+    component.distributionTargets.set([...sampleDistributionTargets]);
     component.allSelected = true;
     fixture.detectChanges();
     const checkboxIcon = debugElement.nativeElement.querySelector('mat-icon[mattooltip="Deselect all items"]');
@@ -304,7 +304,7 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
   });
 
   it('should show check_box_outline_blank icon when allSelected is false', () => {
-    component.distributionTargets = [...sampleDistributionTargets];
+    component.distributionTargets.set([...sampleDistributionTargets]);
     component.allSelected = false;
     fixture.detectChanges();
     const checkboxIcon = debugElement.nativeElement.querySelector('mat-icon[mattooltip="Select all items"]');
@@ -318,10 +318,10 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
     lf.componentRef.setInput('side', Side.AVAILABLE);
     lf.componentRef.setInput('transferDistributionTargetObservable', EMPTY);
     lf.detectChanges();
-    lc.distributionTargets = [];
-    lc.requestInProgress = -1;
-    expect(lc.distributionTargets.length).toBe(0);
-    expect(lc.requestInProgress).toBeLessThan(0);
+    lc.distributionTargets.set([]);
+    lc.requestInProgress.set(-1);
+    expect(lc.distributionTargets().length).toBe(0);
+    expect(lc.requestInProgress()).toBeLessThan(0);
     expect(lc.side()).toBe(Side.AVAILABLE);
   });
 
@@ -331,10 +331,10 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
     lf.componentRef.setInput('side', Side.SELECTED);
     lf.componentRef.setInput('transferDistributionTargetObservable', EMPTY);
     lf.detectChanges();
-    lc.distributionTargets = [];
-    lc.requestInProgress = -1;
-    expect(lc.distributionTargets.length).toBe(0);
-    expect(lc.requestInProgress).toBeLessThan(0);
+    lc.distributionTargets.set([]);
+    lc.requestInProgress.set(-1);
+    expect(lc.distributionTargets().length).toBe(0);
+    expect(lc.requestInProgress()).toBeLessThan(0);
     expect(lc.side()).toBe(Side.SELECTED);
   });
 
@@ -342,8 +342,8 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
     const lf = TestBed.createComponent(WorkbasketDistributionTargetsListComponent);
     const lc = lf.componentInstance;
     lf.componentRef.setInput('side', Side.AVAILABLE);
-    lc.distributionTargets = [];
-    lc.requestInProgress = 0; // not < 0
+    lc.distributionTargets.set([]);
+    lc.requestInProgress.set(0); // not < 0
     lf.componentRef.setInput('transferDistributionTargetObservable', EMPTY);
     lf.detectChanges();
     const emptyMsg = lf.nativeElement.querySelector('.distribution-targets-list__empty-list');
@@ -391,25 +391,25 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
 
     it('should initialize with SELECTED side and populate distributionTargets from store', () => {
       expect(selectedComponent.side()).toBe(Side.SELECTED);
-      expect(selectedComponent.distributionTargets).toBeDefined();
-      expect(selectedComponent.distributionTargets.length).toBe(sampleDistributionTargets.length);
+      expect(selectedComponent.distributionTargets()).toBeDefined();
+      expect(selectedComponent.distributionTargets().length).toBe(sampleDistributionTargets.length);
     });
 
     it('should call applyFilter when selected distribution targets filter changes', () => {
       store.dispatch(new SetWorkbasketFilter({ 'name-like': ['Alpha'] }, 'selectedDistributionTargets'));
-      expect(selectedComponent.distributionTargets).toBeDefined();
+      expect(selectedComponent.distributionTargets()).toBeDefined();
     });
 
     it('should filter distribution targets by name-like after filter dispatch', () => {
       store.dispatch(new SetWorkbasketFilter({ 'name-like': ['Alpha'] }, 'selectedDistributionTargets'));
-      const allMatch = selectedComponent.distributionTargets.every((dt) => dt.name!.toLowerCase().includes('alpha'));
+      const allMatch = selectedComponent.distributionTargets().every((dt) => dt.name!.toLowerCase().includes('alpha'));
       expect(allMatch).toBe(true);
-      expect(selectedComponent.distributionTargets.length).toBe(1);
+      expect(selectedComponent.distributionTargets().length).toBe(1);
     });
 
     it('should filter by exact type when type filter is set', () => {
       store.dispatch(new SetWorkbasketFilter({ type: ['PERSONAL'] } as any, 'selectedDistributionTargets'));
-      const allPersonal = selectedComponent.distributionTargets.every((dt) => dt.type === 'PERSONAL');
+      const allPersonal = selectedComponent.distributionTargets().every((dt) => dt.type === 'PERSONAL');
       expect(allPersonal).toBe(true);
     });
   });
@@ -428,7 +428,7 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
       lf.componentRef.setInput('side', Side.AVAILABLE);
       lf.componentRef.setInput('transferDistributionTargetObservable', EMPTY);
       lf.detectChanges();
-      expect(lc.distributionTargets.length).toBe(0);
+      expect(lc.distributionTargets().length).toBe(0);
       expect(lc.side()).toBe(Side.AVAILABLE);
     });
 
@@ -445,7 +445,7 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
       lf.componentRef.setInput('side', Side.SELECTED);
       lf.componentRef.setInput('transferDistributionTargetObservable', EMPTY);
       lf.detectChanges();
-      expect(lc.distributionTargets.length).toBe(0);
+      expect(lc.distributionTargets().length).toBe(0);
       expect(lc.side()).toBe(Side.SELECTED);
     });
 
@@ -483,8 +483,8 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
       lf.componentRef.setInput('side', Side.AVAILABLE);
       lf.componentRef.setInput('transferDistributionTargetObservable', EMPTY);
       lf.detectChanges();
-      expect(lc.distributionTargets.length).toBeGreaterThan(0);
-      expect(lc.distributionTargets[0].markedForDeletion).toBe(true);
+      expect(lc.distributionTargets().length).toBeGreaterThan(0);
+      expect(lc.distributionTargets()[0].markedForDeletion).toBe(true);
     });
 
     it('should render markedForDeletion indicator in DOM when workbasket is marked', async () => {
@@ -519,13 +519,13 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
       lf.componentRef.setInput('transferDistributionTargetObservable', EMPTY);
       lf.detectChanges();
       await lf.whenStable();
-      expect(lc.distributionTargets.length).toBeGreaterThan(0);
-      expect(lc.distributionTargets[0].markedForDeletion).toBe(true);
+      expect(lc.distributionTargets().length).toBeGreaterThan(0);
+      expect(lc.distributionTargets()[0].markedForDeletion).toBe(true);
       const markedEl = lf.nativeElement.querySelector('.workbaskets-item__marked');
       if (markedEl) {
         expect(markedEl).toBeTruthy();
       } else {
-        expect(lc.distributionTargets[0].markedForDeletion).toBe(true);
+        expect(lc.distributionTargets()[0].markedForDeletion).toBe(true);
       }
       lf.destroy();
     });
@@ -552,16 +552,16 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
         if (cdkViewport) {
           cdkViewport.triggerEventHandler('click', new MouseEvent('click'));
         }
-        if (component.distributionTargets && component.distributionTargets.length > 0) {
-          component.updateSelectAll(!component.distributionTargets[0].selected);
-          component.distributionTargets[0].selected = !component.distributionTargets[0].selected;
+        if (component.distributionTargets() && component.distributionTargets().length > 0) {
+          component.updateSelectAll(!component.distributionTargets()[0].selected);
+          component.distributionTargets()[0].selected = !component.distributionTargets()[0].selected;
         }
         expect(component).toBeTruthy();
       }
     });
 
     it('should render workbasket list items in mat-list-option when distributionTargets have items', () => {
-      component.distributionTargets = [
+      component.distributionTargets.set([
         {
           workbasketId: 'WBI:ITEM1',
           key: 'ITEM1',
@@ -581,10 +581,10 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
           markedForDeletion: false,
           selected: false
         }
-      ];
+      ]);
       fixture.detectChanges();
-      expect(component.distributionTargets.length).toBeGreaterThan(0);
-      expect(component.distributionTargets[0]).toBeDefined();
+      expect(component.distributionTargets().length).toBeGreaterThan(0);
+      expect(component.distributionTargets()[0]).toBeDefined();
     });
 
     it('should cover all three @if branches in toolbar when toggling toolbarState', () => {
@@ -619,7 +619,7 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
 
     it('should call updateSelectAll when mat-list-option is clicked in template', () => {
       const updateSpy = vi.spyOn(component, 'updateSelectAll');
-      component.distributionTargets = sampleDistributionTargets;
+      component.distributionTargets.set(sampleDistributionTargets);
       fixture.detectChanges();
       if (component.workbasketList()) {
         const viewportEl = component.workbasketList()!.elementRef.nativeElement;
@@ -632,7 +632,7 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
         option.triggerEventHandler('click', {});
         expect(updateSpy).toHaveBeenCalled();
       } else {
-        expect(component.distributionTargets.length).toBeGreaterThan(0);
+        expect(component.distributionTargets().length).toBeGreaterThan(0);
       }
     });
   });
@@ -643,21 +643,21 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
   });
 
   it('should select all when selectAll is called', () => {
-    component.distributionTargets = [
+    component.distributionTargets.set([
       { workbasketId: '1', selected: false } as any,
       { workbasketId: '2', selected: false } as any
-    ];
+    ]);
     fixture.detectChanges();
     component.selectAll(true);
-    expect(component.distributionTargets.every((dt) => dt.selected)).toBe(true);
+    expect(component.distributionTargets().every((dt) => dt.selected)).toBe(true);
     expect(component.allSelected).toBe(true);
   });
 
   it('should update select all state when updateSelectAll is called', () => {
-    component.distributionTargets = [
+    component.distributionTargets.set([
       { workbasketId: '1', selected: true } as any,
       { workbasketId: '2', selected: true } as any
-    ];
+    ]);
     component['allSelectedDiff'] = 1;
     component.updateSelectAll(true);
     expect(component.allSelected).toBe(true);
@@ -678,8 +678,8 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
       const lf = TestBed.createComponent(WorkbasketDistributionTargetsListComponent);
       const lc = lf.componentInstance;
       (lc as any).assignWbs = function () {
-        lc.distributionTargets = [];
-        lc.requestInProgress = -1;
+        lc.distributionTargets.set([]);
+        lc.requestInProgress.set(-1);
       };
       lf.componentRef.setInput('side', Side.AVAILABLE);
       lf.componentRef.setInput('transferDistributionTargetObservable', EMPTY);
@@ -694,8 +694,8 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
       const lf = TestBed.createComponent(WorkbasketDistributionTargetsListComponent);
       const lc = lf.componentInstance;
       (lc as any).assignWbs = function () {
-        lc.distributionTargets = [];
-        lc.requestInProgress = -1;
+        lc.distributionTargets.set([]);
+        lc.requestInProgress.set(-1);
       };
       lf.componentRef.setInput('side', Side.SELECTED);
       lf.componentRef.setInput('transferDistributionTargetObservable', EMPTY);
@@ -707,8 +707,8 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
     });
 
     it('should not render empty message while requestInProgress >= 0', () => {
-      component.distributionTargets = [];
-      component.requestInProgress = 0;
+      component.distributionTargets.set([]);
+      component.requestInProgress.set(0);
       fixture.detectChanges();
       const emptyMsg = debugElement.nativeElement.querySelector('.distribution-targets-list__empty-list');
       expect(emptyMsg).toBeFalsy();
@@ -780,8 +780,8 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
       const lf = TestBed.createComponent(WorkbasketDistributionTargetsListComponent);
       const lc = lf.componentInstance;
       (lc as any).assignWbs = function () {
-        lc.distributionTargets = wbs;
-        lc.requestInProgress = 0;
+        lc.distributionTargets.set(wbs);
+        lc.requestInProgress.set(0);
       };
       lf.componentRef.setInput('side', Side.AVAILABLE);
       lf.componentRef.setInput('transferDistributionTargetObservable', EMPTY);
@@ -801,7 +801,7 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
       await lf.whenStable();
       lf.detectChanges();
 
-      expect(lc.distributionTargets[0].markedForDeletion).toBe(true);
+      expect(lc.distributionTargets()[0].markedForDeletion).toBe(true);
       const markedEl = lf.nativeElement.querySelector('.workbaskets-item__marked');
       expect(markedEl).toBeTruthy();
       expect(markedEl.textContent).toContain('error');

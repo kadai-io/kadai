@@ -25,7 +25,6 @@ import { SettingsState } from '../../../shared/store/settings-store/settings.sta
 import { SettingsComponent } from './settings.component';
 import { settingsStateMock } from '../../../shared/store/mock-data/mock-store';
 import { SetSettings } from '../../../shared/store/settings-store/settings.actions';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -51,7 +50,6 @@ describe('SettingsComponent', () => {
           provide: NotificationService,
           useValue: notificationServiceSpy
         },
-        provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()
       ]
     }).compileComponents();
@@ -79,7 +77,7 @@ describe('SettingsComponent', () => {
   });
 
   it('should show error when an invalid form is tried to be saved', () => {
-    component.settings['intervalHighPriority'] = [-100, 100];
+    component.settings()!['intervalHighPriority'] = [-100, 100];
     const showErrorSpy = vi.spyOn(notificationServiceSpy, 'showError');
     component.onSave();
     expect(showErrorSpy).toHaveBeenCalled();
@@ -95,7 +93,7 @@ describe('SettingsComponent', () => {
   it('should restore settings to oldSettings when onReset is called', () => {
     const originalSettings = component.deepCopy(component.oldSettings);
     component.onReset();
-    expect(component.settings).toEqual(originalSettings);
+    expect(component.settings()).toEqual(originalSettings);
   });
 
   it('should update settings value from DOM input when onColorChange is called', () => {
@@ -104,7 +102,7 @@ describe('SettingsComponent', () => {
     input.value = '#ABCDEF';
     document.body.appendChild(input);
     component.onColorChange('testColorKey');
-    expect(component.settings['testColorKey']).toBe('#ABCDEF');
+    expect(component.settings()!['testColorKey']).toBe('#ABCDEF');
     document.body.removeChild(input);
   });
 
@@ -159,10 +157,10 @@ describe('SettingsComponent', () => {
 
   it('should reset settings to old values when Undo changes button is clicked', () => {
     const originalSettings = component.deepCopy(component.oldSettings);
-    component.settings['nameHighPriority'] = 'Modified Value';
+    component.settings()!['nameHighPriority'] = 'Modified Value';
     const resetButton = fixture.nativeElement.querySelector('.settings__button--secondary');
     resetButton.click();
-    expect(component.settings['nameHighPriority']).toEqual(originalSettings['nameHighPriority']);
+    expect(component.settings()!['nameHighPriority']).toEqual(originalSettings['nameHighPriority']);
   });
 
   it('should trigger ngModel write function on text inputs by dispatching input events', () => {

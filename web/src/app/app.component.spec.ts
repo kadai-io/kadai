@@ -30,7 +30,7 @@ import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { OrientationService } from './shared/services/orientation/orientation.service';
 import { WindowRefService } from './shared/services/window/window.service';
 import { Router } from '@angular/router';
-import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('AppComponent', () => {
   let component: AppComponent;

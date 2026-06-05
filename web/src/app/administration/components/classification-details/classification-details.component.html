@@ -97,7 +97,7 @@
                          maxlength="32" name="classification.key" placeholder="Key"
                          required type="text">
                 </mat-form-field>
-                @if (inputOverflowMap()?.get(key.name)) {
+                @if (inputOverflowMap().get(key.name)) {
                   <div class="error">{{ lengthError }}</div>
                 }
                 <!-- <kadai-shared-field-error-display [displayError]="key.invalid && key.dirty"
@@ -114,7 +114,7 @@
                          placeholder="Name" required
                          type="text">
                 </mat-form-field>
-                @if (inputOverflowMap()?.get(name.name)) {
+                @if (inputOverflowMap().get(name.name)) {
                   <div class="error">{{ lengthError }}</div>
                 }
                 <!--
@@ -135,7 +135,7 @@
                             maxlength="255" name="classification.description"
                             placeholder="Description"></textarea>
                 </mat-form-field>
-                @if (inputOverflowMap()?.get(description.name)) {
+                @if (inputOverflowMap().get(description.name)) {
                   <div class="error">{{ lengthError }}
                   </div>
                 }
@@ -179,7 +179,7 @@
                              name="classification.serviceLevel" placeholder="Service Level"
                              required type="text">
                     </mat-form-field>
-                    @if (inputOverflowMap()?.get(serviceLevel.name)) {
+                    @if (inputOverflowMap().get(serviceLevel.name)) {
                       <div
                         class="error">{{ lengthError }}
                       </div>
@@ -194,7 +194,8 @@
                              matInput
                              min="0" name="classification.priority" required type="number">
                     </mat-form-field>
-                    <kadai-shared-field-error-display [displayError]="!isFieldValid('classification.priority')"
+                    <kadai-shared-field-error-display
+                      [displayError]="!isFieldValid('classification.priority')"
                       [validationTrigger]="toggleValidationMap.get('classification.priority.name')"
                       errorMessage="* Priority is required" />
                   </div>
@@ -213,7 +214,7 @@
                          placeholder="Application entry point"
                          type="text">
                 </mat-form-field>
-                @if (inputOverflowMap()?.get(appEntryPoint.name)) {
+                @if (inputOverflowMap().get(appEntryPoint.name)) {
                   <div
                     class="error">{{ lengthError }}
                   </div>
@@ -224,7 +225,7 @@
                   <mat-select [(value)]="classification()!.category" required>
                     <mat-select-trigger>
                       <svg-icon [src]="(getCategoryIcon(classification()!.category) | async)?.left"
-                        class="detailed-fields__category-icon" />
+                                class="detailed-fields__category-icon" />
                       {{ classification()!.category }}
                     </mat-select-trigger>
                     @for (category of categories$ | async; track category) {
@@ -256,7 +257,7 @@
                              placeholder="{{customField.field}}"
                              type="text">
                     </mat-form-field>
-                    @if (inputOverflowMap()?.get(custom.name)) {
+                    @if (inputOverflowMap().get(custom.name)) {
                       <div class="error">{{ lengthError }}</div>
                     }
                   </div>

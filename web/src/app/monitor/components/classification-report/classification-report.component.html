@@ -16,7 +16,7 @@
 ~
 -->
 
-@if (reportData) {
+@if (reportData(); as reportData) {
   <div class="panel panel-default">
     <div class="panel-heading">
       <h4>{{ reportData.meta.name }} ({{ reportData.meta.date | date: 'medium' }})</h4>
@@ -26,8 +26,8 @@
         <div class="col-xs-12 col-md-7 col-md-offset-2">
           <div style="position: relative; width:100vw">
             <canvas
-              [datasets]="lineChartData"
-              [labels]="lineChartLabels"
+              [datasets]="lineChartData()"
+              [labels]="lineChartLabels()"
               [legend]="lineChartLegend"
               [options]="lineChartOptions"
               [type]="lineChartType"

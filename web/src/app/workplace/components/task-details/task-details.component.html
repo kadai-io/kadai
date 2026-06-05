@@ -16,7 +16,7 @@
 ~
 -->
 
-@if (task && !requestInProgress) {
+@if (!requestInProgress() && task(); as task) {
   <div class="task-details">
     <div class="task-details__header">
       <!-- ACTION BUTTONS -->
@@ -37,7 +37,7 @@
             <mat-icon>save</mat-icon>
           </button>
           <!-- TODO: delete ngIf when introducing workbasket store -->
-          @if (currentId != 'new-task') {
+          @if (currentId() != 'new-task') {
             <button (click)="resetTask()"
                     class="task-details__button--secondary"
                     mat-stroked-button matTooltip="Undo changes">
@@ -51,7 +51,7 @@
             <mat-icon class="task-details__mat-icon">more_vert</mat-icon>
           </button>
           <mat-menu #buttonMenu="matMenu">
-            @if (currentId != 'new-task') {
+            @if (currentId() != 'new-task') {
               <button (click)="openTask()"
                       class="task-details__button--secondary"
                       mat-menu-item matTooltip="Open Task to work on it">
@@ -59,7 +59,7 @@
                 <span> Open </span>
               </button>
             }
-            @if (currentId != 'new-task') {
+            @if (currentId() != 'new-task') {
               <button (click)="deleteTask()"
                       class="task-details__button--secondary"
                       mat-menu-item matTooltip="Delete Task">

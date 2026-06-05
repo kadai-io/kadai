@@ -16,9 +16,8 @@
  *
  */
 
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TaskHistoryQueryService } from './task-history-query.service';
 import { StartupService } from '../../../shared/services/startup/startup.service';
@@ -36,7 +35,6 @@ describe('TaskHistoryQueryService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),
         { provide: StartupService, useValue: { getKadaiRestUrl: () => REST_URL } }
       ]

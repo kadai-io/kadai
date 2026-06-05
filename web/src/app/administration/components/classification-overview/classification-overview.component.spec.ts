@@ -25,14 +25,14 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import {
   CreateClassification,
+  DeselectClassification,
   SelectClassification
 } from '../../../shared/store/classification-store/classification.actions';
 import { classificationStateMock, engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
-import { provideHttpClient } from '@angular/common/http';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const routeParamsMock = { id: 'new-classification' };
@@ -56,7 +56,7 @@ describe('ClassificationOverviewComponent', () => {
       imports: [ClassificationOverviewComponent],
       providers: [
         provideStore([ClassificationState, EngineConfigurationState]),
-        provideHttpClient(),
+
         provideHttpClientTesting(),
         provideNoopAnimations(),
         provideAngularSvgIcon(),
@@ -89,13 +89,13 @@ describe('ClassificationOverviewComponent', () => {
   });
 
   it('should display classification details when showDetail is true', () => {
-    component.showDetail = true;
+    component.showDetail.set(true);
     fixture.detectChanges();
     expect(debugElement.nativeElement.querySelector('kadai-administration-classification-details')).toBeTruthy();
   });
 
   it('should show empty page with icon and text when showDetail is false', () => {
-    component.showDetail = false;
+    component.showDetail.set(false);
     fixture.detectChanges();
     const emptyPage = fixture.debugElement.nativeElement.querySelector('.select-classification');
     expect(emptyPage.textContent).toBe('Select a classification');
@@ -121,5 +121,25 @@ describe('ClassificationOverviewComponent', () => {
     actions$.pipe(ofActionDispatched(CreateClassification)).subscribe(() => (isActionDispatched = true));
     component.ngOnInit();
     expect(isActionDispatched).toBe(true);
+  });
+
+  it('should dispatch DeselectClassification action when routerParams id does not exist', () => {
+    mockActivatedRoute.firstChild.params = of({});
+    let isActionDispatched = false;
+    actions$.pipe(ofActionDispatched(DeselectClassification)).subscribe(() => (isActionDispatched = true));
+    component.ngOnInit();
+    expect(isActionDispatched).toBe(true);
+  });
+
+  it('should derive showDetail from store state only, not directly from the route id', () => {
+    store.reset({
+      ...store.snapshot(),
+      classification: { ...classificationStateMock, selectedClassification: undefined }
+    });
+    mockActivatedRoute.firstChild.params = of({ id: 'ID01' });
+    const setSpy = vi.spyOn(component.showDetail, 'set');
+    component.ngOnInit();
+    expect(setSpy).toHaveBeenCalledTimes(1);
+    expect(setSpy).toHaveBeenCalledWith(false);
   });
 });

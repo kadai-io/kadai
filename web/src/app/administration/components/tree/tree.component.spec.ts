@@ -27,7 +27,7 @@ import { ClassificationsService } from '../../../shared/services/classifications
 import { ClassificationTreeService } from '../../services/classification-tree.service';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { of } from 'rxjs';
 import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
@@ -109,7 +109,7 @@ describe('KadaiTreeComponent', () => {
   });
 
   it('should have emptyTreeNodes false initially', () => {
-    expect(component.emptyTreeNodes).toBe(false);
+    expect(component.emptyTreeNodes()).toBe(false);
   });
 
   it('should render tree-root element', () => {
@@ -118,7 +118,7 @@ describe('KadaiTreeComponent', () => {
   });
 
   it('should not show "no classifications" message when emptyTreeNodes is false', () => {
-    component.emptyTreeNodes = false;
+    component.emptyTreeNodes.set(false);
     fixture.detectChanges();
     const msg = fixture.nativeElement.querySelector('h3');
     expect(msg).toBeNull();
@@ -127,7 +127,7 @@ describe('KadaiTreeComponent', () => {
   it('should show "no classifications" message when emptyTreeNodes is true', () => {
     const localFixture = TestBed.createComponent(KadaiTreeComponent);
     const localComponent = localFixture.componentInstance;
-    localComponent.emptyTreeNodes = true;
+    localComponent.emptyTreeNodes.set(true);
     localFixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
     const msg = localFixture.nativeElement.querySelector('h3');
@@ -196,7 +196,7 @@ describe('KadaiTreeComponent', () => {
   });
 
   it('should not collapse emptyTreeNodes message when emptyTreeNodes is false', () => {
-    component.emptyTreeNodes = false;
+    component.emptyTreeNodes.set(false);
     fixture.detectChanges();
     const msg = fixture.nativeElement.querySelector('h3');
     expect(msg).toBeNull();
@@ -271,7 +271,7 @@ describe('KadaiTreeComponent', () => {
 
   it('should handle ngAfterViewChecked when filterText changes', () => {
     fixture.componentRef.setInput('filterText', 'newFilter');
-    expect(component.emptyTreeNodes).toBeDefined();
+    expect(component.emptyTreeNodes()).toBeDefined();
   });
 
   it('should handle ngAfterViewChecked when filterIcon changes', () => {
@@ -287,7 +287,7 @@ describe('KadaiTreeComponent', () => {
   it('should show "no classifications" message when emptyTreeNodes is true in separate fixture', () => {
     const localFixture = TestBed.createComponent(KadaiTreeComponent);
     const localComponent = localFixture.componentInstance;
-    localComponent.emptyTreeNodes = true;
+    localComponent.emptyTreeNodes.set(true);
     localFixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
     const h3 = localFixture.nativeElement.querySelector('h3');
@@ -300,7 +300,7 @@ describe('KadaiTreeComponent', () => {
   it('should hide the tree-root when emptyTreeNodes is true', () => {
     const localFixture = TestBed.createComponent(KadaiTreeComponent);
     const localComponent = localFixture.componentInstance;
-    localComponent.emptyTreeNodes = true;
+    localComponent.emptyTreeNodes.set(true);
     localFixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
     const treeRoot = localFixture.nativeElement.querySelector('tree-root');
@@ -312,7 +312,7 @@ describe('KadaiTreeComponent', () => {
   it('should show tree-root and not show "no classifications" when emptyTreeNodes is false', () => {
     const localFixture = TestBed.createComponent(KadaiTreeComponent);
     const localComponent = localFixture.componentInstance;
-    localComponent.emptyTreeNodes = false;
+    localComponent.emptyTreeNodes.set(false);
     localFixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
     const h3 = localFixture.nativeElement.querySelector('h3');
@@ -518,8 +518,80 @@ describe('KadaiTreeComponent', () => {
     localFixture.componentRef.setInput('filterIcon', 'EXTERNAL');
     localFixture.detectChanges();
 
-    expect(localComponent.filter).toBe('Filterable');
-    expect(localComponent.category).toBe('EXTERNAL');
+    expect(localComponent.filter()).toBe('Filterable');
+    expect(localComponent.category()).toBe('EXTERNAL');
+    localFixture.destroy();
+  });
+
+  it('should filter with autoShow disabled when no filter text or category is active', async () => {
+    const treeNodes = [
+      {
+        classificationId: 'CLF:NOFILTER_PARENT',
+        key: 'NOFILTER_PARENT',
+        name: 'Parent Node',
+        category: 'EXTERNAL',
+        parentId: '',
+        parentKey: '',
+        children: [
+          {
+            classificationId: 'CLF:NOFILTER_CHILD',
+            key: 'NOFILTER_CHILD',
+            name: 'Child Node',
+            category: 'EXTERNAL',
+            parentId: 'CLF:NOFILTER_PARENT',
+            parentKey: 'NOFILTER_PARENT',
+            children: []
+          }
+        ]
+      }
+    ];
+    classificationTreeServiceMock.transformToTreeNode.mockReturnValueOnce(treeNodes);
+
+    const localFixture = TestBed.createComponent(KadaiTreeComponent);
+    const localComponent = localFixture.componentInstance;
+    localComponent.options = { ...localComponent.options, useVirtualScroll: false };
+    localFixture.detectChanges();
+    httpController.match(() => true).forEach((req) => req.flush(''));
+
+    localFixture.detectChanges();
+    await localFixture.whenStable();
+    httpController.match(() => true).forEach((req) => req.flush(''));
+    localFixture.detectChanges();
+
+    const parentNode = (localComponent as any).getNode('CLF:NOFILTER_PARENT');
+    expect(parentNode?.isExpanded).toBeFalsy();
+    localFixture.destroy();
+  });
+
+  it('should filter with autoShow enabled when a filter text is active', async () => {
+    const treeNodes = [
+      {
+        classificationId: 'CLF:FILTERMATCH_PARENT',
+        key: 'FILTERMATCH_PARENT',
+        name: 'Parent Node',
+        category: 'EXTERNAL',
+        parentId: '',
+        parentKey: '',
+        children: []
+      }
+    ];
+    classificationTreeServiceMock.transformToTreeNode.mockReturnValueOnce(treeNodes);
+
+    const localFixture = TestBed.createComponent(KadaiTreeComponent);
+    const localComponent = localFixture.componentInstance;
+    localComponent.options = { ...localComponent.options, useVirtualScroll: false };
+    localFixture.detectChanges();
+    httpController.match(() => true).forEach((req) => req.flush(''));
+
+    localFixture.detectChanges();
+    await localFixture.whenStable();
+    httpController.match(() => true).forEach((req) => req.flush(''));
+
+    localFixture.componentRef.setInput('filterText', 'Matching');
+    const filterNodesSpy = vi.spyOn((localComponent as any).tree().treeModel, 'filterNodes');
+    localFixture.detectChanges();
+
+    expect(filterNodesSpy).toHaveBeenCalledWith(expect.any(Function), true);
     localFixture.destroy();
   });
 
@@ -664,7 +736,7 @@ describe('KadaiTreeComponent', () => {
   it('should render @if (emptyTreeNodes) true branch in DOM via local fixture', () => {
     const localFixture = TestBed.createComponent(KadaiTreeComponent);
     const localComponent = localFixture.componentInstance;
-    localComponent.emptyTreeNodes = true;
+    localComponent.emptyTreeNodes.set(true);
     localFixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
     const el = localFixture.nativeElement.querySelector('h3');
