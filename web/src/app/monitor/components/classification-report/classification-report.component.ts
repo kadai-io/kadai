@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MonitorService } from 'app/monitor/services/monitor.service';
 import { ChartData } from 'app/monitor/models/chart-data';
 import { ReportData } from '../../models/report-data';
@@ -31,6 +31,7 @@ import { DatePipe } from '@angular/common';
   templateUrl: './classification-report.component.html',
   styleUrls: ['./classification-report.component.scss'],
   imports: [ReportTableComponent, BaseChartDirective, DatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [MonitorService]
 })
 export class ClassificationReportComponent implements OnInit {

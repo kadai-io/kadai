@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Settings, SettingTypes } from '../../models/settings';
 import { Store } from '@ngxs/store';
@@ -39,6 +39,7 @@ import { CdkTextareaAutosize } from '@angular/cdk/text-field';
   selector: 'kadai-administration-settings',
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, CdkTextareaAutosize]
 })
 export class SettingsComponent implements OnInit, OnDestroy {

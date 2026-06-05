@@ -16,7 +16,17 @@
  *
  */
 
-import { Component, ElementRef, inject, input, OnDestroy, OnInit, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  inject,
+  input,
+  OnDestroy,
+  OnInit,
+  signal,
+  viewChild,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 
 import { WorkbasketSummaryRepresentation } from 'app/shared/models/workbasket-summary-representation';
@@ -52,6 +62,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   selector: 'kadai-administration-workbasket-list',
   templateUrl: './workbasket-list.component.html',
   styleUrls: ['./workbasket-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     WorkbasketListToolbarComponent,
     MatSelectionList,

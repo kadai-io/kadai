@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { NavigationStart, Router, RouterEvent, RouterOutlet } from '@angular/router';
 import { MasterAndDetailService } from 'app/shared/services/master-and-detail/master-and-detail.service';
 
@@ -26,6 +26,7 @@ import { MatIcon } from '@angular/material/icon';
   selector: 'kadai-shared-master-and-detail',
   templateUrl: './master-and-detail.component.html',
   styleUrls: ['./master-and-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [RouterOutlet, MatIcon]
 })
 export class MasterAndDetailComponent implements OnInit {

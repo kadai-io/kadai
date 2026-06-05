@@ -50,7 +50,7 @@
             </mat-icon>
           }
           @if (selectedCategory != '') {
-            <svg-icon [src]="(getCategoryIcon(selectedCategory) | async)?.left"
+            <svg-icon [src]="$safeNavigationMigration((getCategoryIcon(selectedCategory) | async)?.left)"
               class="classification-list__icons" />
           }
         </button>
@@ -63,7 +63,7 @@
           @for (category of categories$ | async; track category) {
             <button (click)="selectCategory(category)"
                     mat-menu-item>
-              <svg-icon [src]="(getCategoryIcon(category) | async)?.left"
+              <svg-icon [src]="$safeNavigationMigration((getCategoryIcon(category) | async)?.left)"
                         class="classification-list__categories"
                         matTooltip="{{(getCategoryIcon(category) | async)?.right}}" />
               <span> {{ category }} </span>

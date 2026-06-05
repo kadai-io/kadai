@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { DatePipe } from '@angular/common';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
@@ -26,6 +26,7 @@ import { MatInput } from '@angular/material/input';
   selector: 'kadai-task-status-details',
   templateUrl: './task-status-details.component.html',
   styleUrls: ['./task-status-details.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatFormField, MatLabel, MatInput, DatePipe]
 })
 export class TaskStatusDetailsComponent {

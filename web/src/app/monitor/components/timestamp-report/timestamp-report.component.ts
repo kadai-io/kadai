@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ReportData } from '../../models/report-data';
 import { MonitorService } from '../../services/monitor.service';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
@@ -28,6 +28,7 @@ import { DatePipe } from '@angular/common';
   templateUrl: './timestamp-report.component.html',
   styleUrls: ['./timestamp-report.component.scss'],
   imports: [ReportTableComponent, DatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [MonitorService]
 })
 export class TimestampReportComponent implements OnInit {

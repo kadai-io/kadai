@@ -16,7 +16,18 @@
  *
  */
 
-import { Component, effect, inject, input, model, OnDestroy, OnInit, untracked, viewChild } from '@angular/core';
+import {
+  Component,
+  effect,
+  inject,
+  input,
+  model,
+  OnDestroy,
+  OnInit,
+  untracked,
+  viewChild,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { FormsModule, NgForm, NgModel } from '@angular/forms';
 import { Store } from '@ngxs/store';
@@ -65,6 +76,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   selector: 'kadai-administration-workbasket-information',
   templateUrl: './workbasket-information.component.html',
   styleUrls: ['./workbasket-information.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FormsModule,
     MatDivider,

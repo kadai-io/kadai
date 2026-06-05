@@ -16,7 +16,16 @@
  *
  */
 
-import { AfterViewChecked, Component, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import {
+  AfterViewChecked,
+  Component,
+  effect,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { ReportData } from '../../models/report-data';
 import { MonitorService } from '../../services/monitor.service';
 import { WorkbasketType } from '../../../shared/models/workbasket-type';
@@ -81,6 +90,7 @@ import { TaskPriorityReportFilterStateService } from '../../services/task-priori
     MatExpansionPanelTitle,
     MatCheckbox
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [MonitorService]
 })
 export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, OnDestroy {

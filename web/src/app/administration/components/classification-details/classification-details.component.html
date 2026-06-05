@@ -223,13 +223,13 @@
                   <mat-label>Category</mat-label>
                   <mat-select [(value)]="classification()!.category" required>
                     <mat-select-trigger>
-                      <svg-icon [src]="(getCategoryIcon(classification()!.category) | async)?.left"
+                      <svg-icon [src]="$safeNavigationMigration((getCategoryIcon(classification()!.category) | async)?.left)"
                         class="detailed-fields__category-icon" />
                       {{ classification()!.category }}
                     </mat-select-trigger>
                     @for (category of categories$ | async; track category) {
                       <mat-option value="{{category}}">
-                        <svg-icon [src]="(getCategoryIcon(category) | async)?.left"
+                        <svg-icon [src]="$safeNavigationMigration((getCategoryIcon(category) | async)?.left)"
                                   class="detailed-fields__category-icon" />
                         {{ category }}
                       </mat-option>

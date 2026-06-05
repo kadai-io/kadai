@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, effect, inject, input, signal, untracked } from '@angular/core';
+import { Component, effect, inject, input, signal, untracked, ChangeDetectionStrategy } from '@angular/core';
 import { ALL_TYPES, WorkbasketType } from '../../models/workbasket-type';
 import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-filter-parameter';
 import { Store } from '@ngxs/store';
@@ -38,6 +38,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   selector: 'kadai-shared-workbasket-filter',
   templateUrl: './workbasket-filter.component.html',
   styleUrls: ['./workbasket-filter.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatFormField,
     MatLabel,

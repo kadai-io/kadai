@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { MatTabLink, MatTabNav, MatTabNavPanel } from '@angular/material/tabs';
 import { takeUntil } from 'rxjs/operators';
@@ -31,6 +31,7 @@ import { MatOption } from '@angular/material/core';
   selector: 'kadai-monitor',
   templateUrl: './monitor.component.html',
   styleUrls: ['./monitor.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatTabNav,
     MatTabLink,

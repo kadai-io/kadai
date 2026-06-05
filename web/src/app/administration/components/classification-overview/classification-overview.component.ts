@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { Store } from '@ngxs/store';
@@ -37,6 +37,7 @@ import { SvgIconComponent } from 'angular-svg-icon';
   selector: 'kadai-administration-classification-overview',
   templateUrl: './classification-overview.component.html',
   styleUrls: ['./classification-overview.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [ClassificationListComponent, ClassificationDetailsComponent, SvgIconComponent]
 })
 export class ClassificationOverviewComponent implements OnInit, OnDestroy {

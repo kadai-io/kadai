@@ -16,7 +16,16 @@
  *
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, inject, input, OnInit, viewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  input,
+  OnInit,
+  viewChild,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { isEqual } from 'lodash-es';
 import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
 import { expandDown } from 'app/shared/animations/expand.animation';
@@ -50,6 +59,7 @@ import { OrderBy } from '../../../shared/pipes/order-by.pipe';
   templateUrl: './workbasket-distribution-targets-list.component.html',
   styleUrls: ['./workbasket-distribution-targets-list.component.scss'],
   animations: [expandDown],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatToolbar,
     MatTooltip,

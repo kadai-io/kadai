@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit, output } from '@angular/core';
+import { Component, inject, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
 import { ReportData } from '../../models/report-data';
 import { ChartData } from '../../models/chart-data';
 import { MonitorService } from '../../services/monitor.service';
@@ -32,6 +32,7 @@ import { ReportTableComponent } from '../report-table/report-table.component';
   templateUrl: './workbasket-report-due-date.component.html',
   styleUrls: ['./workbasket-report-due-date.component.scss'],
   imports: [BaseChartDirective, ReportTableComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [MonitorService]
 })
 export class WorkbasketReportDueDateComponent implements OnInit {

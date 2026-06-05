@@ -27,7 +27,8 @@ import {
   OnInit,
   output,
   untracked,
-  viewChildren
+  viewChildren,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged, Observable, Subject } from 'rxjs';
@@ -72,6 +73,7 @@ import { MatInput } from '@angular/material/input';
   templateUrl: './workbasket-access-items.component.html',
   animations: [highlight],
   styleUrls: ['./workbasket-access-items.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatButton,
     MatTooltip,

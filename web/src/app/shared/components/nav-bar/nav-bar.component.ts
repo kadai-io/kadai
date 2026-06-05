@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { SelectedRouteService } from 'app/shared/services/selected-route/selected-route';
 import { Subject } from 'rxjs';
 import { expandRight } from 'app/shared/animations/expand.animation';
@@ -32,6 +32,7 @@ import { SvgIconComponent } from 'angular-svg-icon';
   templateUrl: './nav-bar.component.html',
   styleUrls: ['./nav-bar.component.scss'],
   animations: [expandRight],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatToolbar, MatIconButton, MatIcon, SvgIconComponent]
 })
 export class NavBarComponent implements OnInit {

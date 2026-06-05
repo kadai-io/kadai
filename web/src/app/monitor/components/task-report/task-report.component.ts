@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ReportData } from 'app/monitor/models/report-data';
 import { MonitorService } from '../../services/monitor.service';
 import { takeUntil } from 'rxjs/operators';
@@ -32,6 +32,7 @@ import { DatePipe } from '@angular/common';
   templateUrl: './task-report.component.html',
   styleUrls: ['./task-report.component.scss'],
   imports: [ReportTableComponent, BaseChartDirective, DatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [MonitorService]
 })
 export class TaskReportComponent implements OnInit {

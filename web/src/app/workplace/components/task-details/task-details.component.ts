@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -46,6 +46,7 @@ import { TaskAttributeValueComponent } from '../task-attribute-value/task-attrib
   selector: 'kadai-task-details',
   templateUrl: './task-details.component.html',
   styleUrls: ['./task-details.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatButton,
     MatTooltip,

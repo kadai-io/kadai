@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { Actions, ofActionCompleted, ofActionDispatched, Store } from '@ngxs/store';
@@ -53,6 +53,7 @@ import { KadaiTreeComponent } from '../tree/tree.component';
   selector: 'kadai-administration-classification-list',
   templateUrl: './classification-list.component.html',
   styleUrls: ['./classification-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatButton,
     MatTooltip,

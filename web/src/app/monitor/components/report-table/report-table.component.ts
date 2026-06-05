@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, effect, input, signal, untracked } from '@angular/core';
+import { Component, effect, input, signal, untracked, ChangeDetectionStrategy } from '@angular/core';
 import { ReportData } from 'app/monitor/models/report-data';
 import { ReportRow } from '../../models/report-row';
 import { MatButton } from '@angular/material/button';
@@ -25,6 +25,7 @@ import { MatButton } from '@angular/material/button';
   selector: 'kadai-monitor-report-table',
   templateUrl: './report-table.component.html',
   styleUrls: ['./report-table.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatButton]
 })
 export class ReportTableComponent {

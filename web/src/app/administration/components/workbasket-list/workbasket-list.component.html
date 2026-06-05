@@ -84,7 +84,7 @@
 
 <kadai-shared-pagination (changePage)="changePage($event)"
                          [expanded]="expanded()"
-                         [numberOfItems]="(workbasketsSummary$ | async)?.length"
-                         [page]="(workbasketsSummaryRepresentation$ | async) ? (workbasketsSummaryRepresentation$ | async)?.page : (workbasketsSummaryRepresentation$ | async)"
+                         [numberOfItems]="$safeNavigationMigration((workbasketsSummary$ | async)?.length)"
+                         [page]="(workbasketsSummaryRepresentation$ | async) ? $safeNavigationMigration((workbasketsSummaryRepresentation$ | async)?.page) : (workbasketsSummaryRepresentation$ | async)"
                          [resetPaging]="resetPagingSubject.asObservable()"
                          [type]="type" />

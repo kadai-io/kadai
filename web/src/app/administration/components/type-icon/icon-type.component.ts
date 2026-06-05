@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, ChangeDetectionStrategy } from '@angular/core';
 import { WorkbasketType } from 'app/shared/models/workbasket-type';
 import { SvgIconComponent } from 'angular-svg-icon';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -25,6 +25,7 @@ import { MatTooltip } from '@angular/material/tooltip';
   selector: 'kadai-administration-icon-type',
   templateUrl: './icon-type.component.html',
   styleUrls: ['./icon-type.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [SvgIconComponent, MatTooltip]
 })
 export class IconTypeComponent {

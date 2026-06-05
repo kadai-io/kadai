@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, input, OnDestroy, OnInit, viewChild } from '@angular/core';
+import { Component, inject, input, OnDestroy, OnInit, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ClassificationDefinitionService } from 'app/administration/services/classification-definition.service';
 import { WorkbasketDefinitionService } from 'app/administration/services/workbasket-definition.service';
 import { DomainService } from 'app/shared/services/domain/domain.service';
@@ -42,6 +42,7 @@ import { AsyncPipe } from '@angular/common';
   selector: 'kadai-administration-import-export',
   templateUrl: './import-export.component.html',
   styleUrls: ['./import-export.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatButton, MatTooltip, MatIcon, FormsModule, MatMenuTrigger, MatMenu, MatMenuItem, AsyncPipe]
 })
 export class ImportExportComponent implements OnInit, OnDestroy {

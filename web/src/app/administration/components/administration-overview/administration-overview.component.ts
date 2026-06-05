@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Subject } from 'rxjs';
 import { DomainService } from '../../../shared/services/domain/domain.service';
@@ -32,6 +32,7 @@ import { MatOption } from '@angular/material/core';
   selector: 'kadai-administration-overview',
   templateUrl: './administration-overview.component.html',
   styleUrls: ['./administration-overview.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatTabNav,
     MatTabLink,
