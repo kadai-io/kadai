@@ -18,7 +18,6 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { WorkbasketDefinitionService } from './workbasket-definition.service';
 import { StartupService } from '../../shared/services/startup/startup.service';
@@ -35,7 +34,6 @@ describe('WorkbasketDefinitionService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),
         { provide: StartupService, useValue: { getKadaiRestUrl: () => REST_URL } }
       ]

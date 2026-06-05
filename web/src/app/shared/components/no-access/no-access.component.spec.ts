@@ -22,7 +22,6 @@ import { NoAccessComponent } from './no-access.component';
 import { Router } from '@angular/router';
 import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.service';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
-import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('NoAccessComponent', () => {
@@ -38,7 +37,6 @@ describe('NoAccessComponent', () => {
     await TestBed.configureTestingModule({
       imports: [NoAccessComponent],
       providers: [
-        provideHttpClient(),
         provideHttpClientTesting(),
         provideAngularSvgIcon(),
         { provide: Router, useValue: routerMock },

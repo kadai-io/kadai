@@ -20,7 +20,6 @@ import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Customisation, CustomisationContent } from 'app/shared/models/customisation';
 import { asteriskIcon, ClassificationCategoriesService, missingIcon } from './classification-categories.service';
-import { provideHttpClient } from '@angular/common/http';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('ClassificationCategoriesService', () => {
@@ -29,7 +28,7 @@ describe('ClassificationCategoriesService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [ClassificationCategoriesService, provideHttpClient(), provideHttpClientTesting()]
+      providers: [ClassificationCategoriesService, provideHttpClientTesting()]
     });
 
     categoryService = TestBed.inject(ClassificationCategoriesService);

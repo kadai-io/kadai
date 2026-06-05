@@ -26,7 +26,6 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { CreateWorkbasket, SelectWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { take } from 'rxjs/operators';
-import { provideHttpClient } from '@angular/common/http';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
@@ -60,7 +59,7 @@ describe('WorkbasketOverviewComponent', () => {
           provide: ActivatedRoute,
           useValue: mockActivatedRoute
         },
-        provideHttpClient(),
+
         provideHttpClientTesting(),
         provideAngularSvgIcon()
       ]
@@ -219,7 +218,7 @@ describe('WorkbasketOverviewComponent Alternative Params ID', () => {
       providers: [
         provideStore([WorkbasketState, FilterState]),
         { provide: ActivatedRoute, useValue: mockActivatedRouteAlternativeId },
-        provideHttpClient(),
+
         provideHttpClientTesting(),
         provideAngularSvgIcon()
       ]

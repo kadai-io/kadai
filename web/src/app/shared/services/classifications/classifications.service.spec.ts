@@ -17,7 +17,6 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { of } from 'rxjs';
@@ -47,7 +46,7 @@ describe('ClassificationsService', () => {
     TestBed.configureTestingModule({
       providers: [
         ClassificationsService,
-        provideHttpClient(),
+
         provideHttpClientTesting(),
         { provide: StartupService, useValue: mockStartupService },
         { provide: DomainService, useValue: mockDomainService }

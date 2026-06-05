@@ -17,7 +17,6 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TaskService } from './task.service';
@@ -36,12 +35,7 @@ describe('TaskService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        TaskService,
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        { provide: StartupService, useValue: mockStartupService }
-      ]
+      providers: [TaskService, provideHttpClientTesting(), { provide: StartupService, useValue: mockStartupService }]
     });
 
     service = TestBed.inject(TaskService);

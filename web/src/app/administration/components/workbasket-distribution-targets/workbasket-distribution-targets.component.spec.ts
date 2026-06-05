@@ -29,6 +29,7 @@ import { DomainService } from '../../../shared/services/domain/domain.service';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { Side } from '../../models/workbasket-distribution-enums';
 import {
@@ -76,6 +77,8 @@ describe('WorkbasketDistributionTargetsComponent', () => {
       providers: [
         provideStore([WorkbasketState, FilterState]),
         provideAngularSvgIcon(),
+
+        provideHttpClientTesting(),
         { provide: WorkbasketService, useValue: workbasketServiceSpy },
         { provide: ActivatedRoute, useValue: activatedRouteMock },
         { provide: DomainService, useValue: domainServiceSpy },

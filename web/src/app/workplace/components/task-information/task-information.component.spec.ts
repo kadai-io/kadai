@@ -18,7 +18,6 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { of, Subject } from 'rxjs';
@@ -95,7 +94,7 @@ describe('TaskInformationComponent', () => {
       providers: [
         provideStore([EngineConfigurationState]),
         provideNoopAnimations(),
-        provideHttpClient(),
+
         provideHttpClientTesting(),
         { provide: ClassificationsService, useValue: mockClassificationsService },
         { provide: FormsValidatorService, useValue: mockFormsValidatorService }

@@ -55,7 +55,7 @@
                    placeholder="Workbasket"
                    type="text">
             <mat-autocomplete #auto="matAutocomplete" (optionSelected)="searchBasket()">
-              @for (workbasketName of filteredWorkbasketNames; track workbasketName) {
+              @for (workbasketName of filteredWorkbasketNames(); track workbasketName) {
                 <mat-option
                   [value]="workbasketName">
                   {{ workbasketName }}
@@ -112,7 +112,8 @@
           <mat-form-field>
             <mat-label>Filter Tasks</mat-label>
             <input (keyup.enter)="onFilter(); searched.set(true)"
-                   [ngModel]="filterInput()" (ngModelChange)="filterInput.set($event); updateState()"
+                   [ngModel]="filterInput()"
+                   (ngModelChange)="filterInput.set($event); updateState()"
                    matInput
                    placeholder="Filter" type="text">
           </mat-form-field>
@@ -158,7 +159,7 @@
       </button>
       <!-- SORT TASKS BUTTON -->
       <kadai-shared-sort (performSorting)="sorting($event)" [defaultSortBy]="taskDefaultSortBy()"
-        [sortingFields]="sortingFields" />
+                         [sortingFields]="sortingFields" />
     </div>
   }
 

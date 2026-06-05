@@ -36,6 +36,7 @@ import {
   HttpXsrfTokenExtractor,
   provideHttpClient,
   withInterceptors,
+  withXhr,
   withXsrfConfiguration
 } from '@angular/common/http';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -140,6 +141,7 @@ bootstrapApplication(AppComponent, {
     }),
     provideRouter(appRoutes, withHashLocation()),
     provideHttpClient(
+      withXhr(),
       withInterceptors([tokenInterceptor, httpClientInterceptor]),
       withXsrfConfiguration({
         cookieName: 'XSRF-TOKEN',

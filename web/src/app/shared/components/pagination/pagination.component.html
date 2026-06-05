@@ -17,10 +17,10 @@
 -->
 
 <div #pagination class="pagination">
-  <mat-paginator (page)="changeToPage($event)" [length]="page()?.totalElements"
-                 [class]="
+  <mat-paginator (page)="changeToPage($event)" [class]="
                  {'pagination__mat-paginator--expanded': expanded(),
-                 'pagination__mat-paginator--collapsed': !expanded() }" [pageSize]="page()?.size"
+                 'pagination__mat-paginator--collapsed': !expanded() }"
+                 [length]="page()?.totalElements" [pageSize]="page()?.size"
                  [showFirstLastButtons]="true" class="pagination__mat-paginator"
                  hidePageSize="true" />
   @if (expanded()) {

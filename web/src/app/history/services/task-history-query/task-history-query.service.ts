@@ -18,8 +18,6 @@
 
 import { inject, Injectable } from '@angular/core';
 import { TaskHistoryEventResourceData } from 'app/shared/models/task-history-event-resource';
-import { QueryParameters } from 'app/shared/models/query-parameters';
-import { KadaiQueryParameters } from 'app/shared/util/query-parameters';
 import { Sorting, TaskHistoryQuerySortParameter } from 'app/shared/models/sorting';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';

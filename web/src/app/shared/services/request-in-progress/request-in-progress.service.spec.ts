@@ -16,7 +16,7 @@
  *
  */
 
-import { describe, expect, it, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Observable } from 'rxjs';
 import { RequestInProgressService } from './request-in-progress.service';

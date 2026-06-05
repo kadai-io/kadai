@@ -31,8 +31,9 @@
       </button>
 
       <!-- IMPORT EXPORT BUTTONS -->
-      <kadai-administration-import-export [currentSelection]="kadaiType.CLASSIFICATIONS" [parentComponent]="'classifications'"
-        class="classification-list__import-export" />
+      <kadai-administration-import-export [currentSelection]="kadaiType.CLASSIFICATIONS"
+                                          [parentComponent]="'classifications'"
+                                          class="classification-list__import-export" />
     </div>
 
     <!-- FILTER -->
@@ -44,14 +45,14 @@
                 mat-stroked-button
                 matTooltip="Filter Category">
 
-          @if (selectedCategory == '') {
+          @if (selectedCategory() == '') {
             <mat-icon class="classification-list__mat-icon">
               filter_list
             </mat-icon>
           }
-          @if (selectedCategory != '') {
-            <svg-icon [src]="(getCategoryIcon(selectedCategory) | async)?.left"
-              class="classification-list__icons" />
+          @if (selectedCategory() != '') {
+            <svg-icon [src]="(getCategoryIcon(selectedCategory()) | async)?.left"
+                      class="classification-list__icons" />
           }
         </button>
 
@@ -89,12 +90,12 @@
 
 
   <!-- CLASSIFICATION TREE -->
-  @if ((classifications && classifications.length)) {
+  @if (classifications().length) {
     <kadai-administration-tree (switchKadaiSpinnerEmit)="setRequestInProgress($event)"
-                               [filterIcon]="selectedCategory"
+                               [filterIcon]="selectedCategory()"
                                [filterText]="inputValue" />
   } @else {
-    @if (!requestInProgress) {
+    @if (!requestInProgress()) {
       <div class="classification-list__no-items">
         <h3 class="grey">There are no classifications</h3>
       </div>

@@ -24,7 +24,6 @@ import { of } from 'rxjs';
 import { provideStore, Store } from '@ngxs/store';
 import { EngineConfigurationState } from '../../store/engine-configuration-store/engine-configuration.state';
 import { engineConfigurationMock } from '../../store/mock-data/mock-store';
-import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -45,7 +44,7 @@ describe('TypeAheadComponent with AccessId input', () => {
       providers: [
         provideStore([EngineConfigurationState]),
         { provide: AccessIdsService, useValue: accessIdService },
-        provideHttpClient(),
+
         provideHttpClientTesting()
       ]
     }).compileComponents();
@@ -179,7 +178,7 @@ describe('TypeAheadComponent without debounceTime configured', () => {
       providers: [
         provideStore([EngineConfigurationState]),
         { provide: AccessIdsService, useValue: accessIdService },
-        provideHttpClient(),
+
         provideHttpClientTesting()
       ]
     }).compileComponents();

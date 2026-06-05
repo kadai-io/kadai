@@ -28,7 +28,6 @@ import { Observable, of } from 'rxjs';
 import { GetAccessItems } from '../../../shared/store/access-items-management-store/access-items-management.actions';
 import { Direction, Sorting, WorkbasketAccessItemQuerySortParameter } from '../../../shared/models/sorting';
 import { engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
-import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideAngularSvgIcon, SvgIconComponent } from 'angular-svg-icon';
@@ -82,7 +81,8 @@ describe('AccessItemsManagementComponent', () => {
       imports: [AccessItemsManagementComponent],
       providers: [
         provideStore([EngineConfigurationState, AccessItemsManagementState]),
-        provideHttpClient(),
+
+        provideHttpClientTesting(),
         provideAngularSvgIcon(),
         provideNoopAnimations()
       ]
@@ -145,10 +145,10 @@ describe('AccessItemsManagementComponent', () => {
 
   it('should be able to get permissions if selected access ID is not null in onSelectAccessId', () => {
     const selectedAccessId = { accessId: '1', name: '' };
-    app.permissions = [
+    app.permissions.set([
       { accessId: '1', name: 'perm' },
       { accessId: '2', name: 'perm' }
-    ];
+    ]);
     app.onSelectAccessId(selectedAccessId);
     const permissions = store.selectSnapshot((state) => state.accessItemsManagement);
     expect(selectedAccessId).not.toBeNull();
@@ -159,14 +159,14 @@ describe('AccessItemsManagementComponent', () => {
 
   it('should dispatch GetAccessItems action in searchForAccessItemsWorkbaskets', async () => {
     app.accessId = { accessId: '1', name: 'max' };
-    app.groups = [
+    app.groups.set([
       { accessId: '1', name: 'users' },
       { accessId: '2', name: 'users' }
-    ];
-    app.permissions = [
+    ]);
+    app.permissions.set([
       { accessId: '1', name: 'perm' },
       { accessId: '2', name: 'perm' }
-    ];
+    ]);
     app.sortModel = {
       'sort-by': WorkbasketAccessItemQuerySortParameter.ACCESS_ID,
       order: Direction.DESC
@@ -209,8 +209,8 @@ describe('AccessItemsManagementComponent', () => {
       order: Direction.DESC
     };
     app.accessId = { accessId: '1', name: 'max' };
-    app.groups = [{ accessId: '1', name: 'users' }];
-    app.permissions = [{ accessId: '1', name: 'perm' }];
+    app.groups.set([{ accessId: '1', name: 'users' }]);
+    app.permissions.set([{ accessId: '1', name: 'perm' }]);
     app.sorting(newSort);
     expect(app.sortModel).toMatchObject(newSort);
   });
@@ -282,8 +282,8 @@ describe('AccessItemsManagementComponent', () => {
     ]);
     app.accessItemsForm!.patchValue({ accessIdFilter: 'alpha' });
     app.filterAccessItems();
-    expect(app.accessItems.length).toBe(1);
-    expect(app.accessItems[0].accessName).toBe('User Alpha');
+    expect(app.accessItems().length).toBe(1);
+    expect(app.accessItems()[0].accessName).toBe('User Alpha');
   });
 
   it('should filter access items by workbasketKeyFilter', () => {
@@ -343,8 +343,8 @@ describe('AccessItemsManagementComponent', () => {
     ]);
     app.accessItemsForm!.patchValue({ workbasketKeyFilter: 'mykey' });
     app.filterAccessItems();
-    expect(app.accessItems.length).toBe(1);
-    expect(app.accessItems[0].workbasketKey).toBe('MYKEY1');
+    expect(app.accessItems().length).toBe(1);
+    expect(app.accessItems()[0].workbasketKey).toBe('MYKEY1');
   });
 
   it('should clear filters and call searchForAccessItemsWorkbaskets when clearFilter is called', () => {
@@ -383,8 +383,8 @@ describe('AccessItemsManagementComponent', () => {
 
   it('should not dispatch GetGroupsByAccessId when onSelectAccessId is called with the same accessId as before', () => {
     app.accessIdPrevious = 'same-id';
-    app.groups = [];
-    app.permissions = [];
+    app.groups.set([]);
+    app.permissions.set([]);
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(GetAccessItems)).subscribe(() => {
       actionDispatched = true;
@@ -395,8 +395,8 @@ describe('AccessItemsManagementComponent', () => {
 
   it('should dispatch GetAccessItems using only accessId and groups when permissions is null', () => {
     app.accessId = { accessId: 'user1', name: 'User One' };
-    app.groups = [{ accessId: 'group1', name: 'Group One' }];
-    app.permissions = null as any;
+    app.groups.set([{ accessId: 'group1', name: 'Group One' }]);
+    app.permissions.set(null as any);
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(GetAccessItems)).subscribe(() => {
       actionDispatched = true;
@@ -461,9 +461,9 @@ describe('AccessItemsManagementComponent', () => {
       }
     ]);
     app.accessItemsForm!.patchValue({ accessIdFilter: 'alpha' });
-    app.setAccessItemsGroups(app.accessItems);
-    expect(app.accessItems.length).toBe(1);
-    expect(app.accessItems[0].accessName).toBe('Alpha User');
+    app.setAccessItemsGroups(app.accessItems());
+    expect(app.accessItems().length).toBe(1);
+    expect(app.accessItems()[0].accessName).toBe('Alpha User');
   });
 
   it('should trigger filterAccessItems inside setAccessItemsPermissions when filters are already set', () => {
@@ -522,9 +522,9 @@ describe('AccessItemsManagementComponent', () => {
       }
     ]);
     app.accessItemsForm!.patchValue({ workbasketKeyFilter: 'filterkey' });
-    app.setAccessItemsPermissions(app.accessItems);
-    expect(app.accessItems.length).toBe(1);
-    expect(app.accessItems[0].workbasketKey).toBe('FILTERKEY');
+    app.setAccessItemsPermissions(app.accessItems());
+    expect(app.accessItems().length).toBe(1);
+    expect(app.accessItems()[0].workbasketKey).toBe('FILTERKEY');
   });
 
   it('should show "Select an access id" text when accessItemsForm is null', () => {
@@ -539,48 +539,48 @@ describe('AccessItemsManagementComponent', () => {
     app.setAccessItemsGroups([mockAccessItem]);
     app.accessId = { accessId: 'user1', name: 'User Alpha' };
     expect(app.accessItemsForm).toBeTruthy();
-    expect(app.accessItems.length).toBeGreaterThan(0);
+    expect(app.accessItems().length).toBeGreaterThan(0);
   });
 
   it('should render expansion panels when accessItemsForm is set', () => {
     app.accessId = { accessId: 'user1', name: 'User Alpha' };
-    app.groups = [];
-    app.permissions = [];
+    app.groups.set([]);
+    app.permissions.set([]);
     app.setAccessItemsGroups([mockAccessItem]);
     expect(app.accessItemsForm).toBeTruthy();
-    expect(app.accessItems.length).toBe(1);
+    expect(app.accessItems().length).toBe(1);
     expect(app.accessId).toBeTruthy();
   });
 
   it('should render groups table when groups has items', () => {
     app.accessId = { accessId: 'user1', name: 'User Alpha' };
-    app.groups = [{ accessId: 'group1', name: 'Group One' }];
+    app.groups.set([{ accessId: 'group1', name: 'Group One' }]);
     app.setAccessItemsGroups([mockAccessItem]);
-    expect(app.groups.length).toBeGreaterThan(0);
+    expect(app.groups().length).toBeGreaterThan(0);
     expect(app.accessItemsForm).toBeTruthy();
   });
 
   it('should show "no groups" message when groups is empty', () => {
     app.accessId = { accessId: 'user1', name: 'User Alpha' };
-    app.groups = [];
+    app.groups.set([]);
     app.setAccessItemsGroups([mockAccessItem]);
-    expect(app.groups.length).toBe(0);
+    expect(app.groups().length).toBe(0);
     expect(app.accessItemsForm).toBeTruthy();
   });
 
   it('should render permissions table when permissions has items', () => {
     app.accessId = { accessId: 'user1', name: 'User Alpha' };
-    app.groups = [];
-    app.permissions = [{ accessId: 'perm1', name: 'Permission One' }];
+    app.groups.set([]);
+    app.permissions.set([{ accessId: 'perm1', name: 'Permission One' }]);
     app.setAccessItemsGroups([mockAccessItem]);
-    expect(app.permissions.length).toBeGreaterThan(0);
+    expect(app.permissions().length).toBeGreaterThan(0);
     expect(app.accessItemsForm).toBeTruthy();
   });
 
   it('should call revokeAccess when revoke button is clicked', () => {
     app.accessId = { accessId: 'user1', name: 'User Alpha' };
-    app.groups = [];
-    app.permissions = [];
+    app.groups.set([]);
+    app.permissions.set([]);
     app.setAccessItemsGroups([mockAccessItem]);
     const revokeAccessSpy = vi.spyOn(app, 'revokeAccess').mockImplementation(() => {});
     app.revokeAccess();
@@ -589,8 +589,8 @@ describe('AccessItemsManagementComponent', () => {
 
   it('should render keyup.enter binding on workbasketKeyFilter input', () => {
     app.accessId = { accessId: 'user1', name: 'User Alpha' };
-    app.groups = [];
-    app.permissions = [];
+    app.groups.set([]);
+    app.permissions.set([]);
     app.setAccessItemsGroups([mockAccessItem]);
     vi.spyOn(app, 'searchForAccessItemsWorkbaskets').mockImplementation(() => {});
     expect(app.accessItemsForm).toBeTruthy();
@@ -600,8 +600,8 @@ describe('AccessItemsManagementComponent', () => {
 
   it('should call sorting when sort component emits', () => {
     app.accessId = { accessId: 'user1', name: 'User Alpha' };
-    app.groups = [];
-    app.permissions = [];
+    app.groups.set([]);
+    app.permissions.set([]);
     app.setAccessItemsGroups([mockAccessItem]);
     const sortingSpy = vi.spyOn(app, 'sorting').mockImplementation(() => {});
     const newSort: Sorting<WorkbasketAccessItemQuerySortParameter> = {
@@ -614,40 +614,40 @@ describe('AccessItemsManagementComponent', () => {
 
   it('should cover subscribe callback in searchForAccessItemsWorkbaskets when permissions is null', () => {
     app.accessId = { accessId: 'user1', name: 'User One' };
-    app.groups = [];
-    app.permissions = null as any;
+    app.groups.set([]);
+    app.permissions.set(null as any);
     const state = { accessItemsManagement: { accessItemsResource: { accessItems: [mockAccessItem] } } };
     vi.spyOn(store, 'dispatch').mockReturnValue(of(state) as any);
     app.searchForAccessItemsWorkbaskets();
     expect(app.accessItemsForm).toBeTruthy();
-    expect(app.accessItems.length).toBeGreaterThan(0);
+    expect(app.accessItems().length).toBeGreaterThan(0);
   });
 
   it('should cover subscribe callback in searchForAccessItemsWorkbaskets when permissions is set', () => {
     app.accessId = { accessId: 'user1', name: 'User One' };
-    app.groups = [];
-    app.permissions = [{ accessId: 'perm1', name: 'Perm One' }];
+    app.groups.set([]);
+    app.permissions.set([{ accessId: 'perm1', name: 'Perm One' }]);
     const state = { accessItemsManagement: { accessItemsResource: { accessItems: [mockAccessItem] } } };
     vi.spyOn(store, 'dispatch').mockReturnValue(of(state) as any);
     app.searchForAccessItemsWorkbaskets();
     expect(app.accessItemsForm).toBeTruthy();
-    expect(app.accessItems.length).toBeGreaterThan(0);
+    expect(app.accessItems().length).toBeGreaterThan(0);
   });
 
   it('should cover searchForAccessItemsWorkbaskets when accessItemsResource is null', () => {
     app.accessId = { accessId: 'user1', name: 'User One' };
-    app.groups = [];
-    app.permissions = null as any;
+    app.groups.set([]);
+    app.permissions.set(null as any);
     const state = { accessItemsManagement: { accessItemsResource: null } };
     vi.spyOn(store, 'dispatch').mockReturnValue(of(state) as any);
     app.searchForAccessItemsWorkbaskets();
     expect(app.accessItemsForm).toBeTruthy();
-    expect(app.accessItems.length).toBe(0);
+    expect(app.accessItems().length).toBe(0);
   });
 
   it('should cover onSelectAccessId dispatch subscribe callbacks', () => {
-    app.groups = [];
-    app.permissions = [];
+    app.groups.set([]);
+    app.permissions.set([]);
     app.accessIdPrevious = 'other-id';
     const state = { accessItemsManagement: { accessItemsResource: { accessItems: [] } } };
     vi.spyOn(store, 'dispatch').mockReturnValue(of(state) as any);
@@ -658,8 +658,8 @@ describe('AccessItemsManagementComponent', () => {
 
   it('should cover revokeAccess dialog callback when dialog is confirmed', () => {
     app.accessId = { accessId: 'user1', name: 'User One' };
-    app.groups = [];
-    app.permissions = [];
+    app.groups.set([]);
+    app.permissions.set([]);
     app.setAccessItemsGroups([mockAccessItem]);
     const state = { accessItemsManagement: { accessItemsResource: { accessItems: [] } } };
     vi.spyOn(store, 'dispatch').mockReturnValue(of(state) as any);
@@ -690,7 +690,8 @@ describe('AccessItemsManagementComponent — with accessItemsForm pre-set before
       imports: [AccessItemsManagementComponent],
       providers: [
         provideStore([EngineConfigurationState, AccessItemsManagementState]),
-        provideHttpClient(),
+
+        provideHttpClientTesting(),
         provideAngularSvgIcon(),
         provideNoopAnimations()
       ]
@@ -709,8 +710,8 @@ describe('AccessItemsManagementComponent — with accessItemsForm pre-set before
       engineConfiguration: engineConfigurationMock
     });
 
-    app.groups = [];
-    app.permissions = [];
+    app.groups.set([]);
+    app.permissions.set([]);
     app.accessId = { accessId: 'user1', name: 'User One' };
     app.setAccessItemsGroups([mockAccessItem]);
     fixture.detectChanges();
@@ -748,7 +749,7 @@ describe('AccessItemsManagementComponent — with accessItemsForm pre-set before
   it('should show "no groups" message when groups array is empty', () => {
     const panelBody = fixture.nativeElement.querySelector('.access-items__groups-expansion-panel');
     expect(panelBody).toBeTruthy();
-    expect(app.groups?.length ?? 0).toBe(0);
+    expect(app.groups()?.length ?? 0).toBe(0);
   });
 
   it('should trigger searchForAccessItemsWorkbaskets on Enter key in workbasketKeyFilter input', () => {
@@ -793,7 +794,8 @@ describe('AccessItemsManagementComponent — with groups and permissions populat
       imports: [AccessItemsManagementComponent],
       providers: [
         provideStore([EngineConfigurationState, AccessItemsManagementState]),
-        provideHttpClient(),
+
+        provideHttpClientTesting(),
         provideAngularSvgIcon(),
         provideNoopAnimations()
       ]
@@ -896,7 +898,8 @@ describe('AccessItemsManagementComponent — with groups AND permissions populat
       imports: [AccessItemsManagementComponent],
       providers: [
         provideStore([EngineConfigurationState, AccessItemsManagementState]),
-        provideHttpClient(),
+
+        provideHttpClientTesting(),
         provideAngularSvgIcon(),
         provideNoopAnimations()
       ]
@@ -918,11 +921,11 @@ describe('AccessItemsManagementComponent — with groups AND permissions populat
     });
 
     app.accessId = { accessId: 'user1', name: 'User One' };
-    app.groups = [
+    app.groups.set([
       { accessId: 'group1', name: 'Group One' },
       { accessId: 'group2', name: 'Group Two' }
-    ];
-    app.permissions = [{ accessId: 'perm1', name: 'Permission One' }];
+    ]);
+    app.permissions.set([{ accessId: 'perm1', name: 'Permission One' }]);
     app.setAccessItemsGroups([mockAccessItemForTable]);
     fixture.detectChanges();
   });
@@ -942,7 +945,7 @@ describe('AccessItemsManagementComponent — with groups AND permissions populat
   it('should render authorization table with access items rows', () => {
     const authPanel = fixture.nativeElement.querySelector('.access-items__authorization-expansion-panel');
     expect(authPanel).toBeTruthy();
-    expect(app.accessItems.length).toBeGreaterThan(0);
+    expect(app.accessItems().length).toBeGreaterThan(0);
   });
 
   it('should render revoke access button', () => {
@@ -951,18 +954,18 @@ describe('AccessItemsManagementComponent — with groups AND permissions populat
   });
 
   it('should cover @else "no groups" branch after setting groups to empty', () => {
-    app.groups = [];
+    app.groups.set([]);
     app.setAccessItemsGroups([mockAccessItemForTable]);
     fixture.detectChanges();
-    expect(app.groups.length).toBe(0);
+    expect(app.groups().length).toBe(0);
     expect(app.accessItemsForm).toBeTruthy();
   });
 
   it('should cover @else "no permissions" branch after setting permissions to empty', () => {
-    app.permissions = [];
+    app.permissions.set([]);
     app.setAccessItemsGroups([mockAccessItemForTable]);
     fixture.detectChanges();
-    expect(app.permissions.length).toBe(0);
+    expect(app.permissions().length).toBe(0);
     expect(app.accessItemsForm).toBeTruthy();
   });
 
@@ -1011,24 +1014,24 @@ describe('AccessItemsManagementComponent — with groups AND permissions populat
   });
 
   it('should display "The user is not associated to any groups" when groups is empty in template', () => {
-    app.groups = [];
+    app.groups.set([]);
     app.onSelectAccessId({ accessId: 'user1', name: 'User One' });
     const panel = fixture.nativeElement.querySelector('.access-items__groups-expansion-panel');
     if (panel) {
       expect(panel.textContent).toContain('The user is not associated to any groups');
     } else {
-      expect(app.groups.length).toBe(0);
+      expect(app.groups().length).toBe(0);
     }
   });
 
   it('should display "The user is not associated to any permissions" when permissions is empty in template', () => {
-    app.permissions = [];
+    app.permissions.set([]);
     app.onSelectAccessId({ accessId: 'user1', name: 'User One' });
     const panel = fixture.nativeElement.querySelector('.access-items__permissions-expansion-panel');
     if (panel) {
       expect(panel.textContent).toContain('The user is not associated to any permissions');
     } else {
-      expect(app.permissions.length).toBe(0);
+      expect(app.permissions().length).toBe(0);
     }
   });
 });
@@ -1165,8 +1168,8 @@ describe('AccessItemsManagementComponent — HTML template coverage without over
 
   it('should cover @if (accessItemsForm) true branches and groups/permissions @else branches', () => {
     app.accessId = { accessId: 'user-cov', name: 'Coverage User' };
-    app.groups = [];
-    app.permissions = [];
+    app.groups.set([]);
+    app.permissions.set([]);
     app.setAccessItemsGroups([mockAccessItemForCoverage]);
     fixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
@@ -1193,8 +1196,8 @@ describe('AccessItemsManagementComponent — HTML template coverage without over
     httpController.match(() => true).forEach((req) => req.flush(''));
     const groupsPanel = fixture.nativeElement.querySelector('.access-items__groups-expansion-panel');
     expect(groupsPanel).toBeTruthy();
-    expect(app.groups.length).toBeGreaterThan(0);
-    expect(app.permissions.length).toBeGreaterThan(0);
+    expect(app.groups().length).toBeGreaterThan(0);
+    expect(app.permissions().length).toBeGreaterThan(0);
   });
 
   it('should cover accessId.lookupField false branch by overriding accessItemsCustomization$', () => {

@@ -28,7 +28,7 @@ import { KadaiEngineService } from './shared/services/kadai-engine/kadai-engine.
 import { WindowRefService } from 'app/shared/services/window/window.service';
 import { environment } from 'environments/environment';
 import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
-import { takeUntil, map } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { UserInformationComponent } from './shared/components/user-information/user-information.component';

@@ -24,7 +24,6 @@ import { workbasketReportMock } from '../monitor-mock-data';
 import { SettingsState } from '../../../shared/store/settings-store/settings.state';
 import { settingsStateMock } from '../../../shared/store/mock-data/mock-store';
 import { MatDialogModule } from '@angular/material/dialog';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -36,7 +35,7 @@ describe('CanvasComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [NgxsModule.forRoot([SettingsState]), MatDialogModule],
-      providers: [CanvasComponent, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+      providers: [CanvasComponent, provideHttpClientTesting()]
     }).compileComponents();
 
     fixture = TestBed.createComponent(CanvasComponent);

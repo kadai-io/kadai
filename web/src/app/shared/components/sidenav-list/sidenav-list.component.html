@@ -41,7 +41,7 @@
          [routerLink]=[accessUrl] class="navlist__item  navlist__admin-access-items" mat-list-item>Access
         Items</a>
     }
-    @if ((routingAccess)) {
+    @if (routingAccess()) {
       <a (click)="toggleSidenav(routingUrl)"
          [routerLinkActive]="['active__sub']"
          [routerLink]=[routingUrl] class="navlist__item  navlist__admin-task-routing" mat-list-item>Task
@@ -74,7 +74,7 @@
          mat-list-item>Task Search</a>
     }
   </div>
-  @if (historyAccess) {
+  @if (historyAccess()) {
     <a (click)="toggleSidenav(historyUrl)" [routerLinkActive]="['active']"
        [routerLink]=[historyUrl]
        class="navlist__item navlist__history" mat-list-item>History</a>

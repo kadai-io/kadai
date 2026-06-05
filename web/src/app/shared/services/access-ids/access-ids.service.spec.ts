@@ -18,7 +18,6 @@
 
 import { TestBed } from '@angular/core/testing';
 import { AccessIdsService } from './access-ids.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { StartupService } from '../startup/startup.service';
@@ -34,7 +33,6 @@ describe('AccessIdsService', () => {
     TestBed.configureTestingModule({
       providers: [
         AccessIdsService,
-        provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),
         { provide: StartupService, useValue: { getKadaiRestUrl: () => REST_URL } }
       ]

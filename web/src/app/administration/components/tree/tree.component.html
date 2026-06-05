@@ -16,11 +16,11 @@
 ~
 -->
 
-@if (emptyTreeNodes) {
+@if (emptyTreeNodes()) {
   <div>
     <h3 class="grey" style="text-align: center">There are no classifications</h3>
-    <p class="grey" style="text-align: center">No Classifications match used filter "{{ filter }}"
-      in category {{ category }}</p>
+    <p class="grey" style="text-align: center">No Classifications match used filter "{{ filter() }}"
+      in category {{ category() }}</p>
   </div>
 }
 <tree-root
@@ -29,16 +29,16 @@
   (deactivate)="onDeactivate($event)"
   (moveNode)="onMoveNode($event)"
   (treeDrop)="onDrop($event)"
-  [hidden]="emptyTreeNodes"
-  [nodes]="treeNodes()"
+  [hidden]="emptyTreeNodes()"
+  [nodes]="treeNodes() ?? []"
   [options]="options"
 >
   <ng-template #treeNodeTemplate let-index="index" let-node>
     <span class="tree__svg-icon">
       @if (node.data.category) {
         <svg-icon [src]="getCategoryIcon(node.data.category).left"
-          matTooltip="{{ getCategoryIcon(node.data.category).right }}"
-         />
+                  matTooltip="{{ getCategoryIcon(node.data.category).right }}"
+        />
       }
     </span>
     <span>

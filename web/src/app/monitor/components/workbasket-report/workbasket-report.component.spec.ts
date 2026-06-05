@@ -17,7 +17,6 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { WorkbasketReportComponent } from './workbasket-report.component';
@@ -33,7 +32,7 @@ describe('WorkbasketReportComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [WorkbasketReportComponent],
-      providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting(), provideNoopAnimations()]
+      providers: [provideHttpClientTesting(), provideNoopAnimations()]
     }).compileComponents();
 
     fixture = TestBed.createComponent(WorkbasketReportComponent);

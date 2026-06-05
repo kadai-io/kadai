@@ -17,8 +17,6 @@
  */
 
 import { getTestBed, TestBed } from '@angular/core/testing';
-
-import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { StartupService } from './startup.service';
 import { environment } from '../../../../environments/environment';
@@ -40,7 +38,7 @@ describe('StartupService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])]
+      providers: [provideHttpClientTesting(), provideRouter([])]
     });
   });
 

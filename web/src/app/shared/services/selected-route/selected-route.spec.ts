@@ -17,7 +17,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { provideRouter, NavigationEnd } from '@angular/router';
+import { NavigationEnd, provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { SelectedRouteService } from './selected-route';
 

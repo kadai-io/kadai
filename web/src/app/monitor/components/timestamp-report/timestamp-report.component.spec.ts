@@ -17,7 +17,6 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { TimestampReportComponent } from './timestamp-report.component';
@@ -31,7 +30,7 @@ describe('TimestampReportComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TimestampReportComponent],
-      providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting(), provideNoopAnimations()]
+      providers: [provideHttpClientTesting(), provideNoopAnimations()]
     }).compileComponents();
 
     fixture = TestBed.createComponent(TimestampReportComponent);
@@ -60,7 +59,7 @@ describe('TimestampReportComponent', () => {
       rows: [{ desc: ['Created'], cells: [5], total: 5, depth: 0, display: true }],
       sumRow: []
     };
-    component.reportData = null as any;
+    component.reportData.set(null as any);
     fixture.detectChanges();
     const panel = fixture.nativeElement.querySelector('.panel-default');
     expect(panel).toBeNull();
@@ -73,11 +72,11 @@ describe('TimestampReportComponent', () => {
       rows: [{ desc: ['Created'], cells: [5], total: 5, depth: 0, display: true }],
       sumRow: []
     };
-    component.reportData = mockReport as any;
+    component.reportData.set(mockReport as any);
     fixture.detectChanges();
     httpMock.match(() => true).forEach((req) => req.flush(mockReport));
-    expect(component.reportData).toBeTruthy();
-    expect(component.reportData.meta.name).toBe('Timestamp Report');
+    expect(component.reportData()).toBeTruthy();
+    expect(component.reportData()!.meta.name).toBe('Timestamp Report');
     const panel = fixture.nativeElement.querySelector('.panel-default');
     expect(panel).toBeTruthy();
   });
@@ -88,11 +87,11 @@ describe('TimestampReportComponent', () => {
       rows: [{ desc: ['Created'], cells: [5], total: 5, depth: 0, display: true }],
       sumRow: []
     };
-    component.reportData = mockReport as any;
+    component.reportData.set(mockReport as any);
     fixture.detectChanges();
     httpMock.match(() => true).forEach((req) => req.flush(mockReport));
-    expect(component.reportData).toBeTruthy();
-    expect(component.reportData.meta.name).toBe('My Report');
+    expect(component.reportData()).toBeTruthy();
+    expect(component.reportData()!.meta.name).toBe('My Report');
     const heading = fixture.nativeElement.querySelector('h4');
     expect(heading).toBeTruthy();
     expect(heading.textContent).toContain('My Report');
@@ -105,10 +104,10 @@ describe('TimestampReportComponent', () => {
       sumRow: []
     };
     fixture.detectChanges();
-    expect(component.reportData).toBeUndefined();
+    expect(component.reportData()).toBeUndefined();
     const panelBefore = fixture.nativeElement.querySelector('.panel-default');
     expect(panelBefore).toBeNull();
     httpMock.match(() => true).forEach((req) => req.flush(mockReport));
-    expect(component.reportData).toBeTruthy();
+    expect(component.reportData()).toBeTruthy();
   });
 });
