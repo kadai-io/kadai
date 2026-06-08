@@ -52,7 +52,7 @@
     "@types/file-saver-es": "2",
     "@types/jsdom": "28",
     "@types/lodash-es": "4",
-    "@types/node": "25.9.1",
+    "@types/node": "25.9.2",
     "@typescript-eslint/eslint-plugin": "8.60.1",
     "@typescript-eslint/parser": "8.60.1",
     "@vitest/coverage-v8": "4.1.8",
