@@ -4093,9 +4093,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cypress@npm:15.16.0":
-  version: 15.16.0
-  resolution: "cypress@npm:15.16.0"
+"cypress@npm:15.17.0":
+  version: 15.17.0
+  resolution: "cypress@npm:15.17.0"
   dependencies:
     "@cypress/request": "npm:^4.0.0"
     "@cypress/xvfb": "npm:^1.2.4"
@@ -4138,7 +4138,7 @@ __metadata:
     yauzl: "npm:^3.3.1"
   bin:
     cypress: bin/cypress
-  checksum: 10c0/9cee32e8cfc5e5f245ecea1ee9cfd1a9217b052bd88c42a1980986ee58eb3433c1f3be8a04e97e45161fae562fd4cc6e95746727e0263575c093bf2996232e93
+  checksum: 10c0/4f8c38b075ba0f470d948fe9d705b3afc9d87f8a5e7e8592eaef88ae040ed42d3076fadf04c1eb1ef4806b3e9258f8daea14c2b1e05bf159530ad0e23d822d04
   languageName: node
   linkType: hard
 
@@ -6366,7 +6366,7 @@ __metadata:
     "@vitest/coverage-v8": "npm:4.1.8"
     angular-svg-icon: "npm:19.1.1"
     chart.js: "npm:4.5.1"
-    cypress: "npm:15.16.0"
+    cypress: "npm:15.17.0"
     eslint: "npm:10.4.1"
     eslint-config-prettier: "npm:10.1.8"
     eslint-plugin-import: "npm:2.32.0"
