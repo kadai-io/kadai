@@ -56,7 +56,8 @@ describe('ClassificationOverviewComponent', () => {
       imports: [ClassificationOverviewComponent],
       providers: [
         provideStore([ClassificationState, EngineConfigurationState]),
-        provideHttpClient(), provideHttpClientTesting(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideHttpClientTesting(),
         provideNoopAnimations(),
         provideAngularSvgIcon(),
@@ -89,13 +90,13 @@ describe('ClassificationOverviewComponent', () => {
   });
 
   it('should display classification details when showDetail is true', () => {
-    component.showDetail = true;
+    component.showDetail.set(true);
     fixture.detectChanges();
     expect(debugElement.nativeElement.querySelector('kadai-administration-classification-details')).toBeTruthy();
   });
 
   it('should show empty page with icon and text when showDetail is false', () => {
-    component.showDetail = false;
+    component.showDetail.set(false);
     fixture.detectChanges();
     const emptyPage = fixture.debugElement.nativeElement.querySelector('.select-classification');
     expect(emptyPage.textContent).toBe('Select a classification');

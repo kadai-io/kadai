@@ -33,7 +33,8 @@ describe('RoutingUploadService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(), provideHttpClientTesting(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideHttpClientTesting(),
         {
           provide: StartupService,

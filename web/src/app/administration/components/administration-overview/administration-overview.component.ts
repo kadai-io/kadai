@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Subject } from 'rxjs';
 import { DomainService } from '../../../shared/services/domain/domain.service';
@@ -32,7 +32,6 @@ import { MatOption } from '@angular/material/core';
   selector: 'kadai-administration-overview',
   templateUrl: './administration-overview.component.html',
   styleUrls: ['./administration-overview.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatTabNav,
     MatTabLink,
@@ -45,12 +44,12 @@ import { MatOption } from '@angular/material/core';
     RouterOutlet
   ]
 })
-export class AdministrationOverviewComponent implements OnInit {
-  selectedTab = '';
-  domains: Array<string> = [];
-  selectedDomain = '';
+export class AdministrationOverviewComponent {
+  selectedTab = signal('');
+  domains = signal<string[]>([]);
+  selectedDomain = signal('');
   destroy$ = new Subject<void>();
-  routingAccess = false;
+  routingAccess = signal(false);
   private router = inject(Router);
   private domainService = inject(DomainService);
   private kadaiEngineService = inject(KadaiEngineService);
@@ -61,32 +60,31 @@ export class AdministrationOverviewComponent implements OnInit {
     router.events.pipe(takeUntil(this.destroy$)).subscribe((e) => {
       const urlPaths = this.router.url.split('/');
       if (this.router.url.includes('detail')) {
-        this.selectedTab = urlPaths[urlPaths.length - 2];
+        this.selectedTab.set(urlPaths[urlPaths.length - 2]);
       } else {
-        this.selectedTab = urlPaths[urlPaths.length - 1];
+        this.selectedTab.set(urlPaths[urlPaths.length - 1]);
       }
     });
-  }
 
-  ngOnInit() {
     this.kadaiEngineService
       .isCustomRoutingRulesEnabled()
       .pipe(takeUntil(this.destroy$))
       .subscribe((value) => {
-        this.routingAccess = value;
+        this.routingAccess.set(value);
       });
+
     this.domainService
       .getDomains()
       .pipe(takeUntil(this.destroy$))
       .subscribe((domains) => {
-        this.domains = domains;
+        this.domains.set(domains);
       });
 
     this.domainService
       .getSelectedDomain()
       .pipe(takeUntil(this.destroy$))
       .subscribe((domain) => {
-        this.selectedDomain = domain;
+        this.selectedDomain.set(domain);
       });
   }
 

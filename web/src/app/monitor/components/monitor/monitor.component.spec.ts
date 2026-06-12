@@ -60,8 +60,8 @@ describe('MonitorComponent', () => {
 
   it('should create component', () => {
     expect(component).toBeTruthy();
-    expect(component.domains).toEqual(['DOMAIN_A', 'DOMAIN_B']);
-    expect(component.selectedDomain).toBe('DOMAIN_A');
+    expect(component.domains()).toEqual(['DOMAIN_A', 'DOMAIN_B']);
+    expect(component.selectedDomain()).toBe('DOMAIN_A');
   });
 
   it('should call domainService.switchDomain when switchDomain is called', () => {
@@ -86,14 +86,14 @@ describe('MonitorComponent', () => {
 
   it('should render domain options in the select', () => {
     fixture.detectChanges();
-    expect(component.domains.length).toBe(2);
-    expect(component.domains).toContain('DOMAIN_A');
-    expect(component.domains).toContain('DOMAIN_B');
+    expect(component.domains().length).toBe(2);
+    expect(component.domains()).toContain('DOMAIN_A');
+    expect(component.domains()).toContain('DOMAIN_B');
   });
 
   it('should render domain items in the template when domains are available', () => {
     fixture.detectChanges();
-    expect(component.domains.length).toBeGreaterThanOrEqual(2);
+    expect(component.domains().length).toBeGreaterThanOrEqual(2);
   });
 
   it('should set selectedTab to tasks-priority when tasks-priority nav link is clicked', () => {
@@ -153,7 +153,7 @@ describe('MonitorComponent', () => {
     fixture = TestBed.createComponent(MonitorComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-    expect(component.domains).toContain('');
+    expect(component.domains()).toContain('');
   });
 
   it('should have selectedTab active binding match tasks-priority when tab is tasks-priority', () => {

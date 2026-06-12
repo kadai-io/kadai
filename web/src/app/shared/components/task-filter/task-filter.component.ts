@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ALL_STATES, TaskState } from '../../models/task-state';
 import { TaskQueryFilterParameter } from '../../models/task-query-filter-parameter';
 import { Actions, ofActionCompleted, Store } from '@ngxs/store';
@@ -36,7 +36,6 @@ import { MapValuesPipe } from '../../pipes/map-values.pipe';
   selector: 'kadai-shared-task-filter',
   templateUrl: './task-filter.component.html',
   styleUrls: ['./task-filter.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatFormField, MatTooltip, MatLabel, MatInput, FormsModule, MatSelect, MatOption, MapValuesPipe]
 })
 export class TaskFilterComponent implements OnInit, OnDestroy {

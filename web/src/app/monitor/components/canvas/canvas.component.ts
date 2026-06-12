@@ -16,7 +16,7 @@
  *
  */
 
-import { AfterViewInit, Component, inject, input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, inject, input, OnDestroy, OnInit } from '@angular/core';
 import { ArcElement, Chart, DoughnutController, Legend, Title, Tooltip } from 'chart.js';
 import { ReportRow } from '../../models/report-row';
 import { Store } from '@ngxs/store';
@@ -29,7 +29,6 @@ import { SettingMembers } from '../../../settings/components/Settings/expected-m
 @Component({
   selector: 'kadai-monitor-canvas',
   templateUrl: './canvas.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./canvas.component.scss']
 })
 export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {

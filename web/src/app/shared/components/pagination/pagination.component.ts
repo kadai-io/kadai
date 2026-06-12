@@ -26,8 +26,7 @@ import {
   OnInit,
   output,
   untracked,
-  viewChild,
-  ChangeDetectionStrategy
+  viewChild
 } from '@angular/core';
 import { Page } from 'app/shared/models/page';
 import { MatPaginator } from '@angular/material/paginator';
@@ -43,7 +42,6 @@ import { MatOption } from '@angular/material/core';
   selector: 'kadai-shared-pagination',
   templateUrl: './pagination.component.html',
   styleUrls: ['./pagination.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatPaginator, MatFormField, MatInput, FormsModule, MatAutocompleteTrigger, MatAutocomplete, MatOption]
 })
 export class PaginationComponent implements OnInit, AfterViewInit, OnDestroy {

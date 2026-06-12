@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Settings, SettingTypes } from '../../models/settings';
 import { Store } from '@ngxs/store';
@@ -39,12 +39,11 @@ import { CdkTextareaAutosize } from '@angular/cdk/text-field';
   selector: 'kadai-administration-settings',
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, CdkTextareaAutosize]
 })
 export class SettingsComponent implements OnInit, OnDestroy {
   settingTypes = SettingTypes;
-  settings!: Settings;
+  settings = signal<Settings | undefined>(undefined);
   oldSettings!: Settings;
   invalidMembers: string[] = [];
   destroy$ = new Subject<void>();
@@ -56,7 +55,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.settings$.pipe(takeUntil(this.destroy$)).subscribe((settings) => {
       this.requestInProgressService.setRequestInProgress(false);
-      this.settings = this.deepCopy(settings);
+      this.settings.set(this.deepCopy(settings));
       this.oldSettings = this.deepCopy(settings);
     });
   }
@@ -66,10 +65,12 @@ export class SettingsComponent implements OnInit, OnDestroy {
   }
 
   onSave() {
+    const settings = this.settings();
+    if (!settings) return;
     this.changeLabelColor('grey');
-    this.invalidMembers = validateSettings(this.settings);
+    this.invalidMembers = validateSettings(settings);
     if (this.invalidMembers.length === 0) {
-      this.store.dispatch(new SetSettings(this.settings)).subscribe(() => {
+      this.store.dispatch(new SetSettings(settings)).subscribe(() => {
         this.notificationService.showSuccess('SETTINGS_SAVE');
       });
     } else {
@@ -89,11 +90,13 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   onReset() {
     this.changeLabelColor('grey');
-    this.settings = this.deepCopy(this.oldSettings);
+    this.settings.set(this.deepCopy(this.oldSettings));
   }
 
   onColorChange(key: string) {
-    this.settings[key] = (document.getElementById(key) as HTMLInputElement).value;
+    const settings = this.settings();
+    if (!settings) return;
+    settings[key] = (document.getElementById(key) as HTMLInputElement).value;
   }
 
   ngOnDestroy() {

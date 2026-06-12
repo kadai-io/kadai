@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, ElementRef, inject, OnInit, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, signal, viewChild } from '@angular/core';
 import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
@@ -35,7 +35,6 @@ import { SvgIconComponent } from 'angular-svg-icon';
   selector: 'kadai-administration-workbasket-overview',
   templateUrl: './workbasket-overview.component.html',
   styleUrls: ['./workbasket-overview.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [WorkbasketListComponent, MatIcon, WorkbasketDetailsComponent, SvgIconComponent]
 })
 export class WorkbasketOverviewComponent implements OnInit {

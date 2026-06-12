@@ -26,9 +26,9 @@ import {
   OnDestroy,
   OnInit,
   output,
+  signal,
   untracked,
-  viewChildren,
-  ChangeDetectionStrategy
+  viewChildren
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged, Observable, Subject } from 'rxjs';
@@ -73,7 +73,6 @@ import { MatInput } from '@angular/material/input';
   templateUrl: './workbasket-access-items.component.html',
   animations: [highlight],
   styleUrls: ['./workbasket-access-items.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatButton,
     MatTooltip,
@@ -96,7 +95,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
   customFields$!: Observable<CustomField[]>;
   keysOfVisibleFields: string[] = [];
   accessItemsRepresentation!: WorkbasketAccessItemsRepresentation;
-  accessItemsClone: WorkbasketAccessItems[] = [];
+  accessItemsClone = signal<WorkbasketAccessItems[]>([]);
   accessItemsResetClone: WorkbasketAccessItems[] = [];
   toggleValidationAccessIdMap = new Map<number, boolean>();
   added = false;
@@ -172,7 +171,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
               this.accessItemsValidityChanged.emit(isValid);
             });
 
-          this.accessItemsClone = this.cloneAccessItems();
+          this.accessItemsClone.set(this.cloneAccessItems());
           this.accessItemsResetClone = this.cloneAccessItems();
 
           this.isNewAccessItemsFromStore = true;
@@ -323,7 +322,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     const newForm = this.formBuilder.group(workbasketAccessItems);
     newForm.controls.accessId.setValidators(Validators.required);
     this.accessItemsGroups.insert(0, newForm);
-    this.accessItemsClone.unshift(workbasketAccessItems);
+    this.accessItemsClone.update((accessItemsClone) => [workbasketAccessItems, ...accessItemsClone]);
     this.added = true;
   }
 
@@ -332,7 +331,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     this.formsValidatorService.formSubmitAttempt = false;
     this.AccessItemsForm.reset();
     this.setAccessItemsGroups(this.accessItemsResetClone);
-    this.accessItemsClone = this.cloneAccessItems();
+    this.accessItemsClone.set(this.cloneAccessItems());
     this.notificationsService.showSuccess('WORKBASKET_ACCESS_ITEM_RESTORE');
   }
 
@@ -426,7 +425,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     });
     this.selectedRows.forEach((element) => {
       this.accessItemsGroups.removeAt(element);
-      this.accessItemsClone.splice(element, 1);
+      this.accessItemsClone.update((accessItemsClone) => accessItemsClone.filter((_, index) => index !== element));
     });
     this.selectedRows = [];
   }

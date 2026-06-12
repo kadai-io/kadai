@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { SelectedRouteService } from 'app/shared/services/selected-route/selected-route';
 import { Subject } from 'rxjs';
 import { expandRight } from 'app/shared/animations/expand.animation';
@@ -32,7 +32,6 @@ import { SvgIconComponent } from 'angular-svg-icon';
   templateUrl: './nav-bar.component.html',
   styleUrls: ['./nav-bar.component.scss'],
   animations: [expandRight],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatToolbar, MatIconButton, MatIcon, SvgIconComponent]
 })
 export class NavBarComponent implements OnInit {
@@ -43,7 +42,7 @@ export class NavBarComponent implements OnInit {
   titleHistory = 'History';
   titleSettings = 'Settings';
   toggle: boolean = false;
-  title = '';
+  title = signal('');
   destroy$ = new Subject();
   private selectedRouteService = inject(SelectedRouteService);
   private sidenavService = inject(SidenavService);
@@ -65,15 +64,15 @@ export class NavBarComponent implements OnInit {
 
   setTitle(value: string = '') {
     if (value.includes('administration')) {
-      this.title = this.titleAdministration;
+      this.title.set(this.titleAdministration);
     } else if (value.includes('monitor')) {
-      this.title = this.titleMonitor;
+      this.title.set(this.titleMonitor);
     } else if (value.includes('workplace')) {
-      this.title = this.titleWorkplace;
+      this.title.set(this.titleWorkplace);
     } else if (value.includes('history')) {
-      this.title = this.titleHistory;
+      this.title.set(this.titleHistory);
     } else if (value.includes('settings')) {
-      this.title = this.titleSettings;
+      this.title.set(this.titleSettings);
     }
   }
 }

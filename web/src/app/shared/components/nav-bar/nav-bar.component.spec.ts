@@ -63,34 +63,34 @@ describe('NavBarComponent', () => {
     route = 'administration';
     fixture.detectChanges();
     component.setTitle(route);
-    expect(component.title).toBe('Administration');
+    expect(component.title()).toBe('Administration');
   });
   it('should set title to monitor if monitor ist selected', () => {
     route = 'monitor';
     fixture.detectChanges();
     component.setTitle(route);
-    expect(component.title).toBe('Monitor');
+    expect(component.title()).toBe('Monitor');
   });
 
   it('should set title to workplace if workplace ist selected', () => {
     route = 'workplace';
     fixture.detectChanges();
     component.setTitle(route);
-    expect(component.title).toBe('Workplace');
+    expect(component.title()).toBe('Workplace');
   });
 
   it('should set title to history if history ist selected', () => {
     route = 'history';
     fixture.detectChanges();
     component.setTitle(route);
-    expect(component.title).toBe('History');
+    expect(component.title()).toBe('History');
   });
 
   it('should set title to settings if settings ist selected', () => {
     route = 'settings';
     fixture.detectChanges();
     component.setTitle(route);
-    expect(component.title).toBe('Settings');
+    expect(component.title()).toBe('Settings');
   });
 
   it('should toggle sidenav when button clicked', () => {

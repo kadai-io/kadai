@@ -27,8 +27,7 @@ import {
   output,
   signal,
   untracked,
-  viewChild,
-  ChangeDetectionStrategy
+  viewChild
 } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
@@ -62,7 +61,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
   selector: 'kadai-task-information',
   templateUrl: './task-information.component.html',
   styleUrls: ['./task-information.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FormsModule,
     MatFormField,

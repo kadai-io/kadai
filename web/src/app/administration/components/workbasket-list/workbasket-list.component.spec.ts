@@ -66,7 +66,8 @@ describe('WorkbasketListComponent', () => {
       providers: [
         provideStore([WorkbasketState, FilterState]),
         provideRouter([]),
-        provideHttpClient(), provideHttpClientTesting(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideAngularSvgIcon(),
         {
           provide: WorkbasketService,

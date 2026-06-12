@@ -16,16 +16,7 @@
  *
  */
 
-import {
-  AfterViewInit,
-  ChangeDetectorRef,
-  Component,
-  inject,
-  input,
-  OnInit,
-  viewChild,
-  ChangeDetectionStrategy
-} from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, inject, input, OnInit, signal, viewChild } from '@angular/core';
 import { isEqual } from 'lodash-es';
 import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
 import { expandDown } from 'app/shared/animations/expand.animation';
@@ -59,7 +50,6 @@ import { OrderBy } from '../../../shared/pipes/order-by.pipe';
   templateUrl: './workbasket-distribution-targets-list.component.html',
   styleUrls: ['./workbasket-distribution-targets-list.component.scss'],
   animations: [expandDown],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatToolbar,
     MatTooltip,
@@ -95,11 +85,11 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
     FilterSelectors.getSelectedDistributionTargetsFilter
   );
   toolbarState = false;
-  distributionTargets: WorkbasketDistributionTarget[] = [];
+  distributionTargets = signal<WorkbasketDistributionTarget[]>([]);
   distributionTargetsClone!: WorkbasketDistributionTarget[];
   distributionTargetsList = viewChild<MatSelectionList>('workbasket');
   workbasketList = viewChild<CdkVirtualScrollViewport>('scroller');
-  requestInProgress!: number;
+  requestInProgress = signal(0);
   private changeDetector = inject(ChangeDetectorRef);
   private store = inject(Store);
   private destroy$ = new Subject<void>();
@@ -107,7 +97,7 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
   private allSelectedDiff = 0;
 
   ngOnInit(): void {
-    this.requestInProgress = 2;
+    this.requestInProgress.set(2);
     if (this.side() === Side.AVAILABLE) {
       this.availableDistributionTargets$.pipe(takeUntil(this.destroy$)).subscribe((wbs) => this.assignWbs(wbs));
       this.availableDistributionTargetsFilter$.pipe(takeUntil(this.destroy$)).subscribe((filter) => {
@@ -118,7 +108,7 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
         this.filterParam = filter;
         this.store.dispatch(new FetchAvailableDistributionTargets(true, this.filterParam));
         this.selectAll(false);
-        this.requestInProgress--;
+        this.requestInProgress.update((requestInProgress) => requestInProgress - 1);
         this.changeDetector.markForCheck();
       });
     } else {
@@ -131,7 +121,7 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
         this.filterParam = filter;
         this.applyFilter();
         this.selectAll(false);
-        this.requestInProgress--;
+        this.requestInProgress.update((requestInProgress) => requestInProgress - 1);
         this.changeDetector.markForCheck();
       });
     }
@@ -161,20 +151,20 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
   selectAll(selected: boolean) {
     if (this.distributionTargetsList() !== undefined) {
       this.allSelected = selected;
-      this.distributionTargets.map((wb) => (wb.selected = selected));
-      if (selected) this.allSelectedDiff = this.distributionTargets.length;
+      this.distributionTargets().map((wb) => (wb.selected = selected));
+      if (selected) this.allSelectedDiff = this.distributionTargets().length;
       else this.allSelectedDiff = 0;
     }
   }
 
   transferDistributionTargets(targetSide: Side) {
-    let selectedWBs = this.distributionTargets.filter((item: any) => item.selected === true);
-    this.distributionTargets.forEach((wb) => (wb.selected = false));
+    let selectedWBs = this.distributionTargets().filter((item: any) => item.selected === true);
+    this.distributionTargets().forEach((wb) => (wb.selected = false));
     this.store
       .dispatch(new TransferDistributionTargets(targetSide, selectedWBs))
       .pipe(take(1))
       .subscribe(() => {
-        if (this.distributionTargets.length === 0 && targetSide === Side.SELECTED) {
+        if (this.distributionTargets().length === 0 && targetSide === Side.SELECTED) {
           this.store.dispatch(new FetchAvailableDistributionTargets(false, this.filterParam));
         }
       });
@@ -187,16 +177,18 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
   updateSelectAll(selected: boolean) {
     if (selected) this.allSelectedDiff++;
     else this.allSelectedDiff--;
-    this.allSelected = this.allSelectedDiff === this.distributionTargets.length;
+    this.allSelected = this.allSelectedDiff === this.distributionTargets().length;
     return true;
   }
 
   private assignWbs(wbs: WorkbasketSummary[]) {
-    this.distributionTargets = wbs.map((wb) => {
-      return { ...wb, selected: this.allSelected };
-    });
-    this.distributionTargetsClone = this.distributionTargets;
-    this.requestInProgress--;
+    this.distributionTargets.set(
+      wbs.map((wb) => {
+        return { ...wb, selected: this.allSelected };
+      })
+    );
+    this.distributionTargetsClone = this.distributionTargets();
+    this.requestInProgress.update((requestInProgress) => requestInProgress - 1);
   }
 
   private applyFilter() {
@@ -218,18 +210,20 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
       return true;
     }
 
-    this.distributionTargets = this.distributionTargetsClone?.filter((target) => {
-      let matches = true;
-      matches = matches && filterExact(target, this.filterParam.name, 'name');
-      matches = matches && filterExact(target, this.filterParam.key, 'key');
-      matches = matches && filterExact(target, this.filterParam.owner, 'owner');
-      matches = matches && filterExact(target, this.filterParam.domain, 'domain');
-      matches = matches && filterExact(target, this.filterParam.type, 'type');
-      matches = matches && filterLike(target, this.filterParam['owner-like'], 'owner');
-      matches = matches && filterLike(target, this.filterParam['name-like'], 'name');
-      matches = matches && filterLike(target, this.filterParam['key-like'], 'key');
-      matches = matches && filterLike(target, this.filterParam['description-like'], 'description');
-      return matches;
-    });
+    this.distributionTargets.set(
+      this.distributionTargetsClone?.filter((target) => {
+        let matches = true;
+        matches = matches && filterExact(target, this.filterParam.name, 'name');
+        matches = matches && filterExact(target, this.filterParam.key, 'key');
+        matches = matches && filterExact(target, this.filterParam.owner, 'owner');
+        matches = matches && filterExact(target, this.filterParam.domain, 'domain');
+        matches = matches && filterExact(target, this.filterParam.type, 'type');
+        matches = matches && filterLike(target, this.filterParam['owner-like'], 'owner');
+        matches = matches && filterLike(target, this.filterParam['name-like'], 'name');
+        matches = matches && filterLike(target, this.filterParam['key-like'], 'key');
+        matches = matches && filterLike(target, this.filterParam['description-like'], 'description');
+        return matches;
+      }) ?? []
+    );
   }
 }

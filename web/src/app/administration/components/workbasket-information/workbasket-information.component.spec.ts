@@ -83,7 +83,8 @@ describe('WorkbasketInformationComponent', () => {
         provideRouter([]),
         { provide: WorkbasketService, useValue: workbasketServiceMock },
         { provide: FormsValidatorService, useValue: formValidatorServiceMock },
-        provideHttpClient(), provideHttpClientTesting(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideHttpClientTesting(),
         provideAngularSvgIcon()
       ]

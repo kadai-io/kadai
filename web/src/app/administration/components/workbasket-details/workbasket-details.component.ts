@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, input, OnDestroy, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input, OnDestroy, OnInit, signal } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { ACTION } from 'app/shared/models/action';
@@ -52,7 +52,6 @@ import { WorkbasketDistributionTargetsComponent } from '../workbasket-distributi
   selector: 'kadai-administration-workbasket-details',
   templateUrl: './workbasket-details.component.html',
   styleUrls: ['./workbasket-details.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatToolbar,
     MatTooltip,

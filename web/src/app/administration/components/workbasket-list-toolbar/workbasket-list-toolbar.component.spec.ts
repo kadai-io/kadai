@@ -55,7 +55,8 @@ describe('WorkbasketListToolbarComponent', () => {
           provide: DomainService,
           useValue: domainServiceMock
         },
-        provideHttpClient(), provideHttpClientTesting(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideAngularSvgIcon()
       ]
     }).compileComponents();

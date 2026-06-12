@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit, output, signal } from '@angular/core';
 import { ReportData } from '../../models/report-data';
 import { ChartData } from '../../models/chart-data';
 import { MonitorService } from '../../services/monitor.service';
@@ -32,16 +32,15 @@ import { BaseChartDirective } from 'ng2-charts';
   templateUrl: './workbasket-report-planned-date.component.html',
   styleUrls: ['./workbasket-report-planned-date.component.scss'],
   imports: [ReportTableComponent, BaseChartDirective],
-  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [MonitorService]
 })
 export class WorkbasketReportPlannedDateComponent implements OnInit {
   metaInformation = output<MetaInfoData>();
-  reportData!: ReportData;
-  lineChartLabels!: Array<any>;
+  reportData = signal<ReportData | undefined>(undefined);
+  lineChartLabels = signal<Array<any>>([]);
   lineChartLegend = true;
   lineChartType: ChartType = 'line';
-  lineChartData!: Array<ChartData>;
+  lineChartData = signal<Array<ChartData>>([]);
   lineChartOptions: ChartConfiguration['options'] = {
     responsive: true,
     maintainAspectRatio: true,
@@ -57,10 +56,10 @@ export class WorkbasketReportPlannedDateComponent implements OnInit {
   ngOnInit() {
     this.requestInProgressService.setRequestInProgress(true);
     this.restConnectorService.getWorkbasketStatisticsQueryingByPlannedDate().subscribe((report) => {
-      this.reportData = report;
-      this.metaInformation.emit(this.reportData.meta);
-      this.lineChartLabels = this.reportData.meta.header;
-      this.lineChartData = this.restConnectorService.getChartData(this.reportData);
+      this.reportData.set(report);
+      this.metaInformation.emit(report.meta);
+      this.lineChartLabels.set(report.meta.header);
+      this.lineChartData.set(this.restConnectorService.getChartData(report));
       this.requestInProgressService.setRequestInProgress(false);
     });
   }

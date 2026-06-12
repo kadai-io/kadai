@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, input, model, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, model } from '@angular/core';
 import { CustomAttribute } from 'app/workplace/models/task';
 
 import { MatDivider } from '@angular/material/divider';
@@ -31,7 +31,6 @@ import { FormsModule } from '@angular/forms';
   selector: 'kadai-task-attribute-value',
   templateUrl: './task-attribute-value.component.html',
   styleUrls: ['./task-attribute-value.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatDivider, MatButton, MatTooltip, MatIcon, MatFormField, MatInput, FormsModule]
 })
 export class TaskAttributeValueComponent {

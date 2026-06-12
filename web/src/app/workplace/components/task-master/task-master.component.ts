@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { TaskService } from 'app/workplace/services/task.service';
 import { Observable, Subject } from 'rxjs';
@@ -43,15 +43,14 @@ import { PaginationComponent } from '../../../shared/components/pagination/pagin
   selector: 'kadai-task-master',
   templateUrl: './task-master.component.html',
   styleUrls: ['./task-master.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [TaskListToolbarComponent, TaskListComponent, PaginationComponent]
 })
 export class TaskMasterComponent implements OnInit, OnDestroy {
-  tasks?: Task[];
-  tasksPageInformation!: Page;
+  tasks = signal<Task[] | undefined>(undefined);
+  tasksPageInformation = signal<Page | undefined>(undefined);
   type = 'tasks';
   currentBasket?: Workbasket;
-  selectedId = '';
+  selectedId = signal('');
   taskDefaultSortBy: TaskQuerySortParameter = TaskQuerySortParameter.PRIORITY;
   sort: Sorting<TaskQuerySortParameter> = {
     'sort-by': this.taskDefaultSortBy,
@@ -62,7 +61,7 @@ export class TaskMasterComponent implements OnInit, OnDestroy {
     'page-size': 9
   };
   filterBy: TaskQueryFilterParameter = {};
-  requestInProgress = false;
+  requestInProgress = signal(false);
   selectedSearchType: Search = Search.byWorkbasket;
   destroy$ = new Subject();
   filter$: Observable<TaskQueryFilterParameter> = inject(Store).select(FilterSelectors.getTaskFilter);
@@ -81,8 +80,8 @@ export class TaskMasterComponent implements OnInit, OnDestroy {
     });
 
     this.taskService.taskSelectedStream.pipe(takeUntil(this.destroy$)).subscribe((task: Task | undefined) => {
-      this.selectedId = task ? task.taskId : '';
-      if (!this.tasks && task) {
+      this.selectedId.set(task ? task.taskId : '');
+      if (!this.tasks() && task) {
         this.currentBasket = task.workbasketSummary;
         this.getTasks();
       }
@@ -95,7 +94,7 @@ export class TaskMasterComponent implements OnInit, OnDestroy {
     });
 
     this.taskService.taskDeletedStream.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.selectedId = '';
+      this.selectedId.set('');
       this.getTasks();
     });
 
@@ -132,7 +131,7 @@ export class TaskMasterComponent implements OnInit, OnDestroy {
 
   selectSearchType(type: Search) {
     this.selectedSearchType = type;
-    this.tasks = [];
+    this.tasks.set([]);
   }
 
   changePage(page: number) {
@@ -146,7 +145,7 @@ export class TaskMasterComponent implements OnInit, OnDestroy {
   }
 
   private getTasks(): void {
-    this.requestInProgress = true;
+    this.requestInProgress.set(true);
     this.requestInProgressService.setRequestInProgress(true);
 
     if (this.selectedSearchType === Search.byTypeAndValue) {
@@ -160,25 +159,25 @@ export class TaskMasterComponent implements OnInit, OnDestroy {
     }
 
     if (this.selectedSearchType === Search.byWorkbasket && !this.currentBasket) {
-      this.requestInProgress = false;
+      this.requestInProgress.set(false);
       this.requestInProgressService.setRequestInProgress(false);
-      this.tasks = [];
+      this.tasks.set([]);
     } else {
       this.taskService
         .findTasksWithWorkbasket(this.filterBy, this.sort, this.paging)
         .pipe(take(1))
         .subscribe((taskResource) => {
-          this.requestInProgress = false;
+          this.requestInProgress.set(false);
           this.requestInProgressService.setRequestInProgress(false);
           if (taskResource.tasks && taskResource.tasks.length > 0) {
-            this.tasks = taskResource.tasks;
+            this.tasks.set(taskResource.tasks);
           } else {
-            this.tasks = [];
+            this.tasks.set([]);
             if (this.selectedSearchType === Search.byWorkbasket) {
               this.notificationsService.showInformation('EMPTY_WORKBASKET');
             }
           }
-          this.tasksPageInformation = taskResource.page;
+          this.tasksPageInformation.set(taskResource.page);
         });
     }
   }

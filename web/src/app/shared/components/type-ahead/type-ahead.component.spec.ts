@@ -45,7 +45,8 @@ describe('TypeAheadComponent with AccessId input', () => {
       providers: [
         provideStore([EngineConfigurationState]),
         { provide: AccessIdsService, useValue: accessIdService },
-        provideHttpClient(), provideHttpClientTesting(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideHttpClientTesting()
       ]
     }).compileComponents();
@@ -179,7 +180,8 @@ describe('TypeAheadComponent without debounceTime configured', () => {
       providers: [
         provideStore([EngineConfigurationState]),
         { provide: AccessIdsService, useValue: accessIdService },
-        provideHttpClient(), provideHttpClientTesting(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideHttpClientTesting()
       ]
     }).compileComponents();

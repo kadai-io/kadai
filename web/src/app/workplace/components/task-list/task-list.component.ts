@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, input, model, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input, model } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -28,7 +28,6 @@ import { SvgIconComponent } from 'angular-svg-icon';
   selector: 'kadai-task-list',
   templateUrl: './task-list.component.html',
   styleUrls: ['./task-list.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatSelectionList, MatListOption, MatDivider, SvgIconComponent, DatePipe]
 })
 export class TaskListComponent {

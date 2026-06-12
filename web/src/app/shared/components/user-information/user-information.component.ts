@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
 import { UserInfo } from 'app/shared/models/user-info';
 import { expandDown } from '../../animations/expand.animation';
@@ -28,7 +28,6 @@ import { MatButton } from '@angular/material/button';
   templateUrl: './user-information.component.html',
   styleUrls: ['./user-information.component.scss'],
   animations: [expandDown],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [SvgIconComponent, MatButton]
 })
 export class UserInformationComponent implements OnInit {

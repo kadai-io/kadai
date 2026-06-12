@@ -38,7 +38,8 @@ describe('NoAccessComponent', () => {
     await TestBed.configureTestingModule({
       imports: [NoAccessComponent],
       providers: [
-        provideHttpClient(), provideHttpClientTesting(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideHttpClientTesting(),
         provideAngularSvgIcon(),
         { provide: Router, useValue: routerMock },

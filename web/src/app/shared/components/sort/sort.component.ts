@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, input, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, OnInit, output } from '@angular/core';
 import { Direction, Sorting } from 'app/shared/models/sorting';
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -29,7 +29,6 @@ import { MapValuesPipe } from '../../pipes/map-values.pipe';
   selector: 'kadai-shared-sort',
   templateUrl: './sort.component.html',
   styleUrls: ['./sort.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MapValuesPipe]
 })
 export class SortComponent<T> implements OnInit {

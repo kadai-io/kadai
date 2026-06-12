@@ -16,13 +16,13 @@
 ~
 -->
 
-@if (reportData) {
+@if (reportData(); as reportData) {
   <div class="row">
     <div class="col-xs-12 col-md-7 col-md-offset-2">
       <div style="position: relative; width:100vw">
         <canvas
-          [datasets]="lineChartData"
-          [labels]="lineChartLabels"
+          [datasets]="lineChartData()"
+          [labels]="lineChartLabels()"
           [legend]="lineChartLegend"
           [options]="lineChartOptions"
           [type]="lineChartType"
@@ -33,4 +33,4 @@
     </div>
   </div>
 }
-<kadai-monitor-report-table [reportData]="reportData" />
+<kadai-monitor-report-table [reportData]="reportData()" />

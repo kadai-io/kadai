@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { ReportData } from '../../models/report-data';
 import { MonitorService } from '../../services/monitor.service';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
@@ -28,18 +28,17 @@ import { DatePipe } from '@angular/common';
   templateUrl: './timestamp-report.component.html',
   styleUrls: ['./timestamp-report.component.scss'],
   imports: [ReportTableComponent, DatePipe],
-  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [MonitorService]
 })
 export class TimestampReportComponent implements OnInit {
-  reportData!: ReportData;
+  reportData = signal<ReportData | undefined>(undefined);
   private restConnectorService = inject(MonitorService);
   private requestInProgressService = inject(RequestInProgressService);
 
   ngOnInit() {
     this.requestInProgressService.setRequestInProgress(true);
     this.restConnectorService.getDailyEntryExitReport().subscribe((data: ReportData) => {
-      this.reportData = data;
+      this.reportData.set(data);
       this.requestInProgressService.setRequestInProgress(false);
     });
   }

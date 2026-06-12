@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { NavigationStart, Router, RouterEvent, RouterOutlet } from '@angular/router';
 import { MasterAndDetailService } from 'app/shared/services/master-and-detail/master-and-detail.service';
 
@@ -26,12 +26,11 @@ import { MatIcon } from '@angular/material/icon';
   selector: 'kadai-shared-master-and-detail',
   templateUrl: './master-and-detail.component.html',
   styleUrls: ['./master-and-detail.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [RouterOutlet, MatIcon]
 })
 export class MasterAndDetailComponent implements OnInit {
-  showDetail = false;
-  currentRoute = '';
+  showDetail = signal(false);
+  currentRoute = signal('');
   private router = inject(Router);
   private masterAndDetailService = inject(MasterAndDetailService);
   private classifications = 'classifications';
@@ -40,12 +39,12 @@ export class MasterAndDetailComponent implements OnInit {
   private detailRoutes: Array<string> = ['/workbaskets/(detail', 'classifications/(detail', 'tasks/(detail'];
 
   ngOnInit(): void {
-    this.showDetail = this.showDetails();
-    this.masterAndDetailService.setShowDetail(this.showDetail);
+    this.showDetail.set(this.showDetails());
+    this.masterAndDetailService.setShowDetail(this.showDetail());
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationStart) {
-        this.showDetail = this.showDetails(event);
-        this.masterAndDetailService.setShowDetail(this.showDetail);
+        this.showDetail.set(this.showDetails(event));
+        this.masterAndDetailService.setShowDetail(this.showDetail());
       }
     });
   }
@@ -64,11 +63,11 @@ export class MasterAndDetailComponent implements OnInit {
 
   private checkRoute(url: string) {
     if (url.indexOf(this.workbaskets) !== -1) {
-      this.currentRoute = this.workbaskets;
+      this.currentRoute.set(this.workbaskets);
     } else if (url.indexOf(this.classifications) !== -1) {
-      this.currentRoute = this.classifications;
+      this.currentRoute.set(this.classifications);
     } else if (url.indexOf(this.tasks) !== -1) {
-      this.currentRoute = this.tasks;
+      this.currentRoute.set(this.tasks);
     }
   }
 }

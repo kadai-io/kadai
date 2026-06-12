@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.service';
 import { MonitorRoles } from '../../roles/monitor.roles';
@@ -29,7 +29,6 @@ import { SvgIconComponent } from 'angular-svg-icon';
   selector: 'kadai-shared-no-access',
   templateUrl: './no-access.component.html',
   styleUrls: ['./no-access.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [SvgIconComponent]
 })
 export class NoAccessComponent implements OnInit {

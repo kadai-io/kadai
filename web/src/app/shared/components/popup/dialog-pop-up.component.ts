@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent } from '@angular/material/dialog';
 import { ObtainMessageService } from '../../services/obtain-message/obtain-message.service';
 import { messageTypes } from '../../services/obtain-message/message-types';
@@ -26,7 +26,6 @@ import { MatButton } from '@angular/material/button';
   selector: 'kadai-shared-dialog-pop-up',
   templateUrl: './dialog-pop-up.component.html',
   styleUrls: ['./dialog-pop-up.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatDialogContent, MatDialogActions, MatButton, MatDialogClose]
 })
 export class DialogPopUpComponent implements OnInit {

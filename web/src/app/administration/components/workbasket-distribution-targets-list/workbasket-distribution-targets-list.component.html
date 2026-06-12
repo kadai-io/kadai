@@ -64,7 +64,7 @@
   }
 
   <!-- EMPTY LIST -->
-  @if (distributionTargets.length == 0 && requestInProgress < 0) {
+  @if (distributionTargets().length == 0 && requestInProgress() < 0) {
     <div
       class="distribution-targets-list__empty-list">
       <!-- AVAILABLE SIDE -->
@@ -89,7 +89,7 @@
                                  itemSize="90">
       <mat-list-option
         (click)="updateSelectAll(!workbasket.selected) && (workbasket.selected = !workbasket.selected)"
-        *cdkVirtualFor="let workbasket of distributionTargets| orderBy: ['name']; templateCacheSize: 0"
+        *cdkVirtualFor="let workbasket of distributionTargets()| orderBy: ['name']; templateCacheSize: 0"
         [selected]="workbasket.selected"
         [value]="workbasket.workbasketId"
         class="workbasket-distribution-targets__workbaskets-item">

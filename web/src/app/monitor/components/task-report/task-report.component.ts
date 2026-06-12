@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { ReportData } from 'app/monitor/models/report-data';
 import { MonitorService } from '../../services/monitor.service';
 import { takeUntil } from 'rxjs/operators';
@@ -32,7 +32,6 @@ import { DatePipe } from '@angular/common';
   templateUrl: './task-report.component.html',
   styleUrls: ['./task-report.component.scss'],
   imports: [ReportTableComponent, BaseChartDirective, DatePipe],
-  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [MonitorService]
 })
 export class TaskReportComponent implements OnInit {
@@ -42,7 +41,7 @@ export class TaskReportComponent implements OnInit {
     responsive: true,
     maintainAspectRatio: true
   };
-  reportData!: ReportData;
+  reportData = signal<ReportData | undefined>(undefined);
   private monitorService = inject(MonitorService);
   private requestInProgressService = inject(RequestInProgressService);
   private destroy$ = new Subject<void>();
@@ -53,9 +52,9 @@ export class TaskReportComponent implements OnInit {
       .getTaskStatusReport()
       .pipe(takeUntil(this.destroy$))
       .subscribe((report) => {
-        this.reportData = report;
-        this.pieChartData.labels = this.reportData.meta.header;
-        this.pieChartData.datasets.push({ data: this.reportData.sumRow[0].cells });
+        this.pieChartData.labels = report.meta.header;
+        this.pieChartData.datasets.push({ data: report.sumRow[0].cells });
+        this.reportData.set(report);
         this.requestInProgressService.setRequestInProgress(false);
       });
   }

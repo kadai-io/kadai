@@ -16,16 +16,7 @@
  *
  */
 
-import {
-  Component,
-  computed,
-  inject,
-  OnDestroy,
-  OnInit,
-  signal,
-  viewChild,
-  ChangeDetectionStrategy
-} from '@angular/core';
+import { Component, computed, inject, OnDestroy, OnInit, signal, viewChild } from '@angular/core';
 import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 
@@ -82,7 +73,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
   templateUrl: './classification-details.component.html',
   animations: [highlight],
   styleUrls: ['./classification-details.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatToolbar,
     MatTooltip,

@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { MonitorService } from 'app/monitor/services/monitor.service';
 import { ChartData } from 'app/monitor/models/chart-data';
 import { ReportData } from '../../models/report-data';
@@ -31,15 +31,14 @@ import { DatePipe } from '@angular/common';
   templateUrl: './classification-report.component.html',
   styleUrls: ['./classification-report.component.scss'],
   imports: [ReportTableComponent, BaseChartDirective, DatePipe],
-  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [MonitorService]
 })
 export class ClassificationReportComponent implements OnInit {
-  reportData!: ReportData;
-  lineChartLabels!: Array<any>;
+  reportData = signal<ReportData | undefined>(undefined);
+  lineChartLabels = signal<Array<any>>([]);
   lineChartLegend = true;
   lineChartType: ChartType = 'line';
-  lineChartData!: Array<ChartData>;
+  lineChartData = signal<Array<ChartData>>([]);
   lineChartOptions: ChartConfiguration['options'] = {
     responsive: true,
     maintainAspectRatio: true,
@@ -55,9 +54,9 @@ export class ClassificationReportComponent implements OnInit {
   ngOnInit() {
     this.requestInProgressService.setRequestInProgress(true);
     this.restConnectorService.getClassificationTasksReport().subscribe((report) => {
-      this.reportData = report;
-      this.lineChartData = this.restConnectorService.getChartData(this.reportData);
-      this.lineChartLabels = this.reportData.meta.header;
+      this.reportData.set(report);
+      this.lineChartData.set(this.restConnectorService.getChartData(report));
+      this.lineChartLabels.set(report.meta.header);
       this.requestInProgressService.setRequestInProgress(false);
     });
   }

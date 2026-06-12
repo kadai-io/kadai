@@ -16,7 +16,7 @@
  *
  */
 
-import { AfterViewInit, Component, inject, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, inject, signal, viewChild } from '@angular/core';
 import { outputToObservable } from '@angular/core/rxjs-interop';
 import { Direction, Sorting, TaskHistoryQuerySortParameter } from 'app/shared/models/sorting';
 import { TaskHistoryEventData } from '../../shared/models/task-history-event';
@@ -47,7 +47,6 @@ import { DatePipe } from '@angular/common';
   selector: 'kadai-task-query',
   templateUrl: './task-history-query.component.html',
   styleUrls: ['./task-history-query.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatTable,
     MatSort,

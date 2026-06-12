@@ -16,18 +16,7 @@
  *
  */
 
-import {
-  Component,
-  effect,
-  inject,
-  input,
-  OnDestroy,
-  OnInit,
-  output,
-  signal,
-  untracked,
-  ChangeDetectionStrategy
-} from '@angular/core';
+import { Component, effect, inject, input, OnDestroy, OnInit, output, signal, untracked } from '@angular/core';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
 import { debounceTime, distinctUntilChanged, Observable, Subject } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -49,7 +38,6 @@ import { MatOption } from '@angular/material/core';
   selector: 'kadai-shared-type-ahead',
   templateUrl: './type-ahead.component.html',
   styleUrls: ['./type-ahead.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     ReactiveFormsModule,
     NgClass,

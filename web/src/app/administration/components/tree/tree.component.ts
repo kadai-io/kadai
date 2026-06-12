@@ -29,8 +29,7 @@ import {
   output,
   signal,
   untracked,
-  viewChild,
-  ChangeDetectionStrategy
+  viewChild
 } from '@angular/core';
 import { TreeNodeModel } from 'app/administration/models/tree-node';
 
@@ -61,7 +60,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
   selector: 'kadai-administration-tree',
   templateUrl: './tree.component.html',
   styleUrls: ['./tree.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [TreeModule, SvgIconComponent, MatTooltip]
 })
 export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDestroy {

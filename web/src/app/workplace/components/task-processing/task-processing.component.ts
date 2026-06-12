@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, isSignal, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Task } from 'app/workplace/models/task';
 import { Workbasket } from 'app/shared/models/workbasket';
@@ -38,16 +38,15 @@ import { MatDivider } from '@angular/material/divider';
   selector: 'kadai-task-processing',
   templateUrl: './task-processing.component.html',
   styleUrls: ['./task-processing.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatDivider]
 })
 export class TaskProcessingComponent implements OnInit, OnDestroy {
   routeSubscription!: Subscription;
   regex = /\${(.*?)}/g;
   address = 'https://bing.com';
-  link!: SafeResourceUrl;
-  task?: Task;
-  workbaskets!: Workbasket[];
+  link = signal<SafeResourceUrl | undefined>(undefined);
+  task = signal<Task | undefined>(undefined);
+  workbaskets = signal<Workbasket[]>([]);
   private taskService = inject(TaskService);
   private workbasketService = inject(WorkbasketService);
   private classificationService = inject(ClassificationsService);
@@ -66,7 +65,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
         .claimTask(id)
         .pipe(take(1))
         .subscribe((task) => {
-          this.task = task;
+          this.task.set(task);
           this.taskService.publishUpdatedTask(task);
           this.requestInProgressService.setRequestInProgress(false);
         });
@@ -75,13 +74,14 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
 
   async getTask(id: string) {
     this.requestInProgressService.setRequestInProgress(true);
-    this.task = (await this.taskService.getTask(id).toPromise())!;
-    this.taskService.selectTask(this.task);
+    const task = (await this.taskService.getTask(id).toPromise())!;
+    this.task.set(task);
+    this.taskService.selectTask(task);
     const classification = (await this.classificationService
-      .getClassification(this.task.classificationSummary!.classificationId!)
+      .getClassification(task.classificationSummary!.classificationId!)
       .toPromise())!;
-    this.address = this.extractUrl(classification.applicationEntryPoint!) || `${this.address}?q=${this.task.name}`;
-    this.link = this.sanitizer.bypassSecurityTrustResourceUrl(this.address);
+    this.address = this.extractUrl(classification.applicationEntryPoint!) || `${this.address}?q=${task.name}`;
+    this.link.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.address));
     this.getWorkbaskets();
     this.requestInProgressService.setRequestInProgress(false);
   }
@@ -90,29 +90,30 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
     this.requestInProgressService.setRequestInProgress(true);
     this.workbasketService.getAllWorkBaskets().subscribe((workbaskets) => {
       this.requestInProgressService.setRequestInProgress(false);
-      this.workbaskets = workbaskets.workbaskets;
+      const workbasketList = [...workbaskets.workbaskets];
 
-      const index = this.workbaskets.findIndex((workbasket) => workbasket.name === this.task?.workbasketSummary?.name);
+      const index = workbasketList.findIndex((workbasket) => workbasket.name === this.task()?.workbasketSummary?.name);
       if (index !== -1) {
-        this.workbaskets.splice(index, 1);
+        workbasketList.splice(index, 1);
       }
+      this.workbaskets.set(workbasketList);
     });
   }
 
   transferTask(workbasket: Workbasket) {
     this.requestInProgressService.setRequestInProgress(true);
-    this.taskService.transferTask(this.task!.taskId, workbasket.workbasketId!).subscribe((task) => {
+    this.taskService.transferTask(this.task()!.taskId, workbasket.workbasketId!).subscribe((task) => {
       this.requestInProgressService.setRequestInProgress(false);
-      this.task = task;
+      this.task.set(task);
     });
     this.navigateBack();
   }
 
   completeTask() {
     this.requestInProgressService.setRequestInProgress(true);
-    this.taskService.completeTask(this.task!.taskId).subscribe((task) => {
+    this.taskService.completeTask(this.task()!.taskId).subscribe((task) => {
       this.requestInProgressService.setRequestInProgress(false);
-      this.task = task;
+      this.task.set(task);
       this.taskService.publishUpdatedTask(task);
       this.navigateBack();
     });
@@ -121,10 +122,10 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
   cancelClaimTask() {
     this.requestInProgressService.setRequestInProgress(true);
     this.taskService
-      .cancelClaimTask(this.task!.taskId)
+      .cancelClaimTask(this.task()!.taskId)
       .pipe(take(1))
       .subscribe((task) => {
-        this.task = task;
+        this.task.set(task);
         this.taskService.publishUpdatedTask(task);
         this.requestInProgressService.setRequestInProgress(false);
       });
@@ -132,7 +133,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
   }
 
   navigateBack() {
-    this.router.navigate([{ outlets: { detail: `taskdetail/${this.task!.taskId}` } }], {
+    this.router.navigate([{ outlets: { detail: `taskdetail/${this.task()!.taskId}` } }], {
       relativeTo: this.route.parent,
       queryParamsHandling: 'merge'
     });
@@ -156,6 +157,9 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
       let objectValue: any = me;
       parameter.split('.').forEach((property) => {
         objectValue = this.getReflectiveProperty(objectValue, property);
+        if (isSignal(objectValue)) {
+          objectValue = objectValue();
+        }
       });
       extractedUrl = extractedUrl.replace(expression, objectValue);
     });

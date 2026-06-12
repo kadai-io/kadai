@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, model, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, model, OnInit } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -31,7 +31,6 @@ type TaskCustomField = `custom${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
   selector: 'kadai-task-custom-fields',
   templateUrl: './task-custom-fields.component.html',
   styleUrls: ['./task-custom-fields.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatFormField, MatLabel, MatInput, FormsModule]
 })
 export class TaskCustomFieldsComponent implements OnInit {

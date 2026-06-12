@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.service';
 import { SidenavService } from '../../services/sidenav/sidenav.service';
 import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
@@ -30,7 +30,6 @@ import { MatListItem, MatNavList } from '@angular/material/list';
   selector: 'kadai-sidenav-list',
   templateUrl: './sidenav-list.component.html',
   styleUrls: ['./sidenav-list.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatNavList, MatListItem, RouterLinkActive, RouterLink]
 })
 export class SidenavListComponent implements OnInit {
@@ -47,8 +46,8 @@ export class SidenavListComponent implements OnInit {
   administrationAccess = false;
   monitorAccess = false;
   workplaceAccess = false;
-  historyAccess = false;
-  routingAccess = false;
+  historyAccess = signal(false);
+  routingAccess = signal(false);
   settingsAccess = false;
   private kadaiEngineService = inject(KadaiEngineService);
   private sidenavService = inject(SidenavService);
@@ -60,10 +59,10 @@ export class SidenavListComponent implements OnInit {
     this.monitorAccess = this.kadaiEngineService.hasRole(Object.values(MonitorRoles));
     this.workplaceAccess = this.kadaiEngineService.hasRole(Object.values(UserRoles));
     this.kadaiEngineService.isHistoryProviderEnabled().subscribe((value) => {
-      this.historyAccess = value;
+      this.historyAccess.set(value);
     });
     this.kadaiEngineService.isCustomRoutingRulesEnabled().subscribe((value) => {
-      this.routingAccess = value;
+      this.routingAccess.set(value);
     });
     this.settingsAccess = this.administrationAccess;
   }

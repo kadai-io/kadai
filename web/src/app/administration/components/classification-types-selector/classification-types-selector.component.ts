@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Store } from '@ngxs/store';
 import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
@@ -31,7 +31,6 @@ import { MatOption } from '@angular/material/core';
   selector: 'kadai-administration-classification-types-selector',
   templateUrl: './classification-types-selector.component.html',
   styleUrls: ['./classification-types-selector.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatFormField, MatLabel, MatSelect, MatTooltip, MatOption, AsyncPipe]
 })
 export class ClassificationTypesSelectorComponent {

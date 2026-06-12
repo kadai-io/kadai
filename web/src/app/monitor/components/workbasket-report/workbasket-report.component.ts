@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import { MetaInfoData } from '../../models/meta-info-data';
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import { WorkbasketReportDueDateComponent } from '../workbasket-report-due-date/workbasket-report-due-date.component';
@@ -27,7 +27,6 @@ import { DatePipe } from '@angular/common';
   selector: 'kadai-monitor-workbasket-report',
   templateUrl: './workbasket-report.component.html',
   styleUrls: ['./workbasket-report.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatTabGroup, MatTab, WorkbasketReportDueDateComponent, WorkbasketReportPlannedDateComponent, DatePipe]
 })
 export class WorkbasketReportComponent {

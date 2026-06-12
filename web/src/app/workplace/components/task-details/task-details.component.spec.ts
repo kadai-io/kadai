@@ -167,7 +167,8 @@ describe('TaskDetailsComponent', () => {
       imports: [TaskDetailsComponent],
       providers: [
         provideRouter(routes),
-        provideHttpClient(), provideHttpClientTesting(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideStore([EngineConfigurationState]),
         { provide: TaskService, useValue: taskServiceSpy },
         { provide: WorkplaceService, useValue: workplaceServiceSpy },
@@ -222,7 +223,7 @@ describe('TaskDetailsComponent', () => {
 
   it('should subscribe to requestInProgress on init', () => {
     expect(requestInProgressServiceSpy.getRequestInProgress).toHaveBeenCalled();
-    expect(component.requestInProgress).toBe(false);
+    expect(component.requestInProgress()).toBe(false);
   });
 
   it('should call getTask when route params change', () => {
@@ -235,7 +236,7 @@ describe('TaskDetailsComponent', () => {
     originalTask.callbackInfo = [{ key: 'cb1', value: 'cbval1' }];
     originalTask.primaryObjRef = new ObjectReference();
 
-    component.task = originalTask;
+    component.task.set(originalTask);
     component.taskClone = {
       ...originalTask,
       customAttributes: [{ key: 'key1', value: 'val1' }],
@@ -249,17 +250,17 @@ describe('TaskDetailsComponent', () => {
   });
 
   it('should call workOnTaskDisabled returns false when task is null', () => {
-    component.task = undefined;
+    component.task.set(undefined);
     expect(component.workOnTaskDisabled()).toBe(false);
   });
 
   it('should return true for workOnTaskDisabled when task state is COMPLETED', () => {
-    component.task = { ...mockTask, state: 'COMPLETED' } as Task;
+    component.task.set({ ...mockTask, state: 'COMPLETED' } as Task);
     expect(component.workOnTaskDisabled()).toBe(true);
   });
 
   it('should return false for workOnTaskDisabled when task state is READY', () => {
-    component.task = { ...mockTask, state: 'READY' } as Task;
+    component.task.set({ ...mockTask, state: 'READY' } as Task);
     expect(component.workOnTaskDisabled()).toBe(false);
   });
 
@@ -270,28 +271,28 @@ describe('TaskDetailsComponent', () => {
   });
 
   it('should call onSave with createTask when currentId is new-task', () => {
-    component.currentId = 'new-task';
-    component.task = new Task('', new ObjectReference(), mockWorkbasket as any);
+    component.currentId.set('new-task');
+    component.task.set(new Task('', new ObjectReference(), mockWorkbasket as any));
     component.onSave();
     expect(taskServiceSpy.createTask).toHaveBeenCalled();
   });
 
   it('should call onSave with updateTask when currentId is not new-task', () => {
-    component.currentId = 'task-id-1';
-    component.task = mockTask;
+    component.currentId.set('task-id-1');
+    component.task.set(mockTask);
     component.onSave();
     expect(taskServiceSpy.updateTask).toHaveBeenCalled();
   });
 
   it('should show notification when updateTask succeeds', () => {
-    component.currentId = 'task-id-1';
-    component.task = mockTask;
+    component.currentId.set('task-id-1');
+    component.task.set(mockTask);
     component.onSave();
     expect(notificationServiceSpy.showSuccess).toHaveBeenCalledWith('TASK_UPDATE', { taskName: mockTask.name });
   });
 
   it('should call notificationService.showDialog when deleteTask is called', () => {
-    component.currentId = 'task-id-1';
+    component.currentId.set('task-id-1');
     component.deleteTask();
     expect(notificationServiceSpy.showDialog).toHaveBeenCalledWith(
       'TASK_DELETE',
@@ -301,7 +302,7 @@ describe('TaskDetailsComponent', () => {
   });
 
   it('should call backClicked and call taskService.selectTask with undefined', () => {
-    component.task = mockTask;
+    component.task.set(mockTask);
     component.backClicked();
     expect(taskServiceSpy.selectTask).toHaveBeenCalled();
   });
@@ -320,8 +321,8 @@ describe('TaskDetailsComponent', () => {
   });
 
   it('should call deleteTaskConfirmation: delete task then navigate', () => {
-    component.task = mockTask;
-    component.currentId = 'task-id-1';
+    component.task.set(mockTask);
+    component.currentId.set('task-id-1');
     component.deleteTaskConfirmation();
     expect(taskServiceSpy.deleteTask).toHaveBeenCalledWith(mockTask);
     expect(taskServiceSpy.publishTaskDeletion).toHaveBeenCalled();
@@ -329,65 +330,65 @@ describe('TaskDetailsComponent', () => {
   });
 
   it('should set task to undefined after deleteTaskConfirmation', () => {
-    component.task = mockTask;
+    component.task.set(mockTask);
     component.deleteTaskConfirmation();
-    expect(component.task).toBeUndefined();
+    expect(component.task()).toBeUndefined();
   });
 
   it('should handle getTask for new-task correctly', () => {
-    component.currentId = 'new-task';
+    component.currentId.set('new-task');
     component.currentWorkbasket = mockWorkbasket as any;
     component.getTask();
     expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalledWith(true);
     expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalledWith(false);
-    expect(component.task).toBeDefined();
+    expect(component.task()).toBeDefined();
   });
 
   it('should call taskService.getTask for existing task ID', () => {
-    component.currentId = 'task-id-1';
+    component.currentId.set('task-id-1');
     component.getTask();
     expect(taskServiceSpy.getTask).toHaveBeenCalledWith('task-id-1');
   });
 
   it('should show success notification on updateTask success', () => {
-    component.currentId = 'task-id-1';
-    component.task = { ...mockTask } as Task;
+    component.currentId.set('task-id-1');
+    component.task.set({ ...mockTask } as Task);
     component.onSave();
     expect(notificationServiceSpy.showSuccess).toHaveBeenCalledWith('TASK_UPDATE', { taskName: mockTask.name });
   });
 
   it('should call setRequestInProgress(false) when getTask returns an error', () => {
     (taskServiceSpy.getTask as any).mockReturnValue(throwError(() => new Error('not found')));
-    component.currentId = 'some-id';
+    component.currentId.set('some-id');
     component.getTask();
     expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalledWith(false);
   });
 
   it('should call setRequestInProgress(false) when updateTask returns an error', () => {
     (taskServiceSpy.updateTask as any).mockReturnValue(throwError(() => new Error('update failed')));
-    component.currentId = 'task-id-1';
-    component.task = { ...mockTask } as Task;
+    component.currentId.set('task-id-1');
+    component.task.set({ ...mockTask } as Task);
     component.onSave();
     expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalledWith(false);
   });
 
   it('should call setRequestInProgress(false) when createTask returns an error', () => {
     (taskServiceSpy.createTask as any).mockReturnValue(throwError(() => new Error('create failed')));
-    component.currentId = 'new-task';
-    component.task = new Task('', new ObjectReference(), mockWorkbasket as any);
+    component.currentId.set('new-task');
+    component.task.set(new Task('', new ObjectReference(), mockWorkbasket as any));
     component.onSave();
     expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalledWith(false);
   });
 
   it('should navigate when openTask is called', () => {
-    component.currentId = 'task-id-1';
+    component.currentId.set('task-id-1');
     expect(() => component.openTask()).not.toThrow();
   });
 
   it('should render task details when task is set and requestInProgress is false', () => {
-    component.task = mockTask;
-    component.requestInProgress = false;
-    component.currentId = 'task-id-1';
+    component.task.set(mockTask);
+    component.requestInProgress.set(false);
+    component.currentId.set('task-id-1');
     fixture.detectChanges();
     fixture.detectChanges();
     const taskDetails = fixture.nativeElement.querySelector('.task-details');
@@ -403,7 +404,7 @@ describe('TaskDetailsComponent', () => {
     const localFixture = TestBed.createComponent(TaskDetailsComponent);
     const localComponent = localFixture.componentInstance;
     localFixture.detectChanges();
-    expect(localComponent.task).toBeUndefined();
+    expect(localComponent.task()).toBeUndefined();
     const taskDetails = localFixture.nativeElement.querySelector('.task-details');
     expect(taskDetails).toBeNull();
   });
@@ -414,45 +415,45 @@ describe('TaskDetailsComponent', () => {
     (cloneWithoutOptionals as any).callbackInfo = undefined;
     cloneWithoutOptionals.primaryObjRef = undefined;
 
-    component.task = { ...mockTask };
+    component.task.set({ ...mockTask });
     component.taskClone = cloneWithoutOptionals;
 
     component.resetTask();
 
-    expect(component.task.customAttributes).toEqual([]);
-    expect(component.task.callbackInfo).toEqual([]);
-    expect(component.task.primaryObjRef).toBeUndefined();
+    expect(component.task()!.customAttributes).toEqual([]);
+    expect(component.task()!.callbackInfo).toEqual([]);
+    expect(component.task()!.primaryObjRef).toBeUndefined();
   });
 
   it('should return early from deleteTaskConfirmation when task is undefined', () => {
-    component.task = undefined;
+    component.task.set(undefined);
     component.deleteTaskConfirmation();
     expect(taskServiceSpy.deleteTask).not.toHaveBeenCalled();
   });
 
   it('should not call updateTask when task is undefined on onSave', () => {
-    component.task = undefined;
-    component.currentId = 'task-id-1';
+    component.task.set(undefined);
+    component.currentId.set('task-id-1');
     (taskServiceSpy.updateTask as any).mockClear();
     component.onSave();
     expect(taskServiceSpy.updateTask).not.toHaveBeenCalled();
   });
 
   it('should not call createTask when task is undefined on onSave for new-task', () => {
-    component.task = undefined;
-    component.currentId = 'new-task';
+    component.task.set(undefined);
+    component.currentId.set('new-task');
     (taskServiceSpy.createTask as any).mockClear();
     component.onSave();
     expect(taskServiceSpy.createTask).not.toHaveBeenCalled();
   });
 
   it('should not crash when cloneTask is invoked privately with undefined task', () => {
-    component.task = undefined;
+    component.task.set(undefined);
     expect(() => (component as any).cloneTask()).not.toThrow();
   });
 
   it('should not crash when addDateToTask is invoked privately with undefined task', () => {
-    component.task = undefined;
+    component.task.set(undefined);
     expect(() => (component as any).addDateToTask()).not.toThrow();
   });
 
@@ -461,7 +462,7 @@ describe('TaskDetailsComponent', () => {
     (t as any).customAttributes = undefined;
     (t as any).callbackInfo = undefined;
     t.primaryObjRef = undefined;
-    component.task = t;
+    component.task.set(t);
 
     (component as any).cloneTask();
 
@@ -552,7 +553,8 @@ describe('TaskDetailsComponent - DOM interaction', () => {
       imports: [TaskDetailsComponent],
       providers: [
         provideRouter(routes),
-        provideHttpClient(), provideHttpClientTesting(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideStore([EngineConfigurationState]),
         { provide: TaskService, useValue: taskServiceSpy },
         {
@@ -600,23 +602,23 @@ describe('TaskDetailsComponent - DOM interaction', () => {
   it('should not render undo button when currentId equals new-task', () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
-    component.task = { ...mockTask };
-    component.currentId = 'new-task';
-    expect(component.currentId).toBe('new-task'); // before detectChanges
+    component.task.set({ ...mockTask });
+    component.currentId.set('new-task');
+    expect(component.currentId()).toBe('new-task'); // before detectChanges
   });
 
   it('should call resetTask when undo button is clicked', () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
-    component.task = { ...mockTask };
+    component.task.set({ ...mockTask });
     component.taskClone = {
       ...mockTask,
       customAttributes: [],
       callbackInfo: [],
       primaryObjRef: new ObjectReference()
     };
-    component.requestInProgress = false;
-    component.currentId = 'task-id-1';
+    component.requestInProgress.set(false);
+    component.currentId.set('task-id-1');
     fixture.detectChanges();
     const resetSpy = vi.spyOn(component, 'resetTask');
     const undoBtn = fixture.nativeElement.querySelector('button[mattooltip="Undo changes"]');
@@ -628,9 +630,9 @@ describe('TaskDetailsComponent - DOM interaction', () => {
   it('should toggle toggleFormValidation when save button is clicked', () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
-    component.task = { ...mockTask };
-    component.requestInProgress = false;
-    component.currentId = 'task-id-1';
+    component.task.set({ ...mockTask });
+    component.requestInProgress.set(false);
+    component.currentId.set('task-id-1');
     fixture.detectChanges();
     const before = (component as any).toggleFormValidation;
     const saveBtn = fixture.nativeElement.querySelector('button[mattooltip="Save Task"]');
@@ -642,9 +644,9 @@ describe('TaskDetailsComponent - DOM interaction', () => {
   it('should call backClicked when close button is clicked from menu', () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
-    component.task = { ...mockTask };
-    component.requestInProgress = false;
-    component.currentId = 'task-id-1';
+    component.task.set({ ...mockTask });
+    component.requestInProgress.set(false);
+    component.currentId.set('task-id-1');
     fixture.detectChanges();
     const backSpy = vi.spyOn(component, 'backClicked');
     component.backClicked();
@@ -654,9 +656,9 @@ describe('TaskDetailsComponent - DOM interaction', () => {
   it('should call openTask when openTask method is invoked', () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
-    component.task = { ...mockTask };
-    component.requestInProgress = false;
-    component.currentId = 'task-id-1';
+    component.task.set({ ...mockTask });
+    component.requestInProgress.set(false);
+    component.currentId.set('task-id-1');
     fixture.detectChanges();
     const openSpy = vi.spyOn(component, 'openTask');
     component.openTask();
@@ -666,9 +668,9 @@ describe('TaskDetailsComponent - DOM interaction', () => {
   it('should call deleteTask when deleteTask method is invoked', () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
-    component.task = { ...mockTask };
-    component.requestInProgress = false;
-    component.currentId = 'task-id-1';
+    component.task.set({ ...mockTask });
+    component.requestInProgress.set(false);
+    component.currentId.set('task-id-1');
     fixture.detectChanges();
     const deleteSpy = vi.spyOn(component, 'deleteTask');
     component.deleteTask();
@@ -678,9 +680,9 @@ describe('TaskDetailsComponent - DOM interaction', () => {
   it('should render task details container with task set before detectChanges (covers @if (task && !requestInProgress))', () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
-    component.task = { ...mockTask };
-    component.requestInProgress = false;
-    component.currentId = 'task-id-1';
+    component.task.set({ ...mockTask });
+    component.requestInProgress.set(false);
+    component.currentId.set('task-id-1');
     fixture.detectChanges();
     const taskDetails = fixture.nativeElement.querySelector('.task-details');
     expect(taskDetails).toBeTruthy();
@@ -708,9 +710,9 @@ describe('TaskDetailsComponent - DOM interaction', () => {
   it('should render mat-menu items for open/delete when currentId != new-task', () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
-    component.task = { ...mockTask };
-    component.requestInProgress = false;
-    component.currentId = 'task-id-1';
+    component.task.set({ ...mockTask });
+    component.requestInProgress.set(false);
+    component.currentId.set('task-id-1');
     fixture.detectChanges();
     const moreBtn = fixture.nativeElement.querySelector('button[mattooltip="More actions"]');
     if (moreBtn) {
@@ -763,7 +765,8 @@ describe('TaskDetailsComponent - redirect when no workbasket and new-task', () =
     await TestBed.configureTestingModule({
       imports: [TaskDetailsComponent],
       providers: [
-        provideHttpClient(), provideHttpClientTesting(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideStore([EngineConfigurationState]),
         { provide: TaskService, useValue: taskServiceSpy },
         { provide: WorkplaceService, useValue: workplaceServiceSpy },
@@ -870,7 +873,8 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
     await TestBed.configureTestingModule({
       imports: [TaskDetailsComponent],
       providers: [
-        provideHttpClient(), provideHttpClientTesting(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideStore([EngineConfigurationState]),
         {
           provide: ActivatedRoute,
@@ -927,9 +931,9 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
   it('should render task-details when task is set (covers @if (task && !requestInProgress) block)', () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
-    component.task = { ...mockTaskHtml };
-    component.requestInProgress = false;
-    component.currentId = 'task-id-1';
+    component.task.set({ ...mockTaskHtml });
+    component.requestInProgress.set(false);
+    component.currentId.set('task-id-1');
     fixture.detectChanges();
     const taskDetails = fixture.nativeElement.querySelector('.task-details');
     expect(taskDetails).toBeTruthy();
@@ -938,9 +942,9 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
   it('should show badge when task has no taskId (covers @if (!task.taskId) branch)', () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
-    component.task = new Task('', new ObjectReference(), mockWorkbasketHtml as any);
-    component.requestInProgress = false;
-    component.currentId = 'any-id';
+    component.task.set(new Task('', new ObjectReference(), mockWorkbasketHtml as any));
+    component.requestInProgress.set(false);
+    component.currentId.set('any-id');
     fixture.detectChanges();
     const badge = fixture.nativeElement.querySelector('.task-details__badge-message');
     expect(badge).toBeTruthy();
@@ -949,9 +953,9 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
   it('should not show undo button when currentId is new-task (covers @if (currentId != new-task) false branch)', () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
-    component.task = { ...mockTaskHtml };
-    component.requestInProgress = false;
-    component.currentId = 'new-task';
+    component.task.set({ ...mockTaskHtml });
+    component.requestInProgress.set(false);
+    component.currentId.set('new-task');
     fixture.detectChanges();
     const undoBtn = fixture.nativeElement.querySelector('button[mattooltip="Undo changes"]');
     expect(undoBtn).toBeNull();
@@ -960,9 +964,9 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
   it('should show undo button when currentId is not new-task (covers @if (currentId != new-task) true branch)', () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
-    component.task = { ...mockTaskHtml };
-    component.requestInProgress = false;
-    component.currentId = 'task-id-1';
+    component.task.set({ ...mockTaskHtml });
+    component.requestInProgress.set(false);
+    component.currentId.set('task-id-1');
     fixture.detectChanges();
     const undoBtn = fixture.nativeElement.querySelector('button[mattooltip="Undo changes"]');
     expect(undoBtn).toBeTruthy();
@@ -971,9 +975,9 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
   it('should call toggleFormValidation toggle when save button is clicked', () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
-    component.task = { ...mockTaskHtml };
-    component.requestInProgress = false;
-    component.currentId = 'task-id-1';
+    component.task.set({ ...mockTaskHtml });
+    component.requestInProgress.set(false);
+    component.currentId.set('task-id-1');
     fixture.detectChanges();
     const initialToggle = component.toggleFormValidation;
     const saveBtn = fixture.nativeElement.querySelector('button[mattooltip="Save Task"]');
@@ -986,9 +990,9 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
   it('should call resetTask when undo button is clicked', () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
-    component.task = { ...mockTaskHtml };
-    component.requestInProgress = false;
-    component.currentId = 'task-id-1';
+    component.task.set({ ...mockTaskHtml });
+    component.requestInProgress.set(false);
+    component.currentId.set('task-id-1');
     fixture.detectChanges();
     const resetSpy = vi.spyOn(component, 'resetTask');
     const undoBtn = fixture.nativeElement.querySelector('button[mattooltip="Undo changes"]');
@@ -1000,9 +1004,9 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
   it('should trigger onSave when formValid event is emitted from kadai-task-information', () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
-    component.task = { ...mockTaskHtml };
-    component.requestInProgress = false;
-    component.currentId = 'task-id-1';
+    component.task.set({ ...mockTaskHtml });
+    component.requestInProgress.set(false);
+    component.currentId.set('task-id-1');
     fixture.detectChanges();
     const onSaveSpy = vi.spyOn(component, 'onSave');
     const taskInfoDebug = fixture.debugElement.query(By.css('kadai-task-information'));
@@ -1018,9 +1022,9 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
   it('should call openTask when Open menu item is clicked', () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
-    component.task = { ...mockTaskHtml };
-    component.requestInProgress = false;
-    component.currentId = 'task-id-1';
+    component.task.set({ ...mockTaskHtml });
+    component.requestInProgress.set(false);
+    component.currentId.set('task-id-1');
     fixture.detectChanges();
     const openTaskSpy = vi.spyOn(component, 'openTask');
     const triggerDebug = fixture.debugElement.query(By.directive(MatMenuTrigger));
@@ -1045,9 +1049,9 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
   it('should call deleteTask when Delete menu item is clicked', () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
-    component.task = { ...mockTaskHtml };
-    component.requestInProgress = false;
-    component.currentId = 'task-id-1';
+    component.task.set({ ...mockTaskHtml });
+    component.requestInProgress.set(false);
+    component.currentId.set('task-id-1');
     fixture.detectChanges();
     const deleteTaskSpy = vi.spyOn(component, 'deleteTask');
     const triggerDebug = fixture.debugElement.query(By.directive(MatMenuTrigger));
@@ -1072,9 +1076,9 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
   it('should call backClicked when Close menu item is clicked', () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
-    component.task = { ...mockTaskHtml };
-    component.requestInProgress = false;
-    component.currentId = 'task-id-1';
+    component.task.set({ ...mockTaskHtml });
+    component.requestInProgress.set(false);
+    component.currentId.set('task-id-1');
     fixture.detectChanges();
     const backClickedSpy = vi.spyOn(component, 'backClicked');
     const triggerDebug = fixture.debugElement.query(By.directive(MatMenuTrigger));

@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { highlight } from 'app/shared/animations/validation.animation';
 
 @Component({
@@ -24,7 +24,6 @@ import { highlight } from 'app/shared/animations/validation.animation';
   templateUrl: './field-error-display.component.html',
   animations: [highlight],
   styleUrls: ['./field-error-display.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: []
 })
 export class FieldErrorDisplayComponent {

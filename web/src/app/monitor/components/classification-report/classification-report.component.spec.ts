@@ -60,7 +60,7 @@ describe('ClassificationReportComponent', () => {
       rows: [{ desc: ['row1'], cells: [1, 2], total: 3, depth: 0, display: true }],
       sumRow: []
     };
-    component.reportData = null as any;
+    component.reportData.set(null as any);
     fixture.detectChanges();
     const panel = fixture.nativeElement.querySelector('.panel');
     expect(panel).toBeNull();
@@ -75,8 +75,8 @@ describe('ClassificationReportComponent', () => {
     };
     fixture.detectChanges();
     httpMock.match(() => true).forEach((req) => req.flush(mockReport));
-    expect(component.reportData).toBeTruthy();
-    expect(component.reportData.meta.name).toBe('Test Report');
+    expect(component.reportData()).toBeTruthy();
+    expect(component.reportData()!.meta.name).toBe('Test Report');
   });
 
   it('should render the panel element when reportData is set', () => {
@@ -91,14 +91,14 @@ describe('ClassificationReportComponent', () => {
       rows: [{ desc: ['classA'], cells: [5, 10], total: 15, depth: 0, display: true }],
       sumRow: []
     };
-    component.reportData = mockReport as any;
-    component.lineChartLabels = mockReport.meta.header;
-    component.lineChartData = mockReport.rows.map((row) => ({ data: row.cells, label: row.desc[0] }));
+    component.reportData.set(mockReport as any);
+    component.lineChartLabels.set(mockReport.meta.header);
+    component.lineChartData.set(mockReport.rows.map((row) => ({ data: row.cells, label: row.desc[0] })));
     fixture.detectChanges();
     httpMock.match(() => true).forEach((req) => req.flush(mockReport));
     const panel = fixture.nativeElement.querySelector('.panel');
     expect(panel).toBeTruthy();
-    expect(component.reportData.meta.name).toBe('Classification Report');
+    expect(component.reportData()!.meta.name).toBe('Classification Report');
   });
 
   it('should display report name in the panel heading when reportData is loaded', () => {
@@ -113,9 +113,9 @@ describe('ClassificationReportComponent', () => {
       rows: [{ desc: ['classA'], cells: [5, 10], total: 15, depth: 0, display: true }],
       sumRow: []
     };
-    component.reportData = mockReport as any;
-    component.lineChartLabels = mockReport.meta.header;
-    component.lineChartData = mockReport.rows.map((row) => ({ data: row.cells, label: row.desc[0] }));
+    component.reportData.set(mockReport as any);
+    component.lineChartLabels.set(mockReport.meta.header);
+    component.lineChartData.set(mockReport.rows.map((row) => ({ data: row.cells, label: row.desc[0] })));
     fixture.detectChanges();
     httpMock.match(() => true).forEach((req) => req.flush(mockReport));
     const heading = fixture.nativeElement.querySelector('h4');
@@ -134,9 +134,9 @@ describe('ClassificationReportComponent', () => {
     };
     fixture.detectChanges();
     httpMock.match(() => true).forEach((req) => req.flush(mockReport));
-    expect(component.lineChartLabels).toEqual(['Jan', 'Feb']);
-    expect(component.lineChartData).toHaveLength(2);
-    expect(component.lineChartData[0].label).toBe('classA');
-    expect(component.lineChartData[1].label).toBe('classB');
+    expect(component.lineChartLabels()).toEqual(['Jan', 'Feb']);
+    expect(component.lineChartData()).toHaveLength(2);
+    expect(component.lineChartData()[0].label).toBe('classA');
+    expect(component.lineChartData()[1].label).toBe('classB');
   });
 });

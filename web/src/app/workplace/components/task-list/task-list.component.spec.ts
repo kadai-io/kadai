@@ -55,7 +55,13 @@ describe('TaskListComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TaskListComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideAngularSvgIcon(), provideRouter(routes), provideNoopAnimations()]
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideAngularSvgIcon(),
+        provideRouter(routes),
+        provideNoopAnimations()
+      ]
     }).compileComponents();
 
     router = TestBed.inject(Router);

@@ -144,7 +144,7 @@ describe('TaskProcessingComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TaskProcessingComponent);
     component = fixture.componentInstance;
-    component.task = makeTask();
+    component.task.set(makeTask());
     fixture.detectChanges();
   });
 
@@ -191,21 +191,21 @@ describe('TaskProcessingComponent', () => {
 
   describe('getWorkbaskets()', () => {
     it('should call getAllWorkBaskets when invoked directly', () => {
-      component.task = makeTask();
+      component.task.set(makeTask());
 
       component.getWorkbaskets();
 
       expect(mockWorkbasketService.getAllWorkBaskets).toHaveBeenCalled();
-      expect(component.workbaskets).toBeDefined();
-      expect(component.workbaskets.length).toBeGreaterThan(0);
-      const names = component.workbaskets.map((wb) => wb.name);
+      expect(component.workbaskets()).toBeDefined();
+      expect(component.workbaskets().length).toBeGreaterThan(0);
+      const names = component.workbaskets().map((wb) => wb.name);
       expect(names).not.toContain('Workbasket A');
       expect(names).toContain('Workbasket B');
       expect(names).toContain('Workbasket C');
     });
 
     it('should call setRequestInProgress(false) after workbaskets are fetched', () => {
-      component.task = makeTask();
+      component.task.set(makeTask());
       mockRequestInProgressService.setRequestInProgress.mockClear();
 
       component.getWorkbaskets();
@@ -217,18 +217,18 @@ describe('TaskProcessingComponent', () => {
     it('should not remove workbaskets that do not match the task workbasket name', () => {
       const taskWithDifferentWb = makeTask();
       taskWithDifferentWb.workbasketSummary = { workbasketId: 'wb-99', name: 'Nonexistent WB' };
-      component.task = taskWithDifferentWb;
+      component.task.set(taskWithDifferentWb);
 
       component.getWorkbaskets();
 
       // All three workbaskets should remain since none match 'Nonexistent WB'
-      expect(component.workbaskets.length).toBe(3);
+      expect(component.workbaskets().length).toBe(3);
     });
   });
 
   describe('transferTask()', () => {
     it('should call taskService.transferTask with task id and workbasket id', () => {
-      component.task = makeTask();
+      component.task.set(makeTask());
 
       const targetWorkbasket: Workbasket = { workbasketId: 'wb-target', name: 'Target WB' };
       component.transferTask(targetWorkbasket);
@@ -237,7 +237,7 @@ describe('TaskProcessingComponent', () => {
     });
 
     it('should call setRequestInProgress(true) before transfer', () => {
-      component.task = makeTask();
+      component.task.set(makeTask());
       mockRequestInProgressService.setRequestInProgress.mockClear();
 
       const targetWorkbasket: Workbasket = { workbasketId: 'wb-target', name: 'Target WB' };
@@ -247,7 +247,7 @@ describe('TaskProcessingComponent', () => {
     });
 
     it('should call navigateBack after initiating transfer', () => {
-      component.task = makeTask();
+      component.task.set(makeTask());
       mockRouter.navigate.mockClear();
 
       const targetWorkbasket: Workbasket = { workbasketId: 'wb-target', name: 'Target WB' };
@@ -257,7 +257,7 @@ describe('TaskProcessingComponent', () => {
     });
 
     it('should call setRequestInProgress(false) after transfer completes', () => {
-      component.task = makeTask();
+      component.task.set(makeTask());
       const transferredTask = makeTask();
       mockTaskService.transferTask.mockReturnValue(of(transferredTask));
       mockRequestInProgressService.setRequestInProgress.mockClear();
@@ -271,7 +271,7 @@ describe('TaskProcessingComponent', () => {
 
   describe('completeTask()', () => {
     it('should call taskService.completeTask with the task id', () => {
-      component.task = makeTask();
+      component.task.set(makeTask());
 
       component.completeTask();
 
@@ -279,7 +279,7 @@ describe('TaskProcessingComponent', () => {
     });
 
     it('should call setRequestInProgress(true) before completing', () => {
-      component.task = makeTask();
+      component.task.set(makeTask());
       mockRequestInProgressService.setRequestInProgress.mockClear();
 
       component.completeTask();
@@ -290,7 +290,7 @@ describe('TaskProcessingComponent', () => {
     it('should call publishUpdatedTask after completing', () => {
       const completedTask = makeTask({ taskId: 'task-id-1' });
       mockTaskService.completeTask.mockReturnValue(of(completedTask));
-      component.task = makeTask();
+      component.task.set(makeTask());
 
       component.completeTask();
 
@@ -298,7 +298,7 @@ describe('TaskProcessingComponent', () => {
     });
 
     it('should call navigateBack after completing', () => {
-      component.task = makeTask();
+      component.task.set(makeTask());
       mockRouter.navigate.mockClear();
 
       component.completeTask();
@@ -307,7 +307,7 @@ describe('TaskProcessingComponent', () => {
     });
 
     it('should call setRequestInProgress(false) after completing', () => {
-      component.task = makeTask();
+      component.task.set(makeTask());
       mockTaskService.completeTask.mockReturnValue(of(makeTask()));
       mockRequestInProgressService.setRequestInProgress.mockClear();
 
@@ -319,7 +319,7 @@ describe('TaskProcessingComponent', () => {
 
   describe('cancelClaimTask()', () => {
     it('should call taskService.cancelClaimTask with the task id', () => {
-      component.task = makeTask();
+      component.task.set(makeTask());
 
       component.cancelClaimTask();
 
@@ -327,7 +327,7 @@ describe('TaskProcessingComponent', () => {
     });
 
     it('should call setRequestInProgress(true) before cancelling', () => {
-      component.task = makeTask();
+      component.task.set(makeTask());
       mockRequestInProgressService.setRequestInProgress.mockClear();
 
       component.cancelClaimTask();
@@ -336,7 +336,7 @@ describe('TaskProcessingComponent', () => {
     });
 
     it('should call navigateBack after initiating cancel claim', () => {
-      component.task = makeTask();
+      component.task.set(makeTask());
       mockRouter.navigate.mockClear();
 
       component.cancelClaimTask();
@@ -347,7 +347,7 @@ describe('TaskProcessingComponent', () => {
     it('should call publishUpdatedTask after cancel claim resolves', () => {
       const cancelledTask = makeTask();
       mockTaskService.cancelClaimTask.mockReturnValue(of(cancelledTask));
-      component.task = makeTask();
+      component.task.set(makeTask());
 
       component.cancelClaimTask();
 
@@ -355,7 +355,7 @@ describe('TaskProcessingComponent', () => {
     });
 
     it('should call setRequestInProgress(false) after cancel claim resolves', () => {
-      component.task = makeTask();
+      component.task.set(makeTask());
       mockTaskService.cancelClaimTask.mockReturnValue(of(makeTask()));
       mockRequestInProgressService.setRequestInProgress.mockClear();
 
@@ -367,7 +367,7 @@ describe('TaskProcessingComponent', () => {
 
   describe('navigateBack()', () => {
     it('should navigate to the taskdetail outlet with the task id', () => {
-      component.task = makeTask();
+      component.task.set(makeTask());
       mockRouter.navigate.mockClear();
 
       component.navigateBack();
@@ -388,7 +388,7 @@ describe('TaskProcessingComponent', () => {
     });
 
     it('should replace ${task.taskId} with the actual task id', () => {
-      component.task = makeTask();
+      component.task.set(makeTask());
       const url = 'https://example.com/${task.taskId}';
 
       const result = (component as any).extractUrl(url);
@@ -397,7 +397,7 @@ describe('TaskProcessingComponent', () => {
     });
 
     it('should replace ${task.name} with the task name', () => {
-      component.task = makeTask();
+      component.task.set(makeTask());
       const url = 'https://example.com?taskName=${task.name}';
 
       const result = (component as any).extractUrl(url);
@@ -406,7 +406,7 @@ describe('TaskProcessingComponent', () => {
     });
 
     it('should handle multiple template expressions in one URL', () => {
-      component.task = makeTask();
+      component.task.set(makeTask());
       const url = 'https://example.com/${task.taskId}/name/${task.name}';
 
       const result = (component as any).extractUrl(url);
@@ -482,24 +482,24 @@ describe('TaskProcessingComponent', () => {
     });
 
     it('should not render iframe when link is not set', () => {
-      component.link = null as any;
+      component.link.set(null as any);
       fixture.detectChanges();
       const iframe = fixture.nativeElement.querySelector('iframe');
       expect(iframe).toBeNull();
     });
 
     it('should not render iframe when link is not set (false branch)', () => {
-      expect(component.task).toBeTruthy();
-      expect(component.task?.name).toBe('My Task');
-      expect(component.link).toBeUndefined();
+      expect(component.task()).toBeTruthy();
+      expect(component.task()?.name).toBe('My Task');
+      expect(component.link()).toBeUndefined();
     });
 
     it('should render iframe when link is set before detectChanges (true branch)', () => {
       const localFixture = TestBed.createComponent(TaskProcessingComponent);
       const localComponent = localFixture.componentInstance;
-      localComponent.task = makeTask();
+      localComponent.task.set(makeTask());
       const sanitizer = TestBed.inject(DomSanitizer);
-      localComponent.link = sanitizer.bypassSecurityTrustResourceUrl('https://example.com');
+      localComponent.link.set(sanitizer.bypassSecurityTrustResourceUrl('https://example.com'));
       localFixture.detectChanges();
       const iframe = localFixture.nativeElement.querySelector('iframe');
       expect(iframe).toBeTruthy();
@@ -521,15 +521,15 @@ describe('TaskProcessingComponent', () => {
         const menuItems = document.querySelectorAll('[mat-menu-item]');
         expect(menuItems.length).toBeGreaterThan(0);
       } else {
-        expect(component.workbaskets.length).toBeGreaterThan(0);
+        expect(component.workbaskets().length).toBeGreaterThan(0);
       }
     });
 
     it('should render @for menu items and call transferTask when a menu item is clicked', () => {
       const localFixture = TestBed.createComponent(TaskProcessingComponent);
       const localComponent = localFixture.componentInstance;
-      localComponent.task = makeTask();
-      localComponent.workbaskets = makeWorkbaskets().filter((wb) => wb.name !== 'Workbasket A');
+      localComponent.task.set(makeTask());
+      localComponent.workbaskets.set(makeWorkbaskets().filter((wb) => wb.name !== 'Workbasket A'));
       localFixture.detectChanges();
       const transferSpy = vi.spyOn(localComponent, 'transferTask');
       const triggerDebug = localFixture.debugElement.query(By.directive(MatMenuTrigger));
@@ -542,11 +542,11 @@ describe('TaskProcessingComponent', () => {
           (menuBtns[0] as HTMLElement).click();
           expect(transferSpy).toHaveBeenCalled();
         } else {
-          localComponent.transferTask(localComponent.workbaskets[0]);
+          localComponent.transferTask(localComponent.workbaskets()[0]);
           expect(transferSpy).toHaveBeenCalled();
         }
       } else {
-        localComponent.transferTask(localComponent.workbaskets[0]);
+        localComponent.transferTask(localComponent.workbaskets()[0]);
         expect(transferSpy).toHaveBeenCalled();
       }
       localFixture.destroy();
@@ -555,10 +555,10 @@ describe('TaskProcessingComponent', () => {
     it('should render empty workbaskets list with no @for items when workbaskets is empty', () => {
       const localFixture = TestBed.createComponent(TaskProcessingComponent);
       const localComponent = localFixture.componentInstance;
-      localComponent.task = makeTask();
-      localComponent.workbaskets = [];
+      localComponent.task.set(makeTask());
+      localComponent.workbaskets.set([]);
       localFixture.detectChanges();
-      expect(localComponent.workbaskets.length).toBe(0);
+      expect(localComponent.workbaskets().length).toBe(0);
       localFixture.destroy();
     });
 
@@ -570,7 +570,7 @@ describe('TaskProcessingComponent', () => {
       if (header) {
         expect(header.textContent.trim()).toBe('');
       }
-      expect(localComponent.task).toBeUndefined();
+      expect(localComponent.task()).toBeUndefined();
       localFixture.destroy();
     });
   });

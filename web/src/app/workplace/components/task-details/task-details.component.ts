@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -46,7 +46,6 @@ import { TaskAttributeValueComponent } from '../task-attribute-value/task-attrib
   selector: 'kadai-task-details',
   templateUrl: './task-details.component.html',
   styleUrls: ['./task-details.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatButton,
     MatTooltip,
@@ -63,12 +62,12 @@ import { TaskAttributeValueComponent } from '../task-attribute-value/task-attrib
   ]
 })
 export class TaskDetailsComponent implements OnInit, OnDestroy {
-  task?: Task;
+  task = signal<Task | undefined>(undefined);
   taskClone?: Task;
-  requestInProgress = false;
+  requestInProgress = signal(false);
   tabSelected = 'general';
   currentWorkbasket?: Workbasket;
-  currentId!: string;
+  currentId = signal<string>('');
   showDetail = false;
   toggleFormValidation = false;
   destroy$ = new Subject<void>();
@@ -90,9 +89,9 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
     });
 
     this.routeSubscription = this.route.params.subscribe((params) => {
-      this.currentId = params.id;
+      this.currentId.set(params.id);
       // redirect if user enters through a deep-link
-      if (!this.currentWorkbasket && this.currentId === 'new-task') {
+      if (!this.currentWorkbasket && this.currentId() === 'new-task') {
         this.router.navigate([''], { queryParamsHandling: 'merge' });
       }
       this.getTask();
@@ -106,7 +105,7 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
       .getRequestInProgress()
       .pipe(takeUntil(this.destroy$))
       .subscribe((value) => {
-        this.requestInProgress = value;
+        this.requestInProgress.set(value);
       });
   }
 
@@ -114,23 +113,24 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
     if (!this.taskClone) {
       return;
     }
-    this.task = { ...this.taskClone };
-    this.task.customAttributes = this.taskClone.customAttributes?.slice(0) || [];
-    this.task.callbackInfo = this.taskClone.callbackInfo?.slice(0) || [];
-    this.task.primaryObjRef = this.taskClone.primaryObjRef ? { ...this.taskClone.primaryObjRef } : undefined;
+    const task = { ...this.taskClone };
+    task.customAttributes = this.taskClone.customAttributes?.slice(0) || [];
+    task.callbackInfo = this.taskClone.callbackInfo?.slice(0) || [];
+    task.primaryObjRef = this.taskClone.primaryObjRef ? { ...this.taskClone.primaryObjRef } : undefined;
+    this.task.set(task);
     this.notificationService.showSuccess('TASK_RESTORE');
   }
 
   getTask(): void {
     this.requestInProgressService.setRequestInProgress(true);
-    if (this.currentId === 'new-task') {
+    if (this.currentId() === 'new-task') {
       this.requestInProgressService.setRequestInProgress(false);
-      this.task = new Task('', new ObjectReference(), this.currentWorkbasket);
+      this.task.set(new Task('', new ObjectReference(), this.currentWorkbasket));
     } else {
-      this.taskService.getTask(this.currentId).subscribe({
+      this.taskService.getTask(this.currentId()).subscribe({
         next: (task) => {
           this.requestInProgressService.setRequestInProgress(false);
-          this.task = task;
+          this.task.set(task);
           this.cloneTask();
           this.taskService.selectTask(task);
         },
@@ -142,34 +142,35 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   }
 
   openTask() {
-    this.router.navigate([{ outlets: { detail: `task/${this.currentId}` } }], {
+    this.router.navigate([{ outlets: { detail: `task/${this.currentId()}` } }], {
       relativeTo: this.route.parent,
       queryParamsHandling: 'merge'
     });
   }
 
   workOnTaskDisabled(): boolean {
-    return this.task ? this.task.state === 'COMPLETED' : false;
+    const task = this.task();
+    return task ? task.state === 'COMPLETED' : false;
   }
 
   deleteTask(): void {
     this.notificationService.showDialog(
       'TASK_DELETE',
-      { taskId: this.currentId },
+      { taskId: this.currentId() },
       this.deleteTaskConfirmation.bind(this)
     );
   }
 
   deleteTaskConfirmation(): void {
-    if (!this.task) return;
-    const taskToDelete = this.task;
+    const taskToDelete = this.task();
+    if (!taskToDelete) return;
     this.deleteTaskSubscription = this.taskService
       .deleteTask(taskToDelete)
       .pipe(take(1))
       .subscribe(() => {
         this.notificationService.showSuccess('TASK_DELETE', { taskName: taskToDelete.name });
         this.taskService.publishTaskDeletion();
-        this.task = undefined;
+        this.task.set(undefined);
         this.router.navigate(['kadai/workplace/tasks'], { queryParamsHandling: 'merge' });
       });
   }
@@ -179,8 +180,8 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   }
 
   backClicked(): void {
-    delete this.task;
-    this.taskService.selectTask(this.task);
+    this.task.set(undefined);
+    this.taskService.selectTask(undefined);
     this.router.navigate(['./'], { relativeTo: this.route.parent, queryParamsHandling: 'merge' });
   }
 
@@ -203,20 +204,21 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   }
 
   onSave() {
-    this.currentId === 'new-task' ? this.createTask() : this.updateTask();
+    this.currentId() === 'new-task' ? this.createTask() : this.updateTask();
   }
 
   private updateTask() {
-    if (!this.task) return;
+    const task = this.task();
+    if (!task) return;
     this.requestInProgressService.setRequestInProgress(true);
-    trimObject(this.task);
-    this.taskService.updateTask(this.task).subscribe({
-      next: (task) => {
+    trimObject(task);
+    this.taskService.updateTask(task).subscribe({
+      next: (updatedTask) => {
         this.requestInProgressService.setRequestInProgress(false);
-        this.task = task;
+        this.task.set(updatedTask);
         this.cloneTask();
-        this.taskService.publishUpdatedTask(task);
-        this.notificationService.showSuccess('TASK_UPDATE', { taskName: task.name });
+        this.taskService.publishUpdatedTask(updatedTask);
+        this.notificationService.showSuccess('TASK_UPDATE', { taskName: updatedTask.name });
       },
       error: () => {
         this.requestInProgressService.setRequestInProgress(false);
@@ -225,18 +227,19 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   }
 
   private createTask() {
-    if (!this.task) return;
+    const task = this.task();
+    if (!task) return;
     this.requestInProgressService.setRequestInProgress(true);
     this.addDateToTask();
-    trimObject(this.task);
-    this.taskService.createTask(this.task).subscribe({
-      next: (task) => {
+    trimObject(task);
+    this.taskService.createTask(task).subscribe({
+      next: (createdTask) => {
         this.requestInProgressService.setRequestInProgress(false);
-        this.notificationService.showSuccess('TASK_CREATE', { taskName: task.name });
-        this.task = task;
-        this.taskService.selectTask(this.task);
-        this.taskService.publishUpdatedTask(task);
-        this.router.navigate([`../${task.taskId}`], {
+        this.notificationService.showSuccess('TASK_CREATE', { taskName: createdTask.name });
+        this.task.set(createdTask);
+        this.taskService.selectTask(createdTask);
+        this.taskService.publishUpdatedTask(createdTask);
+        this.router.navigate([`../${createdTask.taskId}`], {
           relativeTo: this.route,
           queryParamsHandling: 'merge'
         });
@@ -248,17 +251,19 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   }
 
   private addDateToTask() {
-    if (!this.task) return;
+    const task = this.task();
+    if (!task) return;
     const date = KadaiDate.getDate();
-    this.task.created = date;
-    this.task.modified = date;
+    task.created = date;
+    task.modified = date;
   }
 
   private cloneTask() {
-    if (!this.task) return;
-    this.taskClone = { ...this.task };
-    this.taskClone.customAttributes = this.task.customAttributes?.slice(0) || [];
-    this.taskClone.callbackInfo = this.task.callbackInfo?.slice(0) || [];
-    this.taskClone.primaryObjRef = this.task.primaryObjRef ? { ...this.task.primaryObjRef } : undefined;
+    const task = this.task();
+    if (!task) return;
+    this.taskClone = { ...task };
+    this.taskClone.customAttributes = task.customAttributes?.slice(0) || [];
+    this.taskClone.callbackInfo = task.callbackInfo?.slice(0) || [];
+    this.taskClone.primaryObjRef = task.primaryObjRef ? { ...task.primaryObjRef } : undefined;
   }
 }

@@ -69,7 +69,8 @@ describe('ClassificationListComponent', () => {
       imports: [ClassificationListComponent],
       providers: [
         provideStore([ClassificationState, EngineConfigurationState]),
-        provideHttpClient(), provideHttpClientTesting(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideAngularSvgIcon(),
         { provide: DomainService, useValue: domainServiceSpy },
         { provide: RequestInProgressService, useValue: requestInProgressServiceSpy }
@@ -131,11 +132,11 @@ describe('ClassificationListComponent', () => {
     const filterButton = debugElement.nativeElement.querySelector('.classification-list__filter-button');
     filterButton.click();
     fixture.detectChanges();
-    component.selectedCategory = 'EXTERNAL';
+    component.selectedCategory.set('EXTERNAL');
     const allButton = debugElement.query(By.css('.classification-list__all-button'));
     expect(allButton).toBeTruthy();
     allButton.nativeElement.click();
-    expect(component.selectedCategory).toBe('');
+    expect(component.selectedCategory()).toBe('');
   });
 
   it('should display list of categories which can be selected', () => {
@@ -147,7 +148,7 @@ describe('ClassificationListComponent', () => {
   });
 
   it('should display tree component when classifications exist', () => {
-    component.classifications = [{ classificationId: '1' }, { classificationId: '2' }];
+    component.classifications.set([{ classificationId: '1' }, { classificationId: '2' }]);
     fixture.detectChanges();
     expect(debugElement.nativeElement.querySelector('kadai-administration-tree')).toBeTruthy();
   });
@@ -200,7 +201,7 @@ describe('ClassificationListComponent', () => {
   });
 
   it('should show mat-icon filter_list when selectedCategory is empty string', () => {
-    component.selectedCategory = '';
+    component.selectedCategory.set('');
     fixture.detectChanges();
     const matIcon = debugElement.nativeElement.querySelector(
       '.classification-list__filter-button .classification-list__mat-icon'
@@ -210,7 +211,7 @@ describe('ClassificationListComponent', () => {
   });
 
   it('should show svg-icon instead of mat-icon when selectedCategory is non-empty', () => {
-    component.selectedCategory = 'EXTERNAL';
+    component.selectedCategory.set('EXTERNAL');
     fixture.detectChanges();
     const svgIcon = debugElement.nativeElement.querySelector(
       '.classification-list__filter-button .classification-list__icons'
@@ -230,11 +231,11 @@ describe('ClassificationListComponent', () => {
     expect(categoryButtons.length).toBeGreaterThan(1);
     categoryButtons[1].nativeElement.click();
     fixture.detectChanges();
-    expect(component.selectedCategory).not.toBe('');
+    expect(component.selectedCategory()).not.toBe('');
   });
 
   it('should set selectedCategory to empty string when All button is clicked', () => {
-    component.selectedCategory = 'MANUAL';
+    component.selectedCategory.set('MANUAL');
     fixture.detectChanges();
     const filterButton = debugElement.nativeElement.querySelector('.classification-list__filter-button');
     filterButton.click();
@@ -242,7 +243,7 @@ describe('ClassificationListComponent', () => {
     const allButton = debugElement.query(By.css('.classification-list__all-button'));
     allButton.nativeElement.click();
     fixture.detectChanges();
-    expect(component.selectedCategory).toBe('');
+    expect(component.selectedCategory()).toBe('');
   });
 
   it('should update inputValue when input field value changes', () => {
@@ -255,23 +256,23 @@ describe('ClassificationListComponent', () => {
   });
 
   it('should NOT display no-items div when classifications are empty but requestInProgress is true', () => {
-    component.classifications = [];
-    component.requestInProgress = true;
+    component.classifications.set([]);
+    component.requestInProgress.set(true);
     fixture.detectChanges();
     const noClassifications = debugElement.nativeElement.querySelector('.classification-list__no-items');
     expect(noClassifications).toBeNull();
   });
 
   it('should display no-items div when classifications are empty and requestInProgress is false', () => {
-    component.classifications = [];
-    component.requestInProgress = false;
+    component.classifications.set([]);
+    component.requestInProgress.set(false);
     fixture.detectChanges();
     const noClassifications = debugElement.nativeElement.querySelector('.classification-list__no-items');
     expect(noClassifications).toBeTruthy();
   });
 
   it('should call setRequestInProgress when switchKadaiSpinnerEmit event is emitted from tree', () => {
-    component.classifications = [{ classificationId: '1' }, { classificationId: '2' }];
+    component.classifications.set([{ classificationId: '1' }, { classificationId: '2' }]);
     fixture.detectChanges();
     const treeComponent = debugElement.nativeElement.querySelector('kadai-administration-tree');
     expect(treeComponent).toBeTruthy();
@@ -288,9 +289,9 @@ describe('ClassificationListComponent', () => {
 
   it('should set selectedCategory via selectCategory method', () => {
     component.selectCategory('AUTOMATIC');
-    expect(component.selectedCategory).toBe('AUTOMATIC');
+    expect(component.selectedCategory()).toBe('AUTOMATIC');
     component.selectCategory('');
-    expect(component.selectedCategory).toBe('');
+    expect(component.selectedCategory()).toBe('');
   });
 
   it('should update inputValue via ngModelChange event on filter input', () => {
@@ -311,11 +312,11 @@ describe('ClassificationListComponent', () => {
       categoryButtons[i].nativeElement.click();
       fixture.detectChanges();
     }
-    expect(component.selectedCategory).toBeTruthy();
+    expect(component.selectedCategory()).toBeTruthy();
   });
 
   it('should render category svg-icon in menu when filter button is open with non-empty selectedCategory', () => {
-    component.selectedCategory = 'MANUAL';
+    component.selectedCategory.set('MANUAL');
     fixture.detectChanges();
     const icon = debugElement.nativeElement.querySelector('svg-icon');
     expect(icon).toBeTruthy();
@@ -327,7 +328,7 @@ describe('ClassificationListComponent', () => {
   });
 
   it('should cover getCategoryIcon pipe async call from category menu template', () => {
-    component.selectedCategory = '';
+    component.selectedCategory.set('');
     fixture.detectChanges();
     const filterButton = debugElement.nativeElement.querySelector('.classification-list__filter-button');
     filterButton.click();
@@ -350,8 +351,8 @@ describe('ClassificationListComponent', () => {
   });
 
   it('should display "There are no classifications" when classifications is empty and requestInProgress is false', () => {
-    component.classifications = [];
-    component.requestInProgress = false;
+    component.classifications.set([]);
+    component.requestInProgress.set(false);
     fixture.detectChanges();
     const noItems = debugElement.nativeElement.querySelector('.classification-list__no-items');
     expect(noItems).toBeTruthy();
@@ -359,8 +360,8 @@ describe('ClassificationListComponent', () => {
   });
 
   it('should not display "There are no classifications" when requestInProgress is true', () => {
-    component.classifications = [];
-    component.requestInProgress = true;
+    component.classifications.set([]);
+    component.requestInProgress.set(true);
     fixture.detectChanges();
     const noItems = debugElement.nativeElement.querySelector('.classification-list__no-items');
     expect(noItems).toBeFalsy();
@@ -476,7 +477,7 @@ describe('ClassificationListComponent — HTML template coverage without overrid
   });
 
   it('should trigger setRequestInProgress via switchKadaiSpinnerEmit from tree component (HTML coverage)', () => {
-    component.classifications = [{ classificationId: '1' }, { classificationId: '2' }];
+    component.classifications.set([{ classificationId: '1' }, { classificationId: '2' }]);
     fixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
     const treeEl = debugElement.query(By.css('kadai-administration-tree'));
@@ -491,10 +492,10 @@ describe('ClassificationListComponent — HTML template coverage without overrid
   });
 
   it('should render selectedCategory branch when selectedCategory is non-empty (HTML branch coverage)', () => {
-    component.selectedCategory = 'EXTERNAL';
+    component.selectedCategory.set('EXTERNAL');
     fixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
-    expect(component.selectedCategory).toBe('EXTERNAL');
+    expect(component.selectedCategory()).toBe('EXTERNAL');
     const svgIcon = debugElement.nativeElement.querySelector(
       '.classification-list__filter-button .classification-list__icons'
     );
@@ -504,10 +505,10 @@ describe('ClassificationListComponent — HTML template coverage without overrid
 
   it('should cover ?.left null branch when categoryIcons$ observable has not yet emitted (HTML branch coverage)', () => {
     (component as any).categoryIcons$ = new Observable<any>(() => {});
-    component.selectedCategory = 'EXTERNAL';
+    component.selectedCategory.set('EXTERNAL');
     fixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
-    expect(component.selectedCategory).toBe('EXTERNAL');
+    expect(component.selectedCategory()).toBe('EXTERNAL');
     httpController.match(() => true).forEach((req) => req.flush(''));
   });
 });

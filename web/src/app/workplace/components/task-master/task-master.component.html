@@ -16,6 +16,7 @@
 ~
 -->
 
+@let taskList = tasks();
 <div class="footer-space-pagination-list">
   <div #wbToolbar>
     <kadai-task-list-toolbar (performFilter)="performFilter()"
@@ -23,13 +24,13 @@
                              (selectSearchType)="selectSearchType($event)"
                              [taskDefaultSortBy]="taskDefaultSortBy" />
   </div>
-  @if (!requestInProgress) {
+  @if (!requestInProgress()) {
     <kadai-task-list [(selectedId)]="selectedId"
-                     [tasks]="tasks" />
+                     [tasks]="taskList" />
   }
 </div>
-@if (tasks && tasks.length > 0) {
+@if (taskList && taskList.length > 0) {
   <kadai-shared-pagination (changePage)="changePage($event)"
-                           [numberOfItems]="tasks.length"
-                           [page]="tasksPageInformation" [type]="type" />
+                           [numberOfItems]="taskList.length"
+                           [page]="tasksPageInformation()" [type]="type" />
 }

@@ -47,7 +47,8 @@ describe('ClassificationsService', () => {
     TestBed.configureTestingModule({
       providers: [
         ClassificationsService,
-        provideHttpClient(), provideHttpClientTesting(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideHttpClientTesting(),
         { provide: StartupService, useValue: mockStartupService },
         { provide: DomainService, useValue: mockDomainService }
