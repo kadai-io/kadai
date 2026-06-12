@@ -29,7 +29,7 @@ describe('ClassificationCategoriesService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [ClassificationCategoriesService, provideHttpClient(), provideHttpClientTesting()]
+      providers: [ClassificationCategoriesService, provideHttpClient(), provideHttpClientTesting(), provideHttpClientTesting()]
     });
 
     categoryService = TestBed.inject(ClassificationCategoriesService);

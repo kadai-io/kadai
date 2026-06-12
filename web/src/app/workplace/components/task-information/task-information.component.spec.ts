@@ -95,7 +95,7 @@ describe('TaskInformationComponent', () => {
       providers: [
         provideStore([EngineConfigurationState]),
         provideNoopAnimations(),
-        provideHttpClient(),
+        provideHttpClient(), provideHttpClientTesting(),
         provideHttpClientTesting(),
         { provide: ClassificationsService, useValue: mockClassificationsService },
         { provide: FormsValidatorService, useValue: mockFormsValidatorService }

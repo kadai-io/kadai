@@ -38,7 +38,7 @@ describe('TaskService', () => {
     TestBed.configureTestingModule({
       providers: [
         TaskService,
-        provideHttpClient(),
+        provideHttpClient(), provideHttpClientTesting(),
         provideHttpClientTesting(),
         { provide: StartupService, useValue: mockStartupService }
       ]

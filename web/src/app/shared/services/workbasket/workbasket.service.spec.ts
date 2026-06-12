@@ -46,7 +46,7 @@ describe('WorkbasketService', () => {
     TestBed.configureTestingModule({
       providers: [
         WorkbasketService,
-        provideHttpClient(),
+        provideHttpClient(), provideHttpClientTesting(),
         provideHttpClientTesting(),
         { provide: DomainService, useValue: mockDomainService }
       ]

@@ -20,6 +20,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter, Router, Routes } from '@angular/router';
 import { Component, input, output } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TaskDetailsComponent } from './task-details.component';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TaskService } from '../../services/task.service';
@@ -166,7 +167,7 @@ describe('TaskDetailsComponent', () => {
       imports: [TaskDetailsComponent],
       providers: [
         provideRouter(routes),
-        provideHttpClient(),
+        provideHttpClient(), provideHttpClientTesting(),
         provideStore([EngineConfigurationState]),
         { provide: TaskService, useValue: taskServiceSpy },
         { provide: WorkplaceService, useValue: workplaceServiceSpy },
@@ -551,7 +552,7 @@ describe('TaskDetailsComponent - DOM interaction', () => {
       imports: [TaskDetailsComponent],
       providers: [
         provideRouter(routes),
-        provideHttpClient(),
+        provideHttpClient(), provideHttpClientTesting(),
         provideStore([EngineConfigurationState]),
         { provide: TaskService, useValue: taskServiceSpy },
         {
@@ -762,7 +763,7 @@ describe('TaskDetailsComponent - redirect when no workbasket and new-task', () =
     await TestBed.configureTestingModule({
       imports: [TaskDetailsComponent],
       providers: [
-        provideHttpClient(),
+        provideHttpClient(), provideHttpClientTesting(),
         provideStore([EngineConfigurationState]),
         { provide: TaskService, useValue: taskServiceSpy },
         { provide: WorkplaceService, useValue: workplaceServiceSpy },
@@ -869,7 +870,7 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
     await TestBed.configureTestingModule({
       imports: [TaskDetailsComponent],
       providers: [
-        provideHttpClient(),
+        provideHttpClient(), provideHttpClientTesting(),
         provideStore([EngineConfigurationState]),
         {
           provide: ActivatedRoute,

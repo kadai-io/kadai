@@ -69,7 +69,7 @@ describe('ClassificationListComponent', () => {
       imports: [ClassificationListComponent],
       providers: [
         provideStore([ClassificationState, EngineConfigurationState]),
-        provideHttpClient(),
+        provideHttpClient(), provideHttpClientTesting(),
         provideAngularSvgIcon(),
         { provide: DomainService, useValue: domainServiceSpy },
         { provide: RequestInProgressService, useValue: requestInProgressServiceSpy }

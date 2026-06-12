@@ -82,7 +82,7 @@ describe('AccessItemsManagementComponent', () => {
       imports: [AccessItemsManagementComponent],
       providers: [
         provideStore([EngineConfigurationState, AccessItemsManagementState]),
-        provideHttpClient(),
+        provideHttpClient(), provideHttpClientTesting(),
         provideAngularSvgIcon(),
         provideNoopAnimations()
       ]
@@ -690,7 +690,7 @@ describe('AccessItemsManagementComponent — with accessItemsForm pre-set before
       imports: [AccessItemsManagementComponent],
       providers: [
         provideStore([EngineConfigurationState, AccessItemsManagementState]),
-        provideHttpClient(),
+        provideHttpClient(), provideHttpClientTesting(),
         provideAngularSvgIcon(),
         provideNoopAnimations()
       ]
@@ -793,7 +793,7 @@ describe('AccessItemsManagementComponent — with groups and permissions populat
       imports: [AccessItemsManagementComponent],
       providers: [
         provideStore([EngineConfigurationState, AccessItemsManagementState]),
-        provideHttpClient(),
+        provideHttpClient(), provideHttpClientTesting(),
         provideAngularSvgIcon(),
         provideNoopAnimations()
       ]
@@ -896,7 +896,7 @@ describe('AccessItemsManagementComponent — with groups AND permissions populat
       imports: [AccessItemsManagementComponent],
       providers: [
         provideStore([EngineConfigurationState, AccessItemsManagementState]),
-        provideHttpClient(),
+        provideHttpClient(), provideHttpClientTesting(),
         provideAngularSvgIcon(),
         provideNoopAnimations()
       ]

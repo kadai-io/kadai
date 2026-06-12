@@ -27,6 +27,7 @@ import { CreateWorkbasket } from '../../../shared/store/workbasket-store/workbas
 import { Direction, Sorting, WorkbasketQuerySortParameter } from '../../../shared/models/sorting';
 import { ACTION } from '../../../shared/models/action';
 import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -54,7 +55,7 @@ describe('WorkbasketListToolbarComponent', () => {
           provide: DomainService,
           useValue: domainServiceMock
         },
-        provideHttpClient(),
+        provideHttpClient(), provideHttpClientTesting(),
         provideAngularSvgIcon()
       ]
     }).compileComponents();

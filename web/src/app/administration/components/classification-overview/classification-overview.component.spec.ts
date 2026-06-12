@@ -56,7 +56,7 @@ describe('ClassificationOverviewComponent', () => {
       imports: [ClassificationOverviewComponent],
       providers: [
         provideStore([ClassificationState, EngineConfigurationState]),
-        provideHttpClient(),
+        provideHttpClient(), provideHttpClientTesting(),
         provideHttpClientTesting(),
         provideNoopAnimations(),
         provideAngularSvgIcon(),

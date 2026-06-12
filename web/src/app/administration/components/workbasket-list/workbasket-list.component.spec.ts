@@ -35,6 +35,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ImportExportService } from '../../services/import-export.service';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 
 const workbasketServiceMock: Partial<WorkbasketService> = {
@@ -65,7 +66,7 @@ describe('WorkbasketListComponent', () => {
       providers: [
         provideStore([WorkbasketState, FilterState]),
         provideRouter([]),
-        provideHttpClient(),
+        provideHttpClient(), provideHttpClientTesting(),
         provideAngularSvgIcon(),
         {
           provide: WorkbasketService,
