@@ -16,11 +16,11 @@
 ~
 -->
 
-@if (emptyTreeNodes) {
+@if (emptyTreeNodes()) {
   <div>
     <h3 class="grey" style="text-align: center">There are no classifications</h3>
-    <p class="grey" style="text-align: center">No Classifications match used filter "{{ filter }}"
-      in category {{ category }}</p>
+    <p class="grey" style="text-align: center">No Classifications match used filter "{{ filter() }}"
+      in category {{ category() }}</p>
   </div>
 }
 <tree-root
@@ -29,7 +29,7 @@
   (deactivate)="onDeactivate($event)"
   (moveNode)="onMoveNode($event)"
   (treeDrop)="onDrop($event)"
-  [hidden]="emptyTreeNodes"
+  [hidden]="emptyTreeNodes()"
   [nodes]="treeNodes() ?? []"
   [options]="options"
 >

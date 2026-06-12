@@ -67,9 +67,9 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
   categoryIcons = toSignal(inject(Store).select(EngineConfigurationSelectors.selectCategoryIcons), {
     requireSync: true
   });
-  emptyTreeNodes = false;
-  filter = '';
-  category = '';
+  emptyTreeNodes = signal(false);
+  filter = signal('');
+  category = signal('');
   selectNodeId = signal<string | undefined>(undefined);
   filterText = input<string>();
   filterIcon = input('');
@@ -108,6 +108,7 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
 
   private filterTextOld?: string;
   private filterIconOld = '';
+  private treeModelNodesOld?: TreeNodeModel[];
   private destroy$ = new Subject<void>();
 
   constructor() {
@@ -167,13 +168,22 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
       }
     }
 
-    if (this.filterTextOld !== this.filterText() || this.filterIconOld !== this.filterIcon()) {
+    // The tree model receives the nodes via the [nodes] binding, so by the time this hook
+    // runs it reflects what the tree actually rendered. Re-evaluate the filter whenever the
+    // filter inputs or the rendered nodes change; evaluating against the signal instead
+    // would run one change detection pass too early.
+    const treeModelNodes = this.tree().treeModel.nodes as TreeNodeModel[] | undefined;
+    const filterChanged = this.filterTextOld !== this.filterText() || this.filterIconOld !== this.filterIcon();
+    const treeModelNodesChanged = treeModelNodes !== this.treeModelNodesOld;
+    if (filterChanged || treeModelNodesChanged) {
       this.filterIconOld = this.filterIcon();
       this.filterTextOld = this.filterText();
-      const nodes = this.treeNodes();
-      if (nodes && nodes.length > 0) {
+      this.treeModelNodesOld = treeModelNodes;
+      if (treeModelNodes && treeModelNodes.length > 0) {
         this.filterNodes(this.filterText() ?? '', this.filterIcon());
-        this.manageTreeState();
+        if (filterChanged) {
+          this.manageTreeState();
+        }
       }
     }
   }
@@ -263,9 +273,9 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
     this.tree().treeModel.filterNodes(
       (node: any) => this.checkNameAndKey(node, filterText) && this.checkIcon(node, category)
     );
-    this.filter = filterText;
-    this.category = category || 'ALL';
-    this.emptyTreeNodes = !this.tree().treeModel.getVisibleRoots().length;
+    this.filter.set(filterText);
+    this.category.set(category || 'ALL');
+    this.emptyTreeNodes.set(!this.tree().treeModel.getVisibleRoots()?.length);
   }
 
   private manageTreeState() {
