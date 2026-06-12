@@ -72,8 +72,7 @@ class JobRunnerAccTest extends AbstractAccTest {
         () -> {
           try {
             KadaiEngine kadaiEngine =
-                KadaiEngine.buildKadaiEngine(
-                    kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
+                buildEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
             DataSource dataSource = DataSourceGenerator.getDataSource();
             PlainJavaTransactionProvider transactionProvider =
                 new PlainJavaTransactionProvider(kadaiEngine, dataSource);
@@ -89,7 +88,8 @@ class JobRunnerAccTest extends AbstractAccTest {
     // runEvery is set to P1D Therefore we need to check which jobs run tomorrow.
     // Just to be sure the jobs are found we will look for any job scheduled in the next 2 days.
     List<ScheduledJob> jobsToRun =
-        getJobMapper(kadaiEngine).findJobsToRun(Instant.now().plus(2, ChronoUnit.DAYS));
+        runWithJobMapper(
+            kadaiEngine, mapper -> mapper.findJobsToRun(Instant.now().plus(2, ChronoUnit.DAYS)));
 
     assertThat(jobsToRun).hasSize(1).doesNotContain(job);
   }
@@ -109,7 +109,8 @@ class JobRunnerAccTest extends AbstractAccTest {
 
     runner.runJobs();
     List<ScheduledJob> resultJobs =
-        getJobMapper(kadaiEngine).findJobsToRun(Instant.now().plus(2, ChronoUnit.DAYS));
+        runWithJobMapper(
+            kadaiEngine, mapper -> mapper.findJobsToRun(Instant.now().plus(2, ChronoUnit.DAYS)));
 
     assertThat(resultJobs).hasSize(1);
     assertThat(resultJobs.get(0).getType()).isEqualTo(jobTypeName);

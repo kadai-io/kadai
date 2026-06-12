@@ -60,13 +60,23 @@ class PriorityServiceAccTest {
     classificationService.updateClassification(classification);
 
     List<ScheduledJob> jobsToRun =
-        internalKadaiEngine.getSqlSession().getMapper(JobMapper.class).findJobsToRun(Instant.now());
+        internalKadaiEngine.executeInDatabaseConnection(
+            () ->
+                internalKadaiEngine
+                    .getSqlSession()
+                    .getMapper(JobMapper.class)
+                    .findJobsToRun(Instant.now()));
     assertThat(jobsToRun).isEmpty();
 
     classification.setServiceLevel("P4D");
     classificationService.updateClassification(classification);
     jobsToRun =
-        internalKadaiEngine.getSqlSession().getMapper(JobMapper.class).findJobsToRun(Instant.now());
+        internalKadaiEngine.executeInDatabaseConnection(
+            () ->
+                internalKadaiEngine
+                    .getSqlSession()
+                    .getMapper(JobMapper.class)
+                    .findJobsToRun(Instant.now()));
     assertThat(jobsToRun).isEmpty();
   }
 }

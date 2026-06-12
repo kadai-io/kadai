@@ -26,6 +26,7 @@ import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
 import io.kadai.common.internal.SpringKadaiEngine;
+import io.kadai.common.test.config.SchemaEnforcingDataSource;
 import io.kadai.testapi.KadaiEngineProxy;
 import io.kadai.testapi.extensions.TestContainerExtension;
 import java.sql.Connection;
@@ -54,8 +55,11 @@ class KadaiEngineModesTest {
     void setupKadaiEngines() throws Exception {
       String schemaName = TestContainerExtension.determineSchemaName();
       DataSource dataSource = TestContainerExtension.DATA_SOURCE;
+      SchemaEnforcingDataSource schemaEnforcingDataSource =
+          new SchemaEnforcingDataSource(dataSource, schemaName);
       KadaiConfiguration kadaiConfiguration =
-          new KadaiConfiguration.Builder(dataSource, true, schemaName, false)
+          new KadaiConfiguration.Builder(
+                  schemaEnforcingDataSource.asDataSource(), true, schemaName, false)
               .initKadaiProperties()
               .build();
       thisKadaiEngineProxy =
@@ -67,6 +71,7 @@ class KadaiEngineModesTest {
 
       thatKadaiEngineProxy = new KadaiEngineProxy(KadaiEngine.buildKadaiEngine(kadaiConfiguration));
       thatKadaiEngineProxy.getSqlSession().getConfiguration().addMapper(TestUserMapper.class);
+      schemaEnforcingDataSource.enable();
     }
 
     @Test
@@ -140,8 +145,11 @@ class KadaiEngineModesTest {
     void setupKadaiEngines() throws Exception {
       String schemaName = TestContainerExtension.determineSchemaName();
       DataSource dataSource = TestContainerExtension.DATA_SOURCE;
+      SchemaEnforcingDataSource schemaEnforcingDataSource =
+          new SchemaEnforcingDataSource(dataSource, schemaName);
       KadaiConfiguration kadaiConfiguration =
-          new KadaiConfiguration.Builder(dataSource, false, schemaName, false)
+          new KadaiConfiguration.Builder(
+                  schemaEnforcingDataSource.asDataSource(), false, schemaName, false)
               .initKadaiProperties()
               .build();
       thisKadaiEngineProxy =
@@ -152,6 +160,7 @@ class KadaiEngineModesTest {
 
       thatKadaiEngineProxy = new KadaiEngineProxy(KadaiEngine.buildKadaiEngine(kadaiConfiguration));
       thatKadaiEngineProxy.getSqlSession().getConfiguration().addMapper(TestUserMapper.class);
+      schemaEnforcingDataSource.enable();
     }
 
     @Test
@@ -188,19 +197,25 @@ class KadaiEngineModesTest {
     void setupKadaiEngines() throws Exception {
       String schemaName = TestContainerExtension.determineSchemaName();
       DataSource dataSource = TestContainerExtension.DATA_SOURCE;
+      SchemaEnforcingDataSource schemaEnforcingDataSource =
+          new SchemaEnforcingDataSource(dataSource, schemaName);
       KadaiConfiguration kadaiConfiguration =
-          new KadaiConfiguration.Builder(dataSource, false, schemaName, false)
+          new KadaiConfiguration.Builder(
+                  schemaEnforcingDataSource.asDataSource(), false, schemaName, false)
               .initKadaiProperties()
               .build();
       thisKadaiEngineProxy =
           new KadaiEngineProxy(
               KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.EXPLICIT));
       thisKadaiEngineProxy.getSqlSession().getConfiguration().addMapper(TestUserMapper.class);
-      thisConnection = dataSource.getConnection();
-      thisKadaiEngineProxy.getEngine().getEngine().setConnection(thisConnection);
 
       thatKadaiEngineProxy = new KadaiEngineProxy(KadaiEngine.buildKadaiEngine(kadaiConfiguration));
       thatKadaiEngineProxy.getSqlSession().getConfiguration().addMapper(TestUserMapper.class);
+
+      thisConnection =
+          SchemaEnforcingDataSource.initializeSchema(dataSource.getConnection(), schemaName);
+      thisKadaiEngineProxy.getEngine().getEngine().setConnection(thisConnection);
+      schemaEnforcingDataSource.enable();
     }
 
     @AfterEach

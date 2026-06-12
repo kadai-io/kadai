@@ -38,6 +38,7 @@ import io.kadai.task.internal.jobs.TaskRefreshJob;
 import io.kadai.testapi.KadaiConfigurationModifier;
 import io.kadai.testapi.KadaiInject;
 import io.kadai.testapi.KadaiIntegrationTest;
+import io.kadai.testapi.RawMapperAccess;
 import io.kadai.testapi.security.WithAccessId;
 import io.kadai.workbasket.internal.jobs.WorkbasketCleanupJob;
 import java.time.Duration;
@@ -62,8 +63,6 @@ import org.junit.jupiter.api.function.ThrowingConsumer;
 @KadaiIntegrationTest
 class AbstractKadaiJobAccTest {
 
-  @KadaiInject JobMapper jobMapper;
-
   @KadaiInject JobService jobService;
 
   @KadaiInject KadaiEngine kadaiEngine;
@@ -71,19 +70,20 @@ class AbstractKadaiJobAccTest {
   @KadaiInject KadaiConfiguration kadaiConfiguration;
 
   @AfterEach
-  void cleanupJobs() {
+  void cleanupJobs() throws Exception {
     // Dirty Hack, please refactor me with ticket https://github.com/kadai-io/kadai/issues/46
-    jobMapper.deleteMultiple(TaskCleanupJob.class.getName());
-    jobMapper.deleteMultiple(TaskRefreshJob.class.getName());
-    jobMapper.deleteMultiple(ClassificationChangedJob.class.getName());
-    jobMapper.deleteMultiple(TaskHistoryCleanupJob.class.getName());
-    jobMapper.deleteMultiple(WorkbasketCleanupJob.class.getName());
+    deleteJobs(kadaiEngine, TaskCleanupJob.class.getName());
+    deleteJobs(kadaiEngine, TaskRefreshJob.class.getName());
+    deleteJobs(kadaiEngine, ClassificationChangedJob.class.getName());
+    deleteJobs(kadaiEngine, TaskHistoryCleanupJob.class.getName());
+    deleteJobs(kadaiEngine, WorkbasketCleanupJob.class.getName());
   }
 
   @WithAccessId(user = "admin")
   @Test
-  void should_SetNextScheduledJobBasedOnDueDateOfPredecessor_When_RunningTaskCleanupJob() {
-    List<ScheduledJob> jobsToRun = jobMapper.findJobsToRun(Instant.now());
+  void should_SetNextScheduledJobBasedOnDueDateOfPredecessor_When_RunningTaskCleanupJob()
+      throws Exception {
+    List<ScheduledJob> jobsToRun = findJobsToRun(kadaiEngine, Instant.now());
     assertThat(jobsToRun).isEmpty();
 
     Instant firstDue = Instant.now().truncatedTo(ChronoUnit.MILLIS);
@@ -92,14 +92,14 @@ class AbstractKadaiJobAccTest {
     scheduledJob.setDue(firstDue);
 
     jobService.createJob(scheduledJob);
-    jobsToRun = jobMapper.findJobsToRun(Instant.now());
+    jobsToRun = findJobsToRun(kadaiEngine, Instant.now());
 
     assertThat(jobsToRun).extracting(ScheduledJob::getDue).containsExactly(firstDue);
 
     JobRunner runner = new JobRunner(kadaiEngine);
     runner.runJobs();
     Duration runEvery = kadaiConfiguration.getJobRunEvery();
-    jobsToRun = jobMapper.findJobsToRun(Instant.now().plus(runEvery));
+    jobsToRun = findJobsToRun(kadaiEngine, Instant.now().plus(runEvery));
 
     assertThat(jobsToRun).extracting(ScheduledJob::getDue).containsExactly(firstDue.plus(runEvery));
   }
@@ -128,7 +128,7 @@ class AbstractKadaiJobAccTest {
           final Instant now = Instant.now();
 
           List<ScheduledJob> cleanupJobs =
-              jobMapper.findJobsToRun(now).stream()
+              findJobsToRun(kadaiEngine, now).stream()
                   .filter(scheduledJob -> scheduledJob.getType().equals(t.getRight().getName()))
                   .toList();
 
@@ -136,7 +136,7 @@ class AbstractKadaiJobAccTest {
 
           AbstractKadaiJob.initializeSchedule(kadaiEngine, t.getRight());
 
-          final List<ScheduledJob> jobsToRun = jobMapper.findJobsToRun(now);
+          final List<ScheduledJob> jobsToRun = findJobsToRun(kadaiEngine, now);
 
           assertThat(jobsToRun).isNotEmpty();
           assertThat(jobsToRun).doesNotContainAnyElementsOf(cleanupJobs);
@@ -157,6 +157,22 @@ class AbstractKadaiJobAccTest {
         () -> AbstractKadaiJob.createFromScheduledJob(kadaiEngine, null, scheduledJob);
 
     assertThatCode(call).doesNotThrowAnyException();
+  }
+
+  private static List<ScheduledJob> findJobsToRun(KadaiEngine kadaiEngine, Instant instant)
+      throws Exception {
+    return RawMapperAccess.runWithMapper(
+        kadaiEngine, JobMapper.class, mapper -> mapper.findJobsToRun(instant));
+  }
+
+  private static void deleteJobs(KadaiEngine kadaiEngine, String type) throws Exception {
+    RawMapperAccess.runWithMapper(
+        kadaiEngine,
+        JobMapper.class,
+        mapper -> {
+          mapper.deleteMultiple(type);
+          return null;
+        });
   }
 
   public static class SampleKadaiJob extends AbstractKadaiJob {
@@ -194,8 +210,6 @@ class AbstractKadaiJobAccTest {
   class CleanCompletedTasks implements KadaiConfigurationModifier {
     @KadaiInject KadaiEngine kadaiEngine;
 
-    @KadaiInject JobMapper jobMapper;
-
     @Override
     public Builder modify(Builder builder) {
       return builder
@@ -206,10 +220,11 @@ class AbstractKadaiJobAccTest {
 
     @WithAccessId(user = "admin")
     @Test
-    void should_FindNoJobsToRunUntilFirstRunIsReached_When_CleanupScheduleIsInitialized() {
+    void should_FindNoJobsToRunUntilFirstRunIsReached_When_CleanupScheduleIsInitialized()
+        throws Exception {
       AbstractKadaiJob.initializeSchedule(kadaiEngine, TaskCleanupJob.class);
 
-      List<ScheduledJob> nextJobs = jobMapper.findJobsToRun(Instant.now());
+      List<ScheduledJob> nextJobs = findJobsToRun(kadaiEngine, Instant.now());
       assertThat(nextJobs).isEmpty();
     }
   }

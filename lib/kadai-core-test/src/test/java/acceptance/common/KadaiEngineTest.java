@@ -24,6 +24,7 @@ import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
 import io.kadai.common.internal.configuration.DbSchemaCreator;
+import io.kadai.common.test.config.SchemaEnforcingDataSource;
 import io.kadai.testapi.extensions.TestContainerExtension;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,11 +40,15 @@ class KadaiEngineTest {
   void setupKadaiEngine() throws Exception {
     String schemaName = TestContainerExtension.determineSchemaName();
     DataSource dataSource = TestContainerExtension.DATA_SOURCE;
+    SchemaEnforcingDataSource schemaEnforcingDataSource =
+        new SchemaEnforcingDataSource(dataSource, schemaName);
     KadaiConfiguration kadaiConfiguration =
-        new KadaiConfiguration.Builder(dataSource, false, schemaName, false)
+        new KadaiConfiguration.Builder(
+                schemaEnforcingDataSource.asDataSource(), false, schemaName, false)
             .initKadaiProperties()
             .build();
     this.kadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
+    schemaEnforcingDataSource.enable();
   }
 
   @Test
@@ -69,7 +74,10 @@ class KadaiEngineTest {
   @EnumSource(ConnectionManagementMode.class)
   void should_SetModeExplicit_When_SetConnection(ConnectionManagementMode mode) throws Exception {
     kadaiEngine.setConnectionManagementMode(mode);
-    kadaiEngine.setConnection(kadaiEngine.getConfiguration().getDataSource().getConnection());
+    kadaiEngine.setConnection(
+        SchemaEnforcingDataSource.initializeSchema(
+            kadaiEngine.getConfiguration().getDataSource().getConnection(),
+            kadaiEngine.getConfiguration().getSchemaName()));
 
     assertThat(kadaiEngine.getConnectionManagementMode())
         .isEqualTo(ConnectionManagementMode.EXPLICIT);

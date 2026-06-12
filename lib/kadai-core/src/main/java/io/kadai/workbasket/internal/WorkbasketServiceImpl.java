@@ -571,10 +571,15 @@ public class WorkbasketServiceImpl implements WorkbasketService {
 
   @Override
   public List<WorkbasketPermission> getPermissionsForWorkbasket(String workbasketId) {
-    WorkbasketAccessItem wbAcc =
-        workbasketAccessMapper.findByWorkbasketAndAccessId(
-            workbasketId, kadaiEngine.getEngine().getCurrentUserContext().getAccessIds());
-    return this.getPermissionsFromWorkbasketAccessItem(wbAcc);
+    try {
+      kadaiEngine.openConnection();
+      WorkbasketAccessItem wbAcc =
+          workbasketAccessMapper.findByWorkbasketAndAccessId(
+              workbasketId, kadaiEngine.getEngine().getCurrentUserContext().getAccessIds());
+      return this.getPermissionsFromWorkbasketAccessItem(wbAcc);
+    } finally {
+      kadaiEngine.returnConnection();
+    }
   }
 
   @Override
