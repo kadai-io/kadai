@@ -60,7 +60,7 @@ describe('TaskReportComponent', () => {
       rows: [],
       sumRow: [{ desc: ['Total'], cells: [10], total: 10, depth: 0, display: true }]
     };
-    component.reportData = null as any;
+    component.reportData.set(null as any);
     fixture.detectChanges();
     const panel = fixture.nativeElement.querySelector('.panel-default');
     expect(panel).toBeNull();
@@ -73,12 +73,12 @@ describe('TaskReportComponent', () => {
       rows: [{ desc: ['row1'], cells: [1, 2], total: 3, depth: 0, display: true }],
       sumRow: [{ desc: ['Total'], cells: [3], total: 3, depth: 0, display: true }]
     };
-    component.reportData = mockReport as any;
+    component.reportData.set(mockReport as any);
     component.pieChartData = { labels: mockReport.meta.header, datasets: [{ data: [3] }] };
     fixture.detectChanges();
     httpMock.match(() => true).forEach((req) => req.flush(mockReport));
-    expect(component.reportData).toBeTruthy();
-    expect(component.reportData.meta.name).toBe('Task Report');
+    expect(component.reportData()).toBeTruthy();
+    expect(component.reportData()!.meta.name).toBe('Task Report');
     const panel = fixture.nativeElement.querySelector('.panel-default');
     expect(panel).toBeTruthy();
   });
@@ -121,10 +121,10 @@ describe('TaskReportComponent', () => {
       sumRow: [{ desc: ['Total'], cells: [5], total: 5, depth: 0, display: true }]
     };
     fixture.detectChanges();
-    expect(component.reportData).toBeUndefined();
+    expect(component.reportData()).toBeUndefined();
     const panelBefore = fixture.nativeElement.querySelector('.panel-default');
     expect(panelBefore).toBeNull();
     httpMock.match(() => true).forEach((req) => req.flush(mockReport));
-    expect(component.reportData).toBeTruthy();
+    expect(component.reportData()).toBeTruthy();
   });
 });

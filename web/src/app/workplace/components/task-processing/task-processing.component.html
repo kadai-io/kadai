@@ -31,7 +31,7 @@
         <mat-icon class="task-processing__icon--aquamarine">transfer_within_a_station</mat-icon>
       </button>
       <mat-menu #menu="matMenu">
-        @for (workbasket of workbaskets; track workbasket) {
+        @for (workbasket of workbaskets(); track workbasket) {
           <button (click)="transferTask(workbasket)"
                   mat-menu-item>
             {{ workbasket.name }}
@@ -55,7 +55,7 @@
 
     </div>
 
-    <h4 class="task-processing__task-name">{{ task?.name }}</h4>
+    <h4 class="task-processing__task-name">{{ task()?.name }}</h4>
 
   </div>
 
@@ -65,7 +65,7 @@
 
 
   <!-- CONTENT -->
-  @if (link) {
+  @if (link(); as link) {
     <iframe [src]="link"></iframe>
   }
 

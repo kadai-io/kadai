@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { Actions, ofActionCompleted, ofActionDispatched, Store } from '@ngxs/store';
@@ -73,9 +73,9 @@ import { KadaiTreeComponent } from '../tree/tree.component';
 })
 export class ClassificationListComponent implements OnInit, OnDestroy {
   kadaiType = KadaiType;
-  requestInProgress = true;
+  requestInProgress = signal(true);
   inputValue = '';
-  selectedCategory = '';
+  selectedCategory = signal('');
   classificationTypeSelected$: Observable<string> = inject(Store).select(
     ClassificationSelectors.selectedClassificationType
   );
@@ -85,7 +85,7 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
     EngineConfigurationSelectors.selectCategoryIcons
   );
   destroy$ = new Subject<void>();
-  classifications: ClassificationSummary[] = [];
+  classifications = signal<ClassificationSummary[]>([]);
   private location = inject(Location);
   private importExportService = inject(ImportExportService);
   private domainService = inject(DomainService);
@@ -104,12 +104,19 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.classifications$.pipe(takeUntil(this.destroy$)).subscribe((classifications) => {
-      this.classifications = classifications;
+      this.classifications.set(classifications ?? []);
     });
+
+    this.requestInProgressService
+      .getRequestInProgress()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
+        this.requestInProgress.set(value);
+      });
 
     this.classificationTypeSelected$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.store.dispatch(new GetClassifications());
-      this.selectedCategory = '';
+      this.selectedCategory.set('');
     });
 
     this.importExportService
@@ -125,13 +132,6 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((domain) => {
         this.store.dispatch(GetClassifications);
-      });
-
-    this.requestInProgressService
-      .getRequestInProgress()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((value) => {
-        this.requestInProgress = value;
       });
   }
 
@@ -154,7 +154,7 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
   }
 
   selectCategory(category: string) {
-    this.selectedCategory = category;
+    this.selectedCategory.set(category);
   }
 
   setRequestInProgress(value: boolean) {

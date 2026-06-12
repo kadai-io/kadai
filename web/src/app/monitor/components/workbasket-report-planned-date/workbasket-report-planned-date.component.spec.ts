@@ -60,7 +60,7 @@ describe('WorkbasketReportPlannedDateComponent', () => {
       rows: [{ desc: ['row1'], cells: [1, 2], total: 3, depth: 0, display: true }],
       sumRow: []
     };
-    component.reportData = null as any;
+    component.reportData.set(null as any);
     fixture.detectChanges();
     const row = fixture.nativeElement.querySelector('.row');
     expect(row).toBeNull();
@@ -75,6 +75,6 @@ describe('WorkbasketReportPlannedDateComponent', () => {
     };
     fixture.detectChanges();
     httpMock.match(() => true).forEach((req) => req.flush(mockReport));
-    expect(component.reportData).toBeTruthy();
+    expect(component.reportData()).toBeTruthy();
   });
 });

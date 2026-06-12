@@ -214,8 +214,8 @@ describe('TaskPriorityReportComponent', () => {
 
     component.setValuesFromReportData(mockReportData as any);
 
-    expect(component.reportData.meta).toEqual({ name: 'Test Report', date: '2025-11-20' });
-    expect(component.reportData.sumRow).toEqual({ cells: [6, 3, 1], total: 10 });
+    expect(component.reportData()!.meta).toEqual({ name: 'Test Report', date: '2025-11-20' });
+    expect(component.reportData()!.sumRow).toEqual({ cells: [6, 3, 1], total: 10 });
   });
 
   it('should filter rows by depth and workbasketKey and build tableDataArray', () => {
@@ -224,10 +224,10 @@ describe('TaskPriorityReportComponent', () => {
 
     component.setValuesFromReportData(mockReportData as any);
 
-    expect(component.reportData.rows.every((r) => r.depth === 1)).toBe(true);
-    expect(component.reportData.rows.every((r) => r.desc[0] === 'TPK_VIP')).toBe(true);
+    expect(component.reportData()!.rows.every((r) => r.depth === 1)).toBe(true);
+    expect(component.reportData()!.rows.every((r) => r.desc[0] === 'TPK_VIP')).toBe(true);
 
-    const firstRow = component.tableDataArray[0];
+    const firstRow = component.tableDataArray()[0];
     expect(firstRow).toEqual([
       { priority: 'High Priority', number: 2 },
       { priority: 'Medium Priority', number: 0 },
@@ -338,7 +338,7 @@ describe('TaskPriorityReportComponent', () => {
   it('should render report content when reportData is set and depth is zero', () => {
     component.workbasketKey.set(undefined);
     component.setValuesFromReportData(mockReportData as any);
-    expect(component.reportData).toBeTruthy();
+    expect(component.reportData()).toBeTruthy();
     expect(component['isDepthZero']()).toBe(true);
   });
 
@@ -346,11 +346,11 @@ describe('TaskPriorityReportComponent', () => {
     component.workbasketKey.set('TPK_VIP');
     component.setValuesFromReportData(mockReportData as any);
     expect(component['isDepthZero']()).toBe(false);
-    expect(component.reportData).toBeTruthy();
+    expect(component.reportData()).toBeTruthy();
   });
 
   it('should render "No filters defined." when filtersAreSpecified is false', () => {
-    component.filtersAreSpecified = false;
+    component.filtersAreSpecified.set(false);
     fixture.detectChanges();
     const el = fixture.nativeElement.querySelector('.breadcrumb-filter-row');
     if (el) {
@@ -359,20 +359,20 @@ describe('TaskPriorityReportComponent', () => {
   });
 
   it('should render filter accordion when filtersAreSpecified is true and keys are set', () => {
-    component.filtersAreSpecified = true;
-    component.keys = ['Tasks with state READY', 'Tasks with state CLAIMED'];
+    component.filtersAreSpecified.set(true);
+    component.keys.set(['Tasks with state READY', 'Tasks with state CLAIMED']);
     fixture.detectChanges();
-    expect(component.filtersAreSpecified).toBe(true);
-    expect(component.keys.length).toBe(2);
+    expect(component.filtersAreSpecified()).toBe(true);
+    expect(component.keys().length).toBe(2);
   });
 
   it('should render "Could not find any tasks" message when rows is empty', () => {
     const localFixture = TestBed.createComponent(TaskPriorityReportComponent);
     const localComponent = localFixture.componentInstance;
-    localComponent.reportData = {
+    localComponent.reportData.set({
       ...mockReportData,
       rows: []
-    } as any;
+    } as any);
     localFixture.detectChanges();
     const el = localFixture.nativeElement.querySelector('.task-priority-report');
     if (el) {
@@ -381,7 +381,7 @@ describe('TaskPriorityReportComponent', () => {
   });
 
   it('should not show report when reportData is null', () => {
-    component.reportData = null as any;
+    component.reportData.set(null as any);
     fixture.detectChanges();
     const el = fixture.nativeElement.querySelector('.task-priority-report');
     expect(el).toBeNull();
@@ -399,8 +399,8 @@ describe('TaskPriorityReportComponent', () => {
     component['currentFilter'].set({ state: ['READY'] });
     fixture.detectChanges();
 
-    expect(component.tableDataArray).toBeDefined();
-    expect(Array.isArray(component.tableDataArray)).toBe(true);
+    expect(component.tableDataArray()).toBeDefined();
+    expect(Array.isArray(component.tableDataArray())).toBe(true);
   });
 
   it('should have priority with lowerBound and upperBound properties', () => {
@@ -442,7 +442,7 @@ describe('TaskPriorityReportComponent', () => {
     component.setValuesFromReportData(mockReportData as any);
 
     expect(component['isDepthZero']()).toBe(false);
-    expect(component.reportData.rows.length).toBeGreaterThan(0);
+    expect(component.reportData()!.rows.length).toBeGreaterThan(0);
   });
 
   it('should render rows @for loop with isDepthZero true path covering row link render', () => {
@@ -451,8 +451,8 @@ describe('TaskPriorityReportComponent', () => {
     component.setValuesFromReportData(mockReportData as any);
 
     expect(component['isDepthZero']()).toBe(true);
-    expect(component.reportData.rows.length).toBeGreaterThan(0);
-    expect(component.tableDataArray.length).toBeGreaterThan(0);
+    expect(component.reportData()!.rows.length).toBeGreaterThan(0);
+    expect(component.tableDataArray().length).toBeGreaterThan(0);
   });
 
   it('should cover isPanelOpen toggle by setting it directly to true', () => {
@@ -466,17 +466,17 @@ describe('TaskPriorityReportComponent', () => {
   });
 
   it('should render mat-checkbox elements when filtersAreSpecified is true with keys', () => {
-    component.filtersAreSpecified = true;
-    component.keys = ['Tasks with state READY', 'Tasks with state CLAIMED'];
+    component.filtersAreSpecified.set(true);
+    component.keys.set(['Tasks with state READY', 'Tasks with state CLAIMED']);
     component.activeFilters.set(['Tasks with state READY']);
 
-    expect(component.filtersAreSpecified).toBe(true);
-    expect(component.keys.length).toBeGreaterThan(0);
+    expect(component.filtersAreSpecified()).toBe(true);
+    expect(component.keys().length).toBeGreaterThan(0);
     expect(component.activeFilters().includes('Tasks with state READY')).toBe(true);
   });
 
   it('should render empty rows message when reportData has rows = []', () => {
-    component.reportData = { ...mockReportData, rows: [] } as any;
+    component.reportData.set({ ...mockReportData, rows: [] } as any);
     const el = fixture.nativeElement.querySelector('.task-priority-report');
     if (el) {
       expect(el.textContent).toContain('Could not find');
@@ -486,9 +486,9 @@ describe('TaskPriorityReportComponent', () => {
   it('should open expansion panel and trigger isPanelOpen=true via (opened) event', () => {
     const localFixture = TestBed.createComponent(TaskPriorityReportComponent);
     const localComponent = localFixture.componentInstance;
-    localComponent.reportData = { ...mockReportData } as any;
-    localComponent.filtersAreSpecified = true;
-    localComponent.keys = ['Tasks with state READY', 'Tasks with state CLAIMED'];
+    localComponent.reportData.set({ ...mockReportData } as any);
+    localComponent.filtersAreSpecified.set(true);
+    localComponent.keys.set(['Tasks with state READY', 'Tasks with state CLAIMED']);
     localFixture.detectChanges();
 
     const panel = localFixture.debugElement.query(By.directive(MatExpansionPanel));
@@ -505,9 +505,9 @@ describe('TaskPriorityReportComponent', () => {
   it('should close expansion panel and trigger isPanelOpen=false via (closed) event', () => {
     const localFixture = TestBed.createComponent(TaskPriorityReportComponent);
     const localComponent = localFixture.componentInstance;
-    localComponent.reportData = { ...mockReportData } as any;
-    localComponent.filtersAreSpecified = true;
-    localComponent.keys = ['Tasks with state READY'];
+    localComponent.reportData.set({ ...mockReportData } as any);
+    localComponent.filtersAreSpecified.set(true);
+    localComponent.keys.set(['Tasks with state READY']);
     localComponent.isPanelOpen = true;
     localFixture.detectChanges();
 
@@ -525,9 +525,9 @@ describe('TaskPriorityReportComponent', () => {
   it('should trigger emitFilter when mat-checkbox change event fires', () => {
     const localFixture = TestBed.createComponent(TaskPriorityReportComponent);
     const localComponent = localFixture.componentInstance;
-    localComponent.reportData = { ...mockReportData } as any;
-    localComponent.filtersAreSpecified = true;
-    localComponent.keys = ['Tasks with state READY', 'Tasks with state CLAIMED'];
+    localComponent.reportData.set({ ...mockReportData } as any);
+    localComponent.filtersAreSpecified.set(true);
+    localComponent.keys.set(['Tasks with state READY', 'Tasks with state CLAIMED']);
     localComponent.activeFilters.set([]);
     localFixture.detectChanges();
 
@@ -555,7 +555,7 @@ describe('TaskPriorityReportComponent', () => {
       const rows = reportEl.querySelectorAll('.task-priority-report__workbasket');
       expect(rows.length).toBeGreaterThan(0);
     }
-    expect(component.tableDataArray.length).toBeGreaterThan(0);
+    expect(component.tableDataArray().length).toBeGreaterThan(0);
   });
 
   it('should render workbasket link when isDepthZero is true and rows exist', () => {
@@ -571,7 +571,7 @@ describe('TaskPriorityReportComponent', () => {
   });
 
   it('should show "No filters defined." text when filtersAreSpecified is false and reportData is set', () => {
-    component.filtersAreSpecified = false;
+    component.filtersAreSpecified.set(false);
     const el = fixture.nativeElement.querySelector('.task-priority-report');
     if (el) {
       expect(el.textContent).toContain('No filters defined.');
@@ -581,7 +581,7 @@ describe('TaskPriorityReportComponent', () => {
   it('should render full template content when reportData is set directly (covers template functions)', () => {
     const localFixture = TestBed.createComponent(TaskPriorityReportComponent);
     const localComponent = localFixture.componentInstance;
-    localComponent.reportData = { ...mockReportData } as any;
+    localComponent.reportData.set({ ...mockReportData } as any);
     localFixture.detectChanges();
     const reportEl = localFixture.nativeElement.querySelector('.task-priority-report');
     expect(reportEl).toBeTruthy();
@@ -593,7 +593,7 @@ describe('TaskPriorityReportComponent', () => {
     const localComponent = localFixture.componentInstance;
     localFixture.detectChanges(); // effect fires, ngOnInit sets filtersAreSpecified=true
     localFixture.detectChanges(); // re-render with reportData set
-    localComponent.filtersAreSpecified = false;
+    localComponent.filtersAreSpecified.set(false);
     localFixture.detectChanges();
     const el = localFixture.nativeElement.querySelector('.task-priority-report');
     if (el) {
@@ -643,19 +643,19 @@ describe('TaskPriorityReportComponent', () => {
     const localFixture = TestBed.createComponent(TaskPriorityReportComponent);
     const localComponent = localFixture.componentInstance;
     localComponent.workbasketKey.set('TPK_VIP');
-    localComponent.reportData = {
+    localComponent.reportData.set({
       meta: mockReportData.meta,
       rows: [{ depth: 1, desc: ['TPK_VIP', 'L1050'], cells: [2, 0, 0], total: 2 }],
       sumRow: mockReportData.sumRow
-    } as any;
-    localComponent.tableDataArray = [
+    } as any);
+    localComponent.tableDataArray.set([
       [
         { priority: 'High Priority', number: 2 },
         { priority: 'Medium Priority', number: 0 },
         { priority: 'Low Priority', number: 0 },
         { priority: 'Total', number: 2 }
       ]
-    ];
+    ]);
     localFixture.detectChanges();
     const reportEl = localFixture.nativeElement.querySelector('.task-priority-report');
     if (reportEl) {
@@ -669,7 +669,7 @@ describe('TaskPriorityReportComponent', () => {
       'Tasks with state READY': { state: ['READY'] },
       'Tasks with state CLAIMED': { state: ['CLAIMED'] }
     } as any;
-    component.keys = ['Tasks with state READY', 'Tasks with state CLAIMED'];
+    component.keys.set(['Tasks with state READY', 'Tasks with state CLAIMED']);
     component.activeFilters.set(['Tasks with state READY', 'Tasks with state CLAIMED']);
     const query = component['buildQuery']();
     expect((query as any).state).toEqual(['READY', 'CLAIMED']);
@@ -679,7 +679,7 @@ describe('TaskPriorityReportComponent', () => {
     component.filters = {
       'Tasks with state READY': { state: ['READY'] }
     } as any;
-    component.keys = ['Tasks with state READY'];
+    component.keys.set(['Tasks with state READY']);
     component.activeFilters.set(['Tasks with state READY', 'UNKNOWN_KEY']);
     const query = component['buildQuery']();
     expect((query as any).state).toEqual(['READY']);
@@ -688,9 +688,9 @@ describe('TaskPriorityReportComponent', () => {
   it('should render mat-checkbox as checked when key is in activeFilters — covers [checked]=true branch', () => {
     component.activeFilters.set(['Tasks with state READY']);
     fixture.detectChanges();
-    const firstCheckboxChecked = component.activeFilters().includes(component.keys[0]);
+    const firstCheckboxChecked = component.activeFilters().includes(component.keys()[0]);
     expect(firstCheckboxChecked).toBe(true);
-    const secondCheckboxChecked = component.activeFilters().includes(component.keys[1]);
+    const secondCheckboxChecked = component.activeFilters().includes(component.keys()[1]);
     expect(secondCheckboxChecked).toBe(false);
   });
 
@@ -700,7 +700,7 @@ describe('TaskPriorityReportComponent', () => {
     if (headline) {
       expect(headline.textContent).toContain('Test Report');
     } else {
-      expect(component.reportData).toBeTruthy();
+      expect(component.reportData()).toBeTruthy();
     }
   });
 
@@ -710,7 +710,7 @@ describe('TaskPriorityReportComponent', () => {
     if (rows.length > 0) {
       expect(rows.length).toBeGreaterThan(0);
     } else {
-      expect(component.reportData).toBeTruthy();
+      expect(component.reportData()).toBeTruthy();
     }
   });
 
@@ -721,7 +721,7 @@ describe('TaskPriorityReportComponent', () => {
     if (tables.length > 0) {
       expect(tables.length).toBeGreaterThan(0);
     } else {
-      expect(component.tableDataArray.length).toBeGreaterThan(0);
+      expect(component.tableDataArray().length).toBeGreaterThan(0);
     }
   });
 
@@ -735,12 +735,12 @@ describe('TaskPriorityReportComponent', () => {
   });
 
   it('should display "No filters defined" when filtersAreSpecified is false', () => {
-    component.filtersAreSpecified = false;
+    component.filtersAreSpecified.set(false);
     const el = fixture.nativeElement.querySelector('.task-priority-report');
     if (el) {
       expect(el.textContent).toContain('No filters defined.');
     } else {
-      expect(component.filtersAreSpecified).toBe(false);
+      expect(component.filtersAreSpecified()).toBe(false);
     }
   });
 });

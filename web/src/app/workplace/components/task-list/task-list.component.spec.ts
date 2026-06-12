@@ -20,6 +20,7 @@ import { provideRouter, Router, Routes } from '@angular/router';
 import { Component } from '@angular/core';
 import { TaskListComponent } from './task-list.component';
 import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Task } from '../../models/task';
@@ -54,7 +55,13 @@ describe('TaskListComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TaskListComponent],
-      providers: [provideHttpClient(), provideAngularSvgIcon(), provideRouter(routes), provideNoopAnimations()]
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideAngularSvgIcon(),
+        provideRouter(routes),
+        provideNoopAnimations()
+      ]
     }).compileComponents();
 
     router = TestBed.inject(Router);

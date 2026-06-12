@@ -85,8 +85,8 @@ import { TaskPriorityReportFilterStateService } from '../../services/task-priori
 })
 export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, OnDestroy {
   columns: string[] = ['priority', 'number'];
-  reportData!: ReportData;
-  tableDataArray: { priority: string; number: number }[][] = [];
+  reportData = signal<ReportData | undefined>(undefined);
+  tableDataArray = signal<{ priority: string; number: number }[][]>([]);
   colorShouldChange = true;
   priority: { lowerBound: any; upperBound: any }[] = [];
   nameHighPriority!: string;
@@ -100,8 +100,8 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
   workbasketKey = signal<string | undefined>(undefined);
   isPanelOpen = false;
   filters!: {}[];
-  keys!: string[];
-  filtersAreSpecified = false;
+  keys = signal<string[]>([]);
+  filtersAreSpecified = signal(false);
   private readonly monitorService = inject(MonitorService);
   private readonly requestInProgressService = inject(RequestInProgressService);
   private readonly activatedRoute = inject(ActivatedRoute);
@@ -155,21 +155,22 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
 
   ngOnInit(): void {
     this.settings$.pipe(takeUntil(this.destroy$)).subscribe((settings) => {
-      this.filtersAreSpecified = !!settings?.['filter'] && settings['filter'] !== '';
-      if (this.filtersAreSpecified) {
+      let filtersAreSpecified = !!settings?.['filter'] && settings['filter'] !== '';
+      if (filtersAreSpecified) {
         try {
           this.filters = JSON.parse(settings['filter']);
-          this.keys = Object.keys(this.filters as any);
+          this.keys.set(Object.keys(this.filters as any));
           this.rebuildActiveFiltersFromCurrentFilter();
         } catch {
           this.filters = [] as any;
-          this.keys = [];
-          this.filtersAreSpecified = false;
+          this.keys.set([]);
+          filtersAreSpecified = false;
         }
       } else {
         this.filters = [] as any;
-        this.keys = [];
+        this.keys.set([]);
       }
+      this.filtersAreSpecified.set(filtersAreSpecified);
     });
   }
 
@@ -194,28 +195,30 @@ export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, On
 
   setValuesFromReportData(reportData: ReportData) {
     const depth = this.isDepthZero() ? 0 : 1;
-    this.reportData = {
+    const filteredReportData = {
       meta: reportData.meta,
       rows: reportData.rows
         .filter((row) => row.depth === depth)
         .filter((row) => this.isDepthZero() || row.desc[0] === this.workbasketKey()),
       sumRow: reportData.sumRow
     };
+    this.reportData.set(filteredReportData);
 
     // the order must be high, medium, low because the canvas component defines its labels in this order
     let indexHigh = 0;
     let indexMedium = 1;
     let indexLow = 2;
 
-    this.tableDataArray = [];
-    this.reportData.rows.forEach((row) => {
-      this.tableDataArray.push([
+    const tableDataArray: { priority: string; number: number }[][] = [];
+    filteredReportData.rows.forEach((row) => {
+      tableDataArray.push([
         { priority: this.nameHighPriority, number: row.cells[indexHigh] },
         { priority: this.nameMediumPriority, number: row.cells[indexMedium] },
         { priority: this.nameLowPriority, number: row.cells[indexLow] },
         { priority: 'Total', number: row.total }
       ]);
     });
+    this.tableDataArray.set(tableDataArray);
   }
 
   changeColor() {

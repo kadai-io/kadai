@@ -49,6 +49,7 @@ describe('ClassificationsService', () => {
         ClassificationsService,
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideHttpClientTesting(),
         { provide: StartupService, useValue: mockStartupService },
         { provide: DomainService, useValue: mockDomainService }
       ]

@@ -40,7 +40,7 @@ describe('StartupService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])]
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideHttpClientTesting(), provideRouter([])]
     });
   });
 

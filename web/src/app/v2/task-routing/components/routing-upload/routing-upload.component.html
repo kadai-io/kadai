@@ -32,7 +32,7 @@
       <span class="routing-upload__description">Click to choose file or drag and drop here</span>
     }
     @if (file?.name) {
-      <span class="routing-upload__description">{{ file?.name }}</span>
+      <span class="routing-upload__description">{{ file.name }}</span>
     }
   </div>
   <input #input (change)="onFileChanged($event)"

@@ -40,6 +40,7 @@ describe('TaskService', () => {
         TaskService,
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideHttpClientTesting(),
         { provide: StartupService, useValue: mockStartupService }
       ]
     });

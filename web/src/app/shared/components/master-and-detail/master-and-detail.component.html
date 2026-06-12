@@ -26,14 +26,14 @@
   <div class="vertical-right-divider workplace-overview__divider"></div>
 
   <!-- TASK DETAILS-->
-  @if (showDetail) {
+  @if (showDetail()) {
     <div class="workplace-overview__task-details">
       <router-outlet name="detail" />
     </div>
   }
 
   <!-- TASK DETAILS WITHOUT SELECTED -->
-  @if (!showDetail && currentRoute === 'tasks') {
+  @if (!showDetail() && currentRoute() === 'tasks') {
     <div class="workplace-overview__empty-page">
       <h2> Select a Task </h2>
       <br>

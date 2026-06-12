@@ -55,7 +55,7 @@
                    placeholder="Workbasket"
                    type="text">
             <mat-autocomplete #auto="matAutocomplete" (optionSelected)="searchBasket()">
-              @for (workbasketName of filteredWorkbasketNames; track workbasketName) {
+              @for (workbasketName of filteredWorkbasketNames(); track workbasketName) {
                 <mat-option
                   [value]="workbasketName">
                   {{ workbasketName }}

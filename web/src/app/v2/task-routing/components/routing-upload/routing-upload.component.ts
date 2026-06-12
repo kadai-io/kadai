@@ -20,12 +20,13 @@ import { Component, inject, OnInit } from '@angular/core';
 import { RoutingUploadService } from '@task-routing/services/routing-upload.service';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import { HotToastService } from '@ngneat/hot-toast';
+import { DragAndDropDirective } from 'app/shared/directives/drag-and-drop.directive';
 
 @Component({
   selector: 'kadai-routing-upload',
   templateUrl: './routing-upload.component.html',
   styleUrls: ['./routing-upload.component.scss'],
-  imports: []
+  imports: [DragAndDropDirective]
 })
 export class RoutingUploadComponent implements OnInit {
   file: File | null = null;

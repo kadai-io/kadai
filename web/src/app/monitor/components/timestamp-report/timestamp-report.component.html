@@ -16,7 +16,7 @@
 ~
 -->
 
-@if (reportData) {
+@if (reportData(); as reportData) {
   <div class="panel panel-default">
     <div class="panel-heading">
       <h4>{{ reportData.meta.name }} ({{ reportData.meta.date | date: 'medium' }})</h4>

@@ -32,7 +32,7 @@ describe('MonitorService', () => {
     environment.kadaiRestUrl = 'http://test';
 
     TestBed.configureTestingModule({
-      providers: [MonitorService, provideHttpClient(), provideHttpClientTesting()]
+      providers: [MonitorService, provideHttpClient(), provideHttpClientTesting(), provideHttpClientTesting()]
     });
 
     service = TestBed.inject(MonitorService);
