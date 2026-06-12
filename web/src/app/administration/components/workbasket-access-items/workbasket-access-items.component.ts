@@ -406,8 +406,8 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     });
   }
 
-  getAccessItemCustomProperty(customNumber: number): string {
-    return `permCustom${customNumber}`;
+  getAccessItemCustomProperty(customNumber: number): `permCustom${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12}` {
+    return `permCustom${customNumber}` as `permCustom${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12}`;
   }
 
   selectRow(value: any, index: number) {

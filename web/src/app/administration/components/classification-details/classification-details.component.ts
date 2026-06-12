@@ -194,10 +194,10 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
     this.store.dispatch(new DeselectClassification());
   }
 
-  getCategoryIcon(category: string): Observable<Pair<string, string>> {
+  getCategoryIcon(category?: string): Observable<Pair<string, string>> {
     return this.categoryIcons$.pipe(
       map((iconMap) =>
-        iconMap[category]
+        category && iconMap[category]
           ? { left: iconMap[category], right: category }
           : { left: iconMap.missing, right: 'Category does not match with the configuration' }
       )
@@ -215,8 +215,8 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
     return this.domainService.getSelectedDomainValue() === '';
   }
 
-  getClassificationCustom(customNumber: number): string {
-    return `custom${customNumber}`;
+  getClassificationCustom(customNumber: number): `custom${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8}` {
+    return `custom${customNumber}` as `custom${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8}`;
   }
 
   async onSave() {

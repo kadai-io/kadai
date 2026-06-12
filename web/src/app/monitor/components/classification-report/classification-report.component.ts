@@ -21,7 +21,7 @@ import { MonitorService } from 'app/monitor/services/monitor.service';
 import { ChartData } from 'app/monitor/models/chart-data';
 import { ReportData } from '../../models/report-data';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { ChartConfiguration } from 'chart.js';
+import { ChartConfiguration, ChartType } from 'chart.js';
 import { ReportTableComponent } from '../report-table/report-table.component';
 import { BaseChartDirective } from 'ng2-charts';
 import { DatePipe } from '@angular/common';
@@ -38,7 +38,7 @@ export class ClassificationReportComponent implements OnInit {
   reportData!: ReportData;
   lineChartLabels!: Array<any>;
   lineChartLegend = true;
-  lineChartType = 'line';
+  lineChartType: ChartType = 'line';
   lineChartData!: Array<ChartData>;
   lineChartOptions: ChartConfiguration['options'] = {
     responsive: true,

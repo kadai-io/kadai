@@ -22,7 +22,7 @@ import { ChartData } from '../../models/chart-data';
 import { MonitorService } from '../../services/monitor.service';
 import { MetaInfoData } from '../../models/meta-info-data';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { ChartConfiguration } from 'chart.js';
+import { ChartConfiguration, ChartType } from 'chart.js';
 
 import { BaseChartDirective } from 'ng2-charts';
 import { ReportTableComponent } from '../report-table/report-table.component';
@@ -40,7 +40,7 @@ export class WorkbasketReportDueDateComponent implements OnInit {
   reportData!: ReportData;
   lineChartLabels!: Array<any>;
   lineChartLegend = true;
-  lineChartType = 'line';
+  lineChartType: ChartType = 'line';
   lineChartData!: Array<ChartData>;
   lineChartOptions: ChartConfiguration['options'] = {
     responsive: true,

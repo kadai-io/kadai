@@ -25,6 +25,8 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { FormsModule, NgModel } from '@angular/forms';
 
+type TaskCustomField = `custom${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16}`;
+
 @Component({
   selector: 'kadai-task-custom-fields',
   templateUrl: './task-custom-fields.component.html',
@@ -39,7 +41,7 @@ export class TaskCustomFieldsComponent implements OnInit {
     initialValue: new Map<string, boolean>()
   });
   validateKeypress!: Function;
-  customFields!: string[];
+  customFields!: TaskCustomField[];
   private formsValidatorService = inject(FormsValidatorService);
 
   ngOnInit() {
@@ -49,6 +51,6 @@ export class TaskCustomFieldsComponent implements OnInit {
 
     this.customFields = Object.keys(this.task() ?? {}).filter(
       (attribute) => attribute.startsWith('custom') && /\d/.test(attribute)
-    );
+    ) as TaskCustomField[];
   }
 }

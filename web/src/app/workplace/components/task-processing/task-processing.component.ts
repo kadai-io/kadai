@@ -46,7 +46,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
   regex = /\${(.*?)}/g;
   address = 'https://bing.com';
   link!: SafeResourceUrl;
-  task!: Task;
+  task?: Task;
   workbaskets!: Workbasket[];
   private taskService = inject(TaskService);
   private workbasketService = inject(WorkbasketService);
@@ -92,7 +92,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
       this.requestInProgressService.setRequestInProgress(false);
       this.workbaskets = workbaskets.workbaskets;
 
-      const index = this.workbaskets.findIndex((workbasket) => workbasket.name === this.task.workbasketSummary?.name);
+      const index = this.workbaskets.findIndex((workbasket) => workbasket.name === this.task?.workbasketSummary?.name);
       if (index !== -1) {
         this.workbaskets.splice(index, 1);
       }
@@ -101,7 +101,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
 
   transferTask(workbasket: Workbasket) {
     this.requestInProgressService.setRequestInProgress(true);
-    this.taskService.transferTask(this.task.taskId, workbasket.workbasketId!).subscribe((task) => {
+    this.taskService.transferTask(this.task!.taskId, workbasket.workbasketId!).subscribe((task) => {
       this.requestInProgressService.setRequestInProgress(false);
       this.task = task;
     });
@@ -110,7 +110,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
 
   completeTask() {
     this.requestInProgressService.setRequestInProgress(true);
-    this.taskService.completeTask(this.task.taskId).subscribe((task) => {
+    this.taskService.completeTask(this.task!.taskId).subscribe((task) => {
       this.requestInProgressService.setRequestInProgress(false);
       this.task = task;
       this.taskService.publishUpdatedTask(task);
@@ -121,7 +121,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
   cancelClaimTask() {
     this.requestInProgressService.setRequestInProgress(true);
     this.taskService
-      .cancelClaimTask(this.task.taskId)
+      .cancelClaimTask(this.task!.taskId)
       .pipe(take(1))
       .subscribe((task) => {
         this.task = task;
@@ -132,7 +132,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
   }
 
   navigateBack() {
-    this.router.navigate([{ outlets: { detail: `taskdetail/${this.task.taskId}` } }], {
+    this.router.navigate([{ outlets: { detail: `taskdetail/${this.task!.taskId}` } }], {
       relativeTo: this.route.parent,
       queryParamsHandling: 'merge'
     });

@@ -490,7 +490,7 @@ describe('TaskProcessingComponent', () => {
 
     it('should not render iframe when link is not set (false branch)', () => {
       expect(component.task).toBeTruthy();
-      expect(component.task.name).toBe('My Task');
+      expect(component.task?.name).toBe('My Task');
       expect(component.link).toBeUndefined();
     });
 

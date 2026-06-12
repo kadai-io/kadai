@@ -97,7 +97,7 @@
                          maxlength="32" name="classification.key" placeholder="Key"
                          required type="text">
                 </mat-form-field>
-                @if (inputOverflowMap()?.get(key.name)) {
+                @if (inputOverflowMap().get(key.name)) {
                   <div class="error">{{ lengthError }}</div>
                 }
                 <!-- <kadai-shared-field-error-display [displayError]="key.invalid && key.dirty"
@@ -114,7 +114,7 @@
                          placeholder="Name" required
                          type="text">
                 </mat-form-field>
-                @if (inputOverflowMap()?.get(name.name)) {
+                @if (inputOverflowMap().get(name.name)) {
                   <div class="error">{{ lengthError }}</div>
                 }
                 <!--
@@ -135,7 +135,7 @@
                             maxlength="255" name="classification.description"
                             placeholder="Description"></textarea>
                 </mat-form-field>
-                @if (inputOverflowMap()?.get(description.name)) {
+                @if (inputOverflowMap().get(description.name)) {
                   <div class="error">{{ lengthError }}
                   </div>
                 }
@@ -179,7 +179,7 @@
                              name="classification.serviceLevel" placeholder="Service Level"
                              required type="text">
                     </mat-form-field>
-                    @if (inputOverflowMap()?.get(serviceLevel.name)) {
+                    @if (inputOverflowMap().get(serviceLevel.name)) {
                       <div
                         class="error">{{ lengthError }}
                       </div>
@@ -213,7 +213,7 @@
                          placeholder="Application entry point"
                          type="text">
                 </mat-form-field>
-                @if (inputOverflowMap()?.get(appEntryPoint.name)) {
+                @if (inputOverflowMap().get(appEntryPoint.name)) {
                   <div
                     class="error">{{ lengthError }}
                   </div>
@@ -256,7 +256,7 @@
                              placeholder="{{customField.field}}"
                              type="text">
                     </mat-form-field>
-                    @if (inputOverflowMap()?.get(custom.name)) {
+                    @if (inputOverflowMap().get(custom.name)) {
                       <div class="error">{{ lengthError }}</div>
                     }
                   </div>

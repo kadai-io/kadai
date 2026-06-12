@@ -74,7 +74,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   ]
 })
 export class WorkbasketListComponent implements OnInit, OnDestroy {
-  expanded = input<boolean>();
+  expanded = input(false);
   selectedId = signal<string | undefined>(undefined);
   type = 'workbaskets';
   workbasketDefaultSortBy: WorkbasketQuerySortParameter = WorkbasketQuerySortParameter.NAME;

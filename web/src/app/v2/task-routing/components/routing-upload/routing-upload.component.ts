@@ -20,13 +20,14 @@ import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/cor
 import { RoutingUploadService } from '@task-routing/services/routing-upload.service';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import { HotToastService } from '@ngneat/hot-toast';
+import { DragAndDropDirective } from 'app/shared/directives/drag-and-drop.directive';
 
 @Component({
   selector: 'kadai-routing-upload',
   templateUrl: './routing-upload.component.html',
   styleUrls: ['./routing-upload.component.scss'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: []
+  imports: [DragAndDropDirective]
 })
 export class RoutingUploadComponent implements OnInit {
   file: File | null = null;

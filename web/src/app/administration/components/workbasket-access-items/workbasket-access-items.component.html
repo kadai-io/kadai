@@ -78,7 +78,7 @@
           </tr>
           </thead>
           <tbody>
-            @for (accessItem of accessItemsGroups?.controls; track accessItem; let index = $index) {
+            @for (accessItem of accessItemsGroups.controls; track accessItem; let index = $index) {
               <tr
                 [formGroupName]="index">
                 <!-- REMOVE BUTTON -->
@@ -88,7 +88,7 @@
                          class="workbasket-access-items__select-row" type="checkbox">
                 </td>
                 <!-- ACCESS ID -->
-                @if ((accessItemsCustomization$ | async)?.accessId.lookupField) {
+                @if ((accessItemsCustomization$ | async)?.accessId?.lookupField) {
                   <td
                     [class]="{	'has-warning': (accessItemsClone[index].accessId !== accessItem.value.accessId),
                 							'has-error': !accessItem.value.accessId || accessItemsGroups.controls[index].get('accessId')?.invalid }"

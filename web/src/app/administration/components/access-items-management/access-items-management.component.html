@@ -164,7 +164,7 @@
                     <td class="align-left">
                       <label class="wrap">{{ accessItem.workbasketKey }}</label>
                     </td>
-                    @if ((accessItemsCustomization$ | async)?.accessId.lookupField) {
+                    @if ((accessItemsCustomization$ | async)?.accessId?.lookupField) {
                       <td
                         class="align-left">
                         <label class="wrap"

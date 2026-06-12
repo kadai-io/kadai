@@ -95,7 +95,7 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
     FilterSelectors.getSelectedDistributionTargetsFilter
   );
   toolbarState = false;
-  distributionTargets!: WorkbasketDistributionTarget[];
+  distributionTargets: WorkbasketDistributionTarget[] = [];
   distributionTargetsClone!: WorkbasketDistributionTarget[];
   distributionTargetsList = viewChild<MatSelectionList>('workbasket');
   workbasketList = viewChild<CdkVirtualScrollViewport>('scroller');
