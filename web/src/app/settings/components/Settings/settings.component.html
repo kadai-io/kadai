@@ -34,6 +34,7 @@
   </div>
 
   <div class="settings__content">
+    @if (settings(); as settings) {
     @for (group of settings.schema; track group) {
       <div>
         <h4 class="settings__domain-name"> {{ group.displayName }} </h4>
@@ -100,6 +101,7 @@
         }
         <div class="settings__spacer"></div>
       </div>
+    }
     }
   </div>
 </div>

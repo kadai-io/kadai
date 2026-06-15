@@ -27,6 +27,7 @@ import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-fi
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('WorkbasketFilterComponent', () => {
   let component: WorkbasketFilterComponent;
@@ -44,7 +45,7 @@ describe('WorkbasketFilterComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [WorkbasketFilterComponent, NgxsModule.forRoot([FilterState])],
-      providers: [provideAnimations(), provideAngularSvgIcon(), provideHttpClient()]
+      providers: [provideAnimations(), provideAngularSvgIcon(), provideHttpClient(), provideHttpClientTesting()]
     }).compileComponents();
 
     store = TestBed.inject(Store);
@@ -91,6 +92,16 @@ describe('WorkbasketFilterComponent', () => {
 
     inputFilter['description-like']!.push('desc2');
     expect(component.filter()!['description-like']).toEqual(['desc1']);
+  });
+
+  it('setFilter() should default missing arrays to empty arrays', () => {
+    component.setFilter({});
+
+    expect(component.filter()['description-like']).toEqual([]);
+    expect(component.filter()['key-like']).toEqual([]);
+    expect(component.filter()['name-like']).toEqual([]);
+    expect(component.filter()['owner-like']).toEqual([]);
+    expect(component.filter().type).toEqual([]);
   });
 
   it('selectType() should set filter.type to [type] for non-ALL type', () => {

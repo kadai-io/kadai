@@ -55,7 +55,7 @@
       <!-- FILTER BY TASK STATE -->
       <mat-form-field class="task-filter__input-field--small" matTooltip="Filter Tasks by status">
         <mat-label>Filter by status</mat-label>
-        <mat-select [value]="filter()?.state && filter()?.state[0] ? filter()?.state[0] : undefined">
+        <mat-select [value]="filter()?.state?.[0]">
           @for (state of allStates | mapValues; track state) {
             <mat-option (click)="setStatus(state.key)"
                         [value]="state.key"

@@ -22,6 +22,7 @@ import { FormsModule, NgForm, NgModel } from '@angular/forms';
 import { Store } from '@ngxs/store';
 import { ACTION } from 'app/shared/models/action';
 import { customFieldCount, Workbasket } from 'app/shared/models/workbasket';
+import { WorkbasketType } from 'app/shared/models/workbasket-type';
 import { KadaiDate } from 'app/shared/util/kadai.date';
 import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
@@ -89,7 +90,7 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
   action = input<ACTION>();
   workbasketForm = viewChild<NgForm>('WorkbasketForm');
   workbasketClone!: Workbasket;
-  allTypes!: Map<string, string>;
+  allTypes!: Map<WorkbasketType, string>;
   toggleValidationMap = new Map<string, boolean>();
   isOwnerValid: boolean = true;
   readonly lengthError = 'You have reached the maximum length for this field';
@@ -123,10 +124,10 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.allTypes = new Map([
-      ['PERSONAL', 'Personal'],
-      ['GROUP', 'Group'],
-      ['CLEARANCE', 'Clearance'],
-      ['TOPIC', 'Topic']
+      [WorkbasketType.PERSONAL, 'Personal'],
+      [WorkbasketType.GROUP, 'Group'],
+      [WorkbasketType.CLEARANCE, 'Clearance'],
+      [WorkbasketType.TOPIC, 'Topic']
     ]);
 
     this.customFields$ = this.workbasketsCustomisation$.pipe(
@@ -258,8 +259,8 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
     wb.owner = owner.accessId;
   }
 
-  getWorkbasketCustomProperty(custom: number) {
-    return `custom${custom}`;
+  getWorkbasketCustomProperty(custom: number): `custom${1 | 2 | 3 | 4}` {
+    return `custom${custom}` as `custom${1 | 2 | 3 | 4}`;
   }
 
   ngOnDestroy() {

@@ -109,7 +109,7 @@ describe('KadaiTreeComponent', () => {
   });
 
   it('should have emptyTreeNodes false initially', () => {
-    expect(component.emptyTreeNodes).toBe(false);
+    expect(component.emptyTreeNodes()).toBe(false);
   });
 
   it('should render tree-root element', () => {
@@ -118,7 +118,7 @@ describe('KadaiTreeComponent', () => {
   });
 
   it('should not show "no classifications" message when emptyTreeNodes is false', () => {
-    component.emptyTreeNodes = false;
+    component.emptyTreeNodes.set(false);
     fixture.detectChanges();
     const msg = fixture.nativeElement.querySelector('h3');
     expect(msg).toBeNull();
@@ -127,7 +127,7 @@ describe('KadaiTreeComponent', () => {
   it('should show "no classifications" message when emptyTreeNodes is true', () => {
     const localFixture = TestBed.createComponent(KadaiTreeComponent);
     const localComponent = localFixture.componentInstance;
-    localComponent.emptyTreeNodes = true;
+    localComponent.emptyTreeNodes.set(true);
     localFixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
     const msg = localFixture.nativeElement.querySelector('h3');
@@ -196,7 +196,7 @@ describe('KadaiTreeComponent', () => {
   });
 
   it('should not collapse emptyTreeNodes message when emptyTreeNodes is false', () => {
-    component.emptyTreeNodes = false;
+    component.emptyTreeNodes.set(false);
     fixture.detectChanges();
     const msg = fixture.nativeElement.querySelector('h3');
     expect(msg).toBeNull();
@@ -271,7 +271,7 @@ describe('KadaiTreeComponent', () => {
 
   it('should handle ngAfterViewChecked when filterText changes', () => {
     fixture.componentRef.setInput('filterText', 'newFilter');
-    expect(component.emptyTreeNodes).toBeDefined();
+    expect(component.emptyTreeNodes()).toBeDefined();
   });
 
   it('should handle ngAfterViewChecked when filterIcon changes', () => {
@@ -287,7 +287,7 @@ describe('KadaiTreeComponent', () => {
   it('should show "no classifications" message when emptyTreeNodes is true in separate fixture', () => {
     const localFixture = TestBed.createComponent(KadaiTreeComponent);
     const localComponent = localFixture.componentInstance;
-    localComponent.emptyTreeNodes = true;
+    localComponent.emptyTreeNodes.set(true);
     localFixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
     const h3 = localFixture.nativeElement.querySelector('h3');
@@ -300,7 +300,7 @@ describe('KadaiTreeComponent', () => {
   it('should hide the tree-root when emptyTreeNodes is true', () => {
     const localFixture = TestBed.createComponent(KadaiTreeComponent);
     const localComponent = localFixture.componentInstance;
-    localComponent.emptyTreeNodes = true;
+    localComponent.emptyTreeNodes.set(true);
     localFixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
     const treeRoot = localFixture.nativeElement.querySelector('tree-root');
@@ -312,7 +312,7 @@ describe('KadaiTreeComponent', () => {
   it('should show tree-root and not show "no classifications" when emptyTreeNodes is false', () => {
     const localFixture = TestBed.createComponent(KadaiTreeComponent);
     const localComponent = localFixture.componentInstance;
-    localComponent.emptyTreeNodes = false;
+    localComponent.emptyTreeNodes.set(false);
     localFixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
     const h3 = localFixture.nativeElement.querySelector('h3');
@@ -518,8 +518,8 @@ describe('KadaiTreeComponent', () => {
     localFixture.componentRef.setInput('filterIcon', 'EXTERNAL');
     localFixture.detectChanges();
 
-    expect(localComponent.filter).toBe('Filterable');
-    expect(localComponent.category).toBe('EXTERNAL');
+    expect(localComponent.filter()).toBe('Filterable');
+    expect(localComponent.category()).toBe('EXTERNAL');
     localFixture.destroy();
   });
 
@@ -664,7 +664,7 @@ describe('KadaiTreeComponent', () => {
   it('should render @if (emptyTreeNodes) true branch in DOM via local fixture', () => {
     const localFixture = TestBed.createComponent(KadaiTreeComponent);
     const localComponent = localFixture.componentInstance;
-    localComponent.emptyTreeNodes = true;
+    localComponent.emptyTreeNodes.set(true);
     localFixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
     const el = localFixture.nativeElement.querySelector('h3');

@@ -85,6 +85,7 @@ describe('WorkbasketInformationComponent', () => {
         { provide: FormsValidatorService, useValue: formValidatorServiceMock },
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideHttpClientTesting(),
         provideAngularSvgIcon()
       ]
     }).compileComponents();

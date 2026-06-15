@@ -32,7 +32,7 @@ describe('KadaiEngineService', () => {
     environment.kadaiLogoutUrl = 'http://test/logout';
 
     TestBed.configureTestingModule({
-      providers: [KadaiEngineService, provideHttpClient(), provideHttpClientTesting()]
+      providers: [KadaiEngineService, provideHttpClient(), provideHttpClientTesting(), provideHttpClientTesting()]
     });
 
     service = TestBed.inject(KadaiEngineService);

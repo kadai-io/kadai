@@ -35,6 +35,7 @@ describe('RoutingUploadService', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideHttpClientTesting(),
         {
           provide: StartupService,
           useValue: { getKadaiRestUrl: () => REST_URL }

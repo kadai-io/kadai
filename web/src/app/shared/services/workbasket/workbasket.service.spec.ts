@@ -48,6 +48,7 @@ describe('WorkbasketService', () => {
         WorkbasketService,
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideHttpClientTesting(),
         { provide: DomainService, useValue: mockDomainService }
       ]
     });

@@ -78,3 +78,6 @@ Thumbs.db
 # DB2 database
 db.tar.gz
 .codiumai
+/.sdkmanrc
+/CLAUDE.md
+/web/CLAUDE.md

@@ -16,7 +16,8 @@
  *
  */
 
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngxs/store';
 import {
   FormArray,
@@ -120,15 +121,15 @@ export class AccessItemsManagementComponent implements OnInit {
   accessIdName?: string;
   accessItemsForm: FormGroup | null = null;
   accessId!: AccessId;
-  groups: AccessId[] = [];
-  permissions: AccessId[] = [];
+  groups = signal<AccessId[]>([]);
+  permissions = signal<AccessId[]>([]);
   defaultSortBy: WorkbasketAccessItemQuerySortParameter = WorkbasketAccessItemQuerySortParameter.ACCESS_ID;
   sortingFields: Map<WorkbasketAccessItemQuerySortParameter, string> = WORKBASKET_ACCESS_ITEM_SORT_PARAMETER_NAMING;
   sortModel: Sorting<WorkbasketAccessItemQuerySortParameter> = {
     'sort-by': this.defaultSortBy,
     order: Direction.DESC
   };
-  accessItems: WorkbasketAccessItems[] = [];
+  accessItems = signal<WorkbasketAccessItems[]>([]);
   isGroup: boolean = false;
   accessItemsCustomization$: Observable<AccessItemsCustomisation | undefined> = inject(Store).select(
     EngineConfigurationSelectors.accessItemsCustomisation
@@ -153,11 +154,11 @@ export class AccessItemsManagementComponent implements OnInit {
 
   ngOnInit() {
     this.groups$.pipe(takeUntil(this.destroy$)).subscribe((groups) => {
-      this.groups = groups || [];
+      this.groups.set(groups || []);
     });
 
     this.permissions$.pipe(takeUntil(this.destroy$)).subscribe((permissions) => {
-      this.permissions = permissions || [];
+      this.permissions.set(permissions || []);
     });
 
     this.requestInProgressService.setRequestInProgress(false);
@@ -196,9 +197,9 @@ export class AccessItemsManagementComponent implements OnInit {
 
   searchForAccessItemsWorkbaskets() {
     this.removeFocus();
-    if (this.permissions == null) {
+    if (this.permissions() == null) {
       const filterParameter: WorkbasketAccessItemQueryFilterParameter = {
-        'access-id': [this.accessId, ...this.groups].map((a) => a.accessId).filter((id): id is string => !!id)
+        'access-id': [this.accessId, ...this.groups()].map((a) => a.accessId).filter((id): id is string => !!id)
       };
       this.store
         .dispatch(new GetAccessItems(filterParameter, this.sortModel))
@@ -212,7 +213,7 @@ export class AccessItemsManagementComponent implements OnInit {
         });
     } else {
       const filterParameter: WorkbasketAccessItemQueryFilterParameter = {
-        'access-id': [this.accessId, ...this.groups, ...this.permissions]
+        'access-id': [this.accessId, ...this.groups(), ...this.permissions()]
           .map((a) => a.accessId)
           .filter((id): id is string => !!id)
       };
@@ -254,7 +255,7 @@ export class AccessItemsManagementComponent implements OnInit {
     if (!this.accessItemsForm.value.accessIdFilter) {
       this.accessItemsForm.addControl('accessIdFilter', new FormControl());
     }
-    this.accessItems = accessItems;
+    this.accessItems.set(accessItems);
     if (this.accessItemsForm.value.workbasketKeyFilter || this.accessItemsForm.value.accessIdFilter) {
       this.filterAccessItems();
     }
@@ -280,7 +281,7 @@ export class AccessItemsManagementComponent implements OnInit {
     if (!this.accessItemsForm.value.accessIdFilter) {
       this.accessItemsForm.addControl('accessIdFilter', new FormControl());
     }
-    this.accessItems = accessItems;
+    this.accessItems.set(accessItems);
     if (this.accessItemsForm.value.workbasketKeyFilter || this.accessItemsForm.value.accessIdFilter) {
       this.filterAccessItems();
     }
@@ -291,16 +292,18 @@ export class AccessItemsManagementComponent implements OnInit {
     if (!form) {
       return;
     }
+    let accessItems = this.accessItems();
     if (form.value.accessIdFilter) {
-      this.accessItems = this.accessItems.filter((value) =>
+      accessItems = accessItems.filter((value) =>
         value.accessName.toLowerCase().includes(form.value.accessIdFilter.toLowerCase())
       );
     }
     if (form.value.workbasketKeyFilter) {
-      this.accessItems = this.accessItems.filter((value) =>
+      accessItems = accessItems.filter((value) =>
         value.workbasketKey.toLowerCase().includes(form.value.workbasketKeyFilter.toLowerCase())
       );
     }
+    this.accessItems.set(accessItems);
   }
 
   revokeAccess() {

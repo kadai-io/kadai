@@ -16,7 +16,7 @@
 ~
 -->
 
-@if (reportData) {
+@if (reportData(); as reportData) {
   <div class="task-priority-report">
     <!-- HEADER -->
     <h4 class="task-priority-report__headline"> {{ reportData.meta.name }} ({{
@@ -43,14 +43,14 @@
     </span>
         }
       </nav>
-      @if (filtersAreSpecified) {
+      @if (filtersAreSpecified()) {
         <mat-accordion>
           <mat-expansion-panel (closed)="isPanelOpen = false" (opened)="isPanelOpen = true">
             <mat-expansion-panel-header>
               <mat-panel-title>Task Filter</mat-panel-title>
             </mat-expansion-panel-header>
             <div class="task-priority-report__filters">
-              @for (key of keys; track key) {
+              @for (key of keys(); track key) {
                 <mat-checkbox
                   (change)="emitFilter($event.checked, key)"
                   [checked]="activeFilters().includes(key)">
@@ -88,7 +88,7 @@
           <kadai-monitor-canvas [id]="indexToString(i)" [row]="row" />
           <!-- TABLE -->
           <div>
-            <table [dataSource]="tableDataArray[i]" mat-table>
+            <table [dataSource]="tableDataArray()[i]" mat-table>
               <!-- Column: Priority -->
               <ng-container matColumnDef="priority">
                 <th *matHeaderCellDef mat-header-cell> Priority</th>

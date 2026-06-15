@@ -62,6 +62,7 @@ describe('WorkbasketOverviewComponent', () => {
         },
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideHttpClientTesting(),
         provideAngularSvgIcon()
       ]
     }).compileComponents();
@@ -220,6 +221,7 @@ describe('WorkbasketOverviewComponent Alternative Params ID', () => {
         provideStore([WorkbasketState, FilterState]),
         { provide: ActivatedRoute, useValue: mockActivatedRouteAlternativeId },
         provideHttpClient(),
+        provideHttpClientTesting(),
         provideHttpClientTesting(),
         provideAngularSvgIcon()
       ]

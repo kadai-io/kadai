@@ -97,6 +97,7 @@ describe('TaskInformationComponent', () => {
         provideNoopAnimations(),
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideHttpClientTesting(),
         { provide: ClassificationsService, useValue: mockClassificationsService },
         { provide: FormsValidatorService, useValue: mockFormsValidatorService }
       ]

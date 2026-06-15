@@ -34,6 +34,10 @@ import { IconTypeComponent } from '../../../administration/components/type-icon/
 import { MapValuesPipe } from '../../pipes/map-values.pipe';
 import { toSignal } from '@angular/core/rxjs-interop';
 
+type NormalizedWorkbasketFilter = Required<
+  Pick<WorkbasketQueryFilterParameter, 'description-like' | 'key-like' | 'name-like' | 'owner-like' | 'type'>
+>;
+
 @Component({
   selector: 'kadai-shared-workbasket-filter',
   templateUrl: './workbasket-filter.component.html',
@@ -66,7 +70,13 @@ export class WorkbasketFilterComponent {
   private workbasketListFilter = toSignal(inject(Store).select(FilterSelectors.getWorkbasketListFilter), {
     requireSync: true
   });
-  filter = signal<WorkbasketQueryFilterParameter | null>(null);
+  filter = signal<NormalizedWorkbasketFilter>({
+    'description-like': [],
+    'key-like': [],
+    'name-like': [],
+    'owner-like': [],
+    type: []
+  });
   private store = inject(Store);
 
   constructor() {
@@ -107,6 +117,6 @@ export class WorkbasketFilterComponent {
   }
 
   search() {
-    this.store.dispatch(new SetWorkbasketFilter(this.filter()!, this.component()!));
+    this.store.dispatch(new SetWorkbasketFilter(this.filter(), this.component()!));
   }
 }

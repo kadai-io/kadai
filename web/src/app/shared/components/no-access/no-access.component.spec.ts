@@ -40,6 +40,7 @@ describe('NoAccessComponent', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideHttpClientTesting(),
         provideAngularSvgIcon(),
         { provide: Router, useValue: routerMock },
         { provide: KadaiEngineService, useValue: kadaiEngineServiceMock }
