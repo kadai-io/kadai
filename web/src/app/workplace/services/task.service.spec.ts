@@ -64,16 +64,16 @@ describe('TaskService', () => {
 
   describe('publishUpdatedTask', () => {
     it('should emit the task via taskChangedStream', () => {
-      const task = new Task('task-1');
-      let emitted: Task;
-      service.taskChangedStream.subscribe((t) => (emitted = t));
-      service.publishUpdatedTask(task);
-      expect(emitted).toBe(task);
+      const expectedTask = new Task('task-1');
+      let emitted: Task | undefined;
+      service.taskChangedStream.subscribe((task) => (emitted = task));
+      service.publishUpdatedTask(expectedTask);
+      expect(emitted).toBe(expectedTask);
     });
 
     it('should emit undefined when called without argument', () => {
-      let emitted: Task = null;
-      service.taskChangedStream.subscribe((t) => (emitted = t));
+      let emitted: Task | undefined = new Task('sentinel');
+      service.taskChangedStream.subscribe((task) => (emitted = task));
       service.publishUpdatedTask();
       expect(emitted).toBeUndefined();
     });
@@ -90,16 +90,16 @@ describe('TaskService', () => {
 
   describe('selectTask', () => {
     it('should emit the task via taskSelectedStream', () => {
-      const task = new Task('task-2');
-      let emitted: Task;
-      service.taskSelectedStream.subscribe((t) => (emitted = t));
-      service.selectTask(task);
-      expect(emitted).toBe(task);
+      const expectedTask = new Task('task-2');
+      let emitted: Task | undefined;
+      service.taskSelectedStream.subscribe((task) => (emitted = task));
+      service.selectTask(expectedTask);
+      expect(emitted).toBe(expectedTask);
     });
 
     it('should emit undefined when called without argument', () => {
-      let emitted: Task = null;
-      service.taskSelectedStream.subscribe((t) => (emitted = t));
+      let emitted: Task | undefined = new Task('sentinel');
+      service.taskSelectedStream.subscribe((task) => (emitted = task));
       service.selectTask();
       expect(emitted).toBeUndefined();
     });

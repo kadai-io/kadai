@@ -19,19 +19,18 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Workbasket } from 'app/shared/models/workbasket';
-import { ObjectReference } from '../models/object-reference';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WorkplaceService {
-  private workbasketSelected = new BehaviorSubject<Workbasket>(undefined);
+  private workbasketSelected = new BehaviorSubject<Workbasket | undefined>(undefined);
 
   selectWorkbasket(workbasket?: Workbasket): void {
     this.workbasketSelected.next(workbasket);
   }
 
-  getSelectedWorkbasket(): Observable<Workbasket> {
+  getSelectedWorkbasket(): Observable<Workbasket | undefined> {
     return this.workbasketSelected.asObservable();
   }
 }

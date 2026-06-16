@@ -381,7 +381,7 @@ describe('TaskPriorityReportComponent', () => {
   });
 
   it('should not show report when reportData is null', () => {
-    component.reportData = null;
+    component.reportData = null as any;
     fixture.detectChanges();
     const el = fixture.nativeElement.querySelector('.task-priority-report');
     expect(el).toBeNull();

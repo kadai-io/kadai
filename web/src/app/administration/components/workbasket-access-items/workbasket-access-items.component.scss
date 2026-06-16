@@ -142,15 +142,17 @@
   color: red;
 }
 
-::ng-deep .workbasket-access-items__typeahead .type-ahead__form-field .mat-mdc-form-field-infix {
-  padding-top: 24px;
-  padding-bottom: 0;
-}
-
-::ng-deep .workbasket-access-items__typeahead .type-ahead__form-field .mdc-notched-outline {
-  padding-top: 16px;
-}
-
 table {
   border-collapse: collapse;
+}
+
+:host ::ng-deep .workbasket-access-items__typeahead .type-ahead__form-field {
+  .mat-mdc-form-field-infix {
+    padding-top: 24px;
+    padding-bottom: 0;
+  }
+
+  .mdc-notched-outline {
+    padding-top: 16px;
+  }
 }

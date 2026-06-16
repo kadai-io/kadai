@@ -48,7 +48,8 @@ class MockSvgIconComponent {
 const domainServiceSpy: Partial<DomainService> = {
   getSelectedDomainValue: vi.fn().mockReturnValue('A'),
   getSelectedDomain: vi.fn().mockReturnValue(of('A')),
-  getDomains: vi.fn().mockReturnValue(of('A'))
+  getDomains: vi.fn().mockReturnValue(of('A')),
+  domainChangedComplete: vi.fn()
 };
 
 const requestInProgressServiceSpy: Partial<RequestInProgressService> = {

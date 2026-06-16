@@ -45,7 +45,7 @@ describe('ResizableDirective', () => {
   });
 
   it('should create an instance', () => {
-    let directive: ResizableWidthDirective;
+    let directive!: ResizableWidthDirective;
     runInInjectionContext(fixture.componentRef.injector, () => {
       directive = new ResizableWidthDirective();
     });

@@ -66,7 +66,7 @@ export class WorkbasketFilterComponent {
   private workbasketListFilter = toSignal(inject(Store).select(FilterSelectors.getWorkbasketListFilter), {
     requireSync: true
   });
-  filter = signal<WorkbasketQueryFilterParameter>(null);
+  filter = signal<WorkbasketQueryFilterParameter | null>(null);
   private store = inject(Store);
 
   constructor() {
@@ -90,16 +90,16 @@ export class WorkbasketFilterComponent {
 
   setFilter(filter: WorkbasketQueryFilterParameter) {
     this.filter.set({
-      'description-like': [...filter['description-like']],
-      'key-like': [...filter['key-like']],
-      'name-like': [...filter['name-like']],
-      'owner-like': [...filter['owner-like']],
-      type: [...filter['type']]
+      'description-like': [...(filter['description-like'] ?? [])],
+      'key-like': [...(filter['key-like'] ?? [])],
+      'name-like': [...(filter['name-like'] ?? [])],
+      'owner-like': [...(filter['owner-like'] ?? [])],
+      type: [...(filter['type'] ?? [])]
     });
   }
 
   clear() {
-    this.store.dispatch(new ClearWorkbasketFilter(this.component()));
+    this.store.dispatch(new ClearWorkbasketFilter(this.component()!));
   }
 
   selectType(type: WorkbasketType) {
@@ -107,6 +107,6 @@ export class WorkbasketFilterComponent {
   }
 
   search() {
-    this.store.dispatch(new SetWorkbasketFilter(this.filter(), this.component()));
+    this.store.dispatch(new SetWorkbasketFilter(this.filter()!, this.component()!));
   }
 }

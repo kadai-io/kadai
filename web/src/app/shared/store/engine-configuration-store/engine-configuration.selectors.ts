@@ -29,34 +29,34 @@ import { EngineConfigurationState, EngineConfigurationStateModel } from './engin
 
 export class EngineConfigurationSelectors {
   @Selector([EngineConfigurationState])
-  static globalCustomisation(state: EngineConfigurationStateModel): GlobalCustomisation {
+  static globalCustomisation(state: EngineConfigurationStateModel): GlobalCustomisation | undefined {
     return state.customisation[state.language].global;
   }
 
   @Selector([EngineConfigurationState])
-  static workbasketsCustomisation(state: EngineConfigurationStateModel): WorkbasketsCustomisation {
+  static workbasketsCustomisation(state: EngineConfigurationStateModel): WorkbasketsCustomisation | undefined {
     return state.customisation[state.language].workbaskets;
   }
 
   @Selector([EngineConfigurationState])
-  static classificationsCustomisation(state: EngineConfigurationStateModel): ClassificationsCustomisation {
+  static classificationsCustomisation(state: EngineConfigurationStateModel): ClassificationsCustomisation | undefined {
     return state.customisation[state.language].classifications;
   }
 
   @Selector([EngineConfigurationState])
-  static accessItemsCustomisation(state: EngineConfigurationStateModel): AccessItemsCustomisation {
-    return state.customisation[state.language].workbaskets['access-items'];
+  static accessItemsCustomisation(state: EngineConfigurationStateModel): AccessItemsCustomisation | undefined {
+    return state.customisation[state.language].workbaskets?.['access-items'];
   }
 
   @Selector([EngineConfigurationState])
-  static tasksCustomisation(state: EngineConfigurationStateModel): TasksCustomisation {
+  static tasksCustomisation(state: EngineConfigurationStateModel): TasksCustomisation | undefined {
     return state.customisation[state.language].tasks;
   }
 
   @Selector([EngineConfigurationState])
   static selectCategoryIcons(state: EngineConfigurationStateModel): ClassificationCategoryImages {
     return {
-      ...state.customisation[state.language].classifications.categories
+      ...(state.customisation[state.language].classifications?.categories ?? {})
     };
   }
 }

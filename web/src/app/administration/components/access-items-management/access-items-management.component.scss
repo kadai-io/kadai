@@ -25,11 +25,6 @@ table {
   margin-bottom: 10px;
 }
 
-::ng-deep .mat-mdc-header-cell {
-  color: black;
-  font-weight: bold;
-}
-
 td,
 th {
   padding: 8px;
@@ -119,11 +114,6 @@ tr:first-child > td {
   }
 }
 
-::ng-deep .access-items__groups-expansion-panel * th,
-::ng-deep .access-items__permissions-expansion-panel * th {
-  text-align: left;
-}
-
 .mat-mdc-mini-fab {
   outline-color: none;
   border: none;
@@ -137,4 +127,14 @@ tr:first-child > td {
 .wrap {
   max-width: 150px;
   word-wrap: break-word;
+}
+
+:host ::ng-deep .access-items .mat-mdc-header-cell {
+  color: black;
+  font-weight: bold;
+}
+
+:host ::ng-deep .access-items__groups-expansion-panel th,
+:host ::ng-deep .access-items__permissions-expansion-panel th {
+  text-align: left;
 }

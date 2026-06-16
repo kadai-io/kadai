@@ -1,0 +1,348 @@
+/*!
+ * Copyright [2026] [envite consulting GmbH]
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
+ *
+ */
+
+:root {
+  --mat-app-background-color: #fafafa;
+  --mat-app-text-color: rgba(0, 0, 0, 0.87);
+  --mat-autocomplete-background-color: white;
+  --mat-button-filled-disabled-container-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 12%, transparent);
+  --mat-button-filled-disabled-label-text-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-button-filled-disabled-state-layer-color: rgba(0, 0, 0, 0.54);
+  --mat-button-filled-hover-state-layer-opacity: 0.04;
+  --mat-button-filled-label-text-transform: none;
+  --mat-button-filled-ripple-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 12%, transparent);
+  --mat-button-filled-state-layer-color: rgba(0, 0, 0, 0.87);
+  --mat-button-outlined-disabled-label-text-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-button-outlined-disabled-outline-color: rgba(0, 0, 0, 0.12);
+  --mat-button-outlined-disabled-state-layer-color: rgba(0, 0, 0, 0.54);
+  --mat-button-outlined-hover-state-layer-opacity: 0.04;
+  --mat-button-outlined-keep-touch-target: false;
+  --mat-button-outlined-label-text-color: rgba(0, 0, 0, 0.87);
+  --mat-button-outlined-label-text-transform: none;
+  --mat-button-outlined-outline-color: rgba(0, 0, 0, 0.12);
+  --mat-button-outlined-ripple-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 12%, transparent);
+  --mat-button-outlined-state-layer-color: rgba(0, 0, 0, 0.87);
+  --mat-button-protected-container-elevation-shadow:
+    0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+  --mat-button-protected-disabled-container-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 12%, transparent);
+  --mat-button-protected-disabled-label-text-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-button-protected-disabled-state-layer-color: rgba(0, 0, 0, 0.54);
+  --mat-button-protected-focus-container-elevation-shadow:
+    0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+  --mat-button-protected-hover-container-elevation-shadow:
+    0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+  --mat-button-protected-hover-state-layer-opacity: 0.04;
+  --mat-button-protected-label-text-transform: none;
+  --mat-button-protected-pressed-container-elevation-shadow:
+    0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+  --mat-button-protected-ripple-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 12%, transparent);
+  --mat-button-protected-state-layer-color: rgba(0, 0, 0, 0.87);
+  --mat-button-text-disabled-label-text-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-button-text-disabled-state-layer-color: rgba(0, 0, 0, 0.54);
+  --mat-button-text-hover-state-layer-opacity: 0.04;
+  --mat-button-text-label-text-color: rgba(0, 0, 0, 0.87);
+  --mat-button-text-label-text-transform: none;
+  --mat-button-text-ripple-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 12%, transparent);
+  --mat-button-text-state-layer-color: rgba(0, 0, 0, 0.87);
+  --mat-button-text-with-icon-horizontal-padding: 8px;
+  --mat-button-tonal-container-color: white;
+  --mat-button-tonal-disabled-container-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 12%, transparent);
+  --mat-button-tonal-disabled-label-text-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-button-tonal-disabled-state-layer-color: rgba(0, 0, 0, 0.54);
+  --mat-button-tonal-hover-state-layer-opacity: 0.04;
+  --mat-button-tonal-label-text-color: rgba(0, 0, 0, 0.87);
+  --mat-button-tonal-label-text-transform: none;
+  --mat-button-tonal-ripple-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 12%, transparent);
+  --mat-button-tonal-state-layer-color: rgba(0, 0, 0, 0.87);
+  --mat-checkbox-disabled-label-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-checkbox-disabled-selected-checkmark-color: white;
+  --mat-checkbox-disabled-selected-icon-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-checkbox-disabled-unselected-icon-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-checkbox-label-text-color: rgba(0, 0, 0, 0.87);
+  --mat-checkbox-label-text-tracking: 0.0178571429em;
+  --mat-checkbox-selected-hover-state-layer-opacity: 0.04;
+  --mat-checkbox-unselected-focus-icon-color: rgba(0, 0, 0, 0.87);
+  --mat-checkbox-unselected-focus-state-layer-color: rgba(0, 0, 0, 0.87);
+  --mat-checkbox-unselected-hover-icon-color: rgba(0, 0, 0, 0.87);
+  --mat-checkbox-unselected-hover-state-layer-color: rgba(0, 0, 0, 0.87);
+  --mat-checkbox-unselected-hover-state-layer-opacity: 0.04;
+  --mat-checkbox-unselected-icon-color: rgba(0, 0, 0, 0.54);
+  --mat-checkbox-unselected-pressed-state-layer-color: rgba(0, 0, 0, 0.87);
+  --mat-datepicker-calendar-body-label-text-color: rgba(0, 0, 0, 0.54);
+  --mat-datepicker-calendar-container-background-color: white;
+  --mat-datepicker-calendar-container-elevation-shadow:
+    0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+  --mat-datepicker-calendar-container-shape: 4px;
+  --mat-datepicker-calendar-container-text-color: rgba(0, 0, 0, 0.87);
+  --mat-datepicker-calendar-container-touch-elevation-shadow:
+    0px 11px 15px -7px rgba(0, 0, 0, 0.2), 0px 24px 38px 3px rgba(0, 0, 0, 0.14), 0px 9px 46px 8px rgba(0, 0, 0, 0.12);
+  --mat-datepicker-calendar-container-touch-shape: 4px;
+  --mat-datepicker-calendar-date-disabled-state-text-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-datepicker-calendar-date-focus-state-background-color: color-mix(in srgb, #607d8b 12%, transparent);
+  --mat-datepicker-calendar-date-hover-state-background-color: color-mix(in srgb, #607d8b 4%, transparent);
+  --mat-datepicker-calendar-date-in-comparison-range-state-background-color: color-mix(
+    in srgb,
+    #009688 20%,
+    transparent
+  );
+  --mat-datepicker-calendar-date-in-overlap-range-selected-state-background-color: rgb(
+    69.5241935484,
+    163.4758064516,
+    93.9516129032
+  );
+  --mat-datepicker-calendar-date-in-overlap-range-state-background-color: #a8dab5;
+  --mat-datepicker-calendar-date-in-range-state-background-color: color-mix(in srgb, #607d8b 20%, transparent);
+  --mat-datepicker-calendar-date-preview-state-outline-color: rgba(0, 0, 0, 0.54);
+  --mat-datepicker-calendar-date-selected-disabled-state-background-color: color-mix(in srgb, #607d8b 38%, transparent);
+  --mat-datepicker-calendar-date-selected-state-background-color: #607d8b;
+  --mat-datepicker-calendar-date-text-color: rgba(0, 0, 0, 0.87);
+  --mat-datepicker-calendar-date-today-disabled-state-outline-color: color-mix(
+    in srgb,
+    rgba(0, 0, 0, 0.87) 38%,
+    transparent
+  );
+  --mat-datepicker-calendar-date-today-outline-color: rgba(0, 0, 0, 0.54);
+  --mat-datepicker-calendar-date-today-selected-state-outline-color: white;
+  --mat-datepicker-calendar-header-divider-color: rgba(0, 0, 0, 0.12);
+  --mat-datepicker-calendar-header-text-color: rgba(0, 0, 0, 0.54);
+  --mat-datepicker-calendar-header-text-size: 11px;
+  --mat-datepicker-calendar-header-text-weight: 400;
+  --mat-datepicker-calendar-navigation-button-icon-color: rgba(0, 0, 0, 0.54);
+  --mat-datepicker-calendar-period-button-icon-color: rgba(0, 0, 0, 0.54);
+  --mat-datepicker-calendar-period-button-text-color: rgba(0, 0, 0, 0.87);
+  --mat-datepicker-calendar-text-size: 13px;
+  --mat-datepicker-range-input-disabled-state-separator-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-datepicker-range-input-disabled-state-text-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-datepicker-range-input-separator-color: rgba(0, 0, 0, 0.87);
+  --mat-datepicker-toggle-active-state-icon-color: #607d8b;
+  --mat-datepicker-toggle-icon-color: rgba(0, 0, 0, 0.54);
+  --mat-dialog-container-max-width: 80vw;
+  --mat-dialog-container-min-width: 0;
+  --mat-dialog-container-small-max-width: 80vw;
+  --mat-dialog-headline-padding: 0 24px 9px;
+  --mat-dialog-subhead-color: rgba(0, 0, 0, 0.87);
+  --mat-dialog-subhead-size: 20px;
+  --mat-dialog-subhead-tracking: 0.0125em;
+  --mat-dialog-subhead-weight: 500;
+  --mat-dialog-supporting-text-color: rgba(0, 0, 0, 0.54);
+  --mat-dialog-supporting-text-line-height: 24px;
+  --mat-dialog-supporting-text-size: 16px;
+  --mat-dialog-supporting-text-tracking: 0.03125em;
+  --mat-divider-color: rgba(0, 0, 0, 0.12);
+  --mat-expansion-actions-divider-color: rgba(0, 0, 0, 0.12);
+  --mat-expansion-container-background-color: white;
+  --mat-expansion-container-text-color: rgba(0, 0, 0, 0.87);
+  --mat-expansion-container-text-line-height: 20px;
+  --mat-expansion-container-text-size: 14px;
+  --mat-expansion-container-text-tracking: 0.0178571429em;
+  --mat-expansion-header-description-color: rgba(0, 0, 0, 0.54);
+  --mat-expansion-header-disabled-state-text-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-expansion-header-focus-state-layer-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 12%, transparent);
+  --mat-expansion-header-hover-state-layer-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 4%, transparent);
+  --mat-expansion-header-indicator-color: rgba(0, 0, 0, 0.54);
+  --mat-expansion-header-indicator-display: none;
+  --mat-expansion-header-text-color: rgba(0, 0, 0, 0.87);
+  --mat-expansion-header-text-line-height: inherit;
+  --mat-expansion-header-text-size: 14px;
+  --mat-expansion-header-text-tracking: inherit;
+  --mat-expansion-legacy-header-indicator-display: inline-block;
+  --mat-form-field-container-text-tracking: 0.03125em;
+  --mat-form-field-disabled-input-text-placeholder-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-form-field-disabled-leading-icon-color: unset;
+  --mat-form-field-disabled-select-arrow-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-form-field-disabled-trailing-icon-color: unset;
+  --mat-form-field-enabled-select-arrow-color: rgba(0, 0, 0, 0.54);
+  --mat-form-field-error-focus-trailing-icon-color: unset;
+  --mat-form-field-error-hover-trailing-icon-color: unset;
+  --mat-form-field-error-trailing-icon-color: unset;
+  --mat-form-field-filled-active-indicator-color: rgba(0, 0, 0, 0.54);
+  --mat-form-field-filled-caret-color: #607d8b;
+  --mat-form-field-filled-container-color: #f6f6f6;
+  --mat-form-field-filled-container-shape: 4px;
+  --mat-form-field-filled-disabled-active-indicator-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 12%, transparent);
+  --mat-form-field-filled-disabled-container-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 4%, transparent);
+  --mat-form-field-filled-disabled-input-text-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-form-field-filled-disabled-label-text-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-form-field-filled-error-hover-active-indicator-color: #e53935;
+  --mat-form-field-filled-error-hover-label-text-color: #e53935;
+  --mat-form-field-filled-focus-active-indicator-color: #607d8b;
+  --mat-form-field-filled-focus-label-text-color: color-mix(in srgb, #607d8b 87%, transparent);
+  --mat-form-field-filled-hover-active-indicator-color: rgba(0, 0, 0, 0.87);
+  --mat-form-field-filled-hover-label-text-color: rgba(0, 0, 0, 0.54);
+  --mat-form-field-filled-input-text-color: rgba(0, 0, 0, 0.87);
+  --mat-form-field-filled-input-text-placeholder-color: rgba(0, 0, 0, 0.54);
+  --mat-form-field-filled-label-text-color: rgba(0, 0, 0, 0.54);
+  --mat-form-field-filled-label-text-tracking: 0.03125em;
+  --mat-form-field-focus-select-arrow-color: color-mix(in srgb, #607d8b 87%, transparent);
+  --mat-form-field-focus-state-layer-opacity: 0.12;
+  --mat-form-field-hover-state-layer-opacity: 0.04;
+  --mat-form-field-leading-icon-color: unset;
+  --mat-form-field-outlined-caret-color: #607d8b;
+  --mat-form-field-outlined-disabled-input-text-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-form-field-outlined-disabled-label-text-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-form-field-outlined-disabled-outline-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 12%, transparent);
+  --mat-form-field-outlined-error-hover-label-text-color: #e53935;
+  --mat-form-field-outlined-error-hover-outline-color: #e53935;
+  --mat-form-field-outlined-focus-label-text-color: color-mix(in srgb, #607d8b 87%, transparent);
+  --mat-form-field-outlined-focus-outline-color: #607d8b;
+  --mat-form-field-outlined-hover-label-text-color: rgba(0, 0, 0, 0.87);
+  --mat-form-field-outlined-hover-outline-color: rgba(0, 0, 0, 0.87);
+  --mat-form-field-outlined-input-text-color: rgba(0, 0, 0, 0.87);
+  --mat-form-field-outlined-input-text-placeholder-color: rgba(0, 0, 0, 0.54);
+  --mat-form-field-outlined-label-text-color: rgba(0, 0, 0, 0.54);
+  --mat-form-field-outlined-label-text-populated-size: 16px;
+  --mat-form-field-outlined-label-text-tracking: 0.03125em;
+  --mat-form-field-outlined-outline-color: rgba(0, 0, 0, 0.38);
+  --mat-form-field-select-disabled-option-text-color: GrayText;
+  --mat-form-field-select-option-text-color: inherit;
+  --mat-form-field-state-layer-color: rgba(0, 0, 0, 0.87);
+  --mat-form-field-subscript-text-line-height: 20px;
+  --mat-form-field-subscript-text-tracking: 0.0333333333em;
+  --mat-form-field-trailing-icon-color: unset;
+  --mat-icon-button-container-shape: 50%;
+  --mat-icon-button-disabled-icon-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-icon-button-disabled-state-layer-color: rgba(0, 0, 0, 0.54);
+  --mat-icon-button-hover-state-layer-opacity: 0.04;
+  --mat-icon-button-icon-color: inherit;
+  --mat-icon-button-ripple-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 12%, transparent);
+  --mat-icon-button-state-layer-color: rgba(0, 0, 0, 0.87);
+  --mat-icon-button-touch-target-display: none;
+  --mat-list-active-indicator-color: transparent;
+  --mat-list-active-indicator-shape: 4px;
+  --mat-list-list-item-disabled-label-text-color: rgba(0, 0, 0, 0.87);
+  --mat-list-list-item-disabled-label-text-opacity: 0.38;
+  --mat-list-list-item-disabled-leading-icon-color: rgba(0, 0, 0, 0.87);
+  --mat-list-list-item-disabled-state-layer-color: transparent;
+  --mat-list-list-item-disabled-state-layer-opacity: 0;
+  --mat-list-list-item-disabled-trailing-icon-color: rgba(0, 0, 0, 0.87);
+  --mat-list-list-item-focus-label-text-color: rgba(0, 0, 0, 0.87);
+  --mat-list-list-item-focus-state-layer-color: rgba(0, 0, 0, 0.87);
+  --mat-list-list-item-hover-label-text-color: rgba(0, 0, 0, 0.87);
+  --mat-list-list-item-hover-leading-icon-color: rgba(0, 0, 0, 0.54);
+  --mat-list-list-item-hover-state-layer-color: rgba(0, 0, 0, 0.87);
+  --mat-list-list-item-hover-state-layer-opacity: 0.04;
+  --mat-list-list-item-hover-trailing-icon-color: rgba(0, 0, 0, 0.54);
+  --mat-list-list-item-label-text-color: rgba(0, 0, 0, 0.87);
+  --mat-list-list-item-label-text-tracking: 0.03125em;
+  --mat-list-list-item-leading-avatar-color: transparent;
+  --mat-list-list-item-leading-avatar-shape: 50%;
+  --mat-list-list-item-leading-icon-color: rgba(0, 0, 0, 0.54);
+  --mat-list-list-item-leading-icon-end-space: 32px;
+  --mat-list-list-item-selected-container-color: transparent;
+  --mat-list-list-item-selected-trailing-icon-color: rgba(0, 0, 0, 0.54);
+  --mat-list-list-item-supporting-text-color: rgba(0, 0, 0, 0.54);
+  --mat-list-list-item-supporting-text-tracking: 0.0178571429em;
+  --mat-list-list-item-trailing-icon-color: rgba(0, 0, 0, 0.54);
+  --mat-list-list-item-trailing-supporting-text-color: rgba(0, 0, 0, 0.54);
+  --mat-list-list-item-trailing-supporting-text-line-height: 20px;
+  --mat-list-list-item-trailing-supporting-text-size: 12px;
+  --mat-list-list-item-trailing-supporting-text-tracking: 0.0333333333em;
+  --mat-list-list-item-trailing-supporting-text-weight: 400;
+  --mat-menu-divider-bottom-spacing: 0;
+  --mat-menu-divider-color: rgba(0, 0, 0, 0.12);
+  --mat-menu-divider-top-spacing: 0;
+  --mat-menu-item-focus-state-layer-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 12%, transparent);
+  --mat-menu-item-hover-state-layer-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 4%, transparent);
+  --mat-menu-item-icon-color: rgba(0, 0, 0, 0.87);
+  --mat-menu-item-label-text-color: rgba(0, 0, 0, 0.87);
+  --mat-menu-item-label-text-line-height: 24px;
+  --mat-menu-item-label-text-size: 16px;
+  --mat-menu-item-label-text-tracking: 0.03125em;
+  --mat-menu-item-label-text-weight: 400;
+  --mat-menu-item-leading-spacing: 16px;
+  --mat-menu-item-spacing: 16px;
+  --mat-menu-item-trailing-spacing: 16px;
+  --mat-menu-item-with-icon-leading-spacing: 16px;
+  --mat-menu-item-with-icon-trailing-spacing: 16px;
+  --mat-optgroup-label-text-color: rgba(0, 0, 0, 0.87);
+  --mat-optgroup-label-text-line-height: 24px;
+  --mat-optgroup-label-text-size: 16px;
+  --mat-optgroup-label-text-tracking: 0.03125em;
+  --mat-optgroup-label-text-weight: 400;
+  --mat-option-focus-state-layer-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 12%, transparent);
+  --mat-option-hover-state-layer-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 4%, transparent);
+  --mat-option-label-text-color: rgba(0, 0, 0, 0.87);
+  --mat-option-label-text-line-height: 24px;
+  --mat-option-label-text-tracking: 0.03125em;
+  --mat-option-selected-state-label-text-color: #607d8b;
+  --mat-option-selected-state-layer-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 12%, transparent);
+  --mat-paginator-container-background-color: white;
+  --mat-paginator-container-text-color: rgba(0, 0, 0, 0.87);
+  --mat-paginator-container-text-line-height: 20px;
+  --mat-paginator-container-text-tracking: 0.0333333333em;
+  --mat-paginator-disabled-icon-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-paginator-enabled-icon-color: rgba(0, 0, 0, 0.54);
+  --mat-progress-bar-active-indicator-color: #607d8b;
+  --mat-pseudo-checkbox-full-disabled-selected-checkmark-color: #fafafa;
+  --mat-pseudo-checkbox-full-disabled-selected-icon-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-pseudo-checkbox-full-disabled-unselected-icon-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-pseudo-checkbox-full-selected-checkmark-color: #fafafa;
+  --mat-pseudo-checkbox-full-selected-icon-color: #009688;
+  --mat-pseudo-checkbox-full-unselected-icon-color: rgba(0, 0, 0, 0.54);
+  --mat-pseudo-checkbox-minimal-disabled-selected-checkmark-color: color-mix(
+    in srgb,
+    rgba(0, 0, 0, 0.87) 38%,
+    transparent
+  );
+  --mat-pseudo-checkbox-minimal-selected-checkmark-color: #009688;
+  --mat-ripple-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 12%, transparent);
+  --mat-select-container-elevation-shadow:
+    0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+  --mat-select-disabled-arrow-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-select-disabled-trigger-text-color: color-mix(in srgb, rgba(0, 0, 0, 0.87) 38%, transparent);
+  --mat-select-enabled-arrow-color: rgba(0, 0, 0, 0.54);
+  --mat-select-enabled-trigger-text-color: rgba(0, 0, 0, 0.87);
+  --mat-select-focused-arrow-color: #607d8b;
+  --mat-select-panel-background-color: white;
+  --mat-select-placeholder-text-color: rgba(0, 0, 0, 0.54);
+  --mat-select-trigger-text-tracking: 0.03125em;
+  --mat-sidenav-container-background-color: white;
+  --mat-sidenav-container-divider-color: rgba(0, 0, 0, 0.12);
+  --mat-sidenav-container-elevation-shadow:
+    0px 8px 10px -5px rgba(0, 0, 0, 0.2), 0px 16px 24px 2px rgba(0, 0, 0, 0.14), 0px 6px 30px 5px rgba(0, 0, 0, 0.12);
+  --mat-sidenav-container-text-color: rgba(0, 0, 0, 0.87);
+  --mat-sidenav-container-width: auto;
+  --mat-sidenav-content-background-color: #fafafa;
+  --mat-sidenav-content-text-color: rgba(0, 0, 0, 0.87);
+  --mat-sidenav-scrim-color: rgba(0, 0, 0, 0.6);
+  --mat-sort-arrow-color: rgba(0, 0, 0, 0.87);
+  --mat-tab-disabled-ripple-color: rgba(0, 0, 0, 0.54);
+  --mat-tab-divider-color: transparent;
+  --mat-tab-divider-height: 0;
+  --mat-tab-inactive-focus-label-text-color: rgba(0, 0, 0, 0.54);
+  --mat-tab-inactive-hover-label-text-color: rgba(0, 0, 0, 0.54);
+  --mat-tab-inactive-ripple-color: #607d8b;
+  --mat-tab-label-text-line-height: 36px;
+  --mat-tab-label-text-tracking: 0.0892857143em;
+  --mat-tab-pagination-icon-color: rgba(0, 0, 0, 0.87);
+  --mat-table-background-color: white;
+  --mat-table-footer-supporting-text-tracking: 0.0178571429em;
+  --mat-table-header-headline-color: rgba(0, 0, 0, 0.87);
+  --mat-table-header-headline-line-height: 22px;
+  --mat-table-header-headline-tracking: 0.0071428571em;
+  --mat-table-row-item-label-text-color: rgba(0, 0, 0, 0.87);
+  --mat-table-row-item-label-text-tracking: 0.0178571429em;
+  --mat-table-row-item-outline-color: rgba(0, 0, 0, 0.12);
+  --mat-toolbar-container-background-color: white;
+  --mat-toolbar-container-text-color: rgba(0, 0, 0, 0.87);
+  --mat-toolbar-title-text-tracking: 0.0125em;
+  --mat-tooltip-container-color: #424242;
+  --mat-tooltip-supporting-text-color: white;
+  --mat-tooltip-supporting-text-tracking: 0.0333333333em;
+  --mdc-icon-button-state-layer-size: 40px;
+}

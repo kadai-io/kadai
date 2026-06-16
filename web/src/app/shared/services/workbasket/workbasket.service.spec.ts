@@ -208,7 +208,7 @@ describe('WorkbasketService', () => {
 
   describe('selectWorkBasket', () => {
     it('should emit the provided id via workBasketSelected subject', () => {
-      let emitted: string;
+      let emitted: string | undefined = '';
       service.getSelectedWorkBasket().subscribe((id) => (emitted = id));
 
       service.selectWorkBasket('wb-selected');
@@ -217,7 +217,7 @@ describe('WorkbasketService', () => {
     });
 
     it('should emit undefined when called without argument', () => {
-      let emitted: string = 'initial';
+      let emitted: string | undefined = 'initial';
       service.getSelectedWorkBasket().subscribe((id) => (emitted = id));
 
       service.selectWorkBasket();
@@ -236,7 +236,7 @@ describe('WorkbasketService', () => {
 
   describe('expandWorkbasketActionToolbar', () => {
     it('should emit true via workbasketActionToolbarExpanded subject', () => {
-      let emitted: boolean;
+      let emitted = false;
       service.getWorkbasketActionToolbarExpansion().subscribe((val) => (emitted = val));
 
       service.expandWorkbasketActionToolbar(true);
@@ -245,7 +245,7 @@ describe('WorkbasketService', () => {
     });
 
     it('should emit false via workbasketActionToolbarExpanded subject', () => {
-      let emitted: boolean;
+      let emitted = false;
       service.getWorkbasketActionToolbarExpansion().subscribe((val) => (emitted = val));
 
       service.expandWorkbasketActionToolbar(false);
@@ -264,7 +264,7 @@ describe('WorkbasketService', () => {
 
   describe('triggerWorkBasketSaved', () => {
     it('should emit a numeric timestamp via workBasketSaved subject', () => {
-      let emitted: number;
+      let emitted = 0;
       service.workbasketSavedTriggered().subscribe((val) => (emitted = val));
 
       service.triggerWorkBasketSaved();

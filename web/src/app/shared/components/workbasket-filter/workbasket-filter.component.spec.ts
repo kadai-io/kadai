@@ -71,11 +71,11 @@ describe('WorkbasketFilterComponent', () => {
 
     component.setFilter(inputFilter);
 
-    expect(component.filter()['description-like']).toEqual(['desc1']);
-    expect(component.filter()['key-like']).toEqual(['key1']);
-    expect(component.filter()['name-like']).toEqual(['name1']);
-    expect(component.filter()['owner-like']).toEqual(['owner1']);
-    expect(component.filter().type).toEqual([WorkbasketType.PERSONAL]);
+    expect(component.filter()!['description-like']).toEqual(['desc1']);
+    expect(component.filter()!['key-like']).toEqual(['key1']);
+    expect(component.filter()!['name-like']).toEqual(['name1']);
+    expect(component.filter()!['owner-like']).toEqual(['owner1']);
+    expect(component.filter()!.type).toEqual([WorkbasketType.PERSONAL]);
   });
 
   it('setFilter() should create independent copies of arrays (spreading)', () => {
@@ -89,29 +89,29 @@ describe('WorkbasketFilterComponent', () => {
 
     component.setFilter(inputFilter);
 
-    inputFilter['description-like'].push('desc2');
-    expect(component.filter()['description-like']).toEqual(['desc1']);
+    inputFilter['description-like']!.push('desc2');
+    expect(component.filter()!['description-like']).toEqual(['desc1']);
   });
 
   it('selectType() should set filter.type to [type] for non-ALL type', () => {
     component.setFilter(emptyFilter);
 
     component.selectType(WorkbasketType.PERSONAL);
-    expect(component.filter().type).toEqual([WorkbasketType.PERSONAL]);
+    expect(component.filter()!.type).toEqual([WorkbasketType.PERSONAL]);
   });
 
   it('selectType() should set filter.type to [] when WorkbasketType.ALL is passed', () => {
     component.setFilter({ ...emptyFilter, type: [WorkbasketType.PERSONAL] });
 
     component.selectType(WorkbasketType.ALL);
-    expect(component.filter().type).toEqual([]);
+    expect(component.filter()!.type).toEqual([]);
   });
 
   it('selectType() should set filter.type to [GROUP] for WorkbasketType.GROUP', () => {
     component.setFilter(emptyFilter);
 
     component.selectType(WorkbasketType.GROUP);
-    expect(component.filter().type).toEqual([WorkbasketType.GROUP]);
+    expect(component.filter()!.type).toEqual([WorkbasketType.GROUP]);
   });
 
   it('search() should dispatch SetWorkbasketFilter with current filter and component', () => {
@@ -120,7 +120,7 @@ describe('WorkbasketFilterComponent', () => {
 
     component.search();
 
-    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter(), component.component()));
+    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter()!, component.component()!));
   });
 
   it('clear() should dispatch ClearWorkbasketFilter for the current component', () => {
@@ -175,7 +175,7 @@ describe('WorkbasketFilterComponent', () => {
     searchButton.click();
     fixture.detectChanges();
 
-    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter(), component.component()));
+    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter()!, component.component()!));
   });
 
   it('should call clear() when undo button is clicked in collapsed mode', () => {
@@ -203,7 +203,7 @@ describe('WorkbasketFilterComponent', () => {
     nameInput.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
     fixture.detectChanges();
 
-    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter(), component.component()));
+    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter()!, component.component()!));
   });
 
   it('should call search() when Apply button is clicked in expanded mode', () => {
@@ -218,7 +218,7 @@ describe('WorkbasketFilterComponent', () => {
     applyButton.click();
     fixture.detectChanges();
 
-    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter(), component.component()));
+    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter()!, component.component()!));
   });
 
   it('should call selectType() when a menu item is clicked in expanded mode', () => {
@@ -254,7 +254,7 @@ describe('WorkbasketFilterComponent', () => {
     nameInput.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
     fixture.detectChanges();
 
-    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter(), component.component()));
+    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter()!, component.component()!));
   });
 
   it('should call search() when Enter key is pressed on key input in expanded mode', () => {
@@ -269,7 +269,7 @@ describe('WorkbasketFilterComponent', () => {
     keyInputs[0].dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
     fixture.detectChanges();
 
-    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter(), component.component()));
+    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter()!, component.component()!));
   });
 
   it('should call search() when Enter key is pressed on description input in expanded mode', () => {
@@ -284,7 +284,7 @@ describe('WorkbasketFilterComponent', () => {
     descriptionInputs[1].dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
     fixture.detectChanges();
 
-    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter(), component.component()));
+    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter()!, component.component()!));
   });
 
   it('should call search() when Enter key is pressed on owner input in expanded mode', () => {
@@ -299,7 +299,7 @@ describe('WorkbasketFilterComponent', () => {
     ownerInputs[1].dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
     fixture.detectChanges();
 
-    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter(), component.component()));
+    expect(dispatchSpy).toHaveBeenCalledWith(new SetWorkbasketFilter(component.filter()!, component.component()!));
   });
 
   it('should call clear() when Reset button is clicked in expanded mode', () => {
@@ -380,10 +380,10 @@ describe('WorkbasketFilterComponent', () => {
 
   it('selectType() should cover ALL branch: setting filter.type to [] via ALL_TYPES map', () => {
     component.selectType(WorkbasketType.PERSONAL);
-    expect(component.filter().type).toEqual([WorkbasketType.PERSONAL]);
+    expect(component.filter()!.type).toEqual([WorkbasketType.PERSONAL]);
 
     component.selectType(WorkbasketType.ALL);
-    expect(component.filter().type).toEqual([]);
+    expect(component.filter()!.type).toEqual([]);
   });
 
   it('should render menu items covering @for loop and both @if(value === All) and @if(value !== All) branches when menu is open', () => {

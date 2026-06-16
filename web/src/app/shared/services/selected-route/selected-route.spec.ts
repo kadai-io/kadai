@@ -46,7 +46,7 @@ describe('SelectedRouteService', () => {
   describe('selectRoute', () => {
     it('should emit "workplace" when URL contains workplace', () => {
       const event = new NavigationEnd(1, '/kadai/workplace', '/kadai/workplace');
-      let emitted: string;
+      let emitted = '';
       service.getSelectedRoute().subscribe((route) => (emitted = route));
 
       service.selectRoute(event);
@@ -56,7 +56,7 @@ describe('SelectedRouteService', () => {
 
     it('should emit "administration" when URL contains administration', () => {
       const event = new NavigationEnd(2, '/kadai/administration/workbaskets', '/kadai/administration/workbaskets');
-      let emitted: string;
+      let emitted = '';
       service.getSelectedRoute().subscribe((route) => (emitted = route));
 
       service.selectRoute(event);
@@ -66,7 +66,7 @@ describe('SelectedRouteService', () => {
 
     it('should emit "monitor" when URL contains monitor', () => {
       const event = new NavigationEnd(3, '/kadai/monitor', '/kadai/monitor');
-      let emitted: string;
+      let emitted = '';
       service.getSelectedRoute().subscribe((route) => (emitted = route));
 
       service.selectRoute(event);
@@ -76,7 +76,7 @@ describe('SelectedRouteService', () => {
 
     it('should emit "history" when URL contains history', () => {
       const event = new NavigationEnd(4, '/kadai/history', '/kadai/history');
-      let emitted: string;
+      let emitted = '';
       service.getSelectedRoute().subscribe((route) => (emitted = route));
 
       service.selectRoute(event);
@@ -86,7 +86,7 @@ describe('SelectedRouteService', () => {
 
     it('should emit "settings" when URL contains settings', () => {
       const event = new NavigationEnd(5, '/kadai/settings', '/kadai/settings');
-      let emitted: string;
+      let emitted = '';
       service.getSelectedRoute().subscribe((route) => (emitted = route));
 
       service.selectRoute(event);
@@ -96,7 +96,7 @@ describe('SelectedRouteService', () => {
 
     it('should emit empty string when URL does not match any known route', () => {
       const event = new NavigationEnd(6, '/unknown/path', '/unknown/path');
-      let emitted: string;
+      let emitted = '';
       service.getSelectedRoute().subscribe((route) => (emitted = route));
 
       service.selectRoute(event);
@@ -117,7 +117,7 @@ describe('SelectedRouteService', () => {
 
     it('should use urlAfterRedirects for route detection', () => {
       const event = new NavigationEnd(1, '/original-url', '/kadai/workplace');
-      let emitted: string;
+      let emitted = '';
       service.getSelectedRoute().subscribe((route) => (emitted = route));
 
       service.selectRoute(event);

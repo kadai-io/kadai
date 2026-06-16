@@ -37,7 +37,7 @@ export class IconTypeComponent {
   iconSize = computed(() => (this.size() === 'large' ? '24' : '16'));
   iconColor = computed(() => (this.selected() ? 'white' : '#555'));
 
-  getIconPath(type: WorkbasketType) {
+  getIconPath(type: WorkbasketType | undefined) {
     switch (type) {
       case WorkbasketType.PERSONAL:
         return 'user.svg';

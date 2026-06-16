@@ -1,0 +1,31 @@
+# Quick usage scenario used for testing purposes
+
+name: KADAI - PostgreSQL - Quick
+author: envite consulting GmbH
+description: Quick usage scenario used for testing purposes
+
+compose-file: !include compose.yml
+
+custom_metrics:
+  response_time_avg:
+    unit: us
+    regex: ^(\d+) http_req_duration_avg\s+([\d\.]+)
+  response_time_min:
+    unit: us
+    regex: ^(\d+) http_req_duration_min\s+([\d\.]+)
+  response_time_max:
+    unit: us
+    regex: ^(\d+) http_req_duration_max\s+([\d\.]+)
+  response_time_p95:
+    unit: us
+    regex: ^(\d+) http_req_duration_p95\s+([\d\.]+)
+  throughput:
+    unit: "reqs per s"
+    regex: ^(\d+) http_reqs_per_second\s+([\d\.]+)
+
+flow:
+  - name: Testing
+    container: k6
+    commands:
+      - type: console
+        command: k6 run /tmp/repo/qa/gmt/k6/quick.js

@@ -66,7 +66,7 @@ import { DatePipe } from '@angular/common';
 })
 export class TaskHistoryQueryComponent implements AfterViewInit {
   data = signal<TaskHistoryEventData[]>([]);
-  displayedColumns: Pair<string, TaskHistoryQuerySortParameter>[] = [
+  displayedColumns: Pair<string, TaskHistoryQuerySortParameter | undefined>[] = [
     {
       left: 'parentBusinessProcessId',
       right: TaskHistoryQuerySortParameter.PARENT_BUSINESS_PROCESS_ID
@@ -102,7 +102,7 @@ export class TaskHistoryQueryComponent implements AfterViewInit {
     { left: 'oldData', right: undefined },
     { left: 'newData', right: undefined }
   ];
-  pageInformation = signal<Page>(undefined);
+  pageInformation = signal<Page | undefined>(undefined);
   pageParameter: QueryPagingParameter = {
     page: 1,
     'page-size': 9
@@ -145,10 +145,8 @@ export class TaskHistoryQueryComponent implements AfterViewInit {
 
   updateSortParameter(sort: Sort): void {
     if (sort) {
-      const pair: Pair<string, TaskHistoryQuerySortParameter> = this.displayedColumns.find(
-        (pair) => pair.left === sort.active
-      );
-      if (pair) {
+      const pair = this.displayedColumns.find((pair) => pair.left === sort.active);
+      if (pair && pair.right) {
         this.sortParameter = {
           'sort-by': pair.right,
           order: sort.direction === 'asc' ? Direction.ASC : Direction.DESC

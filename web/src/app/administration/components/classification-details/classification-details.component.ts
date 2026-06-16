@@ -25,7 +25,7 @@ import { highlight } from 'app/shared/animations/validation.animation';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 
 import { DomainService } from 'app/shared/services/domain/domain.service';
-import { FormsModule, NgForm } from '@angular/forms';
+import { FormsModule, NgForm, NgModel } from '@angular/forms';
 import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
 import { ImportExportService } from 'app/administration/services/import-export.service';
 import { map, take, takeUntil } from 'rxjs/operators';
@@ -33,7 +33,12 @@ import { EngineConfigurationSelectors } from 'app/shared/store/engine-configurat
 import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
 import { AsyncPipe, Location } from '@angular/common';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { ClassificationCategoryImages, CustomField, getCustomFields } from '../../../shared/models/customisation';
+import {
+  ClassificationCategoryImages,
+  CustomField,
+  CustomFields,
+  getCustomFields
+} from '../../../shared/models/customisation';
 import { Classification } from '../../../shared/models/classification';
 import { customFieldCount } from '../../../shared/models/classification-summary';
 
@@ -91,7 +96,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   ]
 })
 export class ClassificationDetailsComponent implements OnInit, OnDestroy {
-  classification = signal<Classification>(undefined);
+  classification = signal<Classification | undefined>(undefined);
   isCreatingNewClassification = computed(() => typeof this.classification()?.classificationId === 'undefined');
   categories$: Observable<string[]> = inject(Store).select(ClassificationSelectors.selectCategories);
   categoryIcons$: Observable<ClassificationCategoryImages> = inject(Store).select(
@@ -101,12 +106,12 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
     ClassificationSelectors.selectedClassification
   );
   badgeMessage$: Observable<string> = inject(Store).select(ClassificationSelectors.getBadgeMessage);
-  customFields$: Observable<CustomField[]>;
+  customFields$!: Observable<CustomField[]>;
   readonly lengthError = 'You have reached the maximum length for this field';
   inputOverflowMap = toSignal(inject(FormsValidatorService).inputOverflowObservable, {
     initialValue: new Map<string, boolean>()
   });
-  validateInputOverflow: Function;
+  validateInputOverflow!: Function;
   requestInProgress = toSignal(inject(RequestInProgressService).getRequestInProgress(), { initialValue: false });
   classificationForm = viewChild<NgForm>('ClassificationForm');
   toggleValidationMap = new Map<string, boolean>();
@@ -121,7 +126,7 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.customFields$ = this.store.select(EngineConfigurationSelectors.classificationsCustomisation).pipe(
-      map((customisation) => customisation.information),
+      map((customisation) => customisation?.information ?? ({} as CustomFields)),
       getCustomFields(customFieldCount)
     );
 
@@ -133,10 +138,10 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
       .getImportingFinished()
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        this.store.dispatch(new SelectClassification(this.classification()!.classificationId));
+        this.store.dispatch(new SelectClassification(this.classification()!.classificationId!));
       });
 
-    this.validateInputOverflow = (inputFieldModel, maxLength) => {
+    this.validateInputOverflow = (inputFieldModel: NgModel, maxLength: number) => {
       this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
     };
   }
@@ -160,7 +165,7 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   onRestore() {
     this.formsValidatorService.formSubmitAttempt = false;
     this.store
-      .dispatch(new RestoreSelectedClassification(this.classification()!.classificationId))
+      .dispatch(new RestoreSelectedClassification(this.classification()!.classificationId!))
       .pipe(take(1))
       .subscribe(() => {
         this.notificationsService.showSuccess('CLASSIFICATION_RESTORE');
@@ -192,7 +197,7 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   validChanged(): void {
     this.classification.update((classification) => ({
       ...classification,
-      isValidInDomain: !classification.isValidInDomain
+      isValidInDomain: !classification?.isValidInDomain
     }));
   }
 

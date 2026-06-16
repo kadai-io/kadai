@@ -252,7 +252,7 @@ describe('WorkbasketDetailsComponent', () => {
 
   it('should update workbasket after UpdateWorkbasket action succeeds', async () => {
     await store
-      .dispatch(new UpdateWorkbasket(selectedWorkbasketMock._links.self.href, selectedWorkbasketMock))
+      .dispatch(new UpdateWorkbasket(selectedWorkbasketMock._links!.self.href, selectedWorkbasketMock))
       .toPromise();
     expect(workbasketServiceMock.updateWorkbasket).toHaveBeenCalled();
   });

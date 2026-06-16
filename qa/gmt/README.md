@@ -4,6 +4,13 @@ We are using the [Green Metrics Tool (GMT)](https://www.green-coding.io/products
 
 GMT Documentation: <https://docs.green-coding.io>
 
+## Setup
+
+* GMT for measuring the resource and energy consumption
+* [k6](https://k6.io/) for the automation (calls different API endpoints of the KADAI backend)
+* PostgreSQL as the database for KADAI
+* [KADAI Spring Example App](https://github.com/kadai-io/kadai/tree/master/lib/kadai-spring-example) (slightly modified) as the target subject
+
 ## Local Execution (Testing)
 
 Local execution is only relevant for testing purposes. To make representative measurements, use the [Measurement Cluster](#measurement-cluster-real-measurements) (see below).
@@ -20,7 +27,7 @@ You can either run a local measurement using a cloned KADAI repository on your l
 * using cloned repository (change the path "$HOME/kadai" if necessary):
   
   ```sh
-  python3 runner.py --name "KADAI REST Spring Example Application" --uri "$HOME/kadai" --filename "qa/gmt/usage_scenario.yml" --skip-unsafe --skip-optimizations --dev-no-system-checks --dev-no-sleeps
+  python3 runner.py --name "KADAI REST Spring Example Application" --uri "$HOME/kadai" --filename "qa/gmt/usage_scenario_quick.yml" --skip-unsafe --skip-optimizations --dev-no-system-checks --dev-no-sleeps
   ```
 
 * using remote URI:
@@ -43,33 +50,30 @@ A new measurement on the measurement cluster can be triggered via:
 * the UI: <https://metrics.green-coding.io/request.html>
 * the API: <https://api.green-coding.io/docs#/default/software_add_v1_software_add_post>
 
-For easier use of the API a Python script can be used: [submit_software.py](https://github.com/green-coding-solutions/gmt-helpers/blob/main/api/submit_software.py)
+For easier use of the API you can use the script [./scripts/submit_software.py](./scripts/submit_software.py). See the [./scripts/README.md](./scripts/README.md) for more information.
 
-To compare energy efficiency, we use the machine "CO2 Benchmarking (DVFS OFF, TB OFF, HT OFF) * TX1330 M2" (details can be found in the [GMT documentation](https://docs.green-coding.io/docs/measuring/measurement-cluster/)).
+We use the machine "CO2 Benchmarking (DVFS OFF, TB OFF, HT OFF) - TX1330 M2 [PREMIUM]", because this machine is tuned for reproducability. Details about the machine can be found in the [GMT documentation](https://docs.green-coding.io/docs/measuring/measurement-cluster/).
+
+The results of the runs that we made public can be seen here:
+<https://metrics.green-coding.io/runs.html?name=KADAI&show_archived=false&show_other_users=true>
 
 ## Blauer Engel Certification
 
-For the "Blauer Engel" certification we use the following setup:
+The measurement setup for the "Blauer Engel for Software" certification is defined in the GMT usage scenario file [usage_scenario_blue_angel.yml](./usage_scenario_blue_angel.yml).
 
-* GMT for measuring the resource and energy consumption
-* [k6](https://k6.io/) for the automation
-* PostgreSQL as the database for KADAI
-* [KADAI Spring Example App](https://github.com/kadai-io/kadai/tree/master/lib/kadai-spring-example) (slightly modified) as the target subject
-* Phases:
-  * **Warm-up:** stabilizes JIT/caches.
-  * **Pause:** creates a clean visual/temporal separation in GMT graphs.
-  * **Standard Usage:** runs the measured scenario.
-      `--log-format=raw`, `--log-output=stdout`, and `read-notes-stdout: true` enable timestamped notes so GMT can align k6 steps with energy/time series.
+The scenario is split into three phases:
 
-The measurement setup is defined in a **GMT usage scenario file**: [usage_scenario.yml](./usage_scenario.yml). 
+1. **Warm-up:**: [k6/blue_angel/1_warm_up.js](./k6/blue_angel/1_warm_up.js)
 
-### Phases
+   * primes the JVM (JIT) and caches so that the subsequent measurement reflects steady-state behavior
 
-* **Warm-up**
-  `k6/WarmUpSzenario.js` — primes the JVM (JIT) and caches so that the subsequent measurement reflects steady-state behavior.
+2. **Pause:** [k6/blue_angel/2_pause.js](./k6/blue_angel/2_pause.js)
 
-* **Pause between warm-up and standard usage scenario**
-  `k6/PauseBeforeMeasurement.js` — provides a clearly separated time window between phases (useful for charts/notes and avoiding cross-contamination of metrics).
+   * provides a clearly separated time window between phases (useful for charts/notes and avoiding cross-contamination of metrics)
 
-* **Standard usage scenario (measurement)**
-  `k6/NutzungsszenarioBlauerEngel.js` — realistic, parallel-user workflow covering the everyday task lifecycle (create, read, edit, assign/claim, move, comment, complete), workbasket operations (search/open), and a single monitoring report. Steps are synchronized with short gaps to aid interpretation.
+3. **Standard usage scenario (actual measurement)**: [k6/blue_angel/3_standard_usage_scenario.js](./k6/blue_angel/3_standard_usage_scenario.js)
+
+   * realistic, parallel-user workflow covering the everyday task lifecycle (create, read, edit, assign/claim, move, comment, complete), workbasket operations (search/open), and a single monitoring report
+   * steps are synchronized with short gaps to aid interpretation
+
+To see the results, refer to the [🌱 Sustainability](../../README.md#-sustainability) section in the README file at the root of the repository.

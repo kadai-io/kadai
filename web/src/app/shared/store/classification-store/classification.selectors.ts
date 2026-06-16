@@ -47,7 +47,7 @@ export class ClassificationSelectors {
   }
 
   @Selector([ClassificationState])
-  static selectedClassificationId(state: ClassificationStateModel): string {
+  static selectedClassificationId(state: ClassificationStateModel): string | undefined {
     return state.selectedClassification?.classificationId;
   }
 

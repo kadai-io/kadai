@@ -35,9 +35,9 @@ describe('SidenavListComponent', () => {
   let component: SidenavListComponent;
   let fixture: ComponentFixture<SidenavListComponent>;
   let debugElement: DebugElement;
-  let KadaiEngineServiceSpy: Partial<KadaiEngineService>;
-  let SidenavServiceSpy: Partial<SidenavService>;
-  let RequestInProgressServiceSpy: Partial<RequestInProgressService>;
+  let KadaiEngineServiceSpy: any;
+  let SidenavServiceSpy: any;
+  let RequestInProgressServiceSpy: any;
 
   beforeEach(async () => {
     KadaiEngineServiceSpy = {
@@ -96,7 +96,7 @@ describe('SidenavListComponent', () => {
   });
 
   it('should show all links if user has only monitor access', () => {
-    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles) => {
+    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles: string[]) => {
       return JSON.stringify(roles) === JSON.stringify(Object.values(MonitorRoles));
     });
     vi.mocked(KadaiEngineServiceSpy.isHistoryProviderEnabled).mockReturnValue(of(false));
@@ -117,7 +117,7 @@ describe('SidenavListComponent', () => {
   });
 
   it('should show workplace links when user has workplace access only', () => {
-    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles) => {
+    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles: string[]) => {
       return JSON.stringify(roles) === JSON.stringify(Object.values(UserRoles));
     });
     vi.mocked(KadaiEngineServiceSpy.isHistoryProviderEnabled).mockReturnValue(of(false));
@@ -137,7 +137,7 @@ describe('SidenavListComponent', () => {
   });
 
   it('should show settings link when user has admin access', () => {
-    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles) => {
+    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles: string[]) => {
       return JSON.stringify(roles) === JSON.stringify(Object.values(BusinessAdminRoles));
     });
     vi.mocked(KadaiEngineServiceSpy.isHistoryProviderEnabled).mockReturnValue(of(false));
@@ -157,7 +157,7 @@ describe('SidenavListComponent', () => {
   });
 
   it('should call sidenavService.toggleSidenav when monitor link is clicked', () => {
-    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles) => {
+    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles: string[]) => {
       return JSON.stringify(roles) === JSON.stringify(Object.values(MonitorRoles));
     });
     vi.mocked(KadaiEngineServiceSpy.isHistoryProviderEnabled).mockReturnValue(of(false));
@@ -169,7 +169,7 @@ describe('SidenavListComponent', () => {
   });
 
   it('should call sidenavService.toggleSidenav when workplace link is clicked', () => {
-    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles) => {
+    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles: string[]) => {
       return JSON.stringify(roles) === JSON.stringify(Object.values(UserRoles));
     });
     vi.mocked(KadaiEngineServiceSpy.isHistoryProviderEnabled).mockReturnValue(of(false));
@@ -191,7 +191,7 @@ describe('SidenavListComponent', () => {
   });
 
   it('should call sidenavService.toggleSidenav when settings link is clicked', () => {
-    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles) => {
+    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles: string[]) => {
       return JSON.stringify(roles) === JSON.stringify(Object.values(BusinessAdminRoles));
     });
     vi.mocked(KadaiEngineServiceSpy.isHistoryProviderEnabled).mockReturnValue(of(false));
@@ -212,7 +212,7 @@ describe('SidenavListComponent', () => {
   });
 
   it('should call sidenavService.toggleSidenav when administration parent link is clicked', () => {
-    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles) => {
+    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles: string[]) => {
       return JSON.stringify(roles) === JSON.stringify(Object.values(BusinessAdminRoles));
     });
     vi.mocked(KadaiEngineServiceSpy.isHistoryProviderEnabled).mockReturnValue(of(false));
@@ -224,7 +224,7 @@ describe('SidenavListComponent', () => {
   });
 
   it('should call sidenavService.toggleSidenav when classifications link is clicked', () => {
-    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles) => {
+    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles: string[]) => {
       return JSON.stringify(roles) === JSON.stringify(Object.values(BusinessAdminRoles));
     });
     vi.mocked(KadaiEngineServiceSpy.isHistoryProviderEnabled).mockReturnValue(of(false));
@@ -236,7 +236,7 @@ describe('SidenavListComponent', () => {
   });
 
   it('should call sidenavService.toggleSidenav when access items link is clicked', () => {
-    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles) => {
+    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles: string[]) => {
       return JSON.stringify(roles) === JSON.stringify(Object.values(BusinessAdminRoles));
     });
     vi.mocked(KadaiEngineServiceSpy.isHistoryProviderEnabled).mockReturnValue(of(false));
@@ -258,7 +258,7 @@ describe('SidenavListComponent', () => {
   });
 
   it('should call sidenavService.toggleSidenav when workplace workbaskets sub-link is clicked', () => {
-    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles) => {
+    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles: string[]) => {
       return JSON.stringify(roles) === JSON.stringify(Object.values(UserRoles));
     });
     vi.mocked(KadaiEngineServiceSpy.isHistoryProviderEnabled).mockReturnValue(of(false));
@@ -270,7 +270,7 @@ describe('SidenavListComponent', () => {
   });
 
   it('should call sidenavService.toggleSidenav when workplace task-search sub-link is clicked', () => {
-    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles) => {
+    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles: string[]) => {
       return JSON.stringify(roles) === JSON.stringify(Object.values(UserRoles));
     });
     vi.mocked(KadaiEngineServiceSpy.isHistoryProviderEnabled).mockReturnValue(of(false));
@@ -282,7 +282,7 @@ describe('SidenavListComponent', () => {
   });
 
   it('should call setRequestInProgress when navigating to a different route', () => {
-    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles) => {
+    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles: string[]) => {
       return JSON.stringify(roles) === JSON.stringify(Object.values(MonitorRoles));
     });
     vi.mocked(KadaiEngineServiceSpy.isHistoryProviderEnabled).mockReturnValue(of(false));
@@ -294,7 +294,7 @@ describe('SidenavListComponent', () => {
   });
 
   it('should not call setRequestInProgress when current URL already contains the target route', () => {
-    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles) => {
+    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles: string[]) => {
       return JSON.stringify(roles) === JSON.stringify(Object.values(MonitorRoles));
     });
     vi.mocked(KadaiEngineServiceSpy.isHistoryProviderEnabled).mockReturnValue(of(false));
@@ -308,7 +308,7 @@ describe('SidenavListComponent', () => {
   });
 
   it('should toggle the toggle property on each click', () => {
-    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles) => {
+    vi.mocked(KadaiEngineServiceSpy.hasRole).mockImplementation((roles: string[]) => {
       return JSON.stringify(roles) === JSON.stringify(Object.values(MonitorRoles));
     });
     vi.mocked(KadaiEngineServiceSpy.isHistoryProviderEnabled).mockReturnValue(of(false));

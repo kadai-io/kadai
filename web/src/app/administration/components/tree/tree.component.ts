@@ -34,7 +34,7 @@ import {
 import { TreeNodeModel } from 'app/administration/models/tree-node';
 
 import { ITreeOptions, KEYS, TREE_ACTIONS, TreeComponent, TreeModule } from '@ali-hm/angular-tree-component';
-import { combineLatest, Observable, Subject } from 'rxjs';
+import { combineLatest, firstValueFrom, Observable, Subject } from 'rxjs';
 import { filter, map, takeUntil } from 'rxjs/operators';
 import { Store } from '@ngxs/store';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
@@ -63,18 +63,18 @@ import { toSignal } from '@angular/core/rxjs-interop';
   imports: [TreeModule, SvgIconComponent, MatTooltip]
 })
 export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDestroy {
-  treeNodes = signal<TreeNodeModel[]>(undefined);
+  treeNodes = signal<TreeNodeModel[] | undefined>(undefined);
   categoryIcons = toSignal(inject(Store).select(EngineConfigurationSelectors.selectCategoryIcons), {
     requireSync: true
   });
   emptyTreeNodes = false;
-  filter: string;
-  category: string;
-  selectNodeId = signal<string>(undefined);
+  filter = '';
+  category = '';
+  selectNodeId = signal<string | undefined>(undefined);
   filterText = input<string>();
   filterIcon = input('');
   switchKadaiSpinnerEmit = output<boolean>();
-  selectedClassificationId$: Observable<string> = inject(Store).select(
+  selectedClassificationId$: Observable<string | undefined> = inject(Store).select(
     ClassificationSelectors.selectedClassificationId
   );
   classifications$: Observable<Classification[]> = inject(Store).select(ClassificationSelectors.classifications);
@@ -106,7 +106,7 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
   private tree = viewChild.required<TreeComponent>('tree');
   _selectNodeIdInput = input<string>(undefined, { alias: 'selectNodeId' });
 
-  private filterTextOld: string;
+  private filterTextOld?: string;
   private filterIconOld = '';
   private destroy$ = new Subject<void>();
 
@@ -120,7 +120,7 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
   }
 
   @HostListener('document:click', ['$event'])
-  onDocumentClick(event) {
+  onDocumentClick(event: any) {
     if (this.checkValidElements(event) && this.tree().treeModel.getActiveNode()) {
       this.deselectActiveNode();
     }
@@ -159,8 +159,9 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
       this.selectNode(this.selectNodeId());
     }
 
-    if (this.selectNodeId() != null) {
-      const node = this.getNode(this.selectNodeId());
+    const selectedNodeId = this.selectNodeId();
+    if (selectedNodeId != null) {
+      const node = this.getNode(selectedNodeId);
       if (node != null) {
         node.ensureVisible();
       }
@@ -169,8 +170,11 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
     if (this.filterTextOld !== this.filterText() || this.filterIconOld !== this.filterIcon()) {
       this.filterIconOld = this.filterIcon();
       this.filterTextOld = this.filterText();
-      this.filterNodes(this.filterText() ? this.filterText() : '', this.filterIcon());
-      this.manageTreeState();
+      const nodes = this.treeNodes();
+      if (nodes && nodes.length > 0) {
+        this.filterNodes(this.filterText() ?? '', this.filterIcon());
+        this.manageTreeState();
+      }
     }
   }
 
@@ -189,7 +193,7 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
     }
   }
 
-  async onMoveNode($event) {
+  async onMoveNode($event: any) {
     this.switchKadaiSpinner(true);
     const classification = await this.getClassification($event.node.classificationId);
     classification.parentId = $event.to.parent.classificationId;
@@ -198,7 +202,7 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
     this.updateClassification(classification);
   }
 
-  async onDrop($event) {
+  async onDrop($event: any) {
     if ($event.event.target.tagName === 'TREE-VIEWPORT') {
       this.switchKadaiSpinner(true);
       const classification = await this.getClassification($event.element.data.classificationId);
@@ -235,7 +239,7 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
     return node.data.category.toUpperCase() === iconText.toUpperCase() || iconText === '';
   }
 
-  private selectNode(nodeId: string) {
+  private selectNode(nodeId: string | undefined) {
     if (nodeId) {
       const selectedNode = this.getNode(nodeId);
       if (selectedNode) {
@@ -255,9 +259,9 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
     return this.tree().treeModel.getNodeById(nodeId);
   }
 
-  private filterNodes(filterText, category) {
+  private filterNodes(filterText: string, category: string) {
     this.tree().treeModel.filterNodes(
-      (node) => this.checkNameAndKey(node, filterText) && this.checkIcon(node, category)
+      (node: any) => this.checkNameAndKey(node, filterText) && this.checkIcon(node, category)
     );
     this.filter = filterText;
     this.category = category || 'ALL';
@@ -271,7 +275,7 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
     }
   }
 
-  private checkValidElements(event): boolean {
+  private checkValidElements(event: any): boolean {
     return (
       (this.elementRef.nativeElement.contains(event.target) || this.elementRef.nativeElement === event.target) &&
       (event.target.localName === 'tree-viewport' || event.target.localName === 'kadai-tree')
@@ -279,7 +283,7 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
   }
 
   private getClassification(classificationId: string): Promise<Classification> {
-    return this.classificationsService.getClassification(classificationId).toPromise();
+    return firstValueFrom(this.classificationsService.getClassification(classificationId));
   }
 
   private updateClassification(classification: Classification) {

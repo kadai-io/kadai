@@ -62,12 +62,12 @@ import { TaskAttributeValueComponent } from '../task-attribute-value/task-attrib
   ]
 })
 export class TaskDetailsComponent implements OnInit, OnDestroy {
-  task: Task;
-  taskClone: Task;
+  task?: Task;
+  taskClone?: Task;
   requestInProgress = false;
   tabSelected = 'general';
-  currentWorkbasket: Workbasket;
-  currentId: string;
+  currentWorkbasket?: Workbasket;
+  currentId!: string;
   showDetail = false;
   toggleFormValidation = false;
   destroy$ = new Subject<void>();
@@ -78,10 +78,10 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   private requestInProgressService = inject(RequestInProgressService);
   private notificationService = inject(NotificationService);
   private masterAndDetailService = inject(MasterAndDetailService);
-  private routeSubscription: Subscription;
-  private workbasketSubscription: Subscription;
-  private masterAndDetailSubscription: Subscription;
-  private deleteTaskSubscription: Subscription;
+  private routeSubscription!: Subscription;
+  private workbasketSubscription!: Subscription;
+  private masterAndDetailSubscription!: Subscription;
+  private deleteTaskSubscription!: Subscription;
 
   ngOnInit() {
     this.workbasketSubscription = this.workplaceService.getSelectedWorkbasket().subscribe((workbasket) => {
@@ -160,13 +160,15 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   }
 
   deleteTaskConfirmation(): void {
+    if (!this.task) return;
+    const taskToDelete = this.task;
     this.deleteTaskSubscription = this.taskService
-      .deleteTask(this.task)
+      .deleteTask(taskToDelete)
       .pipe(take(1))
       .subscribe(() => {
-        this.notificationService.showSuccess('TASK_DELETE', { taskName: this.task.name });
+        this.notificationService.showSuccess('TASK_DELETE', { taskName: taskToDelete.name });
         this.taskService.publishTaskDeletion();
-        this.task = null;
+        this.task = undefined;
         this.router.navigate(['kadai/workplace/tasks'], { queryParamsHandling: 'merge' });
       });
   }
@@ -204,6 +206,7 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   }
 
   private updateTask() {
+    if (!this.task) return;
     this.requestInProgressService.setRequestInProgress(true);
     trimObject(this.task);
     this.taskService.updateTask(this.task).subscribe({
@@ -221,6 +224,7 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   }
 
   private createTask() {
+    if (!this.task) return;
     this.requestInProgressService.setRequestInProgress(true);
     this.addDateToTask();
     trimObject(this.task);
@@ -243,12 +247,14 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   }
 
   private addDateToTask() {
+    if (!this.task) return;
     const date = KadaiDate.getDate();
     this.task.created = date;
     this.task.modified = date;
   }
 
   private cloneTask() {
+    if (!this.task) return;
     this.taskClone = { ...this.task };
     this.taskClone.customAttributes = this.task.customAttributes?.slice(0) || [];
     this.taskClone.callbackInfo = this.task.callbackInfo?.slice(0) || [];

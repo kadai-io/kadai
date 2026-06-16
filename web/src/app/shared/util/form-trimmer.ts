@@ -18,7 +18,10 @@
 
 import { NgForm } from '@angular/forms';
 
-export function trimForm(form: NgForm) {
+export function trimForm(form: NgForm | undefined) {
+  if (!form) {
+    return;
+  }
   Object.keys(form.form.controls).forEach((controlName) => {
     let control = form.form.controls[controlName];
     if (typeof control.value === 'string') {
@@ -27,7 +30,7 @@ export function trimForm(form: NgForm) {
   });
 }
 
-export function trimObject(object: Object) {
+export function trimObject(object: { [key: string]: any }) {
   Object.keys(object).forEach((controlName) => {
     let prop = object[controlName];
     if (typeof prop === 'string') {

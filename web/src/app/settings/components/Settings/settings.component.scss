@@ -84,7 +84,3 @@
     color: colors.$aquamarine;
   }
 }
-
-::ng-deep .ng-invalid.ng-touched:not(form) {
-  box-shadow: unset;
-}

@@ -38,7 +38,7 @@ export class FormsValidatorService {
     return this.inputOverflow.asObservable();
   }
 
-  async validateFormInformation(form: NgForm, toggleValidationMap: Map<any, boolean>): Promise<any> {
+  async validateFormInformation(form: NgForm | undefined, toggleValidationMap: Map<any, boolean>): Promise<any> {
     let validSync = true;
     if (!form) {
       return false;
@@ -83,7 +83,7 @@ export class FormsValidatorService {
   }
 
   async validateFormAccess(form: FormArray, toggleValidationAccessIdMap: Map<any, boolean>): Promise<boolean> {
-    const ownerPromise: Array<Promise<boolean>> = new Array<Promise<boolean>>();
+    const ownerPromise: Array<Promise<any>> = new Array<Promise<any>>();
 
     for (let i = 0; i < form.length; i++) {
       ownerPromise.push(
@@ -99,7 +99,7 @@ export class FormsValidatorService {
 
     let result = true;
     const values = await Promise.all(ownerPromise);
-    let responseOwner;
+    let responseOwner: ResponseOwner | undefined;
     values.forEach((owner) => {
       responseOwner = new ResponseOwner(owner);
       result = result && responseOwner.valid;
@@ -134,7 +134,7 @@ export class FormsValidatorService {
     return result;
   }
 
-  isFieldValid(ngForm: NgForm, field: string): boolean {
+  isFieldValid(ngForm: NgForm | undefined, field: string): boolean {
     if (!ngForm || !ngForm.form.controls || !ngForm.form.controls[field]) {
       return false;
     }
@@ -149,7 +149,7 @@ export class FormsValidatorService {
 
   validateInputOverflow(inputFieldModel: NgModel, maxLength: Number, event?: any): void {
     if (this.overflowErrorSubscriptionMap.has(inputFieldModel.name)) {
-      this.overflowErrorSubscriptionMap.get(inputFieldModel.name).unsubscribe();
+      this.overflowErrorSubscriptionMap.get(inputFieldModel.name)?.unsubscribe();
     }
     if (inputFieldModel.value.length >= maxLength) {
       this.inputOverflowInternalMap.set(inputFieldModel.name, true);
@@ -167,7 +167,12 @@ export class FormsValidatorService {
   }
 }
 
-function ResponseOwner(owner) {
-  this.valid = owner.valid;
-  this.field = owner.field;
+class ResponseOwner {
+  valid: any;
+  field: string;
+
+  constructor(owner: any) {
+    this.valid = owner.valid;
+    this.field = owner.field;
+  }
 }

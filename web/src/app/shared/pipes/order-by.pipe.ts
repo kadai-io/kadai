@@ -21,16 +21,20 @@ import { Pipe, PipeTransform } from '@angular/core';
 @Pipe({ name: 'orderBy' })
 export class OrderBy implements PipeTransform {
   transform(records: Object[], sortKeys?: string[]): any {
+    const keys = sortKeys;
+    if (!keys) {
+      return records;
+    }
     return records.sort((a, b) => {
-      for (let i = 0; i < sortKeys.length; i++) {
-        let sortKey = sortKeys[i];
+      for (let i = 0; i < keys.length; i++) {
+        let sortKey = keys[i];
         let direction = 1;
         if (sortKey.charAt(0) === '-') {
           direction = -1;
           sortKey = sortKey.substring(1);
         }
-        const objectA = a[sortKey] ? a[sortKey].toLowerCase() : '';
-        const objectB = b[sortKey] ? b[sortKey].toLowerCase() : '';
+        const objectA = (a as any)[sortKey] ? (a as any)[sortKey].toLowerCase() : '';
+        const objectB = (b as any)[sortKey] ? (b as any)[sortKey].toLowerCase() : '';
         if (objectA < objectB) {
           return -1 * direction;
         }

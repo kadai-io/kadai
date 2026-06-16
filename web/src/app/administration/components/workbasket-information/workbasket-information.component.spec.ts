@@ -120,7 +120,7 @@ describe('WorkbasketInformationComponent', () => {
   it('should create clone of workbasket when workbasket value changes', () => {
     fixture.componentRef.setInput('action', ACTION.READ);
     fixture.detectChanges();
-    expect(component.workbasketClone).toMatchObject(component.workbasket());
+    expect(component.workbasketClone).toMatchObject(component.workbasket()!);
   });
 
   it('should submit when validatorService is true', () => {
@@ -135,7 +135,7 @@ describe('WorkbasketInformationComponent', () => {
     const showSuccessSpy = vi.spyOn(notificationService, 'showSuccess');
     component.onUndo();
     expect(showSuccessSpy).toHaveBeenCalled();
-    expect(component.workbasket()).toMatchObject(component.workbasketClone);
+    expect(component.workbasket()!).toMatchObject(component.workbasketClone);
   });
 
   it('should save workbasket when workbasketId there', async () => {
@@ -146,7 +146,7 @@ describe('WorkbasketInformationComponent', () => {
     actions$.pipe(ofActionDispatched(UpdateWorkbasket)).subscribe(() => (actionDispatched = true));
     component.onSave();
     expect(actionDispatched).toBe(true);
-    expect(component.workbasketClone).toMatchObject(component.workbasket());
+    expect(component.workbasketClone).toMatchObject(component.workbasket()!);
   });
 
   it('should dispatch MarkWorkbasketforDeletion action when onRemoveConfirmed is called', async () => {
@@ -181,8 +181,8 @@ describe('WorkbasketInformationComponent', () => {
 
     await fixture.whenStable();
 
-    expect(component.workbasket()['custom3']).toBe('');
-    expect(component.workbasket()['custom4']).toBe(newValue);
+    expect(component.workbasket()!['custom3']).toBe('');
+    expect(component.workbasket()!['custom4']).toBe(newValue);
   });
 
   it('should call formsValidatorService.isFieldValid when isFieldValid is called', () => {
@@ -193,7 +193,7 @@ describe('WorkbasketInformationComponent', () => {
 
   it('should call notificationService.showDialog when removeWorkbasket is called', () => {
     const notificationService = TestBed.inject(NotificationService);
-    const showDialogSpy = vi.spyOn(notificationService, 'showDialog').mockImplementation(() => undefined);
+    const showDialogSpy = vi.spyOn(notificationService, 'showDialog').mockImplementation(() => undefined as any);
     component.removeWorkbasket();
     expect(showDialogSpy).toHaveBeenCalledWith('WORKBASKET_DELETE', expect.any(Object), expect.any(Function));
   });
@@ -207,7 +207,7 @@ describe('WorkbasketInformationComponent', () => {
 
   it('should set workbasket owner when onSelectedOwner is called', () => {
     component.onSelectedOwner({ accessId: 'user-test', name: 'Test User' });
-    expect(component.workbasket().owner).toBe('user-test');
+    expect(component.workbasket()!.owner).toBe('user-test');
   });
 
   it('should handle workbasket customization without owner config', () => {
@@ -263,8 +263,8 @@ describe('WorkbasketInformationComponent', () => {
 
   it('should set created and modified dates when addDateToWorkbasket is called', () => {
     component.addDateToWorkbasket();
-    expect(component.workbasket().created).toBeDefined();
-    expect(component.workbasket().modified).toBeDefined();
+    expect(component.workbasket()!.created).toBeDefined();
+    expect(component.workbasket()!.modified).toBeDefined();
   });
 
   it('should call postNewWorkbasket when workbasketId is falsy in onSave', () => {
@@ -477,5 +477,101 @@ describe('WorkbasketInformationComponent', () => {
     } else {
       expect(component).toBeTruthy();
     }
+  });
+
+  it('should show error when validateFormInformation returns false', async () => {
+    const notificationService = TestBed.inject(NotificationService);
+    const showErrorSpy = vi.spyOn(notificationService, 'showError');
+    const formsValidatorService = TestBed.inject(FormsValidatorService);
+    (formsValidatorService.validateFormInformation as any).mockReturnValueOnce(Promise.resolve(false));
+    await component.onSubmit();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(showErrorSpy).toHaveBeenCalledWith('WORKBASKET_SAVE');
+  });
+
+  it('should show error when isOwnerValid is false', async () => {
+    const notificationService = TestBed.inject(NotificationService);
+    const showErrorSpy = vi.spyOn(notificationService, 'showError');
+    component.isOwnerValid = false;
+    await component.onSubmit();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(showErrorSpy).toHaveBeenCalledWith('WORKBASKET_SAVE');
+  });
+
+  it('should not dispatch removeDistributionTargets when workbasket has no _links', () => {
+    fixture.componentRef.setInput('workbasket', { ...selectedWorkbasketMock, _links: undefined });
+    fixture.detectChanges();
+    let actionDispatched = false;
+    actions$.pipe(ofActionDispatched(RemoveDistributionTarget)).subscribe(() => (actionDispatched = true));
+    component.removeDistributionTargets();
+    expect(actionDispatched).toBe(false);
+  });
+
+  it('should return early from onSave when workbasket is undefined', () => {
+    fixture.componentRef.setInput('workbasket', undefined);
+    fixture.detectChanges();
+    const postSpy = vi.spyOn(component, 'postNewWorkbasket');
+    component.onSave();
+    expect(postSpy).not.toHaveBeenCalled();
+  });
+
+  it('should return early from onSave update path when workbasket has no _links', () => {
+    fixture.componentRef.setInput('workbasket', { ...selectedWorkbasketMock, workbasketId: 'id-1', _links: undefined });
+    fixture.detectChanges();
+    let actionDispatched = false;
+    actions$.pipe(ofActionDispatched(UpdateWorkbasket)).subscribe(() => (actionDispatched = true));
+    component.onSave();
+    expect(actionDispatched).toBe(false);
+  });
+
+  it('should return early from postNewWorkbasket when workbasket is undefined', () => {
+    fixture.componentRef.setInput('workbasket', undefined);
+    fixture.detectChanges();
+    expect(() => component.postNewWorkbasket()).not.toThrow();
+  });
+
+  it('should return early from addDateToWorkbasket when workbasket is undefined', () => {
+    fixture.componentRef.setInput('workbasket', undefined);
+    fixture.detectChanges();
+    expect(() => component.addDateToWorkbasket()).not.toThrow();
+  });
+
+  it('should return early from onRemoveConfirmed when workbasket has no _links', () => {
+    fixture.componentRef.setInput('workbasket', { ...selectedWorkbasketMock, _links: undefined });
+    fixture.detectChanges();
+    let actionDispatched = false;
+    actions$.pipe(ofActionDispatched(MarkWorkbasketForDeletion)).subscribe(() => (actionDispatched = true));
+    component.onRemoveConfirmed();
+    expect(actionDispatched).toBe(false);
+  });
+
+  it('should not set owner from onSelectedOwner when workbasket is undefined', () => {
+    fixture.componentRef.setInput('workbasket', undefined);
+    fixture.detectChanges();
+    expect(() => component.onSelectedOwner({ accessId: 'a-user', name: 'A User' })).not.toThrow();
+  });
+
+  it('should default all custom fields to visible when workbaskets customisation has no information field', async () => {
+    store.reset({
+      ...store.snapshot(),
+      engineConfiguration: {
+        ...engineConfigurationMock,
+        customisation: {
+          ...engineConfigurationMock.customisation,
+          EN: {
+            ...engineConfigurationMock.customisation.EN,
+            workbaskets: {}
+          }
+        }
+      },
+      workbasket: workbasketReadStateMock
+    });
+    const lf = TestBed.createComponent(WorkbasketInformationComponent);
+    lf.componentRef.setInput('workbasket', { ...selectedWorkbasketMock });
+    lf.detectChanges();
+    await lf.whenStable();
+    lf.detectChanges();
+    const customFields = lf.nativeElement.getElementsByClassName('custom-fields__form-field');
+    expect(customFields.length).toBe(4);
   });
 });

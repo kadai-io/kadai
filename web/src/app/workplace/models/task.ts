@@ -66,6 +66,6 @@ export class Task {
 }
 
 export class CustomAttribute {
-  key: string;
-  value: string;
+  key!: string;
+  value!: string;
 }

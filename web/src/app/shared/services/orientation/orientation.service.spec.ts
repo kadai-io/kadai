@@ -43,7 +43,7 @@ describe('OrientationService', () => {
     });
 
     it('should emit the current orientation on subscription', () => {
-      let emitted: Orientation;
+      let emitted: any = null;
       service.getOrientation().subscribe((o) => (emitted = o));
       expect(emitted).toBe(Orientation.landscape);
     });

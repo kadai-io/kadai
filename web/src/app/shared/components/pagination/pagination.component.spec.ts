@@ -41,7 +41,7 @@ describe('PaginationComponent', () => {
     fixture.detectChanges();
 
     component.pageNumbers = [];
-    for (let i = 1; i <= component.page().totalPages; i++) {
+    for (let i = 1; i <= component.page()!.totalPages!; i++) {
       component.pageNumbers.push(i);
     }
   });
@@ -103,13 +103,13 @@ describe('PaginationComponent', () => {
 
   it('changeLabel getRangeLabel should return "loading..." when length is 0', () => {
     component.changeLabel();
-    const result = component.paginator()._intl.getRangeLabel(0, 10, 0);
+    const result = component.paginator()!._intl.getRangeLabel(0, 10, 0);
     expect(result).toBe('loading...');
   });
 
   it('changeLabel getRangeLabel should return correct range when length > 0', () => {
     component.changeLabel();
-    const result = component.paginator()._intl.getRangeLabel(0, 10, 21);
+    const result = component.paginator()!._intl.getRangeLabel(0, 10, 21);
     expect(result).toBe('1 - 10 of 21');
   });
 
@@ -199,7 +199,7 @@ describe('PaginationComponent', () => {
     fixture.componentRef.setInput('page', { totalPages: 10, totalElements: 100, size: 10, number: 1 });
     fixture.detectChanges();
     const changeToPageSpy = vi.spyOn(component, 'changeToPage');
-    component.paginator().page.emit({ pageIndex: 1, previousPageIndex: 0, pageSize: 10, length: 100 });
+    component.paginator()!.page.emit({ pageIndex: 1, previousPageIndex: 0, pageSize: 10, length: 100 });
     fixture.detectChanges();
     expect(changeToPageSpy).toHaveBeenCalledWith(expect.objectContaining({ pageIndex: 1, previousPageIndex: 0 }));
   });

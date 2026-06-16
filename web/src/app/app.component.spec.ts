@@ -181,7 +181,7 @@ describe('AppComponent', () => {
 
   it('should call toggleSidenav when menu button inside sidenav drawer is clicked', async () => {
     sidenavServiceMock.toggleSidenav.mockClear();
-    await component.sidenav().open();
+    await component.sidenav()!.open();
     fixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
     const menuButton = fixture.nativeElement.querySelector('.navbar_button-toggle');
@@ -194,7 +194,7 @@ describe('AppComponent', () => {
 
   it('should call logout when logout button inside sidenav drawer is clicked', async () => {
     kadaiEngineServiceMock.logout.mockClear();
-    await component.sidenav().open();
+    await component.sidenav()!.open();
     fixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
     const logoutButton = fixture.nativeElement.querySelector('[aria-controls="logout"]');

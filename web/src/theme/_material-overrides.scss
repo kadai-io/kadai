@@ -1,0 +1,197 @@
+/*!
+ * Copyright [2026] [envite consulting GmbH]
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
+ *
+ */
+
+.ng-invalid.ng-touched:not(form) {
+  box-shadow: unset;
+}
+
+.mat-mdc-form-field {
+  .mdc-text-field--outlined .mat-mdc-form-field-infix,
+  .mdc-text-field--no-label .mat-mdc-form-field-infix {
+    min-height: 56px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__trailing,
+  .mdc-notched-outline__notch {
+    border-color: rgba(0, 0, 0, 0.38);
+  }
+
+  &.mat-focused {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__trailing,
+    .mdc-notched-outline__notch {
+      border-color: var(--mat-sys-primary);
+    }
+  }
+}
+
+.mat-mdc-tab-header,
+.mat-mdc-tab-nav-bar {
+  --mat-tab-active-label-text-color: var(--mat-sys-primary);
+  --mat-tab-active-focus-label-text-color: var(--mat-sys-primary);
+  --mat-tab-active-hover-label-text-color: var(--mat-sys-primary);
+  --mat-tab-active-indicator-color: var(--mat-sys-primary);
+  --mat-tab-active-focus-indicator-color: var(--mat-sys-primary);
+  --mat-tab-active-hover-indicator-color: var(--mat-sys-primary);
+  --mat-tab-active-indicator-height: 2px;
+  --mat-tab-active-ripple-color: var(--mat-sys-primary);
+  --mat-tab-inactive-label-text-color: rgba(0, 0, 0, 0.54);
+  --mat-tab-container-height: 48px;
+}
+
+.mat-mdc-table {
+  .mat-mdc-header-row {
+    height: 56px;
+  }
+
+  .mat-mdc-row {
+    height: 48px;
+  }
+
+  .mat-mdc-header-cell {
+    color: rgba(0, 0, 0, 0.87);
+    font-weight: 500;
+  }
+
+  .mat-mdc-cell,
+  .mat-mdc-header-cell {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+}
+
+:root {
+  --mat-button-filled-container-height: 36px;
+  --mat-button-outlined-container-height: 36px;
+  --mat-button-protected-container-height: 36px;
+  --mat-button-text-container-height: 36px;
+  --mat-button-tonal-container-height: 36px;
+  --mat-button-filled-label-text-tracking: 0.0892857143em;
+  --mat-button-outlined-label-text-tracking: 0.0892857143em;
+  --mat-button-protected-label-text-tracking: 0.0892857143em;
+  --mat-button-text-label-text-tracking: 0.0892857143em;
+  --mat-button-tonal-label-text-tracking: 0.0892857143em;
+
+  --mat-button-text-horizontal-padding: 8px;
+  --mat-button-filled-horizontal-padding: 16px;
+  --mat-button-protected-horizontal-padding: 16px;
+  --mat-button-outlined-horizontal-padding: 15px;
+  --mat-button-tonal-horizontal-padding: 16px;
+
+  --mat-button-text-icon-spacing: 8px;
+  --mat-button-text-icon-offset: 0;
+  --mat-button-filled-icon-spacing: 8px;
+  --mat-button-filled-icon-offset: -4px;
+  --mat-button-protected-icon-spacing: 8px;
+  --mat-button-protected-icon-offset: -4px;
+  --mat-button-outlined-icon-spacing: 8px;
+  --mat-button-outlined-icon-offset: -4px;
+  --mat-button-tonal-icon-spacing: 8px;
+  --mat-button-tonal-icon-offset: -4px;
+}
+
+mat-progress-bar[color='accent'] {
+  --mat-progress-bar-track-color: rgba(0, 150, 136, 0.25);
+  --mat-progress-bar-active-indicator-color: var(--mat-sys-tertiary);
+}
+
+mat-progress-bar[color='warn'] {
+  --mat-progress-bar-track-color: rgba(229, 57, 53, 0.25);
+  --mat-progress-bar-active-indicator-color: var(--mat-sys-error);
+}
+
+.mat-mdc-unelevated-button.mat-primary,
+.mat-mdc-raised-button.mat-primary {
+  --mat-button-filled-container-color: var(--mat-sys-primary);
+  --mat-button-filled-label-text-color: var(--mat-sys-on-primary);
+  --mat-button-filled-state-layer-color: var(--mat-sys-on-primary);
+  --mat-button-filled-ripple-color: color-mix(in srgb, var(--mat-sys-on-primary) 12%, transparent);
+  --mat-button-protected-container-color: var(--mat-sys-primary);
+  --mat-button-protected-label-text-color: var(--mat-sys-on-primary);
+  --mat-button-protected-state-layer-color: var(--mat-sys-on-primary);
+  --mat-button-protected-ripple-color: color-mix(in srgb, var(--mat-sys-on-primary) 12%, transparent);
+}
+
+.mat-mdc-unelevated-button.mat-accent,
+.mat-mdc-raised-button.mat-accent {
+  --mat-button-filled-container-color: var(--mat-sys-tertiary);
+  --mat-button-filled-label-text-color: var(--mat-sys-on-tertiary);
+  --mat-button-filled-state-layer-color: var(--mat-sys-on-tertiary);
+  --mat-button-filled-ripple-color: color-mix(in srgb, var(--mat-sys-on-tertiary) 12%, transparent);
+  --mat-button-protected-container-color: var(--mat-sys-tertiary);
+  --mat-button-protected-label-text-color: var(--mat-sys-on-tertiary);
+  --mat-button-protected-state-layer-color: var(--mat-sys-on-tertiary);
+  --mat-button-protected-ripple-color: color-mix(in srgb, var(--mat-sys-on-tertiary) 12%, transparent);
+}
+
+.mat-mdc-unelevated-button.mat-warn,
+.mat-mdc-raised-button.mat-warn {
+  --mat-button-filled-container-color: var(--mat-sys-error);
+  --mat-button-filled-label-text-color: var(--mat-sys-on-error);
+  --mat-button-filled-state-layer-color: var(--mat-sys-on-error);
+  --mat-button-filled-ripple-color: color-mix(in srgb, var(--mat-sys-on-error) 12%, transparent);
+  --mat-button-protected-container-color: var(--mat-sys-error);
+  --mat-button-protected-label-text-color: var(--mat-sys-on-error);
+  --mat-button-protected-state-layer-color: var(--mat-sys-on-error);
+  --mat-button-protected-ripple-color: color-mix(in srgb, var(--mat-sys-on-error) 12%, transparent);
+}
+
+.mat-mdc-button.mat-primary,
+.mat-mdc-outlined-button.mat-primary {
+  --mat-button-text-label-text-color: var(--mat-sys-primary);
+  --mat-button-text-state-layer-color: var(--mat-sys-primary);
+  --mat-button-text-ripple-color: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
+  --mat-button-outlined-label-text-color: var(--mat-sys-primary);
+  --mat-button-outlined-state-layer-color: var(--mat-sys-primary);
+  --mat-button-outlined-ripple-color: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
+}
+
+.mat-mdc-button.mat-accent,
+.mat-mdc-outlined-button.mat-accent {
+  --mat-button-text-label-text-color: var(--mat-sys-tertiary);
+  --mat-button-text-state-layer-color: var(--mat-sys-tertiary);
+  --mat-button-text-ripple-color: color-mix(in srgb, var(--mat-sys-tertiary) 12%, transparent);
+  --mat-button-outlined-label-text-color: var(--mat-sys-tertiary);
+  --mat-button-outlined-state-layer-color: var(--mat-sys-tertiary);
+  --mat-button-outlined-ripple-color: color-mix(in srgb, var(--mat-sys-tertiary) 12%, transparent);
+}
+
+.mat-mdc-button.mat-warn,
+.mat-mdc-outlined-button.mat-warn {
+  --mat-button-text-label-text-color: var(--mat-sys-error);
+  --mat-button-text-state-layer-color: var(--mat-sys-error);
+  --mat-button-text-ripple-color: color-mix(in srgb, var(--mat-sys-error) 12%, transparent);
+  --mat-button-outlined-label-text-color: var(--mat-sys-error);
+  --mat-button-outlined-state-layer-color: var(--mat-sys-error);
+  --mat-button-outlined-ripple-color: color-mix(in srgb, var(--mat-sys-error) 12%, transparent);
+}
+
+.mat-icon.mat-primary {
+  color: var(--mat-sys-primary);
+}
+
+.mat-icon.mat-accent {
+  color: var(--mat-sys-tertiary);
+}
+
+.mat-icon.mat-warn {
+  color: var(--mat-sys-error);
+}
