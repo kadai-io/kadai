@@ -100,6 +100,7 @@ import io.kadai.task.api.models.Task;
 import io.kadai.task.api.models.TaskComment;
 import io.kadai.task.api.models.TaskSummary;
 import io.kadai.task.internal.ServiceLevelHandler.BulkLog;
+import io.kadai.task.internal.jobs.models.TaskCleanupSummary;
 import io.kadai.task.internal.models.AttachmentImpl;
 import io.kadai.task.internal.models.AttachmentSummaryImpl;
 import io.kadai.task.internal.models.MinimalTaskSummary;
@@ -1548,6 +1549,25 @@ public class TaskServiceImpl implements TaskService {
     }
 
     return task;
+  }
+
+  /**
+   * Returns a list of TaskCleanupSummary objects for tasks that were completed before the specified
+   * date.
+   *
+   * @param untilDate date to compare the task's completed date to
+   * @param allCompletedSameParentBusiness true if all tasks sharing the same {@link
+   *     Task#getParentBusinessProcessId() parentBusinessProcessId} must be completed for a task to
+   *     be returned, false otherwise
+   * @return all eligible tasks completed before given timestamp
+   */
+  public List<TaskCleanupSummary> getTasksCompletedBefore(
+      Instant untilDate, boolean allCompletedSameParentBusiness) {
+    return kadaiEngine.executeInDatabaseConnection(
+        () ->
+            allCompletedSameParentBusiness
+                ? taskMapper.findTasksCompletedBeforeWithParentBusinessProcessConstraint(untilDate)
+                : taskMapper.findTasksCompletedBefore(untilDate));
   }
 
   Pair<List<MinimalTaskSummary>, BulkLog> filterTasksAuthorizedForAndLogErrorsForNotAuthorized(
