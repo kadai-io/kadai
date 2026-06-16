@@ -54,11 +54,13 @@ class PojoTest {
                           && !javaClass.getSimpleName().equals("BigIntegerItem")
                           && !javaClass.getSimpleName().equals("IntItem")
                           && !javaClass.getSimpleName().equals("LongItem")
-                          // This is a record, it has a getter per definition
+                          // These are records, they have a getter per definition
                           && !javaClass.getSimpleName().equals("DurationPrioHolder")
-                          // This is a record, it has a getter per definition
                           && !javaClass.getSimpleName().equals("CustomHoliday")
-                          && !javaClass.getSimpleName().equals("TaskPatch"))
+                          && !javaClass.getSimpleName().equals("TaskPatch")
+                          && !javaClass.getSimpleName().equals("DomainFixtures")
+                          && !javaClass.getSimpleName().equals("GenerationSummary")
+                          && !javaClass.getSimpleName().equals("TaskGenerationEnvironment"))
               .map(JavaClass::reflect)
               .toList();
 
