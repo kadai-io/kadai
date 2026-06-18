@@ -281,7 +281,7 @@ jobs:
   test_e2e:
     runs-on: ubuntu-22.04
     name: Test E2E
-    needs: [test_frontend, test_backend]
+    needs: [test_frontend, test_backend_21, test_backend_25]
     if: |
       (always() &&
       needs.detect_changes.outputs.code_changed == 'true' &&
