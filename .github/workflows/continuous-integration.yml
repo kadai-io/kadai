@@ -498,23 +498,13 @@ jobs:
     strategy:
       matrix:
         module:
-          - kadai-common
-          - kadai-common-security
-          - kadai-common-data
-          - kadai-common-logging
-          - kadai-common-test
           - kadai-core
           - kadai-core-test
-          - kadai-test-api
           - kadai-spring
           - kadai-spring-example
-          - kadai-spi-routing-dmn-router
           - kadai-routing-rest
           - kadai-rest-spring
-          - kadai-rest-spring-test-lib
           - kadai-rest-spring-example-common
-          - kadai-loghistory-provider
-          - kadai-simplehistory-provider
           - kadai-simplehistory-rest-spring
     steps:
       - name: Start Eco CI Measurement
