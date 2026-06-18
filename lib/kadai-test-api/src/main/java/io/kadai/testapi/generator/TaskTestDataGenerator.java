@@ -268,7 +268,7 @@ public final class TaskTestDataGenerator {
       classifications.forEach(
           classification ->
               existingClassificationKeysByDomain
-                  .computeIfAbsent(classification.getDomain(), _ -> new LinkedHashSet<>())
+                  .computeIfAbsent(classification.getDomain(), ignore -> new LinkedHashSet<>())
                   .add(classification.getKey().toLowerCase(Locale.ROOT)));
 
       for (String domain : domains) {
@@ -300,7 +300,7 @@ public final class TaskTestDataGenerator {
       workbaskets.forEach(
           workbasket ->
               existingWorkbasketKeysByDomain
-                  .computeIfAbsent(workbasket.getDomain(), _ -> new LinkedHashSet<>())
+                  .computeIfAbsent(workbasket.getDomain(), ignore -> new LinkedHashSet<>())
                   .add(workbasket.getKey().toLowerCase(Locale.ROOT)));
 
       List<String> candidateUsers = extractCandidateUsers(configuration, workbaskets);
@@ -904,7 +904,7 @@ public final class TaskTestDataGenerator {
     try {
       PGConnection pgConnection = connection.unwrap(PGConnection.class);
       return pgConnection.getCopyAPI();
-    } catch (SQLException | RuntimeException _) {
+    } catch (SQLException | RuntimeException ignore) {
       return null;
     }
   }
@@ -933,7 +933,7 @@ public final class TaskTestDataGenerator {
     }
     try {
       connection.rollback();
-    } catch (SQLException _) {
+    } catch (SQLException ignore) {
       // ignore rollback failures and preserve the original exception
     }
   }
@@ -944,7 +944,7 @@ public final class TaskTestDataGenerator {
     }
     try {
       connection.close();
-    } catch (SQLException _) {
+    } catch (SQLException ignore) {
       // ignore close failures and preserve the original exception
     }
   }
@@ -1213,7 +1213,7 @@ public final class TaskTestDataGenerator {
     String domainPrefix = sanitizeForKey(domain);
     String categoryPrefix = sanitizeForKey(category);
     Set<String> keys =
-        existingClassificationKeysByDomain.computeIfAbsent(domain, _ -> new LinkedHashSet<>());
+        existingClassificationKeysByDomain.computeIfAbsent(domain, ignore -> new LinkedHashSet<>());
     int counter = sequence + 1;
     String candidate;
     do {
@@ -1237,7 +1237,7 @@ public final class TaskTestDataGenerator {
       Map<String, Set<String>> existingWorkbasketKeysByDomain) {
     String domainPrefix = sanitizeForKey(domain);
     Set<String> keys =
-        existingWorkbasketKeysByDomain.computeIfAbsent(domain, _ -> new LinkedHashSet<>());
+        existingWorkbasketKeysByDomain.computeIfAbsent(domain, ignore -> new LinkedHashSet<>());
     int counter = sequence + 1;
     String typePrefix =
         switch (type) {
@@ -1429,7 +1429,7 @@ public final class TaskTestDataGenerator {
     }
     try {
       return Duration.parse(serviceLevel);
-    } catch (RuntimeException _) {
+    } catch (RuntimeException ignore) {
       return Duration.ofDays(1);
     }
   }
