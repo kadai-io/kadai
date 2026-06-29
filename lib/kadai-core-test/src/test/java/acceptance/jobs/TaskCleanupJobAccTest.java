@@ -34,9 +34,13 @@ import io.kadai.testapi.KadaiConfigurationModifier;
 import io.kadai.testapi.KadaiInject;
 import io.kadai.testapi.KadaiIntegrationTest;
 import io.kadai.testapi.builder.TaskBuilder;
+import io.kadai.testapi.generator.TaskTestDataGenerator;
 import io.kadai.testapi.security.WithAccessId;
 import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -45,6 +49,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -56,6 +61,10 @@ import org.junit.jupiter.api.function.ThrowingConsumer;
 // All tests are executed as admin, because the jobrunner needs admin rights.
 @KadaiIntegrationTest
 class TaskCleanupJobAccTest {
+
+  private static final long LOAD_TEST_TASK_COUNT = 2_000_000L;
+  private static final int LOAD_TEST_BATCH_SIZE = 10_000;
+  private static final int LOAD_TEST_TASKS_PER_PARENT_BUSINESS_PROCESS_ID = 10;
 
   @KadaiInject TaskService taskService;
   @KadaiInject WorkbasketService workbasketService;
@@ -80,7 +89,7 @@ class TaskCleanupJobAccTest {
         .primaryObjRef(primaryObjRef);
   }
 
-  private List<TaskSummary> tasksForWorkbasket(WorkbasketSummary workbasket) throws Exception {
+  private List<TaskSummary> tasksForWorkbasket(WorkbasketSummary workbasket) {
     return taskService.createTaskQuery().list().stream()
         .filter(t -> t.getWorkbasketSummary().equals(workbasket))
         .toList();
@@ -88,6 +97,40 @@ class TaskCleanupJobAccTest {
 
   private void runTaskCleanupJob(KadaiEngine kadaiEngine) throws Exception {
     new TaskCleanupJob(kadaiEngine, null, null).run();
+  }
+
+  private void createCompletedTasksForLoadTest(
+      KadaiEngine kadaiEngine, WorkbasketSummary workbasket, boolean assignParentBusinessProcessIds)
+      throws Exception {
+    TaskTestDataGenerator.from(kadaiEngine)
+        .persistCompletedTasksForCleanupLoadTest(
+            LOAD_TEST_TASK_COUNT,
+            LOAD_TEST_BATCH_SIZE,
+            classification,
+            workbasket,
+            primaryObjRef,
+            assignParentBusinessProcessIds ? LOAD_TEST_TASKS_PER_PARENT_BUSINESS_PROCESS_ID : 0);
+  }
+
+  private long countTasksForWorkbasket(KadaiEngine kadaiEngine, WorkbasketSummary workbasket)
+      throws Exception {
+    try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
+      setSchema(connection, kadaiEngine.getConfiguration().getSchemaName());
+      try (PreparedStatement statement =
+          connection.prepareStatement("SELECT COUNT(*) FROM TASK WHERE WORKBASKET_ID = ?")) {
+        statement.setString(1, workbasket.getId());
+        try (var resultSet = statement.executeQuery()) {
+          resultSet.next();
+          return resultSet.getLong(1);
+        }
+      }
+    }
+  }
+
+  private static void setSchema(Connection connection, String schemaName) throws SQLException {
+    if (schemaName != null && !schemaName.isBlank()) {
+      connection.setSchema(schemaName);
+    }
   }
 
   @Nested
@@ -566,6 +609,66 @@ class TaskCleanupJobAccTest {
                 .doesNotContain(taskSummaryCompleted);
           };
       return DynamicTest.stream(iterator, c -> "for parentBusinessProcessId = '" + c + "'", test);
+    }
+  }
+
+  @Disabled("Local load test only")
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  class LoadTestCleanCompletedTasks implements KadaiConfigurationModifier {
+
+    @KadaiInject KadaiEngine kadaiEngine;
+
+    @Override
+    public Builder modify(Builder builder) {
+      return builder
+          .taskCleanupJobEnabled(true)
+          .jobFirstRun(Instant.now().minus(10, ChronoUnit.MILLIS))
+          .jobRunEvery(Duration.ofMillis(1))
+          .taskCleanupJobMinimumAge(Duration.ofDays(5))
+          .taskCleanupJobAllCompletedSameParentBusiness(false);
+    }
+
+    @WithAccessId(user = "admin")
+    @Test
+    void should_CleanCompletedTasks_When_GroupConstraintIsDisabled() throws Exception {
+      WorkbasketSummary workbasket =
+          DefaultTestEntities.defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
+      createCompletedTasksForLoadTest(kadaiEngine, workbasket, false);
+
+      runTaskCleanupJob(kadaiEngine);
+
+      assertThat(countTasksForWorkbasket(kadaiEngine, workbasket)).isZero();
+    }
+  }
+
+  @Disabled("Local load test only")
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  class LoadTestCleanCompletedTasksWithBusinessProcessId implements KadaiConfigurationModifier {
+
+    @KadaiInject KadaiEngine kadaiEngine;
+
+    @Override
+    public Builder modify(Builder builder) {
+      return builder
+          .taskCleanupJobEnabled(true)
+          .jobFirstRun(Instant.now().minus(10, ChronoUnit.MILLIS))
+          .jobRunEvery(Duration.ofMillis(1))
+          .taskCleanupJobMinimumAge(Duration.ofDays(5))
+          .taskCleanupJobAllCompletedSameParentBusiness(true);
+    }
+
+    @WithAccessId(user = "admin")
+    @Test
+    void should_CleanCompletedTasks_When_GroupConstraintIsEnabled() throws Exception {
+      WorkbasketSummary workbasket =
+          DefaultTestEntities.defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
+      createCompletedTasksForLoadTest(kadaiEngine, workbasket, true);
+
+      runTaskCleanupJob(kadaiEngine);
+
+      assertThat(countTasksForWorkbasket(kadaiEngine, workbasket)).isZero();
     }
   }
 }

@@ -21,6 +21,7 @@ package acceptance.jobs;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.kadai.KadaiConfiguration;
+import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.ScheduledJob;
 import io.kadai.common.internal.JobMapper;
 import io.kadai.task.internal.jobs.TaskCleanupJob;
@@ -28,6 +29,7 @@ import io.kadai.task.internal.jobs.TaskUpdatePriorityJob;
 import io.kadai.testapi.KadaiConfigurationModifier;
 import io.kadai.testapi.KadaiInject;
 import io.kadai.testapi.KadaiIntegrationTest;
+import io.kadai.testapi.RawMapperAccess;
 import io.kadai.workbasket.internal.jobs.WorkbasketCleanupJob;
 import java.time.Duration;
 import java.time.Instant;
@@ -39,7 +41,7 @@ import org.junit.jupiter.api.Test;
 @KadaiIntegrationTest
 class JobSchedulerInitAccTest implements KadaiConfigurationModifier {
 
-  @KadaiInject JobMapper jobMapper;
+  @KadaiInject KadaiEngine kadaiEngine;
 
   Instant firstRun = Instant.now().minus(2, ChronoUnit.MINUTES).truncatedTo(ChronoUnit.MILLIS);
   Duration runEvery = Duration.ofMinutes(5);
@@ -62,8 +64,8 @@ class JobSchedulerInitAccTest implements KadaiConfigurationModifier {
   }
 
   @Test
-  void should_StartTheJobsImmediately_When_StartMethodIsCalled() {
-    List<ScheduledJob> nextJobs = jobMapper.findJobsToRun(Instant.now().plus(runEvery));
+  void should_StartTheJobsImmediately_When_StartMethodIsCalled() throws Exception {
+    List<ScheduledJob> nextJobs = findJobsToRun(Instant.now().plus(runEvery));
     assertThat(nextJobs).extracting(ScheduledJob::getDue).containsOnly(firstRun.plus(runEvery));
     assertThat(nextJobs)
         .extracting(ScheduledJob::getType)
@@ -71,5 +73,10 @@ class JobSchedulerInitAccTest implements KadaiConfigurationModifier {
             TaskUpdatePriorityJob.class.getName(),
             TaskCleanupJob.class.getName(),
             WorkbasketCleanupJob.class.getName());
+  }
+
+  private List<ScheduledJob> findJobsToRun(Instant instant) throws Exception {
+    return RawMapperAccess.runWithMapper(
+        kadaiEngine, JobMapper.class, mapper -> mapper.findJobsToRun(instant));
   }
 }

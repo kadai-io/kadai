@@ -204,7 +204,7 @@ class UpdateTaskAttachmentWithWorkingDaysCalculationAccTest extends AbstractAccT
     // Change sth. and add same (id) again - override/update
     String newChannel = "UPDATED EXTERNAL SINCE LAST ADD";
     final int attachmentCount2 = task.getAttachments().size();
-    Attachment updatedAttachment = task.getAttachments().get(0);
+    Attachment updatedAttachment = task.getAttachments().getFirst();
     updatedAttachment.setChannel(newChannel);
     Classification newClassification =
         kadaiEngine
@@ -215,7 +215,7 @@ class UpdateTaskAttachmentWithWorkingDaysCalculationAccTest extends AbstractAccT
     task = taskService.updateTask(task);
     task = taskService.getTask(task.getId());
     assertThat(task.getAttachments()).hasSize(attachmentCount2);
-    assertThat(task.getAttachments().get(0).getChannel()).isEqualTo(newChannel);
+    assertThat(task.getAttachments().getFirst().getChannel()).isEqualTo(newChannel);
     assertThat(task.getPriority()).isEqualTo(99);
 
     Instant expDue = workingTimeCalculator.addWorkingTime(task.getPlanned(), Duration.ofDays(1));
@@ -237,7 +237,7 @@ class UpdateTaskAttachmentWithWorkingDaysCalculationAccTest extends AbstractAccT
 
     // Add same again - ignored
     final int attachmentCount2 = task.getAttachments().size();
-    Attachment redundantAttachment = task.getAttachments().get(0);
+    Attachment redundantAttachment = task.getAttachments().getFirst();
     task.addAttachment(redundantAttachment);
     task = taskService.updateTask(task);
     assertThat(task.getAttachments()).hasSize(attachmentCount2);
@@ -282,7 +282,7 @@ class UpdateTaskAttachmentWithWorkingDaysCalculationAccTest extends AbstractAccT
     assertThat(task.getPriority()).isEqualTo(99);
     assertThat(task.getPlanned().plus(Duration.ofDays(1))).isEqualTo(task.getDue());
     int attachmentCount = task.getAttachments().size();
-    Attachment attachmentToRemove = task.getAttachments().get(0);
+    Attachment attachmentToRemove = task.getAttachments().getFirst();
     task.removeAttachment(attachmentToRemove.getId());
     task = taskService.updateTask(task);
     assertThat(task.getAttachments())
@@ -330,16 +330,16 @@ class UpdateTaskAttachmentWithWorkingDaysCalculationAccTest extends AbstractAccT
     final int attachmentCount = task.getAttachments().size();
 
     String newChannel = attachmentToAdd.getChannel() + "-X";
-    task.getAttachments().get(0).setChannel(newChannel);
+    task.getAttachments().getFirst().setChannel(newChannel);
     Classification newClassification =
         kadaiEngine
             .getClassificationService()
             .getClassification("CLI:100000000000000000000000000000000013"); // Prio 99, P2000D
-    task.getAttachments().get(0).setClassificationSummary(newClassification.asSummary());
+    task.getAttachments().getFirst().setClassificationSummary(newClassification.asSummary());
     task = taskService.updateTask(task);
     task = taskService.getTask(task.getId());
     assertThat(task.getAttachments()).hasSize(attachmentCount);
-    assertThat(task.getAttachments().get(0).getChannel()).isEqualTo(newChannel);
+    assertThat(task.getAttachments().getFirst().getChannel()).isEqualTo(newChannel);
     assertThat(task.getPriority()).isEqualTo(99);
     Instant expDue = workingTimeCalculator.addWorkingTime(task.getPlanned(), Duration.ofDays(1));
 
@@ -441,7 +441,7 @@ class UpdateTaskAttachmentWithWorkingDaysCalculationAccTest extends AbstractAccT
     task = taskService.updateTask(task);
     task = taskService.getTask(task.getId());
     assertThat(task.getAttachments()).hasSize(2);
-    assertThat(task.getAttachments().get(0).getClassificationSummary().getKey())
+    assertThat(task.getAttachments().getFirst().getClassificationSummary().getKey())
         .isEqualTo("DOCTYPE_DEFAULT");
 
     Attachment attachment3 =
@@ -462,7 +462,7 @@ class UpdateTaskAttachmentWithWorkingDaysCalculationAccTest extends AbstractAccT
     task.addAttachment(attachment3);
     task = taskService.updateTask(task);
     assertThat(task.getAttachments()).hasSize(1);
-    assertThat(task.getAttachments().get(0).getChannel()).isEqualTo("DHL");
+    assertThat(task.getAttachments().getFirst().getChannel()).isEqualTo("DHL");
     task.getAttachments().forEach(at -> assertThat(task.getModified()).isEqualTo(at.getModified()));
     // setup environment for 2nd version of replacement (list.add call)
     task.getAttachments().add(attachment2);
@@ -474,7 +474,7 @@ class UpdateTaskAttachmentWithWorkingDaysCalculationAccTest extends AbstractAccT
     task.getAttachments().add(attachment3);
     task = taskService.updateTask(task);
     assertThat(task.getAttachments()).hasSize(1);
-    assertThat(task.getAttachments().get(0).getChannel()).isEqualTo("DHL");
+    assertThat(task.getAttachments().getFirst().getChannel()).isEqualTo("DHL");
   }
 
   @WithAccessId(user = "user-1-1")
@@ -527,9 +527,9 @@ class UpdateTaskAttachmentWithWorkingDaysCalculationAccTest extends AbstractAccT
     assertThat(readTask.getAttachments()).hasSize(2);
     assertThat(readTask.getAttachments().get(1).getCreated()).isNotNull();
     assertThat(readTask.getAttachments().get(1).getModified()).isNotNull();
-    assertThat(readTask.getAttachments().get(0).getCreated())
+    assertThat(readTask.getAttachments().getFirst().getCreated())
         .isEqualTo(readTask.getAttachments().get(1).getModified());
-    assertThat(readTask.getAttachments().get(0).getObjectReference()).isNotNull();
+    assertThat(readTask.getAttachments().getFirst().getObjectReference()).isNotNull();
 
     assertThat(readTask.getPriority()).isEqualTo(99);
 
@@ -664,7 +664,7 @@ class UpdateTaskAttachmentWithWorkingDaysCalculationAccTest extends AbstractAccT
     assertThat(classification.getServiceLevel()).isNull();
 
     TaskImpl updatedTask = (TaskImpl) taskService.updateTask(task);
-    classification = updatedTask.getAttachments().get(0).getClassificationSummary();
+    classification = updatedTask.getAttachments().getFirst().getClassificationSummary();
 
     assertThat(classification.getId()).isNotNull();
     assertThat(classification.getDomain()).isNotNull();

@@ -81,7 +81,7 @@ class QueryTasksAccTest extends AbstractAccTest {
   void should_SetOwnerLongNameOfTask_When_PropertyEnabled() throws Exception {
     KadaiConfiguration kadaiConfiguration =
         new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(true).build();
-    KadaiEngine kadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
+    KadaiEngine kadaiEngine = buildEngine(kadaiConfiguration);
 
     List<TaskSummary> tasks =
         kadaiEngine
@@ -101,7 +101,7 @@ class QueryTasksAccTest extends AbstractAccTest {
       throws Exception {
     KadaiConfiguration kadaiConfiguration =
         new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(true).build();
-    KadaiEngine kadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
+    KadaiEngine kadaiEngine = buildEngine(kadaiConfiguration);
 
     final ThrowingCallable call =
         () ->
@@ -124,7 +124,7 @@ class QueryTasksAccTest extends AbstractAccTest {
   void should_NotSetOwnerLongNameOfTask_When_PropertyDisabled() throws Exception {
     KadaiConfiguration kadaiConfiguration =
         new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(false).build();
-    KadaiEngine kadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
+    KadaiEngine kadaiEngine = buildEngine(kadaiConfiguration);
 
     List<TaskSummary> tasks =
         kadaiEngine
@@ -142,7 +142,7 @@ class QueryTasksAccTest extends AbstractAccTest {
   void should_SetOwnerLongNameOfTask_When_FilteringWithOwnerLongNameIn() throws Exception {
     KadaiConfiguration kadaiConfiguration =
         new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(false).build();
-    KadaiEngine kadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
+    KadaiEngine kadaiEngine = buildEngine(kadaiConfiguration);
 
     String longName = "Eifrig, Elena - (user-1-2)";
     List<TaskSummary> tasks =
@@ -160,7 +160,7 @@ class QueryTasksAccTest extends AbstractAccTest {
   void should_SetOwnerLongNameOfTask_When_FilteringWithOwnerLongNameNotIn() throws Exception {
     KadaiConfiguration kadaiConfiguration =
         new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(false).build();
-    KadaiEngine kadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
+    KadaiEngine kadaiEngine = buildEngine(kadaiConfiguration);
     List<TaskSummary> tasks =
         kadaiEngine
             .getTaskService()
@@ -182,7 +182,7 @@ class QueryTasksAccTest extends AbstractAccTest {
   void should_SetOwnerLongNameOfTask_When_FilteringWithOwnerLongNameLike() throws Exception {
     KadaiConfiguration kadaiConfiguration =
         new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(false).build();
-    KadaiEngine kadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
+    KadaiEngine kadaiEngine = buildEngine(kadaiConfiguration);
 
     List<TaskSummary> tasks =
         kadaiEngine.getTaskService().createTaskQuery().ownerLongNameLike("%1-2%").list();
@@ -199,7 +199,7 @@ class QueryTasksAccTest extends AbstractAccTest {
   void should_SetOwnerLongNameOfTask_When_FilteringWithOwnerLongNameNotLike() throws Exception {
     KadaiConfiguration kadaiConfiguration =
         new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(false).build();
-    KadaiEngine kadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
+    KadaiEngine kadaiEngine = buildEngine(kadaiConfiguration);
 
     List<TaskSummary> tasks =
         kadaiEngine.getTaskService().createTaskQuery().ownerLongNameNotLike("%1-1%").list();
@@ -217,7 +217,7 @@ class QueryTasksAccTest extends AbstractAccTest {
       throws Exception {
     KadaiConfiguration kadaiConfiguration =
         new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(true).build();
-    KadaiEngine kadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
+    KadaiEngine kadaiEngine = buildEngine(kadaiConfiguration);
 
     List<TaskSummary> tasks =
         kadaiEngine
@@ -238,7 +238,7 @@ class QueryTasksAccTest extends AbstractAccTest {
   void should_OrderByOwnerLongName_When_QueryingTask() throws Exception {
     KadaiConfiguration kadaiConfiguration =
         new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(false).build();
-    KadaiEngine kadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
+    KadaiEngine kadaiEngine = buildEngine(kadaiConfiguration);
     List<TaskSummary> tasks =
         kadaiEngine
             .getTaskService()
@@ -268,7 +268,7 @@ class QueryTasksAccTest extends AbstractAccTest {
   void should_ListValues_For_OwnerLongName() throws Exception {
     KadaiConfiguration kadaiConfiguration =
         new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(false).build();
-    KadaiEngine kadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
+    KadaiEngine kadaiEngine = buildEngine(kadaiConfiguration);
     List<String> longNames =
         kadaiEngine
             .getTaskService()
@@ -301,7 +301,7 @@ class QueryTasksAccTest extends AbstractAccTest {
   void should_ListValuesCorrectly_When_FilteringWithOwnerLongName() throws Exception {
     KadaiConfiguration kadaiConfiguration =
         new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(false).build();
-    KadaiEngine kadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
+    KadaiEngine kadaiEngine = buildEngine(kadaiConfiguration);
     String longName = "Eifrig, Elena - (user-1-2)";
     List<String> listedValues =
         kadaiEngine
@@ -327,7 +327,7 @@ class QueryTasksAccTest extends AbstractAccTest {
   void should_CountCorrectly_When_FilteringWithOwnerLongName() throws Exception {
     KadaiConfiguration kadaiConfiguration =
         new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(false).build();
-    KadaiEngine kadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
+    KadaiEngine kadaiEngine = buildEngine(kadaiConfiguration);
     String longName = "Eifrig, Elena - (user-1-2)";
     long count = kadaiEngine.getTaskService().createTaskQuery().ownerLongNameIn(longName).count();
     assertThat(count).isEqualTo(25);

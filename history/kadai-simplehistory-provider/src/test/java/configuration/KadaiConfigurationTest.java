@@ -24,6 +24,7 @@ import acceptance.AbstractAccTest;
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.test.config.DataSourceGenerator;
+import io.kadai.common.test.config.SchemaEnforcingDataSource;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 
@@ -32,12 +33,19 @@ class KadaiConfigurationTest extends AbstractAccTest {
   @Test
   void testCreateKadaiEngine() throws Exception {
     DataSource ds = DataSourceGenerator.getDataSource();
+    SchemaEnforcingDataSource schemaEnforcingDataSource =
+        new SchemaEnforcingDataSource(ds, DataSourceGenerator.getSchemaName());
     KadaiConfiguration configuration =
-        new KadaiConfiguration.Builder(ds, false, DataSourceGenerator.getSchemaName(), false)
+        new KadaiConfiguration.Builder(
+                schemaEnforcingDataSource.asDataSource(),
+                false,
+                DataSourceGenerator.getSchemaName(),
+                false)
             .initKadaiProperties()
             .build();
 
     KadaiEngine te = KadaiEngine.buildKadaiEngine(configuration);
+    schemaEnforcingDataSource.enable();
 
     assertThat(te).isNotNull();
   }

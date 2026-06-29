@@ -18,6 +18,7 @@
 
 package io.kadai.testapi;
 
+import static io.kadai.common.test.config.SchemaEnforcingDataSource.unwrap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.kadai.KadaiConfiguration;
@@ -62,7 +63,7 @@ class TestContainerExtensionTest {
       DataSource topLevelDataSource =
           TestContainerExtensionTest.this.kadaiConfiguration.getDataSource();
 
-      assertThat(nestedDataSource).isSameAs(topLevelDataSource).isNotNull();
+      assertThat(unwrap(nestedDataSource)).isSameAs(unwrap(topLevelDataSource)).isNotNull();
     }
 
     @Test
@@ -92,7 +93,7 @@ class TestContainerExtensionTest {
       DataSource topLevelDataSource =
           TestContainerExtensionTest.this.kadaiConfiguration.getDataSource();
 
-      assertThat(nestedDataSource).isSameAs(topLevelDataSource).isNotNull();
+      assertThat(unwrap(nestedDataSource)).isSameAs(unwrap(topLevelDataSource)).isNotNull();
     }
 
     @Test
@@ -118,7 +119,7 @@ class TestContainerExtensionTest {
       DataSource topLevelDataSource =
           TestContainerExtensionTest.this.kadaiConfiguration.getDataSource();
 
-      assertThat(nestedDataSource).isNotNull().isSameAs(topLevelDataSource);
+      assertThat(unwrap(nestedDataSource)).isNotNull().isSameAs(unwrap(topLevelDataSource));
     }
 
     @Test
@@ -146,10 +147,10 @@ class TestContainerExtensionTest {
         DataSource topLevelDataSource =
             TestContainerExtensionTest.this.kadaiConfiguration.getDataSource();
 
-        assertThat(nestedNestedDataSource)
+        assertThat(unwrap(nestedNestedDataSource))
             .isNotNull()
-            .isSameAs(topLevelDataSource)
-            .isSameAs(nestedDataSource);
+            .isSameAs(unwrap(topLevelDataSource))
+            .isSameAs(unwrap(nestedDataSource));
       }
 
       @Test
@@ -189,7 +190,7 @@ class TestContainerExtensionTest {
       DataSource topLevelDataSource =
           TestContainerExtensionTest.this.kadaiConfiguration.getDataSource();
 
-      assertThat(nestedDataSource).isNotNull().isSameAs(topLevelDataSource);
+      assertThat(unwrap(nestedDataSource)).isNotNull().isSameAs(unwrap(topLevelDataSource));
     }
 
     @Test
@@ -217,7 +218,7 @@ class TestContainerExtensionTest {
       DataSource topLevelDataSource =
           TestContainerExtensionTest.this.kadaiConfiguration.getDataSource();
 
-      assertThat(nestedDataSource).isSameAs(topLevelDataSource).isNotNull();
+      assertThat(unwrap(nestedDataSource)).isSameAs(unwrap(topLevelDataSource)).isNotNull();
     }
 
     @Test
