@@ -733,7 +733,9 @@ public class TaskServiceImpl implements TaskService {
       try {
         Task task = getTask(taskId);
         String workbasketId = task.getWorkbasketSummary().getId();
-        taskIdsByWorkbasketId.computeIfAbsent(workbasketId, _ -> new ArrayList<>()).add(taskId);
+        taskIdsByWorkbasketId
+            .computeIfAbsent(workbasketId, ignore -> new ArrayList<>())
+            .add(taskId);
       } catch (TaskNotFoundException | NotAuthorizedOnWorkbasketException e) {
         aggregatedResults.addError(taskId, e);
       }
