@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 env:
-  JAVA_VERSION: 25
+  JAVA_VERSION: 21
   NODE_VERSION: 24
 
   ARTIFACTS_CYPRESS_TESTS_NAME: cypress-tests
@@ -286,7 +286,7 @@ jobs:
       (always() &&
       needs.detect_changes.outputs.code_changed == 'true' &&
       needs.test_frontend.result != 'failure' &&
-      needs.test_backend.result != 'failure') 
+      needs.test_backend.result != 'failure')
       || startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Start Eco CI Measurement
@@ -378,11 +378,13 @@ jobs:
 
   test_backend:
     runs-on: ubuntu-22.04
-    name: Test ${{ matrix.module }} on ${{ matrix.database }}
+    name: Test ${{ matrix.module }} on ${{ matrix.database }} with Java ${{ matrix.java_version }}
     needs: [compile_backend ]
     if: needs.detect_changes.outputs.backend_changed == 'true' || startsWith(github.ref, 'refs/tags/')
     strategy:
       matrix:
+        java_version:
+          - 21
         module:
           - kadai-common
           - kadai-common-security
@@ -405,31 +407,66 @@ jobs:
         database:
           - H2
         include:
-          - module: kadai-core
+          - java_version: 21
+            module: kadai-core
             database: POSTGRES
-          - module: kadai-core
+          - java_version: 21
+            module: kadai-core
             database: DB2
-          - module: kadai-core-test
+          - java_version: 21
+            module: kadai-core-test
             database: POSTGRES
-          - module: kadai-core-test
+          - java_version: 21
+            module: kadai-core-test
             database: DB2
-          - module: kadai-test-api
+          - java_version: 21
+            module: kadai-test-api
             database: POSTGRES
-          - module: kadai-test-api
+          - java_version: 21
+            module: kadai-test-api
             database: DB2
-          - module: kadai-simplehistory-provider
+          - java_version: 21
+            module: kadai-simplehistory-provider
             database: DB2
-          - module: kadai-simplehistory-provider
+          - java_version: 21
+            module: kadai-simplehistory-provider
             database: POSTGRES
-          - module: kadai-rest-spring-example-boot
+          - java_version: 21
+            module: kadai-rest-spring-example-boot
             database: DB2
-          - module: kadai-rest-spring-example-boot  # ← ADD THIS
+          - java_version: 21
+            module: kadai-rest-spring-example-boot
             database: POSTGRES
-          - module: kadai-rest-spring-example-boot  # ← ADD THIS
+          - java_version: 21
+            module: kadai-rest-spring-example-boot
+            database: H2
+          - java_version: 25
+            module: kadai-core
+            database: H2
+          - java_version: 25
+            module: kadai-core-test
+            database: H2
+          - java_version: 25
+            module: kadai-spring
+            database: H2
+          - java_version: 25
+            module: kadai-spring-example
+            database: H2
+          - java_version: 25
+            module: kadai-routing-rest
+            database: H2
+          - java_version: 25
+            module: kadai-rest-spring
+            database: H2
+          - java_version: 25
+            module: kadai-rest-spring-example-common
+            database: H2
+          - java_version: 25
+            module: kadai-simplehistory-rest-spring
             database: H2
     steps:
       - name: Start Eco CI Measurement
-        if: matrix.database == 'H2'
+        if: matrix.database == 'H2' && matrix.java_version == 21
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
         with:
           task: start-measurement
@@ -438,11 +475,11 @@ jobs:
         continue-on-error: true
       - name: Git checkout
         uses: actions/checkout@v7
-      - name: Set up JDK ${{ env.JAVA_VERSION }}
+      - name: Set up JDK ${{ matrix.java_version }}
         uses: actions/setup-java@v5
         with:
           distribution: adopt
-          java-version: ${{ env.JAVA_VERSION }}
+          java-version: ${{ matrix.java_version }}
       - name: Cache maven dependencies
         uses: actions/cache@v6
         with:
@@ -464,14 +501,14 @@ jobs:
         env:
           DB: ${{ matrix.database }}
       - name: Eco CI Measurement of ${{ matrix.module }} (H2)
-        if: matrix.database == 'H2'
+        if: matrix.database == 'H2' && matrix.java_version == 21
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
         with:
           task: get-measurement
           label: "test_backend: ${{ matrix.module }} (H2)"
         continue-on-error: true
       - name: Show Eco CI Results
-        if: matrix.database == 'H2'
+        if: matrix.database == 'H2' && matrix.java_version == 21
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
         with:
           task: display-results
@@ -479,7 +516,7 @@ jobs:
           pr-comment: false
         continue-on-error: true
       - name: Upload JaCoCo Report
-        if: matrix.database == 'H2'
+        if: matrix.database == 'H2' && matrix.java_version == 21
         uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_JACOCO_REPORTS_NAME }}-${{ matrix.module }}
