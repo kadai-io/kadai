@@ -56,7 +56,7 @@
     "@typescript-eslint/eslint-plugin": "8.63.0",
     "@typescript-eslint/parser": "8.63.0",
     "@vitest/coverage-v8": "4.1.10",
-    "cypress": "15.18.0",
+    "cypress": "15.18.1",
     "eslint": "10.6.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-import": "2.32.0",
