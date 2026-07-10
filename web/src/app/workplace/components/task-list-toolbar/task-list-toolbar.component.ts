@@ -16,15 +16,13 @@
  *
  */
 
-import { Component, inject, input, OnInit, output, signal } from '@angular/core';
+import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
 import { Workbasket } from 'app/shared/models/workbasket';
-import { TaskService } from 'app/workplace/services/task.service';
 import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
 import { Sorting, TASK_SORT_PARAMETER_NAMING, TaskQuerySortParameter } from 'app/shared/models/sorting';
 import { expandDown } from 'app/shared/animations/expand.animation';
 import { ActivatedRoute, Router } from '@angular/router';
-import { WorkplaceService } from 'app/workplace/services/workplace.service';
 import { TaskQueryFilterParameter } from '../../../shared/models/task-query-filter-parameter';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -46,11 +44,15 @@ import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autoc
 import { MatOption } from '@angular/material/core';
 import { TaskFilterComponent } from '../../../shared/components/task-filter/task-filter.component';
 import { SortComponent } from '../../../shared/components/sort/sort.component';
-
-export enum Search {
-  byWorkbasket = 'workbasket',
-  byTypeAndValue = 'type-and-value'
-}
+import { SearchType } from '../../models/search';
+import { TaskSelectors } from '../../../shared/store/task-store/task.selectors';
+import {
+  SelectTask,
+  SelectWorkbasket,
+  SetPage,
+  SetSearchType,
+  SetSort
+} from '../../../shared/store/task-store/task.actions';
 
 @Component({
   selector: 'kadai-task-list-toolbar',
@@ -77,9 +79,6 @@ export enum Search {
 })
 export class TaskListToolbarComponent implements OnInit {
   taskDefaultSortBy = input<TaskQuerySortParameter>();
-  performSorting = output<Sorting<TaskQuerySortParameter>>();
-  performFilter = output<void>();
-  selectSearchType = output<Search>();
   sortingFields: Map<TaskQuerySortParameter, string> = TASK_SORT_PARAMETER_NAMING;
   tasks: Task[] = [];
   workbasketNames: string[] = [];
@@ -90,16 +89,14 @@ export class TaskListToolbarComponent implements OnInit {
   currentBasket = signal<Workbasket | undefined>(undefined);
   workbasketSelected = signal(false);
   searched = signal(false);
-  search = Search;
-  searchSelected: Search = Search.byWorkbasket;
+  search = SearchType;
+  searchSelected: SearchType = SearchType.byWorkbasket;
   activeTab = signal(0);
   filterInput = signal('');
   isFilterExpanded$: Observable<boolean> = inject(Store).select(WorkplaceSelectors.getFilterExpansion);
   destroy$ = new Subject<void>();
   private kadaiEngineService = inject(KadaiEngineService);
-  private taskService = inject(TaskService);
   private workbasketService = inject(WorkbasketService);
-  private workplaceService = inject(WorkplaceService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private store = inject(Store);
@@ -132,15 +129,15 @@ export class TaskListToolbarComponent implements OnInit {
           const workbasketOfUser = filteredWorkbasketsByUser[0];
           this.resultName.set(workbasketOfUser.name ?? '');
           this.resultId.set(workbasketOfUser.workbasketId ?? '');
-          this.workplaceService.selectWorkbasket(workbasketOfUser);
+          this.store.dispatch(new SelectWorkbasket(workbasketOfUser));
           this.currentBasket.set(workbasketOfUser);
           this.workbasketSelected.set(true);
           this.searched.set(true);
         }
       });
 
-    this.taskService
-      .getSelectedTask()
+    this.store
+      .select(TaskSelectors.getSelectedTask)
       .pipe(takeUntil(this.destroy$))
       .subscribe((task) => {
         if (typeof task !== 'undefined') {
@@ -153,7 +150,7 @@ export class TaskListToolbarComponent implements OnInit {
             this.resultName.set(workbasketSummary.name ?? '');
             this.resultId.set(workbasketSummary.workbasketId ?? '');
             this.currentBasket.set(workbasketSummary);
-            this.workplaceService.selectWorkbasket(this.currentBasket());
+            this.store.dispatch(new SelectWorkbasket(this.currentBasket()));
             this.workbasketSelected.set(true);
           }
         }
@@ -218,7 +215,7 @@ export class TaskListToolbarComponent implements OnInit {
         if (workbasket.name === this.resultName()) {
           this.resultId.set(workbasket.workbasketId ?? '');
           this.currentBasket.set(workbasket);
-          this.workplaceService.selectWorkbasket(this.currentBasket());
+          this.store.dispatch(new SelectWorkbasket(this.currentBasket()));
         }
       });
 
@@ -226,7 +223,7 @@ export class TaskListToolbarComponent implements OnInit {
 
       if (!this.resultId()) {
         this.currentBasket.set(undefined);
-        this.workplaceService.selectWorkbasket();
+        this.store.dispatch(new SelectWorkbasket(undefined));
       }
     }
 
@@ -234,31 +231,31 @@ export class TaskListToolbarComponent implements OnInit {
   }
 
   sorting(sort: Sorting<TaskQuerySortParameter>) {
-    this.performSorting.emit(sort);
+    this.store.dispatch(new SetSort(sort));
   }
 
   onFilter() {
-    this.performFilter.emit();
+    this.store.dispatch(new SetPage(1));
   }
 
   onClearFilter() {
     this.store.dispatch(new ClearTaskFilter()).subscribe(() => {
-      this.performFilter.emit();
+      this.store.dispatch(new SetPage(1));
     });
   }
 
   createTask() {
-    this.taskService.selectTask();
+    this.store.dispatch(new SelectTask(undefined));
     this.router.navigate([{ outlets: { detail: 'taskdetail/new-task' } }], {
       relativeTo: this.route.parent,
       queryParamsHandling: 'merge'
     });
   }
 
-  selectSearch(type: Search) {
+  selectSearch(type: SearchType) {
     this.searchSelected = type;
     this.resultId.set('');
-    this.selectSearchType.emit(type);
+    this.store.dispatch(new SetSearchType(type));
     this.searchBasket();
     this.onClearFilter();
   }

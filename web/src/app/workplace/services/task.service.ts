@@ -17,7 +17,7 @@
  */
 
 import { Task } from 'app/workplace/models/task';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { TaskResource } from 'app/workplace/models/task-resource';
@@ -34,13 +34,6 @@ export class TaskService {
   private httpClient = inject(HttpClient);
   private startupService = inject(StartupService);
 
-  private taskChangedSource = new Subject<Task | undefined>();
-  taskChangedStream = this.taskChangedSource.asObservable();
-  private taskSelectedSource = new Subject<Task | undefined>();
-  taskSelectedStream = this.taskSelectedSource.asObservable();
-  private taskDeletedSource = new Subject<Task>();
-  taskDeletedStream = this.taskDeletedSource.asObservable();
-
   get url(): string {
     return this.startupService.getKadaiRestUrl() + '/v1/tasks';
   }
@@ -53,22 +46,6 @@ export class TaskService {
       }
     });
     return task;
-  }
-
-  publishUpdatedTask(task?: Task) {
-    this.taskChangedSource.next(task);
-  }
-
-  publishTaskDeletion() {
-    this.taskDeletedSource.next(null as any);
-  }
-
-  selectTask(task?: Task) {
-    this.taskSelectedSource.next(task);
-  }
-
-  getSelectedTask(): Observable<Task | undefined> {
-    return this.taskSelectedStream;
   }
 
   findTasksWithWorkbasket(

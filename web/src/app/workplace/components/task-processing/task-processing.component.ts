@@ -33,6 +33,8 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
 
 import { MatDivider } from '@angular/material/divider';
+import { Store } from '@ngxs/store';
+import { LoadTasks, SelectTask } from '../../../shared/store/task-store/task.actions';
 
 @Component({
   selector: 'kadai-task-processing',
@@ -51,6 +53,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
   private workbasketService = inject(WorkbasketService);
   private classificationService = inject(ClassificationsService);
   private requestInProgressService = inject(RequestInProgressService);
+  private store = inject(Store);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private sanitizer = inject(DomSanitizer);
@@ -66,7 +69,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
         .pipe(take(1))
         .subscribe((task) => {
           this.task.set(task);
-          this.taskService.publishUpdatedTask(task);
+          this.refreshTaskInStore(task);
           this.requestInProgressService.setRequestInProgress(false);
         });
     });
@@ -76,7 +79,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
     this.requestInProgressService.setRequestInProgress(true);
     const task = (await this.taskService.getTask(id).toPromise())!;
     this.task.set(task);
-    this.taskService.selectTask(task);
+    this.store.dispatch(new SelectTask(task));
     const classification = (await this.classificationService
       .getClassification(task.classificationSummary!.classificationId!)
       .toPromise())!;
@@ -114,7 +117,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
     this.taskService.completeTask(this.task()!.taskId).subscribe((task) => {
       this.requestInProgressService.setRequestInProgress(false);
       this.task.set(task);
-      this.taskService.publishUpdatedTask(task);
+      this.refreshTaskInStore(task);
       this.navigateBack();
     });
   }
@@ -126,7 +129,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
       .pipe(take(1))
       .subscribe((task) => {
         this.task.set(task);
-        this.taskService.publishUpdatedTask(task);
+        this.refreshTaskInStore(task);
         this.requestInProgressService.setRequestInProgress(false);
       });
     this.navigateBack();
@@ -143,6 +146,10 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
     if (this.routeSubscription) {
       this.routeSubscription.unsubscribe();
     }
+  }
+
+  private refreshTaskInStore(task: Task) {
+    this.store.dispatch([new SelectTask(task), new LoadTasks()]);
   }
 
   private extractUrl(url: string): string {

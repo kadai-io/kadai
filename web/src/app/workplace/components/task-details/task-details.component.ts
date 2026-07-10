@@ -17,20 +17,18 @@
  */
 
 import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Subject, Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { TaskService } from 'app/workplace/services/task.service';
 import { Task } from 'app/workplace/models/task';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { KadaiDate } from 'app/shared/util/kadai.date';
 import { Workbasket } from 'app/shared/models/workbasket';
-import { WorkplaceService } from 'app/workplace/services/workplace.service';
 import { MasterAndDetailService } from 'app/shared/services/master-and-detail/master-and-detail.service';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { take, takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import { trimObject } from '../../../shared/util/form-trimmer';
-import { ObjectReference } from '../../models/object-reference';
 
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -41,6 +39,9 @@ import { TaskInformationComponent } from '../task-information/task-information.c
 import { TaskStatusDetailsComponent } from '../task-status-details/task-status-details.component';
 import { TaskCustomFieldsComponent } from '../task-custom-fields/task-custom-fields.component';
 import { TaskAttributeValueComponent } from '../task-attribute-value/task-attribute-value.component';
+import { Store } from '@ngxs/store';
+import { TaskSelectors } from '../../../shared/store/task-store/task.selectors';
+import { CreateTask, DeleteTask, GetTask, SelectTask, UpdateTask } from '../../../shared/store/task-store/task.actions';
 
 @Component({
   selector: 'kadai-task-details',
@@ -62,36 +63,41 @@ import { TaskAttributeValueComponent } from '../task-attribute-value/task-attrib
   ]
 })
 export class TaskDetailsComponent implements OnInit, OnDestroy {
+  private store = inject(Store);
+
   task = signal<Task | undefined>(undefined);
   taskClone?: Task;
   requestInProgress = signal(false);
   tabSelected = 'general';
-  currentWorkbasket?: Workbasket;
+  currentWorkbasket = toSignal<Workbasket | undefined>(this.store.select(TaskSelectors.getSelectedWorkbasket));
   currentId = signal<string>('');
   showDetail = false;
   toggleFormValidation = false;
   destroy$ = new Subject<void>();
   private route = inject(ActivatedRoute);
-  private taskService = inject(TaskService);
-  private workplaceService = inject(WorkplaceService);
   private router = inject(Router);
   private requestInProgressService = inject(RequestInProgressService);
   private notificationService = inject(NotificationService);
   private masterAndDetailService = inject(MasterAndDetailService);
   private routeSubscription!: Subscription;
-  private workbasketSubscription!: Subscription;
   private masterAndDetailSubscription!: Subscription;
   private deleteTaskSubscription!: Subscription;
 
   ngOnInit() {
-    this.workbasketSubscription = this.workplaceService.getSelectedWorkbasket().subscribe((workbasket) => {
-      this.currentWorkbasket = workbasket;
-    });
+    this.store
+      .select(TaskSelectors.getSelectedTask)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((task) => {
+        this.task.set(task);
+        if (task) {
+          this.cloneTask();
+        }
+      });
 
     this.routeSubscription = this.route.params.subscribe((params) => {
       this.currentId.set(params.id);
       // redirect if user enters through a deep-link
-      if (!this.currentWorkbasket && this.currentId() === 'new-task') {
+      if (!this.currentWorkbasket() && this.currentId() === 'new-task') {
         this.router.navigate([''], { queryParamsHandling: 'merge' });
       }
       this.getTask();
@@ -122,23 +128,7 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   }
 
   getTask(): void {
-    this.requestInProgressService.setRequestInProgress(true);
-    if (this.currentId() === 'new-task') {
-      this.requestInProgressService.setRequestInProgress(false);
-      this.task.set(new Task('', new ObjectReference(), this.currentWorkbasket));
-    } else {
-      this.taskService.getTask(this.currentId()).subscribe({
-        next: (task) => {
-          this.requestInProgressService.setRequestInProgress(false);
-          this.task.set(task);
-          this.cloneTask();
-          this.taskService.selectTask(task);
-        },
-        error: () => {
-          this.requestInProgressService.setRequestInProgress(false);
-        }
-      });
-    }
+    this.store.dispatch(new GetTask(this.currentId()));
   }
 
   openTask() {
@@ -162,17 +152,11 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   }
 
   deleteTaskConfirmation(): void {
-    const taskToDelete = this.task();
-    if (!taskToDelete) return;
-    this.deleteTaskSubscription = this.taskService
-      .deleteTask(taskToDelete)
-      .pipe(take(1))
-      .subscribe(() => {
-        this.notificationService.showSuccess('TASK_DELETE', { taskName: taskToDelete.name });
-        this.taskService.publishTaskDeletion();
-        this.task.set(undefined);
-        this.router.navigate(['kadai/workplace/tasks'], { queryParamsHandling: 'merge' });
-      });
+    const task = this.task();
+    if (!task) return;
+    this.deleteTaskSubscription = this.store.dispatch(new DeleteTask(task)).subscribe(() => {
+      this.router.navigate(['kadai/workplace/tasks'], { queryParamsHandling: 'merge' });
+    });
   }
 
   selectTab(tab: string): void {
@@ -180,17 +164,13 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   }
 
   backClicked(): void {
-    this.task.set(undefined);
-    this.taskService.selectTask(undefined);
+    this.store.dispatch(new SelectTask(undefined));
     this.router.navigate(['./'], { relativeTo: this.route.parent, queryParamsHandling: 'merge' });
   }
 
   ngOnDestroy(): void {
     if (this.routeSubscription) {
       this.routeSubscription.unsubscribe();
-    }
-    if (this.workbasketSubscription) {
-      this.workbasketSubscription.unsubscribe();
     }
     if (this.masterAndDetailSubscription) {
       this.masterAndDetailSubscription.unsubscribe();
@@ -210,43 +190,20 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   private updateTask() {
     const task = this.task();
     if (!task) return;
-    this.requestInProgressService.setRequestInProgress(true);
     trimObject(task);
-    this.taskService.updateTask(task).subscribe({
-      next: (updatedTask) => {
-        this.requestInProgressService.setRequestInProgress(false);
-        this.task.set(updatedTask);
-        this.cloneTask();
-        this.taskService.publishUpdatedTask(updatedTask);
-        this.notificationService.showSuccess('TASK_UPDATE', { taskName: updatedTask.name });
-      },
-      error: () => {
-        this.requestInProgressService.setRequestInProgress(false);
-      }
-    });
+    this.store.dispatch(new UpdateTask(task));
   }
 
   private createTask() {
     const task = this.task();
     if (!task) return;
-    this.requestInProgressService.setRequestInProgress(true);
     this.addDateToTask();
     trimObject(task);
-    this.taskService.createTask(task).subscribe({
-      next: (createdTask) => {
-        this.requestInProgressService.setRequestInProgress(false);
-        this.notificationService.showSuccess('TASK_CREATE', { taskName: createdTask.name });
-        this.task.set(createdTask);
-        this.taskService.selectTask(createdTask);
-        this.taskService.publishUpdatedTask(createdTask);
-        this.router.navigate([`../${createdTask.taskId}`], {
-          relativeTo: this.route,
-          queryParamsHandling: 'merge'
-        });
-      },
-      error: () => {
-        this.requestInProgressService.setRequestInProgress(false);
-      }
+    this.store.dispatch(new CreateTask(task)).subscribe(() => {
+      this.router.navigate([`../${task.taskId}`], {
+        relativeTo: this.route,
+        queryParamsHandling: 'merge'
+      });
     });
   }
 
