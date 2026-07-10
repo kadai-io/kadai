@@ -23,7 +23,6 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TaskDetailsComponent } from './task-details.component';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TaskService } from '../../services/task.service';
-import { WorkplaceService } from '../../services/workplace.service';
 import { MasterAndDetailService } from '../../../shared/services/master-and-detail/master-and-detail.service';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
@@ -33,6 +32,9 @@ import { ObjectReference } from '../../models/object-reference';
 import { provideStore, Store } from '@ngxs/store';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
+import { TaskWorkflowState } from '../../../shared/store/task-store/task.state';
+import { SelectTask } from '../../../shared/store/task-store/task.actions';
+import { FilterState } from '../../../shared/store/filter-store/filter.state';
 import { TaskInformationComponent } from '../task-information/task-information.component';
 import { TaskStatusDetailsComponent } from '../task-status-details/task-status-details.component';
 import { TaskCustomFieldsComponent } from '../task-custom-fields/task-custom-fields.component';
@@ -79,10 +81,9 @@ describe('TaskDetailsComponent', () => {
   let component: TaskDetailsComponent;
   let fixture: ComponentFixture<TaskDetailsComponent>;
   let taskServiceSpy: Partial<TaskService>;
-  let workplaceServiceSpy: Partial<WorkplaceService>;
-  let masterAndDetailServiceSpy: Partial<MasterAndDetailService>;
   let notificationServiceSpy: Partial<NotificationService>;
   let requestInProgressServiceSpy: Partial<RequestInProgressService>;
+  let store: Store;
 
   const mockWorkbasket = {
     workbasketId: 'WBI:001',
@@ -134,27 +135,17 @@ describe('TaskDetailsComponent', () => {
   beforeEach(async () => {
     taskServiceSpy = {
       getTask: vi.fn().mockReturnValue(of(mockTask)),
-      selectTask: vi.fn(),
       updateTask: vi.fn().mockReturnValue(of(mockTask)),
       createTask: vi.fn().mockReturnValue(of({ ...mockTask, taskId: 'new-task-id' })),
       deleteTask: vi.fn().mockReturnValue(of({})),
-      publishTaskDeletion: vi.fn(),
-      publishUpdatedTask: vi.fn(),
-      getSelectedTask: vi.fn().mockReturnValue(new Subject<Task>().asObservable())
-    };
-
-    workplaceServiceSpy = {
-      getSelectedWorkbasket: vi.fn().mockReturnValue(of(mockWorkbasket))
-    };
-
-    masterAndDetailServiceSpy = {
-      getShowDetail: vi.fn().mockReturnValue(of(false))
+      findTasksWithWorkbasket: vi.fn().mockReturnValue(of({ tasks: [], page: {} }))
     };
 
     notificationServiceSpy = {
       showSuccess: vi.fn(),
       showError: vi.fn(),
-      showDialog: vi.fn()
+      showDialog: vi.fn(),
+      showInformation: vi.fn()
     };
 
     requestInProgressServiceSpy = {
@@ -166,12 +157,10 @@ describe('TaskDetailsComponent', () => {
       imports: [TaskDetailsComponent],
       providers: [
         provideRouter(routes),
-
         provideHttpClientTesting(),
-        provideStore([EngineConfigurationState]),
+        provideStore([EngineConfigurationState, TaskWorkflowState, FilterState]),
         { provide: TaskService, useValue: taskServiceSpy },
-        { provide: WorkplaceService, useValue: workplaceServiceSpy },
-        { provide: MasterAndDetailService, useValue: masterAndDetailServiceSpy },
+        { provide: MasterAndDetailService, useValue: { getShowDetail: vi.fn().mockReturnValue(of(false)) } },
         { provide: NotificationService, useValue: notificationServiceSpy },
         { provide: RequestInProgressService, useValue: requestInProgressServiceSpy }
       ]
@@ -196,8 +185,12 @@ describe('TaskDetailsComponent', () => {
       })
       .compileComponents();
 
-    const store = TestBed.inject(Store);
-    store.reset({ ...store.snapshot(), engineConfiguration: engineConfigurationMock });
+    store = TestBed.inject(Store);
+    store.reset({
+      ...store.snapshot(),
+      engineConfiguration: engineConfigurationMock,
+      task: { ...store.snapshot().task, selectedWorkbasket: mockWorkbasket }
+    });
   });
 
   beforeEach(() => {
@@ -210,13 +203,11 @@ describe('TaskDetailsComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should set currentWorkbasket from workplaceService on init', () => {
-    expect(workplaceServiceSpy.getSelectedWorkbasket).toHaveBeenCalled();
-    expect(component.currentWorkbasket).toEqual(mockWorkbasket);
+  it('should set currentWorkbasket from TaskState on init', () => {
+    expect(component.currentWorkbasket()).toEqual(mockWorkbasket);
   });
 
   it('should set showDetail from masterAndDetailService on init', () => {
-    expect(masterAndDetailServiceSpy.getShowDetail).toHaveBeenCalled();
     expect(component.showDetail).toBe(false);
   });
 
@@ -300,10 +291,11 @@ describe('TaskDetailsComponent', () => {
     );
   });
 
-  it('should call backClicked and call taskService.selectTask with undefined', () => {
+  it('should call backClicked and clear the selected task in TaskState', () => {
+    store.dispatch(new SelectTask(mockTask));
     component.task.set(mockTask);
     component.backClicked();
-    expect(taskServiceSpy.selectTask).toHaveBeenCalled();
+    expect(store.snapshot().task.selectedTask).toBeUndefined();
   });
 
   it('should complete destroy$ on ngOnDestroy', () => {
@@ -324,7 +316,6 @@ describe('TaskDetailsComponent', () => {
     component.currentId.set('task-id-1');
     component.deleteTaskConfirmation();
     expect(taskServiceSpy.deleteTask).toHaveBeenCalledWith(mockTask);
-    expect(taskServiceSpy.publishTaskDeletion).toHaveBeenCalled();
     expect(notificationServiceSpy.showSuccess).toHaveBeenCalledWith('TASK_DELETE', { taskName: mockTask.name });
   });
 
@@ -336,7 +327,6 @@ describe('TaskDetailsComponent', () => {
 
   it('should handle getTask for new-task correctly', () => {
     component.currentId.set('new-task');
-    component.currentWorkbasket = mockWorkbasket as any;
     component.getTask();
     expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalledWith(true);
     expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalledWith(false);
@@ -400,6 +390,11 @@ describe('TaskDetailsComponent', () => {
 
   it('should not render task container when task is null', () => {
     (taskServiceSpy.getTask as ReturnType<typeof vi.fn>).mockReturnValueOnce(new Subject<Task>().asObservable());
+    store.reset({
+      ...store.snapshot(),
+      task: { ...store.snapshot().task, selectedTask: undefined }
+    });
+    fixture.destroy();
     const localFixture = TestBed.createComponent(TaskDetailsComponent);
     const localComponent = localFixture.componentInstance;
     localFixture.detectChanges();
@@ -528,19 +523,17 @@ describe('TaskDetailsComponent - DOM interaction', () => {
   beforeEach(async () => {
     taskServiceSpy = {
       getTask: vi.fn().mockReturnValue(of(mockTask)),
-      selectTask: vi.fn(),
       updateTask: vi.fn().mockReturnValue(of(mockTask)),
       createTask: vi.fn().mockReturnValue(of({ ...mockTask, taskId: 'new-task-id' })),
       deleteTask: vi.fn().mockReturnValue(of({})),
-      publishTaskDeletion: vi.fn(),
-      publishUpdatedTask: vi.fn(),
-      getSelectedTask: vi.fn().mockReturnValue(new Subject<Task>().asObservable())
+      findTasksWithWorkbasket: vi.fn().mockReturnValue(of({ tasks: [], page: {} }))
     };
 
     notificationServiceSpy = {
       showSuccess: vi.fn(),
       showError: vi.fn(),
-      showDialog: vi.fn()
+      showDialog: vi.fn(),
+      showInformation: vi.fn()
     };
 
     requestInProgressServiceSpy = {
@@ -552,18 +545,10 @@ describe('TaskDetailsComponent - DOM interaction', () => {
       imports: [TaskDetailsComponent],
       providers: [
         provideRouter(routes),
-
         provideHttpClientTesting(),
-        provideStore([EngineConfigurationState]),
+        provideStore([EngineConfigurationState, TaskWorkflowState, FilterState]),
         { provide: TaskService, useValue: taskServiceSpy },
-        {
-          provide: WorkplaceService,
-          useValue: { getSelectedWorkbasket: vi.fn().mockReturnValue(of(mockWorkbasket)) }
-        },
-        {
-          provide: MasterAndDetailService,
-          useValue: { getShowDetail: vi.fn().mockReturnValue(of(false)) }
-        },
+        { provide: MasterAndDetailService, useValue: { getShowDetail: vi.fn().mockReturnValue(of(false)) } },
         { provide: NotificationService, useValue: notificationServiceSpy },
         { provide: RequestInProgressService, useValue: requestInProgressServiceSpy }
       ]
@@ -589,7 +574,11 @@ describe('TaskDetailsComponent - DOM interaction', () => {
       .compileComponents();
 
     const store = TestBed.inject(Store);
-    store.reset({ ...store.snapshot(), engineConfiguration: engineConfigurationMock });
+    store.reset({
+      ...store.snapshot(),
+      engineConfiguration: engineConfigurationMock,
+      task: { ...store.snapshot().task, selectedWorkbasket: mockWorkbasket }
+    });
   });
 
   it('should have falsy taskId when task is created for new-task route', () => {
@@ -733,17 +722,10 @@ describe('TaskDetailsComponent - redirect when no workbasket and new-task', () =
   beforeEach(async () => {
     const taskServiceSpy: Partial<TaskService> = {
       getTask: vi.fn().mockReturnValue(of(mockTask)),
-      selectTask: vi.fn(),
       updateTask: vi.fn().mockReturnValue(of(mockTask)),
       createTask: vi.fn().mockReturnValue(of(mockTask)),
       deleteTask: vi.fn().mockReturnValue(of({})),
-      publishTaskDeletion: vi.fn(),
-      publishUpdatedTask: vi.fn(),
-      getSelectedTask: vi.fn().mockReturnValue(new Subject<Task>().asObservable())
-    };
-
-    const workplaceServiceSpy: Partial<WorkplaceService> = {
-      getSelectedWorkbasket: vi.fn().mockReturnValue(of(null))
+      findTasksWithWorkbasket: vi.fn().mockReturnValue(of({ tasks: [], page: {} }))
     };
 
     const masterAndDetailServiceSpy: Partial<MasterAndDetailService> = {
@@ -753,7 +735,8 @@ describe('TaskDetailsComponent - redirect when no workbasket and new-task', () =
     const notificationServiceSpy: Partial<NotificationService> = {
       showSuccess: vi.fn(),
       showError: vi.fn(),
-      showDialog: vi.fn()
+      showDialog: vi.fn(),
+      showInformation: vi.fn()
     };
 
     const requestInProgressServiceSpy: Partial<RequestInProgressService> = {
@@ -765,9 +748,8 @@ describe('TaskDetailsComponent - redirect when no workbasket and new-task', () =
       imports: [TaskDetailsComponent],
       providers: [
         provideHttpClientTesting(),
-        provideStore([EngineConfigurationState]),
+        provideStore([EngineConfigurationState, TaskWorkflowState, FilterState]),
         { provide: TaskService, useValue: taskServiceSpy },
-        { provide: WorkplaceService, useValue: workplaceServiceSpy },
         { provide: MasterAndDetailService, useValue: masterAndDetailServiceSpy },
         { provide: NotificationService, useValue: notificationServiceSpy },
         { provide: RequestInProgressService, useValue: requestInProgressServiceSpy },
@@ -802,6 +784,7 @@ describe('TaskDetailsComponent - redirect when no workbasket and new-task', () =
       .compileComponents();
 
     const store = TestBed.inject(Store);
+    // no workbasket selected in TaskState, matching the original "getSelectedWorkbasket() -> of(null)" setup
     store.reset({ ...store.snapshot(), engineConfiguration: engineConfigurationMock });
 
     fixture = TestBed.createComponent(TaskDetailsComponent);
@@ -819,6 +802,7 @@ describe('TaskDetailsComponent - redirect when no workbasket and new-task', () =
 describe('TaskDetailsComponent - HTML template without overrideComponent', () => {
   let component: TaskDetailsComponent;
   let fixture: ComponentFixture<TaskDetailsComponent>;
+  let store: Store;
 
   const mockWorkbasketHtml = {
     workbasketId: 'WBI:001',
@@ -872,7 +856,7 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
       imports: [TaskDetailsComponent],
       providers: [
         provideHttpClientTesting(),
-        provideStore([EngineConfigurationState]),
+        provideStore([EngineConfigurationState, TaskWorkflowState, FilterState]),
         {
           provide: ActivatedRoute,
           useValue: { params: EMPTY, parent: null }
@@ -885,21 +869,17 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
           provide: TaskService,
           useValue: {
             getTask: vi.fn().mockReturnValue(of(mockTaskHtml)),
-            selectTask: vi.fn(),
             updateTask: vi.fn().mockReturnValue(of(mockTaskHtml)),
             createTask: vi.fn().mockReturnValue(of(mockTaskHtml)),
             deleteTask: vi.fn().mockReturnValue(of({})),
-            publishTaskDeletion: vi.fn(),
-            publishUpdatedTask: vi.fn(),
-            getSelectedTask: vi.fn().mockReturnValue(new Subject<Task>().asObservable())
+            findTasksWithWorkbasket: vi.fn().mockReturnValue(of({ tasks: [], page: {} }))
           }
         },
-        {
-          provide: WorkplaceService,
-          useValue: { getSelectedWorkbasket: vi.fn().mockReturnValue(of(mockWorkbasketHtml)) }
-        },
         { provide: MasterAndDetailService, useValue: { getShowDetail: vi.fn().mockReturnValue(of(false)) } },
-        { provide: NotificationService, useValue: { showSuccess: vi.fn(), showError: vi.fn(), showDialog: vi.fn() } },
+        {
+          provide: NotificationService,
+          useValue: { showSuccess: vi.fn(), showError: vi.fn(), showDialog: vi.fn(), showInformation: vi.fn() }
+        },
         {
           provide: RequestInProgressService,
           useValue: { setRequestInProgress: vi.fn(), getRequestInProgress: vi.fn().mockReturnValue(of(false)) }
@@ -921,8 +901,12 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
       ]
     }).compileComponents();
 
-    const store = TestBed.inject(Store);
-    store.reset({ ...store.snapshot(), engineConfiguration: engineConfigurationMock });
+    store = TestBed.inject(Store);
+    store.reset({
+      ...store.snapshot(),
+      engineConfiguration: engineConfigurationMock,
+      task: { ...store.snapshot().task, selectedWorkbasket: mockWorkbasketHtml }
+    });
   });
 
   it('should render task-details when task is set (covers @if (task && !requestInProgress) block)', () => {
@@ -931,6 +915,7 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
     component.task.set({ ...mockTaskHtml });
     component.requestInProgress.set(false);
     component.currentId.set('task-id-1');
+    store.dispatch(new SelectTask(component.task()));
     fixture.detectChanges();
     const taskDetails = fixture.nativeElement.querySelector('.task-details');
     expect(taskDetails).toBeTruthy();
@@ -942,6 +927,7 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
     component.task.set(new Task('', new ObjectReference(), mockWorkbasketHtml as any));
     component.requestInProgress.set(false);
     component.currentId.set('any-id');
+    store.dispatch(new SelectTask(component.task()));
     fixture.detectChanges();
     const badge = fixture.nativeElement.querySelector('.task-details__badge-message');
     expect(badge).toBeTruthy();
@@ -953,6 +939,7 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
     component.task.set({ ...mockTaskHtml });
     component.requestInProgress.set(false);
     component.currentId.set('new-task');
+    store.dispatch(new SelectTask(component.task()));
     fixture.detectChanges();
     const undoBtn = fixture.nativeElement.querySelector('button[mattooltip="Undo changes"]');
     expect(undoBtn).toBeNull();
@@ -964,6 +951,7 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
     component.task.set({ ...mockTaskHtml });
     component.requestInProgress.set(false);
     component.currentId.set('task-id-1');
+    store.dispatch(new SelectTask(component.task()));
     fixture.detectChanges();
     const undoBtn = fixture.nativeElement.querySelector('button[mattooltip="Undo changes"]');
     expect(undoBtn).toBeTruthy();
@@ -975,6 +963,7 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
     component.task.set({ ...mockTaskHtml });
     component.requestInProgress.set(false);
     component.currentId.set('task-id-1');
+    store.dispatch(new SelectTask(component.task()));
     fixture.detectChanges();
     const initialToggle = component.toggleFormValidation;
     const saveBtn = fixture.nativeElement.querySelector('button[mattooltip="Save Task"]');
@@ -990,6 +979,7 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
     component.task.set({ ...mockTaskHtml });
     component.requestInProgress.set(false);
     component.currentId.set('task-id-1');
+    store.dispatch(new SelectTask(component.task()));
     fixture.detectChanges();
     const resetSpy = vi.spyOn(component, 'resetTask');
     const undoBtn = fixture.nativeElement.querySelector('button[mattooltip="Undo changes"]');
@@ -1004,6 +994,7 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
     component.task.set({ ...mockTaskHtml });
     component.requestInProgress.set(false);
     component.currentId.set('task-id-1');
+    store.dispatch(new SelectTask(component.task()));
     fixture.detectChanges();
     const onSaveSpy = vi.spyOn(component, 'onSave');
     const taskInfoDebug = fixture.debugElement.query(By.css('kadai-task-information'));
@@ -1016,12 +1007,13 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
     }
   });
 
-  it('should call openTask when Open menu item is clicked', () => {
+  it('should call openTask when Open menu item is clicked', async () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
     component.task.set({ ...mockTaskHtml });
     component.requestInProgress.set(false);
     component.currentId.set('task-id-1');
+    store.dispatch(new SelectTask(component.task()));
     fixture.detectChanges();
     const openTaskSpy = vi.spyOn(component, 'openTask');
     const triggerDebug = fixture.debugElement.query(By.directive(MatMenuTrigger));
@@ -1029,6 +1021,7 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
       const trigger = triggerDebug.injector.get(MatMenuTrigger);
       trigger.openMenu();
       fixture.detectChanges();
+      await fixture.whenStable();
       const openBtn = document.querySelector('button[mattooltip="Open Task to work on it"]');
       if (openBtn) {
         (openBtn as HTMLElement).click();
@@ -1043,12 +1036,13 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
     }
   });
 
-  it('should call deleteTask when Delete menu item is clicked', () => {
+  it('should call deleteTask when Delete menu item is clicked', async () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
     component.task.set({ ...mockTaskHtml });
     component.requestInProgress.set(false);
     component.currentId.set('task-id-1');
+    store.dispatch(new SelectTask(component.task()));
     fixture.detectChanges();
     const deleteTaskSpy = vi.spyOn(component, 'deleteTask');
     const triggerDebug = fixture.debugElement.query(By.directive(MatMenuTrigger));
@@ -1056,6 +1050,7 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
       const trigger = triggerDebug.injector.get(MatMenuTrigger);
       trigger.openMenu();
       fixture.detectChanges();
+      await fixture.whenStable();
       const deleteBtn = document.querySelector('button[mattooltip="Delete Task"]');
       if (deleteBtn) {
         (deleteBtn as HTMLElement).click();
@@ -1070,12 +1065,13 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
     }
   });
 
-  it('should call backClicked when Close menu item is clicked', () => {
+  it('should call backClicked when Close menu item is clicked', async () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
     component.task.set({ ...mockTaskHtml });
     component.requestInProgress.set(false);
     component.currentId.set('task-id-1');
+    store.dispatch(new SelectTask(component.task()));
     fixture.detectChanges();
     const backClickedSpy = vi.spyOn(component, 'backClicked');
     const triggerDebug = fixture.debugElement.query(By.directive(MatMenuTrigger));
@@ -1083,6 +1079,7 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
       const trigger = triggerDebug.injector.get(MatMenuTrigger);
       trigger.openMenu();
       fixture.detectChanges();
+      await fixture.whenStable();
       const closeBtn = document.querySelector('button[mattooltip="Close Task"]');
       if (closeBtn) {
         (closeBtn as HTMLElement).click();

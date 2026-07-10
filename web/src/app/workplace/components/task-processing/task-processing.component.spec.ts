@@ -28,8 +28,12 @@ import { TaskService } from '../../services/task.service';
 import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { Task } from '../../models/task';
 import { Workbasket } from '../../../shared/models/workbasket';
+import { provideStore, Store } from '@ngxs/store';
+import { TaskWorkflowState } from '../../../shared/store/task-store/task.state';
+import { FilterState } from '../../../shared/store/filter-store/filter.state';
 
 const makeTask = (overrides: Partial<Task> = {}): Task => {
   const task = new Task(
@@ -75,8 +79,6 @@ describe('TaskProcessingComponent', () => {
   let mockTaskService: {
     claimTask: ReturnType<typeof vi.fn>;
     getTask: ReturnType<typeof vi.fn>;
-    selectTask: ReturnType<typeof vi.fn>;
-    publishUpdatedTask: ReturnType<typeof vi.fn>;
     transferTask: ReturnType<typeof vi.fn>;
     completeTask: ReturnType<typeof vi.fn>;
     cancelClaimTask: ReturnType<typeof vi.fn>;
@@ -85,6 +87,7 @@ describe('TaskProcessingComponent', () => {
   let mockClassificationsService: { getClassification: ReturnType<typeof vi.fn> };
   let mockRequestInProgressService: { setRequestInProgress: ReturnType<typeof vi.fn> };
   let mockRouter: { navigate: ReturnType<typeof vi.fn> };
+  let store: Store;
 
   beforeEach(async () => {
     paramsSubject = new Subject<{ id: string }>();
@@ -95,8 +98,6 @@ describe('TaskProcessingComponent', () => {
     mockTaskService = {
       claimTask: vi.fn().mockReturnValue(of(task)),
       getTask: vi.fn().mockReturnValue(of(task)),
-      selectTask: vi.fn(),
-      publishUpdatedTask: vi.fn(),
       transferTask: vi.fn().mockReturnValue(of(task)),
       completeTask: vi.fn().mockReturnValue(of(task)),
       cancelClaimTask: vi.fn().mockReturnValue(of(task))
@@ -125,10 +126,15 @@ describe('TaskProcessingComponent', () => {
       providers: [
         provideRouter([]),
         provideNoopAnimations(),
+        provideStore([TaskWorkflowState, FilterState]),
         { provide: TaskService, useValue: mockTaskService },
         { provide: WorkbasketService, useValue: mockWorkbasketService },
         { provide: ClassificationsService, useValue: mockClassificationsService },
         { provide: RequestInProgressService, useValue: mockRequestInProgressService },
+        {
+          provide: NotificationService,
+          useValue: { showSuccess: vi.fn(), showInformation: vi.fn(), showError: vi.fn() }
+        },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -139,6 +145,8 @@ describe('TaskProcessingComponent', () => {
         { provide: Router, useValue: mockRouter }
       ]
     }).compileComponents();
+
+    store = TestBed.inject(Store);
   });
 
   beforeEach(() => {
@@ -164,14 +172,14 @@ describe('TaskProcessingComponent', () => {
       expect(mockTaskService.claimTask).toHaveBeenCalledWith('task-abc');
     });
 
-    it('should call publishUpdatedTask after claiming', async () => {
+    it('should select the claimed task in TaskState after claiming', async () => {
       const claimedTask = makeTask();
       mockTaskService.claimTask.mockReturnValue(of(claimedTask));
 
       paramsSubject.next({ id: 'task-id-1' });
       await fixture.whenStable();
 
-      expect(mockTaskService.publishUpdatedTask).toHaveBeenCalledWith(claimedTask);
+      expect(store.snapshot().task.selectedTask).toEqual(claimedTask);
     });
 
     it('should call getTask with the id from route params', async () => {
@@ -287,14 +295,14 @@ describe('TaskProcessingComponent', () => {
       expect(mockRequestInProgressService.setRequestInProgress).toHaveBeenCalledWith(true);
     });
 
-    it('should call publishUpdatedTask after completing', () => {
+    it('should select the completed task in TaskState after completing', () => {
       const completedTask = makeTask({ taskId: 'task-id-1' });
       mockTaskService.completeTask.mockReturnValue(of(completedTask));
       component.task.set(makeTask());
 
       component.completeTask();
 
-      expect(mockTaskService.publishUpdatedTask).toHaveBeenCalledWith(completedTask);
+      expect(store.snapshot().task.selectedTask).toEqual(completedTask);
     });
 
     it('should call navigateBack after completing', () => {
@@ -344,14 +352,14 @@ describe('TaskProcessingComponent', () => {
       expect(mockRouter.navigate).toHaveBeenCalled();
     });
 
-    it('should call publishUpdatedTask after cancel claim resolves', () => {
+    it('should select the cancelled-claim task in TaskState after it resolves', () => {
       const cancelledTask = makeTask();
       mockTaskService.cancelClaimTask.mockReturnValue(of(cancelledTask));
       component.task.set(makeTask());
 
       component.cancelClaimTask();
 
-      expect(mockTaskService.publishUpdatedTask).toHaveBeenCalledWith(cancelledTask);
+      expect(store.snapshot().task.selectedTask).toEqual(cancelledTask);
     });
 
     it('should call setRequestInProgress(false) after cancel claim resolves', () => {
