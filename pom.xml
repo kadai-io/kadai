@@ -41,22 +41,22 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <version.mybatis>3.5.19</version.mybatis>
-        <version.json>20251224</version.json>
+        <version.json>20260522</version.json>
 
         <!-- build dependencies -->
         <version.checkstyle>12.3.1</version.checkstyle>
-        <version.google-java-format>1.34.1</version.google-java-format>
+        <version.google-java-format>1.35.0</version.google-java-format>
         <version.maven.checkstyle>3.6.0</version.maven.checkstyle>
         <version.maven.jar>3.5.0</version.maven.jar>
         <version.maven.war>3.5.1</version.maven.war>
         <version.maven.compiler>3.15.0</version.maven.compiler>
         <version.maven.source>3.4.0</version.maven.source>
         <version.maven.javadoc>3.12.0</version.maven.javadoc>
-        <version.maven.resources>3.4.0</version.maven.resources>
-        <version.maven.surefire>3.5.4</version.maven.surefire>
+        <version.maven.resources>3.5.0</version.maven.resources>
+        <version.maven.surefire>3.5.6</version.maven.surefire>
         <version.maven.clean>3.2.0</version.maven.clean>
         <version.maven.dependency>3.8.1</version.maven.dependency>
-        <version.maven.sonar>5.5.0.6356</version.maven.sonar>
+        <version.maven.sonar>5.7.0.6970</version.maven.sonar>
 
         <!-- release dependencies -->
         <version.maven.gpg>3.2.8</version.maven.gpg>
@@ -71,11 +71,11 @@
         <version.camunda.dmn>7.24.0</version.camunda.dmn>
 
         <!-- test dependencies -->
-        <version.archunit>1.4.1</version.archunit>
-        <version.equalsverifier>4.3.1</version.equalsverifier>
+        <version.archunit>1.4.2</version.archunit>
+        <version.equalsverifier>4.5</version.equalsverifier>
         <version.assertj>3.27.7</version.assertj>
         <version.openpojo>0.9.1</version.openpojo>
-        <version.jacoco>0.8.14</version.jacoco>
+        <version.jacoco>0.8.15</version.jacoco>
         <version.slf4j-test>3.0.3</version.slf4j-test>
         <version.testcontainers>1.21.4</version.testcontainers>
         <version.spring-openapi>2.8.5</version.spring-openapi>
@@ -88,13 +88,13 @@
 
         <!-- Excel to DMN converter dependencies -->
         <version.docx4j>11.5.9</version.docx4j>
-        <version.jakarta.xml.bind-api>4.0.4</version.jakarta.xml.bind-api>
-        <version.jaxb-core>4.0.6</version.jaxb-core>
-        <version.jaxb-impl>4.0.6</version.jaxb-impl>
+        <version.jakarta.xml.bind-api>4.0.5</version.jakarta.xml.bind-api>
+        <version.jaxb-core>4.0.9</version.jaxb-core>
+        <version.jaxb-impl>4.0.9</version.jaxb-impl>
         <version.jakarta.activation>2.1.4</version.jakarta.activation>
 
         <!-- database driver versions -->
-        <version.db2>12.1.3.0</version.db2>
+        <version.db2>12.1.5.0</version.db2>
 
         <!-- sonar settings -->
         <sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
@@ -168,7 +168,7 @@
                     <plugin>
                       <groupId>org.sonatype.central</groupId>
                       <artifactId>central-publishing-maven-plugin</artifactId>
-                      <version>0.10.0</version>
+                      <version>0.11.0</version>
                       <extensions>true</extensions>
                       <configuration>
                           <publishingServerId>central</publishingServerId>
@@ -214,7 +214,7 @@
                   <plugin>
                     <groupId>org.sonatype.central</groupId>
                     <artifactId>central-publishing-maven-plugin</artifactId>
-                    <version>0.10.0</version>
+                    <version>0.11.0</version>
                     <extensions>true</extensions>
                     <configuration>
                       <publishingServerId>central</publishingServerId>

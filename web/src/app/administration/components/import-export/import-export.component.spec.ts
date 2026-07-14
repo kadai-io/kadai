@@ -32,35 +32,27 @@ import { ClassificationDefinitionService } from '../../services/classification-d
 import { KadaiType } from '../../../shared/models/kadai-type';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../../../shared/util/blob-generator');
-
 describe.skip('ImportExportComponent', () => {
   let fixture: ComponentFixture<ImportExportComponent>;
   let debugElement: DebugElement;
   let app: ImportExportComponent;
 
-  const domainServiceSpy = vi.fn().mockImplementation(
-    (): Partial<DomainService> => ({
-      getSelectedDomainValue: vi.fn().mockReturnValue('A'),
-      getSelectedDomain: vi.fn().mockReturnValue(of('A')),
-      getDomains: vi.fn().mockReturnValue(of('A'))
-    })
-  );
+  const domainServiceSpy = vi.fn().mockImplementation((): Partial<DomainService> => ({
+    getSelectedDomainValue: vi.fn().mockReturnValue('A'),
+    getSelectedDomain: vi.fn().mockReturnValue(of('A')),
+    getDomains: vi.fn().mockReturnValue(of('A'))
+  }));
 
-  const httpSpy = vi.fn().mockImplementation(
-    (): Partial<HttpClient> => ({
-      get: vi.fn().mockReturnValue(of([])),
-      post: vi.fn().mockReturnValue(of([]))
-    })
-  );
+  const httpSpy = vi.fn().mockImplementation((): Partial<HttpClient> => ({
+    get: vi.fn().mockReturnValue(of([])),
+    post: vi.fn().mockReturnValue(of([]))
+  }));
 
   const showDialogFn = vi.fn().mockReturnValue(true);
-  const notificationServiceSpy = vi.fn().mockImplementation(
-    (): Partial<NotificationService> => ({
-      showDialog: showDialogFn,
-      showSuccess: showDialogFn
-    })
-  );
+  const notificationServiceSpy = vi.fn().mockImplementation((): Partial<NotificationService> => ({
+    showDialog: showDialogFn,
+    showSuccess: showDialogFn
+  }));
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
