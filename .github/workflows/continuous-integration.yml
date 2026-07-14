@@ -24,6 +24,8 @@ env:
   ARTIFACTS_KADAI_WEB_PATH: web/dist
   ARTIFACTS_JACOCO_REPORTS_NAME: jacoco-reports
   ARTIFACTS_JACOCO_REPORTS_PATH: "**/jacoco.exec"
+  ARTIFACTS_FRONTEND_COVERAGE_NAME: frontend-coverage
+  ARTIFACTS_FRONTEND_COVERAGE_PATH: web/coverage
 
   CACHE_WEB_NAME: web
   # IMPORTANT: this cannot start with CACHE_MAVEN_NAME's value
@@ -214,7 +216,7 @@ jobs:
   test_frontend:
     runs-on: ubuntu-22.04
     name: Test kadai-web
-    needs: [compile_frontend ]
+    needs: [ detect_changes, compile_frontend ]
     if: needs.detect_changes.outputs.frontend_changed == 'true' || startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Start Eco CI Measurement
@@ -261,6 +263,25 @@ jobs:
       - name: Test
         working-directory: web
         run: yarn test
+      - name: Prepare frontend coverage for SonarQube
+        working-directory: web
+        run: |
+          LCOV_FILE=$(find coverage -name lcov.info -print -quit)
+
+          if [[ -z "$LCOV_FILE" ]]; then
+            echo "No frontend LCOV report found below web/coverage"
+            exit 1
+          fi
+
+          if [[ "$LCOV_FILE" != "coverage/lcov.info" ]]; then
+            cp "$LCOV_FILE" coverage/lcov.info
+          fi
+      - name: Upload frontend coverage
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.ARTIFACTS_FRONTEND_COVERAGE_NAME }}
+          path: ${{ env.ARTIFACTS_FRONTEND_COVERAGE_PATH }}
+          if-no-files-found: error
       - name: Eco CI Measurement of web unit tests
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
         with:
@@ -281,7 +302,7 @@ jobs:
   test_e2e:
     runs-on: ubuntu-22.04
     name: Test E2E
-    needs: [test_frontend, test_backend]
+    needs: [ detect_changes, test_frontend, test_backend ]
     if: |
       (always() &&
       needs.detect_changes.outputs.code_changed == 'true' &&
@@ -379,7 +400,7 @@ jobs:
   test_backend:
     runs-on: ubuntu-22.04
     name: Test ${{ matrix.module }} on ${{ matrix.database }} with Java ${{ matrix.java_version }}
-    needs: [compile_backend ]
+    needs: [ detect_changes, compile_backend ]
     if: needs.detect_changes.outputs.backend_changed == 'true' || startsWith(github.ref, 'refs/tags/')
     strategy:
       matrix:
@@ -758,7 +779,7 @@ jobs:
   deploy_to_azure:
     runs-on: ubuntu-22.04
     name: Deploy demo app to Microsoft Azure
-    needs: [ test_frontend, test_e2e, test_backend ]
+    needs: [ detect_changes, test_frontend, test_e2e, test_backend ]
     if: |
       always() &&
       github.repository == 'kadai-io/kadai' &&
@@ -824,7 +845,7 @@ jobs:
   upload_to_sonar:
     runs-on: ubuntu-22.04
     name: Upload SonarQube analysis to sonarcloud
-    needs: [ test_frontend, test_e2e, test_backend ]
+    needs: [ detect_changes, test_frontend, test_e2e, test_backend ]
     # Runs on every push to main and on PRs originating from kadai-io/kadai (not forks).
     # Skipped for release tags, dependabot PRs, and if any test job failed.
     if: |
@@ -870,14 +891,34 @@ jobs:
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download JaCoCo reports
+        if: needs.detect_changes.outputs.backend_changed == 'true'
         uses: actions/download-artifact@v8
         with:
           pattern: ${{ env.ARTIFACTS_JACOCO_REPORTS_NAME }}-*
           merge-multiple: true
+      - name: Download frontend coverage
+        if: needs.detect_changes.outputs.frontend_changed == 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ env.ARTIFACTS_FRONTEND_COVERAGE_NAME }}
+          path: ${{ env.ARTIFACTS_FRONTEND_COVERAGE_PATH }}
       - name: Install kadai
         run: ./mvnw -B install -DskipTests -Dcheckstyle.skip -Dmaven.javadoc.skip
       - name: Upload SonarQube analysis
-        run: ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} -DskipTests
+        run: |
+          SONAR_ARGS=("-Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}")
+
+          if [[ "${{ needs.detect_changes.outputs.backend_changed }}" == "true" ]]; then
+            SONAR_ARGS+=("-Dsonar.coverage.jacoco.xmlReportPaths=ci/kadai-sonar-test-coverage/target/site/jacoco-aggregate/jacoco.xml")
+          else
+            SONAR_ARGS+=("-Dsonar.coverage.jacoco.xmlReportPaths=")
+          fi
+
+          if [[ "${{ needs.detect_changes.outputs.frontend_changed }}" == "true" ]]; then
+            SONAR_ARGS+=("-Dsonar.javascript.lcov.reportPaths=web/coverage/lcov.info")
+          fi
+
+          ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar "${SONAR_ARGS[@]}" -DskipTests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

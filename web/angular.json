@@ -80,7 +80,7 @@
           "options": {
             "buildTarget": "kadai-web:build",
             "coverage": true,
-            "coverageReporters": ["text-summary"],
+            "coverageReporters": ["text-summary", "lcov"],
             "coverageThresholds": {
               "perFile": true,
               "statements": 80,
