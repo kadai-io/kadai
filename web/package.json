@@ -46,7 +46,7 @@
   "devDependencies": {
     "@angular/build": "22.0.0",
     "@angular/cli": "22.0.0",
-    "@angular/compiler": "22.0.0",
+    "@angular/compiler": "22.0.1",
     "@angular/compiler-cli": "22.0.0",
     "@ngxs/devtools-plugin": "22.0.0",
     "@types/file-saver-es": "2",
