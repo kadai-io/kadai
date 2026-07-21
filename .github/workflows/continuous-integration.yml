@@ -912,7 +912,7 @@ jobs:
           SONAR_ARGS=("-Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}")
 
           if [[ "${{ needs.detect_changes.outputs.backend_changed }}" == "true" ]]; then
-            SONAR_ARGS+=("-Dsonar.coverage.jacoco.xmlReportPaths=ci/kadai-sonar-test-coverage/target/site/jacoco-aggregate/jacoco.xml")
+            SONAR_ARGS+=("-Dsonar.coverage.jacoco.xmlReportPaths=ci/kadai-sonar-test-coverage/target/site/jacoco-aggregate/jacoco.xml,../ci/kadai-sonar-test-coverage/target/site/jacoco-aggregate/jacoco.xml,../../ci/kadai-sonar-test-coverage/target/site/jacoco-aggregate/jacoco.xml")
           else
             SONAR_ARGS+=("-Dsonar.coverage.jacoco.xmlReportPaths=")
           fi
