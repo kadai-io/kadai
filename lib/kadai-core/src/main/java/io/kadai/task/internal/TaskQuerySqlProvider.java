@@ -55,8 +55,8 @@ public class TaskQuerySqlProvider {
         + "<if test=\"addAttachmentClassificationNameToSelectClauseForOrdering\">, "
         + "ac.NAME as ACNAME </if>"
         + "<if test=\"addWorkbasketNameToSelectClauseForOrdering\">, w.NAME as WNAME </if>"
-        + "<if test=\"joinWithUserInfo\">, u.LONG_NAME as LONG_NAME</if>"
-        + "<if test=\"joinWithCreatorUserInfo\">, cu.LONG_NAME as CREATOR_LONG_NAME</if>"
+        + "<if test=\"joinWithUserInfo\">, owner_info.LONG_NAME AS OWNER_LONG_NAME</if>"
+        + "<if test=\"joinWithCreatorUserInfo\">, creator_info.LONG_NAME AS CREATOR_LONG_NAME</if>"
         + groupByPorIfActive()
         + groupBySorIfActive()
         + "FROM TASK t "
@@ -76,10 +76,10 @@ public class TaskQuerySqlProvider {
         + "LEFT JOIN WORKBASKET w ON t.WORKBASKET_ID = w.ID "
         + "</if>"
         + "<if test=\"joinWithUserInfo\">"
-        + "LEFT JOIN USER_INFO u ON t.owner = u.USER_ID "
+        + "LEFT JOIN USER_INFO owner_info ON t.OWNER = owner_info.USER_ID "
         + "</if>"
         + "<if test=\"joinWithCreatorUserInfo\">"
-        + "LEFT JOIN USER_INFO cu ON t.creator = cu.USER_ID "
+        + "LEFT JOIN USER_INFO creator_info ON t.CREATOR = creator_info.USER_ID "
         + "</if>"
         + OPENING_WHERE_TAG
         + checkForAuthorization()
@@ -123,8 +123,8 @@ public class TaskQuerySqlProvider {
         + "<if test=\"addClassificationNameToSelectClauseForOrdering\">, c.NAME </if>"
         + "<if test=\"addAttachmentClassificationNameToSelectClauseForOrdering\">, ac.NAME </if>"
         + "<if test=\"addWorkbasketNameToSelectClauseForOrdering\">, w.NAME </if>"
-        + "<if test=\"joinWithUserInfo\">, u.LONG_NAME </if>"
-        + "<if test=\"joinWithCreatorUserInfo\">, cu.LONG_NAME </if>"
+        + "<if test=\"joinWithUserInfo\">, owner_info.LONG_NAME </if>"
+        + "<if test=\"joinWithCreatorUserInfo\">, creator_info.LONG_NAME </if>"
         + "FROM TASK t "
         + "<if test=\"joinWithAttachments\">"
         + "LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID "
@@ -142,10 +142,10 @@ public class TaskQuerySqlProvider {
         + "LEFT JOIN WORKBASKET w ON t.WORKBASKET_ID = w.ID "
         + "</if>"
         + "<if test=\"joinWithUserInfo\">"
-        + "LEFT JOIN USER_INFO u ON t.owner = u.USER_ID "
+        + "LEFT JOIN USER_INFO owner_info ON t.OWNER = owner_info.USER_ID "
         + "</if>"
         + "<if test=\"joinWithCreatorUserInfo\">"
-        + "LEFT JOIN USER_INFO cu ON t.creator = cu.USER_ID "
+        + "LEFT JOIN USER_INFO creator_info ON t.CREATOR = creator_info.USER_ID "
         + "</if>"
         + OPENING_WHERE_TAG
         + commonTaskWhereStatement()
@@ -208,10 +208,10 @@ public class TaskQuerySqlProvider {
         + "LEFT JOIN CLASSIFICATION ac ON a.CLASSIFICATION_ID = ac.ID "
         + "</if>"
         + "<if test=\"joinWithUserInfo\">"
-        + "LEFT JOIN USER_INFO u ON t.owner = u.USER_ID "
+        + "LEFT JOIN USER_INFO owner_info ON t.OWNER = owner_info.USER_ID "
         + "</if>"
         + "<if test=\"joinWithCreatorUserInfo\">"
-        + "LEFT JOIN USER_INFO cu ON t.creator = cu.USER_ID "
+        + "LEFT JOIN USER_INFO creator_info ON t.CREATOR = creator_info.USER_ID "
         + "</if>"
         + OPENING_WHERE_TAG
         + checkForAuthorization()
@@ -241,10 +241,10 @@ public class TaskQuerySqlProvider {
         + "LEFT JOIN OBJECT_REFERENCE o ON t.ID = o.TASK_ID "
         + "</if>"
         + "<if test=\"joinWithUserInfo\">"
-        + "LEFT JOIN USER_INFO u ON t.owner = u.USER_ID "
+        + "LEFT JOIN USER_INFO owner_info ON t.OWNER = owner_info.USER_ID "
         + "</if>"
         + "<if test=\"joinWithCreatorUserInfo\">"
-        + "LEFT JOIN USER_INFO cu ON t.creator = cu.USER_ID "
+        + "LEFT JOIN USER_INFO creator_info ON t.CREATOR = creator_info.USER_ID "
         + "</if>"
         + OPENING_WHERE_TAG
         + commonTaskWhereStatement()
@@ -272,8 +272,8 @@ public class TaskQuerySqlProvider {
   public static String queryTaskColumnValues() {
     return OPENING_SCRIPT_TAG
         + "SELECT DISTINCT ${columnName} "
-        + "<if test=\"joinWithUserInfo\">, u.LONG_NAME </if>"
-        + "<if test=\"joinWithCreatorUserInfo\">, cu.LONG_NAME </if>"
+        + "<if test=\"joinWithUserInfo\">, owner_info.LONG_NAME </if>"
+        + "<if test=\"joinWithCreatorUserInfo\">, creator_info.LONG_NAME </if>"
         + "FROM TASK t "
         + "<if test=\"joinWithAttachments\">"
         + "LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID "
@@ -288,10 +288,10 @@ public class TaskQuerySqlProvider {
         + "LEFT JOIN OBJECT_REFERENCE o ON t.ID = o.TASK_ID "
         + "</if>"
         + "<if test=\"joinWithUserInfo\">"
-        + "LEFT JOIN USER_INFO u ON t.owner = u.USER_ID "
+        + "LEFT JOIN USER_INFO owner_info ON t.OWNER = owner_info.USER_ID "
         + "</if>"
         + "<if test=\"joinWithCreatorUserInfo\">"
-        + "LEFT JOIN USER_INFO cu ON t.creator = cu.USER_ID "
+        + "LEFT JOIN USER_INFO creator_info ON t.CREATOR = creator_info.USER_ID "
         + "</if>"
         + OPENING_WHERE_TAG
         + checkForAuthorization()
@@ -364,8 +364,8 @@ public class TaskQuerySqlProvider {
         + ", ACLASSIFICATION_ID, ACLASSIFICATION_KEY, CHANNEL, REF_VALUE, ARECEIVED"
         + "</if>"
         + "<if test=\"addWorkbasketNameToSelectClauseForOrdering\">, WNAME</if>"
-        + "<if test=\"joinWithUserInfo\">, ULONG_NAME </if>"
-        + "<if test=\"joinWithCreatorUserInfo\">, CULONG_NAME </if>";
+        + "<if test=\"joinWithUserInfo\">, OWNER_LONG_NAME </if>"
+        + "<if test=\"joinWithCreatorUserInfo\">, CREATOR_LONG_NAME </if>";
   }
 
   private static String checkForAuthorization() {
@@ -445,10 +445,10 @@ public class TaskQuerySqlProvider {
         + "LEFT JOIN WORKBASKET w ON t.WORKBASKET_ID = w.ID "
         + "</if>"
         + "<if test=\"joinWithUserInfo\">"
-        + "LEFT JOIN USER_INFO u ON t.owner = u.USER_ID "
+        + "LEFT JOIN USER_INFO owner_info ON t.OWNER = owner_info.USER_ID "
         + "</if>"
         + "<if test=\"joinWithCreatorUserInfo\">"
-        + "LEFT JOIN USER_INFO cu ON t.creator = cu.USER_ID "
+        + "LEFT JOIN USER_INFO creator_info ON t.CREATOR = creator_info.USER_ID "
         + "</if>"
         + OPENING_WHERE_TAG
         + checkForAuthorization()
@@ -480,10 +480,10 @@ public class TaskQuerySqlProvider {
         + "LEFT JOIN WORKBASKET w ON t.WORKBASKET_ID = w.ID "
         + "</if>"
         + "<if test=\"joinWithUserInfo\">"
-        + "LEFT JOIN USER_INFO u ON t.owner = u.USER_ID "
+        + "LEFT JOIN USER_INFO owner_info ON t.OWNER = owner_info.USER_ID "
         + "</if>"
         + "<if test=\"joinWithCreatorUserInfo\">"
-        + "LEFT JOIN USER_INFO cu ON t.creator = cu.USER_ID "
+        + "LEFT JOIN USER_INFO creator_info ON t.CREATOR = creator_info.USER_ID "
         + "</if>"
         + OPENING_WHERE_TAG
         + checkForAuthorization()
@@ -592,10 +592,10 @@ public class TaskQuerySqlProvider {
     whereNotIn("externalIdNotIn", "t.EXTERNAL_ID", sb);
     whereIn("priority", "t.PRIORITY", sb);
     whereNotIn("priorityNotIn", "t.PRIORITY", sb);
-    whereIn("creatorLongNameIn", "cu.LONG_NAME", sb);
-    whereNotIn("creatorLongNameNotIn", "cu.LONG_NAME", sb);
-    whereIn("ownerLongNameIn", "u.LONG_NAME", sb);
-    whereNotIn("ownerLongNameNotIn", "u.LONG_NAME", sb);
+    whereIn("creatorLongNameIn", "creator_info.LONG_NAME", sb);
+    whereNotIn("creatorLongNameNotIn", "creator_info.LONG_NAME", sb);
+    whereIn("ownerLongNameIn", "owner_info.LONG_NAME", sb);
+    whereNotIn("ownerLongNameNotIn", "owner_info.LONG_NAME", sb);
     whereIn("stateIn", "t.STATE", sb);
     whereNotIn("stateNotIn", "t.STATE", sb);
     whereIn("taskId", "t.ID", sb);
@@ -626,10 +626,10 @@ public class TaskQuerySqlProvider {
     whereInInterval("priorityWithin", "t.PRIORITY", sb);
     whereNotInInterval("priorityNotWithin", "t.PRIORITY", sb);
 
-    whereLike("creatorLongNameLike", "cu.LONG_NAME", sb);
-    whereNotLike("creatorLongNameNotLike", "cu.LONG_NAME", sb);
-    whereLike("ownerLongNameLike", "u.LONG_NAME", sb);
-    whereNotLike("ownerLongNameNotLike", "u.LONG_NAME", sb);
+    whereLike("creatorLongNameLike", "creator_info.LONG_NAME", sb);
+    whereNotLike("creatorLongNameNotLike", "creator_info.LONG_NAME", sb);
+    whereLike("ownerLongNameLike", "owner_info.LONG_NAME", sb);
+    whereNotLike("ownerLongNameNotLike", "owner_info.LONG_NAME", sb);
     whereCustomStatements("custom", "t.CUSTOM", 16, sb);
     whereCustomIntStatements("customInt", "t.CUSTOM_INT", 8, sb);
 

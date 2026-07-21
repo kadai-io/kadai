@@ -2836,7 +2836,7 @@ public class TaskServiceImpl implements TaskService {
     if (task.getCreator() == null || task.getCreator().isEmpty()) {
       return;
     }
-    if (task.getOwner().equals(task.getCreator())) {
+    if (Objects.equals(task.getOwner(), task.getCreator())) {
       task.setCreatorLongName(task.getOwnerLongName());
       return;
     }

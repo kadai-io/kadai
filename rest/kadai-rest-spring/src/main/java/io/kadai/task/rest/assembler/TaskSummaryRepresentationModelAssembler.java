@@ -80,6 +80,7 @@ public class TaskSummaryRepresentationModelAssembler
     repModel.setDue(taskSummary.getDue());
     repModel.setName(taskSummary.getName());
     repModel.setCreator(taskSummary.getCreator());
+    repModel.setCreatorLongName(taskSummary.getCreatorLongName());
     repModel.setNote(taskSummary.getNote());
     repModel.setDescription(taskSummary.getDescription());
     repModel.setPriority(taskSummary.getPriority());
@@ -144,6 +145,7 @@ public class TaskSummaryRepresentationModelAssembler
     taskSummary.setDue(repModel.getDue());
     taskSummary.setName(repModel.getName());
     taskSummary.setCreator(repModel.getCreator());
+    taskSummary.setCreatorLongName(repModel.getCreatorLongName());
     taskSummary.setNote(repModel.getNote());
     taskSummary.setDescription(repModel.getDescription());
     taskSummary.setPriority(repModel.getPriority());

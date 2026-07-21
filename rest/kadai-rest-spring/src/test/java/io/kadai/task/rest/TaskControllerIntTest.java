@@ -1518,6 +1518,82 @@ class TaskControllerIntTest {
     }
 
     @Test
+    void should_SortByCreatorLongNameAndExposeCreatorLongName() {
+      String teamleadTaskId = null;
+      String userTaskId = null;
+      try {
+        teamleadTaskId =
+            createTaskForCreatorLongNameSort(
+                "teamlead-1", "WBI:100000000000000000000000000000000004");
+        userTaskId =
+            createTaskForCreatorLongNameSort(
+                "user-1-1", "WBI:100000000000000000000000000000000006");
+
+        String url =
+            restHelper.toUrl(RestEndpoints.URL_TASKS)
+                + "?task-id="
+                + teamleadTaskId
+                + "&task-id="
+                + userTaskId
+                + "&sort-by=CREATOR_LONG_NAME"
+                + "&order=ASCENDING";
+
+        ResponseEntity<TaskSummaryPagedRepresentationModel> response =
+            restClient
+                .get()
+                .uri(url)
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+                .retrieve()
+                .toEntity(TaskSummaryPagedRepresentationModel.class);
+
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getContent())
+            .extracting(TaskSummaryRepresentationModel::getCreatorLongName)
+            .containsExactly("Mustermann, Max - (user-1-1)", "Toll, Titus - (teamlead-1)");
+        assertThat(response.getBody().getContent())
+            .extracting(TaskSummaryRepresentationModel::getTaskId)
+            .containsExactly(userTaskId, teamleadTaskId);
+        assertThat(response.getBody().getLink(IanaLinkRelations.SELF)).isNotNull();
+      } finally {
+        deleteTaskIfCreated(teamleadTaskId);
+        deleteTaskIfCreated(userTaskId);
+      }
+    }
+
+    private String createTaskForCreatorLongNameSort(String userId, String workbasketId) {
+      TaskRepresentationModel taskRepresentationModel = getTaskResourceSample();
+      WorkbasketSummaryRepresentationModel workbasketSummary =
+          new WorkbasketSummaryRepresentationModel();
+      workbasketSummary.setWorkbasketId(workbasketId);
+      taskRepresentationModel.setWorkbasketSummary(workbasketSummary);
+
+      ResponseEntity<TaskRepresentationModel> response =
+          restClient
+              .post()
+              .uri(restHelper.toUrl(RestEndpoints.URL_TASKS))
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser(userId)))
+              .body(taskRepresentationModel)
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+      assertThat(response.getBody()).isNotNull();
+      return response.getBody().getTaskId();
+    }
+
+    private void deleteTaskIfCreated(String taskId) {
+      if (taskId == null) {
+        return;
+      }
+      restClient
+          .delete()
+          .uri(restHelper.toUrl(RestEndpoints.URL_TASKS_ID_FORCE, taskId))
+          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+          .retrieve()
+          .toBodilessEntity();
+    }
+
+    @Test
     void should_GroupByPor() throws Exception {
       Field useSpecificDb2Taskquery =
           kadaiConfiguration.getClass().getDeclaredField("useSpecificDb2Taskquery");

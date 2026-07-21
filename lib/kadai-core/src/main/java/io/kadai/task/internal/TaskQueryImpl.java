@@ -628,8 +628,8 @@ public class TaskQueryImpl implements TaskQuery {
     joinWithCreatorUserInfo = true;
     return (DB.DB2 == getDB()
             && kadaiEngine.getEngine().getConfiguration().isUseSpecificDb2Taskquery())
-        ? addOrderCriteria("CULONG_NAME", sortDirection)
-        : addOrderCriteria("cu.LONG_NAME", sortDirection);
+        ? addOrderCriteria("CREATOR_LONG_NAME", sortDirection)
+        : addOrderCriteria("creator_info.LONG_NAME", sortDirection);
   }
 
   @Override
@@ -2076,8 +2076,8 @@ public class TaskQueryImpl implements TaskQuery {
     joinWithUserInfo = true;
     return (DB.DB2 == getDB()
             && kadaiEngine.getEngine().getConfiguration().isUseSpecificDb2Taskquery())
-        ? addOrderCriteria("ULONG_NAME", sortDirection)
-        : addOrderCriteria("u.LONG_NAME", sortDirection);
+        ? addOrderCriteria("OWNER_LONG_NAME", sortDirection)
+        : addOrderCriteria("owner_info.LONG_NAME", sortDirection);
   }
 
   public List<TaskSummary> list() {
@@ -2409,7 +2409,13 @@ public class TaskQueryImpl implements TaskQuery {
       sortDirection = SortDirection.ASCENDING;
     }
     orderByInner.add(columnName + " " + sortDirection);
-    if (columnName.startsWith("a") || columnName.startsWith("w") || columnName.startsWith("c")) {
+    String lowercaseColumnName = columnName.toLowerCase();
+    if (lowercaseColumnName.startsWith("owner_info.")
+        || lowercaseColumnName.startsWith("creator_info.")) {
+      orderByOuter.add(columnName + " " + sortDirection);
+    } else if (columnName.startsWith("a")
+        || columnName.startsWith("w")
+        || columnName.startsWith("c")) {
       orderByOuter.add(columnName.replace(".", "").toUpperCase() + " " + sortDirection);
     } else {
       if (columnName.startsWith("u")) {

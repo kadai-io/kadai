@@ -35,6 +35,7 @@ import io.kadai.KadaiConfiguration.Builder;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.api.security.UserPrincipal;
 import io.kadai.common.internal.util.CollectionUtil;
 import io.kadai.common.internal.util.Triplet;
 import io.kadai.common.test.security.JaasExtension;
@@ -51,7 +52,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.Callable;
 import java.util.stream.Stream;
+import javax.security.auth.Subject;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
@@ -126,6 +129,152 @@ class QueryTasksAccTest extends AbstractAccTest {
     assertThat(task.getCreatorLongName()).isEqualTo(task.getOwnerLongName());
     assertThat(task.getCreatorLongName()).isEqualTo("Mustermann, Max - (user-1-1)");
     assertThat(UserInfoFindByIdCountInterceptor.getUserInfoFindByIdCount()).isOne();
+  }
+
+  @WithAccessId(user = "user-1-1")
+  @Test
+  void should_SetCreatorLongNameOfTask_When_PropertyEnabled() throws Exception {
+    KadaiConfiguration kadaiConfiguration =
+        new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(true).build();
+    KadaiEngine kadaiEngine =
+        KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
+    Task createdTask = createTask(kadaiEngine, "USER-1-1", "user-1-2");
+
+    List<TaskSummary> tasks =
+        kadaiEngine.getTaskService().createTaskQuery().idIn(createdTask.getId()).list();
+
+    assertThat(tasks).hasSize(1);
+    assertThat(tasks.get(0))
+        .extracting(TaskSummary::getCreatorLongName)
+        .isEqualTo("Mustermann, Max - (user-1-1)");
+  }
+
+  @WithAccessId(user = "user-1-1")
+  @Test
+  void should_NotSetCreatorLongNameOfTask_When_PropertyDisabled() throws Exception {
+    KadaiConfiguration kadaiConfiguration =
+        new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(false).build();
+    KadaiEngine kadaiEngine =
+        KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
+    Task createdTask = createTask(kadaiEngine, "USER-1-1", "user-1-2");
+
+    List<TaskSummary> tasks =
+        kadaiEngine.getTaskService().createTaskQuery().idIn(createdTask.getId()).list();
+
+    assertThat(tasks).hasSize(1);
+    assertThat(tasks.get(0)).extracting(TaskSummary::getCreatorLongName).isNull();
+  }
+
+  @WithAccessId(user = "user-1-1")
+  @Test
+  void should_QueryTaskByCreatorLongName_When_UsingAllCreatorLongNameFilters() throws Exception {
+    KadaiConfiguration kadaiConfiguration =
+        new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(false).build();
+    KadaiEngine kadaiEngine =
+        KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
+    Task createdTask = createTask(kadaiEngine, "USER-1-1", "user-1-2");
+    String longName = "Mustermann, Max - (user-1-1)";
+
+    assertThat(
+            kadaiEngine
+                .getTaskService()
+                .createTaskQuery()
+                .idIn(createdTask.getId())
+                .creatorLongNameIn(longName)
+                .list())
+        .hasSize(1)
+        .extracting(TaskSummary::getCreatorLongName)
+        .containsExactly(longName);
+    assertThat(
+            kadaiEngine
+                .getTaskService()
+                .createTaskQuery()
+                .idIn(createdTask.getId())
+                .creatorLongNameNotIn("Eifrig, Elena - (user-1-2)")
+                .list())
+        .hasSize(1)
+        .extracting(TaskSummary::getCreatorLongName)
+        .containsExactly(longName);
+    assertThat(
+            kadaiEngine
+                .getTaskService()
+                .createTaskQuery()
+                .idIn(createdTask.getId())
+                .creatorLongNameLike("%user-1-1%")
+                .list())
+        .hasSize(1)
+        .extracting(TaskSummary::getCreatorLongName)
+        .containsExactly(longName);
+    assertThat(
+            kadaiEngine
+                .getTaskService()
+                .createTaskQuery()
+                .idIn(createdTask.getId())
+                .creatorLongNameNotLike("%user-1-2%")
+                .list())
+        .hasSize(1)
+        .extracting(TaskSummary::getCreatorLongName)
+        .containsExactly(longName);
+  }
+
+  @WithAccessId(user = "user-1-1")
+  @Test
+  void should_ListValuesAndCountCorrectly_When_FilteringWithCreatorLongName() throws Exception {
+    KadaiConfiguration kadaiConfiguration =
+        new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(false).build();
+    KadaiEngine kadaiEngine =
+        KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
+    Task createdTask = createTask(kadaiEngine, "USER-1-1", "user-1-2");
+    String longName = "Mustermann, Max - (user-1-1)";
+
+    long count =
+        kadaiEngine
+            .getTaskService()
+            .createTaskQuery()
+            .idIn(createdTask.getId())
+            .creatorLongNameIn(longName)
+            .count();
+    List<String> listedValues =
+        kadaiEngine
+            .getTaskService()
+            .createTaskQuery()
+            .idIn(createdTask.getId())
+            .creatorLongNameIn(longName)
+            .listValues(TaskQueryColumnName.ID, null);
+
+    assertThat(count).isOne();
+    assertThat(listedValues).containsExactly(createdTask.getId());
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_OrderAndListValuesByCreatorLongName_When_QueryingTask() throws Exception {
+    KadaiConfiguration kadaiConfiguration =
+        new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(false).build();
+    KadaiEngine kadaiEngine =
+        KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
+    Task taskCreatedByUser11 = createTaskAs(kadaiEngine, "user-1-1", "USER-1-1", "user-1-1");
+    Task taskCreatedByUser12 = createTaskAs(kadaiEngine, "user-1-2", "USER-1-2", "user-1-2");
+
+    List<TaskSummary> tasks =
+        kadaiEngine
+            .getTaskService()
+            .createTaskQuery()
+            .idIn(taskCreatedByUser11.getId(), taskCreatedByUser12.getId())
+            .orderByCreatorLongName(ASCENDING)
+            .list();
+    List<String> listedLongNames =
+        kadaiEngine
+            .getTaskService()
+            .createTaskQuery()
+            .idIn(taskCreatedByUser11.getId(), taskCreatedByUser12.getId())
+            .listValues(TaskQueryColumnName.CREATOR_LONG_NAME, ASCENDING);
+
+    assertThat(tasks)
+        .extracting(TaskSummary::getCreatorLongName)
+        .containsExactly("Eifrig, Elena - (user-1-2)", "Mustermann, Max - (user-1-1)");
+    assertThat(listedLongNames)
+        .containsExactly("Eifrig, Elena - (user-1-2)", "Mustermann, Max - (user-1-1)");
   }
 
   @WithAccessId(user = "user-1-1")
@@ -628,5 +777,24 @@ class QueryTasksAccTest extends AbstractAccTest {
         engineProxy.returnConnection();
       }
     }
+  }
+
+  private Task createTask(KadaiEngine kadaiEngine, String workbasketKey, String owner)
+      throws Exception {
+    Task newTask = kadaiEngine.getTaskService().newTask(workbasketKey, "DOMAIN_A");
+    newTask.setOwner(owner);
+    newTask.setPrimaryObjRef(
+        createObjectReference("COMPANY_A", "SYSTEM_A", "INSTANCE_A", "VNR", "1234567"));
+    newTask.setClassificationKey("T2100");
+    return kadaiEngine.getTaskService().createTask(newTask);
+  }
+
+  private Task createTaskAs(
+      KadaiEngine kadaiEngine, String userId, String workbasketKey, String owner)
+      throws Exception {
+    Subject subject = new Subject();
+    subject.getPrincipals().add(new UserPrincipal(userId));
+    Callable<Task> action = () -> createTask(kadaiEngine, workbasketKey, owner);
+    return Subject.callAs(subject, action);
   }
 }
