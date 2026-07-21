@@ -298,7 +298,8 @@ class QueryTasksAccTest extends AbstractAccTest {
         .isThrownBy(call)
         .extracting(IllegalArgumentException::getMessage)
         .isEqualTo(
-            "The params \"lockResultsEquals\" and \"joinWithUserInfo\" cannot be used together!");
+            "The params \"lockResultsEquals\" and \"joinWithUserInfo\"/"
+                + "\"joinWithCreatorUserInfo\" cannot be used together!");
   }
 
   @WithAccessId(user = "user-1-1")
@@ -790,8 +791,7 @@ class QueryTasksAccTest extends AbstractAccTest {
   }
 
   private Task createTaskAs(
-      KadaiEngine kadaiEngine, String userId, String workbasketKey, String owner)
-      throws Exception {
+      KadaiEngine kadaiEngine, String userId, String workbasketKey, String owner) throws Exception {
     Subject subject = new Subject();
     subject.getPrincipals().add(new UserPrincipal(userId));
     Callable<Task> action = () -> createTask(kadaiEngine, workbasketKey, owner);
