@@ -33,6 +33,7 @@ public enum TaskQueryColumnName implements QueryColumnName {
   DUE("t.due"),
   NAME("t.name"),
   CREATOR("t.creator"),
+  CREATOR_LONG_NAME("cu.long_name"),
   DESCRIPTION("t.description"),
   NOTE("t.note"),
   PRIORITY("t.priority"),

@@ -29,9 +29,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import acceptance.AbstractAccTest;
 import acceptance.KadaiEngineProxy;
 import acceptance.TaskTestMapper;
+import acceptance.UserInfoFindByIdCountInterceptor;
 import io.kadai.KadaiConfiguration;
 import io.kadai.KadaiConfiguration.Builder;
 import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.internal.util.CollectionUtil;
 import io.kadai.common.internal.util.Triplet;
@@ -93,6 +95,37 @@ class QueryTasksAccTest extends AbstractAccTest {
     assertThat(tasks).hasSize(1);
     String longName = kadaiEngine.getUserService().getUser(tasks.get(0).getOwner()).getLongName();
     assertThat(tasks.get(0)).extracting(TaskSummary::getOwnerLongName).isEqualTo(longName);
+  }
+
+  @WithAccessId(user = "user-1-1")
+  @Test
+  void should_SetCreatorLongNameOfTaskAndReuseOwnerLongName_When_OwnerEqualsCreator()
+      throws Exception {
+    KadaiConfiguration kadaiConfiguration =
+        new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(true).build();
+    KadaiEngine kadaiEngine =
+        KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
+    KadaiEngineProxy engineProxy = new KadaiEngineProxy(kadaiEngine);
+    engineProxy
+        .getSqlSession()
+        .getConfiguration()
+        .addInterceptor(new UserInfoFindByIdCountInterceptor());
+
+    Task newTask = kadaiEngine.getTaskService().newTask("USER-1-1", "DOMAIN_A");
+    newTask.setOwner("user-1-1");
+    newTask.setPrimaryObjRef(
+        createObjectReference("COMPANY_A", "SYSTEM_A", "INSTANCE_A", "VNR", "1234567"));
+    newTask.setClassificationKey("T2100");
+    Task createdTask = kadaiEngine.getTaskService().createTask(newTask);
+
+    UserInfoFindByIdCountInterceptor.resetUserInfoFindByIdCount();
+
+    Task task = kadaiEngine.getTaskService().getTask(createdTask.getId());
+
+    assertThat(task.getOwner()).isEqualTo(task.getCreator());
+    assertThat(task.getCreatorLongName()).isEqualTo(task.getOwnerLongName());
+    assertThat(task.getCreatorLongName()).isEqualTo("Mustermann, Max - (user-1-1)");
+    assertThat(UserInfoFindByIdCountInterceptor.getUserInfoFindByIdCount()).isOne();
   }
 
   @WithAccessId(user = "user-1-1")

@@ -51,6 +51,7 @@ public class TaskSummaryImpl implements TaskSummary {
   protected Instant completed;
   protected String name;
   protected String creator;
+  protected String creatorLongName;
   protected String note;
   protected String description;
   protected int priority;
@@ -108,6 +109,7 @@ public class TaskSummaryImpl implements TaskSummary {
     due = copyFrom.due != null ? Instant.from(copyFrom.due) : null;
     name = copyFrom.name;
     creator = copyFrom.creator;
+    creatorLongName = copyFrom.creatorLongName;
     note = copyFrom.note;
     description = copyFrom.description;
     priority = copyFrom.priority;
@@ -181,6 +183,15 @@ public class TaskSummaryImpl implements TaskSummary {
 
   public void setCreator(String creator) {
     this.creator = creator;
+  }
+
+  @Override
+  public String getCreatorLongName() {
+    return creatorLongName;
+  }
+
+  public void setCreatorLongName(String creatorLongName) {
+    this.creatorLongName = creatorLongName == null ? null : creatorLongName.trim();
   }
 
   @Override
@@ -830,6 +841,7 @@ public class TaskSummaryImpl implements TaskSummary {
         due,
         name,
         creator,
+        creatorLongName,
         note,
         description,
         priority,
@@ -904,6 +916,7 @@ public class TaskSummaryImpl implements TaskSummary {
         && Objects.equals(due, other.due)
         && Objects.equals(name, other.name)
         && Objects.equals(creator, other.creator)
+        && Objects.equals(creatorLongName, other.creatorLongName)
         && Objects.equals(note, other.note)
         && Objects.equals(description, other.description)
         && state == other.state
@@ -967,6 +980,8 @@ public class TaskSummaryImpl implements TaskSummary {
         + name
         + ", creator="
         + creator
+        + ", creatorLongName="
+        + creatorLongName
         + ", note="
         + note
         + ", description="

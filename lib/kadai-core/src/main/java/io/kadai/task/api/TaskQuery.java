@@ -417,6 +417,45 @@ public interface TaskQuery extends BaseQuery<TaskSummary, TaskQueryColumnName> {
   TaskQuery creatorNotLike(String... creators);
 
   /**
+   * Adds the long names of the creators to your query.
+   *
+   * @param longNames the long names as String
+   * @return the query
+   */
+  TaskQuery creatorLongNameIn(String... longNames);
+
+  /**
+   * Adds the long names of the creators to your query, which should not be contained.
+   *
+   * @param longNames the long names as String
+   * @return the query
+   */
+  TaskQuery creatorLongNameNotIn(String... longNames);
+
+  /**
+   * Adds the long names of the creator for pattern matching to your query. It will be compared in
+   * SQL with the LIKE operator. You may use a wildcard like % to specify the pattern.
+   *
+   * <p>If you specify multiple arguments they are combined with the OR keyword.
+   *
+   * @param longNames the creators of the searched tasks
+   * @return the query
+   */
+  TaskQuery creatorLongNameLike(String... longNames);
+
+  /**
+   * Adds the long names of the creator for pattern matching to your query, which should not be
+   * contained. It will be compared in SQL with the LIKE operator. You may use a wildcard like % to
+   * specify the pattern.
+   *
+   * <p>If you specify multiple arguments they are combined with the OR keyword.
+   *
+   * @param longNames the creators of the searched tasks
+   * @return the query
+   */
+  TaskQuery creatorLongNameNotLike(String... longNames);
+
+  /**
    * This method sorts the query result according to creators name.
    *
    * @param sortDirection Determines whether the result is sorted in ascending or descending order.
@@ -424,6 +463,16 @@ public interface TaskQuery extends BaseQuery<TaskSummary, TaskQueryColumnName> {
    * @return the query
    */
   TaskQuery orderByCreator(SortDirection sortDirection);
+
+  /**
+   * This method sorts the query result according to the creator's long name. (Should only be used
+   * if each Task has a creator. Otherwise, the result is wrong.)
+   *
+   * @param sortDirection Determines whether the result is sorted in ascending or descending order.
+   *     If sortDirection is null, the result is sorted in ascending order
+   * @return the query
+   */
+  TaskQuery orderByCreatorLongName(SortDirection sortDirection);
 
   // endregion
   // region note
