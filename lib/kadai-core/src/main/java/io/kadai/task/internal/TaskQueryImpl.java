@@ -2265,7 +2265,7 @@ public class TaskQueryImpl implements TaskQuery {
     }
     if ((joinWithUserInfo || joinWithCreatorUserInfo) && lockResults != null && lockResults != 0) {
       throw new IllegalArgumentException(
-          "The params \"lockResultsEquals\" and \"joinWithUserInfo\""
+          "The params \"lockResultsEquals\" and \"joinWithUserInfo\"/\"joinWithCreatorUserInfo\""
               + " cannot be used together!");
     }
     if (withoutAttachment
