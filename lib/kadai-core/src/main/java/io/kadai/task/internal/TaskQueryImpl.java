@@ -2410,9 +2410,10 @@ public class TaskQueryImpl implements TaskQuery {
     }
     orderByInner.add(columnName + " " + sortDirection);
     String lowercaseColumnName = columnName.toLowerCase();
-    if (lowercaseColumnName.startsWith("owner_info.")
-        || lowercaseColumnName.startsWith("creator_info.")) {
-      orderByOuter.add(columnName + " " + sortDirection);
+    if (lowercaseColumnName.startsWith("owner_info.")) {
+      orderByOuter.add("OWNER_LONG_NAME " + sortDirection);
+    } else if (lowercaseColumnName.startsWith("creator_info.")) {
+      orderByOuter.add("CREATOR_LONG_NAME " + sortDirection);
     } else if (columnName.startsWith("a")
         || columnName.startsWith("w")
         || columnName.startsWith("c")) {
