@@ -37,6 +37,11 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 public class TaskQuerySqlProvider {
+  private static final String CREATOR_INFO_LONG_NAME = "creator_info.LONG_NAME";
+  private static final String OWNER_INFO_LONG_NAME = "owner_info.LONG_NAME";
+  private static final String CREATOR_LONG_NAME_ALIAS = "CREATOR_LONG_NAME";
+  private static final String OWNER_LONG_NAME_ALIAS = "OWNER_LONG_NAME";
+
   private TaskQuerySqlProvider() {}
 
   @SuppressWarnings("unused")
@@ -55,8 +60,16 @@ public class TaskQuerySqlProvider {
         + "<if test=\"addAttachmentClassificationNameToSelectClauseForOrdering\">, "
         + "ac.NAME as ACNAME </if>"
         + "<if test=\"addWorkbasketNameToSelectClauseForOrdering\">, w.NAME as WNAME </if>"
-        + "<if test=\"joinWithUserInfo\">, owner_info.LONG_NAME AS OWNER_LONG_NAME</if>"
-        + "<if test=\"joinWithCreatorUserInfo\">, creator_info.LONG_NAME AS CREATOR_LONG_NAME</if>"
+        + "<if test=\"joinWithUserInfo\">, "
+        + OWNER_INFO_LONG_NAME
+        + " AS "
+        + OWNER_LONG_NAME_ALIAS
+        + "</if>"
+        + "<if test=\"joinWithCreatorUserInfo\">, "
+        + CREATOR_INFO_LONG_NAME
+        + " AS "
+        + CREATOR_LONG_NAME_ALIAS
+        + "</if>"
         + groupByPorIfActive()
         + groupBySorIfActive()
         + "FROM TASK t "
@@ -123,8 +136,12 @@ public class TaskQuerySqlProvider {
         + "<if test=\"addClassificationNameToSelectClauseForOrdering\">, c.NAME </if>"
         + "<if test=\"addAttachmentClassificationNameToSelectClauseForOrdering\">, ac.NAME </if>"
         + "<if test=\"addWorkbasketNameToSelectClauseForOrdering\">, w.NAME </if>"
-        + "<if test=\"joinWithUserInfo\">, owner_info.LONG_NAME </if>"
-        + "<if test=\"joinWithCreatorUserInfo\">, creator_info.LONG_NAME </if>"
+        + "<if test=\"joinWithUserInfo\">, "
+        + OWNER_INFO_LONG_NAME
+        + " </if>"
+        + "<if test=\"joinWithCreatorUserInfo\">, "
+        + CREATOR_INFO_LONG_NAME
+        + " </if>"
         + "FROM TASK t "
         + "<if test=\"joinWithAttachments\">"
         + "LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID "
@@ -272,8 +289,12 @@ public class TaskQuerySqlProvider {
   public static String queryTaskColumnValues() {
     return OPENING_SCRIPT_TAG
         + "SELECT DISTINCT ${columnName} "
-        + "<if test=\"joinWithUserInfo\">, owner_info.LONG_NAME </if>"
-        + "<if test=\"joinWithCreatorUserInfo\">, creator_info.LONG_NAME </if>"
+        + "<if test=\"joinWithUserInfo\">, "
+        + OWNER_INFO_LONG_NAME
+        + " </if>"
+        + "<if test=\"joinWithCreatorUserInfo\">, "
+        + CREATOR_INFO_LONG_NAME
+        + " </if>"
         + "FROM TASK t "
         + "<if test=\"joinWithAttachments\">"
         + "LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID "
@@ -364,8 +385,12 @@ public class TaskQuerySqlProvider {
         + ", ACLASSIFICATION_ID, ACLASSIFICATION_KEY, CHANNEL, REF_VALUE, ARECEIVED"
         + "</if>"
         + "<if test=\"addWorkbasketNameToSelectClauseForOrdering\">, WNAME</if>"
-        + "<if test=\"joinWithUserInfo\">, OWNER_LONG_NAME </if>"
-        + "<if test=\"joinWithCreatorUserInfo\">, CREATOR_LONG_NAME </if>";
+        + "<if test=\"joinWithUserInfo\">, "
+        + OWNER_LONG_NAME_ALIAS
+        + " </if>"
+        + "<if test=\"joinWithCreatorUserInfo\">, "
+        + CREATOR_LONG_NAME_ALIAS
+        + " </if>";
   }
 
   private static String checkForAuthorization() {
@@ -592,10 +617,10 @@ public class TaskQuerySqlProvider {
     whereNotIn("externalIdNotIn", "t.EXTERNAL_ID", sb);
     whereIn("priority", "t.PRIORITY", sb);
     whereNotIn("priorityNotIn", "t.PRIORITY", sb);
-    whereIn("creatorLongNameIn", "creator_info.LONG_NAME", sb);
-    whereNotIn("creatorLongNameNotIn", "creator_info.LONG_NAME", sb);
-    whereIn("ownerLongNameIn", "owner_info.LONG_NAME", sb);
-    whereNotIn("ownerLongNameNotIn", "owner_info.LONG_NAME", sb);
+    whereIn("creatorLongNameIn", CREATOR_INFO_LONG_NAME, sb);
+    whereNotIn("creatorLongNameNotIn", CREATOR_INFO_LONG_NAME, sb);
+    whereIn("ownerLongNameIn", OWNER_INFO_LONG_NAME, sb);
+    whereNotIn("ownerLongNameNotIn", OWNER_INFO_LONG_NAME, sb);
     whereIn("stateIn", "t.STATE", sb);
     whereNotIn("stateNotIn", "t.STATE", sb);
     whereIn("taskId", "t.ID", sb);
@@ -626,10 +651,10 @@ public class TaskQuerySqlProvider {
     whereInInterval("priorityWithin", "t.PRIORITY", sb);
     whereNotInInterval("priorityNotWithin", "t.PRIORITY", sb);
 
-    whereLike("creatorLongNameLike", "creator_info.LONG_NAME", sb);
-    whereNotLike("creatorLongNameNotLike", "creator_info.LONG_NAME", sb);
-    whereLike("ownerLongNameLike", "owner_info.LONG_NAME", sb);
-    whereNotLike("ownerLongNameNotLike", "owner_info.LONG_NAME", sb);
+    whereLike("creatorLongNameLike", CREATOR_INFO_LONG_NAME, sb);
+    whereNotLike("creatorLongNameNotLike", CREATOR_INFO_LONG_NAME, sb);
+    whereLike("ownerLongNameLike", OWNER_INFO_LONG_NAME, sb);
+    whereNotLike("ownerLongNameNotLike", OWNER_INFO_LONG_NAME, sb);
     whereCustomStatements("custom", "t.CUSTOM", 16, sb);
     whereCustomIntStatements("customInt", "t.CUSTOM_INT", 8, sb);
 
