@@ -926,12 +926,36 @@ class KadaiConfigurationTest {
                           .next()
                           .setEnd(null),
                   "kadai.working-time.schedule.MONDAY[].end"),
-              invalidCustomHoliday("custom holiday day null", null, 1, "custom[].day"),
-              invalidCustomHoliday("custom holiday day too small", 0, 1, "custom[].day"),
-              invalidCustomHoliday("custom holiday day too large", 32, 1, "custom[].day"),
-              invalidCustomHoliday("custom holiday month null", 1, null, "custom[].month"),
-              invalidCustomHoliday("custom holiday month too small", 1, 0, "custom[].month"),
-              invalidCustomHoliday("custom holiday month too large", 1, 13, "custom[].month"),
+              invalidCustomHoliday(
+                  "custom holiday day null",
+                  null,
+                  1,
+                  "kadai.working-time.holidays.custom[].day"),
+              invalidCustomHoliday(
+                  "custom holiday day too small",
+                  0,
+                  1,
+                  "kadai.working-time.holidays.custom[].day"),
+              invalidCustomHoliday(
+                  "custom holiday day too large",
+                  32,
+                  1,
+                  "kadai.working-time.holidays.custom[].day"),
+              invalidCustomHoliday(
+                  "custom holiday month null",
+                  1,
+                  null,
+                  "kadai.working-time.holidays.custom[].month"),
+              invalidCustomHoliday(
+                  "custom holiday month too small",
+                  1,
+                  0,
+                  "kadai.working-time.holidays.custom[].month"),
+              invalidCustomHoliday(
+                  "custom holiday month too large",
+                  1,
+                  13,
+                  "kadai.working-time.holidays.custom[].month"),
               invalidKadaiProperties(
                   "jobs max retries",
                   p -> p.getJobs().setMaxRetries(0),
@@ -1063,9 +1087,17 @@ class KadaiConfigurationTest {
 
       contextRunner.run(
           context -> {
-            assertThat(context).hasFailed();
-            assertThat(context.getStartupFailure())
-                .hasStackTraceContaining("workingTime.holidays.custom[].day");
+            KadaiProperties kadaiProperties = context.getBean(KadaiProperties.class);
+
+            ThrowingCallable call =
+                () ->
+                    new KadaiConfiguration.Builder(
+                            TestContainerExtension.createDataSourceForH2(), false, "KADAI")
+                        .kadaiProperties(kadaiProperties);
+
+            assertThatThrownBy(call)
+                .isInstanceOf(SystemException.class)
+                .hasMessageContaining("kadai.working-time.holidays.custom[].day");
           });
     }
 
