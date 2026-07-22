@@ -247,7 +247,7 @@ public class KadaiProperties {
 
   public static class WorkingTime {
     private boolean useWorkingTimeCalculation = true;
-    @Valid private Map<DayOfWeek, Set<TimeInterval>> schedule = initDefaultWorkingTimeSchedule();
+    private Map<DayOfWeek, Set<@Valid TimeInterval>> schedule = initDefaultWorkingTimeSchedule();
     @NotNull private ZoneId timezone = ZoneId.of("Europe/Berlin");
     @Valid private Holidays holidays = new Holidays();
 
@@ -259,11 +259,11 @@ public class KadaiProperties {
       this.useWorkingTimeCalculation = useWorkingTimeCalculation;
     }
 
-    public Map<DayOfWeek, Set<TimeInterval>> getSchedule() {
+    public Map<DayOfWeek, Set<@Valid TimeInterval>> getSchedule() {
       return schedule;
     }
 
-    public void setSchedule(Map<DayOfWeek, Set<TimeInterval>> schedule) {
+    public void setSchedule(Map<DayOfWeek, Set<@Valid TimeInterval>> schedule) {
       this.schedule = schedule;
     }
 
@@ -330,14 +330,14 @@ public class KadaiProperties {
   }
 
   public static class Holidays {
-    @Valid private Set<CustomHolidayProperties> custom = new HashSet<>();
+    private Set<@Valid CustomHolidayProperties> custom = new HashSet<>();
     @Valid private German german = new German();
 
-    public Set<CustomHolidayProperties> getCustom() {
+    public Set<@Valid CustomHolidayProperties> getCustom() {
       return custom;
     }
 
-    public void setCustom(Set<CustomHolidayProperties> custom) {
+    public void setCustom(Set<@Valid CustomHolidayProperties> custom) {
       this.custom = custom;
     }
 
