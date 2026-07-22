@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -71,17 +72,25 @@ public class KadaiProperties {
   @Valid private Feature feature = new Feature();
 
   public static KadaiProperties load(String propertiesFile) {
-    Map<String, String> rawProperties = loadRawProperties(propertiesFile);
+    return from(
+        loadRawProperties(propertiesFile), String.format("properties file '%s'", propertiesFile));
+  }
+
+  public static KadaiProperties from(Map<String, String> rawProperties) {
+    return from(rawProperties, "provided properties");
+  }
+
+  private static KadaiProperties from(Map<String, String> rawProperties, String sourceDescription) {
+    Objects.requireNonNull(rawProperties, "rawProperties must not be null");
     try {
       KadaiProperties properties =
           new Binder(new MapConfigurationPropertySource(rawProperties))
               .bind("kadai", KadaiProperties.class)
               .orElseGet(KadaiProperties::new);
-      properties.properties = rawProperties;
+      properties.properties = Map.copyOf(rawProperties);
       return properties;
     } catch (BindException e) {
-      throw new SystemException(
-          String.format("Could not bind properties file '%s'", propertiesFile), e);
+      throw new SystemException(String.format("Could not bind %s", sourceDescription), e);
     }
   }
 

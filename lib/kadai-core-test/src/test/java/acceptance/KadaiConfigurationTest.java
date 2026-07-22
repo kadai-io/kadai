@@ -76,8 +76,6 @@ import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
 
 class KadaiConfigurationTest {
 
@@ -620,12 +618,10 @@ class KadaiConfigurationTest {
               Map.entry("kadai.working-time.holidays.custom[1].day", "16"),
               Map.entry("kadai.working-time.holidays.custom[1].month", "12"),
               Map.entry("kadai.user.minimal-permissions-to-assign-domains[0]", "READ"),
-              Map.entry("kadai.user.minimal-permissions-to-assign-domains[1]", "OPEN"));
+              Map.entry("kadai.user.minimal-permissions-to-assign-domains[1]", "OPEN"),
+              Map.entry("custom.property", "custom-value"));
 
-      KadaiProperties kadaiProperties =
-          new Binder(new MapConfigurationPropertySource(properties))
-              .bind("kadai", KadaiProperties.class)
-              .get();
+      KadaiProperties kadaiProperties = KadaiProperties.from(properties);
 
       assertThat(kadaiProperties.getDomains()).containsExactly("DOMAIN_A", "DOMAIN_B");
       assertThat(kadaiProperties.getRoles().get(KadaiRole.USER))
@@ -640,6 +636,7 @@ class KadaiConfigurationTest {
           .containsExactlyInAnyOrder(CustomHoliday.of(31, 7), CustomHoliday.of(16, 12));
       assertThat(kadaiProperties.getUser().getMinimalPermissionsToAssignDomains())
           .containsExactlyInAnyOrder(WorkbasketPermission.READ, WorkbasketPermission.OPEN);
+      assertThat(kadaiProperties.getProperties()).containsEntry("custom.property", "custom-value");
     }
 
     @Test
