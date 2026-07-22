@@ -86,15 +86,14 @@ class KadaiRoleConfigAccTest {
 
   @Test
   void should_ApplyDifferentConfiguration_For_DifferentFile() throws Exception {
-    String propertiesFileName = createNewConfigFileWithSameDelimiter("dummyTestConfig.properties");
-    String delimiter = "|";
+    String propertiesFileName = createNewConfigFile("dummyTestConfig.properties");
     kadaiConfiguration =
         new KadaiConfiguration.Builder(
                 DataSourceGenerator.getDataSource(),
                 true,
                 DataSourceGenerator.getSchemaName(),
                 true)
-            .initKadaiProperties(propertiesFileName, delimiter)
+            .initKadaiProperties(propertiesFileName)
             .build();
 
     Set<KadaiRole> rolesConfigured = kadaiConfiguration.getRoleMap().keySet();
@@ -114,10 +113,9 @@ class KadaiRoleConfigAccTest {
   }
 
   @Test
-  void should_ApplyConfiguration_When_UsingDifferentDelimiter() throws Exception {
-    String delimiter = ";";
+  void should_ApplyConfiguration_When_UsingIndexedListNotation() throws Exception {
     String propertiesFileName =
-        createNewConfigFileWithDifferentDelimiter("dummyTestConfig.properties", delimiter);
+        createNewConfigFileWithIndexedListNotation("dummyTestConfig.properties");
 
     kadaiConfiguration =
         new KadaiConfiguration.Builder(
@@ -125,7 +123,7 @@ class KadaiRoleConfigAccTest {
                 true,
                 DataSourceGenerator.getSchemaName(),
                 true)
-            .initKadaiProperties(propertiesFileName, delimiter)
+            .initKadaiProperties(propertiesFileName)
             .build();
 
     Set<KadaiRole> rolesConfigured = kadaiConfiguration.getRoleMap().keySet();
@@ -144,29 +142,32 @@ class KadaiRoleConfigAccTest {
     assertThat(taskAdmins).contains("taskadmin");
   }
 
-  private String createNewConfigFileWithDifferentDelimiter(String filename, String delimiter)
+  private String createNewConfigFileWithIndexedListNotation(String filename)
       throws Exception {
     Path file = Files.createFile(tempDir.resolve(filename));
     List<String> lines =
         List.of(
-            "kadai.roles.admin =uSeR " + delimiter + "name=Username,Organisation=envite",
-            "  kadai.roles.business_admin  = name=user2, ou = bpm " + delimiter + " user3 ",
-            " kadai.roles.user = ",
-            "kadai.roles.task_admin= taskadmin");
+            "kadai.roles.admin[0]=uSeR",
+            "kadai.roles.admin[1]=name=Username,Organisation=envite",
+            "kadai.roles.business-admin[0]=name=user2, ou = bpm",
+            "kadai.roles.business-admin[1]=user3",
+            "kadai.roles.task-admin[0]=taskadmin");
 
     Files.write(file, lines, StandardCharsets.UTF_8);
 
     return file.toString();
   }
 
-  private String createNewConfigFileWithSameDelimiter(String filename) throws Exception {
+  private String createNewConfigFile(String filename) throws Exception {
     Path file = Files.createFile(tempDir.resolve(filename));
     List<String> lines =
         List.of(
-            "kadai.roles.admin =uSeR|Username",
-            "  kadai.roles.business_admin  = user2  | user3 ",
-            " kadai.roles.user = nobody",
-            "kadai.roles.task_admin= taskadmin");
+            "kadai.roles.admin[0]=uSeR",
+            "kadai.roles.admin[1]=Username",
+            "kadai.roles.business-admin[0]=user2",
+            "kadai.roles.business-admin[1]=user3",
+            "kadai.roles.user[0]=nobody",
+            "kadai.roles.task-admin[0]=taskadmin");
 
     Files.write(file, lines, StandardCharsets.UTF_8);
 

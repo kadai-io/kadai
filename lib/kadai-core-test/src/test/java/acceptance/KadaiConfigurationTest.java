@@ -26,12 +26,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.kadai.KadaiConfiguration;
 import io.kadai.KadaiConfiguration.Builder;
+import io.kadai.KadaiProperties;
 import io.kadai.common.api.CustomHoliday;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.api.LocalTimeInterval;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.SystemException;
-import io.kadai.common.internal.configuration.KadaiProperty;
 import io.kadai.common.internal.util.CheckedConsumer;
 import io.kadai.common.internal.util.Pair;
 import io.kadai.common.internal.util.ReflectionUtil;
@@ -75,6 +75,9 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
 
 class KadaiConfigurationTest {
 
@@ -83,15 +86,7 @@ class KadaiConfigurationTest {
   class Functionality {
     Map<String, String> kadaiPropertyNameByFieldName =
         ReflectionUtil.retrieveAllFields(Builder.class).stream()
-            .collect(
-                Collectors.toMap(
-                    Field::getName,
-                    f -> {
-                      if (f.isAnnotationPresent(KadaiProperty.class)) {
-                        return f.getAnnotation(KadaiProperty.class).value();
-                      }
-                      return "";
-                    }));
+            .collect(Collectors.toMap(Field::getName, Field::getName));
 
     @Test
     void should_SetDefaultValues() {
@@ -594,18 +589,57 @@ class KadaiConfigurationTest {
       return DynamicTest.stream(fields, Field::getName, testCase);
     }
 
-    @TestFactory
-    Stream<DynamicTest> should_HaveKadaiPropertyAnnotation_For_EachOptionalConfiguration() {
-      Stream<Field> fields =
-          ReflectionUtil.retrieveAllFields(Builder.class).stream()
-              .filter(not(f -> Modifier.isStatic(f.getModifiers())))
-              .filter(not(f -> Modifier.isFinal(f.getModifiers())))
-              .filter(not(f -> "properties".equals(f.getName())));
+    @Test
+    void should_UseSpringConfigurationProperties() {
+      ConfigurationProperties configurationProperties =
+          KadaiProperties.class.getAnnotation(ConfigurationProperties.class);
 
-      ThrowingConsumer<Field> testCase =
-          field -> assertThat(field.isAnnotationPresent(KadaiProperty.class)).isTrue();
+      assertThat(configurationProperties).isNotNull();
+      assertThat(configurationProperties.prefix()).isEqualTo("kadai");
+    }
 
-      return DynamicTest.stream(fields, Field::getName, testCase);
+    @Test
+    void should_BindSpringNotationKadaiPropertiesWithSpringBinder() {
+      Map<String, String> properties =
+          Map.ofEntries(
+              Map.entry("kadai.domains[0]", "DOMAIN_A"),
+              Map.entry("kadai.domains[1]", "DOMAIN_B"),
+              Map.entry("kadai.roles.user[0]", "cn=users,OU=Test,O=KADAI"),
+              Map.entry("kadai.roles.user[1]", "user-1"),
+              Map.entry("kadai.classification.types[0]", "TASK"),
+              Map.entry("kadai.classification.types[1]", "document"),
+              Map.entry("kadai.classification.categories.task[0]", "EXTERNAL"),
+              Map.entry("kadai.classification.categories.task[1]", "manual"),
+              Map.entry("kadai.classification.categories.document[0]", "EXTERNAL"),
+              Map.entry("kadai.working-time.schedule.monday[0].begin", "09:00"),
+              Map.entry("kadai.working-time.schedule.monday[0].end", "18:00"),
+              Map.entry("kadai.working-time.schedule.monday[1].begin", "19:00"),
+              Map.entry("kadai.working-time.schedule.monday[1].end", "20:00"),
+              Map.entry("kadai.working-time.holidays.custom[0].day", "31"),
+              Map.entry("kadai.working-time.holidays.custom[0].month", "7"),
+              Map.entry("kadai.working-time.holidays.custom[1].day", "16"),
+              Map.entry("kadai.working-time.holidays.custom[1].month", "12"),
+              Map.entry("kadai.user.minimal-permissions-to-assign-domains[0]", "READ"),
+              Map.entry("kadai.user.minimal-permissions-to-assign-domains[1]", "OPEN"));
+
+      KadaiProperties kadaiProperties =
+          new Binder(new MapConfigurationPropertySource(properties))
+              .bind("kadai", KadaiProperties.class)
+              .get();
+
+      assertThat(kadaiProperties.getDomains()).containsExactly("DOMAIN_A", "DOMAIN_B");
+      assertThat(kadaiProperties.getRoles().get(KadaiRole.USER))
+          .containsExactlyInAnyOrder("cn=users,OU=Test,O=KADAI", "user-1");
+      assertThat(kadaiProperties.getClassification().getTypes())
+          .containsExactly("TASK", "document");
+      assertThat(kadaiProperties.getClassification().getCategories().get("task"))
+          .containsExactly("EXTERNAL", "manual");
+      assertThat(kadaiProperties.getWorkingTime().toWorkingTimeSchedule().get(DayOfWeek.MONDAY))
+          .hasSize(2);
+      assertThat(kadaiProperties.getWorkingTime().getHolidays().toCustomHolidays())
+          .containsExactlyInAnyOrder(CustomHoliday.of(31, 7), CustomHoliday.of(16, 12));
+      assertThat(kadaiProperties.getUser().getMinimalPermissionsToAssignDomains())
+          .containsExactlyInAnyOrder(WorkbasketPermission.READ, WorkbasketPermission.OPEN);
     }
 
     @Test
@@ -983,8 +1017,7 @@ class KadaiConfigurationTest {
           .hasMessageContaining(
               "Parameter classificationCategoriesByType"
                   + " (kadai.classification.categories.<KEY>) is configured incorrectly. Please"
-                  + " check whether all specified Classification Types exist. Additionally, check"
-                  + " whether the correct separator is used in the property"
+                  + " check whether all specified Classification Types exist in"
                   + " kadai.classification.types .");
     }
 

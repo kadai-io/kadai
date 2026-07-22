@@ -19,6 +19,7 @@
 package io.kadai.common.rest;
 
 import io.kadai.KadaiConfiguration;
+import io.kadai.KadaiProperties;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.common.api.ConfigurationService;
 import io.kadai.common.api.KadaiEngine;
@@ -30,13 +31,14 @@ import io.kadai.user.api.UserService;
 import io.kadai.workbasket.api.WorkbasketService;
 import java.sql.SQLException;
 import javax.sql.DataSource;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.support.JacksonHandlerInstantiator;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -44,6 +46,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @ComponentScan("io.kadai")
 @EnableTransactionManagement
+@EnableConfigurationProperties(KadaiProperties.class)
+@PropertySource("classpath:kadai.properties")
 public class RestConfiguration {
 
   private final String schemaName;
@@ -96,22 +100,10 @@ public class RestConfiguration {
   @Bean
   @ConditionalOnMissingBean(KadaiConfiguration.class)
   public KadaiConfiguration kadaiConfiguration(
-      DataSource dataSource,
-      @Qualifier("kadaiPropertiesFileName") String propertiesFileName,
-      @Qualifier("kadaiPropertiesDelimiter") String delimiter) {
+      DataSource dataSource, KadaiProperties kadaiProperties) {
     return new KadaiConfiguration.Builder(dataSource, true, schemaName)
-        .initKadaiProperties(propertiesFileName, delimiter)
+        .kadaiProperties(kadaiProperties)
         .build();
-  }
-
-  @Bean
-  public String kadaiPropertiesFileName() {
-    return "/kadai.properties";
-  }
-
-  @Bean
-  public String kadaiPropertiesDelimiter() {
-    return "|";
   }
 
   // Needed for injection into jackson deserializer.

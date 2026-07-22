@@ -26,37 +26,25 @@ import io.kadai.common.api.LocalTimeInterval;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.configuration.DB;
-import io.kadai.common.internal.configuration.KadaiProperty;
-import io.kadai.common.internal.configuration.parser.PropertyParser;
-import io.kadai.common.internal.util.FileLoaderUtil;
 import io.kadai.common.internal.util.Pair;
-import io.kadai.common.internal.util.ReflectionUtil;
 import io.kadai.workbasket.api.WorkbasketPermission;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -736,7 +724,6 @@ public class KadaiConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Builder.class);
     private static final String DEFAULT_KADAI_PROPERTIES = "/kadai.properties";
-    private static final String DEFAULT_KADAI_PROPERTY_SEPARATOR = "|";
 
     // region general configuration
     private final DataSource dataSource;
@@ -744,169 +731,121 @@ public class KadaiConfiguration {
     private final String schemaName;
     private final boolean securityEnabled;
 
-    @KadaiProperty("kadai.domains")
-    private List<String> domains = new ArrayList<>();
+    private List<String> domains;
 
-    @KadaiProperty("kadai.servicelevel.validation.enforce")
-    private boolean enforceServiceLevel = true;
+    private boolean enforceServiceLevel;
 
-    @KadaiProperty("kadai.routing.includeOwner")
-    private boolean includeOwnerWhenRouting = false;
+    private boolean includeOwnerWhenRouting;
 
     // endregion
 
     // region authentication configuration
-    @KadaiProperty("kadai.roles")
-    private Map<KadaiRole, Set<String>> roleMap = new EnumMap<>(KadaiRole.class);
+    private Map<KadaiRole, Set<String>> roleMap;
 
     // endregion
 
     // region classification configuration
-    @KadaiProperty("kadai.classification.types")
-    private List<String> classificationTypes = new ArrayList<>();
+    private List<String> classificationTypes;
 
-    @KadaiProperty("kadai.classification.categories")
-    private Map<String, List<String>> classificationCategoriesByType = new HashMap<>();
+    private Map<String, List<String>> classificationCategoriesByType;
 
     // endregion
 
     // region working time configuration
 
-    @KadaiProperty("kadai.workingTime.useWorkingTimeCalculation")
-    private boolean useWorkingTimeCalculation = true;
+    private boolean useWorkingTimeCalculation;
 
-    @KadaiProperty("kadai.workingTime.schedule")
-    private Map<DayOfWeek, Set<LocalTimeInterval>> workingTimeSchedule =
-        initDefaultWorkingTimeSchedule();
+    private Map<DayOfWeek, Set<LocalTimeInterval>> workingTimeSchedule;
 
-    @KadaiProperty("kadai.workingTime.timezone")
-    private ZoneId workingTimeScheduleTimeZone = ZoneId.of("Europe/Berlin");
+    private ZoneId workingTimeScheduleTimeZone;
 
-    @KadaiProperty("kadai.workingTime.holidays.custom")
-    private Set<CustomHoliday> customHolidays = new HashSet<>();
+    private Set<CustomHoliday> customHolidays;
 
-    @KadaiProperty("kadai.workingTime.holidays.german.enabled")
-    private boolean germanPublicHolidaysEnabled = true;
+    private boolean germanPublicHolidaysEnabled;
 
-    @KadaiProperty("kadai.workingTime.holidays.german.corpus-christi.enabled")
-    private boolean germanPublicHolidaysCorpusChristiEnabled = false;
+    private boolean germanPublicHolidaysCorpusChristiEnabled;
 
     // endregion
 
     // region history configuration
-    @KadaiProperty("kadai.history.simple.deleteOnTaskDeletion.enabled")
-    private boolean deleteHistoryEventsOnTaskDeletionEnabled = false;
+    private boolean deleteHistoryEventsOnTaskDeletionEnabled;
 
-    @KadaiProperty("kadai.history.logger.name")
-    private String logHistoryLoggerName = null; // default value will be set in the logger class.
+    private String logHistoryLoggerName;
 
     // endregion
 
     // region job configuration
-    @KadaiProperty("kadai.jobs.scheduler.enabled")
-    private boolean jobSchedulerEnabled = true;
+    private boolean jobSchedulerEnabled;
 
-    @KadaiProperty("kadai.jobs.scheduler.initialStartDelay")
-    private long jobSchedulerInitialStartDelay = 0;
+    private long jobSchedulerInitialStartDelay;
 
-    @KadaiProperty("kadai.jobs.scheduler.period")
-    private long jobSchedulerPeriod = 5;
+    private long jobSchedulerPeriod;
 
-    @KadaiProperty("kadai.jobs.scheduler.periodTimeUnit")
-    private TimeUnit jobSchedulerPeriodTimeUnit = TimeUnit.MINUTES;
+    private TimeUnit jobSchedulerPeriodTimeUnit;
 
-    @KadaiProperty("kadai.jobs.maxRetries")
-    private int maxNumberOfJobRetries = 3;
+    private int maxNumberOfJobRetries;
 
-    @KadaiProperty("kadai.jobs.batchSize")
-    private int jobBatchSize = 100;
+    private int jobBatchSize;
 
-    @KadaiProperty("kadai.jobs.firstRunAt")
-    private Instant jobFirstRun = Instant.parse("2023-01-01T00:00:00Z");
+    private Instant jobFirstRun;
 
-    @KadaiProperty("kadai.jobs.runEvery")
-    private Duration jobRunEvery = Duration.ofDays(1);
+    private Duration jobRunEvery;
 
-    @KadaiProperty("kadai.jobs.lockExpirationPeriod")
-    private Duration jobLockExpirationPeriod = Duration.ofMinutes(30);
+    private Duration jobLockExpirationPeriod;
 
-    @KadaiProperty("kadai.jobs.cleanup.task.enable")
-    private boolean taskCleanupJobEnabled = true;
+    private boolean taskCleanupJobEnabled;
 
-    @KadaiProperty("kadai.jobs.cleanup.task.minimumAge")
-    private Duration taskCleanupJobMinimumAge = Duration.ofDays(14);
+    private Duration taskCleanupJobMinimumAge;
 
-    @KadaiProperty("kadai.jobs.cleanup.task.allCompletedSameParentBusiness")
-    private boolean taskCleanupJobAllCompletedSameParentBusiness = true;
+    private boolean taskCleanupJobAllCompletedSameParentBusiness;
 
-    @KadaiProperty("kadai.jobs.cleanup.task.lockExpirationPeriod")
-    private Duration taskCleanupJobLockExpirationPeriod = Duration.ofMinutes(30);
+    private Duration taskCleanupJobLockExpirationPeriod;
 
-    @KadaiProperty("kadai.jobs.cleanup.workbasket.enable")
-    private boolean workbasketCleanupJobEnabled = true;
+    private boolean workbasketCleanupJobEnabled;
 
-    @KadaiProperty("kadai.jobs.cleanup.workbasket.lockExpirationPeriod")
-    private Duration workbasketCleanupJobLockExpirationPeriod = Duration.ofMinutes(30);
+    private Duration workbasketCleanupJobLockExpirationPeriod;
 
-    @KadaiProperty("kadai.jobs.cleanup.history.simple.enable")
-    private boolean simpleHistoryCleanupJobEnabled = false;
+    private boolean simpleHistoryCleanupJobEnabled;
 
-    @KadaiProperty("kadai.jobs.cleanup.history.simple.batchSize")
-    private int simpleHistoryCleanupJobBatchSize = 100;
+    private int simpleHistoryCleanupJobBatchSize;
 
-    @KadaiProperty("kadai.jobs.cleanup.history.simple.minimumAge")
-    private Duration simpleHistoryCleanupJobMinimumAge = Duration.ofDays(14);
+    private Duration simpleHistoryCleanupJobMinimumAge;
 
-    @KadaiProperty("kadai.jobs.cleanup.history.simple.allCompletedSameParentBusiness")
-    private boolean simpleHistoryCleanupJobAllCompletedSameParentBusiness = true;
+    private boolean simpleHistoryCleanupJobAllCompletedSameParentBusiness;
 
-    @KadaiProperty("kadai.jobs.cleanup.history.simple.lockExpirationPeriod")
-    private Duration simpleHistoryCleanupJobLockExpirationPeriod = Duration.ofMinutes(30);
+    private Duration simpleHistoryCleanupJobLockExpirationPeriod;
 
-    @KadaiProperty("kadai.jobs.priority.task.enable")
-    private boolean taskUpdatePriorityJobEnabled = false;
+    private boolean taskUpdatePriorityJobEnabled;
 
-    @KadaiProperty("kadai.jobs.priority.task.batchSize")
-    private int taskUpdatePriorityJobBatchSize = 100;
+    private int taskUpdatePriorityJobBatchSize;
 
-    @KadaiProperty("kadai.jobs.priority.task.firstRunAt")
-    private Instant taskUpdatePriorityJobFirstRun = Instant.parse("2023-01-01T00:00:00Z");
+    private Instant taskUpdatePriorityJobFirstRun;
 
-    @KadaiProperty("kadai.jobs.priority.task.runEvery")
-    private Duration taskUpdatePriorityJobRunEvery = Duration.ofDays(1);
+    private Duration taskUpdatePriorityJobRunEvery;
 
-    @KadaiProperty("kadai.jobs.priority.task.lockExpirationPeriod")
-    private Duration taskUpdatePriorityJobLockExpirationPeriod = Duration.ofMinutes(30);
+    private Duration taskUpdatePriorityJobLockExpirationPeriod;
 
-    @KadaiProperty("kadai.jobs.refresh.user.enable")
-    private boolean userInfoRefreshJobEnabled = false;
+    private boolean userInfoRefreshJobEnabled;
 
-    @KadaiProperty("kadai.jobs.refresh.user.firstRunAt")
-    private Instant userRefreshJobFirstRun = Instant.parse("2023-01-01T23:00:00Z");
+    private Instant userRefreshJobFirstRun;
 
-    @KadaiProperty("kadai.jobs.refresh.user.runEvery")
-    private Duration userRefreshJobRunEvery = Duration.ofDays(1);
+    private Duration userRefreshJobRunEvery;
 
-    @KadaiProperty("kadai.jobs.refresh.user.lockExpirationPeriod")
-    private Duration userRefreshJobLockExpirationPeriod = Duration.ofMinutes(30);
+    private Duration userRefreshJobLockExpirationPeriod;
 
-    @KadaiProperty("kadai.jobs.customJobs")
-    private Set<String> customJobs = new HashSet<>();
+    private Set<String> customJobs;
 
     // endregion
 
     // region user configuration
-    @KadaiProperty("kadai.user.addAdditionalUserInfo")
-    private boolean addAdditionalUserInfo = false;
+    private boolean addAdditionalUserInfo;
 
-    @KadaiProperty("kadai.user.minimalPermissionsToAssignDomains")
-    private Set<WorkbasketPermission> minimalPermissionsToAssignDomains = new HashSet<>();
+    private Set<WorkbasketPermission> minimalPermissionsToAssignDomains;
 
     // endregion
 
     // region database configuration
-    @KadaiProperty("kadai.feature.useSpecificDb2Taskquery")
-    private boolean useSpecificDb2Taskquery = true;
+    private boolean useSpecificDb2Taskquery;
 
     // endregion
 
@@ -928,6 +867,7 @@ public class KadaiConfiguration {
       this.securityEnabled = securityEnabled;
       this.dataSource = Objects.requireNonNull(dataSource);
       this.schemaName = initSchemaName(schemaName);
+      applyKadaiProperties(new KadaiProperties(), false);
     }
 
     public Builder(KadaiConfiguration conf) {
@@ -1030,54 +970,137 @@ public class KadaiConfiguration {
 
     /**
      * Configure the {@linkplain KadaiConfiguration} with the default {@linkplain
-     * #DEFAULT_KADAI_PROPERTIES property file location} and {@linkplain
-     * #DEFAULT_KADAI_PROPERTY_SEPARATOR property separator}.
+     * #DEFAULT_KADAI_PROPERTIES property file location}.
      *
-     * @see #initKadaiProperties(String, String)
+     * @see #initKadaiProperties(String)
      */
     @SuppressWarnings({"unused", "checkstyle:JavadocMethod"})
     public Builder initKadaiProperties() {
-      return initKadaiProperties(DEFAULT_KADAI_PROPERTIES, DEFAULT_KADAI_PROPERTY_SEPARATOR);
+      return initKadaiProperties(DEFAULT_KADAI_PROPERTIES);
     }
 
     /**
-     * Configure the {@linkplain KadaiConfiguration} with the default {@linkplain
-     * #DEFAULT_KADAI_PROPERTY_SEPARATOR property separator}.
+     * Configure the {@linkplain KadaiConfiguration} with the default property file notation.
      *
-     * @see #initKadaiProperties(String, String)
+     * @see KadaiProperties
      */
     @SuppressWarnings({"unused", "checkstyle:JavadocMethod"})
     public Builder initKadaiProperties(String propertiesFile) {
-      return initKadaiProperties(propertiesFile, DEFAULT_KADAI_PROPERTY_SEPARATOR);
-    }
-
-    /**
-     * Configure the {@linkplain KadaiConfiguration} using a property file from the classpath of
-     * {@linkplain KadaiConfiguration KadaiConfigurations} or the system.
-     *
-     * <p>Please check this builders instance fields for the {@linkplain KadaiProperty} for property
-     * naming.
-     *
-     * @param propertiesFile path to the properties file.
-     * @param separator if a property is a collection type, this separator determines which sequence
-     *     delimits each individual value.
-     * @return the builder
-     * @throws SystemException if propertiesFile or separator is null or empty
-     */
-    public Builder initKadaiProperties(String propertiesFile, String separator) {
       if (propertiesFile == null || propertiesFile.isEmpty() || propertiesFile.isBlank()) {
         throw new SystemException("property file can't be null or empty");
       }
-      if (separator == null || separator.isEmpty() || separator.isBlank()) {
-        throw new SystemException("separator file can't be null or empty");
-      }
 
-      LOGGER.debug(
-          "Reading kadai configuration from {} with separator {}", propertiesFile, separator);
-      properties = loadProperties(propertiesFile);
-      configureAnnotatedFields(separator, properties);
-      addMasterDomain();
+      LOGGER.debug("Reading kadai configuration from {}", propertiesFile);
+      kadaiProperties(KadaiProperties.load(propertiesFile));
       return this;
+    }
+
+    public Builder kadaiProperties(KadaiProperties kadaiProperties) {
+      applyKadaiProperties(kadaiProperties, true);
+      return this;
+    }
+
+    private void applyKadaiProperties(KadaiProperties kadaiProperties, boolean addMasterDomain) {
+      this.properties = kadaiProperties.getProperties();
+      // general configuration
+      this.domains = new ArrayList<>(kadaiProperties.getDomains());
+      this.enforceServiceLevel = kadaiProperties.getServiceLevel().getValidation().isEnforce();
+      this.includeOwnerWhenRouting = kadaiProperties.getRouting().isIncludeOwner();
+      // authentication configuration
+      this.roleMap = kadaiProperties.getRoles();
+      // classification configuration
+      this.classificationTypes = kadaiProperties.getClassification().getTypes();
+      this.classificationCategoriesByType = kadaiProperties.getClassification().getCategories();
+      // working time configuration
+      this.useWorkingTimeCalculation =
+          kadaiProperties.getWorkingTime().isUseWorkingTimeCalculation();
+      this.workingTimeSchedule = kadaiProperties.getWorkingTime().toWorkingTimeSchedule();
+      this.workingTimeScheduleTimeZone = kadaiProperties.getWorkingTime().getTimezone();
+      this.customHolidays = kadaiProperties.getWorkingTime().getHolidays().toCustomHolidays();
+      this.germanPublicHolidaysEnabled =
+          kadaiProperties.getWorkingTime().getHolidays().getGerman().isEnabled();
+      this.germanPublicHolidaysCorpusChristiEnabled =
+          kadaiProperties
+              .getWorkingTime()
+              .getHolidays()
+              .getGerman()
+              .getCorpusChristi()
+              .isEnabled();
+      // history configuration
+      this.deleteHistoryEventsOnTaskDeletionEnabled =
+          kadaiProperties.getHistory().getSimple().getDeleteOnTaskDeletion().isEnabled();
+      this.logHistoryLoggerName = kadaiProperties.getHistory().getLogger().getName();
+      // job configuration
+      this.jobSchedulerEnabled = kadaiProperties.getJobs().getScheduler().isEnabled();
+      this.jobSchedulerInitialStartDelay =
+          kadaiProperties.getJobs().getScheduler().getInitialStartDelay();
+      this.jobSchedulerPeriod = kadaiProperties.getJobs().getScheduler().getPeriod();
+      this.jobSchedulerPeriodTimeUnit =
+          kadaiProperties.getJobs().getScheduler().getPeriodTimeUnit();
+      this.maxNumberOfJobRetries = kadaiProperties.getJobs().getMaxRetries();
+      this.jobBatchSize = kadaiProperties.getJobs().getBatchSize();
+      this.jobFirstRun = kadaiProperties.getJobs().getFirstRunAt();
+      this.jobRunEvery = kadaiProperties.getJobs().getRunEvery();
+      this.jobLockExpirationPeriod = kadaiProperties.getJobs().getLockExpirationPeriod();
+      this.taskCleanupJobEnabled = kadaiProperties.getJobs().getCleanup().getTask().isEnable();
+      this.taskCleanupJobMinimumAge =
+          kadaiProperties.getJobs().getCleanup().getTask().getMinimumAge();
+      this.taskCleanupJobAllCompletedSameParentBusiness =
+          kadaiProperties.getJobs().getCleanup().getTask().isAllCompletedSameParentBusiness();
+      this.taskCleanupJobLockExpirationPeriod =
+          kadaiProperties.getJobs().getCleanup().getTask().getLockExpirationPeriod();
+      this.workbasketCleanupJobEnabled =
+          kadaiProperties.getJobs().getCleanup().getWorkbasket().isEnable();
+      this.workbasketCleanupJobLockExpirationPeriod =
+          kadaiProperties.getJobs().getCleanup().getWorkbasket().getLockExpirationPeriod();
+      this.simpleHistoryCleanupJobEnabled =
+          kadaiProperties.getJobs().getCleanup().getHistory().getSimple().isEnable();
+      this.simpleHistoryCleanupJobBatchSize =
+          kadaiProperties.getJobs().getCleanup().getHistory().getSimple().getBatchSize();
+      this.simpleHistoryCleanupJobMinimumAge =
+          kadaiProperties.getJobs().getCleanup().getHistory().getSimple().getMinimumAge();
+      this.simpleHistoryCleanupJobAllCompletedSameParentBusiness =
+          kadaiProperties
+              .getJobs()
+              .getCleanup()
+              .getHistory()
+              .getSimple()
+              .isAllCompletedSameParentBusiness();
+      this.simpleHistoryCleanupJobLockExpirationPeriod =
+          kadaiProperties
+              .getJobs()
+              .getCleanup()
+              .getHistory()
+              .getSimple()
+              .getLockExpirationPeriod();
+      this.taskUpdatePriorityJobEnabled =
+          kadaiProperties.getJobs().getPriority().getTask().isEnable();
+      this.taskUpdatePriorityJobBatchSize =
+          kadaiProperties.getJobs().getPriority().getTask().getBatchSize();
+      this.taskUpdatePriorityJobFirstRun =
+          kadaiProperties.getJobs().getPriority().getTask().getFirstRunAt();
+      this.taskUpdatePriorityJobRunEvery =
+          kadaiProperties.getJobs().getPriority().getTask().getRunEvery();
+      this.taskUpdatePriorityJobLockExpirationPeriod =
+          kadaiProperties.getJobs().getPriority().getTask().getLockExpirationPeriod();
+      this.userInfoRefreshJobEnabled =
+          kadaiProperties.getJobs().getRefresh().getUser().isEnable();
+      this.userRefreshJobFirstRun =
+          kadaiProperties.getJobs().getRefresh().getUser().getFirstRunAt();
+      this.userRefreshJobRunEvery =
+          kadaiProperties.getJobs().getRefresh().getUser().getRunEvery();
+      this.userRefreshJobLockExpirationPeriod =
+          kadaiProperties.getJobs().getRefresh().getUser().getLockExpirationPeriod();
+      this.customJobs = kadaiProperties.getJobs().getCustomJobs();
+      // user configuration
+      this.addAdditionalUserInfo = kadaiProperties.getUser().isAddAdditionalUserInfo();
+      this.minimalPermissionsToAssignDomains =
+          kadaiProperties.getUser().getMinimalPermissionsToAssignDomains();
+      // database configuration
+      this.useSpecificDb2Taskquery = kadaiProperties.getFeature().isUseSpecificDb2Taskquery();
+      if (addMasterDomain) {
+        addMasterDomain();
+      }
     }
 
     // region builder methods
@@ -1365,46 +1388,12 @@ public class KadaiConfiguration {
 
     // endregion
 
-    private static Map<DayOfWeek, Set<LocalTimeInterval>> initDefaultWorkingTimeSchedule() {
-      Map<DayOfWeek, Set<LocalTimeInterval>> workingTime = new EnumMap<>(DayOfWeek.class);
-      Set<LocalTimeInterval> standardWorkingSlots =
-          Set.of(new LocalTimeInterval(LocalTime.MIN, LocalTime.MAX));
-      workingTime.put(DayOfWeek.MONDAY, standardWorkingSlots);
-      workingTime.put(DayOfWeek.TUESDAY, standardWorkingSlots);
-      workingTime.put(DayOfWeek.WEDNESDAY, standardWorkingSlots);
-      workingTime.put(DayOfWeek.THURSDAY, standardWorkingSlots);
-      workingTime.put(DayOfWeek.FRIDAY, standardWorkingSlots);
-      return workingTime;
-    }
-
     private void addMasterDomain() {
       // Master Domain is treat as empty string
       // it must be always added to the configuration
       // add the master domain always at the end of the list
       if (!this.domains.contains(MASTER_DOMAIN)) {
         this.domains.add(MASTER_DOMAIN);
-      }
-    }
-
-    private void configureAnnotatedFields(String separator, Map<String, String> props) {
-      final List<Field> fields = ReflectionUtil.retrieveAllFields(getClass());
-      for (Field field : fields) {
-        Optional.ofNullable(field.getAnnotation(KadaiProperty.class))
-            .flatMap(
-                kadaiProperty ->
-                    PropertyParser.getPropertyParser(field.getType())
-                        .parse(props, separator, field, kadaiProperty))
-            .ifPresent(value -> setFieldValue(field, value));
-      }
-    }
-
-    private void setFieldValue(Field field, Object value) {
-      try {
-        field.set(this, value);
-      } catch (IllegalAccessException | IllegalArgumentException e) {
-        throw new SystemException(
-            String.format("Property value '%s' is invalid for field '%s'", value, field.getName()),
-            e);
       }
     }
 
@@ -1497,8 +1486,7 @@ public class KadaiConfiguration {
         throw new InvalidArgumentException(
             "Parameter classificationCategoriesByType (kadai.classification.categories.<KEY>)"
                 + " is configured incorrectly. Please check whether all specified"
-                + " Classification Types exist. Additionally, check whether the correct"
-                + " separator is used in the property kadai.classification.types .");
+                + " Classification Types exist in kadai.classification.types .");
       }
 
       if (!classificationCategoriesByType.keySet().containsAll(classificationTypes)) {
@@ -1530,19 +1518,5 @@ public class KadaiConfiguration {
       }
     }
 
-    private Map<String, String> loadProperties(String propertiesFile) {
-      Properties props = new Properties();
-      try (InputStream stream =
-          FileLoaderUtil.openFileFromClasspathOrSystem(propertiesFile, KadaiConfiguration.class)) {
-        props.load(stream);
-      } catch (IOException e) {
-        throw new SystemException(
-            String.format("Could not process properties file '%s'", propertiesFile), e);
-      }
-      return props.entrySet().stream()
-          .collect(
-              Collectors.toUnmodifiableMap(
-                  e -> e.getKey().toString(), e -> e.getValue().toString()));
-    }
   }
 }
