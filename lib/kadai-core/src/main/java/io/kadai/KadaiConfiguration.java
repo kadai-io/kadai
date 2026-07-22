@@ -1001,6 +1001,7 @@ public class KadaiConfiguration {
     }
 
     private void applyKadaiProperties(KadaiProperties kadaiProperties, boolean addMasterDomain) {
+      kadaiProperties.validate();
       this.properties = kadaiProperties.getProperties();
       // general configuration
       this.domains = new ArrayList<>(kadaiProperties.getDomains());

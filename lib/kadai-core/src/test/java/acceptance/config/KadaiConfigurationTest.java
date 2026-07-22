@@ -81,4 +81,18 @@ class KadaiConfigurationTest {
         .isInstanceOf(SystemException.class)
         .hasMessageContaining("Could not bind properties file");
   }
+
+  @Test
+  void should_ThrowError_When_CustomHolidayDayIsOutOfRange() {
+    DataSource ds = DataSourceGenerator.getDataSource();
+    KadaiConfiguration.Builder builder =
+        new KadaiConfiguration.Builder(ds, false, DataSourceGenerator.getSchemaName(), true);
+
+    ThrowingCallable call =
+        () -> builder.initKadaiProperties("/custom_holiday_out_of_range_kadai.properties");
+
+    assertThatThrownBy(call)
+        .isInstanceOf(SystemException.class)
+        .hasMessageContaining("kadai.working-time.holidays.custom[].day");
+  }
 }

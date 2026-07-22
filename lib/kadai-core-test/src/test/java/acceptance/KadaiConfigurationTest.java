@@ -60,6 +60,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -76,6 +77,9 @@ import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.annotation.Configuration;
 
 class KadaiConfigurationTest {
 
@@ -597,7 +601,7 @@ class KadaiConfigurationTest {
     }
 
     @Test
-    void should_BindSpringNotationKadaiPropertiesWithSpringBinder() {
+    void should_BindKadaiPropertiesWithPlainJavaFactory() {
       Map<String, String> properties =
           Map.ofEntries(
               Map.entry("kadai.domains[0]", "DOMAIN_A"),
@@ -637,6 +641,55 @@ class KadaiConfigurationTest {
       assertThat(kadaiProperties.getUser().getMinimalPermissionsToAssignDomains())
           .containsExactlyInAnyOrder(WorkbasketPermission.READ, WorkbasketPermission.OPEN);
       assertThat(kadaiProperties.getProperties()).containsEntry("custom.property", "custom-value");
+      assertThatExceptionOfType(UnsupportedOperationException.class)
+          .isThrownBy(() -> kadaiProperties.getProperties().put("another.property", "value"));
+    }
+
+    @Test
+    void should_BindKadaiPropertiesWithSpringApplicationContext() {
+      ApplicationContextRunner contextRunner =
+          new ApplicationContextRunner()
+              .withUserConfiguration(KadaiPropertiesConfiguration.class)
+              .withPropertyValues(
+                  "kadai.domains[0]=DOMAIN_A",
+                  "kadai.domains[1]=DOMAIN_B",
+                  "kadai.roles.user[0]=cn=users,OU=Test,O=KADAI",
+                  "kadai.roles.user[1]=user-1",
+                  "kadai.classification.types[0]=TASK",
+                  "kadai.classification.types[1]=document",
+                  "kadai.classification.categories.task[0]=EXTERNAL",
+                  "kadai.classification.categories.task[1]=manual",
+                  "kadai.classification.categories.document[0]=EXTERNAL",
+                  "kadai.working-time.schedule.monday[0].begin=09:00",
+                  "kadai.working-time.schedule.monday[0].end=18:00",
+                  "kadai.working-time.schedule.monday[1].begin=19:00",
+                  "kadai.working-time.schedule.monday[1].end=20:00",
+                  "kadai.working-time.holidays.custom[0].day=31",
+                  "kadai.working-time.holidays.custom[0].month=7",
+                  "kadai.working-time.holidays.custom[1].day=16",
+                  "kadai.working-time.holidays.custom[1].month=12",
+                  "kadai.user.minimal-permissions-to-assign-domains[0]=READ",
+                  "kadai.user.minimal-permissions-to-assign-domains[1]=OPEN");
+
+      contextRunner.run(
+          context -> {
+            KadaiProperties kadaiProperties = context.getBean(KadaiProperties.class);
+
+            assertThat(kadaiProperties.getDomains()).containsExactly("DOMAIN_A", "DOMAIN_B");
+            assertThat(kadaiProperties.getRoles().get(KadaiRole.USER))
+                .containsExactlyInAnyOrder("cn=users,OU=Test,O=KADAI", "user-1");
+            assertThat(kadaiProperties.getClassification().getTypes())
+                .containsExactly("TASK", "document");
+            assertThat(kadaiProperties.getClassification().getCategories().get("task"))
+                .containsExactly("EXTERNAL", "manual");
+            assertThat(
+                    kadaiProperties.getWorkingTime().toWorkingTimeSchedule().get(DayOfWeek.MONDAY))
+                .hasSize(2);
+            assertThat(kadaiProperties.getWorkingTime().getHolidays().toCustomHolidays())
+                .containsExactlyInAnyOrder(CustomHoliday.of(31, 7), CustomHoliday.of(16, 12));
+            assertThat(kadaiProperties.getUser().getMinimalPermissionsToAssignDomains())
+                .containsExactlyInAnyOrder(WorkbasketPermission.READ, WorkbasketPermission.OPEN);
+          });
     }
 
     @Test
@@ -844,6 +897,177 @@ class KadaiConfigurationTest {
   @Nested
   @TestInstance(Lifecycle.PER_CLASS)
   class Validation {
+
+    @TestFactory
+    Stream<DynamicTest> should_RejectInvalidKadaiProperties() {
+      DataSource dataSource = TestContainerExtension.createDataSourceForH2();
+      return Stream.of(
+              invalidKadaiProperties(
+                  "working time timezone",
+                  p -> p.getWorkingTime().setTimezone(null),
+                  "kadai.working-time.timezone"),
+              invalidKadaiProperties(
+                  "working time interval begin",
+                  p ->
+                      p.getWorkingTime()
+                          .getSchedule()
+                          .get(DayOfWeek.MONDAY)
+                          .iterator()
+                          .next()
+                          .setBegin(null),
+                  "kadai.working-time.schedule.MONDAY[].begin"),
+              invalidKadaiProperties(
+                  "working time interval end",
+                  p ->
+                      p.getWorkingTime()
+                          .getSchedule()
+                          .get(DayOfWeek.MONDAY)
+                          .iterator()
+                          .next()
+                          .setEnd(null),
+                  "kadai.working-time.schedule.MONDAY[].end"),
+              invalidCustomHoliday("custom holiday day null", null, 1, "custom[].day"),
+              invalidCustomHoliday("custom holiday day too small", 0, 1, "custom[].day"),
+              invalidCustomHoliday("custom holiday day too large", 32, 1, "custom[].day"),
+              invalidCustomHoliday("custom holiday month null", 1, null, "custom[].month"),
+              invalidCustomHoliday("custom holiday month too small", 1, 0, "custom[].month"),
+              invalidCustomHoliday("custom holiday month too large", 1, 13, "custom[].month"),
+              invalidKadaiProperties(
+                  "jobs max retries",
+                  p -> p.getJobs().setMaxRetries(0),
+                  "kadai.jobs.max-retries"),
+              invalidKadaiProperties(
+                  "jobs batch size", p -> p.getJobs().setBatchSize(0), "kadai.jobs.batch-size"),
+              invalidKadaiProperties(
+                  "jobs first run",
+                  p -> p.getJobs().setFirstRunAt(null),
+                  "kadai.jobs.first-run-at"),
+              invalidKadaiProperties(
+                  "jobs run every", p -> p.getJobs().setRunEvery(null), "kadai.jobs.run-every"),
+              invalidKadaiProperties(
+                  "jobs lock expiration period",
+                  p -> p.getJobs().setLockExpirationPeriod(null),
+                  "kadai.jobs.lock-expiration-period"),
+              invalidKadaiProperties(
+                  "scheduler initial start delay",
+                  p -> p.getJobs().getScheduler().setInitialStartDelay(-1),
+                  "kadai.jobs.scheduler.initial-start-delay"),
+              invalidKadaiProperties(
+                  "scheduler period",
+                  p -> p.getJobs().getScheduler().setPeriod(0),
+                  "kadai.jobs.scheduler.period"),
+              invalidKadaiProperties(
+                  "scheduler period time unit",
+                  p -> p.getJobs().getScheduler().setPeriodTimeUnit(null),
+                  "kadai.jobs.scheduler.period-time-unit"),
+              invalidKadaiProperties(
+                  "task cleanup minimum age",
+                  p -> p.getJobs().getCleanup().getTask().setMinimumAge(null),
+                  "kadai.jobs.cleanup.task.minimum-age"),
+              invalidKadaiProperties(
+                  "task cleanup lock expiration period",
+                  p -> p.getJobs().getCleanup().getTask().setLockExpirationPeriod(null),
+                  "kadai.jobs.cleanup.task.lock-expiration-period"),
+              invalidKadaiProperties(
+                  "workbasket cleanup lock expiration period",
+                  p -> p.getJobs().getCleanup().getWorkbasket().setLockExpirationPeriod(null),
+                  "kadai.jobs.cleanup.workbasket.lock-expiration-period"),
+              invalidKadaiProperties(
+                  "simple history cleanup batch size",
+                  p -> p.getJobs().getCleanup().getHistory().getSimple().setBatchSize(0),
+                  "kadai.jobs.cleanup.history.simple.batch-size"),
+              invalidKadaiProperties(
+                  "simple history cleanup minimum age",
+                  p -> p.getJobs().getCleanup().getHistory().getSimple().setMinimumAge(null),
+                  "kadai.jobs.cleanup.history.simple.minimum-age"),
+              invalidKadaiProperties(
+                  "simple history cleanup lock expiration period",
+                  p ->
+                      p.getJobs()
+                          .getCleanup()
+                          .getHistory()
+                          .getSimple()
+                          .setLockExpirationPeriod(null),
+                  "kadai.jobs.cleanup.history.simple.lock-expiration-period"),
+              invalidKadaiProperties(
+                  "priority task batch size",
+                  p -> p.getJobs().getPriority().getTask().setBatchSize(0),
+                  "kadai.jobs.priority.task.batch-size"),
+              invalidKadaiProperties(
+                  "priority task first run",
+                  p -> p.getJobs().getPriority().getTask().setFirstRunAt(null),
+                  "kadai.jobs.priority.task.first-run-at"),
+              invalidKadaiProperties(
+                  "priority task run every",
+                  p -> p.getJobs().getPriority().getTask().setRunEvery(null),
+                  "kadai.jobs.priority.task.run-every"),
+              invalidKadaiProperties(
+                  "priority task lock expiration period",
+                  p -> p.getJobs().getPriority().getTask().setLockExpirationPeriod(null),
+                  "kadai.jobs.priority.task.lock-expiration-period"),
+              invalidKadaiProperties(
+                  "refresh user first run",
+                  p -> p.getJobs().getRefresh().getUser().setFirstRunAt(null),
+                  "kadai.jobs.refresh.user.first-run-at"),
+              invalidKadaiProperties(
+                  "refresh user run every",
+                  p -> p.getJobs().getRefresh().getUser().setRunEvery(null),
+                  "kadai.jobs.refresh.user.run-every"),
+              invalidKadaiProperties(
+                  "refresh user lock expiration period",
+                  p -> p.getJobs().getRefresh().getUser().setLockExpirationPeriod(null),
+                  "kadai.jobs.refresh.user.lock-expiration-period"))
+          .map(
+              invalidProperties ->
+                  DynamicTest.dynamicTest(
+                      invalidProperties.name(),
+                      () -> {
+                        KadaiProperties kadaiProperties = new KadaiProperties();
+                        invalidProperties.mutation().accept(kadaiProperties);
+
+                        ThrowingCallable call =
+                            () ->
+                                new KadaiConfiguration.Builder(dataSource, false, "KADAI")
+                                    .kadaiProperties(kadaiProperties);
+
+                        assertThatThrownBy(call)
+                            .isInstanceOf(SystemException.class)
+                            .hasMessageContaining(invalidProperties.expectedMessage());
+                      }));
+    }
+
+    @Test
+    void should_RejectInvalidKadaiProperties_When_BindingWithPlainJavaFactory() {
+      Map<String, String> properties =
+          Map.of(
+              "kadai.working-time.holidays.custom[0].day",
+              "32",
+              "kadai.working-time.holidays.custom[0].month",
+              "1");
+
+      ThrowingCallable call = () -> KadaiProperties.from(properties);
+
+      assertThatThrownBy(call)
+          .isInstanceOf(SystemException.class)
+          .hasMessageContaining("kadai.working-time.holidays.custom[].day");
+    }
+
+    @Test
+    void should_RejectInvalidKadaiProperties_When_BindingWithSpringApplicationContext() {
+      ApplicationContextRunner contextRunner =
+          new ApplicationContextRunner()
+              .withUserConfiguration(KadaiPropertiesConfiguration.class)
+              .withPropertyValues(
+                  "kadai.working-time.holidays.custom[0].day=32",
+                  "kadai.working-time.holidays.custom[0].month=1");
+
+      contextRunner.run(
+          context -> {
+            assertThat(context).hasFailed();
+            assertThat(context.getStartupFailure())
+                .hasStackTraceContaining("workingTime.holidays.custom[].day");
+          });
+    }
 
     @ParameterizedTest
     @ValueSource(ints = {-1, 0})
@@ -1053,6 +1277,25 @@ class KadaiConfigurationTest {
               "Parameter jobSchedulerPeriod (kadai.jobs.scheduler.period)"
                   + " must be a positive integer");
     }
+
+    private InvalidKadaiProperties invalidCustomHoliday(
+        String name, Integer day, Integer month, String expectedMessage) {
+      return invalidKadaiProperties(
+          name,
+          p -> {
+            KadaiProperties.CustomHolidayProperties customHoliday =
+                new KadaiProperties.CustomHolidayProperties();
+            customHoliday.setDay(day);
+            customHoliday.setMonth(month);
+            p.getWorkingTime().getHolidays().setCustom(Set.of(customHoliday));
+          },
+          expectedMessage);
+    }
+
+    private InvalidKadaiProperties invalidKadaiProperties(
+        String name, Consumer<KadaiProperties> mutation, String expectedMessage) {
+      return new InvalidKadaiProperties(name, mutation, expectedMessage);
+    }
   }
 
   @Nested
@@ -1161,4 +1404,11 @@ class KadaiConfigurationTest {
                   Map.entry(KadaiRole.TASK_ROUTER, Set.of("task_router-1", "task_router-2"))));
     }
   }
+
+  @Configuration
+  @EnableConfigurationProperties(KadaiProperties.class)
+  static class KadaiPropertiesConfiguration {}
+
+  private record InvalidKadaiProperties(
+      String name, Consumer<KadaiProperties> mutation, String expectedMessage) {}
 }

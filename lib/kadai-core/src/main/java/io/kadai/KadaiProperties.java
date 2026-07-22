@@ -87,6 +87,7 @@ public class KadaiProperties {
           new Binder(new MapConfigurationPropertySource(rawProperties))
               .bind("kadai", KadaiProperties.class)
               .orElseGet(KadaiProperties::new);
+      properties.validate();
       properties.properties = Map.copyOf(rawProperties);
       return properties;
     } catch (BindException e) {
@@ -180,6 +181,126 @@ public class KadaiProperties {
 
   public void setFeature(Feature feature) {
     this.feature = feature;
+  }
+
+  void validate() {
+    validateWorkingTime();
+    validateJobs();
+  }
+
+  private void validateWorkingTime() {
+    WorkingTime workingTimeProperties = getWorkingTime();
+    requireNotNull(workingTimeProperties.getTimezone(), "kadai.working-time.timezone");
+    workingTimeProperties
+        .getSchedule()
+        .forEach(
+            (day, intervals) ->
+                intervals.forEach(
+                    interval -> {
+                      requireNotNull(
+                          interval.getBegin(),
+                          String.format("kadai.working-time.schedule.%s[].begin", day));
+                      requireNotNull(
+                          interval.getEnd(),
+                          String.format("kadai.working-time.schedule.%s[].end", day));
+                    }));
+    workingTimeProperties
+        .getHolidays()
+        .getCustom()
+        .forEach(
+            customHoliday -> {
+              requireBetween(
+                  customHoliday.getDay(), 1, 31, "kadai.working-time.holidays.custom[].day");
+              requireBetween(
+                  customHoliday.getMonth(), 1, 12, "kadai.working-time.holidays.custom[].month");
+            });
+  }
+
+  private void validateJobs() {
+    Jobs jobsProperties = getJobs();
+    requirePositive(jobsProperties.getMaxRetries(), "kadai.jobs.max-retries");
+    requirePositive(jobsProperties.getBatchSize(), "kadai.jobs.batch-size");
+    requireNotNull(jobsProperties.getFirstRunAt(), "kadai.jobs.first-run-at");
+    requireNotNull(jobsProperties.getRunEvery(), "kadai.jobs.run-every");
+    requireNotNull(jobsProperties.getLockExpirationPeriod(), "kadai.jobs.lock-expiration-period");
+
+    Scheduler schedulerProperties = jobsProperties.getScheduler();
+    requirePositiveOrZero(
+        schedulerProperties.getInitialStartDelay(), "kadai.jobs.scheduler.initial-start-delay");
+    requirePositive(schedulerProperties.getPeriod(), "kadai.jobs.scheduler.period");
+    requireNotNull(
+        schedulerProperties.getPeriodTimeUnit(), "kadai.jobs.scheduler.period-time-unit");
+
+    CleanupTask cleanupTaskProperties = jobsProperties.getCleanup().getTask();
+    requireNotNull(cleanupTaskProperties.getMinimumAge(), "kadai.jobs.cleanup.task.minimum-age");
+    requireNotNull(
+        cleanupTaskProperties.getLockExpirationPeriod(),
+        "kadai.jobs.cleanup.task.lock-expiration-period");
+
+    CleanupWorkbasket cleanupWorkbasketProperties = jobsProperties.getCleanup().getWorkbasket();
+    requireNotNull(
+        cleanupWorkbasketProperties.getLockExpirationPeriod(),
+        "kadai.jobs.cleanup.workbasket.lock-expiration-period");
+
+    CleanupHistorySimple cleanupHistorySimpleProperties =
+        jobsProperties.getCleanup().getHistory().getSimple();
+    requirePositive(
+        cleanupHistorySimpleProperties.getBatchSize(),
+        "kadai.jobs.cleanup.history.simple.batch-size");
+    requireNotNull(
+        cleanupHistorySimpleProperties.getMinimumAge(),
+        "kadai.jobs.cleanup.history.simple.minimum-age");
+    requireNotNull(
+        cleanupHistorySimpleProperties.getLockExpirationPeriod(),
+        "kadai.jobs.cleanup.history.simple.lock-expiration-period");
+
+    PriorityTask priorityTaskProperties = jobsProperties.getPriority().getTask();
+    requirePositive(priorityTaskProperties.getBatchSize(), "kadai.jobs.priority.task.batch-size");
+    requireNotNull(priorityTaskProperties.getFirstRunAt(), "kadai.jobs.priority.task.first-run-at");
+    requireNotNull(priorityTaskProperties.getRunEvery(), "kadai.jobs.priority.task.run-every");
+    requireNotNull(
+        priorityTaskProperties.getLockExpirationPeriod(),
+        "kadai.jobs.priority.task.lock-expiration-period");
+
+    RefreshUser refreshUserProperties = jobsProperties.getRefresh().getUser();
+    requireNotNull(refreshUserProperties.getFirstRunAt(), "kadai.jobs.refresh.user.first-run-at");
+    requireNotNull(refreshUserProperties.getRunEvery(), "kadai.jobs.refresh.user.run-every");
+    requireNotNull(
+        refreshUserProperties.getLockExpirationPeriod(),
+        "kadai.jobs.refresh.user.lock-expiration-period");
+  }
+
+  private void requireNotNull(Object value, String propertyName) {
+    if (value == null) {
+      throw new SystemException(String.format("Property '%s' must not be null", propertyName));
+    }
+  }
+
+  private void requirePositive(int value, String propertyName) {
+    if (value <= 0) {
+      throw new SystemException(String.format("Property '%s' must be positive", propertyName));
+    }
+  }
+
+  private void requirePositive(long value, String propertyName) {
+    if (value <= 0) {
+      throw new SystemException(String.format("Property '%s' must be positive", propertyName));
+    }
+  }
+
+  private void requirePositiveOrZero(long value, String propertyName) {
+    if (value < 0) {
+      throw new SystemException(
+          String.format("Property '%s' must be positive or zero", propertyName));
+    }
+  }
+
+  private void requireBetween(Integer value, int min, int max, String propertyName) {
+    requireNotNull(value, propertyName);
+    if (value < min || value > max) {
+      throw new SystemException(
+          String.format("Property '%s' must be between %d and %d", propertyName, min, max));
+    }
   }
 
   private static Map<String, String> loadRawProperties(String propertiesFile) {
