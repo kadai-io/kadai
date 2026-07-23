@@ -646,6 +646,57 @@ class KadaiConfigurationTest {
     }
 
     @Test
+    void should_BindCompleteSimpleListsWithPlainJavaFactory() {
+      Map<String, String> properties =
+          Map.ofEntries(
+              Map.entry("kadai.domains", "DOMAIN_A,DOMAIN_B"),
+              Map.entry("kadai.roles.user", "user-1,user-2"),
+              Map.entry("kadai.classification.types", "TASK,document"),
+              Map.entry("kadai.classification.categories.task", "EXTERNAL,manual"),
+              Map.entry("kadai.classification.categories.document", "EXTERNAL"),
+              Map.entry("kadai.jobs.custom-jobs", "A,B"),
+              Map.entry("kadai.user.minimal-permissions-to-assign-domains", "READ,OPEN"));
+
+      KadaiProperties kadaiProperties = KadaiProperties.from(properties);
+
+      assertThat(kadaiProperties.getDomains()).containsExactly("DOMAIN_A", "DOMAIN_B");
+      assertThat(kadaiProperties.getRoles().get(KadaiRole.USER))
+          .containsExactlyInAnyOrder("user-1", "user-2");
+      assertThat(kadaiProperties.getClassification().getTypes())
+          .containsExactly("TASK", "document");
+      assertThat(kadaiProperties.getClassification().getCategories().get("task"))
+          .containsExactly("EXTERNAL", "manual");
+      assertThat(kadaiProperties.getClassification().getCategories().get("document"))
+          .containsExactly("EXTERNAL");
+      assertThat(kadaiProperties.getJobs().getCustomJobs()).containsExactlyInAnyOrder("A", "B");
+      assertThat(kadaiProperties.getUser().getMinimalPermissionsToAssignDomains())
+          .containsExactlyInAnyOrder(WorkbasketPermission.READ, WorkbasketPermission.OPEN);
+    }
+
+    @Test
+    void should_BindIndexedNestedObjectListsWithPlainJavaFactory() {
+      Map<String, String> properties =
+          Map.ofEntries(
+              Map.entry("kadai.working-time.schedule.monday[0].begin", "09:00"),
+              Map.entry("kadai.working-time.schedule.monday[0].end", "18:00"),
+              Map.entry("kadai.working-time.schedule.monday[1].begin", "19:00"),
+              Map.entry("kadai.working-time.schedule.monday[1].end", "20:00"),
+              Map.entry("kadai.working-time.holidays.custom[0].day", "31"),
+              Map.entry("kadai.working-time.holidays.custom[0].month", "7"),
+              Map.entry("kadai.working-time.holidays.custom[1].day", "16"),
+              Map.entry("kadai.working-time.holidays.custom[1].month", "12"));
+
+      KadaiProperties kadaiProperties = KadaiProperties.from(properties);
+
+      assertThat(kadaiProperties.getWorkingTime().toWorkingTimeSchedule().get(DayOfWeek.MONDAY))
+          .containsExactlyInAnyOrder(
+              new LocalTimeInterval(LocalTime.of(9, 0), LocalTime.of(18, 0)),
+              new LocalTimeInterval(LocalTime.of(19, 0), LocalTime.of(20, 0)));
+      assertThat(kadaiProperties.getWorkingTime().getHolidays().toCustomHolidays())
+          .containsExactlyInAnyOrder(CustomHoliday.of(31, 7), CustomHoliday.of(16, 12));
+    }
+
+    @Test
     void should_BindKadaiPropertiesWithSpringApplicationContext() {
       ApplicationContextRunner contextRunner =
           new ApplicationContextRunner()
