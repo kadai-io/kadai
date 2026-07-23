@@ -51,16 +51,50 @@ import org.springframework.boot.context.properties.source.MapConfigurationProper
 @ConfigurationProperties(prefix = "kadai")
 public class KadaiProperties {
 
+  /**
+   * Raw properties as loaded for KADAI.
+   *
+   * <p>This is mainly used to retain custom extension properties and should not normally be
+   * configured through Spring Boot binding.
+   */
   private Map<String, String> properties = Map.of();
+
+  /**
+   * Domains available for classifications and workbaskets.
+   *
+   * <p>Values are normalized to upper case when KADAI builds the final configuration.
+   */
   private List<String> domains = new ArrayList<>();
+
+  /** Service-level validation configuration. */
   private ServiceLevel serviceLevel = new ServiceLevel();
+
+  /** Task routing configuration. */
   private Routing routing = new Routing();
+
+  /**
+   * Role assignments from KADAI roles to access ids.
+   *
+   * <p>Configure values with indexed entries, for example {@code kadai.roles.user[0]=user-1}.
+   */
   private Map<KadaiRole, Set<String>> roles = new EnumMap<>(KadaiRole.class);
+
+  /** Classification type and category configuration. */
   private Classification classification = new Classification();
+
+  /** Working time calculation configuration. */
   private WorkingTime workingTime = new WorkingTime();
+
+  /** Simple history and audit logger configuration. */
   private History history = new History();
+
+  /** Background job configuration. */
   private Jobs jobs = new Jobs();
+
+  /** User-related KADAI configuration. */
   private User user = new User();
+
+  /** Feature flags for KADAI internals. */
   private Feature feature = new Feature();
 
   public static KadaiProperties load(String propertiesFile) {
@@ -358,6 +392,7 @@ public class KadaiProperties {
   }
 
   public static class ServiceLevel {
+    /** Service-level validation switches. */
     private Validation validation = new Validation();
 
     public Validation getValidation() {
@@ -370,6 +405,10 @@ public class KadaiProperties {
   }
 
   public static class Validation {
+    /**
+     * Whether KADAI enforces task date attributes to be consistent with the classification service
+     * level.
+     */
     private boolean enforce = true;
 
     public boolean isEnforce() {
@@ -382,6 +421,7 @@ public class KadaiProperties {
   }
 
   public static class Routing {
+    /** Whether task routing should include the current task owner. */
     private boolean includeOwner = false;
 
     public boolean isIncludeOwner() {
@@ -394,7 +434,19 @@ public class KadaiProperties {
   }
 
   public static class Classification {
+    /**
+     * Classification types.
+     *
+     * <p>Values are case-insensitive and are normalized to upper case when KADAI builds the final
+     * configuration.
+     */
     private List<String> types = new ArrayList<>();
+
+    /**
+     * Classification categories for each configured classification type.
+     *
+     * <p>The map key is the classification type, for example {@code task} or {@code document}.
+     */
     private Map<String, List<String>> categories = new HashMap<>();
 
     public List<String> getTypes() {
@@ -415,9 +467,26 @@ public class KadaiProperties {
   }
 
   public static class WorkingTime {
+    /**
+     * Whether KADAI calculates service levels from configured working time intervals.
+     *
+     * <p>If disabled, KADAI uses working-day based calculation.
+     */
     private boolean useWorkingTimeCalculation = true;
+
+    /**
+     * Working time intervals by day of week.
+     *
+     * <p>Configure values with indexed entries, for example {@code
+     * kadai.working-time.schedule.monday[0].begin=09:00} and {@code
+     * kadai.working-time.schedule.monday[0].end=18:00}.
+     */
     private Map<DayOfWeek, Set<TimeInterval>> schedule = initDefaultWorkingTimeSchedule();
+
+    /** Time zone used for working time calculation. */
     private ZoneId timezone = ZoneId.of("Europe/Berlin");
+
+    /** Holiday configuration for working time calculation. */
     private Holidays holidays = new Holidays();
 
     public boolean isUseWorkingTimeCalculation() {
@@ -467,7 +536,14 @@ public class KadaiProperties {
   }
 
   public static class TimeInterval {
+    /** Start time of a working time interval. */
     private LocalTime begin = LocalTime.MIN;
+
+    /**
+     * End time of a working time interval.
+     *
+     * <p>{@code 00:00} is interpreted as the end of the day.
+     */
     private LocalTime end = LocalTime.MAX;
 
     public TimeInterval() {}
@@ -499,7 +575,16 @@ public class KadaiProperties {
   }
 
   public static class Holidays {
+    /**
+     * Custom holidays that do not count as working time.
+     *
+     * <p>Configure each holiday with day and month entries, for example {@code
+     * kadai.working-time.holidays.custom[0].day=31} and {@code
+     * kadai.working-time.holidays.custom[0].month=7}.
+     */
     private Set<CustomHolidayProperties> custom = new HashSet<>();
+
+    /** German public holiday configuration. */
     private German german = new German();
 
     public Set<CustomHolidayProperties> getCustom() {
@@ -526,8 +611,10 @@ public class KadaiProperties {
   }
 
   public static class CustomHolidayProperties {
+    /** Day of month for a custom holiday. Valid values are 1 through 31. */
     private Integer day;
 
+    /** Month for a custom holiday. Valid values are 1 through 12. */
     private Integer month;
 
     public Integer getDay() {
@@ -552,7 +639,10 @@ public class KadaiProperties {
   }
 
   public static class German {
+    /** Whether standard German public holidays are enabled. */
     private boolean enabled = true;
+
+    /** German Corpus Christi public holiday configuration. */
     private CorpusChristi corpusChristi = new CorpusChristi();
 
     public boolean isEnabled() {
@@ -573,6 +663,7 @@ public class KadaiProperties {
   }
 
   public static class CorpusChristi {
+    /** Whether the German Corpus Christi public holiday is enabled. */
     private boolean enabled = false;
 
     public boolean isEnabled() {
@@ -585,7 +676,10 @@ public class KadaiProperties {
   }
 
   public static class History {
+    /** Simple history configuration. */
     private Simple simple = new Simple();
+
+    /** Audit/history logger configuration. */
     private Logger logger = new Logger();
 
     public Simple getSimple() {
@@ -606,6 +700,7 @@ public class KadaiProperties {
   }
 
   public static class Simple {
+    /** Task-deletion behavior for simple history events. */
     private DeleteOnTaskDeletion deleteOnTaskDeletion = new DeleteOnTaskDeletion();
 
     public DeleteOnTaskDeletion getDeleteOnTaskDeletion() {
@@ -618,6 +713,7 @@ public class KadaiProperties {
   }
 
   public static class DeleteOnTaskDeletion {
+    /** Whether simple history events for a task are deleted when the task itself is deleted. */
     private boolean enabled = false;
 
     public boolean isEnabled() {
@@ -630,6 +726,7 @@ public class KadaiProperties {
   }
 
   public static class Logger {
+    /** Logger name used for audit/history logging, for example {@code AUDIT}. */
     private String name = null;
 
     public String getName() {
@@ -642,15 +739,38 @@ public class KadaiProperties {
   }
 
   public static class Jobs {
+    /** Scheduler configuration for KADAI jobs. */
     private Scheduler scheduler = new Scheduler();
+
+    /** Number of automatic retries after a job has failed. */
     private int maxRetries = 3;
+
+    /** Upper bound for how many tasks can be processed by one job. */
     private int batchSize = 100;
+
+    /** Default first execution time for KADAI jobs. */
     private Instant firstRunAt = Instant.parse("2023-01-01T00:00:00Z");
+
+    /** Default period between executions of KADAI jobs. */
     private Duration runEvery = Duration.ofDays(1);
+
+    /**
+     * Default duration for which a job lock is valid.
+     *
+     * <p>It should be longer than the longest expected job execution time.
+     */
     private Duration lockExpirationPeriod = Duration.ofMinutes(30);
+
+    /** Cleanup job configuration. */
     private Cleanup cleanup = new Cleanup();
+
+    /** Task priority recalculation job configuration. */
     private Priority priority = new Priority();
+
+    /** User information refresh job configuration. */
     private Refresh refresh = new Refresh();
+
+    /** Fully qualified class names of custom KADAI jobs to initialize. */
     private Set<String> customJobs = new HashSet<>();
 
     public Scheduler getScheduler() {
@@ -735,9 +855,16 @@ public class KadaiProperties {
   }
 
   public static class Scheduler {
+    /** Whether automated scheduling of KADAI jobs is enabled. */
     private boolean enabled = true;
+
+    /** Delay before the scheduler performs its first run. */
     private long initialStartDelay = 0;
+
+    /** Interval between scheduler runs. */
     private long period = 5;
+
+    /** Time unit for the scheduler initial start delay and scheduler period. */
     private TimeUnit periodTimeUnit = TimeUnit.MINUTES;
 
     public boolean isEnabled() {
@@ -774,8 +901,13 @@ public class KadaiProperties {
   }
 
   public static class Cleanup {
+    /** Task cleanup job configuration. */
     private CleanupTask task = new CleanupTask();
+
+    /** Workbasket cleanup job configuration. */
     private CleanupWorkbasket workbasket = new CleanupWorkbasket();
+
+    /** History cleanup job configuration. */
     private CleanupHistory history = new CleanupHistory();
 
     public CleanupTask getTask() {
@@ -804,9 +936,23 @@ public class KadaiProperties {
   }
 
   public static class CleanupTask {
+    /** Whether automated cleanup of completed tasks is enabled. */
     private boolean enable = true;
+
+    /** Minimum age a completed task must have before it may be deleted by the cleanup job. */
     private Duration minimumAge = Duration.ofDays(14);
+
+    /**
+     * Whether completed tasks are kept if other tasks with the same parent business process id are
+     * not completed yet.
+     */
     private boolean allCompletedSameParentBusiness = true;
+
+    /**
+     * Duration for which the task cleanup job lock is valid.
+     *
+     * <p>It should be longer than the longest expected job execution time.
+     */
     private Duration lockExpirationPeriod = Duration.ofMinutes(30);
 
     public boolean isEnable() {
@@ -843,7 +989,14 @@ public class KadaiProperties {
   }
 
   public static class CleanupWorkbasket {
+    /** Whether the workbasket cleanup job is enabled. */
     private boolean enable = true;
+
+    /**
+     * Duration for which the workbasket cleanup job lock is valid.
+     *
+     * <p>It should be longer than the longest expected job execution time.
+     */
     private Duration lockExpirationPeriod = Duration.ofMinutes(30);
 
     public boolean isEnable() {
@@ -864,6 +1017,7 @@ public class KadaiProperties {
   }
 
   public static class CleanupHistory {
+    /** Simple history cleanup job configuration. */
     private CleanupHistorySimple simple = new CleanupHistorySimple();
 
     public CleanupHistorySimple getSimple() {
@@ -876,10 +1030,28 @@ public class KadaiProperties {
   }
 
   public static class CleanupHistorySimple {
+    /** Whether the simple history cleanup job is enabled. */
     private boolean enable = false;
+
+    /**
+     * Upper bound for how many history events can be processed by one simple history cleanup job.
+     */
     private int batchSize = 100;
+
+    /** Minimum age a simple history event must have before it may be deleted by the cleanup job. */
     private Duration minimumAge = Duration.ofDays(14);
+
+    /**
+     * Whether simple history cleanup should keep task history events if related task history events
+     * with the same parent business process id are not completed.
+     */
     private boolean allCompletedSameParentBusiness = true;
+
+    /**
+     * Duration for which the simple history cleanup job lock is valid.
+     *
+     * <p>It should be longer than the longest expected job execution time.
+     */
     private Duration lockExpirationPeriod = Duration.ofMinutes(30);
 
     public boolean isEnable() {
@@ -924,6 +1096,7 @@ public class KadaiProperties {
   }
 
   public static class Priority {
+    /** Task priority recalculation job configuration. */
     private PriorityTask task = new PriorityTask();
 
     public PriorityTask getTask() {
@@ -936,10 +1109,25 @@ public class KadaiProperties {
   }
 
   public static class PriorityTask {
+    /**
+     * Whether automated priority recalculation for tasks that are not in an end state is enabled.
+     */
     private boolean enable = false;
+
+    /** Upper bound for how many tasks can be processed by one task priority recalculation job. */
     private int batchSize = 100;
+
+    /** First execution time of the task priority recalculation job. */
     private Instant firstRunAt = Instant.parse("2023-01-01T00:00:00Z");
+
+    /** Period between executions of the task priority recalculation job. */
     private Duration runEvery = Duration.ofDays(1);
+
+    /**
+     * Duration for which the task priority recalculation job lock is valid.
+     *
+     * <p>It should be longer than the longest expected job execution time.
+     */
     private Duration lockExpirationPeriod = Duration.ofMinutes(30);
 
     public boolean isEnable() {
@@ -984,6 +1172,7 @@ public class KadaiProperties {
   }
 
   public static class Refresh {
+    /** User information refresh job configuration. */
     private RefreshUser user = new RefreshUser();
 
     public RefreshUser getUser() {
@@ -996,9 +1185,20 @@ public class KadaiProperties {
   }
 
   public static class RefreshUser {
+    /** Whether the user information refresh job is enabled. */
     private boolean enable = false;
+
+    /** First execution time of the user information refresh job. */
     private Instant firstRunAt = Instant.parse("2023-01-01T23:00:00Z");
+
+    /** Period between executions of the user information refresh job. */
     private Duration runEvery = Duration.ofDays(1);
+
+    /**
+     * Duration for which the user information refresh job lock is valid.
+     *
+     * <p>It should be longer than the longest expected job execution time.
+     */
     private Duration lockExpirationPeriod = Duration.ofMinutes(30);
 
     public boolean isEnable() {
@@ -1035,7 +1235,16 @@ public class KadaiProperties {
   }
 
   public static class User {
+    /**
+     * Whether additional attributes from the {@code USER_INFO} table are added to user-related task
+     * responses and task queries.
+     */
     private boolean addAdditionalUserInfo = false;
+
+    /**
+     * Minimal workbasket permissions a user needs to be assigned to a domain during dynamic domain
+     * computation.
+     */
     private Set<WorkbasketPermission> minimalPermissionsToAssignDomains = new HashSet<>();
 
     public boolean isAddAdditionalUserInfo() {
@@ -1057,6 +1266,7 @@ public class KadaiProperties {
   }
 
   public static class Feature {
+    /** Whether KADAI should use the DB2-specific task query implementation. */
     private boolean useSpecificDb2Taskquery = true;
 
     public boolean isUseSpecificDb2Taskquery() {
