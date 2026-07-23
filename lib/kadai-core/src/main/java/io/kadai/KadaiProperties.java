@@ -901,12 +901,12 @@ public class KadaiProperties {
     }
   }
 
-  public static class CleanupTask {
+  public static class CleanupTask extends CleanupJob {
     /** Whether automated cleanup of completed tasks is enabled. */
     private boolean enable = true;
 
     /** Minimum age a completed task must have before it may be deleted by the cleanup job. */
-    @NotNull(message = "kadai.jobs.cleanup.task.minimum-age")
+    @NotNull
     private Duration minimumAge = Duration.ofDays(14);
 
     /**
@@ -914,14 +914,6 @@ public class KadaiProperties {
      * not completed yet.
      */
     private boolean allCompletedSameParentBusiness = true;
-
-    /**
-     * Duration for which the task cleanup job lock is valid.
-     *
-     * <p>It should be longer than the longest expected job execution time.
-     */
-    @NotNull(message = "kadai.jobs.cleanup.task.lock-expiration-period")
-    private Duration lockExpirationPeriod = Duration.ofMinutes(30);
 
     public boolean isEnable() {
       return enable;
@@ -946,27 +938,11 @@ public class KadaiProperties {
     public void setAllCompletedSameParentBusiness(boolean allCompletedSameParentBusiness) {
       this.allCompletedSameParentBusiness = allCompletedSameParentBusiness;
     }
-
-    public Duration getLockExpirationPeriod() {
-      return lockExpirationPeriod;
-    }
-
-    public void setLockExpirationPeriod(Duration lockExpirationPeriod) {
-      this.lockExpirationPeriod = lockExpirationPeriod;
-    }
   }
 
-  public static class CleanupWorkbasket {
+  public static class CleanupWorkbasket extends CleanupJob {
     /** Whether the workbasket cleanup job is enabled. */
     private boolean enable = true;
-
-    /**
-     * Duration for which the workbasket cleanup job lock is valid.
-     *
-     * <p>It should be longer than the longest expected job execution time.
-     */
-    @NotNull(message = "kadai.jobs.cleanup.workbasket.lock-expiration-period")
-    private Duration lockExpirationPeriod = Duration.ofMinutes(30);
 
     public boolean isEnable() {
       return enable;
@@ -974,14 +950,6 @@ public class KadaiProperties {
 
     public void setEnable(boolean enable) {
       this.enable = enable;
-    }
-
-    public Duration getLockExpirationPeriod() {
-      return lockExpirationPeriod;
-    }
-
-    public void setLockExpirationPeriod(Duration lockExpirationPeriod) {
-      this.lockExpirationPeriod = lockExpirationPeriod;
     }
   }
 
@@ -1000,33 +968,9 @@ public class KadaiProperties {
     }
   }
 
-  public static class CleanupHistorySimple {
+  public static class CleanupHistorySimple extends BatchCleanupJob {
     /** Whether the simple history cleanup job is enabled. */
     private boolean enable = false;
-
-    /**
-     * Upper bound for how many history events can be processed by one simple history cleanup job.
-     */
-    @Positive(message = "kadai.jobs.cleanup.history.simple.batch-size")
-    private int batchSize = 100;
-
-    /** Minimum age a simple history event must have before it may be deleted by the cleanup job. */
-    @NotNull(message = "kadai.jobs.cleanup.history.simple.minimum-age")
-    private Duration minimumAge = Duration.ofDays(14);
-
-    /**
-     * Whether simple history cleanup should keep task history events if related task history events
-     * with the same parent business process id are not completed.
-     */
-    private boolean allCompletedSameParentBusiness = true;
-
-    /**
-     * Duration for which the simple history cleanup job lock is valid.
-     *
-     * <p>It should be longer than the longest expected job execution time.
-     */
-    @NotNull(message = "kadai.jobs.cleanup.history.simple.lock-expiration-period")
-    private Duration lockExpirationPeriod = Duration.ofMinutes(30);
 
     public boolean isEnable() {
       return enable;
@@ -1035,6 +979,124 @@ public class KadaiProperties {
     public void setEnable(boolean enable) {
       this.enable = enable;
     }
+  }
+
+  public static class Priority {
+    /** Task priority recalculation job configuration. */
+    @Valid
+    @NotNull(message = "kadai.jobs.priority.task")
+    private PriorityTask task = new PriorityTask();
+
+    public PriorityTask getTask() {
+      return task;
+    }
+
+    public void setTask(PriorityTask task) {
+      this.task = task;
+    }
+  }
+
+  public static class PriorityTask extends BatchScheduledJob {
+    /**
+     * Whether automated priority recalculation for tasks that are not in an end state is enabled.
+     */
+    private boolean enable = false;
+
+    /** First execution time of the task priority recalculation job. */
+    @NotNull
+    private Instant firstRunAt = Instant.parse("2023-01-01T00:00:00Z");
+
+    public boolean isEnable() {
+      return enable;
+    }
+
+    public void setEnable(boolean enable) {
+      this.enable = enable;
+    }
+
+    public Instant getFirstRunAt() {
+      return firstRunAt;
+    }
+
+    public void setFirstRunAt(Instant firstRunAt) {
+      this.firstRunAt = firstRunAt;
+    }
+  }
+
+  public static class Refresh {
+    /** User information refresh job configuration. */
+    @Valid
+    @NotNull(message = "kadai.jobs.refresh.user")
+    private RefreshUser user = new RefreshUser();
+
+    public RefreshUser getUser() {
+      return user;
+    }
+
+    public void setUser(RefreshUser user) {
+      this.user = user;
+    }
+  }
+
+  public static class RefreshUser extends ScheduledJob {
+    /** Whether the user information refresh job is enabled. */
+    private boolean enable = false;
+
+    /** First execution time of the user information refresh job. */
+    @NotNull
+    private Instant firstRunAt = Instant.parse("2023-01-01T23:00:00Z");
+
+    public boolean isEnable() {
+      return enable;
+    }
+
+    public void setEnable(boolean enable) {
+      this.enable = enable;
+    }
+
+    public Instant getFirstRunAt() {
+      return firstRunAt;
+    }
+
+    public void setFirstRunAt(Instant firstRunAt) {
+      this.firstRunAt = firstRunAt;
+    }
+  }
+
+  public abstract static class JobWithLock {
+    /**
+     * Duration for which the job lock is valid.
+     *
+     * <p>It should be longer than the longest expected job execution time.
+     */
+    @NotNull
+    private Duration lockExpirationPeriod = Duration.ofMinutes(30);
+
+    public Duration getLockExpirationPeriod() {
+      return lockExpirationPeriod;
+    }
+
+    public void setLockExpirationPeriod(Duration lockExpirationPeriod) {
+      this.lockExpirationPeriod = lockExpirationPeriod;
+    }
+  }
+
+  public abstract static class CleanupJob extends JobWithLock {}
+
+  public abstract static class BatchCleanupJob extends CleanupJob {
+    /** Upper bound for how many cleanup records can be processed by one job run. */
+    @Positive
+    private int batchSize = 100;
+
+    /** Minimum age an item must have before it may be deleted by the cleanup job. */
+    @NotNull
+    private Duration minimumAge = Duration.ofDays(14);
+
+    /**
+     * Whether cleanup should keep items if related items with the same parent business process id
+     * are not completed.
+     */
+    private boolean allCompletedSameParentBusiness = true;
 
     public int getBatchSize() {
       return batchSize;
@@ -1059,64 +1121,26 @@ public class KadaiProperties {
     public void setAllCompletedSameParentBusiness(boolean allCompletedSameParentBusiness) {
       this.allCompletedSameParentBusiness = allCompletedSameParentBusiness;
     }
-
-    public Duration getLockExpirationPeriod() {
-      return lockExpirationPeriod;
-    }
-
-    public void setLockExpirationPeriod(Duration lockExpirationPeriod) {
-      this.lockExpirationPeriod = lockExpirationPeriod;
-    }
   }
 
-  public static class Priority {
-    /** Task priority recalculation job configuration. */
-    @Valid
-    @NotNull(message = "kadai.jobs.priority.task")
-    private PriorityTask task = new PriorityTask();
-
-    public PriorityTask getTask() {
-      return task;
-    }
-
-    public void setTask(PriorityTask task) {
-      this.task = task;
-    }
-  }
-
-  public static class PriorityTask {
-    /**
-     * Whether automated priority recalculation for tasks that are not in an end state is enabled.
-     */
-    private boolean enable = false;
-
-    /** Upper bound for how many tasks can be processed by one task priority recalculation job. */
-    @Positive(message = "kadai.jobs.priority.task.batch-size")
-    private int batchSize = 100;
-
-    /** First execution time of the task priority recalculation job. */
-    @NotNull(message = "kadai.jobs.priority.task.first-run-at")
-    private Instant firstRunAt = Instant.parse("2023-01-01T00:00:00Z");
-
-    /** Period between executions of the task priority recalculation job. */
-    @NotNull(message = "kadai.jobs.priority.task.run-every")
+  public abstract static class ScheduledJob extends JobWithLock {
+    /** Period between job executions. */
+    @NotNull
     private Duration runEvery = Duration.ofDays(1);
 
-    /**
-     * Duration for which the task priority recalculation job lock is valid.
-     *
-     * <p>It should be longer than the longest expected job execution time.
-     */
-    @NotNull(message = "kadai.jobs.priority.task.lock-expiration-period")
-    private Duration lockExpirationPeriod = Duration.ofMinutes(30);
-
-    public boolean isEnable() {
-      return enable;
+    public Duration getRunEvery() {
+      return runEvery;
     }
 
-    public void setEnable(boolean enable) {
-      this.enable = enable;
+    public void setRunEvery(Duration runEvery) {
+      this.runEvery = runEvery;
     }
+  }
+
+  public abstract static class BatchScheduledJob extends ScheduledJob {
+    /** Upper bound for how many items can be processed by one job run. */
+    @Positive
+    private int batchSize = 100;
 
     public int getBatchSize() {
       return batchSize;
@@ -1124,98 +1148,6 @@ public class KadaiProperties {
 
     public void setBatchSize(int batchSize) {
       this.batchSize = batchSize;
-    }
-
-    public Instant getFirstRunAt() {
-      return firstRunAt;
-    }
-
-    public void setFirstRunAt(Instant firstRunAt) {
-      this.firstRunAt = firstRunAt;
-    }
-
-    public Duration getRunEvery() {
-      return runEvery;
-    }
-
-    public void setRunEvery(Duration runEvery) {
-      this.runEvery = runEvery;
-    }
-
-    public Duration getLockExpirationPeriod() {
-      return lockExpirationPeriod;
-    }
-
-    public void setLockExpirationPeriod(Duration lockExpirationPeriod) {
-      this.lockExpirationPeriod = lockExpirationPeriod;
-    }
-  }
-
-  public static class Refresh {
-    /** User information refresh job configuration. */
-    @Valid
-    @NotNull(message = "kadai.jobs.refresh.user")
-    private RefreshUser user = new RefreshUser();
-
-    public RefreshUser getUser() {
-      return user;
-    }
-
-    public void setUser(RefreshUser user) {
-      this.user = user;
-    }
-  }
-
-  public static class RefreshUser {
-    /** Whether the user information refresh job is enabled. */
-    private boolean enable = false;
-
-    /** First execution time of the user information refresh job. */
-    @NotNull(message = "kadai.jobs.refresh.user.first-run-at")
-    private Instant firstRunAt = Instant.parse("2023-01-01T23:00:00Z");
-
-    /** Period between executions of the user information refresh job. */
-    @NotNull(message = "kadai.jobs.refresh.user.run-every")
-    private Duration runEvery = Duration.ofDays(1);
-
-    /**
-     * Duration for which the user information refresh job lock is valid.
-     *
-     * <p>It should be longer than the longest expected job execution time.
-     */
-    @NotNull(message = "kadai.jobs.refresh.user.lock-expiration-period")
-    private Duration lockExpirationPeriod = Duration.ofMinutes(30);
-
-    public boolean isEnable() {
-      return enable;
-    }
-
-    public void setEnable(boolean enable) {
-      this.enable = enable;
-    }
-
-    public Instant getFirstRunAt() {
-      return firstRunAt;
-    }
-
-    public void setFirstRunAt(Instant firstRunAt) {
-      this.firstRunAt = firstRunAt;
-    }
-
-    public Duration getRunEvery() {
-      return runEvery;
-    }
-
-    public void setRunEvery(Duration runEvery) {
-      this.runEvery = runEvery;
-    }
-
-    public Duration getLockExpirationPeriod() {
-      return lockExpirationPeriod;
-    }
-
-    public void setLockExpirationPeriod(Duration lockExpirationPeriod) {
-      this.lockExpirationPeriod = lockExpirationPeriod;
     }
   }
 
