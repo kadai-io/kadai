@@ -24,6 +24,15 @@ import io.kadai.common.api.LocalTimeInterval;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.util.FileLoaderUtil;
 import io.kadai.workbasket.api.WorkbasketPermission;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Valid;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.DayOfWeek;
@@ -42,6 +51,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.BindException;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -51,12 +61,16 @@ import org.springframework.boot.context.properties.source.MapConfigurationProper
 @ConfigurationProperties(prefix = "kadai")
 public class KadaiProperties {
 
+  private static final ValidatorFactory VALIDATOR_FACTORY = createValidatorFactory();
+  private static final Validator VALIDATOR = VALIDATOR_FACTORY.getValidator();
+
   /**
    * Raw properties as loaded for KADAI.
    *
    * <p>This is mainly used to retain custom extension properties and should not normally be
    * configured through Spring Boot binding.
    */
+  @NotNull(message = "kadai.properties")
   private Map<String, String> properties = Map.of();
 
   /**
@@ -64,12 +78,16 @@ public class KadaiProperties {
    *
    * <p>Values are normalized to upper case when KADAI builds the final configuration.
    */
+  @NotNull(message = "kadai.domains")
   private List<String> domains = new ArrayList<>();
 
   /** Service-level validation configuration. */
+  @Valid
+  @NotNull(message = "kadai.service-level")
   private ServiceLevel serviceLevel = new ServiceLevel();
 
   /** Task routing configuration. */
+  @NotNull(message = "kadai.routing")
   private Routing routing = new Routing();
 
   /**
@@ -77,24 +95,36 @@ public class KadaiProperties {
    *
    * <p>Configure values with indexed entries, for example {@code kadai.roles.user[0]=user-1}.
    */
+  @NotNull(message = "kadai.roles")
   private Map<KadaiRole, Set<String>> roles = new EnumMap<>(KadaiRole.class);
 
   /** Classification type and category configuration. */
+  @Valid
+  @NotNull(message = "kadai.classification")
   private Classification classification = new Classification();
 
   /** Working time calculation configuration. */
+  @Valid
+  @NotNull(message = "kadai.working-time")
   private WorkingTime workingTime = new WorkingTime();
 
   /** Simple history and audit logger configuration. */
+  @Valid
+  @NotNull(message = "kadai.history")
   private History history = new History();
 
   /** Background job configuration. */
+  @Valid
+  @NotNull(message = "kadai.jobs")
   private Jobs jobs = new Jobs();
 
   /** User-related KADAI configuration. */
+  @Valid
+  @NotNull(message = "kadai.user")
   private User user = new User();
 
   /** Feature flags for KADAI internals. */
+  @NotNull(message = "kadai.feature")
   private Feature feature = new Feature();
 
   public static KadaiProperties load(String propertiesFile) {
@@ -210,170 +240,59 @@ public class KadaiProperties {
   }
 
   void validate() {
-    validateTopLevelProperties();
-    validateWorkingTime();
-    validateJobs();
-  }
-
-  private void validateTopLevelProperties() {
-    requireNotNull(properties, "kadai.properties");
-    requireNotNull(domains, "kadai.domains");
-    requireNotNull(serviceLevel, "kadai.service-level");
-    requireNotNull(serviceLevel.getValidation(), "kadai.service-level.validation");
-    requireNotNull(routing, "kadai.routing");
-    requireNotNull(roles, "kadai.roles");
-    requireNotNull(classification, "kadai.classification");
-    requireNotNull(classification.getTypes(), "kadai.classification.types");
-    requireNotNull(classification.getCategories(), "kadai.classification.categories");
-    requireNotNull(workingTime, "kadai.working-time");
-    requireNotNull(history, "kadai.history");
-    requireNotNull(history.getSimple(), "kadai.history.simple");
-    requireNotNull(
-        history.getSimple().getDeleteOnTaskDeletion(),
-        "kadai.history.simple.delete-on-task-deletion");
-    requireNotNull(history.getLogger(), "kadai.history.logger");
-    requireNotNull(jobs, "kadai.jobs");
-    requireNotNull(user, "kadai.user");
-    requireNotNull(
-        user.getMinimalPermissionsToAssignDomains(),
-        "kadai.user.minimal-permissions-to-assign-domains");
-    requireNotNull(feature, "kadai.feature");
-  }
-
-  private void validateWorkingTime() {
-    requireNotNull(workingTime.getTimezone(), "kadai.working-time.timezone");
-    requireNotNull(workingTime.getSchedule(), "kadai.working-time.schedule");
-    workingTime
-        .getSchedule()
-        .forEach(
-            (day, intervals) -> {
-              requireNotNull(intervals, String.format("kadai.working-time.schedule.%s", day));
-              intervals.forEach(
-                  interval -> {
-                    requireNotNull(
-                        interval, String.format("kadai.working-time.schedule.%s[]", day));
-                    requireNotNull(
-                        interval.getBegin(),
-                        String.format("kadai.working-time.schedule.%s[].begin", day));
-                    requireNotNull(
-                        interval.getEnd(),
-                        String.format("kadai.working-time.schedule.%s[].end", day));
-                  });
-            });
-    requireNotNull(workingTime.getHolidays(), "kadai.working-time.holidays");
-    requireNotNull(workingTime.getHolidays().getCustom(), "kadai.working-time.holidays.custom");
-    workingTime
-        .getHolidays()
-        .getCustom()
-        .forEach(
-            customHoliday -> {
-              requireNotNull(customHoliday, "kadai.working-time.holidays.custom[]");
-              requireBetween(
-                  customHoliday.getDay(), 1, 31, "kadai.working-time.holidays.custom[].day");
-              requireBetween(
-                  customHoliday.getMonth(), 1, 12, "kadai.working-time.holidays.custom[].month");
-            });
-    requireNotNull(workingTime.getHolidays().getGerman(), "kadai.working-time.holidays.german");
-    requireNotNull(
-        workingTime.getHolidays().getGerman().getCorpusChristi(),
-        "kadai.working-time.holidays.german.corpus-christi");
-  }
-
-  private void validateJobs() {
-    requireNotNull(jobs.getScheduler(), "kadai.jobs.scheduler");
-    requirePositive(jobs.getMaxRetries(), "kadai.jobs.max-retries");
-    requirePositive(jobs.getBatchSize(), "kadai.jobs.batch-size");
-    requireNotNull(jobs.getFirstRunAt(), "kadai.jobs.first-run-at");
-    requireNotNull(jobs.getRunEvery(), "kadai.jobs.run-every");
-    requireNotNull(jobs.getLockExpirationPeriod(), "kadai.jobs.lock-expiration-period");
-
-    Scheduler schedulerProperties = jobs.getScheduler();
-    requirePositiveOrZero(
-        schedulerProperties.getInitialStartDelay(), "kadai.jobs.scheduler.initial-start-delay");
-    requirePositive(schedulerProperties.getPeriod(), "kadai.jobs.scheduler.period");
-    requireNotNull(
-        schedulerProperties.getPeriodTimeUnit(), "kadai.jobs.scheduler.period-time-unit");
-
-    requireNotNull(jobs.getCleanup(), "kadai.jobs.cleanup");
-    requireNotNull(jobs.getCleanup().getTask(), "kadai.jobs.cleanup.task");
-    CleanupTask cleanupTaskProperties = jobs.getCleanup().getTask();
-    requireNotNull(cleanupTaskProperties.getMinimumAge(), "kadai.jobs.cleanup.task.minimum-age");
-    requireNotNull(
-        cleanupTaskProperties.getLockExpirationPeriod(),
-        "kadai.jobs.cleanup.task.lock-expiration-period");
-
-    requireNotNull(jobs.getCleanup().getWorkbasket(), "kadai.jobs.cleanup.workbasket");
-    CleanupWorkbasket cleanupWorkbasketProperties = jobs.getCleanup().getWorkbasket();
-    requireNotNull(
-        cleanupWorkbasketProperties.getLockExpirationPeriod(),
-        "kadai.jobs.cleanup.workbasket.lock-expiration-period");
-
-    requireNotNull(jobs.getCleanup().getHistory(), "kadai.jobs.cleanup.history");
-    requireNotNull(jobs.getCleanup().getHistory().getSimple(), "kadai.jobs.cleanup.history.simple");
-    CleanupHistorySimple cleanupHistorySimpleProperties =
-        jobs.getCleanup().getHistory().getSimple();
-    requirePositive(
-        cleanupHistorySimpleProperties.getBatchSize(),
-        "kadai.jobs.cleanup.history.simple.batch-size");
-    requireNotNull(
-        cleanupHistorySimpleProperties.getMinimumAge(),
-        "kadai.jobs.cleanup.history.simple.minimum-age");
-    requireNotNull(
-        cleanupHistorySimpleProperties.getLockExpirationPeriod(),
-        "kadai.jobs.cleanup.history.simple.lock-expiration-period");
-
-    requireNotNull(jobs.getPriority(), "kadai.jobs.priority");
-    requireNotNull(jobs.getPriority().getTask(), "kadai.jobs.priority.task");
-    PriorityTask priorityTaskProperties = jobs.getPriority().getTask();
-    requirePositive(priorityTaskProperties.getBatchSize(), "kadai.jobs.priority.task.batch-size");
-    requireNotNull(priorityTaskProperties.getFirstRunAt(), "kadai.jobs.priority.task.first-run-at");
-    requireNotNull(priorityTaskProperties.getRunEvery(), "kadai.jobs.priority.task.run-every");
-    requireNotNull(
-        priorityTaskProperties.getLockExpirationPeriod(),
-        "kadai.jobs.priority.task.lock-expiration-period");
-
-    requireNotNull(jobs.getRefresh(), "kadai.jobs.refresh");
-    requireNotNull(jobs.getRefresh().getUser(), "kadai.jobs.refresh.user");
-    RefreshUser refreshUserProperties = jobs.getRefresh().getUser();
-    requireNotNull(refreshUserProperties.getFirstRunAt(), "kadai.jobs.refresh.user.first-run-at");
-    requireNotNull(refreshUserProperties.getRunEvery(), "kadai.jobs.refresh.user.run-every");
-    requireNotNull(
-        refreshUserProperties.getLockExpirationPeriod(),
-        "kadai.jobs.refresh.user.lock-expiration-period");
-    requireNotNull(jobs.getCustomJobs(), "kadai.jobs.custom-jobs");
-  }
-
-  private void requireNotNull(Object value, String propertyName) {
-    if (value == null) {
-      throw new SystemException(String.format("Property '%s' must not be null", propertyName));
-    }
-  }
-
-  private void requirePositive(int value, String propertyName) {
-    if (value <= 0) {
-      throw new SystemException(String.format("Property '%s' must be positive", propertyName));
-    }
-  }
-
-  private void requirePositive(long value, String propertyName) {
-    if (value <= 0) {
-      throw new SystemException(String.format("Property '%s' must be positive", propertyName));
-    }
-  }
-
-  private void requirePositiveOrZero(long value, String propertyName) {
-    if (value < 0) {
+    Set<ConstraintViolation<KadaiProperties>> violations = VALIDATOR.validate(this);
+    if (!violations.isEmpty()) {
+      String invalidProperties =
+          violations.stream()
+              .map(KadaiProperties::toPropertyName)
+              .sorted()
+              .collect(Collectors.joining(", "));
       throw new SystemException(
-          String.format("Property '%s' must be positive or zero", propertyName));
+          String.format("Invalid KADAI properties: %s", invalidProperties));
     }
   }
 
-  private void requireBetween(Integer value, int min, int max, String propertyName) {
-    requireNotNull(value, propertyName);
-    if (value < min || value > max) {
-      throw new SystemException(
-          String.format("Property '%s' must be between %d and %d", propertyName, min, max));
+  private static ValidatorFactory createValidatorFactory() {
+    return jakarta.validation.Validation.byDefaultProvider()
+        .configure()
+        .messageInterpolator(new ParameterMessageInterpolator())
+        .buildValidatorFactory();
+  }
+
+  private static String toPropertyName(ConstraintViolation<KadaiProperties> violation) {
+    String message = violation.getMessage();
+    if (message.startsWith("kadai.")) {
+      return message;
     }
+    return "kadai." + toKebabCasePropertyPath(violation.getPropertyPath().toString());
+  }
+
+  private static String toKebabCasePropertyPath(String propertyPath) {
+    String normalizedPath =
+        propertyPath
+            .replaceAll("\\[([^\\]]+)]\\.<map value>\\[\\]", ".$1[]")
+            .replace(".<map value>", "")
+            .replace(".<iterable element>", "")
+            .replaceAll("\\[[0-9]+]", "[]");
+    return java.util.Arrays.stream(normalizedPath.split("\\."))
+        .map(KadaiProperties::toKebabCasePropertyPathSegment)
+        .collect(Collectors.joining("."));
+  }
+
+  private static String toKebabCasePropertyPathSegment(String segment) {
+    if (segment.matches("[A-Z_]+(\\[\\])?")) {
+      return segment;
+    }
+    StringBuilder result = new StringBuilder();
+    for (int i = 0; i < segment.length(); i++) {
+      char c = segment.charAt(i);
+      if (Character.isUpperCase(c)) {
+        result.append('-').append(Character.toLowerCase(c));
+      } else {
+        result.append(c);
+      }
+    }
+    return result.toString();
   }
 
   private static Map<String, String> loadRawProperties(String propertiesFile) {
@@ -393,6 +312,7 @@ public class KadaiProperties {
 
   public static class ServiceLevel {
     /** Service-level validation switches. */
+    @NotNull(message = "kadai.service-level.validation")
     private Validation validation = new Validation();
 
     public Validation getValidation() {
@@ -440,6 +360,7 @@ public class KadaiProperties {
      * <p>Values are case-insensitive and are normalized to upper case when KADAI builds the final
      * configuration.
      */
+    @NotNull(message = "kadai.classification.types")
     private List<String> types = new ArrayList<>();
 
     /**
@@ -447,6 +368,7 @@ public class KadaiProperties {
      *
      * <p>The map key is the classification type, for example {@code task} or {@code document}.
      */
+    @NotNull(message = "kadai.classification.categories")
     private Map<String, List<String>> categories = new HashMap<>();
 
     public List<String> getTypes() {
@@ -481,12 +403,17 @@ public class KadaiProperties {
      * kadai.working-time.schedule.monday[0].begin=09:00} and {@code
      * kadai.working-time.schedule.monday[0].end=18:00}.
      */
-    private Map<DayOfWeek, Set<TimeInterval>> schedule = initDefaultWorkingTimeSchedule();
+    @NotNull(message = "kadai.working-time.schedule")
+    private Map<DayOfWeek, @NotNull @Valid Set<@NotNull @Valid TimeInterval>> schedule =
+        initDefaultWorkingTimeSchedule();
 
     /** Time zone used for working time calculation. */
+    @NotNull(message = "kadai.working-time.timezone")
     private ZoneId timezone = ZoneId.of("Europe/Berlin");
 
     /** Holiday configuration for working time calculation. */
+    @Valid
+    @NotNull(message = "kadai.working-time.holidays")
     private Holidays holidays = new Holidays();
 
     public boolean isUseWorkingTimeCalculation() {
@@ -537,6 +464,7 @@ public class KadaiProperties {
 
   public static class TimeInterval {
     /** Start time of a working time interval. */
+    @NotNull
     private LocalTime begin = LocalTime.MIN;
 
     /**
@@ -544,6 +472,7 @@ public class KadaiProperties {
      *
      * <p>{@code 00:00} is interpreted as the end of the day.
      */
+    @NotNull
     private LocalTime end = LocalTime.MAX;
 
     public TimeInterval() {}
@@ -582,9 +511,12 @@ public class KadaiProperties {
      * kadai.working-time.holidays.custom[0].day=31} and {@code
      * kadai.working-time.holidays.custom[0].month=7}.
      */
-    private Set<CustomHolidayProperties> custom = new HashSet<>();
+    @NotNull(message = "kadai.working-time.holidays.custom")
+    private Set<@NotNull @Valid CustomHolidayProperties> custom = new HashSet<>();
 
     /** German public holiday configuration. */
+    @Valid
+    @NotNull(message = "kadai.working-time.holidays.german")
     private German german = new German();
 
     public Set<CustomHolidayProperties> getCustom() {
@@ -612,9 +544,15 @@ public class KadaiProperties {
 
   public static class CustomHolidayProperties {
     /** Day of month for a custom holiday. Valid values are 1 through 31. */
+    @NotNull(message = "kadai.working-time.holidays.custom[].day")
+    @Min(value = 1, message = "kadai.working-time.holidays.custom[].day")
+    @Max(value = 31, message = "kadai.working-time.holidays.custom[].day")
     private Integer day;
 
     /** Month for a custom holiday. Valid values are 1 through 12. */
+    @NotNull(message = "kadai.working-time.holidays.custom[].month")
+    @Min(value = 1, message = "kadai.working-time.holidays.custom[].month")
+    @Max(value = 12, message = "kadai.working-time.holidays.custom[].month")
     private Integer month;
 
     public Integer getDay() {
@@ -643,6 +581,7 @@ public class KadaiProperties {
     private boolean enabled = true;
 
     /** German Corpus Christi public holiday configuration. */
+    @NotNull(message = "kadai.working-time.holidays.german.corpus-christi")
     private CorpusChristi corpusChristi = new CorpusChristi();
 
     public boolean isEnabled() {
@@ -677,9 +616,12 @@ public class KadaiProperties {
 
   public static class History {
     /** Simple history configuration. */
+    @Valid
+    @NotNull(message = "kadai.history.simple")
     private Simple simple = new Simple();
 
     /** Audit/history logger configuration. */
+    @NotNull(message = "kadai.history.logger")
     private Logger logger = new Logger();
 
     public Simple getSimple() {
@@ -701,6 +643,7 @@ public class KadaiProperties {
 
   public static class Simple {
     /** Task-deletion behavior for simple history events. */
+    @NotNull(message = "kadai.history.simple.delete-on-task-deletion")
     private DeleteOnTaskDeletion deleteOnTaskDeletion = new DeleteOnTaskDeletion();
 
     public DeleteOnTaskDeletion getDeleteOnTaskDeletion() {
@@ -740,18 +683,24 @@ public class KadaiProperties {
 
   public static class Jobs {
     /** Scheduler configuration for KADAI jobs. */
+    @Valid
+    @NotNull(message = "kadai.jobs.scheduler")
     private Scheduler scheduler = new Scheduler();
 
     /** Number of automatic retries after a job has failed. */
+    @Positive(message = "kadai.jobs.max-retries")
     private int maxRetries = 3;
 
     /** Upper bound for how many tasks can be processed by one job. */
+    @Positive(message = "kadai.jobs.batch-size")
     private int batchSize = 100;
 
     /** Default first execution time for KADAI jobs. */
+    @NotNull(message = "kadai.jobs.first-run-at")
     private Instant firstRunAt = Instant.parse("2023-01-01T00:00:00Z");
 
     /** Default period between executions of KADAI jobs. */
+    @NotNull(message = "kadai.jobs.run-every")
     private Duration runEvery = Duration.ofDays(1);
 
     /**
@@ -759,18 +708,26 @@ public class KadaiProperties {
      *
      * <p>It should be longer than the longest expected job execution time.
      */
+    @NotNull(message = "kadai.jobs.lock-expiration-period")
     private Duration lockExpirationPeriod = Duration.ofMinutes(30);
 
     /** Cleanup job configuration. */
+    @Valid
+    @NotNull(message = "kadai.jobs.cleanup")
     private Cleanup cleanup = new Cleanup();
 
     /** Task priority recalculation job configuration. */
+    @Valid
+    @NotNull(message = "kadai.jobs.priority")
     private Priority priority = new Priority();
 
     /** User information refresh job configuration. */
+    @Valid
+    @NotNull(message = "kadai.jobs.refresh")
     private Refresh refresh = new Refresh();
 
     /** Fully qualified class names of custom KADAI jobs to initialize. */
+    @NotNull(message = "kadai.jobs.custom-jobs")
     private Set<String> customJobs = new HashSet<>();
 
     public Scheduler getScheduler() {
@@ -859,12 +816,15 @@ public class KadaiProperties {
     private boolean enabled = true;
 
     /** Delay before the scheduler performs its first run. */
+    @PositiveOrZero(message = "kadai.jobs.scheduler.initial-start-delay")
     private long initialStartDelay = 0;
 
     /** Interval between scheduler runs. */
+    @Positive(message = "kadai.jobs.scheduler.period")
     private long period = 5;
 
     /** Time unit for the scheduler initial start delay and scheduler period. */
+    @NotNull(message = "kadai.jobs.scheduler.period-time-unit")
     private TimeUnit periodTimeUnit = TimeUnit.MINUTES;
 
     public boolean isEnabled() {
@@ -902,12 +862,18 @@ public class KadaiProperties {
 
   public static class Cleanup {
     /** Task cleanup job configuration. */
+    @Valid
+    @NotNull(message = "kadai.jobs.cleanup.task")
     private CleanupTask task = new CleanupTask();
 
     /** Workbasket cleanup job configuration. */
+    @Valid
+    @NotNull(message = "kadai.jobs.cleanup.workbasket")
     private CleanupWorkbasket workbasket = new CleanupWorkbasket();
 
     /** History cleanup job configuration. */
+    @Valid
+    @NotNull(message = "kadai.jobs.cleanup.history")
     private CleanupHistory history = new CleanupHistory();
 
     public CleanupTask getTask() {
@@ -940,6 +906,7 @@ public class KadaiProperties {
     private boolean enable = true;
 
     /** Minimum age a completed task must have before it may be deleted by the cleanup job. */
+    @NotNull(message = "kadai.jobs.cleanup.task.minimum-age")
     private Duration minimumAge = Duration.ofDays(14);
 
     /**
@@ -953,6 +920,7 @@ public class KadaiProperties {
      *
      * <p>It should be longer than the longest expected job execution time.
      */
+    @NotNull(message = "kadai.jobs.cleanup.task.lock-expiration-period")
     private Duration lockExpirationPeriod = Duration.ofMinutes(30);
 
     public boolean isEnable() {
@@ -997,6 +965,7 @@ public class KadaiProperties {
      *
      * <p>It should be longer than the longest expected job execution time.
      */
+    @NotNull(message = "kadai.jobs.cleanup.workbasket.lock-expiration-period")
     private Duration lockExpirationPeriod = Duration.ofMinutes(30);
 
     public boolean isEnable() {
@@ -1018,6 +987,8 @@ public class KadaiProperties {
 
   public static class CleanupHistory {
     /** Simple history cleanup job configuration. */
+    @Valid
+    @NotNull(message = "kadai.jobs.cleanup.history.simple")
     private CleanupHistorySimple simple = new CleanupHistorySimple();
 
     public CleanupHistorySimple getSimple() {
@@ -1036,9 +1007,11 @@ public class KadaiProperties {
     /**
      * Upper bound for how many history events can be processed by one simple history cleanup job.
      */
+    @Positive(message = "kadai.jobs.cleanup.history.simple.batch-size")
     private int batchSize = 100;
 
     /** Minimum age a simple history event must have before it may be deleted by the cleanup job. */
+    @NotNull(message = "kadai.jobs.cleanup.history.simple.minimum-age")
     private Duration minimumAge = Duration.ofDays(14);
 
     /**
@@ -1052,6 +1025,7 @@ public class KadaiProperties {
      *
      * <p>It should be longer than the longest expected job execution time.
      */
+    @NotNull(message = "kadai.jobs.cleanup.history.simple.lock-expiration-period")
     private Duration lockExpirationPeriod = Duration.ofMinutes(30);
 
     public boolean isEnable() {
@@ -1097,6 +1071,8 @@ public class KadaiProperties {
 
   public static class Priority {
     /** Task priority recalculation job configuration. */
+    @Valid
+    @NotNull(message = "kadai.jobs.priority.task")
     private PriorityTask task = new PriorityTask();
 
     public PriorityTask getTask() {
@@ -1115,12 +1091,15 @@ public class KadaiProperties {
     private boolean enable = false;
 
     /** Upper bound for how many tasks can be processed by one task priority recalculation job. */
+    @Positive(message = "kadai.jobs.priority.task.batch-size")
     private int batchSize = 100;
 
     /** First execution time of the task priority recalculation job. */
+    @NotNull(message = "kadai.jobs.priority.task.first-run-at")
     private Instant firstRunAt = Instant.parse("2023-01-01T00:00:00Z");
 
     /** Period between executions of the task priority recalculation job. */
+    @NotNull(message = "kadai.jobs.priority.task.run-every")
     private Duration runEvery = Duration.ofDays(1);
 
     /**
@@ -1128,6 +1107,7 @@ public class KadaiProperties {
      *
      * <p>It should be longer than the longest expected job execution time.
      */
+    @NotNull(message = "kadai.jobs.priority.task.lock-expiration-period")
     private Duration lockExpirationPeriod = Duration.ofMinutes(30);
 
     public boolean isEnable() {
@@ -1173,6 +1153,8 @@ public class KadaiProperties {
 
   public static class Refresh {
     /** User information refresh job configuration. */
+    @Valid
+    @NotNull(message = "kadai.jobs.refresh.user")
     private RefreshUser user = new RefreshUser();
 
     public RefreshUser getUser() {
@@ -1189,9 +1171,11 @@ public class KadaiProperties {
     private boolean enable = false;
 
     /** First execution time of the user information refresh job. */
+    @NotNull(message = "kadai.jobs.refresh.user.first-run-at")
     private Instant firstRunAt = Instant.parse("2023-01-01T23:00:00Z");
 
     /** Period between executions of the user information refresh job. */
+    @NotNull(message = "kadai.jobs.refresh.user.run-every")
     private Duration runEvery = Duration.ofDays(1);
 
     /**
@@ -1199,6 +1183,7 @@ public class KadaiProperties {
      *
      * <p>It should be longer than the longest expected job execution time.
      */
+    @NotNull(message = "kadai.jobs.refresh.user.lock-expiration-period")
     private Duration lockExpirationPeriod = Duration.ofMinutes(30);
 
     public boolean isEnable() {
@@ -1245,6 +1230,7 @@ public class KadaiProperties {
      * Minimal workbasket permissions a user needs to be assigned to a domain during dynamic domain
      * computation.
      */
+    @NotNull(message = "kadai.user.minimal-permissions-to-assign-domains")
     private Set<WorkbasketPermission> minimalPermissionsToAssignDomains = new HashSet<>();
 
     public boolean isAddAdditionalUserInfo() {
