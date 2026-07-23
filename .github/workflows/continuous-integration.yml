@@ -904,12 +904,15 @@ jobs:
           path: ${{ env.ARTIFACTS_FRONTEND_COVERAGE_PATH }}
       - name: Install kadai
         run: ./mvnw -B install -DskipTests -Dcheckstyle.skip -Dmaven.javadoc.skip
+      - name: Generate JaCoCo aggregate report
+        if: needs.detect_changes.outputs.backend_changed == 'true'
+        run: ./mvnw -B verify -pl :kadai-sonar-test-coverage -am -DskipTests -Dcheckstyle.skip -Dmaven.javadoc.skip
       - name: Upload SonarQube analysis
         run: |
           SONAR_ARGS=("-Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}")
 
           if [[ "${{ needs.detect_changes.outputs.backend_changed }}" == "true" ]]; then
-            SONAR_ARGS+=("-Dsonar.coverage.jacoco.xmlReportPaths=ci/kadai-sonar-test-coverage/target/site/jacoco-aggregate/jacoco.xml")
+            SONAR_ARGS+=("-Dsonar.coverage.jacoco.xmlReportPaths=ci/kadai-sonar-test-coverage/target/site/jacoco-aggregate/jacoco.xml,../ci/kadai-sonar-test-coverage/target/site/jacoco-aggregate/jacoco.xml,../../ci/kadai-sonar-test-coverage/target/site/jacoco-aggregate/jacoco.xml")
           else
             SONAR_ARGS+=("-Dsonar.coverage.jacoco.xmlReportPaths=")
           fi
