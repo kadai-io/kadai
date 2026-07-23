@@ -212,7 +212,7 @@ KADAI ships Spring Boot configuration metadata for the `kadai.*` properties. IDE
 Spring Boot metadata can use it for property completion, type hints, enum value suggestions and
 inline documentation.
 
-You can configure it by linking the `kadai.properties` inside inside your `application.properties` or `application.yml`
+You can configure it by linking the `kadai.properties` inside your `application.properties` or `application.yml`:
 
 ```properties
 spring.config.import=optional:classpath:kadai.properties
