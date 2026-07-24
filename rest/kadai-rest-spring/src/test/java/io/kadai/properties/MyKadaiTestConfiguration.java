@@ -37,12 +37,6 @@ public class MyKadaiTestConfiguration {
   }
 
   @Bean
-  @Primary
-  public String kadaiPropertiesDelimiter() {
-    return ";";
-  }
-
-  @Bean
   public PlatformTransactionManager txManager(DataSource dataSource) {
     return new DataSourceTransactionManager(dataSource);
   }
