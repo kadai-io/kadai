@@ -22,6 +22,7 @@ import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
 import io.kadai.common.internal.configuration.DbSchemaCreator;
 import io.kadai.common.test.config.DataSourceGenerator;
+import io.kadai.common.test.config.SchemaEnforcingDataSource;
 import io.kadai.sampledata.SampleDataGenerator;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.internal.models.ObjectReferenceImpl;
@@ -47,8 +48,10 @@ public abstract class AbstractAccTest {
       sampleDataGenerator.dropDb();
     }
     dataSource = DataSourceGenerator.getDataSource();
+    SchemaEnforcingDataSource schemaEnforcingDataSource =
+        new SchemaEnforcingDataSource(dataSource, schemaName);
     kadaiConfiguration =
-        new KadaiConfiguration.Builder(dataSource, false, schemaName)
+        new KadaiConfiguration.Builder(schemaEnforcingDataSource.asDataSource(), false, schemaName)
             .initKadaiProperties()
             .germanPublicHolidaysEnabled(true)
             .build();
@@ -59,6 +62,7 @@ public abstract class AbstractAccTest {
     sampleDataGenerator.generateTestData();
     kadaiEngine =
         KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
+    schemaEnforcingDataSource.enable();
   }
 
   protected ObjectReference createObjectReference(

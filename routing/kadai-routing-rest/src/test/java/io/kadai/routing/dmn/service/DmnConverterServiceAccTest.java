@@ -27,6 +27,7 @@ import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
 import io.kadai.common.api.exceptions.KadaiRuntimeException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.test.config.DataSourceGenerator;
+import io.kadai.common.test.config.SchemaEnforcingDataSource;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.common.test.security.WithAccessId;
 import io.kadai.sampledata.SampleDataGenerator;
@@ -61,8 +62,10 @@ class DmnConverterServiceAccTest {
 
     DataSource dataSource = DataSourceGenerator.createDataSourceForH2();
     String schemaName = "KADAI";
+    SchemaEnforcingDataSource schemaEnforcingDataSource =
+        new SchemaEnforcingDataSource(dataSource, schemaName);
     KadaiConfiguration kadaiConfiguration =
-        new KadaiConfiguration.Builder(dataSource, false, schemaName)
+        new KadaiConfiguration.Builder(schemaEnforcingDataSource.asDataSource(), false, schemaName)
             .initKadaiProperties()
             .germanPublicHolidaysEnabled(true)
             .build();
@@ -73,6 +76,7 @@ class DmnConverterServiceAccTest {
     }
     kadaiEngine =
         KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.AUTOCOMMIT);
+    schemaEnforcingDataSource.enable();
 
     sampleDataGenerator.clearDb();
     sampleDataGenerator.generateTestData();

@@ -18,9 +18,11 @@
 
 package acceptance.report;
 
+import acceptance.AbstractAccTest;
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.test.config.DataSourceGenerator;
+import io.kadai.common.test.config.SchemaEnforcingDataSource;
 import io.kadai.sampledata.SampleDataGenerator;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeAll;
@@ -34,13 +36,14 @@ public abstract class AbstractReportAccTest {
   protected static void resetDb() throws Exception {
     DataSource dataSource = DataSourceGenerator.getDataSource();
     String schemaName = DataSourceGenerator.getSchemaName();
+    SchemaEnforcingDataSource schemaEnforcingDataSource =
+        new SchemaEnforcingDataSource(dataSource, schemaName);
     kadaiConfiguration =
-        new KadaiConfiguration.Builder(dataSource, false, schemaName)
+        new KadaiConfiguration.Builder(schemaEnforcingDataSource.asDataSource(), false, schemaName)
             .initKadaiProperties()
             .germanPublicHolidaysEnabled(false)
             .build();
-    kadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
-    kadaiEngine.setConnectionManagementMode(KadaiEngine.ConnectionManagementMode.AUTOCOMMIT);
+    kadaiEngine = AbstractAccTest.buildEngine(kadaiConfiguration);
     SampleDataGenerator sampleDataGenerator = new SampleDataGenerator(dataSource, schemaName);
     sampleDataGenerator.clearDb();
     sampleDataGenerator.generateMonitorData();

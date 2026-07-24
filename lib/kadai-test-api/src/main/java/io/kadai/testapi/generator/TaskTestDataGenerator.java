@@ -80,6 +80,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.SplittableRandom;
 import java.util.TimeZone;
+import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -395,44 +396,47 @@ public final class TaskTestDataGenerator {
    * for the transaction. Other databases use a prepared-statement batch insert fallback.
    */
   public GenerationSummary persist(long numberOfTasks, int batchSize) {
-    if (kadaiEngine == null) {
-      throw new TestDataGenerationException(
-          "Persisting tasks requires a generator created via TaskTestDataGenerator.from(...)"
-              + " so that a KadaiEngine is available");
+    return persistGeneratedTasks(numberOfTasks, batchSize, this::generateTask);
+  }
+
+  /**
+   * Persists completed tasks for cleanup-job load tests.
+   *
+   * @param numberOfTasks the number of tasks to persist
+   * @param batchSize the maximum number of tasks per database batch or PostgreSQL COPY buffer
+   * @param classification classification assigned to each generated task
+   * @param workbasket workbasket assigned to each generated task
+   * @param primaryObjRef primary object reference assigned to each generated task
+   * @param parentBusinessProcessIdGroupSize number of tasks sharing one parent business process id;
+   *     use {@code 0} to persist tasks without a parent business process id
+   * @return summary of the persistence run
+   */
+  public GenerationSummary persistCompletedTasksForCleanupLoadTest(
+      long numberOfTasks,
+      int batchSize,
+      ClassificationSummary classification,
+      WorkbasketSummary workbasket,
+      ObjectReference primaryObjRef,
+      int parentBusinessProcessIdGroupSize) {
+    Objects.requireNonNull(classification, "classification must not be null");
+    Objects.requireNonNull(workbasket, "workbasket must not be null");
+    Objects.requireNonNull(primaryObjRef, "primaryObjRef must not be null");
+    if (parentBusinessProcessIdGroupSize < 0) {
+      throw new IllegalArgumentException("parentBusinessProcessIdGroupSize must not be negative");
     }
 
-    validateTaskCount(numberOfTasks);
-    validateBatchSize(batchSize);
-
-    if (numberOfTasks == 0) {
-      return new GenerationSummary(
-          0, 0, 0, environment.classifications().size(), environment.workbaskets().size());
-    }
-
-    Connection connection = null;
-    try {
-      connection = kadaiEngine.getConfiguration().getDataSource().getConnection();
-      connection.setAutoCommit(false);
-      setSchema(connection, kadaiEngine.getConfiguration().getSchemaName());
-
-      boolean postgreSql = isPostgreSql(connection);
-      CopyManager copyManager = postgreSql ? getPostgreSqlCopyManager(connection) : null;
-      if (postgreSql) {
-        tunePostgreSqlSession(connection);
-      }
-
-      GenerationSummary summary =
-          copyManager != null
-              ? persistWithPostgreSqlCopy(numberOfTasks, batchSize, copyManager)
-              : persistWithJdbcBatch(numberOfTasks, batchSize, connection);
-      connection.commit();
-      return summary;
-    } catch (Exception ex) {
-      rollbackQuietly(connection);
-      throw new TestDataGenerationException("Task persistence failed", ex);
-    } finally {
-      closeQuietly(connection);
-    }
+    Instant completed = clock.instant().minus(Duration.ofDays(10));
+    return persistGeneratedTasks(
+        numberOfTasks,
+        batchSize,
+        index ->
+            generateCompletedTaskForCleanupLoadTest(
+                index,
+                completed,
+                classification,
+                workbasket,
+                primaryObjRef,
+                parentBusinessProcessIdGroupSize));
   }
 
   @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
@@ -549,14 +553,108 @@ public final class TaskTestDataGenerator {
     return task;
   }
 
+  private GenerationSummary persistGeneratedTasks(
+      long numberOfTasks, int batchSize, LongFunction<Task> taskFactory) {
+    if (kadaiEngine == null) {
+      throw new TestDataGenerationException(
+          "Persisting tasks requires a generator created via TaskTestDataGenerator.from(...)"
+              + " so that a KadaiEngine is available");
+    }
+
+    validateTaskCount(numberOfTasks);
+    validateBatchSize(batchSize);
+
+    if (numberOfTasks == 0) {
+      return new GenerationSummary(
+          0, 0, 0, environment.classifications().size(), environment.workbaskets().size());
+    }
+
+    Connection connection = null;
+    try {
+      connection = kadaiEngine.getConfiguration().getDataSource().getConnection();
+      connection.setAutoCommit(false);
+      setSchema(connection, kadaiEngine.getConfiguration().getSchemaName());
+
+      boolean postgreSql = isPostgreSql(connection);
+      CopyManager copyManager = postgreSql ? getPostgreSqlCopyManager(connection) : null;
+      if (postgreSql) {
+        tunePostgreSqlSession(connection);
+      }
+
+      GenerationSummary summary =
+          copyManager != null
+              ? persistWithPostgreSqlCopy(numberOfTasks, batchSize, copyManager, taskFactory)
+              : persistWithJdbcBatch(numberOfTasks, batchSize, connection, taskFactory);
+      connection.commit();
+      return summary;
+    } catch (Exception ex) {
+      rollbackQuietly(connection);
+      throw new TestDataGenerationException("Task persistence failed", ex);
+    } finally {
+      closeQuietly(connection);
+    }
+  }
+
+  private Task generateCompletedTaskForCleanupLoadTest(
+      long index,
+      Instant completed,
+      ClassificationSummary classification,
+      WorkbasketSummary workbasket,
+      ObjectReference primaryObjRef,
+      int parentBusinessProcessIdGroupSize) {
+    GeneratedTaskImpl task = (GeneratedTaskImpl) generateTask(index);
+    Instant created = completed.minus(Duration.ofDays(1));
+    task.setId(formatLoadTestIdentifier(IdGenerator.ID_PREFIX_TASK, index));
+    task.setExternalId(formatLoadTestIdentifier(IdGenerator.ID_PREFIX_EXT_TASK, index));
+    task.setCreatedIgnoreFreeze(created);
+    task.freezeCreated();
+    task.setClaimed(created.plus(Duration.ofHours(1)));
+    task.setCompleted(completed);
+    task.setModifiedIgnoreFreeze(completed);
+    task.freezeModified();
+    task.setPlanned(created);
+    task.setDue(completed.plus(Duration.ofDays(1)));
+    task.setName("TaskCleanupJob load test task");
+    task.setCreator("admin");
+    task.setDescription(null);
+    task.setNote(null);
+    task.setPriorityIgnoreFreeze(classification.getPriority());
+    task.freezePriority();
+    task.setManualPriority(-1);
+    task.setStateIgnoreFreeze(TaskState.COMPLETED);
+    task.freezeState();
+    task.setClassificationSummary(classification);
+    task.setWorkbasketSummary(workbasket);
+    task.setBusinessProcessId(
+        formatLoadTestIdentifier(IdGenerator.ID_PREFIX_BUSINESS_PROCESS, index));
+    task.setParentBusinessProcessId(
+        parentBusinessProcessIdGroupSize == 0
+            ? null
+            : formatLoadTestIdentifier("PBI", index / parentBusinessProcessIdGroupSize));
+    task.setOwner("admin");
+    task.setPrimaryObjRef(primaryObjRef);
+    task.setReadIgnoreFreeze(false);
+    task.freezeRead();
+    task.setTransferredIgnoreFreeze(false);
+    task.freezeTransferred();
+    task.setReopenedIgnoreFreeze(false);
+    task.freezeReopened();
+    task.setCallbackInfo(null);
+    task.setCallbackState(CallbackState.NONE);
+    task.setNumberOfComments(0);
+    return task;
+  }
+
   private GenerationSummary persistWithPostgreSqlCopy(
-      long numberOfTasks, int batchSize, CopyManager copyManager) throws SQLException, IOException {
+      long numberOfTasks, int batchSize, CopyManager copyManager, LongFunction<Task> taskFactory)
+      throws SQLException, IOException {
     StringBuilder buffer = new StringBuilder(estimateCopyBufferCapacity(batchSize));
     long emittedTaskCount = 0;
     long emittedBatchCount = 0;
 
     for (long index = 0; index < numberOfTasks; index++) {
-      appendTaskAsPostgreSqlCopyRow(buffer, prepareTaskForDirectPersistence(generateTask(index)));
+      appendTaskAsPostgreSqlCopyRow(
+          buffer, prepareTaskForDirectPersistence(taskFactory.apply(index)));
       emittedTaskCount++;
       if (emittedTaskCount % batchSize == 0) {
         copyBatch(copyManager, buffer);
@@ -579,13 +677,14 @@ public final class TaskTestDataGenerator {
   }
 
   private GenerationSummary persistWithJdbcBatch(
-      long numberOfTasks, int batchSize, Connection connection) throws SQLException {
+      long numberOfTasks, int batchSize, Connection connection, LongFunction<Task> taskFactory)
+      throws SQLException {
     long emittedTaskCount = 0;
     long emittedBatchCount = 0;
 
     try (PreparedStatement statement = connection.prepareStatement(TASK_INSERT_SQL)) {
       for (long index = 0; index < numberOfTasks; index++) {
-        bindTask(statement, prepareTaskForDirectPersistence(generateTask(index)));
+        bindTask(statement, prepareTaskForDirectPersistence(taskFactory.apply(index)));
         statement.addBatch();
         emittedTaskCount++;
         if (emittedTaskCount % batchSize == 0) {
@@ -1512,6 +1611,10 @@ public final class TaskTestDataGenerator {
 
   private static String formatIdentifier(String prefix, long sequence) {
     return String.format("%s:%s", prefix, pad(sequence, 12));
+  }
+
+  private static String formatLoadTestIdentifier(String prefix, long sequence) {
+    return String.format("%s:L%s", prefix, pad(sequence, 35));
   }
 
   private static String pad(long value, int length) {

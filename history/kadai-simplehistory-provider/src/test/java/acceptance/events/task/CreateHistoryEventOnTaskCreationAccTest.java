@@ -20,7 +20,7 @@ package acceptance.events.task;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import acceptance.AbstractAccTest;
+import acceptance.AbstractRawMapperAccTest;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.internal.util.CheckedRunnable;
 import io.kadai.simplehistory.task.internal.TaskHistoryQueryImpl;
@@ -33,7 +33,7 @@ import io.kadai.task.internal.models.TaskImpl;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class CreateHistoryEventOnTaskCreationAccTest extends AbstractAccTest {
+class CreateHistoryEventOnTaskCreationAccTest extends AbstractRawMapperAccTest {
 
   private final TaskService taskService = kadaiEngine.getTaskService();
 
