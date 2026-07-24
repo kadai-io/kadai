@@ -87,6 +87,7 @@ public class TaskQueryImpl implements TaskQuery {
   private boolean addAttachmentClassificationNameToSelectClauseForOrdering = false;
   private boolean addWorkbasketNameToSelectClauseForOrdering = false;
   private boolean joinWithUserInfo;
+  private boolean joinWithCreatorUserInfo;
   private boolean groupByPor;
   private String groupBySor;
   private String[] taskId;
@@ -115,6 +116,10 @@ public class TaskQueryImpl implements TaskQuery {
   private String[] creatorNotIn;
   private String[] creatorLike;
   private String[] creatorNotLike;
+  private String[] creatorLongNameIn;
+  private String[] creatorLongNameNotIn;
+  private String[] creatorLongNameLike;
+  private String[] creatorLongNameNotLike;
   private String[] noteLike;
   private String[] noteNotLike;
   private String[] descriptionLike;
@@ -366,6 +371,8 @@ public class TaskQueryImpl implements TaskQuery {
     this.withoutAttachment = false;
     this.lockResults = 0;
     this.joinWithUserInfo = kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo();
+    this.joinWithCreatorUserInfo =
+        kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo();
   }
 
   @Override
@@ -584,8 +591,45 @@ public class TaskQueryImpl implements TaskQuery {
   }
 
   @Override
+  public TaskQuery creatorLongNameIn(String... longNames) {
+    joinWithCreatorUserInfo = true;
+    this.creatorLongNameIn = longNames;
+    return this;
+  }
+
+  @Override
+  public TaskQuery creatorLongNameNotIn(String... longNames) {
+    joinWithCreatorUserInfo = true;
+    this.creatorLongNameNotIn = longNames;
+    return this;
+  }
+
+  @Override
+  public TaskQuery creatorLongNameLike(String... longNames) {
+    joinWithCreatorUserInfo = true;
+    this.creatorLongNameLike = toLowerCopy(longNames);
+    return this;
+  }
+
+  @Override
+  public TaskQuery creatorLongNameNotLike(String... longNames) {
+    joinWithCreatorUserInfo = true;
+    this.creatorLongNameNotLike = toLowerCopy(longNames);
+    return this;
+  }
+
+  @Override
   public TaskQuery orderByCreator(SortDirection sortDirection) {
     return addOrderCriteria("CREATOR", sortDirection);
+  }
+
+  @Override
+  public TaskQuery orderByCreatorLongName(SortDirection sortDirection) {
+    joinWithCreatorUserInfo = true;
+    return (DB.DB2 == getDB()
+            && kadaiEngine.getEngine().getConfiguration().isUseSpecificDb2Taskquery())
+        ? addOrderCriteria("CREATOR_LONG_NAME", sortDirection)
+        : addOrderCriteria("creator_info.LONG_NAME", sortDirection);
   }
 
   @Override
@@ -1372,6 +1416,22 @@ public class TaskQueryImpl implements TaskQuery {
     return ownerLongNameNotLike;
   }
 
+  public String[] getCreatorLongNameIn() {
+    return creatorLongNameIn;
+  }
+
+  public String[] getCreatorLongNameNotIn() {
+    return creatorLongNameNotIn;
+  }
+
+  public String[] getCreatorLongNameLike() {
+    return creatorLongNameLike;
+  }
+
+  public String[] getCreatorLongNameNotLike() {
+    return creatorLongNameNotLike;
+  }
+
   @Override
   public TaskQuery secondaryObjectReferenceIn(ObjectReference... objectReferences) {
     this.joinWithSecondaryObjectReferences = true;
@@ -2016,8 +2076,8 @@ public class TaskQueryImpl implements TaskQuery {
     joinWithUserInfo = true;
     return (DB.DB2 == getDB()
             && kadaiEngine.getEngine().getConfiguration().isUseSpecificDb2Taskquery())
-        ? addOrderCriteria("ULONG_NAME", sortDirection)
-        : addOrderCriteria("u.LONG_NAME", sortDirection);
+        ? addOrderCriteria("OWNER_LONG_NAME", sortDirection)
+        : addOrderCriteria("owner_info.LONG_NAME", sortDirection);
   }
 
   public List<TaskSummary> list() {
@@ -2093,6 +2153,9 @@ public class TaskQueryImpl implements TaskQuery {
 
       if (columnName == TaskQueryColumnName.OWNER_LONG_NAME) {
         joinWithUserInfo = true;
+      }
+      if (columnName == TaskQueryColumnName.CREATOR_LONG_NAME) {
+        joinWithCreatorUserInfo = true;
       }
 
       setupJoinAndOrderParameters();
@@ -2200,9 +2263,9 @@ public class TaskQueryImpl implements TaskQuery {
       throw new IllegalArgumentException(
           "The params \"lockResultsEquals\" and \"selectAndClaim\"" + " cannot be used together!");
     }
-    if (joinWithUserInfo && lockResults != null && lockResults != 0) {
+    if ((joinWithUserInfo || joinWithCreatorUserInfo) && lockResults != null && lockResults != 0) {
       throw new IllegalArgumentException(
-          "The params \"lockResultsEquals\" and \"joinWithUserInfo\""
+          "The params \"lockResultsEquals\" and \"joinWithUserInfo\"/\"joinWithCreatorUserInfo\""
               + " cannot be used together!");
     }
     if (withoutAttachment
@@ -2346,7 +2409,14 @@ public class TaskQueryImpl implements TaskQuery {
       sortDirection = SortDirection.ASCENDING;
     }
     orderByInner.add(columnName + " " + sortDirection);
-    if (columnName.startsWith("a") || columnName.startsWith("w") || columnName.startsWith("c")) {
+    String lowercaseColumnName = columnName.toLowerCase();
+    if (lowercaseColumnName.startsWith("owner_info.")) {
+      orderByOuter.add("OWNER_LONG_NAME " + sortDirection);
+    } else if (lowercaseColumnName.startsWith("creator_info.")) {
+      orderByOuter.add("CREATOR_LONG_NAME " + sortDirection);
+    } else if (columnName.startsWith("a")
+        || columnName.startsWith("w")
+        || columnName.startsWith("c")) {
       orderByOuter.add(columnName.replace(".", "").toUpperCase() + " " + sortDirection);
     } else {
       if (columnName.startsWith("u")) {
@@ -2450,6 +2520,14 @@ public class TaskQueryImpl implements TaskQuery {
         + Arrays.toString(creatorLike)
         + ", creatorNotLike="
         + Arrays.toString(creatorNotLike)
+        + ", creatorLongNameIn="
+        + Arrays.toString(creatorLongNameIn)
+        + ", creatorLongNameNotIn="
+        + Arrays.toString(creatorLongNameNotIn)
+        + ", creatorLongNameLike="
+        + Arrays.toString(creatorLongNameLike)
+        + ", creatorLongNameNotLike="
+        + Arrays.toString(creatorLongNameNotLike)
         + ", noteLike="
         + Arrays.toString(noteLike)
         + ", noteNotLike="

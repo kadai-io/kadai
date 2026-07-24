@@ -82,6 +82,9 @@ public class TaskSummaryRepresentationModel
   @Schema(name = "creator", description = "the creator of the task.")
   protected String creator;
 
+  @Schema(name = "creatorLongName", description = "The long name of the task creator.")
+  protected String creatorLongName;
+
   @Schema(name = "note", description = "note.")
   protected String note;
 
@@ -318,6 +321,14 @@ public class TaskSummaryRepresentationModel
 
   public void setCreator(String creator) {
     this.creator = creator;
+  }
+
+  public String getCreatorLongName() {
+    return creatorLongName;
+  }
+
+  public void setCreatorLongName(String creatorLongName) {
+    this.creatorLongName = creatorLongName;
   }
 
   public String getNote() {

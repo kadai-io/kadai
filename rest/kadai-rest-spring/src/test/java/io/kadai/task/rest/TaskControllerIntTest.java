@@ -1518,6 +1518,35 @@ class TaskControllerIntTest {
     }
 
     @Test
+    void should_SortByCreatorLongNameAndExposeCreatorLongName() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS)
+              + "?task-id=TKI:000000000000000000000000000000000026"
+              + "&task-id=TKI:000000000000000000000000000000000027"
+              + "&sort-by=CREATOR_LONG_NAME"
+              + "&order=ASCENDING";
+
+      ResponseEntity<TaskSummaryPagedRepresentationModel> response =
+          restClient
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getContent())
+          .extracting(TaskSummaryRepresentationModel::getCreatorLongName)
+          .containsExactly("Eifrig, Elena - (user-1-2)", "Mustermann, Max - (user-1-1)");
+      assertThat(response.getBody().getContent())
+          .extracting(TaskSummaryRepresentationModel::getTaskId)
+          .containsExactly(
+              "TKI:000000000000000000000000000000000027",
+              "TKI:000000000000000000000000000000000026");
+      assertThat(response.getBody().getLink(IanaLinkRelations.SELF)).isNotNull();
+    }
+
+    @Test
     void should_GroupByPor() throws Exception {
       Field useSpecificDb2Taskquery =
           kadaiConfiguration.getClass().getDeclaredField("useSpecificDb2Taskquery");

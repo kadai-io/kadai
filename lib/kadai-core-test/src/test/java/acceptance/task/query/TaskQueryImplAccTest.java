@@ -482,7 +482,8 @@ class TaskQueryImplAccTest {
       List<TaskSummary> list = taskService.createTaskQuery().workbasketIdIn(wb.getId()).list();
 
       assertThat(list).containsExactlyInAnyOrder(taskSummary1, taskSummary2);
-      assertThat(taskSummary1).hasNoNullFieldsOrPropertiesExcept("ownerLongName", "groupByCount");
+      assertThat(taskSummary1)
+          .hasNoNullFieldsOrPropertiesExcept("creatorLongName", "ownerLongName", "groupByCount");
     }
 
     @WithAccessId(user = "user-1-1")

@@ -57,6 +57,13 @@ public interface TaskSummary {
   String getCreator();
 
   /**
+   * Returns the long name of the creator of the {@linkplain Task}.
+   *
+   * @return the long name of the creator
+   */
+  String getCreatorLongName();
+
+  /**
    * Returns the time when the {@linkplain Task} was created.
    *
    * @return the created Instant

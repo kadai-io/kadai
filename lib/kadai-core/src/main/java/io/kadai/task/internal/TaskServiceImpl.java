@@ -473,13 +473,8 @@ public class TaskServiceImpl implements TaskService {
 
         resultTask.setClassificationSummary(classification);
 
-        if (resultTask.getOwner() != null
-            && !resultTask.getOwner().isEmpty()
-            && kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo()) {
-          User owner = userMapper.findById(resultTask.getOwner());
-          if (owner != null) {
-            resultTask.setOwnerLongName(owner.getLongName());
-          }
+        if (kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo()) {
+          addOwnerAndCreatorLongNames(resultTask);
         }
         return resultTask;
       } else {
@@ -2410,12 +2405,8 @@ public class TaskServiceImpl implements TaskService {
     if (taskToCreate.getDescription() == null && classification != null) {
       taskToCreate.setDescription(classification.getDescription());
     }
-    if (taskToCreate.getOwner() != null
-        && kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo()) {
-      User user = userMapper.findById(taskToCreate.getOwner());
-      if (user != null) {
-        taskToCreate.setOwnerLongName(user.getLongName());
-      }
+    if (kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo()) {
+      addOwnerAndCreatorLongNames(taskToCreate);
     }
     setDefaultTaskReceivedDateFromAttachments(taskToCreate);
 
@@ -2807,10 +2798,7 @@ public class TaskServiceImpl implements TaskService {
           oldTaskImpl.getId(), oldTaskImpl.getState(), READY, READY_FOR_REVIEW);
     }
     if (isOwnerChanged && kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo()) {
-      User user = userMapper.findById(newTaskImpl.getOwner());
-      if (user != null) {
-        newTaskImpl.setOwnerLongName(user.getLongName());
-      }
+      addOwnerAndCreatorLongNames(newTaskImpl);
     }
   }
 
@@ -2827,6 +2815,35 @@ public class TaskServiceImpl implements TaskService {
               newClassificationSummary.getKey(), newTaskImpl.getWorkbasketSummary().getDomain());
       newClassificationSummary = newClassification.asSummary();
       newTaskImpl.setClassificationSummary(newClassificationSummary);
+    }
+  }
+
+  private void addOwnerAndCreatorLongNames(TaskSummaryImpl task) {
+    addOwnerLongName(task);
+    addCreatorLongName(task);
+  }
+
+  private void addOwnerLongName(TaskSummaryImpl task) {
+    if (task.getOwner() != null && !task.getOwner().isEmpty()) {
+      User owner = userMapper.findById(task.getOwner());
+      if (owner != null) {
+        task.setOwnerLongName(owner.getLongName());
+      }
+    }
+  }
+
+  private void addCreatorLongName(TaskSummaryImpl task) {
+    if (task.getCreator() == null || task.getCreator().isEmpty()) {
+      return;
+    }
+    if (Objects.equals(task.getOwner(), task.getCreator())) {
+      task.setCreatorLongName(task.getOwnerLongName());
+      return;
+    }
+
+    User creator = userMapper.findById(task.getCreator());
+    if (creator != null) {
+      task.setCreatorLongName(creator.getLongName());
     }
   }
 

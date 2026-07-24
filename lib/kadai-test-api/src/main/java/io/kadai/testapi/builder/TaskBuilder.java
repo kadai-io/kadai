@@ -154,6 +154,11 @@ public class TaskBuilder implements SummaryEntityBuilder<TaskSummary, Task, Task
     return this;
   }
 
+  public TaskBuilder creatorLongName(String creatorLongName) {
+    testTask.setCreatorLongName(creatorLongName);
+    return this;
+  }
+
   public TaskBuilder primaryObjRef(ObjectReference primaryObjRef) {
     testTask.setPrimaryObjRef(primaryObjRef);
     return this;

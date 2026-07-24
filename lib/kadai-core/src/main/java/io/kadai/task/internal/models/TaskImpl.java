@@ -294,6 +294,7 @@ public class TaskImpl extends TaskSummaryImpl implements Task {
     taskSummary.setModified(modified);
     taskSummary.setName(name);
     taskSummary.setCreator(creator);
+    taskSummary.setCreatorLongName(creatorLongName);
     taskSummary.setNote(note);
     taskSummary.setDescription(description);
     taskSummary.setOwner(owner);
