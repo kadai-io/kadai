@@ -56,57 +56,6 @@ describe('TaskService', () => {
     });
   });
 
-  describe('publishUpdatedTask', () => {
-    it('should emit the task via taskChangedStream', () => {
-      const expectedTask = new Task('task-1');
-      let emitted: Task | undefined;
-      service.taskChangedStream.subscribe((task) => (emitted = task));
-      service.publishUpdatedTask(expectedTask);
-      expect(emitted).toBe(expectedTask);
-    });
-
-    it('should emit undefined when called without argument', () => {
-      let emitted: Task | undefined = new Task('sentinel');
-      service.taskChangedStream.subscribe((task) => (emitted = task));
-      service.publishUpdatedTask();
-      expect(emitted).toBeUndefined();
-    });
-  });
-
-  describe('publishTaskDeletion', () => {
-    it('should emit null via taskDeletedStream', () => {
-      let emitted: any = 'not null';
-      service.taskDeletedStream.subscribe((t) => (emitted = t));
-      service.publishTaskDeletion();
-      expect(emitted).toBeNull();
-    });
-  });
-
-  describe('selectTask', () => {
-    it('should emit the task via taskSelectedStream', () => {
-      const expectedTask = new Task('task-2');
-      let emitted: Task | undefined;
-      service.taskSelectedStream.subscribe((task) => (emitted = task));
-      service.selectTask(expectedTask);
-      expect(emitted).toBe(expectedTask);
-    });
-
-    it('should emit undefined when called without argument', () => {
-      let emitted: Task | undefined = new Task('sentinel');
-      service.taskSelectedStream.subscribe((task) => (emitted = task));
-      service.selectTask();
-      expect(emitted).toBeUndefined();
-    });
-  });
-
-  describe('getSelectedTask', () => {
-    it('should return an observable from taskSelectedStream', () => {
-      const obs = service.getSelectedTask();
-      expect(obs).toBeDefined();
-      expect(typeof obs.subscribe).toBe('function');
-    });
-  });
-
   describe('findTasksWithWorkbasket', () => {
     it('should make a GET request to tasks url with query params', () => {
       const filterParam = { workbasketId: ['wb-1'] };

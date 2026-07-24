@@ -16,21 +16,7 @@
  *
  */
 
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { Workbasket } from 'app/shared/models/workbasket';
-
-@Injectable({
-  providedIn: 'root'
-})
-export class WorkplaceService {
-  private workbasketSelected = new BehaviorSubject<Workbasket | undefined>(undefined);
-
-  selectWorkbasket(workbasket?: Workbasket): void {
-    this.workbasketSelected.next(workbasket);
-  }
-
-  getSelectedWorkbasket(): Observable<Workbasket | undefined> {
-    return this.workbasketSelected.asObservable();
-  }
+export enum SearchType {
+  byWorkbasket = 'workbasket',
+  byTypeAndValue = 'type-and-value'
 }
