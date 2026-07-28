@@ -10,8 +10,8 @@ SETLOCAL
     ECHO 1 - Start DB2 11.5
     ECHO 2 - Stop  DB2 11.5
     ECHO.
-    ECHO 3 - Start POSTGRES 14
-    ECHO 4 - Stop  POSTGRES 14
+    ECHO 3 - Start POSTGRES 17
+    ECHO 4 - Stop  POSTGRES 17
     ECHO.
     ECHO 5 - Stop all
     ECHO.
@@ -19,8 +19,8 @@ SETLOCAL
     ECHO.
     IF [%MENU%]==[1] GOTO START_DB2_11_5
     IF [%MENU%]==[2] GOTO STOP_DB2_11_5
-    IF [%MENU%]==[3] GOTO START_POSTGRES_14
-    IF [%MENU%]==[4] GOTO STOP_POSTGRES_14
+    IF [%MENU%]==[3] GOTO START_POSTGRES_17
+    IF [%MENU%]==[4] GOTO STOP_POSTGRES_17
     IF [%MENU%]==[7] GOTO STOP_ALL
     EXIT /B
 
@@ -39,19 +39,19 @@ SETLOCAL
     ECHO ---
     GOTO MENU
 
-:START_POSTGRES_14
+:START_POSTGRES_17
     ECHO ---
-    ECHO docker compose -f %~dp0/docker-compose.yml up -d kadai-postgres_14
-    docker compose -f %~dp0/docker-compose.yml up -d kadai-postgres_14
+    ECHO docker compose -f %~dp0/docker-compose.yml up -d kadai-postgres_17
+    docker compose -f %~dp0/docker-compose.yml up -d kadai-postgres_17
 
     ECHO ---
     GOTO MENU
 
-:STOP_POSTGRES_14
+:STOP_POSTGRES_17
     ECHO ---
-    ECHO docker stop kadai-postgres_14
-    ECHO docker compose -f %~dp0/docker-compose.yml rm -f -s -v kadai-postgres_14
-    docker compose -f %~dp0/docker-compose.yml rm -f -s -v kadai-postgres_14
+    ECHO docker stop kadai-postgres_17
+    ECHO docker compose -f %~dp0/docker-compose.yml rm -f -s -v kadai-postgres_17
+    docker compose -f %~dp0/docker-compose.yml rm -f -s -v kadai-postgres_17
     ECHO ---
     GOTO MENU
 
