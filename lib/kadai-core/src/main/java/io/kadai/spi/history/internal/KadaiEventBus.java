@@ -25,12 +25,14 @@ import static java.util.stream.Collectors.toMap;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.internal.util.CollectionUtil;
 import io.kadai.common.internal.util.SpiLoader;
+import io.kadai.spi.history.api.BatchKadaiEventConsumer;
 import io.kadai.spi.history.api.KadaiEventConsumer;
 import io.kadai.spi.history.api.events.KadaiEvent;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -103,6 +105,62 @@ public final class KadaiEventBus {
   }
 
   /**
+   * Forwards multiple {@linkplain KadaiEvent events} to all eligible consumers in consumer batches.
+   *
+   * @param events the events to forward
+   * @param <T> the event type
+   */
+  @SuppressWarnings("unchecked") // Safe cast by definition of 'Object::getClass'
+  public <T extends KadaiEvent> void dispatchAll(Collection<T> events) {
+    List<KadaiEventConsumer<?>> consumersInDispatchOrder = new ArrayList<>();
+    Map<KadaiEventConsumer<?>, List<KadaiEvent>> eventsByConsumer = new IdentityHashMap<>();
+    events.forEach(
+        event -> {
+          event.setUserId(kadaiEngine.getCurrentUserContext().getUserId());
+          event.setProxyAccessId(kadaiEngine.getCurrentUserContext().getProxyAccessId());
+
+          getConsumers((Class<T>) event.getClass())
+              .forEach(
+                  consumer -> {
+                    if (!eventsByConsumer.containsKey(consumer)) {
+                      consumersInDispatchOrder.add(consumer);
+                      eventsByConsumer.put(consumer, new ArrayList<>());
+                    }
+                    eventsByConsumer.get(consumer).add(event);
+                  });
+        });
+
+    consumersInDispatchOrder.forEach(
+        consumer -> {
+          List<KadaiEvent> eventsForConsumer = eventsByConsumer.get(consumer);
+          if (consumer instanceof BatchKadaiEventConsumer<?> batchConsumer) {
+            try {
+              consumeAll(batchConsumer, eventsForConsumer);
+              LOGGER.info(
+                  "Forwarded {} events to consumer '{}'",
+                  eventsForConsumer.size(),
+                  consumer.getClass().getName());
+            } catch (RuntimeException e) {
+              LOGGER.error("Consumer '{}' failed", consumer.getClass().getName(), e);
+            }
+          } else {
+            eventsForConsumer.forEach(
+                event -> {
+                  try {
+                    consume(consumer, event);
+                    LOGGER.info(
+                        "Forwarded event '{}' to consumer '{}'",
+                        event,
+                        consumer.getClass().getName());
+                  } catch (RuntimeException e) {
+                    LOGGER.error("Consumer '{}' failed", consumer.getClass().getName(), e);
+                  }
+                });
+          }
+        });
+  }
+
+  /**
    * Returns true if at least one {@linkplain KadaiEventConsumer consumer} is registered.
    *
    * @return true if at least one consumer is registered, false otherwise
@@ -166,5 +224,16 @@ public final class KadaiEventBus {
         enabled = false;
       }
     }
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  private void consumeAll(
+      BatchKadaiEventConsumer consumer, Collection<? extends KadaiEvent> events) {
+    consumer.consumeAll(events);
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  private void consume(KadaiEventConsumer consumer, KadaiEvent event) {
+    consumer.consume(event);
   }
 }

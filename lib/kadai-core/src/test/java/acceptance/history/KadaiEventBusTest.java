@@ -28,11 +28,14 @@ import static org.mockito.Mockito.verify;
 import acceptance.AbstractAccTest;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiRole;
+import io.kadai.spi.history.api.BatchKadaiEventConsumer;
 import io.kadai.spi.history.api.KadaiEventConsumer;
 import io.kadai.spi.history.api.events.KadaiEvent;
 import io.kadai.spi.history.api.events.task.TaskCreatedEvent;
 import io.kadai.spi.history.api.events.task.TaskHistoryEvent;
 import io.kadai.spi.history.internal.KadaiEventBus;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -179,6 +182,50 @@ class KadaiEventBusTest extends AbstractAccTest {
     assertThat(event.getProxyAccessId()).isEqualTo("uid=admin,cn=users,ou=test,o=kadai");
   }
 
+  @Test
+  void should_DispatchAllEventsInSingleConsumerBatch() {
+    final KadaiEventBus eventBus = new KadaiEventBus(kadaiEngine);
+    final var taskConsumer = new RecordingTaskHistoryEventConsumer();
+    eventBus.subscribes(taskConsumer);
+
+    eventBus.dispatchAll(List.of(new TaskHistoryEvent(), new TaskHistoryEvent()));
+
+    assertThat(taskConsumer.consumeAllCalls).isOne();
+    assertThat(taskConsumer.consumeCalls).isZero();
+    assertThat(taskConsumer.consumedEvents).hasSize(2);
+  }
+
+  @Test
+  void should_KeepPerEventFailureIsolation_When_DispatchAllUsesDefaultConsumerImplementation() {
+    final KadaiEventBus eventBus = new KadaiEventBus(kadaiEngine);
+    final var taskConsumer = new FailingTaskHistoryEventConsumer();
+    eventBus.subscribes(taskConsumer);
+
+    eventBus.dispatchAll(List.of(new TaskHistoryEvent(), new TaskHistoryEvent()));
+
+    assertThat(taskConsumer.consumeCalls).isEqualTo(2);
+    assertThat(taskConsumer.consumedEvents).hasSize(1);
+  }
+
+  @Test
+  void should_EnrichUserAndProxyAccessId_For_DispatchAll() {
+    final KadaiEventBus eventBus = new KadaiEventBus(kadaiEngine);
+    final var taskConsumer = new RecordingTaskHistoryEventConsumer();
+    final List<TaskHistoryEvent> events =
+        new ArrayList<>(List.of(new TaskHistoryEvent(), new TaskHistoryEvent()));
+    eventBus.subscribes(taskConsumer);
+
+    kadaiEngine.runAs(() -> eventBus.dispatchAll(events), KadaiRole.ADMIN, "roberto");
+
+    assertThat(events)
+        .allSatisfy(
+            event -> {
+              assertThat(event.getUserId()).isEqualTo("roberto");
+              assertThat(event.getProxyAccessId())
+                  .isEqualTo("uid=admin,cn=users,ou=test,o=kadai");
+            });
+  }
+
   private static class TaskHistoryEventConsumer implements KadaiEventConsumer<TaskHistoryEvent> {
     @Override
     public void consume(TaskHistoryEvent ignore) {}
@@ -202,6 +249,58 @@ class KadaiEventBusTest extends AbstractAccTest {
     @Override
     public Class<TaskCreatedEvent> reify() {
       return TaskCreatedEvent.class;
+    }
+  }
+
+  private static class FailingTaskHistoryEventConsumer
+      implements KadaiEventConsumer<TaskHistoryEvent> {
+
+    private int consumeCalls;
+    private final List<TaskHistoryEvent> consumedEvents = new ArrayList<>();
+
+    @Override
+    public void consume(TaskHistoryEvent event) {
+      consumeCalls++;
+      if (consumeCalls == 1) {
+        throw new IllegalStateException("Expected test exception");
+      }
+      consumedEvents.add(event);
+    }
+
+    @Override
+    public void initialize(KadaiEngine ignore) {}
+
+    @Override
+    public Class<TaskHistoryEvent> reify() {
+      return TaskHistoryEvent.class;
+    }
+  }
+
+  private static class RecordingTaskHistoryEventConsumer
+      implements BatchKadaiEventConsumer<TaskHistoryEvent> {
+
+    private int consumeCalls;
+    private int consumeAllCalls;
+    private final List<TaskHistoryEvent> consumedEvents = new ArrayList<>();
+
+    @Override
+    public void consume(TaskHistoryEvent event) {
+      consumeCalls++;
+      consumedEvents.add(event);
+    }
+
+    @Override
+    public void consumeAll(Collection<TaskHistoryEvent> events) {
+      consumeAllCalls++;
+      consumedEvents.addAll(events);
+    }
+
+    @Override
+    public void initialize(KadaiEngine ignore) {}
+
+    @Override
+    public Class<TaskHistoryEvent> reify() {
+      return TaskHistoryEvent.class;
     }
   }
 }
