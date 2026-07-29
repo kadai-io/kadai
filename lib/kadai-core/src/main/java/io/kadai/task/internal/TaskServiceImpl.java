@@ -2256,7 +2256,7 @@ public class TaskServiceImpl implements TaskService {
       BulkOperationResults<String, KadaiException> bulkLog,
       List<String> taskIds,
       List<MinimalTaskSummary> taskSummaries) {
-    Map<String, MinimalTaskSummary> taskSummariesById = new HashMap<>(taskSummaries.size());
+    Map<String, MinimalTaskSummary> taskSummariesById = HashMap.newHashMap(taskSummaries.size());
     taskSummaries.forEach(
         taskSummary -> taskSummariesById.putIfAbsent(taskSummary.getTaskId(), taskSummary));
 
