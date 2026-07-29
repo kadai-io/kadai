@@ -979,12 +979,8 @@ public class TaskServiceImpl implements TaskService {
         return bulkLog;
       }
 
-      List<MinimalTaskSummary> taskSummaries = taskMapper.findExistingTasks(taskIds, null);
-
-      Iterator<String> taskIdIterator = taskIds.iterator();
-      while (taskIdIterator.hasNext()) {
-        removeSingleTaskForTaskDeletionById(bulkLog, taskSummaries, taskIdIterator);
-      }
+      removeInvalidTasksForTaskDeletionById(
+          bulkLog, taskIds, taskMapper.findExistingTasks(taskIds, null));
 
       if (!taskIds.isEmpty()) {
         attachmentMapper.deleteMultipleByTaskIds(taskIds);
@@ -2256,20 +2252,30 @@ public class TaskServiceImpl implements TaskService {
     }
   }
 
-  private void removeSingleTaskForTaskDeletionById(
+  static void removeInvalidTasksForTaskDeletionById(
       BulkOperationResults<String, KadaiException> bulkLog,
-      List<MinimalTaskSummary> taskSummaries,
+      List<String> taskIds,
+      List<MinimalTaskSummary> taskSummaries) {
+    Map<String, MinimalTaskSummary> taskSummariesById = new HashMap<>(taskSummaries.size());
+    taskSummaries.forEach(
+        taskSummary -> taskSummariesById.putIfAbsent(taskSummary.getTaskId(), taskSummary));
+
+    Iterator<String> taskIdIterator = taskIds.iterator();
+    while (taskIdIterator.hasNext()) {
+      removeSingleTaskForTaskDeletionById(bulkLog, taskSummariesById, taskIdIterator);
+    }
+  }
+
+  private static void removeSingleTaskForTaskDeletionById(
+      BulkOperationResults<String, KadaiException> bulkLog,
+      Map<String, MinimalTaskSummary> taskSummariesById,
       Iterator<String> taskIdIterator) {
     String currentTaskId = taskIdIterator.next();
     if (currentTaskId == null || currentTaskId.isEmpty()) {
       bulkLog.addError("", new TaskNotFoundException(null));
       taskIdIterator.remove();
     } else {
-      MinimalTaskSummary foundSummary =
-          taskSummaries.stream()
-              .filter(taskSummary -> currentTaskId.equals(taskSummary.getTaskId()))
-              .findFirst()
-              .orElse(null);
+      MinimalTaskSummary foundSummary = taskSummariesById.get(currentTaskId);
       if (foundSummary == null) {
         bulkLog.addError(currentTaskId, new TaskNotFoundException(currentTaskId));
         taskIdIterator.remove();
