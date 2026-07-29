@@ -31,8 +31,10 @@ import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
+import io.kadai.task.api.CallbackState;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.TaskState;
+import io.kadai.task.api.exceptions.InvalidCallbackStateException;
 import io.kadai.task.api.exceptions.InvalidTaskStateException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.Attachment;
@@ -250,20 +252,38 @@ class DeleteTaskAccTest {
             .primaryObjRef(DefaultTestEntities.defaultTestObjectReference().build())
             .state(TaskState.READY)
             .buildAndStore(taskService);
+    Task taskWithCallback =
+        TaskBuilder.newTask()
+            .classificationSummary(defaultClassificationSummary)
+            .workbasketSummary(defaultWorkbasketSummary)
+            .primaryObjRef(DefaultTestEntities.defaultTestObjectReference().build())
+            .state(TaskState.COMPLETED)
+            .callbackState(CallbackState.CALLBACK_PROCESSING_REQUIRED)
+            .buildAndStore(taskService);
     BulkOperationResults<String, KadaiException> results =
         taskService.deleteTasks(
-            List.of(task1.getId(), task2.getId(), taskNotComplete.getId(), "INVALID_TASK_ID"));
+            List.of(
+                task1.getId(),
+                task2.getId(),
+                taskNotComplete.getId(),
+                taskWithCallback.getId(),
+                "INVALID_TASK_ID"));
 
     assertThat(results.containsErrors()).isTrue();
     assertThat(results.getErrorMap().keySet())
-        .containsExactlyInAnyOrder(taskNotComplete.getId(), "INVALID_TASK_ID");
+        .containsExactlyInAnyOrder(
+            taskNotComplete.getId(), taskWithCallback.getId(), "INVALID_TASK_ID");
     assertThat(results.getErrorMap().get(taskNotComplete.getId()))
         .isInstanceOf(InvalidTaskStateException.class);
+    assertThat(results.getErrorMap().get(taskWithCallback.getId()))
+        .isInstanceOf(InvalidCallbackStateException.class);
     assertThat(results.getErrorMap().get("INVALID_TASK_ID"))
         .isInstanceOf(TaskNotFoundException.class);
 
     Task notDeletedTask = taskService.getTask(taskNotComplete.getId());
     assertThat(notDeletedTask).isNotNull();
+    Task notDeletedTaskWithCallback = taskService.getTask(taskWithCallback.getId());
+    assertThat(notDeletedTaskWithCallback).isNotNull();
     ThrowingCallable call = () -> taskService.getTask(task1.getId());
     TaskNotFoundException e = catchThrowableOfType(TaskNotFoundException.class, call);
     assertThat(e.getTaskId()).isEqualTo(task1.getId());

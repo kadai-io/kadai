@@ -196,6 +196,24 @@ class KadaiEventBusTest extends AbstractAccTest {
   }
 
   @Test
+  void should_DispatchAllToMostSpecificAndMoreGeneralConsumers_For_SpecializedEvent() {
+    final KadaiEventBus eventBus = new KadaiEventBus(kadaiEngine);
+    final var taskConsumer = new RecordingTaskHistoryEventConsumer();
+    final var taskCreatedConsumer = new RecordingTaskCreatedEventConsumer();
+    TaskCreatedEvent taskCreatedEvent = mock(TaskCreatedEvent.class);
+    TaskHistoryEvent taskHistoryEvent = new TaskHistoryEvent();
+    eventBus.subscribes(taskConsumer);
+    eventBus.subscribes(taskCreatedConsumer);
+
+    eventBus.dispatchAll(List.of(taskCreatedEvent, taskHistoryEvent));
+
+    assertThat(taskConsumer.consumeAllCalls).isOne();
+    assertThat(taskConsumer.consumedEvents).containsExactly(taskCreatedEvent, taskHistoryEvent);
+    assertThat(taskCreatedConsumer.consumeAllCalls).isOne();
+    assertThat(taskCreatedConsumer.consumedEvents).containsExactly(taskCreatedEvent);
+  }
+
+  @Test
   void should_KeepPerEventFailureIsolation_When_DispatchAllUsesDefaultConsumerImplementation() {
     final KadaiEventBus eventBus = new KadaiEventBus(kadaiEngine);
     final var taskConsumer = new FailingTaskHistoryEventConsumer();
@@ -301,6 +319,32 @@ class KadaiEventBusTest extends AbstractAccTest {
     @Override
     public Class<TaskHistoryEvent> reify() {
       return TaskHistoryEvent.class;
+    }
+  }
+
+  private static class RecordingTaskCreatedEventConsumer
+      implements BatchKadaiEventConsumer<TaskCreatedEvent> {
+
+    private int consumeAllCalls;
+    private final List<TaskCreatedEvent> consumedEvents = new ArrayList<>();
+
+    @Override
+    public void consume(TaskCreatedEvent event) {
+      consumedEvents.add(event);
+    }
+
+    @Override
+    public void consumeAll(Collection<TaskCreatedEvent> events) {
+      consumeAllCalls++;
+      consumedEvents.addAll(events);
+    }
+
+    @Override
+    public void initialize(KadaiEngine ignore) {}
+
+    @Override
+    public Class<TaskCreatedEvent> reify() {
+      return TaskCreatedEvent.class;
     }
   }
 }

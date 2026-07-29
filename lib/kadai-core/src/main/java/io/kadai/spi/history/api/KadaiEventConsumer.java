@@ -21,7 +21,6 @@ package io.kadai.spi.history.api;
 import io.kadai.common.api.KadaiInitializable;
 import io.kadai.common.api.Reifiable;
 import io.kadai.spi.history.api.events.KadaiEvent;
-import java.util.Collection;
 
 /**
  * Interface specifying how to consume {@linkplain KadaiEvent KadaiEvents}.
