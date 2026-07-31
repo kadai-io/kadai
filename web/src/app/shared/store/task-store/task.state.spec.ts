@@ -24,6 +24,9 @@ import { of, throwError } from 'rxjs';
 import { TaskWorkflowState } from './task.state';
 import { FilterState } from '../filter-store/filter.state';
 import {
+  CancelClaimTask,
+  ClaimTask,
+  CompleteTask,
   CreateTask,
   DeleteTask,
   GetTask,
@@ -34,6 +37,7 @@ import {
   SetPageSize,
   SetSearchType,
   SetSort,
+  TransferTask,
   UpdateTask
 } from './task.actions';
 
@@ -81,7 +85,11 @@ describe('TaskWorkflowState', () => {
       getTask: vi.fn().mockReturnValue(of(mockTask)),
       createTask: vi.fn().mockReturnValue(of(mockTask)),
       updateTask: vi.fn().mockReturnValue(of(mockTask)),
-      deleteTask: vi.fn().mockReturnValue(of(mockTask))
+      deleteTask: vi.fn().mockReturnValue(of(mockTask)),
+      claimTask: vi.fn().mockReturnValue(of(mockTask)),
+      completeTask: vi.fn().mockReturnValue(of(mockTask)),
+      cancelClaimTask: vi.fn().mockReturnValue(of(mockTask)),
+      transferTask: vi.fn().mockReturnValue(of(mockTask))
     };
 
     notificationServiceMock = {
@@ -363,6 +371,104 @@ describe('TaskWorkflowState', () => {
       expect(store.snapshot().task.selectedTask).toBeUndefined();
       expect(notificationServiceMock.showSuccess).toHaveBeenCalledWith('TASK_DELETE', { taskName: mockTask.name });
       expect(taskServiceMock.findTasksWithWorkbasket).toHaveBeenCalled();
+    });
+  });
+
+  describe('ClaimTask', () => {
+    it('claims the task, selects it, shows a toast, and reloads the list', async () => {
+      store.reset({
+        ...store.snapshot(),
+        task: { ...initialTaskState, selectedWorkbasket: mockWorkbasket }
+      });
+
+      await store.dispatch(new ClaimTask(mockTask.taskId)).toPromise();
+
+      expect(taskServiceMock.claimTask).toHaveBeenCalledWith(mockTask.taskId);
+      expect(store.snapshot().task.selectedTask).toEqual(mockTask);
+      expect(notificationServiceMock.showSuccess).toHaveBeenCalledWith('TASK_CLAIM', { taskName: mockTask.name });
+      expect(taskServiceMock.findTasksWithWorkbasket).toHaveBeenCalled();
+      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(true);
+      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+    });
+
+    it('clears requestInProgress and rethrows on error', async () => {
+      (taskServiceMock.claimTask as ReturnType<typeof vi.fn>).mockReturnValue(throwError(() => new Error('boom')));
+
+      await expect(store.dispatch(new ClaimTask(mockTask.taskId)).toPromise()).rejects.toThrow('boom');
+      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+    });
+  });
+
+  describe('CompleteTask', () => {
+    it('completes the task, selects it, shows a toast, and reloads the list', async () => {
+      store.reset({
+        ...store.snapshot(),
+        task: { ...initialTaskState, selectedWorkbasket: mockWorkbasket }
+      });
+
+      await store.dispatch(new CompleteTask(mockTask.taskId)).toPromise();
+
+      expect(taskServiceMock.completeTask).toHaveBeenCalledWith(mockTask.taskId);
+      expect(store.snapshot().task.selectedTask).toEqual(mockTask);
+      expect(notificationServiceMock.showSuccess).toHaveBeenCalledWith('TASK_COMPLETE', { taskName: mockTask.name });
+      expect(taskServiceMock.findTasksWithWorkbasket).toHaveBeenCalled();
+    });
+
+    it('clears requestInProgress and rethrows on error', async () => {
+      (taskServiceMock.completeTask as ReturnType<typeof vi.fn>).mockReturnValue(throwError(() => new Error('boom')));
+
+      await expect(store.dispatch(new CompleteTask(mockTask.taskId)).toPromise()).rejects.toThrow('boom');
+      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+    });
+  });
+
+  describe('CancelClaimTask', () => {
+    it('cancels the claim, selects the task, shows a toast, and reloads the list', async () => {
+      store.reset({
+        ...store.snapshot(),
+        task: { ...initialTaskState, selectedWorkbasket: mockWorkbasket }
+      });
+
+      await store.dispatch(new CancelClaimTask(mockTask.taskId)).toPromise();
+
+      expect(taskServiceMock.cancelClaimTask).toHaveBeenCalledWith(mockTask.taskId);
+      expect(store.snapshot().task.selectedTask).toEqual(mockTask);
+      expect(notificationServiceMock.showSuccess).toHaveBeenCalledWith('TASK_CANCEL_CLAIM', {
+        taskName: mockTask.name
+      });
+      expect(taskServiceMock.findTasksWithWorkbasket).toHaveBeenCalled();
+    });
+
+    it('clears requestInProgress and rethrows on error', async () => {
+      (taskServiceMock.cancelClaimTask as ReturnType<typeof vi.fn>).mockReturnValue(
+        throwError(() => new Error('boom'))
+      );
+
+      await expect(store.dispatch(new CancelClaimTask(mockTask.taskId)).toPromise()).rejects.toThrow('boom');
+      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+    });
+  });
+
+  describe('TransferTask', () => {
+    it('transfers the task, selects it, shows a toast, and reloads the list', async () => {
+      store.reset({
+        ...store.snapshot(),
+        task: { ...initialTaskState, selectedWorkbasket: mockWorkbasket }
+      });
+
+      await store.dispatch(new TransferTask(mockTask.taskId, 'wb-target')).toPromise();
+
+      expect(taskServiceMock.transferTask).toHaveBeenCalledWith(mockTask.taskId, 'wb-target');
+      expect(store.snapshot().task.selectedTask).toEqual(mockTask);
+      expect(notificationServiceMock.showSuccess).toHaveBeenCalledWith('TASK_TRANSFER', { taskName: mockTask.name });
+      expect(taskServiceMock.findTasksWithWorkbasket).toHaveBeenCalled();
+    });
+
+    it('clears requestInProgress and rethrows on error', async () => {
+      (taskServiceMock.transferTask as ReturnType<typeof vi.fn>).mockReturnValue(throwError(() => new Error('boom')));
+
+      await expect(store.dispatch(new TransferTask(mockTask.taskId, 'wb-target')).toPromise()).rejects.toThrow('boom');
+      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
     });
   });
 });

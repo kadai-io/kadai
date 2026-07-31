@@ -34,6 +34,9 @@ import { NotificationService } from '../../services/notifications/notification.s
 import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
 import { FilterSelectors } from '../filter-store/filter.selectors';
 import {
+  CancelClaimTask,
+  ClaimTask,
+  CompleteTask,
   CreateTask,
   DeleteTask,
   GetTask,
@@ -44,6 +47,7 @@ import {
   SetPageSize,
   SetSearchType,
   SetSort,
+  TransferTask,
   UpdateTask
 } from './task.actions';
 
@@ -207,6 +211,50 @@ export class TaskWorkflowState {
       tap(() => {
         this.notificationService.showSuccess('TASK_DELETE', { taskName: action.task.name });
         ctx.patchState({ selectedTask: undefined });
+        ctx.dispatch(new LoadTasks());
+      })
+    );
+  }
+
+  @Action(ClaimTask)
+  claimTask(ctx: StateContext<TaskWorkflowStateModel>, action: ClaimTask): Observable<any> {
+    return this.withRequestInProgress(this.taskService.claimTask(action.taskId)).pipe(
+      tap((task) => {
+        ctx.patchState({ selectedTask: task });
+        this.notificationService.showSuccess('TASK_CLAIM', { taskName: task.name });
+        ctx.dispatch(new LoadTasks());
+      })
+    );
+  }
+
+  @Action(CompleteTask)
+  completeTask(ctx: StateContext<TaskWorkflowStateModel>, action: CompleteTask): Observable<any> {
+    return this.withRequestInProgress(this.taskService.completeTask(action.taskId)).pipe(
+      tap((task) => {
+        ctx.patchState({ selectedTask: task });
+        this.notificationService.showSuccess('TASK_COMPLETE', { taskName: task.name });
+        ctx.dispatch(new LoadTasks());
+      })
+    );
+  }
+
+  @Action(CancelClaimTask)
+  cancelClaimTask(ctx: StateContext<TaskWorkflowStateModel>, action: CancelClaimTask): Observable<any> {
+    return this.withRequestInProgress(this.taskService.cancelClaimTask(action.taskId)).pipe(
+      tap((task) => {
+        ctx.patchState({ selectedTask: task });
+        this.notificationService.showSuccess('TASK_CANCEL_CLAIM', { taskName: task.name });
+        ctx.dispatch(new LoadTasks());
+      })
+    );
+  }
+
+  @Action(TransferTask)
+  transferTask(ctx: StateContext<TaskWorkflowStateModel>, action: TransferTask): Observable<any> {
+    return this.withRequestInProgress(this.taskService.transferTask(action.taskId, action.workbasketId)).pipe(
+      tap((task) => {
+        ctx.patchState({ selectedTask: task });
+        this.notificationService.showSuccess('TASK_TRANSFER', { taskName: task.name });
         ctx.dispatch(new LoadTasks());
       })
     );

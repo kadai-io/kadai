@@ -34,6 +34,7 @@ import { Workbasket } from '../../../shared/models/workbasket';
 import { provideStore, Store } from '@ngxs/store';
 import { TaskWorkflowState } from '../../../shared/store/task-store/task.state';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
+import { SelectTask } from '../../../shared/store/task-store/task.actions';
 
 const makeTask = (overrides: Partial<Task> = {}): Task => {
   const task = new Task(
@@ -88,6 +89,8 @@ describe('TaskProcessingComponent', () => {
   let mockRequestInProgressService: { setRequestInProgress: ReturnType<typeof vi.fn> };
   let mockRouter: { navigate: ReturnType<typeof vi.fn> };
   let store: Store;
+
+  const selectTask = (task: Task | undefined) => store.dispatch(new SelectTask(task)).toPromise();
 
   beforeEach(async () => {
     paramsSubject = new Subject<{ id: string }>();
@@ -152,7 +155,6 @@ describe('TaskProcessingComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TaskProcessingComponent);
     component = fixture.componentInstance;
-    component.task.set(makeTask());
     fixture.detectChanges();
   });
 
@@ -165,11 +167,21 @@ describe('TaskProcessingComponent', () => {
       expect(component.routeSubscription).toBeDefined();
     });
 
-    it('should call claimTask with the id from route params', async () => {
+    it('should call getTask with the id from route params', async () => {
+      paramsSubject.next({ id: 'task-xyz' });
+      await fixture.whenStable();
+
+      expect(mockTaskService.getTask).toHaveBeenCalledWith('task-xyz');
+    });
+
+    it('should call claimTask with the id from route params after getTask resolves', async () => {
       paramsSubject.next({ id: 'task-abc' });
       await fixture.whenStable();
 
       expect(mockTaskService.claimTask).toHaveBeenCalledWith('task-abc');
+      const getTaskOrder = mockTaskService.getTask.mock.invocationCallOrder[0];
+      const claimTaskOrder = mockTaskService.claimTask.mock.invocationCallOrder[0];
+      expect(getTaskOrder).toBeLessThan(claimTaskOrder);
     });
 
     it('should select the claimed task in TaskState after claiming', async () => {
@@ -182,13 +194,6 @@ describe('TaskProcessingComponent', () => {
       expect(store.snapshot().task.selectedTask).toEqual(claimedTask);
     });
 
-    it('should call getTask with the id from route params', async () => {
-      paramsSubject.next({ id: 'task-xyz' });
-      await fixture.whenStable();
-
-      expect(mockTaskService.getTask).toHaveBeenCalledWith('task-xyz');
-    });
-
     it('should call setRequestInProgress(true) at the start of getTask', async () => {
       paramsSubject.next({ id: 'task-id-1' });
       await fixture.whenStable();
@@ -198,8 +203,8 @@ describe('TaskProcessingComponent', () => {
   });
 
   describe('getWorkbaskets()', () => {
-    it('should call getAllWorkBaskets when invoked directly', () => {
-      component.task.set(makeTask());
+    it('should call getAllWorkBaskets when invoked directly', async () => {
+      await selectTask(makeTask());
 
       component.getWorkbaskets();
 
@@ -212,8 +217,8 @@ describe('TaskProcessingComponent', () => {
       expect(names).toContain('Workbasket C');
     });
 
-    it('should call setRequestInProgress(false) after workbaskets are fetched', () => {
-      component.task.set(makeTask());
+    it('should call setRequestInProgress(false) after workbaskets are fetched', async () => {
+      await selectTask(makeTask());
       mockRequestInProgressService.setRequestInProgress.mockClear();
 
       component.getWorkbaskets();
@@ -222,10 +227,10 @@ describe('TaskProcessingComponent', () => {
       expect(mockRequestInProgressService.setRequestInProgress).toHaveBeenCalledWith(true);
     });
 
-    it('should not remove workbaskets that do not match the task workbasket name', () => {
+    it('should not remove workbaskets that do not match the task workbasket name', async () => {
       const taskWithDifferentWb = makeTask();
       taskWithDifferentWb.workbasketSummary = { workbasketId: 'wb-99', name: 'Nonexistent WB' };
-      component.task.set(taskWithDifferentWb);
+      await selectTask(taskWithDifferentWb);
 
       component.getWorkbaskets();
 
@@ -235,8 +240,8 @@ describe('TaskProcessingComponent', () => {
   });
 
   describe('transferTask()', () => {
-    it('should call taskService.transferTask with task id and workbasket id', () => {
-      component.task.set(makeTask());
+    it('should call taskService.transferTask with task id and workbasket id', async () => {
+      await selectTask(makeTask());
 
       const targetWorkbasket: Workbasket = { workbasketId: 'wb-target', name: 'Target WB' };
       component.transferTask(targetWorkbasket);
@@ -244,138 +249,113 @@ describe('TaskProcessingComponent', () => {
       expect(mockTaskService.transferTask).toHaveBeenCalledWith('task-id-1', 'wb-target');
     });
 
-    it('should call setRequestInProgress(true) before transfer', () => {
-      component.task.set(makeTask());
-      mockRequestInProgressService.setRequestInProgress.mockClear();
-
-      const targetWorkbasket: Workbasket = { workbasketId: 'wb-target', name: 'Target WB' };
-      component.transferTask(targetWorkbasket);
-
-      expect(mockRequestInProgressService.setRequestInProgress).toHaveBeenCalledWith(true);
-    });
-
-    it('should call navigateBack after initiating transfer', () => {
-      component.task.set(makeTask());
+    it('should call navigateBack after transfer completes', async () => {
+      await selectTask(makeTask());
       mockRouter.navigate.mockClear();
 
       const targetWorkbasket: Workbasket = { workbasketId: 'wb-target', name: 'Target WB' };
       component.transferTask(targetWorkbasket);
+      await fixture.whenStable();
 
       expect(mockRouter.navigate).toHaveBeenCalled();
     });
 
-    it('should call setRequestInProgress(false) after transfer completes', () => {
-      component.task.set(makeTask());
-      const transferredTask = makeTask();
-      mockTaskService.transferTask.mockReturnValue(of(transferredTask));
-      mockRequestInProgressService.setRequestInProgress.mockClear();
+    it('should not navigate before the transfer response arrives', async () => {
+      await selectTask(makeTask());
+      mockRouter.navigate.mockClear();
+      const transferResponse = new Subject<Task>();
+      mockTaskService.transferTask.mockReturnValue(transferResponse.asObservable());
 
       const targetWorkbasket: Workbasket = { workbasketId: 'wb-target', name: 'Target WB' };
       component.transferTask(targetWorkbasket);
 
-      expect(mockRequestInProgressService.setRequestInProgress).toHaveBeenCalledWith(false);
+      expect(mockRouter.navigate).not.toHaveBeenCalled();
+
+      transferResponse.next(makeTask());
+      transferResponse.complete();
+      await fixture.whenStable();
+
+      expect(mockRouter.navigate).toHaveBeenCalled();
+    });
+
+    it('should select the transferred task in TaskState after transfer completes', async () => {
+      await selectTask(makeTask());
+      const transferredTask = makeTask({ taskId: 'task-id-1' });
+      mockTaskService.transferTask.mockReturnValue(of(transferredTask));
+
+      const targetWorkbasket: Workbasket = { workbasketId: 'wb-target', name: 'Target WB' };
+      component.transferTask(targetWorkbasket);
+      await fixture.whenStable();
+
+      expect(store.snapshot().task.selectedTask).toEqual(transferredTask);
     });
   });
 
   describe('completeTask()', () => {
-    it('should call taskService.completeTask with the task id', () => {
-      component.task.set(makeTask());
+    it('should call taskService.completeTask with the task id', async () => {
+      await selectTask(makeTask());
 
       component.completeTask();
 
       expect(mockTaskService.completeTask).toHaveBeenCalledWith('task-id-1');
     });
 
-    it('should call setRequestInProgress(true) before completing', () => {
-      component.task.set(makeTask());
-      mockRequestInProgressService.setRequestInProgress.mockClear();
-
-      component.completeTask();
-
-      expect(mockRequestInProgressService.setRequestInProgress).toHaveBeenCalledWith(true);
-    });
-
-    it('should select the completed task in TaskState after completing', () => {
+    it('should select the completed task in TaskState after completing', async () => {
+      await selectTask(makeTask());
       const completedTask = makeTask({ taskId: 'task-id-1' });
       mockTaskService.completeTask.mockReturnValue(of(completedTask));
-      component.task.set(makeTask());
 
       component.completeTask();
+      await fixture.whenStable();
 
       expect(store.snapshot().task.selectedTask).toEqual(completedTask);
     });
 
-    it('should call navigateBack after completing', () => {
-      component.task.set(makeTask());
+    it('should call navigateBack after completing', async () => {
+      await selectTask(makeTask());
       mockRouter.navigate.mockClear();
 
       component.completeTask();
+      await fixture.whenStable();
 
       expect(mockRouter.navigate).toHaveBeenCalled();
-    });
-
-    it('should call setRequestInProgress(false) after completing', () => {
-      component.task.set(makeTask());
-      mockTaskService.completeTask.mockReturnValue(of(makeTask()));
-      mockRequestInProgressService.setRequestInProgress.mockClear();
-
-      component.completeTask();
-
-      expect(mockRequestInProgressService.setRequestInProgress).toHaveBeenCalledWith(false);
     });
   });
 
   describe('cancelClaimTask()', () => {
-    it('should call taskService.cancelClaimTask with the task id', () => {
-      component.task.set(makeTask());
+    it('should call taskService.cancelClaimTask with the task id', async () => {
+      await selectTask(makeTask());
 
       component.cancelClaimTask();
 
       expect(mockTaskService.cancelClaimTask).toHaveBeenCalledWith('task-id-1');
     });
 
-    it('should call setRequestInProgress(true) before cancelling', () => {
-      component.task.set(makeTask());
-      mockRequestInProgressService.setRequestInProgress.mockClear();
-
-      component.cancelClaimTask();
-
-      expect(mockRequestInProgressService.setRequestInProgress).toHaveBeenCalledWith(true);
-    });
-
-    it('should call navigateBack after initiating cancel claim', () => {
-      component.task.set(makeTask());
+    it('should call navigateBack after cancel claim completes', async () => {
+      await selectTask(makeTask());
       mockRouter.navigate.mockClear();
 
       component.cancelClaimTask();
+      await fixture.whenStable();
 
       expect(mockRouter.navigate).toHaveBeenCalled();
     });
 
-    it('should select the cancelled-claim task in TaskState after it resolves', () => {
+    it('should select the cancelled-claim task in TaskState after it resolves', async () => {
+      await selectTask(makeTask());
       const cancelledTask = makeTask();
       mockTaskService.cancelClaimTask.mockReturnValue(of(cancelledTask));
-      component.task.set(makeTask());
 
       component.cancelClaimTask();
+      await fixture.whenStable();
 
       expect(store.snapshot().task.selectedTask).toEqual(cancelledTask);
-    });
-
-    it('should call setRequestInProgress(false) after cancel claim resolves', () => {
-      component.task.set(makeTask());
-      mockTaskService.cancelClaimTask.mockReturnValue(of(makeTask()));
-      mockRequestInProgressService.setRequestInProgress.mockClear();
-
-      component.cancelClaimTask();
-
-      expect(mockRequestInProgressService.setRequestInProgress).toHaveBeenCalledWith(false);
     });
   });
 
   describe('navigateBack()', () => {
-    it('should navigate to the taskdetail outlet with the task id', () => {
-      component.task.set(makeTask());
+    it('should navigate to the taskdetail outlet with the task id', async () => {
+      await selectTask(makeTask());
       mockRouter.navigate.mockClear();
 
       component.navigateBack();
@@ -395,8 +375,8 @@ describe('TaskProcessingComponent', () => {
       expect(result).toBe(url);
     });
 
-    it('should replace ${task.taskId} with the actual task id', () => {
-      component.task.set(makeTask());
+    it('should replace ${task.taskId} with the actual task id', async () => {
+      await selectTask(makeTask());
       const url = 'https://example.com/${task.taskId}';
 
       const result = (component as any).extractUrl(url);
@@ -404,8 +384,8 @@ describe('TaskProcessingComponent', () => {
       expect(result).toBe('https://example.com/task-id-1');
     });
 
-    it('should replace ${task.name} with the task name', () => {
-      component.task.set(makeTask());
+    it('should replace ${task.name} with the task name', async () => {
+      await selectTask(makeTask());
       const url = 'https://example.com?taskName=${task.name}';
 
       const result = (component as any).extractUrl(url);
@@ -413,8 +393,8 @@ describe('TaskProcessingComponent', () => {
       expect(result).toBe('https://example.com?taskName=My Task');
     });
 
-    it('should handle multiple template expressions in one URL', () => {
-      component.task.set(makeTask());
+    it('should handle multiple template expressions in one URL', async () => {
+      await selectTask(makeTask());
       const url = 'https://example.com/${task.taskId}/name/${task.name}';
 
       const result = (component as any).extractUrl(url);
@@ -471,7 +451,9 @@ describe('TaskProcessingComponent', () => {
   });
 
   describe('HTML template - DOM interaction', () => {
-    it('should call completeTask when complete button is clicked', () => {
+    it('should call completeTask when complete button is clicked', async () => {
+      await selectTask(makeTask());
+      fixture.detectChanges();
       const completeSpy = vi.spyOn(component, 'completeTask');
       const btn = fixture.nativeElement.querySelector('button[mattooltip="Complete Task and return to Task list"]');
       expect(btn).toBeTruthy();
@@ -479,7 +461,9 @@ describe('TaskProcessingComponent', () => {
       expect(completeSpy).toHaveBeenCalled();
     });
 
-    it('should call cancelClaimTask when cancel claim button is clicked', () => {
+    it('should call cancelClaimTask when cancel claim button is clicked', async () => {
+      await selectTask(makeTask());
+      fixture.detectChanges();
       const cancelSpy = vi.spyOn(component, 'cancelClaimTask');
       const btn = fixture.nativeElement.querySelector(
         'button[mattooltip="Cancel Task claim and return to Task overview"]'
@@ -496,16 +480,10 @@ describe('TaskProcessingComponent', () => {
       expect(iframe).toBeNull();
     });
 
-    it('should not render iframe when link is not set (false branch)', () => {
-      expect(component.task()).toBeTruthy();
-      expect(component.task()?.name).toBe('My Task');
-      expect(component.link()).toBeUndefined();
-    });
-
-    it('should render iframe when link is set before detectChanges (true branch)', () => {
+    it('should render iframe when link is set before detectChanges (true branch)', async () => {
+      await selectTask(makeTask());
       const localFixture = TestBed.createComponent(TaskProcessingComponent);
       const localComponent = localFixture.componentInstance;
-      localComponent.task.set(makeTask());
       const sanitizer = TestBed.inject(DomSanitizer);
       localComponent.link.set(sanitizer.bypassSecurityTrustResourceUrl('https://example.com'));
       localFixture.detectChanges();
@@ -513,14 +491,18 @@ describe('TaskProcessingComponent', () => {
       expect(iframe).toBeTruthy();
     });
 
-    it('should render task name in header', () => {
+    it('should render task name in header', async () => {
+      await selectTask(makeTask());
+      fixture.detectChanges();
       const header = fixture.nativeElement.querySelector('.task-processing__task-name');
       expect(header).toBeTruthy();
       expect(header.textContent).toContain('My Task');
     });
 
-    it('should open Transfer Task mat-menu and render @for workbasket items', () => {
+    it('should open Transfer Task mat-menu and render @for workbasket items', async () => {
+      await selectTask(makeTask());
       component.getWorkbaskets();
+      fixture.detectChanges();
       const triggerDebug = fixture.debugElement.query(By.directive(MatMenuTrigger));
       if (triggerDebug) {
         const trigger = triggerDebug.injector.get(MatMenuTrigger);
@@ -533,10 +515,10 @@ describe('TaskProcessingComponent', () => {
       }
     });
 
-    it('should render @for menu items and call transferTask when a menu item is clicked', () => {
+    it('should render @for menu items and call transferTask when a menu item is clicked', async () => {
+      await selectTask(makeTask());
       const localFixture = TestBed.createComponent(TaskProcessingComponent);
       const localComponent = localFixture.componentInstance;
-      localComponent.task.set(makeTask());
       localComponent.workbaskets.set(makeWorkbaskets().filter((wb) => wb.name !== 'Workbasket A'));
       localFixture.detectChanges();
       const transferSpy = vi.spyOn(localComponent, 'transferTask');
@@ -560,17 +542,18 @@ describe('TaskProcessingComponent', () => {
       localFixture.destroy();
     });
 
-    it('should render empty workbaskets list with no @for items when workbaskets is empty', () => {
+    it('should render empty workbaskets list with no @for items when workbaskets is empty', async () => {
+      await selectTask(makeTask());
       const localFixture = TestBed.createComponent(TaskProcessingComponent);
       const localComponent = localFixture.componentInstance;
-      localComponent.task.set(makeTask());
       localComponent.workbaskets.set([]);
       localFixture.detectChanges();
       expect(localComponent.workbaskets().length).toBe(0);
       localFixture.destroy();
     });
 
-    it('should render null task name (covers task?.name null branch in template)', () => {
+    it('should render null task name (covers task?.name null branch in template)', async () => {
+      await selectTask(undefined);
       const localFixture = TestBed.createComponent(TaskProcessingComponent);
       const localComponent = localFixture.componentInstance;
       localFixture.detectChanges();
