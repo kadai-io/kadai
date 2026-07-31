@@ -20,7 +20,7 @@ package acceptance.events.workbasket;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import acceptance.AbstractAccTest;
+import acceptance.AbstractRawMapperAccTest;
 import io.kadai.common.internal.util.CheckedRunnable;
 import io.kadai.simplehistory.workbasket.api.WorkbasketHistoryService;
 import io.kadai.simplehistory.workbasket.internal.WorkbasketHistoryEventMapper;
@@ -32,10 +32,10 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class CreateHistoryEventOnWorkbasketAccessItemsSetAccTest extends AbstractAccTest {
+class CreateHistoryEventOnWorkbasketAccessItemsSetAccTest extends AbstractRawMapperAccTest {
 
   private final WorkbasketService workbasketService = kadaiEngine.getWorkbasketService();
-  private final WorkbasketHistoryService historyService = AbstractAccTest.workbasketHistoryService;
+  private final WorkbasketHistoryService historyService = workbasketHistoryService;
   private final WorkbasketHistoryEventMapper workbasketHistoryEventMapper =
       getWorkbasketHistoryEventMapper();
 

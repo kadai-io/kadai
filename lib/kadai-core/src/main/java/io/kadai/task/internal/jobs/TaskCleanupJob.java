@@ -29,6 +29,7 @@ import io.kadai.common.internal.jobs.AbstractKadaiJob;
 import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import io.kadai.common.internal.util.CollectionUtil;
 import io.kadai.common.internal.util.LogSanitizer;
+import io.kadai.task.internal.TaskServiceImpl;
 import io.kadai.task.internal.jobs.models.TaskCleanupSummary;
 import java.time.Duration;
 import java.time.Instant;
@@ -59,7 +60,10 @@ public class TaskCleanupJob extends AbstractKadaiJob {
     Instant completedBefore = Instant.now().minus(minimumAge);
     LOGGER.info("Running job to delete all tasks completed before ({})", completedBefore);
     try {
-      List<TaskCleanupSummary> tasksCompletedBefore = getTasksCompletedBefore(completedBefore);
+      final TaskServiceImpl kadaiEngineImpl =
+          (TaskServiceImpl) super.kadaiEngineImpl.getTaskService();
+      List<TaskCleanupSummary> tasksCompletedBefore =
+          kadaiEngineImpl.getTasksCompletedBefore(completedBefore, allCompletedSameParentBusiness);
 
       int totalNumberOfTasksDeleted =
           CollectionUtil.partitionBasedOnSize(tasksCompletedBefore, batchSize).stream()
@@ -75,14 +79,6 @@ public class TaskCleanupJob extends AbstractKadaiJob {
   @Override
   protected String getType() {
     return TaskCleanupJob.class.getName();
-  }
-
-  private List<TaskCleanupSummary> getTasksCompletedBefore(Instant untilDate) {
-    return allCompletedSameParentBusiness
-        ? kadaiEngineImpl
-            .getTaskMapper()
-            .findTasksCompletedBeforeWithParentBusinessProcessConstraint(untilDate)
-        : kadaiEngineImpl.getTaskMapper().findTasksCompletedBefore(untilDate);
   }
 
   private int deleteTasksTransactionally(List<TaskCleanupSummary> tasksToBeDeleted) {

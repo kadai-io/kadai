@@ -21,11 +21,13 @@ package acceptance.config;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import acceptance.AbstractAccTest;
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.CustomHoliday;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.exceptions.WrongCustomHolidayFormatException;
 import io.kadai.common.test.config.DataSourceGenerator;
+import io.kadai.common.test.config.SchemaEnforcingDataSource;
 import javax.sql.DataSource;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
@@ -35,12 +37,17 @@ class KadaiConfigurationTest {
   @Test
   void should_ReturnKadaiEngine_When_BuildingWithConfiguration() throws Exception {
     DataSource ds = DataSourceGenerator.getDataSource();
+    SchemaEnforcingDataSource schemaEnforcingDataSource =
+        new SchemaEnforcingDataSource(ds, DataSourceGenerator.getSchemaName());
     KadaiConfiguration configuration =
-        new KadaiConfiguration.Builder(ds, false, DataSourceGenerator.getSchemaName())
+        new KadaiConfiguration.Builder(
+                schemaEnforcingDataSource.asDataSource(),
+                false,
+                DataSourceGenerator.getSchemaName())
             .initKadaiProperties()
             .build();
 
-    KadaiEngine te = KadaiEngine.buildKadaiEngine(configuration);
+    KadaiEngine te = AbstractAccTest.buildEngine(configuration);
 
     assertThat(te).isNotNull();
   }

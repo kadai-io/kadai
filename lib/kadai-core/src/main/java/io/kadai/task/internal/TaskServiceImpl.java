@@ -101,6 +101,7 @@ import io.kadai.task.api.models.Task;
 import io.kadai.task.api.models.TaskComment;
 import io.kadai.task.api.models.TaskSummary;
 import io.kadai.task.internal.ServiceLevelHandler.BulkLog;
+import io.kadai.task.internal.jobs.models.TaskCleanupSummary;
 import io.kadai.task.internal.models.AttachmentImpl;
 import io.kadai.task.internal.models.AttachmentSummaryImpl;
 import io.kadai.task.internal.models.MinimalTaskSummary;
@@ -1325,49 +1326,53 @@ public class TaskServiceImpl implements TaskService {
   }
 
   public List<String> findTasksIdsAffectedByClassificationChange(String classificationId) {
-    // tasks directly affected
-    List<TaskSummary> tasksAffectedDirectly =
-        createTaskQuery().classificationIdIn(classificationId).stateIn(READY, CLAIMED).list();
+    try {
+      kadaiEngine.openConnection();
+      // tasks directly affected
+      List<TaskSummary> tasksAffectedDirectly =
+          createTaskQuery().classificationIdIn(classificationId).stateIn(READY, CLAIMED).list();
 
-    // tasks indirectly affected via attachments
-    List<Pair<String, Instant>> affectedPairs =
-        tasksAffectedDirectly.stream()
-            .map(t -> Pair.of(t.getId(), t.getPlanned()))
-            .collect(toList());
-    // tasks indirectly affected via attachments
-    List<Pair<String, Instant>> taskIdsAndPlannedFromAttachments =
-        attachmentMapper.findTaskIdsAndPlannedAffectedByClassificationChange(classificationId);
+      // tasks indirectly affected via attachments
+      List<Pair<String, Instant>> affectedPairs =
+          tasksAffectedDirectly.stream()
+              .map(t -> Pair.of(t.getId(), t.getPlanned()))
+              .collect(toList());
+      List<Pair<String, Instant>> taskIdsAndPlannedFromAttachments =
+          attachmentMapper.findTaskIdsAndPlannedAffectedByClassificationChange(classificationId);
 
-    List<String> taskIdsFromAttachments =
-        taskIdsAndPlannedFromAttachments.stream().map(Pair::getLeft).toList();
-    List<Pair<String, Instant>> filteredTaskIdsAndPlannedFromAttachments =
-        taskIdsFromAttachments.isEmpty()
-            ? new ArrayList<>()
-            : taskMapper.filterTaskIdsForReadyAndClaimed(taskIdsFromAttachments);
-    affectedPairs.addAll(filteredTaskIdsAndPlannedFromAttachments);
-    //  sort all affected tasks according to the planned instant
-    List<String> affectedTaskIds =
-        affectedPairs.stream()
-            .sorted(Comparator.comparing(Pair::getRight))
-            .distinct()
-            .map(Pair::getLeft)
-            .toList();
+      List<String> taskIdsFromAttachments =
+          taskIdsAndPlannedFromAttachments.stream().map(Pair::getLeft).toList();
+      List<Pair<String, Instant>> filteredTaskIdsAndPlannedFromAttachments =
+          taskIdsFromAttachments.isEmpty()
+              ? new ArrayList<>()
+              : taskMapper.filterTaskIdsForReadyAndClaimed(taskIdsFromAttachments);
+      affectedPairs.addAll(filteredTaskIdsAndPlannedFromAttachments);
+      // sort all affected tasks according to the planned instant
+      List<String> affectedTaskIds =
+          affectedPairs.stream()
+              .sorted(Comparator.comparing(Pair::getRight))
+              .distinct()
+              .map(Pair::getLeft)
+              .toList();
 
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug(
-          "the following tasks are affected by the update of classification {} : {}",
-          classificationId,
-          affectedTaskIds);
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug(
+            "the following tasks are affected by the update of classification {} : {}",
+            classificationId,
+            affectedTaskIds);
+      }
+      return affectedTaskIds;
+    } finally {
+      kadaiEngine.returnConnection();
     }
-    return affectedTaskIds;
   }
 
   public void refreshPriorityAndDueDatesOfTasksOnClassificationUpdate(
       List<String> taskIds, boolean serviceLevelChanged, boolean priorityChanged) {
-    Pair<List<MinimalTaskSummary>, BulkLog> resultsPair = getMinimalTaskSummaries(taskIds);
-    List<MinimalTaskSummary> tasks = resultsPair.getLeft();
     try {
       kadaiEngine.openConnection();
+      Pair<List<MinimalTaskSummary>, BulkLog> resultsPair = getMinimalTaskSummaries(taskIds);
+      List<MinimalTaskSummary> tasks = resultsPair.getLeft();
       Set<String> adminAccessIds =
           kadaiEngine.getEngine().getConfiguration().getRoleMap().get(KadaiRole.ADMIN);
       if (adminAccessIds.contains(kadaiEngine.getEngine().getCurrentUserContext().getUserId())) {
@@ -1540,6 +1545,25 @@ public class TaskServiceImpl implements TaskService {
     }
 
     return task;
+  }
+
+  /**
+   * Returns a list of TaskCleanupSummary objects for tasks that were completed before the specified
+   * date.
+   *
+   * @param untilDate date to compare the task's completed date to
+   * @param allCompletedSameParentBusiness true if all tasks sharing the same {@link
+   *     Task#getParentBusinessProcessId() parentBusinessProcessId} must be completed for a task to
+   *     be returned, false otherwise
+   * @return all eligible tasks completed before given timestamp
+   */
+  public List<TaskCleanupSummary> getTasksCompletedBefore(
+      Instant untilDate, boolean allCompletedSameParentBusiness) {
+    return kadaiEngine.executeInDatabaseConnection(
+        () ->
+            allCompletedSameParentBusiness
+                ? taskMapper.findTasksCompletedBeforeWithParentBusinessProcessConstraint(untilDate)
+                : taskMapper.findTasksCompletedBefore(untilDate));
   }
 
   Pair<List<MinimalTaskSummary>, BulkLog> filterTasksAuthorizedForAndLogErrorsForNotAuthorized(

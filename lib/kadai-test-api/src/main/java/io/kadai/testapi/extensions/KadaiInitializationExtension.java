@@ -42,6 +42,7 @@ import io.kadai.common.internal.security.CurrentUserContextImpl;
 import io.kadai.common.internal.util.ReflectionUtil;
 import io.kadai.common.internal.util.SpiLoader;
 import io.kadai.common.internal.workingtime.WorkingTimeCalculatorImpl;
+import io.kadai.common.test.config.SchemaEnforcingDataSource;
 import io.kadai.monitor.api.MonitorService;
 import io.kadai.monitor.internal.MonitorServiceImpl;
 import io.kadai.task.api.TaskService;
@@ -80,6 +81,56 @@ public class KadaiInitializationExtension
 
   public static final String STORE_KADAI_ENTITY_MAP = "kadaiEntityMap";
 
+  @Override
+  public void postProcessTestInstance(Object testInstance, ExtensionContext context)
+      throws Exception {
+    Class<?> testClass = testInstance.getClass();
+    if (isTopLevelClass(testClass)
+        || isAnnotated(testClass, CleanKadaiContext.class)
+        || isAnnotated(testClass, WithServiceProvider.class)
+        || isAnnotated(testClass, WithServiceProviders.class)
+        || testInstance instanceof KadaiConfigurationModifier) {
+      Store store = getClassLevelStore(context);
+      String schemaName = store.get(TestContainerExtension.STORE_SCHEMA_NAME, String.class);
+      SchemaEnforcingDataSource schemaEnforcingDataSource = createSchemaEnforcingDataSource(store);
+      KadaiConfiguration.Builder kadaiConfigurationBuilder =
+          new KadaiConfiguration.Builder(
+                  schemaEnforcingDataSource.asDataSource(), false, schemaName)
+              .initKadaiProperties();
+
+      if (testInstance instanceof KadaiConfigurationModifier modifier) {
+        kadaiConfigurationBuilder = modifier.modify(kadaiConfigurationBuilder);
+      }
+
+      KadaiEngine kadaiEngine;
+      try (MockedStatic<SpiLoader> staticMock = Mockito.mockStatic(SpiLoader.class)) {
+        ServiceProviderExtractor.extractServiceProviders(
+                testClass, extractEnclosingTestInstances(testInstance))
+            .forEach(
+                (spi, serviceProviders) ->
+                    staticMock.when(() -> SpiLoader.load(spi)).thenReturn(serviceProviders));
+        kadaiEngine =
+            KadaiEngine.buildKadaiEngine(
+                kadaiConfigurationBuilder.build(), ConnectionManagementMode.AUTOCOMMIT);
+      }
+
+      schemaEnforcingDataSource.enable();
+
+      store.put(STORE_KADAI_ENTITY_MAP, generateKadaiEntityMap(kadaiEngine));
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public void preDestroyTestInstance(ExtensionContext context) {
+    if (isTopLevelClass(context.getRequiredTestClass())) {
+      Map<Class<?>, Object> entityMap =
+          (Map<Class<?>, Object>) getClassLevelStore(context).get(STORE_KADAI_ENTITY_MAP);
+      KadaiEngineImpl kadaiEngineImpl = (KadaiEngineImpl) entityMap.get(KadaiEngineImpl.class);
+      Optional.ofNullable(kadaiEngineImpl.getJobScheduler()).ifPresent(JobScheduler::stop);
+    }
+  }
+
   private static Map<Class<?>, Object> extractEnclosingTestInstances(Object instance)
       throws IllegalAccessException {
     HashMap<Class<?>, Object> instanceByClass = new HashMap<>();
@@ -90,7 +141,7 @@ public class KadaiInitializationExtension
     return instanceByClass;
   }
 
-  private static KadaiConfiguration.Builder createDefaultKadaiConfigurationBuilder(Store store) {
+  private static SchemaEnforcingDataSource createSchemaEnforcingDataSource(Store store) {
     String schemaName = store.get(TestContainerExtension.STORE_SCHEMA_NAME, String.class);
     if (schemaName == null) {
       throw new JUnitException("Expected schemaName to be defined in store, but it's not.");
@@ -100,7 +151,7 @@ public class KadaiInitializationExtension
       throw new JUnitException("Expected dataSource to be defined in store, but it's not.");
     }
 
-    return new KadaiConfiguration.Builder(dataSource, false, schemaName).initKadaiProperties();
+    return new SchemaEnforcingDataSource(dataSource, schemaName);
   }
 
   private static Map<Class<?>, Object> generateKadaiEntityMap(KadaiEngine kadaiEngine)
@@ -152,49 +203,5 @@ public class KadaiInitializationExtension
     SqlSessionManager sqlSessionManager = (SqlSessionManager) sessionManagerField.get(kadaiEngine);
 
     return sqlSessionManager.getMapper(JobMapper.class);
-  }
-
-  @Override
-  public void postProcessTestInstance(Object testInstance, ExtensionContext context)
-      throws Exception {
-    Class<?> testClass = testInstance.getClass();
-    if (isTopLevelClass(testClass)
-        || isAnnotated(testClass, CleanKadaiContext.class)
-        || isAnnotated(testClass, WithServiceProvider.class)
-        || isAnnotated(testClass, WithServiceProviders.class)
-        || testInstance instanceof KadaiConfigurationModifier) {
-      Store store = getClassLevelStore(context);
-      KadaiConfiguration.Builder kadaiConfigurationBuilder =
-          createDefaultKadaiConfigurationBuilder(store);
-
-      if (testInstance instanceof KadaiConfigurationModifier modifier) {
-        kadaiConfigurationBuilder = modifier.modify(kadaiConfigurationBuilder);
-      }
-
-      KadaiEngine kadaiEngine;
-      try (MockedStatic<SpiLoader> staticMock = Mockito.mockStatic(SpiLoader.class)) {
-        ServiceProviderExtractor.extractServiceProviders(
-                testClass, extractEnclosingTestInstances(testInstance))
-            .forEach(
-                (spi, serviceProviders) ->
-                    staticMock.when(() -> SpiLoader.load(spi)).thenReturn(serviceProviders));
-        kadaiEngine =
-            KadaiEngine.buildKadaiEngine(
-                kadaiConfigurationBuilder.build(), ConnectionManagementMode.AUTOCOMMIT);
-      }
-
-      store.put(STORE_KADAI_ENTITY_MAP, generateKadaiEntityMap(kadaiEngine));
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public void preDestroyTestInstance(ExtensionContext context) {
-    if (isTopLevelClass(context.getRequiredTestClass())) {
-      Map<Class<?>, Object> entityMap =
-          (Map<Class<?>, Object>) getClassLevelStore(context).get(STORE_KADAI_ENTITY_MAP);
-      KadaiEngineImpl kadaiEngineImpl = (KadaiEngineImpl) entityMap.get(KadaiEngineImpl.class);
-      Optional.ofNullable(kadaiEngineImpl.getJobScheduler()).ifPresent(JobScheduler::stop);
-    }
   }
 }

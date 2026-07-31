@@ -20,7 +20,7 @@ package acceptance.events.classification;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import acceptance.AbstractAccTest;
+import acceptance.AbstractRawMapperAccTest;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.internal.util.CheckedRunnable;
@@ -30,7 +30,7 @@ import io.kadai.spi.history.api.events.classification.ClassificationHistoryEvent
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class CreateHistoryEventOnClassificationDeletionAccTest extends AbstractAccTest {
+class CreateHistoryEventOnClassificationDeletionAccTest extends AbstractRawMapperAccTest {
 
   private final ClassificationService classificationService =
       kadaiEngine.getClassificationService();

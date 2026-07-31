@@ -45,7 +45,7 @@ class QueryUsersWithSortingTest extends AbstractAccTest {
   void setupKadaiEngine() throws Exception {
     KadaiConfiguration kadaiConfiguration =
         new Builder(AbstractAccTest.kadaiConfiguration).addAdditionalUserInfo(false).build();
-    this.kadaiEngine = KadaiEngine.buildKadaiEngine(kadaiConfiguration);
+    this.kadaiEngine = buildEngine(kadaiConfiguration);
   }
 
   @ParameterizedTest

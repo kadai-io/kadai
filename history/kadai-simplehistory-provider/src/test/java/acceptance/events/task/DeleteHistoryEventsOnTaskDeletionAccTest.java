@@ -21,7 +21,7 @@ package acceptance.events.task;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import acceptance.AbstractAccTest;
+import acceptance.AbstractRawMapperAccTest;
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.internal.util.CheckedRunnable;
@@ -38,7 +38,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(JaasExtension.class)
-class DeleteHistoryEventsOnTaskDeletionAccTest extends AbstractAccTest {
+class DeleteHistoryEventsOnTaskDeletionAccTest extends AbstractRawMapperAccTest {
 
   @Test
   void should_DeleteHistoryEvents_When_TaskIsDeletedWithHistoryDeletionEnabled() throws Exception {
@@ -187,7 +187,7 @@ class DeleteHistoryEventsOnTaskDeletionAccTest extends AbstractAccTest {
   private void createKadaiEngineWithNewConfig(boolean deleteHistoryOnTaskDeletionEnabled)
       throws SQLException {
     KadaiConfiguration configuration =
-        new KadaiConfiguration.Builder(AbstractAccTest.kadaiConfiguration)
+        new KadaiConfiguration.Builder(kadaiConfiguration)
             .deleteHistoryEventsOnTaskDeletionEnabled(deleteHistoryOnTaskDeletionEnabled)
             .build();
     initKadaiEngine(configuration);
