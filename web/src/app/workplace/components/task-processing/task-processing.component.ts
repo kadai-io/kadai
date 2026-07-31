@@ -17,15 +17,14 @@
  */
 
 import { Component, inject, isSignal, OnDestroy, OnInit, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Task } from 'app/workplace/models/task';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { TaskService } from 'app/workplace/services/task.service';
 import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
 import { Subscription } from 'rxjs';
 import { ClassificationsService } from 'app/shared/services/classifications/classifications.service';
-import { take } from 'rxjs/operators';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -34,7 +33,14 @@ import { MatIcon } from '@angular/material/icon';
 
 import { MatDivider } from '@angular/material/divider';
 import { Store } from '@ngxs/store';
-import { LoadTasks, SelectTask } from '../../../shared/store/task-store/task.actions';
+import {
+  CancelClaimTask,
+  ClaimTask,
+  CompleteTask,
+  GetTask,
+  TransferTask
+} from '../../../shared/store/task-store/task.actions';
+import { TaskSelectors } from '../../../shared/store/task-store/task.selectors';
 
 @Component({
   selector: 'kadai-task-processing',
@@ -47,9 +53,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
   regex = /\${(.*?)}/g;
   address = 'https://bing.com';
   link = signal<SafeResourceUrl | undefined>(undefined);
-  task = signal<Task | undefined>(undefined);
   workbaskets = signal<Workbasket[]>([]);
-  private taskService = inject(TaskService);
   private workbasketService = inject(WorkbasketService);
   private classificationService = inject(ClassificationsService);
   private requestInProgressService = inject(RequestInProgressService);
@@ -57,36 +61,26 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private sanitizer = inject(DomSanitizer);
+  task = toSignal<Task | undefined>(this.store.select(TaskSelectors.getSelectedTask));
 
   ngOnInit() {
     this.routeSubscription = this.route.params.subscribe((params) => {
       const { id } = params;
-      this.getTask(id);
-
-      this.requestInProgressService.setRequestInProgress(true);
-      this.taskService
-        .claimTask(id)
-        .pipe(take(1))
-        .subscribe((task) => {
-          this.task.set(task);
-          this.refreshTaskInStore(task);
-          this.requestInProgressService.setRequestInProgress(false);
-        });
+      this.loadAndClaimTask(id);
     });
   }
 
-  async getTask(id: string) {
-    this.requestInProgressService.setRequestInProgress(true);
-    const task = (await this.taskService.getTask(id).toPromise())!;
-    this.task.set(task);
-    this.store.dispatch(new SelectTask(task));
+  async loadAndClaimTask(id: string) {
+    await this.store.dispatch(new GetTask(id)).toPromise();
+    await this.store.dispatch(new ClaimTask(id)).toPromise();
+
+    const task = this.store.selectSnapshot(TaskSelectors.getSelectedTask)!;
     const classification = (await this.classificationService
       .getClassification(task.classificationSummary!.classificationId!)
       .toPromise())!;
     this.address = this.extractUrl(classification.applicationEntryPoint!) || `${this.address}?q=${task.name}`;
     this.link.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.address));
     this.getWorkbaskets();
-    this.requestInProgressService.setRequestInProgress(false);
   }
 
   getWorkbaskets() {
@@ -104,35 +98,21 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
   }
 
   transferTask(workbasket: Workbasket) {
-    this.requestInProgressService.setRequestInProgress(true);
-    this.taskService.transferTask(this.task()!.taskId, workbasket.workbasketId!).subscribe((task) => {
-      this.requestInProgressService.setRequestInProgress(false);
-      this.task.set(task);
+    this.store.dispatch(new TransferTask(this.task()!.taskId, workbasket.workbasketId!)).subscribe(() => {
+      this.navigateBack();
     });
-    this.navigateBack();
   }
 
   completeTask() {
-    this.requestInProgressService.setRequestInProgress(true);
-    this.taskService.completeTask(this.task()!.taskId).subscribe((task) => {
-      this.requestInProgressService.setRequestInProgress(false);
-      this.task.set(task);
-      this.refreshTaskInStore(task);
+    this.store.dispatch(new CompleteTask(this.task()!.taskId)).subscribe(() => {
       this.navigateBack();
     });
   }
 
   cancelClaimTask() {
-    this.requestInProgressService.setRequestInProgress(true);
-    this.taskService
-      .cancelClaimTask(this.task()!.taskId)
-      .pipe(take(1))
-      .subscribe((task) => {
-        this.task.set(task);
-        this.refreshTaskInStore(task);
-        this.requestInProgressService.setRequestInProgress(false);
-      });
-    this.navigateBack();
+    this.store.dispatch(new CancelClaimTask(this.task()!.taskId)).subscribe(() => {
+      this.navigateBack();
+    });
   }
 
   navigateBack() {
@@ -146,10 +126,6 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
     if (this.routeSubscription) {
       this.routeSubscription.unsubscribe();
     }
-  }
-
-  private refreshTaskInStore(task: Task) {
-    this.store.dispatch([new SelectTask(task), new LoadTasks()]);
   }
 
   private extractUrl(url: string): string {

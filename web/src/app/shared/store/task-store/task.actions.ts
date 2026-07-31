@@ -86,3 +86,31 @@ export class DeleteTask {
 
   constructor(public task: Task) {}
 }
+
+// Task lifecycle
+export class ClaimTask {
+  static readonly type = '[Task lifecycle] Claim a task';
+
+  constructor(public taskId: string) {}
+}
+
+export class CompleteTask {
+  static readonly type = '[Task lifecycle] Complete a task';
+
+  constructor(public taskId: string) {}
+}
+
+export class CancelClaimTask {
+  static readonly type = '[Task lifecycle] Cancel a task claim';
+
+  constructor(public taskId: string) {}
+}
+
+export class TransferTask {
+  static readonly type = '[Task lifecycle] Transfer a task to another workbasket';
+
+  constructor(
+    public taskId: string,
+    public workbasketId: string
+  ) {}
+}
