@@ -44,6 +44,7 @@ public enum TaskQuerySortBy implements QuerySortBy<TaskQuery> {
   TASK_ID(TaskQuery::orderByTaskId),
   MODIFIED(TaskQuery::orderByModified),
   CREATOR(TaskQuery::orderByCreator),
+  CREATOR_LONG_NAME(TaskQuery::orderByCreatorLongName),
   NOTE(TaskQuery::orderByNote),
   OWNER(TaskQuery::orderByOwner),
   OWNER_LONG_NAME(TaskQuery::orderByOwnerLongName),
