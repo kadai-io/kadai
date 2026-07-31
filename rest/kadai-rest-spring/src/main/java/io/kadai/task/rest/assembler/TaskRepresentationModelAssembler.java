@@ -85,6 +85,7 @@ public class TaskRepresentationModelAssembler
     repModel.setDue(task.getDue());
     repModel.setName(task.getName());
     repModel.setCreator(task.getCreator());
+    repModel.setCreatorLongName(task.getCreatorLongName());
     repModel.setNote(task.getNote());
     repModel.setDescription(task.getDescription());
     repModel.setPriority(task.getPriority());
@@ -159,6 +160,7 @@ public class TaskRepresentationModelAssembler
     task.setDue(repModel.getDue());
     task.setName(repModel.getName());
     task.setCreator(repModel.getCreator());
+    task.setCreatorLongName(repModel.getCreatorLongName());
     task.setNote(repModel.getNote());
     task.setDescription(repModel.getDescription());
     task.setPriority(repModel.getPriority());
