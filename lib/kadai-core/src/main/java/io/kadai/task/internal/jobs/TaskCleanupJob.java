@@ -78,11 +78,13 @@ public class TaskCleanupJob extends AbstractKadaiJob {
   }
 
   private List<TaskCleanupSummary> getTasksCompletedBefore(Instant untilDate) {
-    return allCompletedSameParentBusiness
-        ? kadaiEngineImpl
-            .getTaskMapper()
-            .findTasksCompletedBeforeWithParentBusinessProcessConstraint(untilDate)
-        : kadaiEngineImpl.getTaskMapper().findTasksCompletedBefore(untilDate);
+    return kadaiEngineImpl.executeInDatabaseConnection(
+        () ->
+            allCompletedSameParentBusiness
+                ? kadaiEngineImpl
+                    .getTaskMapper()
+                    .findTasksCompletedBeforeWithParentBusinessProcessConstraint(untilDate)
+                : kadaiEngineImpl.getTaskMapper().findTasksCompletedBefore(untilDate));
   }
 
   private int deleteTasksTransactionally(List<TaskCleanupSummary> tasksToBeDeleted) {
