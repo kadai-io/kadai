@@ -921,10 +921,6 @@ jobs:
             SONAR_ARGS+=("-Dsonar.coverage.jacoco.xmlReportPaths=")
           fi
 
-          if [[ "${{ needs.detect_changes.outputs.frontend_changed }}" == "true" ]]; then
-            SONAR_ARGS+=("-Dsonar.javascript.lcov.reportPaths=web/coverage/lcov.info")
-          fi
-
           ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar "${SONAR_ARGS[@]}" -DskipTests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
