@@ -375,31 +375,13 @@ describe('TaskProcessingComponent', () => {
       expect(result).toBe(url);
     });
 
-    it('should replace ${task.taskId} with the actual task id', async () => {
-      await selectTask(makeTask());
-      const url = 'https://example.com/${task.taskId}';
-
-      const result = (component as any).extractUrl(url);
-
-      expect(result).toBe('https://example.com/task-id-1');
-    });
-
-    it('should replace ${task.name} with the task name', async () => {
-      await selectTask(makeTask());
-      const url = 'https://example.com?taskName=${task.name}';
-
-      const result = (component as any).extractUrl(url);
-
-      expect(result).toBe('https://example.com?taskName=My Task');
-    });
-
     it('should handle multiple template expressions in one URL', async () => {
       await selectTask(makeTask());
-      const url = 'https://example.com/${task.taskId}/name/${task.name}';
+      const url = 'https://example.com/${task.taskId}/name/${task.name}?taskName=${task.name}';
 
       const result = (component as any).extractUrl(url);
 
-      expect(result).toBe('https://example.com/task-id-1/name/My Task');
+      expect(result).toBe('https://example.com/task-id-1/name/My Task?taskName=My Task');
     });
 
     it('should return the URL unchanged when it is an empty string', () => {

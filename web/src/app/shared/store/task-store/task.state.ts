@@ -73,10 +73,10 @@ import {
   }
 })
 export class TaskWorkflowState {
-  private taskService = inject(TaskService);
-  private notificationService = inject(NotificationService);
-  private requestInProgressService = inject(RequestInProgressService);
-  private store = inject(Store);
+  private readonly taskService = inject(TaskService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly requestInProgressService = inject(RequestInProgressService);
+  private readonly store = inject(Store);
 
   private withRequestInProgress<T>(source: Observable<T>): Observable<T> {
     this.requestInProgressService.setRequestInProgress(true);
