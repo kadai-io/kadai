@@ -67,7 +67,7 @@ export enum WorkbasketAccessItemQuerySortParameter {
 
 export const WORKBASKET_ACCESS_ITEM_SORT_PARAMETER_NAMING: Map<WorkbasketAccessItemQuerySortParameter, string> =
   new Map([
-    [WorkbasketAccessItemQuerySortParameter.ACCESS_ID, 'Access id'],
+    [WorkbasketAccessItemQuerySortParameter.ACCESS_ID, 'Name id'],
     [WorkbasketAccessItemQuerySortParameter.WORKBASKET_KEY, 'Workbasket Key']
   ]);
 

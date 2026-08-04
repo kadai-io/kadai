@@ -112,7 +112,7 @@
               <tr>
                 <th></th>
                 <th class="align-left">Workbasket Key</th>
-                <th class="align-left">Access Id</th>
+                <th class="align-left">Name Id</th>
                 <th>Read</th>
                 <th>Read tasks</th>
                 <th>Open</th>
@@ -146,9 +146,9 @@
                 <th>
                   <mat-form-field appearance="outline"
                                   class="access-items__authorization-expansion-panel-filter">
-                    <mat-label>Access id filter</mat-label>
+                    <mat-label>Name id filter</mat-label>
                     <input (keyup.enter)="searchForAccessItemsWorkbaskets()"
-                           formControlName="accessIdFilter" matInput
+                           formControlName="nameIdFilter" matInput
                            type="text">
                   </mat-form-field>
                 </th>
