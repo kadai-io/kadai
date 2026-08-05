@@ -51,6 +51,7 @@ import com.tngtech.archunit.lang.SimpleConditionEvent;
 import com.tngtech.archunit.library.dependencies.SliceAssignment;
 import com.tngtech.archunit.library.dependencies.SliceIdentifier;
 import io.kadai.KadaiConfiguration;
+import io.kadai.KadaiProperties;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.WorkingTimeCalculator;
 import io.kadai.common.api.exceptions.ErrorCode;
@@ -384,7 +385,8 @@ class ArchitectureTest {
   @Test
   void allClassesAreInsideApiOrInternal() {
     classes()
-        .that()
+        .that(notKadaiProperties())
+        .and()
         .areNotAssignableFrom(KadaiConfiguration.class)
         .and()
         .areNotAssignableFrom(KadaiConfiguration.Builder.class)
@@ -394,6 +396,16 @@ class ArchitectureTest {
         .should()
         .resideInAnyPackage("..api..", "..internal..")
         .check(importedClasses);
+  }
+
+  private DescribedPredicate<JavaClass> notKadaiProperties() {
+    return new DescribedPredicate<>("not KadaiProperties or nested classes") {
+      @Override
+      public boolean test(JavaClass input) {
+        return !input.getName().equals(KadaiProperties.class.getName())
+            && !input.getName().startsWith(KadaiProperties.class.getName() + "$");
+      }
+    };
   }
 
   @TestFactory

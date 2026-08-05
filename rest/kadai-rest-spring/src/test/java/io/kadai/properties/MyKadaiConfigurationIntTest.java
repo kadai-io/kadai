@@ -39,6 +39,5 @@ class MyKadaiConfigurationIntTest {
   void should_loadApplicationContextWithMyKadaiProperties_When_ApplicationStarts() {
     assertThat(appContext.getBean("kadaiPropertiesFileName", String.class))
         .isEqualTo("/mykadai.properties");
-    assertThat(appContext.getBean("kadaiPropertiesDelimiter", String.class)).isEqualTo(";");
   }
 }

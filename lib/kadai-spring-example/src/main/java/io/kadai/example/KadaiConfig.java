@@ -19,6 +19,7 @@
 package io.kadai.example;
 
 import io.kadai.KadaiConfiguration;
+import io.kadai.KadaiProperties;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.internal.SpringKadaiEngine;
@@ -27,9 +28,9 @@ import io.kadai.user.api.UserService;
 import io.kadai.workbasket.api.WorkbasketService;
 import java.sql.SQLException;
 import javax.sql.DataSource;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,6 +43,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 /** Class to set /load configuration for Kadai Library. */
 @Configuration
 @EnableTransactionManagement()
+@EnableConfigurationProperties(KadaiProperties.class)
+@PropertySource("classpath:kadai.properties")
 public class KadaiConfig {
 
   @Value("${kadai.schemaName:KADAI}")
@@ -69,22 +72,10 @@ public class KadaiConfig {
 
   @Bean
   public KadaiConfiguration kadaiConfiguration(
-      DataSource dataSource,
-      @Qualifier("kadaiPropertiesFileName") String propertiesFileName,
-      @Qualifier("kadaiPropertiesDelimiter") String delimiter) {
+      DataSource dataSource, KadaiProperties kadaiProperties) {
     return new KadaiConfiguration.Builder(dataSource, true, schemaName, false)
-        .initKadaiProperties(propertiesFileName, delimiter)
+        .kadaiProperties(kadaiProperties)
         .build();
-  }
-
-  @Bean
-  public String kadaiPropertiesFileName() {
-    return "/kadai.properties";
-  }
-
-  @Bean
-  public String kadaiPropertiesDelimiter() {
-    return "|";
   }
 
   @Bean

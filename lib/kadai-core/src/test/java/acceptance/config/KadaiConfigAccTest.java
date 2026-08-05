@@ -76,16 +76,14 @@ class KadaiConfigAccTest {
 
   @Test
   void should_ApplyClassificationProperties_When_PropertiesAreDefined() throws Exception {
-    String delimiter = ";";
-    String propertiesFileName =
-        createNewConfigFile("dummyTestConfig3.properties", delimiter, true, true);
+    String propertiesFileName = createNewConfigFile("dummyTestConfig3.properties", true, true);
     kadaiConfiguration =
         new KadaiConfiguration.Builder(
                 DataSourceGenerator.getDataSource(),
                 true,
                 DataSourceGenerator.getSchemaName(),
                 true)
-            .initKadaiProperties(propertiesFileName, delimiter)
+            .initKadaiProperties(propertiesFileName)
             .build();
     assertThat(kadaiConfiguration.getClassificationCategoriesByType())
         .containsExactlyInAnyOrderEntriesOf(
@@ -95,24 +93,27 @@ class KadaiConfigAccTest {
   }
 
   private String createNewConfigFile(
-      String filename, String delimiter, boolean addingTypes, boolean addingClassification)
+      String filename, boolean addingTypes, boolean addingClassification)
       throws Exception {
     Path file = Files.createFile(tempDir.resolve(filename));
     List<String> lines =
         Stream.of(
-                "kadai.roles.admin =Holger|Stefan",
-                "kadai.roles.business_admin  = ebe  | konstantin ",
-                "kadai.roles.user = nobody")
+                "kadai.roles.admin[0]=Holger",
+                "kadai.roles.admin[1]=Stefan",
+                "kadai.roles.business-admin[0]=ebe",
+                "kadai.roles.business-admin[1]=konstantin",
+                "kadai.roles.user[0]=nobody")
             .collect(Collectors.toList());
     if (addingTypes) {
-      lines.add(String.format("kadai.classification.types= TASK %s document", delimiter));
+      lines.add("kadai.classification.types[0]=TASK");
+      lines.add("kadai.classification.types[1]=document");
     }
     if (addingClassification) {
-      lines.add(
-          String.format(
-              "kadai.classification.categories.task= EXTERNAL%s manual%s autoMAtic%s Process",
-              delimiter, delimiter, delimiter));
-      lines.add("kadai.classification.categories.document= EXTERNAL");
+      lines.add("kadai.classification.categories.task[0]=EXTERNAL");
+      lines.add("kadai.classification.categories.task[1]=manual");
+      lines.add("kadai.classification.categories.task[2]=autoMAtic");
+      lines.add("kadai.classification.categories.task[3]=Process");
+      lines.add("kadai.classification.categories.document[0]=EXTERNAL");
     }
 
     Files.write(file, lines, StandardCharsets.UTF_8);

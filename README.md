@@ -206,6 +206,18 @@ We use the h2 database in this example.
 
 See `rest/kadai-rest-spring-example-boot` and it dependencies
 
+## Configuration properties
+
+KADAI ships Spring Boot configuration metadata for the `kadai.*` properties. IDEs that support
+Spring Boot metadata can use it for property completion, type hints, enum value suggestions and
+inline documentation.
+
+You can configure it by linking the `kadai.properties` inside your `application.properties` or `application.yml`:
+
+```properties
+spring.config.import=optional:classpath:kadai.properties
+```
+
 # ⚙️Customize Behaviour
 
 [![Oracle](https://custom-icon-badges.demolab.com/badge/SPI-F80000?logo=oracle&logoColor=fff)](https://docs.oracle.com/javase/tutorial/sound/SPI-intro.html)
