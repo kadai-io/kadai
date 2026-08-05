@@ -213,6 +213,18 @@ class RequestReviewAccTest {
         .hasMessage("WorkbasketId must not be null or empty");
   }
 
+  @WithAccessId(user = "user-1-2")
+  @Test
+  void should_ThrowException_When_ForceRequestReviewWithEmptyWorkbasketId() throws Exception {
+    Task task = createTaskClaimedByUser("user-1-1").buildAndStore(taskService, "user-1-1");
+    ThrowingCallable call =
+        () -> taskService.forceRequestReviewWithWorkbasketId(task.getId(), null, null);
+
+    assertThatThrownBy(call)
+        .isInstanceOf(InvalidArgumentException.class)
+        .hasMessage("WorkbasketId must not be null or empty");
+  }
+
   @WithAccessId(user = "user-1-1")
   @TestFactory
   Stream<DynamicTest> should_ThrowException_When_ForceRequestReviewAndTaskIsInEndState() {

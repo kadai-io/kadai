@@ -227,6 +227,21 @@ public class RequestChangesWithAfterSpiAccTest {
       assertThat(result.getWorkbasketSummary()).isEqualTo(newWorkbasket);
       assertThat(result.getOwner()).isEqualTo("owner-1-2");
     }
+
+    @WithAccessId(user = "user-1-1")
+    @Test
+    void should_ForceReturnTransferredTask_When_SpiTransfersTaskWithWorkbasketIdAndOwnerId()
+        throws Exception {
+      Task task = createTaskInReviewByUser("owner-1-2").buildAndStore(taskService);
+
+      Task result =
+          taskService.forceRequestChangesWithWorkbasketId(
+              task.getId(), newWorkbasket.getId(), "owner-1-2");
+
+      assertThat(result.getWorkbasketSummary()).isEqualTo(newWorkbasket);
+      assertThat(result.getOwner()).isEqualTo("owner-1-2");
+      assertThat(result.getState()).isEqualTo(TaskState.READY);
+    }
   }
 
   @Nested
