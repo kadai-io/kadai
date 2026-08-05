@@ -4214,6 +4214,161 @@ class TaskControllerIntTest {
 
   @Nested
   @TestInstance(Lifecycle.PER_CLASS)
+  class RequestReviewWithWorkbasketKeyAndDomainOnTasks {
+
+    private static final String WORKBASKET_KEY = "USER-1-1";
+    private static final String DOMAIN = "DOMAIN_A";
+
+    @Test
+    void should_RequestReviewWithWorkbasketKeyAndDomain() {
+      ResponseEntity<TaskRepresentationModel> response =
+          restClient
+              .post()
+              .uri(
+                  restHelper.toUrl(
+                      RestEndpoints.URL_TASKS_ID_REQUEST_REVIEW_WORKBASKET_KEY_DOMAIN,
+                      "TKI:000000000000000000000000000000000035",
+                      DOMAIN,
+                      WORKBASKET_KEY))
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getState()).isEqualTo(TaskState.READY_FOR_REVIEW);
+    }
+
+    @Test
+    void should_ForceRequestReviewWithWorkbasketKeyAndDomain() {
+      ResponseEntity<TaskRepresentationModel> response =
+          restClient
+              .post()
+              .uri(
+                  restHelper.toUrl(
+                      RestEndpoints.URL_TASKS_ID_REQUEST_REVIEW_FORCE_WORKBASKET_KEY_DOMAIN,
+                      "TKI:000000000000000000000000000000000101",
+                      DOMAIN,
+                      WORKBASKET_KEY))
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+              .body(Map.of("ownerId", "user-1-1"))
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getState()).isEqualTo(TaskState.READY_FOR_REVIEW);
+      assertThat(response.getBody().getOwner()).isEqualTo("user-1-1");
+    }
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  class RequestChangesWithWorkbasketKeyAndDomainOnTasks {
+
+    private static final String WORKBASKET_KEY = "USER-1-1";
+    private static final String DOMAIN = "DOMAIN_A";
+    private static final String WORKBASKET_ID = "WBI:100000000000000000000000000000000006";
+
+    @Test
+    void should_RequestChangesWithWorkbasketKeyAndDomain() {
+      ResponseEntity<TaskRepresentationModel> response =
+          restClient
+              .post()
+              .uri(
+                  restHelper.toUrl(
+                      RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES_WORKBASKET_KEY_DOMAIN,
+                      "TKI:000000000000000000000000000000000136",
+                      DOMAIN,
+                      WORKBASKET_KEY))
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getState()).isEqualTo(TaskState.READY);
+      assertThat(response.getBody().getWorkbasketSummary().getWorkbasketId())
+          .isEqualTo(WORKBASKET_ID);
+    }
+
+    @Test
+    void should_ForceRequestChangesWithWorkbasketKeyAndDomain() {
+      ResponseEntity<TaskRepresentationModel> response =
+          restClient
+              .post()
+              .uri(
+                  restHelper.toUrl(
+                      RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES_FORCE_WORKBASKET_KEY_DOMAIN,
+                      "TKI:000000000000000000000000000000000100",
+                      DOMAIN,
+                      WORKBASKET_KEY))
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+              .body(Map.of("ownerId", "user-1-1"))
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getState()).isEqualTo(TaskState.READY);
+      assertThat(response.getBody().getOwner()).isEqualTo("user-1-1");
+      assertThat(response.getBody().getWorkbasketSummary().getWorkbasketId())
+          .isEqualTo(WORKBASKET_ID);
+    }
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  class TransferTasksWithWorkbasketKeyAndDomain {
+
+    private static final String WORKBASKET_KEY = "USER-1-1";
+    private static final String DOMAIN = "DOMAIN_A";
+    private static final String WORKBASKET_ID = "WBI:100000000000000000000000000000000006";
+
+    @Test
+    void should_TransferOneTaskWithWorkbasketKeyAndDomain() {
+      ResponseEntity<TaskRepresentationModel> response =
+          restClient
+              .post()
+              .uri(
+                  restHelper.toUrl(
+                      RestEndpoints.URL_TASKS_ID_TRANSFER_WORKBASKET_KEY_DOMAIN,
+                      "TKI:000000000000000000000000000000000003",
+                      DOMAIN,
+                      WORKBASKET_KEY))
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getWorkbasketSummary().getWorkbasketId())
+          .isEqualTo(WORKBASKET_ID);
+      assertThat(response.getBody().isTransferred()).isTrue();
+    }
+
+    @Test
+    void should_TransferMultipleTasksWithWorkbasketKeyAndDomain() {
+      ResponseEntity<Map<String, Object>> response =
+          restClient
+              .post()
+              .uri(
+                  restHelper.toUrl(
+                      RestEndpoints.URL_TRANSFER_WORKBASKET_KEY_DOMAIN, DOMAIN, WORKBASKET_KEY))
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .body(
+                  new TransferTaskRepresentationModel(
+                      true,
+                      "user-1-1",
+                      List.of(
+                          "TKI:000000000000000000000000000000000004",
+                          "TKI:000000000000000000000000000000000039")))
+              .retrieve()
+              .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
+
+      assertThat(response.getBody()).isNotNull();
+      assertThat((Map<String, Object>) response.getBody().get("tasksWithErrors"))
+          .containsKey("TKI:000000000000000000000000000000000039");
+    }
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
   class TransferTasks {
     @TestFactory
     Stream<DynamicTest> should_SetTransferFlagAndOwnerDependentOnBody_When_TransferringTask() {
