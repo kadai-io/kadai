@@ -325,6 +325,18 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
+  public Task requestReviewWithWorkbasketKeyAndDomain(
+      String taskId, String workbasketKey, String domain, String ownerId)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          WorkbasketNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
+    return requestReviewWithWorkbasketId(
+        taskId, workbasketService.getWorkbasket(workbasketKey, domain).getId(), ownerId);
+  }
+
+  @Override
   public Task forceRequestReview(String taskId)
       throws InvalidTaskStateException,
           TaskNotFoundException,
@@ -343,6 +355,18 @@ public class TaskServiceImpl implements TaskService {
       throw new InvalidArgumentException("WorkbasketId must not be null or empty");
     }
     return requestReview(taskId, workbasketId, ownerId, true);
+  }
+
+  @Override
+  public Task forceRequestReviewWithWorkbasketKeyAndDomain(
+      String taskId, String workbasketKey, String domain, String ownerId)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          WorkbasketNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
+    return forceRequestReviewWithWorkbasketId(
+        taskId, workbasketService.getWorkbasket(workbasketKey, domain).getId(), ownerId);
   }
 
   @Override
@@ -367,6 +391,18 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
+  public Task requestChangesWithWorkbasketKeyAndDomain(
+      String taskId, String workbasketKey, String domain, String ownerId)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          WorkbasketNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
+    return requestChangesWithWorkbasketId(
+        taskId, workbasketService.getWorkbasket(workbasketKey, domain).getId(), ownerId);
+  }
+
+  @Override
   public Task forceRequestChanges(String taskId)
       throws InvalidTaskStateException,
           TaskNotFoundException,
@@ -386,6 +422,18 @@ public class TaskServiceImpl implements TaskService {
       throw new InvalidArgumentException("WorkbasketId must not be null or empty");
     }
     return requestChanges(taskId, workbasketId, ownerId, true);
+  }
+
+  @Override
+  public Task forceRequestChangesWithWorkbasketKeyAndDomain(
+      String taskId, String workbasketKey, String domain, String ownerId)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          WorkbasketNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
+    return forceRequestChangesWithWorkbasketId(
+        taskId, workbasketService.getWorkbasket(workbasketKey, domain).getId(), ownerId);
   }
 
   @Override
