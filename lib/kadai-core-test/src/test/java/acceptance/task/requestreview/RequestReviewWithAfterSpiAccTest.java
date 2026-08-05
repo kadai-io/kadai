@@ -216,6 +216,20 @@ public class RequestReviewWithAfterSpiAccTest {
 
     @WithAccessId(user = "user-1-1")
     @Test
+    void should_ReturnTransferredTask_When_SpiTransfersTaskWithWorkbasketKeyAndDomain()
+        throws Exception {
+      Task task = createTaskClaimedByUser("user-1-1").buildAndStore(taskService);
+
+      Task result =
+          taskService.requestReviewWithWorkbasketKeyAndDomain(
+              task.getId(), newWorkbasket.getKey(), newWorkbasket.getDomain(), null);
+
+      assertThat(result.getWorkbasketSummary()).isEqualTo(newWorkbasket);
+      assertThat(result.getOwner()).isNull();
+    }
+
+    @WithAccessId(user = "user-1-1")
+    @Test
     void should_ReturnTransferredTask_When_SpiTransfersTaskWithWorkbasketIdAndOwnerId()
         throws Exception {
       Task task = createTaskClaimedByUser("user-1-1").buildAndStore(taskService);
@@ -237,6 +251,21 @@ public class RequestReviewWithAfterSpiAccTest {
       Task result =
           taskService.forceRequestReviewWithWorkbasketId(
               task.getId(), newWorkbasket.getId(), "user-1-2");
+
+      assertThat(result.getWorkbasketSummary()).isEqualTo(newWorkbasket);
+      assertThat(result.getOwner()).isEqualTo("user-1-2");
+      assertThat(result.getState()).isEqualTo(TaskState.READY_FOR_REVIEW);
+    }
+
+    @WithAccessId(user = "user-1-1")
+    @Test
+    void should_ForceReturnTransferredTask_When_SpiTransfersTaskWithWorkbasketKeyAndDomain()
+        throws Exception {
+      Task task = createTaskClaimedByUser("user-1-2").buildAndStore(taskService);
+
+      Task result =
+          taskService.forceRequestReviewWithWorkbasketKeyAndDomain(
+              task.getId(), newWorkbasket.getKey(), newWorkbasket.getDomain(), "user-1-2");
 
       assertThat(result.getWorkbasketSummary()).isEqualTo(newWorkbasket);
       assertThat(result.getOwner()).isEqualTo("user-1-2");
