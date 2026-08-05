@@ -324,11 +324,26 @@ public class TaskController implements TaskApi {
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_REVIEW_FORCE)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<TaskRepresentationModel> forceRequestReview(
-      @PathVariable("taskId") String taskId)
+      @PathVariable("taskId") String taskId,
+      @RequestBody(required = false) Map<String, String> body)
       throws InvalidTaskStateException,
           TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException {
+    String workbasketId = null;
+    String ownerId = null;
+
+    if (body != null) {
+      workbasketId = body.getOrDefault("workbasketId", null);
+      ownerId = body.getOrDefault("ownerId", null);
+    }
+
+    if (workbasketId != null) {
+      Task task =
+          taskService.forceRequestReviewWithWorkbasketId(
+              taskId, workbasketId, ownerId);
+      return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
+    }
     Task task = taskService.forceRequestReview(taskId);
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
   }
@@ -362,11 +377,26 @@ public class TaskController implements TaskApi {
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES_FORCE)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<TaskRepresentationModel> forceRequestChanges(
-      @PathVariable("taskId") String taskId)
+      @PathVariable("taskId") String taskId,
+      @RequestBody(required = false) Map<String, String> body)
       throws InvalidTaskStateException,
           TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException {
+    String workbasketId = null;
+    String ownerId = null;
+
+    if (body != null) {
+      workbasketId = body.getOrDefault("workbasketId", null);
+      ownerId = body.getOrDefault("ownerId", null);
+    }
+
+    if (workbasketId != null) {
+      Task task =
+          taskService.forceRequestChangesWithWorkbasketId(
+              taskId, workbasketId, ownerId);
+      return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
+    }
     Task task = taskService.forceRequestChanges(taskId);
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
   }

@@ -334,6 +334,18 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
+  public Task forceRequestReviewWithWorkbasketId(String taskId, String workbasketId, String ownerId)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
+    if (workbasketId == null || workbasketId.isEmpty()) {
+      throw new InvalidArgumentException("WorkbasketId must not be null or empty");
+    }
+    return requestReview(taskId, workbasketId, ownerId, true);
+  }
+
+  @Override
   public Task requestChanges(String taskId)
       throws InvalidTaskStateException,
           TaskNotFoundException,
@@ -361,6 +373,19 @@ public class TaskServiceImpl implements TaskService {
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException {
     return requestChanges(taskId, null, null, true);
+  }
+
+  @Override
+  public Task forceRequestChangesWithWorkbasketId(
+      String taskId, String workbasketId, String ownerId)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
+    if (workbasketId == null || workbasketId.isEmpty()) {
+      throw new InvalidArgumentException("WorkbasketId must not be null or empty");
+    }
+    return requestChanges(taskId, workbasketId, ownerId, true);
   }
 
   @Override

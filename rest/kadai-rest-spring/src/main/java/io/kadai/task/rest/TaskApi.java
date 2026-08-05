@@ -691,6 +691,7 @@ public interface TaskApi {
    * This endpoint force request a review on the specified Task.
    *
    * @param taskId taskId the id of the relevant Task
+   * @param body the body of the request, that can contain the workbasketId and the ownerId
    * @return the Task after a review has been requested
    * @throws InvalidTaskStateException if the state of the Task with taskId is not CLAIMED
    * @throws TaskNotFoundException if the Task with taskId wasn't found
@@ -709,6 +710,22 @@ public interface TaskApi {
             required = true,
             example = "TKI:000000000000000000000000000000000101")
       },
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              required = false,
+              description = "Optional JSON body with workbasketId and ownerId",
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
+                      schema =
+                          @Schema(
+                              example =
+                                  """
+        {
+          "workbasketId": "WBI:000000000000000000000000000000000001",
+          "ownerId": "user-1-1"
+        }
+      """))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -741,7 +758,9 @@ public interface TaskApi {
       })
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_REVIEW_FORCE)
   @Transactional(rollbackFor = Exception.class)
-  ResponseEntity<TaskRepresentationModel> forceRequestReview(@PathVariable("taskId") String taskId)
+  ResponseEntity<TaskRepresentationModel> forceRequestReview(
+      @PathVariable("taskId") String taskId,
+      @RequestBody(required = false) Map<String, String> body)
       throws InvalidTaskStateException,
           TaskNotFoundException,
           InvalidOwnerException,
@@ -830,6 +849,7 @@ public interface TaskApi {
    * This endpoint force requests changes on a Task.
    *
    * @param taskId the Id of the Task on which a review should be requested
+   * @param body the body of the request, that can contain the workbasketId and the ownerId
    * @return the change requested Task
    * @throws InvalidTaskStateException if the Task with taskId is in an end state
    * @throws TaskNotFoundException if the Task with taskId wasn't found
@@ -848,6 +868,22 @@ public interface TaskApi {
             required = true,
             example = "TKI:000000000000000000000000000000000100")
       },
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              required = false,
+              description = "Optional JSON body with workbasketId and ownerId",
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
+                      schema =
+                          @Schema(
+                              example =
+                                  """
+        {
+          "workbasketId": "WBI:000000000000000000000000000000000001",
+          "ownerId": "user-1-1"
+        }
+      """))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -880,7 +916,9 @@ public interface TaskApi {
       })
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES_FORCE)
   @Transactional(rollbackFor = Exception.class)
-  ResponseEntity<TaskRepresentationModel> forceRequestChanges(@PathVariable("taskId") String taskId)
+  ResponseEntity<TaskRepresentationModel> forceRequestChanges(
+      @PathVariable("taskId") String taskId,
+      @RequestBody(required = false) Map<String, String> body)
       throws InvalidTaskStateException,
           TaskNotFoundException,
           InvalidOwnerException,

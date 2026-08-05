@@ -361,6 +361,32 @@ public interface TaskService {
           NotAuthorizedOnWorkbasketException;
 
   /**
+   * Force request review for an existing {@linkplain Task}, specifying a target {@linkplain
+   * Workbasket} and optionally a new owner for the {@linkplain Task}. This operation succeeds
+   * even if the current user is not the {@linkplain Task#getOwner() owner} or the Task is not in
+   * {@linkplain TaskState#CLAIMED} yet.
+   *
+   * @param taskId the {@linkplain Task#getId() id} of the specified {@linkplain Task}
+   * @param workbasketId the {@linkplain Workbasket#getId() id} of the target {@linkplain
+   *     Workbasket} where the {@linkplain Task} will be moved to after the review is requested
+   * @param ownerId the {@linkplain Task#getOwner() owner id} of the {@linkplain Task} (optional,
+   *     can be null)
+   * @return the {@linkplain Task} after a review has been requested
+   * @throws InvalidArgumentException if workbasketId is null or empty
+   * @throws InvalidTaskStateException if the {@linkplain Task#getState() state} of the {@linkplain
+   *     Task} with taskId is one of the {@linkplain TaskState#END_STATES}
+   * @throws TaskNotFoundException if the {@linkplain Task} with taskId wasn't found
+   * @throws InvalidOwnerException cannot be thrown
+   * @throws NotAuthorizedOnWorkbasketException if the current user has no {@linkplain
+   *     WorkbasketPermission#READ} for the {@linkplain Workbasket} the {@linkplain Task} is in
+   */
+  Task forceRequestReviewWithWorkbasketId(String taskId, String workbasketId, String ownerId)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException;
+
+  /**
    * Request changes for an existing {@linkplain Task} that is in {@linkplain TaskState#IN_REVIEW}.
    * The {@linkplain TaskState} is changed to {@linkplain TaskState#READY} after changes have been
    * requested.
@@ -421,6 +447,33 @@ public interface TaskService {
    *     WorkbasketPermission#READ} for the {@linkplain Workbasket} the {@linkplain Task} is in
    */
   Task forceRequestChanges(String taskId)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException;
+
+  /**
+   * Force request changes for an existing {@linkplain Task}, specifying a target {@linkplain
+   * Workbasket} and optionally a new owner for the {@linkplain Task}. This operation succeeds
+   * even if the current user is not the {@linkplain Task#getOwner() owner} or the Task is not in
+   * {@linkplain TaskState#IN_REVIEW}. The {@linkplain TaskState} is changed to {@linkplain
+   * TaskState#READY} after changes have been requested.
+   *
+   * @param taskId the {@linkplain Task#getId() id} of the specified {@linkplain Task}
+   * @param workbasketId the {@linkplain Workbasket#getId() id} of the target {@linkplain
+   *     Workbasket} where the {@linkplain Task} will be moved to after the changes are requested
+   * @param ownerId the {@linkplain Task#getOwner() owner id} of the {@linkplain Task} (optional,
+   *     can be null)
+   * @return the {@linkplain Task} after changes have been requested
+   * @throws InvalidArgumentException if workbasketId is null or empty
+   * @throws InvalidTaskStateException if the {@linkplain Task#getState() state} of the {@linkplain
+   *     Task} with taskId is one of the {@linkplain TaskState#END_STATES}
+   * @throws TaskNotFoundException if the {@linkplain Task} with taskId wasn't found
+   * @throws InvalidOwnerException cannot be thrown
+   * @throws NotAuthorizedOnWorkbasketException if the current user has no {@linkplain
+   *     WorkbasketPermission#READ} for the {@linkplain Workbasket} the {@linkplain Task} is in
+   */
+  Task forceRequestChangesWithWorkbasketId(String taskId, String workbasketId, String ownerId)
       throws InvalidTaskStateException,
           TaskNotFoundException,
           InvalidOwnerException,
