@@ -277,11 +277,11 @@ export class AccessItemsManagementComponent implements OnInit {
     if (!this.accessItemsForm.value.workbasketKeyFilter) {
       this.accessItemsForm.addControl('workbasketKeyFilter', new FormControl());
     }
-    if (!this.accessItemsForm.value.nameIdFilter) {
-      this.accessItemsForm.addControl('nameIdFilter', new FormControl());
+    if (!this.accessItemsForm.value.accessIdFilter) {
+      this.accessItemsForm.addControl('accessIdFilter', new FormControl());
     }
     this.accessItems.set(accessItems);
-    if (this.accessItemsForm.value.workbasketKeyFilter || this.accessItemsForm.value.nameIdFilter) {
+    if (this.accessItemsForm.value.workbasketKeyFilter || this.accessItemsForm.value.accessIdFilter) {
       this.filterAccessItems();
     }
   }
@@ -292,9 +292,9 @@ export class AccessItemsManagementComponent implements OnInit {
       return;
     }
     let accessItems = this.accessItems();
-    if (form.value.nameIdFilter) {
+    if (form.value.accessIdFilter) {
       accessItems = accessItems.filter((value) =>
-        value.accessName.toLowerCase().includes(form.value.nameIdFilter.toLowerCase())
+        value.accessName.toLowerCase().includes(form.value.accessIdFilter.toLowerCase())
       );
     }
     if (form.value.workbasketKeyFilter) {
@@ -343,7 +343,7 @@ export class AccessItemsManagementComponent implements OnInit {
     if (this.accessItemsForm) {
       this.accessItemsForm.patchValue({
         workbasketKeyFilter: '',
-        nameIdFilter: ''
+        accessIdFilter: ''
       });
       this.searchForAccessItemsWorkbaskets();
     }
