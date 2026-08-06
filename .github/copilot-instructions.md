@@ -48,7 +48,7 @@ kadai/
 - **Build tool:** Maven (use `./mvnw` wrapper)
 - **Framework:** Spring Boot 4.x
 - **Persistence:** MyBatis with SQL providers for H2, PostgreSQL, and DB2
-- **Databases:** H2 (tests), PostgreSQL 14+, IBM DB2 11.5.6+
+- **Databases:** H2 (tests), PostgreSQL 17+, IBM DB2 11.5.6+
 - **Decision engine:** Camunda DMN (for task routing)
 - **Testing:** JUnit 5, AssertJ, TestContainers, ArchUnit
 - **Code quality:** Checkstyle (Google Java Style), JaCoCo, SonarCloud

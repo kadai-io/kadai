@@ -1,7 +1,7 @@
 version: '3'
 services:
-  kadai-postgres_14:
-    build: postgres_14
+  kadai-postgres_17:
+    build: postgres_17
     ports:
       - "5102:5432"
     environment:
