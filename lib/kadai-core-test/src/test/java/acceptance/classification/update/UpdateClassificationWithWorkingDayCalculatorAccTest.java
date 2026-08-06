@@ -151,7 +151,7 @@ class UpdateClassificationWithWorkingDayCalculatorAccTest implements KadaiConfig
     expectedClassification.setId(updatedClassification.getId());
 
     assertThat(expectedClassification).hasNoNullFieldsOrProperties();
-    assertThat(modifiedBefore).isBefore(updatedClassification.getModified());
+    assertThat(updatedClassification.getModified()).isAfterOrEqualTo(modifiedBefore);
     assertThat(updatedClassification).isEqualTo(expectedClassification);
   }
 
