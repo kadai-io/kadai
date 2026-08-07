@@ -440,6 +440,29 @@ class ProvideWorkbasketReportAccTest extends AbstractReportAccTest {
 
   @WithAccessId(user = "monitor")
   @Test
+  void should_ApplyDomainFilterToAllCombinedFilters_When_BuildingWorkbasketReport()
+      throws Exception {
+    WorkbasketReport report =
+        MONITOR_SERVICE
+            .createWorkbasketReportBuilder()
+            .withColumnHeaders(
+                List.of(new TimeIntervalColumnHeader(Integer.MIN_VALUE, Integer.MAX_VALUE)))
+            .domainIn(List.of("DOMAIN_A"))
+            .combinedClassificationFilterIn(
+                List.of(
+                    new CombinedClassificationFilter(
+                        "CLI:000000000000000000000000000000000001",
+                        "CLI:000000000000000000000000000000000006"),
+                    new CombinedClassificationFilter(
+                        "CLI:000000000000000000000000000000000003",
+                        "CLI:000000000000000000000000000000000008")))
+            .buildReport();
+
+    assertThat(report.getSumRow().getTotalValue()).isEqualTo(4);
+  }
+
+  @WithAccessId(user = "monitor")
+  @Test
   void testGetTotalNumbersOfTasksOfWorkbasketReportBasedOnPlannedDateWithReportLineItemDefinitions()
       throws Exception {
     List<TimeIntervalColumnHeader> columnHeaders = getListOfColumnHeaders();
@@ -483,6 +506,27 @@ class ProvideWorkbasketReportAccTest extends AbstractReportAccTest {
     assertThat(customValues)
         .containsExactlyInAnyOrder(
             "Geschaeftsstelle A", "Geschaeftsstelle B", "Geschaeftsstelle C");
+  }
+
+  @WithAccessId(user = "monitor")
+  @Test
+  void should_ApplyDomainFilterToAllCombinedFilters_When_RetrievingCustomValues()
+      throws Exception {
+    List<String> customValues =
+        MONITOR_SERVICE
+            .createWorkbasketReportBuilder()
+            .domainIn(List.of("DOMAIN_B"))
+            .combinedClassificationFilterIn(
+                List.of(
+                    new CombinedClassificationFilter(
+                        "CLI:000000000000000000000000000000000001",
+                        "CLI:000000000000000000000000000000000006"),
+                    new CombinedClassificationFilter(
+                        "CLI:000000000000000000000000000000000003",
+                        "CLI:000000000000000000000000000000000008")))
+            .listCustomAttributeValuesForCustomAttributeName(TaskCustomField.CUSTOM_1);
+
+    assertThat(customValues).isEmpty();
   }
 
   private List<TimeIntervalColumnHeader> getListOfColumnHeaders() {

@@ -58,7 +58,7 @@ public class DockerContainerCreator {
       }
       case POSTGRES -> {
         try (PostgreSQLContainer<?> selfPostgreSQLContainer =
-            new PostgreSQLContainer<>(DockerImageName.parse("postgres:14.7"))) {
+            new PostgreSQLContainer<>(DockerImageName.parse("postgres:17"))) {
 
           yield Optional.of(
               selfPostgreSQLContainer

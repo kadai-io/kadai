@@ -193,7 +193,7 @@ Runtime Environment at least Java 17
 Supported Databases:
 
 * H2 (We test with 2.1.214*)
-* Postgres (We test with 14.7*)
+* Postgres (We test with 17*)
 * DB2 (We test with 11.5.6*)
 
 _* other versions of the named databases should work also, but haven't been tested_
@@ -322,5 +322,3 @@ with the support of the open source community.
 ---
 [![envite consulting GmbH](docs/images/envite-black.png)](https://envite.de/)
 ---
-
-                       
