@@ -705,25 +705,27 @@ jobs:
         if: needs.detect_changes.outputs.backend_changed == 'true' || startsWith(github.ref, 'refs/tags/v')
         run: |
           echo "Using Maven profile: $DEPLOY_PROFILE"
+          MODULES=":kadai-parent,:kadai-common-parent,:kadai-common-logging,:kadai-common,:kadai-common-security,:kadai-common-data,:kadai-common-test,:kadai-test-api,:kadai-lib-parent,:kadai-core,:kadai-spring,:kadai-rest-parent,:kadai-rest-spring,:kadai-history-parent,:kadai-simplehistory-provider,:kadai-simplehistory-rest-spring,:kadai-loghistory-provider,:kadai-routing-parent,:kadai-spi-routing-dmn-router,:kadai-routing-rest"
+
+          # The web POM inherits its coordinates and Central-required metadata from
+          # its parent POM hierarchy. For a release, publish it in the same Central
+          # bundle, as those parents are not available from Central until publication.
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            MODULES+=",:kadai-web"
+          fi
+
           ./mvnw -B deploy -P "${DEPLOY_PROFILE}" \
           --settings ci/mvnsettings.xml \
           -Dmaven.test.skip=true -Dcheckstyle.skip -Djacoco.skip \
-          -pl :kadai-parent,\
-          :kadai-common-parent,:kadai-common-logging,:kadai-common,:kadai-common-security,\
-          :kadai-common-data,:kadai-common-test,:kadai-test-api,\
-          :kadai-lib-parent,:kadai-core,:kadai-spring,\
-          :kadai-rest-parent,:kadai-rest-spring,\
-          :kadai-history-parent,:kadai-simplehistory-provider,:kadai-simplehistory-rest-spring,:kadai-loghistory-provider,\
-          :kadai-routing-parent,:kadai-spi-routing-dmn-router,:kadai-routing-rest
+          -pl "$MODULES"
         env:
           GPG_KEY_NAME: ${{ secrets.GPG_KEY_NAME }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-      # Deploy the frontend module (kadai-web) only when frontend code changed or a release
-      # tag is pushed. kadai-web has no Java dependencies, so no backend artifacts are needed.
+      # On release tags, kadai-web is deployed above with its parent POMs in one Central bundle.
       - name: Release frontend artifact to Sonatype-Central
-        if: needs.detect_changes.outputs.frontend_changed == 'true' || startsWith(github.ref, 'refs/tags/v')
+        if: needs.detect_changes.outputs.frontend_changed == 'true' && !startsWith(github.ref, 'refs/tags/v')
         run: |
           echo "Using Maven profile: $DEPLOY_PROFILE"
           ./mvnw -B deploy -P "${DEPLOY_PROFILE}" \
