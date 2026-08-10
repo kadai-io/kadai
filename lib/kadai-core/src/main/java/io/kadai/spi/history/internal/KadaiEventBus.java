@@ -96,8 +96,12 @@ public final class KadaiEventBus {
             consumer -> {
               try {
                 consumer.consume(event);
-                LOGGER.info(
-                    "Forwarded event '{}' to consumer '{}'", event, consumer.getClass().getName());
+                if (LOGGER.isDebugEnabled()) {
+                  LOGGER.debug(
+                      "Forwarded event '{}' to consumer '{}'",
+                      event,
+                      consumer.getClass().getName());
+                }
               } catch (RuntimeException e) {
                 LOGGER.error("Consumer '{}' failed", consumer.getClass().getName(), e);
               }
@@ -148,10 +152,12 @@ public final class KadaiEventBus {
                 event -> {
                   try {
                     consume(consumer, event);
-                    LOGGER.info(
-                        "Forwarded event '{}' to consumer '{}'",
-                        event,
-                        consumer.getClass().getName());
+                    if (LOGGER.isDebugEnabled()) {
+                      LOGGER.debug(
+                          "Forwarded event '{}' to consumer '{}'",
+                          event,
+                          consumer.getClass().getName());
+                    }
                   } catch (RuntimeException e) {
                     LOGGER.error("Consumer '{}' failed", consumer.getClass().getName(), e);
                   }
