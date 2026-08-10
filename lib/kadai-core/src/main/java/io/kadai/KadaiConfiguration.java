@@ -118,6 +118,7 @@ public class KadaiConfiguration {
   private final Duration jobRunEvery;
   private final Duration jobLockExpirationPeriod;
   private final boolean taskCleanupJobEnabled;
+  private final int taskCleanupJobBatchSize;
   private final Duration taskCleanupJobMinimumAge;
   private final boolean taskCleanupJobAllCompletedSameParentBusiness;
   private final Duration taskCleanupJobLockExpirationPeriod;
@@ -211,6 +212,7 @@ public class KadaiConfiguration {
     this.jobRunEvery = builder.jobRunEvery;
     this.jobLockExpirationPeriod = builder.jobLockExpirationPeriod;
     this.taskCleanupJobEnabled = builder.taskCleanupJobEnabled;
+    this.taskCleanupJobBatchSize = builder.taskCleanupJobBatchSize;
     this.taskCleanupJobMinimumAge = builder.taskCleanupJobMinimumAge;
     this.taskCleanupJobAllCompletedSameParentBusiness =
         builder.taskCleanupJobAllCompletedSameParentBusiness;
@@ -370,6 +372,10 @@ public class KadaiConfiguration {
     return taskCleanupJobEnabled;
   }
 
+  public int getTaskCleanupJobBatchSize() {
+    return taskCleanupJobBatchSize;
+  }
+
   public Duration getTaskCleanupJobMinimumAge() {
     return taskCleanupJobMinimumAge;
   }
@@ -515,6 +521,7 @@ public class KadaiConfiguration {
         jobRunEvery,
         jobLockExpirationPeriod,
         taskCleanupJobEnabled,
+        taskCleanupJobBatchSize,
         taskCleanupJobMinimumAge,
         taskCleanupJobAllCompletedSameParentBusiness,
         taskCleanupJobLockExpirationPeriod,
@@ -566,6 +573,7 @@ public class KadaiConfiguration {
         && maxNumberOfJobRetries == other.maxNumberOfJobRetries
         && jobBatchSize == other.jobBatchSize
         && taskCleanupJobEnabled == other.taskCleanupJobEnabled
+        && taskCleanupJobBatchSize == other.taskCleanupJobBatchSize
         && taskCleanupJobAllCompletedSameParentBusiness
             == other.taskCleanupJobAllCompletedSameParentBusiness
         && workbasketCleanupJobEnabled == other.workbasketCleanupJobEnabled
@@ -679,6 +687,8 @@ public class KadaiConfiguration {
         + jobLockExpirationPeriod
         + ", taskCleanupJobEnabled="
         + taskCleanupJobEnabled
+        + ", taskCleanupJobBatchSize="
+        + taskCleanupJobBatchSize
         + ", taskCleanupJobMinimumAge="
         + taskCleanupJobMinimumAge
         + ", taskCleanupJobAllCompletedSameParentBusiness="
@@ -832,6 +842,9 @@ public class KadaiConfiguration {
 
     @KadaiProperty("kadai.jobs.cleanup.task.enable")
     private boolean taskCleanupJobEnabled = true;
+
+    @KadaiProperty("kadai.jobs.cleanup.task.batchSize")
+    private int taskCleanupJobBatchSize = 5_000;
 
     @KadaiProperty("kadai.jobs.cleanup.task.minimumAge")
     private Duration taskCleanupJobMinimumAge = Duration.ofDays(14);
@@ -995,6 +1008,7 @@ public class KadaiConfiguration {
       this.jobRunEvery = conf.jobRunEvery;
       this.jobLockExpirationPeriod = conf.jobLockExpirationPeriod;
       this.taskCleanupJobEnabled = conf.taskCleanupJobEnabled;
+      this.taskCleanupJobBatchSize = conf.taskCleanupJobBatchSize;
       this.taskCleanupJobMinimumAge = conf.taskCleanupJobMinimumAge;
       this.taskCleanupJobAllCompletedSameParentBusiness =
           conf.taskCleanupJobAllCompletedSameParentBusiness;
@@ -1222,6 +1236,11 @@ public class KadaiConfiguration {
       return this;
     }
 
+    public Builder taskCleanupJobBatchSize(int taskCleanupJobBatchSize) {
+      this.taskCleanupJobBatchSize = taskCleanupJobBatchSize;
+      return this;
+    }
+
     public Builder jobLockExpirationPeriod(Duration jobLockExpirationPeriod) {
       this.jobLockExpirationPeriod = jobLockExpirationPeriod;
       return this;
@@ -1442,6 +1461,11 @@ public class KadaiConfiguration {
       if (jobBatchSize <= 0) {
         throw new InvalidArgumentException(
             "Parameter jobBatchSize (kadai.jobs.batchSize) must be a positive integer");
+      }
+      if (taskCleanupJobBatchSize <= 0) {
+        throw new InvalidArgumentException(
+            "Parameter taskCleanupJobBatchSize (kadai.jobs.cleanup.task.batchSize)"
+                + " must be a positive integer");
       }
       if (maxNumberOfJobRetries <= 0) {
         throw new InvalidArgumentException(

@@ -49,7 +49,7 @@ public class TaskCleanupJob extends AbstractKadaiJob {
       KadaiEngine kadaiEngine, KadaiTransactionProvider txProvider, ScheduledJob scheduledJob) {
     super(kadaiEngine, txProvider, scheduledJob, true);
     minimumAge = kadaiEngine.getConfiguration().getTaskCleanupJobMinimumAge();
-    batchSize = kadaiEngine.getConfiguration().getJobBatchSize();
+    batchSize = kadaiEngine.getConfiguration().getTaskCleanupJobBatchSize();
     allCompletedSameParentBusiness =
         kadaiEngine.getConfiguration().isTaskCleanupJobAllCompletedSameParentBusiness();
   }
