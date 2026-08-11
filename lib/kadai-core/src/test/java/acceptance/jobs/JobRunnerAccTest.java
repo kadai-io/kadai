@@ -109,22 +109,18 @@ class JobRunnerAccTest extends AbstractAccTest {
             Instant.now().plus(TASK_CLEANUP_JOB_LOCK_EXPIRATION_PERIOD));
 
     Instant renewalStarted = Instant.now();
-    assertThat(
-            jobService.renewLock(lockedJob, TASK_CLEANUP_JOB_LOCK_EXPIRATION_PERIOD))
-        .isTrue();
+    assertThat(jobService.renewLock(lockedJob, TASK_CLEANUP_JOB_LOCK_EXPIRATION_PERIOD)).isTrue();
     assertThat(lockedJob.getLockExpires())
         .isBetween(
             renewalStarted.plus(TASK_CLEANUP_JOB_LOCK_EXPIRATION_PERIOD).minusMillis(1),
             Instant.now().plus(TASK_CLEANUP_JOB_LOCK_EXPIRATION_PERIOD));
 
     lockedJob.setLockedBy("another-worker");
-    assertThat(
-            jobService.renewLock(lockedJob, TASK_CLEANUP_JOB_LOCK_EXPIRATION_PERIOD))
-        .isFalse();
+    assertThat(jobService.renewLock(lockedJob, TASK_CLEANUP_JOB_LOCK_EXPIRATION_PERIOD)).isFalse();
   }
 
   @Test
-  void should_RunTaskCleanupDeletionBatchOutsideControlTransactions() throws Exception {
+  void should_RunTaskCleanupDeletionBatchOutsideControlTransactions() {
     createJob(Instant.now().minus(5, ChronoUnit.MINUTES), TaskCleanupJob.class.getName());
     CountingTransactionProvider transactionProvider =
         new CountingTransactionProvider(
@@ -141,7 +137,7 @@ class JobRunnerAccTest extends AbstractAccTest {
   }
 
   @Test
-  void should_RunWholeJobPolicyInOneTransaction() throws Exception {
+  void should_RunWholeJobPolicyInOneTransaction() {
     createJob(Instant.now().minus(5, ChronoUnit.MINUTES), TaskUpdatePriorityJob.class.getName());
     CountingTransactionProvider transactionProvider =
         new CountingTransactionProvider(

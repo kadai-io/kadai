@@ -34,5 +34,6 @@ public interface BatchKadaiEventConsumer<T extends KadaiEvent> extends KadaiEven
    *
    * @param events the events to consume
    */
+  @Override
   void consumeAll(Collection<T> events);
 }
