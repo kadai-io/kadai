@@ -44,9 +44,7 @@ public interface KadaiEventConsumer<T extends KadaiEvent> extends KadaiInitializ
    * BatchKadaiEventConsumer} for that purpose.
    *
    * @param events the events to consume
-   * @deprecated Implement {@link BatchKadaiEventConsumer} instead.
    */
-  @Deprecated(forRemoval = true, since = "12.1.0")
   default void consumeAll(Collection<T> events) {
     events.forEach(this::consume);
   }
