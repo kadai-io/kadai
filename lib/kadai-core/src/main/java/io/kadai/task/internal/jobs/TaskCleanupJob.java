@@ -18,6 +18,7 @@
 
 package io.kadai.task.internal.jobs;
 
+import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.BulkOperationResults;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.ScheduledJob;
@@ -25,11 +26,12 @@ import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
+import io.kadai.common.internal.JobServiceImpl;
 import io.kadai.common.internal.jobs.AbstractKadaiJob;
+import io.kadai.common.internal.jobs.JobTransactionPolicy;
 import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import io.kadai.common.internal.util.CollectionUtil;
 import io.kadai.common.internal.util.LogSanitizer;
-import io.kadai.task.internal.jobs.models.TaskCleanupSummary;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -54,19 +56,38 @@ public class TaskCleanupJob extends AbstractKadaiJob {
         kadaiEngine.getConfiguration().isTaskCleanupJobAllCompletedSameParentBusiness();
   }
 
+  public static Duration getLockExpirationPeriod(KadaiConfiguration kadaiConfiguration) {
+    return kadaiConfiguration.getTaskCleanupJobLockExpirationPeriod();
+  }
+
+  @Override
+  public JobTransactionPolicy getTransactionPolicy() {
+    return JobTransactionPolicy.JOB_MANAGED;
+  }
+
   @Override
   public void execute() {
     Instant completedBefore = Instant.now().minus(minimumAge);
+    long jobStartedAt = System.nanoTime();
     LOGGER.info("Running job to delete all tasks completed before ({})", completedBefore);
     try {
-      List<TaskCleanupSummary> tasksCompletedBefore = getTasksCompletedBefore(completedBefore);
+      renewLock();
+      long selectionStartedAt = System.nanoTime();
+      List<String> tasksCompletedBefore = getTasksCompletedBefore(completedBefore);
+      LOGGER.info(
+          "Selected {} tasks for cleanup in {} ms.",
+          tasksCompletedBefore.size(),
+          Duration.ofNanos(System.nanoTime() - selectionStartedAt).toMillis());
 
       int totalNumberOfTasksDeleted =
           CollectionUtil.partitionBasedOnSize(tasksCompletedBefore, batchSize).stream()
               .mapToInt(this::deleteTasksTransactionally)
               .sum();
 
-      LOGGER.info("Job ended successfully. {} tasks deleted.", totalNumberOfTasksDeleted);
+      LOGGER.info(
+          "Job ended successfully. {} tasks deleted in {} ms.",
+          totalNumberOfTasksDeleted,
+          Duration.ofNanos(System.nanoTime() - jobStartedAt).toMillis());
     } catch (Exception e) {
       throw new SystemException("Error while processing TaskCleanupJob.", e);
     }
@@ -77,7 +98,7 @@ public class TaskCleanupJob extends AbstractKadaiJob {
     return TaskCleanupJob.class.getName();
   }
 
-  private List<TaskCleanupSummary> getTasksCompletedBefore(Instant untilDate) {
+  private List<String> getTasksCompletedBefore(Instant untilDate) {
     return allCompletedSameParentBusiness
         ? kadaiEngineImpl
             .getTaskMapper()
@@ -85,28 +106,44 @@ public class TaskCleanupJob extends AbstractKadaiJob {
         : kadaiEngineImpl.getTaskMapper().findTasksCompletedBefore(untilDate);
   }
 
-  private int deleteTasksTransactionally(List<TaskCleanupSummary> tasksToBeDeleted) {
+  private int deleteTasksTransactionally(List<String> tasksToBeDeleted) {
     return KadaiTransactionProvider.executeInTransactionIfPossible(
         txProvider,
         () -> {
+          int deletedTasks;
           try {
-            return deleteTasks(tasksToBeDeleted);
+            deletedTasks = deleteTasks(tasksToBeDeleted);
           } catch (Exception ex) {
             LOGGER.warn("Could not delete tasks.", ex);
             return 0;
           }
+          renewLock();
+          return deletedTasks;
         });
   }
 
-  private int deleteTasks(List<TaskCleanupSummary> tasksToBeDeleted)
+  private void renewLock() {
+    if (scheduledJob == null) {
+      return;
+    }
+    boolean lockRenewed =
+        ((JobServiceImpl) kadaiEngineImpl.getJobService())
+            .renewLock(
+                scheduledJob,
+                kadaiEngineImpl.getConfiguration().getTaskCleanupJobLockExpirationPeriod());
+    if (!lockRenewed) {
+      throw new SystemException(
+          "Task cleanup job lock was lost. Stopping cleanup to avoid concurrent processing.");
+    }
+  }
+
+  private int deleteTasks(List<String> tasksToBeDeleted)
       throws InvalidArgumentException, NotAuthorizedException {
 
-    List<String> tasksIdsToBeDeleted =
-        tasksToBeDeleted.stream().map(TaskCleanupSummary::getTaskId).toList();
     BulkOperationResults<String, KadaiException> results =
-        kadaiEngineImpl.getTaskService().deleteTasks(tasksIdsToBeDeleted);
+        kadaiEngineImpl.getTaskService().deleteTasks(tasksToBeDeleted);
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("{} tasks deleted.", tasksIdsToBeDeleted.size() - results.getFailedIds().size());
+      LOGGER.debug("{} tasks deleted.", tasksToBeDeleted.size() - results.getFailedIds().size());
     }
     for (String failedId : results.getFailedIds()) {
       if (LOGGER.isWarnEnabled()) {
@@ -116,7 +153,7 @@ public class TaskCleanupJob extends AbstractKadaiJob {
             LogSanitizer.stripLineBreakingChars(results.getErrorForId(failedId)));
       }
     }
-    return tasksIdsToBeDeleted.size() - results.getFailedIds().size();
+    return tasksToBeDeleted.size() - results.getFailedIds().size();
   }
 
   @Override

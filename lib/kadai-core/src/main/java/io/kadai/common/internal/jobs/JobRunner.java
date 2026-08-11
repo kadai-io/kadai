@@ -20,11 +20,12 @@ package io.kadai.common.internal.jobs;
 
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.ScheduledJob;
+import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.JobServiceImpl;
 import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.List;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,38 +47,55 @@ public class JobRunner {
   }
 
   public void runJobs() {
-    findAndLockJobsToRun().forEach(this::runJobTransactionally);
-  }
-
-  private List<ScheduledJob> findAndLockJobsToRun() {
-    return KadaiTransactionProvider.executeInTransactionIfPossible(
-        txProvider, () -> jobService.findJobsToRun().stream().map(this::lockJob).toList());
-  }
-
-  private void runJobTransactionally(ScheduledJob scheduledJob) {
     KadaiTransactionProvider.executeInTransactionIfPossible(
-        txProvider,
+            txProvider, () -> jobService.findJobsToRun().stream().map(this::lockJob))
+        .forEach(this::runJob);
+  }
+
+  private void runJob(ScheduledJob scheduledJob) {
+    kadaiEngine.runAsAdmin(
         () -> {
-          boolean successful = kadaiEngine.runAsAdmin(() -> runScheduledJob(scheduledJob));
-          if (successful) {
-            jobService.deleteJob(scheduledJob);
+          try {
+            AbstractKadaiJob job =
+                (AbstractKadaiJob)
+                    AbstractKadaiJob.createFromScheduledJob(kadaiEngine, txProvider, scheduledJob);
+            if (job.getTransactionPolicy() == JobTransactionPolicy.WHOLE_JOB) {
+              KadaiTransactionProvider.executeInTransactionIfPossible(
+                  txProvider, () -> executeAndFinalize(job, scheduledJob));
+            } else {
+              executeJob(job);
+              KadaiTransactionProvider.executeInTransactionIfPossible(
+                  txProvider, () -> finalizeScheduledJob(job, scheduledJob));
+            }
+          } catch (Exception e) {
+            LOGGER.error("Error running job: {} ", scheduledJob.getType(), e);
           }
         });
   }
 
-  private boolean runScheduledJob(ScheduledJob scheduledJob) {
+  private void executeAndFinalize(AbstractKadaiJob job, ScheduledJob scheduledJob) {
+    executeJob(job);
+    finalizeScheduledJob(job, scheduledJob);
+  }
+
+  private void executeJob(AbstractKadaiJob job) {
     try {
-      AbstractKadaiJob.createFromScheduledJob(kadaiEngine, txProvider, scheduledJob).run();
-      return true;
+      job.execute();
     } catch (Exception e) {
-      LOGGER.error("Error running job: {} ", scheduledJob.getType(), e);
-      return false;
+      throw new SystemException("Error running job: " + job.getClass().getName(), e);
     }
+  }
+
+  private void finalizeScheduledJob(AbstractKadaiJob job, ScheduledJob scheduledJob) {
+    if (job.isAsync()) {
+      job.scheduleNextJob();
+    }
+    jobService.deleteJob(scheduledJob);
   }
 
   private ScheduledJob lockJob(ScheduledJob job) {
     String hostAddress = getHostAddress();
-    String owner = hostAddress + " - " + Thread.currentThread().getName();
+    String owner = hostAddress + " - " + UUID.randomUUID();
     job.setLockedBy(owner);
     ScheduledJob lockedJob = jobService.lockJob(job, owner);
     if (LOGGER.isDebugEnabled()) {
