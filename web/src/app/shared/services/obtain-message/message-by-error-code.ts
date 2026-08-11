@@ -111,6 +111,10 @@ export const messageByErrorCode = {
     TASK_UPDATE: 'Task with name {taskName} was updated',
     TASK_DELETE: 'Task with name {taskName} was deleted',
     TASK_RESTORE: 'Task restored',
+    TASK_CLAIM: 'Task with name {taskName} was claimed',
+    TASK_COMPLETE: 'Task with name {taskName} was completed',
+    TASK_CANCEL_CLAIM: 'Claim of task with name {taskName} was cancelled',
+    TASK_TRANSFER: 'Task with name {taskName} was transferred',
 
     SETTINGS_SAVE: 'Settings were updated'
   },

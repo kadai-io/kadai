@@ -43,7 +43,8 @@
         @for (accessId of filteredAccessIds(); track accessId) {
           <mat-option [value]="accessId.accessId"
                       class="type-ahead__form-options"
-                      matTooltip="{{accessId.accessId}} {{accessId.name}}">
+                      matTooltip="{{accessId.accessId}} {{accessId.name}}"
+                      [matTooltipPosition]="matTooltipPosition()">
             <small>{{ accessId.accessId }}&nbsp;&nbsp;{{ accessId.name }}</small>
           </mat-option>
         }

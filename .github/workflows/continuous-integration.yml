@@ -43,6 +43,8 @@ jobs:
       backend_changed: ${{ steps.filter.outputs.backend }}
       frontend_changed: ${{ steps.filter.outputs.frontend }} 
       code_changed: ${{ steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' }}  
+      # Master coverage must contain the complete test suite, independent of the changed paths.
+      run_all_tests: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
     steps:
       - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
@@ -72,7 +74,7 @@ jobs:
     name: Compile all maven modules
     runs-on: ubuntu-22.04
     needs: [ detect_changes ]
-    if: needs.detect_changes.outputs.code_changed == 'true' || startsWith(github.ref, 'refs/tags/')
+    if: needs.detect_changes.outputs.run_all_tests == 'true' || needs.detect_changes.outputs.code_changed == 'true' || startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -133,7 +135,7 @@ jobs:
     name: Compile kadai-web
     runs-on: ubuntu-22.04
     needs: [ detect_changes ]
-    if: needs.detect_changes.outputs.code_changed == 'true' || startsWith(github.ref, 'refs/tags/')
+    if: needs.detect_changes.outputs.run_all_tests == 'true' || needs.detect_changes.outputs.code_changed == 'true' || startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -217,7 +219,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Test kadai-web
     needs: [ detect_changes, compile_frontend ]
-    if: needs.detect_changes.outputs.frontend_changed == 'true' || startsWith(github.ref, 'refs/tags/')
+    if: needs.detect_changes.outputs.run_all_tests == 'true' || needs.detect_changes.outputs.frontend_changed == 'true' || startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -305,7 +307,7 @@ jobs:
     needs: [ detect_changes, test_frontend, test_backend ]
     if: |
       (always() &&
-      needs.detect_changes.outputs.code_changed == 'true' &&
+      (needs.detect_changes.outputs.run_all_tests == 'true' || needs.detect_changes.outputs.code_changed == 'true') &&
       needs.test_frontend.result != 'failure' &&
       needs.test_backend.result != 'failure')
       || startsWith(github.ref, 'refs/tags/')
@@ -401,7 +403,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Test ${{ matrix.module }} on ${{ matrix.database }} with Java ${{ matrix.java_version }}
     needs: [ detect_changes, compile_backend ]
-    if: needs.detect_changes.outputs.backend_changed == 'true' || startsWith(github.ref, 'refs/tags/')
+    if: needs.detect_changes.outputs.run_all_tests == 'true' || needs.detect_changes.outputs.backend_changed == 'true' || startsWith(github.ref, 'refs/tags/')
     strategy:
       matrix:
         java_version:
@@ -705,25 +707,27 @@ jobs:
         if: needs.detect_changes.outputs.backend_changed == 'true' || startsWith(github.ref, 'refs/tags/v')
         run: |
           echo "Using Maven profile: $DEPLOY_PROFILE"
+          MODULES=":kadai-parent,:kadai-common-parent,:kadai-common-logging,:kadai-common,:kadai-common-security,:kadai-common-data,:kadai-common-test,:kadai-test-api,:kadai-lib-parent,:kadai-core,:kadai-spring,:kadai-rest-parent,:kadai-rest-spring,:kadai-history-parent,:kadai-simplehistory-provider,:kadai-simplehistory-rest-spring,:kadai-loghistory-provider,:kadai-routing-parent,:kadai-spi-routing-dmn-router,:kadai-routing-rest"
+
+          # The web POM inherits its coordinates and Central-required metadata from
+          # its parent POM hierarchy. For a release, publish it in the same Central
+          # bundle, as those parents are not available from Central until publication.
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            MODULES+=",:kadai-web"
+          fi
+
           ./mvnw -B deploy -P "${DEPLOY_PROFILE}" \
           --settings ci/mvnsettings.xml \
           -Dmaven.test.skip=true -Dcheckstyle.skip -Djacoco.skip \
-          -pl :kadai-parent,\
-          :kadai-common-parent,:kadai-common-logging,:kadai-common,:kadai-common-security,\
-          :kadai-common-data,:kadai-common-test,:kadai-test-api,\
-          :kadai-lib-parent,:kadai-core,:kadai-spring,\
-          :kadai-rest-parent,:kadai-rest-spring,\
-          :kadai-history-parent,:kadai-simplehistory-provider,:kadai-simplehistory-rest-spring,:kadai-loghistory-provider,\
-          :kadai-routing-parent,:kadai-spi-routing-dmn-router,:kadai-routing-rest
+          -pl "$MODULES"
         env:
           GPG_KEY_NAME: ${{ secrets.GPG_KEY_NAME }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-      # Deploy the frontend module (kadai-web) only when frontend code changed or a release
-      # tag is pushed. kadai-web has no Java dependencies, so no backend artifacts are needed.
+      # On release tags, kadai-web is deployed above with its parent POMs in one Central bundle.
       - name: Release frontend artifact to Sonatype-Central
-        if: needs.detect_changes.outputs.frontend_changed == 'true' || startsWith(github.ref, 'refs/tags/v')
+        if: needs.detect_changes.outputs.frontend_changed == 'true' && !startsWith(github.ref, 'refs/tags/v')
         run: |
           echo "Using Maven profile: $DEPLOY_PROFILE"
           ./mvnw -B deploy -P "${DEPLOY_PROFILE}" \
@@ -859,7 +863,7 @@ jobs:
         github.event_name == 'push' &&
         github.event.head_commit.author.name == 'dependabot[bot]'
       ) &&
-      needs.detect_changes.outputs.code_changed == 'true' &&
+      (needs.detect_changes.outputs.run_all_tests == 'true' || needs.detect_changes.outputs.code_changed == 'true') &&
       needs.test_frontend.result != 'failure' &&
       needs.test_e2e.result != 'failure' &&
       needs.test_backend.result != 'failure'
@@ -895,13 +899,13 @@ jobs:
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download JaCoCo reports
-        if: needs.detect_changes.outputs.backend_changed == 'true'
+        if: needs.detect_changes.outputs.run_all_tests == 'true' || needs.detect_changes.outputs.backend_changed == 'true'
         uses: actions/download-artifact@v8
         with:
           pattern: ${{ env.ARTIFACTS_JACOCO_REPORTS_NAME }}-*
           merge-multiple: true
       - name: Download frontend coverage
-        if: needs.detect_changes.outputs.frontend_changed == 'true'
+        if: needs.detect_changes.outputs.run_all_tests == 'true' || needs.detect_changes.outputs.frontend_changed == 'true'
         uses: actions/download-artifact@v8
         with:
           name: ${{ env.ARTIFACTS_FRONTEND_COVERAGE_NAME }}
@@ -909,20 +913,16 @@ jobs:
       - name: Install kadai
         run: ./mvnw -B install -DskipTests -Dcheckstyle.skip -Dmaven.javadoc.skip
       - name: Generate JaCoCo aggregate report
-        if: needs.detect_changes.outputs.backend_changed == 'true'
+        if: needs.detect_changes.outputs.run_all_tests == 'true' || needs.detect_changes.outputs.backend_changed == 'true'
         run: ./mvnw -B verify -pl :kadai-sonar-test-coverage -am -DskipTests -Dcheckstyle.skip -Dmaven.javadoc.skip
       - name: Upload SonarQube analysis
         run: |
           SONAR_ARGS=("-Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}")
 
-          if [[ "${{ needs.detect_changes.outputs.backend_changed }}" == "true" ]]; then
+          if [[ "${{ needs.detect_changes.outputs.run_all_tests }}" == "true" || "${{ needs.detect_changes.outputs.backend_changed }}" == "true" ]]; then
             SONAR_ARGS+=("-Dsonar.coverage.jacoco.xmlReportPaths=ci/kadai-sonar-test-coverage/target/site/jacoco-aggregate/jacoco.xml,../ci/kadai-sonar-test-coverage/target/site/jacoco-aggregate/jacoco.xml,../../ci/kadai-sonar-test-coverage/target/site/jacoco-aggregate/jacoco.xml")
           else
             SONAR_ARGS+=("-Dsonar.coverage.jacoco.xmlReportPaths=")
-          fi
-
-          if [[ "${{ needs.detect_changes.outputs.frontend_changed }}" == "true" ]]; then
-            SONAR_ARGS+=("-Dsonar.javascript.lcov.reportPaths=web/coverage/lcov.info")
           fi
 
           ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar "${SONAR_ARGS[@]}" -DskipTests

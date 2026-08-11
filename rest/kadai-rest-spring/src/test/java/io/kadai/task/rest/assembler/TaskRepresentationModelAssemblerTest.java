@@ -99,6 +99,7 @@ class TaskRepresentationModelAssemblerTest {
     repModel.setDue(Instant.parse("2019-09-13T08:44:17.588Z"));
     repModel.setName("name");
     repModel.setCreator("creator");
+    repModel.setCreatorLongName("creatorLongName");
     repModel.setDescription("desc");
     repModel.setNote("note");
     repModel.setManualPriority(123);
@@ -204,6 +205,7 @@ class TaskRepresentationModelAssemblerTest {
     task.setDue(Instant.parse("2019-09-13T08:44:17.588Z"));
     task.setName("name");
     task.setCreator("creator");
+    task.setCreatorLongName("creatorLongName");
     task.setDescription("desc");
     task.setNote("note");
     task.setPriority(123);
@@ -280,6 +282,7 @@ class TaskRepresentationModelAssemblerTest {
     task.setDue(Instant.parse("2019-09-13T08:44:17.588Z"));
     task.setName("name");
     task.setCreator("creator");
+    task.setCreatorLongName("creatorLongName");
     task.setDescription("desc");
     task.setNote("note");
     task.setPriority(123);

@@ -17,27 +17,21 @@
  */
 
 import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { Task } from 'app/workplace/models/task';
-import { TaskService } from 'app/workplace/services/task.service';
-import { Observable, Subject } from 'rxjs';
-import { Direction, Sorting, TaskQuerySortParameter } from 'app/shared/models/sorting';
-import { Workbasket } from 'app/shared/models/workbasket';
-import { WorkplaceService } from 'app/workplace/services/workplace.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { TaskQuerySortParameter } from 'app/shared/models/sorting';
 import { OrientationService } from 'app/shared/services/orientation/orientation.service';
-import { Page } from 'app/shared/models/page';
-import { take, takeUntil } from 'rxjs/operators';
-import { Search, TaskListToolbarComponent } from '../task-list-toolbar/task-list-toolbar.component';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { QueryPagingParameter } from '../../../shared/models/query-paging-parameter';
-import { TaskQueryFilterParameter } from '../../../shared/models/task-query-filter-parameter';
-import { Store } from '@ngxs/store';
-import { FilterSelectors } from '../../../shared/store/filter-store/filter.selectors';
-import { WorkplaceSelectors } from '../../../shared/store/workplace-store/workplace.selectors';
-import { CalculateNumberOfCards } from '../../../shared/store/workplace-store/workplace.actions';
+import { Subject } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
+import { TaskListToolbarComponent } from '../task-list-toolbar/task-list-toolbar.component';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 
 import { TaskListComponent } from '../task-list/task-list.component';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
+import { Store } from '@ngxs/store';
+import { TaskSelectors } from '../../../shared/store/task-store/task.selectors';
+import { SetPage, SetPageSize } from '../../../shared/store/task-store/task.actions';
+import { WorkplaceSelectors } from '../../../shared/store/workplace-store/workplace.selectors';
+import { CalculateNumberOfCards } from '../../../shared/store/workplace-store/workplace.actions';
 
 @Component({
   selector: 'kadai-task-master',
@@ -46,56 +40,22 @@ import { PaginationComponent } from '../../../shared/components/pagination/pagin
   imports: [TaskListToolbarComponent, TaskListComponent, PaginationComponent]
 })
 export class TaskMasterComponent implements OnInit, OnDestroy {
-  tasks = signal<Task[] | undefined>(undefined);
-  tasksPageInformation = signal<Page | undefined>(undefined);
   type = 'tasks';
-  currentBasket?: Workbasket;
-  selectedId = signal('');
   taskDefaultSortBy: TaskQuerySortParameter = TaskQuerySortParameter.PRIORITY;
-  sort: Sorting<TaskQuerySortParameter> = {
-    'sort-by': this.taskDefaultSortBy,
-    order: Direction.ASC
-  };
-  paging: QueryPagingParameter = {
-    page: 1,
-    'page-size': 9
-  };
-  filterBy: TaskQueryFilterParameter = {};
-  requestInProgress = signal(false);
-  selectedSearchType: Search = Search.byWorkbasket;
   destroy$ = new Subject();
-  filter$: Observable<TaskQueryFilterParameter> = inject(Store).select(FilterSelectors.getTaskFilter);
-  cards$: Observable<number> = inject(Store).select(WorkplaceSelectors.getNumberOfCards);
-  private taskService = inject(TaskService);
-  private workplaceService = inject(WorkplaceService);
-  private notificationsService = inject(NotificationService);
-  private orientationService = inject(OrientationService);
   private store = inject(Store);
+  private orientationService = inject(OrientationService);
   private requestInProgressService = inject(RequestInProgressService);
+
+  tasks = toSignal(this.store.select(TaskSelectors.getTasks));
+  tasksPageInformation = toSignal(this.store.select(TaskSelectors.getPage));
+  selectedId = toSignal(this.store.select(TaskSelectors.getSelectedTask).pipe(map((task) => task?.taskId ?? '')));
+  requestInProgress = toSignal(this.requestInProgressService.getRequestInProgress());
+  private cards$ = this.store.select(WorkplaceSelectors.getNumberOfCards);
 
   ngOnInit() {
     this.cards$.pipe(takeUntil(this.destroy$)).subscribe((cards) => {
-      this.paging['page-size'] = cards;
-      this.getTasks();
-    });
-
-    this.taskService.taskSelectedStream.pipe(takeUntil(this.destroy$)).subscribe((task: Task | undefined) => {
-      this.selectedId.set(task ? task.taskId : '');
-      if (!this.tasks() && task) {
-        this.currentBasket = task.workbasketSummary;
-        this.getTasks();
-      }
-    });
-
-    this.taskService.taskChangedStream.pipe(takeUntil(this.destroy$)).subscribe((task) => {
-      if (!task) return;
-      this.currentBasket = task.workbasketSummary;
-      this.getTasks();
-    });
-
-    this.taskService.taskDeletedStream.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.selectedId.set('');
-      this.getTasks();
+      this.store.dispatch(new SetPageSize(cards));
     });
 
     this.orientationService
@@ -104,81 +64,14 @@ export class TaskMasterComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.store.dispatch(new CalculateNumberOfCards());
       });
-
-    this.workplaceService
-      .getSelectedWorkbasket()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((workbasket) => {
-        this.currentBasket = workbasket;
-        if (this.selectedSearchType === Search.byWorkbasket) {
-          this.getTasks();
-        }
-      });
-  }
-
-  performSorting(sort: Sorting<TaskQuerySortParameter>) {
-    this.sort = sort;
-    this.getTasks();
-  }
-
-  performFilter() {
-    this.paging.page = 1;
-    this.filter$.pipe(take(1)).subscribe((filter) => {
-      this.filterBy = { ...filter };
-      this.getTasks();
-    });
-  }
-
-  selectSearchType(type: Search) {
-    this.selectedSearchType = type;
-    this.tasks.set([]);
   }
 
   changePage(page: number) {
-    this.paging.page = page;
-    this.getTasks();
+    this.store.dispatch(new SetPage(page));
   }
 
   ngOnDestroy(): void {
     this.destroy$.next(null);
     this.destroy$.complete();
-  }
-
-  private getTasks(): void {
-    this.requestInProgress.set(true);
-    this.requestInProgressService.setRequestInProgress(true);
-
-    if (this.selectedSearchType === Search.byTypeAndValue) {
-      delete this.currentBasket;
-    }
-
-    if (this.currentBasket?.workbasketId) {
-      this.filterBy['workbasket-id'] = [this.currentBasket.workbasketId];
-    } else {
-      delete this.filterBy['workbasket-id'];
-    }
-
-    if (this.selectedSearchType === Search.byWorkbasket && !this.currentBasket) {
-      this.requestInProgress.set(false);
-      this.requestInProgressService.setRequestInProgress(false);
-      this.tasks.set([]);
-    } else {
-      this.taskService
-        .findTasksWithWorkbasket(this.filterBy, this.sort, this.paging)
-        .pipe(take(1))
-        .subscribe((taskResource) => {
-          this.requestInProgress.set(false);
-          this.requestInProgressService.setRequestInProgress(false);
-          if (taskResource.tasks && taskResource.tasks.length > 0) {
-            this.tasks.set(taskResource.tasks);
-          } else {
-            this.tasks.set([]);
-            if (this.selectedSearchType === Search.byWorkbasket) {
-              this.notificationsService.showInformation('EMPTY_WORKBASKET');
-            }
-          }
-          this.tasksPageInformation.set(taskResource.page);
-        });
-    }
   }
 }

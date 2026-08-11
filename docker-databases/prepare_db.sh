@@ -19,7 +19,7 @@ export TOP_PID=$$
 #H
 #H database:
 #H   - DB2 | DB2_11_5
-#H   - POSTGRES | POSTGRES_14
+#H   - POSTGRES | POSTGRES_17
 # Arguments:
 #   $1: exit code
 function helpAndExit() {
@@ -36,8 +36,8 @@ function mapDBToDockerComposeServiceName() {
     DB2|DB2_11_5)
       echo "kadai-db2_11-5"
       ;;
-    POSTGRES|POSTGRES_14)
-      echo "kadai-postgres_14"
+    POSTGRES|POSTGRES_17)
+      echo "kadai-postgres_17"
       ;;
     *)
       echo "unknown database '$1'" >&2 && kill -s TERM $TOP_PID
@@ -54,7 +54,7 @@ function main() {
   DB2|DB2_11_5)
     docker compose -f $scriptDir/docker-compose.yml up -d "$(mapDBToDockerComposeServiceName "$1")"
     ;;
-  POSTGRES|POSTGRES_14)
+  POSTGRES|POSTGRES_17)
     docker compose -f $scriptDir/docker-compose.yml up -d "$(mapDBToDockerComposeServiceName "$1")"
     ;;
   stop)

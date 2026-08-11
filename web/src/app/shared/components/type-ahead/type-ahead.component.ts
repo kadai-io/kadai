@@ -29,7 +29,7 @@ import { EngineConfigurationSelectors } from '../../store/engine-configuration-s
 import { GlobalCustomisation } from '../../models/customisation';
 import { NgClass } from '@angular/common';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MatTooltip, TooltipPosition } from '@angular/material/tooltip';
 import { MatInput } from '@angular/material/input';
 import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { MatOption } from '@angular/material/core';
@@ -52,6 +52,7 @@ import { MatOption } from '@angular/material/core';
   ]
 })
 export class TypeAheadComponent implements OnInit, OnDestroy {
+  matTooltipPosition = input<TooltipPosition>('below');
   savedAccessId = input<any>();
   placeHolderMessage = input<string>();
   entityId = input<any>();

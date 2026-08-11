@@ -181,6 +181,35 @@ class GetTaskIdsOfWorkbasketReportAccTest extends AbstractReportAccTest {
             "TKI:000000000000000000000000000000000044"); // from first filter
   }
 
+  @WithAccessId(user = "monitor")
+  @Test
+  void should_ApplyDomainFilterToEveryCombinedClassificationAlternative_When_RetrievingTaskIds()
+      throws Exception {
+    List<String> ids =
+        MONITOR_SERVICE
+            .createWorkbasketReportBuilder()
+            .domainIn(List.of("DOMAIN_A"))
+            .combinedClassificationFilterIn(
+                List.of(
+                    new CombinedClassificationFilter(
+                        "CLI:000000000000000000000000000000000001",
+                        "CLI:000000000000000000000000000000000006"),
+                    new CombinedClassificationFilter(
+                        "CLI:000000000000000000000000000000000003",
+                        "CLI:000000000000000000000000000000000008")))
+            .listTaskIdsForSelectedItems(
+                List.of(
+                    new SelectedItem(
+                        "USER-1-1", null, Integer.MIN_VALUE, Integer.MAX_VALUE)),
+                TaskTimestamp.DUE);
+
+    assertThat(ids)
+        .containsExactlyInAnyOrder(
+            "TKI:000000000000000000000000000000000013",
+            "TKI:000000000000000000000000000000000036",
+            "TKI:000000000000000000000000000000000044");
+  }
+
   private List<TimeIntervalColumnHeader> getListOfColumnHeaders() {
     List<TimeIntervalColumnHeader> columnHeaders = new ArrayList<>();
     columnHeaders.add(new TimeIntervalColumnHeader(Integer.MIN_VALUE, -11));

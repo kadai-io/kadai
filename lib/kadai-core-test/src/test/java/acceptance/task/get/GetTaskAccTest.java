@@ -251,7 +251,8 @@ class GetTaskAccTest {
     assertThatCode(() -> readTask.getCustomAttributeMap().put("X", "Y")).doesNotThrowAnyException();
     assertThatCode(() -> readTask.getCallbackInfo().put("X", "Y")).doesNotThrowAnyException();
     assertThat(readTask)
-        .hasNoNullFieldsOrPropertiesExcept("ownerLongName", "completed", "groupByCount");
+        .hasNoNullFieldsOrPropertiesExcept(
+            "creatorLongName", "ownerLongName", "completed", "groupByCount");
   }
 
   @WithAccessId(user = "user-1-1")

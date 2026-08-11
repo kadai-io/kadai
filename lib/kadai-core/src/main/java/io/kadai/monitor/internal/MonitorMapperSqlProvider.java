@@ -53,13 +53,14 @@ public class MonitorMapperSqlProvider {
         + OPENING_WHERE_TAG
         + taskWhereStatements()
         + "<if test=\"report.combinedClassificationFilter != null\">"
-        + "AND <foreach collection='report.combinedClassificationFilter' "
-        + "item='item' separator='OR'> "
-        + "T.CLASSIFICATION_ID = #{item.taskClassificationId}"
+        + "AND (<foreach collection='report.combinedClassificationFilter' "
+        + "item='item' separator=' OR '> "
+        + "(T.CLASSIFICATION_ID = #{item.taskClassificationId} "
         + "<if test=\"item.attachmentClassificationId != null\">"
-        + "AND A.CLASSIFICATION_ID = #{item.attachmentClassificationId}"
+        + "AND A.CLASSIFICATION_ID = #{item.attachmentClassificationId} "
         + "</if>"
-        + "</foreach>"
+        + ") "
+        + "</foreach>) "
         + "</if>"
         + "AND T.${timestamp} IS NOT NULL "
         + CLOSING_WHERE_TAG
@@ -179,12 +180,13 @@ public class MonitorMapperSqlProvider {
         + OPENING_WHERE_TAG
         + taskWhereStatements()
         + "<if test=\"combinedClassificationFilter != null\">"
-        + "AND <foreach collection='combinedClassificationFilter' item='item' separator='OR'> "
-        + "T.CLASSIFICATION_ID = #{item.taskClassificationId} "
+        + "AND (<foreach collection='combinedClassificationFilter' item='item' separator=' OR '> "
+        + "(T.CLASSIFICATION_ID = #{item.taskClassificationId} "
         + "<if test=\"item.attachmentClassificationId != null\">"
         + "AND A.CLASSIFICATION_ID = #{item.attachmentClassificationId} "
         + "</if>"
-        + "</foreach>"
+        + ") "
+        + "</foreach>) "
         + "</if>"
         + "AND T.${timestamp} IS NOT NULL AND ( "
         + "<foreach collection='selectedItems' item='selectedItem' separator=' OR '>"
@@ -277,12 +279,13 @@ public class MonitorMapperSqlProvider {
         + OPENING_WHERE_TAG
         + taskWhereStatements()
         + "<if test=\"combinedClassificationFilter != null\">"
-        + "AND <foreach collection='combinedClassificationFilter' item='item' separator='OR'> "
-        + "T.CLASSIFICATION_ID = #{item.taskClassificationId} "
+        + "AND (<foreach collection='combinedClassificationFilter' item='item' separator=' OR '> "
+        + "(T.CLASSIFICATION_ID = #{item.taskClassificationId} "
         + "<if test=\"item.attachmentClassificationId != null\">"
         + "AND A.CLASSIFICATION_ID = #{item.attachmentClassificationId} "
         + "</if>"
-        + "</foreach>"
+        + ") "
+        + "</foreach>) "
         + "</if>"
         + CLOSING_WHERE_TAG
         + CLOSING_SCRIPT_TAG;
