@@ -48,7 +48,7 @@ public class JobRunner {
 
   public void runJobs() {
     KadaiTransactionProvider.executeInTransactionIfPossible(
-            txProvider, () -> jobService.findJobsToRun().stream().map(this::lockJob))
+            txProvider, () -> jobService.findJobsToRun().stream().map(this::lockJob).toList())
         .forEach(this::runJob);
   }
 
