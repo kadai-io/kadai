@@ -134,9 +134,10 @@ class JobRunnerAccTest extends AbstractAccTest {
 
     runner.runJobs();
 
-    // One transaction locks the scheduled job, one deletes the only cleanup batch, and one
-    // atomically schedules its successor and deletes the completed scheduled job.
-    assertThat(transactionProvider.getInvocationCount()).isEqualTo(3);
+    // One transaction locks the scheduled job, one renews its lock and selects cleanup IDs, one
+    // deletes the only cleanup batch, and one atomically schedules its successor and deletes the
+    // completed scheduled job.
+    assertThat(transactionProvider.getInvocationCount()).isEqualTo(4);
   }
 
   @Test

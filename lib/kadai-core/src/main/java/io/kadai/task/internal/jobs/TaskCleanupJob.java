@@ -71,9 +71,8 @@ public class TaskCleanupJob extends AbstractKadaiJob {
     long jobStartedAt = System.nanoTime();
     LOGGER.info("Running job to delete all tasks completed before ({})", completedBefore);
     try {
-      renewLock();
       long selectionStartedAt = System.nanoTime();
-      List<String> tasksCompletedBefore = getTasksCompletedBefore(completedBefore);
+      List<String> tasksCompletedBefore = getTasksCompletedBeforeTransactionally(completedBefore);
       LOGGER.info(
           "Selected {} tasks for cleanup in {} ms.",
           tasksCompletedBefore.size(),
@@ -106,6 +105,15 @@ public class TaskCleanupJob extends AbstractKadaiJob {
                     .getTaskMapper()
                     .findTasksCompletedBeforeWithParentBusinessProcessConstraint(untilDate)
                 : kadaiEngineImpl.getTaskMapper().findTasksCompletedBefore(untilDate));
+  }
+
+  private List<String> getTasksCompletedBeforeTransactionally(Instant untilDate) {
+    return KadaiTransactionProvider.executeInTransactionIfPossible(
+        txProvider,
+        () -> {
+          renewLock();
+          return getTasksCompletedBefore(untilDate);
+        });
   }
 
   private int deleteTasksTransactionally(List<String> tasksToBeDeleted) {
