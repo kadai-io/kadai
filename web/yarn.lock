@@ -2362,15 +2362,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jsdom@npm:28":
-  version: 28.0.3
-  resolution: "@types/jsdom@npm:28.0.3"
+"@types/jsdom@npm:30":
+  version: 30.0.0
+  resolution: "@types/jsdom@npm:30.0.0"
   dependencies:
     "@types/node": "npm:*"
     "@types/tough-cookie": "npm:*"
     parse5: "npm:^8.0.0"
-    undici-types: "npm:^7.21.0"
-  checksum: 10c0/08b1cd61ee3e9610676be3c68a782a94667b86a5f73b8a262095d05f84c9e864fc11b25ae53450cd519a0abd46c202906a735bd61aa176257a981964bc5b1166
+    undici-types: "npm:^8.9.0"
+  checksum: 10c0/5489ff43ccaaaa473c1a0f10f623e6329a57234454203f557d0ff3bff28e51423b20219ff5c1c8f3d3552c862b36576c25340724b6e93d283c759b8db6868422
   languageName: node
   linkType: hard
 
@@ -5642,7 +5642,7 @@ __metadata:
     "@ngxs/router-plugin": "npm:22.0.0"
     "@ngxs/store": "npm:22.0.0"
     "@types/file-saver-es": "npm:2"
-    "@types/jsdom": "npm:28"
+    "@types/jsdom": "npm:30"
     "@types/lodash-es": "npm:4"
     "@types/node": "npm:26.1.2"
     "@typescript-eslint/eslint-plugin": "npm:8.66.0"
@@ -7940,10 +7940,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici-types@npm:^7.21.0":
-  version: 7.28.0
-  resolution: "undici-types@npm:7.28.0"
-  checksum: 10c0/e1230791cfbaf7fc88a4ebb5282423886a2fb325572234437a3e9c9f7dff970bebe12d5672d6d23a3584119d6d43f8222d06531ed749d8ddeb3551f004fca55d
+"undici-types@npm:^8.9.0":
+  version: 8.10.0
+  resolution: "undici-types@npm:8.10.0"
+  checksum: 10c0/beed5d37590eb750245e25430400e0bbb30f7fc31bc405e3211826eac6f99c9d2c1b957fe56fd096292ed0253526f7cde2dd4cfb29fa31e8f0dafcb00f5c3091
   languageName: node
   linkType: hard
 
