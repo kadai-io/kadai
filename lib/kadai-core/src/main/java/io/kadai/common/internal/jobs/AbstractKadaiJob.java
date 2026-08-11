@@ -143,6 +143,15 @@ public abstract class AbstractKadaiJob implements KadaiJob {
     }
   }
 
+  /**
+   * Returns the transaction policy used by JobRunner when this job is run from a schedule.
+   *
+   * @return the transaction policy for scheduled execution.
+   */
+  public JobTransactionPolicy getTransactionPolicy() {
+    return JobTransactionPolicy.WHOLE_JOB;
+  }
+
   public boolean isAsync() {
     return async;
   }
