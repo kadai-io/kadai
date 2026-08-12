@@ -302,7 +302,6 @@ public interface TaskApi {
    * This endpoint claims a Task if possible.
    *
    * @param taskId the Id of the Task which should be claimed
-   * @param userName TODO: this is currently not used
    * @return the claimed Task
    * @throws TaskNotFoundException if the requested Task does not exist.
    * @throws InvalidTaskStateException if the state of the requested Task is not READY.
@@ -354,8 +353,7 @@ public interface TaskApi {
       })
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_CLAIM)
   @Transactional(rollbackFor = Exception.class)
-  ResponseEntity<TaskRepresentationModel> claimTask(
-      @PathVariable("taskId") String taskId, @RequestBody(required = false) String userName)
+  ResponseEntity<TaskRepresentationModel> claimTask(@PathVariable("taskId") String taskId)
       throws TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException,
@@ -365,7 +363,6 @@ public interface TaskApi {
    * This endpoint force claims a Task if possible even if it is already claimed by someone else.
    *
    * @param taskId the Id of the Task which should be force claimed
-   * @param userName TODO: this is currently not used
    * @return the force claimed Task
    * @throws TaskNotFoundException if the requested Task does not exist.
    * @throws InvalidTaskStateException if the state of Task with taskId is in an END_STATE.
@@ -419,8 +416,7 @@ public interface TaskApi {
       })
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_CLAIM_FORCE)
   @Transactional(rollbackFor = Exception.class)
-  ResponseEntity<TaskRepresentationModel> forceClaimTask(
-      @PathVariable("taskId") String taskId, @RequestBody(required = false) String userName)
+  ResponseEntity<TaskRepresentationModel> forceClaimTask(@PathVariable("taskId") String taskId)
       throws TaskNotFoundException,
           InvalidTaskStateException,
           InvalidOwnerException,
@@ -1351,9 +1347,7 @@ public interface TaskApi {
         @ApiResponse(
             responseCode = "412",
             description = "TASK_TRANSFER_CHECK_FAILED",
-            content = {
-              @Content(schema = @Schema(implementation = TransferCheckException.class))
-            })
+            content = {@Content(schema = @Schema(implementation = TransferCheckException.class))})
       })
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_TRANSFER_WORKBASKET_ID)
   @Transactional(rollbackFor = Exception.class)
@@ -1476,13 +1470,10 @@ public interface TaskApi {
       },
       requestBody =
           @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              description =
-                  "JSON formatted request body containing the TaskIds to be transferred",
+              description = "JSON formatted request body containing the TaskIds to be transferred",
               content =
                   @Content(
-                      schema =
-                          @Schema(
-                              implementation = TransferTaskOwnerRepresentationModel.class),
+                      schema = @Schema(implementation = TransferTaskOwnerRepresentationModel.class),
                       examples =
                           @ExampleObject(
                               value =
@@ -1501,14 +1492,11 @@ public interface TaskApi {
                 @Content(
                     mediaType = MediaTypes.HAL_JSON_VALUE,
                     schema =
-                        @Schema(
-                            implementation = BulkOperationResultsRepresentationModel.class))),
+                        @Schema(implementation = BulkOperationResultsRepresentationModel.class))),
         @ApiResponse(
             responseCode = "400",
             description = "INVALID_ARGUMENT",
-            content = {
-              @Content(schema = @Schema(implementation = InvalidArgumentException.class))
-            })
+            content = {@Content(schema = @Schema(implementation = InvalidArgumentException.class))})
       })
   @PostMapping(path = RestEndpoints.URL_TRANSFER_TO_OWNER)
   @Transactional(rollbackFor = Exception.class)
@@ -2258,7 +2246,6 @@ public interface TaskApi {
    * @param filterCustomFields the filter parameters regarding TaskCustomFields
    * @param filterCustomIntFields the filter parameters regarding TaskCustomIntFields
    * @return the deleted task summaries
-   * @throws InvalidArgumentException TODO: this is never thrown
    * @throws NotAuthorizedException if the current user is not authorized to delete the requested
    *     Tasks.
    */

@@ -224,8 +224,7 @@ public class TaskController implements TaskApi {
 
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_CLAIM)
   @Transactional(rollbackFor = Exception.class)
-  public ResponseEntity<TaskRepresentationModel> claimTask(
-      @PathVariable("taskId") String taskId, @RequestBody(required = false) String userName)
+  public ResponseEntity<TaskRepresentationModel> claimTask(@PathVariable("taskId") String taskId)
       throws TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException,
@@ -238,7 +237,7 @@ public class TaskController implements TaskApi {
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_CLAIM_FORCE)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<TaskRepresentationModel> forceClaimTask(
-      @PathVariable("taskId") String taskId, @RequestBody(required = false) String userName)
+      @PathVariable("taskId") String taskId)
       throws TaskNotFoundException,
           InvalidTaskStateException,
           InvalidOwnerException,
