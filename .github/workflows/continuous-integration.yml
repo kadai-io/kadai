@@ -463,6 +463,9 @@ jobs:
           - java_version: 21
             module: kadai-rest-spring-example-boot
             database: H2
+          - java_version: 21
+            module: kadai-gmt
+            database: POSTGRES
           - java_version: 25
             module: kadai-core
             database: H2
