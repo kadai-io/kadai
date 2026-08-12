@@ -675,7 +675,7 @@ public class TaskController implements TaskApi {
       @ParameterObject TaskQueryFilterParameter filterParameter,
       @ParameterObject TaskQueryFilterCustomFields filterCustomFields,
       @ParameterObject TaskQueryFilterCustomIntFields filterCustomIntFields)
-      throws InvalidArgumentException, NotAuthorizedException {
+      throws NotAuthorizedException {
     TaskQuery query = taskService.createTaskQuery();
     filterParameter.apply(query);
     filterCustomFields.apply(query);

@@ -2273,12 +2273,6 @@ public interface TaskApi {
                     schema =
                         @Schema(implementation = TaskSummaryCollectionRepresentationModel.class))),
         @ApiResponse(
-            responseCode = "400",
-            description = "INVALID_ARGUMENT",
-            content = {
-              @Content(schema = @Schema(implementation = InvalidArgumentException.class))
-            }),
-        @ApiResponse(
             responseCode = "403",
             description = "NOT_AUTHORIZED",
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
@@ -2289,5 +2283,5 @@ public interface TaskApi {
       @ParameterObject TaskQueryFilterParameter filterParameter,
       @ParameterObject TaskQueryFilterCustomFields filterCustomFields,
       @ParameterObject TaskQueryFilterCustomIntFields filterCustomIntFields)
-      throws InvalidArgumentException, NotAuthorizedException;
+      throws NotAuthorizedException;
 }
