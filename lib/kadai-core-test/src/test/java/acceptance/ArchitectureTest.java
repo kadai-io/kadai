@@ -342,7 +342,6 @@ class ArchitectureTest {
 
   @Test
   void moduleTaskShouldOnlyDependOn() {
-    // FIXME should not depend on spi
     moduleShouldOnlyDependOn("task", List.of("workbasket", "classification", "common", "spi"));
   }
 
