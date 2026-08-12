@@ -24,6 +24,10 @@ import io.kadai.classification.api.ClassificationService;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.task.api.TaskService;
 import io.kadai.workbasket.api.WorkbasketService;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
@@ -80,7 +84,7 @@ class TaskTestDataEndpointIntTest {
   }
 
   @Test
-  void should_CreateTasksAndSupportingFixturesAfterTheApplicationIsHealthy() {
+  void should_CreateTasksAndSupportingFixturesAfterTheApplicationIsHealthy() throws Exception {
     RestClient restClient = RestClient.create();
     ResponseEntity<Map<String, Object>> healthResponse =
         restClient
@@ -93,17 +97,17 @@ class TaskTestDataEndpointIntTest {
     assertThat(healthResponse.getBody()).containsEntry("status", "UP");
 
     TestDataCounts countsBefore = retrieveTestDataCounts();
-    ResponseEntity<Void> response =
-        restClient
-            .post()
-            .uri(url("/api/v1/gmt/tasks"))
-            .contentType(MediaType.APPLICATION_JSON)
-            .header(HttpHeaders.AUTHORIZATION, basicAuthentication("admin", "admin"))
-            .body("{\"taskCount\":" + TASK_COUNT + "}")
-            .retrieve()
-            .toBodilessEntity();
+    HttpResponse<Void> response =
+        HttpClient.newHttpClient()
+            .send(
+                HttpRequest.newBuilder(URI.create(url("/api/v1/gmt/tasks")))
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .header(HttpHeaders.AUTHORIZATION, basicAuthentication("admin", "admin"))
+                    .POST(HttpRequest.BodyPublishers.ofString("{\"taskCount\":" + TASK_COUNT + "}"))
+                    .build(),
+                HttpResponse.BodyHandlers.discarding());
 
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
 
     TestDataCounts countsAfter = retrieveTestDataCounts();
     assertThat(countsAfter.taskCount() - countsBefore.taskCount()).isEqualTo(TASK_COUNT);

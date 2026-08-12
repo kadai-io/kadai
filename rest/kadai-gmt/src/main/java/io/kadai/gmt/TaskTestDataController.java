@@ -18,6 +18,8 @@
 
 package io.kadai.gmt;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.testapi.generator.GenerationSummary;
 import io.kadai.testapi.generator.TaskTestDataGenerator;
@@ -61,5 +63,10 @@ public class TaskTestDataController {
    *
    * @param taskCount number of tasks to create
    */
-  public record TaskGenerationRequest(@NotNull @Min(0) Long taskCount) {}
+  public record TaskGenerationRequest(
+      @JsonProperty("taskCount") @NotNull @Min(0) Long taskCount) {
+
+    @JsonCreator
+    public TaskGenerationRequest {}
+  }
 }
