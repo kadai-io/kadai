@@ -323,7 +323,6 @@ class UpdateTaskAccTest {
     Thread.sleep(10);
     taskService.updateTask(task);
     task2.setCustomField(CUSTOM_2, "Walter");
-    // TODO flaky test ... if speed is too high,
     assertThatThrownBy(() -> taskService.updateTask(task2))
         .isInstanceOf(ConcurrencyException.class)
         .hasMessage(
