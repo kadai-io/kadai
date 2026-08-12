@@ -62,6 +62,8 @@ public interface TaskCommentApi {
    * @return the Task Comment
    * @throws NotAuthorizedOnWorkbasketException if the user is not authorized for the requested Task
    *     Comment
+   * @throws TaskNotFoundException if the Task associated with the requested Task Comment is not
+   *     found
    * @throws TaskCommentNotFoundException if the requested Task Comment is not found
    * @throws InvalidArgumentException if the requested Id is null or empty
    */
