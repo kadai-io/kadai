@@ -481,7 +481,6 @@ public interface WorkbasketApi {
    * @throws NotAuthorizedException if the current user is not member of role BUSINESS_ADMIN or
    *     ADMIN
    * @throws InvalidArgumentException if the new Workbasket Access Items are not provided.
-   * @throws WorkbasketNotFoundException TODO: this is never thrown.
    * @throws LogicalDuplicateInPayloadException if a duplicate Workbasket Access Item exists in the
    *     provided list.
    * @throws NotAuthorizedOnWorkbasketException if the current user has not correct permissions

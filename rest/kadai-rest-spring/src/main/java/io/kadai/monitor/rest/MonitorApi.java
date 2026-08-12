@@ -58,7 +58,6 @@ public interface MonitorApi {
    * @param taskTimestamp determine which Task Timestamp should be used for comparison
    * @return the computed Report
    * @throws NotAuthorizedException if the current user is not authorized to compute the Report
-   * @throws InvalidArgumentException TODO: this is never thrown ...
    */
   @Operation(
       summary = "Compute a Workbasket Report",
@@ -171,7 +170,6 @@ public interface MonitorApi {
    * @param taskTimestamp determine which Task Timestamp should be used for comparison
    * @return the computed Report
    * @throws NotAuthorizedException if the current user is not authorized to compute the Report
-   * @throws InvalidArgumentException TODO: this is never thrown ...
    */
   @Operation(
       summary = "Compute a Classification Category Report",
@@ -220,7 +218,6 @@ public interface MonitorApi {
    * @param taskTimestamp determine which Task Timestamp should be used for comparison
    * @return the computed Report
    * @throws NotAuthorizedException if the current user is not authorized to compute the Report
-   * @throws InvalidArgumentException TODO: this is never thrown
    */
   @Operation(
       summary = "Compute a Classification Report",
@@ -270,7 +267,6 @@ public interface MonitorApi {
    * @param taskTimestamp determine which Task Timestamp should be used for comparison
    * @return the computed Report
    * @throws NotAuthorizedException if the current user is not authorized to compute the Report
-   * @throws InvalidArgumentException TODO: this is never thrown
    */
   @Operation(
       summary = "Compute a Detailed Classification Report",
@@ -321,7 +317,6 @@ public interface MonitorApi {
    * @param taskTimestamp determine which Task Timestamp should be used for comparison
    * @return the computed Report
    * @throws NotAuthorizedException if the current user is not authorized to compute the Report
-   * @throws InvalidArgumentException TODO: this is never thrown
    */
   @Operation(
       summary = "Compute a Detailed Classification Report",
@@ -437,7 +432,6 @@ public interface MonitorApi {
    * @param timestamps Filter by the Task Timestamp of the task
    * @return the computed report
    * @throws NotAuthorizedException if the current user is not authorized to compute the report
-   * @throws InvalidArgumentException TODO: this is never thrown
    */
   @Operation(
       summary = "Compute a Timestamp Report",
