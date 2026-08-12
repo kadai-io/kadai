@@ -229,7 +229,6 @@ public class TaskController implements TaskApi {
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException {
-    // TODO verify user
     Task updatedTask = taskService.claim(taskId);
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(updatedTask));
   }
@@ -242,7 +241,6 @@ public class TaskController implements TaskApi {
           InvalidTaskStateException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException {
-    // TODO verify user
     Task updatedTask = taskService.forceClaim(taskId);
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(updatedTask));
   }
