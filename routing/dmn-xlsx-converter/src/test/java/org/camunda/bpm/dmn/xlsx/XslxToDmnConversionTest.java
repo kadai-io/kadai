@@ -41,8 +41,6 @@ public class XslxToDmnConversionTest {
   private static final String JAVASCRIPT_SNIPPET =
       "if (exp1 % 2 == 0)\n" + "    {erg = 2;}\n" + "else\n" + "    {erg = 1;}\n" + "erg;";
 
-  // TODO: assert input entry text content
-
   @Test
   public void testSimpleConversion() {
     XlsxConverter converter = new XlsxConverter();
