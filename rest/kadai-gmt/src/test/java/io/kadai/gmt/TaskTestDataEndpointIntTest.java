@@ -99,7 +99,7 @@ class TaskTestDataEndpointIntTest {
             .uri(url("/api/v1/gmt/tasks"))
             .contentType(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, basicAuthentication("admin", "admin"))
-            .body(new TaskTestDataController.TaskGenerationRequest(TASK_COUNT))
+            .body("{\"taskCount\":" + TASK_COUNT + "}")
             .retrieve()
             .toBodilessEntity();
 
