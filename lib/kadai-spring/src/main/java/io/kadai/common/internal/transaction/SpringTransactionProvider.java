@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-/** TODO. */
+/** Provides suport for Spring-managed transactions. */
 @Component
 public class SpringTransactionProvider implements KadaiTransactionProvider {
 
