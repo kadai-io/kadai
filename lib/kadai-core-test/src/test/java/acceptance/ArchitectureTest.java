@@ -390,7 +390,6 @@ class ArchitectureTest {
         .areNotAssignableFrom(KadaiConfiguration.Builder.class)
         .and()
         .resideOutsideOfPackages("acceptance..", "..testapi..", "..test..", "..sampledata..")
-        .and(resideOutsideOfPackage("..simplehistory..")) // FIXME: With #994
         .should()
         .resideInAnyPackage("..api..", "..internal..")
         .check(importedClasses);
