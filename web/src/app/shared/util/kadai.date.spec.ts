@@ -35,9 +35,6 @@ describe('KadaiDate', () => {
 
   it('should return different values on successive calls as time passes', async () => {
     const first = KadaiDate.getDate();
-    await vi.waitFor(
-        () => expect(first).not.toBe(KadaiDate.getDate())), 
-        {timeout: 1021}
-    }
-  );
+    await vi.waitFor(() => expect(first).not.toBe(KadaiDate.getDate()), { timeout: 1021 });
+  });
 });
