@@ -182,9 +182,9 @@ If you are only interested in how KADAI looks and feel, you can try our [Demo En
 
 ## Requirements
 
-[![Java](https://img.shields.io/badge/Java-17+-%23ED8B00.svg?logo=openjdk&logoColor=white)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
+[![Java](https://img.shields.io/badge/Java-21+-%23ED8B00.svg?logo=openjdk&logoColor=white)](https://www.oracle.com/java/technologies/javase/jdk21-archive-downloads.html)
 
-Runtime Environment at least Java 17
+Runtime Environment at least Java 21
 
 [![H2](https://img.shields.io/badge/H2-003B28?style=flat&logo=h2&logoColor=white)](https://www.h2database.com/html/main.html)
 [![Postgres](https://img.shields.io/badge/Postgres-%23316192.svg?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
@@ -309,6 +309,12 @@ These badges show the energy cost for this scenario (done by 100 virtual users):
 
 The full procedure for the measurement can be found [in this PDF file](docs/Messungen-Blauer-Engel-KADAI.pdf).
 The setup using the Green Metrics Tool is described [here](./qa/gmt/README.md).
+
+# 👤 Contributors
+
+<a href="https://github.com/kadai-io/kadai/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=kadai-io/kadai" alt="contributors" loading="lazy"/>
+</a>
 
 # 📨Contact
 
