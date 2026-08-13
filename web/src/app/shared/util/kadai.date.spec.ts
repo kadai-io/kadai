@@ -16,7 +16,7 @@
  *
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { KadaiDate } from './kadai.date';
 
 describe('KadaiDate', () => {
@@ -35,8 +35,9 @@ describe('KadaiDate', () => {
 
   it('should return different values on successive calls as time passes', async () => {
     const first = KadaiDate.getDate();
-    await new Promise((resolve) => setTimeout(resolve, 1001));
-    const second = KadaiDate.getDate();
-    expect(first).not.toBe(second);
-  });
+    await vi.waitFor(
+        () => expect(first).not.toBe(KadaiDate.getDate())), 
+        {timeout: 1021}
+    }
+  );
 });
