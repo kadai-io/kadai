@@ -74,10 +74,10 @@ describe('TypeAheadComponent with AccessId input', () => {
     input.dispatchEvent(new Event('input'));
     component.accessIdForm.get('accessId')!.updateValueAndValidity({ emitEvent: true });
 
-    fixture.detectChanges();
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    expect(component.name()).toBe('Gerda');
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(component.name()).toBe('Gerda');
+    });
   });
 
   it('should emit false when an invalid access id is set', async () => {
@@ -86,10 +86,10 @@ describe('TypeAheadComponent with AccessId input', () => {
     component.accessIdForm.get('accessId')!.setValue('invalid-user');
     component.accessIdForm.get('accessId')!.updateValueAndValidity({ emitEvent: true });
 
-    fixture.detectChanges();
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    expect(emitSpy).toHaveBeenCalledWith(false);
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(emitSpy).toHaveBeenCalledWith(false);
+    });
   });
 
   it('should emit true when a valid access id is set', async () => {
@@ -97,10 +97,10 @@ describe('TypeAheadComponent with AccessId input', () => {
     component.accessIdForm.get('accessId')!.setValue('user-g-1');
     component.accessIdForm.get('accessId')!.updateValueAndValidity({ emitEvent: true });
 
-    fixture.detectChanges();
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    expect(emitSpy).toHaveBeenCalledWith(true);
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(emitSpy).toHaveBeenCalledWith(true);
+    });
   });
 
   it('should mark the accessId control as touched when invalid and displayError is true', async () => {
@@ -111,10 +111,10 @@ describe('TypeAheadComponent with AccessId input', () => {
     component.accessIdForm.get('accessId')?.setValue('invalid-user');
     component.searchForAccessId('invalid-user');
 
-    fixture.detectChanges();
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    expect(markAsTouchedSpy).toHaveBeenCalled();
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(markAsTouchedSpy).toHaveBeenCalled();
+    });
   });
 
   it('should not emit accessIdEventEmitter when placeHolderMessage is "Search for AccessId"', () => {

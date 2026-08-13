@@ -484,8 +484,9 @@ describe('WorkbasketInformationComponent', () => {
     const formsValidatorService = TestBed.inject(FormsValidatorService);
     (formsValidatorService.validateFormInformation as any).mockReturnValueOnce(Promise.resolve(false));
     await component.onSubmit();
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(showErrorSpy).toHaveBeenCalledWith('WORKBASKET_SAVE');
+    vi.waitFor(() => {
+      expect(showErrorSpy).toHaveBeenCalledWith('WORKBASKET_SAVE');
+    });
   });
 
   it('should show error when isOwnerValid is false', async () => {
@@ -493,8 +494,9 @@ describe('WorkbasketInformationComponent', () => {
     const showErrorSpy = vi.spyOn(notificationService, 'showError');
     component.isOwnerValid = false;
     await component.onSubmit();
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(showErrorSpy).toHaveBeenCalledWith('WORKBASKET_SAVE');
+    vi.waitFor(() => {
+      expect(showErrorSpy).toHaveBeenCalledWith('WORKBASKET_SAVE');
+    });
   });
 
   it('should not dispatch removeDistributionTargets when workbasket has no _links', () => {
