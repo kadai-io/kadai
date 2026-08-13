@@ -206,7 +206,7 @@ We use the h2 database in this example.
 
 See `rest/kadai-rest-spring-example-boot` and it dependencies
 
-# ⚙️Customize Behaviour
+# ⚙️Customize Behavior
 
 [![Oracle](https://custom-icon-badges.demolab.com/badge/SPI-F80000?logo=oracle&logoColor=fff)](https://docs.oracle.com/javase/tutorial/sound/SPI-intro.html)
 
