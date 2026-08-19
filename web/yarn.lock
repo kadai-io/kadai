@@ -5,15 +5,15 @@ __metadata:
   version: 10
   cacheKey: 10c0
 
-"@ali-hm/angular-tree-component@npm:22.0.6":
-  version: 22.0.6
-  resolution: "@ali-hm/angular-tree-component@npm:22.0.6"
+"@ali-hm/angular-tree-component@npm:22.0.7":
+  version: 22.0.7
+  resolution: "@ali-hm/angular-tree-component@npm:22.0.7"
   dependencies:
     tslib: "npm:^2.8.0"
   peerDependencies:
     "@angular/common": ">=22.0"
     "@angular/core": ">=22.0"
-  checksum: 10c0/9ff35f04d2ce6646c095dfbc986b661570ea083e051b099f1ce0990fba4398427c36f2e1d073d73a68c47585495145b629ed765efac3be66f02c110ffeb185bd
+  checksum: 10c0/a519e36976a6b1e6a8dd608f5c5e2d735b060463507e985d17c3b040cb01f4e94c3fb4a157ff5f1b0ebd5e0faeea5c06b8983e652a4eb9e590b159680deb8333
   languageName: node
   linkType: hard
 
@@ -5622,7 +5622,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "kadai@workspace:."
   dependencies:
-    "@ali-hm/angular-tree-component": "npm:22.0.6"
+    "@ali-hm/angular-tree-component": "npm:22.0.7"
     "@angular/animations": "npm:22.1.2"
     "@angular/build": "npm:22.1.4"
     "@angular/cdk": "npm:22.1.2"
