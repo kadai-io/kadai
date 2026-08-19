@@ -30,6 +30,7 @@ import io.kadai.common.internal.JobServiceImpl;
 import io.kadai.common.internal.jobs.AbstractKadaiJob;
 import io.kadai.common.internal.jobs.JobTransactionPolicy;
 import io.kadai.common.internal.transaction.KadaiTransactionProvider;
+import io.kadai.common.internal.util.CheckedSupplier;
 import io.kadai.common.internal.util.CollectionUtil;
 import io.kadai.common.internal.util.LogSanitizer;
 import java.time.Duration;
@@ -117,19 +118,19 @@ public class TaskCleanupJob extends AbstractKadaiJob {
   }
 
   private int deleteTasksTransactionally(List<String> tasksToBeDeleted) {
-    return KadaiTransactionProvider.executeInTransactionIfPossible(
-        txProvider,
-        () -> {
-          int deletedTasks;
-          try {
-            deletedTasks = deleteTasks(tasksToBeDeleted);
-          } catch (Exception ex) {
-            LOGGER.warn("Could not delete tasks.", ex);
-            return 0;
-          }
-          renewLock();
-          return deletedTasks;
-        });
+    try {
+      return KadaiTransactionProvider.executeInTransactionIfPossible(
+          txProvider,
+          CheckedSupplier.rethrowing(
+              () -> {
+                int deletedTasks = deleteTasks(tasksToBeDeleted);
+                renewLock();
+                return deletedTasks;
+              }));
+    } catch (Exception ex) {
+      LOGGER.warn("Could not delete tasks.", ex);
+      return 0;
+    }
   }
 
   private void renewLock() {

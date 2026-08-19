@@ -24,19 +24,25 @@ import io.kadai.KadaiConfiguration.Builder;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.models.ClassificationSummary;
 import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.internal.jobs.PlainJavaTransactionProvider;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.api.models.ObjectReference;
+import io.kadai.task.api.models.Task;
 import io.kadai.task.api.models.TaskSummary;
 import io.kadai.task.internal.jobs.TaskCleanupJob;
 import io.kadai.testapi.DefaultTestEntities;
 import io.kadai.testapi.KadaiConfigurationModifier;
 import io.kadai.testapi.KadaiInject;
 import io.kadai.testapi.KadaiIntegrationTest;
+import io.kadai.testapi.builder.TaskAttachmentBuilder;
 import io.kadai.testapi.builder.TaskBuilder;
 import io.kadai.testapi.security.WithAccessId;
 import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -90,6 +96,34 @@ class TaskCleanupJobAccTest {
     new TaskCleanupJob(kadaiEngine, null, null).run();
   }
 
+  private void preventTaskDeletion(KadaiEngine kadaiEngine, String taskId) throws Exception {
+    try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
+      connection.setSchema(kadaiEngine.getConfiguration().getSchemaName());
+      try (Statement statement = connection.createStatement()) {
+        statement.execute(
+            "CREATE TABLE TASK_CLEANUP_TEST_REFERENCE "
+                + "(TASK_ID VARCHAR(40) NOT NULL, "
+                + "CONSTRAINT TASK_CLEANUP_TEST_REFERENCE_TASK "
+                + "FOREIGN KEY (TASK_ID) REFERENCES TASK (ID))");
+      }
+      try (PreparedStatement statement =
+          connection.prepareStatement(
+              "INSERT INTO TASK_CLEANUP_TEST_REFERENCE (TASK_ID) VALUES (?)")) {
+        statement.setString(1, taskId);
+        statement.executeUpdate();
+      }
+    }
+  }
+
+  private void allowTaskDeletion(KadaiEngine kadaiEngine) throws Exception {
+    try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
+      connection.setSchema(kadaiEngine.getConfiguration().getSchemaName());
+      try (Statement statement = connection.createStatement()) {
+        statement.execute("DROP TABLE TASK_CLEANUP_TEST_REFERENCE");
+      }
+    }
+  }
+
   @Nested
   @TestInstance(Lifecycle.PER_CLASS)
   class CleanCompletedTasks implements KadaiConfigurationModifier {
@@ -134,6 +168,39 @@ class TaskCleanupJobAccTest {
       assertThat(taskSummaries)
           .filteredOn(t -> t.getWorkbasketSummary().equals(workbasket))
           .isEmpty();
+    }
+
+    @WithAccessId(user = "admin")
+    @Test
+    void should_RollBackTaskDeletionBatch_When_DeletingTaskFails() throws Exception {
+      Task task =
+          newTaskBuilder(workbasket)
+              .state(TaskState.COMPLETED)
+              .completed(Instant.now().minus(6, ChronoUnit.DAYS))
+              .attachments(
+                  TaskAttachmentBuilder.newAttachment()
+                      .classificationSummary(classification)
+                      .objectReference(primaryObjRef)
+                      .build())
+              .objectReferences(DefaultTestEntities.defaultTestObjectReference().build())
+              .buildAndStore(taskService);
+      preventTaskDeletion(kadaiEngine, task.getId());
+
+      try {
+        new TaskCleanupJob(
+                kadaiEngine,
+                new PlainJavaTransactionProvider(
+                    kadaiEngine, kadaiEngine.getConfiguration().getDataSource()),
+                null)
+            .run();
+
+        Task taskAfterFailedCleanup = taskService.getTask(task.getId());
+        assertThat(taskAfterFailedCleanup.getAttachments()).hasSize(1);
+        assertThat(taskAfterFailedCleanup.getSecondaryObjectReferences()).hasSize(1);
+      } finally {
+        allowTaskDeletion(kadaiEngine);
+        taskService.deleteTask(task.getId());
+      }
     }
   }
 
