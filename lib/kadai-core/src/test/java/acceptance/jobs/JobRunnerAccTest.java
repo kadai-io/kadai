@@ -28,6 +28,7 @@ import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.JobServiceImpl;
 import io.kadai.common.internal.jobs.JobRunner;
 import io.kadai.common.internal.jobs.PlainJavaTransactionProvider;
+import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import io.kadai.common.test.config.DataSourceGenerator;
 import io.kadai.common.test.util.ParallelThreadHelper;
 import io.kadai.task.internal.jobs.TaskCleanupJob;
@@ -94,6 +95,63 @@ class JobRunnerAccTest extends AbstractAccTest {
     assertThat(jobsToRun).hasSize(1).doesNotContain(job);
   }
 
+  @Test
+  void should_UseAndRenewTaskCleanupSpecificLockExpiration() {
+    ScheduledJob job =
+        createJob(Instant.now().minus(5, ChronoUnit.MINUTES), TaskCleanupJob.class.getName());
+    Instant lockStarted = Instant.now();
+
+    ScheduledJob lockedJob = jobService.lockJob(job, "cleanup-worker");
+
+    assertThat(lockedJob.getLockExpires())
+        .isBetween(
+            lockStarted.plus(TASK_CLEANUP_JOB_LOCK_EXPIRATION_PERIOD).minusMillis(1),
+            Instant.now().plus(TASK_CLEANUP_JOB_LOCK_EXPIRATION_PERIOD));
+
+    Instant renewalStarted = Instant.now();
+    assertThat(jobService.renewLock(lockedJob, TASK_CLEANUP_JOB_LOCK_EXPIRATION_PERIOD)).isTrue();
+    assertThat(lockedJob.getLockExpires())
+        .isBetween(
+            renewalStarted.plus(TASK_CLEANUP_JOB_LOCK_EXPIRATION_PERIOD).minusMillis(1),
+            Instant.now().plus(TASK_CLEANUP_JOB_LOCK_EXPIRATION_PERIOD));
+
+    lockedJob.setLockedBy("another-worker");
+    assertThat(jobService.renewLock(lockedJob, TASK_CLEANUP_JOB_LOCK_EXPIRATION_PERIOD)).isFalse();
+  }
+
+  @Test
+  void should_RunTaskCleanupDeletionBatchOutsideControlTransactions() {
+    createJob(Instant.now().minus(5, ChronoUnit.MINUTES), TaskCleanupJob.class.getName());
+    CountingTransactionProvider transactionProvider =
+        new CountingTransactionProvider(
+            new PlainJavaTransactionProvider(kadaiEngine, DataSourceGenerator.getDataSource()));
+    JobRunner runner = new JobRunner(kadaiEngine);
+    runner.registerTransactionProvider(transactionProvider);
+
+    runner.runJobs();
+
+    // One transaction locks the scheduled job, one renews its lock and selects cleanup IDs, one
+    // deletes the only cleanup batch, and one atomically schedules its successor and deletes the
+    // completed scheduled job.
+    assertThat(transactionProvider.getInvocationCount()).isEqualTo(4);
+  }
+
+  @Test
+  void should_RunWholeJobPolicyInOneTransaction() {
+    createJob(Instant.now().minus(5, ChronoUnit.MINUTES), TaskUpdatePriorityJob.class.getName());
+    CountingTransactionProvider transactionProvider =
+        new CountingTransactionProvider(
+            new PlainJavaTransactionProvider(kadaiEngine, DataSourceGenerator.getDataSource()));
+    JobRunner runner = new JobRunner(kadaiEngine);
+    runner.registerTransactionProvider(transactionProvider);
+
+    runner.runJobs();
+
+    // One transaction locks the scheduled job; the other executes it, schedules its successor,
+    // and deletes the completed scheduled job.
+    assertThat(transactionProvider.getInvocationCount()).isEqualTo(2);
+  }
+
   @ParameterizedTest
   @MethodSource("provideJobCreationClassNameWithExpirationPeriod")
   @Disabled(
@@ -134,5 +192,25 @@ class JobRunnerAccTest extends AbstractAccTest {
     job.setDue(firstDue);
     jobService.createJob(job);
     return job;
+  }
+
+  private static final class CountingTransactionProvider implements KadaiTransactionProvider {
+
+    private final KadaiTransactionProvider delegate;
+    private int invocationCount;
+
+    private CountingTransactionProvider(KadaiTransactionProvider delegate) {
+      this.delegate = delegate;
+    }
+
+    @Override
+    public <T> T executeInTransaction(java.util.function.Supplier<T> supplier) {
+      invocationCount++;
+      return delegate.executeInTransaction(supplier);
+    }
+
+    private int getInvocationCount() {
+      return invocationCount;
+    }
   }
 }

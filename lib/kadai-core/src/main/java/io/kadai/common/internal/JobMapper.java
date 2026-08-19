@@ -87,6 +87,14 @@ public interface JobMapper {
               + "where JOB_ID = #{jobId}")
   void update(ScheduledJob job);
 
+  @Update(
+      "UPDATE SCHEDULED_JOB SET LOCK_EXPIRES = #{lockExpires} "
+          + "WHERE JOB_ID = #{jobId} AND LOCKED_BY = #{lockedBy}")
+  int renewLock(
+      @Param("jobId") int jobId,
+      @Param("lockedBy") String lockedBy,
+      @Param("lockExpires") Instant lockExpires);
+
   @Delete(value = "DELETE FROM SCHEDULED_JOB WHERE JOB_ID = #{jobId}")
   void delete(ScheduledJob job);
 

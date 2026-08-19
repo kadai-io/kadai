@@ -107,6 +107,18 @@ public class JobServiceImpl implements JobService {
     }
   }
 
+  public boolean renewLock(ScheduledJob job, Duration lockExpirationPeriod) {
+    Instant lockExpires = Instant.now().plus(lockExpirationPeriod);
+    int updatedRows =
+        kadaiEngineImpl.executeInDatabaseConnection(
+            () -> jobMapper.renewLock(job.getJobId(), job.getLockedBy(), lockExpires));
+    if (updatedRows == 1) {
+      job.setLockExpires(lockExpires);
+      return true;
+    }
+    return false;
+  }
+
   private void initializeDefaultJobProperties(ScheduledJob job) {
     Instant now = Instant.now();
     job.setCreated(now);
