@@ -22,7 +22,7 @@ import { Router } from '@angular/router';
 import { environment } from 'app/../environments/environment';
 import { inject, Injectable, Injector } from '@angular/core';
 import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { WindowRefService } from 'app/shared/services/window/window.service';
 
 interface EnvironmentConfig {
@@ -50,8 +50,7 @@ export class StartupService {
   // TODO: refactor this - Done ?
   getEnvironmentFilePromise() {
     return firstValueFrom(
-      this.httpClient.get<EnvironmentConfig>('environments/data-sources/environment-information.json')
-      .pipe(
+      this.httpClient.get<EnvironmentConfig>('environments/data-sources/environment-information.json').pipe(
         tap((config) => {
           if (config?.kadaiRestUrl) {
             environment.kadaiRestUrl = config.kadaiRestUrl;
@@ -66,7 +65,7 @@ export class StartupService {
           return of(null);
         })
       )
-    ).then(() => void(0));
+    ).then(() => void 0);
   }
 
   getKadaiRestUrl() {
