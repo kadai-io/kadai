@@ -138,6 +138,7 @@ public class KadaiConfiguration {
   private final Duration taskUpdatePriorityJobLockExpirationPeriod;
 
   private final boolean userInfoRefreshJobEnabled;
+  private final int userRefreshJobBatchSize;
   private final Instant userRefreshJobFirstRun;
   private final Duration userRefreshJobRunEvery;
   private final Duration userRefreshJobLockExpirationPeriod;
@@ -234,6 +235,7 @@ public class KadaiConfiguration {
     this.taskUpdatePriorityJobLockExpirationPeriod =
         builder.taskUpdatePriorityJobLockExpirationPeriod;
     this.userInfoRefreshJobEnabled = builder.userInfoRefreshJobEnabled;
+    this.userRefreshJobBatchSize = builder.userRefreshJobBatchSize;
     this.userRefreshJobFirstRun = builder.userRefreshJobFirstRun;
     this.userRefreshJobRunEvery = builder.userRefreshJobRunEvery;
     this.userRefreshJobLockExpirationPeriod = builder.userRefreshJobLockExpirationPeriod;
@@ -440,6 +442,15 @@ public class KadaiConfiguration {
     return userInfoRefreshJobEnabled;
   }
 
+  /**
+   * Maximum number of statements accumulated before the user-refresh JDBC writer is flushed.
+   *
+   * @return the JDBC flush size, not a transaction size
+   */
+  public int getUserRefreshJobBatchSize() {
+    return userRefreshJobBatchSize;
+  }
+
   public Instant getUserRefreshJobFirstRun() {
     return userRefreshJobFirstRun;
   }
@@ -538,6 +549,7 @@ public class KadaiConfiguration {
         taskUpdatePriorityJobRunEvery,
         taskUpdatePriorityJobLockExpirationPeriod,
         userInfoRefreshJobEnabled,
+        userRefreshJobBatchSize,
         userRefreshJobFirstRun,
         userRefreshJobRunEvery,
         userRefreshJobLockExpirationPeriod,
@@ -584,6 +596,7 @@ public class KadaiConfiguration {
         && taskUpdatePriorityJobEnabled == other.taskUpdatePriorityJobEnabled
         && taskUpdatePriorityJobBatchSize == other.taskUpdatePriorityJobBatchSize
         && userInfoRefreshJobEnabled == other.userInfoRefreshJobEnabled
+        && userRefreshJobBatchSize == other.userRefreshJobBatchSize
         && addAdditionalUserInfo == other.addAdditionalUserInfo
         && useSpecificDb2Taskquery == other.useSpecificDb2Taskquery
         && Objects.equals(dataSource, other.dataSource)
@@ -721,6 +734,8 @@ public class KadaiConfiguration {
         + taskUpdatePriorityJobLockExpirationPeriod
         + ", userInfoRefreshJobEnabled="
         + userInfoRefreshJobEnabled
+        + ", userRefreshJobBatchSize="
+        + userRefreshJobBatchSize
         + ", userRefreshJobFirstRun="
         + userRefreshJobFirstRun
         + ", userRefreshJobRunEvery="
@@ -894,6 +909,9 @@ public class KadaiConfiguration {
     @KadaiProperty("kadai.jobs.refresh.user.enable")
     private boolean userInfoRefreshJobEnabled = false;
 
+    @KadaiProperty("kadai.jobs.refresh.user.batchSize")
+    private int userRefreshJobBatchSize = 1_000;
+
     @KadaiProperty("kadai.jobs.refresh.user.firstRunAt")
     private Instant userRefreshJobFirstRun = Instant.parse("2023-01-01T23:00:00Z");
 
@@ -1029,6 +1047,7 @@ public class KadaiConfiguration {
       this.taskUpdatePriorityJobLockExpirationPeriod =
           conf.taskUpdatePriorityJobLockExpirationPeriod;
       this.userInfoRefreshJobEnabled = conf.userInfoRefreshJobEnabled;
+      this.userRefreshJobBatchSize = conf.userRefreshJobBatchSize;
       this.userRefreshJobFirstRun = conf.userRefreshJobFirstRun;
       this.userRefreshJobRunEvery = conf.userRefreshJobRunEvery;
       this.userRefreshJobLockExpirationPeriod = conf.userRefreshJobLockExpirationPeriod;
@@ -1334,6 +1353,11 @@ public class KadaiConfiguration {
       return this;
     }
 
+    public Builder userRefreshJobBatchSize(int userRefreshJobBatchSize) {
+      this.userRefreshJobBatchSize = userRefreshJobBatchSize;
+      return this;
+    }
+
     public Builder userRefreshJobFirstRun(Instant userRefreshJobFirstRun) {
       this.userRefreshJobFirstRun = userRefreshJobFirstRun;
       return this;
@@ -1465,6 +1489,11 @@ public class KadaiConfiguration {
       if (taskCleanupJobBatchSize <= 0) {
         throw new InvalidArgumentException(
             "Parameter taskCleanupJobBatchSize (kadai.jobs.cleanup.task.batchSize)"
+                + " must be a positive integer");
+      }
+      if (userRefreshJobBatchSize <= 0) {
+        throw new InvalidArgumentException(
+            "Parameter userRefreshJobBatchSize (kadai.jobs.refresh.user.batchSize)"
                 + " must be a positive integer");
       }
       if (maxNumberOfJobRetries <= 0) {
