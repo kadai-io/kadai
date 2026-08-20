@@ -54,6 +54,18 @@ public class UserMapperSqlProvider {
         + CLOSING_SCRIPT_TAG;
   }
 
+  public static String findAllUsersForRefresh() {
+    return "SELECT " + USER_INFO_COLUMNS + "FROM USER_INFO";
+  }
+
+  public static String findAllGroupsForRefresh() {
+    return "SELECT USER_ID, GROUP_ID AS ACCESS_ID FROM GROUP_INFO";
+  }
+
+  public static String findAllPermissionsForRefresh() {
+    return "SELECT USER_ID, PERMISSION_ID AS ACCESS_ID FROM PERMISSION_INFO";
+  }
+
   public static String findGroupsById() {
     return OPENING_SCRIPT_TAG
         + "SELECT GROUP_ID FROM GROUP_INFO WHERE USER_ID = #{id} "
