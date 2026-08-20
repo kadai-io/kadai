@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.rest.ldap.LdapClient;
+import io.kadai.common.rest.ldap.LdapUserSnapshot;
 import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.testapi.security.JaasExtension;
 import io.kadai.testapi.security.WithAccessId;
@@ -161,13 +162,14 @@ class UserInfoRefreshJobIntTest {
 
       // Incomplete user - supposed to fail in the Job
       users.get(0).setId(null);
-      when(ldapClient.searchUsersInUserRole()).thenReturn(users);
+      when(ldapClient.searchAllUsersInUserRole())
+          .thenReturn(new LdapUserSnapshot(users, 1, users.size()));
 
       UserInfoRefreshJob userInfoRefreshJob = new UserInfoRefreshJob(kadaiEngine);
       userInfoRefreshJob.execute();
 
       users = getUsers(connection);
-      List<User> ldapusers = ldapClient.searchUsersInUserRole();
+      List<User> ldapusers = users;
 
       assertThat(users).hasSize(ldapusers.size() - 1);
       assertThat(users).hasSize(5);
