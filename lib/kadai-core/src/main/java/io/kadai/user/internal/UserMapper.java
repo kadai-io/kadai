@@ -95,9 +95,13 @@ public interface UserMapper {
   List<UserImpl> findAllUsersForRefresh();
 
   @SelectProvider(type = UserMapperSqlProvider.class, method = "findAllGroupsForRefresh")
+  @Result(property = "userId", column = "USER_ID")
+  @Result(property = "accessId", column = "ACCESS_ID")
   List<UserAccessIdRow> findAllGroupsForRefresh();
 
   @SelectProvider(type = UserMapperSqlProvider.class, method = "findAllPermissionsForRefresh")
+  @Result(property = "userId", column = "USER_ID")
+  @Result(property = "accessId", column = "ACCESS_ID")
   List<UserAccessIdRow> findAllPermissionsForRefresh();
 
   @SelectProvider(type = UserMapperSqlProvider.class, method = "findGroupsById")
