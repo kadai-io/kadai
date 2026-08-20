@@ -23,7 +23,7 @@ import { Classification } from '../../models/classification';
 export class ClassificationSelectors {
   @Selector([ClassificationState])
   static classificationTypes(state: ClassificationStateModel): string[] {
-    return Object.keys(state.classificationTypes);
+    return Array.from(state.classificationTypes.keys());
   }
 
   @Selector([ClassificationState])
@@ -33,7 +33,7 @@ export class ClassificationSelectors {
 
   @Selector([ClassificationState])
   static selectCategories(state: ClassificationStateModel): string[] {
-    return state.classificationTypes[state.selectedClassificationType];
+    return state.classificationTypes.get(state.selectedClassificationType) || [];
   }
 
   @Selector([ClassificationState])
