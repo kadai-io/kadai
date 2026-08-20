@@ -310,6 +310,7 @@ class KadaiConfigurationTest {
       Duration expectedTaskUpdatePriorityJobRunEvery = Duration.ofMinutes(17);
       Duration expectedTaskUpdatePriorityJobLockExpirationPeriod = Duration.ofDays(2);
       boolean expectedUserInfoRefreshJobEnabled = true;
+      int expectedUserRefreshJobBatchSize = 998;
       Instant expectedUserRefreshJobFirstRun = Instant.MIN.plus(2, ChronoUnit.DAYS);
       Duration expectedUserRefreshJobRunEvery = Duration.ofDays(5);
       Duration expectedUserRefreshJobLockExpirationPeriod = Duration.ofDays(2);
@@ -530,6 +531,7 @@ class KadaiConfigurationTest {
               .taskUpdatePriorityJobRunEvery(Duration.ofMinutes(17))
               .taskUpdatePriorityJobLockExpirationPeriod(Duration.ofDays(10))
               .userInfoRefreshJobEnabled(true)
+              .userRefreshJobBatchSize(998)
               .userRefreshJobFirstRun(Instant.MIN.plus(2, ChronoUnit.DAYS))
               .userRefreshJobRunEvery(Duration.ofDays(5))
               .userRefreshJobLockExpirationPeriod(Duration.ofDays(8))
@@ -821,6 +823,20 @@ class KadaiConfigurationTest {
   @Nested
   @TestInstance(Lifecycle.PER_CLASS)
   class Validation {
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 0})
+    void should_ThrowInvalidArgumentEx_When_UserRefreshJobBatchSizeIsNotPositive(int batchSize) {
+      KadaiConfiguration.Builder builder =
+          new KadaiConfiguration.Builder(
+                  TestContainerExtension.createDataSourceForH2(), false, "KADAI")
+              .userRefreshJobBatchSize(batchSize);
+
+      assertThatThrownBy(builder::build)
+          .isInstanceOf(InvalidArgumentException.class)
+          .hasMessageContaining("userRefreshJobBatchSize (kadai.jobs.refresh.user.batchSize)")
+          .hasMessageContaining("positive integer");
+    }
 
     @ParameterizedTest
     @ValueSource(ints = {-1, 0})
