@@ -35,9 +35,13 @@ import io.kadai.user.internal.models.UserImpl;
 import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.WorkbasketQueryColumnName;
 import io.kadai.workbasket.api.WorkbasketService;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.ibatis.exceptions.PersistenceException;
@@ -184,6 +188,285 @@ public class UserServiceImpl implements UserService {
         });
   }
 
+  /**
+   * Normalizes the source outside the refresh transaction. Invalid individual source records are
+   * excluded; duplicate canonical ids are a generation-wide error because choosing an arbitrary
+   * LDAP result would make removals unsafe.
+   *
+   * @param sourceUsers postprocessed LDAP users
+   * @return valid canonical users and source counts
+   */
+  public PreparedUserRefreshInput prepareUserRefresh(Collection<User> sourceUsers) {
+    Map<String, UserRefreshState> users = new HashMap<>();
+    int rejected = 0;
+    for (User user : sourceUsers) {
+      UserRefreshState state;
+      try {
+        state = toRefreshState(user);
+      } catch (InvalidUserRefreshEntryException e) {
+        rejected++;
+        continue;
+      }
+      if (users.putIfAbsent(state.id(), state) != null) {
+        throw new DuplicateUserRefreshIdException(state.id());
+      }
+    }
+    return new PreparedUserRefreshInput(
+        Map.copyOf(users), sourceUsers.size(), users.size(), rejected);
+  }
+
+  /**
+   * Reconciles a prepared authoritative source using one engine connection. The caller supplies the
+   * outer transaction for scheduled execution; direct callers still get an engine connection scope.
+   *
+   * @param input prepared authoritative source
+   * @param batchSize configured JDBC batch flush size
+   * @return reconciliation counts
+   * @throws NotAuthorizedException if the caller lacks the required role
+   * @throws InvalidArgumentException if the batch size is invalid
+   */
+  public UserRefreshResult synchronizeUsers(PreparedUserRefreshInput input, int batchSize)
+      throws NotAuthorizedException {
+    if (batchSize <= 0) {
+      throw new InvalidArgumentException("User refresh batch size must be positive");
+    }
+    internalKadaiEngine.getEngine().checkRoleMembership(KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
+    return internalKadaiEngine.executeInDatabaseConnection(
+        () -> synchronizeUsersInConnection(input));
+  }
+
+  private UserRefreshResult synchronizeUsersInConnection(PreparedUserRefreshInput input) {
+    Map<String, UserRefreshState> current = new HashMap<>();
+    for (UserImpl user : userMapper.findAllUsersForRefresh()) {
+      UserRefreshState state = toRefreshState(user);
+      if (current.putIfAbsent(state.id(), state) != null) {
+        throw new InvalidArgumentException("Duplicate user id in database refresh snapshot");
+      }
+    }
+    Set<String> orphanGroupUsers = new HashSet<>();
+    Set<String> orphanPermissionUsers = new HashSet<>();
+    for (UserAccessIdRow row : userMapper.findAllGroupsForRefresh()) {
+      UserRefreshState user = current.get(row.getUserId());
+      if (user == null) {
+        orphanGroupUsers.add(row.getUserId());
+      } else {
+        current.put(user.id(), withGroups(user, add(user.groups(), row.getAccessId())));
+      }
+    }
+    for (UserAccessIdRow row : userMapper.findAllPermissionsForRefresh()) {
+      UserRefreshState user = current.get(row.getUserId());
+      if (user == null) {
+        orphanPermissionUsers.add(row.getUserId());
+      } else {
+        current.put(user.id(), withPermissions(user, add(user.permissions(), row.getAccessId())));
+      }
+    }
+
+    int inserted = 0;
+    int updated = 0;
+    int removed = 0;
+    int unchanged = 0;
+    int groupAdds = 0;
+    int groupRemoves = 0;
+    int permissionAdds = 0;
+    int permissionRemoves = 0;
+    Map<String, UserRefreshState> remaining = new HashMap<>(current);
+    for (UserRefreshState desired : input.usersById().values()) {
+      UserRefreshState existing = remaining.remove(desired.id());
+      if (existing == null) {
+        // A pre-existing orphan for this id would otherwise conflict with the membership PK.
+        userMapper.deleteGroups(desired.id());
+        userMapper.deletePermissions(desired.id());
+        insertRefreshState(desired);
+        inserted++;
+        groupAdds += desired.groups().size();
+        permissionAdds += desired.permissions().size();
+      } else {
+        boolean scalarChanged = !desired.hasSameScalars(existing);
+        boolean groupsChanged = !desired.groups().equals(existing.groups());
+        boolean permissionsChanged = !desired.permissions().equals(existing.permissions());
+        if (!scalarChanged && !groupsChanged && !permissionsChanged) {
+          unchanged++;
+          continue;
+        }
+        if (scalarChanged) {
+          userMapper.update(asUser(desired));
+          updated++;
+        }
+        if (groupsChanged) {
+          groupAdds += difference(desired.groups(), existing.groups()).size();
+          groupRemoves += difference(existing.groups(), desired.groups()).size();
+          userMapper.deleteGroups(desired.id());
+          if (!desired.groups().isEmpty()) {
+            userMapper.insertGroups(asUser(desired));
+          }
+        }
+        if (permissionsChanged) {
+          permissionAdds += difference(desired.permissions(), existing.permissions()).size();
+          permissionRemoves += difference(existing.permissions(), desired.permissions()).size();
+          userMapper.deletePermissions(desired.id());
+          if (!desired.permissions().isEmpty()) {
+            userMapper.insertPermissions(asUser(desired));
+          }
+        }
+      }
+    }
+    for (UserRefreshState stale : remaining.values()) {
+      userMapper.deleteGroups(stale.id());
+      userMapper.deletePermissions(stale.id());
+      userMapper.delete(stale.id());
+      removed++;
+      groupRemoves += stale.groups().size();
+      permissionRemoves += stale.permissions().size();
+    }
+    orphanGroupUsers.forEach(userMapper::deleteGroups);
+    orphanPermissionUsers.forEach(userMapper::deletePermissions);
+    internalKadaiEngine.getSqlSession().clearCache();
+    return new UserRefreshResult(
+        input.inputUsers(),
+        input.acceptedUsers(),
+        input.rejectedUsers(),
+        inserted,
+        updated,
+        removed,
+        unchanged,
+        groupAdds,
+        groupRemoves,
+        permissionAdds,
+        permissionRemoves,
+        orphanGroupUsers.size(),
+        orphanPermissionUsers.size());
+  }
+
+  private void insertRefreshState(UserRefreshState state) {
+    User user = asUser(state);
+    userMapper.insert(user);
+    if (!state.groups().isEmpty()) {
+      userMapper.insertGroups(user);
+    }
+    if (!state.permissions().isEmpty()) {
+      userMapper.insertPermissions(user);
+    }
+  }
+
+  private static Set<String> add(Set<String> values, String value) {
+    Set<String> result = new HashSet<>(values);
+    result.add(value);
+    return result;
+  }
+
+  private static Set<String> difference(Set<String> left, Set<String> right) {
+    Set<String> result = new HashSet<>(left);
+    result.removeAll(right);
+    return result;
+  }
+
+  private static UserRefreshState withGroups(UserRefreshState user, Set<String> groups) {
+    return new UserRefreshState(
+        user.id(),
+        user.firstName(),
+        user.lastName(),
+        user.fullName(),
+        user.longName(),
+        user.email(),
+        user.phone(),
+        user.mobilePhone(),
+        user.orgLevel1(),
+        user.orgLevel2(),
+        user.orgLevel3(),
+        user.orgLevel4(),
+        user.data(),
+        groups,
+        user.permissions());
+  }
+
+  private static UserRefreshState withPermissions(UserRefreshState user, Set<String> permissions) {
+    return new UserRefreshState(
+        user.id(),
+        user.firstName(),
+        user.lastName(),
+        user.fullName(),
+        user.longName(),
+        user.email(),
+        user.phone(),
+        user.mobilePhone(),
+        user.orgLevel1(),
+        user.orgLevel2(),
+        user.orgLevel3(),
+        user.orgLevel4(),
+        user.data(),
+        user.groups(),
+        permissions);
+  }
+
+  private static UserRefreshState toRefreshState(User user) {
+    if (user == null
+        || user.getId() == null
+        || user.getId().isEmpty()
+        || user.getFirstName() == null
+        || user.getLastName() == null
+        || user.getGroups() == null
+        || user.getPermissions() == null) {
+      throw new InvalidUserRefreshEntryException("Invalid LDAP user refresh entry");
+    }
+    String id = user.getId().toLowerCase(Locale.ROOT);
+    String fullName = user.getFullName();
+    if (fullName == null || fullName.isEmpty()) {
+      fullName = String.format("%s, %s", user.getLastName(), user.getFirstName());
+    }
+    String longName = user.getLongName();
+    if (longName == null || longName.isEmpty()) {
+      longName = String.format("%s - (%s)", fullName, id);
+    }
+    return new UserRefreshState(
+        id,
+        user.getFirstName(),
+        user.getLastName(),
+        fullName,
+        longName,
+        user.getEmail(),
+        user.getPhone(),
+        user.getMobilePhone(),
+        user.getOrgLevel1(),
+        user.getOrgLevel2(),
+        user.getOrgLevel3(),
+        user.getOrgLevel4(),
+        user.getData(),
+        normalize(user.getGroups()),
+        normalize(user.getPermissions()));
+  }
+
+  private static Set<String> normalize(Set<String> values) {
+    Set<String> result = new HashSet<>();
+    for (String value : values) {
+      if (value == null) {
+        throw new InvalidUserRefreshEntryException("Invalid LDAP membership");
+      }
+      result.add(value.toLowerCase(Locale.ROOT));
+    }
+    return Set.copyOf(result);
+  }
+
+  private static User asUser(UserRefreshState state) {
+    UserImpl user = new UserImpl();
+    user.setId(state.id());
+    user.setFirstName(state.firstName());
+    user.setLastName(state.lastName());
+    user.setFullName(state.fullName());
+    user.setLongName(state.longName());
+    user.setEmail(state.email());
+    user.setPhone(state.phone());
+    user.setMobilePhone(state.mobilePhone());
+    user.setOrgLevel1(state.orgLevel1());
+    user.setOrgLevel2(state.orgLevel2());
+    user.setOrgLevel3(state.orgLevel3());
+    user.setOrgLevel4(state.orgLevel4());
+    user.setData(state.data());
+    user.setGroups(state.groups());
+    user.setPermissions(state.permissions());
+    return user;
+  }
+
   Set<String> determineDomains(User user) {
     Set<String> accessIds = new HashSet<>(user.getGroups());
     accessIds.addAll(user.getPermissions());
@@ -237,10 +520,10 @@ public class UserServiceImpl implements UserService {
 
   private void standardCreateActions(User user) {
     if (user.getFullName() == null || user.getFullName().isEmpty()) {
-      user.setFullName(user.getLastName() + ", " + user.getFirstName());
+      user.setFullName(String.format("%s, %s", user.getLastName(), user.getFirstName()));
     }
     if (user.getLongName() == null || user.getLongName().isEmpty()) {
-      user.setLongName(user.getFullName() + " - (" + user.getId() + ")");
+      user.setLongName(String.format("%s - (%s)", user.getFullName(), user.getId()));
     }
     user.setId(user.getId().toLowerCase());
     user.setGroups(
@@ -255,12 +538,12 @@ public class UserServiceImpl implements UserService {
       if (newUser.getFullName() == null
           || newUser.getFullName().isEmpty()
           || newUser.getFullName().equals(oldUser.getFullName())) {
-        newUser.setFullName(newUser.getLastName() + ", " + newUser.getFirstName());
+        newUser.setFullName(String.format("%s, %s", newUser.getLastName(), newUser.getFirstName()));
       }
       if (newUser.getLongName() == null
           || newUser.getLongName().isEmpty()
           || newUser.getLongName().equals(oldUser.getLongName())) {
-        newUser.setLongName(newUser.getFullName() + " - (" + newUser.getId() + ")");
+        newUser.setLongName(String.format("%s - (%s)", newUser.getFullName(), newUser.getId()));
       }
     }
     newUser.setId(newUser.getId().toLowerCase());
@@ -268,5 +551,17 @@ public class UserServiceImpl implements UserService {
         newUser.getGroups().stream().map((String::toLowerCase)).collect(Collectors.toSet()));
     newUser.setPermissions(
         newUser.getPermissions().stream().map((String::toLowerCase)).collect(Collectors.toSet()));
+  }
+
+  private static final class DuplicateUserRefreshIdException extends InvalidArgumentException {
+    private DuplicateUserRefreshIdException(String userId) {
+      super(String.format("Duplicate normalized user id in LDAP refresh: %s", userId));
+    }
+  }
+
+  private static final class InvalidUserRefreshEntryException extends InvalidArgumentException {
+    private InvalidUserRefreshEntryException(String message) {
+      super(message);
+    }
   }
 }

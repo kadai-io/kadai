@@ -49,9 +49,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.ldap.NameNotFoundException;
+import org.springframework.ldap.control.PagedResultsControlExchangeDirContextProcessor;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.AbstractContextMapper;
+import org.springframework.ldap.core.support.SingleContextSource;
 import org.springframework.ldap.filter.AndFilter;
 import org.springframework.ldap.filter.EqualsFilter;
 import org.springframework.ldap.filter.NotPresentFilter;
@@ -166,15 +168,7 @@ public class LdapClient {
   }
 
   public List<User> searchUsersInUserRole() {
-
-    Set<String> userGroupsOrUser = kadaiConfiguration.getRoleMap().get(KadaiRole.USER);
-
-    final OrFilter userOrGroupFilter = new OrFilter();
-    userGroupsOrUser.forEach(
-        userOrGroup -> {
-          userOrGroupFilter.or(new EqualsFilter(getUserMemberOfGroupAttribute(), userOrGroup));
-          userOrGroupFilter.or(new EqualsFilter(getUserIdAttribute(), userOrGroup));
-        });
+    final OrFilter userOrGroupFilter = userRoleFilter();
 
     final List<User> users =
         ldapTemplate.search(
@@ -187,6 +181,73 @@ public class LdapClient {
     LOGGER.debug("exit from searchUsersInUserRole. Retrieved the following users: {}.", users);
 
     return users;
+  }
+
+  /**
+   * Reads the entire user-role result using LDAP paged-results controls. This method intentionally
+   * does not use the shared template's interactive count limit: a truncated result is unsafe for an
+   * authoritative user-refresh.
+   */
+  public LdapUserSnapshot searchAllUsersInUserRole() {
+    isInitOrFail();
+    SearchControls controls = new SearchControls();
+    controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+    controls.setReturningAttributes(getLookUpUserInfoAttributesToReturn());
+    controls.setCountLimit(0);
+    List<User> users = new ArrayList<>();
+    Set<String> cookies = new java.util.HashSet<>();
+    PagedResultsControlExchangeDirContextProcessor processor =
+        new PagedResultsControlExchangeDirContextProcessor(1_000);
+    int pageCount = 0;
+    try {
+      int pages =
+          SingleContextSource.doWithSingleContext(
+              ldapTemplate.getContextSource(),
+              operations -> {
+                int completedPages = 0;
+                do {
+                  List<User> page =
+                      operations.search(
+                          getUserSearchBase(),
+                          userRoleFilter().encode(),
+                          controls,
+                          new UserInfoContextMapper(),
+                          processor);
+                  users.addAll(page);
+                  completedPages++;
+                  byte[] cookie =
+                      processor.getExchange().getResponse() == null
+                          ? null
+                          : processor.getExchange().getResponse().getCookie();
+                  String cookieKey =
+                      cookie == null ? null : java.util.Base64.getEncoder().encodeToString(cookie);
+                  if (processor.hasMore() && (cookieKey == null || !cookies.add(cookieKey))) {
+                    throw new SystemException("LDAP paged user refresh did not make progress");
+                  }
+                } while (processor.hasMore());
+                return completedPages;
+              },
+              true,
+              false,
+              false);
+      pageCount = pages;
+    } catch (SystemException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new SystemException("Could not obtain a complete LDAP user snapshot", e);
+    }
+    return new LdapUserSnapshot(List.copyOf(users), pageCount, users.size());
+  }
+
+  private OrFilter userRoleFilter() {
+    Set<String> userGroupsOrUser = kadaiConfiguration.getRoleMap().get(KadaiRole.USER);
+    final OrFilter userOrGroupFilter = new OrFilter();
+    userGroupsOrUser.forEach(
+        userOrGroup -> {
+          userOrGroupFilter.or(new EqualsFilter(getUserMemberOfGroupAttribute(), userOrGroup));
+          userOrGroupFilter.or(new EqualsFilter(getUserIdAttribute(), userOrGroup));
+        });
+    return userOrGroupFilter;
   }
 
   public List<AccessIdRepresentationModel> searchUsersByNameOrAccessId(final String name)

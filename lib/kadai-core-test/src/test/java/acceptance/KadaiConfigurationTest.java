@@ -156,6 +156,7 @@ class KadaiConfigurationTest {
           .isEqualTo(Instant.parse("2023-01-01T00:00:00Z"));
       assertThat(configuration.getTaskUpdatePriorityJobRunEvery()).isEqualTo(Duration.ofDays(1));
       assertThat(configuration.isUserInfoRefreshJobEnabled()).isFalse();
+      assertThat(configuration.getUserRefreshJobBatchSize()).isEqualTo(1_000);
       assertThat(configuration.getUserRefreshJobFirstRun())
           .isEqualTo(Instant.parse("2023-01-01T23:00:00Z"));
       assertThat(configuration.getUserRefreshJobRunEvery()).isEqualTo(Duration.ofDays(1));
@@ -229,6 +230,7 @@ class KadaiConfigurationTest {
           .isEqualTo(Instant.parse("2018-07-25T08:00:00Z"));
       assertThat(configuration.getTaskUpdatePriorityJobRunEvery()).isEqualTo(Duration.ofDays(3));
       assertThat(configuration.isUserInfoRefreshJobEnabled()).isTrue();
+      assertThat(configuration.getUserRefreshJobBatchSize()).isEqualTo(998);
       assertThat(configuration.getUserRefreshJobFirstRun())
           .isEqualTo(Instant.parse("2018-07-25T08:00:00Z"));
       assertThat(configuration.getUserRefreshJobRunEvery()).isEqualTo(Duration.ofDays(4));
@@ -473,7 +475,7 @@ class KadaiConfigurationTest {
     }
 
     @Test
-    void should_PopulateEveryConfigurationProperty_When_UsingCopyConstructor()  throws Exception {
+    void should_PopulateEveryConfigurationProperty_When_UsingCopyConstructor() throws Exception {
       // given
       KadaiConfiguration configuration =
           new Builder(TestContainerExtension.createDataSourceForH2(), false, "KADAI", false)
