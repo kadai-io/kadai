@@ -69,6 +69,7 @@ public class LdapClient {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LdapClient.class);
   private static final String CN = "cn";
+  static final int COMPLETE_USER_SEARCH_PAGE_SIZE = 1_000;
 
   private final KadaiConfiguration kadaiConfiguration;
   private final Environment env;
@@ -187,6 +188,9 @@ public class LdapClient {
    * Reads the entire user-role result using LDAP paged-results controls. This method intentionally
    * does not use the shared template's interactive count limit: a truncated result is unsafe for an
    * authoritative user-refresh.
+   *
+   * @return the complete user snapshot
+   * @throws SystemException if LDAP paging is incomplete or cannot be read
    */
   public LdapUserSnapshot searchAllUsersInUserRole() {
     isInitOrFail();
@@ -194,49 +198,85 @@ public class LdapClient {
     controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
     controls.setReturningAttributes(getLookUpUserInfoAttributesToReturn());
     controls.setCountLimit(0);
-    List<User> users = new ArrayList<>();
-    Set<String> cookies = new java.util.HashSet<>();
-    PagedResultsControlExchangeDirContextProcessor processor =
-        new PagedResultsControlExchangeDirContextProcessor(1_000);
-    int pageCount = 0;
     try {
-      int pages =
-          SingleContextSource.doWithSingleContext(
-              ldapTemplate.getContextSource(),
-              operations -> {
-                int completedPages = 0;
-                do {
-                  List<User> page =
-                      operations.search(
-                          getUserSearchBase(),
-                          userRoleFilter().encode(),
-                          controls,
-                          new UserInfoContextMapper(),
-                          processor);
-                  users.addAll(page);
-                  completedPages++;
-                  byte[] cookie =
-                      processor.getExchange().getResponse() == null
-                          ? null
-                          : processor.getExchange().getResponse().getCookie();
-                  String cookieKey =
-                      cookie == null ? null : java.util.Base64.getEncoder().encodeToString(cookie);
-                  if (processor.hasMore() && (cookieKey == null || !cookies.add(cookieKey))) {
-                    throw new SystemException("LDAP paged user refresh did not make progress");
-                  }
-                } while (processor.hasMore());
-                return completedPages;
-              },
-              true,
-              false,
-              false);
-      pageCount = pages;
+      return SingleContextSource.doWithSingleContext(
+          ldapTemplate.getContextSource(),
+          operations -> {
+            PagedResultsControlExchangeDirContextProcessor processor =
+                new PagedResultsControlExchangeDirContextProcessor(
+                    COMPLETE_USER_SEARCH_PAGE_SIZE);
+            return collectCompleteUserSnapshot(
+                ignored -> {
+                    List<User> page =
+                        operations.search(
+                            getUserSearchBase(),
+                            userRoleFilter().encode(),
+                            controls,
+                            new UserInfoContextMapper(),
+                            processor);
+                    var response = processor.getExchange().getResponse();
+                    return new LdapUserPage(
+                        page,
+                        response != null,
+                        response == null || response.getCookie() == null
+                            ? new byte[0]
+                            : response.getCookie());
+                });
+          },
+          true,
+          false,
+          false);
     } catch (SystemException e) {
       throw e;
     } catch (Exception e) {
       throw new SystemException("Could not obtain a complete LDAP user snapshot", e);
     }
-    return new LdapUserSnapshot(List.copyOf(users), pageCount, users.size());
+  }
+
+  /**
+   * Collects all pages and refuses to treat an unverified response as authoritative.
+   *
+   * @param reader page reader
+   * @return complete snapshot
+   * @throws SystemException if paging metadata is incomplete, or reading a page fails
+   */
+  static LdapUserSnapshot collectCompleteUserSnapshot(LdapUserPageReader reader) {
+    Objects.requireNonNull(reader, "reader");
+    List<User> users = new ArrayList<>();
+    Set<String> seenCookies = new java.util.HashSet<>();
+    byte[] requestCookie = new byte[0];
+    int pageCount = 0;
+    while (true) {
+      LdapUserPage page;
+      try {
+        page = reader.read(Arrays.copyOf(requestCookie, requestCookie.length));
+      } catch (SystemException e) {
+        throw e;
+      } catch (RuntimeException e) {
+        throw new SystemException("Could not obtain a complete LDAP user snapshot", e);
+      }
+      if (page == null) {
+        throw new SystemException("LDAP paging returned a null page");
+      }
+      if (!page.responseControlPresent()) {
+        throw new SystemException(
+            "LDAP paging response control is missing; refusing an incomplete user snapshot");
+      }
+      if (page.nextCookie() == null) {
+        throw new SystemException("LDAP paging response contained a null cookie");
+      }
+      users.addAll(page.users());
+      pageCount++;
+      byte[] nextCookie = page.nextCookie();
+      if (nextCookie.length == 0) {
+        return new LdapUserSnapshot(users, pageCount, users.size());
+      }
+      String cookieKey = java.util.Base64.getEncoder().encodeToString(nextCookie);
+      if (!seenCookies.add(cookieKey)) {
+        throw new SystemException("LDAP paging returned a repeated non-terminal cookie");
+      }
+      requestCookie = nextCookie;
+    }
   }
 
   private OrFilter userRoleFilter() {
