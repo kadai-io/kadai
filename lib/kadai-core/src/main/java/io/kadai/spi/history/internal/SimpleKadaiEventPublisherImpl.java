@@ -43,6 +43,12 @@ public class SimpleKadaiEventPublisherImpl<T extends KadaiEvent> implements Kada
   }
 
   @Override
+  public void publishAll(Collection<T> events) {
+    kadaiEventBus.dispatchAll(events);
+    LOGGER.info("Published {} events", events.size());
+  }
+
+  @Override
   public void publishing(Supplier<T> supplyEvent) {
     if (kadaiEventBus.isEnabled()) {
       publish(supplyEvent.get());
@@ -59,7 +65,7 @@ public class SimpleKadaiEventPublisherImpl<T extends KadaiEvent> implements Kada
   @Override
   public void publishingAll(Supplier<Collection<T>> supplyEvents) {
     if (kadaiEventBus.isEnabled()) {
-      supplyEvents.get().forEach(this::publish);
+      publishAll(supplyEvents.get());
     }
   }
 }

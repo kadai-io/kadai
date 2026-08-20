@@ -86,13 +86,32 @@ class JobSchedulerExecutionAccTest implements KadaiConfigurationModifier {
     primaryObjRef = DefaultTestEntities.defaultTestObjectReference().build();
   }
 
+  private static void makeJobsOverdue(JobMapper jobMapper, List<ScheduledJob> jobs) {
+    Instant due = Instant.now().minus(10, ChronoUnit.MILLIS);
+    jobs.forEach(
+        job -> {
+          job.setDue(due);
+          jobMapper.update(job);
+        });
+  }
+
+  private static void makeJobRunFirst(JobMapper jobMapper, List<ScheduledJob> jobs, String type) {
+    jobs.stream()
+        .filter(job -> type.equals(job.getType()))
+        .forEach(
+            job -> {
+              job.setPriority(51);
+              jobMapper.update(job);
+            });
+  }
+
   @WithAccessId(user = "admin")
   @Test
   void should_ExecuteAJobSuccessfully() throws Exception {
     Instant timeStampAnyJobIsOverdue = Instant.now().plus(10, ChronoUnit.DAYS);
     KadaiEngine kadaiEngine =
         KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.EXPLICIT);
-    JobScheduler jobScheduler = new JobScheduler(kadaiEngine, new FakeClock());
+    final JobScheduler jobScheduler = new JobScheduler(kadaiEngine, new FakeClock());
     TaskBuilder.newTask()
         .workbasketSummary(workbasket)
         .classificationSummary(classification)
@@ -102,7 +121,7 @@ class JobSchedulerExecutionAccTest implements KadaiConfigurationModifier {
         .buildAndStoreAsSummary(taskService);
     final List<ScheduledJob> jobsToRun = jobMapper.findJobsToRun(timeStampAnyJobIsOverdue);
 
-    Thread.sleep(2); // to make sure that TaskCleanupJob is overdue
+    makeJobsOverdue(jobMapper, jobsToRun);
     jobScheduler.start();
 
     List<TaskSummary> existingTasks = taskService.createTaskQuery().list();
@@ -168,7 +187,7 @@ class JobSchedulerExecutionAccTest implements KadaiConfigurationModifier {
       Instant timeStampAnyJobIsOverdue = Instant.now().plus(10, ChronoUnit.DAYS);
       KadaiEngine kadaiEngine =
           KadaiEngine.buildKadaiEngine(kadaiConfiguration, ConnectionManagementMode.EXPLICIT);
-      JobScheduler jobScheduler = new JobScheduler(kadaiEngine, new FakeClock());
+      final JobScheduler jobScheduler = new JobScheduler(kadaiEngine, new FakeClock());
       TaskBuilder.newTask()
           .workbasketSummary(workbasket)
           .classificationSummary(classification)
@@ -178,7 +197,8 @@ class JobSchedulerExecutionAccTest implements KadaiConfigurationModifier {
           .buildAndStoreAsSummary(taskService);
       final List<ScheduledJob> jobsToRun = jobMapper.findJobsToRun(timeStampAnyJobIsOverdue);
 
-      Thread.sleep(2); // to make sure that TaskCleanupJob is overdue
+      makeJobsOverdue(jobMapper, jobsToRun);
+      makeJobRunFirst(jobMapper, jobsToRun, AlwaysFailJob.class.getName());
       jobScheduler.start();
 
       List<TaskSummary> existingTasks = taskService.createTaskQuery().list();

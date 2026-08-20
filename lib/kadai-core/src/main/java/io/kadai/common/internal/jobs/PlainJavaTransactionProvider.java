@@ -47,10 +47,13 @@ public class PlainJavaTransactionProvider implements KadaiTransactionProvider {
     }
     try (Connection connection = dataSource.getConnection()) {
       kadaiEngine.setConnection(connection);
-      final T t = supplier.get();
-      connection.commit();
-      kadaiEngine.closeConnection();
-      return t;
+      try {
+        final T t = supplier.get();
+        connection.commit();
+        return t;
+      } finally {
+        kadaiEngine.closeConnection();
+      }
     } catch (SQLException ex) {
       throw new SystemException("caught exception", ex);
     } finally {

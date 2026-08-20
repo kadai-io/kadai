@@ -141,6 +141,7 @@ class KadaiConfigurationTest {
       assertThat(configuration.getJobFirstRun()).isEqualTo(Instant.parse("2023-01-01T00:00:00Z"));
       assertThat(configuration.getJobRunEvery()).isEqualTo(Duration.ofDays(1));
       assertThat(configuration.isTaskCleanupJobEnabled()).isTrue();
+      assertThat(configuration.getTaskCleanupJobBatchSize()).isEqualTo(5_000);
       assertThat(configuration.getTaskCleanupJobMinimumAge()).isEqualTo(Duration.ofDays(14));
       assertThat(configuration.isTaskCleanupJobAllCompletedSameParentBusiness()).isTrue();
       assertThat(configuration.isWorkbasketCleanupJobEnabled()).isTrue();
@@ -290,6 +291,7 @@ class KadaiConfigurationTest {
       Duration expectedJobRunEvery = Duration.ofDays(2);
       Duration expectedJobLockExpirationPeriod = Duration.ofDays(2);
       boolean expectedTaskCleanupJobEnabled = false;
+      int expectedTaskCleanupJobBatchSize = 5_001;
       Duration expectedTaskCleanupJobMinimumAge = Duration.ofDays(1);
       boolean expectedTaskCleanupJobAllCompletedSameParentBusiness = false;
       Duration expectedTaskCleanupJobLockExpirationPeriod = Duration.ofDays(2);
@@ -356,6 +358,7 @@ class KadaiConfigurationTest {
               .jobRunEvery(expectedJobRunEvery)
               .jobLockExpirationPeriod(expectedJobLockExpirationPeriod)
               .taskCleanupJobEnabled(expectedTaskCleanupJobEnabled)
+              .taskCleanupJobBatchSize(expectedTaskCleanupJobBatchSize)
               .taskCleanupJobMinimumAge(expectedTaskCleanupJobMinimumAge)
               .taskCleanupJobAllCompletedSameParentBusiness(
                   expectedTaskCleanupJobAllCompletedSameParentBusiness)
@@ -432,6 +435,8 @@ class KadaiConfigurationTest {
       assertThat(configuration.getJobFirstRun()).isEqualTo(expectedJobFirstJun);
       assertThat(configuration.getJobRunEvery()).isEqualTo(expectedJobRunEvery);
       assertThat(configuration.isTaskCleanupJobEnabled()).isEqualTo(expectedTaskCleanupJobEnabled);
+      assertThat(configuration.getTaskCleanupJobBatchSize())
+          .isEqualTo(expectedTaskCleanupJobBatchSize);
       assertThat(configuration.getTaskCleanupJobMinimumAge())
           .isEqualTo(expectedTaskCleanupJobMinimumAge);
       assertThat(configuration.isTaskCleanupJobAllCompletedSameParentBusiness())
@@ -506,6 +511,7 @@ class KadaiConfigurationTest {
               .jobRunEvery(Duration.ofDays(2))
               .jobLockExpirationPeriod(Duration.ofDays(2))
               .taskCleanupJobEnabled(false)
+              .taskCleanupJobBatchSize(5_001)
               .taskCleanupJobMinimumAge(Duration.ofDays(1))
               .taskCleanupJobAllCompletedSameParentBusiness(false)
               .taskCleanupJobLockExpirationPeriod(Duration.ofDays(6))
@@ -828,6 +834,24 @@ class KadaiConfigurationTest {
           .isInstanceOf(InvalidArgumentException.class)
           .hasMessageContaining(
               "Parameter jobBatchSize (kadai.jobs.batchSize) must be a positive integer");
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 0})
+    void should_ThrowInvalidArgumentEx_When_TaskCleanupJobBatchSizeIsNotPositive(
+        int taskCleanupJobBatchSize) {
+      KadaiConfiguration.Builder builder =
+          new KadaiConfiguration.Builder(
+                  TestContainerExtension.createDataSourceForH2(), false, "KADAI")
+              .taskCleanupJobBatchSize(taskCleanupJobBatchSize);
+
+      ThrowingCallable call = builder::build;
+
+      assertThatThrownBy(call)
+          .isInstanceOf(InvalidArgumentException.class)
+          .hasMessageContaining(
+              "Parameter taskCleanupJobBatchSize (kadai.jobs.cleanup.task.batchSize)"
+                  + " must be a positive integer");
     }
 
     @ParameterizedTest

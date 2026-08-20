@@ -18,34 +18,22 @@
 
 package io.kadai.spi.history.api;
 
-import io.kadai.common.api.KadaiInitializable;
-import io.kadai.common.api.Reifiable;
 import io.kadai.spi.history.api.events.KadaiEvent;
 import java.util.Collection;
 
 /**
- * Interface specifying how to consume {@linkplain KadaiEvent KadaiEvents}.
+ * Interface for {@linkplain KadaiEventConsumer event consumers} that can process multiple events in
+ * one batch.
  *
  * @param <T> the type of event this consumer consumes
  */
-public interface KadaiEventConsumer<T extends KadaiEvent> extends KadaiInitializable, Reifiable<T> {
+public interface BatchKadaiEventConsumer<T extends KadaiEvent> extends KadaiEventConsumer<T> {
 
   /**
-   * Consumes an event.
-   *
-   * @param event the event to consume
-   */
-  void consume(T event);
-
-  /**
-   * Consumes multiple events without guaranteeing order.
-   *
-   * <p>This method does not opt a consumer into batched event-bus dispatch. Implement {@link
-   * BatchKadaiEventConsumer} for that purpose.
+   * Consumes multiple events in one batch without guaranteeing order.
    *
    * @param events the events to consume
    */
-  default void consumeAll(Collection<T> events) {
-    events.forEach(this::consume);
-  }
+  @Override
+  void consumeAll(Collection<T> events);
 }
