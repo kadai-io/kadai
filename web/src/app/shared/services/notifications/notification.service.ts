@@ -66,8 +66,10 @@ export class NotificationService {
     )}
   `,
       // prevents duplicated toast because of double call in task-master
-      // TODO: delete while frontend refactoring
-      { id: 'empty-workbasket' }
+      // TODO: delete while frontend refactoring - Done ?
+
+      // 'informationKey' is used as the unique id to prevent toast duplication
+      { id: informationKey }
     );
   }
 
