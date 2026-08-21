@@ -64,7 +64,7 @@ export class FilterState implements NgxsOnInit {
     ctx.setState({
       ...ctx.getState(),
       [action.component]: filter
-    }); 
+    });
 
     return of(null);
   }
