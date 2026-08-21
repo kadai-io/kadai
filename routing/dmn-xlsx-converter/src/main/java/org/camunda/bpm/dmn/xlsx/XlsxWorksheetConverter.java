@@ -20,6 +20,7 @@
 package org.camunda.bpm.dmn.xlsx;
 
 import java.util.List;
+import java.util.UUID;
 import org.camunda.bpm.dmn.xlsx.api.SpreadsheetAdapter;
 import org.camunda.bpm.dmn.xlsx.api.SpreadsheetCell;
 import org.camunda.bpm.dmn.xlsx.api.SpreadsheetRow;
@@ -110,9 +111,7 @@ public class XlsxWorksheetConverter {
   /** With a generated id */
   public <E extends DmnElement> E generateElement(
       DmnModelInstance modelInstance, Class<E> elementClass) {
-    // TODO: use a proper generator for random IDs
-    String generatedId =
-        elementClass.getSimpleName() + Integer.toString((int) (Integer.MAX_VALUE * Math.random()));
+    String generatedId = elementClass.getSimpleName() + UUID.randomUUID();
     return generateElement(modelInstance, elementClass, generatedId);
   }
 

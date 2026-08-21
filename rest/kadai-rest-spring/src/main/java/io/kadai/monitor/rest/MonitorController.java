@@ -18,7 +18,6 @@
 
 package io.kadai.monitor.rest;
 
-import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.monitor.api.MonitorService;
@@ -77,7 +76,7 @@ public class MonitorController implements MonitorApi {
   public ResponseEntity<ReportRepresentationModel> computeWorkbasketReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
-      throws NotAuthorizedException, InvalidArgumentException {
+      throws NotAuthorizedException {
     if (taskTimestamp == null) {
       taskTimestamp = TaskTimestamp.DUE;
     }
@@ -98,7 +97,7 @@ public class MonitorController implements MonitorApi {
       @RequestParam(name = "workbasket-type", required = false) WorkbasketType[] workbasketTypes,
       @RequestParam(name = "columnHeader", required = false)
           PriorityColumnHeaderRepresentationModel[] columnHeaders)
-      throws NotAuthorizedException, InvalidArgumentException {
+      throws NotAuthorizedException {
 
     WorkbasketPriorityReport.Builder builder =
         monitorService.createWorkbasketPriorityReportBuilder().workbasketTypeIn(workbasketTypes);
@@ -125,7 +124,7 @@ public class MonitorController implements MonitorApi {
       @RequestParam(name = "workbasket-type", required = false) WorkbasketType[] workbasketTypes,
       @RequestParam(name = "columnHeader", required = false)
           PriorityColumnHeaderRepresentationModel[] columnHeaders)
-      throws NotAuthorizedException, InvalidArgumentException {
+      throws NotAuthorizedException {
 
     WorkbasketPriorityReport.Builder builder =
         monitorService.createWorkbasketPriorityReportBuilder().workbasketTypeIn(workbasketTypes);
@@ -150,7 +149,7 @@ public class MonitorController implements MonitorApi {
   public ResponseEntity<ReportRepresentationModel> computeClassificationCategoryReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
-      throws InvalidArgumentException, NotAuthorizedException {
+      throws NotAuthorizedException {
     if (taskTimestamp == null) {
       taskTimestamp = TaskTimestamp.DUE;
     }
@@ -170,7 +169,7 @@ public class MonitorController implements MonitorApi {
   public ResponseEntity<ReportRepresentationModel> computeClassificationReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
-      throws NotAuthorizedException, InvalidArgumentException {
+      throws NotAuthorizedException {
     if (taskTimestamp == null) {
       taskTimestamp = TaskTimestamp.DUE;
     }
@@ -189,7 +188,7 @@ public class MonitorController implements MonitorApi {
   public ResponseEntity<ReportRepresentationModel> computeDetailedClassificationReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
-      throws NotAuthorizedException, InvalidArgumentException {
+      throws NotAuthorizedException {
     if (taskTimestamp == null) {
       taskTimestamp = TaskTimestamp.DUE;
     }
@@ -209,7 +208,7 @@ public class MonitorController implements MonitorApi {
       @RequestParam(name = "custom-field") TaskCustomField customField,
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
-      throws NotAuthorizedException, InvalidArgumentException {
+      throws NotAuthorizedException {
     if (taskTimestamp == null) {
       taskTimestamp = TaskTimestamp.DUE;
     }
@@ -256,7 +255,7 @@ public class MonitorController implements MonitorApi {
   public ResponseEntity<ReportRepresentationModel> computeTimestampReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp[] timestamps)
-      throws NotAuthorizedException, InvalidArgumentException {
+      throws NotAuthorizedException {
 
     TimestampReport.Builder builder = monitorService.createTimestampReportBuilder();
     filterParameter.apply(builder);

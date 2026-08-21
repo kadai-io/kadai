@@ -224,13 +224,11 @@ public class TaskController implements TaskApi {
 
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_CLAIM)
   @Transactional(rollbackFor = Exception.class)
-  public ResponseEntity<TaskRepresentationModel> claimTask(
-      @PathVariable("taskId") String taskId, @RequestBody(required = false) String userName)
+  public ResponseEntity<TaskRepresentationModel> claimTask(@PathVariable("taskId") String taskId)
       throws TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException {
-    // TODO verify user
     Task updatedTask = taskService.claim(taskId);
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(updatedTask));
   }
@@ -238,12 +236,11 @@ public class TaskController implements TaskApi {
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_CLAIM_FORCE)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<TaskRepresentationModel> forceClaimTask(
-      @PathVariable("taskId") String taskId, @RequestBody(required = false) String userName)
+      @PathVariable("taskId") String taskId)
       throws TaskNotFoundException,
           InvalidTaskStateException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException {
-    // TODO verify user
     Task updatedTask = taskService.forceClaim(taskId);
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(updatedTask));
   }
@@ -676,7 +673,7 @@ public class TaskController implements TaskApi {
       @ParameterObject TaskQueryFilterParameter filterParameter,
       @ParameterObject TaskQueryFilterCustomFields filterCustomFields,
       @ParameterObject TaskQueryFilterCustomIntFields filterCustomIntFields)
-      throws InvalidArgumentException, NotAuthorizedException {
+      throws NotAuthorizedException {
     TaskQuery query = taskService.createTaskQuery();
     filterParameter.apply(query);
     filterCustomFields.apply(query);
