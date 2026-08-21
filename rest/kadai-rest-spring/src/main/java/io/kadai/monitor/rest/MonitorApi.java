@@ -19,7 +19,6 @@
 package io.kadai.monitor.rest;
 
 import io.kadai.classification.api.models.Classification;
-import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.monitor.api.TaskTimestamp;
@@ -58,7 +57,6 @@ public interface MonitorApi {
    * @param taskTimestamp determine which Task Timestamp should be used for comparison
    * @return the computed Report
    * @throws NotAuthorizedException if the current user is not authorized to compute the Report
-   * @throws InvalidArgumentException TODO: this is never thrown ...
    */
   @Operation(
       summary = "Compute a Workbasket Report",
@@ -86,12 +84,6 @@ public interface MonitorApi {
                     mediaType = MediaTypes.HAL_JSON_VALUE,
                     schema = @Schema(implementation = ReportRepresentationModel.class))),
         @ApiResponse(
-            responseCode = "400",
-            description = "INVALID_ARGUMENT",
-            content = {
-              @Content(schema = @Schema(implementation = InvalidArgumentException.class))
-            }),
-        @ApiResponse(
             responseCode = "403",
             description = "NOT_AUTHORIZED",
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
@@ -100,7 +92,7 @@ public interface MonitorApi {
   ResponseEntity<ReportRepresentationModel> computeWorkbasketReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
-      throws NotAuthorizedException, InvalidArgumentException;
+      throws NotAuthorizedException;
 
   @GetMapping(path = RestEndpoints.URL_MONITOR_WORKBASKET_PRIORITY_REPORT)
   ResponseEntity<ReportRepresentationModel> computePriorityWorkbasketReport(
@@ -108,7 +100,7 @@ public interface MonitorApi {
       @RequestParam(name = "workbasket-type", required = false) WorkbasketType[] workbasketTypes,
       @RequestParam(name = "columnHeader", required = false)
           PriorityColumnHeaderRepresentationModel[] columnHeaders)
-      throws NotAuthorizedException, InvalidArgumentException;
+      throws NotAuthorizedException;
 
   /**
    * This endpoint generates a Detailed Workbasket Priority Report.
@@ -125,7 +117,6 @@ public interface MonitorApi {
    * @param columnHeaders the column headers for the report
    * @return the computed Report
    * @throws NotAuthorizedException if the current user is not authorized to compute the Report
-   * @throws InvalidArgumentException if topicWorkbaskets or useDefaultValues are false
    */
   @Operation(
       summary = "Compute a Detailed Workbasket Priority Report",
@@ -136,28 +127,28 @@ public interface MonitorApi {
               + "number of {@linkplain Task}s, grouped by their priorities. "
               + "<p>Each Column Header represents a priority range.",
       parameters = {
-          @Parameter(
-              name = "workbasket-type",
-              description = "Determine the WorkbasketTypes to include in the report",
-              example = "GROUP"),
-          @Parameter(name = "columnHeader", description = "The column headers for the report")
+        @Parameter(
+            name = "workbasket-type",
+            description = "Determine the WorkbasketTypes to include in the report",
+            example = "GROUP"),
+        @Parameter(name = "columnHeader", description = "The column headers for the report")
       },
       responses = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "The computed Report",
-              content =
-              @Content(
-                  mediaType = MediaTypes.HAL_JSON_VALUE,
-                  schema = @Schema(implementation = ReportRepresentationModel.class)))
+        @ApiResponse(
+            responseCode = "200",
+            description = "The computed Report",
+            content =
+                @Content(
+                    mediaType = MediaTypes.HAL_JSON_VALUE,
+                    schema = @Schema(implementation = ReportRepresentationModel.class)))
       })
   @GetMapping(path = RestEndpoints.URL_MONITOR_DETAILED_WORKBASKET_PRIORITY_REPORT)
   ResponseEntity<ReportRepresentationModel> computeDetailedWorkbasketPriorityReport(
       @ParameterObject PriorityReportFilterParameter filterParameter,
       @RequestParam(name = "workbasket-type", required = false) WorkbasketType[] workbasketTypes,
       @RequestParam(name = "columnHeader", required = false)
-      PriorityColumnHeaderRepresentationModel[] columnHeaders)
-      throws NotAuthorizedException, InvalidArgumentException;
+          PriorityColumnHeaderRepresentationModel[] columnHeaders)
+      throws NotAuthorizedException;
 
   /**
    * This endpoint generates a Classification Category Report.
@@ -171,7 +162,6 @@ public interface MonitorApi {
    * @param taskTimestamp determine which Task Timestamp should be used for comparison
    * @return the computed Report
    * @throws NotAuthorizedException if the current user is not authorized to compute the Report
-   * @throws InvalidArgumentException TODO: this is never thrown ...
    */
   @Operation(
       summary = "Compute a Classification Category Report",
@@ -192,12 +182,6 @@ public interface MonitorApi {
                     mediaType = MediaTypes.HAL_JSON_VALUE,
                     schema = @Schema(implementation = ReportRepresentationModel.class))),
         @ApiResponse(
-            responseCode = "400",
-            description = "INVALID_ARGUMENT",
-            content = {
-              @Content(schema = @Schema(implementation = InvalidArgumentException.class))
-            }),
-        @ApiResponse(
             responseCode = "403",
             description = "NOT_AUTHORIZED",
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
@@ -206,7 +190,7 @@ public interface MonitorApi {
   ResponseEntity<ReportRepresentationModel> computeClassificationCategoryReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
-      throws InvalidArgumentException, NotAuthorizedException;
+      throws NotAuthorizedException;
 
   /**
    * This endpoint generates a Classification Report.
@@ -220,7 +204,6 @@ public interface MonitorApi {
    * @param taskTimestamp determine which Task Timestamp should be used for comparison
    * @return the computed Report
    * @throws NotAuthorizedException if the current user is not authorized to compute the Report
-   * @throws InvalidArgumentException TODO: this is never thrown
    */
   @Operation(
       summary = "Compute a Classification Report",
@@ -241,12 +224,6 @@ public interface MonitorApi {
                     mediaType = MediaTypes.HAL_JSON_VALUE,
                     schema = @Schema(implementation = ReportRepresentationModel.class))),
         @ApiResponse(
-            responseCode = "400",
-            description = "INVALID_ARGUMENT",
-            content = {
-              @Content(schema = @Schema(implementation = InvalidArgumentException.class))
-            }),
-        @ApiResponse(
             responseCode = "403",
             description = "NOT_AUTHORIZED",
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
@@ -255,7 +232,7 @@ public interface MonitorApi {
   ResponseEntity<ReportRepresentationModel> computeClassificationReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
-      throws NotAuthorizedException, InvalidArgumentException;
+      throws NotAuthorizedException;
 
   /**
    * This endpoint generates a Detailed Classification Report.
@@ -270,7 +247,6 @@ public interface MonitorApi {
    * @param taskTimestamp determine which Task Timestamp should be used for comparison
    * @return the computed Report
    * @throws NotAuthorizedException if the current user is not authorized to compute the Report
-   * @throws InvalidArgumentException TODO: this is never thrown
    */
   @Operation(
       summary = "Compute a Detailed Classification Report",
@@ -292,12 +268,6 @@ public interface MonitorApi {
                     mediaType = MediaTypes.HAL_JSON_VALUE,
                     schema = @Schema(implementation = ReportRepresentationModel.class))),
         @ApiResponse(
-            responseCode = "400",
-            description = "INVALID_ARGUMENT",
-            content = {
-              @Content(schema = @Schema(implementation = InvalidArgumentException.class))
-            }),
-        @ApiResponse(
             responseCode = "403",
             description = "NOT_AUTHORIZED",
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
@@ -306,7 +276,7 @@ public interface MonitorApi {
   ResponseEntity<ReportRepresentationModel> computeDetailedClassificationReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
-      throws NotAuthorizedException, InvalidArgumentException;
+      throws NotAuthorizedException;
 
   /**
    * This endpoint generates a Task Custom Field Value Report.
@@ -321,7 +291,6 @@ public interface MonitorApi {
    * @param taskTimestamp determine which Task Timestamp should be used for comparison
    * @return the computed Report
    * @throws NotAuthorizedException if the current user is not authorized to compute the Report
-   * @throws InvalidArgumentException TODO: this is never thrown
    */
   @Operation(
       summary = "Compute a Detailed Classification Report",
@@ -348,12 +317,6 @@ public interface MonitorApi {
                     mediaType = MediaTypes.HAL_JSON_VALUE,
                     schema = @Schema(implementation = ReportRepresentationModel.class))),
         @ApiResponse(
-            responseCode = "400",
-            description = "INVALID_ARGUMENT",
-            content = {
-              @Content(schema = @Schema(implementation = InvalidArgumentException.class))
-            }),
-        @ApiResponse(
             responseCode = "403",
             description = "NOT_AUTHORIZED",
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
@@ -363,7 +326,7 @@ public interface MonitorApi {
       @RequestParam(name = "custom-field") TaskCustomField customField,
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp taskTimestamp)
-      throws NotAuthorizedException, InvalidArgumentException;
+      throws NotAuthorizedException;
 
   /**
    * This endpoint generates a Task Status Report.
@@ -437,7 +400,6 @@ public interface MonitorApi {
    * @param timestamps Filter by the Task Timestamp of the task
    * @return the computed report
    * @throws NotAuthorizedException if the current user is not authorized to compute the report
-   * @throws InvalidArgumentException TODO: this is never thrown
    */
   @Operation(
       summary = "Compute a Timestamp Report",
@@ -459,12 +421,6 @@ public interface MonitorApi {
                     mediaType = MediaTypes.HAL_JSON_VALUE,
                     schema = @Schema(implementation = ReportRepresentationModel.class))),
         @ApiResponse(
-            responseCode = "400",
-            description = "INVALID_ARGUMENT",
-            content = {
-              @Content(schema = @Schema(implementation = InvalidArgumentException.class))
-            }),
-        @ApiResponse(
             responseCode = "403",
             description = "NOT_AUTHORIZED",
             content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
@@ -473,5 +429,5 @@ public interface MonitorApi {
   ResponseEntity<ReportRepresentationModel> computeTimestampReport(
       @ParameterObject TimeIntervalReportFilterParameter filterParameter,
       @RequestParam(name = "task-timestamp", required = false) TaskTimestamp[] timestamps)
-      throws NotAuthorizedException, InvalidArgumentException;
+      throws NotAuthorizedException;
 }
