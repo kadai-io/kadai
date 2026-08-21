@@ -25,10 +25,10 @@ export const classificationStateMock = {
   classifications: [],
   selectedClassification: { classificationId: 'ID01', key: 'KEY01', name: 'Recommendation' },
   selectedClassificationType: 'DOCUMENT',
-  classificationTypes: {
-    TASK: [],
-    DOCUMENT: ['EXTERNAL', 'MANUAL', 'AUTOMATIC']
-  },
+  classificationTypes: new Map<string, string[]>([
+    ['TASK', []],
+    ['DOCUMENT', ['EXTERNAL', 'MANUAL', 'AUTOMATIC']]
+  ]),
   badgeMessage: 'Creating new classification'
 };
 

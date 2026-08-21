@@ -21,7 +21,7 @@ import { EMPTY, Observable, of } from 'rxjs';
 import { mergeMap, take, tap } from 'rxjs/operators';
 import { KadaiDate } from 'app/shared/util/kadai.date';
 import {
-  CategoriesResponse,
+  CategoriesMap,
   ClassificationCategoriesService
 } from '../../services/classification-categories/classification-categories.service';
 import {
@@ -62,11 +62,13 @@ export class ClassificationState implements NgxsAfterBootstrap {
   initializeStore(ctx: StateContext<ClassificationStateModel>): Observable<any> {
     return this.categoryService.getClassificationCategoriesByType().pipe(
       take(1),
-      tap((classificationTypes) => {
+      tap((classificationTypes: CategoriesMap) => {
+        const firstType = classificationTypes.keys().next().value;
+
         ctx.patchState({
           classificationTypes,
           classifications: undefined,
-          selectedClassificationType: Object.keys(classificationTypes)[0]
+          selectedClassificationType: firstType
         });
       })
     );
@@ -77,7 +79,7 @@ export class ClassificationState implements NgxsAfterBootstrap {
     ctx: StateContext<ClassificationStateModel>,
     action: SetSelectedClassificationType
   ): Observable<null> {
-    if (ctx.getState().classificationTypes[action.selectedType]) {
+    if (ctx.getState().classificationTypes.get(action.selectedType)) {
       ctx.patchState({
         selectedClassificationType: action.selectedType,
         selectedClassification: undefined
@@ -185,7 +187,7 @@ export class ClassificationState implements NgxsAfterBootstrap {
     }
 
     // the classification is restored to a new classification
-    const category = state.classificationTypes[state.selectedClassificationType][0];
+    const category = state.classificationTypes.get(state.selectedClassificationType)?.[0];
     const { type, created, modified, domain, parentId, parentKey } = state.selectedClassification;
     ctx.patchState({
       selectedClassification: {
@@ -209,9 +211,9 @@ export class ClassificationState implements NgxsAfterBootstrap {
     const date = KadaiDate.getDate();
     const initialClassification: Classification = {
       type: state.selectedClassificationType,
-      category: state.classificationTypes[state.selectedClassificationType][0],
-      created: date,
-      modified: date,
+      category: state.classificationTypes.get(state.selectedClassificationType)?.[0],
+      created: new Date(date),
+      modified: new Date(date),
       domain: this.domainService.getSelectedDomainValue()
     };
     if (state.selectedClassification) {
@@ -291,6 +293,6 @@ export interface ClassificationStateModel {
   classifications: ClassificationSummary[];
   selectedClassification: Classification;
   selectedClassificationType: string;
-  classificationTypes: CategoriesResponse;
+  classificationTypes: CategoriesMap;
   badgeMessage: string;
 }

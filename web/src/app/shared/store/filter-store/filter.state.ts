@@ -97,6 +97,11 @@ export class FilterState implements NgxsOnInit {
       filter['wildcard-search-fields'].shift();
     }
 
+    // Delete priority filter if value of 'priority' is null
+    if (filter['priority'].length > 0 && filter['priority'][0] === null) {
+      filter['priority'].shift();
+    }
+
     ctx.setState({
       ...ctx.getState(),
       tasks: filter

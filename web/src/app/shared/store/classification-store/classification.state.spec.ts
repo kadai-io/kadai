@@ -40,10 +40,10 @@ import { ClassificationCategoriesService } from '../../services/classification-c
 import { ClassificationsService } from '../../services/classifications/classifications.service';
 import { DomainService } from '../../services/domain/domain.service';
 
-const mockClassificationTypes = {
-  TASK: ['EXTERNAL', 'MANUAL', 'AUTOMATIC'],
-  DOCUMENT: ['EXTERNAL', 'MANUAL']
-};
+const mockClassificationTypes = new Map<string, string[]>([
+  ['TASK', ['EXTERNAL', 'MANUAL', 'AUTOMATIC']],
+  ['DOCUMENT', ['EXTERNAL', 'MANUAL']]
+]);
 
 const mockClassification = {
   classificationId: 'CLI:001',

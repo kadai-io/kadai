@@ -18,7 +18,7 @@
 
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, map, Observable, of, shareReplay, tap, throwError } from 'rxjs';
 
 import { Classification } from 'app/shared/models/classification';
 
@@ -37,6 +37,7 @@ export class ClassificationsService {
   private httpClient = inject(HttpClient);
   private domainService = inject(DomainService);
   private startupService = inject(StartupService);
+  private domainCache = new Map<string, Observable<ClassificationPagingList>>();
 
   get url(): string {
     return this.startupService.getKadaiRestUrl() + '/v1/classifications';
@@ -48,9 +49,26 @@ export class ClassificationsService {
     sortParameter?: Sorting<ClassificationQuerySortParameter>,
     pagingParameter?: QueryPagingParameter
   ): Observable<ClassificationPagingList> {
-    return this.httpClient.get<ClassificationPagingList>(
-      `${this.url}${asUrlQueryString({ ...filterParameter, ...sortParameter, ...pagingParameter })}`
-    );
+    const domainKey = filterParameter?.domain?.join(',') || 'default';
+
+    if (this.domainCache.has(domainKey)) {
+      return this.domainCache.get(domainKey)!;
+    }
+
+    const request$ = this.httpClient
+      .get<ClassificationPagingList>(
+        `${this.url}${asUrlQueryString({ ...filterParameter, ...sortParameter, ...pagingParameter })}`
+      )
+      .pipe(
+        shareReplay(1),
+        catchError((err) => {
+          this.domainCache.delete(domainKey);
+          return throwError(() => err);
+        })
+      );
+
+    this.domainCache.set(domainKey, request$);
+    return request$;
   }
 
   // GET

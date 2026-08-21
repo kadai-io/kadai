@@ -16,14 +16,19 @@
  *
  */
 
-import { of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { environment } from 'app/../environments/environment';
 import { inject, Injectable, Injector } from '@angular/core';
 import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
-import { map } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { WindowRefService } from 'app/shared/services/window/window.service';
+
+interface EnvironmentConfig {
+  kadaiRestUrl?: string;
+  kadaiLogoutUrl?: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -38,27 +43,29 @@ export class StartupService {
     return this.injector.get(Router);
   }
 
-  load(): Promise<any> {
+  load(): Promise<EnvironmentConfig> {
     return this.loadEnvironment();
   }
 
-  // TODO: refactor this
+  // TODO: refactor this - Done ?
   getEnvironmentFilePromise() {
-    return this.httpClient
-      .get<any>('environments/data-sources/environment-information.json')
-      .pipe(
-        map((jsonFile) => {
-          if (jsonFile && jsonFile.kadaiRestUrl) {
-            environment.kadaiRestUrl = jsonFile.kadaiRestUrl;
+    return firstValueFrom(
+      this.httpClient.get<EnvironmentConfig>('environments/data-sources/environment-information.json').pipe(
+        tap((config) => {
+          if (config?.kadaiRestUrl) {
+            environment.kadaiRestUrl = config.kadaiRestUrl;
           }
 
-          if (jsonFile && jsonFile.kadaiLogoutUrl) {
-            environment.kadaiLogoutUrl = jsonFile.kadaiLogoutUrl;
+          if (config?.kadaiLogoutUrl) {
+            environment.kadaiLogoutUrl = config.kadaiLogoutUrl;
           }
+        }),
+        catchError((error) => {
+          console.warn('Failed to load environment configuration:', error);
+          return of(null);
         })
       )
-      .toPromise()
-      .catch(() => of(true));
+    ).then(() => void 0);
   }
 
   getKadaiRestUrl() {
@@ -69,7 +76,7 @@ export class StartupService {
     return environment.kadaiLogoutUrl;
   }
 
-  private loadEnvironment() {
+  private loadEnvironment(): Promise<EnvironmentConfig> {
     return this.getEnvironmentFilePromise()
       .then(() => this.kadaiEngineService.getUserInformation())
       .catch((error) => {

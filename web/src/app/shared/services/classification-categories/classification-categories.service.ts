@@ -33,15 +33,19 @@ export interface CategoriesResponse {
   [key: string]: string[];
 }
 
+export type CategoriesMap = Map<string, string[]>;
+
 @Injectable({
   providedIn: 'root'
 })
 export class ClassificationCategoriesService {
   private httpClient = inject(HttpClient);
 
-  // TODO: convert to Map (maybe via ES6)
-  getClassificationCategoriesByType(): Observable<CategoriesResponse> {
-    return this.httpClient.get<CategoriesResponse>(`${environment.kadaiRestUrl}/v1/classifications-by-type`);
+  // TODO: convert to Map (maybe via ES6) - Done ?
+  getClassificationCategoriesByType(): Observable<CategoriesMap> {
+    return this.httpClient
+      .get<CategoriesResponse>(`${environment.kadaiRestUrl}/v1/classifications-by-type`)
+      .pipe(map((obj) => new Map(Object.entries(obj))));
   }
 
   getCustomisation(): Observable<Customisation> {
