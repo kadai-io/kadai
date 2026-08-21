@@ -166,6 +166,7 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
   }
 
   // TODO: this is currently called for every selected task and is only necessary when we switch the workbasket -> can be optimized.
+  // - Done (in ClassificationService)?
   private getClassificationByDomain() {
     this.requestInProgress.set(true);
     this.classificationService
