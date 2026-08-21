@@ -688,9 +688,97 @@ public interface TaskApi {
           NotAuthorizedOnWorkbasketException;
 
   /**
+   * This endpoint requests a review on the specified Task.
+   *
+   * @param taskId the id of the relevant Task
+   * @param workbasketKey the key of the target Workbasket
+   * @param domain the domain of the target Workbasket
+   * @param body the body of the request, that can contain the ownerId
+   * @return the Task after a review has been requested
+   * @throws InvalidTaskStateException if the state of the Task with taskId is not CLAIMED
+   * @throws TaskNotFoundException if the Task with taskId wasn't found
+   * @throws WorkbasketNotFoundException if the target Workbasket wasn't found
+   * @throws InvalidOwnerException if the Task is claimed by another user
+   * @throws NotAuthorizedOnWorkbasketException if the current user has no READ permissions for the
+   *     Workbasket the Task is in
+   * @title Request a review on a Task
+   */
+  @Operation(
+      summary = "Request a review on a Task",
+      description = "This endpoint requests a review on the specified Task.",
+      parameters = {
+        @Parameter(name = "taskId", description = "the id of the relevant Task", required = true),
+        @Parameter(name = "key", description = "the key of the target Workbasket", required = true),
+        @Parameter(
+            name = "domain",
+            description = "the domain of the target Workbasket",
+            required = true)
+      },
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              required = false,
+              description = "Optional JSON body with ownerId",
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
+                      schema = @Schema(example = "{ \"ownerId\": \"user-1-1\" }"))),
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "the Task after a review has been requested",
+            content =
+                @Content(
+                    mediaType = MediaTypes.HAL_JSON_VALUE,
+                    schema = @Schema(implementation = TaskRepresentationModel.class))),
+        @ApiResponse(
+            responseCode = "400",
+            description = "TASK_INVALID_OWNER, TASK_INVALID_STATE",
+            content =
+                @Content(
+                    schema =
+                        @Schema(
+                            anyOf = {
+                              InvalidOwnerException.class,
+                              InvalidTaskStateException.class
+                            }))),
+        @ApiResponse(
+            responseCode = "403",
+            description =
+                "NOT_AUTHORIZED_ON_WORKBASKET_WITH_ID,"
+                    + " NOT_AUTHORIZED_ON_WORKBASKET_WITH_KEY_AND_DOMAIN",
+            content =
+                @Content(
+                    schema = @Schema(implementation = NotAuthorizedOnWorkbasketException.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "TASK_NOT_FOUND, WORKBASKET_WITH_KEY_NOT_FOUND",
+            content =
+                @Content(
+                    schema =
+                        @Schema(
+                            anyOf = {
+                              TaskNotFoundException.class,
+                              WorkbasketNotFoundException.class
+                            })))
+      })
+  @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_REVIEW_WORKBASKET_KEY_DOMAIN)
+  @Transactional(rollbackFor = Exception.class)
+  ResponseEntity<TaskRepresentationModel> requestReviewWithWorkbasketKeyAndDomain(
+      @PathVariable("taskId") String taskId,
+      @PathVariable("key") String workbasketKey,
+      @PathVariable("domain") String domain,
+      @RequestBody(required = false) Map<String, String> body)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          WorkbasketNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException;
+
+  /**
    * This endpoint force request a review on the specified Task.
    *
    * @param taskId taskId the id of the relevant Task
+   * @param body the body of the request, that can contain the workbasketId and the ownerId
    * @return the Task after a review has been requested
    * @throws InvalidTaskStateException if the state of the Task with taskId is not CLAIMED
    * @throws TaskNotFoundException if the Task with taskId wasn't found
@@ -709,6 +797,22 @@ public interface TaskApi {
             required = true,
             example = "TKI:000000000000000000000000000000000101")
       },
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              required = false,
+              description = "Optional JSON body with workbasketId and ownerId",
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
+                      schema =
+                          @Schema(
+                              example =
+                                  """
+        {
+          "workbasketId": "WBI:000000000000000000000000000000000001",
+          "ownerId": "user-1-1"
+        }
+      """))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -741,9 +845,91 @@ public interface TaskApi {
       })
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_REVIEW_FORCE)
   @Transactional(rollbackFor = Exception.class)
-  ResponseEntity<TaskRepresentationModel> forceRequestReview(@PathVariable("taskId") String taskId)
+  ResponseEntity<TaskRepresentationModel> forceRequestReview(
+      @PathVariable("taskId") String taskId,
+      @RequestBody(required = false) Map<String, String> body)
       throws InvalidTaskStateException,
           TaskNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException;
+
+  /**
+   * This endpoint force request a review on the specified Task.
+   *
+   * @param taskId taskId the id of the relevant Task
+   * @param workbasketKey the key of the target Workbasket
+   * @param domain the domain of the target Workbasket
+   * @param body the body of the request, that can contain the ownerId
+   * @return the Task after a review has been requested
+   * @throws InvalidTaskStateException if the state of the Task with taskId is not CLAIMED
+   * @throws TaskNotFoundException if the Task with taskId wasn't found
+   * @throws WorkbasketNotFoundException if the target Workbasket wasn't found
+   * @throws InvalidOwnerException cannot be thrown
+   * @throws NotAuthorizedOnWorkbasketException if the current user has no READ permissions for the
+   *     Workbasket the Task is in
+   * @title Force request a review on a Task
+   */
+  @Operation(
+      summary = "Force request a review on a Task",
+      description = "This endpoint force requests a review on the specified Task.",
+      parameters = {
+        @Parameter(name = "taskId", description = "the id of the relevant Task", required = true),
+        @Parameter(name = "key", description = "the key of the target Workbasket", required = true),
+        @Parameter(
+            name = "domain",
+            description = "the domain of the target Workbasket",
+            required = true)
+      },
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              required = false,
+              description = "Optional JSON body with ownerId",
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
+                      schema = @Schema(example = "{ \"ownerId\": \"user-1-1\" }"))),
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "the Task after a review has been requested",
+            content =
+                @Content(
+                    mediaType = MediaTypes.HAL_JSON_VALUE,
+                    schema = @Schema(implementation = TaskRepresentationModel.class))),
+        @ApiResponse(
+            responseCode = "400",
+            description = "TASK_INVALID_STATE",
+            content = @Content(schema = @Schema(implementation = InvalidTaskStateException.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description =
+                "NOT_AUTHORIZED_ON_WORKBASKET_WITH_ID,"
+                    + " NOT_AUTHORIZED_ON_WORKBASKET_WITH_KEY_AND_DOMAIN",
+            content =
+                @Content(
+                    schema = @Schema(implementation = NotAuthorizedOnWorkbasketException.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "TASK_NOT_FOUND, WORKBASKET_WITH_KEY_NOT_FOUND",
+            content =
+                @Content(
+                    schema =
+                        @Schema(
+                            anyOf = {
+                              TaskNotFoundException.class,
+                              WorkbasketNotFoundException.class
+                            })))
+      })
+  @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_REVIEW_FORCE_WORKBASKET_KEY_DOMAIN)
+  @Transactional(rollbackFor = Exception.class)
+  ResponseEntity<TaskRepresentationModel> forceRequestReviewWithWorkbasketKeyAndDomain(
+      @PathVariable("taskId") String taskId,
+      @PathVariable("key") String workbasketKey,
+      @PathVariable("domain") String domain,
+      @RequestBody(required = false) Map<String, String> body)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          WorkbasketNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException;
 
@@ -827,9 +1013,97 @@ public interface TaskApi {
           NotAuthorizedOnWorkbasketException;
 
   /**
+   * This endpoint request changes on the specified Task.
+   *
+   * @param taskId the id of the relevant Task
+   * @param workbasketKey the key of the target Workbasket
+   * @param domain the domain of the target Workbasket
+   * @param body the body of the request, that can contain the ownerId
+   * @return the Task after changes have been requested
+   * @throws InvalidTaskStateException if the state of the Task with taskId is not IN_REVIEW
+   * @throws TaskNotFoundException if the Task with taskId wasn't found
+   * @throws WorkbasketNotFoundException if the target Workbasket wasn't found
+   * @throws InvalidOwnerException if the Task is claimed by another user
+   * @throws NotAuthorizedOnWorkbasketException if the current user has no READ permissions for the
+   *     Workbasket the Task is in
+   * @title Request changes on a Task
+   */
+  @Operation(
+      summary = "Request changes on a Task",
+      description = "This endpoint requests changes on the specified Task.",
+      parameters = {
+        @Parameter(name = "taskId", description = "the id of the relevant Task", required = true),
+        @Parameter(name = "key", description = "the key of the target Workbasket", required = true),
+        @Parameter(
+            name = "domain",
+            description = "the domain of the target Workbasket",
+            required = true)
+      },
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              required = false,
+              description = "Optional JSON body with ownerId",
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
+                      schema = @Schema(example = "{ \"ownerId\": \"user-1-1\" }"))),
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "the Task after changes have been requested",
+            content =
+                @Content(
+                    mediaType = MediaTypes.HAL_JSON_VALUE,
+                    schema = @Schema(implementation = TaskRepresentationModel.class))),
+        @ApiResponse(
+            responseCode = "400",
+            description = "TASK_INVALID_OWNER, TASK_INVALID_STATE",
+            content =
+                @Content(
+                    schema =
+                        @Schema(
+                            anyOf = {
+                              InvalidOwnerException.class,
+                              InvalidTaskStateException.class
+                            }))),
+        @ApiResponse(
+            responseCode = "403",
+            description =
+                "NOT_AUTHORIZED_ON_WORKBASKET_WITH_ID,"
+                    + " NOT_AUTHORIZED_ON_WORKBASKET_WITH_KEY_AND_DOMAIN",
+            content =
+                @Content(
+                    schema = @Schema(implementation = NotAuthorizedOnWorkbasketException.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "TASK_NOT_FOUND, WORKBASKET_WITH_KEY_NOT_FOUND",
+            content =
+                @Content(
+                    schema =
+                        @Schema(
+                            anyOf = {
+                              TaskNotFoundException.class,
+                              WorkbasketNotFoundException.class
+                            })))
+      })
+  @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES_WORKBASKET_KEY_DOMAIN)
+  @Transactional(rollbackFor = Exception.class)
+  ResponseEntity<TaskRepresentationModel> requestChangesWithWorkbasketKeyAndDomain(
+      @PathVariable("taskId") String taskId,
+      @PathVariable("key") String workbasketKey,
+      @PathVariable("domain") String domain,
+      @RequestBody(required = false) Map<String, String> body)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          WorkbasketNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException;
+
+  /**
    * This endpoint force requests changes on a Task.
    *
    * @param taskId the Id of the Task on which a review should be requested
+   * @param body the body of the request, that can contain the workbasketId and the ownerId
    * @return the change requested Task
    * @throws InvalidTaskStateException if the Task with taskId is in an end state
    * @throws TaskNotFoundException if the Task with taskId wasn't found
@@ -848,6 +1122,22 @@ public interface TaskApi {
             required = true,
             example = "TKI:000000000000000000000000000000000100")
       },
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              required = false,
+              description = "Optional JSON body with workbasketId and ownerId",
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
+                      schema =
+                          @Schema(
+                              example =
+                                  """
+        {
+          "workbasketId": "WBI:000000000000000000000000000000000001",
+          "ownerId": "user-1-1"
+        }
+      """))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -880,9 +1170,91 @@ public interface TaskApi {
       })
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES_FORCE)
   @Transactional(rollbackFor = Exception.class)
-  ResponseEntity<TaskRepresentationModel> forceRequestChanges(@PathVariable("taskId") String taskId)
+  ResponseEntity<TaskRepresentationModel> forceRequestChanges(
+      @PathVariable("taskId") String taskId,
+      @RequestBody(required = false) Map<String, String> body)
       throws InvalidTaskStateException,
           TaskNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException;
+
+  /**
+   * This endpoint force requests changes on a Task.
+   *
+   * @param taskId the Id of the Task on which a review should be requested
+   * @param workbasketKey the key of the target Workbasket
+   * @param domain the domain of the target Workbasket
+   * @param body the body of the request, that can contain the ownerId
+   * @return the change requested Task
+   * @throws InvalidTaskStateException if the Task with taskId is in an end state
+   * @throws TaskNotFoundException if the Task with taskId wasn't found
+   * @throws WorkbasketNotFoundException if the target Workbasket wasn't found
+   * @throws InvalidOwnerException cannot be thrown
+   * @throws NotAuthorizedOnWorkbasketException if the current user has no READ permissions for the
+   *     Workbasket the Task is in
+   * @title Force request changes on a Task
+   */
+  @Operation(
+      summary = "Force request changes on a Task",
+      description = "This endpoint force requests changes on the specified Task.",
+      parameters = {
+        @Parameter(name = "taskId", description = "the id of the relevant Task", required = true),
+        @Parameter(name = "key", description = "the key of the target Workbasket", required = true),
+        @Parameter(
+            name = "domain",
+            description = "the domain of the target Workbasket",
+            required = true)
+      },
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              required = false,
+              description = "Optional JSON body with ownerId",
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
+                      schema = @Schema(example = "{ \"ownerId\": \"user-1-1\" }"))),
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "the Task after changes have been requested",
+            content =
+                @Content(
+                    mediaType = MediaTypes.HAL_JSON_VALUE,
+                    schema = @Schema(implementation = TaskRepresentationModel.class))),
+        @ApiResponse(
+            responseCode = "400",
+            description = "TASK_INVALID_STATE",
+            content = @Content(schema = @Schema(implementation = InvalidTaskStateException.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description =
+                "NOT_AUTHORIZED_ON_WORKBASKET_WITH_ID,"
+                    + " NOT_AUTHORIZED_ON_WORKBASKET_WITH_KEY_AND_DOMAIN",
+            content =
+                @Content(
+                    schema = @Schema(implementation = NotAuthorizedOnWorkbasketException.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "TASK_NOT_FOUND, WORKBASKET_WITH_KEY_NOT_FOUND",
+            content =
+                @Content(
+                    schema =
+                        @Schema(
+                            anyOf = {
+                              TaskNotFoundException.class,
+                              WorkbasketNotFoundException.class
+                            })))
+      })
+  @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES_FORCE_WORKBASKET_KEY_DOMAIN)
+  @Transactional(rollbackFor = Exception.class)
+  ResponseEntity<TaskRepresentationModel> forceRequestChangesWithWorkbasketKeyAndDomain(
+      @PathVariable("taskId") String taskId,
+      @PathVariable("key") String workbasketKey,
+      @PathVariable("domain") String domain,
+      @RequestBody(required = false) Map<String, String> body)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          WorkbasketNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException;
 
@@ -1369,6 +1741,97 @@ public interface TaskApi {
           TransferCheckException;
 
   /**
+   * This endpoint transfers a given Task to a given Workbasket, if possible.
+   *
+   * @title Transfer a Task to another Workbasket
+   * @param taskId the Id of the Task which should be transferred
+   * @param workbasketKey the key of the destination Workbasket
+   * @param domain the domain of the destination Workbasket
+   * @param transferTaskRepresentationModel sets the transfer flag of the Task (default: true) and
+   *     owner of the task
+   * @return the successfully transferred Task.
+   * @throws TaskNotFoundException if the requested Task does not exist
+   * @throws WorkbasketNotFoundException if the requested Workbasket does not exist
+   * @throws NotAuthorizedOnWorkbasketException if the current user has no authorization to transfer
+   *     the Task.
+   * @throws InvalidTaskStateException if the Task is in a state which does not allow transferring.
+   * @throws TransferCheckException if the transfer is denied
+   */
+  @Operation(
+      summary = "Transfer a Task to another Workbasket",
+      description = "This endpoint transfers a Task to a given Workbasket, if possible.",
+      parameters = {
+        @Parameter(
+            name = "taskId",
+            description = "the id of the Task to transfer",
+            required = true),
+        @Parameter(
+            name = "key",
+            description = "the key of the destination Workbasket",
+            required = true),
+        @Parameter(
+            name = "domain",
+            description = "the domain of the destination Workbasket",
+            required = true)
+      },
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              required = false,
+              description = "Optional JSON body with owner and setTransferFlag",
+              content =
+                  @Content(
+                      schema = @Schema(implementation = TransferTaskRepresentationModel.class))),
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "the successfully transferred Task",
+            content =
+                @Content(
+                    mediaType = MediaTypes.HAL_JSON_VALUE,
+                    schema = @Schema(implementation = TaskRepresentationModel.class))),
+        @ApiResponse(
+            responseCode = "400",
+            description = "TASK_INVALID_STATE",
+            content = @Content(schema = @Schema(implementation = InvalidTaskStateException.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description =
+                "NOT_AUTHORIZED_ON_WORKBASKET_WITH_ID,"
+                    + " NOT_AUTHORIZED_ON_WORKBASKET_WITH_KEY_AND_DOMAIN",
+            content =
+                @Content(
+                    schema = @Schema(implementation = NotAuthorizedOnWorkbasketException.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "TASK_NOT_FOUND, WORKBASKET_WITH_KEY_NOT_FOUND",
+            content =
+                @Content(
+                    schema =
+                        @Schema(
+                            anyOf = {
+                              TaskNotFoundException.class,
+                              WorkbasketNotFoundException.class
+                            }))),
+        @ApiResponse(
+            responseCode = "412",
+            description = "TASK_TRANSFER_CHECK_FAILED",
+            content = @Content(schema = @Schema(implementation = TransferCheckException.class)))
+      })
+  @PostMapping(path = RestEndpoints.URL_TASKS_ID_TRANSFER_WORKBASKET_KEY_DOMAIN)
+  @Transactional(rollbackFor = Exception.class)
+  ResponseEntity<TaskRepresentationModel> transferTaskWithWorkbasketKeyAndDomain(
+      @PathVariable("taskId") String taskId,
+      @PathVariable("key") String workbasketKey,
+      @PathVariable("domain") String domain,
+      @RequestBody(required = false)
+          TransferTaskRepresentationModel transferTaskRepresentationModel)
+      throws TaskNotFoundException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          InvalidTaskStateException,
+          TransferCheckException;
+
+  /**
    * This endpoint transfers a list of Tasks listed in the body to a given Workbasket, if possible.
    * Tasks that can be transfered without throwing an exception get transferred independent of other
    * Tasks. If the transfer of a Task throws an exception, then the Task will remain in the old
@@ -1447,6 +1910,78 @@ public interface TaskApi {
   @Transactional(rollbackFor = Exception.class)
   ResponseEntity<BulkOperationResultsRepresentationModel> transferTasks(
       @PathVariable("workbasketId") String workbasketId,
+      @RequestBody TransferTaskRepresentationModel transferTaskRepresentationModel)
+      throws NotAuthorizedOnWorkbasketException, WorkbasketNotFoundException;
+
+  /**
+   * This endpoint transfers a list of Tasks listed in the body to a given Workbasket, if possible.
+   * Tasks that can be transfered without throwing an exception get transferred independent of other
+   * Tasks. If the transfer of a Task throws an exception, then the Task will remain in the old
+   * Workbasket.
+   *
+   * @title Transfer Tasks to another Workbasket
+   * @param workbasketKey the key of the destination Workbasket
+   * @param domain the domain of the destination Workbasket
+   * @param transferTaskRepresentationModel JSON formatted request body containing the TaskIds,
+   *     owner and setTransferFlag of tasks to be transferred; owner and setTransferFlag are
+   *     optional, while the TaskIds are mandatory
+   * @return the taskIds and corresponding ErrorCode of tasks failed to be transferred
+   * @throws WorkbasketNotFoundException if the requested Workbasket does not exist
+   * @throws NotAuthorizedOnWorkbasketException if the current user has no authorization to transfer
+   *     the Task
+   */
+  @Operation(
+      summary = "Transfer Tasks to another Workbasket",
+      description =
+          "This endpoint transfers a list of Tasks listed in the body to a given Workbasket, if "
+              + "possible. Tasks that can be transferred without throwing an exception get "
+              + "transferred independent of other Tasks. If the transfer of a Task throws an "
+              + "exception, then the Task will remain in the old Workbasket.",
+      parameters = {
+        @Parameter(
+            name = "key",
+            description = "the key of the destination Workbasket",
+            required = true),
+        @Parameter(
+            name = "domain",
+            description = "the domain of the destination Workbasket",
+            required = true)
+      },
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              required = true,
+              description = "JSON body with taskIds and optional owner and setTransferFlag",
+              content =
+                  @Content(
+                      schema = @Schema(implementation = TransferTaskRepresentationModel.class))),
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "the task ids and errors for failed transfers",
+            content =
+                @Content(
+                    mediaType = MediaTypes.HAL_JSON_VALUE,
+                    schema =
+                        @Schema(implementation = BulkOperationResultsRepresentationModel.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description =
+                "NOT_AUTHORIZED_ON_WORKBASKET_WITH_ID,"
+                    + " NOT_AUTHORIZED_ON_WORKBASKET_WITH_KEY_AND_DOMAIN",
+            content =
+                @Content(
+                    schema = @Schema(implementation = NotAuthorizedOnWorkbasketException.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "WORKBASKET_WITH_KEY_NOT_FOUND",
+            content =
+                @Content(schema = @Schema(implementation = WorkbasketNotFoundException.class)))
+      })
+  @PostMapping(path = RestEndpoints.URL_TRANSFER_WORKBASKET_KEY_DOMAIN)
+  @Transactional(rollbackFor = Exception.class)
+  ResponseEntity<BulkOperationResultsRepresentationModel> transferTasksWithWorkbasketKeyAndDomain(
+      @PathVariable("key") String workbasketKey,
+      @PathVariable("domain") String domain,
       @RequestBody TransferTaskRepresentationModel transferTaskRepresentationModel)
       throws NotAuthorizedOnWorkbasketException, WorkbasketNotFoundException;
 
