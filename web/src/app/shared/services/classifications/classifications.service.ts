@@ -55,8 +55,6 @@ export class ClassificationsService {
       return this.domainCache.get(domainKey)!;
     }
 
-    console.log('I am called');
-
     const request$ = this.httpClient
       .get<ClassificationPagingList>(
         `${this.url}${asUrlQueryString({ ...filterParameter, ...sortParameter, ...pagingParameter })}`
