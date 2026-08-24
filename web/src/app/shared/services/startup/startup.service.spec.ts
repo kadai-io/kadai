@@ -115,10 +115,7 @@ describe('StartupService', () => {
 
     await promise;
 
-    expect(consoleSpy).toHaveBeenCalledWith(
-      'Failed to load environment configuration:',
-      expect.anything()
-    );
+    expect(consoleSpy).toHaveBeenCalledWith('Failed to load environment configuration:', expect.anything());
 
     consoleSpy.mockRestore();
     httpMock.verify();

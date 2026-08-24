@@ -19,7 +19,12 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Customisation, CustomisationContent } from 'app/shared/models/customisation';
-import { asteriskIcon, CategoriesResponse, ClassificationCategoriesService, missingIcon } from './classification-categories.service';
+import {
+  asteriskIcon,
+  CategoriesResponse,
+  ClassificationCategoriesService,
+  missingIcon
+} from './classification-categories.service';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { environment } from 'environments/environment';
 

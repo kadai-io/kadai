@@ -538,7 +538,7 @@ describe('ClassificationState', () => {
       expect(unchanged.name).toBe('Unchanged');
     });
   });
-  
+
   describe('ClassificationSelectors', () => {
     it('should select classificationTypes as an array of keys', () => {
       const types = store.selectSnapshot(ClassificationSelectors.classificationTypes);
