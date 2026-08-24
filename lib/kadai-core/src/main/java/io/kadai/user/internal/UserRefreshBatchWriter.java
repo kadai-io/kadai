@@ -97,22 +97,20 @@ final class UserRefreshBatchWriter {
   private void addRowsByUserAccessIdRow(List<UserAccessIdRow> rows, String sql)
       throws SQLException {
     for (UserAccessIdRow row : rows) {
-      try (PreparedStatement statement = statement(sql)) {
-        statement.setString(1, row.userId());
-        statement.setString(2, row.accessId());
-        statement.addBatch();
-        operationAdded();
-      }
+      PreparedStatement statement = statement(sql);
+      statement.setString(1, row.userId());
+      statement.setString(2, row.accessId());
+      statement.addBatch();
+      operationAdded();
     }
   }
 
   private void addDeleteRows(List<String> rows) throws SQLException {
     for (String value : rows) {
-      try (PreparedStatement statement = statement(UserRefreshBatchWriter.DELETE_USER_SQL)) {
-        statement.setString(1, value);
-        statement.addBatch();
-        operationAdded();
-      }
+      PreparedStatement statement = statement(UserRefreshBatchWriter.DELETE_USER_SQL);
+      statement.setString(1, value);
+      statement.addBatch();
+      operationAdded();
     }
   }
 

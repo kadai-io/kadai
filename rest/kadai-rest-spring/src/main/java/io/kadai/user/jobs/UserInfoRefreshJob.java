@@ -22,8 +22,8 @@ import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.ScheduledJob;
 import io.kadai.common.api.exceptions.SystemException;
-import io.kadai.common.internal.JobServiceImpl;
 import io.kadai.common.internal.jobs.AbstractKadaiJob;
+import io.kadai.common.internal.jobs.JobLockGuard;
 import io.kadai.common.internal.jobs.JobTransactionPolicy;
 import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import io.kadai.common.internal.util.LogSanitizer;
@@ -47,7 +47,7 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
   private static final Logger LOGGER = LoggerFactory.getLogger(UserInfoRefreshJob.class);
   private final RefreshUserPostprocessorManager refreshUserPostprocessorManager;
   private final LdapClient ldapClient;
-  private final UserRefreshJobLockGuard lockGuard;
+  private final JobLockGuard lockGuard;
   private final int batchSize;
 
   public UserInfoRefreshJob(KadaiEngine kadaiEngine) {
@@ -62,7 +62,11 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
         scheduledJob,
         null,
         new RefreshUserPostprocessorManager(),
-        createLockGuard(kadaiEngine, scheduledJob));
+        JobLockGuard.forScheduledJob(
+            kadaiEngine,
+            scheduledJob,
+            kadaiEngine.getConfiguration().getUserRefreshJobLockExpirationPeriod(),
+            "User info refresh job"));
   }
 
   UserInfoRefreshJob(
@@ -71,7 +75,7 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
       ScheduledJob scheduledJob,
       LdapClient ldapClient,
       RefreshUserPostprocessorManager postprocessorManager,
-      UserRefreshJobLockGuard lockGuard) {
+      JobLockGuard lockGuard) {
     super(kadaiEngine, txProvider, scheduledJob, true);
     runEvery = kadaiEngine.getConfiguration().getUserRefreshJobRunEvery();
     firstRun = kadaiEngine.getConfiguration().getUserRefreshJobFirstRun();
@@ -167,22 +171,4 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
         });
   }
 
-  private static UserRefreshJobLockGuard createLockGuard(
-      KadaiEngine kadaiEngine, ScheduledJob scheduledJob) {
-    if (scheduledJob == null) {
-      return () -> {};
-    }
-    return () -> {
-      boolean renewed =
-          ((JobServiceImpl) kadaiEngine.getJobService())
-              .renewLock(
-                  scheduledJob,
-                  kadaiEngine.getConfiguration().getUserRefreshJobLockExpirationPeriod());
-      if (!renewed) {
-        throw new SystemException(
-            "User info refresh job lock was lost. Stopping refresh to avoid concurrent "
-                + "processing.");
-      }
-    };
-  }
 }
