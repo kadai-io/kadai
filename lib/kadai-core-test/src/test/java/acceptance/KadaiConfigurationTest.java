@@ -383,6 +383,7 @@ class KadaiConfigurationTest {
               .taskUpdatePriorityJobLockExpirationPeriod(
                   expectedTaskUpdatePriorityJobLockExpirationPeriod)
               .userInfoRefreshJobEnabled(expectedUserInfoRefreshJobEnabled)
+              .userRefreshJobBatchSize(expectedUserRefreshJobBatchSize)
               .userRefreshJobFirstRun(expectedUserRefreshJobFirstRun)
               .userRefreshJobRunEvery(expectedUserRefreshJobRunEvery)
               .userRefreshJobLockExpirationPeriod(expectedUserRefreshJobLockExpirationPeriod)
@@ -464,6 +465,8 @@ class KadaiConfigurationTest {
           .isEqualTo(expectedTaskUpdatePriorityJobRunEvery);
       assertThat(configuration.isUserInfoRefreshJobEnabled())
           .isEqualTo(expectedUserInfoRefreshJobEnabled);
+      assertThat(configuration.getUserRefreshJobBatchSize())
+          .isEqualTo(expectedUserRefreshJobBatchSize);
       assertThat(configuration.getUserRefreshJobFirstRun())
           .isEqualTo(expectedUserRefreshJobFirstRun);
       assertThat(configuration.getUserRefreshJobRunEvery())
