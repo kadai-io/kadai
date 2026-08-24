@@ -39,6 +39,7 @@ import {
 import { ClassificationCategoriesService } from '../../services/classification-categories/classification-categories.service';
 import { ClassificationsService } from '../../services/classifications/classifications.service';
 import { DomainService } from '../../services/domain/domain.service';
+import { ClassificationSelectors } from './classification.selectors';
 
 const mockClassificationTypes = new Map<string, string[]>([
   ['TASK', ['EXTERNAL', 'MANUAL', 'AUTOMATIC']],
@@ -535,6 +536,77 @@ describe('ClassificationState', () => {
       const state = store.snapshot().classification;
       const unchanged = state.classifications.find((c: any) => c.classificationId === 'CLI:002');
       expect(unchanged.name).toBe('Unchanged');
+    });
+  });
+  
+  describe('ClassificationSelectors', () => {
+    it('should select classificationTypes as an array of keys', () => {
+      const types = store.selectSnapshot(ClassificationSelectors.classificationTypes);
+      expect(types).toEqual(['TASK', 'DOCUMENT']);
+    });
+
+    it('should select selectedClassificationType', () => {
+      const selectedType = store.selectSnapshot(ClassificationSelectors.selectedClassificationType);
+      expect(selectedType).toBe('TASK');
+    });
+
+    it('should select categories for selected classification type', () => {
+      const categories = store.selectSnapshot(ClassificationSelectors.selectCategories);
+      expect(categories).toEqual(['EXTERNAL', 'MANUAL', 'AUTOMATIC']);
+    });
+
+    it('should return empty array for selectCategories when type is not found', () => {
+      store.reset({
+        ...store.snapshot(),
+        classification: {
+          ...initialClassificationState,
+          selectedClassificationType: 'UNKNOWN_TYPE'
+        }
+      });
+
+      const categories = store.selectSnapshot(ClassificationSelectors.selectCategories);
+      expect(categories).toEqual([]);
+    });
+
+    it('should select classifications list', () => {
+      const list = store.selectSnapshot(ClassificationSelectors.classifications);
+      expect(list).toEqual(mockClassificationList.classifications);
+    });
+
+    it('should select selectedClassification', () => {
+      const selected = store.selectSnapshot(ClassificationSelectors.selectedClassification);
+      expect(selected).toEqual(mockClassification);
+    });
+
+    it('should select selectedClassificationId', () => {
+      const id = store.selectSnapshot(ClassificationSelectors.selectedClassificationId);
+      expect(id).toBe('CLI:001');
+    });
+
+    it('should return undefined for selectedClassificationId if no classification is selected', () => {
+      store.reset({
+        ...store.snapshot(),
+        classification: {
+          ...initialClassificationState,
+          selectedClassification: undefined
+        }
+      });
+
+      const id = store.selectSnapshot(ClassificationSelectors.selectedClassificationId);
+      expect(id).toBeUndefined();
+    });
+
+    it('should select getBadgeMessage', () => {
+      store.reset({
+        ...store.snapshot(),
+        classification: {
+          ...initialClassificationState,
+          badgeMessage: 'Test Badge Message'
+        }
+      });
+
+      const message = store.selectSnapshot(ClassificationSelectors.getBadgeMessage);
+      expect(message).toBe('Test Badge Message');
     });
   });
 });
