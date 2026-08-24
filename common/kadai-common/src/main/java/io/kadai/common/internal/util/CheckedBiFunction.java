@@ -19,9 +19,7 @@
 package io.kadai.common.internal.util;
 
 import io.kadai.common.api.exceptions.SystemException;
-
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 @FunctionalInterface
 public interface CheckedBiFunction<T, U, R, E extends Exception> {
