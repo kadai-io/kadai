@@ -41,7 +41,6 @@ export type CategoriesMap = Map<string, string[]>;
 export class ClassificationCategoriesService {
   private httpClient = inject(HttpClient);
 
-  // TODO: convert to Map (maybe via ES6) - Done ?
   getClassificationCategoriesByType(): Observable<CategoriesMap> {
     return this.httpClient
       .get<CategoriesResponse>(`${environment.kadaiRestUrl}/v1/classifications-by-type`)

@@ -47,7 +47,6 @@ export class StartupService {
     return this.loadEnvironment();
   }
 
-  // TODO: refactor this - Done ?
   getEnvironmentFilePromise() {
     return firstValueFrom(
       this.httpClient.get<EnvironmentConfig>('environments/data-sources/environment-information.json').pipe(

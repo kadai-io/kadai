@@ -58,7 +58,6 @@ export class TaskFilterComponent implements OnInit, OnDestroy {
     this.updateState();
   }
 
-  // TODO: filter tasks when pressing 'enter' - Done ?
   search() {
     this.updateState();
     this.store.dispatch(new SetPage(1));
