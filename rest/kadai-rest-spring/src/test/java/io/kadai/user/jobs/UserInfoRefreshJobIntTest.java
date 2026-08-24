@@ -85,8 +85,6 @@ class UserInfoRefreshJobIntTest {
 
     try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
       List<User> users = getUsers(connection);
-
-      users = getUsers(connection);
       List<User> ldapusers = ldapClient.searchUsersInUserRole();
       users.sort(Comparator.comparing(User::getId));
       ldapusers.sort(Comparator.comparing(User::getId));
@@ -146,16 +144,17 @@ class UserInfoRefreshJobIntTest {
       UserInfoRefreshJob userInfoRefreshJob = new UserInfoRefreshJob(kadaiEngine);
       userInfoRefreshJob.execute();
 
-      Statement statement = connection.createStatement();
-      ResultSet rs =
-          statement.executeQuery(
-              "SELECT * FROM "
-                  + connection.getSchema()
-                  + ".USER_INFO "
-                  + "WHERE USER_ID='user-2-2'");
-      rs.next();
-      String updatedOrgLevel = rs.getString("ORG_LEVEL_1");
-      assertThat(updatedOrgLevel).isEqualTo("FirstSecond");
+      try (Statement statement = connection.createStatement();
+          ResultSet rs =
+              statement.executeQuery(
+                  "SELECT * FROM "
+                      + connection.getSchema()
+                      + ".USER_INFO "
+                      + "WHERE USER_ID='user-2-2'")) {
+        rs.next();
+        String updatedOrgLevel = rs.getString("ORG_LEVEL_1");
+        assertThat(updatedOrgLevel).isEqualTo("FirstSecond");
+      }
     }
   }
 
@@ -183,11 +182,12 @@ class UserInfoRefreshJobIntTest {
   private List<User> getUsers(Connection connection) throws Exception {
 
     List<String> users = new ArrayList<>();
-    Statement statement = connection.createStatement();
-    ResultSet rs = statement.executeQuery("SELECT * FROM " + connection.getSchema() + ".USER_INFO");
-
-    while (rs.next()) {
-      users.add(rs.getString("USER_ID"));
+    try (Statement statement = connection.createStatement();
+        ResultSet rs =
+            statement.executeQuery("SELECT * FROM " + connection.getSchema() + ".USER_INFO")) {
+      while (rs.next()) {
+        users.add(rs.getString("USER_ID"));
+      }
     }
 
     List<User> userList = users.stream().map(rethrowing(userService::getUser)).toList();
@@ -196,28 +196,34 @@ class UserInfoRefreshJobIntTest {
 
   private List<String> getGroupInfo(Connection connection, String userId) throws Exception {
     List<String> groupIds = new ArrayList<>();
-    PreparedStatement ps =
-        connection.prepareStatement(
-            "SELECT group_id FROM " + connection.getSchema() + ".group_info WHERE user_id = ?");
-    ps.setString(1, userId);
-    ResultSet rs = ps.executeQuery();
-    while (rs.next()) {
-      groupIds.add(rs.getString(1));
+    try (PreparedStatement ps =
+            connection.prepareStatement(
+                "SELECT group_id FROM "
+                    + connection.getSchema()
+                    + ".group_info WHERE user_id = ?")) {
+      ps.setString(1, userId);
+      try (ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+          groupIds.add(rs.getString(1));
+        }
+      }
     }
     return groupIds;
   }
 
   private List<String> getPermissionInfo(Connection connection, String userId) throws Exception {
     List<String> permissionIds = new ArrayList<>();
-    PreparedStatement ps =
-        connection.prepareStatement(
-            "SELECT permission_id FROM "
-                + connection.getSchema()
-                + ".permission_info WHERE user_id = ?");
-    ps.setString(1, userId);
-    ResultSet rs = ps.executeQuery();
-    while (rs.next()) {
-      permissionIds.add(rs.getString(1));
+    try (PreparedStatement ps =
+            connection.prepareStatement(
+                "SELECT permission_id FROM "
+                    + connection.getSchema()
+                    + ".permission_info WHERE user_id = ?")) {
+      ps.setString(1, userId);
+      try (ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+          permissionIds.add(rs.getString(1));
+        }
+      }
     }
     return permissionIds;
   }

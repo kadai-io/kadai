@@ -135,7 +135,8 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
           String.format(
               "Finished user refresh: ldapUsers=%d, pages=%d, accepted=%d, rejected=%d, "
                   + "inserted=%d, updated=%d, removed=%d, unchanged=%d, groupAdds=%d, "
-                  + "groupRemoves=%d, permissionAdds=%d, permissionRemoves=%d, totalMs=%d",
+                  + "groupRemoves=%d, permissionAdds=%d, permissionRemoves=%d, "
+                  + "orphanGroupRemoves=%d, orphanPermissionRemoves=%d, totalMs=%d",
               snapshot.resultCount(),
               snapshot.pageCount(),
               result.acceptedUsers(),
@@ -148,6 +149,8 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
               result.removedGroups(),
               result.addedPermissions(),
               result.removedPermissions(),
+              result.orphanGroupsRemoved(),
+              result.orphanPermissionsRemoved(),
               Duration.ofNanos(System.nanoTime() - startedAt).toMillis()));
     } catch (Exception e) {
       throw new SystemException("Error while processing UserInfoRefreshJob.", e);
