@@ -23,50 +23,6 @@ import { asteriskIcon, CategoriesResponse, ClassificationCategoriesService, miss
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { environment } from 'environments/environment';
 
-// describe('ClassificationCategoriesService', () => {
-//   let categoryService: ClassificationCategoriesService;
-//   let httpMock: HttpTestingController;
-
-//   beforeEach(() => {
-//     TestBed.configureTestingModule({
-//       providers: [ClassificationCategoriesService, provideHttpClientTesting()]
-//     });
-
-//     categoryService = TestBed.inject(ClassificationCategoriesService);
-//     httpMock = TestBed.inject(HttpTestingController);
-//   });
-
-//   it('should insert missing icon into customisation', async () => {
-//     const expectedCustomisationContent: CustomisationContent = {
-//       classifications: { categories: { all: asteriskIcon, missing: missingIcon } }
-//     };
-
-//     const expectedCustomisation: Customisation = {
-//       EN: expectedCustomisationContent,
-//       DE: expectedCustomisationContent
-//     };
-
-//     const initialCustomisations: Customisation[] = [
-//       {
-//         EN: { classifications: { categories: {} } },
-//         DE: { classifications: { categories: {} } }
-//       },
-//       { EN: { classifications: {} }, DE: { classifications: {} } },
-//       { EN: {}, DE: {} }
-//     ];
-
-//     initialCustomisations.forEach((initialCustomisation) => {
-//       categoryService.getCustomisation().subscribe((customisation) => {
-//         expect(customisation).toEqual(expectedCustomisation);
-//       });
-
-//       httpMock.expectOne('environments/data-sources/kadai-customization.json').flush(initialCustomisation);
-
-//       httpMock.verify();
-//     });
-//   });
-// });
-
 describe('ClassificationCategoriesService', () => {
   let categoryService: ClassificationCategoriesService;
   let httpMock: HttpTestingController;
