@@ -65,7 +65,7 @@
     "jsdom": "30.0.1",
     "prettier": "3.9.6",
     "sass": "1.102.0",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "vitest": "4.1.10"
   },
   "packageManager": "yarn@4.17.1"
