@@ -46,6 +46,8 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UserInfoRefreshJob.class);
   private final RefreshUserPostprocessorManager refreshUserPostprocessorManager;
+  private final LdapClient ldapClient;
+  private final UserRefreshJobLockGuard lockGuard;
   private final int batchSize;
 
   public UserInfoRefreshJob(KadaiEngine kadaiEngine) {
@@ -54,10 +56,28 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
 
   public UserInfoRefreshJob(
       KadaiEngine kadaiEngine, KadaiTransactionProvider txProvider, ScheduledJob scheduledJob) {
+    this(
+        kadaiEngine,
+        txProvider,
+        scheduledJob,
+        null,
+        new RefreshUserPostprocessorManager(),
+        createLockGuard(kadaiEngine, scheduledJob));
+  }
+
+  UserInfoRefreshJob(
+      KadaiEngine kadaiEngine,
+      KadaiTransactionProvider txProvider,
+      ScheduledJob scheduledJob,
+      LdapClient ldapClient,
+      RefreshUserPostprocessorManager postprocessorManager,
+      UserRefreshJobLockGuard lockGuard) {
     super(kadaiEngine, txProvider, scheduledJob, true);
     runEvery = kadaiEngine.getConfiguration().getUserRefreshJobRunEvery();
     firstRun = kadaiEngine.getConfiguration().getUserRefreshJobFirstRun();
-    refreshUserPostprocessorManager = new RefreshUserPostprocessorManager();
+    this.ldapClient = ldapClient;
+    refreshUserPostprocessorManager = postprocessorManager;
+    this.lockGuard = lockGuard;
     batchSize = kadaiEngine.getConfiguration().getUserRefreshJobBatchSize();
   }
 
@@ -80,10 +100,12 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
     long startedAt = System.nanoTime();
     LOGGER.info("Running differential job to refresh user info");
     try {
-      final LdapClient ldapClient =
-          ApplicationContextProvider.getApplicationContext()
-              .getBean("ldapClient", LdapClient.class);
-      LdapUserSnapshot snapshot = ldapClient.searchAllUsersInUserRole();
+      final LdapClient sourceClient =
+          ldapClient != null
+              ? ldapClient
+              : ApplicationContextProvider.getApplicationContext()
+                  .getBean("ldapClient", LdapClient.class);
+      LdapUserSnapshot snapshot = sourceClient.searchAllUsersInUserRole();
       List<User> processedUsers = new ArrayList<>(snapshot.users().size());
       int postprocessorFailures = 0;
       for (User user : snapshot.users()) {
@@ -97,7 +119,8 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
           postprocessorFailures++;
           LOGGER.error(
               "Failed to prepare LDAP user '{}' for refresh",
-              LogSanitizer.stripLineBreakingChars(user == null ? null : user.getId()),
+              LogSanitizer.stripLineBreakingChars(
+                  user == null || user.getId() == null ? "null" : user.getId()),
               e);
         }
       }
@@ -131,31 +154,35 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
       UserServiceImpl userService, PreparedUserRefreshInput input) {
     return KadaiTransactionProvider.executeInTransactionIfPossible(
         txProvider,
-        () -> {
-          renewLockOrFail();
+          () -> {
+          lockGuard.renewOrThrow();
           UserRefreshResult result;
           try {
             result = userService.synchronizeUsers(input, batchSize);
           } catch (Exception e) {
             throw new SystemException("Could not synchronize LDAP user snapshot", e);
           }
-          renewLockOrFail();
+          lockGuard.renewOrThrow();
           return result;
         });
   }
 
-  private void renewLockOrFail() {
+  private static UserRefreshJobLockGuard createLockGuard(
+      KadaiEngine kadaiEngine, ScheduledJob scheduledJob) {
     if (scheduledJob == null) {
-      return;
+      return () -> {};
     }
-    boolean renewed =
-        ((JobServiceImpl) kadaiEngineImpl.getJobService())
-            .renewLock(
-                scheduledJob,
-                kadaiEngineImpl.getConfiguration().getUserRefreshJobLockExpirationPeriod());
-    if (!renewed) {
-      throw new SystemException(
-          "User info refresh job lock was lost. Stopping refresh to avoid concurrent processing.");
-    }
+    return () -> {
+      boolean renewed =
+          ((JobServiceImpl) kadaiEngine.getJobService())
+              .renewLock(
+                  scheduledJob,
+                  kadaiEngine.getConfiguration().getUserRefreshJobLockExpirationPeriod());
+      if (!renewed) {
+        throw new SystemException(
+            "User info refresh job lock was lost. Stopping refresh to avoid concurrent "
+                + "processing.");
+      }
+    };
   }
 }

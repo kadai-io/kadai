@@ -20,6 +20,7 @@ package io.kadai.user.jobs;
 
 import static io.kadai.common.internal.util.CheckedFunction.rethrowing;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 import io.kadai.common.api.KadaiEngine;
@@ -30,6 +31,7 @@ import io.kadai.testapi.security.JaasExtension;
 import io.kadai.testapi.security.WithAccessId;
 import io.kadai.user.api.UserService;
 import io.kadai.user.api.models.User;
+import io.kadai.user.internal.UserServiceImpl;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -38,17 +40,15 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguration;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 @KadaiSpringBootTest
 @ExtendWith(JaasExtension.class)
-@TestMethodOrder(OrderAnnotation.class)
 class UserInfoRefreshJobIntTest {
 
   KadaiEngine kadaiEngine;
@@ -63,17 +63,28 @@ class UserInfoRefreshJobIntTest {
     this.ldapClient = ldapClient;
   }
 
+  @BeforeEach
+  @WithAccessId(user = "businessadmin")
+  void clearRefreshState() throws Exception {
+    ((UserServiceImpl) userService).deleteAllUsersGroupsPermissions();
+    reset(ldapClient);
+  }
+
+  @AfterEach
+  @WithAccessId(user = "businessadmin")
+  void cleanRefreshState() throws Exception {
+    ((UserServiceImpl) userService).deleteAllUsersGroupsPermissions();
+    reset(ldapClient);
+  }
+
   @Test
   @WithAccessId(user = "businessadmin")
-  @Order(1)
   void should_RefreshUserInfo_When_UserInfoRefreshJobIsExecuted() throws Exception {
+    UserInfoRefreshJob userInfoRefreshJob = new UserInfoRefreshJob(kadaiEngine);
+    userInfoRefreshJob.execute();
+
     try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
-
       List<User> users = getUsers(connection);
-      assertThat(users).hasSize(18);
-
-      UserInfoRefreshJob userInfoRefreshJob = new UserInfoRefreshJob(kadaiEngine);
-      userInfoRefreshJob.execute();
 
       users = getUsers(connection);
       List<User> ldapusers = ldapClient.searchUsersInUserRole();
@@ -128,7 +139,6 @@ class UserInfoRefreshJobIntTest {
 
   @Test
   @WithAccessId(user = "businessadmin")
-  @Order(2)
   void should_PostprocessUser_When_RefreshUserPostprocessorIsActive() throws Exception {
 
     try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
@@ -151,28 +161,22 @@ class UserInfoRefreshJobIntTest {
 
   @Test
   @WithAccessId(user = "businessadmin")
-  @Order(3)
   void should_RefreshUserInfoAndSkipErrorProneUsers_When_UserInfoRefreshJobIsExecuted()
       throws Exception {
+    new UserInfoRefreshJob(kadaiEngine).execute();
+    List<User> sourceUsers;
+    try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
+      sourceUsers = getUsers(connection);
+    }
+    int sourceCount = sourceUsers.size();
+    sourceUsers.get(0).setId(null);
+    when(ldapClient.searchAllUsersInUserRole())
+        .thenReturn(new LdapUserSnapshot(sourceUsers, 1, sourceUsers.size()));
+
+    new UserInfoRefreshJob(kadaiEngine).execute();
 
     try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
-
-      List<User> users = getUsers(connection);
-      assertThat(users).hasSize(6);
-
-      // Incomplete user - supposed to fail in the Job
-      users.get(0).setId(null);
-      when(ldapClient.searchAllUsersInUserRole())
-          .thenReturn(new LdapUserSnapshot(users, 1, users.size()));
-
-      UserInfoRefreshJob userInfoRefreshJob = new UserInfoRefreshJob(kadaiEngine);
-      userInfoRefreshJob.execute();
-
-      users = getUsers(connection);
-      List<User> ldapusers = users;
-
-      assertThat(users).hasSize(ldapusers.size() - 1);
-      assertThat(users).hasSize(5);
+      assertThat(getUsers(connection)).hasSize(sourceCount - 1);
     }
   }
 
