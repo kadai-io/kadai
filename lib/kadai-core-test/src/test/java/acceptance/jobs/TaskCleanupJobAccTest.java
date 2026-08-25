@@ -730,7 +730,7 @@ class TaskCleanupJobAccTest {
 
     @WithAccessId(user = "admin")
     @Test
-    void should_KeepCompleteParentGroup_WhenOneDomainHasNotReachedItsMinimumAge()
+    void should_KeepCompleteParentGroup_When_OneDomainHasNotReachedItsMinimumAge()
         throws Exception {
       String parentBusinessProcessId = "DOMAIN_SPECIFIC_PARENT";
       TaskSummary domainATask =
