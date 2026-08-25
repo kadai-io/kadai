@@ -115,6 +115,7 @@ export const messageByErrorCode = {
     TASK_COMPLETE: 'Task with name {taskName} was completed',
     TASK_CANCEL_CLAIM: 'Claim of task with name {taskName} was cancelled',
     TASK_TRANSFER: 'Task with name {taskName} was transferred',
+    TASK_REOPEN: 'Task with name {taskName} was reopened',
 
     SETTINGS_SAVE: 'Settings were updated'
   },
@@ -150,6 +151,7 @@ export const messageByErrorCode = {
     WORKBASKET_DELETE: 'Delete Workbasket with key {workbasketKey}?',
     CLASSIFICATION_DELETE: 'Delete Classification with key {classificationKey}?',
     TASK_DELETE: 'Delete Task with id {taskId}?',
+    TASK_REOPEN: 'Reopen Task with id {taskId}?',
     ACCESS_ITEM_MANAGEMENT_REVOKE_ACCESS: 'Delete all access related to {accessId}?'
   }
 };
