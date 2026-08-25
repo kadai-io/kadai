@@ -146,10 +146,11 @@ class UserRefreshPreparationTest {
     assertThat(prepared.usersById()).containsOnlyKeys("stable");
     Map<String, UserRefreshState> usersById = prepared.usersById();
     UserRefreshState stableUser = usersById.get("stable");
+    Set<String> stableUserGroups = stableUser.groups();
 
     assertThatThrownBy(usersById::clear)
         .isInstanceOf(UnsupportedOperationException.class);
-    assertThatThrownBy(() -> stableUser.groups().add("x"))
+    assertThatThrownBy(() -> stableUserGroups.add("x"))
         .isInstanceOf(UnsupportedOperationException.class);
   }
 

@@ -133,7 +133,8 @@ class LdapClientPagingTest {
     assertThatThrownBy(() -> new LdapUserSnapshot(List.of(), 0, 0))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("pageCount");
-    assertThatThrownBy(() -> new LdapUserSnapshot(List.of(user("a")), 1, 0))
+    List<User> users = List.of(user("a"));
+    assertThatThrownBy(() -> new LdapUserSnapshot(users, 1, 0))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("resultCount");
   }
