@@ -34,7 +34,7 @@ import { Workbasket } from '../../../shared/models/workbasket';
 import { provideStore, Store } from '@ngxs/store';
 import { TaskWorkflowState } from '../../../shared/store/task-store/task.state';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
-import { SelectTask } from '../../../shared/store/task-store/task.actions';
+import { ReopenTask, SelectTask } from '../../../shared/store/task-store/task.actions';
 
 const makeTask = (overrides: Partial<Task> = {}): Task => {
   const task = new Task(
@@ -59,6 +59,7 @@ const makeTask = (overrides: Partial<Task> = {}): Task => {
     undefined,
     false,
     false,
+    false,
     1,
     [],
     []
@@ -81,6 +82,7 @@ describe('TaskProcessingComponent', () => {
     claimTask: ReturnType<typeof vi.fn>;
     getTask: ReturnType<typeof vi.fn>;
     transferTask: ReturnType<typeof vi.fn>;
+    reopenTask: ReturnType<typeof vi.fn>;
     completeTask: ReturnType<typeof vi.fn>;
     cancelClaimTask: ReturnType<typeof vi.fn>;
   };
@@ -102,6 +104,7 @@ describe('TaskProcessingComponent', () => {
       claimTask: vi.fn().mockReturnValue(of(task)),
       getTask: vi.fn().mockReturnValue(of(task)),
       transferTask: vi.fn().mockReturnValue(of(task)),
+      reopenTask: vi.fn().mockResolvedValue(of(task)),
       completeTask: vi.fn().mockReturnValue(of(task)),
       cancelClaimTask: vi.fn().mockReturnValue(of(task))
     };
@@ -136,7 +139,7 @@ describe('TaskProcessingComponent', () => {
         { provide: RequestInProgressService, useValue: mockRequestInProgressService },
         {
           provide: NotificationService,
-          useValue: { showSuccess: vi.fn(), showInformation: vi.fn(), showError: vi.fn() }
+          useValue: { showSuccess: vi.fn(), showInformation: vi.fn(), showError: vi.fn(), showDialog: vi.fn() }
         },
         {
           provide: ActivatedRoute,
@@ -288,6 +291,91 @@ describe('TaskProcessingComponent', () => {
       await fixture.whenStable();
 
       expect(store.snapshot().task.selectedTask).toEqual(transferredTask);
+    });
+  });
+
+  describe('reopenTask()', () => {
+    let mockNotificationService: { showDialog: ReturnType<typeof vi.fn> };
+
+    beforeEach(() => {
+      mockNotificationService = TestBed.inject(NotificationService) as any;
+      mockNotificationService.showDialog = vi.fn();
+    });
+
+    it('should call notificationService.showDialog with TASK_REOPEN and task id', async () => {
+      await selectTask(makeTask());
+
+      component.reopenTask();
+
+      expect(mockNotificationService.showDialog).toHaveBeenCalledWith(
+        'TASK_REOPEN',
+        { taskId: 'task-id-1' },
+        expect.any(Function)
+      );
+    });
+
+    it('should dispatch ReopenTask and navigateBack when dialog callback is executed', async () => {
+      await selectTask(makeTask());
+      const dispatchSpy = vi.spyOn(store, 'dispatch').mockReturnValue(of(void 0));
+      const navigateBackSpy = vi.spyOn(component, 'navigateBack');
+
+      mockNotificationService.showDialog.mockImplementation((_dialog, _params, callback) => {
+        callback();
+      });
+
+      component.reopenTask();
+
+      expect(dispatchSpy).toHaveBeenCalledWith(new ReopenTask('task-id-1'));
+      expect(navigateBackSpy).toHaveBeenCalled();
+    });
+
+    it('should not dispatch ReopenTask if task or taskId is missing when callback fires', async () => {
+      await selectTask({ taskId: undefined } as any);
+      const dispatchSpy = vi.spyOn(store, 'dispatch');
+
+      mockNotificationService.showDialog.mockImplementation((_dialog, _params, callback) => {
+        callback();
+      });
+
+      component.reopenTask();
+
+      expect(dispatchSpy).not.toHaveBeenCalled();
+    });
+
+    it('should call reopenTask when reopen button is clicked', async () => {
+      await selectTask(makeTask({ state: 'COMPLETED' }));
+      fixture.detectChanges();
+      const reopenSpy = vi.spyOn(component, 'reopenTask');
+
+      const btn = fixture.nativeElement.querySelector('button[mattooltip="Restore Task and return to Task list"]');
+      expect(btn).toBeTruthy();
+
+      btn.click();
+      expect(reopenSpy).toHaveBeenCalled();
+    });
+
+    it('should render and handle @else branch actions (completeTask and cancelClaimTask)', async () => {
+      await selectTask(makeTask({ state: 'CLAIMED' }));
+      fixture.detectChanges();
+
+      const completeSpy = vi.spyOn(component, 'completeTask').mockImplementation(() => {});
+      const cancelClaimSpy = vi.spyOn(component, 'cancelClaimTask').mockImplementation(() => {});
+
+      const completeBtn = fixture.nativeElement.querySelector(
+        'button[mattooltip="Complete Task and return to Task list"]'
+      );
+      const cancelClaimBtn = fixture.nativeElement.querySelector(
+        'button[mattooltip="Cancel Task claim and return to Task overview"]'
+      );
+
+      expect(completeBtn).toBeTruthy();
+      expect(cancelClaimBtn).toBeTruthy();
+
+      completeBtn.click();
+      cancelClaimBtn.click();
+
+      expect(completeSpy).toHaveBeenCalled();
+      expect(cancelClaimSpy).toHaveBeenCalled();
     });
   });
 
