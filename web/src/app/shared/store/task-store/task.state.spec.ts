@@ -19,7 +19,7 @@
 import { TestBed } from '@angular/core/testing';
 import { NgxsModule, Store } from '@ngxs/store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { of, throwError } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 
 import { TaskWorkflowState } from './task.state';
 import { FilterState } from '../filter-store/filter.state';
@@ -31,6 +31,7 @@ import {
   DeleteTask,
   GetTask,
   LoadTasks,
+  ReopenTask,
   SelectTask,
   SelectWorkbasket,
   SetPage,
@@ -469,6 +470,35 @@ describe('TaskWorkflowState', () => {
       (taskServiceMock.transferTask as ReturnType<typeof vi.fn>).mockReturnValue(throwError(() => new Error('boom')));
 
       await expect(store.dispatch(new TransferTask(mockTask.taskId, 'wb-target')).toPromise()).rejects.toThrow('boom');
+      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+    });
+  });
+
+  describe('ReopenTask', () => {
+    it('reopens the task, selects it, shows a toast, and reloads the list', async () => {
+      store.reset({
+        ...store.snapshot(),
+        task: { ...initialTaskState, selectedWorkbasket: mockWorkbasket }
+      });
+
+      await firstValueFrom(store.dispatch(new ReopenTask(mockTask.taskId)));
+
+      expect(taskServiceMock.reopenTask).toHaveBeenCalledWith(mockTask.taskId);
+      expect(store.snapshot().task.selectedTask).toEqual(mockTask);
+      expect(notificationServiceMock.showSuccess).toHaveBeenCalledWith('TASK_REOPEN', {
+        taskName: mockTask.name
+      });
+      expect(taskServiceMock.findTasksWithWorkbasket).toHaveBeenCalled();
+      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(true);
+      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+    });
+
+    it('clears requestInProgress and rethrows on error', async () => {
+      (taskServiceMock.reopenTask as ReturnType<typeof vi.fn>).mockReturnValue(
+        throwError(() => new Error('error happened'))
+      );
+
+      await expect(firstValueFrom(store.dispatch(new ReopenTask(mockTask.taskId)))).rejects.toThrow('error happened');
       expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
     });
   });
