@@ -38,9 +38,11 @@ import {
   ClaimTask,
   CompleteTask,
   GetTask,
+  ReopenTask,
   TransferTask
 } from '../../../shared/store/task-store/task.actions';
 import { TaskSelectors } from '../../../shared/store/task-store/task.selectors';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
 
 @Component({
   selector: 'kadai-task-processing',
@@ -57,6 +59,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
   private workbasketService = inject(WorkbasketService);
   private classificationService = inject(ClassificationsService);
   private requestInProgressService = inject(RequestInProgressService);
+  private notificationService = inject(NotificationService);
   private store = inject(Store);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -106,6 +109,15 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
   completeTask() {
     this.store.dispatch(new CompleteTask(this.task()!.taskId)).subscribe(() => {
       this.navigateBack();
+    });
+  }
+
+  reopenTask() {
+    this.notificationService.showDialog('TASK_REOPEN', { taskId: this.task()!.taskId }, () => {
+      if (!this.task()!.taskId) return;
+      this.store.dispatch(new ReopenTask(this.task()!.taskId)).subscribe(() => {
+        this.navigateBack();
+      });
     });
   }
 
