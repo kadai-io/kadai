@@ -58,6 +58,19 @@ export class TaskFilterComponent implements OnInit, OnDestroy {
     this.updateState();
   }
 
+  setIsReopened(value?: boolean): void {
+    const currentFilter = this.filter();
+    if (!currentFilter) return;
+
+    if (value !== undefined) {
+      currentFilter['is-reopened'] = [value];
+    } else {
+      currentFilter['is-reopened'] = [];
+    }
+
+    this.updateState();
+  }
+
   search() {
     this.updateState();
     this.store.dispatch(new SetPage(1));
@@ -71,7 +84,8 @@ export class TaskFilterComponent implements OnInit, OnDestroy {
     this.filter.set({
       priority: [],
       'name-like': [],
-      'owner-like': []
+      'owner-like': [],
+      'is-reopened': []
     });
   }
 

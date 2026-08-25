@@ -67,6 +67,19 @@
           }
         </mat-select>
       </mat-form-field>
+ 
+    </div>
+
+    <div class="task-filter__row">
+      <!-- FILTER BY REOPENED -->
+      <mat-form-field class="task-filter__input-field--small" matTooltip="Filter Tasks by reopened state">
+        <mat-label>Filter by reopened</mat-label>
+        <mat-select [value]="filter()?.['is-reopened']?.[0]" (selectionChange)="setIsReopened($event.value)">
+          <mat-option [value]="undefined">All</mat-option>
+          <mat-option [value]="true">Yes</mat-option>
+          <mat-option [value]="false">No</mat-option>
+        </mat-select>
+      </mat-form-field>
     </div>
 
   </div>
