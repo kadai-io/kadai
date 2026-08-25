@@ -17,6 +17,8 @@
 package io.kadai.common.rest.ldap;
 
 import io.kadai.user.api.models.User;
+
+import jakarta.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -55,5 +57,17 @@ record LdapUserPage(List<User> users, boolean responseControlPresent, byte[] nex
     int result = Objects.hash(users, responseControlPresent);
     result = 31 * result + Arrays.hashCode(nextCookie);
     return result;
+  }
+
+  @Nonnull
+  @Override
+  public String toString() {
+    return "LdapUserPage [users="
+        + users
+        + ", responseControlPresent="
+        + responseControlPresent
+        + ", nextCookie="
+        + Arrays.toString(nextCookie)
+        + "]";
   }
 }
