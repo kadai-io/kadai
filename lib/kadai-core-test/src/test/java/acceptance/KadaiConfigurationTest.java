@@ -143,6 +143,13 @@ class KadaiConfigurationTest {
       assertThat(configuration.isTaskCleanupJobEnabled()).isTrue();
       assertThat(configuration.getTaskCleanupJobBatchSize()).isEqualTo(5_000);
       assertThat(configuration.getTaskCleanupJobMinimumAge()).isEqualTo(Duration.ofDays(14));
+      assertThat(configuration.getTaskCleanupJobMinimumAgeByDomain()).isEmpty();
+      assertThat(configuration.getTaskCleanupJobMinimumAgeForDomain("DOMAIN_A"))
+          .isEqualTo(Duration.ofDays(14));
+      assertThat(configuration.getTaskCleanupJobMinimumAgeForDomain(null))
+          .isEqualTo(Duration.ofDays(14));
+      assertThat(configuration.getTaskCleanupJobMinimumAgeForDomain(MASTER_DOMAIN))
+          .isEqualTo(Duration.ofDays(14));
       assertThat(configuration.isTaskCleanupJobAllCompletedSameParentBusiness()).isTrue();
       assertThat(configuration.isWorkbasketCleanupJobEnabled()).isTrue();
       assertThat(configuration.isSimpleHistoryCleanupJobEnabled()).isFalse();
@@ -216,6 +223,12 @@ class KadaiConfigurationTest {
       assertThat(configuration.getJobRunEvery()).isEqualTo(Duration.ofDays(2));
       assertThat(configuration.isTaskCleanupJobEnabled()).isFalse();
       assertThat(configuration.getTaskCleanupJobMinimumAge()).isEqualTo(Duration.ofDays(15));
+      assertThat(configuration.getTaskCleanupJobMinimumAgeByDomain())
+          .isEqualTo(Map.of("DOMAIN_A", Duration.ofDays(8)));
+      assertThat(configuration.getTaskCleanupJobMinimumAgeForDomain("domain_a"))
+          .isEqualTo(Duration.ofDays(8));
+      assertThat(configuration.getTaskCleanupJobMinimumAgeForDomain("DOMAIN_B"))
+          .isEqualTo(Duration.ofDays(15));
       assertThat(configuration.isTaskCleanupJobAllCompletedSameParentBusiness()).isFalse();
       assertThat(configuration.isWorkbasketCleanupJobEnabled()).isFalse();
       assertThat(configuration.isSimpleHistoryCleanupJobEnabled()).isTrue();
@@ -293,6 +306,8 @@ class KadaiConfigurationTest {
       boolean expectedTaskCleanupJobEnabled = false;
       int expectedTaskCleanupJobBatchSize = 5_001;
       Duration expectedTaskCleanupJobMinimumAge = Duration.ofDays(1);
+      Map<String, Duration> expectedTaskCleanupJobMinimumAgeByDomain =
+          Map.of("A", Duration.ofHours(1));
       boolean expectedTaskCleanupJobAllCompletedSameParentBusiness = false;
       Duration expectedTaskCleanupJobLockExpirationPeriod = Duration.ofDays(2);
       boolean expectedWorkbasketCleanupJobEnabled = false;
@@ -360,6 +375,7 @@ class KadaiConfigurationTest {
               .taskCleanupJobEnabled(expectedTaskCleanupJobEnabled)
               .taskCleanupJobBatchSize(expectedTaskCleanupJobBatchSize)
               .taskCleanupJobMinimumAge(expectedTaskCleanupJobMinimumAge)
+              .taskCleanupJobMinimumAgeByDomain(expectedTaskCleanupJobMinimumAgeByDomain)
               .taskCleanupJobAllCompletedSameParentBusiness(
                   expectedTaskCleanupJobAllCompletedSameParentBusiness)
               .taskCleanupJobLockExpirationPeriod(expectedTaskCleanupJobLockExpirationPeriod)
@@ -439,6 +455,10 @@ class KadaiConfigurationTest {
           .isEqualTo(expectedTaskCleanupJobBatchSize);
       assertThat(configuration.getTaskCleanupJobMinimumAge())
           .isEqualTo(expectedTaskCleanupJobMinimumAge);
+      assertThat(configuration.getTaskCleanupJobMinimumAgeByDomain())
+          .isEqualTo(expectedTaskCleanupJobMinimumAgeByDomain);
+      assertThat(configuration.getTaskCleanupJobMinimumAgeForDomain("A"))
+          .isEqualTo(Duration.ofHours(1));
       assertThat(configuration.isTaskCleanupJobAllCompletedSameParentBusiness())
           .isEqualTo(expectedTaskCleanupJobAllCompletedSameParentBusiness);
       assertThat(configuration.isWorkbasketCleanupJobEnabled())
@@ -513,6 +533,7 @@ class KadaiConfigurationTest {
               .taskCleanupJobEnabled(false)
               .taskCleanupJobBatchSize(5_001)
               .taskCleanupJobMinimumAge(Duration.ofDays(1))
+              .taskCleanupJobMinimumAgeByDomain(Map.of("A", Duration.ofHours(1)))
               .taskCleanupJobAllCompletedSameParentBusiness(false)
               .taskCleanupJobLockExpirationPeriod(Duration.ofDays(6))
               .workbasketCleanupJobEnabled(false)
@@ -919,6 +940,27 @@ class KadaiConfigurationTest {
           .hasMessageContaining(
               "Parameter taskCleanupJobMinimumAge (kadai.jobs.cleanup.task.minimumAge) "
                   + "must not be negative");
+    }
+
+    @Test
+    void should_ValidateTaskCleanupJobMinimumAgeByDomain() {
+      KadaiConfiguration.Builder builder =
+          new KadaiConfiguration.Builder(
+                  TestContainerExtension.createDataSourceForH2(), false, "KADAI")
+              .domains(List.of("DOMAIN_A"))
+              .taskCleanupJobMinimumAgeByDomain(Map.of("DOMAIN_A", Duration.ZERO));
+
+      assertThat(builder.build().getTaskCleanupJobMinimumAgeForDomain("domain_a"))
+          .isEqualTo(Duration.ZERO);
+      assertThatThrownBy(
+              () ->
+                  new KadaiConfiguration.Builder(
+                          TestContainerExtension.createDataSourceForH2(), false, "KADAI")
+                      .domains(List.of("DOMAIN_A"))
+                      .taskCleanupJobMinimumAgeByDomain(Map.of("DOMAIN_B", Duration.ofDays(1)))
+                      .build())
+          .isInstanceOf(InvalidArgumentException.class)
+          .hasMessageContaining("kadai.jobs.cleanup.task.minimumAgeByDomain.DOMAIN_B");
     }
 
     @ParameterizedTest
