@@ -17,7 +17,6 @@
 package io.kadai.common.rest.ldap;
 
 import io.kadai.user.api.models.User;
-
 import jakarta.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
