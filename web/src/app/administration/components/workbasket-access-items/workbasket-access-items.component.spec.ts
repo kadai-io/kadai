@@ -148,11 +148,10 @@ describe('WorkbasketAccessItemsComponent', () => {
   });
 
   it('should dispatch UpdateWorkbasketAccessItems action when save button is triggered', () => {
-    component.accessItemsRepresentation._links!.self.href = 'https://link.mock';
     const onSaveSpy = vi.spyOn(component, 'onSave');
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(UpdateWorkbasketAccessItems)).subscribe(() => (actionDispatched = true));
-    component.onSave();
+    component.onSave('https://link.mock', component.cloneAccessItems());
     expect(onSaveSpy).toHaveBeenCalled();
     expect(actionDispatched).toBe(true);
   });
@@ -202,14 +201,22 @@ describe('WorkbasketAccessItemsComponent', () => {
     expect(clone[0].accessId).toBe(original[0].accessId);
   });
 
-  it('should update workbasketId for all access items when setWorkbasketIdForCopy is called', () => {
+  it('should prepare copied access items for a new workbasket without changing the source items', () => {
     fixture.detectChanges();
     const newId = 'WBI:NEW-WORKBASKET-ID';
-    component.setWorkbasketIdForCopy(newId);
-    component.accessItemsGroups.value.forEach((item: any) => {
-      expect(item.workbasketId).toBe(newId);
-      expect('accessItemId' in item).toBe(false);
-    });
+    const sourceAccessItems = component.cloneAccessItems();
+    const originalSourceAccessItems = sourceAccessItems.map((item) => ({ ...item }));
+
+    const copiedAccessItems = component.prepareAccessItemsForNewWorkbasket(sourceAccessItems, newId);
+
+    expect(copiedAccessItems).toEqual(
+      sourceAccessItems.map((sourceAccessItem) => {
+        const expectedAccessItem = { ...sourceAccessItem, workbasketId: newId };
+        Reflect.deleteProperty(expectedAccessItem, 'accessItemId');
+        return expectedAccessItem;
+      })
+    );
+    expect(sourceAccessItems).toEqual(originalSourceAccessItems);
   });
 
   it('should add index to selectedRows when selectRow is called with checked true', () => {
@@ -240,8 +247,59 @@ describe('WorkbasketAccessItemsComponent', () => {
     const onSaveSpy = vi.spyOn(component, 'onSave');
     await component.onSubmit();
     expect(component.formsValidatorService.formSubmitAttempt).toBe(true);
-    expect(validateSpy).toHaveBeenCalledWith(component.accessItemsGroups, component.toggleValidationAccessIdMap);
+    expect(validateSpy).toHaveBeenCalledWith(expect.anything(), component.toggleValidationAccessIdMap);
+    expect(validateSpy.mock.calls[0][0].getRawValue()).toEqual(component.accessItemsGroups.getRawValue());
     expect(onSaveSpy).toHaveBeenCalled();
+  });
+
+  it('should save copied access items when the target access items replace the form during validation', async () => {
+    fixture.detectChanges();
+    const sourceAccessItems = component.cloneAccessItems();
+    const targetWorkbasketId = 'WBI:TARGET-WORKBASKET-ID';
+    const targetAccessItemsUrl = 'https://link.mock/target/workbasketAccessItems';
+    const targetAccessItems = component.prepareAccessItemsForNewWorkbasket(sourceAccessItems, targetWorkbasketId);
+    let resolveValidation!: (isFormValid: boolean) => void;
+    const validationPromise = new Promise<boolean>((resolve) => {
+      resolveValidation = resolve;
+    });
+    vi.spyOn(component.formsValidatorService, 'validateFormAccess').mockReturnValue(validationPromise);
+    let updateAction: UpdateWorkbasketAccessItems | undefined;
+    actions$.pipe(ofActionDispatched(UpdateWorkbasketAccessItems)).subscribe((action) => (updateAction = action));
+
+    const submitPromise = component.onSubmit(targetAccessItems, targetAccessItemsUrl);
+
+    const currentWorkbasketState = store.snapshot().workbasket;
+    store.reset({
+      ...store.snapshot(),
+      workbasket: {
+        ...currentWorkbasketState,
+        workbasketAccessItems: {
+          accessItems: [],
+          _links: { self: { href: targetAccessItemsUrl } }
+        }
+      }
+    });
+    fixture.detectChanges();
+    expect(component.accessItemsGroups.length).toBe(0);
+
+    resolveValidation(true);
+    await submitPromise;
+
+    expect(updateAction).toBeDefined();
+    expect(updateAction!.url).toBe(targetAccessItemsUrl);
+    expect(updateAction!.workbasketAccessItems).toHaveLength(sourceAccessItems.length);
+    expect(updateAction!.workbasketAccessItems.every((item) => item.workbasketId === targetWorkbasketId)).toBe(true);
+    expect(updateAction!.workbasketAccessItems.every((item) => !('accessItemId' in item))).toBe(true);
+    expect(updateAction!.workbasketAccessItems.map((item) => item.accessId)).toEqual(
+      sourceAccessItems.map((item) => item.accessId)
+    );
+    expect(updateAction!.workbasketAccessItems).toEqual(
+      sourceAccessItems.map((sourceAccessItem) => {
+        const expectedAccessItem = { ...sourceAccessItem, workbasketId: targetWorkbasketId };
+        Reflect.deleteProperty(expectedAccessItem, 'accessItemId');
+        return expectedAccessItem;
+      })
+    );
   });
 
   it('should set isNewAccessItemsFromStore and isAccessItemsTabSelected to false in ngAfterViewChecked when element exists', () => {
