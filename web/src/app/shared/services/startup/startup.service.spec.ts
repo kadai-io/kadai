@@ -88,6 +88,39 @@ describe('StartupService', () => {
     httpMock.verify();
   });
 
+  it('should not update environment if config is null or empty', async () => {
+    environment.kadaiRestUrl = 'defaultRestUrl';
+    environment.kadaiLogoutUrl = 'defaultLogoutUrl';
+
+    const promise = service.getEnvironmentFilePromise();
+
+    const req = httpMock.expectOne(environmentFile);
+    req.flush(null);
+
+    await promise;
+
+    expect(environment.kadaiRestUrl).toBe('defaultRestUrl');
+    expect(environment.kadaiLogoutUrl).toBe('defaultLogoutUrl');
+
+    httpMock.verify();
+  });
+
+  it('should catch error and return null when getEnvironmentFilePromise fails', async () => {
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const promise = service.getEnvironmentFilePromise();
+
+    const req = httpMock.expectOne(environmentFile);
+    req.flush('Error loading file', { status: 404, statusText: 'Not Found' });
+
+    await promise;
+
+    expect(consoleSpy).toHaveBeenCalledWith('Failed to load environment configuration:', expect.anything());
+
+    consoleSpy.mockRestore();
+    httpMock.verify();
+  });
+
   describe('getKadaiRestUrl', () => {
     it('should return the environment kadaiRestUrl', () => {
       environment.kadaiRestUrl = 'http://expected-rest-url';
@@ -140,6 +173,18 @@ describe('StartupService', () => {
       envReq.flush('not found', { status: 404, statusText: 'Not Found' });
 
       await expect(promise).resolves.not.toThrow();
+      httpMock.verify();
+    });
+
+    it('should catch error when getUserInformation rejects', async () => {
+      const kadaiEngineService = TestBed.inject(KadaiEngineService);
+      vi.spyOn(kadaiEngineService, 'getUserInformation').mockRejectedValue(new Error('User info failed'));
+
+      const promise = service.load();
+      const envReq = httpMock.expectOne(environmentFile);
+      envReq.flush(dummyEnvironmentInformation);
+
+      await expect(promise).resolves.toBeUndefined();
       httpMock.verify();
     });
   });
