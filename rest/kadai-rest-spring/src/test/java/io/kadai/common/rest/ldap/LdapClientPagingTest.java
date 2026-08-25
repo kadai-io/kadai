@@ -123,7 +123,8 @@ class LdapClientPagingTest {
     LdapUserSnapshot snapshot =
         LdapClient.collectCompleteUserSnapshot(
             ignored -> new LdapUserPage(page.users(), true, new byte[0]));
-    assertThatThrownBy(() -> snapshot.users().clear())
+    List<User> snapshotUsers = snapshot.users();
+    assertThatThrownBy(snapshotUsers::clear)
         .isInstanceOf(UnsupportedOperationException.class);
   }
 

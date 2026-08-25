@@ -327,22 +327,7 @@ public class UserServiceImpl implements UserService {
     }
     Set<String> groups = normalize(user.getGroups());
     Set<String> permissions = normalize(user.getPermissions());
-    validatePersistedLengths(
-        id,
-        user.getFirstName(),
-        user.getLastName(),
-        fullName,
-        longName,
-        user.getEmail(),
-        user.getPhone(),
-        user.getMobilePhone(),
-        user.getOrgLevel1(),
-        user.getOrgLevel2(),
-        user.getOrgLevel3(),
-        user.getOrgLevel4(),
-        groups,
-        permissions);
-    return new UserRefreshState(
+    UserRefreshState state = new UserRefreshState(
         id,
         user.getFirstName(),
         user.getLastName(),
@@ -358,6 +343,8 @@ public class UserServiceImpl implements UserService {
         user.getData(),
         groups,
         permissions);
+    validatePersistedLengths(state);
+    return state;
   }
 
   private static Set<String> normalize(Set<String> values) {
@@ -371,35 +358,21 @@ public class UserServiceImpl implements UserService {
     return Set.copyOf(result);
   }
 
-  private static void validatePersistedLengths(
-      String id,
-      String firstName,
-      String lastName,
-      String fullName,
-      String longName,
-      String email,
-      String phone,
-      String mobilePhone,
-      String orgLevel1,
-      String orgLevel2,
-      String orgLevel3,
-      String orgLevel4,
-      Set<String> groups,
-      Set<String> permissions) {
-    validateLength("user ID", id, 32);
-    validateLength("first name", firstName, 32);
-    validateLength("last name", lastName, 32);
-    validateLength("full name", fullName, 64);
-    validateLength("long name", longName, 64);
-    validateLength("email", email, 64);
-    validateLength("phone", phone, 32);
-    validateLength("mobile phone", mobilePhone, 32);
-    validateLength("org level 1", orgLevel1, 32);
-    validateLength("org level 2", orgLevel2, 32);
-    validateLength("org level 3", orgLevel3, 32);
-    validateLength("org level 4", orgLevel4, 32);
-    groups.forEach(group -> validateLength("group ID", group, 256));
-    permissions.forEach(permission -> validateLength("permission ID", permission, 256));
+  private static void validatePersistedLengths(UserRefreshState state) {
+    validateLength("user ID", state.id(), 32);
+    validateLength("first name", state.firstName(), 32);
+    validateLength("last name", state.lastName(), 32);
+    validateLength("full name", state.fullName(), 64);
+    validateLength("long name", state.longName(), 64);
+    validateLength("email", state.email(), 64);
+    validateLength("phone", state.phone(), 32);
+    validateLength("mobile phone", state.mobilePhone(), 32);
+    validateLength("org level 1", state.orgLevel1(), 32);
+    validateLength("org level 2", state.orgLevel2(), 32);
+    validateLength("org level 3", state.orgLevel3(), 32);
+    validateLength("org level 4", state.orgLevel4(), 32);
+    state.groups().forEach(group -> validateLength("group ID", group, 256));
+    state.permissions().forEach(permission -> validateLength("permission ID", permission, 256));
   }
 
   private static void validateLength(String field, String value, int maximum) {

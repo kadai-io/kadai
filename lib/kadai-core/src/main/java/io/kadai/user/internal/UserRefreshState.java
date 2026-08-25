@@ -38,7 +38,7 @@ public record UserRefreshState(
     Set<String> permissions) {
 
   public UserRefreshState {
-    id = Objects.requireNonNull(id, "id");
+    Objects.requireNonNull(id, "id");
     groups = Set.copyOf(Objects.requireNonNull(groups, "groups"));
     permissions = Set.copyOf(Objects.requireNonNull(permissions, "permissions"));
   }

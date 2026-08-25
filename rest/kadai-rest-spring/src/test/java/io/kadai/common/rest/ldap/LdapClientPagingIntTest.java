@@ -79,8 +79,7 @@ class LdapClientPagingIntTest {
             .filter(id -> id.startsWith("complete-page-"))
             .collect(Collectors.toSet());
     assertThat(snapshot.pageCount()).isGreaterThan(1);
-    assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
-    assertThat(actual).hasSize(numberOfUsers);
+    assertThat(actual).containsExactlyInAnyOrderElementsOf(expected).hasSize(numberOfUsers);
   }
 
   @Test
@@ -92,7 +91,8 @@ class LdapClientPagingIntTest {
 
     assertThat(first).isNotSameAs(second);
     assertThat(first.users()).isNotSameAs(second.users()).isEqualTo(second.users());
-    assertThatThrownBy(() -> first.users().clear())
+    List<User> firstUsers = first.users();
+    assertThatThrownBy(firstUsers::clear)
         .isInstanceOf(UnsupportedOperationException.class);
   }
 

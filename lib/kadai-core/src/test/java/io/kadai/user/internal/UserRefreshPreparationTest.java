@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -110,8 +111,9 @@ class UserRefreshPreparationTest {
 
     assertThat(prepared.usersById()).containsOnlyKeys("valid-a", "valid-b");
     assertThat(prepared.rejectedUsers()).isEqualTo(2);
-    assertThatThrownBy(
-            () -> userService.prepareUserRefresh(List.of(user("Duplicate"), user("duplicate"))))
+    List<User> duplicateUsers = List.of(user("Duplicate"), user("duplicate"));
+
+    assertThatThrownBy(() -> userService.prepareUserRefresh(duplicateUsers))
         .isInstanceOf(InvalidArgumentException.class)
         .hasMessageContaining("duplicate");
   }
@@ -142,9 +144,12 @@ class UserRefreshPreparationTest {
     PreparedUserRefreshInput prepared = userService.prepareUserRefresh(source);
     source.clear();
     assertThat(prepared.usersById()).containsOnlyKeys("stable");
-    assertThatThrownBy(() -> prepared.usersById().clear())
+    Map<String, UserRefreshState> usersById = prepared.usersById();
+    UserRefreshState stableUser = usersById.get("stable");
+
+    assertThatThrownBy(usersById::clear)
         .isInstanceOf(UnsupportedOperationException.class);
-    assertThatThrownBy(() -> prepared.usersById().get("stable").groups().add("x"))
+    assertThatThrownBy(() -> stableUser.groups().add("x"))
         .isInstanceOf(UnsupportedOperationException.class);
   }
 

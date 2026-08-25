@@ -66,13 +66,16 @@ class UserInfoRefreshJobIntTest {
   @BeforeEach
   @WithAccessId(user = "businessadmin")
   void clearRefreshState() throws Exception {
-    ((UserServiceImpl) userService).deleteAllUsersGroupsPermissions();
-    reset(ldapClient);
+    resetRefreshState();
   }
 
   @AfterEach
   @WithAccessId(user = "businessadmin")
   void cleanRefreshState() throws Exception {
+    resetRefreshState();
+  }
+
+  private void resetRefreshState() throws Exception {
     ((UserServiceImpl) userService).deleteAllUsersGroupsPermissions();
     reset(ldapClient);
   }

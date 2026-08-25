@@ -113,19 +113,11 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
       List<User> processedUsers = new ArrayList<>(snapshot.users().size());
       int postprocessorFailures = 0;
       for (User user : snapshot.users()) {
-        try {
-          User processed = refreshUserPostprocessorManager.processUserAfterRefresh(user);
-          if (processed == null) {
-            throw new IllegalArgumentException("Refresh user postprocessor returned null");
-          }
+        User processed = processUserAfterRefresh(user);
+        if (processed != null) {
           processedUsers.add(processed);
-        } catch (Exception e) {
+        } else {
           postprocessorFailures++;
-          LOGGER.error(
-              "Failed to prepare LDAP user '{}' for refresh",
-              LogSanitizer.stripLineBreakingChars(
-                  user == null || user.getId() == null ? "null" : user.getId()),
-              e);
         }
       }
       UserServiceImpl userService = (UserServiceImpl) kadaiEngineImpl.getUserService();
@@ -154,6 +146,23 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
               Duration.ofNanos(System.nanoTime() - startedAt).toMillis()));
     } catch (Exception e) {
       throw new SystemException("Error while processing UserInfoRefreshJob.", e);
+    }
+  }
+
+  private User processUserAfterRefresh(User user) {
+    try {
+      User processed = refreshUserPostprocessorManager.processUserAfterRefresh(user);
+      if (processed == null) {
+        throw new IllegalArgumentException("Refresh user postprocessor returned null");
+      }
+      return processed;
+    } catch (Exception e) {
+      LOGGER.error(
+          "Failed to prepare LDAP user '{}' for refresh",
+          LogSanitizer.stripLineBreakingChars(
+              user == null || user.getId() == null ? "null" : user.getId()),
+          e);
+      return null;
     }
   }
 

@@ -22,6 +22,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -169,7 +170,7 @@ class UserRefreshBatchWriterTest {
                 0,
                 0));
 
-    verify(delete, org.mockito.Mockito.times(expectedFlushes)).executeBatch();
+    verify(delete, times(expectedFlushes)).executeBatch();
   }
 
   static Stream<Arguments> batchBoundaries() {
@@ -191,6 +192,8 @@ class UserRefreshBatchWriterTest {
 
     new UserRefreshBatchWriter(connection, 5)
         .apply(plan(List.of(user("one", "data"), user("two", "data")), List.of()));
+
+    verify(insert).executeBatch();
   }
 
   @ParameterizedTest
@@ -200,10 +203,10 @@ class UserRefreshBatchWriterTest {
     PreparedStatement insert = statement(connection, UserRefreshBatchWriter.INSERT_USER_SQL);
     when(insert.executeBatch()).thenReturn(new int[] {updateCount});
 
-    assertThatThrownBy(
-            () ->
-                new UserRefreshBatchWriter(connection, 5)
-                    .apply(plan(List.of(user("one", "data")), List.of())))
+    UserRefreshBatchWriter writer = new UserRefreshBatchWriter(connection, 5);
+    UserRefreshPlan plan = plan(List.of(user("one", "data")), List.of());
+
+    assertThatThrownBy(() -> writer.apply(plan))
         .isInstanceOf(SystemException.class);
   }
 
@@ -213,10 +216,10 @@ class UserRefreshBatchWriterTest {
     when(connection.prepareStatement(UserRefreshBatchWriter.INSERT_USER_SQL))
         .thenThrow(new SQLException("database unavailable"));
 
-    assertThatThrownBy(
-            () ->
-                new UserRefreshBatchWriter(connection, 5)
-                    .apply(plan(List.of(user("one", "data")), List.of())))
+    UserRefreshBatchWriter writer = new UserRefreshBatchWriter(connection, 5);
+    UserRefreshPlan plan = plan(List.of(user("one", "data")), List.of());
+
+    assertThatThrownBy(() -> writer.apply(plan))
         .isInstanceOf(SystemException.class)
         .hasCauseInstanceOf(SQLException.class);
   }
@@ -248,17 +251,17 @@ class UserRefreshBatchWriterTest {
     PreparedStatement group = statement(connection, UserRefreshBatchWriter.INSERT_GROUP_SQL);
     when(insert.executeBatch()).thenThrow(new SQLException("write failed"));
 
-    assertThatThrownBy(
-            () ->
-                new UserRefreshBatchWriter(connection, 10)
-                    .apply(
-                        plan(
-                            List.of(user("one", "data")),
-                            List.of(),
-                            List.of(new UserAccessIdRow("one", "group")),
-                            List.of(),
-                            List.of(),
-                            List.of())))
+    UserRefreshBatchWriter writer = new UserRefreshBatchWriter(connection, 10);
+    UserRefreshPlan plan =
+        plan(
+            List.of(user("one", "data")),
+            List.of(),
+            List.of(new UserAccessIdRow("one", "group")),
+            List.of(),
+            List.of(),
+            List.of());
+
+    assertThatThrownBy(() -> writer.apply(plan))
         .isInstanceOf(SystemException.class);
 
     verify(insert).close();

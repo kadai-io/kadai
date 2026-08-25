@@ -144,12 +144,12 @@ class UserRefreshSynchronizationAccTest {
     createGuardReference("z-protected");
     Map<String, List<List<String>>> before = dumpTables();
 
-    assertThatThrownBy(
-            () ->
-                synchronize(
-                    List.of(
-                        user("a-change", "New", "new", Set.of("g-new"), Set.of("p-new")),
-                        user("b-insert", "Inserted", null, Set.of("g"), Set.of("p")))))
+    List<User> refreshedUsers =
+        List.of(
+            user("a-change", "New", "new", Set.of("g-new"), Set.of("p-new")),
+            user("b-insert", "Inserted", null, Set.of("g"), Set.of("p")));
+
+    assertThatThrownBy(() -> synchronize(refreshedUsers))
         .isInstanceOf(RuntimeException.class);
 
     assertThat(dumpTables()).isEqualTo(before);
@@ -177,7 +177,7 @@ class UserRefreshSynchronizationAccTest {
 
   @Test
   @WithAccessId(user = "businessadmin")
-  void should_RejectInvalidBatchSizeBeforeWrites() throws Exception {
+  void should_RejectInvalidBatchSizeBeforeWrites() {
     PreparedUserRefreshInput prepared = userServiceImpl.prepareUserRefresh(List.of());
 
     assertThatThrownBy(() -> userServiceImpl.synchronizeUsers(prepared, 0))
