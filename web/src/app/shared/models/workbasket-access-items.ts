@@ -46,4 +46,8 @@ export interface WorkbasketAccessItems {
   _links?: Links;
 }
 
+export type WorkbasketAccessItemWrite = Omit<WorkbasketAccessItems, 'accessItemId'> & {
+  accessItemId?: string;
+};
+
 export const customFieldCount: number = 12;

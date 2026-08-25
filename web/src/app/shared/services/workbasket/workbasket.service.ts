@@ -21,7 +21,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'environments/environment';
 import { Workbasket } from 'app/shared/models/workbasket';
-import { WorkbasketAccessItems } from 'app/shared/models/workbasket-access-items';
+import { WorkbasketAccessItems, WorkbasketAccessItemWrite } from 'app/shared/models/workbasket-access-items';
 import { WorkbasketSummaryRepresentation } from 'app/shared/models/workbasket-summary-representation';
 import { WorkbasketAccessItemsRepresentation } from 'app/shared/models/workbasket-access-items-representation';
 import { WorkbasketDistributionTargets } from 'app/shared/models/workbasket-distribution-targets';
@@ -117,7 +117,9 @@ export class WorkbasketService {
   // PUT
   updateWorkBasketAccessItem(
     url: string,
-    workbasketAccessItem: WorkbasketAccessItemsRepresentation
+    workbasketAccessItem: Omit<WorkbasketAccessItemsRepresentation, 'accessItems'> & {
+      accessItems: WorkbasketAccessItemWrite[];
+    }
   ): Observable<WorkbasketAccessItemsRepresentation> {
     return this.httpClient.put<WorkbasketAccessItemsRepresentation>(url, workbasketAccessItem);
   }
