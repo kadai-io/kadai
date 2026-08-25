@@ -89,7 +89,8 @@ describe('TaskWorkflowState', () => {
       claimTask: vi.fn().mockReturnValue(of(mockTask)),
       completeTask: vi.fn().mockReturnValue(of(mockTask)),
       cancelClaimTask: vi.fn().mockReturnValue(of(mockTask)),
-      transferTask: vi.fn().mockReturnValue(of(mockTask))
+      transferTask: vi.fn().mockReturnValue(of(mockTask)),
+      reopenTask: vi.fn().mockReturnValue(of(mockTask))
     };
 
     notificationServiceMock = {
