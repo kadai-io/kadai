@@ -32,4 +32,28 @@ record LdapUserPage(List<User> users, boolean responseControlPresent, byte[] nex
   public byte[] nextCookie() {
     return nextCookie == null ? null : Arrays.copyOf(nextCookie, nextCookie.length);
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    LdapUserPage other = (LdapUserPage) obj;
+    return responseControlPresent == other.responseControlPresent
+        && Objects.equals(users, other.users)
+        && Arrays.equals(nextCookie, other.nextCookie);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = Objects.hash(users, responseControlPresent);
+    result = 31 * result + Arrays.hashCode(nextCookie);
+    return result;
+  }
 }
