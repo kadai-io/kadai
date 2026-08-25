@@ -280,7 +280,7 @@ describe('WorkbasketAccessItemsComponent', () => {
       }
     });
     fixture.detectChanges();
-    expect(component.accessItemsGroups.length).toBe(0);
+    expect(component.accessItemsGroups).toHaveLength(0);
 
     resolveValidation(true);
     await submitPromise;
