@@ -89,4 +89,8 @@ export class TaskService {
   createTask(task: Task): Observable<Task> {
     return this.httpClient.post<Task>(this.url, task);
   }
+
+  reopenTask(taskId: string): Observable<Task> {
+    return this.httpClient.post<Task>(`${this.url}/${taskId}/reopen`, '');
+  }
 }

@@ -114,3 +114,9 @@ export class TransferTask {
     public workbasketId: string
   ) {}
 }
+
+export class ReopenTask {
+  static readonly type = '[Task lifecycle] Reopen a task';
+
+  constructor(public taskId: string) {}
+}
