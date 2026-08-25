@@ -49,6 +49,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
@@ -633,6 +634,122 @@ class TaskCleanupJobAccTest {
                 .doesNotContain(taskSummaryCompleted);
           };
       return DynamicTest.stream(iterator, c -> "for parentBusinessProcessId = '" + c + "'", test);
+    }
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  class DomainSpecificMinimumAge implements KadaiConfigurationModifier {
+
+    @KadaiInject KadaiEngine kadaiEngine;
+
+    WorkbasketSummary domainAWorkbasket;
+    WorkbasketSummary domainBWorkbasket;
+
+    @Override
+    public Builder modify(Builder builder) {
+      return builder
+          .domains(List.of("DOMAIN_A", "DOMAIN_B"))
+          .taskCleanupJobEnabled(true)
+          .taskCleanupJobMinimumAge(Duration.ofDays(14))
+          .taskCleanupJobMinimumAgeByDomain(
+              Map.of("DOMAIN_A", Duration.ofDays(7), "DOMAIN_B", Duration.ofDays(30)))
+          .taskCleanupJobAllCompletedSameParentBusiness(false);
+    }
+
+    @WithAccessId(user = "businessadmin")
+    @BeforeAll
+    void setup() throws Exception {
+      domainAWorkbasket =
+          DefaultTestEntities.defaultTestWorkbasket()
+              .key("DOMAIN_A_CLEANUP")
+              .domain("DOMAIN_A")
+              .buildAndStoreAsSummary(workbasketService);
+      domainBWorkbasket =
+          DefaultTestEntities.defaultTestWorkbasket()
+              .key("DOMAIN_B_CLEANUP")
+              .domain("DOMAIN_B")
+              .buildAndStoreAsSummary(workbasketService);
+    }
+
+    @WithAccessId(user = "admin")
+    @Test
+    void should_ApplyDomainSpecificMinimumAgeAndFallback() throws Exception {
+      TaskSummary domainATask =
+          newTaskBuilder(domainAWorkbasket)
+              .state(TaskState.COMPLETED)
+              .completed(Instant.now().minus(10, ChronoUnit.DAYS))
+              .buildAndStoreAsSummary(taskService);
+      TaskSummary domainBTask =
+          newTaskBuilder(domainBWorkbasket)
+              .state(TaskState.COMPLETED)
+              .completed(Instant.now().minus(10, ChronoUnit.DAYS))
+              .buildAndStoreAsSummary(taskService);
+
+      runTaskCleanupJob(kadaiEngine);
+
+      assertThat(tasksForWorkbasket(domainAWorkbasket)).doesNotContain(domainATask);
+      assertThat(tasksForWorkbasket(domainBWorkbasket)).contains(domainBTask);
+    }
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  class DomainSpecificMinimumAgeWithParentConstraint implements KadaiConfigurationModifier {
+
+    @KadaiInject KadaiEngine kadaiEngine;
+
+    WorkbasketSummary domainAWorkbasket;
+    WorkbasketSummary domainBWorkbasket;
+
+    @Override
+    public Builder modify(Builder builder) {
+      return builder
+          .domains(List.of("DOMAIN_A", "DOMAIN_B"))
+          .taskCleanupJobEnabled(true)
+          .taskCleanupJobMinimumAge(Duration.ofDays(14))
+          .taskCleanupJobMinimumAgeByDomain(
+              Map.of("DOMAIN_A", Duration.ofDays(7), "DOMAIN_B", Duration.ofDays(30)))
+          .taskCleanupJobAllCompletedSameParentBusiness(true);
+    }
+
+    @WithAccessId(user = "businessadmin")
+    @BeforeAll
+    void setup() throws Exception {
+      domainAWorkbasket =
+          DefaultTestEntities.defaultTestWorkbasket()
+              .key("DOMAIN_A_PARENT_CLEANUP")
+              .domain("DOMAIN_A")
+              .buildAndStoreAsSummary(workbasketService);
+      domainBWorkbasket =
+          DefaultTestEntities.defaultTestWorkbasket()
+              .key("DOMAIN_B_PARENT_CLEANUP")
+              .domain("DOMAIN_B")
+              .buildAndStoreAsSummary(workbasketService);
+    }
+
+    @WithAccessId(user = "admin")
+    @Test
+    void should_KeepCompleteParentGroup_WhenOneDomainHasNotReachedItsMinimumAge()
+        throws Exception {
+      String parentBusinessProcessId = "DOMAIN_SPECIFIC_PARENT";
+      TaskSummary domainATask =
+          newTaskBuilder(domainAWorkbasket)
+              .state(TaskState.COMPLETED)
+              .completed(Instant.now().minus(10, ChronoUnit.DAYS))
+              .parentBusinessProcessId(parentBusinessProcessId)
+              .buildAndStoreAsSummary(taskService);
+      TaskSummary domainBTask =
+          newTaskBuilder(domainBWorkbasket)
+              .state(TaskState.COMPLETED)
+              .completed(Instant.now().minus(20, ChronoUnit.DAYS))
+              .parentBusinessProcessId(parentBusinessProcessId)
+              .buildAndStoreAsSummary(taskService);
+
+      runTaskCleanupJob(kadaiEngine);
+
+      assertThat(tasksForWorkbasket(domainAWorkbasket)).contains(domainATask);
+      assertThat(tasksForWorkbasket(domainBWorkbasket)).contains(domainBTask);
     }
   }
 }
