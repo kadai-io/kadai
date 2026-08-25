@@ -555,7 +555,7 @@ describe('ClassificationState', () => {
       expect(categories).toEqual(['EXTERNAL', 'MANUAL', 'AUTOMATIC']);
     });
 
-    it('should return empty array for selectCategories when type is not found', () => {
+    it('should select undefined for selectedClassificationId if classificationType is not found', () => {
       store.reset({
         ...store.snapshot(),
         classification: {
@@ -565,7 +565,7 @@ describe('ClassificationState', () => {
       });
 
       const categories = store.selectSnapshot(ClassificationSelectors.selectCategories);
-      expect(categories).toEqual([]);
+      expect(categories).toBeUndefined();
     });
 
     it('should select classifications list', () => {
@@ -583,7 +583,7 @@ describe('ClassificationState', () => {
       expect(id).toBe('CLI:001');
     });
 
-    it('should return undefined for selectedClassificationId if no classification is selected', () => {
+    it('should select undefined for selectedClassificationId if no classification is selected', () => {
       store.reset({
         ...store.snapshot(),
         classification: {
