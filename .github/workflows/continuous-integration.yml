@@ -305,12 +305,17 @@ jobs:
     runs-on: ubuntu-22.04
     name: Test E2E
     needs: [ detect_changes, test_frontend, test_backend ]
+    # Path-filtered test jobs may be skipped, but a cancelled workflow must stop E2E.
     if: |
-      (always() &&
-      (needs.detect_changes.outputs.run_all_tests == 'true' || needs.detect_changes.outputs.code_changed == 'true') &&
-      needs.test_frontend.result != 'failure' &&
-      needs.test_backend.result != 'failure')
-      || startsWith(github.ref, 'refs/tags/')
+      !cancelled() &&
+      (
+        (
+          (needs.detect_changes.outputs.run_all_tests == 'true' || needs.detect_changes.outputs.code_changed == 'true') &&
+          needs.test_frontend.result != 'failure' &&
+          needs.test_backend.result != 'failure'
+        )
+        || startsWith(github.ref, 'refs/tags/')
+      )
     steps:
       - name: Start Eco CI Measurement
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
@@ -611,7 +616,7 @@ jobs:
     name: Release artifacts to Sonatype-Central
     needs: [ detect_changes, test_frontend, test_e2e, test_backend ]
     if: |
-      always() &&
+      !cancelled() &&
       github.repository == 'kadai-io/kadai' &&
       ( startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' ) &&
       github.head_ref == '' &&
@@ -788,7 +793,7 @@ jobs:
     name: Deploy demo app to Microsoft Azure
     needs: [ detect_changes, test_frontend, test_e2e, test_backend ]
     if: |
-      always() &&
+      !cancelled() &&
       github.repository == 'kadai-io/kadai' &&
       github.ref == 'refs/heads/master' &&
       github.head_ref == '' &&
@@ -854,9 +859,9 @@ jobs:
     name: Upload SonarQube analysis to sonarcloud
     needs: [ detect_changes, test_frontend, test_e2e, test_backend ]
     # Runs on every push to main and on PRs originating from kadai-io/kadai (not forks).
-    # Skipped for release tags, dependabot PRs, dependabot-authored pushes, and if any test job failed.
+    # Skipped for release tags, dependabot PRs, dependabot-authored pushes, failed tests, and cancelled workflows.
     if: |
-      always() &&
+      !cancelled() &&
       github.repository == 'kadai-io/kadai' &&
       ( github.event_name != 'pull_request' ||
         github.event.pull_request.head.repo.full_name == github.repository ) &&
