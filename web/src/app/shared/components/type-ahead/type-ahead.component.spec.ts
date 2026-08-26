@@ -16,7 +16,7 @@
  *
  */
 
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { TypeAheadComponent } from './type-ahead.component';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
@@ -26,7 +26,6 @@ import { EngineConfigurationState } from '../../store/engine-configuration-store
 import { engineConfigurationMock } from '../../store/mock-data/mock-store';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AccessId } from 'app/shared/models/access-id';
 
 const accessIdService: Partial<AccessIdsService> = {
   searchForAccessId: vi.fn().mockReturnValue(of([{ accessId: 'user-g-1', name: 'Gerda' }]))
