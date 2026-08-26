@@ -1508,15 +1508,9 @@ public class KadaiConfiguration {
     }
 
     private void validateTaskCleanupMinimumAgeByDomain() {
-      if (taskCleanupJobMinimumAgeByDomain == null) {
-        throw invalidTaskCleanupMinimumAgeByDomain("must not be null");
-      }
       for (Entry<String, Duration> entry : taskCleanupJobMinimumAgeByDomain.entrySet()) {
         String domain = entry.getKey();
         Duration duration = entry.getValue();
-        if (domain == null || domain.isBlank()) {
-          throw invalidTaskCleanupMinimumAgeByDomain("must not contain a null or blank domain");
-        }
         if (duration == null || duration.isNegative()) {
           throw new InvalidArgumentException(
               "Parameter taskCleanupJobMinimumAgeByDomain "

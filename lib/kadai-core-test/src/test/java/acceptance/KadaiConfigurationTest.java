@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -961,6 +962,88 @@ class KadaiConfigurationTest {
                       .build())
           .isInstanceOf(InvalidArgumentException.class)
           .hasMessageContaining("kadai.jobs.cleanup.task.minimumAgeByDomain.DOMAIN_B");
+    }
+
+    @Test
+    void should_RejectNullTaskCleanupJobMinimumAgeByDomain() {
+      assertThatThrownBy(
+              () ->
+                  new KadaiConfiguration.Builder(
+                          TestContainerExtension.createDataSourceForH2(), false, "KADAI")
+                      .taskCleanupJobMinimumAgeByDomain(null)
+                      .build())
+          .isInstanceOf(InvalidArgumentException.class)
+          .hasMessageContaining("kadai.jobs.cleanup.task.minimumAgeByDomain");
+    }
+
+    @Test
+    void should_RejectNullDomainInTaskCleanupJobMinimumAgeByDomain() {
+      Map<String, Duration> overrides = new HashMap<>();
+      overrides.put(null, Duration.ofDays(1));
+
+      assertThatThrownBy(
+              () ->
+                  new KadaiConfiguration.Builder(
+                          TestContainerExtension.createDataSourceForH2(), false, "KADAI")
+                      .taskCleanupJobMinimumAgeByDomain(overrides)
+                      .build())
+          .isInstanceOf(InvalidArgumentException.class);
+    }
+
+    @Test
+    void should_RejectBlankDomainInTaskCleanupJobMinimumAgeByDomain() {
+      assertThatThrownBy(
+              () ->
+                  new KadaiConfiguration.Builder(
+                          TestContainerExtension.createDataSourceForH2(), false, "KADAI")
+                      .taskCleanupJobMinimumAgeByDomain(Map.of("   ", Duration.ofDays(1)))
+                      .build())
+          .isInstanceOf(InvalidArgumentException.class);
+    }
+
+    @Test
+    void should_RejectDuplicateNormalizedDomainsInTaskCleanupJobMinimumAgeByDomain() {
+      Map<String, Duration> overrides = new LinkedHashMap<>();
+      overrides.put("domain_a", Duration.ofDays(7));
+      overrides.put("DOMAIN_A", Duration.ofDays(8));
+
+      assertThatThrownBy(
+              () ->
+                  new KadaiConfiguration.Builder(
+                          TestContainerExtension.createDataSourceForH2(), false, "KADAI")
+                      .domains(List.of("DOMAIN_A"))
+                      .taskCleanupJobMinimumAgeByDomain(overrides)
+                      .build())
+          .isInstanceOf(InvalidArgumentException.class)
+          .hasMessageContaining("duplicate domains after normalization: DOMAIN_A");
+    }
+
+    @Test
+    void should_RejectNullDurationInTaskCleanupJobMinimumAgeByDomain() {
+      Map<String, Duration> overrides = new HashMap<>();
+      overrides.put("DOMAIN_A", null);
+
+      assertThatThrownBy(
+              () ->
+                  new KadaiConfiguration.Builder(
+                          TestContainerExtension.createDataSourceForH2(), false, "KADAI")
+                      .domains(List.of("DOMAIN_A"))
+                      .taskCleanupJobMinimumAgeByDomain(overrides)
+                      .build())
+          .isInstanceOf(InvalidArgumentException.class)
+          .hasMessageContaining("kadai.jobs.cleanup.task.minimumAgeByDomain.DOMAIN_A");
+    }
+
+    @Test
+    void should_RejectNegativeDurationInTaskCleanupJobMinimumAgeByDomain() {
+      assertThatThrownBy(
+              () ->
+                  new KadaiConfiguration.Builder(
+                          TestContainerExtension.createDataSourceForH2(), false, "KADAI")
+                      .domains(List.of("DOMAIN_A"))
+                      .taskCleanupJobMinimumAgeByDomain(Map.of("DOMAIN_A", Duration.ofDays(-1)))
+                      .build())
+          .isInstanceOf(InvalidArgumentException.class);
     }
 
     @ParameterizedTest
