@@ -108,21 +108,19 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
 
     this.accessIdForm.controls['accessId'].valueChanges
       .pipe(
-        debounceTime(this.debounceTime), 
-        distinctUntilChanged(), 
-        switchMap(
-          (value) => {
-            if (!value) {
-              this.handleEmptyAccessId();
-              return of(null);
-            }
-
-            return this.accessIdService.searchForAccessId(value).pipe(
-              map((accessIds) => ({value, accessIds})),
-              catchError(() => of(null))
-            )
+        debounceTime(this.debounceTime),
+        distinctUntilChanged(),
+        switchMap((value) => {
+          if (!value) {
+            this.handleEmptyAccessId();
+            return of(null);
           }
-        ), 
+
+          return this.accessIdService.searchForAccessId(value).pipe(
+            map((accessIds) => ({ value, accessIds })),
+            catchError(() => of(null))
+          );
+        }),
         takeUntil(this.destroy$)
       )
       .subscribe((result) => {
@@ -130,7 +128,7 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
         this.processAccessIdResult(result.value, result?.accessIds);
       });
   }
-  
+
   handleEmptyAccessId() {
     this.name.set('');
     this.isFormValid.emit(!this.isRequired());

@@ -166,35 +166,45 @@ describe('TypeAheadComponent with AccessId input', () => {
     expect(setAccessIdSpy).not.toHaveBeenCalled();
   });
 
-it('should ignore stale/older search requests if a new input was provided (prevent race condition)', async () => {
-  const searchSpy = vi.spyOn(accessIdService, 'searchForAccessId')
-    .mockReset()
-    .mockReturnValueOnce(of([{ accessId: 'user-a', name: 'User A' }]).pipe(delay(50)))   // simulation of a long request
-    .mockReturnValueOnce(of([{ accessId: 'user-b', name: 'User B' }]).pipe(delay(10)));  // the second request was sent later but was processed first
+  it('should ignore stale/older search requests if a new input was provided (prevent race condition)', async () => {
+    const searchSpy = vi
+      .spyOn(accessIdService, 'searchForAccessId')
+      .mockReset()
+      .mockReturnValueOnce(of([{ accessId: 'user-a', name: 'User A' }]).pipe(delay(50))) // simulation of a long request
+      .mockReturnValueOnce(of([{ accessId: 'user-b', name: 'User B' }]).pipe(delay(10))); // the second request was sent later but was processed first
 
-  const inputEl: HTMLInputElement = fixture.nativeElement.querySelector('input');
+    const inputEl: HTMLInputElement = fixture.nativeElement.querySelector('input');
 
-  inputEl.value = 'user-a';
-  inputEl.dispatchEvent(new Event('input'));
-  fixture.detectChanges();
-
-  await vi.waitFor(() => {
-    expect(searchSpy).toHaveBeenCalledTimes(1);
-  }, { timeout: 750 });
-
-  inputEl.value = 'user-b';
-  inputEl.dispatchEvent(new Event('input'));
-  fixture.detectChanges();
-
-  await vi.waitFor(() => {
-    expect(searchSpy).toHaveBeenCalledTimes(2);
-  }, { timeout: 750 });
-
-  await vi.waitFor(() => {
+    inputEl.value = 'user-a';
+    inputEl.dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    expect(component.name()).toBe('User B');
-  }, { timeout: 750 });
-});
+
+    await vi.waitFor(
+      () => {
+        expect(searchSpy).toHaveBeenCalledTimes(1);
+      },
+      { timeout: 750 }
+    );
+
+    inputEl.value = 'user-b';
+    inputEl.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    await vi.waitFor(
+      () => {
+        expect(searchSpy).toHaveBeenCalledTimes(2);
+      },
+      { timeout: 750 }
+    );
+
+    await vi.waitFor(
+      () => {
+        fixture.detectChanges();
+        expect(component.name()).toBe('User B');
+      },
+      { timeout: 750 }
+    );
+  });
 });
 
 describe('TypeAheadComponent without debounceTime configured', () => {
