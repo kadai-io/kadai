@@ -354,6 +354,28 @@ describe('TaskProcessingComponent', () => {
       expect(reopenSpy).toHaveBeenCalled();
     });
 
+    it('should not dispatch ClaimTask in loadAndClaimTask if the task is COMPLETED', async () => {
+      const completedTask = makeTask({ state: 'COMPLETED', taskId: 'task-id-1' });
+      mockTaskService.getTask.mockReturnValue(of(completedTask));
+      mockTaskService.claimTask.mockClear();
+
+      await component.loadAndClaimTask('task-id-1');
+
+      expect(mockTaskService.getTask).toHaveBeenCalledWith('task-id-1');
+      expect(mockTaskService.claimTask).not.toHaveBeenCalled();
+    });
+
+    it('should not dispatch ClaimTask in loadAndClaimTask if the task is CANCELLED', async () => {
+      const cancelledTask = makeTask({ state: 'CANCELLED', taskId: 'task-id-1' });
+      mockTaskService.getTask.mockReturnValue(of(cancelledTask));
+      mockTaskService.claimTask.mockClear();
+
+      await component.loadAndClaimTask('task-id-1');
+
+      expect(mockTaskService.getTask).toHaveBeenCalledWith('task-id-1');
+      expect(mockTaskService.claimTask).not.toHaveBeenCalled();
+    });
+
     it('should render and handle @else branch actions (completeTask and cancelClaimTask)', async () => {
       await selectTask(makeTask({ state: 'CLAIMED' }));
       fixture.detectChanges();
