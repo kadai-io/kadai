@@ -116,10 +116,7 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
             return of(null);
           }
 
-          return this.accessIdService.searchForAccessId(value).pipe(
-            map((accessIds) => ({ value, accessIds })),
-            catchError(() => of(null))
-          );
+          return this.accessIdService.searchForAccessId(value).pipe(map((accessIds) => ({ value, accessIds })));
         }),
         takeUntil(this.destroy$)
       )
