@@ -165,6 +165,29 @@ describe('TypeAheadComponent with AccessId input', () => {
     expect(setAccessIdSpy).not.toHaveBeenCalled();
   });
 
+  it('should call handleEmptyAccessId and not search when accessId value is cleared or empty', async () => {
+    const handleEmptyAccessIdSpy = vi.spyOn(component, 'handleEmptyAccessId');
+    const searchSpy = vi.spyOn(accessIdService, 'searchForAccessId');
+
+    component.accessIdForm.get('accessId')!.setValue('user-g-1');
+    fixture.detectChanges();
+
+    await vi.waitFor(() => {
+      expect(searchSpy).toHaveBeenCalledWith('user-g-1');
+    });
+
+    searchSpy.mockClear();
+    handleEmptyAccessIdSpy.mockClear();
+
+    component.accessIdForm.get('accessId')!.setValue('');
+    fixture.detectChanges();
+
+    await vi.waitFor(() => {
+      expect(handleEmptyAccessIdSpy).toHaveBeenCalled();
+      expect(searchSpy).not.toHaveBeenCalled();
+    });
+  });
+
   it('should ignore stale/older search requests if a new input was provided (prevent race condition)', async () => {
     const searchSpy = vi
       .spyOn(accessIdService, 'searchForAccessId')
