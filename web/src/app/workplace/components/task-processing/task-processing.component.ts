@@ -16,14 +16,14 @@
  *
  */
 
-import { Component, inject, isSignal, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, isSignal, OnDestroy, OnInit, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Task } from 'app/workplace/models/task';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { ClassificationsService } from 'app/shared/services/classifications/classifications.service';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { MatButton } from '@angular/material/button';
@@ -65,6 +65,10 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private sanitizer = inject(DomSanitizer);
   task = toSignal<Task | undefined>(this.store.select(TaskSelectors.getSelectedTask));
+  isTaskClosed = computed(() => {
+    const state = this.task()?.state;
+    return state === 'COMPLETED' || state === 'CANCELLED';
+  });
 
   ngOnInit() {
     this.routeSubscription = this.route.params.subscribe((params) => {
@@ -74,13 +78,17 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
   }
 
   async loadAndClaimTask(id: string) {
-    await this.store.dispatch(new GetTask(id)).toPromise();
-    await this.store.dispatch(new ClaimTask(id)).toPromise();
+    await firstValueFrom(this.store.dispatch(new GetTask(id)));
 
     const task = this.store.selectSnapshot(TaskSelectors.getSelectedTask)!;
-    const classification = (await this.classificationService
-      .getClassification(task.classificationSummary!.classificationId!)
-      .toPromise())!;
+
+    if (!this.isTaskClosed()) {
+      await firstValueFrom(this.store.dispatch(new ClaimTask(id)));
+    }
+
+    const classification = await firstValueFrom(
+      this.classificationService.getClassification(task.classificationSummary!.classificationId!)
+    )!;
     this.address = this.extractUrl(classification.applicationEntryPoint!) || `${this.address}?q=${task.name}`;
     this.link.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.address));
     this.getWorkbaskets();
