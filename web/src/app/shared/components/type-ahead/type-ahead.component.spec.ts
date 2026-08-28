@@ -20,7 +20,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { TypeAheadComponent } from './type-ahead.component';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
-import { delay, of } from 'rxjs';
+import { delay, of, Subject } from 'rxjs';
 import { provideStore, Store } from '@ngxs/store';
 import { EngineConfigurationState } from '../../store/engine-configuration-store/engine-configuration.state';
 import { engineConfigurationMock } from '../../store/mock-data/mock-store';
@@ -189,11 +189,16 @@ describe('TypeAheadComponent with AccessId input', () => {
   });
 
   it('should ignore stale/older search requests if a new input was provided (prevent race condition)', async () => {
+    vi.useFakeTimers();
+
+    const requestA$ = new Subject<any>();
+    const requestB$ = new Subject<any>();
+
     const searchSpy = vi
       .spyOn(accessIdService, 'searchForAccessId')
       .mockReset()
-      .mockReturnValueOnce(of([{ accessId: 'user-a', name: 'User A' }]).pipe(delay(50))) // simulation of a long request
-      .mockReturnValueOnce(of([{ accessId: 'user-b', name: 'User B' }]).pipe(delay(10))); // the second request was sent later but was processed first
+      .mockReturnValueOnce(requestA$.asObservable())
+      .mockReturnValueOnce(requestB$.asObservable());
 
     const inputEl: HTMLInputElement = fixture.nativeElement.querySelector('input');
 
@@ -201,31 +206,31 @@ describe('TypeAheadComponent with AccessId input', () => {
     inputEl.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
-    await vi.waitFor(
-      () => {
-        expect(searchSpy).toHaveBeenCalledTimes(1);
-      },
-      { timeout: 750 }
-    );
+    vi.advanceTimersByTime(component.debounceTime);
+    expect(searchSpy).toHaveBeenCalledTimes(1);
+    expect(searchSpy).toHaveBeenLastCalledWith('user-a');
 
     inputEl.value = 'user-b';
     inputEl.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
-    await vi.waitFor(
-      () => {
-        expect(searchSpy).toHaveBeenCalledTimes(2);
-      },
-      { timeout: 750 }
-    );
+    vi.advanceTimersByTime(component.debounceTime);
+    expect(searchSpy).toHaveBeenCalledTimes(2);
+    expect(searchSpy).toHaveBeenLastCalledWith('user-b');
 
-    await vi.waitFor(
-      () => {
-        fixture.detectChanges();
-        expect(component.name()).toBe('User B');
-      },
-      { timeout: 750 }
-    );
+    requestB$.next([{ accessId: 'user-b', name: 'User B' }]);
+    requestB$.complete();
+    fixture.detectChanges();
+
+    expect(component.name()).toBe('User B');
+
+    requestA$.next([{ accessId: 'user-a', name: 'User A' }]);
+    requestA$.complete();
+    fixture.detectChanges();
+
+    expect(component.name()).toBe('User B');
+
+    vi.useRealTimers();
   });
 });
 
