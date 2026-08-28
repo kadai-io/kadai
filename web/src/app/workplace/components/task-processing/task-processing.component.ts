@@ -95,7 +95,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
     return this.store.dispatch(new GetTask(id)).pipe(
       switchMap(() => {
         if (this.canClaimTask()) {
-         return this.store.dispatch(new ClaimTask(id));
+          return this.store.dispatch(new ClaimTask(id));
         }
         return of(null);
       }),
