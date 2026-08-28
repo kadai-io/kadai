@@ -31,13 +31,16 @@ import io.kadai.user.api.UserService;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
 import io.kadai.user.api.models.User;
+import io.kadai.user.internal.models.UserAttributeRow;
 import io.kadai.user.internal.models.UserImpl;
 import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.WorkbasketQueryColumnName;
 import io.kadai.workbasket.api.WorkbasketService;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.ibatis.exceptions.PersistenceException;
@@ -94,9 +97,12 @@ public class UserServiceImpl implements UserService {
         userIds.stream().map(String::toLowerCase).collect(Collectors.toSet());
 
     List<UserImpl> users =
-        internalKadaiEngine.executeInDatabaseConnection(() -> userMapper.findByIds(finalUserIds));
-
-    users.forEach(user -> user.setDomains(determineDomains(user)));
+        internalKadaiEngine.executeInDatabaseConnection(
+            () -> {
+              List<UserImpl> foundUsers = userMapper.findByIds(finalUserIds);
+              enrichUsers(foundUsers);
+              return foundUsers;
+            });
 
     return users.stream().map(User.class::cast).toList();
   }
@@ -182,6 +188,46 @@ public class UserServiceImpl implements UserService {
           userMapper.deleteAllGroups();
           userMapper.deleteAllPermissions();
         });
+  }
+
+  void enrichUsers(List<UserImpl> users) {
+    if (users == null || users.isEmpty()) {
+      return;
+    }
+
+    Set<String> userIds = users.stream().map(UserImpl::getId).collect(Collectors.toSet());
+
+    Map<String, Set<String>> groupsByUserId =
+        toUserAttributeMap(userMapper.findGroupsByIds(userIds));
+    Map<String, Set<String>> permissionsByUserId =
+        toUserAttributeMap(userMapper.findPermissionsByIds(userIds));
+
+    Map<String, Set<String>> domainsByUserId;
+    if (minimalWorkbasketPermissions == null || minimalWorkbasketPermissions.isEmpty()) {
+      domainsByUserId = Collections.emptyMap();
+    } else {
+      domainsByUserId =
+          toUserAttributeMap(userMapper.findDomainsByIds(userIds, minimalWorkbasketPermissions));
+    }
+
+    for (UserImpl user : users) {
+      user.setGroups(groupsByUserId.getOrDefault(user.getId(), Collections.emptySet()));
+      user.setPermissions(
+          permissionsByUserId.getOrDefault(user.getId(), Collections.emptySet()));
+      user.setDomains(domainsByUserId.getOrDefault(user.getId(), Collections.emptySet()));
+    }
+  }
+
+  private static Map<String, Set<String>> toUserAttributeMap(List<UserAttributeRow> rows) {
+    Map<String, Set<String>> attributesByUserId = new HashMap<>();
+
+    for (UserAttributeRow row : rows) {
+      attributesByUserId
+          .computeIfAbsent(row.getUserId(), ignored -> new HashSet<>())
+          .add(row.getAttributeValue());
+    }
+
+    return attributesByUserId;
   }
 
   Set<String> determineDomains(User user) {
