@@ -34,7 +34,7 @@ import { Workbasket } from '../../../shared/models/workbasket';
 import { provideStore, Store } from '@ngxs/store';
 import { TaskWorkflowState } from '../../../shared/store/task-store/task.state';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
-import { ReopenTask, SelectTask } from '../../../shared/store/task-store/task.actions';
+import { ClaimTask, GetTask, ReopenTask, SelectTask } from '../../../shared/store/task-store/task.actions';
 
 const makeTask = (overrides: Partial<Task> = {}): Task => {
   const task = new Task(
@@ -660,6 +660,69 @@ describe('TaskProcessingComponent', () => {
       }
       expect(localComponent.task()).toBeUndefined();
       localFixture.destroy();
+    });
+
+    it('should cancel unfinished workflow A when switching to task B and ignore late responses from A', () => {
+      vi.useFakeTimers();
+
+      const getTaskA$ = new Subject<void>();
+      const getTaskB$ = new Subject<void>();
+
+      const claimTaskA$ = new Subject<void>();
+      const claimTaskB$ = new Subject<void>();
+
+      const classificationA$ = new Subject<any>();
+      const classificationB$ = new Subject<any>();
+
+      vi.spyOn(store, 'dispatch').mockImplementation((action: any) => {
+        if (action instanceof GetTask) {
+          return action.taskId === 'task-a' ? getTaskA$ : getTaskB$;
+        }
+        if (action instanceof ClaimTask) {
+          return action.taskId === 'task-a' ? claimTaskA$ : claimTaskB$;
+        }
+        return of(void 0);
+      });
+
+      vi.spyOn(mockClassificationsService, 'getClassification').mockImplementation((id: string) => {
+        return id === 'class-a' ? classificationA$ : classificationB$;
+      });
+
+      paramsSubject.next({ id: 'task-a' });
+      fixture.detectChanges();
+
+      getTaskA$.next();
+      getTaskA$.complete();
+
+      paramsSubject.next({ id: 'task-b' });
+      fixture.detectChanges();
+
+      vi.spyOn(store, 'selectSnapshot').mockReturnValue({
+        name: 'Task B',
+        classificationSummary: { classificationId: 'class-b' }
+      });
+
+      getTaskB$.next();
+      getTaskB$.complete();
+
+      claimTaskB$.next();
+      claimTaskB$.complete();
+
+      claimTaskA$.next();
+      claimTaskA$.complete();
+      classificationA$.next({ applicationEntryPoint: 'http://app-a.com' });
+      classificationA$.complete();
+      fixture.detectChanges();
+
+      expect(component.address).not.toContain('app-a.com');
+
+      classificationB$.next({ applicationEntryPoint: 'http://app-b.com' });
+      classificationB$.complete();
+      fixture.detectChanges();
+
+      expect(component.address).toBe('http://app-b.com');
+
+      vi.useRealTimers();
     });
 
     it('should not render Reopen button when task state is TERMINATED', async () => {
