@@ -81,6 +81,9 @@ public class TaskQueryImpl implements TaskQuery {
   private boolean joinWithSecondaryObjectReferences = false;
   private boolean joinWithClassifications = false;
   private boolean joinWithAttachmentClassifications = false;
+  private boolean filterByAttachments = false;
+  private boolean filterByAttachmentClassifications = false;
+  private boolean filterBySecondaryObjectReferences = false;
   private boolean joinWithWorkbaskets = false;
   private boolean addAttachmentColumnsToSelectClauseForOrdering = false;
   private boolean addClassificationNameToSelectClauseForOrdering = false;
@@ -1170,6 +1173,7 @@ public class TaskQueryImpl implements TaskQuery {
               + "in order to group by sor.");
     }
     groupBySor = type;
+    joinWithSecondaryObjectReferences = true;
     return sorTypeIn(type);
   }
 
@@ -1193,14 +1197,12 @@ public class TaskQueryImpl implements TaskQuery {
 
   @Override
   public TaskQuery attachmentClassificationIdIn(String... attachmentClassificationIds) {
-    joinWithAttachments = true;
     this.attachmentClassificationIdIn = attachmentClassificationIds;
     return this;
   }
 
   @Override
   public TaskQuery attachmentClassificationIdNotIn(String... attachmentClassificationIds) {
-    joinWithAttachments = true;
     this.attachmentClassificationIdNotIn = attachmentClassificationIds;
     return this;
   }
@@ -1217,28 +1219,24 @@ public class TaskQueryImpl implements TaskQuery {
 
   @Override
   public TaskQuery attachmentClassificationKeyIn(String... attachmentClassificationKeys) {
-    joinWithAttachments = true;
     this.attachmentClassificationKeyIn = attachmentClassificationKeys;
     return this;
   }
 
   @Override
   public TaskQuery attachmentClassificationKeyNotIn(String... attachmentClassificationKeys) {
-    joinWithAttachments = true;
     this.attachmentClassificationKeyNotIn = attachmentClassificationKeys;
     return this;
   }
 
   @Override
   public TaskQuery attachmentClassificationKeyLike(String... attachmentClassificationKeys) {
-    joinWithAttachments = true;
     this.attachmentClassificationKeyLike = toLowerCopy(attachmentClassificationKeys);
     return this;
   }
 
   @Override
   public TaskQuery attachmentClassificationKeyNotLike(String... attachmentClassificationKeys) {
-    joinWithAttachments = true;
     this.attachmentClassificationKeyNotLike = toLowerCopy(attachmentClassificationKeys);
     return this;
   }
@@ -1255,28 +1253,24 @@ public class TaskQueryImpl implements TaskQuery {
 
   @Override
   public TaskQuery attachmentClassificationNameIn(String... attachmentClassificationNames) {
-    joinWithAttachmentClassifications = true;
     this.attachmentClassificationNameIn = attachmentClassificationNames;
     return this;
   }
 
   @Override
   public TaskQuery attachmentClassificationNameNotIn(String... attachmentClassificationNames) {
-    joinWithAttachmentClassifications = true;
     this.attachmentClassificationNameNotIn = attachmentClassificationNames;
     return this;
   }
 
   @Override
   public TaskQuery attachmentClassificationNameLike(String... attachmentClassificationNames) {
-    joinWithAttachmentClassifications = true;
     this.attachmentClassificationNameLike = toLowerCopy(attachmentClassificationNames);
     return this;
   }
 
   @Override
   public TaskQuery attachmentClassificationNameNotLike(String... attachmentClassificationNames) {
-    joinWithAttachmentClassifications = true;
     this.attachmentClassificationNameNotLike = toLowerCopy(attachmentClassificationNames);
     return this;
   }
@@ -1293,28 +1287,24 @@ public class TaskQueryImpl implements TaskQuery {
 
   @Override
   public TaskQuery attachmentChannelIn(String... attachmentChannels) {
-    joinWithAttachments = true;
     this.attachmentChannelIn = attachmentChannels;
     return this;
   }
 
   @Override
   public TaskQuery attachmentChannelNotIn(String... attachmentChannels) {
-    joinWithAttachments = true;
     this.attachmentChannelNotIn = attachmentChannels;
     return this;
   }
 
   @Override
   public TaskQuery attachmentChannelLike(String... attachmentChannels) {
-    joinWithAttachments = true;
     this.attachmentChannelLike = toLowerCopy(attachmentChannels);
     return this;
   }
 
   @Override
   public TaskQuery attachmentChannelNotLike(String... attachmentChannels) {
-    joinWithAttachments = true;
     this.attachmentChannelNotLike = toLowerCopy(attachmentChannels);
     return this;
   }
@@ -1331,28 +1321,24 @@ public class TaskQueryImpl implements TaskQuery {
 
   @Override
   public TaskQuery attachmentReferenceValueIn(String... referenceValues) {
-    joinWithAttachments = true;
     this.attachmentReferenceIn = referenceValues;
     return this;
   }
 
   @Override
   public TaskQuery attachmentReferenceValueNotIn(String... referenceValues) {
-    joinWithAttachments = true;
     this.attachmentReferenceNotIn = referenceValues;
     return this;
   }
 
   @Override
   public TaskQuery attachmentReferenceValueLike(String... referenceValues) {
-    joinWithAttachments = true;
     this.attachmentReferenceLike = toLowerCopy(referenceValues);
     return this;
   }
 
   @Override
   public TaskQuery attachmentReferenceValueNotLike(String... referenceValues) {
-    joinWithAttachments = true;
     this.attachmentReferenceNotLike = toLowerCopy(referenceValues);
     return this;
   }
@@ -1370,7 +1356,6 @@ public class TaskQueryImpl implements TaskQuery {
   @Override
   public TaskQuery attachmentReceivedWithin(TimeInterval... receivedIn) {
     validateAllTimeIntervals(receivedIn);
-    joinWithAttachments = true;
     this.attachmentReceivedWithin = receivedIn;
     return this;
   }
@@ -1378,7 +1363,6 @@ public class TaskQueryImpl implements TaskQuery {
   @Override
   public TaskQuery attachmentNotReceivedWithin(TimeInterval... receivedNotIn) {
     validateAllTimeIntervals(receivedNotIn);
-    joinWithAttachments = true;
     this.attachmentReceivedNotWithin = receivedNotIn;
     return this;
   }
@@ -1395,7 +1379,6 @@ public class TaskQueryImpl implements TaskQuery {
 
   @Override
   public TaskQuery withoutAttachment() {
-    this.joinWithAttachments = true;
     this.withoutAttachment = true;
     return this;
   }
@@ -1434,68 +1417,57 @@ public class TaskQueryImpl implements TaskQuery {
 
   @Override
   public TaskQuery secondaryObjectReferenceIn(ObjectReference... objectReferences) {
-    this.joinWithSecondaryObjectReferences = true;
     this.secondaryObjectReferences = objectReferences;
     return this;
   }
 
   public TaskQuery sorCompanyIn(String... companies) {
-    joinWithSecondaryObjectReferences = true;
     sorCompanyIn = companies;
     return this;
   }
 
   public TaskQuery sorCompanyLike(String... companies) {
-    joinWithSecondaryObjectReferences = true;
     sorCompanyLike = toLowerCopy(companies);
     return this;
   }
 
   public TaskQuery sorSystemIn(String... systems) {
-    joinWithSecondaryObjectReferences = true;
     sorSystemIn = systems;
     return this;
   }
 
   public TaskQuery sorSystemLike(String... systems) {
-    joinWithSecondaryObjectReferences = true;
     sorSystemLike = toLowerCopy(systems);
     return this;
   }
 
   public TaskQuery sorSystemInstanceIn(String... systemInstances) {
-    joinWithSecondaryObjectReferences = true;
     sorSystemInstanceIn = systemInstances;
     return this;
   }
 
   public TaskQuery sorSystemInstanceLike(String... systemInstances) {
-    joinWithSecondaryObjectReferences = true;
     sorSystemInstanceLike = toLowerCopy(systemInstances);
     return this;
   }
 
   public TaskQuery sorTypeIn(String... types) {
-    joinWithSecondaryObjectReferences = true;
     sorTypeIn = types;
     return this;
   }
 
   public TaskQuery sorTypeLike(String... types) {
-    joinWithSecondaryObjectReferences = true;
     sorTypeLike = toLowerCopy(types);
     return this;
   }
 
   @Override
   public TaskQuery sorValueIn(String... values) {
-    joinWithSecondaryObjectReferences = true;
     sorValueIn = values;
     return this;
   }
 
   public TaskQuery sorValueLike(String... values) {
-    joinWithSecondaryObjectReferences = true;
     sorValueLike = toLowerCopy(values);
     return this;
   }
@@ -2299,12 +2271,61 @@ public class TaskQueryImpl implements TaskQuery {
     return DB.getDB(this.kadaiEngine.getSqlSession().getConfiguration().getDatabaseId());
   }
 
+  private void setupRelatedEntityFilterParameters() {
+    filterByAttachmentClassifications =
+        attachmentClassificationNameIn != null
+            || hasElements(attachmentClassificationNameNotIn)
+            || attachmentClassificationNameLike != null
+            || attachmentClassificationNameNotLike != null;
+
+    filterByAttachments =
+        attachmentClassificationIdIn != null
+            || hasElements(attachmentClassificationIdNotIn)
+            || attachmentClassificationKeyIn != null
+            || hasElements(attachmentClassificationKeyNotIn)
+            || attachmentClassificationKeyLike != null
+            || attachmentClassificationKeyNotLike != null
+            || filterByAttachmentClassifications
+            || attachmentChannelIn != null
+            || hasElements(attachmentChannelNotIn)
+            || attachmentChannelLike != null
+            || attachmentChannelNotLike != null
+            || attachmentReferenceIn != null
+            || hasElements(attachmentReferenceNotIn)
+            || attachmentReferenceLike != null
+            || attachmentReferenceNotLike != null
+            || attachmentReceivedWithin != null
+            || attachmentReceivedNotWithin != null;
+
+    filterBySecondaryObjectReferences =
+        secondaryObjectReferences != null
+            || sorCompanyIn != null
+            || sorCompanyLike != null
+            || sorSystemIn != null
+            || sorSystemLike != null
+            || sorSystemInstanceIn != null
+            || sorSystemInstanceLike != null
+            || sorTypeIn != null
+            || sorTypeLike != null
+            || sorValueIn != null
+            || sorValueLike != null;
+  }
+
+  private static boolean hasElements(Object[] values) {
+    return values != null && values.length > 0;
+  }
+
   private void setupJoinAndOrderParameters() {
+    setupRelatedEntityFilterParameters();
+
     // if classificationName or attachmentClassificationName are added to the result set, and
     // multiple
     // attachments exist, the addition of these attribute may increase the result set.
     // in order to have the same result set independent of sorting yes or no,
     // we add the add... flags whenever we join with classification or attachmentClassification
+    if (joinWithAttachments && filterByAttachmentClassifications) {
+      joinWithAttachmentClassifications = true;
+    }
     if (joinWithAttachmentClassifications) {
       joinWithAttachments = true;
       addAttachmentClassificationNameToSelectClauseForOrdering = true;

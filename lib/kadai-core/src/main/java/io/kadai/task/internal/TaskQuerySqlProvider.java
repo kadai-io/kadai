@@ -554,12 +554,94 @@ public class TaskQuerySqlProvider {
     whereNotLike(filter + "NotLike", channel, sb);
   }
 
-  private static StringBuilder commonTaskWhereStatement() {
+  private static StringBuilder commonAttachmentFilterWhereStatement() {
     StringBuilder sb = new StringBuilder();
+
     commonWhereClauses("attachmentChannel", "a.CHANNEL", sb);
     commonWhereClauses("attachmentClassificationKey", "a.CLASSIFICATION_KEY", sb);
     commonWhereClauses("attachmentClassificationName", "ac.NAME", sb);
     commonWhereClauses("attachmentReference", "a.REF_VALUE", sb);
+
+    whereIn("attachmentClassificationIdIn", "a.CLASSIFICATION_ID", sb);
+    whereNotIn("attachmentClassificationIdNotIn", "a.CLASSIFICATION_ID", sb);
+
+    whereInInterval("attachmentReceivedWithin", "a.RECEIVED", sb);
+    whereNotInInterval("attachmentReceivedNotWithin", "a.RECEIVED", sb);
+
+    return sb;
+  }
+
+  private static String attachmentWhereStatement() {
+    String filterStatement = commonAttachmentFilterWhereStatement().toString();
+
+    return "<if test='filterByAttachments'>"
+        + "<choose>"
+        + "<when test='joinWithAttachments'>"
+        + filterStatement
+        + "</when>"
+        + "<otherwise>"
+        + "AND EXISTS ("
+        + "SELECT 1 FROM ATTACHMENT a "
+        + "<if test='filterByAttachmentClassifications'>"
+        + "LEFT JOIN CLASSIFICATION ac ON a.CLASSIFICATION_ID = ac.ID "
+        + "</if>"
+        + "WHERE a.TASK_ID = t.ID "
+        + filterStatement
+        + ") "
+        + "</otherwise>"
+        + "</choose>"
+        + "</if> ";
+  }
+
+  private static String withoutAttachmentWhereStatement() {
+    return "<if test='withoutAttachment'>"
+        + "AND NOT EXISTS ("
+        + "SELECT 1 FROM ATTACHMENT a_without "
+        + "WHERE a_without.TASK_ID = t.ID"
+        + ") "
+        + "</if> ";
+  }
+
+  private static StringBuilder commonSecondaryObjectReferenceFilterWhereStatement() {
+    StringBuilder sb = new StringBuilder();
+
+    whereIn("sorCompanyIn", "o.COMPANY", sb);
+    whereLike("sorCompanyLike", "o.COMPANY", sb);
+    whereIn("sorSystemIn", "o.SYSTEM", sb);
+    whereLike("sorSystemLike", "o.SYSTEM", sb);
+    whereIn("sorSystemInstanceIn", "o.SYSTEM_INSTANCE", sb);
+    whereLike("sorSystemInstanceLike", "o.SYSTEM_INSTANCE", sb);
+    whereIn("sorTypeIn", "o.TYPE", sb);
+    whereLike("sorTypeLike", "o.TYPE", sb);
+    whereIn("sorValueIn", "o.VALUE", sb);
+    whereLike("sorValueLike", "o.VALUE", sb);
+
+    sb.append(commonTaskSecondaryObjectReferencesWhereStatement());
+
+    return sb;
+  }
+
+  private static String secondaryObjectReferenceWhereStatement() {
+    String filterStatement = commonSecondaryObjectReferenceFilterWhereStatement().toString();
+
+    return "<if test='filterBySecondaryObjectReferences'>"
+        + "<choose>"
+        + "<when test='joinWithSecondaryObjectReferences'>"
+        + filterStatement
+        + "</when>"
+        + "<otherwise>"
+        + "AND EXISTS ("
+        + "SELECT 1 FROM OBJECT_REFERENCE o "
+        + "WHERE o.TASK_ID = t.ID "
+        + filterStatement
+        + ") "
+        + "</otherwise>"
+        + "</choose>"
+        + "</if> ";
+  }
+
+  private static StringBuilder commonTaskWhereStatement() {
+    StringBuilder sb = new StringBuilder();
     commonWhereClauses("businessProcessId", "t.BUSINESS_PROCESS_ID", sb);
     commonWhereClauses("classificationCategory", "CLASSIFICATION_CATEGORY", sb);
     commonWhereClauses("classificationKey", "t.CLASSIFICATION_KEY", sb);
@@ -575,19 +657,6 @@ public class TaskQuerySqlProvider {
     commonWhereClauses("porType", "t.POR_TYPE", sb);
     commonWhereClauses("porValue", "t.POR_VALUE", sb);
 
-    whereIn("sorCompanyIn", "o.COMPANY", sb);
-    whereLike("sorCompanyLike", "o.COMPANY", sb);
-    whereIn("sorSystemIn", "o.SYSTEM", sb);
-    whereLike("sorSystemLike", "o.SYSTEM", sb);
-    whereIn("sorSystemInstanceIn", "o.SYSTEM_INSTANCE", sb);
-    whereLike("sorSystemInstanceLike", "o.SYSTEM_INSTANCE", sb);
-    whereIn("sorTypeIn", "o.TYPE", sb);
-    whereLike("sorTypeLike", "o.TYPE", sb);
-    whereIn("sorValueIn", "o.VALUE", sb);
-    whereLike("sorValueLike", "o.VALUE", sb);
-
-    whereIn("attachmentClassificationIdIn", "a.CLASSIFICATION_ID", sb);
-    whereNotIn("attachmentClassificationIdNotIn", "a.CLASSIFICATION_ID", sb);
     whereIn("callbackStateIn", "t.CALLBACK_STATE", sb);
     whereNotIn("callbackStateNotIn", "t.CALLBACK_STATE", sb);
     whereIn("classificationIdIn", "t.CLASSIFICATION_ID", sb);
@@ -611,8 +680,6 @@ public class TaskQuerySqlProvider {
     whereLike("noteLike", "t.NOTE", sb);
     whereNotLike("noteNotLike", "t.NOTE", sb);
 
-    whereInInterval("attachmentReceivedWithin", "a.RECEIVED", sb);
-    whereNotInInterval("attachmentReceivedNotWithin", "a.RECEIVED", sb);
     whereInInterval("claimedWithin", "t.CLAIMED", sb);
     whereNotInInterval("claimedNotWithin", "t.CLAIMED", sb);
     whereInInterval("completedWithin", "t.COMPLETED", sb);
@@ -661,9 +728,10 @@ public class TaskQuerySqlProvider {
             + "LIKE #{wildcardSearchValueLike}"
             + "</foreach>)"
             + "</if> ");
-    sb.append("<if test='withoutAttachment'> AND a.ID IS NULL</if> ");
+    sb.append(attachmentWhereStatement());
+    sb.append(withoutAttachmentWhereStatement());
     sb.append(commonTaskObjectReferenceWhereStatement());
-    sb.append(commonTaskSecondaryObjectReferencesWhereStatement());
+    sb.append(secondaryObjectReferenceWhereStatement());
     return sb;
   }
 }

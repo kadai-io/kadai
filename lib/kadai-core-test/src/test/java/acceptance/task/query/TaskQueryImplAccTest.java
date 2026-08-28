@@ -41,6 +41,7 @@ import io.kadai.task.api.CallbackState;
 import io.kadai.task.api.TaskCustomField;
 import io.kadai.task.api.TaskCustomIntField;
 import io.kadai.task.api.TaskQuery;
+import io.kadai.task.api.TaskQueryColumnName;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.api.WildcardSearchField;
@@ -2606,6 +2607,260 @@ class TaskQueryImplAccTest {
             taskService.createTaskQuery().workbasketIdIn(wb.getId()).reopenedEquals(false).list();
 
         assertThat(list).containsExactly(taskSummary2);
+      }
+    }
+
+    @Nested
+    @TestInstance(Lifecycle.PER_CLASS)
+    class RelatedEntityExistsFiltering {
+
+      WorkbasketSummary wb;
+
+      @WithAccessId(user = "user-1-1")
+      @BeforeAll
+      void setup() throws Exception {
+        wb = createWorkbasketWithPermission();
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
+      void should_CountTaskOnce_When_MultipleAttachmentsMatchFilter() throws Exception {
+        String channel = "exists-count-attachment-channel";
+
+        Attachment attachment1 = createAttachment().channel(channel).build();
+        Attachment attachment2 = createAttachment().channel(channel).build();
+
+        TaskSummary task =
+            taskInWorkbasket(wb)
+                .attachments(attachment1, attachment2)
+                .buildAndStoreAsSummary(taskService);
+
+        long count =
+            taskService
+                .createTaskQuery()
+                .workbasketIdIn(wb.getId())
+                .attachmentChannelIn(channel)
+                .count();
+
+        List<TaskSummary> tasks =
+            taskService
+                .createTaskQuery()
+                .workbasketIdIn(wb.getId())
+                .attachmentChannelIn(channel)
+                .list();
+
+        assertThat(count).isOne();
+        assertThat(tasks).containsExactly(task);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
+      void should_CountTaskOnce_When_MultipleSecondaryObjectReferencesMatchFilter()
+          throws Exception {
+        String company = "exists-count-sor-company";
+
+        ObjectReference sor1 =
+            ObjectReferenceBuilder.newObjectReference()
+                .company(company)
+                .type("exists-count-sor-type-1")
+                .value("exists-count-sor-value-1")
+                .build();
+
+        ObjectReference sor2 =
+            ObjectReferenceBuilder.newObjectReference()
+                .company(company)
+                .type("exists-count-sor-type-2")
+                .value("exists-count-sor-value-2")
+                .build();
+
+        TaskSummary task =
+            taskInWorkbasket(wb)
+                .objectReferences(sor1, sor2)
+                .buildAndStoreAsSummary(taskService);
+
+        long count =
+            taskService
+                .createTaskQuery()
+                .workbasketIdIn(wb.getId())
+                .sorCompanyIn(company)
+                .count();
+
+        List<TaskSummary> tasks =
+            taskService
+                .createTaskQuery()
+                .workbasketIdIn(wb.getId())
+                .sorCompanyIn(company)
+                .list();
+
+        assertThat(count).isOne();
+        assertThat(tasks).containsExactly(task);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
+      void should_RequireSameAttachmentToMatchAllAttachmentFilters() throws Exception {
+        String channel = "exists-same-attachment-channel";
+        String reference = "exists-same-attachment-reference";
+
+        Attachment channelOnly =
+            createAttachment()
+                .channel(channel)
+                .objectReference(
+                    defaultTestObjectReference()
+                        .value("exists-same-attachment-wrong-reference")
+                        .build())
+                .build();
+
+        Attachment referenceOnly =
+            createAttachment()
+                .channel("exists-same-attachment-wrong-channel")
+                .objectReference(defaultTestObjectReference().value(reference).build())
+                .build();
+
+        TaskSummary splitAcrossAttachments =
+            taskInWorkbasket(wb)
+                .attachments(channelOnly, referenceOnly)
+                .buildAndStoreAsSummary(taskService);
+
+        Attachment matchingAttachment =
+            createAttachment()
+                .channel(channel)
+                .objectReference(defaultTestObjectReference().value(reference).build())
+                .build();
+
+        TaskSummary sameAttachmentMatches =
+            taskInWorkbasket(wb)
+                .attachments(matchingAttachment)
+                .buildAndStoreAsSummary(taskService);
+
+        List<TaskSummary> tasks =
+            taskService
+                .createTaskQuery()
+                .workbasketIdIn(wb.getId())
+                .attachmentChannelIn(channel)
+                .attachmentReferenceValueIn(reference)
+                .list();
+
+        assertThat(tasks)
+            .containsExactly(sameAttachmentMatches)
+            .doesNotContain(splitAcrossAttachments);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
+      void should_RequireSameSecondaryObjectReferenceToMatchAllSorFilters() throws Exception {
+        String company = "exists-same-sor-company";
+        String value = "exists-same-sor-value";
+
+        ObjectReference companyOnly =
+            ObjectReferenceBuilder.newObjectReference()
+                .company(company)
+                .type("exists-same-sor-type")
+                .value("exists-same-sor-wrong-value")
+                .build();
+
+        ObjectReference valueOnly =
+            ObjectReferenceBuilder.newObjectReference()
+                .company("exists-same-sor-wrong-company")
+                .type("exists-same-sor-type")
+                .value(value)
+                .build();
+
+        TaskSummary splitAcrossObjectReferences =
+            taskInWorkbasket(wb)
+                .objectReferences(companyOnly, valueOnly)
+                .buildAndStoreAsSummary(taskService);
+
+        ObjectReference matchingSor =
+            ObjectReferenceBuilder.newObjectReference()
+                .company(company)
+                .type("exists-same-sor-type")
+                .value(value)
+                .build();
+
+        TaskSummary sameObjectReferenceMatches =
+            taskInWorkbasket(wb)
+                .objectReferences(matchingSor)
+                .buildAndStoreAsSummary(taskService);
+
+        List<TaskSummary> tasks =
+            taskService
+                .createTaskQuery()
+                .workbasketIdIn(wb.getId())
+                .sorCompanyIn(company)
+                .sorValueIn(value)
+                .list();
+
+        assertThat(tasks)
+            .containsExactly(sameObjectReferenceMatches)
+            .doesNotContain(splitAcrossObjectReferences);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
+      void should_FilterJoinedAttachmentRow_When_ListingAttachmentValues() throws Exception {
+        String matchingReference = "exists-list-values-attachment-reference";
+
+        Attachment matchingAttachment =
+            createAttachment()
+                .channel("exists-list-values-matching-channel")
+                .objectReference(defaultTestObjectReference().value(matchingReference).build())
+                .build();
+
+        Attachment nonMatchingAttachment =
+            createAttachment()
+                .channel("exists-list-values-non-matching-channel")
+                .objectReference(
+                    defaultTestObjectReference()
+                        .value("exists-list-values-other-reference")
+                        .build())
+                .build();
+
+        taskInWorkbasket(wb)
+            .attachments(matchingAttachment, nonMatchingAttachment)
+            .buildAndStoreAsSummary(taskService);
+
+        List<String> channels =
+            taskService
+                .createTaskQuery()
+                .workbasketIdIn(wb.getId())
+                .attachmentReferenceValueIn(matchingReference)
+                .listValues(TaskQueryColumnName.A_CHANNEL, null);
+
+        assertThat(channels).containsExactly("exists-list-values-matching-channel");
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
+      void should_FilterJoinedSorRow_When_ListingSorValues() throws Exception {
+        String matchingCompany = "exists-list-values-sor-company";
+
+        ObjectReference matchingSor =
+            ObjectReferenceBuilder.newObjectReference()
+                .company(matchingCompany)
+                .type("exists-list-values-sor-type")
+                .value("exists-list-values-matching-sor-value")
+                .build();
+
+        ObjectReference nonMatchingSor =
+            ObjectReferenceBuilder.newObjectReference()
+                .company("exists-list-other-sor-company")
+                .type("exists-list-values-sor-type")
+                .value("exists-list-values-non-matching-sor-value")
+                .build();
+
+        taskInWorkbasket(wb)
+            .objectReferences(matchingSor, nonMatchingSor)
+            .buildAndStoreAsSummary(taskService);
+
+        List<String> values =
+            taskService
+                .createTaskQuery()
+                .workbasketIdIn(wb.getId())
+                .sorCompanyIn(matchingCompany)
+                .listValues(TaskQueryColumnName.O_VALUE, null);
+
+        assertThat(values).containsExactly("exists-list-values-matching-sor-value");
       }
     }
 
