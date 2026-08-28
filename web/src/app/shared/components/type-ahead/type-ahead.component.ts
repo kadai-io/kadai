@@ -18,10 +18,10 @@
 
 import { Component, effect, inject, input, OnDestroy, OnInit, output, signal, untracked } from '@angular/core';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
-import { debounceTime, distinctUntilChanged, Observable, of, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Observable, of, Subject, timer } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { AccessId } from '../../models/access-id';
-import { map, switchMap, take, takeUntil } from 'rxjs/operators';
+import { catchError, map, switchMap, take, takeUntil } from 'rxjs/operators';
 import { Store } from '@ngxs/store';
 import { WorkbasketSelectors } from '../../store/workbasket-store/workbasket.selectors';
 import { ButtonAction } from '../../../administration/models/button-action';
@@ -108,7 +108,6 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
 
     this.accessIdForm.controls['accessId'].valueChanges
       .pipe(
-        debounceTime(this.debounceTime),
         distinctUntilChanged(),
         switchMap((value) => {
           if (!value) {
@@ -116,7 +115,11 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
             return of(null);
           }
 
-          return this.accessIdService.searchForAccessId(value).pipe(map((accessIds) => ({ value, accessIds })));
+          return timer(this.debounceTime).pipe(
+            switchMap(() => this.accessIdService.searchForAccessId(value)),
+            map((accessIds) => ({ value, accessIds })),
+            catchError(() => of(null))
+          );
         }),
         takeUntil(this.destroy$)
       )
