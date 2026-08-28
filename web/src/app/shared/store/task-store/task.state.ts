@@ -41,6 +41,7 @@ import {
   DeleteTask,
   GetTask,
   LoadTasks,
+  ReopenTask,
   SelectTask,
   SelectWorkbasket,
   SetPage,
@@ -255,6 +256,17 @@ export class TaskWorkflowState {
       tap((task) => {
         ctx.patchState({ selectedTask: task });
         this.notificationService.showSuccess('TASK_TRANSFER', { taskName: task.name });
+        ctx.dispatch(new LoadTasks());
+      })
+    );
+  }
+
+  @Action(ReopenTask)
+  reopenTask(ctx: StateContext<TaskWorkflowStateModel>, action: ReopenTask): Observable<any> {
+    return this.withRequestInProgress(this.taskService.reopenTask(action.taskId)).pipe(
+      tap((task) => {
+        ctx.patchState({ selectedTask: task });
+        this.notificationService.showSuccess('TASK_REOPEN', { taskName: task.name });
         ctx.dispatch(new LoadTasks());
       })
     );

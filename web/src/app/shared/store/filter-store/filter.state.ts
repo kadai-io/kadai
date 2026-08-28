@@ -39,7 +39,8 @@ const emptyTaskFilter: TaskQueryFilterParameter = {
   priority: [],
   'por-value': [],
   'wildcard-search-fields': [],
-  'wildcard-search-value': []
+  'wildcard-search-value': [],
+  'is-reopened': []
 };
 
 @Injectable({

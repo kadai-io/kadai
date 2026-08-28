@@ -129,6 +129,7 @@ describe('TaskDetailsComponent', () => {
     'READY',
     false,
     false,
+    false,
     1
   );
 
@@ -517,6 +518,7 @@ describe('TaskDetailsComponent - DOM interaction', () => {
     'READY',
     false,
     false,
+    false,
     1
   );
 
@@ -846,6 +848,7 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
     undefined,
     undefined,
     'READY',
+    false,
     false,
     false,
     1
