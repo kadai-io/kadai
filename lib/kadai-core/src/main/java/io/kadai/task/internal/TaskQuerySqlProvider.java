@@ -376,17 +376,20 @@ public class TaskQuerySqlProvider {
         + "<choose>"
         + "<when test=\"_databaseId == 'db2'\">"
         + "SELECT WORKBASKET_ID as WID, MAX(PERM_READ) as MAX_READ, "
-        + "MAX(PERM_READTASKS) as MAX_READTASKS "
+        + "MAX(PERM_READTASKS) as MAX_READTASKS, "
+        + "MAX(PERM_EDITTASKS) as MAX_EDITTASKS "
         + "</when>"
         + "<otherwise>"
         + "SELECT WORKBASKET_ID as WID, MAX(PERM_READ::int) as MAX_READ, "
-        + "MAX(PERM_READTASKS::int) as MAX_READTASKS "
+        + "MAX(PERM_READTASKS::int) as MAX_READTASKS, "
+        + "MAX(PERM_EDITTASKS::int) as MAX_EDITTASKS "
         + "</otherwise>"
         + "</choose>"
         + "FROM WORKBASKET_ACCESS_LIST s where ACCESS_ID IN "
         + "(<foreach item='item' collection='accessIdIn' separator=',' >#{item}</foreach>) "
         + "GROUP by WORKBASKET_ID) f "
-        + "WHERE MAX_READ = 1 AND MAX_READTASKS = 1) "
+        + "WHERE MAX_READ = 1 AND MAX_READTASKS = 1 "
+        + "<if test='selectAndClaim == true'>AND MAX_EDITTASKS = 1 </if>) "
         + "</if>";
   }
 

@@ -63,9 +63,11 @@ class SelectAndClaimTaskAccTest extends AbstractAccTest {
   Workbasket wbWithoutRead;
   Workbasket wbWithoutReadTasks;
   Workbasket wbWithoutEditTasks;
+  Workbasket wbWithAllPermissions;
   Task task1;
   Task task2;
   Task task3;
+  Task task4;
 
   @WithAccessId(user = "admin")
   @BeforeAll
@@ -73,14 +75,17 @@ class SelectAndClaimTaskAccTest extends AbstractAccTest {
     wbWithoutRead = createWorkBasket();
     wbWithoutReadTasks = createWorkBasket();
     wbWithoutEditTasks = createWorkBasket();
+    wbWithAllPermissions = createWorkBasket();
 
     createWorkbasketAccessItem(wbWithoutRead, WorkbasketPermission.READ);
     createWorkbasketAccessItem(wbWithoutReadTasks, WorkbasketPermission.READTASKS);
     createWorkbasketAccessItem(wbWithoutEditTasks, WorkbasketPermission.EDITTASKS);
+    createWorkbasketAccessItemWithAllPermissions(wbWithAllPermissions);
 
     task3 = createTask(wbWithoutEditTasks);
     task1 = createTask(wbWithoutRead);
     task2 = createTask(wbWithoutReadTasks);
+    task4 = createTask(wbWithAllPermissions);
   }
 
   @Test
@@ -132,6 +137,22 @@ class SelectAndClaimTaskAccTest extends AbstractAccTest {
     TaskQuery query = kadaiEngine.getTaskService().createTaskQuery().idIn("notexisting");
     Optional<Task> task = kadaiEngine.getTaskService().selectAndClaim(query);
     assertThat(task).isEmpty();
+  }
+
+  @WithAccessId(user = "user-1-2")
+  @Test
+  void should_SelectNextClaimableTask_When_FirstReturnedTaskIsNotEditable() throws Exception {
+    TaskQuery query =
+        taskService
+            .createTaskQuery()
+            .idIn(task3.getId(), task4.getId())
+            .orderByTaskId(SortDirection.ASCENDING);
+
+    Optional<Task> selectedAndClaimedTask = taskService.selectAndClaim(query);
+
+    assertThat(selectedAndClaimedTask).isPresent();
+    assertThat(selectedAndClaimedTask.get().getId()).isEqualTo(task4.getId());
+    assertThat(selectedAndClaimedTask.get().getOwner()).isEqualTo("user-1-2");
   }
 
   private Runnable getRunnableTest(List<Task> selectedAndClaimedTasks, List<String> accessIds)
@@ -186,6 +207,17 @@ class SelectAndClaimTaskAccTest extends AbstractAccTest {
       wbai.setPermission(WorkbasketPermission.READ, true);
       wbai.setPermission(WorkbasketPermission.READTASKS, true);
     }
+    workbasketService.createWorkbasketAccessItem(wbai);
+  }
+
+  private void createWorkbasketAccessItemWithAllPermissions(Workbasket workbasket)
+      throws Exception {
+    WorkbasketService workbasketService = kadaiEngine.getWorkbasketService();
+    WorkbasketAccessItem wbai =
+        workbasketService.newWorkbasketAccessItem(workbasket.getId(), "user-1-2");
+    wbai.setPermission(WorkbasketPermission.READ, true);
+    wbai.setPermission(WorkbasketPermission.READTASKS, true);
+    wbai.setPermission(WorkbasketPermission.EDITTASKS, true);
     workbasketService.createWorkbasketAccessItem(wbai);
   }
 
