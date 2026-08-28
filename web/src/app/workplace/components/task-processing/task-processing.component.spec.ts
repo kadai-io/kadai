@@ -178,6 +178,9 @@ describe('TaskProcessingComponent', () => {
     });
 
     it('should call claimTask with the id from route params after getTask resolves', async () => {
+      // receive task with non undefined state (should not be 'CANCELLED', 'COMPLETED' or 'TERMINATED')
+      mockTaskService.getTask.mockReturnValue(of(makeTask({ taskId: 'task-abc', state: 'READY' })));
+
       paramsSubject.next({ id: 'task-abc' });
       await fixture.whenStable();
 
@@ -354,26 +357,28 @@ describe('TaskProcessingComponent', () => {
       expect(reopenSpy).toHaveBeenCalled();
     });
 
-    it('should not dispatch ClaimTask in loadAndClaimTask if the task is COMPLETED', async () => {
-      const completedTask = makeTask({ state: 'COMPLETED', taskId: 'task-id-1' });
-      mockTaskService.getTask.mockReturnValue(of(completedTask));
-      mockTaskService.claimTask.mockClear();
+    it.each(['COMPLETED', 'CANCELLED', 'TERMINATED'])(
+      'should not dispatch ClaimTask in loadAndClaimTask when task state is %s',
+      async (state) => {
+        const closedTask = makeTask({ state: state as any, taskId: 'task-id-1' });
+        mockTaskService.getTask.mockReturnValue(of(closedTask));
+        mockTaskService.claimTask.mockClear();
 
-      await component.loadAndClaimTask('task-id-1');
+        await component.loadAndClaimTask('task-id-1');
 
-      expect(mockTaskService.getTask).toHaveBeenCalledWith('task-id-1');
-      expect(mockTaskService.claimTask).not.toHaveBeenCalled();
-    });
+        expect(mockTaskService.getTask).toHaveBeenCalledWith('task-id-1');
+        expect(mockTaskService.claimTask).not.toHaveBeenCalled();
+      }
+    );
 
-    it('should not dispatch ClaimTask in loadAndClaimTask if the task is CANCELLED', async () => {
-      const cancelledTask = makeTask({ state: 'CANCELLED', taskId: 'task-id-1' });
-      mockTaskService.getTask.mockReturnValue(of(cancelledTask));
-      mockTaskService.claimTask.mockClear();
+    it('should not render Reopen button when task state is TERMINATED', async () => {
+      await selectTask(makeTask({ state: 'TERMINATED' }));
+      fixture.detectChanges();
 
-      await component.loadAndClaimTask('task-id-1');
-
-      expect(mockTaskService.getTask).toHaveBeenCalledWith('task-id-1');
-      expect(mockTaskService.claimTask).not.toHaveBeenCalled();
+      const reopenBtn = fixture.nativeElement.querySelector(
+        'button[mattooltip="Restore Task and return to Task list"]'
+      );
+      expect(reopenBtn).toBeNull();
     });
 
     it('should render and handle @else branch actions (completeTask and cancelClaimTask)', async () => {
@@ -655,6 +660,40 @@ describe('TaskProcessingComponent', () => {
       }
       expect(localComponent.task()).toBeUndefined();
       localFixture.destroy();
+    });
+
+    it('should not render Reopen button when task state is TERMINATED', async () => {
+      await selectTask(makeTask({ state: 'TERMINATED' }));
+      fixture.detectChanges();
+
+      const reopenBtn = fixture.nativeElement.querySelector(
+        'button[mattooltip="Restore Task and return to Task list"]'
+      );
+      expect(reopenBtn).toBeNull();
+    });
+
+    it('should render and handle @else branch actions (completeTask and cancelClaimTask)', async () => {
+      await selectTask(makeTask({ state: 'CLAIMED' }));
+      fixture.detectChanges();
+
+      const completeSpy = vi.spyOn(component, 'completeTask').mockImplementation(() => {});
+      const cancelClaimSpy = vi.spyOn(component, 'cancelClaimTask').mockImplementation(() => {});
+
+      const completeBtn = fixture.nativeElement.querySelector(
+        'button[mattooltip="Complete Task and return to Task list"]'
+      );
+      const cancelClaimBtn = fixture.nativeElement.querySelector(
+        'button[mattooltip="Cancel Task claim and return to Task overview"]'
+      );
+
+      expect(completeBtn).toBeTruthy();
+      expect(cancelClaimBtn).toBeTruthy();
+
+      completeBtn.click();
+      cancelClaimBtn.click();
+
+      expect(completeSpy).toHaveBeenCalled();
+      expect(cancelClaimSpy).toHaveBeenCalled();
     });
   });
 });

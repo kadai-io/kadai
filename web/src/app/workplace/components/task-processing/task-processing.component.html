@@ -39,7 +39,8 @@
         }
       </mat-menu>
 
-      @if(isTaskClosed()) {
+      @if (canReopenTask()) {
+        <!-- REOPEN TASK -->
         <button (click)="reopenTask()" class="task-processing__button--secondary"
                 mat-stroked-button matTooltip="Restore Task and return to Task list">
           <span> Reopen Task </span>

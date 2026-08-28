@@ -65,9 +65,13 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private sanitizer = inject(DomSanitizer);
   task = toSignal<Task | undefined>(this.store.select(TaskSelectors.getSelectedTask));
-  isTaskClosed = computed(() => {
+  canReopenTask = computed(() => {
     const state = this.task()?.state;
     return state === 'COMPLETED' || state === 'CANCELLED';
+  });
+  canClaimTask = computed(() => {
+    const state = this.task()?.state;
+    return !!state && state !== 'COMPLETED' && state !== 'CANCELLED' && state !== 'TERMINATED';
   });
 
   ngOnInit() {
@@ -82,7 +86,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
 
     const task = this.store.selectSnapshot(TaskSelectors.getSelectedTask)!;
 
-    if (!this.isTaskClosed()) {
+    if (this.canClaimTask()) {
       await firstValueFrom(this.store.dispatch(new ClaimTask(id)));
     }
 
