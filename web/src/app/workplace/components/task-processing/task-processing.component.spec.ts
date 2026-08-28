@@ -674,6 +674,9 @@ describe('TaskProcessingComponent', () => {
       const classificationA$ = new Subject<any>();
       const classificationB$ = new Subject<any>();
 
+      // allow claim logic to proceed through the switchMap chain
+      vi.spyOn(component, 'canClaimTask').mockReturnValue(true);
+
       vi.spyOn(store, 'dispatch').mockImplementation((action: any) => {
         if (action instanceof GetTask) {
           return action.taskId === 'task-a' ? getTaskA$ : getTaskB$;
