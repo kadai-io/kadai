@@ -49,6 +49,9 @@ import org.slf4j.LoggerFactory;
 
 public class UserServiceImpl implements UserService {
   private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
+  // Keep enrichment statements below database bind-parameter limits.
+  // Broader dynamic-SQL batching is tracked in #1206.
+  private static final int USER_ENRICHMENT_BATCH_SIZE = 10_000;
   private final InternalKadaiEngine internalKadaiEngine;
   private final UserMapper userMapper;
   private final WorkbasketService workbasketService;
@@ -195,39 +198,49 @@ public class UserServiceImpl implements UserService {
       return;
     }
 
-    Set<String> userIds = users.stream().map(UserImpl::getId).collect(Collectors.toSet());
+    List<String> userIds = users.stream().map(UserImpl::getId).distinct().toList();
 
-    Map<String, Set<String>> groupsByUserId =
-        toUserAttributeMap(userMapper.findGroupsByIds(userIds));
-    Map<String, Set<String>> permissionsByUserId =
-        toUserAttributeMap(userMapper.findPermissionsByIds(userIds));
+    Map<String, Set<String>> groupsByUserId = new HashMap<>();
+    Map<String, Set<String>> permissionsByUserId = new HashMap<>();
+    Map<String, Set<String>> domainsByUserId = new HashMap<>();
 
-    Map<String, Set<String>> domainsByUserId;
-    if (minimalWorkbasketPermissions == null || minimalWorkbasketPermissions.isEmpty()) {
-      domainsByUserId = Collections.emptyMap();
-    } else {
-      domainsByUserId =
-          toUserAttributeMap(userMapper.findDomainsByIds(userIds, minimalWorkbasketPermissions));
+    boolean resolveDomains =
+        minimalWorkbasketPermissions != null && !minimalWorkbasketPermissions.isEmpty();
+
+    for (int fromIndex = 0;
+        fromIndex < userIds.size();
+        fromIndex += USER_ENRICHMENT_BATCH_SIZE) {
+      int toIndex = Math.min(fromIndex + USER_ENRICHMENT_BATCH_SIZE, userIds.size());
+      Set<String> batchUserIds = new HashSet<>(userIds.subList(fromIndex, toIndex));
+
+      addUserAttributes(groupsByUserId, userMapper.findGroupsByIds(batchUserIds));
+      addUserAttributes(permissionsByUserId, userMapper.findPermissionsByIds(batchUserIds));
+
+      if (resolveDomains) {
+        addUserAttributes(
+            domainsByUserId,
+            userMapper.findDomainsByIds(batchUserIds, minimalWorkbasketPermissions));
+      }
     }
 
     for (UserImpl user : users) {
-      user.setGroups(groupsByUserId.getOrDefault(user.getId(), Collections.emptySet()));
+      user.setGroups(
+          new HashSet<>(groupsByUserId.getOrDefault(user.getId(), Collections.emptySet())));
       user.setPermissions(
-          permissionsByUserId.getOrDefault(user.getId(), Collections.emptySet()));
-      user.setDomains(domainsByUserId.getOrDefault(user.getId(), Collections.emptySet()));
+          new HashSet<>(
+              permissionsByUserId.getOrDefault(user.getId(), Collections.emptySet())));
+      user.setDomains(
+          new HashSet<>(domainsByUserId.getOrDefault(user.getId(), Collections.emptySet())));
     }
   }
 
-  private static Map<String, Set<String>> toUserAttributeMap(List<UserAttributeRow> rows) {
-    Map<String, Set<String>> attributesByUserId = new HashMap<>();
-
+  private static void addUserAttributes(
+      Map<String, Set<String>> attributesByUserId, List<UserAttributeRow> rows) {
     for (UserAttributeRow row : rows) {
       attributesByUserId
           .computeIfAbsent(row.getUserId(), ignored -> new HashSet<>())
           .add(row.getAttributeValue());
     }
-
-    return attributesByUserId;
   }
 
   Set<String> determineDomains(User user) {

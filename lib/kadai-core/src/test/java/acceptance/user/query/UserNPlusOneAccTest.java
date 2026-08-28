@@ -25,15 +25,21 @@ import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.common.test.security.JaasExtension;
 import io.kadai.user.api.UserQueryColumnName;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.ibatis.cache.CacheKey;
+import org.apache.ibatis.executor.CachingExecutor;
 import org.apache.ibatis.executor.Executor;
+import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.plugin.Intercepts;
 import org.apache.ibatis.plugin.Invocation;
+import org.apache.ibatis.plugin.Plugin;
 import org.apache.ibatis.plugin.Signature;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
@@ -57,6 +63,18 @@ class UserNPlusOneAccTest extends AbstractAccTest {
     SqlSessionManager sqlSessionManager =
         (SqlSessionManager) sessionManagerField.get(kadaiEngine);
     sqlSessionManager.getConfiguration().addInterceptor(queryCounter);
+  }
+
+  @Test
+  void should_CountNestedMybatisQueries() throws Exception {
+    queryCounter.reset();
+
+    kadaiEngine.getUserService().getUser("user-1-1");
+
+    assertThat(queryCounter.snapshot().statementIds())
+        .contains(
+            "io.kadai.user.internal.UserMapper.findGroupsById",
+            "io.kadai.user.internal.UserMapper.findPermissionsById");
   }
 
   @Test
@@ -157,14 +175,62 @@ class UserNPlusOneAccTest extends AbstractAccTest {
 
   private record QueryStats(int count, List<String> statementIds) {}
 
-  @Intercepts(
-      @Signature(
-          type = Executor.class,
-          method = "query",
-          args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class}))
+  @Intercepts({
+    @Signature(
+        type = Executor.class,
+        method = "query",
+        args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class}),
+    @Signature(
+        type = Executor.class,
+        method = "query",
+        args = {
+          MappedStatement.class,
+          Object.class,
+          RowBounds.class,
+          ResultHandler.class,
+          CacheKey.class,
+          BoundSql.class
+        })
+  })
   private static class QueryCountingInterceptor implements Interceptor {
 
     private final ArrayList<String> statementIds = new ArrayList<>();
+
+    @Override
+    public Object plugin(Object target) {
+      Object plugin = Interceptor.super.plugin(target);
+      // CachingExecutor gives ResultLoader its unproxied wrapper. Route that wrapper through this
+      // proxy so nested six-argument queries are counted as well.
+      Executor executor = unwrapCachingExecutor(target);
+      if (executor != null) {
+        try {
+          Field delegateField = CachingExecutor.class.getDeclaredField("delegate");
+          delegateField.setAccessible(true);
+          ((Executor) delegateField.get(executor)).setExecutorWrapper((Executor) plugin);
+        } catch (ReflectiveOperationException e) {
+          throw new IllegalStateException("Could not instrument the nested-query executor", e);
+        }
+      }
+      return plugin;
+    }
+
+    private static Executor unwrapCachingExecutor(Object target) {
+      Object current = target;
+      try {
+        while (Proxy.isProxyClass(current.getClass())) {
+          InvocationHandler invocationHandler = Proxy.getInvocationHandler(current);
+          if (!(invocationHandler instanceof Plugin)) {
+            return null;
+          }
+          Field targetField = Plugin.class.getDeclaredField("target");
+          targetField.setAccessible(true);
+          current = targetField.get(invocationHandler);
+        }
+      } catch (ReflectiveOperationException e) {
+        throw new IllegalStateException("Could not inspect the MyBatis executor proxy", e);
+      }
+      return current instanceof CachingExecutor ? (Executor) current : null;
+    }
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {

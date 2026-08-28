@@ -182,6 +182,14 @@ class UserServiceAccTest {
     @WithAccessId(user = "user-1-1")
     @Test
     void should_EnrichUsersInBulk_When_QueryingUsers() throws Exception {
+      Workbasket workbasket =
+          defaultTestWorkbasket().buildAndStore(workbasketService, "businessadmin");
+      createAccessItem(
+          "query-group-a",
+          workbasket,
+          WorkbasketPermission.READ,
+          WorkbasketPermission.OPEN);
+
       User userA =
           randomTestUser()
               .groups(Set.of("query-group-a"))
@@ -210,8 +218,10 @@ class UserServiceAccTest {
 
       assertThat(queriedUserA.getGroups()).containsExactly("query-group-a");
       assertThat(queriedUserA.getPermissions()).containsExactly("query-permission-a");
+      assertThat(queriedUserA.getDomains()).containsExactly(workbasket.getDomain());
       assertThat(queriedUserB.getGroups()).containsExactly("query-group-b");
       assertThat(queriedUserB.getPermissions()).containsExactly("query-permission-b");
+      assertThat(queriedUserB.getDomains()).isEmpty();
     }
 
     @WithAccessId(user = "user-1-1")
@@ -387,6 +397,35 @@ class UserServiceAccTest {
 
       assertThat(returnedCompleteUser.getDomains()).containsExactly(workbasket.getDomain());
       assertThat(returnedIncompleteUser.getDomains()).isEmpty();
+    }
+
+    @WithAccessId(user = "user-1-1")
+    @Test
+    void should_NotAggregatePermissionsAcrossWorkbaskets_When_GettingUsers() throws Exception {
+      Workbasket readWorkbasket =
+          defaultTestWorkbasket()
+              .domain("DOMAIN_A")
+              .buildAndStore(workbasketService, "businessadmin");
+      Workbasket openWorkbasket =
+          defaultTestWorkbasket()
+              .domain("DOMAIN_A")
+              .buildAndStore(workbasketService, "businessadmin");
+
+      createAccessItem(
+          "bulk-read-other-workbasket", readWorkbasket, WorkbasketPermission.READ);
+      createAccessItem(
+          "bulk-open-other-workbasket", openWorkbasket, WorkbasketPermission.OPEN);
+
+      User user =
+          randomTestUser()
+              .groups(
+                  Set.of("bulk-read-other-workbasket", "bulk-open-other-workbasket"))
+              .buildAndStore(userService, "businessadmin");
+
+      User returnedUser =
+          userService.getUsers(Set.of(user.getId())).stream().findFirst().orElseThrow();
+
+      assertThat(returnedUser.getDomains()).isEmpty();
     }
 
     @WithAccessId(user = "user-1-1")
