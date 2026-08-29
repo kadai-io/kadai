@@ -2167,46 +2167,14 @@ public class TaskQueryImpl implements TaskQuery {
   @Override
   public long count() {
     Long rowCount;
-
-    boolean originalJoinWithAttachments = joinWithAttachments;
-    boolean originalJoinWithAttachmentClassifications = joinWithAttachmentClassifications;
-    boolean originalJoinWithSecondaryObjectReferences = joinWithSecondaryObjectReferences;
-    boolean originalAddAttachmentClassificationNameToSelectClauseForOrdering =
-        addAttachmentClassificationNameToSelectClauseForOrdering;
-    boolean originalUseDistinctKeyword = useDistinctKeyword;
-
     try {
       kadaiEngine.openConnection();
       checkOpenReadAndReadTasksPermissionForSpecifiedWorkbaskets();
       setupAccessIds();
-
-      if (!groupByPor && groupBySor == null) {
-        // count() has no ORDER BY / related-column projection.
-        // Force attachment/SOR filters back to their EXISTS branch.
-        joinWithAttachments = false;
-        joinWithAttachmentClassifications = false;
-        joinWithSecondaryObjectReferences = false;
-
-        // setupJoinAndOrderParameters() would otherwise recreate the attachment join
-        // for orderByAttachmentClassificationName(...).
-        addAttachmentClassificationNameToSelectClauseForOrdering = false;
-
-        // Recompute DISTINCT for the actual count shape instead of retaining state
-        // from an earlier operation on the same mutable query.
-        useDistinctKeyword = false;
-      }
-
       setupJoinAndOrderParameters();
       rowCount = kadaiEngine.getSqlSession().selectOne(getLinkToCounterTaskScript(), this);
       return (rowCount == null) ? 0L : rowCount;
     } finally {
-      joinWithAttachments = originalJoinWithAttachments;
-      joinWithAttachmentClassifications = originalJoinWithAttachmentClassifications;
-      joinWithSecondaryObjectReferences = originalJoinWithSecondaryObjectReferences;
-      addAttachmentClassificationNameToSelectClauseForOrdering =
-          originalAddAttachmentClassificationNameToSelectClauseForOrdering;
-      useDistinctKeyword = originalUseDistinctKeyword;
-
       kadaiEngine.returnConnection();
     }
   }

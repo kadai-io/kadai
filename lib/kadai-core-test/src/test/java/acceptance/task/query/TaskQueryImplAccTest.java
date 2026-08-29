@@ -2741,6 +2741,55 @@ class TaskQueryImplAccTest {
 
       @WithAccessId(user = "user-1-1")
       @Test
+      void should_CountTaskOnce_When_MultipleAttachmentsAndSorsMatch() throws Exception {
+        String channel = "count-derived-combined-channel";
+        String company = "count-derived-combined-company";
+
+        Attachment attachment1 = createAttachment().channel(channel).build();
+        Attachment attachment2 = createAttachment().channel(channel).build();
+
+        ObjectReference sor1 =
+            ObjectReferenceBuilder.newObjectReference()
+                .company(company)
+                .type("count-derived-combined-type-1")
+                .value("count-derived-combined-value-1")
+                .build();
+
+        ObjectReference sor2 =
+            ObjectReferenceBuilder.newObjectReference()
+                .company(company)
+                .type("count-derived-combined-type-2")
+                .value("count-derived-combined-value-2")
+                .build();
+
+        TaskSummary task =
+            taskInWorkbasket(wb)
+                .attachments(attachment1, attachment2)
+                .objectReferences(sor1, sor2)
+                .buildAndStoreAsSummary(taskService);
+
+        long count =
+            taskService
+                .createTaskQuery()
+                .workbasketIdIn(wb.getId())
+                .attachmentChannelIn(channel)
+                .sorCompanyIn(company)
+                .count();
+
+        assertThat(count).isOne();
+
+        assertThat(
+                taskService
+                    .createTaskQuery()
+                    .workbasketIdIn(wb.getId())
+                    .attachmentChannelIn(channel)
+                    .sorCompanyIn(company)
+                    .list())
+            .containsExactly(task);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
       void should_RequireSameAttachmentToMatchAllAttachmentFilters() throws Exception {
         String channel = "exists-same-attachment-channel";
         String reference = "exists-same-attachment-reference";
@@ -2791,6 +2840,43 @@ class TaskQueryImplAccTest {
 
       @WithAccessId(user = "user-1-1")
       @Test
+      void should_RequireSameAttachmentToMatchAllAttachmentFilters_When_Counting()
+          throws Exception {
+        String channel = "count-same-attachment-channel";
+        String reference = "count-same-attachment-reference";
+
+        Attachment channelOnly =
+            createAttachment()
+                .channel(channel)
+                .objectReference(
+                    defaultTestObjectReference()
+                        .value("count-same-attachment-wrong-reference")
+                        .build())
+                .build();
+
+        Attachment referenceOnly =
+            createAttachment()
+                .channel("count-same-attachment-wrong-channel")
+                .objectReference(defaultTestObjectReference().value(reference).build())
+                .build();
+
+        taskInWorkbasket(wb)
+            .attachments(channelOnly, referenceOnly)
+            .buildAndStoreAsSummary(taskService);
+
+        long count =
+            taskService
+                .createTaskQuery()
+                .workbasketIdIn(wb.getId())
+                .attachmentChannelIn(channel)
+                .attachmentReferenceValueIn(reference)
+                .count();
+
+        assertThat(count).isZero();
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
       void should_RequireSameSecondaryObjectReferenceToMatchAllSorFilters() throws Exception {
         String company = "exists-same-sor-company";
         String value = "exists-same-sor-value";
@@ -2837,6 +2923,42 @@ class TaskQueryImplAccTest {
         assertThat(tasks)
             .containsExactly(sameObjectReferenceMatches)
             .doesNotContain(splitAcrossObjectReferences);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
+      void should_RequireSameSecondaryObjectReferenceToMatchAllSorFilters_When_Counting()
+          throws Exception {
+        String company = "count-same-sor-company";
+        String value = "count-same-sor-value";
+
+        ObjectReference companyOnly =
+            ObjectReferenceBuilder.newObjectReference()
+                .company(company)
+                .type("count-same-sor-type")
+                .value("count-same-sor-wrong-value")
+                .build();
+
+        ObjectReference valueOnly =
+            ObjectReferenceBuilder.newObjectReference()
+                .company("count-same-sor-wrong-company")
+                .type("count-same-sor-type")
+                .value(value)
+                .build();
+
+        taskInWorkbasket(wb)
+            .objectReferences(companyOnly, valueOnly)
+            .buildAndStoreAsSummary(taskService);
+
+        long count =
+            taskService
+                .createTaskQuery()
+                .workbasketIdIn(wb.getId())
+                .sorCompanyIn(company)
+                .sorValueIn(value)
+                .count();
+
+        assertThat(count).isZero();
       }
 
       @WithAccessId(user = "user-1-1")

@@ -196,17 +196,24 @@ public class TaskQuerySqlProvider {
         + groupByPorIfActive()
         + groupBySorIfActive()
         + "FROM TASK t "
+        + "<choose>"
+        + "<when test=\"groupByPor or groupBySor != null\">"
         + "<if test=\"joinWithAttachments\">"
         + "LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID "
         + "</if>"
         + "<if test=\"joinWithSecondaryObjectReferences\">"
         + "LEFT JOIN OBJECT_REFERENCE o ON t.ID = o.TASK_ID "
         + "</if>"
-        + "<if test=\"joinWithClassifications\">"
-        + "LEFT JOIN CLASSIFICATION c ON t.CLASSIFICATION_ID = c.ID "
-        + "</if>"
         + "<if test=\"joinWithAttachmentClassifications\">"
         + "LEFT JOIN CLASSIFICATION ac ON a.CLASSIFICATION_ID = ac.ID "
+        + "</if>"
+        + "</when>"
+        + "<otherwise>"
+        + countRelatedEntityFilterJoins()
+        + "</otherwise>"
+        + "</choose>"
+        + "<if test=\"joinWithClassifications\">"
+        + "LEFT JOIN CLASSIFICATION c ON t.CLASSIFICATION_ID = c.ID "
         + "</if>"
         + "<if test=\"joinWithUserInfo\">"
         + "LEFT JOIN USER_INFO owner_info ON t.OWNER = owner_info.USER_ID "
@@ -216,7 +223,14 @@ public class TaskQuerySqlProvider {
         + "</if>"
         + OPENING_WHERE_TAG
         + checkForAuthorization()
+        + "<choose>"
+        + "<when test=\"groupByPor or groupBySor != null\">"
         + commonTaskWhereStatement()
+        + "</when>"
+        + "<otherwise>"
+        + commonTaskWhereStatement(false)
+        + "</otherwise>"
+        + "</choose>"
         + CLOSING_WHERE_TAG
         + closeOuterClauseForGroupByPor()
         + closeOuterClauseForGroupBySor()
@@ -225,21 +239,32 @@ public class TaskQuerySqlProvider {
 
   @SuppressWarnings("unused")
   public static String countQueryTasksDb2() {
+    String distinctKeyword =
+        "<if test=\"useDistinctKeyword and (groupByPor or groupBySor != null)\">DISTINCT</if> ";
+
     return OPENING_SCRIPT_TAG
         + "WITH X (ID, WORKBASKET_ID) AS ("
-        + "SELECT <if test=\"useDistinctKeyword\">DISTINCT</if> "
+        + "SELECT "
+        + distinctKeyword
         + "t.ID, t.WORKBASKET_ID FROM TASK t "
+        + "<choose>"
+        + "<when test=\"groupByPor or groupBySor != null\">"
         + "<if test=\"joinWithAttachments\">"
         + "LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID "
         + "</if>"
-        + "<if test=\"joinWithClassifications\">"
-        + "LEFT JOIN CLASSIFICATION c ON t.CLASSIFICATION_ID = c.ID "
+        + "<if test=\"joinWithSecondaryObjectReferences\">"
+        + "LEFT JOIN OBJECT_REFERENCE o ON t.ID = o.TASK_ID "
         + "</if>"
         + "<if test=\"joinWithAttachmentClassifications\">"
         + "LEFT JOIN CLASSIFICATION ac ON a.CLASSIFICATION_ID = ac.ID "
         + "</if>"
-        + "<if test=\"joinWithSecondaryObjectReferences\">"
-        + "LEFT JOIN OBJECT_REFERENCE o ON t.ID = o.TASK_ID "
+        + "</when>"
+        + "<otherwise>"
+        + countRelatedEntityFilterJoins()
+        + "</otherwise>"
+        + "</choose>"
+        + "<if test=\"joinWithClassifications\">"
+        + "LEFT JOIN CLASSIFICATION c ON t.CLASSIFICATION_ID = c.ID "
         + "</if>"
         + "<if test=\"joinWithUserInfo\">"
         + "LEFT JOIN USER_INFO owner_info ON t.OWNER = owner_info.USER_ID "
@@ -248,7 +273,14 @@ public class TaskQuerySqlProvider {
         + "LEFT JOIN USER_INFO creator_info ON t.CREATOR = creator_info.USER_ID "
         + "</if>"
         + OPENING_WHERE_TAG
+        + "<choose>"
+        + "<when test=\"groupByPor or groupBySor != null\">"
         + commonTaskWhereStatement()
+        + "</when>"
+        + "<otherwise>"
+        + commonTaskWhereStatement(false)
+        + "</otherwise>"
+        + "</choose>"
         + CLOSING_WHERE_TAG
         + "), Y (ID, FLAG) AS ("
         + "SELECT ID, ("
@@ -267,6 +299,31 @@ public class TaskQuerySqlProvider {
         + "FROM X ) SELECT COUNT(*) "
         + "FROM Y WHERE FLAG = 1 with UR"
         + CLOSING_SCRIPT_TAG;
+  }
+
+  private static String countRelatedEntityFilterJoins() {
+    String attachmentFilterStatement = commonAttachmentFilterWhereStatement().toString();
+    String sorFilterStatement = commonSecondaryObjectReferenceFilterWhereStatement().toString();
+
+    return "<if test='filterByAttachments'>"
+        + "INNER JOIN ("
+        + "SELECT DISTINCT a.TASK_ID "
+        + "FROM ATTACHMENT a "
+        + "<if test='filterByAttachmentClassifications'>"
+        + "LEFT JOIN CLASSIFICATION ac ON a.CLASSIFICATION_ID = ac.ID "
+        + "</if>"
+        + "WHERE 1 = 1 "
+        + attachmentFilterStatement
+        + ") filtered_a ON filtered_a.TASK_ID = t.ID "
+        + "</if>"
+        + "<if test='filterBySecondaryObjectReferences'>"
+        + "INNER JOIN ("
+        + "SELECT DISTINCT o.TASK_ID "
+        + "FROM OBJECT_REFERENCE o "
+        + "WHERE 1 = 1 "
+        + sorFilterStatement
+        + ") filtered_o ON filtered_o.TASK_ID = t.ID "
+        + "</if>";
   }
 
   @SuppressWarnings("unused")
@@ -641,6 +698,10 @@ public class TaskQuerySqlProvider {
   }
 
   private static StringBuilder commonTaskWhereStatement() {
+    return commonTaskWhereStatement(true);
+  }
+
+  private static StringBuilder commonTaskWhereStatement(boolean includeRelatedEntityFilters) {
     StringBuilder sb = new StringBuilder();
     commonWhereClauses("businessProcessId", "t.BUSINESS_PROCESS_ID", sb);
     commonWhereClauses("classificationCategory", "CLASSIFICATION_CATEGORY", sb);
@@ -728,10 +789,14 @@ public class TaskQuerySqlProvider {
             + "LIKE #{wildcardSearchValueLike}"
             + "</foreach>)"
             + "</if> ");
-    sb.append(attachmentWhereStatement());
+    if (includeRelatedEntityFilters) {
+      sb.append(attachmentWhereStatement());
+    }
     sb.append(withoutAttachmentWhereStatement());
     sb.append(commonTaskObjectReferenceWhereStatement());
-    sb.append(secondaryObjectReferenceWhereStatement());
+    if (includeRelatedEntityFilters) {
+      sb.append(secondaryObjectReferenceWhereStatement());
+    }
     return sb;
   }
 }

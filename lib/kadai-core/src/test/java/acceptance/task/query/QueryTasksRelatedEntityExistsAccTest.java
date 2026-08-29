@@ -139,18 +139,83 @@ class QueryTasksRelatedEntityExistsAccTest extends AbstractAccTest {
 
   @WithAccessId(user = "admin")
   @Test
-  void should_UseExistsForCount_When_AttachmentJoinIsOnlyNeededForOrdering() {
+  void should_UseDeduplicatedAttachmentJoinForCount_When_FilteringByAttachment() {
     taskService
         .createTaskQuery()
-        .attachmentChannelIn("exists-count-sql-shape-channel")
+        .attachmentChannelIn("count-derived-attachment-channel")
         .orderByAttachmentChannel(ASCENDING)
         .count();
 
     String sql = normalizedCapturedSql();
 
     assertThat(sql)
-        .contains("EXISTS (SELECT 1 FROM ATTACHMENT a WHERE a.TASK_ID = t.ID")
+        .contains("INNER JOIN (SELECT DISTINCT a.TASK_ID FROM ATTACHMENT a")
+        .contains("filtered_a ON filtered_a.TASK_ID = t.ID")
+        .doesNotContain("LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID")
+        .doesNotContain("EXISTS (SELECT 1 FROM ATTACHMENT a WHERE a.TASK_ID = t.ID");
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_UseDeduplicatedSorJoinForCount_When_FilteringBySor() {
+    taskService
+        .createTaskQuery()
+        .sorCompanyIn("count-derived-sor-company")
+        .sorValueIn("count-derived-sor-value")
+        .count();
+
+    String sql = normalizedCapturedSql();
+
+    assertThat(sql)
+        .contains("INNER JOIN (SELECT DISTINCT o.TASK_ID FROM OBJECT_REFERENCE o")
+        .contains("filtered_o ON filtered_o.TASK_ID = t.ID")
+        .doesNotContain("LEFT JOIN OBJECT_REFERENCE o ON t.ID = o.TASK_ID")
+        .doesNotContain("EXISTS (SELECT 1 FROM OBJECT_REFERENCE o WHERE o.TASK_ID = t.ID");
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_JoinAttachmentClassificationInsideDeduplicatedCountRelation() {
+    taskService
+        .createTaskQuery()
+        .attachmentClassificationNameLike("count-derived-classification%")
+        .count();
+
+    String sql = normalizedCapturedSql();
+
+    assertThat(sql)
+        .contains("INNER JOIN (SELECT DISTINCT a.TASK_ID FROM ATTACHMENT a")
+        .contains("LEFT JOIN CLASSIFICATION ac ON a.CLASSIFICATION_ID = ac.ID")
+        .contains("filtered_a ON filtered_a.TASK_ID = t.ID")
         .doesNotContain("LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID");
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_KeepNotExistsForCount_When_QueryingWithoutAttachment() {
+    taskService.createTaskQuery().withoutAttachment().count();
+
+    String sql = normalizedCapturedSql();
+
+    assertThat(sql)
+        .contains(
+            "NOT EXISTS (SELECT 1 FROM ATTACHMENT a_without "
+                + "WHERE a_without.TASK_ID = t.ID)")
+        .doesNotContain("filtered_a ON filtered_a.TASK_ID = t.ID")
+        .doesNotContain("LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID");
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_NotJoinAttachmentForCount_When_AttachmentIsOnlyUsedForOrdering() {
+    taskService.createTaskQuery().orderByAttachmentChannel(ASCENDING).count();
+
+    String sql = normalizedCapturedSql();
+
+    assertThat(sql)
+        .doesNotContain("filtered_a ON filtered_a.TASK_ID = t.ID")
+        .doesNotContain("LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID")
+        .doesNotContain("EXISTS (SELECT 1 FROM ATTACHMENT a WHERE a.TASK_ID = t.ID");
   }
 
   @WithAccessId(user = "admin")
