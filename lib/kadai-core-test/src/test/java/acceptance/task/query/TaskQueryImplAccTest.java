@@ -2655,6 +2655,49 @@ class TaskQueryImplAccTest {
 
       @WithAccessId(user = "user-1-1")
       @Test
+      void should_CountTaskOnce_When_AttachmentJoinIsOnlyNeededForOrdering() throws Exception {
+        String channel = "exists-count-with-attachment-ordering";
+
+        Attachment attachment = createAttachment().channel(channel).build();
+
+        TaskSummary task =
+            taskInWorkbasket(wb)
+                .attachments(attachment, attachment.copy())
+                .buildAndStoreAsSummary(taskService);
+
+        TaskQuery query =
+            taskService
+                .createTaskQuery()
+                .workbasketIdIn(wb.getId())
+                .attachmentChannelIn(channel)
+                .orderByAttachmentChannel(null);
+
+        long count = query.count();
+        List<TaskSummary> tasks = query.list();
+
+        assertThat(count).isOne();
+        assertThat(tasks).containsExactly(task);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
+      void should_CountTaskOnce_When_OnlyOrderingByAttachment() throws Exception {
+        Attachment attachment =
+            createAttachment().channel("exists-count-order-only-channel").build();
+
+        TaskSummary task =
+            taskInWorkbasket(wb)
+                .attachments(attachment, attachment.copy())
+                .buildAndStoreAsSummary(taskService);
+
+        long count =
+            taskService.createTaskQuery().idIn(task.getId()).orderByAttachmentChannel(null).count();
+
+        assertThat(count).isOne();
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
       void should_CountTaskOnce_When_MultipleSecondaryObjectReferencesMatchFilter()
           throws Exception {
         String company = "exists-count-sor-company";

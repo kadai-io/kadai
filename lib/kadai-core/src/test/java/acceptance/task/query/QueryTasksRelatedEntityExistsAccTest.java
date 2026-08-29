@@ -139,6 +139,22 @@ class QueryTasksRelatedEntityExistsAccTest extends AbstractAccTest {
 
   @WithAccessId(user = "admin")
   @Test
+  void should_UseExistsForCount_When_AttachmentJoinIsOnlyNeededForOrdering() {
+    taskService
+        .createTaskQuery()
+        .attachmentChannelIn("exists-count-sql-shape-channel")
+        .orderByAttachmentChannel(ASCENDING)
+        .count();
+
+    String sql = normalizedCapturedSql();
+
+    assertThat(sql)
+        .contains("EXISTS (SELECT 1 FROM ATTACHMENT a WHERE a.TASK_ID = t.ID")
+        .doesNotContain("LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID");
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
   void should_KeepAttachmentJoin_When_AttachmentIsNeededForProjection() {
     taskService
         .createTaskQuery()
