@@ -139,55 +139,81 @@ class QueryTasksRelatedEntityExistsAccTest extends AbstractAccTest {
 
   @WithAccessId(user = "admin")
   @Test
-  void should_UseDeduplicatedAttachmentJoinForCount_When_FilteringByAttachment() {
+  void should_UseCountDistinctWithRawAttachmentJoin_When_OnlyAttachmentIsFiltered() {
     taskService
         .createTaskQuery()
-        .attachmentChannelIn("count-derived-attachment-channel")
+        .attachmentChannelIn("count-distinct-attachment-channel")
         .orderByAttachmentChannel(ASCENDING)
         .count();
 
     String sql = normalizedCapturedSql();
 
     assertThat(sql)
-        .contains("INNER JOIN (SELECT DISTINCT a.TASK_ID FROM ATTACHMENT a")
-        .contains("filtered_a ON filtered_a.TASK_ID = t.ID")
-        .doesNotContain("LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID")
+        .satisfies(this::assertCountDistinctTaskIds)
+        .contains("INNER JOIN ATTACHMENT a ON a.TASK_ID = t.ID")
+        .contains("a.CHANNEL")
+        .doesNotContain("SELECT DISTINCT a.TASK_ID")
+        .doesNotContain("filtered_a ON filtered_a.TASK_ID = t.ID")
         .doesNotContain("EXISTS (SELECT 1 FROM ATTACHMENT a WHERE a.TASK_ID = t.ID");
   }
 
   @WithAccessId(user = "admin")
   @Test
-  void should_UseDeduplicatedSorJoinForCount_When_FilteringBySor() {
+  void should_UseCountDistinctWithRawSorJoin_When_OnlySorIsFiltered() {
     taskService
         .createTaskQuery()
-        .sorCompanyIn("count-derived-sor-company")
-        .sorValueIn("count-derived-sor-value")
+        .sorCompanyIn("count-distinct-sor-company")
+        .sorValueIn("count-distinct-sor-value")
         .count();
 
     String sql = normalizedCapturedSql();
 
     assertThat(sql)
-        .contains("INNER JOIN (SELECT DISTINCT o.TASK_ID FROM OBJECT_REFERENCE o")
-        .contains("filtered_o ON filtered_o.TASK_ID = t.ID")
-        .doesNotContain("LEFT JOIN OBJECT_REFERENCE o ON t.ID = o.TASK_ID")
+        .satisfies(this::assertCountDistinctTaskIds)
+        .contains("INNER JOIN OBJECT_REFERENCE o ON o.TASK_ID = t.ID")
+        .contains("o.COMPANY")
+        .contains("o.VALUE")
+        .doesNotContain("SELECT DISTINCT o.TASK_ID")
+        .doesNotContain("filtered_o ON filtered_o.TASK_ID = t.ID")
         .doesNotContain("EXISTS (SELECT 1 FROM OBJECT_REFERENCE o WHERE o.TASK_ID = t.ID");
   }
 
   @WithAccessId(user = "admin")
   @Test
-  void should_JoinAttachmentClassificationInsideDeduplicatedCountRelation() {
+  void should_JoinAttachmentClassificationWithRawAttachmentCount() {
     taskService
         .createTaskQuery()
-        .attachmentClassificationNameLike("count-derived-classification%")
+        .attachmentClassificationNameLike("count-distinct-classification%")
         .count();
 
     String sql = normalizedCapturedSql();
 
     assertThat(sql)
-        .contains("INNER JOIN (SELECT DISTINCT a.TASK_ID FROM ATTACHMENT a")
+        .satisfies(this::assertCountDistinctTaskIds)
+        .contains("INNER JOIN ATTACHMENT a ON a.TASK_ID = t.ID")
         .contains("LEFT JOIN CLASSIFICATION ac ON a.CLASSIFICATION_ID = ac.ID")
+        .contains("ac.NAME")
+        .doesNotContain("filtered_a ON filtered_a.TASK_ID = t.ID");
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_UseSeparateDeduplicatedRelations_When_AttachmentAndSorAreBothFiltered() {
+    taskService
+        .createTaskQuery()
+        .attachmentChannelIn("count-both-channel")
+        .sorCompanyIn("count-both-company")
+        .count();
+
+    String sql = normalizedCapturedSql();
+
+    assertThat(sql)
+        .contains("COUNT(*)")
+        .contains("SELECT DISTINCT a.TASK_ID")
         .contains("filtered_a ON filtered_a.TASK_ID = t.ID")
-        .doesNotContain("LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID");
+        .contains("SELECT DISTINCT o.TASK_ID")
+        .contains("filtered_o ON filtered_o.TASK_ID = t.ID")
+        .doesNotContain("COUNT(DISTINCT t.ID)");
   }
 
   @WithAccessId(user = "admin")
@@ -198,9 +224,11 @@ class QueryTasksRelatedEntityExistsAccTest extends AbstractAccTest {
     String sql = normalizedCapturedSql();
 
     assertThat(sql)
+        .contains("COUNT(*)")
         .contains(
             "NOT EXISTS (SELECT 1 FROM ATTACHMENT a_without "
                 + "WHERE a_without.TASK_ID = t.ID)")
+        .doesNotContain("COUNT(DISTINCT t.ID)")
         .doesNotContain("filtered_a ON filtered_a.TASK_ID = t.ID")
         .doesNotContain("LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID");
   }
@@ -213,6 +241,8 @@ class QueryTasksRelatedEntityExistsAccTest extends AbstractAccTest {
     String sql = normalizedCapturedSql();
 
     assertThat(sql)
+        .contains("COUNT(*)")
+        .doesNotContain("COUNT(DISTINCT t.ID)")
         .doesNotContain("filtered_a ON filtered_a.TASK_ID = t.ID")
         .doesNotContain("LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID")
         .doesNotContain("EXISTS (SELECT 1 FROM ATTACHMENT a WHERE a.TASK_ID = t.ID");
@@ -252,5 +282,17 @@ class QueryTasksRelatedEntityExistsAccTest extends AbstractAccTest {
     String sql = ParameterizedQuerySqlCaptureInterceptor.getCapturedSql();
     assertThat(sql).isNotNull();
     return sql.replaceAll("\\s+", " ").trim();
+  }
+
+  private void assertCountDistinctTaskIds(String sql) {
+    if (isDb2()) {
+      assertThat(sql).contains("SELECT DISTINCT t.ID, t.WORKBASKET_ID");
+    } else {
+      assertThat(sql).contains("COUNT(DISTINCT t.ID)");
+    }
+  }
+
+  private boolean isDb2() {
+    return "DB2".equals(System.getenv("DB"));
   }
 }

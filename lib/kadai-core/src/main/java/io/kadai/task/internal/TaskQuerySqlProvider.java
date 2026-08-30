@@ -186,7 +186,8 @@ public class TaskQuerySqlProvider {
   @SuppressWarnings("unused")
   public static String countQueryTasks() {
     return OPENING_SCRIPT_TAG
-        + "SELECT COUNT(*) "
+        + "SELECT "
+        + countExpression()
         + "<if test=\"groupByPor or groupBySor != null\"> "
         + "FROM (SELECT t.ID, t.POR_VALUE "
         + "</if> "
@@ -209,7 +210,7 @@ public class TaskQuerySqlProvider {
         + "</if>"
         + "</when>"
         + "<otherwise>"
-        + countRelatedEntityFilterJoins()
+        + countRelatedEntityJoins()
         + "</otherwise>"
         + "</choose>"
         + "<if test=\"joinWithClassifications\">"
@@ -229,6 +230,7 @@ public class TaskQuerySqlProvider {
         + "</when>"
         + "<otherwise>"
         + commonTaskWhereStatement(false)
+        + countSingleRelatedEntityWhereStatement()
         + "</otherwise>"
         + "</choose>"
         + CLOSING_WHERE_TAG
@@ -239,13 +241,10 @@ public class TaskQuerySqlProvider {
 
   @SuppressWarnings("unused")
   public static String countQueryTasksDb2() {
-    String distinctKeyword =
-        "<if test=\"useDistinctKeyword and (groupByPor or groupBySor != null)\">DISTINCT</if> ";
-
     return OPENING_SCRIPT_TAG
         + "WITH X (ID, WORKBASKET_ID) AS ("
         + "SELECT "
-        + distinctKeyword
+        + db2CountDistinctKeyword()
         + "t.ID, t.WORKBASKET_ID FROM TASK t "
         + "<choose>"
         + "<when test=\"groupByPor or groupBySor != null\">"
@@ -260,7 +259,7 @@ public class TaskQuerySqlProvider {
         + "</if>"
         + "</when>"
         + "<otherwise>"
-        + countRelatedEntityFilterJoins()
+        + countRelatedEntityJoins()
         + "</otherwise>"
         + "</choose>"
         + "<if test=\"joinWithClassifications\">"
@@ -279,6 +278,7 @@ public class TaskQuerySqlProvider {
         + "</when>"
         + "<otherwise>"
         + commonTaskWhereStatement(false)
+        + countSingleRelatedEntityWhereStatement()
         + "</otherwise>"
         + "</choose>"
         + CLOSING_WHERE_TAG
@@ -301,7 +301,24 @@ public class TaskQuerySqlProvider {
         + CLOSING_SCRIPT_TAG;
   }
 
-  private static String countRelatedEntityFilterJoins() {
+  private static String countRelatedEntityJoins() {
+    return "<choose>"
+        + "<when test='filterByAttachments and !filterBySecondaryObjectReferences'>"
+        + "INNER JOIN ATTACHMENT a ON a.TASK_ID = t.ID "
+        + "<if test='filterByAttachmentClassifications'>"
+        + "LEFT JOIN CLASSIFICATION ac ON a.CLASSIFICATION_ID = ac.ID "
+        + "</if>"
+        + "</when>"
+        + "<when test='!filterByAttachments and filterBySecondaryObjectReferences'>"
+        + "INNER JOIN OBJECT_REFERENCE o ON o.TASK_ID = t.ID "
+        + "</when>"
+        + "<when test='filterByAttachments and filterBySecondaryObjectReferences'>"
+        + countDeduplicatedRelatedEntityJoins()
+        + "</when>"
+        + "</choose>";
+  }
+
+  private static String countDeduplicatedRelatedEntityJoins() {
     String attachmentFilterStatement = commonAttachmentFilterWhereStatement().toString();
     String sorFilterStatement = commonSecondaryObjectReferenceFilterWhereStatement().toString();
 
@@ -324,6 +341,45 @@ public class TaskQuerySqlProvider {
         + sorFilterStatement
         + ") filtered_o ON filtered_o.TASK_ID = t.ID "
         + "</if>";
+  }
+
+  private static String countSingleRelatedEntityWhereStatement() {
+    String attachmentFilterStatement = commonAttachmentFilterWhereStatement().toString();
+    String sorFilterStatement = commonSecondaryObjectReferenceFilterWhereStatement().toString();
+
+    return "<choose>"
+        + "<when test='filterByAttachments and !filterBySecondaryObjectReferences'>"
+        + attachmentFilterStatement
+        + "</when>"
+        + "<when test='!filterByAttachments and filterBySecondaryObjectReferences'>"
+        + sorFilterStatement
+        + "</when>"
+        + "</choose>";
+  }
+
+  private static String exactlyOneRelatedEntityFilterExpression() {
+    return "((filterByAttachments and !filterBySecondaryObjectReferences) "
+        + "or (!filterByAttachments and filterBySecondaryObjectReferences))";
+  }
+
+  private static String countExpression() {
+    return "<choose>"
+        + "<when test='!groupByPor and groupBySor == null and "
+        + exactlyOneRelatedEntityFilterExpression()
+        + "'>COUNT(DISTINCT t.ID)</when>"
+        + "<otherwise>COUNT(*)</otherwise>"
+        + "</choose> ";
+  }
+
+  private static String db2CountDistinctKeyword() {
+    return "<choose>"
+        + "<when test='groupByPor or groupBySor != null'>"
+        + "<if test='useDistinctKeyword'>DISTINCT</if>"
+        + "</when>"
+        + "<when test='"
+        + exactlyOneRelatedEntityFilterExpression()
+        + "'>DISTINCT</when>"
+        + "</choose> ";
   }
 
   @SuppressWarnings("unused")

@@ -2655,6 +2655,36 @@ class TaskQueryImplAccTest {
 
       @WithAccessId(user = "user-1-1")
       @Test
+      void should_CountTaskOnce_When_ThreeAttachmentsMatchRawCountJoin() throws Exception {
+        String channel = "count-distinct-three-attachments";
+
+        Attachment attachment = createAttachment().channel(channel).build();
+
+        TaskSummary task =
+            taskInWorkbasket(wb)
+                .attachments(attachment, attachment.copy(), attachment.copy())
+                .buildAndStoreAsSummary(taskService);
+
+        long count =
+            taskService
+                .createTaskQuery()
+                .workbasketIdIn(wb.getId())
+                .attachmentChannelIn(channel)
+                .count();
+
+        assertThat(count).isOne();
+
+        assertThat(
+                taskService
+                    .createTaskQuery()
+                    .workbasketIdIn(wb.getId())
+                    .attachmentChannelIn(channel)
+                    .list())
+            .containsExactly(task);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
       void should_CountTaskOnce_When_AttachmentJoinIsOnlyNeededForOrdering() throws Exception {
         String channel = "exists-count-with-attachment-ordering";
 
