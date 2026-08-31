@@ -35,6 +35,8 @@ import { provideStore, Store } from '@ngxs/store';
 import { TaskWorkflowState } from '../../../shared/store/task-store/task.state';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
 import { ClaimTask, GetTask, ReopenTask, SelectTask } from '../../../shared/store/task-store/task.actions';
+import { Classification } from 'app/shared/models/classification';
+import { TaskSelectors } from 'app/shared/store/task-store/task.selectors';
 
 const makeTask = (overrides: Partial<Task> = {}): Task => {
   const task = new Task(
@@ -665,26 +667,34 @@ describe('TaskProcessingComponent', () => {
     it('should cancel unfinished workflow A when switching to task B and ignore late responses from A', () => {
       vi.useFakeTimers();
 
-      const getTaskA$ = new Subject<void>();
-      const getTaskB$ = new Subject<void>();
+      const getTaskA$ = new Subject<Task>();
+      const getTaskB$ = new Subject<Task>();
 
-      const claimTaskA$ = new Subject<void>();
-      const claimTaskB$ = new Subject<void>();
+      const claimTaskA$ = new Subject<Task>();
+      const claimTaskB$ = new Subject<Task>();
 
-      const classificationA$ = new Subject<any>();
-      const classificationB$ = new Subject<any>();
+      const classificationA$ = new Subject<Classification>();
+      const classificationB$ = new Subject<Classification>();
 
-      // allow claim logic to proceed through the switchMap chain
+      const taskA = {
+        taskId: 'task-a',
+        name: 'Task A',
+        classificationSummary: { classificationId: 'class-a' }
+      } as Task;
+      const taskB = {
+        taskId: 'task-b',
+        name: 'Task B',
+        classificationSummary: { classificationId: 'class-b' }
+      } as Task;
+
       vi.spyOn(component, 'canClaimTask').mockReturnValue(true);
 
-      vi.spyOn(store, 'dispatch').mockImplementation((action: any) => {
-        if (action instanceof GetTask) {
-          return action.taskId === 'task-a' ? getTaskA$ : getTaskB$;
-        }
-        if (action instanceof ClaimTask) {
-          return action.taskId === 'task-a' ? claimTaskA$ : claimTaskB$;
-        }
-        return of(void 0);
+      vi.spyOn(mockTaskService, 'getTask').mockImplementation((id: string) => {
+        return id === 'task-a' ? getTaskA$ : getTaskB$;
+      });
+
+      vi.spyOn(mockTaskService, 'claimTask').mockImplementation((id: string) => {
+        return id === 'task-a' ? claimTaskA$ : claimTaskB$;
       });
 
       vi.spyOn(mockClassificationsService, 'getClassification').mockImplementation((id: string) => {
@@ -694,33 +704,33 @@ describe('TaskProcessingComponent', () => {
       paramsSubject.next({ id: 'task-a' });
       fixture.detectChanges();
 
-      getTaskA$.next();
-      getTaskA$.complete();
-
       paramsSubject.next({ id: 'task-b' });
       fixture.detectChanges();
 
-      vi.spyOn(store, 'selectSnapshot').mockReturnValue({
-        name: 'Task B',
-        classificationSummary: { classificationId: 'class-b' }
-      });
-
-      getTaskB$.next();
+      getTaskB$.next(taskB);
       getTaskB$.complete();
 
-      claimTaskB$.next();
+      claimTaskB$.next(taskB);
       claimTaskB$.complete();
 
-      claimTaskA$.next();
-      claimTaskA$.complete();
-      classificationA$.next({ applicationEntryPoint: 'http://app-a.com' });
-      classificationA$.complete();
+      classificationB$.next({ applicationEntryPoint: 'http://app-b.com' } as Classification);
+      classificationB$.complete();
+
+      vi.runAllTimers();
       fixture.detectChanges();
 
-      expect(component.address).not.toContain('app-a.com');
+      expect(component.address).toBe('http://app-b.com');
 
-      classificationB$.next({ applicationEntryPoint: 'http://app-b.com' });
-      classificationB$.complete();
+      getTaskA$.next(taskA);
+      getTaskA$.complete();
+
+      claimTaskA$.next(taskA);
+      claimTaskA$.complete();
+
+      classificationA$.next({ applicationEntryPoint: 'http://app-a.com' } as Classification);
+      classificationA$.complete();
+
+      vi.runAllTimers();
       fixture.detectChanges();
 
       expect(component.address).toBe('http://app-b.com');
