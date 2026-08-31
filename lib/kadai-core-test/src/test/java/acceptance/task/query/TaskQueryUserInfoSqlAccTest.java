@@ -281,6 +281,21 @@ class TaskQueryUserInfoSqlAccTest implements KadaiConfigurationModifier {
 
   @WithAccessId(user = "admin")
   @Test
+  void should_NotRetainUserInfoJoin_WhenScalarValuesReplaceLongNameOrdering() {
+    TaskQuery ownerQuery = taskService.createTaskQuery().orderByOwnerLongName(ASCENDING);
+    TaskQuery creatorQuery = taskService.createTaskQuery().orderByCreatorLongName(ASCENDING);
+
+    ownerQuery.listValues(TaskQueryColumnName.NAME, ASCENDING);
+    creatorQuery.listValues(TaskQueryColumnName.NAME, ASCENDING);
+    String ownerSummarySql = captureSql(ownerQuery::list);
+    String creatorSummarySql = captureSql(creatorQuery::list);
+
+    assertThat(ownerSummarySql).doesNotContain("user_info owner_info", "user_info creator_info");
+    assertThat(creatorSummarySql).doesNotContain("user_info owner_info", "user_info creator_info");
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
   void should_RetainSelectedLongNameOrdering_WhenScalarValuesAreReused() {
     TaskQuery query = taskService.createTaskQuery().groupByPor();
 

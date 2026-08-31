@@ -2329,11 +2329,11 @@ public class TaskQueryImpl implements TaskQuery {
   }
 
   public boolean isJoinWithUserInfoForTaskSummary() {
-    return addAdditionalUserInfo || joinWithUserInfo;
+    return addAdditionalUserInfo || hasOwnerLongNameFilter() || orderByOwnerLongName;
   }
 
   public boolean isJoinWithCreatorUserInfoForTaskSummary() {
-    return addAdditionalUserInfo || joinWithCreatorUserInfo;
+    return addAdditionalUserInfo || hasCreatorLongNameFilter() || orderByCreatorLongName;
   }
 
   public boolean isJoinWithUserInfoForCount() {
