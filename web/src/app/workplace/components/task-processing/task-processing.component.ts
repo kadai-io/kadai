@@ -23,7 +23,20 @@ import { Task } from 'app/workplace/models/task';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
-import { distinctUntilChanged, EMPTY, map, Observable, of, Subject, Subscription, switchMap, takeUntil } from 'rxjs';
+import {
+  catchError,
+  distinctUntilChanged,
+  EMPTY,
+  filter,
+  map,
+  Observable,
+  of,
+  Subject,
+  Subscription,
+  switchMap,
+  take,
+  takeUntil
+} from 'rxjs';
 import { ClassificationsService } from 'app/shared/services/classifications/classifications.service';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { MatButton } from '@angular/material/button';
@@ -81,7 +94,16 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
       .pipe(
         map((params) => params['id']),
         distinctUntilChanged(),
-        switchMap((id) => (id ? this.loadAndClaimTask(id) : EMPTY)),
+        switchMap((id) => {
+          if (!id) {
+            return EMPTY;
+          }
+          return this.loadAndClaimTask(id).pipe(
+            catchError((error) => {
+              return EMPTY;
+            })
+          );
+        }),
         takeUntil(this.destroy$)
       )
       .subscribe(({ task, classification }) => {
@@ -93,13 +115,17 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
 
   loadAndClaimTask(id: string): Observable<{ task: Task; classification: Classification }> {
     return this.store.dispatch(new GetTask(id)).pipe(
-      switchMap(() => {
+      switchMap(() => this.store.select(TaskSelectors.getSelectedTask)),
+      filter((task): task is Task => !!task && task.taskId === id),
+      take(1),
+
+      switchMap((task) => {
         if (this.canClaimTask()) {
-          return this.store.dispatch(new ClaimTask(id));
+          return this.store.dispatch(new ClaimTask(id)).pipe(map(() => task));
         }
-        return of(null);
+        return of(task);
       }),
-      map(() => this.store.selectSnapshot(TaskSelectors.getSelectedTask)!),
+
       switchMap((task) =>
         this.classificationService
           .getClassification(task.classificationSummary!.classificationId!)
