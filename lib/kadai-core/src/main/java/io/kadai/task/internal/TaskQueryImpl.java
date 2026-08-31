@@ -89,6 +89,8 @@ public class TaskQueryImpl implements TaskQuery {
   private boolean addWorkbasketNameToSelectClauseForOrdering = false;
   private boolean joinWithUserInfo;
   private boolean joinWithCreatorUserInfo;
+  private boolean orderByOwnerLongName;
+  private boolean orderByCreatorLongName;
   private boolean groupByPor;
   private String groupBySor;
   private String[] taskId;
@@ -628,6 +630,7 @@ public class TaskQueryImpl implements TaskQuery {
   @Override
   public TaskQuery orderByCreatorLongName(SortDirection sortDirection) {
     joinWithCreatorUserInfo = true;
+    orderByCreatorLongName = true;
     return (DB.DB2 == getDB()
             && kadaiEngine.getEngine().getConfiguration().isUseSpecificDb2Taskquery())
         ? addOrderCriteria("CREATOR_LONG_NAME", sortDirection)
@@ -2076,6 +2079,7 @@ public class TaskQueryImpl implements TaskQuery {
   @Override
   public TaskQuery orderByOwnerLongName(SortDirection sortDirection) {
     joinWithUserInfo = true;
+    orderByOwnerLongName = true;
     return (DB.DB2 == getDB()
             && kadaiEngine.getEngine().getConfiguration().isUseSpecificDb2Taskquery())
         ? addOrderCriteria("OWNER_LONG_NAME", sortDirection)
@@ -2132,6 +2136,8 @@ public class TaskQueryImpl implements TaskQuery {
       this.columnName = columnName;
       this.orderByOuter.clear();
       this.orderByInner.clear();
+      this.orderByOwnerLongName = columnName == TaskQueryColumnName.OWNER_LONG_NAME;
+      this.orderByCreatorLongName = columnName == TaskQueryColumnName.CREATOR_LONG_NAME;
       this.addOrderCriteria(columnName.toString(), sortDirection);
       checkForIllegalParamCombinations();
       checkOpenReadAndReadTasksPermissionForSpecifiedWorkbaskets();
@@ -2331,10 +2337,18 @@ public class TaskQueryImpl implements TaskQuery {
   }
 
   public boolean isJoinWithUserInfoForCount() {
-    return hasOwnerLongNameFilter();
+    return hasOwnerLongNameFilter() || (isGroupingActive() && orderByOwnerLongName);
   }
 
   public boolean isJoinWithCreatorUserInfoForCount() {
+    return hasCreatorLongNameFilter() || (isGroupingActive() && orderByCreatorLongName);
+  }
+
+  public boolean isJoinWithUserInfoForGroupCount() {
+    return hasOwnerLongNameFilter();
+  }
+
+  public boolean isJoinWithCreatorUserInfoForGroupCount() {
     return hasCreatorLongNameFilter();
   }
 
@@ -2358,6 +2372,10 @@ public class TaskQueryImpl implements TaskQuery {
         || creatorLongNameNotIn != null
         || creatorLongNameLike != null
         || creatorLongNameNotLike != null;
+  }
+
+  private boolean isGroupingActive() {
+    return groupByPor || groupBySor != null;
   }
 
   private void setupAccessIds() {

@@ -91,6 +91,55 @@ class TaskQueryUserInfoSqlAccTest implements KadaiConfigurationModifier {
 
   @WithAccessId(user = "admin")
   @Test
+  void should_JoinOwnerUserInfo_When_GroupedCountOrdersByOwnerLongName() {
+    String sql =
+        captureSql(
+            () ->
+                taskService
+                    .createTaskQuery()
+                    .groupByPor()
+                    .orderByOwnerLongName(ASCENDING)
+                    .count());
+
+    assertThat(sql).contains("user_info owner_info").doesNotContain("user_info creator_info");
+    assertThat(countOccurrences(sql, "user_info owner_info")).isEqualTo(1);
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_JoinCreatorUserInfo_When_GroupedCountOrdersByCreatorLongName() {
+    String sql =
+        captureSql(
+            () ->
+                taskService
+                    .createTaskQuery()
+                    .groupBySor("SecondType")
+                    .orderByCreatorLongName(ASCENDING)
+                    .count());
+
+    assertThat(sql).contains("user_info creator_info").doesNotContain("user_info owner_info");
+    assertThat(countOccurrences(sql, "user_info creator_info")).isEqualTo(1);
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_JoinRequiredUserInfo_When_GroupedCountMixesFilterAndLongNameOrdering() {
+    String sql =
+        captureSql(
+            () ->
+                taskService
+                    .createTaskQuery()
+                    .groupByPor()
+                    .ownerLongNameLike("%user-1-1%")
+                    .orderByCreatorLongName(ASCENDING)
+                    .count());
+
+    assertThat(countOccurrences(sql, "user_info owner_info")).isEqualTo(2);
+    assertThat(countOccurrences(sql, "user_info creator_info")).isEqualTo(1);
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
   void should_JoinOnlyRequiredUserInfo_When_CountFiltersByLongName() {
     String ownerSql =
         captureSql(() -> taskService.createTaskQuery().ownerLongNameLike("%user-1-1%").count());
@@ -195,16 +244,61 @@ class TaskQueryUserInfoSqlAccTest implements KadaiConfigurationModifier {
     assertThat(countSql).doesNotContain("user_info owner_info", "user_info creator_info");
     assertThat(ownerSortSql)
         .contains("user_info owner_info")
+        .contains("owner_long_name asc")
         .doesNotContain("user_info creator_info");
     assertThat(creatorFilterSql)
         .contains("user_info creator_info")
         .doesNotContain("user_info owner_info");
   }
 
+  @WithAccessId(user = "admin")
+  @Test
+  void should_NotLeakGroupedSummaryOrderingIntoGroupCount() {
+    String sql =
+        captureSql(
+            () ->
+                taskService
+                    .createTaskQuery()
+                    .groupByPor()
+                    .orderByOwnerLongName(ASCENDING)
+                    .list());
+
+    assertThat(countOccurrences(sql, "user_info owner_info")).isEqualTo(1);
+    assertThat(sql).doesNotContain("user_info creator_info");
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_NotRetainLongNameOrdering_WhenScalarValuesReplaceOrdering() {
+    TaskQuery query =
+        taskService.createTaskQuery().groupByPor().orderByOwnerLongName(ASCENDING);
+
+    query.listValues(TaskQueryColumnName.NAME, ASCENDING);
+    String countSql = captureSql(query::count);
+
+    assertThat(countSql).doesNotContain("user_info owner_info", "user_info creator_info");
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_RetainSelectedLongNameOrdering_WhenScalarValuesAreReused() {
+    TaskQuery query = taskService.createTaskQuery().groupByPor();
+
+    query.listValues(TaskQueryColumnName.OWNER_LONG_NAME, ASCENDING);
+    String countSql = captureSql(query::count);
+
+    assertThat(countOccurrences(countSql, "user_info owner_info")).isEqualTo(1);
+    assertThat(countSql).doesNotContain("user_info creator_info");
+  }
+
   private String captureSql(Runnable query) {
     SqlCaptureInterceptor.reset();
     query.run();
     return SqlCaptureInterceptor.get().toLowerCase(Locale.ROOT);
+  }
+
+  private int countOccurrences(String value, String substring) {
+    return (value.length() - value.replace(substring, "").length()) / substring.length();
   }
 
   @Nested
@@ -344,6 +438,36 @@ class TaskQueryUserInfoSqlAccTest implements KadaiConfigurationModifier {
                   .nameIn("same-name-for-distinct-test")
                   .listValues(TaskQueryColumnName.NAME, ASCENDING))
           .containsExactly("same-name-for-distinct-test");
+    }
+  }
+
+  @Nested
+  @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+  class WithAdditionalUserInfoAndGenericTaskQuery implements KadaiConfigurationModifier {
+
+    @KadaiInject InternalKadaiEngine configuredInternalKadaiEngine;
+    @KadaiInject TaskService configuredTaskService;
+
+    @Override
+    public KadaiConfiguration.Builder modify(KadaiConfiguration.Builder builder) {
+      return builder.addAdditionalUserInfo(true).useSpecificDb2Taskquery(false);
+    }
+
+    @BeforeAll
+    void registerSqlCaptureInterceptor() {
+      configuredInternalKadaiEngine
+          .getSqlSession()
+          .getConfiguration()
+          .addInterceptor(new SqlCaptureInterceptor());
+    }
+
+    @WithAccessId(user = "admin")
+    @Test
+    void should_NotLeakGroupedSummaryEnrichmentIntoGroupCount() {
+      String sql = captureSql(() -> configuredTaskService.createTaskQuery().groupByPor().list());
+
+      assertThat(countOccurrences(sql, "user_info owner_info")).isEqualTo(1);
+      assertThat(countOccurrences(sql, "user_info creator_info")).isEqualTo(1);
     }
   }
 

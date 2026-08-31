@@ -84,10 +84,8 @@ public class TaskQuerySqlProvider {
         + commonTaskWhereStatement()
         + "<if test='selectAndClaim == true'> AND t.STATE = 'READY' </if>"
         + CLOSING_WHERE_TAG
-        + closeOuterClauseForGroupByPor(
-            "joinWithUserInfoForTaskSummary", "joinWithCreatorUserInfoForTaskSummary")
-        + closeOuterClauseForGroupBySor(
-            "joinWithUserInfoForTaskSummary", "joinWithCreatorUserInfoForTaskSummary")
+        + closeOuterClauseForGroupByPor()
+        + closeOuterClauseForGroupBySor()
         + "<if test='!orderByOuter.isEmpty()'>"
         + "ORDER BY <foreach item='item' collection='orderByOuter' separator=',' >${item}</foreach>"
         + "</if> "
@@ -217,10 +215,8 @@ public class TaskQuerySqlProvider {
         + checkForAuthorization()
         + commonTaskWhereStatement()
         + CLOSING_WHERE_TAG
-        + closeOuterClauseForGroupByPor(
-            "joinWithUserInfoForCount", "joinWithCreatorUserInfoForCount")
-        + closeOuterClauseForGroupBySor(
-            "joinWithUserInfoForCount", "joinWithCreatorUserInfoForCount")
+        + closeOuterClauseForGroupByPor()
+        + closeOuterClauseForGroupBySor()
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -426,8 +422,7 @@ public class TaskQuerySqlProvider {
     return "<if test=\"groupByPor or groupBySor != null\"> " + "SELECT * FROM (" + "</if> ";
   }
 
-  private static String closeOuterClauseForGroupByPor(
-      String ownerUserInfoProperty, String creatorUserInfoProperty) {
+  private static String closeOuterClauseForGroupByPor() {
     return "<if test=\"groupByPor\"> "
         + ") t LEFT JOIN"
         + " (SELECT POR_VALUE as PVALUE, COUNT(POR_VALUE) AS R_COUNT "
@@ -448,14 +443,10 @@ public class TaskQuerySqlProvider {
         + "<if test=\"joinWithWorkbaskets\">"
         + "LEFT JOIN WORKBASKET w ON t.WORKBASKET_ID = w.ID "
         + "</if>"
-        + "<if test=\""
-        + ownerUserInfoProperty
-        + "\">"
+        + "<if test=\"joinWithUserInfoForGroupCount\">"
         + "LEFT JOIN USER_INFO owner_info ON t.OWNER = owner_info.USER_ID "
         + "</if>"
-        + "<if test=\""
-        + creatorUserInfoProperty
-        + "\">"
+        + "<if test=\"joinWithCreatorUserInfoForGroupCount\">"
         + "LEFT JOIN USER_INFO creator_info ON t.CREATOR = creator_info.USER_ID "
         + "</if>"
         + OPENING_WHERE_TAG
@@ -469,8 +460,7 @@ public class TaskQuerySqlProvider {
         + "</if> ";
   }
 
-  private static String closeOuterClauseForGroupBySor(
-      String ownerUserInfoProperty, String creatorUserInfoProperty) {
+  private static String closeOuterClauseForGroupBySor() {
     return "<if test='groupBySor != null'> "
         + ") t LEFT JOIN"
         + " (SELECT o.VALUE, COUNT(o.VALUE) AS R_COUNT "
@@ -488,14 +478,10 @@ public class TaskQuerySqlProvider {
         + "<if test=\"joinWithWorkbaskets\">"
         + "LEFT JOIN WORKBASKET w ON t.WORKBASKET_ID = w.ID "
         + "</if>"
-        + "<if test=\""
-        + ownerUserInfoProperty
-        + "\">"
+        + "<if test=\"joinWithUserInfoForGroupCount\">"
         + "LEFT JOIN USER_INFO owner_info ON t.OWNER = owner_info.USER_ID "
         + "</if>"
-        + "<if test=\""
-        + creatorUserInfoProperty
-        + "\">"
+        + "<if test=\"joinWithCreatorUserInfoForGroupCount\">"
         + "LEFT JOIN USER_INFO creator_info ON t.CREATOR = creator_info.USER_ID "
         + "</if>"
         + OPENING_WHERE_TAG
