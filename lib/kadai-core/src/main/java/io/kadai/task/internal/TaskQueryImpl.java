@@ -87,8 +87,6 @@ public class TaskQueryImpl implements TaskQuery {
   private boolean addClassificationNameToSelectClauseForOrdering = false;
   private boolean addAttachmentClassificationNameToSelectClauseForOrdering = false;
   private boolean addWorkbasketNameToSelectClauseForOrdering = false;
-  private boolean joinWithUserInfo;
-  private boolean joinWithCreatorUserInfo;
   private boolean orderByOwnerLongName;
   private boolean orderByCreatorLongName;
   private boolean groupByPor;
@@ -375,8 +373,6 @@ public class TaskQueryImpl implements TaskQuery {
     this.lockResults = 0;
     this.addAdditionalUserInfo =
         kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo();
-    this.joinWithUserInfo = false;
-    this.joinWithCreatorUserInfo = false;
   }
 
   @Override
@@ -596,28 +592,24 @@ public class TaskQueryImpl implements TaskQuery {
 
   @Override
   public TaskQuery creatorLongNameIn(String... longNames) {
-    joinWithCreatorUserInfo = true;
     this.creatorLongNameIn = longNames;
     return this;
   }
 
   @Override
   public TaskQuery creatorLongNameNotIn(String... longNames) {
-    joinWithCreatorUserInfo = true;
     this.creatorLongNameNotIn = longNames;
     return this;
   }
 
   @Override
   public TaskQuery creatorLongNameLike(String... longNames) {
-    joinWithCreatorUserInfo = true;
     this.creatorLongNameLike = toLowerCopy(longNames);
     return this;
   }
 
   @Override
   public TaskQuery creatorLongNameNotLike(String... longNames) {
-    joinWithCreatorUserInfo = true;
     this.creatorLongNameNotLike = toLowerCopy(longNames);
     return this;
   }
@@ -629,7 +621,6 @@ public class TaskQueryImpl implements TaskQuery {
 
   @Override
   public TaskQuery orderByCreatorLongName(SortDirection sortDirection) {
-    joinWithCreatorUserInfo = true;
     orderByCreatorLongName = true;
     return (DB.DB2 == getDB()
             && kadaiEngine.getEngine().getConfiguration().isUseSpecificDb2Taskquery())
@@ -977,28 +968,24 @@ public class TaskQueryImpl implements TaskQuery {
   }
 
   public TaskQuery ownerLongNameIn(String... longNames) {
-    joinWithUserInfo = true;
     this.ownerLongNameIn = longNames;
     return this;
   }
 
   @Override
   public TaskQuery ownerLongNameNotIn(String... longNames) {
-    joinWithUserInfo = true;
     this.ownerLongNameNotIn = longNames;
     return this;
   }
 
   @Override
   public TaskQuery ownerLongNameLike(String... longNames) {
-    joinWithUserInfo = true;
     this.ownerLongNameLike = toLowerCopy(longNames);
     return this;
   }
 
   @Override
   public TaskQuery ownerLongNameNotLike(String... longNames) {
-    joinWithUserInfo = true;
     this.ownerLongNameNotLike = toLowerCopy(longNames);
     return this;
   }
@@ -2078,7 +2065,6 @@ public class TaskQueryImpl implements TaskQuery {
 
   @Override
   public TaskQuery orderByOwnerLongName(SortDirection sortDirection) {
-    joinWithUserInfo = true;
     orderByOwnerLongName = true;
     return (DB.DB2 == getDB()
             && kadaiEngine.getEngine().getConfiguration().isUseSpecificDb2Taskquery())
