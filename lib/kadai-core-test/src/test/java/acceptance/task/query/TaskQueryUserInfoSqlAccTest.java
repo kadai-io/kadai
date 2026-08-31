@@ -269,7 +269,7 @@ class TaskQueryUserInfoSqlAccTest implements KadaiConfigurationModifier {
 
   @WithAccessId(user = "admin")
   @Test
-  void should_NotRetainLongNameOrdering_WhenScalarValuesReplaceOrdering() {
+  void should_NotRetainLongNameOrdering_When_ReplacingWithScalarValues() {
     TaskQuery query =
         taskService.createTaskQuery().groupByPor().orderByOwnerLongName(ASCENDING);
 
@@ -281,7 +281,7 @@ class TaskQueryUserInfoSqlAccTest implements KadaiConfigurationModifier {
 
   @WithAccessId(user = "admin")
   @Test
-  void should_NotRetainUserInfoJoin_WhenScalarValuesReplaceLongNameOrdering() {
+  void should_NotRetainUserInfoJoin_When_ReplacingLongNameOrderingWithScalarValues() {
     TaskQuery ownerQuery = taskService.createTaskQuery().orderByOwnerLongName(ASCENDING);
     TaskQuery creatorQuery = taskService.createTaskQuery().orderByCreatorLongName(ASCENDING);
 
@@ -296,7 +296,7 @@ class TaskQueryUserInfoSqlAccTest implements KadaiConfigurationModifier {
 
   @WithAccessId(user = "admin")
   @Test
-  void should_RetainSelectedLongNameOrdering_WhenScalarValuesAreReused() {
+  void should_RetainSelectedLongNameOrdering_When_ReusingScalarValues() {
     TaskQuery query = taskService.createTaskQuery().groupByPor();
 
     query.listValues(TaskQueryColumnName.OWNER_LONG_NAME, ASCENDING);
