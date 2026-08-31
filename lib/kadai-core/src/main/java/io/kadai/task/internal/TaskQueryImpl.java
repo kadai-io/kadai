@@ -71,6 +71,7 @@ public class TaskQueryImpl implements TaskQuery {
   private final TaskServiceImpl taskService;
   private final List<String> orderByOuter;
   private final List<String> orderByInner;
+  private final boolean addAdditionalUserInfo;
 
   private TaskQueryColumnName columnName;
   private String[] accessIdIn;
@@ -370,9 +371,10 @@ public class TaskQueryImpl implements TaskQuery {
     this.filterByAccessIdIn = true;
     this.withoutAttachment = false;
     this.lockResults = 0;
-    this.joinWithUserInfo = kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo();
-    this.joinWithCreatorUserInfo =
+    this.addAdditionalUserInfo =
         kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo();
+    this.joinWithUserInfo = false;
+    this.joinWithCreatorUserInfo = false;
   }
 
   @Override
@@ -2151,13 +2153,6 @@ public class TaskQueryImpl implements TaskQuery {
         joinWithSecondaryObjectReferences = true;
       }
 
-      if (columnName == TaskQueryColumnName.OWNER_LONG_NAME) {
-        joinWithUserInfo = true;
-      }
-      if (columnName == TaskQueryColumnName.CREATOR_LONG_NAME) {
-        joinWithCreatorUserInfo = true;
-      }
-
       setupJoinAndOrderParameters();
       result = kadaiEngine.getSqlSession().selectList(LINK_TO_VALUE_MAPPER, this);
       return result;
@@ -2263,7 +2258,9 @@ public class TaskQueryImpl implements TaskQuery {
       throw new IllegalArgumentException(
           "The params \"lockResultsEquals\" and \"selectAndClaim\"" + " cannot be used together!");
     }
-    if ((joinWithUserInfo || joinWithCreatorUserInfo) && lockResults != null && lockResults != 0) {
+    if ((isJoinWithUserInfoForTaskSummary() || isJoinWithCreatorUserInfoForTaskSummary())
+        && lockResults != null
+        && lockResults != 0) {
       throw new IllegalArgumentException(
           "The params \"lockResultsEquals\" and \"joinWithUserInfo\"/\"joinWithCreatorUserInfo\""
               + " cannot be used together!");
@@ -2323,6 +2320,44 @@ public class TaskQueryImpl implements TaskQuery {
     if (joinWithAttachments || joinWithClassifications || joinWithSecondaryObjectReferences) {
       useDistinctKeyword = true;
     }
+  }
+
+  public boolean isJoinWithUserInfoForTaskSummary() {
+    return addAdditionalUserInfo || joinWithUserInfo;
+  }
+
+  public boolean isJoinWithCreatorUserInfoForTaskSummary() {
+    return addAdditionalUserInfo || joinWithCreatorUserInfo;
+  }
+
+  public boolean isJoinWithUserInfoForCount() {
+    return hasOwnerLongNameFilter();
+  }
+
+  public boolean isJoinWithCreatorUserInfoForCount() {
+    return hasCreatorLongNameFilter();
+  }
+
+  public boolean isJoinWithUserInfoForColumnValues() {
+    return columnName == TaskQueryColumnName.OWNER_LONG_NAME || hasOwnerLongNameFilter();
+  }
+
+  public boolean isJoinWithCreatorUserInfoForColumnValues() {
+    return columnName == TaskQueryColumnName.CREATOR_LONG_NAME || hasCreatorLongNameFilter();
+  }
+
+  private boolean hasOwnerLongNameFilter() {
+    return ownerLongNameIn != null
+        || ownerLongNameNotIn != null
+        || ownerLongNameLike != null
+        || ownerLongNameNotLike != null;
+  }
+
+  private boolean hasCreatorLongNameFilter() {
+    return creatorLongNameIn != null
+        || creatorLongNameNotIn != null
+        || creatorLongNameLike != null
+        || creatorLongNameNotLike != null;
   }
 
   private void setupAccessIds() {
