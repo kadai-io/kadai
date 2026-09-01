@@ -16,7 +16,7 @@
  *
  */
 
-package acceptance.common;
+package acceptance.user;
 
 import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR_FOR_COLUMN_QUERY;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 class UserSqlProviderTest {
 
   @Test
-  void should_NotUseUncommittedRead_ForOrdinaryUserReads() {
+  void should_NotUseUncommittedRead_For_OrdinaryUserReads() {
     assertThat(UserMapperSqlProvider.findById()).doesNotContainIgnoringCase("with ur");
     assertThat(UserMapperSqlProvider.findByIds()).doesNotContainIgnoringCase("with ur");
     assertThat(UserMapperSqlProvider.findGroupsById()).doesNotContainIgnoringCase("with ur");
@@ -39,7 +39,7 @@ class UserSqlProviderTest {
   }
 
   @Test
-  void should_UseUncommittedReadOnly_ForColumnValueDiscovery() {
+  void should_UseUncommittedReadOnly_For_ColumnValueDiscovery() {
     assertThat(UserQuerySqlProvider.queryUserColumnValues())
         .contains(DB2_WITH_UR_FOR_COLUMN_QUERY);
   }

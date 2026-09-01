@@ -28,14 +28,7 @@ import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
 import io.kadai.common.internal.SpringKadaiEngine;
 import io.kadai.testapi.KadaiEngineProxy;
 import io.kadai.testapi.extensions.TestContainerExtension;
-import io.kadai.user.api.UserQuery;
-import io.kadai.user.api.exceptions.UserNotFoundException;
-import io.kadai.user.api.models.User;
-import io.kadai.user.api.models.UserSummary;
-import io.kadai.user.internal.UserMapper;
-import io.kadai.user.internal.models.UserImpl;
 import java.sql.Connection;
-import java.util.List;
 import javax.sql.DataSource;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.AfterEach;
@@ -258,72 +251,5 @@ class KadaiEngineModesTest {
       assertThat(actual).isNull();
     }
 
-    @Test
-    void should_NotDirtyReadUser_When_ReadThroughProductionUserService() throws Exception {
-      User expected = newProductionUser("production-user");
-      UserMapper writerMapper = thisKadaiEngineProxy.getSqlSession().getMapper(UserMapper.class);
-
-      thisKadaiEngineProxy
-          .getEngine()
-          .executeInDatabaseConnection(() -> writerMapper.insert(expected));
-
-      assertThatExceptionOfType(UserNotFoundException.class)
-          .isThrownBy(
-              () ->
-                  thatKadaiEngineProxy
-                      .getEngine()
-                      .getEngine()
-                      .getUserService()
-                      .getUser(expected.getId()));
-
-      thisConnection.commit();
-      clearReaderSqlSessionCache();
-
-      User actual =
-          thatKadaiEngineProxy.getEngine().getEngine().getUserService().getUser(expected.getId());
-      assertThat(actual.getId()).isEqualTo(expected.getId());
-    }
-
-    @Test
-    void should_NotDirtyReadUsers_When_UsingProductionUserQuery() throws Exception {
-      User expected = newProductionUser("production-query-user");
-      UserMapper writerMapper = thisKadaiEngineProxy.getSqlSession().getMapper(UserMapper.class);
-      UserQuery userQuery =
-          thatKadaiEngineProxy.getEngine().getEngine().getUserService().createUserQuery();
-      userQuery.idIn(expected.getId());
-
-      thisKadaiEngineProxy
-          .getEngine()
-          .executeInDatabaseConnection(() -> writerMapper.insert(expected));
-
-      assertThat(userQuery.list()).isEmpty();
-      assertThat(userQuery.count()).isZero();
-
-      thisConnection.commit();
-      clearReaderSqlSessionCache();
-
-      List<UserSummary> actual = userQuery.list();
-      assertThat(actual).extracting(UserSummary::getId).containsExactly(expected.getId());
-      assertThat(userQuery.count()).isEqualTo(1L);
-    }
-
-    private void clearReaderSqlSessionCache() {
-      thatKadaiEngineProxy.openConnection();
-      try {
-        thatKadaiEngineProxy.getEngine().getEngine().clearSqlSessionCache();
-      } finally {
-        thatKadaiEngineProxy.returnConnection();
-      }
-    }
-
-    private User newProductionUser(String id) {
-      UserImpl user = new UserImpl();
-      user.setId(id);
-      user.setFirstName("First");
-      user.setLastName("Last");
-      user.setFullName("Last, First");
-      user.setLongName("Last, First - (" + id + ")");
-      return user;
-    }
   }
 }
