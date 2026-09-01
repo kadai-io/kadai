@@ -1,0 +1,87 @@
+name: Build and publish KADAI GMT container
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/kadai-gmt-container.yml"
+      - "rest/kadai-gmt/**"
+      - "rest/kadai-rest-spring/**"
+      - "rest/kadai-rest-spring-example-common/**"
+      - "common/**"
+      - "lib/**"
+      - "pom.xml"
+      - "rest/pom.xml"
+      - "qa/checkstyle/checkstyle.xml"
+      - "mvnw"
+      - ".mvn/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/kadai-gmt
+
+jobs:
+  build-test-publish:
+    name: Build, test, and publish image
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: rest/kadai-gmt/Dockerfile
+          load: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+          cache-from: type=gha,scope=kadai-gmt
+          cache-to: type=gha,mode=max,scope=kadai-gmt
+
+      - name: Run image with H2
+        run: |
+          docker run --detach --rm --name kadai-gmt --publish 8080:8080 \
+            --env 'SPRING_DATASOURCE_URL=jdbc:h2:mem:kadai;NON_KEYWORDS=KEY,VALUE;IGNORECASE=TRUE;DB_CLOSE_ON_EXIT=FALSE;LOCK_MODE=0' \
+            --env SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver \
+            --env SPRING_DATASOURCE_USERNAME=sa \
+            --env SPRING_DATASOURCE_PASSWORD= \
+            --env KADAI_SCHEMA_NAME=KADAI \
+            --env MANAGEMENT_HEALTH_LDAP_ENABLED=false \
+            "${IMAGE_NAME}:latest"
+
+      - name: Verify health endpoint
+        run: |
+          timeout 120 bash -c \
+            'until curl --fail --silent --show-error http://localhost:8080/kadai/actuator/health; do sleep 2; done'
+
+      - name: Show container logs
+        if: always()
+        run: docker logs kadai-gmt
+
+      - name: Stop container
+        if: always()
+        run: docker stop kadai-gmt || true
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish image
+        run: |
+          docker push "${IMAGE_NAME}:latest"
+          docker push "${IMAGE_NAME}:sha-${GITHUB_SHA}"
