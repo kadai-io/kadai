@@ -116,16 +116,14 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
   loadAndClaimTask(id: string): Observable<{ task: Task; classification: Classification }> {
     return this.store.dispatch(new GetTask(id)).pipe(
       switchMap(() => this.store.select(TaskSelectors.getSelectedTask)),
-      filter((task): task is Task => !!task && task.taskId === id),
+      filter((task): task is Task => !!task),
       take(1),
-
       switchMap((task) => {
         if (this.canClaimTask()) {
           return this.store.dispatch(new ClaimTask(id)).pipe(map(() => task));
         }
         return of(task);
       }),
-
       switchMap((task) =>
         this.classificationService
           .getClassification(task.classificationSummary!.classificationId!)
