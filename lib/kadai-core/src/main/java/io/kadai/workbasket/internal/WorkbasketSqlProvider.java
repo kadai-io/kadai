@@ -19,7 +19,6 @@
 package io.kadai.workbasket.internal;
 
 import static io.kadai.common.internal.util.SqlProviderUtil.CLOSING_SCRIPT_TAG;
-import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_SCRIPT_TAG;
 
 import io.kadai.common.internal.util.Pair;
@@ -61,7 +60,6 @@ public class WorkbasketSqlProvider {
         + "SELECT "
         + commonSelectFields(false)
         + " FROM WORKBASKET WHERE ID = #{id}"
-        + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -70,7 +68,6 @@ public class WorkbasketSqlProvider {
         + "SELECT "
         + commonSelectFields(true)
         + " FROM WORKBASKET WHERE ID = #{id} "
-        + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -79,7 +76,6 @@ public class WorkbasketSqlProvider {
         + "SELECT "
         + commonSelectFields(false)
         + " FROM WORKBASKET WHERE UPPER(KEY) = UPPER(#{key}) and UPPER(DOMAIN) = UPPER(#{domain}) "
-        + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -89,7 +85,6 @@ public class WorkbasketSqlProvider {
         + commonSelectFields(true)
         + " FROM WORKBASKET "
         + "WHERE ID IN (SELECT TARGET_ID FROM DISTRIBUTION_TARGETS WHERE SOURCE_ID = #{id}) "
-        + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -99,14 +94,12 @@ public class WorkbasketSqlProvider {
         + commonSelectFields(true)
         + " FROM WORKBASKET "
         + "WHERE ID IN (SELECT SOURCE_ID FROM DISTRIBUTION_TARGETS WHERE TARGET_ID = #{id}) "
-        + "<if test=\"_databaseId == 'db2'\">with UR </if> "
         + CLOSING_SCRIPT_TAG;
   }
 
   public static String findAll() {
     return OPENING_SCRIPT_TAG
         + "SELECT * FROM WORKBASKET ORDER BY ID "
-        + "<if test=\"_databaseId == 'db2'\">with UR </if> "
         + CLOSING_SCRIPT_TAG;
   }
 

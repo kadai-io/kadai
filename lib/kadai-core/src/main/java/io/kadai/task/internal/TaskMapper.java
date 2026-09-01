@@ -48,7 +48,6 @@ public interface TaskMapper {
           + "CUSTOM_INT_1, CUSTOM_INT_2, CUSTOM_INT_3, CUSTOM_INT_4, CUSTOM_INT_5, CUSTOM_INT_6, CUSTOM_INT_7, CUSTOM_INT_8, NUMBER_OF_COMMENTS "
           + "FROM TASK "
           + "WHERE ID = #{id} "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   @Result(property = "id", column = "ID")
   @Result(property = "externalId", column = "EXTERNAL_ID")
@@ -218,7 +217,6 @@ public interface TaskMapper {
           + "<if test='taskIds != null'>ID IN(<foreach item='item' collection='taskIds' separator=',' >#{item}</foreach>)</if> "
           + "<if test='externalIds != null'>EXTERNAL_ID IN(<foreach item='item' collection='externalIds' separator=',' >#{item}</foreach>)</if> "
           + "</where> "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   @Result(property = "taskId", column = "ID")
   @Result(property = "externalId", column = "EXTERNAL_ID")
@@ -295,7 +293,6 @@ public interface TaskMapper {
       "<script>SELECT ID, PLANNED, STATE FROM TASK "
           + "WHERE ID IN(<foreach item='item' collection='taskIds' separator=',' >#{item}</foreach>) "
           + "AND STATE IN ( 'READY','CLAIMED') "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   @Result(property = "left", column = "ID")
   @Result(
@@ -345,7 +342,6 @@ public interface TaskMapper {
   @Select(
       "<script>SELECT ID FROM TASK "
           + "WHERE COMPLETED &lt;= #{completedBefore} "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if>"
           + "</script>")
   List<String> findTasksCompletedBefore(@Param("completedBefore") Instant completedBefore);
 
@@ -373,7 +369,6 @@ public interface TaskMapper {
           + "WHERE t.COMPLETED &lt;= #{completedBefore} "
           + "AND (t.PARENT_BUSINESS_PROCESS_ID IS NULL "
           + "OR CHARACTER_LENGTH(t.PARENT_BUSINESS_PROCESS_ID) = 0) "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if>"
           + "</script>")
   List<String> findTasksCompletedBeforeWithParentBusinessProcessConstraint(
       @Param("completedBefore") Instant completedBefore);
