@@ -734,6 +734,8 @@ describe('TaskProcessingComponent', () => {
       fixture.detectChanges();
 
       expect(component.address).toBe('http://app-b.com');
+      expect(store.selectSnapshot(TaskSelectors.getSelectedTask)?.taskId).toBe('task-b');
+      expect(component.task()?.taskId).toBe('task-b');
 
       vi.useRealTimers();
     });
