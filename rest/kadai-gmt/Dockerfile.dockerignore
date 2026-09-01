@@ -1,5 +1,9 @@
 .git
 .github
 **/target
-web/**
-
+web/.angular
+web/coverage
+web/cypress/screenshots
+web/cypress/videos
+web/dist
+web/node_modules
