@@ -38,6 +38,7 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import io.kadai.KadaiConfiguration;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.models.ClassificationSummary;
+import io.kadai.classification.internal.models.ClassificationSummaryImpl;
 import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.internal.util.Pair;
@@ -47,6 +48,7 @@ import io.kadai.task.api.TaskService;
 import io.kadai.task.api.TaskState;
 import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
+import io.kadai.task.api.models.Attachment;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.api.models.TaskSummary;
@@ -372,6 +374,111 @@ class UpdateTaskAccTest {
     assertThat(task.getPlanned()).isEqualTo(updatedTask.getPlanned());
     assertThat(task.getName()).isEqualTo(updatedTask.getName());
     assertThat(task.getDescription()).isEqualTo(updatedTask.getDescription());
+  }
+
+  @WithAccessId(user = "user-1-2")
+  @Test
+  void should_PreserveSchedule_When_UpdatingTaskWithoutSchedulingDates() throws Exception {
+    Task task =
+        TaskBuilder.newTask()
+            .classificationSummary(defaultClassificationSummary)
+            .workbasketSummary(defaultWorkbasketSummary)
+            .primaryObjRef(defaultObjectReference)
+            .buildAndStore(taskService, "admin");
+    final Instant oldPlanned = task.getPlanned();
+    final Instant oldDue = task.getDue();
+
+    task.setPlanned(null);
+    task.setDue(null);
+    task.setNote("updated without scheduling dates");
+    Task updatedTask = taskService.updateTask(task);
+
+    assertThat(updatedTask.getPlanned()).isEqualTo(oldPlanned);
+    assertThat(updatedTask.getDue()).isEqualTo(oldDue);
+  }
+
+  @WithAccessId(user = "user-1-2")
+  @Test
+  void should_RecalculateDueFromOldPlanned_When_ClassificationChangesWithoutDates()
+      throws Exception {
+    ClassificationSummary newClassificationSummary =
+        defaultTestClassification()
+            .serviceLevel("P3D")
+            .buildAndStoreAsSummary(classificationService, "admin");
+    Task task =
+        TaskBuilder.newTask()
+            .classificationSummary(defaultClassificationSummary)
+            .workbasketSummary(defaultWorkbasketSummary)
+            .primaryObjRef(defaultObjectReference)
+            .planned(Instant.parse("2024-01-02T10:00:00Z"))
+            .buildAndStore(taskService, "admin");
+    final Instant oldPlanned = task.getPlanned();
+    final Instant oldDue = task.getDue();
+
+    task.setClassificationKey(newClassificationSummary.getKey());
+    task.setPlanned(null);
+    task.setDue(null);
+    Task updatedTask = taskService.updateTask(task);
+
+    assertThat(updatedTask.getPlanned()).isEqualTo(oldPlanned);
+    assertThat(updatedTask.getDue()).isAfter(oldDue);
+  }
+
+  @WithAccessId(user = "user-1-2")
+  @Test
+  void should_UsePersistedClassification_When_UpdatedClassificationSummaryIsIncomplete()
+      throws Exception {
+    Task task =
+        TaskBuilder.newTask()
+            .classificationSummary(defaultClassificationSummary)
+            .workbasketSummary(defaultWorkbasketSummary)
+            .primaryObjRef(defaultObjectReference)
+            .buildAndStore(taskService, "admin");
+    ClassificationSummaryImpl incompleteClassificationSummary = new ClassificationSummaryImpl();
+    incompleteClassificationSummary.setKey(defaultClassificationSummary.getKey());
+    ((TaskImpl) task).setClassificationSummary(incompleteClassificationSummary);
+
+    Task updatedTask = taskService.updateTask(task);
+
+    assertThat(updatedTask.getClassificationSummary()).isEqualTo(defaultClassificationSummary);
+  }
+
+  @WithAccessId(user = "user-1-2")
+  @Test
+  void should_RecalculateScheduleFromAttachmentClassification_When_DatesAreNotProvided()
+      throws Exception {
+    ClassificationSummary attachmentClassification =
+        defaultTestClassification()
+            .serviceLevel("P2D")
+            .priority(5)
+            .buildAndStoreAsSummary(classificationService, "admin");
+    Attachment attachment = taskService.newAttachment();
+    attachment.setClassificationSummary(attachmentClassification);
+    attachment.setObjectReference(defaultObjectReference);
+    Task task =
+        TaskBuilder.newTask()
+            .classificationSummary(defaultClassificationSummary)
+            .workbasketSummary(defaultWorkbasketSummary)
+            .primaryObjRef(defaultObjectReference)
+            .attachments(attachment)
+            .buildAndStore(taskService, "admin");
+    final Instant oldPlanned = task.getPlanned();
+    final Instant oldDue = task.getDue();
+    ClassificationSummary urgentAttachmentClassification =
+        defaultTestClassification()
+            .serviceLevel("PT0S")
+            .priority(7)
+            .buildAndStoreAsSummary(classificationService, "admin");
+
+    task.getAttachments().get(0).setClassificationSummary(urgentAttachmentClassification);
+    task.setPlanned(null);
+    task.setDue(null);
+    Task updatedTask = taskService.updateTask(task);
+
+    assertThat(updatedTask.getPlanned()).isEqualTo(oldPlanned);
+    assertThat(updatedTask.getDue()).isEqualTo(oldPlanned);
+    assertThat(updatedTask.getDue()).isNotEqualTo(oldDue);
+    assertThat(updatedTask.getPriority()).isEqualTo(7);
   }
 
   @WithAccessId(user = "user-1-2")
