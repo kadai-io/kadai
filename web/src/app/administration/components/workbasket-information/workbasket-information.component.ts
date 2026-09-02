@@ -61,6 +61,7 @@ import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MapValuesPipe } from '../../../shared/pipes/map-values.pipe';
 import { RemoveNoneTypePipe } from '../../../shared/pipes/remove-empty-type.pipe';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { OverflowFeedbackDirective } from 'app/shared/directives/overflow-feedback.directive';
 
 @Component({
   selector: 'kadai-administration-workbasket-information',
@@ -82,7 +83,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
     MatError,
     AsyncPipe,
     MapValuesPipe,
-    RemoveNoneTypePipe
+    RemoveNoneTypePipe,
+    OverflowFeedbackDirective
   ]
 })
 export class WorkbasketInformationComponent implements OnInit, OnDestroy {
