@@ -67,6 +67,7 @@ import { MatSelect, MatSelectTrigger } from '@angular/material/select';
 import { SvgIconComponent } from 'angular-svg-icon';
 import { MatOption } from '@angular/material/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { OverflowFeedbackDirective } from 'app/shared/directives/overflow-feedback.directive';
 
 @Component({
   selector: 'kadai-administration-classification-details',
@@ -92,7 +93,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
     MatSelectTrigger,
     SvgIconComponent,
     MatOption,
-    AsyncPipe
+    AsyncPipe,
+    OverflowFeedbackDirective
   ]
 })
 export class ClassificationDetailsComponent implements OnInit, OnDestroy {
