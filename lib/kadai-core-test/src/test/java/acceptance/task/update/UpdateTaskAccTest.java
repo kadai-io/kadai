@@ -428,7 +428,7 @@ class UpdateTaskAccTest {
   @Test
   void should_UsePersistedClassification_When_UpdatedClassificationSummaryIsIncomplete()
       throws Exception {
-    Task task =
+    final Task task =
         TaskBuilder.newTask()
             .classificationSummary(defaultClassificationSummary)
             .workbasketSummary(defaultWorkbasketSummary)
@@ -436,11 +436,46 @@ class UpdateTaskAccTest {
             .buildAndStore(taskService, "admin");
     ClassificationSummaryImpl incompleteClassificationSummary = new ClassificationSummaryImpl();
     incompleteClassificationSummary.setKey(defaultClassificationSummary.getKey());
+    incompleteClassificationSummary.setServiceLevel("P30D");
+    incompleteClassificationSummary.setPriority(999);
     ((TaskImpl) task).setClassificationSummary(incompleteClassificationSummary);
 
     Task updatedTask = taskService.updateTask(task);
 
     assertThat(updatedTask.getClassificationSummary()).isEqualTo(defaultClassificationSummary);
+  }
+
+  @WithAccessId(user = "user-1-2")
+  @Test
+  void should_UsePersistedClassificationMetadata_When_UpdatedClassificationHasSameKey()
+      throws Exception {
+    ClassificationSummary persistedClassificationSummary =
+        defaultTestClassification()
+            .serviceLevel("PT2H")
+            .priority(10)
+            .buildAndStoreAsSummary(classificationService, "admin");
+    final Task task =
+        TaskBuilder.newTask()
+            .classificationSummary(persistedClassificationSummary)
+            .workbasketSummary(defaultWorkbasketSummary)
+            .primaryObjRef(defaultObjectReference)
+            .planned(Instant.parse("2024-01-02T10:00:00Z"))
+            .buildAndStore(taskService, "admin");
+    final Instant expectedDue = task.getDue();
+
+    ClassificationSummaryImpl forgedClassificationSummary = new ClassificationSummaryImpl();
+    forgedClassificationSummary.setId(persistedClassificationSummary.getId());
+    forgedClassificationSummary.setKey(persistedClassificationSummary.getKey());
+    forgedClassificationSummary.setServiceLevel("P30D");
+    forgedClassificationSummary.setPriority(999);
+    ((TaskImpl) task).setClassificationSummary(forgedClassificationSummary);
+    task.setNote("updated unrelated property");
+
+    Task updatedTask = taskService.updateTask(task);
+
+    assertThat(updatedTask.getClassificationSummary()).isEqualTo(persistedClassificationSummary);
+    assertThat(updatedTask.getPriority()).isEqualTo(10);
+    assertThat(updatedTask.getDue()).isEqualTo(expectedDue);
   }
 
   @WithAccessId(user = "user-1-2")

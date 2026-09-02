@@ -2812,19 +2812,18 @@ public class TaskServiceImpl implements TaskService {
       throws ClassificationNotFoundException {
     ClassificationSummary oldClassificationSummary = oldTaskImpl.getClassificationSummary();
     ClassificationSummary newClassificationSummary = newTaskImpl.getClassificationSummary();
-    if (newClassificationSummary == null) {
-      newClassificationSummary = oldClassificationSummary;
+    if (newClassificationSummary == null
+        || Objects.equals(oldClassificationSummary.getKey(), newClassificationSummary.getKey())) {
+      // A task update may only select a classification by key; its metadata is authoritative only
+      // when it comes from the persisted classification.
+      newTaskImpl.setClassificationSummary(oldClassificationSummary);
+      return;
     }
-    // Resolve incomplete incoming summaries before service-level calculation due to weak types
-    if (!oldClassificationSummary.getKey().equals(newClassificationSummary.getKey())
-        || newClassificationSummary.getServiceLevel() == null
-        || newClassificationSummary.getServiceLevel().isEmpty()) {
-      Classification newClassification =
-          this.classificationService.getClassification(
-              newClassificationSummary.getKey(), newTaskImpl.getWorkbasketSummary().getDomain());
-      newClassificationSummary = newClassification.asSummary();
-      newTaskImpl.setClassificationSummary(newClassificationSummary);
-    }
+
+    Classification newClassification =
+        this.classificationService.getClassification(
+            newClassificationSummary.getKey(), newTaskImpl.getWorkbasketSummary().getDomain());
+    newTaskImpl.setClassificationSummary(newClassification.asSummary());
   }
 
   private void addOwnerAndCreatorLongNames(TaskSummaryImpl task) {
