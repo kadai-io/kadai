@@ -110,10 +110,6 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   badgeMessage$: Observable<string> = inject(Store).select(ClassificationSelectors.getBadgeMessage);
   customFields$!: Observable<CustomField[]>;
   readonly lengthError = 'You have reached the maximum length for this field';
-  inputOverflowMap = toSignal(inject(FormsValidatorService).inputOverflowObservable, {
-    initialValue: new Map<string, boolean>()
-  });
-  validateInputOverflow!: Function;
   requestInProgress = toSignal(inject(RequestInProgressService).getRequestInProgress(), { initialValue: false });
   classificationForm = viewChild<NgForm>('ClassificationForm');
   toggleValidationMap = new Map<string, boolean>();
@@ -142,10 +138,6 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.store.dispatch(new SelectClassification(this.classification()!.classificationId!));
       });
-
-    this.validateInputOverflow = (inputFieldModel: NgModel, maxLength: number) => {
-      this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
-    };
   }
 
   isFieldValid(field: string): boolean {

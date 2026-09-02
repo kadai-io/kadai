@@ -96,10 +96,6 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
   toggleValidationMap = new Map<string, boolean>();
   isOwnerValid: boolean = true;
   readonly lengthError = 'You have reached the maximum length for this field';
-  inputOverflowMap = toSignal(inject(FormsValidatorService).inputOverflowObservable, {
-    initialValue: new Map<string, boolean>()
-  });
-  validateInputOverflow!: Function;
   customFields$!: Observable<CustomField[]>;
   destroy$ = new Subject<void>();
   private store = inject(Store);
@@ -136,11 +132,6 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
       map((customisation) => customisation?.information ?? ({} as CustomFields)),
       getCustomFields(customFieldCount)
     );
-    this.validateInputOverflow = (inputFieldModel: NgModel, maxLength: number) => {
-      if (typeof inputFieldModel.value !== 'undefined') {
-        this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
-      }
-    };
     this.buttonAction$
       .pipe(takeUntil(this.destroy$))
       .pipe(filter((buttonAction) => typeof buttonAction !== 'undefined'))

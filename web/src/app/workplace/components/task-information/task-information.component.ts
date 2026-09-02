@@ -94,10 +94,6 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
   isClassificationEmpty!: boolean;
   isOwnerValid: boolean = true;
   readonly lengthError = 'You have reached the maximum length';
-  inputOverflowMap = toSignal(inject(FormsValidatorService).inputOverflowObservable, {
-    initialValue: new Map<string, boolean>()
-  });
-  validateInputOverflow!: Function;
   tasksCustomisation$: Observable<TasksCustomisation | undefined> = inject(Store).select(
     EngineConfigurationSelectors.tasksCustomisation
   );
@@ -116,9 +112,6 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.getClassificationByDomain();
-    this.validateInputOverflow = (inputFieldModel: NgModel, maxLength: number) => {
-      this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
-    };
   }
 
   isFieldValid(field: string): boolean {
