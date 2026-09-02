@@ -27,11 +27,11 @@ export class RequestInProgressService {
   private readonly requestInProgressSubject = new BehaviorSubject<boolean>(false);
 
   setRequestInProgress(value: boolean) {
-    if(value) {
+    if (value) {
       this.activeRequestsCount++;
-      if(this.activeRequestsCount === 1) {
+      if (this.activeRequestsCount === 1) {
         this.requestInProgressSubject.next(true);
-      } 
+      }
     } else {
       if (this.activeRequestsCount > 0) {
         this.activeRequestsCount--;
@@ -45,8 +45,6 @@ export class RequestInProgressService {
   }
 
   getRequestInProgress(): Observable<boolean> {
-    return this.requestInProgressSubject.asObservable().pipe(
-      distinctUntilChanged()
-    );
+    return this.requestInProgressSubject.asObservable().pipe(distinctUntilChanged());
   }
 }

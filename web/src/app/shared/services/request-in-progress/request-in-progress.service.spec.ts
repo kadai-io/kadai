@@ -105,8 +105,8 @@ describe('RequestInProgressService', () => {
       const emittedValues: boolean[] = [];
       service.getRequestInProgress().subscribe((v) => emittedValues.push(v));
 
-      service.setRequestInProgress(false); 
-      service.setRequestInProgress(true);  
+      service.setRequestInProgress(false);
+      service.setRequestInProgress(true);
       service.setRequestInProgress(false);
 
       expect(emittedValues).toEqual([false, true, false]);
