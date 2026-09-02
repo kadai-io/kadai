@@ -56,6 +56,7 @@ import {
 } from '@angular/material/datepicker';
 import { Store } from '@ngxs/store';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { OverflowFeedbackDirective } from 'app/shared/directives/overflow-feedback.directive';
 
 @Component({
   selector: 'kadai-task-information',
@@ -78,7 +79,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
     FieldErrorDisplayComponent,
     TypeAheadComponent,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    OverflowFeedbackDirective
   ]
 })
 export class TaskInformationComponent implements OnInit, OnDestroy {
