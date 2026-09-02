@@ -2815,7 +2815,10 @@ public class TaskServiceImpl implements TaskService {
     if (newClassificationSummary == null) {
       newClassificationSummary = oldClassificationSummary;
     }
-    if (!oldClassificationSummary.getKey().equals(newClassificationSummary.getKey())) {
+    // Resolve incomplete incoming summaries before service-level calculation due to weak types
+    if (!oldClassificationSummary.getKey().equals(newClassificationSummary.getKey())
+        || newClassificationSummary.getServiceLevel() == null
+        || newClassificationSummary.getServiceLevel().isEmpty()) {
       Classification newClassification =
           this.classificationService.getClassification(
               newClassificationSummary.getKey(), newTaskImpl.getWorkbasketSummary().getDomain());
