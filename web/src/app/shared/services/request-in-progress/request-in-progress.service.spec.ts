@@ -38,6 +38,14 @@ describe('RequestInProgressService', () => {
     expect(result).toBeInstanceOf(Observable);
   });
 
+  it('should emit initial value (false) upon subscription', () => {
+    let emitted: boolean | undefined;
+    service.getRequestInProgress().subscribe((value) => {
+      emitted = value;
+    });
+    expect(emitted).toBe(false);
+  });
+
   it('should emit true when setRequestInProgress(true) is called', () => {
     let emitted: boolean | undefined;
     service.getRequestInProgress().subscribe((value) => {
@@ -64,14 +72,44 @@ describe('RequestInProgressService', () => {
     service.setRequestInProgress(true);
     service.setRequestInProgress(false);
     service.setRequestInProgress(true);
-    expect(emittedValues).toEqual([true, false, true]);
+    expect(emittedValues).toEqual([false, true, false, true]);
   });
 
-  it('multiple subscribers should all receive the emitted value', () => {
-    const values: boolean[] = [];
-    service.getRequestInProgress().subscribe((v) => values.push(v));
-    service.getRequestInProgress().subscribe((v) => values.push(v));
+  it('multiple subscribers should all receive current and emitted values', () => {
+    const values1: boolean[] = [];
+    const values2: boolean[] = [];
+
+    service.getRequestInProgress().subscribe((v) => values1.push(v));
     service.setRequestInProgress(true);
-    expect(values).toEqual([true, true]);
+    service.getRequestInProgress().subscribe((v) => values2.push(v));
+    service.setRequestInProgress(true);
+
+    expect(values1).toEqual([false, true]);
+    expect(values2).toEqual([true]);
+  });
+
+  describe('Reference Counting (Overlap Safety)', () => {
+    it('should stay true during overlapping requests and emit false only when active count reaches 0', () => {
+      const emittedValues: boolean[] = [];
+      service.getRequestInProgress().subscribe((v) => emittedValues.push(v));
+
+      service.setRequestInProgress(true);
+      service.setRequestInProgress(true);
+      service.setRequestInProgress(false);
+      service.setRequestInProgress(false);
+
+      expect(emittedValues).toEqual([false, true, false]);
+    });
+
+    it('should not let counter drop below zero if setRequestInProgress(false) is called redundantly', () => {
+      const emittedValues: boolean[] = [];
+      service.getRequestInProgress().subscribe((v) => emittedValues.push(v));
+
+      service.setRequestInProgress(false); 
+      service.setRequestInProgress(true);  
+      service.setRequestInProgress(false);
+
+      expect(emittedValues).toEqual([false, true, false]);
+    });
   });
 });

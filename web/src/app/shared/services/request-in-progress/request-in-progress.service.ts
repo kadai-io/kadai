@@ -17,19 +17,36 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RequestInProgressService {
-  public requestInProgressTriggered = new Subject<boolean>();
+  private activeRequestsCount = 0;
+  private readonly requestInProgressSubject = new BehaviorSubject<boolean>(false);
 
   setRequestInProgress(value: boolean) {
-    this.requestInProgressTriggered.next(value);
+    if(value) {
+      this.activeRequestsCount++;
+      if(this.activeRequestsCount === 1) {
+        this.requestInProgressSubject.next(true);
+      } 
+    } else {
+      if (this.activeRequestsCount > 0) {
+        this.activeRequestsCount--;
+      }
+      if (this.activeRequestsCount === 0) {
+        this.requestInProgressSubject.next(false);
+      }
+    }
+
+    this.requestInProgressSubject.next(value);
   }
 
   getRequestInProgress(): Observable<boolean> {
-    return this.requestInProgressTriggered.asObservable();
+    return this.requestInProgressSubject.asObservable().pipe(
+      distinctUntilChanged()
+    );
   }
 }
