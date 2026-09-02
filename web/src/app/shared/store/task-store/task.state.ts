@@ -18,9 +18,8 @@
 
 import { Action, State, StateContext, Store } from '@ngxs/store';
 import { finalize, take, tap } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
+import { defer, Observable, of } from 'rxjs';
 import { inject, Injectable } from '@angular/core';
-
 import { TaskService } from '../../../workplace/services/task.service';
 import { Task } from '../../../workplace/models/task';
 import { ObjectReference } from '../../../workplace/models/object-reference';
@@ -80,11 +79,14 @@ export class TaskWorkflowState {
   private readonly store = inject(Store);
 
   private withRequestInProgress<T>(source: Observable<T>): Observable<T> {
-    this.requestInProgressService.setRequestInProgress(true);
-    return source.pipe(
-      take(1),
-      finalize(() => this.requestInProgressService.setRequestInProgress(false))
-    );
+    return defer(() => {
+      this.requestInProgressService.setRequestInProgress(true);
+
+      return source.pipe(
+        take(1),
+        finalize(() => this.requestInProgressService.setRequestInProgress(false))
+      );
+    });
   }
 
   @Action(LoadTasks)
