@@ -29,7 +29,7 @@
               <label for="task-custom-{{i + 1}}"></label>
               <input #custom="ngModel" 
                      [kadaiOverflowFeedback]="255"
-                     #customFieldOverflow{{i + 1}}="overflowFeedback"
+                     #customFieldOverflow="overflowFeedback"
                      [(ngModel)]="task()![customField]"
                      id="task-custom-{{i + 1}}" 
                      matInput
@@ -38,7 +38,7 @@
                      placeholder="Custom {{i + 1}}"
                      type="text">
             </mat-form-field>
-            @if (customFieldOverflow{{i + 1}}.isOverflowed()) {
+            @if (customFieldOverflow.isOverflowed()) {
               <div class="error">{{ lengthError }}</div>
             }
           </div>

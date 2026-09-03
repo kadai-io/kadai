@@ -22,6 +22,7 @@ import { Task } from 'app/workplace/models/task';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
+import { OverflowFeedbackDirective } from 'app/shared/directives/overflow-feedback.directive';
 
 type TaskCustomField = `custom${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16}`;
 
@@ -29,7 +30,7 @@ type TaskCustomField = `custom${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
   selector: 'kadai-task-custom-fields',
   templateUrl: './task-custom-fields.component.html',
   styleUrls: ['./task-custom-fields.component.scss'],
-  imports: [MatFormField, MatLabel, MatInput, FormsModule]
+  imports: [MatFormField, MatLabel, MatInput, FormsModule, OverflowFeedbackDirective]
 })
 export class TaskCustomFieldsComponent implements OnInit {
   task = model<Task>();
