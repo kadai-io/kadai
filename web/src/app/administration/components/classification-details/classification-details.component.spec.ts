@@ -59,15 +59,9 @@ const domainServiceSpy: Partial<DomainService> = {
   getSelectedDomain: vi.fn().mockReturnValue(of('A'))
 };
 
-const inputOverflowSubject = new Subject<Map<string, boolean>>();
-
 const formsValidatorServiceSpy: Partial<FormsValidatorService> = {
   isFieldValid: vi.fn().mockReturnValue(true),
-  validateInputOverflow: vi.fn(),
-  validateFormInformation: vi.fn().mockImplementation((): Promise<any> => Promise.resolve(true)),
-  get inputOverflowObservable(): Observable<Map<string, boolean>> {
-    return inputOverflowSubject.asObservable();
-  }
+  validateFormInformation: vi.fn().mockImplementation((): Promise<any> => Promise.resolve(true))
 };
 
 const notificationServiceSpy: Partial<NotificationService> = {
@@ -400,44 +394,66 @@ describe('ClassificationDetailsComponent', () => {
     expect(badge).toBeFalsy();
   });
 
-  it('should call validateInputOverflow when key input fires input event', () => {
-    const keyInput = debugElement.nativeElement.querySelector('#classification-key');
+  it('should show overflow error when key exceeds character limit', () => {
+    const keyInput: HTMLInputElement = debugElement.nativeElement.querySelector('#classification-key');
     expect(keyInput).toBeTruthy();
-    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+
+    keyInput.value = 'a'.repeat(33);
     keyInput.dispatchEvent(new Event('input'));
-    expect(validateSpy).toHaveBeenCalled();
+    fixture.detectChanges();
+
+    const errorEl = debugElement.nativeElement.querySelector('.error');
+    expect(errorEl).toBeTruthy();
   });
 
-  it('should call validateInputOverflow when name input fires input event', () => {
-    const nameInput = debugElement.nativeElement.querySelector('#classification-name');
+  it('should show overflow error when name exceeds character limit', () => {
+    const nameInput: HTMLInputElement = debugElement.nativeElement.querySelector('#classification-name');
     expect(nameInput).toBeTruthy();
-    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+
+    nameInput.value = 'a'.repeat(256);
     nameInput.dispatchEvent(new Event('input'));
-    expect(validateSpy).toHaveBeenCalled();
+    fixture.detectChanges();
+
+    const errorEl = debugElement.nativeElement.querySelector('.error');
+    expect(errorEl).toBeTruthy();
   });
 
-  it('should call validateInputOverflow when description textarea fires input event', () => {
-    const descInput = debugElement.nativeElement.querySelector('#classification-description');
+  it('should show overflow error when description textarea exceeds character limit', () => {
+    const descInput: HTMLTextAreaElement = debugElement.nativeElement.querySelector('#classification-description');
     expect(descInput).toBeTruthy();
-    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+
+    descInput.value = 'a'.repeat(256);
     descInput.dispatchEvent(new Event('input'));
-    expect(validateSpy).toHaveBeenCalled();
+    fixture.detectChanges();
+
+    const errorEl = debugElement.nativeElement.querySelector('.error');
+    expect(errorEl).toBeTruthy();
   });
 
-  it('should call validateInputOverflow when service level input fires input event', () => {
-    const slInput = debugElement.nativeElement.querySelector('#classification-service-level');
+  it('should show overflow error when service level exceeds character limit', () => {
+    const slInput: HTMLInputElement = debugElement.nativeElement.querySelector('#classification-service-level');
     expect(slInput).toBeTruthy();
-    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+
+    slInput.value = 'a'.repeat(256);
     slInput.dispatchEvent(new Event('input'));
-    expect(validateSpy).toHaveBeenCalled();
+    fixture.detectChanges();
+
+    const errorEl = debugElement.nativeElement.querySelector('.error');
+    expect(errorEl).toBeTruthy();
   });
 
-  it('should call validateInputOverflow when app entry point input fires input event', () => {
-    const aepInput = debugElement.nativeElement.querySelector('#classification-application-entry-point');
+  it('should show overflow error when app entry point exceeds character limit', () => {
+    const aepInput: HTMLInputElement = debugElement.nativeElement.querySelector(
+      '#classification-application-entry-point'
+    );
     expect(aepInput).toBeTruthy();
-    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
+
+    aepInput.value = 'a'.repeat(256);
     aepInput.dispatchEvent(new Event('input'));
-    expect(validateSpy).toHaveBeenCalled();
+    fixture.detectChanges();
+
+    const errorEl = debugElement.nativeElement.querySelector('.error');
+    expect(errorEl).toBeTruthy();
   });
 
   it('should call validChanged when valid-in-domain icon is clicked', () => {
@@ -456,51 +472,9 @@ describe('ClassificationDetailsComponent', () => {
     expect(completeSpy).toHaveBeenCalled();
   });
 
-  it('should display error div for key input when inputOverflowMap has key entry true', () => {
-    inputOverflowSubject.next(new Map<string, boolean>([['classification.key', true]]));
+  it('should not display any error divs when limit is not exceeded for any field', () => {
     fixture.detectChanges();
-    const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
-    expect(errorDivs.length).toBeGreaterThan(0);
-  });
 
-  it('should display error div for name input when inputOverflowMap has name entry true', () => {
-    inputOverflowSubject.next(new Map<string, boolean>([['classification.name', true]]));
-    fixture.detectChanges();
-    const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
-    expect(errorDivs.length).toBeGreaterThan(0);
-  });
-
-  it('should display error div for description when inputOverflowMap has description entry true', () => {
-    inputOverflowSubject.next(new Map<string, boolean>([['classification.description', true]]));
-    fixture.detectChanges();
-    const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
-    expect(errorDivs.length).toBeGreaterThan(0);
-  });
-
-  it('should display error div for serviceLevel when inputOverflowMap has serviceLevel entry true', () => {
-    inputOverflowSubject.next(new Map<string, boolean>([['classification.serviceLevel', true]]));
-    fixture.detectChanges();
-    const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
-    expect(errorDivs.length).toBeGreaterThan(0);
-  });
-
-  it('should display error div for appEntryPoint when inputOverflowMap has appEntryPoint entry true', () => {
-    inputOverflowSubject.next(new Map<string, boolean>([['classification.applicationEntryPoint', true]]));
-    fixture.detectChanges();
-    const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
-    expect(errorDivs.length).toBeGreaterThan(0);
-  });
-
-  it('should display error div for custom field when inputOverflowMap has custom field entry true', () => {
-    inputOverflowSubject.next(new Map<string, boolean>([['classification.custom1', true]]));
-    fixture.detectChanges();
-    const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
-    expect(errorDivs.length).toBeGreaterThan(0);
-  });
-
-  it('should not display any error divs when inputOverflowMap is empty', () => {
-    inputOverflowSubject.next(new Map<string, boolean>());
-    fixture.detectChanges();
     const errorDivs = debugElement.nativeElement.querySelectorAll('.error');
     expect(errorDivs.length).toBe(0);
   });
