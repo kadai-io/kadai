@@ -16,14 +16,12 @@
  *
  */
 
-import { Component, inject, model, OnInit } from '@angular/core';
+import { Component, model, OnInit } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
-import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { FormsModule, NgModel } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 
 type TaskCustomField = `custom${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16}`;
 
@@ -36,18 +34,9 @@ type TaskCustomField = `custom${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
 export class TaskCustomFieldsComponent implements OnInit {
   task = model<Task>();
   readonly lengthError = 'You have reached the maximum length';
-  inputOverflowMap = toSignal(inject(FormsValidatorService).inputOverflowObservable, {
-    initialValue: new Map<string, boolean>()
-  });
-  validateKeypress!: Function;
   customFields!: TaskCustomField[];
-  private formsValidatorService = inject(FormsValidatorService);
 
   ngOnInit() {
-    this.validateKeypress = (inputFieldModel: NgModel, maxLength: number) => {
-      this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
-    };
-
     this.customFields = Object.keys(this.task() ?? {}).filter(
       (attribute) => attribute.startsWith('custom') && /\d/.test(attribute)
     ) as TaskCustomField[];
