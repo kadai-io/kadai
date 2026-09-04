@@ -212,7 +212,6 @@ public class MonitorMapperSqlProvider {
         + "</if> "
         + "</foreach>) "
         + CLOSING_WHERE_TAG
-        + "<if test=\"_databaseId == 'db2'\">with UR </if> "
         + CLOSING_SCRIPT_TAG;
   }
 

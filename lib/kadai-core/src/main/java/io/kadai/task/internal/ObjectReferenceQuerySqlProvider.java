@@ -20,7 +20,7 @@ package io.kadai.task.internal;
 
 import static io.kadai.common.internal.util.SqlProviderUtil.CLOSING_SCRIPT_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.CLOSING_WHERE_TAG;
-import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR;
+import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR_FOR_COLUMN_QUERY;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_SCRIPT_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_WHERE_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.whereIn;
@@ -37,7 +37,6 @@ public class ObjectReferenceQuerySqlProvider {
         + commonObjectReferenceWhereStatement()
         + CLOSING_WHERE_TAG
         + "ORDER BY COMPANY ASC, SYSTEM ASC, SYSTEM_INSTANCE ASC, TYPE ASC, VALUE ASC"
-        + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -48,7 +47,6 @@ public class ObjectReferenceQuerySqlProvider {
         + OPENING_WHERE_TAG
         + commonObjectReferenceWhereStatement()
         + CLOSING_WHERE_TAG
-        + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -59,7 +57,7 @@ public class ObjectReferenceQuerySqlProvider {
         + OPENING_WHERE_TAG
         + commonObjectReferenceWhereStatement()
         + CLOSING_WHERE_TAG
-        + DB2_WITH_UR
+        + DB2_WITH_UR_FOR_COLUMN_QUERY
         + CLOSING_SCRIPT_TAG;
   }
 

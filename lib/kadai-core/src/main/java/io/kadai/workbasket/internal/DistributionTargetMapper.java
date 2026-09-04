@@ -38,13 +38,11 @@ public interface DistributionTargetMapper {
 
   @Select(
       "<script>SELECT TARGET_ID FROM DISTRIBUTION_TARGETS WHERE SOURCE_ID = #{sourceId} "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   List<String> findBySourceId(@Param("sourceId") String sourceId);
 
   @Select(
       "<script>SELECT count(*) FROM DISTRIBUTION_TARGETS WHERE SOURCE_ID = #{sourceId} AND TARGET_ID = #{targetId}"
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   int getNumberOfDistributionTargets(
       @Param("sourceId") String sourceId, @Param("targetId") String targetId);
