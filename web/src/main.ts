@@ -24,7 +24,6 @@ import {
   provideZonelessChangeDetection
 } from '@angular/core';
 import { environment } from 'environments/environment';
-import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { StartupService } from 'app/shared/services/startup/startup.service';
 import { NotificationService } from './app/shared/services/notifications/notification.service';
 import {
@@ -77,7 +76,6 @@ export const tokenInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, n
 };
 
 export const httpClientInterceptor: HttpInterceptorFn = (request: HttpRequest<unknown>, next: HttpHandlerFn) => {
-  const requestInProgressService = inject(RequestInProgressService);
   const tokenExtractor = inject(HttpXsrfTokenExtractor);
   const notificationService = inject(NotificationService);
 
@@ -99,7 +97,6 @@ export const httpClientInterceptor: HttpInterceptorFn = (request: HttpRequest<un
     tap(
       () => {},
       (error) => {
-        requestInProgressService.setRequestInProgress(false);
         if (
           error.status !== 404 &&
           (!(error instanceof HttpErrorResponse) || (error.url ?? '').indexOf('environment-information.json') === -1)

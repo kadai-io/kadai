@@ -18,7 +18,7 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { Observable } from 'rxjs';
+import { finalize, Observable, Subject } from 'rxjs';
 import { RequestInProgressService } from './request-in-progress.service';
 
 describe('RequestInProgressService', () => {
@@ -115,6 +115,33 @@ describe('RequestInProgressService', () => {
       service.setRequestInProgress(false);
 
       expect(emittedValues).toEqual([false, true, false]);
+    });
+
+    it('should keep progress active when an overlapping request fails while another is still active', () => {
+      const emittedValues: boolean[] = [];
+      service.getRequestInProgress().subscribe((v) => emittedValues.push(v));
+
+      const requestA$ = new Subject<void>();
+      const requestB$ = new Subject<void>();
+
+      const track = <T>(source$: Subject<T>) => {
+        service.setRequestInProgress(true);
+        return source$.pipe(finalize(() => service.setRequestInProgress(false)));
+      };
+
+      const subA = track(requestA$).subscribe({ error: () => {} });
+      const subB = track(requestB$).subscribe();
+
+      expect(emittedValues).toEqual([false, true]);
+      requestA$.error(new Error('HTTP Error 500'));
+      expect(emittedValues[emittedValues.length - 1]).toBe(true);
+
+      requestB$.next();
+      requestB$.complete();
+      expect(emittedValues[emittedValues.length - 1]).toBe(false);
+
+      subA.unsubscribe();
+      subB.unsubscribe();
     });
   });
 });
