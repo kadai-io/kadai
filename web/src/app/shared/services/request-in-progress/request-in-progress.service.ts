@@ -40,8 +40,6 @@ export class RequestInProgressService {
         this.requestInProgressSubject.next(false);
       }
     }
-
-    this.requestInProgressSubject.next(value);
   }
 
   getRequestInProgress(): Observable<boolean> {

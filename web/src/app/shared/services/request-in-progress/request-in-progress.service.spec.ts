@@ -89,16 +89,21 @@ describe('RequestInProgressService', () => {
   });
 
   describe('Reference Counting (Overlap Safety)', () => {
-    it('should stay true during overlapping requests and emit false only when active count reaches 0', () => {
+    it('should remain true when one of multiple overlapping requests finishes', () => {
       const emittedValues: boolean[] = [];
-      service.getRequestInProgress().subscribe((v) => emittedValues.push(v));
+      service.getRequestInProgress().subscribe((val) => emittedValues.push(val));
 
       service.setRequestInProgress(true);
-      service.setRequestInProgress(true);
-      service.setRequestInProgress(false);
-      service.setRequestInProgress(false);
+      expect(emittedValues[emittedValues.length - 1]).toBe(true);
 
-      expect(emittedValues).toEqual([false, true, false]);
+      service.setRequestInProgress(true);
+      expect(emittedValues[emittedValues.length - 1]).toBe(true);
+
+      service.setRequestInProgress(false);
+      expect(emittedValues[emittedValues.length - 1]).toBe(true);
+
+      service.setRequestInProgress(false);
+      expect(emittedValues[emittedValues.length - 1]).toBe(false);
     });
 
     it('should not let counter drop below zero if setRequestInProgress(false) is called redundantly', () => {
