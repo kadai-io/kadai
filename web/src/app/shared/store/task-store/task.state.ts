@@ -80,11 +80,11 @@ export class TaskWorkflowState {
 
   private withRequestInProgress<T>(source: Observable<T>): Observable<T> {
     return defer(() => {
-      this.requestInProgressService.setRequestInProgress(true);
+      this.requestInProgressService.beginRequest();
 
       return source.pipe(
         take(1),
-        finalize(() => this.requestInProgressService.setRequestInProgress(false))
+        finalize(() => this.requestInProgressService.endRequest())
       );
     });
   }
