@@ -18,9 +18,8 @@
 
 import { Action, State, StateContext, Store } from '@ngxs/store';
 import { finalize, take, tap } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
+import { defer, Observable, of } from 'rxjs';
 import { inject, Injectable } from '@angular/core';
-
 import { TaskService } from '../../../workplace/services/task.service';
 import { Task } from '../../../workplace/models/task';
 import { ObjectReference } from '../../../workplace/models/object-reference';
@@ -80,11 +79,14 @@ export class TaskWorkflowState {
   private readonly store = inject(Store);
 
   private withRequestInProgress<T>(source: Observable<T>): Observable<T> {
-    this.requestInProgressService.setRequestInProgress(true);
-    return source.pipe(
-      take(1),
-      finalize(() => this.requestInProgressService.setRequestInProgress(false))
-    );
+    return defer(() => {
+      this.requestInProgressService.beginRequest();
+
+      return source.pipe(
+        take(1),
+        finalize(() => this.requestInProgressService.endRequest())
+      );
+    });
   }
 
   @Action(LoadTasks)
@@ -164,7 +166,7 @@ export class TaskWorkflowState {
 
   @Action(SelectTask)
   selectTask(ctx: StateContext<TaskWorkflowStateModel>, action: SelectTask): Observable<any> {
-    ctx.patchState({ selectedTask: action.task });
+    ctx.patchState({ selectedTask: action.task, activeTaskId: action.task?.taskId });
     return of(null);
   }
 
@@ -173,13 +175,19 @@ export class TaskWorkflowState {
     if (action.taskId === 'new-task') {
       this.requestInProgressService.setRequestInProgress(true);
       const newTask = new Task('', new ObjectReference(), ctx.getState().selectedWorkbasket);
-      ctx.patchState({ selectedTask: newTask });
+
+      ctx.patchState({ selectedTask: newTask, activeTaskId: 'new-task' });
       this.requestInProgressService.setRequestInProgress(false);
       return of(null);
     }
+
+    ctx.patchState({ activeTaskId: action.taskId });
+
     return this.withRequestInProgress(this.taskService.getTask(action.taskId)).pipe(
       tap((task) => {
-        ctx.patchState({ selectedTask: task });
+        if (ctx.getState().activeTaskId === action.taskId) {
+          ctx.patchState({ selectedTask: task });
+        }
       })
     );
   }
@@ -188,7 +196,7 @@ export class TaskWorkflowState {
   createTask(ctx: StateContext<TaskWorkflowStateModel>, action: CreateTask): Observable<any> {
     return this.withRequestInProgress(this.taskService.createTask(action.task)).pipe(
       tap((task) => {
-        ctx.patchState({ selectedTask: task });
+        ctx.patchState({ selectedTask: task, activeTaskId: task.taskId });
         this.notificationService.showSuccess('TASK_CREATE', { taskName: task.name });
         ctx.dispatch(new LoadTasks());
       })
@@ -197,11 +205,16 @@ export class TaskWorkflowState {
 
   @Action(UpdateTask)
   updateTask(ctx: StateContext<TaskWorkflowStateModel>, action: UpdateTask): Observable<any> {
+    const taskId = action.task.taskId;
+    ctx.patchState({ activeTaskId: taskId });
+
     return this.withRequestInProgress(this.taskService.updateTask(action.task)).pipe(
       tap((task) => {
-        ctx.patchState({ selectedTask: task });
-        this.notificationService.showSuccess('TASK_UPDATE', { taskName: task.name });
-        ctx.dispatch(new LoadTasks());
+        if (ctx.getState().activeTaskId === taskId) {
+          ctx.patchState({ selectedTask: task, activeTaskId: task.taskId });
+          this.notificationService.showSuccess('TASK_UPDATE', { taskName: task.name });
+          ctx.dispatch(new LoadTasks());
+        }
       })
     );
   }
@@ -211,7 +224,7 @@ export class TaskWorkflowState {
     return this.withRequestInProgress(this.taskService.deleteTask(action.task)).pipe(
       tap(() => {
         this.notificationService.showSuccess('TASK_DELETE', { taskName: action.task.name });
-        ctx.patchState({ selectedTask: undefined });
+        ctx.patchState({ selectedTask: undefined, activeTaskId: undefined });
         ctx.dispatch(new LoadTasks());
       })
     );
@@ -219,55 +232,75 @@ export class TaskWorkflowState {
 
   @Action(ClaimTask)
   claimTask(ctx: StateContext<TaskWorkflowStateModel>, action: ClaimTask): Observable<any> {
+    ctx.patchState({ activeTaskId: action.taskId });
+
     return this.withRequestInProgress(this.taskService.claimTask(action.taskId)).pipe(
       tap((task) => {
-        ctx.patchState({ selectedTask: task });
-        this.notificationService.showSuccess('TASK_CLAIM', { taskName: task.name });
-        ctx.dispatch(new LoadTasks());
+        if (ctx.getState().activeTaskId === action.taskId) {
+          ctx.patchState({ selectedTask: task, activeTaskId: task.taskId });
+          this.notificationService.showSuccess('TASK_CLAIM', { taskName: task.name });
+          ctx.dispatch(new LoadTasks());
+        }
       })
     );
   }
 
   @Action(CompleteTask)
   completeTask(ctx: StateContext<TaskWorkflowStateModel>, action: CompleteTask): Observable<any> {
+    ctx.patchState({ activeTaskId: action.taskId });
+
     return this.withRequestInProgress(this.taskService.completeTask(action.taskId)).pipe(
       tap((task) => {
-        ctx.patchState({ selectedTask: task });
-        this.notificationService.showSuccess('TASK_COMPLETE', { taskName: task.name });
-        ctx.dispatch(new LoadTasks());
+        if (ctx.getState().activeTaskId === action.taskId) {
+          ctx.patchState({ selectedTask: task, activeTaskId: task.taskId });
+          this.notificationService.showSuccess('TASK_COMPLETE', { taskName: task.name });
+          ctx.dispatch(new LoadTasks());
+        }
       })
     );
   }
 
   @Action(CancelClaimTask)
   cancelClaimTask(ctx: StateContext<TaskWorkflowStateModel>, action: CancelClaimTask): Observable<any> {
+    ctx.patchState({ activeTaskId: action.taskId });
+
     return this.withRequestInProgress(this.taskService.cancelClaimTask(action.taskId)).pipe(
       tap((task) => {
-        ctx.patchState({ selectedTask: task });
-        this.notificationService.showSuccess('TASK_CANCEL_CLAIM', { taskName: task.name });
-        ctx.dispatch(new LoadTasks());
+        if (ctx.getState().activeTaskId === action.taskId) {
+          ctx.patchState({ selectedTask: task, activeTaskId: task.taskId });
+          this.notificationService.showSuccess('TASK_CANCEL_CLAIM', { taskName: task.name });
+          ctx.dispatch(new LoadTasks());
+        }
       })
     );
   }
 
   @Action(TransferTask)
   transferTask(ctx: StateContext<TaskWorkflowStateModel>, action: TransferTask): Observable<any> {
+    ctx.patchState({ activeTaskId: action.taskId });
+
     return this.withRequestInProgress(this.taskService.transferTask(action.taskId, action.workbasketId)).pipe(
       tap((task) => {
-        ctx.patchState({ selectedTask: task });
-        this.notificationService.showSuccess('TASK_TRANSFER', { taskName: task.name });
-        ctx.dispatch(new LoadTasks());
+        if (ctx.getState().activeTaskId === action.taskId) {
+          ctx.patchState({ selectedTask: task, activeTaskId: task.taskId });
+          this.notificationService.showSuccess('TASK_TRANSFER', { taskName: task.name });
+          ctx.dispatch(new LoadTasks());
+        }
       })
     );
   }
 
   @Action(ReopenTask)
   reopenTask(ctx: StateContext<TaskWorkflowStateModel>, action: ReopenTask): Observable<any> {
+    ctx.patchState({ activeTaskId: action.taskId });
+
     return this.withRequestInProgress(this.taskService.reopenTask(action.taskId)).pipe(
       tap((task) => {
-        ctx.patchState({ selectedTask: task });
-        this.notificationService.showSuccess('TASK_REOPEN', { taskName: task.name });
-        ctx.dispatch(new LoadTasks());
+        if (ctx.getState().activeTaskId === action.taskId) {
+          ctx.patchState({ selectedTask: task, activeTaskId: task.taskId });
+          this.notificationService.showSuccess('TASK_REOPEN', { taskName: task.name });
+          ctx.dispatch(new LoadTasks());
+        }
       })
     );
   }
@@ -281,4 +314,5 @@ export interface TaskWorkflowStateModel {
   selectedSearchType: SearchType;
   sort: Sorting<TaskQuerySortParameter>;
   paging: QueryPagingParameter;
+  activeTaskId?: string;
 }

@@ -23,7 +23,20 @@ import { Task } from 'app/workplace/models/task';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
-import { firstValueFrom, Subscription } from 'rxjs';
+import {
+  catchError,
+  distinctUntilChanged,
+  EMPTY,
+  filter,
+  map,
+  Observable,
+  of,
+  Subject,
+  Subscription,
+  switchMap,
+  take,
+  takeUntil
+} from 'rxjs';
 import { ClassificationsService } from 'app/shared/services/classifications/classifications.service';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { MatButton } from '@angular/material/button';
@@ -43,6 +56,7 @@ import {
 } from '../../../shared/store/task-store/task.actions';
 import { TaskSelectors } from '../../../shared/store/task-store/task.selectors';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { Classification } from 'app/shared/models/classification';
 
 @Component({
   selector: 'kadai-task-processing',
@@ -73,29 +87,49 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
     const state = this.task()?.state;
     return !!state && state !== 'COMPLETED' && state !== 'CANCELLED' && state !== 'TERMINATED';
   });
+  destroy$ = new Subject();
 
   ngOnInit() {
-    this.routeSubscription = this.route.params.subscribe((params) => {
-      const { id } = params;
-      this.loadAndClaimTask(id);
-    });
+    this.routeSubscription = this.route.params
+      .pipe(
+        map((params) => params['id']),
+        distinctUntilChanged(),
+        switchMap((id) => {
+          if (!id) {
+            return EMPTY;
+          }
+          return this.loadAndClaimTask(id).pipe(
+            catchError((error) => {
+              return EMPTY;
+            })
+          );
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(({ task, classification }) => {
+        this.address = this.extractUrl(classification.applicationEntryPoint!) || `${this.address}?q=${task.name}`;
+        this.link.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.address));
+        this.getWorkbaskets();
+      });
   }
 
-  async loadAndClaimTask(id: string) {
-    await firstValueFrom(this.store.dispatch(new GetTask(id)));
-
-    const task = this.store.selectSnapshot(TaskSelectors.getSelectedTask)!;
-
-    if (this.canClaimTask()) {
-      await firstValueFrom(this.store.dispatch(new ClaimTask(id)));
-    }
-
-    const classification = await firstValueFrom(
-      this.classificationService.getClassification(task.classificationSummary!.classificationId!)
-    )!;
-    this.address = this.extractUrl(classification.applicationEntryPoint!) || `${this.address}?q=${task.name}`;
-    this.link.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.address));
-    this.getWorkbaskets();
+  loadAndClaimTask(id: string): Observable<{ task: Task; classification: Classification }> {
+    return this.store.dispatch(new GetTask(id)).pipe(
+      switchMap(() => this.store.select(TaskSelectors.getSelectedTask)),
+      filter((task): task is Task => !!task),
+      take(1),
+      switchMap((task) => {
+        if (this.canClaimTask()) {
+          return this.store.dispatch(new ClaimTask(id)).pipe(map(() => task));
+        }
+        return of(task);
+      }),
+      switchMap((task) =>
+        this.classificationService
+          .getClassification(task.classificationSummary!.classificationId!)
+          .pipe(map((classification) => ({ task, classification })))
+      )
+    );
   }
 
   getWorkbaskets() {

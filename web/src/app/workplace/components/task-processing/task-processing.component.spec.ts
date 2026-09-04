@@ -35,6 +35,8 @@ import { provideStore, Store } from '@ngxs/store';
 import { TaskWorkflowState } from '../../../shared/store/task-store/task.state';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
 import { ReopenTask, SelectTask } from '../../../shared/store/task-store/task.actions';
+import { Classification } from 'app/shared/models/classification';
+import { TaskSelectors } from 'app/shared/store/task-store/task.selectors';
 
 const makeTask = (overrides: Partial<Task> = {}): Task => {
   const task = new Task(
@@ -88,7 +90,11 @@ describe('TaskProcessingComponent', () => {
   };
   let mockWorkbasketService: { getAllWorkBaskets: ReturnType<typeof vi.fn> };
   let mockClassificationsService: { getClassification: ReturnType<typeof vi.fn> };
-  let mockRequestInProgressService: { setRequestInProgress: ReturnType<typeof vi.fn> };
+  let mockRequestInProgressService: {
+    setRequestInProgress: ReturnType<typeof vi.fn>;
+    beginRequest: ReturnType<typeof vi.fn>;
+    endRequest: ReturnType<typeof vi.fn>;
+  };
   let mockRouter: { navigate: ReturnType<typeof vi.fn> };
   let store: Store;
 
@@ -120,7 +126,9 @@ describe('TaskProcessingComponent', () => {
     };
 
     mockRequestInProgressService = {
-      setRequestInProgress: vi.fn()
+      setRequestInProgress: vi.fn(),
+      beginRequest: vi.fn(),
+      endRequest: vi.fn()
     };
 
     mockRouter = {
@@ -660,6 +668,89 @@ describe('TaskProcessingComponent', () => {
       }
       expect(localComponent.task()).toBeUndefined();
       localFixture.destroy();
+    });
+
+    it('should cancel unfinished workflow A when switching to task B and ignore late responses from A', () => {
+      vi.useFakeTimers();
+
+      const getTaskA$ = new Subject<Task>();
+      const getTaskB$ = new Subject<Task>();
+
+      const claimTaskA$ = new Subject<Task>();
+      const claimTaskB$ = new Subject<Task>();
+
+      const classificationA$ = new Subject<Classification>();
+      const classificationB$ = new Subject<Classification>();
+
+      const taskA = {
+        taskId: 'task-a',
+        name: 'Task A',
+        classificationSummary: { classificationId: 'class-a' }
+      } as Task;
+      const taskB = {
+        taskId: 'task-b',
+        name: 'Task B',
+        classificationSummary: { classificationId: 'class-b' }
+      } as Task;
+
+      vi.spyOn(component, 'canClaimTask').mockReturnValue(true);
+
+      vi.spyOn(mockTaskService, 'getTask').mockImplementation((id: string) => {
+        return id === 'task-a' ? getTaskA$ : getTaskB$;
+      });
+
+      vi.spyOn(mockTaskService, 'claimTask').mockImplementation((id: string) => {
+        return id === 'task-a' ? claimTaskA$ : claimTaskB$;
+      });
+
+      vi.spyOn(mockClassificationsService, 'getClassification').mockImplementation((id: string) => {
+        return id === 'class-a' ? classificationA$ : classificationB$;
+      });
+
+      // 1. start request A but do not complete
+      paramsSubject.next({ id: 'task-a' });
+      fixture.detectChanges();
+
+      getTaskA$.next(taskA);
+      getTaskA$.complete();
+      fixture.detectChanges();
+
+      // 2. start and fully complete request B
+      paramsSubject.next({ id: 'task-b' });
+      fixture.detectChanges();
+
+      getTaskB$.next(taskB);
+      getTaskB$.complete();
+
+      claimTaskB$.next(taskB);
+      claimTaskB$.complete();
+
+      classificationB$.next({ applicationEntryPoint: 'http://app-b.com' } as Classification);
+      classificationB$.complete();
+
+      vi.runAllTimers();
+      fixture.detectChanges();
+
+      // 3. assert intermediate result
+      expect(component.address).toBe('http://app-b.com');
+      expect(component.task()?.taskId).toBe('task-b');
+
+      // 4. fully complete request A - late Claim A and Classification A
+      claimTaskA$.next(taskA);
+      claimTaskA$.complete();
+
+      classificationA$.next({ applicationEntryPoint: 'http://app-a.com' } as Classification);
+      classificationA$.complete();
+
+      vi.runAllTimers();
+      fixture.detectChanges();
+
+      // 5. final assert
+      expect(component.address).toBe('http://app-b.com');
+      expect(store.selectSnapshot(TaskSelectors.getSelectedTask)?.taskId).toBe('task-b');
+      expect(component.task()?.taskId).toBe('task-b');
+
+      vi.useRealTimers();
     });
 
     it('should not render Reopen button when task state is TERMINATED', async () => {
