@@ -56,6 +56,7 @@ import {
 } from '@angular/material/datepicker';
 import { Store } from '@ngxs/store';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { OverflowFeedbackDirective } from 'app/shared/directives/overflow-feedback.directive';
 
 @Component({
   selector: 'kadai-task-information',
@@ -78,7 +79,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
     FieldErrorDisplayComponent,
     TypeAheadComponent,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    OverflowFeedbackDirective
   ]
 })
 export class TaskInformationComponent implements OnInit, OnDestroy {
@@ -92,10 +94,6 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
   isClassificationEmpty!: boolean;
   isOwnerValid: boolean = true;
   readonly lengthError = 'You have reached the maximum length';
-  inputOverflowMap = toSignal(inject(FormsValidatorService).inputOverflowObservable, {
-    initialValue: new Map<string, boolean>()
-  });
-  validateInputOverflow!: Function;
   tasksCustomisation$: Observable<TasksCustomisation | undefined> = inject(Store).select(
     EngineConfigurationSelectors.tasksCustomisation
   );
@@ -114,9 +112,6 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.getClassificationByDomain();
-    this.validateInputOverflow = (inputFieldModel: NgModel, maxLength: number) => {
-      this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
-    };
   }
 
   isFieldValid(field: string): boolean {

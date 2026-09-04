@@ -67,6 +67,7 @@ import { MatSelect, MatSelectTrigger } from '@angular/material/select';
 import { SvgIconComponent } from 'angular-svg-icon';
 import { MatOption } from '@angular/material/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { OverflowFeedbackDirective } from 'app/shared/directives/overflow-feedback.directive';
 
 @Component({
   selector: 'kadai-administration-classification-details',
@@ -92,7 +93,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
     MatSelectTrigger,
     SvgIconComponent,
     MatOption,
-    AsyncPipe
+    AsyncPipe,
+    OverflowFeedbackDirective
   ]
 })
 export class ClassificationDetailsComponent implements OnInit, OnDestroy {
@@ -108,10 +110,6 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   badgeMessage$: Observable<string> = inject(Store).select(ClassificationSelectors.getBadgeMessage);
   customFields$!: Observable<CustomField[]>;
   readonly lengthError = 'You have reached the maximum length for this field';
-  inputOverflowMap = toSignal(inject(FormsValidatorService).inputOverflowObservable, {
-    initialValue: new Map<string, boolean>()
-  });
-  validateInputOverflow!: Function;
   requestInProgress = toSignal(inject(RequestInProgressService).getRequestInProgress(), { initialValue: false });
   classificationForm = viewChild<NgForm>('ClassificationForm');
   toggleValidationMap = new Map<string, boolean>();
@@ -140,10 +138,6 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.store.dispatch(new SelectClassification(this.classification()!.classificationId!));
       });
-
-    this.validateInputOverflow = (inputFieldModel: NgModel, maxLength: number) => {
-      this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
-    };
   }
 
   isFieldValid(field: string): boolean {
