@@ -120,6 +120,7 @@ public class KadaiConfiguration {
   private final boolean taskCleanupJobEnabled;
   private final int taskCleanupJobBatchSize;
   private final Duration taskCleanupJobMinimumAge;
+  private final Map<String, Duration> taskCleanupJobMinimumAgeByDomain;
   private final boolean taskCleanupJobAllCompletedSameParentBusiness;
   private final Duration taskCleanupJobLockExpirationPeriod;
 
@@ -214,6 +215,7 @@ public class KadaiConfiguration {
     this.taskCleanupJobEnabled = builder.taskCleanupJobEnabled;
     this.taskCleanupJobBatchSize = builder.taskCleanupJobBatchSize;
     this.taskCleanupJobMinimumAge = builder.taskCleanupJobMinimumAge;
+    this.taskCleanupJobMinimumAgeByDomain = Map.copyOf(builder.taskCleanupJobMinimumAgeByDomain);
     this.taskCleanupJobAllCompletedSameParentBusiness =
         builder.taskCleanupJobAllCompletedSameParentBusiness;
     this.taskCleanupJobLockExpirationPeriod = builder.taskCleanupJobLockExpirationPeriod;
@@ -380,6 +382,18 @@ public class KadaiConfiguration {
     return taskCleanupJobMinimumAge;
   }
 
+  public Map<String, Duration> getTaskCleanupJobMinimumAgeByDomain() {
+    return taskCleanupJobMinimumAgeByDomain;
+  }
+
+  public Duration getTaskCleanupJobMinimumAgeForDomain(String domain) {
+    if (domain == null || MASTER_DOMAIN.equals(domain)) {
+      return taskCleanupJobMinimumAge;
+    }
+    return taskCleanupJobMinimumAgeByDomain.getOrDefault(
+        domain.toUpperCase(), taskCleanupJobMinimumAge);
+  }
+
   public boolean isTaskCleanupJobAllCompletedSameParentBusiness() {
     return taskCleanupJobAllCompletedSameParentBusiness;
   }
@@ -523,6 +537,7 @@ public class KadaiConfiguration {
         taskCleanupJobEnabled,
         taskCleanupJobBatchSize,
         taskCleanupJobMinimumAge,
+        taskCleanupJobMinimumAgeByDomain,
         taskCleanupJobAllCompletedSameParentBusiness,
         taskCleanupJobLockExpirationPeriod,
         workbasketCleanupJobEnabled,
@@ -601,6 +616,7 @@ public class KadaiConfiguration {
         && Objects.equals(jobRunEvery, other.jobRunEvery)
         && Objects.equals(jobLockExpirationPeriod, other.jobLockExpirationPeriod)
         && Objects.equals(taskCleanupJobMinimumAge, other.taskCleanupJobMinimumAge)
+        && Objects.equals(taskCleanupJobMinimumAgeByDomain, other.taskCleanupJobMinimumAgeByDomain)
         && Objects.equals(
             taskCleanupJobLockExpirationPeriod, other.taskCleanupJobLockExpirationPeriod)
         && Objects.equals(
@@ -691,6 +707,8 @@ public class KadaiConfiguration {
         + taskCleanupJobBatchSize
         + ", taskCleanupJobMinimumAge="
         + taskCleanupJobMinimumAge
+        + ", taskCleanupJobMinimumAgeByDomain="
+        + taskCleanupJobMinimumAgeByDomain
         + ", taskCleanupJobAllCompletedSameParentBusiness="
         + taskCleanupJobAllCompletedSameParentBusiness
         + ", taskCleanupJobLockExpirationPeriod="
@@ -848,6 +866,9 @@ public class KadaiConfiguration {
 
     @KadaiProperty("kadai.jobs.cleanup.task.minimumAge")
     private Duration taskCleanupJobMinimumAge = Duration.ofDays(14);
+
+    @KadaiProperty("kadai.jobs.cleanup.task.minimumAgeByDomain")
+    private Map<String, Duration> taskCleanupJobMinimumAgeByDomain = new HashMap<>();
 
     @KadaiProperty("kadai.jobs.cleanup.task.allCompletedSameParentBusiness")
     private boolean taskCleanupJobAllCompletedSameParentBusiness = true;
@@ -1010,6 +1031,7 @@ public class KadaiConfiguration {
       this.taskCleanupJobEnabled = conf.taskCleanupJobEnabled;
       this.taskCleanupJobBatchSize = conf.taskCleanupJobBatchSize;
       this.taskCleanupJobMinimumAge = conf.taskCleanupJobMinimumAge;
+      this.taskCleanupJobMinimumAgeByDomain = conf.taskCleanupJobMinimumAgeByDomain;
       this.taskCleanupJobAllCompletedSameParentBusiness =
           conf.taskCleanupJobAllCompletedSameParentBusiness;
       this.taskCleanupJobLockExpirationPeriod = conf.taskCleanupJobLockExpirationPeriod;
@@ -1251,6 +1273,12 @@ public class KadaiConfiguration {
       return this;
     }
 
+    public Builder taskCleanupJobMinimumAgeByDomain(
+        Map<String, Duration> taskCleanupJobMinimumAgeByDomain) {
+      this.taskCleanupJobMinimumAgeByDomain = taskCleanupJobMinimumAgeByDomain;
+      return this;
+    }
+
     public Builder taskCleanupJobAllCompletedSameParentBusiness(
         boolean taskCleanupJobAllCompletedSameParentBusiness) {
       this.taskCleanupJobAllCompletedSameParentBusiness =
@@ -1429,6 +1457,7 @@ public class KadaiConfiguration {
 
     private void adjustConfiguration() {
       domains = domains.stream().map(String::toUpperCase).toList();
+      taskCleanupJobMinimumAgeByDomain = normalizeTaskCleanupMinimumAgeByDomain();
       classificationTypes = classificationTypes.stream().map(String::toUpperCase).toList();
       classificationCategoriesByType =
           classificationCategoriesByType.entrySet().stream()
@@ -1455,6 +1484,56 @@ public class KadaiConfiguration {
                               .map(String::toLowerCase)
                               .collect(Collectors.toSet())))
               .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+    }
+
+    private Map<String, Duration> normalizeTaskCleanupMinimumAgeByDomain() {
+      if (taskCleanupJobMinimumAgeByDomain == null) {
+        throw invalidTaskCleanupMinimumAgeByDomain("must not be null");
+      }
+
+      Map<String, Duration> normalizedOverrides = new LinkedHashMap<>();
+      for (Entry<String, Duration> entry : taskCleanupJobMinimumAgeByDomain.entrySet()) {
+        String domain = entry.getKey();
+        if (domain == null || domain.isBlank()) {
+          throw invalidTaskCleanupMinimumAgeByDomain("must not contain a null or blank domain");
+        }
+        String normalizedDomain = domain.toUpperCase();
+        if (normalizedOverrides.containsKey(normalizedDomain)) {
+          throw invalidTaskCleanupMinimumAgeByDomain(
+              "must not contain duplicate domains after normalization: " + normalizedDomain);
+        }
+        normalizedOverrides.put(normalizedDomain, entry.getValue());
+      }
+      return normalizedOverrides;
+    }
+
+    private void validateTaskCleanupMinimumAgeByDomain() {
+      for (Entry<String, Duration> entry : taskCleanupJobMinimumAgeByDomain.entrySet()) {
+        String domain = entry.getKey();
+        Duration duration = entry.getValue();
+        if (duration == null || duration.isNegative()) {
+          throw new InvalidArgumentException(
+              "Parameter taskCleanupJobMinimumAgeByDomain "
+                  + "(kadai.jobs.cleanup.task.minimumAgeByDomain."
+                  + domain
+                  + ") must not be null or negative");
+        }
+        if (!domains.contains(domain)) {
+          throw new InvalidArgumentException(
+              "Parameter taskCleanupJobMinimumAgeByDomain "
+                  + "(kadai.jobs.cleanup.task.minimumAgeByDomain."
+                  + domain
+                  + ") refers to unknown domain "
+                  + domain);
+        }
+      }
+    }
+
+    private InvalidArgumentException invalidTaskCleanupMinimumAgeByDomain(String detail) {
+      return new InvalidArgumentException(
+          "Parameter taskCleanupJobMinimumAgeByDomain "
+              + "(kadai.jobs.cleanup.task.minimumAgeByDomain) "
+              + detail);
     }
 
     private void validateConfiguration() {
@@ -1487,6 +1566,7 @@ public class KadaiConfiguration {
             "Parameter taskCleanupJobMinimumAge "
                 + "(kadai.jobs.cleanup.task.minimumAge) must not be negative");
       }
+      validateTaskCleanupMinimumAgeByDomain();
       if (taskUpdatePriorityJobBatchSize <= 0) {
         throw new InvalidArgumentException(
             "Parameter taskUpdatePriorityJobBatchSize (kadai.jobs.priority.task.batchSize)"
