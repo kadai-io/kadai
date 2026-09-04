@@ -90,7 +90,11 @@ describe('TaskProcessingComponent', () => {
   };
   let mockWorkbasketService: { getAllWorkBaskets: ReturnType<typeof vi.fn> };
   let mockClassificationsService: { getClassification: ReturnType<typeof vi.fn> };
-  let mockRequestInProgressService: { setRequestInProgress: ReturnType<typeof vi.fn> };
+  let mockRequestInProgressService: {
+    setRequestInProgress: ReturnType<typeof vi.fn>;
+    beginRequest: ReturnType<typeof vi.fn>;
+    endRequest: ReturnType<typeof vi.fn>;
+  };
   let mockRouter: { navigate: ReturnType<typeof vi.fn> };
   let store: Store;
 
@@ -122,7 +126,9 @@ describe('TaskProcessingComponent', () => {
     };
 
     mockRequestInProgressService = {
-      setRequestInProgress: vi.fn()
+      setRequestInProgress: vi.fn(),
+      beginRequest: vi.fn(),
+      endRequest: vi.fn()
     };
 
     mockRouter = {
