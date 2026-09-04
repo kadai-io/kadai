@@ -41,6 +41,7 @@ import io.kadai.user.api.UserService;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
 import io.kadai.user.api.models.User;
+import io.kadai.user.api.models.UserSummary;
 import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.models.Workbasket;
@@ -180,6 +181,102 @@ class UserServiceAccTest {
 
     @WithAccessId(user = "user-1-1")
     @Test
+    void should_EnrichUsersInBulk_When_QueryingUsers() throws Exception {
+      Workbasket workbasket =
+          defaultTestWorkbasket().buildAndStore(workbasketService, "businessadmin");
+      createAccessItem(
+          "query-group-a",
+          workbasket,
+          WorkbasketPermission.READ,
+          WorkbasketPermission.OPEN);
+
+      User userA =
+          randomTestUser()
+              .groups(Set.of("query-group-a"))
+              .permissions(Set.of("query-permission-a"))
+              .buildAndStore(userService, "businessadmin");
+      User userB =
+          randomTestUser()
+              .groups(Set.of("query-group-b"))
+              .permissions(Set.of("query-permission-b"))
+              .buildAndStore(userService, "businessadmin");
+
+      List<UserSummary> queriedUsers =
+          userService.createUserQuery().idIn(userA.getId(), userB.getId()).list();
+
+      assertThat(queriedUsers).hasSize(2);
+      UserSummary queriedUserA =
+          queriedUsers.stream()
+              .filter(user -> userA.getId().equals(user.getId()))
+              .findFirst()
+              .orElseThrow();
+      UserSummary queriedUserB =
+          queriedUsers.stream()
+              .filter(user -> userB.getId().equals(user.getId()))
+              .findFirst()
+              .orElseThrow();
+
+      assertThat(queriedUserA.getGroups()).containsExactly("query-group-a");
+      assertThat(queriedUserA.getPermissions()).containsExactly("query-permission-a");
+      assertThat(queriedUserA.getDomains()).containsExactly(workbasket.getDomain());
+      assertThat(queriedUserB.getGroups()).containsExactly("query-group-b");
+      assertThat(queriedUserB.getPermissions()).containsExactly("query-permission-b");
+      assertThat(queriedUserB.getDomains()).isEmpty();
+    }
+
+    @WithAccessId(user = "user-1-1")
+    @Test
+    void should_EnrichUsersInBulk_When_QueryingUsersWithPagination() throws Exception {
+      User userA =
+          randomTestUser()
+              .groups(Set.of("pagination-group-a"))
+              .permissions(Set.of("pagination-permission-a"))
+              .buildAndStore(userService, "businessadmin");
+      User userB =
+          randomTestUser()
+              .groups(Set.of("pagination-group-b"))
+              .permissions(Set.of("pagination-permission-b"))
+              .buildAndStore(userService, "businessadmin");
+
+      List<UserSummary> queriedUsers =
+          userService.createUserQuery().idIn(userA.getId(), userB.getId()).list(0, 2);
+
+      assertThat(queriedUsers).hasSize(2);
+      UserSummary queriedUserA =
+          queriedUsers.stream()
+              .filter(user -> userA.getId().equals(user.getId()))
+              .findFirst()
+              .orElseThrow();
+      UserSummary queriedUserB =
+          queriedUsers.stream()
+              .filter(user -> userB.getId().equals(user.getId()))
+              .findFirst()
+              .orElseThrow();
+
+      assertThat(queriedUserA.getGroups()).containsExactly("pagination-group-a");
+      assertThat(queriedUserA.getPermissions()).containsExactly("pagination-permission-a");
+      assertThat(queriedUserB.getGroups()).containsExactly("pagination-group-b");
+      assertThat(queriedUserB.getPermissions()).containsExactly("pagination-permission-b");
+    }
+
+    @WithAccessId(user = "user-1-1")
+    @Test
+    void should_EnrichUserInBulk_When_UsingSingleUserQuery() throws Exception {
+      User expected =
+          randomTestUser()
+              .groups(Set.of("single-query-group"))
+              .permissions(Set.of("single-query-permission"))
+              .buildAndStore(userService, "businessadmin");
+
+      UserSummary actual = userService.createUserQuery().idIn(expected.getId()).single();
+
+      assertThat(actual.getId()).isEqualTo(expected.getId());
+      assertThat(actual.getGroups()).containsExactly("single-query-group");
+      assertThat(actual.getPermissions()).containsExactly("single-query-permission");
+    }
+
+    @WithAccessId(user = "user-1-1")
+    @Test
     void should_DetermineDomains_When_WorkbasketPermissionsExistForUsers() throws Exception {
       Workbasket workbasketDomainA =
           defaultTestWorkbasket().buildAndStore(workbasketService, "businessadmin");
@@ -267,6 +364,68 @@ class UserServiceAccTest {
               4,
               new Condition<>(
                   domains -> Set.of(workbasketDomainB.getDomain()).equals(domains), "DOMAIN_B"));
+    }
+
+    @WithAccessId(user = "user-1-1")
+    @Test
+    void should_AggregatePermissionsPerUserAndWorkbasket_When_GettingUsers() throws Exception {
+      Workbasket workbasket =
+          defaultTestWorkbasket().buildAndStore(workbasketService, "businessadmin");
+      createAccessItem("bulk-read", workbasket, WorkbasketPermission.READ);
+      createAccessItem("bulk-open", workbasket, WorkbasketPermission.OPEN);
+
+      User completeUser =
+          randomTestUser()
+              .groups(Set.of("bulk-read", "bulk-open"))
+              .buildAndStore(userService, "businessadmin");
+      User incompleteUser =
+          randomTestUser().groups(Set.of("bulk-read")).buildAndStore(userService, "businessadmin");
+
+      List<User> users =
+          userService.getUsers(Set.of(completeUser.getId(), incompleteUser.getId()));
+
+      User returnedCompleteUser =
+          users.stream()
+              .filter(user -> completeUser.getId().equals(user.getId()))
+              .findFirst()
+              .orElseThrow();
+      User returnedIncompleteUser =
+          users.stream()
+              .filter(user -> incompleteUser.getId().equals(user.getId()))
+              .findFirst()
+              .orElseThrow();
+
+      assertThat(returnedCompleteUser.getDomains()).containsExactly(workbasket.getDomain());
+      assertThat(returnedIncompleteUser.getDomains()).isEmpty();
+    }
+
+    @WithAccessId(user = "user-1-1")
+    @Test
+    void should_NotAggregatePermissionsAcrossWorkbaskets_When_GettingUsers() throws Exception {
+      Workbasket readWorkbasket =
+          defaultTestWorkbasket()
+              .domain("DOMAIN_A")
+              .buildAndStore(workbasketService, "businessadmin");
+      Workbasket openWorkbasket =
+          defaultTestWorkbasket()
+              .domain("DOMAIN_A")
+              .buildAndStore(workbasketService, "businessadmin");
+
+      createAccessItem(
+          "bulk-read-other-workbasket", readWorkbasket, WorkbasketPermission.READ);
+      createAccessItem(
+          "bulk-open-other-workbasket", openWorkbasket, WorkbasketPermission.OPEN);
+
+      User user =
+          randomTestUser()
+              .groups(
+                  Set.of("bulk-read-other-workbasket", "bulk-open-other-workbasket"))
+              .buildAndStore(userService, "businessadmin");
+
+      User returnedUser =
+          userService.getUsers(Set.of(user.getId())).stream().findFirst().orElseThrow();
+
+      assertThat(returnedUser.getDomains()).isEmpty();
     }
 
     @WithAccessId(user = "user-1-1")
