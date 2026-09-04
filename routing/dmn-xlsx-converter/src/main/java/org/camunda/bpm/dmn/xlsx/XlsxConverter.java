@@ -23,6 +23,7 @@ import java.util.List;
 import org.camunda.bpm.dmn.xlsx.api.SpreadsheetAdapter;
 import org.camunda.bpm.model.dmn.DmnModelInstance;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
+import org.docx4j.openpackaging.packages.OpcPackage;
 import org.docx4j.openpackaging.packages.SpreadsheetMLPackage;
 import org.docx4j.openpackaging.parts.SpreadsheetML.SharedStrings;
 import org.docx4j.openpackaging.parts.SpreadsheetML.WorkbookPart;
@@ -68,7 +69,11 @@ public class XlsxConverter {
   private SpreadsheetMLPackage loadSpreadsheet(InputStream inputStream)
       throws XlsxConversionException {
     try {
-      return SpreadsheetMLPackage.load(inputStream);
+      OpcPackage opcPackage = OpcPackage.load(inputStream);
+      if (!(opcPackage instanceof SpreadsheetMLPackage spreadsheetPackage)) {
+        throw new XlsxConversionException("Input document is not an XLSX spreadsheet");
+      }
+      return spreadsheetPackage;
     } catch (Docx4JException e) {
       throw new XlsxConversionException("Could not load XLSX document", e);
     }

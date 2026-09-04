@@ -32,6 +32,7 @@ import org.camunda.bpm.model.dmn.instance.DecisionTable;
 import org.camunda.bpm.model.dmn.instance.Rule;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.SpreadsheetMLPackage;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.PartName;
 import org.docx4j.openpackaging.parts.SpreadsheetML.SharedStrings;
 import org.junit.jupiter.api.Test;
@@ -61,6 +62,21 @@ class XlsxConverterTest {
         .isExactlyInstanceOf(XlsxConversionException.class)
         .hasMessageContaining("Could not load XLSX")
         .hasCauseInstanceOf(Docx4JException.class);
+  }
+
+  @Test
+  void should_ThrowXlsxConversionException_When_InputIsValidNonXlsxOfficeDocument()
+      throws Exception {
+    WordprocessingMLPackage wordPackage = WordprocessingMLPackage.createPackage();
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    wordPackage.save(outputStream);
+
+    assertThatThrownBy(
+            () ->
+                new XlsxConverter()
+                    .convert(new ByteArrayInputStream(outputStream.toByteArray())))
+        .isExactlyInstanceOf(XlsxConversionException.class)
+        .hasMessageContaining("not an XLSX");
   }
 
   @Test
@@ -101,6 +117,22 @@ class XlsxConverterTest {
         converter.convert(new ByteArrayInputStream(createTwoWorksheetWorkbook()));
 
     assertThatWorksheetWasConverted(result, "SecondDecision", "second-input", "second-output");
+  }
+
+  @Test
+  void should_ConvertWorksheetWithoutSharedStrings_WhenCellsContainNumbers() throws Exception {
+    DmnModelInstance result =
+        new XlsxConverter()
+            .convert(new ByteArrayInputStream(createWorkbookWithoutSharedStrings()));
+
+    Decision decision =
+        result.getDefinitions().getChildElementsByType(Decision.class).iterator().next();
+    assertThat(decision.getId()).isEqualTo("NumericDecision");
+
+    DecisionTable table = TestHelper.assertAndGetSingleDecisionTable(result);
+    Rule rule = table.getRules().iterator().next();
+    assertThat(rule.getInputEntries().iterator().next().getTextContent()).isEqualTo("3");
+    assertThat(rule.getOutputEntries().iterator().next().getTextContent()).isEqualTo("4");
   }
 
   @ParameterizedTest
@@ -160,6 +192,20 @@ class XlsxConverterTest {
     return saveSpreadsheet(spreadsheetPackage);
   }
 
+  private static byte[] createWorkbookWithoutSharedStrings() throws Exception {
+    ObjectFactory objectFactory = Context.getsmlObjectFactory();
+    SpreadsheetMLPackage spreadsheetPackage = SpreadsheetMLPackage.createPackage();
+    org.docx4j.openpackaging.parts.SpreadsheetML.WorksheetPart worksheetPart =
+        spreadsheetPackage.createWorksheetPart(
+            new PartName("/xl/worksheets/sheet1.xml"), "NumericDecision", 1);
+    Worksheet worksheet = worksheetPart.getContents();
+
+    worksheet.getSheetData().getRow().add(createNumericRow(objectFactory, 1, 1, 2));
+    worksheet.getSheetData().getRow().add(createNumericRow(objectFactory, 2, 3, 4));
+
+    return saveSpreadsheet(spreadsheetPackage);
+  }
+
   private static void addWorksheet(
       SpreadsheetMLPackage spreadsheetPackage,
       ObjectFactory objectFactory,
@@ -195,12 +241,30 @@ class XlsxConverterTest {
     return row;
   }
 
+  private static Row createNumericRow(ObjectFactory objectFactory, long rowNumber, int... values) {
+    Row row = objectFactory.createRow();
+    row.setR(rowNumber);
+    for (int i = 0; i < values.length; i++) {
+      String column = Character.toString((char) ('A' + i));
+      row.getC().add(createNumericCell(objectFactory, column + rowNumber, values[i]));
+    }
+    return row;
+  }
+
   private static Cell createCell(
       ObjectFactory objectFactory, CTSst sharedStrings, String reference, String value) {
     Cell cell = objectFactory.createCell();
     cell.setR(reference);
     cell.setT(STCellType.S);
     cell.setV(Integer.toString(addSharedString(objectFactory, sharedStrings, value)));
+    return cell;
+  }
+
+  private static Cell createNumericCell(ObjectFactory objectFactory, String reference, int value) {
+    Cell cell = objectFactory.createCell();
+    cell.setR(reference);
+    cell.setT(STCellType.N);
+    cell.setV(Integer.toString(value));
     return cell;
   }
 
