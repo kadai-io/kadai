@@ -24,25 +24,32 @@ import { BehaviorSubject, distinctUntilChanged, Observable } from 'rxjs';
 })
 export class RequestInProgressService {
   private activeRequestsCount = 0;
+  private isDirectlySet = false;
   private readonly requestInProgressSubject = new BehaviorSubject<boolean>(false);
 
-  setRequestInProgress(value: boolean) {
-    if (value) {
-      this.activeRequestsCount++;
-      if (this.activeRequestsCount === 1) {
-        this.requestInProgressSubject.next(true);
-      }
-    } else {
-      if (this.activeRequestsCount > 0) {
-        this.activeRequestsCount--;
-      }
-      if (this.activeRequestsCount === 0) {
-        this.requestInProgressSubject.next(false);
-      }
+  beginRequest(): void {
+    this.activeRequestsCount++;
+    this.updateState();
+  }
+
+  endRequest(): void {
+    if (this.activeRequestsCount > 0) {
+      this.activeRequestsCount--;
     }
+    this.updateState();
+  }
+
+  setRequestInProgress(value: boolean): void {
+    this.isDirectlySet = value;
+    this.updateState();
   }
 
   getRequestInProgress(): Observable<boolean> {
     return this.requestInProgressSubject.asObservable().pipe(distinctUntilChanged());
+  }
+
+  private updateState(): void {
+    const isBusy = this.isDirectlySet || this.activeRequestsCount > 0;
+    this.requestInProgressSubject.next(isBusy);
   }
 }
