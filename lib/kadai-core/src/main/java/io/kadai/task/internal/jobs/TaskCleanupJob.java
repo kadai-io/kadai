@@ -26,6 +26,7 @@ import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
+import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.JobServiceImpl;
 import io.kadai.common.internal.jobs.AbstractKadaiJob;
 import io.kadai.common.internal.jobs.JobTransactionPolicy;
@@ -33,6 +34,7 @@ import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import io.kadai.common.internal.util.CheckedSupplier;
 import io.kadai.common.internal.util.CollectionUtil;
 import io.kadai.common.internal.util.LogSanitizer;
+import io.kadai.task.internal.TaskMapper;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -99,13 +101,15 @@ public class TaskCleanupJob extends AbstractKadaiJob {
   }
 
   private List<String> getTasksCompletedBefore(Instant untilDate) {
-    return kadaiEngineImpl.executeInDatabaseConnection(
-        () ->
-            allCompletedSameParentBusiness
-                ? kadaiEngineImpl
-                    .getTaskMapper()
-                    .findTasksCompletedBeforeWithParentBusinessProcessConstraint(untilDate)
-                : kadaiEngineImpl.getTaskMapper().findTasksCompletedBefore(untilDate));
+    InternalKadaiEngine internalKadaiEngine = getInternalKadaiEngine();
+    return internalKadaiEngine.executeInDatabaseConnection(
+        () -> {
+          TaskMapper taskMapper =
+              internalKadaiEngine.getSqlSession().getMapper(TaskMapper.class);
+          return allCompletedSameParentBusiness
+              ? taskMapper.findTasksCompletedBeforeWithParentBusinessProcessConstraint(untilDate)
+              : taskMapper.findTasksCompletedBefore(untilDate);
+        });
   }
 
   private List<String> getTasksCompletedBeforeTransactionally(Instant untilDate) {
@@ -138,10 +142,10 @@ public class TaskCleanupJob extends AbstractKadaiJob {
       return;
     }
     boolean lockRenewed =
-        ((JobServiceImpl) kadaiEngineImpl.getJobService())
+        ((JobServiceImpl) kadaiEngine.getJobService())
             .renewLock(
                 scheduledJob,
-                kadaiEngineImpl.getConfiguration().getTaskCleanupJobLockExpirationPeriod());
+                kadaiEngine.getConfiguration().getTaskCleanupJobLockExpirationPeriod());
     if (!lockRenewed) {
       throw new SystemException(
           "Task cleanup job lock was lost. Stopping cleanup to avoid concurrent processing.");
@@ -152,7 +156,7 @@ public class TaskCleanupJob extends AbstractKadaiJob {
       throws InvalidArgumentException, NotAuthorizedException {
 
     BulkOperationResults<String, KadaiException> results =
-        kadaiEngineImpl.getTaskService().deleteTasks(tasksToBeDeleted);
+        kadaiEngine.getTaskService().deleteTasks(tasksToBeDeleted);
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("{} tasks deleted.", tasksToBeDeleted.size() - results.getFailedIds().size());
     }
@@ -173,8 +177,8 @@ public class TaskCleanupJob extends AbstractKadaiJob {
         + firstRun
         + ", runEvery="
         + runEvery
-        + ", kadaiEngineImpl="
-        + kadaiEngineImpl
+        + ", kadaiEngine="
+        + kadaiEngine
         + ", txProvider="
         + txProvider
         + ", scheduledJob="
