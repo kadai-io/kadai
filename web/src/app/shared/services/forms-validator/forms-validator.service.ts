@@ -56,11 +56,17 @@ export class FormsValidatorService {
 
     const ownerPromise = new Promise((resolve) => {
       const ownerString = 'owner';
-      if (form.form.controls[this.workbasketOwner]) {
-        this.accessIdsService.searchForAccessId(form.form.controls[this.workbasketOwner].value).subscribe((items) => {
+      const ownerControl = form.form.controls[this.workbasketOwner];
+
+      if (ownerControl) {
+        const requestedOwnerValue = ownerControl.value;
+
+        this.accessIdsService.searchForAccessId(requestedOwnerValue).subscribe((items) => {
           const validationState = toggleValidationMap.get(this.workbasketOwner);
           toggleValidationMap.set(this.workbasketOwner, !validationState);
-          const valid = items.find((item) => item.accessId === form.form.controls[this.workbasketOwner].value);
+          const stillCurrent = ownerControl.value === requestedOwnerValue;
+          const matches = items.some((item) => item.accessId === requestedOwnerValue);
+          const valid = stillCurrent && matches;
           resolve(new ResponseOwner({ valid, field: ownerString }));
         });
       } else {
