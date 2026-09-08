@@ -16,12 +16,12 @@
  *
  */
 
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FormsValidatorService } from './forms-validator.service';
 import { AccessIdsService } from 'app/shared/services/access-ids/access-ids.service';
 import { NotificationService } from '../notifications/notification.service';
-import { FormArray, FormControl } from '@angular/forms';
+import { FormArray, FormControl, NgForm } from '@angular/forms';
 import { of, Subject } from 'rxjs';
 
 const accessIdsServiceMock = {
@@ -196,15 +196,15 @@ describe('FormsValidatorService', () => {
 
       const toggleMap = new Map<any, boolean>();
       const validationPromise = service.validateFormInformation(mockForm, toggleMap);
-      console.log(validationPromise);
 
       mockOwnerValue = 'ownerB';
 
-      accessIdSubject.next([{ accessId: 'ownerA' }]);
+      accessIdSubject.next([{ accessId: 'ownerB' }]);
       accessIdSubject.complete();
 
       const result = await validationPromise;
 
+      expect(notificationServiceMock.showError).not.toHaveBeenCalled();
       expect(result).toBe(false);
     });
 

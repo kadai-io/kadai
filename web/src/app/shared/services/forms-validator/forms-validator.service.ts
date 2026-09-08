@@ -62,9 +62,15 @@ export class FormsValidatorService {
         const requestedOwnerValue = ownerControl.value;
 
         this.accessIdsService.searchForAccessId(requestedOwnerValue).subscribe((items) => {
+          const stillCurrent = ownerControl.value === requestedOwnerValue;
+
+          if (!stillCurrent) {
+            resolve(null);
+            return;
+          }
+
           const validationState = toggleValidationMap.get(this.workbasketOwner);
           toggleValidationMap.set(this.workbasketOwner, !validationState);
-          const stillCurrent = ownerControl.value === requestedOwnerValue;
           const matches = items.some((item) => item.accessId === requestedOwnerValue);
           const valid = stillCurrent && matches;
           resolve(new ResponseOwner({ valid, field: ownerString }));
@@ -77,6 +83,10 @@ export class FormsValidatorService {
     });
 
     const values = await Promise.all([forFieldsPromise, ownerPromise]);
+    if (values[1] === null) {
+      return false;
+    }
+
     const responseOwner = new ResponseOwner(values[1]);
     if (!(values[0] && responseOwner.valid)) {
       if (!responseOwner.valid) {
