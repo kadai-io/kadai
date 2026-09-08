@@ -90,8 +90,15 @@ export class FormsValidatorService {
         new Promise((resolve) => {
           const validationState = toggleValidationAccessIdMap.get(i);
           toggleValidationAccessIdMap.set(i, !validationState);
-          this.accessIdsService.searchForAccessId(form.controls[i].value.accessId).subscribe((items) => {
-            resolve(new ResponseOwner({ valid: items.length > 0, field: 'access id' }));
+
+          const enteredAccessId = form.controls[i].value?.accessId;
+
+          this.accessIdsService.searchForAccessId(enteredAccessId).subscribe((items) => {
+            const isValid = items
+              ? items.some((item) => item.accessId?.toLowerCase() === enteredAccessId?.toLowerCase())
+              : false;
+
+            resolve(new ResponseOwner({ valid: isValid, field: 'access id' }));
           });
         })
       );
