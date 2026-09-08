@@ -605,6 +605,15 @@ public class KadaiEngineImpl implements KadaiEngine {
     }
 
     @Override
+    public Connection getConnection() {
+      try {
+        return sessionManager.getConnection();
+      } catch (Exception e) {
+        throw new SystemException("Could not obtain the current database connection", e);
+      }
+    }
+
+    @Override
     public void initSqlSession() {
       if (mode == EXPLICIT && connection == null) {
         throw new ConnectionNotSetException();

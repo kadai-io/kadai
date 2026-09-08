@@ -22,6 +22,7 @@ import static io.kadai.common.internal.util.CheckedSupplier.wrapping;
 
 import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.KadaiRole;
+import io.kadai.common.api.exceptions.DuplicateUserRefreshIdException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.internal.InternalKadaiEngine;
@@ -35,9 +36,16 @@ import io.kadai.user.internal.models.UserImpl;
 import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.WorkbasketQueryColumnName;
 import io.kadai.workbasket.api.WorkbasketService;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Savepoint;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.ibatis.exceptions.PersistenceException;
@@ -184,6 +192,197 @@ public class UserServiceImpl implements UserService {
         });
   }
 
+  /**
+   * Normalizes the source outside the refresh transaction. Invalid individual source records are
+   * excluded; duplicate canonical ids are a generation-wide error because choosing an arbitrary
+   * LDAP result would make removals unsafe.
+   *
+   * @param sourceUsers postprocessed LDAP users
+   * @return valid canonical users and source counts
+   * @throws InvalidArgumentException if the source is null or contains duplicate canonical ids
+   * @throws DuplicateUserRefreshIdException if two valid source entries have the same normalized id
+   */
+  public PreparedUserRefreshInput prepareUserRefresh(Collection<User> sourceUsers) {
+    if (sourceUsers == null) {
+      throw new InvalidArgumentException("User refresh source must not be null");
+    }
+    Map<String, UserRefreshState> users = new HashMap<>();
+    int rejected = 0;
+    for (User user : sourceUsers) {
+      UserRefreshState state;
+      try {
+        state = toRefreshState(user);
+      } catch (InvalidArgumentException e) {
+        rejected++;
+        continue;
+      }
+      if (users.putIfAbsent(state.id(), state) != null) {
+        throw new DuplicateUserRefreshIdException(state.id());
+      }
+    }
+    return new PreparedUserRefreshInput(
+        Map.copyOf(users), sourceUsers.size(), users.size(), rejected);
+  }
+
+  /**
+   * Reconciles a prepared authoritative source using one engine connection. The caller supplies the
+   * outer transaction for scheduled execution; direct callers still get an engine connection scope.
+   *
+   * @param input prepared authoritative source
+   * @param batchSize configured JDBC batch flush size
+   * @return reconciliation counts
+   * @throws NotAuthorizedException if the caller lacks the required role
+   * @throws InvalidArgumentException if the batch size is invalid
+   */
+  public UserRefreshResult synchronizeUsers(PreparedUserRefreshInput input, int batchSize)
+      throws NotAuthorizedException {
+    if (batchSize <= 0) {
+      throw new InvalidArgumentException("User refresh batch size must be positive");
+    }
+    if (input == null) {
+      throw new InvalidArgumentException("User refresh input must not be null");
+    }
+    internalKadaiEngine.getEngine().checkRoleMembership(KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
+    return internalKadaiEngine.executeInDatabaseConnection(
+        () -> synchronizeUsersInConnection(input, batchSize));
+  }
+
+  /**
+   * Loads the current snapshot through exactly three flat mapper queries.
+   *
+   * @return the current database snapshot
+   */
+  UserDatabaseSnapshot loadUserDatabaseSnapshot() {
+    return new UserRefreshSnapshotLoader(userMapper).load();
+  }
+
+  private UserRefreshResult synchronizeUsersInConnection(
+      PreparedUserRefreshInput input, int batchSize) {
+    Connection connection = internalKadaiEngine.getConnection();
+    // makes direct execution rollback-safe without opening or committing another connection
+    Savepoint savepoint = null;
+    try {
+      savepoint = connection.setSavepoint("KADAI_USER_REFRESH");
+      UserDatabaseSnapshot current = loadUserDatabaseSnapshot();
+      UserRefreshPlan plan = UserRefreshDiffCalculator.calculate(current, input.usersById());
+      if (!plan.isEmpty()) {
+        new UserRefreshBatchWriter(connection, batchSize).apply(plan);
+        internalKadaiEngine.getSqlSession().clearCache();
+      }
+      connection.releaseSavepoint(savepoint);
+      return new UserRefreshResult(
+          input.inputUsers(),
+          input.acceptedUsers(),
+          input.rejectedUsers(),
+          plan.usersToInsert().size(),
+          plan.updatedUsers(),
+          plan.userIdsToDelete().size(),
+          plan.unchangedUsers(),
+          plan.groupsToInsert().size(),
+          plan.groupsToDelete().size(),
+          plan.permissionsToInsert().size(),
+          plan.permissionsToDelete().size(),
+          plan.orphanGroupsToDelete().size(),
+          plan.orphanPermissionsToDelete().size());
+    } catch (RuntimeException | Error e) {
+      rollbackToSavepoint(connection, savepoint, e);
+      throw e;
+    } catch (SQLException e) {
+      rollbackToSavepoint(connection, savepoint, e);
+      throw new io.kadai.common.api.exceptions.SystemException(
+          "Could not synchronize the LDAP user snapshot", e);
+    }
+  }
+
+  private static void rollbackToSavepoint(
+      Connection connection, Savepoint savepoint, Throwable failure) {
+    if (savepoint == null) {
+      return;
+    }
+    try {
+      connection.rollback(savepoint);
+    } catch (SQLException rollbackFailure) {
+      failure.addSuppressed(rollbackFailure);
+    }
+  }
+
+  private static UserRefreshState toRefreshState(User user) {
+    if (user == null
+        || user.getId() == null
+        || user.getId().isEmpty()
+        || user.getFirstName() == null
+        || user.getLastName() == null
+        || user.getGroups() == null
+        || user.getPermissions() == null) {
+      throw new InvalidArgumentException("Invalid LDAP user refresh entry");
+    }
+    String id = user.getId().toLowerCase(Locale.ROOT);
+    String fullName = user.getFullName();
+    if (fullName == null || fullName.isEmpty()) {
+      fullName = String.format("%s, %s", user.getLastName(), user.getFirstName());
+    }
+    String longName = user.getLongName();
+    if (longName == null || longName.isEmpty()) {
+      longName = String.format("%s - (%s)", fullName, id);
+    }
+    Set<String> groups = normalize(user.getGroups());
+    Set<String> permissions = normalize(user.getPermissions());
+    UserRefreshState state = new UserRefreshState(
+        id,
+        user.getFirstName(),
+        user.getLastName(),
+        fullName,
+        longName,
+        user.getEmail(),
+        user.getPhone(),
+        user.getMobilePhone(),
+        user.getOrgLevel1(),
+        user.getOrgLevel2(),
+        user.getOrgLevel3(),
+        user.getOrgLevel4(),
+        user.getData(),
+        groups,
+        permissions);
+    validatePersistedLengths(state);
+    return state;
+  }
+
+  private static Set<String> normalize(Set<String> values) {
+    Set<String> result = new HashSet<>();
+    for (String value : values) {
+      if (value == null) {
+        throw new InvalidArgumentException("Invalid LDAP membership");
+      }
+      result.add(value.toLowerCase(Locale.ROOT));
+    }
+    return Set.copyOf(result);
+  }
+
+  private static void validatePersistedLengths(UserRefreshState state) {
+    validateLength("user ID", state.id(), 32);
+    validateLength("first name", state.firstName(), 32);
+    validateLength("last name", state.lastName(), 32);
+    validateLength("full name", state.fullName(), 64);
+    validateLength("long name", state.longName(), 64);
+    validateLength("email", state.email(), 64);
+    validateLength("phone", state.phone(), 32);
+    validateLength("mobile phone", state.mobilePhone(), 32);
+    validateLength("org level 1", state.orgLevel1(), 32);
+    validateLength("org level 2", state.orgLevel2(), 32);
+    validateLength("org level 3", state.orgLevel3(), 32);
+    validateLength("org level 4", state.orgLevel4(), 32);
+    state.groups().forEach(group -> validateLength("group ID", group, 256));
+    state.permissions().forEach(permission -> validateLength("permission ID", permission, 256));
+  }
+
+  private static void validateLength(String field, String value, int maximum) {
+    if (value != null && value.length() > maximum) {
+      throw new InvalidArgumentException(
+          String.format(
+              "Invalid LDAP user refresh entry: %s exceeds %d characters", field, maximum));
+    }
+  }
+
   Set<String> determineDomains(User user) {
     Set<String> accessIds = new HashSet<>(user.getGroups());
     accessIds.addAll(user.getPermissions());
@@ -237,10 +436,10 @@ public class UserServiceImpl implements UserService {
 
   private void standardCreateActions(User user) {
     if (user.getFullName() == null || user.getFullName().isEmpty()) {
-      user.setFullName(user.getLastName() + ", " + user.getFirstName());
+      user.setFullName(String.format("%s, %s", user.getLastName(), user.getFirstName()));
     }
     if (user.getLongName() == null || user.getLongName().isEmpty()) {
-      user.setLongName(user.getFullName() + " - (" + user.getId() + ")");
+      user.setLongName(String.format("%s - (%s)", user.getFullName(), user.getId()));
     }
     user.setId(user.getId().toLowerCase());
     user.setGroups(
@@ -255,12 +454,12 @@ public class UserServiceImpl implements UserService {
       if (newUser.getFullName() == null
           || newUser.getFullName().isEmpty()
           || newUser.getFullName().equals(oldUser.getFullName())) {
-        newUser.setFullName(newUser.getLastName() + ", " + newUser.getFirstName());
+        newUser.setFullName(String.format("%s, %s", newUser.getLastName(), newUser.getFirstName()));
       }
       if (newUser.getLongName() == null
           || newUser.getLongName().isEmpty()
           || newUser.getLongName().equals(oldUser.getLongName())) {
-        newUser.setLongName(newUser.getFullName() + " - (" + newUser.getId() + ")");
+        newUser.setLongName(String.format("%s - (%s)", newUser.getFullName(), newUser.getId()));
       }
     }
     newUser.setId(newUser.getId().toLowerCase());
@@ -269,4 +468,5 @@ public class UserServiceImpl implements UserService {
     newUser.setPermissions(
         newUser.getPermissions().stream().map((String::toLowerCase)).collect(Collectors.toSet()));
   }
+
 }
