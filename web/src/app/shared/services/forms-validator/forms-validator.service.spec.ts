@@ -25,7 +25,8 @@ import { FormArray, FormControl } from '@angular/forms';
 import { of } from 'rxjs';
 
 const accessIdsServiceMock = {
-  searchForAccessId: vi.fn().mockReturnValue(of([{ accessId: 'user1' }]))
+  searchForAccessId: vi.fn().mockReturnValue(of([{ accessId: 'user1' }])),
+  validateAccessId: vi.fn().mockReturnValue(of(true))
 };
 
 const notificationServiceMock = {
@@ -202,7 +203,7 @@ describe('FormsValidatorService', () => {
       expect(result).toBe(true);
     });
 
-    it('should resolve to true when access ID matches case-insensitively', async () => {
+    it('should use the backend validation result without fuzzy search', async () => {
       accessIdsServiceMock.searchForAccessId.mockReturnValue(of([{ accessId: 'USER1' }]));
 
       const formArray = new FormArray([
@@ -219,10 +220,12 @@ describe('FormsValidatorService', () => {
       ]);
       const result = await service.validateFormAccess(formArray, new Map());
       expect(result).toBe(true);
+      expect(accessIdsServiceMock.validateAccessId).toHaveBeenCalledWith('user1');
+      expect(accessIdsServiceMock.searchForAccessId).not.toHaveBeenCalled();
     });
 
     it('should resolve to false when an access ID is not found', async () => {
-      accessIdsServiceMock.searchForAccessId.mockReturnValue(of([]));
+      accessIdsServiceMock.validateAccessId.mockReturnValue(of(false));
 
       const formArray = new FormArray([
         new FormControl({
@@ -240,8 +243,8 @@ describe('FormsValidatorService', () => {
       expect(result).toBe(false);
     });
 
-    it('should resolve to false when search returns only fuzzy matches', async () => {
-      accessIdsServiceMock.searchForAccessId.mockReturnValue(of([{ accessId: 'user-a' }, { accessId: 'user-b' }]));
+    it('should resolve to false when backend rejects an access ID', async () => {
+      accessIdsServiceMock.validateAccessId.mockReturnValue(of(false));
 
       const formArray = new FormArray([
         new FormControl({
