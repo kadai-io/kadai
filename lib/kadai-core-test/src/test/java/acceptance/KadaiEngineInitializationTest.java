@@ -24,6 +24,8 @@ import io.kadai.KadaiConfiguration;
 import io.kadai.KadaiConfiguration.Builder;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
+import io.kadai.common.internal.InternalKadaiEngine;
+import io.kadai.common.internal.InternalKadaiEngineResolver;
 import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.spi.priority.api.PriorityServiceProvider;
 import io.kadai.spi.priority.internal.PriorityServiceManager;
@@ -106,7 +108,10 @@ public class KadaiEngineInitializationTest {
     @Test
     @SuppressWarnings("unchecked")
     void should_InitializePriorityServiceProviders() throws Exception {
-      PriorityServiceManager priorityServiceManager = kadaiEngine.getPriorityServiceManager();
+      InternalKadaiEngine internalKadaiEngine =
+          InternalKadaiEngineResolver.resolve(kadaiEngine);
+      PriorityServiceManager priorityServiceManager =
+          internalKadaiEngine.getPriorityServiceManager();
       Field priorityServiceProvidersField =
           PriorityServiceManager.class.getDeclaredField("priorityServiceProviders");
       priorityServiceProvidersField.setAccessible(true);
@@ -120,6 +125,14 @@ public class KadaiEngineInitializationTest {
           .extracting(MyPriorityServiceProvider.class::cast)
           .extracting(sp -> sp.kadaiEngine)
           .containsOnly(kadaiEngine);
+    }
+
+    @Test
+    void should_ResolveInternalEngineFromPublicEngine() {
+      InternalKadaiEngine internalKadaiEngine =
+          InternalKadaiEngineResolver.resolve(kadaiEngine);
+
+      assertThat(internalKadaiEngine.getEngine()).isSameAs(kadaiEngine);
     }
   }
 }

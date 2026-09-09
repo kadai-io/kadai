@@ -79,6 +79,13 @@ public interface InternalKadaiEngine {
         });
   }
 
+  /**
+   * Returns whether an explicit JDBC connection is currently set on the underlying KADAI engine.
+   *
+   * @return {@code true} if a connection supplied through the engine is currently active
+   */
+  boolean isConnectionSet();
+
   /** Initializes the SqlSessionManager. */
   void initSqlSession();
 

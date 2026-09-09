@@ -23,8 +23,9 @@ import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.ScheduledJob;
 import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.api.exceptions.SystemException;
+import io.kadai.common.internal.InternalKadaiEngine;
+import io.kadai.common.internal.InternalKadaiEngineResolver;
 import io.kadai.common.internal.JobServiceImpl;
-import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -34,7 +35,7 @@ import java.time.Instant;
 /** Abstract base for all background jobs of KADAI. */
 public abstract class AbstractKadaiJob implements KadaiJob {
 
-  protected final KadaiEngineImpl kadaiEngineImpl;
+  protected final KadaiEngine kadaiEngine;
   protected final KadaiTransactionProvider txProvider;
   protected final ScheduledJob scheduledJob;
   private final boolean async;
@@ -46,12 +47,16 @@ public abstract class AbstractKadaiJob implements KadaiJob {
       KadaiTransactionProvider txProvider,
       ScheduledJob job,
       boolean async) {
-    this.kadaiEngineImpl = (KadaiEngineImpl) kadaiEngine;
+    this.kadaiEngine = kadaiEngine;
     this.txProvider = txProvider;
     this.scheduledJob = job;
     this.async = async;
-    firstRun = kadaiEngineImpl.getConfiguration().getJobFirstRun();
-    runEvery = kadaiEngineImpl.getConfiguration().getJobRunEvery();
+    firstRun = kadaiEngine.getConfiguration().getJobFirstRun();
+    runEvery = kadaiEngine.getConfiguration().getJobRunEvery();
+  }
+
+  protected final InternalKadaiEngine getInternalKadaiEngine() {
+    return InternalKadaiEngineResolver.resolve(kadaiEngine);
   }
 
   public static KadaiJob createFromScheduledJob(
@@ -185,6 +190,6 @@ public abstract class AbstractKadaiJob implements KadaiJob {
     ScheduledJob job = new ScheduledJob();
     job.setType(getType());
     job.setDue(getNextDueForJob());
-    kadaiEngineImpl.getJobService().createJob(job);
+    kadaiEngine.getJobService().createJob(job);
   }
 }

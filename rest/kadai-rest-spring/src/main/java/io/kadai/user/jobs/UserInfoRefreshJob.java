@@ -86,7 +86,7 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
       LOGGER.debug("Trying to delete all users, groups and permissions");
     }
 
-    final UserServiceImpl userServiceImpl = (UserServiceImpl) kadaiEngineImpl.getUserService();
+    final UserServiceImpl userServiceImpl = (UserServiceImpl) kadaiEngine.getUserService();
     userServiceImpl.deleteAllUsersGroupsPermissions();
 
     if (LOGGER.isDebugEnabled()) {
@@ -110,7 +110,7 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Trying to insert user {}", user);
       }
-      kadaiEngineImpl.getUserService().createUser(user);
+      kadaiEngine.getUserService().createUser(user);
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Successfully inserted user {}", user);
       }
@@ -122,7 +122,7 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
   private void addExistingConfigurationDataToUser(User user) {
     try {
 
-      String userData = kadaiEngineImpl.getUserService().getUser(user.getId()).getData();
+      String userData = kadaiEngine.getUserService().getUser(user.getId()).getData();
       if (userData != null) {
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Trying to set userData {} for user {}", userData, user);
