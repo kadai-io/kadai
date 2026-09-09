@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -57,6 +58,8 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.env.Environment;
+import org.springframework.ldap.NameNotFoundException;
+import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.ldap.core.LdapTemplate;
 
 @ExtendWith(MockitoExtension.class)
@@ -426,6 +429,49 @@ class LdapClientTest {
     assertThat(cut.validateAccessId("monitor-users")).isFalse();
     assertThat(cut.validateAccessId("g03-permission-id")).isTrue();
     assertThat(cut.validateAccessId("permission-name")).isFalse();
+  }
+
+  @Test
+  void should_OnlyClassifyConfiguredGroupEntriesAsValidGroupDns() {
+    setUpEnvMock();
+    cut.init();
+
+    DirContextOperations group = mock(DirContextOperations.class);
+    when(group.getStringAttributes("objectclass"))
+        .thenReturn(new String[] {"top", "GROUPofuniquenames"});
+    when(group.getStringAttribute("permission")).thenReturn(null);
+
+    DirContextOperations container = mock(DirContextOperations.class);
+    when(container.getStringAttributes("objectclass"))
+        .thenReturn(new String[] {"top", "container"});
+
+    DirContextOperations permission = mock(DirContextOperations.class);
+    when(permission.getStringAttributes("objectclass"))
+        .thenReturn(new String[] {"top", "groupOfUniqueNames"});
+    when(permission.getStringAttribute("permission")).thenReturn("permission-name");
+
+    assertThat(cut.new ExactGroupDnContextMapper().doMapFromContext(group)).isTrue();
+    assertThat(cut.new ExactGroupDnContextMapper().doMapFromContext(container)).isFalse();
+    assertThat(cut.new ExactGroupDnContextMapper().doMapFromContext(permission)).isFalse();
+  }
+
+  @Test
+  void should_ReturnFalseWhenExactGroupDnDoesNotExist() throws Exception {
+    setUpEnvMock();
+    when(environment.getProperty("kadai.ldap.useDnForGroups")).thenReturn("true");
+    cut.init();
+
+    when(ldapTemplate.search(
+            anyString(),
+            anyString(),
+            any(SearchControls.class),
+            any(LdapClient.DnStringContextMapper.class)))
+        .thenReturn(Collections.emptyList());
+    when(ldapTemplate.lookup(
+            any(LdapName.class), any(), any(LdapClient.ExactGroupDnContextMapper.class)))
+        .thenThrow(new NameNotFoundException("not found"));
+
+    assertThat(cut.validateAccessId("cn=unknown,ou=groups,o=KadaiTest")).isFalse();
   }
 
   private void setUpEnvMock() {

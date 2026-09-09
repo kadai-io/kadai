@@ -419,7 +419,11 @@ class AccessIdControllerIntTest {
   @Test
   void should_ReturnFalseForNonExternalDnAndUnknownAccessId() {
     List<String> accessIds =
-        List.of("uid=teamlead-1,cn=users,OU=Test,O=KADAI", "does-not-exist");
+        List.of(
+            "uid=teamlead-1,cn=users,OU=Test,O=KADAI",
+            "cn=groups,OU=Test,O=KADAI",
+            "cn=g01,cn=groups,OU=Test,O=KADAI",
+            "does-not-exist");
 
     for (String accessId : accessIds) {
       ResponseEntity<Boolean> response =

@@ -450,20 +450,10 @@ public class LdapClient {
       return false;
     }
 
-    if (nameIsDn(accessId)) {
-      try {
-        AccessIdRepresentationModel resolved = searchAccessIdByDn(accessId);
-        return resolved != null
-            && resolved.getAccessId() != null
-            && resolved.getAccessId().equalsIgnoreCase(accessId);
-      } catch (NameNotFoundException e) {
-        return false;
-      }
-    }
-
     return hasExactUserAccessId(accessId)
         || (!useDnForGroups() && hasExactGroupAccessId(accessId))
-        || hasExactPermissionAccessId(accessId);
+        || hasExactPermissionAccessId(accessId)
+        || (useDnForGroups() && nameIsDn(accessId) && hasExactGroupDn(accessId));
   }
 
   private boolean hasExactUserAccessId(String accessId) {
@@ -491,6 +481,18 @@ public class LdapClient {
     filter.and(new PresentFilter(getPermissionNameAttribute()));
     filter.and(new EqualsFilter(getEffectivePermissionAccessIdAttribute(), accessId));
     return hasExactAccessId(getPermissionSearchBase(), filter);
+  }
+
+  private boolean hasExactGroupDn(String accessId) throws InvalidNameException {
+    try {
+      String nameWithoutBaseDn = getNameWithoutBaseDn(accessId).toLowerCase();
+      return ldapTemplate.lookup(
+          new LdapName(nameWithoutBaseDn),
+          getExactGroupDnAttributesToReturn(),
+          new ExactGroupDnContextMapper());
+    } catch (NameNotFoundException e) {
+      return false;
+    }
   }
 
   private boolean hasExactAccessId(String searchBase, AndFilter filter) {
@@ -706,6 +708,13 @@ public class LdapClient {
   String getNameWithoutBaseDn(String name) {
     // (?i) --> case insensitive replacement
     return name.replaceAll("(?i)" + Pattern.quote("," + getBaseDn()), "");
+  }
+
+  private String[] getExactGroupDnAttributesToReturn() {
+    if (permissionsAreEmpty()) {
+      return new String[] {getGroupSearchFilterName()};
+    }
+    return new String[] {getGroupSearchFilterName(), getPermissionNameAttribute()};
   }
 
   String[] getLookUpGroupAttributesToReturn() {
@@ -1078,6 +1087,24 @@ public class LdapClient {
       String lastName = context.getStringAttribute(getUserLastnameAttribute());
       accessId.setName(String.format("%s, %s", lastName, firstName));
       return accessId;
+    }
+  }
+
+  class ExactGroupDnContextMapper extends AbstractContextMapper<Boolean> {
+
+    @Override
+    public Boolean doMapFromContext(final DirContextOperations context) {
+      String[] groupFilterValues = context.getStringAttributes(getGroupSearchFilterName());
+      boolean matchesGroupFilter =
+          groupFilterValues != null
+              && Arrays.stream(groupFilterValues)
+                  .anyMatch(
+                      value ->
+                          value != null && value.equalsIgnoreCase(getGroupSearchFilterValue()));
+      boolean isPermission =
+          !permissionsAreEmpty()
+              && context.getStringAttribute(getPermissionNameAttribute()) != null;
+      return matchesGroupFilter && !isPermission;
     }
   }
 
