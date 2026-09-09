@@ -175,7 +175,7 @@ describe('FormsValidatorService', () => {
       expect(result).toBeFalsy();
     });
 
-    it('should ignore stale async validation response if owner value changed while request was pending', async () => {
+    it('should ignore stale async validation response and return null if owner value changed while request was pending', async () => {
       const accessIdSubject = new Subject<any[]>();
       accessIdsServiceMock.searchForAccessId.mockReturnValue(accessIdSubject);
 
@@ -205,7 +205,7 @@ describe('FormsValidatorService', () => {
       const result = await validationPromise;
 
       expect(notificationServiceMock.showError).not.toHaveBeenCalled();
-      expect(result).toBe(false);
+      expect(result).toBe(null);
     });
 
     it('should accept async validation response when owner value remains unchanged', async () => {

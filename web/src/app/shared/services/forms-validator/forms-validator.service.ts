@@ -38,9 +38,9 @@ export class FormsValidatorService {
     return this.inputOverflow.asObservable();
   }
 
-  // 1. returns true if the form is valid, 
-  // 2. false if not valid 
-  // 3. and null if the async validation response is stale 
+  // 1. returns true if the form is valid,
+  // 2. false if not valid
+  // 3. and null if the async validation response is stale
   // (the user changed the value in the meantime)
   async validateFormInformation(form: NgForm | undefined, toggleValidationMap: Map<any, boolean>): Promise<any> {
     let validSync = true;
