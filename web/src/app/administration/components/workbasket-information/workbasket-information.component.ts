@@ -162,6 +162,11 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
     this.formsValidatorService
       .validateFormInformation(this.workbasketForm(), this.toggleValidationMap)
       .then((value) => {
+        // discard submitting form if the request is stale
+        if (value === null) {
+          return;
+        }
+
         if (value && this.isOwnerValid) {
           this.onSave();
         } else {

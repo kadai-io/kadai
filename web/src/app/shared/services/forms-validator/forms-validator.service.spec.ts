@@ -22,7 +22,7 @@ import { FormsValidatorService } from './forms-validator.service';
 import { AccessIdsService } from 'app/shared/services/access-ids/access-ids.service';
 import { NotificationService } from '../notifications/notification.service';
 import { FormArray, FormControl } from '@angular/forms';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 
 const accessIdsServiceMock = {
   searchForAccessId: vi.fn().mockReturnValue(of([{ accessId: 'user1' }]))
@@ -173,6 +173,69 @@ describe('FormsValidatorService', () => {
       const toggleMap = new Map<any, boolean>();
       const result = await service.validateFormInformation(mockForm, toggleMap);
       expect(result).toBeFalsy();
+    });
+
+    it('should ignore stale async validation response and return null if owner value changed while request was pending', async () => {
+      const accessIdSubject = new Subject<any[]>();
+      accessIdsServiceMock.searchForAccessId.mockReturnValue(accessIdSubject);
+
+      let mockOwnerValue = 'ownerA';
+      const mockForm: any = {
+        form: {
+          controls: {
+            'workbasket.owner': {
+              get value() {
+                return mockOwnerValue;
+              },
+              invalid: false,
+              valid: true
+            }
+          }
+        }
+      };
+
+      const toggleMap = new Map<any, boolean>();
+      const validationPromise = service.validateFormInformation(mockForm, toggleMap);
+
+      mockOwnerValue = 'ownerB';
+
+      accessIdSubject.next([{ accessId: 'ownerB' }]);
+      accessIdSubject.complete();
+
+      const result = await validationPromise;
+
+      expect(notificationServiceMock.showError).not.toHaveBeenCalled();
+      expect(result).toBe(null);
+    });
+
+    it('should accept async validation response when owner value remains unchanged', async () => {
+      const accessIdSubject = new Subject<any[]>();
+      accessIdsServiceMock.searchForAccessId.mockReturnValue(accessIdSubject);
+
+      let mockOwnerValue = 'ownerA';
+      const mockForm: any = {
+        form: {
+          controls: {
+            'workbasket.owner': {
+              get value() {
+                return mockOwnerValue;
+              },
+              invalid: false,
+              valid: true
+            }
+          }
+        }
+      };
+
+      const toggleMap = new Map<any, boolean>();
+      const validationPromise = service.validateFormInformation(mockForm, toggleMap);
+
+      accessIdSubject.next([{ accessId: 'ownerA' }]);
+      accessIdSubject.complete();
+
+      const result = await validationPromise;
+
+      expect(result).toBe(true);
     });
   });
 

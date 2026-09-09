@@ -38,6 +38,10 @@ export class FormsValidatorService {
     return this.inputOverflow.asObservable();
   }
 
+  // 1. returns true if the form is valid,
+  // 2. false if not valid
+  // 3. and null if the async validation response is stale
+  // (the user changed the value in the meantime)
   async validateFormInformation(form: NgForm | undefined, toggleValidationMap: Map<any, boolean>): Promise<any> {
     let validSync = true;
     if (!form) {
@@ -56,12 +60,23 @@ export class FormsValidatorService {
 
     const ownerPromise = new Promise((resolve) => {
       const ownerString = 'owner';
-      if (form.form.controls[this.workbasketOwner]) {
-        this.accessIdsService.searchForAccessId(form.form.controls[this.workbasketOwner].value).subscribe((items) => {
+      const ownerControl = form.form.controls[this.workbasketOwner];
+
+      if (ownerControl) {
+        const requestedOwnerValue = ownerControl.value;
+
+        this.accessIdsService.searchForAccessId(requestedOwnerValue).subscribe((items) => {
+          const stillCurrent = ownerControl.value === requestedOwnerValue;
+
+          if (!stillCurrent) {
+            resolve(null);
+            return;
+          }
+
           const validationState = toggleValidationMap.get(this.workbasketOwner);
           toggleValidationMap.set(this.workbasketOwner, !validationState);
-          const valid = items.find((item) => item.accessId === form.form.controls[this.workbasketOwner].value);
-          resolve(new ResponseOwner({ valid, field: ownerString }));
+          const matches = items.some((item) => item.accessId === requestedOwnerValue);
+          resolve(new ResponseOwner({ valid: matches, field: ownerString }));
         });
       } else {
         const validationState = toggleValidationMap.get(form.form.controls[this.workbasketOwner]);
@@ -71,6 +86,11 @@ export class FormsValidatorService {
     });
 
     const values = await Promise.all([forFieldsPromise, ownerPromise]);
+    // return null in case of stale request
+    if (values[1] === null) {
+      return null;
+    }
+
     const responseOwner = new ResponseOwner(values[1]);
     if (!(values[0] && responseOwner.valid)) {
       if (!responseOwner.valid) {
