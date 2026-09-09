@@ -74,7 +74,10 @@ describe('TaskListToolbarComponent', () => {
         { provide: WorkbasketService, useValue: workbasketServiceMock },
         { provide: TaskService, useValue: {} },
         { provide: NotificationService, useValue: { showSuccess: vi.fn(), showInformation: vi.fn() } },
-        { provide: RequestInProgressService, useValue: { setRequestInProgress: vi.fn() } },
+        {
+          provide: RequestInProgressService,
+          useValue: { setRequestInProgress: vi.fn(), beginRequest: vi.fn(), endRequest: vi.fn() }
+        },
         { provide: KadaiEngineService, useValue: kadaiEngineServiceMock },
         { provide: Router, useValue: routerMock },
         { provide: ActivatedRoute, useValue: { queryParams: queryParams$.asObservable(), parent: {} } }

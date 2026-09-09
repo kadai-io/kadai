@@ -202,12 +202,50 @@ describe('FormsValidatorService', () => {
       expect(result).toBe(true);
     });
 
+    it('should resolve to true when access ID matches case-insensitively', async () => {
+      accessIdsServiceMock.searchForAccessId.mockReturnValue(of([{ accessId: 'USER1' }]));
+
+      const formArray = new FormArray([
+        new FormControl({
+          accessId: 'user1',
+          permRead: true,
+          permReadTasks: false,
+          permEditTasks: false,
+          permOpen: false,
+          permAppend: false,
+          permTransfer: false,
+          permDistribute: false
+        })
+      ]);
+      const result = await service.validateFormAccess(formArray, new Map());
+      expect(result).toBe(true);
+    });
+
     it('should resolve to false when an access ID is not found', async () => {
       accessIdsServiceMock.searchForAccessId.mockReturnValue(of([]));
 
       const formArray = new FormArray([
         new FormControl({
           accessId: 'unknownUser',
+          permRead: false,
+          permReadTasks: false,
+          permEditTasks: false,
+          permOpen: false,
+          permAppend: false,
+          permTransfer: false,
+          permDistribute: false
+        })
+      ]);
+      const result = await service.validateFormAccess(formArray, new Map());
+      expect(result).toBe(false);
+    });
+
+    it('should resolve to false when search returns only fuzzy matches', async () => {
+      accessIdsServiceMock.searchForAccessId.mockReturnValue(of([{ accessId: 'user-a' }, { accessId: 'user-b' }]));
+
+      const formArray = new FormArray([
+        new FormControl({
+          accessId: 'user',
           permRead: false,
           permReadTasks: false,
           permEditTasks: false,

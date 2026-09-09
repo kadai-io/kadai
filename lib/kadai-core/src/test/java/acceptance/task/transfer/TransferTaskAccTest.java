@@ -402,10 +402,46 @@ class TransferTaskAccTest extends AbstractAccTest {
 
   @WithAccessId(user = "admin")
   @Test
+  void should_NotSetTheTransferFlag_When_WorkbasketKeyAndDomainAreProvided() throws Exception {
+    taskService.transfer(
+        "TKI:000000000000000000000000000000000003", "USER-1-1", "DOMAIN_A", false);
+
+    Task transferredTask = taskService.getTask("TKI:000000000000000000000000000000000003");
+    assertThat(transferredTask).isNotNull();
+    assertThat(transferredTask.isTransferred()).isFalse();
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
   void should_NotSetTheTransferFlagWithinBulkTransfer_When_SetTransferFlagNotRequested()
       throws Exception {
     taskService.transferTasks(
         "WBI:100000000000000000000000000000000006",
+        List.of(
+            "TKI:000000000000000000000000000000000003",
+            "TKI:000000000000000000000000000000000004",
+            "TKI:000000000000000000000000000000000005"),
+        false);
+
+    List<TaskSummary> transferredTasks =
+        taskService
+            .createTaskQuery()
+            .idIn(
+                "TKI:000000000000000000000000000000000004",
+                "TKI:000000000000000000000000000000000005",
+                "TKI:000000000000000000000000000000000003")
+            .list();
+
+    assertThat(transferredTasks).extracting(TaskSummary::isTransferred).containsOnly(false);
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_NotSetTheTransferFlagWithinBulkTransfer_When_WorkbasketKeyAndDomainAreProvided()
+      throws Exception {
+    taskService.transferTasks(
+        "USER-1-1",
+        "DOMAIN_A",
         List.of(
             "TKI:000000000000000000000000000000000003",
             "TKI:000000000000000000000000000000000004",

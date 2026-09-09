@@ -34,7 +34,7 @@ import { Workbasket } from '../../../shared/models/workbasket';
 import { provideStore, Store } from '@ngxs/store';
 import { TaskWorkflowState } from '../../../shared/store/task-store/task.state';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
-import { ClaimTask, GetTask, ReopenTask, SelectTask } from '../../../shared/store/task-store/task.actions';
+import { ReopenTask, SelectTask } from '../../../shared/store/task-store/task.actions';
 import { Classification } from 'app/shared/models/classification';
 import { TaskSelectors } from 'app/shared/store/task-store/task.selectors';
 
@@ -90,7 +90,11 @@ describe('TaskProcessingComponent', () => {
   };
   let mockWorkbasketService: { getAllWorkBaskets: ReturnType<typeof vi.fn> };
   let mockClassificationsService: { getClassification: ReturnType<typeof vi.fn> };
-  let mockRequestInProgressService: { setRequestInProgress: ReturnType<typeof vi.fn> };
+  let mockRequestInProgressService: {
+    setRequestInProgress: ReturnType<typeof vi.fn>;
+    beginRequest: ReturnType<typeof vi.fn>;
+    endRequest: ReturnType<typeof vi.fn>;
+  };
   let mockRouter: { navigate: ReturnType<typeof vi.fn> };
   let store: Store;
 
@@ -122,7 +126,9 @@ describe('TaskProcessingComponent', () => {
     };
 
     mockRequestInProgressService = {
-      setRequestInProgress: vi.fn()
+      setRequestInProgress: vi.fn(),
+      beginRequest: vi.fn(),
+      endRequest: vi.fn()
     };
 
     mockRouter = {
@@ -701,9 +707,15 @@ describe('TaskProcessingComponent', () => {
         return id === 'class-a' ? classificationA$ : classificationB$;
       });
 
+      // 1. start request A but do not complete
       paramsSubject.next({ id: 'task-a' });
       fixture.detectChanges();
 
+      getTaskA$.next(taskA);
+      getTaskA$.complete();
+      fixture.detectChanges();
+
+      // 2. start and fully complete request B
       paramsSubject.next({ id: 'task-b' });
       fixture.detectChanges();
 
@@ -719,11 +731,11 @@ describe('TaskProcessingComponent', () => {
       vi.runAllTimers();
       fixture.detectChanges();
 
+      // 3. assert intermediate result
       expect(component.address).toBe('http://app-b.com');
+      expect(component.task()?.taskId).toBe('task-b');
 
-      getTaskA$.next(taskA);
-      getTaskA$.complete();
-
+      // 4. fully complete request A - late Claim A and Classification A
       claimTaskA$.next(taskA);
       claimTaskA$.complete();
 
@@ -733,7 +745,10 @@ describe('TaskProcessingComponent', () => {
       vi.runAllTimers();
       fixture.detectChanges();
 
+      // 5. final assert
       expect(component.address).toBe('http://app-b.com');
+      expect(store.selectSnapshot(TaskSelectors.getSelectedTask)?.taskId).toBe('task-b');
+      expect(component.task()?.taskId).toBe('task-b');
 
       vi.useRealTimers();
     });

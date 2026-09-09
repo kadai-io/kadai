@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.kadai</groupId>
   <artifactId>kadai-parent</artifactId>
-  <version>12.0.1-SNAPSHOT</version>
+  <version>12.0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>${project.groupId}:${project.artifactId}</name>
@@ -48,11 +48,11 @@
     <version.maven.checkstyle>3.6.0</version.maven.checkstyle>
     <version.maven.jar>3.5.1</version.maven.jar>
     <version.maven.war>3.5.1</version.maven.war>
-    <version.maven.compiler>3.15.0</version.maven.compiler>
+    <version.maven.compiler>3.16.0</version.maven.compiler>
     <version.maven.source>3.4.0</version.maven.source>
     <version.maven.javadoc>3.12.0</version.maven.javadoc>
     <version.maven.resources>3.5.0</version.maven.resources>
-    <version.maven.surefire>3.5.6</version.maven.surefire>
+    <version.maven.surefire>3.6.0</version.maven.surefire>
     <version.maven.clean>3.2.0</version.maven.clean>
     <version.maven.dependency>3.8.1</version.maven.dependency>
     <version.maven.sonar>5.7.0.6970</version.maven.sonar>
@@ -85,7 +85,7 @@
     <version.aspectj>1.9.25.1</version.aspectj>
 
     <!-- Excel to DMN converter dependencies -->
-    <version.docx4j>17.0.3</version.docx4j>
+    <version.docx4j>17.0.5</version.docx4j>
     <version.jakarta.xml.bind-api>4.0.5</version.jakarta.xml.bind-api>
     <version.jaxb-core>4.0.9</version.jaxb-core>
     <version.jaxb-impl>4.0.9</version.jaxb-impl>

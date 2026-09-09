@@ -110,6 +110,22 @@ class RequestReviewAccTest {
 
   @WithAccessId(user = "user-1-1")
   @Test
+  void should_RequestReviewWithWorkbasketKeyAndDomain_When_TaskIsClaimed() throws Exception {
+    Task task = createTaskClaimedByUser("user-1-1").buildAndStore(taskService);
+
+    Task result =
+        taskService.requestReviewWithWorkbasketKeyAndDomain(
+            task.getId(),
+            defaultWorkbasketSummary.getKey(),
+            defaultWorkbasketSummary.getDomain(),
+            null);
+
+    assertThat(result.getState()).isEqualTo(TaskState.READY_FOR_REVIEW);
+    assertThat(result.getOwner()).isNull();
+  }
+
+  @WithAccessId(user = "user-1-1")
+  @Test
   void should_ForceRequestReview_When_TaskIsClaimedByDifferentUser() throws Exception {
     Instant now = Instant.now();
     Task task = createTaskClaimedByUser("user-1-2").buildAndStore(taskService);
@@ -133,6 +149,23 @@ class RequestReviewAccTest {
     assertThat(result.getState()).isEqualTo(TaskState.READY_FOR_REVIEW);
     assertThat(result.getOwner()).isNull();
     assertThat(result.getModified()).isAfterOrEqualTo(now);
+  }
+
+  @WithAccessId(user = "user-1-1")
+  @Test
+  void should_ForceRequestReviewWithWorkbasketKeyAndDomain_When_TaskIsClaimedByDifferentUser()
+      throws Exception {
+    Task task = createTaskClaimedByUser("user-1-2").buildAndStore(taskService);
+
+    Task result =
+        taskService.forceRequestReviewWithWorkbasketKeyAndDomain(
+            task.getId(),
+            defaultWorkbasketSummary.getKey(),
+            defaultWorkbasketSummary.getDomain(),
+            "user-1-1");
+
+    assertThat(result.getState()).isEqualTo(TaskState.READY_FOR_REVIEW);
+    assertThat(result.getOwner()).isEqualTo("user-1-1");
   }
 
   @WithAccessId(user = "user-1-1")
@@ -207,6 +240,18 @@ class RequestReviewAccTest {
     Task task = createTaskClaimedByUser("user-1-1").buildAndStore(taskService, "user-1-1");
     ThrowingCallable call =
         () -> taskService.requestReviewWithWorkbasketId(task.getId(), null, null);
+
+    assertThatThrownBy(call)
+        .isInstanceOf(InvalidArgumentException.class)
+        .hasMessage("WorkbasketId must not be null or empty");
+  }
+
+  @WithAccessId(user = "user-1-2")
+  @Test
+  void should_ThrowException_When_ForceRequestReviewWithEmptyWorkbasketId() throws Exception {
+    Task task = createTaskClaimedByUser("user-1-1").buildAndStore(taskService, "user-1-1");
+    ThrowingCallable call =
+        () -> taskService.forceRequestReviewWithWorkbasketId(task.getId(), null, null);
 
     assertThatThrownBy(call)
         .isInstanceOf(InvalidArgumentException.class)
