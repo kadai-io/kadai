@@ -39,6 +39,8 @@ describe('FormsValidatorService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    accessIdsServiceMock.searchForAccessId.mockReturnValue(of([{ accessId: 'user1' }]));
+    accessIdsServiceMock.validateAccessId.mockReturnValue(of(true));
 
     TestBed.configureTestingModule({
       providers: [
@@ -147,8 +149,6 @@ describe('FormsValidatorService', () => {
     });
 
     it('should resolve to truthy when owner field exists and accessId matches', async () => {
-      accessIdsServiceMock.searchForAccessId.mockReturnValue(of([{ accessId: 'user1' }]));
-
       const mockForm: any = {
         form: {
           controls: {
@@ -185,8 +185,6 @@ describe('FormsValidatorService', () => {
     });
 
     it('should resolve to true when all access IDs are found', async () => {
-      accessIdsServiceMock.searchForAccessId.mockReturnValue(of([{ accessId: 'user1' }]));
-
       const formArray = new FormArray([
         new FormControl({
           accessId: 'user1',
@@ -204,8 +202,6 @@ describe('FormsValidatorService', () => {
     });
 
     it('should use the backend validation result without fuzzy search', async () => {
-      accessIdsServiceMock.searchForAccessId.mockReturnValue(of([{ accessId: 'USER1' }]));
-
       const formArray = new FormArray([
         new FormControl({
           accessId: 'user1',
@@ -243,12 +239,22 @@ describe('FormsValidatorService', () => {
       expect(result).toBe(false);
     });
 
-    it('should resolve to false when backend rejects an access ID', async () => {
-      accessIdsServiceMock.validateAccessId.mockReturnValue(of(false));
+    it('should resolve to false when any access ID is rejected', async () => {
+      accessIdsServiceMock.validateAccessId.mockReturnValueOnce(of(true)).mockReturnValueOnce(of(false));
 
       const formArray = new FormArray([
         new FormControl({
-          accessId: 'user',
+          accessId: 'valid-user',
+          permRead: false,
+          permReadTasks: false,
+          permEditTasks: false,
+          permOpen: false,
+          permAppend: false,
+          permTransfer: false,
+          permDistribute: false
+        }),
+        new FormControl({
+          accessId: 'invalid-user',
           permRead: false,
           permReadTasks: false,
           permEditTasks: false,
@@ -258,14 +264,17 @@ describe('FormsValidatorService', () => {
           permDistribute: false
         })
       ]);
+
       const result = await service.validateFormAccess(formArray, new Map());
+
       expect(result).toBe(false);
+      expect(accessIdsServiceMock.validateAccessId).toHaveBeenNthCalledWith(1, 'valid-user');
+      expect(accessIdsServiceMock.validateAccessId).toHaveBeenNthCalledWith(2, 'invalid-user');
     });
   });
 
   describe('validateFormAccess - permission warnings', () => {
     it('should show warnings when permEditTasks is true but permReadTasks is false', async () => {
-      accessIdsServiceMock.searchForAccessId.mockReturnValue(of([{ accessId: 'user1' }]));
       const formArray = new FormArray([
         new FormControl({
           accessId: 'user1',
@@ -283,7 +292,6 @@ describe('FormsValidatorService', () => {
     });
 
     it('should show warnings when permReadTasks is true but permRead is false', async () => {
-      accessIdsServiceMock.searchForAccessId.mockReturnValue(of([{ accessId: 'user1' }]));
       const formArray = new FormArray([
         new FormControl({
           accessId: 'user1',

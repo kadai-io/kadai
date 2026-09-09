@@ -93,9 +93,10 @@ describe('AccessIdsService', () => {
         expect(result).toBe(true);
       });
 
-      const req = httpMock.expectOne((request) =>
-        request.url === REST_URL + '/v1/access-ids/validation'
-        && request.params.get('access-id') === 'kadai:callcenter:ab:ab/a:callcenter'
+      const req = httpMock.expectOne(
+        (request) =>
+          request.url === REST_URL + '/v1/access-ids/validation' &&
+          request.params.get('access-id') === 'kadai:callcenter:ab:ab/a:callcenter'
       );
       expect(req.request.method).toBe('GET');
       req.flush(true);
@@ -106,9 +107,8 @@ describe('AccessIdsService', () => {
         expect(result).toBe(false);
       });
 
-      const req = httpMock.expectOne((request) =>
-        request.url === REST_URL + '/v1/access-ids/validation'
-        && request.params.get('access-id') === 'ab'
+      const req = httpMock.expectOne(
+        (request) => request.url === REST_URL + '/v1/access-ids/validation' && request.params.get('access-id') === 'ab'
       );
       req.flush(false);
     });

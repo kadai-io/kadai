@@ -439,6 +439,24 @@ class AccessIdControllerIntTest {
   }
 
   @Test
+  void should_ReturnBadRequestWhenValidationAccessIdIsMissing() {
+    ThrowingCallable call =
+        () ->
+            restClient
+                .get()
+                .uri(restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_VALIDATION))
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+                .retrieve()
+                .toEntity(Boolean.class);
+
+    assertThatThrownBy(call)
+        .isInstanceOf(HttpStatusCodeException.class)
+        .extracting(HttpStatusCodeException.class::cast)
+        .extracting(HttpStatusCodeException::getStatusCode)
+        .isEqualTo(HttpStatus.BAD_REQUEST);
+  }
+
+  @Test
   void should_RejectValidationForOrdinaryUsers() {
     ThrowingCallable call =
         () ->
