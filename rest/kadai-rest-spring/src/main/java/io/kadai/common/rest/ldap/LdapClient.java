@@ -437,41 +437,81 @@ public class LdapClient {
   }
 
   /**
-   * Validates a given AccessId / name.
+   * Validates a given exact externally visible Access Id.
    *
-   * @param name lookup string for names or groups
-   * @return whether the given name is valid or not
-   * @throws InvalidNameException thrown if name is not a valid dn
+   * @param accessId the Access Id to validate
+   * @return whether the given Access Id is valid
+   * @throws InvalidNameException if the Access Id is a malformed distinguished name
    */
-  public boolean validateAccessId(final String name) throws InvalidNameException {
+  public boolean validateAccessId(final String accessId) throws InvalidNameException {
     isInitOrFail();
 
-    if (nameIsDn(name)) {
-
-      AccessIdRepresentationModel groupByDn = searchAccessIdByDn(name);
-
-      return groupByDn != null;
-
-    } else {
-
-      final AndFilter andFilter = new AndFilter();
-      andFilter.and(new EqualsFilter(getUserSearchFilterName(), getUserSearchFilterValue()));
-
-      final OrFilter orFilter = new OrFilter();
-      orFilter.or(new EqualsFilter(getUserIdAttribute(), name));
-
-      andFilter.and(orFilter);
-
-      final List<AccessIdRepresentationModel> accessIds =
-          ldapTemplate.search(
-              getUserSearchBase(),
-              andFilter.encode(),
-              SearchControls.SUBTREE_SCOPE,
-              getLookUpUserAttributesToReturn(),
-              new UserContextMapper());
-
-      return !accessIds.isEmpty();
+    if (accessId == null || accessId.isEmpty()) {
+      return false;
     }
+
+    if (nameIsDn(accessId)) {
+      try {
+        AccessIdRepresentationModel resolved = searchAccessIdByDn(accessId);
+        return resolved != null
+            && resolved.getAccessId() != null
+            && resolved.getAccessId().equalsIgnoreCase(accessId);
+      } catch (NameNotFoundException e) {
+        return false;
+      }
+    }
+
+    return hasExactUserAccessId(accessId)
+        || (!useDnForGroups() && hasExactGroupAccessId(accessId))
+        || hasExactPermissionAccessId(accessId);
+  }
+
+  private boolean hasExactUserAccessId(String accessId) {
+    AndFilter filter = new AndFilter();
+    filter.and(new EqualsFilter(getUserSearchFilterName(), getUserSearchFilterValue()));
+    filter.and(new EqualsFilter(getUserIdAttribute(), accessId));
+    return hasExactAccessId(getUserSearchBase(), filter);
+  }
+
+  private boolean hasExactGroupAccessId(String accessId) {
+    AndFilter filter = new AndFilter();
+    filter.and(new EqualsFilter(getGroupSearchFilterName(), getGroupSearchFilterValue()));
+    filter.and(new EqualsFilter(getEffectiveGroupAccessIdAttribute(), accessId));
+    return hasExactAccessId(getGroupSearchBase(), getPermissionsNotPresentAndFilter(filter));
+  }
+
+  private boolean hasExactPermissionAccessId(String accessId) {
+    if (permissionsAreEmpty()) {
+      return false;
+    }
+
+    AndFilter filter = new AndFilter();
+    filter.and(
+        new EqualsFilter(getPermissionSearchFilterName(), getPermissionSearchFilterValue()));
+    filter.and(new PresentFilter(getPermissionNameAttribute()));
+    filter.and(new EqualsFilter(getEffectivePermissionAccessIdAttribute(), accessId));
+    return hasExactAccessId(getPermissionSearchBase(), filter);
+  }
+
+  private boolean hasExactAccessId(String searchBase, AndFilter filter) {
+    SearchControls searchControls = new SearchControls();
+    searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+    searchControls.setCountLimit(1);
+    return !ldapTemplate
+        .search(searchBase, filter.encode(), searchControls, new DnStringContextMapper())
+        .isEmpty();
+  }
+
+  private String getEffectiveGroupAccessIdAttribute() {
+    return getGroupIdAttribute() != null && !getGroupIdAttribute().isEmpty()
+        ? getGroupIdAttribute()
+        : getGroupNameAttribute();
+  }
+
+  private String getEffectivePermissionAccessIdAttribute() {
+    return getPermissionIdAttribute() != null && !getPermissionIdAttribute().isEmpty()
+        ? getPermissionIdAttribute()
+        : getPermissionNameAttribute();
   }
 
   public String getUserSearchBase() {
