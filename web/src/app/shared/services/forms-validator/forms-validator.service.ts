@@ -38,6 +38,10 @@ export class FormsValidatorService {
     return this.inputOverflow.asObservable();
   }
 
+  // 1. returns true if the form is valid, 
+  // 2. false if not valid 
+  // 3. and null if the async validation response is stale 
+  // (the user changed the value in the meantime)
   async validateFormInformation(form: NgForm | undefined, toggleValidationMap: Map<any, boolean>): Promise<any> {
     let validSync = true;
     if (!form) {
@@ -72,8 +76,7 @@ export class FormsValidatorService {
           const validationState = toggleValidationMap.get(this.workbasketOwner);
           toggleValidationMap.set(this.workbasketOwner, !validationState);
           const matches = items.some((item) => item.accessId === requestedOwnerValue);
-          const valid = stillCurrent && matches;
-          resolve(new ResponseOwner({ valid, field: ownerString }));
+          resolve(new ResponseOwner({ valid: matches, field: ownerString }));
         });
       } else {
         const validationState = toggleValidationMap.get(form.form.controls[this.workbasketOwner]);
@@ -83,8 +86,9 @@ export class FormsValidatorService {
     });
 
     const values = await Promise.all([forFieldsPromise, ownerPromise]);
+    // return null in case of stale request
     if (values[1] === null) {
-      return false;
+      return null;
     }
 
     const responseOwner = new ResponseOwner(values[1]);

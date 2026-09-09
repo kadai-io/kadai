@@ -16,12 +16,12 @@
  *
  */
 
-import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FormsValidatorService } from './forms-validator.service';
 import { AccessIdsService } from 'app/shared/services/access-ids/access-ids.service';
 import { NotificationService } from '../notifications/notification.service';
-import { FormArray, FormControl, NgForm } from '@angular/forms';
+import { FormArray, FormControl } from '@angular/forms';
 import { of, Subject } from 'rxjs';
 
 const accessIdsServiceMock = {
