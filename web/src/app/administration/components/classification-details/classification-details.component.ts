@@ -25,8 +25,7 @@ import { highlight } from 'app/shared/animations/validation.animation';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 
 import { DomainService } from 'app/shared/services/domain/domain.service';
-import { FormsModule, NgForm, NgModel } from '@angular/forms';
-import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
+import { FormsModule, NgForm } from '@angular/forms';
 import { ImportExportService } from 'app/administration/services/import-export.service';
 import { map, take, takeUntil } from 'rxjs/operators';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
@@ -67,6 +66,9 @@ import { MatSelect, MatSelectTrigger } from '@angular/material/select';
 import { SvgIconComponent } from 'angular-svg-icon';
 import { MatOption } from '@angular/material/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { OverflowFeedbackDirective } from 'app/shared/directives/overflow-feedback.directive';
+import { FormSubmitDirective } from 'app/shared/directives/form-submit.directive';
+import { FormFieldSubmitDirective } from 'app/shared/directives/form-field-submit.directive';
 
 @Component({
   selector: 'kadai-administration-classification-details',
@@ -92,7 +94,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
     MatSelectTrigger,
     SvgIconComponent,
     MatOption,
-    AsyncPipe
+    AsyncPipe,
+    OverflowFeedbackDirective,
+    FormSubmitDirective,
+    FormFieldSubmitDirective
   ]
 })
 export class ClassificationDetailsComponent implements OnInit, OnDestroy {
@@ -108,10 +113,6 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   badgeMessage$: Observable<string> = inject(Store).select(ClassificationSelectors.getBadgeMessage);
   customFields$!: Observable<CustomField[]>;
   readonly lengthError = 'You have reached the maximum length for this field';
-  inputOverflowMap = toSignal(inject(FormsValidatorService).inputOverflowObservable, {
-    initialValue: new Map<string, boolean>()
-  });
-  validateInputOverflow!: Function;
   requestInProgress = toSignal(inject(RequestInProgressService).getRequestInProgress(), { initialValue: false });
   classificationForm = viewChild<NgForm>('ClassificationForm');
   toggleValidationMap = new Map<string, boolean>();
@@ -119,7 +120,6 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   private location = inject(Location);
   private requestInProgressService = inject(RequestInProgressService);
   private domainService = inject(DomainService);
-  private formsValidatorService = inject(FormsValidatorService);
   private notificationsService = inject(NotificationService);
   private importExportService = inject(ImportExportService);
   private store = inject(Store);
@@ -140,30 +140,25 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.store.dispatch(new SelectClassification(this.classification()!.classificationId!));
       });
-
-    this.validateInputOverflow = (inputFieldModel: NgModel, maxLength: number) => {
-      this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
-    };
-  }
-
-  isFieldValid(field: string): boolean {
-    return this.formsValidatorService.isFieldValid(this.classificationForm(), field);
   }
 
   onSubmit() {
-    this.formsValidatorService.formSubmitAttempt = true;
     trimForm(this.classificationForm());
-    this.formsValidatorService
-      .validateFormInformation(this.classificationForm(), this.toggleValidationMap)
-      .then((value) => {
-        if (value) {
-          this.onSave();
-        }
-      });
+
+    const form = this.classificationForm();
+    if (!form) {
+      return;
+    }
+
+    if (form.valid) {
+      this.onSave();
+    } else {
+      form.control.markAllAsTouched();
+      this.notificationsService.showError('CLASSIFICATION_SAVE');
+    }
   }
 
   onRestore() {
-    this.formsValidatorService.formSubmitAttempt = false;
     this.store
       .dispatch(new RestoreSelectedClassification(this.classification()!.classificationId!))
       .pipe(take(1))

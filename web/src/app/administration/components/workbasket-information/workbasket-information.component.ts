@@ -18,7 +18,7 @@
 
 import { Component, effect, inject, input, model, OnDestroy, OnInit, untracked, viewChild } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { FormsModule, NgForm, NgModel } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Store } from '@ngxs/store';
 import { ACTION } from 'app/shared/models/action';
 import { customFieldCount, Workbasket } from 'app/shared/models/workbasket';
@@ -26,7 +26,6 @@ import { WorkbasketType } from 'app/shared/models/workbasket-type';
 import { KadaiDate } from 'app/shared/util/kadai.date';
 import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
-import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
 import { filter, map, takeUntil } from 'rxjs/operators';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
@@ -61,6 +60,9 @@ import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MapValuesPipe } from '../../../shared/pipes/map-values.pipe';
 import { RemoveNoneTypePipe } from '../../../shared/pipes/remove-empty-type.pipe';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { OverflowFeedbackDirective } from 'app/shared/directives/overflow-feedback.directive';
+import { FormFieldSubmitDirective } from 'app/shared/directives/form-field-submit.directive';
+import { FormSubmitDirective } from 'app/shared/directives/form-submit.directive';
 
 @Component({
   selector: 'kadai-administration-workbasket-information',
@@ -82,7 +84,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
     MatError,
     AsyncPipe,
     MapValuesPipe,
-    RemoveNoneTypePipe
+    RemoveNoneTypePipe,
+    OverflowFeedbackDirective,
+    FormSubmitDirective,
+    FormFieldSubmitDirective
   ]
 })
 export class WorkbasketInformationComponent implements OnInit, OnDestroy {
@@ -91,13 +96,8 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
   workbasketForm = viewChild<NgForm>('WorkbasketForm');
   workbasketClone!: Workbasket;
   allTypes!: Map<WorkbasketType, string>;
-  toggleValidationMap = new Map<string, boolean>();
   isOwnerValid: boolean = true;
   readonly lengthError = 'You have reached the maximum length for this field';
-  inputOverflowMap = toSignal(inject(FormsValidatorService).inputOverflowObservable, {
-    initialValue: new Map<string, boolean>()
-  });
-  validateInputOverflow!: Function;
   customFields$!: Observable<CustomField[]>;
   destroy$ = new Subject<void>();
   private store = inject(Store);
@@ -110,7 +110,6 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
   buttonAction$: Observable<ButtonAction | undefined> = this.store.select(WorkbasketSelectors.buttonAction);
   private workbasketService = inject(WorkbasketService);
   private requestInProgressService = inject(RequestInProgressService);
-  private formsValidatorService = inject(FormsValidatorService);
   private notificationService = inject(NotificationService);
 
   constructor() {
@@ -134,11 +133,6 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
       map((customisation) => customisation?.information ?? ({} as CustomFields)),
       getCustomFields(customFieldCount)
     );
-    this.validateInputOverflow = (inputFieldModel: NgModel, maxLength: number) => {
-      if (typeof inputFieldModel.value !== 'undefined') {
-        this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
-      }
-    };
     this.buttonAction$
       .pipe(takeUntil(this.destroy$))
       .pipe(filter((buttonAction) => typeof buttonAction !== 'undefined'))
@@ -164,30 +158,22 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
-    this.formsValidatorService.formSubmitAttempt = true;
     trimForm(this.workbasketForm());
-    this.formsValidatorService
-      .validateFormInformation(this.workbasketForm(), this.toggleValidationMap)
-      .then((value) => {
-        // discard submitting form if the request is stale
-        if (value === null) {
-          return;
-        }
 
-        if (value && this.isOwnerValid) {
-          this.onSave();
-        } else {
-          this.notificationService.showError('WORKBASKET_SAVE');
-        }
-      });
-  }
+    const form = this.workbasketForm();
+    if (!form) {
+      return;
+    }
 
-  isFieldValid(field: string): boolean {
-    return this.formsValidatorService.isFieldValid(this.workbasketForm(), field);
+    if (form.valid && this.isOwnerValid) {
+      this.onSave();
+    } else {
+      form.control.markAllAsTouched();
+      this.notificationService.showError('WORKBASKET_SAVE');
+    }
   }
 
   onUndo() {
-    this.formsValidatorService.formSubmitAttempt = false;
     this.notificationService.showSuccess('WORKBASKET_RESTORE');
     this.workbasket.set({ ...this.workbasketClone });
   }

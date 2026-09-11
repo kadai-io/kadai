@@ -17,20 +17,13 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { Subject } from 'rxjs';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { TaskCustomFieldsComponent } from './task-custom-fields.component';
-import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
 import { Task } from '../../models/task';
 
 describe('TaskCustomFieldsComponent', () => {
   let component: TaskCustomFieldsComponent;
   let fixture: ComponentFixture<TaskCustomFieldsComponent>;
-  let inputOverflowSubject: Subject<Map<string, boolean>>;
-  let mockFormsValidatorService: {
-    inputOverflowObservable: Subject<Map<string, boolean>>;
-    validateInputOverflow: ReturnType<typeof vi.fn>;
-  };
 
   const createTask = (): Task =>
     new Task(
@@ -66,16 +59,8 @@ describe('TaskCustomFieldsComponent', () => {
     );
 
   beforeEach(async () => {
-    inputOverflowSubject = new Subject<Map<string, boolean>>();
-
-    mockFormsValidatorService = {
-      inputOverflowObservable: inputOverflowSubject,
-      validateInputOverflow: vi.fn()
-    };
-
     await TestBed.configureTestingModule({
-      imports: [TaskCustomFieldsComponent],
-      providers: [{ provide: FormsValidatorService, useValue: mockFormsValidatorService }]
+      imports: [TaskCustomFieldsComponent]
     }).compileComponents();
   });
 
@@ -101,27 +86,6 @@ describe('TaskCustomFieldsComponent', () => {
 
     it('should exclude task keys that start with "custom" but contain no digit', () => {
       expect(component.customFields).not.toContain('customAttributes');
-    });
-
-    it('should subscribe to inputOverflowObservable and update inputOverflowMap', () => {
-      const testMap = new Map<string, boolean>([['custom1', true]]);
-
-      inputOverflowSubject.next(testMap);
-
-      expect(component.inputOverflowMap()).toBe(testMap);
-    });
-
-    it('should set validateKeypress to a function', () => {
-      expect(typeof component.validateKeypress).toBe('function');
-    });
-
-    it('should call formsValidatorService.validateInputOverflow when validateKeypress is invoked', () => {
-      const fakeModel = { name: 'custom1', value: 'some-value' } as any;
-      const maxLength = 255;
-
-      component.validateKeypress(fakeModel, maxLength);
-
-      expect(mockFormsValidatorService.validateInputOverflow).toHaveBeenCalledWith(fakeModel, maxLength);
     });
   });
 
@@ -179,27 +143,7 @@ describe('TaskCustomFieldsComponent', () => {
     });
   });
 
-  describe('inputOverflowMap', () => {
-    it('should start as an empty Map before first emission', () => {
-      const freshFixture = TestBed.createComponent(TaskCustomFieldsComponent);
-      const freshComponent = freshFixture.componentInstance;
-      expect(freshComponent.inputOverflowMap).toBeDefined();
-      expect(freshComponent.inputOverflowMap().size).toBe(0);
-    });
-
-    it('should be updated each time inputOverflowObservable emits', () => {
-      const firstMap = new Map<string, boolean>([['custom1', true]]);
-      const secondMap = new Map<string, boolean>([['custom2', false]]);
-
-      inputOverflowSubject.next(firstMap);
-      expect(component.inputOverflowMap()).toBe(firstMap);
-
-      inputOverflowSubject.next(secondMap);
-      expect(component.inputOverflowMap()).toBe(secondMap);
-    });
-  });
-
-  describe('template rendering', () => {
+  describe('template rendering & overflow directives', () => {
     it('should not render anything when task is null', () => {
       fixture.componentRef.setInput('task', null);
       fixture.detectChanges();
@@ -212,18 +156,26 @@ describe('TaskCustomFieldsComponent', () => {
       expect(inputs.length).toBeGreaterThan(0);
     });
 
-    it('should show error div when inputOverflowMap has matching field name', () => {
-      const errorMap = new Map<string, boolean>([['task.custom1', true]]);
-      inputOverflowSubject.next(errorMap);
+    it('should display overflow error when a custom field value exceeds the character limit', () => {
+      const input: HTMLInputElement = fixture.nativeElement.querySelector('#task-custom-1');
+      expect(input).toBeTruthy();
+
+      input.value = 'a'.repeat(256);
+      input.dispatchEvent(new Event('input'));
       fixture.detectChanges();
+
       const errorEl = fixture.nativeElement.querySelector('.error');
       expect(errorEl).toBeTruthy();
     });
 
-    it('should not show error div when inputOverflowMap has no matching field name', () => {
-      const errorMap = new Map<string, boolean>([['task.custom1', false]]);
-      inputOverflowSubject.next(errorMap);
+    it('should not show overflow error when custom field value is within limit', () => {
+      const input: HTMLInputElement = fixture.nativeElement.querySelector('#task-custom-1');
+      expect(input).toBeTruthy();
+
+      input.value = 'Valid text';
+      input.dispatchEvent(new Event('input'));
       fixture.detectChanges();
+
       const errorEl = fixture.nativeElement.querySelector('.error');
       expect(errorEl).toBeNull();
     });
@@ -231,13 +183,6 @@ describe('TaskCustomFieldsComponent', () => {
     it('should render spacer elements for even-index custom fields', () => {
       const spacers = fixture.nativeElement.querySelectorAll('.task-custom-fields__spacer');
       expect(spacers.length).toBeGreaterThan(0);
-    });
-
-    it('should call formsValidatorService.validateInputOverflow when input event is triggered on a custom field', () => {
-      const input: HTMLInputElement = fixture.nativeElement.querySelector('#task-custom-1');
-      expect(input).toBeTruthy();
-      input.dispatchEvent(new Event('input'));
-      expect(mockFormsValidatorService.validateInputOverflow).toHaveBeenCalled();
     });
   });
 });
