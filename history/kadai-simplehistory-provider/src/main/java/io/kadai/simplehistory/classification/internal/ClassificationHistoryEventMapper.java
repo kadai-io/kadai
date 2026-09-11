@@ -50,7 +50,6 @@ public interface ClassificationHistoryEventMapper {
           + " DOMAIN, KEY, NAME, PARENT_ID, PARENT_KEY, PRIORITY, SERVICE_LEVEL, TYPE,"
           + " CUSTOM_1, CUSTOM_2, CUSTOM_3, CUSTOM_4, CUSTOM_5, CUSTOM_6, CUSTOM_7, CUSTOM_8, DETAILS"
           + " FROM CLASSIFICATION_HISTORY_EVENT WHERE ID = #{id} "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   @Result(property = "id", column = "ID")
   @Result(property = "eventType", column = "EVENT_TYPE")

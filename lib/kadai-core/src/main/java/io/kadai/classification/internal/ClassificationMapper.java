@@ -35,7 +35,6 @@ public interface ClassificationMapper {
           + "FROM CLASSIFICATION "
           + "WHERE KEY = #{key}"
           + " AND DOMAIN = #{domain}"
-          + "<if test=\"_databaseId == 'db2'\"> with UR </if> "
           + "</script>")
   @Result(property = "id", column = "ID")
   @Result(property = "key", column = "KEY")
@@ -66,7 +65,6 @@ public interface ClassificationMapper {
       "<script>SELECT ID, KEY, PARENT_ID, PARENT_KEY, CATEGORY, TYPE, DOMAIN, VALID_IN_DOMAIN, CREATED, MODIFIED, NAME, DESCRIPTION, PRIORITY, SERVICE_LEVEL, APPLICATION_ENTRY_POINT, CUSTOM_1, CUSTOM_2, CUSTOM_3, CUSTOM_4, CUSTOM_5, CUSTOM_6, CUSTOM_7, CUSTOM_8 "
           + "FROM CLASSIFICATION "
           + "WHERE ID = #{id}"
-          + "<if test=\"_databaseId == 'db2'\"> with UR </if> "
           + "</script>")
   @Result(property = "id", column = "ID")
   @Result(property = "key", column = "KEY")

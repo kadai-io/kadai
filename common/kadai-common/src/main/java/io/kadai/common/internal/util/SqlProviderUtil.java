@@ -25,7 +25,15 @@ public class SqlProviderUtil {
   public static final String CLOSING_SCRIPT_TAG = "</script>";
   public static final String OPENING_WHERE_TAG = "<where>";
   public static final String CLOSING_WHERE_TAG = "</where>";
-  public static final String DB2_WITH_UR = "<if test=\"_databaseId == 'db2'\">with UR </if>";
+  /**
+   * DB2 uncommitted-read suffix for explicit column-value discovery queries only.
+   *
+   * <p>Do not use this for entity, list, count, relationship, monitor, or history reads because a
+   * statement-level WITH UR overrides the isolation behavior expected from the caller's
+   * connection.
+   */
+  public static final String DB2_WITH_UR_FOR_COLUMN_QUERY =
+      "<if test=\"_databaseId == 'db2'\">with UR </if>";
 
   private SqlProviderUtil() {}
 

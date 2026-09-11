@@ -20,7 +20,7 @@ package io.kadai.task.internal;
 
 import static io.kadai.common.internal.util.SqlProviderUtil.CLOSING_SCRIPT_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.CLOSING_WHERE_TAG;
-import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR;
+import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR_FOR_COLUMN_QUERY;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_SCRIPT_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_WHERE_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.whereIn;
@@ -87,7 +87,7 @@ public class TaskCommentQuerySqlProvider {
         + checkForAuthorization()
         + commonTaskCommentWhereStatement()
         + CLOSING_WHERE_TAG
-        + DB2_WITH_UR
+        + DB2_WITH_UR_FOR_COLUMN_QUERY
         + CLOSING_SCRIPT_TAG;
   }
 
