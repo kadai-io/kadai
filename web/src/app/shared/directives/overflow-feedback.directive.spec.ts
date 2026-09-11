@@ -8,10 +8,10 @@ import { OverflowFeedbackDirective } from './overflow-feedback.directive';
   imports: [OverflowFeedbackDirective],
   template: `<input [kadaiOverflowFeedback]="10" type="text" />`
 })
-class TestHostComponent {}
+class TestComponent {}
 
 describe('OverflowFeedbackDirective', () => {
-  let fixture: ComponentFixture<TestHostComponent>;
+  let fixture: ComponentFixture<TestComponent>;
   let directive: OverflowFeedbackDirective;
   let inputEl: HTMLInputElement;
 
@@ -19,10 +19,10 @@ describe('OverflowFeedbackDirective', () => {
     vi.useFakeTimers();
 
     TestBed.configureTestingModule({
-      imports: [TestHostComponent]
+      imports: [TestComponent]
     });
 
-    fixture = TestBed.createComponent(TestHostComponent);
+    fixture = TestBed.createComponent(TestComponent);
     fixture.detectChanges();
 
     const inputDebugEl = fixture.debugElement.query(By.directive(OverflowFeedbackDirective));

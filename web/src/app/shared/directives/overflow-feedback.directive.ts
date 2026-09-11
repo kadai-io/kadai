@@ -1,15 +1,15 @@
-import { Directive, HostListener, input, OnDestroy, signal } from '@angular/core';
+import { Directive, input, OnDestroy, signal } from '@angular/core';
 
 @Directive({
   selector: '[kadaiOverflowFeedback]',
-  exportAs: 'overflowFeedback'
+  exportAs: 'overflowFeedback',
+  host: { '(input)': 'onInput($event)' }
 })
 export class OverflowFeedbackDirective implements OnDestroy {
   maxLength = input<number>(0, { alias: 'kadaiOverflowFeedback' });
   readonly isOverflowed = signal<boolean>(false);
   private timeoutId?: ReturnType<typeof setTimeout>;
 
-  @HostListener('input', ['$event'])
   onInput(event: Event): void {
     const target = event.target as HTMLInputElement | HTMLTextAreaElement | null;
     const value = target?.value ?? '';
