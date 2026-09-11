@@ -695,19 +695,19 @@ class TaskCleanupJobAccTest {
           newTaskBuilder(domainCWorkbasket)
               .state(TaskState.COMPLETED)
               .completed(Instant.now().minus(20, ChronoUnit.DAYS))
-              .buildAndStoreAsSummary(kadaiEngine.getTaskService());
+              .buildAndStoreAsSummary(taskService);
       final TaskSummary domainCRecentTask =
           newTaskBuilder(domainCWorkbasket)
               .state(TaskState.COMPLETED)
               .completed(Instant.now().minus(10, ChronoUnit.DAYS))
-              .buildAndStoreAsSummary(kadaiEngine.getTaskService());
+              .buildAndStoreAsSummary(taskService);
 
       runTaskCleanupJob(kadaiEngine);
 
       assertThat(tasksForWorkbasket(domainAWorkbasket)).doesNotContain(domainATask);
       assertThat(tasksForWorkbasket(domainBWorkbasket)).contains(domainBTask);
-      assertThat(kadaiEngine.getTaskService().createTaskQuery().list()).filteredOn(
-          task -> task.getWorkbasketSummary().equals(domainCWorkbasket))
+      assertThat(taskService.createTaskQuery().list())
+          .filteredOn(task -> task.getWorkbasketSummary().equals(domainCWorkbasket))
           .contains(domainCRecentTask)
           .doesNotContain(domainCOldTask);
     }
@@ -774,8 +774,7 @@ class TaskCleanupJobAccTest {
 
     @WithAccessId(user = "admin")
     @Test
-    void should_CleanCompleteParentGroup_When_AllDomainsReachedTheirMinimumAge()
-        throws Exception {
+    void should_CleanCompleteParentGroup_When_AllDomainsReachedTheirMinimumAge() throws Exception {
       String parentBusinessProcessId = "DOMAIN_SPECIFIC_ELIGIBLE_PARENT";
       TaskSummary domainATask =
           newTaskBuilder(domainAWorkbasket)
