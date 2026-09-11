@@ -19,7 +19,9 @@
 package io.kadai.user.internal;
 
 import io.kadai.user.api.models.User;
+import io.kadai.user.internal.models.UserAttributeRow;
 import io.kadai.user.internal.models.UserImpl;
+import io.kadai.workbasket.api.WorkbasketPermission;
 import java.util.List;
 import java.util.Set;
 import org.apache.ibatis.annotations.DeleteProvider;
@@ -53,11 +55,6 @@ public interface UserMapper {
   UserImpl findById(String id);
 
   @Result(property = "id", column = "USER_ID")
-  @Result(property = "groups", column = "USER_ID", many = @Many(select = "findGroupsById"))
-  @Result(
-      property = "permissions",
-      column = "USER_ID",
-      many = @Many(select = "findPermissionsById"))
   @Result(property = "firstName", column = "FIRST_NAME")
   @Result(property = "lastName", column = "LAST_NAME")
   @Result(property = "fullName", column = "FULL_NAME")
@@ -78,6 +75,23 @@ public interface UserMapper {
 
   @SelectProvider(type = UserMapperSqlProvider.class, method = "findPermissionsById")
   Set<String> findPermissionsById(String id);
+
+  @SelectProvider(type = UserMapperSqlProvider.class, method = "findGroupsByIds")
+  @Result(property = "userId", column = "USER_ID")
+  @Result(property = "attributeValue", column = "ATTRIBUTE_VALUE")
+  List<UserAttributeRow> findGroupsByIds(@Param("ids") Set<String> ids);
+
+  @SelectProvider(type = UserMapperSqlProvider.class, method = "findPermissionsByIds")
+  @Result(property = "userId", column = "USER_ID")
+  @Result(property = "attributeValue", column = "ATTRIBUTE_VALUE")
+  List<UserAttributeRow> findPermissionsByIds(@Param("ids") Set<String> ids);
+
+  @SelectProvider(type = UserMapperSqlProvider.class, method = "findDomainsByIds")
+  @Result(property = "userId", column = "USER_ID")
+  @Result(property = "attributeValue", column = "ATTRIBUTE_VALUE")
+  List<UserAttributeRow> findDomainsByIds(
+      @Param("ids") Set<String> ids,
+      @Param("permissions") List<WorkbasketPermission> permissions);
 
   @InsertProvider(type = UserMapperSqlProvider.class, method = "insert")
   void insert(User user);
