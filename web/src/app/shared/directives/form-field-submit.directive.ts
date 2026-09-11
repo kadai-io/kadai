@@ -1,8 +1,6 @@
-import { Directive, computed, inject, signal } from '@angular/core';
+import { Directive, inject, signal } from '@angular/core';
 import { NgControl } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { FormSubmitDirective } from './form-submit.directive';
-import { of } from 'rxjs';
 
 @Directive({
   selector: '[kadaiFormFieldSubmit]',
@@ -24,17 +22,6 @@ export class FormFieldSubmitDirective {
     }
   }
 
-  // readonly hasError = computed(() => {
-  //   const control = this.ngControl?.control;
-  //   if (!control) {
-  //     return false;
-  //   }
-
-  //   const isTouched = control.touched || this.isInteracted();
-  //   const isSubmitted = this.formSubmit?.isSubmitted() ?? false;
-
-  //   return control.invalid && (isTouched || isSubmitted);
-  // });
   get hasError(): boolean {
     const control = this.ngControl?.control;
     if (!control) {

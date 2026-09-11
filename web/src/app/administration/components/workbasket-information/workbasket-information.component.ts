@@ -18,7 +18,7 @@
 
 import { Component, effect, inject, input, model, OnDestroy, OnInit, untracked, viewChild } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { FormsModule, NgForm, NgModel } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Store } from '@ngxs/store';
 import { ACTION } from 'app/shared/models/action';
 import { customFieldCount, Workbasket } from 'app/shared/models/workbasket';
