@@ -29,11 +29,11 @@ import { ObjectReference } from '../../models/object-reference';
 import { Classification } from '../../../shared/models/classification';
 import { AccessId } from '../../../shared/models/access-id';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
-import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
 import { By } from '@angular/platform-browser';
 import { OverflowFeedbackDirective } from 'app/shared/directives/overflow-feedback.directive';
+import { FormFieldSubmitDirective } from 'app/shared/directives/form-field-submit.directive';
 
 const mockPrimaryObjRef = new ObjectReference(undefined, 'Company A', 'System A', 'Instance A', 'TypeA', 'Value A');
 
@@ -63,12 +63,6 @@ describe('TaskInformationComponent', () => {
     getClassifications: ReturnType<typeof vi.fn>;
   };
 
-  let mockFormsValidatorService: {
-    isFieldValid: ReturnType<typeof vi.fn>;
-    validateFormInformation: ReturnType<typeof vi.fn>;
-    formSubmitAttempt: boolean;
-  };
-
   beforeEach(async () => {
     mockClassificationsService = {
       getClassifications: vi.fn().mockReturnValue(
@@ -78,12 +72,6 @@ describe('TaskInformationComponent', () => {
       )
     };
 
-    mockFormsValidatorService = {
-      isFieldValid: vi.fn().mockReturnValue(true),
-      validateFormInformation: vi.fn().mockResolvedValue(true),
-      formSubmitAttempt: false
-    };
-
     await TestBed.configureTestingModule({
       imports: [TaskInformationComponent],
       providers: [
@@ -91,8 +79,7 @@ describe('TaskInformationComponent', () => {
         provideNoopAnimations(),
 
         provideHttpClientTesting(),
-        { provide: ClassificationsService, useValue: mockClassificationsService },
-        { provide: FormsValidatorService, useValue: mockFormsValidatorService }
+        { provide: ClassificationsService, useValue: mockClassificationsService }
       ]
     }).compileComponents();
 
@@ -125,43 +112,6 @@ describe('TaskInformationComponent', () => {
     it('should populate classifications from the service response', () => {
       expect(component.classifications).toBeDefined();
       expect(component.classifications().length).toBe(2);
-    });
-  });
-
-  describe('saveToggleTriggered effect', () => {
-    it('should call validate (and thus validateFormInformation) when saveToggleTriggered changes value', async () => {
-      fixture.componentRef.setInput('saveToggleTriggered', true);
-      fixture.detectChanges();
-
-      await fixture.whenStable();
-
-      expect(mockFormsValidatorService.validateFormInformation).toHaveBeenCalled();
-      expect(mockFormsValidatorService.formSubmitAttempt).toBe(true);
-    });
-
-    it('should not call validateFormInformation when saveToggleTriggered is not set', () => {
-      mockFormsValidatorService.validateFormInformation.mockClear();
-
-      fixture.detectChanges();
-
-      expect(mockFormsValidatorService.validateFormInformation).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('isFieldValid()', () => {
-    it('should delegate to formsValidatorService.isFieldValid with taskForm and field name', () => {
-      const result = component.isFieldValid('taskName');
-
-      expect(mockFormsValidatorService.isFieldValid).toHaveBeenCalledWith(component.taskForm(), 'taskName');
-      expect(result).toBe(true);
-    });
-
-    it('should return false when formsValidatorService.isFieldValid returns false', () => {
-      mockFormsValidatorService.isFieldValid.mockReturnValue(false);
-
-      const result = component.isFieldValid('missingField');
-
-      expect(result).toBe(false);
     });
   });
 
@@ -234,16 +184,6 @@ describe('TaskInformationComponent', () => {
   });
 
   describe('ngOnDestroy()', () => {
-    it('should call next and complete on the internal destroy$ subject', () => {
-      const nextSpy = vi.spyOn(component['destroy$'], 'next');
-      const completeSpy = vi.spyOn(component['destroy$'], 'complete');
-
-      component.ngOnDestroy();
-
-      expect(nextSpy).toHaveBeenCalled();
-      expect(completeSpy).toHaveBeenCalled();
-    });
-
     it('should call next and complete on destroy$', () => {
       const nextSpy = vi.spyOn(component['destroy$'], 'next');
       const completeSpy = vi.spyOn(component['destroy$'], 'complete');
@@ -319,88 +259,73 @@ describe('TaskInformationComponent', () => {
 
   describe('validate() - triggered via saveToggleTriggered effect', () => {
     it('should emit formValid(true) when form is valid, classification is set, and owner is valid', async () => {
-      mockFormsValidatorService.validateFormInformation.mockResolvedValue(true);
-      component.isOwnerValid = true;
-      component.task()!.classificationSummary = { classificationId: 'class-1' };
+      const emitSpy = vi.spyOn(component.formValid, 'emit');
 
-      const emittedValues: boolean[] = [];
-      component.formValid.subscribe((val) => emittedValues.push(val));
+      component.isOwnerValid = true;
+      fixture.componentRef.setInput('task', {
+        ...component.task()!,
+        classificationSummary: { classificationId: 'class-1', name: 'Class 1' }
+      });
 
       fixture.componentRef.setInput('saveToggleTriggered', true);
       fixture.detectChanges();
-
       await fixture.whenStable();
 
-      expect(emittedValues).toContain(true);
+      expect(emitSpy).toHaveBeenCalledWith(true);
     });
 
-    it('should not emit formValid when form validation returns false', async () => {
-      mockFormsValidatorService.validateFormInformation.mockResolvedValue(false);
-      component.task()!.classificationSummary = { classificationId: 'class-1' };
+    it('should not emit formValid when form is not valid', async () => {
+      const emitSpy = vi.spyOn(component.formValid, 'emit');
 
-      const emittedValues: boolean[] = [];
-      component.formValid.subscribe((val) => emittedValues.push(val));
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const nameControl = component.taskForm()?.control.controls['task.name'];
+      nameControl?.setValue('');
+
+      fixture.detectChanges();
 
       fixture.componentRef.setInput('saveToggleTriggered', true);
       fixture.detectChanges();
-
       await fixture.whenStable();
 
-      expect(emittedValues.length).toBe(0);
+      expect(emitSpy).not.toHaveBeenCalled();
     });
 
     it('should not emit formValid when classificationSummary is undefined', async () => {
-      mockFormsValidatorService.validateFormInformation.mockResolvedValue(true);
-      component.isOwnerValid = true;
-      component.task()!.classificationSummary = undefined;
+      const emitSpy = vi.spyOn(component.formValid, 'emit');
 
-      const emittedValues: boolean[] = [];
-      component.formValid.subscribe((val) => emittedValues.push(val));
+      component.isOwnerValid = true;
+      fixture.componentRef.setInput('task', {
+        ...component.task()!,
+        classificationSummary: undefined
+      });
 
       fixture.componentRef.setInput('saveToggleTriggered', true);
       fixture.detectChanges();
-
       await fixture.whenStable();
 
-      expect(emittedValues.length).toBe(0);
+      expect(emitSpy).not.toHaveBeenCalled();
     });
 
     it('should not emit formValid when isOwnerValid is false', async () => {
-      mockFormsValidatorService.validateFormInformation.mockResolvedValue(true);
-      component.isOwnerValid = false;
-      component.task()!.classificationSummary = { classificationId: 'class-1' };
+      const emitSpy = vi.spyOn(component.formValid, 'emit');
 
-      const emittedValues: boolean[] = [];
-      component.formValid.subscribe((val) => emittedValues.push(val));
+      component.isOwnerValid = false;
+      fixture.componentRef.setInput('task', {
+        ...component.task()!,
+        classificationSummary: { classificationId: 'class-1', name: 'Class 1' }
+      });
 
       fixture.componentRef.setInput('saveToggleTriggered', true);
       fixture.detectChanges();
-
       await fixture.whenStable();
 
-      expect(emittedValues.length).toBe(0);
-    });
-
-    it('should set isClassificationEmpty to true when classificationSummary is undefined', () => {
-      component.task()!.classificationSummary = undefined;
-
-      fixture.componentRef.setInput('saveToggleTriggered', true);
-      fixture.detectChanges();
-
-      expect(component.isClassificationEmpty).toBe(true);
-    });
-
-    it('should set isClassificationEmpty to false when classificationSummary is defined', () => {
-      component.task()!.classificationSummary = { classificationId: 'class-1' };
-
-      fixture.componentRef.setInput('saveToggleTriggered', true);
-      fixture.detectChanges();
-
-      expect(component.isClassificationEmpty).toBe(false);
+      expect(emitSpy).not.toHaveBeenCalled();
     });
   });
 
-  describe('template rendering & overflow directives', () => {
+  describe('template rendering', () => {
     it('should render owner as text input field (else branch) when lookupField is false', () => {
       const store = TestBed.inject(Store);
       const configWithoutLookup = {
@@ -434,65 +359,44 @@ describe('TaskInformationComponent', () => {
       const matSelects = localFixture.nativeElement.querySelectorAll('mat-select');
       expect(matSelects.length).toBeGreaterThan(0);
     });
+  });
 
-    describe('overflow feedback display for fields', () => {
-      const testCases = [
-        { id: '#task-name', label: 'task name' },
-        { id: '#task-note', label: 'note' },
-        { id: '#task\\.primaryObjRef\\.company', label: 'company' },
-        { id: '#task\\.primaryObjRef\\.system', label: 'system' },
-        { id: '#task\\.primaryObjRef\\.systemInstance', label: 'systemInstance' },
-        { id: '#task\\.primaryObjRef\\.type', label: 'type' },
-        { id: '#task\\.primaryObjRef\\.value', label: 'value' },
-        { id: '#task-parent-business-process-id', label: 'parentBusinessProcessId' },
-        { id: '#task-business-process-id', label: 'businessProcessId' }
-      ];
+  describe('field error display on validation error', () => {
+    const validationErrorTestCases = [
+      { id: '#task-name', label: 'task name' },
+      { id: '#task\\.primaryObjRef\\.system', label: 'system' },
+      { id: '#task\\.primaryObjRef\\.type', label: 'type' },
+      { id: '#task\\.primaryObjRef\\.company', label: 'company' },
+      { id: '#task\\.primaryObjRef\\.systemInstance', label: 'systemInstance' },
+      { id: '#task\\.primaryObjRef\\.value', label: 'value' }
+    ];
 
-      testCases.forEach(({ id, label }) => {
-        it(`should display error message when ${label} directive signals overflow`, () => {
-          const inputDebug = fixture.debugElement.query(By.css(id));
-          if (inputDebug) {
-            const directiveInstance = inputDebug.injector.get(OverflowFeedbackDirective);
-            vi.spyOn(directiveInstance, 'isOverflowed').mockReturnValue(true);
-            fixture.detectChanges();
+    validationErrorTestCases.forEach(({ id, label }) => {
+      it(`should display error message component when ${label} directive signals hasError`, () => {
+        const inputDebug = fixture.debugElement.query(By.css(id));
+        expect(inputDebug).toBeTruthy();
 
-            const errorEl = fixture.nativeElement.querySelector('.error');
-            expect(errorEl).toBeTruthy();
-          }
-        });
+        const directiveInstance = inputDebug.injector.get(FormFieldSubmitDirective);
+        vi.spyOn(directiveInstance, 'hasError', 'get').mockReturnValue(true);
+        fixture.detectChanges();
+
+        const errorComponentEl = fixture.nativeElement.querySelector('kadai-shared-field-error-display');
+        expect(errorComponentEl).toBeTruthy();
       });
+    });
 
-      it('should show overflow error on owner fallback input when overflowed (lookupField: false)', () => {
-        const store = TestBed.inject(Store);
-        const configWithoutLookup = {
-          customisation: {
-            EN: {
-              global: { debounceTimeLookupField: 50 },
-              tasks: {
-                information: {
-                  owner: { lookupField: false }
-                }
-              }
-            }
-          },
-          language: 'EN'
-        };
-        store.reset({ ...store.snapshot(), engineConfiguration: configWithoutLookup });
-
-        const localFixture = TestBed.createComponent(TaskInformationComponent);
-        localFixture.componentRef.setInput('task', { ...mockTask });
-        localFixture.detectChanges();
-
-        const ownerInput: HTMLInputElement = localFixture.nativeElement.querySelector('#ts-owner');
-        expect(ownerInput).toBeTruthy();
-
-        ownerInput.value = 'a'.repeat(256);
-        ownerInput.dispatchEvent(new Event('input'));
-        localFixture.detectChanges();
-
-        const errorEl = localFixture.nativeElement.querySelector('.error');
-        expect(errorEl).toBeTruthy();
+    it('should not display error message component when fields do not have errors', () => {
+      validationErrorTestCases.forEach(({ id }) => {
+        const inputDebug = fixture.debugElement.query(By.css(id));
+        if (inputDebug) {
+          const directiveInstance = inputDebug.injector.get(FormFieldSubmitDirective);
+          vi.spyOn(directiveInstance, 'hasError', 'get').mockReturnValue(false);
+        }
       });
+      fixture.detectChanges();
+
+      const errorComponentEl = fixture.nativeElement.querySelector('kadai-shared-field-error-display');
+      expect(errorComponentEl?.textContent?.trim()).toBe('');
     });
   });
 
@@ -650,6 +554,61 @@ describe('TaskInformationComponent', () => {
       newFixture.detectChanges();
 
       expect(mockClassificationsService.getClassifications).toHaveBeenCalledWith({ domain: ['DOMAIN_B'] });
+    });
+  });
+
+  describe('template bindings & events coverage', () => {
+    it('should trigger changedClassification on mat-option click when classificationSummary is present', async () => {
+      const spy = vi.spyOn(component, 'changedClassification');
+      const selectDebug = fixture.debugElement.query(By.css('mat-select'));
+      expect(selectDebug).toBeTruthy();
+
+      selectDebug.nativeElement.click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const options = fixture.debugElement.queryAll(By.css('mat-option'));
+      expect(options.length).toBeGreaterThan(0);
+
+      options[0].triggerEventHandler('click', null);
+      fixture.detectChanges();
+
+      expect(spy).toHaveBeenCalledWith(component.classifications()[0]);
+    });
+
+    it('should trigger changedClassification on mat-option click when classificationSummary is null', async () => {
+      fixture.componentRef.setInput('task', { ...mockTask, classificationSummary: undefined });
+      fixture.detectChanges();
+
+      const spy = vi.spyOn(component, 'changedClassification');
+      const selectDebug = fixture.debugElement.query(By.css('mat-select'));
+      expect(selectDebug).toBeTruthy();
+
+      selectDebug.nativeElement.click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const options = fixture.debugElement.queryAll(By.css('mat-option'));
+      expect(options.length).toBeGreaterThan(0);
+
+      options[0].triggerEventHandler('click', null);
+      fixture.detectChanges();
+
+      expect(spy).toHaveBeenCalledWith(component.classifications()[0]);
+    });
+
+    it('should handle type-ahead outputs (accessIdEventEmitter and isFormValid) when lookupField is enabled', () => {
+      const typeAheadDebug = fixture.debugElement.query(By.css('kadai-shared-type-ahead'));
+      expect(typeAheadDebug).toBeTruthy();
+
+      const ownerSpy = vi.spyOn(component, 'onSelectedOwner');
+      const testOwner: AccessId = { accessId: 'new-owner-123' };
+
+      typeAheadDebug.triggerEventHandler('accessIdEventEmitter', testOwner);
+      expect(ownerSpy).toHaveBeenCalledWith(testOwner);
+
+      typeAheadDebug.triggerEventHandler('isFormValid', false);
+      expect(component.isOwnerValid).toBe(false);
     });
   });
 });

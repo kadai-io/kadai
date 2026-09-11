@@ -23,7 +23,6 @@ import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { Observable, of } from 'rxjs';
 import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
@@ -56,11 +55,6 @@ const workbasketServiceMock: Partial<WorkbasketService> = {
   removeDistributionTarget: vi.fn().mockReturnValue(of(true))
 };
 
-const formValidatorServiceMock: Partial<FormsValidatorService> = {
-  isFieldValid: vi.fn().mockReturnValue(true),
-  validateFormInformation: vi.fn().mockImplementation((): Promise<any> => Promise.resolve(true))
-};
-
 describe('WorkbasketInformationComponent', () => {
   let fixture: ComponentFixture<WorkbasketInformationComponent>;
   let debugElement: DebugElement;
@@ -75,7 +69,6 @@ describe('WorkbasketInformationComponent', () => {
         provideStore([EngineConfigurationState, WorkbasketState]),
         provideRouter([]),
         { provide: WorkbasketService, useValue: workbasketServiceMock },
-        { provide: FormsValidatorService, useValue: formValidatorServiceMock },
 
         provideHttpClientTesting(),
         provideAngularSvgIcon()
@@ -114,12 +107,6 @@ describe('WorkbasketInformationComponent', () => {
     fixture.componentRef.setInput('action', ACTION.READ);
     fixture.detectChanges();
     expect(component.workbasketClone).toMatchObject(component.workbasket()!);
-  });
-
-  it('should submit when validatorService is true', () => {
-    const formsValidatorService = TestBed.inject(FormsValidatorService);
-    component.onSubmit();
-    expect(formsValidatorService.formSubmitAttempt).toBe(true);
   });
 
   it('should reset workbasket information when onUndo is called', () => {
@@ -178,12 +165,6 @@ describe('WorkbasketInformationComponent', () => {
     expect(component.workbasket()!['custom4']).toBe(newValue);
   });
 
-  it('should call formsValidatorService.isFieldValid when isFieldValid is called', () => {
-    const result = component.isFieldValid('key');
-    expect(formValidatorServiceMock.isFieldValid).toHaveBeenCalled();
-    expect(result).toBe(true);
-  });
-
   it('should call notificationService.showDialog when removeWorkbasket is called', () => {
     const notificationService = TestBed.inject(NotificationService);
     const showDialogSpy = vi.spyOn(notificationService, 'showDialog').mockImplementation(() => undefined as any);
@@ -224,8 +205,6 @@ describe('WorkbasketInformationComponent', () => {
     component.ngOnInit();
     expect(component).toBeTruthy();
   });
-
-  // it('should not validate when validateInputOverflow is called with undefined value', () => {
   //   const mockModel: any = { name: 'testField', value: undefined };
 
   //   component.validateInputOverflow(mockModel, 10);
@@ -466,25 +445,19 @@ describe('WorkbasketInformationComponent', () => {
     expect(errorEl).toBeTruthy();
   });
 
-  it('should show error when validateFormInformation returns false', async () => {
+  it('should show error when form is invalid', () => {
     const notificationService = TestBed.inject(NotificationService);
     const showErrorSpy = vi.spyOn(notificationService, 'showError');
-    const formsValidatorService = TestBed.inject(FormsValidatorService);
-    (formsValidatorService.validateFormInformation as any).mockReturnValueOnce(Promise.resolve(false));
-    await component.onSubmit();
-    vi.waitFor(() => {
-      expect(showErrorSpy).toHaveBeenCalledWith('WORKBASKET_SAVE');
-    });
+    component.onSubmit();
+    expect(showErrorSpy).toHaveBeenCalledWith('WORKBASKET_SAVE');
   });
 
-  it('should show error when isOwnerValid is false', async () => {
+  it('should show error when isOwnerValid is false', () => {
     const notificationService = TestBed.inject(NotificationService);
     const showErrorSpy = vi.spyOn(notificationService, 'showError');
     component.isOwnerValid = false;
-    await component.onSubmit();
-    vi.waitFor(() => {
-      expect(showErrorSpy).toHaveBeenCalledWith('WORKBASKET_SAVE');
-    });
+    component.onSubmit();
+    expect(showErrorSpy).toHaveBeenCalledWith('WORKBASKET_SAVE');
   });
 
   it('should not dispatch removeDistributionTargets when workbasket has no _links', () => {

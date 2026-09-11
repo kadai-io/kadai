@@ -36,6 +36,7 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
 
 describe('WorkbasketAccessItemsComponent', () => {
   let fixture: ComponentFixture<WorkbasketAccessItemsComponent>;
@@ -241,49 +242,40 @@ describe('WorkbasketAccessItemsComponent', () => {
     expect(component.selectedRows).toEqual([]);
   });
 
-  it('should set formSubmitAttempt to true and call validateFormAccess, onSave when onSubmit is called', async () => {
+  it('should call onSave when the form is valid and submitted', async () => {
     fixture.detectChanges();
-    const validateSpy = vi.spyOn(component.formsValidatorService, 'validateFormAccess').mockResolvedValue(true);
     const onSaveSpy = vi.spyOn(component, 'onSave');
     await component.onSubmit();
-    expect(component.formsValidatorService.formSubmitAttempt).toBe(true);
-    expect(validateSpy).toHaveBeenCalledWith(expect.anything(), component.toggleValidationAccessIdMap);
-    expect(validateSpy.mock.calls[0][0].getRawValue()).toEqual(component.accessItemsGroups.getRawValue());
     expect(onSaveSpy).toHaveBeenCalled();
   });
 
-  it('should save copied access items when the target access items replace the form during validation', async () => {
+  it('should not call onSave and show error notification when form is invalid', async () => {
+    const notificationService = TestBed.inject(NotificationService);
+
+    fixture.detectChanges();
+    const onSaveSpy = vi.spyOn(component, 'onSave');
+    const notificationSpy = vi.spyOn(notificationService, 'showError');
+
+    component.accessItemsGroups.controls[0].get('accessId')?.setValue('');
+    component.accessItemsGroups.controls[0].get('accessId')?.updateValueAndValidity();
+
+    await component.onSubmit();
+
+    expect(notificationSpy).toHaveBeenCalledWith('OWNER_NOT_VALID', { owner: 'access id' });
+    expect(onSaveSpy).not.toHaveBeenCalled();
+  });
+
+  it('should save copied access items when the target access items are submitted', async () => {
     fixture.detectChanges();
     const sourceAccessItems = component.cloneAccessItems();
     const targetWorkbasketId = 'WBI:TARGET-WORKBASKET-ID';
     const targetAccessItemsUrl = 'https://link.mock/target/workbasketAccessItems';
     const targetAccessItems = component.prepareAccessItemsForNewWorkbasket(sourceAccessItems, targetWorkbasketId);
-    let resolveValidation!: (isFormValid: boolean) => void;
-    const validationPromise = new Promise<boolean>((resolve) => {
-      resolveValidation = resolve;
-    });
-    vi.spyOn(component.formsValidatorService, 'validateFormAccess').mockReturnValue(validationPromise);
+
     let updateAction: UpdateWorkbasketAccessItems | undefined;
     actions$.pipe(ofActionDispatched(UpdateWorkbasketAccessItems)).subscribe((action) => (updateAction = action));
 
-    const submitPromise = component.onSubmit(targetAccessItems, targetAccessItemsUrl);
-
-    const currentWorkbasketState = store.snapshot().workbasket;
-    store.reset({
-      ...store.snapshot(),
-      workbasket: {
-        ...currentWorkbasketState,
-        workbasketAccessItems: {
-          accessItems: [],
-          _links: { self: { href: targetAccessItemsUrl } }
-        }
-      }
-    });
-    fixture.detectChanges();
-    expect(component.accessItemsGroups).toHaveLength(0);
-
-    resolveValidation(true);
-    await submitPromise;
+    await component.onSubmit(targetAccessItems, targetAccessItemsUrl);
 
     expect(updateAction).toBeDefined();
     expect(updateAction!.url).toBe(targetAccessItemsUrl);
@@ -541,15 +533,6 @@ describe('WorkbasketAccessItemsComponent', () => {
     fixture.detectChanges();
     const textInput = debugElement.nativeElement.querySelector('input[formcontrolname="accessId"]');
     expect(textInput).toBeTruthy();
-  });
-
-  it('should show has-error class on accessId cell when accessId is empty and formSubmitAttempt is true', () => {
-    fixture.detectChanges();
-    component.formsValidatorService.formSubmitAttempt = true;
-    component.accessItemsGroups.controls[0].get('accessId')?.setValue('');
-    expect(component.formsValidatorService.formSubmitAttempt).toBe(true);
-    expect(component.accessItemsGroups.controls[0].get('accessId')?.value).toBe('');
-    expect(component.accessItemsGroups.controls[0].get('accessId')?.invalid).toBe(true);
   });
 
   it('should render visible custom field column headers in the table', async () => {

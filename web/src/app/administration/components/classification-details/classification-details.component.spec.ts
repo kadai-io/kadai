@@ -18,7 +18,7 @@
 
 import { DebugElement } from '@angular/core';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
-import { EMPTY, firstValueFrom, Observable, of, Subject } from 'rxjs';
+import { EMPTY, firstValueFrom, Observable, of } from 'rxjs';
 import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
 import { DomainService } from '../../../shared/services/domain/domain.service';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -28,7 +28,6 @@ import { EngineConfigurationState } from '../../../shared/store/engine-configura
 import { classificationStateMock, engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
 import { ClassificationDetailsComponent } from './classification-details.component';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import {
   CopyClassification,
@@ -59,11 +58,6 @@ const domainServiceSpy: Partial<DomainService> = {
   getSelectedDomain: vi.fn().mockReturnValue(of('A'))
 };
 
-const formsValidatorServiceSpy: Partial<FormsValidatorService> = {
-  isFieldValid: vi.fn().mockReturnValue(true),
-  validateFormInformation: vi.fn().mockImplementation((): Promise<any> => Promise.resolve(true))
-};
-
 const notificationServiceSpy: Partial<NotificationService> = {
   showError: vi.fn(),
   showSuccess: vi.fn(),
@@ -87,7 +81,6 @@ describe('ClassificationDetailsComponent', () => {
         { provide: ClassificationsService, useValue: classificationServiceSpy },
         { provide: ClassificationCategoriesService, useValue: classificationCategoriesServiceSpy },
         { provide: DomainService, useValue: domainServiceSpy },
-        { provide: FormsValidatorService, useValue: formsValidatorServiceSpy },
         { provide: NotificationService, useValue: notificationServiceSpy }
       ]
     }).compileComponents();
@@ -110,7 +103,10 @@ describe('ClassificationDetailsComponent', () => {
   });
 
   it('should trigger onSave() when value exists and onSubmit() is called', async () => {
-    component.onSave = vi.fn().mockImplementation(() => undefined);
+    vi.spyOn(component, 'onSave').mockImplementation(async () => undefined);
+    const form = component.classificationForm();
+    expect(form).toBeDefined();
+    vi.spyOn(form!.control, 'valid', 'get').mockReturnValue(true);
     component.onSubmit();
     await fixture.whenStable();
     expect(component.onSave).toHaveBeenCalled();
