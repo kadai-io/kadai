@@ -19,7 +19,8 @@
 @if (workbasket()) {
   <div id="wb-information">
     <div class="workbasket-information-wrapper">
-      <ng-form #WorkbasketForm="ngForm">
+      <ng-form #WorkbasketForm="ngForm" 
+               kadaiFormSubmit>
         <div class="form">
           <!-- GENERAL FIELDS -->
           <h6 class="subheading"> General </h6>
@@ -43,14 +44,15 @@
                        name="workbasket.key" 
                        placeholder="Key" 
                        required
-                       type="text">
+                       type="text"
+                       kadaiFormFieldSubmit
+                       #keyField="kadaiFormField">
               </mat-form-field>
               @if (keyOverflow.isOverflowed()) {
                 <div class="error">{{ lengthError }}</div>
               }
               @if (action() != 3) {
-                <kadai-shared-field-error-display [displayError]="!isFieldValid('workbasket.key')"
-                                                  [validationTrigger]="toggleValidationMap.get('workbasket.key')"
+                <kadai-shared-field-error-display [displayError]="keyField.hasError"
                                                   errorMessage="* Key is required" />
               }
               <!-- NAME -->
@@ -67,13 +69,14 @@
                        name="workbasket.name"
                        placeholder="Name" 
                        required 
-                       type="text">
+                       type="text"
+                       kadaiFormFieldSubmit
+                       #nameField="kadaiFormField">
               </mat-form-field>
               @if (nameOverflow.isOverflowed()) {
                 <div class="error">{{ lengthError }}</div>
               }
-              <kadai-shared-field-error-display [displayError]="!isFieldValid('workbasket.name')"
-                                                [validationTrigger]="toggleValidationMap.get('workbasket.name')"
+              <kadai-shared-field-error-display [displayError]="nameField.hasError"
                                                 errorMessage="* Name is required" />
               <!-- OWNER -->
               @if (lookupField()) {
@@ -94,12 +97,14 @@
                        name="workbasket.owner" 
                        placeholder="Owner" 
                        required
-                       type="text">
+                       type="text"
+                       kadaiAccessIdValidator
+                       kadaiFormFieldSubmit
+                       #ownerField="kadaiFormField">
                 @if (ownerOverflow.isOverflowed()) {
                   <div class="error">{{ lengthError }}</div>
                 }
-                <kadai-shared-field-error-display [displayError]="!isFieldValid('workbasket.owner')"
-                                                  [validationTrigger]="toggleValidationMap.get('workbasket.owner')"
+                <kadai-shared-field-error-display [displayError]="ownerField.hasError"
                                                   errorMessage="* Owner is required" />
               }
               <!-- DESCRIPTION AND TYPE -->

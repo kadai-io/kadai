@@ -29,5 +29,4 @@ import { highlight } from 'app/shared/animations/validation.animation';
 export class FieldErrorDisplayComponent {
   displayError = input<boolean>();
   errorMessage = input<string>();
-  validationTrigger = input<boolean>();
 }

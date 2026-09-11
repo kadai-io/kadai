@@ -78,7 +78,8 @@
       </mat-toolbar>
       <!-- DETAILED FIELDS -->
       <div style="padding: 0">
-        <ng-form #ClassificationForm="ngForm">
+        <ng-form #ClassificationForm="ngForm"
+                 kadaiFormSubmit>
           <div class="detailed-fields">
             <h6 class="detailed-fields__subheading"> General </h6>
             <mat-divider class="detailed-fields__horizontal-line" />
@@ -207,11 +208,12 @@
                              min="0" 
                              name="classification.priority" 
                              required 
-                             type="number">
+                             type="number"
+                             kadaiFormFieldSubmit
+                             #priorityField="kadaiFormField">
                     </mat-form-field>
                     <kadai-shared-field-error-display
-                      [displayError]="!isFieldValid('classification.priority')"
-                      [validationTrigger]="toggleValidationMap.get('classification.priority.name')"
+                      [displayError]="priorityField.hasError"
                       errorMessage="* Priority is required" />
                   </div>
                 </div>

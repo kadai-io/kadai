@@ -19,7 +19,8 @@
 @if (!requestInProgress() && task(); as task) {
   @let objRef = task.primaryObjRef!;
   <div>
-    <ng-form #TaskForm="ngForm">
+    <ng-form #TaskForm="ngForm"
+             kadaiFormSubmit>
       <div class="task-information">
         <div class="task-information__column--left">
           <!-- TASK NAME -->
@@ -32,13 +33,14 @@
                    [kadaiOverflowFeedback]="255"
                    id="task-name"
                    matInput maxlength="255" name="task.name"
-                   placeholder="Name" required type="text">
+                   placeholder="Name" required type="text"
+                   kadaiFormFieldSubmit
+                   #nameField="kadaiFormField">
           </mat-form-field>
           @if (nameOverflow.isOverflowed()) {
             <div class="error">{{ lengthError }}</div>
           }
-          <kadai-shared-field-error-display [displayError]="!isFieldValid('task.name')"
-                                            [validationTrigger]="toggleValidationMap.get('task.name')"
+          <kadai-shared-field-error-display [displayError]="nameField.hasError"
                                             errorMessage="* Name is required" />
           <!-- TASK SYSTEM -->
           <mat-form-field appearance="outline">
@@ -51,14 +53,15 @@
                    id="task.primaryObjRef.system" matInput maxlength="32"
                    name="task.primaryObjRef.system"
                    placeholder="System description" required
-                   type="text">
+                   type="text"
+                   kadaiFormFieldSubmit
+                   #systemField="kadaiFormField">
           </mat-form-field>
           @if (systemOverflow.isOverflowed()) {
             <div class="error">{{ lengthError }}</div>
           }
           <kadai-shared-field-error-display
-            [displayError]="!isFieldValid('task.primaryObjRef.system')"
-            [validationTrigger]="toggleValidationMap.get('task.primaryObjRef.system')"
+            [displayError]="systemField.hasError"
             errorMessage="* System is required" />
           <!-- TYPE -->
           <mat-form-field appearance="outline">
@@ -71,14 +74,15 @@
                    id="task.primaryObjRef.type" matInput maxlength="32"
                    name="task.primaryObjRef.type"
                    placeholder="Reference type" required
-                   type="text">
+                   type="text"
+                   kadaiFormFieldSubmit
+                   #typeField="kadaiFormField">
           </mat-form-field>
           @if (typeOverflow.isOverflowed()) {
             <div class="error">{{ lengthError }}</div>
           }
           <kadai-shared-field-error-display
-            [displayError]="!isFieldValid('task.primaryObjRef.type')"
-            [validationTrigger]="toggleValidationMap.get('task.primaryObjRef.type')"
+            [displayError]="typeField.hasError"
             errorMessage="* Reference type is required" />
           <!-- CLASSIFICATION -->
           @if (task.classificationSummary) {
@@ -141,6 +145,7 @@
               <label for="ts-owner"></label>
               <input #owner="ngModel"
                      #ownerOverflow="overflowFeedback"
+                     kadaiAccessIdExists
                      [(ngModel)]="task.owner"
                      [kadaiOverflowFeedback]="32"
                      id="ts-owner"
@@ -165,14 +170,15 @@
                    maxlength="32"
                    name="task.primaryObjRef.company"
                    placeholder="Company description" required
-                   type="text">
+                   type="text"
+                   kadaiFormFieldSubmit
+                   #companyField="kadaiFormField">
           </mat-form-field>
           @if (companyOverflow.isOverflowed()) {
             <div class="error">{{ lengthError }}</div>
           }
           <kadai-shared-field-error-display
-            [displayError]="!isFieldValid('task.primaryObjRef.company')"
-            [validationTrigger]="toggleValidationMap.get('task.primaryObjRef.company')"
+            [displayError]="companyField.hasError"
             errorMessage="* Company is required" />
           <!-- TASK SYSTEM INSTANCE -->
           <mat-form-field appearance="outline">
@@ -185,14 +191,15 @@
                    id="task.primaryObjRef.systemInstance" matInput
                    maxlength="32" name="task.primaryObjRef.systemInstance"
                    placeholder="System Instance description" required
-                   type="text">
+                   type="text"
+                   kadaiFormFieldSubmit
+                   #systemInstanceField="kadaiFormField">
           </mat-form-field>
           @if (systemInstanceOverflow.isOverflowed()) {
             <div class="error">{{ lengthError }}</div>
           }
           <kadai-shared-field-error-display
-            [displayError]="!isFieldValid('task.primaryObjRef.systemInstance')"
-            [validationTrigger]="toggleValidationMap.get('task.primaryObjRef.systemInstance')"
+            [displayError]="systemInstanceField.hasError"
             errorMessage="* System instance is required" />
           <!-- REFERENCE VALUE -->
           <mat-form-field appearance="outline">
@@ -205,14 +212,15 @@
                    id="task.primaryObjRef.value" matInput maxlength="32"
                    name="task.primaryObjRef.value"
                    placeholder="Reference value" required
-                   type="text">
+                   type="text"
+                   kadaiFormFieldSubmit
+                   #valueField="kadaiFormField">
           </mat-form-field>
           @if (valueOverflow.isOverflowed()) {
             <div class="error">{{ lengthError }}</div>
           }
           <kadai-shared-field-error-display
-            [displayError]="!isFieldValid('task.primaryObjRef.value')"
-            [validationTrigger]="toggleValidationMap.get('task.primaryObjRef.value')"
+            [displayError]="valueField.hasError"
             errorMessage="* Reference value is required" />
           <div class="task-information__due-date-and-priority">
             <!-- DUE DATE -->
