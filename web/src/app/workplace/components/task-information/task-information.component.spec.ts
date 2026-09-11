@@ -323,6 +323,48 @@ describe('TaskInformationComponent', () => {
 
       expect(emitSpy).not.toHaveBeenCalled();
     });
+
+    it('should handle repeated submission triggers correctly and keep emitting formValid state', async () => {
+      const emitSpy = vi.spyOn(component.formValid, 'emit');
+      component.isOwnerValid = true;
+
+      fixture.componentRef.setInput('task', {
+        ...component.task()!,
+        classificationSummary: { classificationId: 'class-1', name: 'Class 1' }
+      });
+
+      fixture.componentRef.setInput('saveToggleTriggered', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(emitSpy).toHaveBeenCalledTimes(1);
+      expect(emitSpy).toHaveBeenLastCalledWith(true);
+
+      fixture.componentRef.setInput('saveToggleTriggered', !component.saveToggleTriggered());
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(emitSpy).toHaveBeenCalledTimes(2);
+      expect(emitSpy).toHaveBeenLastCalledWith(true);
+    });
+
+    it('should not emit formValid when type-ahead lookup signals an invalid state or lookup error', async () => {
+      const emitSpy = vi.spyOn(component.formValid, 'emit');
+
+      const typeAheadDebug = fixture.debugElement.query(By.css('kadai-shared-type-ahead'));
+      expect(typeAheadDebug).toBeTruthy();
+
+      typeAheadDebug.triggerEventHandler('isFormValid', false);
+      fixture.detectChanges();
+
+      expect(component.isOwnerValid).toBe(false);
+
+      fixture.componentRef.setInput('saveToggleTriggered', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('template rendering', () => {
