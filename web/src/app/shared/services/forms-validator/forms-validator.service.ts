@@ -113,11 +113,7 @@ export class FormsValidatorService {
 
           const enteredAccessId = form.controls[i].value?.accessId;
 
-          this.accessIdsService.searchForAccessId(enteredAccessId).subscribe((items) => {
-            const isValid = items
-              ? items.some((item) => item.accessId?.toLowerCase() === enteredAccessId?.toLowerCase())
-              : false;
-
+          this.accessIdsService.validateAccessId(enteredAccessId).subscribe((isValid) => {
             resolve(new ResponseOwner({ valid: isValid, field: 'access id' }));
           });
         })
