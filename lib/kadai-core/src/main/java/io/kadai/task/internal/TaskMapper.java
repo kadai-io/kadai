@@ -354,7 +354,6 @@ public interface TaskMapper {
           + "SELECT t.ID FROM TASK t WHERE (t.DOMAIN IS NULL OR t.DOMAIN NOT IN "
           + "<foreach collection='completedBeforeByDomain' index='domain' item='completedBefore' open='(' separator=',' close=')'>#{domain}</foreach>) "
           + "AND t.COMPLETED &lt;= #{defaultCompletedBefore} "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if>"
           + "</script>")
   List<String> findTasksCompletedBeforeByDomain(
       @Param("defaultCompletedBefore") Instant defaultCompletedBefore,
@@ -415,7 +414,6 @@ public interface TaskMapper {
           + "<foreach collection='completedBeforeByDomain' index='domain' item='completedBefore' open='(' separator=',' close=')'>#{domain}</foreach>) "
           + "AND t.COMPLETED &lt;= #{defaultCompletedBefore})"
           + ") "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if>"
           + "</script>")
   List<String> findTasksCompletedBeforeByDomainWithParentBusinessProcessConstraint(
       @Param("defaultCompletedBefore") Instant defaultCompletedBefore,
