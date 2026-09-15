@@ -69,10 +69,18 @@ public final class RestEndpoints {
   public static final String URL_TASKS_ID_REQUEST_REVIEW = API_V1 + "tasks/{taskId}/request-review";
   public static final String URL_TASKS_ID_REQUEST_REVIEW_FORCE =
       API_V1 + "tasks/{taskId}/request-review/force";
+  public static final String URL_TASKS_ID_REQUEST_REVIEW_WORKBASKET_KEY_DOMAIN =
+      API_V1 + "tasks/{taskId}/request-review/domain/{domain}/key/{key}";
+  public static final String URL_TASKS_ID_REQUEST_REVIEW_FORCE_WORKBASKET_KEY_DOMAIN =
+      API_V1 + "tasks/{taskId}/request-review/force/domain/{domain}/key/{key}";
   public static final String URL_TASKS_ID_REQUEST_CHANGES =
       API_V1 + "tasks/{taskId}/request-changes";
   public static final String URL_TASKS_ID_REQUEST_CHANGES_FORCE =
       API_V1 + "tasks/{taskId}/request-changes/force";
+  public static final String URL_TASKS_ID_REQUEST_CHANGES_WORKBASKET_KEY_DOMAIN =
+      API_V1 + "tasks/{taskId}/request-changes/domain/{domain}/key/{key}";
+  public static final String URL_TASKS_ID_REQUEST_CHANGES_FORCE_WORKBASKET_KEY_DOMAIN =
+      API_V1 + "tasks/{taskId}/request-changes/force/domain/{domain}/key/{key}";
   public static final String URL_TASKS_ID_COMPLETE = API_V1 + "tasks/{taskId}/complete";
   public static final String URL_TASKS_BULK_COMPLETE = API_V1 + "tasks/bulkcomplete";
   public static final String URL_TASKS_ID_COMPLETE_FORCE = API_V1 + "tasks/{taskId}/complete/force";
@@ -83,11 +91,14 @@ public final class RestEndpoints {
   public static final String URL_TASKS_ID_REOPEN = API_V1 + "tasks/{taskId}/reopen";
   public static final String URL_TASKS_ID_TRANSFER_WORKBASKET_ID =
       API_V1 + "tasks/{taskId}/transfer/{workbasketId}";
+  public static final String URL_TASKS_ID_TRANSFER_WORKBASKET_KEY_DOMAIN =
+      API_V1 + "tasks/{taskId}/transfer/domain/{domain}/key/{key}";
   public static final String URL_TRANSFER_WORKBASKET_ID = API_V1 + "tasks/transfer/{workbasketId}";
+  public static final String URL_TRANSFER_WORKBASKET_KEY_DOMAIN =
+      API_V1 + "tasks/transfer/domain/{domain}/key/{key}";
   public static final String URL_TRANSFER_TO_OWNER = API_V1 + "tasks/transfer-to-owner/{ownerId}";
   public static final String URL_TASKS_ID_SET_READ = API_V1 + "tasks/{taskId}/set-read";
-  public static final String URL_DISTRIBUTE =
-      API_V1 + "tasks/distribute/{workbasketId}";
+  public static final String URL_DISTRIBUTE = API_V1 + "tasks/distribute/{workbasketId}";
   public static final String URL_TASKS_IDS = API_V1 + "tasks/ids";
   public static final String URL_TASKS_BULK_UPDATE = API_V1 + "tasks/bulkupdate";
 

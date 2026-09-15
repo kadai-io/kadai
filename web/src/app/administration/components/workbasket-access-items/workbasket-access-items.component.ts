@@ -32,18 +32,29 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged, Observable, Subject } from 'rxjs';
-import { Actions, ofActionCompleted, Store } from '@ngxs/store';
+import {
+  Actions,
+  ofActionCompleted,
+  ofActionDispatched,
+  ofActionErrored,
+  ofActionSuccessful,
+  Store
+} from '@ngxs/store';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { Workbasket } from 'app/shared/models/workbasket';
-import { customFieldCount, WorkbasketAccessItems } from 'app/shared/models/workbasket-access-items';
+import {
+  customFieldCount,
+  WorkbasketAccessItems,
+  WorkbasketAccessItemWrite
+} from 'app/shared/models/workbasket-access-items';
 import { WorkbasketAccessItemsRepresentation } from 'app/shared/models/workbasket-access-items-representation';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { highlight } from 'app/shared/animations/validation.animation';
 import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
 import { AccessId } from 'app/shared/models/access-id';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
-import { filter, map, startWith, take, takeUntil, tap } from 'rxjs/operators';
+import { filter, map, startWith, takeUntil, tap } from 'rxjs/operators';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import {
   AccessItemsCustomisation,
@@ -102,7 +113,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
   isNewAccessItemsFromStore = false;
   isAccessItemsTabSelected = false;
   destroy$ = new Subject<void>();
-  selectedWorkbasket$: Observable<Workbasket> = inject(Store).select(WorkbasketSelectors.selectedWorkbasket);
+  private pendingNewWorkbasketAccessItems?: WorkbasketAccessItems[];
   accessItemsCustomization$: Observable<AccessItemsCustomisation | undefined> = inject(Store).select(
     EngineConfigurationSelectors.accessItemsCustomisation
   );
@@ -215,13 +226,28 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
       this.onSubmit();
     });
 
+    this.ngxsActions$.pipe(ofActionDispatched(SaveNewWorkbasket), takeUntil(this.destroy$)).subscribe(() => {
+      this.pendingNewWorkbasketAccessItems = this.snapshotAccessItems();
+    });
+
     // saving workbasket access items when workbasket was copied or created
-    this.ngxsActions$.pipe(ofActionCompleted(SaveNewWorkbasket), takeUntil(this.destroy$)).subscribe(() => {
-      this.selectedWorkbasket$.pipe(take(1)).subscribe((workbasket) => {
-        this.accessItemsRepresentation._links = { self: { href: workbasket._links!.accessItems.href } };
-        this.setWorkbasketIdForCopy(workbasket.workbasketId!);
-        this.onSubmit();
-      });
+    this.ngxsActions$.pipe(ofActionSuccessful(SaveNewWorkbasket), takeUntil(this.destroy$)).subscribe(() => {
+      const sourceAccessItems = this.pendingNewWorkbasketAccessItems ?? [];
+      this.pendingNewWorkbasketAccessItems = undefined;
+
+      const workbasket = this.store.selectSnapshot(WorkbasketSelectors.selectedWorkbasket);
+      const workbasketId = workbasket?.workbasketId;
+      const accessItemsUrl = workbasket?._links?.accessItems?.href;
+
+      if (!workbasketId || !accessItemsUrl) {
+        return;
+      }
+
+      void this.onSubmit(this.prepareAccessItemsForNewWorkbasket(sourceAccessItems, workbasketId), accessItemsUrl);
+    });
+
+    this.ngxsActions$.pipe(ofActionErrored(SaveNewWorkbasket), takeUntil(this.destroy$)).subscribe(() => {
+      this.pendingNewWorkbasketAccessItems = undefined;
     });
 
     this.buttonAction$
@@ -335,31 +361,31 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     this.notificationsService.showSuccess('WORKBASKET_ACCESS_ITEM_RESTORE');
   }
 
-  async onSubmit() {
+  async onSubmit(
+    accessItems: WorkbasketAccessItemWrite[] = this.snapshotAccessItems(),
+    accessItemsUrl: string | undefined = this.accessItemsRepresentation?._links?.self?.href
+  ) {
     this.formsValidatorService.formSubmitAttempt = true;
 
+    if (!accessItemsUrl) {
+      return;
+    }
+
     const shouldSaveWorkbasket = await this.formsValidatorService
-      .validateFormAccess(this.accessItemsGroups, this.toggleValidationAccessIdMap)
+      .validateFormAccess(this.buildValidationForm(accessItems), this.toggleValidationAccessIdMap)
       .then((isFormValid) => isFormValid)
       .catch(() => false);
 
     if (shouldSaveWorkbasket) {
-      this.onSave();
+      this.onSave(accessItemsUrl, accessItems);
     }
   }
 
-  onSave() {
+  onSave(accessItemsUrl: string, accessItems: WorkbasketAccessItemWrite[]) {
     this.requestInProgressService.setRequestInProgress(true);
-    this.store
-      .dispatch(
-        new UpdateWorkbasketAccessItems(
-          this.accessItemsRepresentation._links!.self.href,
-          this.AccessItemsForm.value.accessItemsGroups ?? []
-        )
-      )
-      .subscribe(() => {
-        this.requestInProgressService.setRequestInProgress(false);
-      });
+    this.store.dispatch(new UpdateWorkbasketAccessItems(accessItemsUrl, accessItems)).subscribe(() => {
+      this.requestInProgressService.setRequestInProgress(false);
+    });
   }
 
   accessItemSelected(accessItem: AccessId, row: number) {
@@ -393,16 +419,26 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
   }
 
   cloneAccessItems(): WorkbasketAccessItems[] {
-    return (this.AccessItemsForm.value.accessItemsGroups ?? []).map((accessItems: WorkbasketAccessItems) => ({
-      ...accessItems
-    }));
+    return this.snapshotAccessItems();
   }
 
-  setWorkbasketIdForCopy(workbasketId: string) {
-    this.accessItemsGroups.value.forEach((element: any) => {
-      delete element.accessItemId;
-      element.workbasketId = workbasketId;
+  prepareAccessItemsForNewWorkbasket(
+    sourceAccessItems: WorkbasketAccessItems[],
+    workbasketId: string
+  ): WorkbasketAccessItemWrite[] {
+    return sourceAccessItems.map((sourceAccessItem) => {
+      const accessItem: WorkbasketAccessItemWrite = { ...sourceAccessItem, workbasketId };
+      delete accessItem.accessItemId;
+      return accessItem;
     });
+  }
+
+  private snapshotAccessItems(): WorkbasketAccessItems[] {
+    return (this.accessItemsGroups.getRawValue() as WorkbasketAccessItems[]).map((accessItem) => ({ ...accessItem }));
+  }
+
+  private buildValidationForm(accessItems: WorkbasketAccessItemWrite[]): FormArray {
+    return this.formBuilder.array(accessItems.map((accessItem) => this.formBuilder.group(accessItem)));
   }
 
   getAccessItemCustomProperty(customNumber: number): `permCustom${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12}` {

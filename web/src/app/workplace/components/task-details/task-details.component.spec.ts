@@ -151,6 +151,8 @@ describe('TaskDetailsComponent', () => {
 
     requestInProgressServiceSpy = {
       setRequestInProgress: vi.fn(),
+      beginRequest: vi.fn(),
+      endRequest: vi.fn(),
       getRequestInProgress: vi.fn().mockReturnValue(of(false))
     };
 
@@ -218,7 +220,7 @@ describe('TaskDetailsComponent', () => {
   });
 
   it('should call getTask when route params change', () => {
-    expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalled();
+    expect(requestInProgressServiceSpy.beginRequest).toHaveBeenCalled();
   });
 
   it('should reset task when resetTask is called', () => {
@@ -347,27 +349,27 @@ describe('TaskDetailsComponent', () => {
     expect(notificationServiceSpy.showSuccess).toHaveBeenCalledWith('TASK_UPDATE', { taskName: mockTask.name });
   });
 
-  it('should call setRequestInProgress(false) when getTask returns an error', () => {
+  it('should end request tracking when getTask returns an error', () => {
     (taskServiceSpy.getTask as any).mockReturnValue(throwError(() => new Error('not found')));
     component.currentId.set('some-id');
     component.getTask();
-    expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalledWith(false);
+    expect(requestInProgressServiceSpy.endRequest).toHaveBeenCalled();
   });
 
-  it('should call setRequestInProgress(false) when updateTask returns an error', () => {
+  it('should end request tracking when updateTask returns an error', () => {
     (taskServiceSpy.updateTask as any).mockReturnValue(throwError(() => new Error('update failed')));
     component.currentId.set('task-id-1');
     component.task.set({ ...mockTask } as Task);
     component.onSave();
-    expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalledWith(false);
+    expect(requestInProgressServiceSpy.endRequest).toHaveBeenCalled();
   });
 
-  it('should call setRequestInProgress(false) when createTask returns an error', () => {
+  it('should end request tracking when createTask returns an error', () => {
     (taskServiceSpy.createTask as any).mockReturnValue(throwError(() => new Error('create failed')));
     component.currentId.set('new-task');
     component.task.set(new Task('', new ObjectReference(), mockWorkbasket as any));
     component.onSave();
-    expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalledWith(false);
+    expect(requestInProgressServiceSpy.endRequest).toHaveBeenCalled();
   });
 
   it('should navigate when openTask is called', () => {
@@ -540,6 +542,8 @@ describe('TaskDetailsComponent - DOM interaction', () => {
 
     requestInProgressServiceSpy = {
       setRequestInProgress: vi.fn(),
+      beginRequest: vi.fn(),
+      endRequest: vi.fn(),
       getRequestInProgress: vi.fn().mockReturnValue(of(false))
     };
 
@@ -743,6 +747,8 @@ describe('TaskDetailsComponent - redirect when no workbasket and new-task', () =
 
     const requestInProgressServiceSpy: Partial<RequestInProgressService> = {
       setRequestInProgress: vi.fn(),
+      beginRequest: vi.fn(),
+      endRequest: vi.fn(),
       getRequestInProgress: vi.fn().mockReturnValue(of(false))
     };
 
@@ -885,7 +891,12 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
         },
         {
           provide: RequestInProgressService,
-          useValue: { setRequestInProgress: vi.fn(), getRequestInProgress: vi.fn().mockReturnValue(of(false)) }
+          useValue: {
+            setRequestInProgress: vi.fn(),
+            beginRequest: vi.fn(),
+            endRequest: vi.fn(),
+            getRequestInProgress: vi.fn().mockReturnValue(of(false))
+          }
         },
         {
           provide: ClassificationsService,
