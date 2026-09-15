@@ -20,7 +20,7 @@ package io.kadai.task.internal;
 
 import static io.kadai.common.internal.util.SqlProviderUtil.CLOSING_SCRIPT_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.CLOSING_WHERE_TAG;
-import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR;
+import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR_FOR_COLUMN_QUERY;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_SCRIPT_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_WHERE_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.whereCustomIntStatements;
@@ -106,7 +106,6 @@ public class TaskQuerySqlProvider {
         + "</if>"
         + "<if test=\"_databaseId == 'db2' and (selectAndClaim or lockResults != 0) \">WITH RS USE "
         + "AND KEEP UPDATE LOCKS </if>"
-        + "<if test=\"_databaseId == 'db2' and !selectAndClaim and lockResults==0 \">WITH UR </if>"
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -179,7 +178,6 @@ public class TaskQuerySqlProvider {
         + "<if test='!orderByOuter.isEmpty()'>"
         + "ORDER BY <foreach item='item' collection='orderByOuter' separator=',' >${item}</foreach>"
         + "</if> "
-        + "with UR "
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -265,7 +263,7 @@ public class TaskQuerySqlProvider {
         + "</if> "
         + ") "
         + "FROM X ) SELECT COUNT(*) "
-        + "FROM Y WHERE FLAG = 1 with UR"
+        + "FROM Y WHERE FLAG = 1 "
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -335,7 +333,7 @@ public class TaskQuerySqlProvider {
         + "</choose>"
         + "</foreach>"
         + "</if> "
-        + DB2_WITH_UR
+        + DB2_WITH_UR_FOR_COLUMN_QUERY
         + CLOSING_SCRIPT_TAG;
   }
 

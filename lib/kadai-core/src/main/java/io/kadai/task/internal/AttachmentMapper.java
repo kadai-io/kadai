@@ -48,7 +48,6 @@ public interface AttachmentMapper {
       "<script> SELECT ID, TASK_ID, CREATED, MODIFIED, CLASSIFICATION_KEY, CLASSIFICATION_ID, REF_COMPANY, REF_SYSTEM, REF_INSTANCE, REF_TYPE, REF_VALUE, CHANNEL, RECEIVED, CUSTOM_ATTRIBUTES "
           + "FROM ATTACHMENT "
           + "WHERE TASK_ID = #{taskId} "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   @Result(property = "id", column = "ID")
   @Result(property = "taskId", column = "TASK_ID")
@@ -83,7 +82,6 @@ public interface AttachmentMapper {
           + "</otherwise>"
           + "</choose>"
           + "</where>"
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   @Result(property = "id", column = "ID")
   @Result(property = "taskId", column = "TASK_ID")
@@ -118,7 +116,6 @@ public interface AttachmentMapper {
 
   @Select(
       "<script> select CUSTOM_ATTRIBUTES from ATTACHMENT where id = #{attachmentId}"
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   @Result(
       property = "customAttributes",
@@ -133,7 +130,6 @@ public interface AttachmentMapper {
           + "WHERE EXISTS ("
           + "SELECT 1 FROM ATTACHMENT a WHERE a.TASK_ID = t.ID AND a.CLASSIFICATION_ID = #{classificationId}"
           + ") "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   @Result(property = "left", column = "ID")
   @Result(property = "right", column = "PLANNED")
