@@ -250,6 +250,5 @@ class KadaiEngineModesTest {
 
       assertThat(actual).isNull();
     }
-
   }
 }
