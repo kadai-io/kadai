@@ -342,7 +342,6 @@ class ArchitectureTest {
 
   @Test
   void moduleTaskShouldOnlyDependOn() {
-    // FIXME should not depend on spi
     moduleShouldOnlyDependOn("task", List.of("workbasket", "classification", "common", "spi"));
   }
 
@@ -390,7 +389,6 @@ class ArchitectureTest {
         .areNotAssignableFrom(KadaiConfiguration.Builder.class)
         .and()
         .resideOutsideOfPackages("acceptance..", "..testapi..", "..test..", "..sampledata..")
-        .and(resideOutsideOfPackage("..simplehistory..")) // FIXME: With #994
         .should()
         .resideInAnyPackage("..api..", "..internal..")
         .check(importedClasses);

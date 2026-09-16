@@ -36,8 +36,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
-// TODO: this has to be moved to kadai-common but this is currently not possible due to the
-// workbasket and task imports
 class ObjectAttributeChangeDetectorTest {
 
   @Test

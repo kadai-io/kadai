@@ -137,12 +137,13 @@ describe('NotificationService', () => {
 
   describe('showInformation', () => {
     it('should call toastService.show with info icon and message', () => {
-      service.showInformation('INFO_KEY', {});
+      const informationKey = 'INFO_KEY';
+      service.showInformation(informationKey, {});
 
-      expect(mockObtainMessageService.getMessage).toHaveBeenCalledWith('INFO_KEY', {}, expect.anything());
+      expect(mockObtainMessageService.getMessage).toHaveBeenCalledWith(informationKey, {}, expect.anything());
       expect(mockHotToastService.show).toHaveBeenCalledWith(
         expect.stringContaining('mocked message'),
-        expect.objectContaining({ id: 'empty-workbasket' })
+        expect.objectContaining({ id: informationKey })
       );
     });
 

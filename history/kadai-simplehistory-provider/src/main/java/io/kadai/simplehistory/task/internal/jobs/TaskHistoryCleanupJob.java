@@ -16,7 +16,7 @@
  *
  */
 
-package io.kadai.simplehistory.jobs;
+package io.kadai.simplehistory.task.internal.jobs;
 
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.groupingBy;

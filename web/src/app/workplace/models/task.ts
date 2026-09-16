@@ -43,6 +43,7 @@ export class Task {
     public state?: any,
     public read?: boolean,
     public transferred?: boolean,
+    public reopened?: boolean,
     public priority?: number,
     public customAttributes: CustomAttribute[] = [],
     public callbackInfo: CustomAttribute[] = [],

@@ -39,7 +39,6 @@ export interface CategoriesResponse {
 export class ClassificationCategoriesService {
   private httpClient = inject(HttpClient);
 
-  // TODO: convert to Map (maybe via ES6)
   getClassificationCategoriesByType(): Observable<CategoriesResponse> {
     return this.httpClient.get<CategoriesResponse>(`${environment.kadaiRestUrl}/v1/classifications-by-type`);
   }

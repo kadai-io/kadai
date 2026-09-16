@@ -31,6 +31,7 @@ import { MatSelect } from '@angular/material/select';
 
 import { MatOption } from '@angular/material/core';
 import { MapValuesPipe } from '../../pipes/map-values.pipe';
+import { SetPage } from 'app/shared/store/task-store/task.actions';
 
 @Component({
   selector: 'kadai-shared-task-filter',
@@ -57,8 +58,23 @@ export class TaskFilterComponent implements OnInit, OnDestroy {
     this.updateState();
   }
 
-  // TODO: filter tasks when pressing 'enter'
-  search() {}
+  setIsReopened(value?: boolean): void {
+    const currentFilter = this.filter();
+    if (!currentFilter) return;
+
+    if (value !== undefined) {
+      currentFilter['is-reopened'] = [value];
+    } else {
+      currentFilter['is-reopened'] = [];
+    }
+
+    this.updateState();
+  }
+
+  search() {
+    this.updateState();
+    this.store.dispatch(new SetPage(1));
+  }
 
   updateState() {
     this.store.dispatch(new SetTaskFilter(this.filter()!));
@@ -68,7 +84,8 @@ export class TaskFilterComponent implements OnInit, OnDestroy {
     this.filter.set({
       priority: [],
       'name-like': [],
-      'owner-like': []
+      'owner-like': [],
+      'is-reopened': []
     });
   }
 

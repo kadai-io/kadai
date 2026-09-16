@@ -22,7 +22,7 @@
   <div class="task-filter__input-fields">
 
     <div class="task-filter__row">
-      <!-- FILTER BY NAME AND OWNER -->
+      <!-- FILTER BY NAME -->
       <mat-form-field class="task-filter__input-field--large" matTooltip="Filter Tasks by name"
                       style="margin-right: 16px;">
         <mat-label>Filter by name</mat-label>
@@ -44,6 +44,7 @@
     </div>
 
     <div class="task-filter__row">
+      <!-- FILTER BY OWNER -->
       <mat-form-field class="task-filter__input-field--large" matTooltip="Filter Tasks by owner"
                       style="margin-right: 16px">
         <mat-label>Filter by owner</mat-label>
@@ -64,6 +65,19 @@
               {{ state.value }}
             </mat-option>
           }
+        </mat-select>
+      </mat-form-field>
+ 
+    </div>
+
+    <div class="task-filter__row">
+      <!-- FILTER BY REOPENED -->
+      <mat-form-field class="task-filter__input-field--small" matTooltip="Filter Tasks by reopened state">
+        <mat-label>Filter by reopened</mat-label>
+        <mat-select [value]="filter()?.['is-reopened']?.[0]" (selectionChange)="setIsReopened($event.value)">
+          <mat-option [value]="undefined">All</mat-option>
+          <mat-option [value]="true">Yes</mat-option>
+          <mat-option [value]="false">No</mat-option>
         </mat-select>
       </mat-form-field>
     </div>

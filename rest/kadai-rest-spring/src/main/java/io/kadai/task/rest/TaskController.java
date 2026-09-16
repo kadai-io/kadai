@@ -224,13 +224,11 @@ public class TaskController implements TaskApi {
 
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_CLAIM)
   @Transactional(rollbackFor = Exception.class)
-  public ResponseEntity<TaskRepresentationModel> claimTask(
-      @PathVariable("taskId") String taskId, @RequestBody(required = false) String userName)
+  public ResponseEntity<TaskRepresentationModel> claimTask(@PathVariable("taskId") String taskId)
       throws TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException {
-    // TODO verify user
     Task updatedTask = taskService.claim(taskId);
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(updatedTask));
   }
@@ -238,12 +236,11 @@ public class TaskController implements TaskApi {
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_CLAIM_FORCE)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<TaskRepresentationModel> forceClaimTask(
-      @PathVariable("taskId") String taskId, @RequestBody(required = false) String userName)
+      @PathVariable("taskId") String taskId)
       throws TaskNotFoundException,
           InvalidTaskStateException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException {
-    // TODO verify user
     Task updatedTask = taskService.forceClaim(taskId);
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(updatedTask));
   }
@@ -324,11 +321,24 @@ public class TaskController implements TaskApi {
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_REVIEW_FORCE)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<TaskRepresentationModel> forceRequestReview(
-      @PathVariable("taskId") String taskId)
+      @PathVariable("taskId") String taskId,
+      @RequestBody(required = false) Map<String, String> body)
       throws InvalidTaskStateException,
           TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException {
+    String workbasketId = null;
+    String ownerId = null;
+
+    if (body != null) {
+      workbasketId = body.getOrDefault("workbasketId", null);
+      ownerId = body.getOrDefault("ownerId", null);
+    }
+
+    if (workbasketId != null) {
+      Task task = taskService.forceRequestReviewWithWorkbasketId(taskId, workbasketId, ownerId);
+      return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
+    }
     Task task = taskService.forceRequestReview(taskId);
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
   }
@@ -362,12 +372,97 @@ public class TaskController implements TaskApi {
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES_FORCE)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<TaskRepresentationModel> forceRequestChanges(
-      @PathVariable("taskId") String taskId)
+      @PathVariable("taskId") String taskId,
+      @RequestBody(required = false) Map<String, String> body)
       throws InvalidTaskStateException,
           TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException {
+    String workbasketId = null;
+    String ownerId = null;
+
+    if (body != null) {
+      workbasketId = body.getOrDefault("workbasketId", null);
+      ownerId = body.getOrDefault("ownerId", null);
+    }
+
+    if (workbasketId != null) {
+      Task task = taskService.forceRequestChangesWithWorkbasketId(taskId, workbasketId, ownerId);
+      return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
+    }
     Task task = taskService.forceRequestChanges(taskId);
+    return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
+  }
+
+  @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_REVIEW_WORKBASKET_KEY_DOMAIN)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<TaskRepresentationModel> requestReviewWithWorkbasketKeyAndDomain(
+      @PathVariable("taskId") String taskId,
+      @PathVariable("key") String workbasketKey,
+      @PathVariable("domain") String domain,
+      @RequestBody(required = false) Map<String, String> body)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          WorkbasketNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
+    Task task =
+        taskService.requestReviewWithWorkbasketKeyAndDomain(
+            taskId, workbasketKey, domain, getOwnerId(body));
+    return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
+  }
+
+  @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_REVIEW_FORCE_WORKBASKET_KEY_DOMAIN)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<TaskRepresentationModel> forceRequestReviewWithWorkbasketKeyAndDomain(
+      @PathVariable("taskId") String taskId,
+      @PathVariable("key") String workbasketKey,
+      @PathVariable("domain") String domain,
+      @RequestBody(required = false) Map<String, String> body)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          WorkbasketNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
+    Task task =
+        taskService.forceRequestReviewWithWorkbasketKeyAndDomain(
+            taskId, workbasketKey, domain, getOwnerId(body));
+    return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
+  }
+
+  @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES_WORKBASKET_KEY_DOMAIN)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<TaskRepresentationModel> requestChangesWithWorkbasketKeyAndDomain(
+      @PathVariable("taskId") String taskId,
+      @PathVariable("key") String workbasketKey,
+      @PathVariable("domain") String domain,
+      @RequestBody(required = false) Map<String, String> body)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          WorkbasketNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
+    Task task =
+        taskService.requestChangesWithWorkbasketKeyAndDomain(
+            taskId, workbasketKey, domain, getOwnerId(body));
+    return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
+  }
+
+  @PostMapping(path = RestEndpoints.URL_TASKS_ID_REQUEST_CHANGES_FORCE_WORKBASKET_KEY_DOMAIN)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<TaskRepresentationModel> forceRequestChangesWithWorkbasketKeyAndDomain(
+      @PathVariable("taskId") String taskId,
+      @PathVariable("key") String workbasketKey,
+      @PathVariable("domain") String domain,
+      @RequestBody(required = false) Map<String, String> body)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          WorkbasketNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
+    Task task =
+        taskService.forceRequestChangesWithWorkbasketKeyAndDomain(
+            taskId, workbasketKey, domain, getOwnerId(body));
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
   }
 
@@ -494,6 +589,34 @@ public class TaskController implements TaskApi {
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(updatedTask));
   }
 
+  @PostMapping(path = RestEndpoints.URL_TASKS_ID_TRANSFER_WORKBASKET_KEY_DOMAIN)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<TaskRepresentationModel> transferTaskWithWorkbasketKeyAndDomain(
+      @PathVariable("taskId") String taskId,
+      @PathVariable("key") String workbasketKey,
+      @PathVariable("domain") String domain,
+      @RequestBody(required = false)
+          TransferTaskRepresentationModel transferTaskRepresentationModel)
+      throws TaskNotFoundException,
+          WorkbasketNotFoundException,
+          NotAuthorizedOnWorkbasketException,
+          InvalidTaskStateException,
+          TransferCheckException {
+    Task updatedTask;
+    if (transferTaskRepresentationModel == null) {
+      updatedTask = taskService.transfer(taskId, workbasketKey, domain);
+    } else {
+      updatedTask =
+          taskService.transferWithOwner(
+              taskId,
+              workbasketKey,
+              domain,
+              transferTaskRepresentationModel.getOwner(),
+              transferTaskRepresentationModel.getSetTransferFlag());
+    }
+    return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(updatedTask));
+  }
+
   @PostMapping(path = RestEndpoints.URL_TRANSFER_WORKBASKET_ID)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<BulkOperationResultsRepresentationModel> transferTasks(
@@ -512,6 +635,25 @@ public class TaskController implements TaskApi {
         bulkOperationResultsRepresentationModelAssembler.toModel(result);
 
     return ResponseEntity.ok(repModel);
+  }
+
+  @PostMapping(path = RestEndpoints.URL_TRANSFER_WORKBASKET_KEY_DOMAIN)
+  @Transactional(rollbackFor = Exception.class)
+  public ResponseEntity<BulkOperationResultsRepresentationModel>
+      transferTasksWithWorkbasketKeyAndDomain(
+          @PathVariable("key") String workbasketKey,
+          @PathVariable("domain") String domain,
+          @RequestBody TransferTaskRepresentationModel transferTaskRepresentationModel)
+          throws NotAuthorizedOnWorkbasketException, WorkbasketNotFoundException {
+    BulkOperationResults<String, KadaiException> result =
+        taskService.transferTasksWithOwner(
+            workbasketKey,
+            domain,
+            transferTaskRepresentationModel.getTaskIds(),
+            transferTaskRepresentationModel.getOwner(),
+            transferTaskRepresentationModel.getSetTransferFlag());
+
+    return ResponseEntity.ok(bulkOperationResultsRepresentationModelAssembler.toModel(result));
   }
 
   @PostMapping(path = RestEndpoints.URL_TRANSFER_TO_OWNER)
@@ -676,7 +818,7 @@ public class TaskController implements TaskApi {
       @ParameterObject TaskQueryFilterParameter filterParameter,
       @ParameterObject TaskQueryFilterCustomFields filterCustomFields,
       @ParameterObject TaskQueryFilterCustomIntFields filterCustomIntFields)
-      throws InvalidArgumentException, NotAuthorizedException {
+      throws NotAuthorizedException {
     TaskQuery query = taskService.createTaskQuery();
     filterParameter.apply(query);
     filterCustomFields.apply(query);
@@ -743,6 +885,10 @@ public class TaskController implements TaskApi {
           workbasketId, taskIds, distributionStrategyName, additionalInformation);
     }
     return taskService.distribute(workbasketId, taskIds);
+  }
+
+  private String getOwnerId(Map<String, String> body) {
+    return body == null ? null : body.get("ownerId");
   }
 
   // endregion

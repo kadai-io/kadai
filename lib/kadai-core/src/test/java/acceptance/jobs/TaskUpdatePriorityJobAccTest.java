@@ -44,7 +44,6 @@ class TaskUpdatePriorityJobAccTest extends AbstractAccTest {
   @BeforeEach
   void before() throws Exception {
     // required if single tests modify database
-    // TODO split test class into readOnly & modifying tests to improve performance
     resetDb(true);
 
     kadaiConfiguration =

@@ -39,20 +39,28 @@
         }
       </mat-menu>
 
-      <!-- COMPLETE TASK -->
-      <button (click)="completeTask()" class="task-processing__button--secondary"
-              mat-stroked-button matTooltip="Complete Task and return to Task list">
-        <span> Complete Task </span>
-        <mat-icon class="task-processing__icon--aquamarine">check</mat-icon>
-      </button>
+      @if (canReopenTask()) {
+        <!-- REOPEN TASK -->
+        <button (click)="reopenTask()" class="task-processing__button--secondary"
+                mat-stroked-button matTooltip="Restore Task and return to Task list">
+          <span> Reopen Task </span>
+          <mat-icon class="task-processing__icon--aquamarine">restore</mat-icon>
+        </button>  
+      } @else {
+        <!-- COMPLETE TASK -->
+        <button (click)="completeTask()" class="task-processing__button--secondary"
+                mat-stroked-button matTooltip="Complete Task and return to Task list">
+          <span> Complete Task </span>
+          <mat-icon class="task-processing__icon--aquamarine">check</mat-icon>
+        </button>
 
-      <!-- CANCEL CLAIM -->
-      <button (click)="cancelClaimTask()" class="task-processing__button--secondary"
-              mat-stroked-button matTooltip="Cancel Task claim and return to Task overview">
-        <span> Cancel claim </span>
-        <mat-icon class="task-processing__icon--aquamarine">clear</mat-icon>
-      </button>
-
+        <!-- CANCEL CLAIM -->
+        <button (click)="cancelClaimTask()" class="task-processing__button--secondary"
+                mat-stroked-button matTooltip="Cancel Task claim and return to Task overview">
+          <span> Cancel claim </span>
+          <mat-icon class="task-processing__icon--aquamarine">clear</mat-icon>
+        </button>
+      }
     </div>
 
     <h4 class="task-processing__task-name">{{ task()?.name }}</h4>

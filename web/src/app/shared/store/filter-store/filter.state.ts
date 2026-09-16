@@ -39,7 +39,8 @@ const emptyTaskFilter: TaskQueryFilterParameter = {
   priority: [],
   'por-value': [],
   'wildcard-search-fields': [],
-  'wildcard-search-value': []
+  'wildcard-search-value': [],
+  'is-reopened': []
 };
 
 @Injectable({
@@ -95,6 +96,11 @@ export class FilterState implements NgxsOnInit {
     // Delete wildcard search field 'NAME' if 'name-like' exists
     if (filter['name-like'].length > 0 && filter['name-like'][0] !== '') {
       filter['wildcard-search-fields'].shift();
+    }
+
+    // Delete priority filter if value of 'priority' is null
+    if (filter['priority'].length > 0 && filter['priority'][0] === null) {
+      filter['priority'].shift();
     }
 
     ctx.setState({

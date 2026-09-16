@@ -54,13 +54,14 @@ public class MapPropertyParser implements PropertyParser<Map<?, ?>> {
 
     // Parses property files into a Map using the following layout: <Property>.<Key> = <value>
     String propertyKey = kadaiProperty.value();
+    String propertyPrefix = propertyKey + ".";
     Map<?, ?> mapFromProperties =
         properties.keySet().stream()
-            .filter(it -> it.startsWith(propertyKey))
+            .filter(it -> it.startsWith(propertyPrefix))
             .map(
                 it -> {
                   // Keys of the map entry is everything after the propertyKey + "."
-                  String rawKey = it.substring(propertyKey.length() + 1);
+                  String rawKey = it.substring(propertyPrefix.length());
                   // key is always present. filter guarantees that.
                   @SuppressWarnings("OptionalGetWithoutIsPresent")
                   Object key =

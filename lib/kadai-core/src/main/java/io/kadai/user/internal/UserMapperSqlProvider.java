@@ -19,7 +19,6 @@
 package io.kadai.user.internal;
 
 import static io.kadai.common.internal.util.SqlProviderUtil.CLOSING_SCRIPT_TAG;
-import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_SCRIPT_TAG;
 
 @SuppressWarnings("unused")
@@ -40,7 +39,6 @@ public class UserMapperSqlProvider {
         + USER_INFO_COLUMNS
         + "FROM USER_INFO "
         + "WHERE USER_ID = #{id} "
-        + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -50,7 +48,6 @@ public class UserMapperSqlProvider {
         + USER_INFO_COLUMNS
         + "FROM USER_INFO "
         + "WHERE USER_ID IN (<foreach item='id' collection='ids' separator=',' >#{id}</foreach>) "
-        + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -69,14 +66,12 @@ public class UserMapperSqlProvider {
   public static String findGroupsById() {
     return OPENING_SCRIPT_TAG
         + "SELECT GROUP_ID FROM GROUP_INFO WHERE USER_ID = #{id} "
-        + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
 
   public static String findPermissionsById() {
     return OPENING_SCRIPT_TAG
         + "SELECT PERMISSION_ID FROM PERMISSION_INFO WHERE USER_ID = #{id} "
-        + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
 

@@ -21,8 +21,8 @@ import { Links } from './links';
 
 export interface Classification extends ClassificationSummary {
   isValidInDomain?: boolean;
-  created?: string; // TODO: make this a Date
-  modified?: string; // TODO: make this a Date
+  created?: string;
+  modified?: string;
   description?: string;
 
   _links?: Links;
