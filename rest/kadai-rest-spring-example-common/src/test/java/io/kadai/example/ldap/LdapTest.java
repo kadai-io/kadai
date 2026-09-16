@@ -21,6 +21,7 @@ package io.kadai.example.ldap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.kadai.common.rest.ldap.LdapClient;
+import io.kadai.common.rest.ldap.LdapUserSnapshot;
 import io.kadai.common.rest.models.AccessIdRepresentationModel;
 import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.user.api.models.User;
@@ -113,6 +114,39 @@ class LdapTest {
     assertThat(user11.getFirstName()).isEqualTo("Max");
     assertThat(user11.getLastName()).isEqualTo("Mustermann");
     assertThat(user11.getFullName()).isEqualTo("Max Mustermann");
+    assertThat(user11.getEmail()).isNull();
+    assertThat(user11.getPhone()).isNull();
+    assertThat(user11.getMobilePhone()).isNull();
+    assertThat(user11.getOrgLevel1()).isNull();
+    assertThat(user11.getOrgLevel2()).isNull();
+    assertThat(user11.getOrgLevel3()).isNull();
+    assertThat(user11.getOrgLevel4()).isNull();
+  }
+
+  @Test
+  void should_ReturnCompleteSnapshotWithCorrectMetadataAndAttributes() {
+    LdapUserSnapshot snapshot = ldapClient.searchAllUsersInUserRole();
+
+    assertThat(snapshot.pageCount()).isPositive();
+    assertThat(snapshot.resultCount()).isEqualTo(snapshot.users().size());
+    Map<String, User> users =
+        snapshot.users().stream().collect(Collectors.toMap(User::getId, Function.identity()));
+
+    assertThat(users).hasSize(8);
+    User teamlead1 = users.get("teamlead-1");
+    assertThat(teamlead1.getFirstName()).isEqualTo("Titus");
+    assertThat(teamlead1.getLastName()).isEqualTo("Toll");
+    assertThat(teamlead1.getFullName()).isEqualTo("Titus Toll");
+    assertThat(teamlead1.getEmail()).isEqualTo("Titus.Toll@kadai.de");
+    assertThat(teamlead1.getPhone()).isEqualTo("012345678");
+    assertThat(teamlead1.getMobilePhone()).isEqualTo("09876554321");
+    assertThat(teamlead1.getOrgLevel1()).isEqualTo("ABC");
+    assertThat(teamlead1.getOrgLevel2()).isEqualTo("DEF/GHI");
+    assertThat(teamlead1.getOrgLevel3()).isEqualTo("JKL");
+    assertThat(teamlead1.getOrgLevel4()).isEqualTo("MNO/PQR");
+    assertThat(teamlead1.getGroups()).isNotEmpty();
+
+    User user11 = users.get("user-1-1");
     assertThat(user11.getEmail()).isNull();
     assertThat(user11.getPhone()).isNull();
     assertThat(user11.getMobilePhone()).isNull();
