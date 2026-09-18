@@ -30,8 +30,7 @@ import {
   viewChild
 } from '@angular/core';
 import { Task } from 'app/workplace/models/task';
-import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
-import { FormsModule, NgForm, NgModel } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Observable, Subject } from 'rxjs';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
@@ -55,7 +54,10 @@ import {
   MatDatepickerToggle
 } from '@angular/material/datepicker';
 import { Store } from '@ngxs/store';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { OverflowFeedbackDirective } from 'app/shared/directives/overflow-feedback.directive';
+import { FormFieldSubmitDirective } from 'app/shared/directives/form-field-submit.directive';
+import { FormSubmitDirective } from 'app/shared/directives/form-submit.directive';
+import { AccessIdExistsValidatorDirective } from 'app/shared/directives/access-id-exists-validator.directive';
 
 @Component({
   selector: 'kadai-task-information',
@@ -78,7 +80,11 @@ import { toSignal } from '@angular/core/rxjs-interop';
     FieldErrorDisplayComponent,
     TypeAheadComponent,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    OverflowFeedbackDirective,
+    FormSubmitDirective,
+    FormFieldSubmitDirective,
+    AccessIdExistsValidatorDirective
   ]
 })
 export class TaskInformationComponent implements OnInit, OnDestroy {
@@ -86,21 +92,15 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
   saveToggleTriggered = input<boolean>();
   formValid = output<boolean>();
   taskForm = viewChild<NgForm>('TaskForm');
-  toggleValidationMap = new Map<string, boolean>();
   requestInProgress = signal(false);
   classifications = signal<Classification[]>([]);
   isClassificationEmpty!: boolean;
   isOwnerValid: boolean = true;
   readonly lengthError = 'You have reached the maximum length';
-  inputOverflowMap = toSignal(inject(FormsValidatorService).inputOverflowObservable, {
-    initialValue: new Map<string, boolean>()
-  });
-  validateInputOverflow!: Function;
   tasksCustomisation$: Observable<TasksCustomisation | undefined> = inject(Store).select(
     EngineConfigurationSelectors.tasksCustomisation
   );
   private classificationService = inject(ClassificationsService);
-  private formsValidatorService = inject(FormsValidatorService);
   private destroy$ = new Subject<void>();
 
   constructor() {
@@ -114,13 +114,6 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.getClassificationByDomain();
-    this.validateInputOverflow = (inputFieldModel: NgModel, maxLength: number) => {
-      this.formsValidatorService.validateInputOverflow(inputFieldModel, maxLength);
-    };
-  }
-
-  isFieldValid(field: string): boolean {
-    return this.formsValidatorService.isFieldValid(this.taskForm(), field);
   }
 
   updateDate($event: any) {
@@ -155,14 +148,20 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
   }
 
   private validate() {
+    const form = this.taskForm();
+    if (!form) {
+      return;
+    }
+
     const task = this.task();
-    this.isClassificationEmpty = typeof task?.classificationSummary === 'undefined';
-    this.formsValidatorService.formSubmitAttempt = true;
-    this.formsValidatorService.validateFormInformation(this.taskForm(), this.toggleValidationMap).then((value) => {
-      if (value && !this.isClassificationEmpty && this.isOwnerValid) {
-        this.formValid.emit(true);
-      }
-    });
+    this.isClassificationEmpty = !task?.classificationSummary;
+
+    const formGroup = form.control;
+    formGroup.markAllAsTouched();
+
+    if (formGroup.valid && !this.isClassificationEmpty && this.isOwnerValid) {
+      this.formValid.emit(true);
+    }
   }
 
   // TODO: this is currently called for every selected task and is only necessary when we switch the workbasket -> can be optimized.

@@ -671,13 +671,6 @@ describe('AccessItemsManagementComponent', () => {
     app.revokeAccess();
     expect(store.dispatch).toHaveBeenCalled();
   });
-
-  it('should call isFieldValid for a specific field and index', () => {
-    app.setAccessItemsGroups([mockAccessItem]);
-    app.setAccessItemsPermissions([mockAccessItem]);
-    const result = app.isFieldValid('permRead', 0);
-    expect(typeof result).toBe('boolean');
-  });
 });
 
 describe('AccessItemsManagementComponent — with accessItemsForm pre-set before detectChanges', () => {

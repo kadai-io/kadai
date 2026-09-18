@@ -20,10 +20,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketInformationComponent } from './workbasket-information.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
-import { Observable, of, Subject } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
@@ -56,17 +55,6 @@ const workbasketServiceMock: Partial<WorkbasketService> = {
   removeDistributionTarget: vi.fn().mockReturnValue(of(true))
 };
 
-const inputOverflowSubject = new Subject<Map<string, boolean>>();
-
-const formValidatorServiceMock: Partial<FormsValidatorService> = {
-  isFieldValid: vi.fn().mockReturnValue(true),
-  validateInputOverflow: vi.fn(),
-  validateFormInformation: vi.fn().mockImplementation((): Promise<any> => Promise.resolve(true)),
-  get inputOverflowObservable(): Observable<Map<string, boolean>> {
-    return inputOverflowSubject.asObservable();
-  }
-};
-
 describe('WorkbasketInformationComponent', () => {
   let fixture: ComponentFixture<WorkbasketInformationComponent>;
   let debugElement: DebugElement;
@@ -81,7 +69,6 @@ describe('WorkbasketInformationComponent', () => {
         provideStore([EngineConfigurationState, WorkbasketState]),
         provideRouter([]),
         { provide: WorkbasketService, useValue: workbasketServiceMock },
-        { provide: FormsValidatorService, useValue: formValidatorServiceMock },
 
         provideHttpClientTesting(),
         provideAngularSvgIcon()
@@ -120,12 +107,6 @@ describe('WorkbasketInformationComponent', () => {
     fixture.componentRef.setInput('action', ACTION.READ);
     fixture.detectChanges();
     expect(component.workbasketClone).toMatchObject(component.workbasket()!);
-  });
-
-  it('should submit when validatorService is true', () => {
-    const formsValidatorService = TestBed.inject(FormsValidatorService);
-    component.onSubmit();
-    expect(formsValidatorService.formSubmitAttempt).toBe(true);
   });
 
   it('should reset workbasket information when onUndo is called', () => {
@@ -184,12 +165,6 @@ describe('WorkbasketInformationComponent', () => {
     expect(component.workbasket()!['custom4']).toBe(newValue);
   });
 
-  it('should call formsValidatorService.isFieldValid when isFieldValid is called', () => {
-    const result = component.isFieldValid('key');
-    expect(formValidatorServiceMock.isFieldValid).toHaveBeenCalled();
-    expect(result).toBe(true);
-  });
-
   it('should call notificationService.showDialog when removeWorkbasket is called', () => {
     const notificationService = TestBed.inject(NotificationService);
     const showDialogSpy = vi.spyOn(notificationService, 'showDialog').mockImplementation(() => undefined as any);
@@ -230,12 +205,11 @@ describe('WorkbasketInformationComponent', () => {
     component.ngOnInit();
     expect(component).toBeTruthy();
   });
+  //   const mockModel: any = { name: 'testField', value: undefined };
 
-  it('should not validate when validateInputOverflow is called with undefined value', () => {
-    const mockModel: any = { name: 'testField', value: undefined };
-    component.validateInputOverflow(mockModel, 10);
-    expect(component).toBeTruthy();
-  });
+  //   component.validateInputOverflow(mockModel, 10);
+  //   expect(component).toBeTruthy();
+  // });
 
   it('should complete destroy$ on ngOnDestroy', () => {
     const nextSpy = vi.spyOn(component.destroy$, 'next');
@@ -320,30 +294,6 @@ describe('WorkbasketInformationComponent', () => {
     expect(lc.action()).toBe(3);
   });
 
-  it('should call validateInputOverflow when name input receives input event', () => {
-    const nameInput = debugElement.nativeElement.querySelector('#workbasket-name');
-    expect(nameInput).toBeTruthy();
-    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
-    nameInput.dispatchEvent(new Event('input'));
-    expect(validateSpy).toHaveBeenCalled();
-  });
-
-  it('should call validateInputOverflow when key input receives input event', () => {
-    const keyInput = debugElement.nativeElement.querySelector('#workbasket-key');
-    expect(keyInput).toBeTruthy();
-    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
-    keyInput.dispatchEvent(new Event('input'));
-    expect(validateSpy).toHaveBeenCalled();
-  });
-
-  it('should call validateInputOverflow when description input receives input event', () => {
-    const descInput = debugElement.nativeElement.querySelector('#workbasket-description');
-    expect(descInput).toBeTruthy();
-    const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
-    descInput.dispatchEvent(new Event('input'));
-    expect(validateSpy).toHaveBeenCalled();
-  });
-
   it('should not render form when workbasket is null', () => {
     const lf = TestBed.createComponent(WorkbasketInformationComponent);
     lf.componentRef.setInput('workbasket', null);
@@ -357,31 +307,40 @@ describe('WorkbasketInformationComponent', () => {
     expect(wbInfo).toBeTruthy();
   });
 
-  it('should show overflow error for key input when inputOverflowMap has true value', () => {
-    inputOverflowSubject.next(new Map([['workbasket.key', true]]));
-    fixture.detectChanges();
+  it('should show overflow error for key input when limit is exceeded', () => {
     const keyInput = debugElement.nativeElement.querySelector('#workbasket-key');
     expect(keyInput).toBeTruthy();
+
+    keyInput.value = 'a'.repeat(65);
     keyInput.dispatchEvent(new Event('input'));
-    expect(component).toBeTruthy();
+    fixture.detectChanges();
+
+    const errorDiv = debugElement.nativeElement.querySelector('.error');
+    expect(errorDiv).toBeTruthy();
   });
 
-  it('should show overflow error for name input when inputOverflowMap has true value', () => {
-    inputOverflowSubject.next(new Map([['workbasket.name', true]]));
-    fixture.detectChanges();
+  it('should show overflow error for name input when limit is exceeded', () => {
     const nameInput = debugElement.nativeElement.querySelector('#workbasket-name');
     expect(nameInput).toBeTruthy();
+
+    nameInput.value = 'a'.repeat(256);
     nameInput.dispatchEvent(new Event('input'));
-    expect(component).toBeTruthy();
+    fixture.detectChanges();
+
+    const errorDiv = debugElement.nativeElement.querySelector('.error');
+    expect(errorDiv).toBeTruthy();
   });
 
-  it('should show overflow error for description input when inputOverflowMap has true value', () => {
-    inputOverflowSubject.next(new Map([['workbasket.description', true]]));
-    fixture.detectChanges();
+  it('should show overflow error for description input when limit is exceeded', () => {
     const descInput = debugElement.nativeElement.querySelector('#workbasket-description');
     expect(descInput).toBeTruthy();
+
+    descInput.value = 'a'.repeat(256);
     descInput.dispatchEvent(new Event('input'));
-    expect(component).toBeTruthy();
+    fixture.detectChanges();
+
+    const errorDiv = debugElement.nativeElement.querySelector('.error');
+    expect(errorDiv).toBeTruthy();
   });
 
   it('should show key field-error-display when action is not 3', () => {
@@ -400,7 +359,7 @@ describe('WorkbasketInformationComponent', () => {
     expect(lc.action()).toBe(3);
   });
 
-  it('should show owner input field when lookupField is false and trigger input event', () => {
+  it('should show owner input field and validate overflow when lookupField is false', () => {
     store.reset({
       ...store.snapshot(),
       engineConfiguration: {
@@ -425,78 +384,80 @@ describe('WorkbasketInformationComponent', () => {
     const lc = lf.componentInstance;
     lf.componentRef.setInput('workbasket', { ...selectedWorkbasketMock });
     lf.detectChanges();
-    const ownerInput = lf.nativeElement.querySelector('#wb-owner');
-    if (ownerInput) {
-      const validateSpy = vi.spyOn(lc as any, 'validateInputOverflow');
-      ownerInput.dispatchEvent(new Event('input'));
-      expect(validateSpy).toHaveBeenCalled();
-    }
+
+    const ownerInput: HTMLInputElement = lf.nativeElement.querySelector('#wb-owner');
+    expect(ownerInput).toBeTruthy();
     expect(lc.lookupField()).toBe(false);
+
+    ownerInput.value = 'a'.repeat(129);
+    ownerInput.dispatchEvent(new Event('input'));
+    lf.detectChanges();
+
+    const errorEl = lf.nativeElement.querySelector('.error');
+    expect(errorEl).toBeTruthy();
   });
 
-  it('should trigger orgLevel1 input validation when orgLevel1 input receives input event', () => {
-    const orgLevel1Input = debugElement.nativeElement.querySelector('input[name="workbasket.orgLevel1"]');
-    if (orgLevel1Input) {
-      const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
-      orgLevel1Input.dispatchEvent(new Event('input'));
-      expect(validateSpy).toHaveBeenCalled();
-    } else {
-      expect(component).toBeTruthy();
-    }
+  it('should show overflow error when orgLevel1 exceeds character limit', () => {
+    const input: HTMLInputElement = debugElement.nativeElement.querySelector('input[name="workbasket.orgLevel1"]');
+    expect(input).toBeTruthy();
+
+    input.value = 'a'.repeat(256);
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    const errorEl = debugElement.nativeElement.querySelector('.error');
+    expect(errorEl).toBeTruthy();
   });
 
-  it('should trigger orgLevel2 input validation when input receives event', () => {
-    const orgLevel2Input = debugElement.nativeElement.querySelector('input[name="workbasket.orgLevel2"]');
-    if (orgLevel2Input) {
-      const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
-      orgLevel2Input.dispatchEvent(new Event('input'));
-      expect(validateSpy).toHaveBeenCalled();
-    } else {
-      expect(component).toBeTruthy();
-    }
+  it('should show overflow error when orgLevel2 exceeds character limit', () => {
+    const input: HTMLInputElement = debugElement.nativeElement.querySelector('input[name="workbasket.orgLevel2"]');
+    expect(input).toBeTruthy();
+
+    input.value = 'a'.repeat(256);
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    const errorEl = debugElement.nativeElement.querySelector('.error');
+    expect(errorEl).toBeTruthy();
   });
 
-  it('should trigger orgLevel3 input validation when input receives event', () => {
-    const orgLevel3Input = debugElement.nativeElement.querySelector('input[name="workbasket.orgLevel3"]');
-    if (orgLevel3Input) {
-      const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
-      orgLevel3Input.dispatchEvent(new Event('input'));
-      expect(validateSpy).toHaveBeenCalled();
-    } else {
-      expect(component).toBeTruthy();
-    }
+  it('should show overflow error when orgLevel3 exceeds character limit', () => {
+    const input: HTMLInputElement = debugElement.nativeElement.querySelector('input[name="workbasket.orgLevel3"]');
+    expect(input).toBeTruthy();
+
+    input.value = 'a'.repeat(256);
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    const errorEl = debugElement.nativeElement.querySelector('.error');
+    expect(errorEl).toBeTruthy();
   });
 
-  it('should trigger orgLevel4 input validation when input receives event', () => {
-    const orgLevel4Input = debugElement.nativeElement.querySelector('input[name="workbasket.orgLevel4"]');
-    if (orgLevel4Input) {
-      const validateSpy = vi.spyOn(component as any, 'validateInputOverflow');
-      orgLevel4Input.dispatchEvent(new Event('input'));
-      expect(validateSpy).toHaveBeenCalled();
-    } else {
-      expect(component).toBeTruthy();
-    }
+  it('should show overflow error when orgLevel4 exceeds character limit', () => {
+    const input: HTMLInputElement = debugElement.nativeElement.querySelector('input[name="workbasket.orgLevel4"]');
+    expect(input).toBeTruthy();
+
+    input.value = 'a'.repeat(256);
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    const errorEl = debugElement.nativeElement.querySelector('.error');
+    expect(errorEl).toBeTruthy();
   });
 
-  it('should show error when validateFormInformation returns false', async () => {
+  it('should show error when form is invalid', () => {
     const notificationService = TestBed.inject(NotificationService);
     const showErrorSpy = vi.spyOn(notificationService, 'showError');
-    const formsValidatorService = TestBed.inject(FormsValidatorService);
-    (formsValidatorService.validateFormInformation as any).mockReturnValueOnce(Promise.resolve(false));
-    await component.onSubmit();
-    vi.waitFor(() => {
-      expect(showErrorSpy).toHaveBeenCalledWith('WORKBASKET_SAVE');
-    });
+    component.onSubmit();
+    expect(showErrorSpy).toHaveBeenCalledWith('WORKBASKET_SAVE');
   });
 
-  it('should show error when isOwnerValid is false', async () => {
+  it('should show error when isOwnerValid is false', () => {
     const notificationService = TestBed.inject(NotificationService);
     const showErrorSpy = vi.spyOn(notificationService, 'showError');
     component.isOwnerValid = false;
-    await component.onSubmit();
-    vi.waitFor(() => {
-      expect(showErrorSpy).toHaveBeenCalledWith('WORKBASKET_SAVE');
-    });
+    component.onSubmit();
+    expect(showErrorSpy).toHaveBeenCalledWith('WORKBASKET_SAVE');
   });
 
   it('should not dispatch removeDistributionTargets when workbasket has no _links', () => {
