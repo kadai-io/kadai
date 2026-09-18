@@ -1,9 +1,9 @@
-import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { AbstractControl } from '@angular/forms';
 
-export const permissionDependencyValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+export function getPermissionWarnings(control: AbstractControl): string[] {
   const value = control.value;
   if (!value) {
-    return null;
+    return [];
   }
 
   const { permEditTasks, permReadTasks, permRead, permOpen, permDistribute, permAppend, permTransfer } = value;
@@ -25,5 +25,5 @@ export const permissionDependencyValidator: ValidatorFn = (control: AbstractCont
     warnings.push('PERM_DISTRIBUTE_MISSING_DEPENDING_PERMISSIONS');
   }
 
-  return warnings.length > 0 ? { permissionWarnings: warnings } : null;
-};
+  return warnings;
+}
