@@ -81,6 +81,42 @@ public interface AccessIdApi {
       throws InvalidArgumentException, NotAuthorizedException, InvalidNameException;
 
   /**
+   * Validates whether an Access Id is an exact externally visible LDAP Access Id.
+   *
+   * @param accessId the exact Access Id to validate.
+   * @return {@code true} if a user, group, or permission has this Access Id.
+   * @throws NotAuthorizedException if the current user is not ADMIN or BUSINESS_ADMIN.
+   * @throws InvalidNameException if name is not a valid dn.
+   * @title Validate Access Id
+   */
+  @Operation(
+      summary = "Validate Access Id",
+      description =
+          "Validates an exact externally visible Access Id for users, groups, and permissions "
+              + "in the configured LDAP.",
+      parameters = {
+        @Parameter(
+            name = "access-id",
+            description = "the exact Access Id to validate.",
+            example = "teamlead-1",
+            required = true)
+      },
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "whether the Access Id is valid",
+            content = @Content(schema = @Schema(implementation = Boolean.class))),
+        @ApiResponse(responseCode = "400", description = "BAD_REQUEST"),
+        @ApiResponse(
+            responseCode = "403",
+            description = "NOT_AUTHORIZED",
+            content = {@Content(schema = @Schema(implementation = NotAuthorizedException.class))})
+      })
+  @GetMapping(path = RestEndpoints.URL_ACCESS_ID_VALIDATION)
+  ResponseEntity<Boolean> validateAccessId(@RequestParam("access-id") String accessId)
+      throws NotAuthorizedException, InvalidNameException;
+
+  /**
    * This endpoint searches AccessIds for a provided name or Access Id. It will only search and
    * return users and members of groups which are configured with the requested KADAI role. This
    * search will only work if the users in the configured LDAP have an attribute that shows their
