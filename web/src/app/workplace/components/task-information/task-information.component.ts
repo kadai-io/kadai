@@ -183,7 +183,7 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
       this.formValid.emit(true);
     } else {
       if (ownerControl?.hasError('invalidAccessId') || ownerControl?.hasError('accessIdLookupError')) {
-        this.notificationService.showError('OWNER_NOT_VALID', { owner: ownerControl.value });
+        this.notificationService.showError('OWNER_NOT_VALID', { owner: 'access id' });
       }
     }
   }
