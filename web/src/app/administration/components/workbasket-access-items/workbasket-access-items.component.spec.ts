@@ -20,7 +20,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketAccessItemsComponent } from './workbasket-access-items.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import {
@@ -37,6 +37,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { AccessIdsService } from 'app/shared/services/access-ids/access-ids.service';
 
 describe('WorkbasketAccessItemsComponent', () => {
   let fixture: ComponentFixture<WorkbasketAccessItemsComponent>;
@@ -251,14 +252,28 @@ describe('WorkbasketAccessItemsComponent', () => {
 
   it('should not call onSave and show error notification when form is invalid', async () => {
     const notificationService = TestBed.inject(NotificationService);
+    const accessIdsService = TestBed.inject(AccessIdsService);
+
+    vi.spyOn(accessIdsService, 'searchForAccessId').mockReturnValue(
+      of([{ accessId: 'user-1-1', name: 'Max Mustermann' }])
+    );
 
     fixture.detectChanges();
     const onSaveSpy = vi.spyOn(component, 'onSave');
     const notificationSpy = vi.spyOn(notificationService, 'showError');
 
-    component.accessItemsGroups.controls[0].get('accessId')?.setValue('');
-    component.accessItemsGroups.controls[0].get('accessId')?.updateValueAndValidity();
+    component.accessItemsRepresentation = {
+      accessItems: [component.createWorkbasketAccessItems()],
+      _links: { self: { href: 'some-valid-url' } }
+    };
+    component.setAccessItemsGroups(component.accessItemsRepresentation.accessItems);
 
+    const accessIdControl = component.accessItemsGroups.controls[0].get('accessId');
+    accessIdControl?.setValue('invalid-user');
+    accessIdControl?.updateValueAndValidity();
+
+    fixture.detectChanges();
+    await fixture.whenStable();
     await component.onSubmit();
 
     expect(notificationSpy).toHaveBeenCalledWith('OWNER_NOT_VALID', { owner: 'access id' });

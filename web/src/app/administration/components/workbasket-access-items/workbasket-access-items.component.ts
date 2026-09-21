@@ -309,9 +309,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
   }
 
   setAccessItemsGroups(accessItems: WorkbasketAccessItems[]) {
-    const AccessItemsFormGroups = accessItems.map((accessItem) =>
-      this.formBuilder.group(accessItem)
-    );
+    const AccessItemsFormGroups = accessItems.map((accessItem) => this.formBuilder.group(accessItem));
     AccessItemsFormGroups.forEach((accessItemGroup) => {
       accessItemGroup.controls.accessId.setValidators(Validators.required);
       accessItemGroup.controls.accessId.setAsyncValidators(accessIdExistsValidator(this.accessIdService));
@@ -380,7 +378,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     this.checkPermissionWarnings();
 
     if (this.accessItemsGroups.invalid) {
-      this.notificationsService.showError('OWNER_NOT_VALID', { owner: "access id" });
+      this.notificationsService.showError('OWNER_NOT_VALID', { owner: 'access id' });
       return;
     }
 

@@ -31,9 +31,7 @@ describe('getPermissionWarnings (Vitest)', () => {
     };
 
     const control = new FormControl(invalidPermissions);
-    expect(getPermissionWarnings(control)).toEqual([
-      'PERM_EDIT_TASKS_MISSING_DEPENDING_PERMISSION'
-    ]);
+    expect(getPermissionWarnings(control)).toEqual(['PERM_EDIT_TASKS_MISSING_DEPENDING_PERMISSION']);
   });
 
   it('should return warning when permReadTasks is true but permRead is missing', () => {
@@ -44,9 +42,7 @@ describe('getPermissionWarnings (Vitest)', () => {
     };
 
     const control = new FormControl(invalidPermissions);
-    expect(getPermissionWarnings(control)).toEqual([
-      'PERM_READ_TASKS_MISSING_DEPENDING_PERMISSIONS'
-    ]);
+    expect(getPermissionWarnings(control)).toEqual(['PERM_READ_TASKS_MISSING_DEPENDING_PERMISSIONS']);
   });
 
   it('should return warning when permOpen is true but permReadTasks and permRead is missing', () => {
@@ -57,9 +53,7 @@ describe('getPermissionWarnings (Vitest)', () => {
     };
 
     const control = new FormControl(invalidPermissions);
-    expect(getPermissionWarnings(control)).toEqual([
-      'PERM_OPEN_MISSING_DEPENDING_PERMISSIONS'
-    ]);
+    expect(getPermissionWarnings(control)).toEqual(['PERM_OPEN_MISSING_DEPENDING_PERMISSIONS']);
   });
 
   it('should return warning when permDistribute is true but permAppend or permTransfer is missing', () => {
@@ -70,9 +64,7 @@ describe('getPermissionWarnings (Vitest)', () => {
     };
 
     const control = new FormControl(invalidPermissions);
-    expect(getPermissionWarnings(control)).toEqual([
-      'PERM_DISTRIBUTE_MISSING_DEPENDING_PERMISSIONS'
-    ]);
+    expect(getPermissionWarnings(control)).toEqual(['PERM_DISTRIBUTE_MISSING_DEPENDING_PERMISSIONS']);
   });
 
   it('should return multiple warnings if several dependency rules are violated simultaneously', () => {
@@ -99,8 +91,6 @@ describe('getPermissionWarnings (Vitest)', () => {
       permRead: new FormControl(true)
     });
 
-    expect(getPermissionWarnings(formGroup)).toEqual([
-      'PERM_EDIT_TASKS_MISSING_DEPENDING_PERMISSION'
-    ]);
+    expect(getPermissionWarnings(formGroup)).toEqual(['PERM_EDIT_TASKS_MISSING_DEPENDING_PERMISSION']);
   });
 });
