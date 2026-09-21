@@ -380,14 +380,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     this.checkPermissionWarnings();
 
     if (this.accessItemsGroups.invalid) {
-      const index = this.accessItemsGroups.controls.findIndex((g) => g.get('accessId')?.invalid);
-      const formValue = this.accessItemsGroups.controls[index]?.get('accessId')?.value;
-    
-      const typeAheadComponent = this.typeAheadComponents()[index];
-      const typeAheadValue = typeAheadComponent?.accessIdForm.get('accessId')?.value;
-
-      const owner = (typeof formValue === 'string' && formValue.trim() ? formValue : typeAheadValue) || 'access id';
-      this.notificationsService.showError('OWNER_NOT_VALID', { owner });
+      this.notificationsService.showError('OWNER_NOT_VALID', { owner: "access id" });
       return;
     }
 
