@@ -375,6 +375,111 @@ class AccessIdControllerIntTest {
         .containsExactlyInAnyOrder("user-1-1", "user-1-2");
   }
 
+  @Test
+  void should_ValidateExactUserGroupAndPermissionAccessIds() {
+    List<String> accessIds =
+        List.of(
+            "User-b-2",
+            "cn=ksc-users,cn=groups,OU=Test,O=KADAI",
+            "kadai:callcenter:ab:ab/a:callcenter");
+
+    for (String accessId : accessIds) {
+      ResponseEntity<Boolean> response =
+          restClient
+              .get()
+              .uri(
+                  restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_VALIDATION)
+                      + "?access-id="
+                      + accessId)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(Boolean.class);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody()).isTrue();
+    }
+  }
+
+  @Test
+  void should_AllowBusinessAdminsToValidateAccessIds() {
+    ResponseEntity<Boolean> response =
+        restClient
+            .get()
+            .uri(
+                restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_VALIDATION)
+                    + "?access-id=teamlead-1")
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("businessadmin")))
+            .retrieve()
+            .toEntity(Boolean.class);
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody()).isTrue();
+  }
+
+  @Test
+  void should_ReturnFalseForNonExternalDnAndUnknownAccessId() {
+    List<String> accessIds =
+        List.of(
+            "uid=teamlead-1,cn=users,OU=Test,O=KADAI",
+            "cn=groups,OU=Test,O=KADAI",
+            "cn=g01,cn=groups,OU=Test,O=KADAI",
+            "does-not-exist");
+
+    for (String accessId : accessIds) {
+      ResponseEntity<Boolean> response =
+          restClient
+              .get()
+              .uri(
+                  restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_VALIDATION)
+                      + "?access-id="
+                      + accessId)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(Boolean.class);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody()).isFalse();
+    }
+  }
+
+  @Test
+  void should_ReturnBadRequestWhenValidationAccessIdIsMissing() {
+    ThrowingCallable call =
+        () ->
+            restClient
+                .get()
+                .uri(restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_VALIDATION))
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+                .retrieve()
+                .toEntity(Boolean.class);
+
+    assertThatThrownBy(call)
+        .isInstanceOf(HttpStatusCodeException.class)
+        .extracting(HttpStatusCodeException.class::cast)
+        .extracting(HttpStatusCodeException::getStatusCode)
+        .isEqualTo(HttpStatus.BAD_REQUEST);
+  }
+
+  @Test
+  void should_RejectValidationForOrdinaryUsers() {
+    ThrowingCallable call =
+        () ->
+            restClient
+                .get()
+                .uri(
+                    restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_VALIDATION)
+                        + "?access-id=teamlead-1")
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("user-1-1")))
+                .retrieve()
+                .toEntity(Boolean.class);
+
+    assertThatThrownBy(call)
+        .isInstanceOf(HttpStatusCodeException.class)
+        .extracting(HttpStatusCodeException.class::cast)
+        .extracting(HttpStatusCodeException::getStatusCode)
+        .isEqualTo(HttpStatus.FORBIDDEN);
+  }
+
   @ParameterizedTest
   @ValueSource(
       strings = {

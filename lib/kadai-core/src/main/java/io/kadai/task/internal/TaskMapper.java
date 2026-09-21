@@ -48,7 +48,6 @@ public interface TaskMapper {
           + "CUSTOM_INT_1, CUSTOM_INT_2, CUSTOM_INT_3, CUSTOM_INT_4, CUSTOM_INT_5, CUSTOM_INT_6, CUSTOM_INT_7, CUSTOM_INT_8, NUMBER_OF_COMMENTS "
           + "FROM TASK "
           + "WHERE ID = #{id} "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   @Result(property = "id", column = "ID")
   @Result(property = "externalId", column = "EXTERNAL_ID")
@@ -218,7 +217,6 @@ public interface TaskMapper {
           + "<if test='taskIds != null'>ID IN(<foreach item='item' collection='taskIds' separator=',' >#{item}</foreach>)</if> "
           + "<if test='externalIds != null'>EXTERNAL_ID IN(<foreach item='item' collection='externalIds' separator=',' >#{item}</foreach>)</if> "
           + "</where> "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   @Result(property = "taskId", column = "ID")
   @Result(property = "externalId", column = "EXTERNAL_ID")
@@ -295,7 +293,6 @@ public interface TaskMapper {
       "<script>SELECT ID, PLANNED, STATE FROM TASK "
           + "WHERE ID IN(<foreach item='item' collection='taskIds' separator=',' >#{item}</foreach>) "
           + "AND STATE IN ( 'READY','CLAIMED') "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   @Result(property = "left", column = "ID")
   @Result(
@@ -345,9 +342,22 @@ public interface TaskMapper {
   @Select(
       "<script>SELECT ID FROM TASK "
           + "WHERE COMPLETED &lt;= #{completedBefore} "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if>"
           + "</script>")
   List<String> findTasksCompletedBefore(@Param("completedBefore") Instant completedBefore);
+
+  @Select(
+      "<script>"
+          + "<foreach collection='completedBeforeByDomain' index='domain' item='completedBefore' separator=' UNION ALL '>"
+          + "SELECT t.ID FROM TASK t WHERE t.DOMAIN = #{domain} AND t.COMPLETED &lt;= #{completedBefore}"
+          + "</foreach> "
+          + "UNION ALL "
+          + "SELECT t.ID FROM TASK t WHERE (t.DOMAIN IS NULL OR t.DOMAIN NOT IN "
+          + "<foreach collection='completedBeforeByDomain' index='domain' item='completedBefore' open='(' separator=',' close=')'>#{domain}</foreach>) "
+          + "AND t.COMPLETED &lt;= #{defaultCompletedBefore} "
+          + "</script>")
+  List<String> findTasksCompletedBeforeByDomain(
+      @Param("defaultCompletedBefore") Instant defaultCompletedBefore,
+      @Param("completedBeforeByDomain") Map<String, Instant> completedBeforeByDomain);
 
   @Select(
       "<script>"
@@ -373,8 +383,39 @@ public interface TaskMapper {
           + "WHERE t.COMPLETED &lt;= #{completedBefore} "
           + "AND (t.PARENT_BUSINESS_PROCESS_ID IS NULL "
           + "OR CHARACTER_LENGTH(t.PARENT_BUSINESS_PROCESS_ID) = 0) "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if>"
           + "</script>")
   List<String> findTasksCompletedBeforeWithParentBusinessProcessConstraint(
       @Param("completedBefore") Instant completedBefore);
+
+  @Select(
+      "<script>"
+          + "WITH TASKS_WITH_PARENT_CLEANUP_ELIGIBILITY AS ("
+          + "SELECT t.ID, "
+          + "COUNT(*) OVER (PARTITION BY t.PARENT_BUSINESS_PROCESS_ID) AS PARENT_TASK_COUNT, "
+          + "SUM(CASE WHEN ("
+          + "<foreach collection='completedBeforeByDomain' index='domain' item='completedBefore' separator=' OR '>(t.DOMAIN = #{domain} AND t.COMPLETED &lt;= #{completedBefore})</foreach> "
+          + "OR ((t.DOMAIN IS NULL OR t.DOMAIN NOT IN "
+          + "<foreach collection='completedBeforeByDomain' index='domain' item='completedBefore' open='(' separator=',' close=')'>#{domain}</foreach>) "
+          + "AND t.COMPLETED &lt;= #{defaultCompletedBefore})"
+          + ") THEN 1 ELSE 0 END) OVER (PARTITION BY t.PARENT_BUSINESS_PROCESS_ID) "
+          + "AS PARENT_ELIGIBLE_TASK_COUNT "
+          + "FROM TASK t WHERE t.PARENT_BUSINESS_PROCESS_ID IS NOT NULL "
+          + "AND CHARACTER_LENGTH(t.PARENT_BUSINESS_PROCESS_ID) &gt; 0"
+          + ") "
+          + "SELECT ID FROM TASKS_WITH_PARENT_CLEANUP_ELIGIBILITY "
+          + "WHERE PARENT_TASK_COUNT = PARENT_ELIGIBLE_TASK_COUNT "
+          + "UNION ALL "
+          + "SELECT t.ID FROM TASK t "
+          + "WHERE (t.PARENT_BUSINESS_PROCESS_ID IS NULL "
+          + "OR CHARACTER_LENGTH(t.PARENT_BUSINESS_PROCESS_ID) = 0) "
+          + "AND ("
+          + "<foreach collection='completedBeforeByDomain' index='domain' item='completedBefore' separator=' OR '>(t.DOMAIN = #{domain} AND t.COMPLETED &lt;= #{completedBefore})</foreach> "
+          + "OR ((t.DOMAIN IS NULL OR t.DOMAIN NOT IN "
+          + "<foreach collection='completedBeforeByDomain' index='domain' item='completedBefore' open='(' separator=',' close=')'>#{domain}</foreach>) "
+          + "AND t.COMPLETED &lt;= #{defaultCompletedBefore})"
+          + ") "
+          + "</script>")
+  List<String> findTasksCompletedBeforeByDomainWithParentBusinessProcessConstraint(
+      @Param("defaultCompletedBefore") Instant defaultCompletedBefore,
+      @Param("completedBeforeByDomain") Map<String, Instant> completedBeforeByDomain);
 }

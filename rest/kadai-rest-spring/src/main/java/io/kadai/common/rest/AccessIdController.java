@@ -59,6 +59,13 @@ public class AccessIdController implements AccessIdApi {
     return ResponseEntity.ok(accessIdUsers);
   }
 
+  @GetMapping(path = RestEndpoints.URL_ACCESS_ID_VALIDATION)
+  public ResponseEntity<Boolean> validateAccessId(@RequestParam("access-id") String accessId)
+      throws NotAuthorizedException, InvalidNameException {
+    kadaiEngine.checkRoleMembership(KadaiRole.ADMIN, KadaiRole.BUSINESS_ADMIN);
+    return ResponseEntity.ok(ldapClient.validateAccessId(accessId));
+  }
+
   @GetMapping(path = RestEndpoints.URL_ACCESS_ID_WITH_NAME)
   public ResponseEntity<List<AccessIdRepresentationModel>> searchUsersByNameOrAccessIdForRole(
       @RequestParam("search-for") String nameOrAccessId, @RequestParam("role") String role)

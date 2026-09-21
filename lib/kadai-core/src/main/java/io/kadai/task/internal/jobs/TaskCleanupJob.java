@@ -35,7 +35,9 @@ import io.kadai.common.internal.util.CollectionUtil;
 import io.kadai.common.internal.util.LogSanitizer;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,14 +46,16 @@ public class TaskCleanupJob extends AbstractKadaiJob {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(TaskCleanupJob.class);
 
-  private final Duration minimumAge;
+  private final Duration defaultMinimumAge;
+  private final Map<String, Duration> minimumAgeByDomain;
   private final int batchSize;
   private final boolean allCompletedSameParentBusiness;
 
   public TaskCleanupJob(
       KadaiEngine kadaiEngine, KadaiTransactionProvider txProvider, ScheduledJob scheduledJob) {
     super(kadaiEngine, txProvider, scheduledJob, true);
-    minimumAge = kadaiEngine.getConfiguration().getTaskCleanupJobMinimumAge();
+    defaultMinimumAge = kadaiEngine.getConfiguration().getTaskCleanupJobMinimumAge();
+    minimumAgeByDomain = kadaiEngine.getConfiguration().getTaskCleanupJobMinimumAgeByDomain();
     batchSize = kadaiEngine.getConfiguration().getTaskCleanupJobBatchSize();
     allCompletedSameParentBusiness =
         kadaiEngine.getConfiguration().isTaskCleanupJobAllCompletedSameParentBusiness();
@@ -68,12 +72,23 @@ public class TaskCleanupJob extends AbstractKadaiJob {
 
   @Override
   public void execute() {
-    Instant completedBefore = Instant.now().minus(minimumAge);
+    Instant cleanupRunTime = Instant.now();
+    Instant defaultCompletedBefore = cleanupRunTime.minus(defaultMinimumAge);
+    Map<String, Instant> completedBeforeByDomain =
+        calculateCompletedBeforeByDomain(cleanupRunTime);
     long jobStartedAt = System.nanoTime();
-    LOGGER.info("Running job to delete all tasks completed before ({})", completedBefore);
+    LOGGER.info(
+        "Running task cleanup with default minimum age {} and {} domain override(s).",
+        defaultMinimumAge,
+        minimumAgeByDomain.size());
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Task cleanup completed-before cutoffs by domain: {}", completedBeforeByDomain);
+    }
     try {
       long selectionStartedAt = System.nanoTime();
-      List<String> tasksCompletedBefore = getTasksCompletedBeforeTransactionally(completedBefore);
+      List<String> tasksCompletedBefore =
+          getTaskIdsEligibleForCleanupTransactionally(
+              defaultCompletedBefore, completedBeforeByDomain);
       LOGGER.info(
           "Selected {} tasks for cleanup in {} ms.",
           tasksCompletedBefore.size(),
@@ -98,22 +113,53 @@ public class TaskCleanupJob extends AbstractKadaiJob {
     return TaskCleanupJob.class.getName();
   }
 
-  private List<String> getTasksCompletedBefore(Instant untilDate) {
-    return kadaiEngineImpl.executeInDatabaseConnection(
-        () ->
-            allCompletedSameParentBusiness
-                ? kadaiEngineImpl
-                    .getTaskMapper()
-                    .findTasksCompletedBeforeWithParentBusinessProcessConstraint(untilDate)
-                : kadaiEngineImpl.getTaskMapper().findTasksCompletedBefore(untilDate));
+  private Map<String, Instant> calculateCompletedBeforeByDomain(Instant cleanupRunTime) {
+    Map<String, Instant> completedBeforeByDomain = new LinkedHashMap<>();
+    minimumAgeByDomain.entrySet().stream()
+        .sorted(Map.Entry.comparingByKey())
+        .forEach(
+            entry ->
+                completedBeforeByDomain.put(
+                    entry.getKey(), cleanupRunTime.minus(entry.getValue())));
+    return completedBeforeByDomain;
   }
 
-  private List<String> getTasksCompletedBeforeTransactionally(Instant untilDate) {
+  private List<String> getTaskIdsEligibleForCleanup(
+      Instant defaultCompletedBefore, Map<String, Instant> completedBeforeByDomain) {
+    return kadaiEngineImpl.executeInDatabaseConnection(
+        () ->
+            getTaskIdsEligibleForCleanup(
+                defaultCompletedBefore, completedBeforeByDomain, allCompletedSameParentBusiness));
+  }
+
+  private List<String> getTaskIdsEligibleForCleanup(
+      Instant defaultCompletedBefore,
+      Map<String, Instant> completedBeforeByDomain,
+      boolean requireAllCompletedSameParentBusiness) {
+    if (completedBeforeByDomain.isEmpty()) {
+      return requireAllCompletedSameParentBusiness
+          ? kadaiEngineImpl
+              .getTaskMapper()
+              .findTasksCompletedBeforeWithParentBusinessProcessConstraint(defaultCompletedBefore)
+          : kadaiEngineImpl.getTaskMapper().findTasksCompletedBefore(defaultCompletedBefore);
+    }
+    return requireAllCompletedSameParentBusiness
+        ? kadaiEngineImpl
+            .getTaskMapper()
+            .findTasksCompletedBeforeByDomainWithParentBusinessProcessConstraint(
+                defaultCompletedBefore, completedBeforeByDomain)
+        : kadaiEngineImpl
+            .getTaskMapper()
+            .findTasksCompletedBeforeByDomain(defaultCompletedBefore, completedBeforeByDomain);
+  }
+
+  private List<String> getTaskIdsEligibleForCleanupTransactionally(
+      Instant defaultCompletedBefore, Map<String, Instant> completedBeforeByDomain) {
     return KadaiTransactionProvider.executeInTransactionIfPossible(
         txProvider,
         () -> {
           renewLock();
-          return getTasksCompletedBefore(untilDate);
+          return getTaskIdsEligibleForCleanup(defaultCompletedBefore, completedBeforeByDomain);
         });
   }
 
@@ -179,8 +225,10 @@ public class TaskCleanupJob extends AbstractKadaiJob {
         + txProvider
         + ", scheduledJob="
         + scheduledJob
-        + ", minimumAge="
-        + minimumAge
+        + ", defaultMinimumAge="
+        + defaultMinimumAge
+        + ", minimumAgeByDomain="
+        + minimumAgeByDomain
         + ", batchSize="
         + batchSize
         + ", allCompletedSameParentBusiness="

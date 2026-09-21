@@ -55,7 +55,7 @@
     <version.maven.surefire>3.6.0</version.maven.surefire>
     <version.maven.clean>3.2.0</version.maven.clean>
     <version.maven.dependency>3.8.1</version.maven.dependency>
-    <version.maven.sonar>5.7.0.6970</version.maven.sonar>
+    <version.maven.sonar>5.8.0.7211</version.maven.sonar>
 
     <!-- release dependencies -->
     <version.maven.gpg>3.2.8</version.maven.gpg>
@@ -78,14 +78,14 @@
     <version.slf4j-test>3.0.3</version.slf4j-test>
     <version.testcontainers>1.21.4</version.testcontainers>
     <version.jakarta.servlet>6.1.0</version.jakarta.servlet>
-    <version.spring-openapi>3.1.0</version.spring-openapi>
+    <version.spring-openapi>3.1.1</version.spring-openapi>
 
     <!-- AspectJ dependencies -->
-    <version.aspectj-maven-plugin>1.16.0</version.aspectj-maven-plugin>
+    <version.aspectj-maven-plugin>1.16.1</version.aspectj-maven-plugin>
     <version.aspectj>1.9.25.1</version.aspectj>
 
     <!-- Excel to DMN converter dependencies -->
-    <version.docx4j>17.0.5</version.docx4j>
+    <version.docx4j>17.1.0</version.docx4j>
     <version.jakarta.xml.bind-api>4.0.5</version.jakarta.xml.bind-api>
     <version.jaxb-core>4.0.9</version.jaxb-core>
     <version.jaxb-impl>4.0.9</version.jaxb-impl>
