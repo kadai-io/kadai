@@ -17,7 +17,7 @@
  */
 
 import { Component, effect, inject, input, model, OnDestroy, OnInit, untracked, viewChild } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Store } from '@ngxs/store';
 import { ACTION } from 'app/shared/models/action';
@@ -63,6 +63,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { OverflowFeedbackDirective } from 'app/shared/directives/overflow-feedback.directive';
 import { FormFieldSubmitDirective } from 'app/shared/directives/form-field-submit.directive';
 import { FormSubmitDirective } from 'app/shared/directives/form-submit.directive';
+import { AccessIdExistsValidatorDirective } from 'app/shared/directives/access-id-exists-validator.directive';
 
 @Component({
   selector: 'kadai-administration-workbasket-information',
@@ -87,7 +88,8 @@ import { FormSubmitDirective } from 'app/shared/directives/form-submit.directive
     RemoveNoneTypePipe,
     OverflowFeedbackDirective,
     FormSubmitDirective,
-    FormFieldSubmitDirective
+    FormFieldSubmitDirective,
+    AccessIdExistsValidatorDirective
   ]
 })
 export class WorkbasketInformationComponent implements OnInit, OnDestroy {
@@ -157,12 +159,16 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
       });
   }
 
-  onSubmit() {
+  async onSubmit() {
     trimForm(this.workbasketForm());
 
     const form = this.workbasketForm();
     if (!form) {
       return;
+    }
+
+    if (form.pending) {
+      await firstValueFrom(form.statusChanges!.pipe(filter((status) => status !== 'PENDING')));
     }
 
     if (form.valid && this.isOwnerValid) {

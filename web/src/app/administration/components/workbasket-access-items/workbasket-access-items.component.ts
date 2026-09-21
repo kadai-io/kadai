@@ -31,7 +31,7 @@ import {
   viewChildren
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { distinctUntilChanged, Observable, Subject } from 'rxjs';
+import { distinctUntilChanged, firstValueFrom, Observable, Subject } from 'rxjs';
 import {
   Actions,
   ofActionCompleted,
@@ -309,10 +309,10 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
   }
 
   setAccessItemsGroups(accessItems: WorkbasketAccessItems[]) {
-    const AccessItemsFormGroups = accessItems.map((accessItem) => this.formBuilder.group(accessItem));
-    AccessItemsFormGroups.forEach((accessItemGroup) => {
-      accessItemGroup.controls.accessId.setValidators(Validators.required);
-      accessItemGroup.controls.accessId.setAsyncValidators(accessIdExistsValidator(this.accessIdService));
+    const AccessItemsFormGroups = accessItems.map((accessItem) => {
+      const group = this.formBuilder.group(accessItem);
+      this.setupAccessIdValidators(group);
+      return group;
     });
     const AccessItemsFormArray = this.formBuilder.array(AccessItemsFormGroups);
     this.AccessItemsForm.setControl('accessItemsGroups', AccessItemsFormArray);
@@ -353,7 +353,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     workbasketAccessItems.workbasketId = this.workbasket()!.workbasketId!;
     workbasketAccessItems.permRead = true;
     const newForm = this.formBuilder.group(workbasketAccessItems);
-    newForm.controls.accessId.setValidators(Validators.required);
+    this.setupAccessIdValidators(newForm);
     this.accessItemsGroups.insert(0, newForm);
     this.accessItemsClone.update((accessItemsClone) => [workbasketAccessItems, ...accessItemsClone]);
     this.added = true;
@@ -373,6 +373,10 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
   ) {
     if (!accessItemsUrl) {
       return;
+    }
+
+    if (this.accessItemsGroups.pending) {
+      await firstValueFrom(this.accessItemsGroups.statusChanges.pipe(filter((status) => status !== 'PENDING')));
     }
 
     this.checkPermissionWarnings();
@@ -439,6 +443,15 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
 
   private snapshotAccessItems(): WorkbasketAccessItems[] {
     return (this.accessItemsGroups.getRawValue() as WorkbasketAccessItems[]).map((accessItem) => ({ ...accessItem }));
+  }
+
+  private setupAccessIdValidators(group: FormGroup): void {
+    const control = group.get('accessId');
+    if (control) {
+      control.setValidators(Validators.required);
+      control.setAsyncValidators(accessIdExistsValidator(this.accessIdService));
+      control.updateValueAndValidity();
+    }
   }
 
   private checkPermissionWarnings(): void {

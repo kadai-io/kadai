@@ -244,8 +244,19 @@ describe('WorkbasketAccessItemsComponent', () => {
   });
 
   it('should call onSave when the form is valid and submitted', async () => {
-    fixture.detectChanges();
+    const accessIdsService = TestBed.inject(AccessIdsService);
     const onSaveSpy = vi.spyOn(component, 'onSave');
+    vi.spyOn(accessIdsService, 'searchForAccessId').mockImplementation((query) =>
+      of([{ accessId: (query as string) || 'user-b-1', name: 'User B 1' }])
+    );
+
+    component.setAccessItemsGroups(component.accessItemsRepresentation.accessItems);
+    component.accessItemsGroups.controls.forEach((group) => {
+      group.get('accessId')?.updateValueAndValidity();
+    });
+
+    fixture.detectChanges();
+    await fixture.whenStable();
     await component.onSubmit();
     expect(onSaveSpy).toHaveBeenCalled();
   });
@@ -254,9 +265,7 @@ describe('WorkbasketAccessItemsComponent', () => {
     const notificationService = TestBed.inject(NotificationService);
     const accessIdsService = TestBed.inject(AccessIdsService);
 
-    vi.spyOn(accessIdsService, 'searchForAccessId').mockReturnValue(
-      of([{ accessId: 'user-1-1', name: 'Max Mustermann' }])
-    );
+    vi.spyOn(accessIdsService, 'searchForAccessId').mockReturnValue(of([]));
 
     fixture.detectChanges();
     const onSaveSpy = vi.spyOn(component, 'onSave');
@@ -281,7 +290,15 @@ describe('WorkbasketAccessItemsComponent', () => {
   });
 
   it('should save copied access items when the target access items are submitted', async () => {
+    const accessIdsService = TestBed.inject(AccessIdsService);
+
+    vi.spyOn(accessIdsService, 'searchForAccessId').mockImplementation((query) => {
+      return of([{ accessId: query, name: query }]);
+    });
+
     fixture.detectChanges();
+    await fixture.whenStable();
+
     const sourceAccessItems = component.cloneAccessItems();
     const targetWorkbasketId = 'WBI:TARGET-WORKBASKET-ID';
     const targetAccessItemsUrl = 'https://link.mock/target/workbasketAccessItems';

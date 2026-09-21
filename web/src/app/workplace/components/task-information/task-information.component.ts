@@ -103,6 +103,7 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
   );
   private classificationService = inject(ClassificationsService);
   private notificationService = inject(NotificationService);
+  private cancelPendingWait$ = new Subject<void>();
   private destroy$ = new Subject<void>();
 
   constructor() {
@@ -161,11 +162,14 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
     const formGroup = form.control;
     formGroup.markAllAsTouched();
 
+    this.cancelPendingWait$.next();
+
     if (formGroup.pending) {
       formGroup.statusChanges
         .pipe(
           filter((status) => status !== 'PENDING'),
           take(1),
+          takeUntil(this.cancelPendingWait$),
           takeUntil(this.destroy$)
         )
         .subscribe(() => {
