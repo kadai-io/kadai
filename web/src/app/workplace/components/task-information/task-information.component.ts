@@ -36,7 +36,7 @@ import { EngineConfigurationSelectors } from 'app/shared/store/engine-configurat
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
 import { Classification } from '../../../shared/models/classification';
 import { TasksCustomisation } from '../../../shared/models/customisation';
-import { takeUntil } from 'rxjs/operators';
+import { filter, take, takeUntil } from 'rxjs/operators';
 import { AccessId } from '../../../shared/models/access-id';
 import { AsyncPipe } from '@angular/common';
 import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
@@ -58,6 +58,7 @@ import { OverflowFeedbackDirective } from 'app/shared/directives/overflow-feedba
 import { FormFieldSubmitDirective } from 'app/shared/directives/form-field-submit.directive';
 import { FormSubmitDirective } from 'app/shared/directives/form-submit.directive';
 import { AccessIdExistsValidatorDirective } from 'app/shared/directives/access-id-exists-validator.directive';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
 
 @Component({
   selector: 'kadai-task-information',
@@ -101,6 +102,7 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
     EngineConfigurationSelectors.tasksCustomisation
   );
   private classificationService = inject(ClassificationsService);
+  private notificationService = inject(NotificationService);
   private destroy$ = new Subject<void>();
 
   constructor() {
@@ -159,8 +161,30 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
     const formGroup = form.control;
     formGroup.markAllAsTouched();
 
+    if (formGroup.pending) {
+      formGroup.statusChanges
+        .pipe(
+          filter((status) => status !== 'PENDING'),
+          take(1),
+          takeUntil(this.destroy$)
+        )
+        .subscribe(() => {
+          this.checkAndEmitValidity(formGroup);
+        });
+    } else {
+      this.checkAndEmitValidity(formGroup);
+    }
+  }
+
+  private checkAndEmitValidity(formGroup: any) {
+    const ownerControl = formGroup.controls['task.owner'];
+
     if (formGroup.valid && !this.isClassificationEmpty && this.isOwnerValid) {
       this.formValid.emit(true);
+    } else {
+      if (ownerControl?.hasError('invalidAccessId') || ownerControl?.hasError('accessIdLookupError')) {
+        this.notificationService.showError('OWNER_NOT_VALID', { owner: ownerControl.value});
+      }
     }
   }
 

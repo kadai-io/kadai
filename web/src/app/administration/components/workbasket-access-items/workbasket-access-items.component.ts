@@ -77,9 +77,11 @@ import { MatIcon } from '@angular/material/icon';
 import { ResizableWidthDirective } from '../../../shared/directives/resizable-width.directive';
 import { TypeAheadComponent } from '../../../shared/components/type-ahead/type-ahead.component';
 import { MatInput } from '@angular/material/input';
-import { permissionDependencyValidator } from 'app/shared/validators/permission-dependency.validator';
+import { getPermissionWarnings } from 'app/shared/validators/permission-dependency.validator';
 import { FormSubmitDirective } from 'app/shared/directives/form-submit.directive';
 import { FormFieldSubmitDirective } from 'app/shared/directives/form-field-submit.directive';
+import { accessIdExistsValidator } from 'app/shared/validators/access-id-exists.validator';
+import { AccessIdsService } from 'app/shared/services/access-ids/access-ids.service';
 
 @Component({
   selector: 'kadai-administration-workbasket-access-items',
@@ -104,6 +106,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
   expanded = input<boolean>();
   accessItemsValidityChanged = output<boolean>();
   inputs = viewChildren<ElementRef>('htmlInputElement');
+  typeAheadComponents = viewChildren(TypeAheadComponent);
   selectedRows: number[] = [];
   workbasketClone?: Workbasket;
   customFields$!: Observable<CustomField[]>;
@@ -128,6 +131,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     accessItemsGroups: this.formBuilder.array<FormGroup>([])
   });
   private notificationsService = inject(NotificationService);
+  private accessIdService = inject(AccessIdsService);
   private store = inject(Store);
   private ngxsActions$ = inject(Actions);
 
@@ -306,10 +310,11 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
 
   setAccessItemsGroups(accessItems: WorkbasketAccessItems[]) {
     const AccessItemsFormGroups = accessItems.map((accessItem) =>
-      this.formBuilder.group(accessItem, { validators: [permissionDependencyValidator] })
+      this.formBuilder.group(accessItem)
     );
     AccessItemsFormGroups.forEach((accessItemGroup) => {
       accessItemGroup.controls.accessId.setValidators(Validators.required);
+      accessItemGroup.controls.accessId.setAsyncValidators(accessIdExistsValidator(this.accessIdService));
     });
     const AccessItemsFormArray = this.formBuilder.array(AccessItemsFormGroups);
     this.AccessItemsForm.setControl('accessItemsGroups', AccessItemsFormArray);
@@ -349,7 +354,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     const workbasketAccessItems: WorkbasketAccessItems = this.createWorkbasketAccessItems();
     workbasketAccessItems.workbasketId = this.workbasket()!.workbasketId!;
     workbasketAccessItems.permRead = true;
-    const newForm = this.formBuilder.group(workbasketAccessItems, { validators: [permissionDependencyValidator] });
+    const newForm = this.formBuilder.group(workbasketAccessItems);
     newForm.controls.accessId.setValidators(Validators.required);
     this.accessItemsGroups.insert(0, newForm);
     this.accessItemsClone.update((accessItemsClone) => [workbasketAccessItems, ...accessItemsClone]);
@@ -375,7 +380,14 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     this.checkPermissionWarnings();
 
     if (this.accessItemsGroups.invalid) {
-      this.notificationsService.showError('OWNER_NOT_VALID', { owner: 'access id' });
+      const index = this.accessItemsGroups.controls.findIndex((g) => g.get('accessId')?.invalid);
+      const formValue = this.accessItemsGroups.controls[index]?.get('accessId')?.value;
+    
+      const typeAheadComponent = this.typeAheadComponents()[index];
+      const typeAheadValue = typeAheadComponent?.accessIdForm.get('accessId')?.value;
+
+      const owner = (typeof formValue === 'string' && formValue.trim() ? formValue : typeAheadValue) || 'access id';
+      this.notificationsService.showError('OWNER_NOT_VALID', { owner });
       return;
     }
 
@@ -440,8 +452,8 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
 
   private checkPermissionWarnings(): void {
     this.accessItemsGroups.controls.forEach((group) => {
-      const warnings: string[] = group.errors?.['permissionWarnings'];
-      warnings?.forEach((key) => this.notificationsService.showWarning(key));
+      const warnings = getPermissionWarnings(group as FormGroup);
+      warnings.forEach((key) => this.notificationsService.showWarning(key));
     });
   }
 
