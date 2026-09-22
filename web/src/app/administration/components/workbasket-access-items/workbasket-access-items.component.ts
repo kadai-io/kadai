@@ -134,6 +134,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
   private accessIdService = inject(AccessIdsService);
   private store = inject(Store);
   private ngxsActions$ = inject(Actions);
+  isSubmitting = false;
 
   constructor() {
     effect(() => {
@@ -374,19 +375,34 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     if (!accessItemsUrl) {
       return;
     }
-
-    if (this.accessItemsGroups.pending) {
-      await firstValueFrom(this.accessItemsGroups.statusChanges.pipe(filter((status) => status !== 'PENDING')));
-    }
-
-    this.checkPermissionWarnings();
-
-    if (this.accessItemsGroups.invalid) {
-      this.notificationsService.showError('OWNER_NOT_VALID', { owner: 'access id' });
+    if (this.isSubmitting) {
       return;
     }
+    this.isSubmitting = true;
 
-    this.onSave(accessItemsUrl, accessItems);
+    try {
+      let isValid = false;
+      const isTestingLiveForm = this.isAccessItemsMatchingForm(accessItems);
+
+      if (isTestingLiveForm) {
+        if (this.accessItemsGroups.pending) {
+          await firstValueFrom(this.accessItemsGroups.statusChanges.pipe(filter((status) => status !== 'PENDING')));
+        }
+        this.checkPermissionWarnings();
+        isValid = this.accessItemsGroups.valid;
+      } else {
+        isValid = await this.validateAccessItemsSnapshot(accessItems);
+      }
+
+      if (!isValid) {
+        this.notificationsService.showError('OWNER_NOT_VALID', { owner: 'access id' });
+        return;
+      }
+
+      this.onSave(accessItemsUrl, accessItems);
+    } finally {
+      this.isSubmitting = false;
+    }
   }
 
   onSave(accessItemsUrl: string, accessItems: WorkbasketAccessItemWrite[]) {
@@ -459,6 +475,33 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
       const warnings = getPermissionWarnings(group as FormGroup);
       warnings.forEach((key) => this.notificationsService.showWarning(key));
     });
+  }
+
+  private async validateAccessItemsSnapshot(accessItems: WorkbasketAccessItemWrite[]): Promise<boolean> {
+    const tempGroups = accessItems.map((item) => {
+      const group = this.formBuilder.group(item);
+      this.setupAccessIdValidators(group);
+      return group;
+    });
+
+    const tempFormArray = this.formBuilder.array(tempGroups);
+    tempGroups.forEach((group) => {
+      const warnings = getPermissionWarnings(group);
+      warnings.forEach((key) => this.notificationsService.showWarning(key));
+    });
+
+    if (tempFormArray.pending) {
+      await firstValueFrom(tempFormArray.statusChanges.pipe(filter((status) => status !== 'PENDING')));
+    }
+    return tempFormArray.valid;
+  }
+
+  private isAccessItemsMatchingForm(accessItems: WorkbasketAccessItemWrite[]): boolean {
+    const liveItems = this.snapshotAccessItems();
+    if (liveItems.length !== accessItems.length) {
+      return false;
+    }
+    return liveItems.every((item, index) => item.accessId === accessItems[index]?.accessId);
   }
 
   getAccessItemCustomProperty(customNumber: number): `permCustom${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12}` {

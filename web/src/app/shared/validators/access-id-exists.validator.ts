@@ -1,6 +1,6 @@
 import { AsyncValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Observable, of } from 'rxjs';
-import { map, catchError, switchMap, first } from 'rxjs/operators';
+import { map, catchError, first } from 'rxjs/operators';
 import { AccessIdsService } from 'app/shared/services/access-ids/access-ids.service';
 
 export function accessIdExistsValidator(accessIdsService: AccessIdsService): AsyncValidatorFn {
@@ -11,12 +11,8 @@ export function accessIdExistsValidator(accessIdsService: AccessIdsService): Asy
 
     const value = typeof control.value === 'string' ? control.value : control.value.accessId;
 
-    return of(value).pipe(
-      switchMap((searchVal) => accessIdsService.searchForAccessId(searchVal)),
-      map((items) => {
-        const isValid = items?.some((item) => item.accessId?.toLowerCase() === value?.toLowerCase());
-        return isValid ? null : { invalidAccessId: true };
-      }),
+    return accessIdsService.validateAccessId(value).pipe(
+      map((isValid) => (isValid ? null : { invalidAccessId: true })),
       catchError(() => of({ accessIdLookupError: true })),
       first()
     );

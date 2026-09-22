@@ -113,6 +113,7 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
   private workbasketService = inject(WorkbasketService);
   private requestInProgressService = inject(RequestInProgressService);
   private notificationService = inject(NotificationService);
+  isSubmitting = false;
 
   constructor() {
     effect(() => {
@@ -160,6 +161,10 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
   }
 
   async onSubmit() {
+    if (this.isSubmitting) {
+      return;
+    }
+
     trimForm(this.workbasketForm());
 
     const form = this.workbasketForm();
@@ -167,15 +172,29 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (form.pending) {
-      await firstValueFrom(form.statusChanges!.pipe(filter((status) => status !== 'PENDING')));
-    }
+    this.isSubmitting = true;
 
-    if (form.valid && this.isOwnerValid) {
-      this.onSave();
-    } else {
-      form.control.markAllAsTouched();
-      this.notificationService.showError('WORKBASKET_SAVE');
+    try {
+      if (form.pending) {
+        await firstValueFrom(form.statusChanges!.pipe(filter((status) => status !== 'PENDING')));
+      }
+
+      const ownerControl = form.form.controls['workbasket.owner'];
+      const isOwnerInvalid = ownerControl?.hasError('invalidAccessId') || ownerControl?.hasError('accessIdLookupError');
+
+      const isOwnerValidCombined = this.lookupField() ? this.isOwnerValid : !isOwnerInvalid;
+
+      if (form.valid && isOwnerValidCombined) {
+        this.onSave();
+      } else if (isOwnerInvalid || (this.lookupField() && !this.isOwnerValid)) {
+        form.control.markAllAsTouched();
+        this.notificationService.showError('OWNER_NOT_VALID', { owner: 'owner' });
+      } else {
+        form.control.markAllAsTouched();
+        this.notificationService.showError('WORKBASKET_SAVE');
+      }
+    } finally {
+      this.isSubmitting = false;
     }
   }
 
@@ -254,6 +273,21 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
     const wb = this.workbasket();
     if (!wb) return;
     wb.owner = owner.accessId;
+  }
+
+  get ownerErrorMessage(): string {
+    const form = this.workbasketForm()?.form;
+    if (!form) {
+      return '';
+    }
+    const ownerControl = form.controls['workbasket.owner'];
+    if (ownerControl?.hasError('required')) {
+      return '* Owner is required';
+    }
+    if (ownerControl?.hasError('invalidAccessId') || ownerControl?.hasError('accessIdLookupError')) {
+      return '* Owner is not valid';
+    }
+    return '';
   }
 
   getWorkbasketCustomProperty(custom: number): `custom${1 | 2 | 3 | 4}` {

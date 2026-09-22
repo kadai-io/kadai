@@ -106,7 +106,7 @@
                   <div class="error">{{ lengthError }}</div>
                 }
                 <kadai-shared-field-error-display [displayError]="ownerField.hasError"
-                                                  errorMessage="* Owner is required" />
+                                                  [errorMessage]="ownerErrorMessage" />
               }
               <!-- DESCRIPTION AND TYPE -->
               <div class="general__description-and-type">
