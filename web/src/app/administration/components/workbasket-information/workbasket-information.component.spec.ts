@@ -457,7 +457,7 @@ describe('WorkbasketInformationComponent', () => {
     const showErrorSpy = vi.spyOn(notificationService, 'showError');
     component.isOwnerValid = false;
     component.onSubmit();
-    expect(showErrorSpy).toHaveBeenCalledWith('WORKBASKET_SAVE');
+    expect(showErrorSpy).toHaveBeenCalledWith('OWNER_NOT_VALID', { owner: 'owner' });
   });
 
   it('should not dispatch removeDistributionTargets when workbasket has no _links', () => {

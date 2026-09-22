@@ -75,6 +75,7 @@ describe('WorkbasketAccessItemsComponent', () => {
 
   afterEach(async () => {
     fixture.componentRef.setInput('workbasket', { ...selectedWorkbasketMock });
+    vi.useRealTimers();
   });
 
   it('should create component', () => {
@@ -244,11 +245,14 @@ describe('WorkbasketAccessItemsComponent', () => {
   });
 
   it('should call onSave when the form is valid and submitted', async () => {
+    vi.useFakeTimers();
     const accessIdsService = TestBed.inject(AccessIdsService);
     const onSaveSpy = vi.spyOn(component, 'onSave');
-    vi.spyOn(accessIdsService, 'searchForAccessId').mockImplementation((query) =>
-      of([{ accessId: (query as string) || 'user-b-1', name: 'User B 1' }])
-    );
+
+    const validateSpy = vi.spyOn(accessIdsService, 'validateAccessId').mockReturnValue(of(true));
+    if (!validateSpy.mock) {
+      vi.spyOn(accessIdsService, 'searchForAccessId').mockReturnValue(of([{ accessId: 'user-b-1', name: 'User B 1' }]));
+    }
 
     component.setAccessItemsGroups(component.accessItemsRepresentation.accessItems);
     component.accessItemsGroups.controls.forEach((group) => {
@@ -256,16 +260,25 @@ describe('WorkbasketAccessItemsComponent', () => {
     });
 
     fixture.detectChanges();
+    vi.advanceTimersByTime(500);
     await fixture.whenStable();
-    await component.onSubmit();
+
+    const submitPromise = component.onSubmit();
+    vi.advanceTimersByTime(500);
+    await submitPromise;
+
     expect(onSaveSpy).toHaveBeenCalled();
   });
 
   it('should not call onSave and show error notification when form is invalid', async () => {
+    vi.useFakeTimers();
     const notificationService = TestBed.inject(NotificationService);
     const accessIdsService = TestBed.inject(AccessIdsService);
 
-    vi.spyOn(accessIdsService, 'searchForAccessId').mockReturnValue(of([]));
+    const validateSpy = vi.spyOn(accessIdsService, 'validateAccessId').mockReturnValue(of(false));
+    if (!validateSpy.mock) {
+      vi.spyOn(accessIdsService, 'searchForAccessId').mockReturnValue(of([]));
+    }
 
     fixture.detectChanges();
     const onSaveSpy = vi.spyOn(component, 'onSave');
@@ -282,21 +295,30 @@ describe('WorkbasketAccessItemsComponent', () => {
     accessIdControl?.updateValueAndValidity();
 
     fixture.detectChanges();
+    vi.advanceTimersByTime(500);
     await fixture.whenStable();
-    await component.onSubmit();
+
+    const submitPromise = component.onSubmit();
+    vi.advanceTimersByTime(500);
+    await submitPromise;
 
     expect(notificationSpy).toHaveBeenCalledWith('OWNER_NOT_VALID', { owner: 'access id' });
     expect(onSaveSpy).not.toHaveBeenCalled();
   });
 
   it('should save copied access items when the target access items are submitted', async () => {
+    vi.useFakeTimers();
     const accessIdsService = TestBed.inject(AccessIdsService);
 
-    vi.spyOn(accessIdsService, 'searchForAccessId').mockImplementation((query) => {
-      return of([{ accessId: query, name: query }]);
-    });
+    const validateSpy = vi.spyOn(accessIdsService, 'validateAccessId').mockReturnValue(of(true));
+    if (!validateSpy.mock) {
+      vi.spyOn(accessIdsService, 'searchForAccessId').mockImplementation((query: any) =>
+        of([{ accessId: query, name: query }])
+      );
+    }
 
     fixture.detectChanges();
+    vi.advanceTimersByTime(500);
     await fixture.whenStable();
 
     const sourceAccessItems = component.cloneAccessItems();
@@ -307,7 +329,9 @@ describe('WorkbasketAccessItemsComponent', () => {
     let updateAction: UpdateWorkbasketAccessItems | undefined;
     actions$.pipe(ofActionDispatched(UpdateWorkbasketAccessItems)).subscribe((action) => (updateAction = action));
 
-    await component.onSubmit(targetAccessItems, targetAccessItemsUrl);
+    const submitPromise = component.onSubmit(targetAccessItems, targetAccessItemsUrl);
+    vi.advanceTimersByTime(500);
+    await submitPromise;
 
     expect(updateAction).toBeDefined();
     expect(updateAction!.url).toBe(targetAccessItemsUrl);
