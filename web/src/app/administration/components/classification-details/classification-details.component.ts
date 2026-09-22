@@ -154,7 +154,7 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
       this.onSave();
     } else {
       form.control.markAllAsTouched();
-      this.notificationsService.showError('CLASSIFICATION_SAVE');
+      this.notificationsService.showError('EMPTY_FIELDS');
     }
   }
 

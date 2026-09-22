@@ -20,7 +20,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketAccessItemsComponent } from './workbasket-access-items.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import {
@@ -220,6 +220,32 @@ describe('WorkbasketAccessItemsComponent', () => {
       })
     );
     expect(sourceAccessItems).toEqual(originalSourceAccessItems);
+  });
+
+  it('should save the updated form values if user modifies input while async validation is pending', async () => {
+    const accessIdSubject = new Subject<boolean>();
+    const accessIdsService = TestBed.inject(AccessIdsService);
+
+    vi.spyOn(accessIdsService, 'validateAccessId').mockReturnValue(accessIdSubject);
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+    component.setAccessItemsGroups(component.accessItemsRepresentation.accessItems);
+    fixture.detectChanges();
+
+    const inputControl = component.accessItemsGroups.at(0).get('accessId');
+    inputControl?.setValue('USER_OLD');
+    const submitPromise = component.onSubmit();
+    inputControl?.setValue('USER_NEW');
+
+    accessIdSubject.next(true);
+    accessIdSubject.complete();
+    await submitPromise;
+
+    expect(dispatchSpy).toHaveBeenLastCalledWith(
+      new UpdateWorkbasketAccessItems(
+        expect.any(String),
+        expect.arrayContaining([expect.objectContaining({ accessId: 'USER_NEW' })])
+      )
+    );
   });
 
   it('should add index to selectedRows when selectRow is called with checked true', () => {

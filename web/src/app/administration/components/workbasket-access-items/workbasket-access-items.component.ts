@@ -106,7 +106,6 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
   expanded = input<boolean>();
   accessItemsValidityChanged = output<boolean>();
   inputs = viewChildren<ElementRef>('htmlInputElement');
-  typeAheadComponents = viewChildren(TypeAheadComponent);
   selectedRows: number[] = [];
   workbasketClone?: Workbasket;
   customFields$!: Observable<CustomField[]>;
@@ -369,37 +368,25 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
   }
 
   async onSubmit(
-    accessItems: WorkbasketAccessItemWrite[] = this.snapshotAccessItems(),
+    accessItems?: WorkbasketAccessItemWrite[],
     accessItemsUrl: string | undefined = this.accessItemsRepresentation?._links?.self?.href
   ) {
-    if (!accessItemsUrl) {
-      return;
-    }
-    if (this.isSubmitting) {
+    if (!accessItemsUrl || this.isSubmitting) {
       return;
     }
     this.isSubmitting = true;
 
     try {
-      let isValid = false;
-      const isTestingLiveForm = this.isAccessItemsMatchingForm(accessItems);
-
-      if (isTestingLiveForm) {
-        if (this.accessItemsGroups.pending) {
-          await firstValueFrom(this.accessItemsGroups.statusChanges.pipe(filter((status) => status !== 'PENDING')));
-        }
-        this.checkPermissionWarnings();
-        isValid = this.accessItemsGroups.valid;
-      } else {
-        isValid = await this.validateAccessItemsSnapshot(accessItems);
-      }
-
+      let currentAccessItems = accessItems ?? this.snapshotAccessItems();
+      const isValid = await this.validateAccessItemsSnapshot(currentAccessItems);
       if (!isValid) {
         this.notificationsService.showError('OWNER_NOT_VALID', { owner: 'access id' });
         return;
       }
-
-      this.onSave(accessItemsUrl, accessItems);
+      if (!accessItems) {
+        currentAccessItems = this.snapshotAccessItems();
+      }
+      this.onSave(accessItemsUrl, currentAccessItems);
     } finally {
       this.isSubmitting = false;
     }
@@ -470,13 +457,6 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     }
   }
 
-  private checkPermissionWarnings(): void {
-    this.accessItemsGroups.controls.forEach((group) => {
-      const warnings = getPermissionWarnings(group as FormGroup);
-      warnings.forEach((key) => this.notificationsService.showWarning(key));
-    });
-  }
-
   private async validateAccessItemsSnapshot(accessItems: WorkbasketAccessItemWrite[]): Promise<boolean> {
     const tempGroups = accessItems.map((item) => {
       const group = this.formBuilder.group(item);
@@ -490,18 +470,11 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
       warnings.forEach((key) => this.notificationsService.showWarning(key));
     });
 
+    tempFormArray.updateValueAndValidity();
     if (tempFormArray.pending) {
       await firstValueFrom(tempFormArray.statusChanges.pipe(filter((status) => status !== 'PENDING')));
     }
     return tempFormArray.valid;
-  }
-
-  private isAccessItemsMatchingForm(accessItems: WorkbasketAccessItemWrite[]): boolean {
-    const liveItems = this.snapshotAccessItems();
-    if (liveItems.length !== accessItems.length) {
-      return false;
-    }
-    return liveItems.every((item, index) => item.accessId === accessItems[index]?.accessId);
   }
 
   getAccessItemCustomProperty(customNumber: number): `permCustom${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12}` {
@@ -512,16 +485,12 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     if (value.target.checked) {
       this.selectedRows.push(index);
     } else {
-      this.selectedRows = this.selectedRows.filter(function (number) {
-        return number != index;
-      });
+      this.selectedRows = this.selectedRows.filter((number) => number != index);
     }
   }
 
   deleteAccessItems() {
-    this.selectedRows.sort(function (a, b) {
-      return b - a;
-    });
+    this.selectedRows.sort((a, b) => b - a);
     this.selectedRows.forEach((element) => {
       this.accessItemsGroups.removeAt(element);
       this.accessItemsClone.update((accessItemsClone) => accessItemsClone.filter((_, index) => index !== element));
