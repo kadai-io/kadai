@@ -380,11 +380,9 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
       let currentAccessItems = accessItems ?? this.snapshotAccessItems();
       const isValid = await this.validateAccessItemsSnapshot(currentAccessItems);
       if (!isValid) {
+        this.AccessItemsForm.markAllAsTouched();
         this.notificationsService.showError('OWNER_NOT_VALID', { owner: 'access id' });
         return;
-      }
-      if (!accessItems) {
-        currentAccessItems = this.snapshotAccessItems();
       }
       this.onSave(accessItemsUrl, currentAccessItems);
     } finally {

@@ -222,30 +222,29 @@ describe('WorkbasketAccessItemsComponent', () => {
     expect(sourceAccessItems).toEqual(originalSourceAccessItems);
   });
 
-  it('should save the updated form values if user modifies input while async validation is pending', async () => {
-    const accessIdSubject = new Subject<boolean>();
+  it('should save the snapshot that was validated, even if form changes during validation', async () => {
+    vi.useFakeTimers();
     const accessIdsService = TestBed.inject(AccessIdsService);
+    const onSaveSpy = vi.spyOn(component, 'onSave');
 
-    vi.spyOn(accessIdsService, 'validateAccessId').mockReturnValue(accessIdSubject);
-    const dispatchSpy = vi.spyOn(store, 'dispatch');
-    component.setAccessItemsGroups(component.accessItemsRepresentation.accessItems);
+    const validationSubject = new Subject<boolean>();
+    vi.spyOn(accessIdsService, 'validateAccessId').mockReturnValue(validationSubject.asObservable());
     fixture.detectChanges();
 
-    const inputControl = component.accessItemsGroups.at(0).get('accessId');
-    inputControl?.setValue('USER_OLD');
-    const submitPromise = component.onSubmit();
-    inputControl?.setValue('USER_NEW');
+    const submitPromise = component.onSubmit(undefined, 'https://link.mock');
+    component.accessItemsGroups.controls[0].get('accessId')?.setValue('USER_MODIFIED');
+    fixture.detectChanges();
 
-    accessIdSubject.next(true);
-    accessIdSubject.complete();
+    validationSubject.next(true);
+    validationSubject.complete();
+
+    vi.advanceTimersByTime(500);
     await submitPromise;
 
-    expect(dispatchSpy).toHaveBeenLastCalledWith(
-      new UpdateWorkbasketAccessItems(
-        expect.any(String),
-        expect.arrayContaining([expect.objectContaining({ accessId: 'USER_NEW' })])
-      )
-    );
+    expect(onSaveSpy).toHaveBeenCalledWith('https://link.mock', [
+      expect.objectContaining({ accessId: 'user-b-0' }),
+      expect.objectContaining({ accessId: 'user-b-1' })
+    ]);
   });
 
   it('should add index to selectedRows when selectRow is called with checked true', () => {
