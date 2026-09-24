@@ -40,12 +40,10 @@ describe('FieldErrorDisplayComponent', () => {
     expect(component).toBeTruthy();
     expect(component.displayError()).toBeUndefined();
     expect(component.errorMessage()).toBeUndefined();
-    expect(component.validationTrigger()).toBeUndefined();
   });
 
   it('should accept displayError input set to true', () => {
     fixture.componentRef.setInput('displayError', true);
-    fixture.componentRef.setInput('validationTrigger', false);
     fixture.detectChanges();
     expect(component.displayError()).toBe(true);
   });
@@ -62,21 +60,12 @@ describe('FieldErrorDisplayComponent', () => {
     expect(component.errorMessage()).toBe('Field is required');
   });
 
-  it('should accept validationTrigger input', () => {
-    fixture.componentRef.setInput('validationTrigger', true);
-    fixture.componentRef.setInput('displayError', false);
-    fixture.detectChanges();
-    expect(component.validationTrigger()).toBe(true);
-  });
-
   it('should hold all three input values simultaneously when displayError is true', () => {
     fixture.componentRef.setInput('displayError', true);
     fixture.componentRef.setInput('errorMessage', 'This field is required');
-    fixture.componentRef.setInput('validationTrigger', false);
     fixture.detectChanges();
 
     expect(component.displayError()).toBe(true);
     expect(component.errorMessage()).toBe('This field is required');
-    expect(component.validationTrigger()).toBe(false);
   });
 });

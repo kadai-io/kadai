@@ -40,7 +40,6 @@ import { TaskStatusDetailsComponent } from '../task-status-details/task-status-d
 import { TaskCustomFieldsComponent } from '../task-custom-fields/task-custom-fields.component';
 import { TaskAttributeValueComponent } from '../task-attribute-value/task-attribute-value.component';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
-import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
 import { By } from '@angular/platform-browser';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
@@ -901,15 +900,6 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
         {
           provide: ClassificationsService,
           useValue: { getClassifications: vi.fn().mockReturnValue(of({ classifications: [] })) }
-        },
-        {
-          provide: FormsValidatorService,
-          useValue: {
-            inputOverflowObservable: EMPTY,
-            validateInputOverflow: vi.fn(),
-            isFieldValid: vi.fn().mockReturnValue(true),
-            validateFormInformation: vi.fn().mockResolvedValue(true)
-          }
         },
         provideNoopAnimations()
       ]

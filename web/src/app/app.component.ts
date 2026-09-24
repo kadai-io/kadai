@@ -19,7 +19,6 @@
 import { Component, HostListener, inject, OnDestroy, OnInit, viewChild } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Subject } from 'rxjs';
-import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
 import { SidenavService } from './shared/services/sidenav/sidenav.service';
 import { RequestInProgressService } from './shared/services/request-in-progress/request-in-progress.service';
 import { OrientationService } from './shared/services/orientation/orientation.service';
@@ -69,7 +68,6 @@ export class AppComponent implements OnInit, OnDestroy {
   public sidenav = viewChild<MatSidenav>('sidenav');
   private router = inject(Router);
   private orientationService = inject(OrientationService);
-  private formsValidatorService = inject(FormsValidatorService);
   private sidenavService = inject(SidenavService);
   private kadaiEngineService = inject(KadaiEngineService);
   private selectedRouteService = inject(SelectedRouteService);
@@ -84,7 +82,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.router.events.pipe(takeUntil(this.destroy$)).subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.selectedRouteService.selectRoute(event);
-        this.formsValidatorService.formSubmitAttempt = false;
       }
     });
   }
