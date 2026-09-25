@@ -26,8 +26,8 @@ import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
-import io.kadai.common.internal.JobServiceImpl;
 import io.kadai.common.internal.jobs.AbstractKadaiJob;
+import io.kadai.common.internal.jobs.JobLockGuard;
 import io.kadai.common.internal.jobs.JobTransactionPolicy;
 import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import io.kadai.common.internal.util.CheckedSupplier;
@@ -50,6 +50,7 @@ public class TaskCleanupJob extends AbstractKadaiJob {
   private final Map<String, Duration> minimumAgeByDomain;
   private final int batchSize;
   private final boolean allCompletedSameParentBusiness;
+  private final JobLockGuard lockGuard;
 
   public TaskCleanupJob(
       KadaiEngine kadaiEngine, KadaiTransactionProvider txProvider, ScheduledJob scheduledJob) {
@@ -59,6 +60,12 @@ public class TaskCleanupJob extends AbstractKadaiJob {
     batchSize = kadaiEngine.getConfiguration().getTaskCleanupJobBatchSize();
     allCompletedSameParentBusiness =
         kadaiEngine.getConfiguration().isTaskCleanupJobAllCompletedSameParentBusiness();
+    lockGuard =
+        JobLockGuard.forScheduledJob(
+            kadaiEngine,
+            scheduledJob,
+            kadaiEngine.getConfiguration().getTaskCleanupJobLockExpirationPeriod(),
+            "Task cleanup job");
   }
 
   public static Duration getLockExpirationPeriod(KadaiConfiguration kadaiConfiguration) {
@@ -158,7 +165,7 @@ public class TaskCleanupJob extends AbstractKadaiJob {
     return KadaiTransactionProvider.executeInTransactionIfPossible(
         txProvider,
         () -> {
-          renewLock();
+          lockGuard.renewOrThrow();
           return getTaskIdsEligibleForCleanup(defaultCompletedBefore, completedBeforeByDomain);
         });
   }
@@ -170,27 +177,12 @@ public class TaskCleanupJob extends AbstractKadaiJob {
           CheckedSupplier.rethrowing(
               () -> {
                 int deletedTasks = deleteTasks(tasksToBeDeleted);
-                renewLock();
+                lockGuard.renewOrThrow();
                 return deletedTasks;
               }));
     } catch (Exception ex) {
       LOGGER.warn("Could not delete tasks.", ex);
       return 0;
-    }
-  }
-
-  private void renewLock() {
-    if (scheduledJob == null) {
-      return;
-    }
-    boolean lockRenewed =
-        ((JobServiceImpl) kadaiEngineImpl.getJobService())
-            .renewLock(
-                scheduledJob,
-                kadaiEngineImpl.getConfiguration().getTaskCleanupJobLockExpirationPeriod());
-    if (!lockRenewed) {
-      throw new SystemException(
-          "Task cleanup job lock was lost. Stopping cleanup to avoid concurrent processing.");
     }
   }
 

@@ -20,7 +20,9 @@ package io.kadai.common.internal.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -59,5 +61,11 @@ public class CollectionUtil {
     r.addAll(a);
     r.addAll(b);
     return r;
+  }
+
+  public static <T> Set<T> difference(Set<T> left, Set<T> right) {
+    Set<T> result = new HashSet<>(left);
+    result.removeAll(right);
+    return result;
   }
 }
