@@ -16,55 +16,39 @@
  *
  */
 
-import { Settings, SettingTypes } from '../../models/settings';
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
-export const validateSettings = (settings: Settings): string[] => {
-  const invalidMembers = [];
+export function jsonValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    if (!control.value) return null;
+    try {
+      JSON.parse(control.value);
+      return null;
+    } catch {
+      return { invalidJson: true };
+    }
+  };
+}
 
-  for (let group of settings.schema) {
-    for (let member of group.members) {
-      const value = settings[member.key];
+export function intervalValidator(minBound?: number, maxBound?: number): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const lower = control.get('lower')?.value;
+    const upper = control.get('upper')?.value;
 
-      if (member.type == SettingTypes.Text || member.type == SettingTypes.Interval) {
-        let compareWithMin;
-        let compareWithMax;
-        switch (member.type) {
-          case SettingTypes.Text:
-            compareWithMin = value.length;
-            compareWithMax = value.length;
-            break;
-          case SettingTypes.Interval:
-            compareWithMin = value[0];
-            compareWithMax = value[1];
-            break;
-        }
+    const errors: ValidationErrors = {};
 
-        let isValid = true;
-        if ((member.min || member.min == 0) && member.max) {
-          isValid = compareWithMin >= member.min && compareWithMax <= member.max;
-        } else if (member.min || member.min == 0) {
-          isValid = compareWithMin >= member.min;
-        } else if (member.max) {
-          isValid = compareWithMax <= member.max;
-        }
-
-        if (!isValid) {
-          invalidMembers.push(member.key);
-        }
-
-        if (member.type == SettingTypes.Interval && compareWithMin > compareWithMax) {
-          invalidMembers.push(member.key);
-        }
-      }
-
-      if (member.type == SettingTypes.Json) {
-        try {
-          JSON.parse(value);
-        } catch {
-          invalidMembers.push(member.key);
-        }
+    if (lower !== null && lower !== undefined && upper !== null && upper !== undefined) {
+      if (lower > upper) {
+        errors.invalidOrder = true;
       }
     }
-  }
-  return invalidMembers;
-};
+    if (minBound !== undefined && (lower < minBound || upper < minBound)) {
+      errors.belowMin = true;
+    }
+    if (maxBound !== undefined && (lower > maxBound || upper > maxBound)) {
+      errors.exceedsMax = true;
+    }
+
+    return Object.keys(errors).length > 0 ? errors : null;
+  };
+}
