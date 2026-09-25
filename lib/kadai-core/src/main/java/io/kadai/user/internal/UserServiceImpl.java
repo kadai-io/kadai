@@ -31,13 +31,16 @@ import io.kadai.user.api.UserService;
 import io.kadai.user.api.exceptions.UserAlreadyExistException;
 import io.kadai.user.api.exceptions.UserNotFoundException;
 import io.kadai.user.api.models.User;
+import io.kadai.user.internal.models.UserAttributeRow;
 import io.kadai.user.internal.models.UserImpl;
 import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.WorkbasketQueryColumnName;
 import io.kadai.workbasket.api.WorkbasketService;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.ibatis.exceptions.PersistenceException;
@@ -46,6 +49,9 @@ import org.slf4j.LoggerFactory;
 
 public class UserServiceImpl implements UserService {
   private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
+  // Keep enrichment statements below database bind-parameter limits.
+  // Broader dynamic-SQL batching is tracked in #1206.
+  private static final int USER_ENRICHMENT_BATCH_SIZE = 10_000;
   private final InternalKadaiEngine internalKadaiEngine;
   private final UserMapper userMapper;
   private final WorkbasketService workbasketService;
@@ -94,9 +100,12 @@ public class UserServiceImpl implements UserService {
         userIds.stream().map(String::toLowerCase).collect(Collectors.toSet());
 
     List<UserImpl> users =
-        internalKadaiEngine.executeInDatabaseConnection(() -> userMapper.findByIds(finalUserIds));
-
-    users.forEach(user -> user.setDomains(determineDomains(user)));
+        internalKadaiEngine.executeInDatabaseConnection(
+            () -> {
+              List<UserImpl> foundUsers = userMapper.findByIds(finalUserIds);
+              enrichUsers(foundUsers);
+              return foundUsers;
+            });
 
     return users.stream().map(User.class::cast).toList();
   }
@@ -182,6 +191,56 @@ public class UserServiceImpl implements UserService {
           userMapper.deleteAllGroups();
           userMapper.deleteAllPermissions();
         });
+  }
+
+  void enrichUsers(List<UserImpl> users) {
+    if (users == null || users.isEmpty()) {
+      return;
+    }
+
+    List<String> userIds = users.stream().map(UserImpl::getId).distinct().toList();
+
+    Map<String, Set<String>> groupsByUserId = new HashMap<>();
+    Map<String, Set<String>> permissionsByUserId = new HashMap<>();
+    Map<String, Set<String>> domainsByUserId = new HashMap<>();
+
+    boolean resolveDomains =
+        minimalWorkbasketPermissions != null && !minimalWorkbasketPermissions.isEmpty();
+
+    for (int fromIndex = 0;
+        fromIndex < userIds.size();
+        fromIndex += USER_ENRICHMENT_BATCH_SIZE) {
+      int toIndex = Math.min(fromIndex + USER_ENRICHMENT_BATCH_SIZE, userIds.size());
+      Set<String> batchUserIds = new HashSet<>(userIds.subList(fromIndex, toIndex));
+
+      addUserAttributes(groupsByUserId, userMapper.findGroupsByIds(batchUserIds));
+      addUserAttributes(permissionsByUserId, userMapper.findPermissionsByIds(batchUserIds));
+
+      if (resolveDomains) {
+        addUserAttributes(
+            domainsByUserId,
+            userMapper.findDomainsByIds(batchUserIds, minimalWorkbasketPermissions));
+      }
+    }
+
+    for (UserImpl user : users) {
+      user.setGroups(
+          new HashSet<>(groupsByUserId.getOrDefault(user.getId(), Collections.emptySet())));
+      user.setPermissions(
+          new HashSet<>(
+              permissionsByUserId.getOrDefault(user.getId(), Collections.emptySet())));
+      user.setDomains(
+          new HashSet<>(domainsByUserId.getOrDefault(user.getId(), Collections.emptySet())));
+    }
+  }
+
+  private static void addUserAttributes(
+      Map<String, Set<String>> attributesByUserId, List<UserAttributeRow> rows) {
+    for (UserAttributeRow row : rows) {
+      attributesByUserId
+          .computeIfAbsent(row.getUserId(), ignored -> new HashSet<>())
+          .add(row.getAttributeValue());
+    }
   }
 
   Set<String> determineDomains(User user) {

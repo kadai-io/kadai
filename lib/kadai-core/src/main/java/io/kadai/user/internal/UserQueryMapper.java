@@ -20,7 +20,6 @@ package io.kadai.user.internal;
 
 import io.kadai.user.internal.models.UserImpl;
 import java.util.List;
-import org.apache.ibatis.annotations.Many;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.SelectProvider;
 
@@ -31,14 +30,6 @@ public interface UserQueryMapper {
 
   @SelectProvider(type = UserQuerySqlProvider.class, method = "queryUsers")
   @Result(property = "id", column = "USER_ID")
-  @Result(
-      property = "groups",
-      column = "USER_ID",
-      many = @Many(select = "io.kadai.user.internal.UserMapper.findGroupsById"))
-  @Result(
-      property = "permissions",
-      column = "USER_ID",
-      many = @Many(select = "io.kadai.user.internal.UserMapper.findPermissionsById"))
   @Result(property = "firstName", column = "FIRST_NAME")
   @Result(property = "lastName", column = "LAST_NAME")
   @Result(property = "fullName", column = "FULL_NAME")
