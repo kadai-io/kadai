@@ -20,13 +20,18 @@
 
   <!-- BUTTONS -->
   <div class="settings__buttons">
-    <button (click)="onSave()" class="settings__button--primary" mat-button
+    <button (click)="onSave()" 
+            [disabled]="settingsForm.invalid" 
+            class="settings__button--primary" 
+            mat-button
             matTooltip="Save settings">
       Save
       <mat-icon class="md-20">save</mat-icon>
     </button>
 
-    <button (click)="onReset()" class="settings__button--secondary" mat-stroked-button
+    <button (click)="onReset()" 
+            class="settings__button--secondary" 
+            mat-stroked-button
             matTooltip="Revert changes">
       Undo changes
       <mat-icon class="settings__icon md-20">restore</mat-icon>
@@ -35,72 +40,116 @@
 
   <div class="settings__content">
     @if (settings(); as settings) {
-      @for (group of settings.schema; track group) {
-        <div>
-          <h4 class="settings__domain-name"> {{ group.displayName }} </h4>
-          @for (member of group.members; track member) {
+      @if (settingsForm) {
+        <form [formGroup]="settingsForm">
+          @for (group of settings.schema; track group) {
             <div>
-              <!-- STRING -->
-              @if (member.type == settingTypes.Text) {
-                <div class="settings__grid">
-                  <div class="settings__text"> {{ member.displayName }}</div>
-                  <mat-form-field appearance="outline" class="settings__grid--two-columns">
-                    <mat-label class="{{member.key}}">{{ member.displayName }}</mat-label>
-                    <input [(ngModel)]="settings[member.key]" matInput maxlength="{{member.max}}"
-                           minlength="{{member.min}}"
-                           placeholder="{{member.displayName}}"
-                           type="text">
-                  </mat-form-field>
+              <h4 class="settings__domain-name"> {{ group.displayName }} </h4>
+              @for (member of group.members; track member) {
+                <div>
+                  
+                  <!-- STRING -->
+                  @if (member.type == settingTypes.Text) {
+                    <div class="settings__grid">
+                      <div class="settings__text"> {{ member.displayName }}</div>
+                      <mat-form-field appearance="outline" class="settings__grid--two-columns">
+                        <mat-label>{{ member.displayName }}</mat-label>
+                        <input [formControlName]="member.key"
+                               matInput
+                               placeholder="{{member.displayName}}"
+                               type="text">
+                        @if (settingsForm.get(member.key)?.hasError('minlength')) {
+                          <mat-error>
+                            Minimum length is {{ member.min }}
+                          </mat-error>
+                        }
+                        @if (settingsForm.get(member.key)?.hasError('maxlength')) {
+                          <mat-error>
+                            Maximum length is {{ member.max }}
+                          </mat-error>
+                        }
+                      </mat-form-field>
+                    </div>
+                  }
+
+                  <!-- INTERVAL -->
+                  @if (member.type == settingTypes.Interval) {
+                    <div [formGroupName]="member.key" class="settings__grid">
+                      <div class="settings__text">{{ member.displayName }}</div>
+                      
+                      <mat-form-field appearance="outline">
+                        <mat-label>Lower boundary</mat-label>
+                        <input formControlName="lower" 
+                               matInput 
+                               placeholder="Lower boundary" 
+                               type="number">
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline">
+                        <mat-label>Upper boundary</mat-label>
+                        <input formControlName="upper" 
+                               matInput 
+                               placeholder="Upper boundary" 
+                               type="number">
+                      </mat-form-field>
+
+                      @if (settingsForm.get(member.key)?.errors; as errors) {
+                        @if (errors['invalidOrder']) {
+                          <mat-error>
+                            Lower boundary must be less than or equal to upper boundary
+                          </mat-error>
+                        }
+                        @if (errors['belowMin']) {
+                          <mat-error>
+                            Values must be at least {{ member.min }}
+                          </mat-error>
+                        }
+                        @if (errors['exceedsMax']) {
+                          <mat-error>
+                            Values must not exceed {{ member.max }}
+                          </mat-error>
+                        }
+                      }
+                    </div>
+                  }
+
+                  <!-- COLOR -->
+                  @if (member.type == settingTypes.Color) {
+                    <div class="settings__grid settings__color">
+                      <div class="settings__text">{{ member.displayName }}</div>
+                      <input [formControlName]="member.key" 
+                             class="settings__colors--input" 
+                             matInput 
+                             type="color">
+                    </div>
+                  }
+
+                  <!-- JSON -->
+                  @if (member.type == settingTypes.Json) {
+                    <div class="settings__grid">
+                      <div class="settings__text">{{ member.displayName }}</div>
+                      <mat-form-field appearance="outline" class="settings__grid--two-columns">
+                        <mat-label>{{ member.displayName }}</mat-label>
+                        <textarea [formControlName]="member.key" 
+                                  cdkAutosizeMaxRows="10"
+                                  cdkAutosizeMinRows="1"
+                                  cdkTextareaAutosize
+                                  matInput
+                                  placeholder="{{member.displayName}}"></textarea>
+                        @if (settingsForm.get(member.key)?.hasError('invalidJson')) {
+                          <mat-error>
+                            Invalid JSON format
+                          </mat-error>
+                        }
+                      </mat-form-field>
+                    </div>
+                  }
                 </div>
               }
-              <!-- INTERVAL -->
-              @if (member.type == settingTypes.Interval) {
-                <div class="settings__grid">
-                  <div class="settings__text">{{ member.displayName }}</div>
-                  <mat-form-field appearance="outline">
-                    <mat-label class="{{member.key}}">Lower boundary</mat-label>
-                    <input [(ngModel)]="settings[member.key][0]" matInput max="{{member.max}}"
-                           min="{{member.min}}"
-                           placeholder="Lower boundary" type="number">
-                  </mat-form-field>
-                  <mat-form-field appearance="outline">
-                    <mat-label class="{{member}}">Upper boundary</mat-label>
-                    <input [(ngModel)]="settings[member.key][1]" matInput max="{{member.max}}"
-                           min="{{member.min}}"
-                           placeholder="Upper boundary" type="number">
-                  </mat-form-field>
-                </div>
-              }
-              <!-- COLOR -->
-              @if (member.type == settingTypes.Color) {
-                <div
-                  class="settings__grid settings__color">
-                  <div class="settings__text">{{ member.displayName }}</div>
-                  <input (change)="onColorChange(member.key)" class="settings__colors--input"
-                         id="{{member.key}}" matInput
-                         type="color" value="{{settings[member.key]}}">
-                </div>
-              }
-              <!-- JSON -->
-              @if (member.type == settingTypes.Json) {
-                <div class="settings__grid">
-                  <div class="settings__text">{{ member.displayName }}</div>
-                  <mat-form-field appearance="outline" class="settings__grid--two-columns">
-                    <mat-label class="{{member.key}}">
-                      {{ member.displayName }}
-                    </mat-label>
-                    <textarea [(ngModel)]="settings[member.key]" cdkAutosizeMaxRows="10"
-                              cdkAutosizeMinRows="1"
-                              cdkTextareaAutosize
-                              matInput
-                              placeholder="{{member.displayName}}"></textarea>
-                  </mat-form-field>
-                </div>
-              }
+              <div class="settings__spacer"></div>
             </div>
           }
-          <div class="settings__spacer"></div>
-        </div>
+        </form>
       }
     }
   </div>
