@@ -179,7 +179,7 @@ describe('Settings Validators', () => {
     it('should return null for a valid JSON array or primitive number', () => {
       const arrayControl = new FormControl('[1, 2, 3]', [jsonValidator()]);
       expect(arrayControl.errors).toBeNull();
-      
+
       const numberControl = new FormControl('123', [jsonValidator()]);
       expect(numberControl.errors).toBeNull();
     });
