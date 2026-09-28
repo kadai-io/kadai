@@ -217,4 +217,38 @@ describe('SettingsComponent', () => {
     expect(component.settingsForm.contains('customDynamicText')).toBe(true);
     expect(component.settingsForm.contains('customDynamicColor')).toBe(true);
   });
+
+  it('should render validation errors in DOM when form controls are invalid and touched', () => {
+    const jsonControl = component.settingsForm.get('filter');
+    jsonControl?.setValue('{ invalid');
+    jsonControl?.markAsTouched();
+    jsonControl?.markAsDirty();
+
+    fixture.detectChanges();
+
+    const matErrors = fixture.nativeElement.querySelectorAll('mat-error');
+    expect(matErrors.length).toBeGreaterThan(0);
+  });
+
+  it('should disable save button when form is invalid', () => {
+    const jsonControl = component.settingsForm.get('filter');
+    jsonControl?.setValue('{ invalid');
+    fixture.detectChanges();
+
+    const saveButton = fixture.nativeElement.querySelector('.settings__button--primary') as HTMLButtonElement;
+    expect(saveButton.disabled).toBe(true);
+  });
+
+  it('should handle template rendering when settings state is empty', () => {
+    store.reset({
+      ...store.snapshot(),
+      settings: {
+        settings: null
+      }
+    });
+    fixture.detectChanges();
+
+    const container = fixture.nativeElement.querySelector('.settings');
+    expect(container).toBeTruthy();
+  });
 });
