@@ -5496,7 +5496,7 @@ __metadata:
     ng2-charts: "npm:10.0.0"
     prettier: "npm:3.9.9"
     rxjs: "npm:7.8.2"
-    sass: "npm:1.104.1"
+    sass: "npm:1.105.0"
     tslib: "npm:2.8.1"
     typescript: "npm:6.0.3"
     vite: "npm:8.3.0"
@@ -7075,6 +7075,23 @@ __metadata:
   bin:
     sass: sass.js
   checksum: 10c0/d04e1898a9470a7a5052e67cbe5fc4ec342374f6d65a75eb180a5a60d0ee1af85bb2df6d877087169c4d53e358ff0864f2343fd594dc60474ce7a6467ee41961
+  languageName: node
+  linkType: hard
+
+"sass@npm:1.105.0":
+  version: 1.105.0
+  resolution: "sass@npm:1.105.0"
+  dependencies:
+    "@parcel/watcher": "npm:^2.4.1"
+    chokidar: "npm:^5.0.0"
+    immutable: "npm:^5.1.5"
+    source-map-js: "npm:>=0.6.2 <2.0.0"
+  dependenciesMeta:
+    "@parcel/watcher":
+      optional: true
+  bin:
+    sass: sass.js
+  checksum: 10c0/ddd6a8cc70d325fe7465036de32cb3506b578e131719c8bcfd4c225e051b7e8f5b231c3be450e293043876db58a247b9c354ecc1ca466a8274e2d9a8d4bc1ae1
   languageName: node
   linkType: hard
 
