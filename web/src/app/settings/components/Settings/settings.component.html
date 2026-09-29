@@ -116,7 +116,9 @@
                   <!-- COLOR -->
                   @if (member.type == settingTypes.Color) {
                     <div class="settings__grid settings__color">
-                      <div class="settings__text">{{ member.displayName }}</div>
+                      <label [for]="member.key" class="settings__text">
+                        {{ member.displayName }}
+                      </label>
                       <input [formControlName]="member.key" 
                              class="settings__colors--input" 
                              matInput 
