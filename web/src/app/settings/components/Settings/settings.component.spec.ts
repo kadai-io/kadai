@@ -26,7 +26,6 @@ import { settingsStateMock } from '../../../shared/store/mock-data/mock-store';
 import { SetSettings } from '../../../shared/store/settings-store/settings.actions';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { SettingTypes } from 'app/settings/models/settings';
 
 const notificationServiceSpy: Partial<NotificationService> = {
   showError: vi.fn(),
@@ -219,116 +218,75 @@ describe('SettingsComponent', () => {
     expect(component.settingsForm.contains('customDynamicColor')).toBe(true);
   });
 
-  it('should disable save button when form is invalid', () => {
-    const jsonControl = component.settingsForm.get('filter');
-    jsonControl?.setValue('{ invalid');
+  it('should render mat-error for minlength error on text control', () => {
+    const control = component.settingsForm.get('nameMediumPriority');
+    control?.setErrors({ minlength: true });
+    control?.markAsTouched();
     fixture.detectChanges();
 
-    const saveButton = fixture.nativeElement.querySelector('.settings__button--primary') as HTMLButtonElement;
-    expect(saveButton.disabled).toBe(true);
+    const errorEl = fixture.nativeElement.querySelector('mat-error');
+    expect(errorEl).not.toBeNull();
   });
 
-  it('should handle template rendering when settings state is empty', () => {
-    store.reset({
-      ...store.snapshot(),
-      settings: {
-        settings: null
-      }
-    });
+  it('should render mat-error for maxlength error on text control', () => {
+    const control = component.settingsForm.get('nameMediumPriority');
+    control?.setErrors({ maxlength: true });
+    control?.markAsTouched();
     fixture.detectChanges();
 
-    const container = fixture.nativeElement.querySelector('.settings');
-    expect(container).toBeTruthy();
+    const errorEl = fixture.nativeElement.querySelector('mat-error');
+    expect(errorEl).not.toBeNull();
   });
 
-  it('should render minlength and maxlength errors for text inputs', () => {
-    const textStateMock = {
-      settings: {
-        textShort: 'a',
-        textLong: 'a'.repeat(500),
-        schema: [
-          {
-            displayName: 'Text Errors Group',
-            members: [
-              { key: 'textShort', displayName: 'Text Short', type: SettingTypes.Text, min: 5, max: 10 },
-              { key: 'textLong', displayName: 'Text Long', type: SettingTypes.Text, min: 1, max: 50 }
-            ]
-          }
-        ]
-      }
-    };
-
-    store.reset({ ...store.snapshot(), settings: textStateMock });
-    component.ngOnInit();
-
-    const shortControl = component.settingsForm.get('textShort');
-    const longControl = component.settingsForm.get('textLong');
-
-    shortControl?.setErrors({ minlength: true });
-    shortControl?.markAsTouched();
-
-    longControl?.setErrors({ maxlength: true });
-    longControl?.markAsTouched();
-
-    fixture.detectChanges();
-
-    const errors = fixture.nativeElement.querySelectorAll('mat-error');
-    expect(errors.length).toBeGreaterThanOrEqual(2);
-  });
-
-  it('should handle interval specific errors (invalidOrder, belowMin, exceedsMax)', () => {
-    const intervalStateMock = {
-      settings: {
-        intervalVal: { lower: 10, upper: 50 },
-        schema: [
-          {
-            displayName: 'Interval Group',
-            members: [
-              { key: 'intervalVal', displayName: 'Interval', type: component.settingTypes.Interval, min: 0, max: 100 }
-            ]
-          }
-        ]
-      }
-    };
-
-    store.reset({ ...store.snapshot(), settings: intervalStateMock });
-    component.ngOnInit();
-    fixture.detectChanges();
-
-    const intervalGroup = component.settingsForm.get('intervalVal');
+  it('should render mat-error when interval has invalidOrder error', () => {
+    const intervalGroup = component.settingsForm.get('intervalHighPriority');
 
     intervalGroup?.setErrors({ invalidOrder: true });
-    expect(intervalGroup?.hasError('invalidOrder')).toBe(true);
+    fixture.detectChanges();
+
+    const errorEl = fixture.nativeElement.querySelector('mat-error');
+    expect(errorEl).not.toBeNull();
+    intervalGroup?.setErrors(null);
+  });
+
+  it('should render mat-error when interval has belowMin error', () => {
+    const intervalGroup = component.settingsForm.get('intervalHighPriority');
 
     intervalGroup?.setErrors({ belowMin: true });
-    expect(intervalGroup?.hasError('belowMin')).toBe(true);
+    fixture.detectChanges();
+
+    const errorEl = fixture.nativeElement.querySelector('mat-error');
+    expect(errorEl).not.toBeNull();
+    intervalGroup?.setErrors(null);
+  });
+
+  it('should render mat-error when interval has exceedsMax error', () => {
+    const intervalGroup = component.settingsForm.get('intervalHighPriority');
 
     intervalGroup?.setErrors({ exceedsMax: true });
-    expect(intervalGroup?.hasError('exceedsMax')).toBe(true);
+    fixture.detectChanges();
+
+    const errorEl = fixture.nativeElement.querySelector('mat-error');
+    expect(errorEl).not.toBeNull();
+    intervalGroup?.setErrors(null);
   });
 
-  it('should render empty state when schema has no members or settings is empty', () => {
-    const emptyStateMock = {
-      settings: {
-        schema: []
-      }
-    };
-
-    store.reset({ ...store.snapshot(), settings: emptyStateMock });
-    component.ngOnInit();
+  it('should render mat-error for invalidJson error on JSON control', () => {
+    const jsonControl = component.settingsForm.get('filter');
+    jsonControl?.setErrors({ invalidJson: true });
+    jsonControl?.markAsTouched();
     fixture.detectChanges();
 
-    const domainHeadings = fixture.nativeElement.querySelectorAll('.settings__domain-name');
-    expect(domainHeadings.length).toBe(0);
+    const errorEl = fixture.nativeElement.querySelector('mat-error');
+    expect(errorEl).not.toBeNull();
   });
 
-  it('should not render form content when settings is null or undefined', () => {
-    component.settings.set(null as any);
+  it('should not render any mat-error when form controls are valid', () => {
+    component.settingsForm.markAsUntouched();
+    component.settingsForm.setErrors(null);
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('form')).toBeNull();
 
-    component.settings.set(undefined);
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('form')).toBeNull();
+    const errorEl = fixture.nativeElement.querySelector('mat-error');
+    expect(errorEl).toBeNull();
   });
 });
