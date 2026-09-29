@@ -119,7 +119,8 @@
                       <label [for]="member.key" class="settings__text">
                         {{ member.displayName }}
                       </label>
-                      <input [formControlName]="member.key" 
+                      <input [id]="member.key"
+                             [formControlName]="member.key" 
                              class="settings__colors--input" 
                              matInput 
                              type="color">
