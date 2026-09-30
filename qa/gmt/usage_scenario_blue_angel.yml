@@ -9,6 +9,8 @@ compose-file: !include compose.yml
 services:
   app:
     # Frozen image for reproducible Blauer Engel certification measurements. Only change this manually.
+    # Available image tags: https://github.com/kadai-io/kadai/pkgs/container/kadai-gmt
+    # Pin the `sha-<commit>` tag of the build whose code should be certified.
     image: ghcr.io/kadai-io/kadai-gmt:sha-1e149da421699fdc554aaebda671df262ca5713b
   postgres:
     # Frozen for reproducible Blauer Engel certification measurements. Only change this manually.

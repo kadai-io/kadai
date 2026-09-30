@@ -19,6 +19,7 @@ GMT Documentation: <https://docs.green-coding.io>
 
 The scenarios use the moving `ghcr.io/kadai-io/kadai-gmt:latest` image by default; the certification
 scenario overrides it with a frozen `sha-<commit>` tag.
+Available application image tags are published on the [kadai-gmt package page](https://github.com/kadai-io/kadai/pkgs/container/kadai-gmt).
 
 ### Database Filling
 
