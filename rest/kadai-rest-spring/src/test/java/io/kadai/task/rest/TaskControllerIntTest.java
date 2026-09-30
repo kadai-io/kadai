@@ -3597,6 +3597,11 @@ class TaskControllerIntTest {
 
         TaskRepresentationModel allowedEdit = readTask(taskUrl);
         allowedEdit.setName("allowed REST update");
+        allowedEdit.setCreated(Instant.parse("2025-01-01T00:00:00Z"));
+        allowedEdit.setCreator("spoofed creator");
+        allowedEdit.setCreatorLongName("spoofed creator name");
+        allowedEdit.setOwnerLongName("spoofed owner name");
+        allowedEdit.setGroupByCount(42);
         TaskRepresentationModel putResponse = updateTask(taskUrl, allowedEdit);
         TaskRepresentationModel getResponse = readTask(taskUrl);
         assertThat(putResponse.getName()).isEqualTo("allowed REST update");
@@ -3606,6 +3611,11 @@ class TaskControllerIntTest {
         assertThat(putResponse.isTransferred()).isEqualTo(getResponse.isTransferred());
         assertThat(putResponse.isReopened()).isEqualTo(getResponse.isReopened());
         assertThat(putResponse.getNumberOfComments()).isEqualTo(getResponse.getNumberOfComments());
+        assertThat(putResponse.getCreated()).isEqualTo(getResponse.getCreated());
+        assertThat(putResponse.getCreator()).isEqualTo(getResponse.getCreator());
+        assertThat(putResponse.getCreatorLongName()).isEqualTo(getResponse.getCreatorLongName());
+        assertThat(putResponse.getOwnerLongName()).isEqualTo(getResponse.getOwnerLongName());
+        assertThat(putResponse.getGroupByCount()).isEqualTo(getResponse.getGroupByCount());
 
         ObjectNode omittedMetadata = objectMapper.valueToTree(readTask(taskUrl));
         omittedMetadata.remove(

@@ -702,6 +702,7 @@ public class TaskServiceImpl implements TaskService {
       }
 
       verifyServerOwnedTaskFieldsUnchanged(oldTaskImpl, newTaskImpl);
+      restoreFieldsNotUpdatedByTaskMapper(oldTaskImpl, newTaskImpl);
 
       attachmentHandler.insertAndDeleteAttachmentsOnTaskUpdate(newTaskImpl, oldTaskImpl);
       objectReferenceHandler.insertAndDeleteObjectReferencesOnTaskUpdate(newTaskImpl, oldTaskImpl);
@@ -727,11 +728,10 @@ public class TaskServiceImpl implements TaskService {
                   task,
                   ObjectAttributeChangeDetector.determineChangesInAttributes(
                       oldTaskImpl, newTaskImpl)));
-
-      return getTask(newTaskImpl.getId());
     } finally {
       kadaiEngine.returnConnection();
     }
+    return task;
   }
 
   @Override
@@ -2009,6 +2009,17 @@ public class TaskServiceImpl implements TaskService {
       throw new InvalidArgumentException(
           "Server-owned task metadata cannot be changed via update of the task");
     }
+  }
+
+  private void restoreFieldsNotUpdatedByTaskMapper(
+      TaskImpl oldTaskImpl, TaskImpl newTaskImpl) {
+    newTaskImpl.setCreated(oldTaskImpl.getCreated());
+    newTaskImpl.setCreator(oldTaskImpl.getCreator());
+    newTaskImpl.setCreatorLongName(oldTaskImpl.getCreatorLongName());
+    newTaskImpl.setOwnerLongName(oldTaskImpl.getOwnerLongName());
+    newTaskImpl.setCallbackState(oldTaskImpl.getCallbackState());
+    newTaskImpl.setNumberOfComments(oldTaskImpl.getNumberOfComments());
+    newTaskImpl.setGroupByCount(oldTaskImpl.getGroupByCount());
   }
 
   private Task claim(String taskId, boolean forceClaim)
