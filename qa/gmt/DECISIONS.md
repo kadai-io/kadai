@@ -64,8 +64,8 @@ Status: `accepted` | `proposed` | `superseded (by #N)`. Entries are append-only,
 ## Regular measurement image strategy
 - Date / related: 2026-09-30, #2259
 - Status: accepted
-- Context: The regular scenario previously used the moving `latest` tag, so a measurement for a given commit could pick up an image built from a later commit.
-- Decision: Pin a `sha-<commit>` in the regular scenario and bump it automatically via CI instead of using `latest` (approved by the maintainer).
+- Context: A measurement must use the image built from the commit that is being measured.
+- Decision: Pin a `sha-<commit>` in the regular scenario and bump it automatically via CI instead of using `latest`.
 - Consequences: Per-commit reproducibility; requires CI automation to keep the pin up to date.
 
 ## Embedded LDAP for the example application
@@ -79,12 +79,12 @@ Status: `accepted` | `proposed` | `superseded (by #N)`. Entries are append-only,
 - Date / related: 2026-09-30, #2259
 - Status: accepted
 - Context: Disjoint pools avoid cross-contamination between warm-up and measurement, but make the two phases independent instead of one continuous session.
-- Decision: Keep the disjoint pools (approved by the maintainer).
+- Decision: Keep the disjoint pools.
 - Consequences: Warm-up mutations cannot affect measured reads.
 
 ## Generator idempotency
 - Date / related: 2026-09-30, #2116
 - Status: accepted
 - Context: `POST /kadai/api/v1/gmt/tasks` is not idempotent — a second call fails on the unique external ID `ETI:000000000000`. GMT always starts a fresh database.
-- Decision: Keep relying on a fresh database; make the generator re-runnable only if repeated generation against the same database is needed (approved by the maintainer).
+- Decision: Keep relying on a fresh database; make the generator re-runnable only if repeated generation against the same database is needed.
 - Consequences: Repeated local runs must recreate the database (or drop the schema) first.
