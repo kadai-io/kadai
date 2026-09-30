@@ -12,7 +12,12 @@ services:
     # TODO(#2259): bump to the sha of the commit that contains the embedded LDAP configuration,
     # once the container workflow has published that image.
     image: ghcr.io/kadai-io/kadai-gmt:sha-d9b671575cfd55127c093a8c61a12367f433e79d
+  postgres:
+    # Frozen for reproducible Blauer Engel certification measurements. Only change this manually.
+    image: postgres:17.11
   k6:
+    # Frozen for reproducible Blauer Engel certification measurements. Only change this manually.
+    image: grafana/k6:2.3.0
     setup-commands:
       - command: k6 run /tmp/repo/qa/gmt/k6/setup_tasks.js
 
