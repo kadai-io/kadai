@@ -4,7 +4,7 @@ submit_software.py — Programmatically submit Software for measurement via the 
 
 Features:
 - List available machines
-- Submit software to /v1/software/add
+- Submit software to /v1/runs/add
 
 Env vars (optional):
   GMT_API_URL        -> base API URL will default to https://api.green-coding.io/
@@ -156,14 +156,14 @@ class APIClient:
 
     def submit_software(self, payload: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
-        Submits software to /v1/software/add
+        Submits software to /v1/runs/add
         """
         # Trim string values like your JS
         for k, v in list(payload.items()):
             if isinstance(v, str):
                 payload[k] = v.strip()
 
-        return self._request("/v1/software/add", method="POST", json_body=payload)
+        return self._request("/v1/runs/add", method="POST", json_body=payload)
 
 
 def load_token(token_flag: Optional[str]) -> Optional[str]:
