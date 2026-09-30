@@ -13,7 +13,7 @@ Status: `accepted` | `proposed` | `superseded (by #N)`. Entries are append-only,
 - Consequences: The measured subject is maintained in this repository; the external image is no longer needed.
 
 ## Embedded LDAP instead of an external LDAP container
-- Date / related: 2026-09-30, #2268
+- Date / related: 2026-09-30, #2268, #2269
 - Status: accepted
 - Context: `kadai-gmt` authenticates via LDAP but had no LDAP server configured, so API calls failed.
 - Decision: Enable Spring's embedded LDAP in `kadai-gmt` to make the image self-contained.
@@ -51,7 +51,7 @@ Status: `accepted` | `proposed` | `superseded (by #N)`. Entries are append-only,
 - Date / related: 2026-09-30, #2259
 - Status: accepted
 - Context: Measurements should be reproducible per commit; the Blauer Engel certification must additionally be decoupled from later changes.
-- Decision: Both the regular and the certification scenarios pin a `sha-<commit>` app image. The regular pin is bumped automatically by CI; the certification pin is changed manually. The certification additionally pins the postgres and k6 images.
+- Decision: Both the regular and the certification scenarios pin a `sha-<commit>` app image (not `latest`). The regular pin is bumped automatically by CI; the certification pin is changed manually. The certification additionally pins the postgres and k6 images.
 - Consequences: Per-commit reproducibility; regular runs follow new images through the CI auto-bump.
 
 ## Seed count
@@ -60,27 +60,6 @@ Status: `accepted` | `proposed` | `superseded (by #N)`. Entries are append-only,
 - Context: 100000 tasks is the realistic task count chosen for the original Blauer Engel certification.
 - Decision: Seed 100000 tasks for the standard/certification scenarios and 1000 for the quick test/debug scenario.
 - Consequences: Quick runs stay fast; representative runs use the same data volume as the original certification.
-
-## Regular measurement image strategy
-- Date / related: 2026-09-30, #2259
-- Status: accepted
-- Context: A measurement must use the image built from the commit that is being measured.
-- Decision: Pin a `sha-<commit>` in the regular scenario and bump it automatically via CI instead of using `latest`.
-- Consequences: Per-commit reproducibility; requires CI automation to keep the pin up to date.
-
-## Embedded LDAP for the example application
-- Date / related: 2026-09-30, #2268, #2269
-- Status: accepted
-- Context: The embedded LDAP server (see above) was initially only proposed as the approach for the example application.
-- Decision: Keep the embedded LDAP server; the approach was confirmed by merging #2269.
-- Consequences: The image stays self-contained; the test LDIF and plaintext credentials remain suitable for measurements only.
-
-## Disjoint warm-up/measurement pools
-- Date / related: 2026-09-30, #2259
-- Status: accepted
-- Context: Disjoint pools avoid cross-contamination between warm-up and measurement, but make the two phases independent instead of one continuous session.
-- Decision: Keep the disjoint pools.
-- Consequences: Warm-up mutations cannot affect measured reads.
 
 ## Generator idempotency
 - Date / related: 2026-09-30, #2116
