@@ -69,10 +69,10 @@ Status: `accepted` | `proposed` | `superseded (by #N)`. Entries are append-only,
 - Consequences: Per-commit reproducibility; requires CI automation to keep the pin up to date.
 
 ## Embedded LDAP for the example application
-- Date / related: 2026-09-30, #2268
-- Status: proposed
-- Context: `kadai-gmt` currently uses Spring's embedded LDAP to avoid an extra container.
-- Proposed decision: Keep the embedded LDAP server, pending confirmation that this is acceptable for the example application.
+- Date / related: 2026-09-30, #2268, #2269
+- Status: accepted
+- Context: The embedded LDAP server (see above) was initially only proposed as the approach for the example application.
+- Decision: Keep the embedded LDAP server; the approach was confirmed by merging #2269.
 - Consequences: The image stays self-contained; the test LDIF and plaintext credentials remain suitable for measurements only.
 
 ## Disjoint warm-up/measurement pools
