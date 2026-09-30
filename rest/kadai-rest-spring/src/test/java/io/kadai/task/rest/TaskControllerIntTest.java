@@ -24,6 +24,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.kadai.KadaiConfiguration;
 import io.kadai.classification.rest.models.ClassificationSummaryRepresentationModel;
 import io.kadai.common.internal.util.Pair;
@@ -100,6 +102,7 @@ class TaskControllerIntTest {
   private final RestHelper restHelper;
   private final RestClient restClient;
   @Autowired KadaiConfiguration kadaiConfiguration;
+  private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
   @Autowired
   TaskControllerIntTest(RestHelper restHelper, RestClient restClient) {
@@ -3298,6 +3301,38 @@ class TaskControllerIntTest {
       assertThat(responseDeleted.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"claimed", "completed", "numberOfComments"})
+    void should_RejectHistoricalMetadataOnTaskCreation(String field) {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS);
+      TaskRepresentationModel taskRepresentationModel = getTaskResourceSample();
+      switch (field) {
+        case "claimed" ->
+            taskRepresentationModel.setClaimed(Instant.parse("2025-01-01T00:00:00Z"));
+        case "completed" ->
+            taskRepresentationModel.setCompleted(Instant.parse("2025-01-01T00:00:00Z"));
+        case "numberOfComments" -> taskRepresentationModel.setNumberOfComments(2);
+        default -> throw new IllegalStateException("Unexpected field: " + field);
+      }
+
+      assertThatThrownBy(
+              () ->
+                  restClient
+                      .post()
+                      .uri(url)
+                      .headers(
+                          headers ->
+                              headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                      .body(taskRepresentationModel)
+                      .retrieve()
+                      .toEntity(TaskRepresentationModel.class))
+          .as("rejecting non-neutral %s on task creation", field)
+          .isInstanceOf(HttpStatusCodeException.class)
+          .extracting(HttpStatusCodeException.class::cast)
+          .extracting(HttpStatusCodeException::getStatusCode)
+          .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
     @Test
     void should_CreateTaskWithError_When_SpecifyingAttachmentWrong() {
       TaskRepresentationModel taskRepresentationModel = getTaskResourceSample();
@@ -3522,6 +3557,130 @@ class TaskControllerIntTest {
   @Nested
   @TestInstance(Lifecycle.PER_CLASS)
   class UpdateTasks {
+
+    @Test
+    void should_RejectServerMetadataChangesAndReturnAuthoritativeTaskAfterAllowedUpdate() {
+      String createUrl = restHelper.toUrl(RestEndpoints.URL_TASKS);
+      ResponseEntity<TaskRepresentationModel> createdResponse =
+          restClient
+              .post()
+              .uri(createUrl)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .body(getTaskResourceSample())
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class);
+      assertThat(createdResponse.getBody()).isNotNull();
+      String taskId = createdResponse.getBody().getTaskId();
+      String taskUrl = restHelper.toUrl(RestEndpoints.URL_TASKS_ID, taskId);
+
+      try {
+        TaskRepresentationModel claimedEdit = readTask(taskUrl);
+        claimedEdit.setClaimed(Instant.parse("2025-01-01T00:00:00Z"));
+        assertUpdateRejected(taskUrl, claimedEdit, HttpStatus.CONFLICT);
+        assertThat(readTask(taskUrl).getClaimed()).isNull();
+
+        TaskRepresentationModel completedEdit = readTask(taskUrl);
+        completedEdit.setCompleted(Instant.parse("2025-01-01T00:00:00Z"));
+        assertUpdateRejected(taskUrl, completedEdit, HttpStatus.BAD_REQUEST);
+
+        TaskRepresentationModel transferEdit = readTask(taskUrl);
+        transferEdit.setTransferred(true);
+        assertUpdateRejected(taskUrl, transferEdit, HttpStatus.BAD_REQUEST);
+
+        TaskRepresentationModel reopenEdit = readTask(taskUrl);
+        reopenEdit.setReopened(true);
+        assertUpdateRejected(taskUrl, reopenEdit, HttpStatus.BAD_REQUEST);
+
+        TaskRepresentationModel commentCountEdit = readTask(taskUrl);
+        commentCountEdit.setNumberOfComments(1);
+        assertUpdateRejected(taskUrl, commentCountEdit, HttpStatus.BAD_REQUEST);
+
+        TaskRepresentationModel allowedEdit = readTask(taskUrl);
+        allowedEdit.setName("allowed REST update");
+        TaskRepresentationModel putResponse = updateTask(taskUrl, allowedEdit);
+        TaskRepresentationModel getResponse = readTask(taskUrl);
+        assertThat(putResponse.getName()).isEqualTo("allowed REST update");
+        assertThat(putResponse.getClaimed()).isEqualTo(getResponse.getClaimed());
+        assertThat(putResponse.getCompleted()).isEqualTo(getResponse.getCompleted());
+        assertThat(putResponse.getState()).isEqualTo(getResponse.getState());
+        assertThat(putResponse.isTransferred()).isEqualTo(getResponse.isTransferred());
+        assertThat(putResponse.isReopened()).isEqualTo(getResponse.isReopened());
+        assertThat(putResponse.getNumberOfComments()).isEqualTo(getResponse.getNumberOfComments());
+
+        ObjectNode omittedMetadata = objectMapper.valueToTree(readTask(taskUrl));
+        omittedMetadata.remove(
+            List.of(
+                "claimed",
+                "completed",
+                "state",
+                "numberOfComments",
+                "read",
+                "transferred",
+                "reopened"));
+        omittedMetadata.put("taskId", taskId);
+        omittedMetadata.put("name", "update with omitted metadata");
+        assertThatThrownBy(
+                () ->
+                    restClient
+                        .put()
+                        .uri(taskUrl)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .headers(
+                            headers ->
+                                headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                        .body(omittedMetadata.toString())
+                        .retrieve()
+                        .toEntity(TaskRepresentationModel.class))
+            .isInstanceOf(HttpStatusCodeException.class)
+            .extracting(HttpStatusCodeException.class::cast)
+            .extracting(HttpStatusCodeException::getStatusCode)
+            .isEqualTo(HttpStatus.CONFLICT);
+
+        TaskRepresentationModel staleVersion = readTask(taskUrl);
+        TaskRepresentationModel latestVersion = readTask(taskUrl);
+        latestVersion.setName("newer allowed update");
+        updateTask(taskUrl, latestVersion);
+        staleVersion.setName("stale update");
+        assertUpdateRejected(taskUrl, staleVersion, HttpStatus.CONFLICT);
+      } finally {
+        restClient
+            .delete()
+            .uri(restHelper.toUrl(RestEndpoints.URL_TASKS_ID_FORCE, taskId))
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toBodilessEntity();
+      }
+    }
+
+    private TaskRepresentationModel readTask(String url) {
+      return restClient
+          .get()
+          .uri(url)
+          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+          .retrieve()
+          .toEntity(TaskRepresentationModel.class)
+          .getBody();
+    }
+
+    private TaskRepresentationModel updateTask(String url, TaskRepresentationModel task) {
+      return restClient
+          .put()
+          .uri(url)
+          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+          .body(task)
+          .retrieve()
+          .toEntity(TaskRepresentationModel.class)
+          .getBody();
+    }
+
+    private void assertUpdateRejected(
+        String url, TaskRepresentationModel task, HttpStatus expectedStatus) {
+      assertThatThrownBy(() -> updateTask(url, task))
+          .isInstanceOf(HttpStatusCodeException.class)
+          .extracting(HttpStatusCodeException.class::cast)
+          .extracting(HttpStatusCodeException::getStatusCode)
+          .isEqualTo(expectedStatus);
+    }
 
     @Test
     void should_ChangeValueOfReceived_When_UpdatingTask() {

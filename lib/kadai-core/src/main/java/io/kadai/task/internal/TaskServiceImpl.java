@@ -701,6 +701,8 @@ public class TaskServiceImpl implements TaskService {
             WorkbasketPermission.EDITTASKS);
       }
 
+      verifyServerOwnedTaskFieldsUnchanged(oldTaskImpl, newTaskImpl);
+
       attachmentHandler.insertAndDeleteAttachmentsOnTaskUpdate(newTaskImpl, oldTaskImpl);
       objectReferenceHandler.insertAndDeleteObjectReferencesOnTaskUpdate(newTaskImpl, oldTaskImpl);
       ObjectReferenceImpl.validate(
@@ -726,10 +728,10 @@ public class TaskServiceImpl implements TaskService {
                   ObjectAttributeChangeDetector.determineChangesInAttributes(
                       oldTaskImpl, newTaskImpl)));
 
+      return getTask(newTaskImpl.getId());
     } finally {
       kadaiEngine.returnConnection();
     }
-    return task;
   }
 
   @Override
@@ -1991,13 +1993,22 @@ public class TaskServiceImpl implements TaskService {
     // With fast execution below 1ms there will be no concurrencyException
     if (oldTaskImpl.getModified() != null
             && !oldTaskImpl.getModified().equals(newTaskImpl.getModified())
-        || oldTaskImpl.getClaimed() != null
-            && !oldTaskImpl.getClaimed().equals(newTaskImpl.getClaimed())
-        || oldTaskImpl.getState() != null
-            && !oldTaskImpl.getState().equals(newTaskImpl.getState())) {
+        || !Objects.equals(oldTaskImpl.getClaimed(), newTaskImpl.getClaimed())
+        || !Objects.equals(oldTaskImpl.getState(), newTaskImpl.getState())) {
       throw new ConcurrencyException(newTaskImpl.getId());
     }
     newTaskImpl.setModified(Instant.now());
+  }
+
+  private void verifyServerOwnedTaskFieldsUnchanged(
+      TaskImpl oldTaskImpl, TaskImpl candidateTaskImpl) {
+    if (!Objects.equals(oldTaskImpl.getCompleted(), candidateTaskImpl.getCompleted())
+        || oldTaskImpl.isTransferred() != candidateTaskImpl.isTransferred()
+        || oldTaskImpl.isReopened() != candidateTaskImpl.isReopened()
+        || oldTaskImpl.getNumberOfComments() != candidateTaskImpl.getNumberOfComments()) {
+      throw new InvalidArgumentException(
+          "Server-owned task metadata cannot be changed via update of the task");
+    }
   }
 
   private Task claim(String taskId, boolean forceClaim)
@@ -2457,9 +2468,12 @@ public class TaskServiceImpl implements TaskService {
     taskToCreate.setState(READY);
     taskToCreate.setCreated(now);
     taskToCreate.setModified(now);
+    taskToCreate.setClaimed(null);
+    taskToCreate.setCompleted(null);
     taskToCreate.setRead(false);
     taskToCreate.setTransferred(false);
     taskToCreate.setReopened(false);
+    taskToCreate.setNumberOfComments(0);
 
     String creator = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
     if (kadaiEngine.getEngine().getConfiguration().isSecurityEnabled() && creator == null) {
