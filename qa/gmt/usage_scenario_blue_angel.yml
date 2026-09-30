@@ -9,9 +9,7 @@ compose-file: !include compose.yml
 services:
   app:
     # Frozen image for reproducible Blauer Engel certification measurements. Only change this manually.
-    # TODO(#2259): bump to the sha of the commit that contains the embedded LDAP configuration,
-    # once the container workflow has published that image.
-    image: ghcr.io/kadai-io/kadai-gmt:sha-d9b671575cfd55127c093a8c61a12367f433e79d
+    image: ghcr.io/kadai-io/kadai-gmt:sha-1e149da421699fdc554aaebda671df262ca5713b
   postgres:
     # Frozen for reproducible Blauer Engel certification measurements. Only change this manually.
     image: postgres:17.11
