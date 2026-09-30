@@ -4,9 +4,9 @@ services:
 
   app:
     container_name: kadai-example-app
-    # Default image for tests and regular measurements.
-    # The Blauer Engel certification scenario pins a frozen sha tag instead
-    # (see usage_scenario_blue_angel.yml).
+    # Default image for test/debug runs.
+    # The standard and certification scenarios override this with a pinned sha tag
+    # (see usage_scenario_standard.yml and usage_scenario_blue_angel.yml).
     image: ghcr.io/kadai-io/kadai-gmt:latest
     ports:
       - "8080:8080"

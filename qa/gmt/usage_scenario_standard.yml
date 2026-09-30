@@ -1,7 +1,7 @@
 # Regular usage scenario for continuous performance + energy measurements.
 # TODO(#1922): This is currently a copy of the Blauer Engel certification scenario
 # (usage_scenario_blue_angel.yml) and will be adapted to its own scenario in the future.
-# Unlike the certification scenario it uses the moving `latest` image from compose.yml.
+# Its app image is pinned like the certification scenario's, but bumped automatically by CI.
 
 name: KADAI - PostgreSQL - Standard Usage
 author: envite consulting GmbH
@@ -10,6 +10,11 @@ description: Regular energy measurement of the standard KADAI workflow with hund
 compose-file: !include compose.yml
 
 services:
+  app:
+    # Pinned per commit for reproducible measurements. CI bumps this automatically after
+    # publishing a new image (see .github/workflows/kadai-gmt-container.yml).
+    # Available tags: https://github.com/kadai-io/kadai/pkgs/container/kadai-gmt
+    image: ghcr.io/kadai-io/kadai-gmt:sha-1e149da421699fdc554aaebda671df262ca5713b
   k6:
     setup-commands:
       - command: k6 run /tmp/repo/qa/gmt/k6/setup_tasks.js
