@@ -47,12 +47,12 @@ Status: `accepted` | `proposed` | `superseded (by #N)`. Entries are append-only,
 - Decision: Warm-up and measurement read disjoint task slices via `TASK_POOL_OFFSET`, from a stable ascending sort.
 - Consequences: Measured reads are independent of warm-up mutations; the phases do not model one continuous session.
 
-## Image strategy: moving for regular, frozen for certification
+## Image strategy: pinned for regular and certification
 - Date / related: 2026-09-30, #2259
 - Status: accepted
-- Context: Regular measurements should follow the current application; the Blauer Engel certification must be reproducible.
-- Decision: Regular runs use `ghcr.io/kadai-io/kadai-gmt:latest`; the certification scenario pins a `sha-<commit>` app image and additionally pins the postgres and k6 images.
-- Consequences: Regular runs track the app; certification is decoupled from later image bumps and its app pin must be bumped manually.
+- Context: Measurements should be reproducible per commit; the Blauer Engel certification must additionally be decoupled from later changes.
+- Decision: Both the regular and the certification scenarios pin a `sha-<commit>` app image. The regular pin is bumped automatically by CI; the certification pin is changed manually. The certification additionally pins the postgres and k6 images.
+- Consequences: Per-commit reproducibility; regular runs follow new images through the CI auto-bump.
 
 ## Seed count
 - Date / related: 2026-09-30, #2259
@@ -63,9 +63,9 @@ Status: `accepted` | `proposed` | `superseded (by #N)`. Entries are append-only,
 
 ## Regular measurement image strategy
 - Date / related: 2026-09-30, #2259
-- Status: proposed
-- Context: The regular scenario uses the moving `latest` tag, so a measurement for a given commit can pick up an image built from a later commit.
-- Proposed decision: Pin a `sha-<commit>` in the regular scenario and bump it automatically via CI instead of using `latest`.
+- Status: accepted
+- Context: The regular scenario previously used the moving `latest` tag, so a measurement for a given commit could pick up an image built from a later commit.
+- Decision: Pin a `sha-<commit>` in the regular scenario and bump it automatically via CI instead of using `latest` (approved by the maintainer).
 - Consequences: Per-commit reproducibility; requires CI automation to keep the pin up to date.
 
 ## Embedded LDAP for the example application
@@ -77,14 +77,14 @@ Status: `accepted` | `proposed` | `superseded (by #N)`. Entries are append-only,
 
 ## Disjoint warm-up/measurement pools
 - Date / related: 2026-09-30, #2259
-- Status: proposed
+- Status: accepted
 - Context: Disjoint pools avoid cross-contamination between warm-up and measurement, but make the two phases independent instead of one continuous session.
-- Proposed decision: Keep the disjoint pools, pending confirmation.
+- Decision: Keep the disjoint pools (approved by the maintainer).
 - Consequences: Warm-up mutations cannot affect measured reads.
 
 ## Generator idempotency
 - Date / related: 2026-09-30, #2116
-- Status: proposed
+- Status: accepted
 - Context: `POST /kadai/api/v1/gmt/tasks` is not idempotent — a second call fails on the unique external ID `ETI:000000000000`. GMT always starts a fresh database.
-- Proposed decision: Keep relying on a fresh database; make the generator re-runnable only if repeated generation against the same database is needed.
+- Decision: Keep relying on a fresh database; make the generator re-runnable only if repeated generation against the same database is needed (approved by the maintainer).
 - Consequences: Repeated local runs must recreate the database (or drop the schema) first.
