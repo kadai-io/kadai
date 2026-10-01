@@ -141,9 +141,12 @@ class UpdateClassificationAccTest {
 
   private Classification createMasterClassification() throws Exception {
     Classification classification =
-        classificationService.newClassification(
-            "identity-" + UUID.randomUUID(), MASTER_DOMAIN, "TASK");
+        classificationService.newClassification(newClassificationKey(), MASTER_DOMAIN, "TASK");
     return classificationService.createClassification(classification);
+  }
+
+  private String newClassificationKey() {
+    return UUID.randomUUID().toString().replace("-", "");
   }
 
   @WithAccessId(user = "businessadmin")
@@ -174,12 +177,12 @@ class UpdateClassificationAccTest {
     Classification original = createMasterClassification();
 
     Classification keyUpdate = classificationService.getClassification(original.getId());
-    ((ClassificationImpl) keyUpdate).setKey("changed-" + original.getKey());
+    ((ClassificationImpl) keyUpdate).setKey(newClassificationKey());
     assertThatThrownBy(() -> classificationService.updateClassification(keyUpdate))
         .isInstanceOf(InvalidArgumentException.class);
 
     Classification typeUpdate = classificationService.getClassification(original.getId());
-    ((ClassificationImpl) typeUpdate).setType("document");
+    ((ClassificationImpl) typeUpdate).setType("DOCUMENT");
     assertThatThrownBy(() -> classificationService.updateClassification(typeUpdate))
         .isInstanceOf(InvalidArgumentException.class);
 
@@ -193,8 +196,7 @@ class UpdateClassificationAccTest {
   @Test
   void should_RejectUpdate_When_IdIsMissing() {
     Classification withoutId =
-        classificationService.newClassification(
-            "identity-" + UUID.randomUUID(), MASTER_DOMAIN, "TASK");
+        classificationService.newClassification(newClassificationKey(), MASTER_DOMAIN, "TASK");
 
     assertThatThrownBy(() -> classificationService.updateClassification(withoutId))
         .isInstanceOf(InvalidArgumentException.class)

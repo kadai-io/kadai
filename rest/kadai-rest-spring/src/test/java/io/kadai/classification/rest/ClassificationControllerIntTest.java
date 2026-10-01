@@ -533,7 +533,7 @@ class ClassificationControllerIntTest {
     newClassification.setType("TASK");
     newClassification.setCategory("MANUAL");
     newClassification.setDomain("DOMAIN_A");
-    newClassification.setKey("immutable-" + UUID.randomUUID());
+    newClassification.setKey(UUID.randomUUID().toString().replace("-", ""));
     newClassification.setName("identity test");
     String collectionUrl = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS);
     ResponseEntity<ClassificationRepresentationModel> createdResponse =
@@ -550,7 +550,7 @@ class ClassificationControllerIntTest {
         restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS_ID, original.getClassificationId());
 
     String originalKey = original.getKey();
-    original.setKey(originalKey + "-changed");
+    original.setKey(UUID.randomUUID().toString().replace("-", ""));
     assertUpdateRejected(classificationUrl, original);
     original.setKey(originalKey);
 
