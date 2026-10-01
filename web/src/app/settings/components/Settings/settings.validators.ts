@@ -20,9 +20,14 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 export function jsonValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
-    if (!control.value) return null;
+    const value = control.value;
+
+    if (typeof value !== 'string' || value.trim() === '') {
+      return { invalidJson: true };
+    }
+
     try {
-      JSON.parse(control.value);
+      JSON.parse(value);
       return null;
     } catch {
       return { invalidJson: true };

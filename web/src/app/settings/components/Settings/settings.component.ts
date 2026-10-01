@@ -121,7 +121,14 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   private createTextControl(member: SettingsMember, value: any): FormControl {
     const validators: ValidatorFn[] = [];
-    if (member.min !== undefined) validators.push(Validators.minLength(member.min));
+    if (member.min !== undefined) {
+      validators.push(Validators.minLength(member.min));
+
+      if (member.min > 0) {
+        validators.push(Validators.required);
+      }
+    }
+
     if (member.max !== undefined) validators.push(Validators.maxLength(member.max));
 
     return this.fb.control(value ?? '', validators);

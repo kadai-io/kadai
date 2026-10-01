@@ -21,7 +21,7 @@
   <!-- BUTTONS -->
   <div class="settings__buttons">
     <button (click)="onSave()" 
-            [disabled]="settingsForm.invalid" 
+            [disabled]="settingsForm?.invalid ?? true" 
             class="settings__button--primary" 
             mat-button
             matTooltip="Save settings">
