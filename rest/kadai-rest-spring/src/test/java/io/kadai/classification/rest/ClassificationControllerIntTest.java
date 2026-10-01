@@ -546,25 +546,25 @@ class ClassificationControllerIntTest {
             .toEntity(ClassificationRepresentationModel.class);
     ClassificationRepresentationModel original = createdResponse.getBody();
     assertThat(original).isNotNull();
-    Instant created = original.getCreated();
-    String originalKey = original.getKey();
-    String originalDomain = original.getDomain();
-    String originalType = original.getType();
     String classificationUrl =
         restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS_ID, original.getClassificationId());
 
+    String originalKey = original.getKey();
     original.setKey(originalKey + "-changed");
     assertUpdateRejected(classificationUrl, original);
     original.setKey(originalKey);
 
+    String originalDomain = original.getDomain();
     original.setDomain("DOMAIN_B");
     assertUpdateRejected(classificationUrl, original);
     original.setDomain(originalDomain);
 
+    String originalType = original.getType();
     original.setType("DOCUMENT");
     assertUpdateRejected(classificationUrl, original);
     original.setType(originalType);
 
+    Instant created = original.getCreated();
     original.setCreated(created.minusSeconds(60));
     original.setName("updated name");
     ResponseEntity<ClassificationRepresentationModel> updatedResponse =
