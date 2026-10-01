@@ -101,9 +101,6 @@ describe('Settings Validators', () => {
   describe('jsonValidator', () => {
     it.each([
       { value: '{"key": "value"}', description: 'valid JSON object string' },
-      { value: '', description: 'empty JSON string' },
-      { value: null, description: 'null value' },
-      { value: undefined, description: 'undefined value' },
       { value: '[1, 2, 3]', description: 'valid JSON array' },
       { value: '123', description: 'primitive number string' }
     ])('should return null for $description', ({ value }) => {
@@ -112,8 +109,13 @@ describe('Settings Validators', () => {
       expect(control.valid).toBe(true);
     });
 
-    it('should return invalidJson error for a malformed JSON string', () => {
-      const control = new FormControl('{not valid json', [jsonValidator()]);
+    it.each([
+      { value: '', description: 'empty JSON string' },
+      { value: null, description: 'null value' },
+      { value: undefined, description: 'undefined value' },
+      { value: '{not valid json', description: 'malformed JSON string' }
+    ])('should return invalidJson error for $description', ({ value }) => {
+      const control = new FormControl(value, [jsonValidator()]);
       expect(control.errors?.['invalidJson']).toBe(true);
       expect(control.valid).toBe(false);
     });
