@@ -4,6 +4,8 @@ We are using the [Green Metrics Tool (GMT)](https://www.green-coding.io/products
 
 GMT Documentation: <https://docs.green-coding.io>
 
+Design decisions for this setup are documented in [DECISIONS.md](./DECISIONS.md).
+
 ## Setup
 
 * GMT for measuring the resource and energy consumption
