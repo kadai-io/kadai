@@ -85,3 +85,26 @@ jobs:
         run: |
           docker push "${IMAGE_NAME}:latest"
           docker push "${IMAGE_NAME}:sha-${GITHUB_SHA}"
+
+  bump-scenario-pin:
+    name: Bump pinned image in regular GMT scenario
+    needs: build-test-publish
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Bump pinned image
+        run: |
+          sed -i -E "s#(${IMAGE_NAME}:sha-)[0-9a-f]+#\1${GITHUB_SHA}#" qa/gmt/usage_scenario_standard.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add qa/gmt/usage_scenario_standard.yml
+          if git diff --cached --quiet; then
+            echo "Pinned image is already up to date."
+            exit 0
+          fi
+          git commit -m "Bump pinned kadai-gmt image for regular GMT measurements"
+          git push

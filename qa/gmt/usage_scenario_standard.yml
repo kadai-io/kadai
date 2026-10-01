@@ -1,23 +1,21 @@
-# This is the original usage scenario used for the Blue Angel certification in 2025
+# Regular usage scenario for continuous performance + energy measurements.
+# TODO(#1922): This is currently a copy of the Blauer Engel certification scenario
+# (usage_scenario_blue_angel.yml) and will be adapted to its own scenario in the future.
+# Its app image is pinned like the certification scenario's, but bumped automatically by CI.
 
 name: KADAI - PostgreSQL - Standard Usage
 author: envite consulting GmbH
-description: Messung eines realistischen KADAI-Nutzungsszenarios mit hundert API-Nutzern und Pausen von vier Sekunden zwischen den einzelnen Aktivitäten. Nach einer Aufwärmphase zur Stabilisierung von JIT folgt die Messung des Standard-Workflows -- Tasks (Aufgaben) erstellen, bearbeiten, zuweisen und abschließen; Workbaskets (Postkörbe) suchen und öffnen; Kommentare lesen, schreiben und löschen; Task-Status-Report abrufen.
+description: Regular energy measurement of the standard KADAI workflow with hundred API users and pauses of four seconds between the individual activities. After a warm-up phase for JIT stabilization the standard workflow is measured -- create, edit, assign and complete tasks; search and open workbaskets; read, write and delete comments; retrieve the task status report.
 
 compose-file: !include compose.yml
 
 services:
   app:
-    # Frozen image for reproducible Blauer Engel certification measurements. Only change this manually.
-    # Available image tags: https://github.com/kadai-io/kadai/pkgs/container/kadai-gmt
-    # Pin the `sha-<commit>` tag of the build whose code should be certified.
+    # Pinned per commit for reproducible measurements. CI bumps this automatically after
+    # publishing a new image (see .github/workflows/kadai-gmt-container.yml).
+    # Available tags: https://github.com/kadai-io/kadai/pkgs/container/kadai-gmt
     image: ghcr.io/kadai-io/kadai-gmt:sha-1e149da421699fdc554aaebda671df262ca5713b
-  postgres:
-    # Frozen for reproducible Blauer Engel certification measurements. Only change this manually.
-    image: postgres:17.11
   k6:
-    # Frozen for reproducible Blauer Engel certification measurements. Only change this manually.
-    image: grafana/k6:2.3.0
     setup-commands:
       - command: k6 run /tmp/repo/qa/gmt/k6/setup_tasks.js
 
