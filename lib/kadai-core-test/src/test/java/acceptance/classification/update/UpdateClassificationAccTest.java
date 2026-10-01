@@ -18,6 +18,7 @@
 
 package acceptance.classification.update;
 
+import static io.kadai.common.api.SharedConstants.MASTER_DOMAIN;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestClassification;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestObjectReference;
 import static io.kadai.testapi.DefaultTestEntities.defaultTestWorkbasket;
@@ -31,6 +32,7 @@ import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.exceptions.ClassificationNotFoundException;
 import io.kadai.classification.api.models.Classification;
 import io.kadai.classification.api.models.ClassificationSummary;
+import io.kadai.classification.internal.models.ClassificationImpl;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.api.WorkingTimeCalculator;
@@ -56,6 +58,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
@@ -134,6 +137,138 @@ class UpdateClassificationAccTest {
               .getId());
     }
     return taskList;
+  }
+
+  private Classification createMasterClassification() throws Exception {
+    Classification classification =
+        classificationService.newClassification(
+            "identity-" + UUID.randomUUID(), MASTER_DOMAIN, "TASK");
+    return classificationService.createClassification(classification);
+  }
+
+  @WithAccessId(user = "businessadmin")
+  @Test
+  void should_RejectUpdate_When_DomainIsChangedFromMaster() throws Exception {
+    Classification original = createMasterClassification();
+    Classification update = classificationService.getClassification(original.getId());
+    ((ClassificationImpl) update).setDomain("DOMAIN_A");
+
+    assertThatThrownBy(() -> classificationService.updateClassification(update))
+        .isInstanceOf(InvalidArgumentException.class);
+
+    Classification persisted = classificationService.getClassification(original.getId());
+    assertThat(persisted.getDomain()).isEqualTo(MASTER_DOMAIN);
+    assertThat(persisted.getModified()).isEqualTo(original.getModified());
+    assertThat(
+            classificationService
+                .createClassificationQuery()
+                .keyIn(original.getKey())
+                .domainIn("DOMAIN_A")
+                .list())
+        .isEmpty();
+  }
+
+  @WithAccessId(user = "businessadmin")
+  @Test
+  void should_RejectUpdate_When_KeyOrTypeIsChanged() throws Exception {
+    Classification original = createMasterClassification();
+
+    Classification keyUpdate = classificationService.getClassification(original.getId());
+    ((ClassificationImpl) keyUpdate).setKey("changed-" + original.getKey());
+    assertThatThrownBy(() -> classificationService.updateClassification(keyUpdate))
+        .isInstanceOf(InvalidArgumentException.class);
+
+    Classification typeUpdate = classificationService.getClassification(original.getId());
+    ((ClassificationImpl) typeUpdate).setType("document");
+    assertThatThrownBy(() -> classificationService.updateClassification(typeUpdate))
+        .isInstanceOf(InvalidArgumentException.class);
+
+    Classification persisted = classificationService.getClassification(original.getId());
+    assertThat(persisted.getKey()).isEqualTo(original.getKey());
+    assertThat(persisted.getType()).isEqualTo(original.getType());
+    assertThat(persisted.getModified()).isEqualTo(original.getModified());
+  }
+
+  @WithAccessId(user = "businessadmin")
+  @Test
+  void should_RejectUpdate_When_IdIsMissing() {
+    Classification withoutId =
+        classificationService.newClassification(
+            "identity-" + UUID.randomUUID(), MASTER_DOMAIN, "TASK");
+
+    assertThatThrownBy(() -> classificationService.updateClassification(withoutId))
+        .isInstanceOf(InvalidArgumentException.class)
+        .hasMessage("ClassificationId must not be null or empty for update.");
+  }
+
+  @WithAccessId(user = "businessadmin")
+  @Test
+  void should_RejectUpdate_When_KeyLookupAndIdReferToDifferentClassifications()
+      throws Exception {
+    Classification target = createMasterClassification();
+    Thread.sleep(10);
+    Classification versionSource = createMasterClassification();
+    assertThat(target.getModified()).isNotEqualTo(versionSource.getModified());
+
+    Classification update =
+        classificationService.newClassification(
+            versionSource.getKey(), "DOMAIN_A", versionSource.getType());
+    ClassificationImpl updateImpl = (ClassificationImpl) update;
+    updateImpl.setId(target.getId());
+    updateImpl.setModified(versionSource.getModified());
+
+    assertThatThrownBy(() -> classificationService.updateClassification(update))
+        .isInstanceOf(InvalidArgumentException.class);
+
+    assertThat(classificationService.getClassification(target.getId()).getKey())
+        .isEqualTo(target.getKey());
+    assertThat(classificationService.getClassification(target.getId()).getModified())
+        .isEqualTo(target.getModified());
+    assertThat(classificationService.getClassification(versionSource.getId()).getKey())
+        .isEqualTo(versionSource.getKey());
+    assertThat(
+            classificationService
+                .createClassificationQuery()
+                .keyIn(versionSource.getKey())
+                .domainIn("DOMAIN_A")
+                .list())
+        .isEmpty();
+  }
+
+  @WithAccessId(user = "businessadmin")
+  @Test
+  void should_RejectTimestampFromAnotherClassification() throws Exception {
+    Classification target = createMasterClassification();
+    Thread.sleep(10);
+    Classification other = createMasterClassification();
+    assertThat(target.getModified()).isNotEqualTo(other.getModified());
+
+    Classification update = classificationService.getClassification(target.getId());
+    ((ClassificationImpl) update).setModified(other.getModified());
+
+    assertThatThrownBy(() -> classificationService.updateClassification(update))
+        .isInstanceOf(ConcurrencyException.class);
+    assertThat(classificationService.getClassification(target.getId()).getModified())
+        .isEqualTo(target.getModified());
+  }
+
+  @WithAccessId(user = "businessadmin")
+  @Test
+  void should_PreserveImmutableFields_When_MutableFieldIsUpdated() throws Exception {
+    Classification original = createMasterClassification();
+    Instant created = original.getCreated();
+    Classification update = classificationService.getClassification(original.getId());
+    ((ClassificationImpl) update).setCreated(created.minus(Duration.ofDays(1)));
+    update.setName("updated name");
+
+    Classification result = classificationService.updateClassification(update);
+
+    assertThat(result.getId()).isEqualTo(original.getId());
+    assertThat(result.getKey()).isEqualTo(original.getKey());
+    assertThat(result.getDomain()).isEqualTo(original.getDomain());
+    assertThat(result.getType()).isEqualTo(original.getType());
+    assertThat(result.getCreated()).isEqualTo(created);
+    assertThat(result.getName()).isEqualTo("updated name");
   }
 
   @TestInstance(Lifecycle.PER_CLASS)
