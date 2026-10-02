@@ -15,12 +15,12 @@ Design decisions for this setup are documented in [DECISIONS.md](./DECISIONS.md)
 
 ### Scenarios
 
-* [usage_scenario_quick.yml](./usage_scenario_quick.yml): test/debug scenario, seeds 1000 tasks
-* [usage_scenario_standard.yml](./usage_scenario_standard.yml): regular energy measurements, uses the moving `latest` image, seeds 100000 tasks
-* [usage_scenario_blue_angel.yml](./usage_scenario_blue_angel.yml): "Blauer Engel for Software" certification, pins a frozen `sha-<commit>` image
+* [usage_scenario_quick.yml](./usage_scenario_quick.yml): test/debug scenario, uses the moving `latest` image, seeds 1000 tasks
+* [usage_scenario_standard.yml](./usage_scenario_standard.yml): regular energy measurements, pins a `sha-<commit>` image that CI bumps automatically, seeds 100000 tasks
+* [usage_scenario_blue_angel.yml](./usage_scenario_blue_angel.yml): "Blauer Engel for Software" certification, pins a frozen `sha-<commit>` image (and the postgres/k6 images), seeds 100000 tasks
 
-The scenarios use the moving `ghcr.io/kadai-io/kadai-gmt:latest` image by default; the certification
-scenario overrides it with a frozen `sha-<commit>` tag.
+Only the quick scenario uses the moving `ghcr.io/kadai-io/kadai-gmt:latest` image; the standard and
+certification scenarios pin a `sha-<commit>` tag (standard auto-bumped by CI, certification manually).
 Available application image tags are published on the [kadai-gmt package page](https://github.com/kadai-io/kadai/pkgs/container/kadai-gmt).
 
 ### Database Filling
