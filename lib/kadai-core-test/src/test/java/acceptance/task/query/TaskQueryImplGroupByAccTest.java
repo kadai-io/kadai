@@ -284,6 +284,19 @@ class TaskQueryImplGroupByAccTest implements KadaiConfigurationModifier {
 
   @WithAccessId(user = "user-1-1")
   @Test
+  void should_Count_When_GroupingByPorAndOrderingByOwnerLongName() {
+    Long numberOfTasks =
+        taskService
+            .createTaskQuery()
+            .workbasketIdIn(defaultWorkbasket.getId())
+            .groupByPor()
+            .orderByOwnerLongName(SortDirection.ASCENDING)
+            .count();
+    assertThat(numberOfTasks).isEqualTo(1);
+  }
+
+  @WithAccessId(user = "user-1-1")
+  @Test
   void should_GroupBySor_When_OrderingByName() {
     List<TaskSummary> list =
         taskService
@@ -325,6 +338,19 @@ class TaskQueryImplGroupByAccTest implements KadaiConfigurationModifier {
             .createTaskQuery()
             .workbasketIdIn(defaultWorkbasket.getId())
             .groupBySor("SecondType")
+            .count();
+    assertThat(numberOfTasks).isEqualTo(1);
+  }
+
+  @WithAccessId(user = "user-1-1")
+  @Test
+  void should_Count_When_GroupingBySorAndOrderingByCreatorLongName() {
+    Long numberOfTasks =
+        taskService
+            .createTaskQuery()
+            .workbasketIdIn(defaultWorkbasket.getId())
+            .groupBySor("SecondType")
+            .orderByCreatorLongName(SortDirection.ASCENDING)
             .count();
     assertThat(numberOfTasks).isEqualTo(1);
   }
