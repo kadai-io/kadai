@@ -27,19 +27,17 @@ function main() {
   git config user.name "github-actions[bot]"
   git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-  git fetch origin master
-  git checkout -B master origin/master
+  git fetch --depth=1 origin master
+  # Deterministic branch: re-running for the same SHA force-pushes the branch and
+  # updates the already-existing PR instead of creating a duplicate.
+  local branch="chore/bump-gmt-pin-${GITHUB_SHA}"
+  git checkout -B "$branch" origin/master
   sed -i -E "s#(${IMAGE_NAME}:sha-)[0-9a-f]+#\1${GITHUB_SHA}#" "$scenario_file"
   git add "$scenario_file"
   if git diff --cached --quiet; then
     echo "Pinned image is already up to date."
     exit 0
   fi
-
-  # Deterministic branch: re-running for the same SHA force-pushes the branch and
-  # updates the already-existing PR instead of creating a duplicate.
-  local branch="chore/bump-gmt-pin-${GITHUB_SHA}"
-  git checkout -B "$branch"
   git commit -m "Bump pinned kadai-gmt image for regular GMT measurements"
   git push --force origin "$branch"
 
