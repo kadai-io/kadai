@@ -96,6 +96,40 @@ describe('Settings Validators', () => {
 
       expect(() => group.updateValueAndValidity()).not.toThrow();
     });
+
+    it('should return requiredBounds error when lower or upper bound is missing/null', () => {
+      const validator = intervalValidator(0, 100);
+
+      const groupWithNullLower = new FormGroup({
+        lower: new FormControl(null),
+        upper: new FormControl(10)
+      });
+
+      const groupWithNullUpper = new FormGroup({
+        lower: new FormControl(5),
+        upper: new FormControl(null)
+      });
+
+      const groupWithBothNull = new FormGroup({
+        lower: new FormControl(null),
+        upper: new FormControl(null)
+      });
+
+      expect(validator(groupWithNullLower)).toEqual({ requiredBounds: true });
+      expect(validator(groupWithNullUpper)).toEqual({ requiredBounds: true });
+      expect(validator(groupWithBothNull)).toEqual({ requiredBounds: true });
+    });
+
+    it('should pass when both bounds are provided and within range', () => {
+      const validator = intervalValidator(0, 100);
+
+      const validGroup = new FormGroup({
+        lower: new FormControl(2),
+        upper: new FormControl(8)
+      });
+
+      expect(validator(validGroup)).toBeNull();
+    });
   });
 
   describe('jsonValidator', () => {

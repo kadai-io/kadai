@@ -21,7 +21,7 @@
   <!-- BUTTONS -->
   <div class="settings__buttons">
     <button (click)="onSave()" 
-            [disabled]="settingsForm?.invalid ?? true" 
+            [disabled]="settingsForm?.invalid ?? true"
             class="settings__button--primary" 
             mat-button
             matTooltip="Save settings">
@@ -58,6 +58,11 @@
                                matInput
                                placeholder="{{member.displayName}}"
                                type="text">
+                        @if (settingsForm.get(member.key)?.hasError('required')) {
+                          <mat-error>
+                            This field is required
+                          </mat-error>
+                        }
                         @if (settingsForm.get(member.key)?.hasError('minlength')) {
                           <mat-error>
                             Minimum length is {{ member.min }}
@@ -94,6 +99,11 @@
                       </mat-form-field>
 
                       @if (settingsForm.get(member.key)?.errors; as errors) {
+                        @if (errors['requiredBounds']) {
+                          <mat-error>
+                            Both lower and upper boundaries are required valid numbers
+                          </mat-error>
+                        }
                         @if (errors['invalidOrder']) {
                           <mat-error>
                             Lower boundary must be less than or equal to upper boundary

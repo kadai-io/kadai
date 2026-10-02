@@ -37,19 +37,29 @@ export function jsonValidator(): ValidatorFn {
 
 export function intervalValidator(minBound?: number, maxBound?: number): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
-    const lower = control.get('lower')?.value;
-    const upper = control.get('upper')?.value;
+    const lowerRaw = control.get('lower')?.value;
+    const upperRaw = control.get('upper')?.value;
+
+    const isLowerEmpty = lowerRaw === null || lowerRaw === undefined || lowerRaw === '';
+    const isUpperEmpty = upperRaw === null || upperRaw === undefined || upperRaw === '';
+
+    if (isLowerEmpty || isUpperEmpty) {
+      return { requiredBounds: true };
+    }
+
+    const lower = Number(lowerRaw);
+    const upper = Number(upperRaw);
 
     const errors: ValidationErrors = {};
 
-    if (lower !== null && lower !== undefined && upper !== null && upper !== undefined) {
-      if (lower > upper) {
-        errors.invalidOrder = true;
-      }
+    if (lower > upper) {
+      errors.invalidOrder = true;
     }
+
     if (minBound !== undefined && (lower < minBound || upper < minBound)) {
       errors.belowMin = true;
     }
+
     if (maxBound !== undefined && (lower > maxBound || upper > maxBound)) {
       errors.exceedsMax = true;
     }
