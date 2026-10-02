@@ -92,30 +92,12 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
 
-      - name: Bump pinned image
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Rebuild the commit on current master and retry, so a concurrent push to
-          # master during the build does not leave the pin stale.
-          for _ in 1 2 3; do
-            git fetch origin master
-            git reset --hard origin/master
-            sed -i -E "s#(${IMAGE_NAME}:sha-)[0-9a-f]+#\1${GITHUB_SHA}#" qa/gmt/usage_scenario_standard.yml
-            git add qa/gmt/usage_scenario_standard.yml
-            if git diff --cached --quiet; then
-              echo "Pinned image is already up to date."
-              exit 0
-            fi
-            git commit -m "Bump pinned kadai-gmt image for regular GMT measurements"
-            if git push; then
-              exit 0
-            fi
-            sleep 5
-          done
-          echo "Failed to push image-pin bump after retries." >&2
-          exit 1
+      - name: Open PR bumping the pinned image
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ci/bump_gmt_pin.sh qa/gmt/usage_scenario_standard.yml
