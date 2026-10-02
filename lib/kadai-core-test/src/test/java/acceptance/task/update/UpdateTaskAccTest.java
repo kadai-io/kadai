@@ -49,6 +49,7 @@ import io.kadai.task.api.exceptions.ServiceLevelViolationException;
 import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.Task;
+import io.kadai.task.api.models.TaskComment;
 import io.kadai.task.api.models.TaskSummary;
 import io.kadai.task.internal.models.ObjectReferenceImpl;
 import io.kadai.task.internal.models.TaskImpl;
@@ -169,6 +170,86 @@ class UpdateTaskAccTest {
     assertThat(updatedTask.getPrimaryObjRef().getSystemInstance()).isEqualTo("INSTANCE_A");
     assertThat(updatedTask.getPrimaryObjRef().getType()).isEqualTo("VNR");
     assertThat(updatedTask.getPrimaryObjRef().getValue()).isEqualTo("7654321");
+  }
+
+  @WithAccessId(user = "user-1-2")
+  @Test
+  void should_RejectClaimedChange_When_StoredClaimedIsNull() throws Exception {
+    Task task =
+        TaskBuilder.newTask()
+            .classificationSummary(defaultClassificationSummary)
+            .workbasketSummary(defaultWorkbasketSummary)
+            .primaryObjRef(defaultObjectReference)
+            .buildAndStore(taskService);
+    TaskImpl candidate = (TaskImpl) task;
+    candidate.setClaimed(Instant.now());
+
+    assertThatThrownBy(() -> taskService.updateTask(candidate))
+        .isInstanceOf(ConcurrencyException.class);
+    assertThat(taskService.getTask(task.getId()).getClaimed()).isNull();
+  }
+
+  @WithAccessId(user = "user-1-2")
+  @Test
+  void should_RejectChangesToServerOwnedMetadata() throws Exception {
+    for (String field : List.of("completed", "transferred", "reopened", "numberOfComments")) {
+      Task task =
+          TaskBuilder.newTask()
+              .classificationSummary(defaultClassificationSummary)
+              .workbasketSummary(defaultWorkbasketSummary)
+              .primaryObjRef(defaultObjectReference)
+              .buildAndStore(taskService);
+      TaskImpl candidate = (TaskImpl) task;
+      switch (field) {
+        case "completed" -> candidate.setCompleted(Instant.now());
+        case "transferred" -> candidate.setTransferred(true);
+        case "reopened" -> candidate.setReopened(true);
+        case "numberOfComments" -> candidate.setNumberOfComments(1);
+        default -> throw new IllegalStateException("Unexpected field: " + field);
+      }
+
+      assertThatThrownBy(() -> taskService.updateTask(candidate))
+          .as("changing %s through an ordinary task update", field)
+          .isInstanceOf(InvalidArgumentException.class);
+
+      Task unchanged = taskService.getTask(task.getId());
+      assertThat(unchanged.getCompleted()).isNull();
+      assertThat(unchanged.isTransferred()).isFalse();
+      assertThat(unchanged.isReopened()).isFalse();
+      assertThat(unchanged.getNumberOfComments()).isZero();
+    }
+  }
+
+  @WithAccessId(user = "user-1-2")
+  @Test
+  void should_KeepCommentCountOperationOwnedAcrossTaskUpdates() throws Exception {
+    Task task =
+        TaskBuilder.newTask()
+            .classificationSummary(defaultClassificationSummary)
+            .workbasketSummary(defaultWorkbasketSummary)
+            .primaryObjRef(defaultObjectReference)
+            .buildAndStore(taskService);
+    final Task staleTask = taskService.getTask(task.getId());
+
+    TaskComment firstComment = taskService.newTaskComment(task.getId());
+    firstComment.setTextField("first comment");
+    taskService.createTaskComment(firstComment);
+    TaskComment secondComment = taskService.newTaskComment(task.getId());
+    secondComment.setTextField("second comment");
+    taskService.createTaskComment(secondComment);
+
+    assertThat(taskService.getTask(task.getId()).getNumberOfComments()).isEqualTo(2);
+    staleTask.setName("stale update");
+    assertThatThrownBy(() -> taskService.updateTask(staleTask))
+        .isInstanceOf(ConcurrencyException.class);
+
+    Task freshTask = taskService.getTask(task.getId());
+    freshTask.setName("ordinary update");
+    taskService.updateTask(freshTask);
+    assertThat(taskService.getTask(task.getId()).getNumberOfComments()).isEqualTo(2);
+
+    taskService.deleteTaskComment(taskService.getTaskComments(task.getId()).get(0).getId());
+    assertThat(taskService.getTask(task.getId()).getNumberOfComments()).isEqualTo(1);
   }
 
   @WithAccessId(user = "user-1-2")

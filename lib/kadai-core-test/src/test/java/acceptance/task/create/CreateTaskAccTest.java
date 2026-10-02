@@ -43,6 +43,7 @@ import io.kadai.task.api.models.Attachment;
 import io.kadai.task.api.models.AttachmentSummary;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.Task;
+import io.kadai.task.api.models.TaskComment;
 import io.kadai.task.internal.models.TaskImpl;
 import io.kadai.testapi.KadaiConfigurationModifier;
 import io.kadai.testapi.KadaiInject;
@@ -90,6 +91,7 @@ class CreateTaskAccTest {
 
   ClassificationSummary defaultClassificationSummary;
   WorkbasketSummary defaultWorkbasketSummary;
+  WorkbasketSummary destinationWorkbasketSummary;
   ObjectReference defaultObjectReference;
   Attachment defaultAttachment;
   User defaultUser;
@@ -100,6 +102,8 @@ class CreateTaskAccTest {
     defaultClassificationSummary =
         defaultTestClassification().buildAndStoreAsSummary(classificationService);
     defaultWorkbasketSummary = defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
+    destinationWorkbasketSummary =
+        defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
 
     WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
         .workbasketId(defaultWorkbasketSummary.getId())
@@ -107,6 +111,18 @@ class CreateTaskAccTest {
         .permission(WorkbasketPermission.OPEN)
         .permission(WorkbasketPermission.READ)
         .permission(WorkbasketPermission.READTASKS)
+        .permission(WorkbasketPermission.EDITTASKS)
+        .permission(WorkbasketPermission.APPEND)
+        .permission(WorkbasketPermission.TRANSFER)
+        .buildAndStore(workbasketService);
+
+    WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
+        .workbasketId(destinationWorkbasketSummary.getId())
+        .accessId("user-1-2")
+        .permission(WorkbasketPermission.OPEN)
+        .permission(WorkbasketPermission.READ)
+        .permission(WorkbasketPermission.READTASKS)
+        .permission(WorkbasketPermission.EDITTASKS)
         .permission(WorkbasketPermission.APPEND)
         .buildAndStore(workbasketService);
     defaultObjectReference = defaultTestObjectReference().build();
@@ -143,6 +159,40 @@ class CreateTaskAccTest {
     Task createdTask = taskService.createTask(newTask);
 
     assertThat(createdTask).isNotNull();
+  }
+
+  @WithAccessId(user = "user-1-2")
+  @Test
+  void should_InitializeServerMetadataWhenCreatingFromPublicTaskCopy() throws Exception {
+    Task sourceTask = taskService.createTask(createDefaultTask());
+    sourceTask =
+        taskService.transfer(sourceTask.getId(), destinationWorkbasketSummary.getId(), true);
+    sourceTask = taskService.claim(sourceTask.getId());
+    sourceTask = taskService.completeTask(sourceTask.getId());
+    sourceTask = taskService.reopen(sourceTask.getId());
+    sourceTask = taskService.completeTask(sourceTask.getId());
+    TaskComment comment = taskService.newTaskComment(sourceTask.getId());
+    comment.setTextField("source task comment");
+    taskService.createTaskComment(comment);
+    sourceTask = taskService.getTask(sourceTask.getId());
+
+    assertThat(sourceTask.getClaimed()).isNotNull();
+    assertThat(sourceTask.getCompleted()).isNotNull();
+    assertThat(sourceTask.getNumberOfComments()).isEqualTo(1);
+    assertThat(sourceTask.isTransferred()).isTrue();
+    assertThat(sourceTask.isReopened()).isTrue();
+
+    Task copiedTask = sourceTask.copy();
+    Task createdCopy = taskService.createTask(copiedTask);
+
+    assertThat(createdCopy.getId()).isNotEqualTo(sourceTask.getId());
+    assertThat(createdCopy.getClaimed()).isNull();
+    assertThat(createdCopy.getCompleted()).isNull();
+    assertThat(createdCopy.getNumberOfComments()).isZero();
+    assertThat(createdCopy.getState()).isEqualTo(TaskState.READY);
+    assertThat(createdCopy.isRead()).isFalse();
+    assertThat(createdCopy.isTransferred()).isFalse();
+    assertThat(createdCopy.isReopened()).isFalse();
   }
 
   @WithAccessId(user = "user-1-1", groups = "cn=routers,cn=groups,OU=Test,O=KADAI")
