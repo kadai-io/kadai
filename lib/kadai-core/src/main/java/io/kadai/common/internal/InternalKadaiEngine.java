@@ -32,6 +32,7 @@ import io.kadai.spi.task.internal.CreateTaskPreprocessorManager;
 import io.kadai.spi.task.internal.ReviewRequiredManager;
 import io.kadai.spi.task.internal.TaskDistributionManager;
 import io.kadai.spi.task.internal.TaskEndstatePreprocessorManager;
+import java.sql.Connection;
 import java.util.function.Supplier;
 import org.apache.ibatis.session.SqlSession;
 
@@ -78,6 +79,13 @@ public interface InternalKadaiEngine {
           return null;
         });
   }
+
+  /**
+   * Returns the connection belonging to the currently active engine session.
+   *
+   * @return the current JDBC connection
+   */
+  Connection getConnection();
 
   /** Initializes the SqlSessionManager. */
   void initSqlSession();
