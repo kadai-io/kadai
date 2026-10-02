@@ -51,8 +51,8 @@ Status: `accepted` | `proposed` | `superseded (by #N)`. Entries are append-only,
 - Date / related: 2026-09-30, #2259
 - Status: accepted
 - Context: Measurements should be reproducible per commit; the Blauer Engel certification must additionally be decoupled from later changes.
-- Decision: Both the regular and the certification scenarios pin a `sha-<commit>` app image (not `latest`). The regular pin is bumped automatically by CI; the certification pin is changed manually. The certification additionally pins the postgres and k6 images.
-- Consequences: Per-commit reproducibility; regular runs follow new images through the CI auto-bump.
+- Decision: Both the regular and the certification scenarios pin a `sha-<commit>` app image (not `latest`). The regular pin is bumped automatically; the certification pin is changed manually. The certification additionally pins the postgres and k6 images.
+- Consequences: Per-commit reproducibility; regular runs follow new images through the automatic bump.
 
 ## Seed count
 - Date / related: 2026-09-30, #2259
@@ -67,3 +67,10 @@ Status: `accepted` | `proposed` | `superseded (by #N)`. Entries are append-only,
 - Context: `POST /kadai/api/v1/gmt/tasks` is not idempotent — a second call fails on the unique external ID `ETI:000000000000`. GMT always starts a fresh database.
 - Decision: Keep relying on a fresh database; make the generator re-runnable only if repeated generation against the same database is needed.
 - Consequences: Repeated local runs must recreate the database (or drop the schema) first.
+
+## Bump the regular pin via pull request, not a direct master push
+- Date / related: 2026-10-02, #2280
+- Status: accepted
+- Context: The bump job used to push the one-line change directly to `master`, which is covered by the repository ruleset **Master protection** (PR + 1 approval) and rejected the push (`GH013`). The built-in GitHub Actions app cannot be added as a bypass actor, so a `GITHUB_TOKEN`-based workflow can never push to or merge into `master` under this ruleset.
+- Decision: The bump job opens (or updates) a pull request on a deterministic `chore/bump-gmt-pin-<sha>` branch; a KADAI team member approves and merges it. This mirrors the existing post-release snapshot-version bump flow (`update_version` / `ci/commitPoms.sh`).
+- Consequences: The pin lags until a team member merges the PR; eventual consistency is acceptable because the bump only fires when `kadai-gmt` changes. The ruleset stays fully intact and the change still goes through review and an audit trail. No new infrastructure (GitHub App, deploy key) is needed.
