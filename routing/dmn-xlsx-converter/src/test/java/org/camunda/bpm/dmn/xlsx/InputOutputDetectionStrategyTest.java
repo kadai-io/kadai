@@ -16,7 +16,6 @@
  *
  */
 
-
 package org.camunda.bpm.dmn.xlsx;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,7 +32,7 @@ import org.junit.jupiter.api.Test;
 public class InputOutputDetectionStrategyTest {
 
   @Test
-  public void testStaticDetectionStrategy() {
+  public void testStaticDetectionStrategy() throws XlsxConversionException {
     XlsxConverter converter = new XlsxConverter();
     converter.setIoDetectionStrategy(
         new StaticInputOutputDetectionStrategy(
