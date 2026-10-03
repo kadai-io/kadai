@@ -162,7 +162,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
     } as Settings;
 
     this.store.dispatch(new SetSettings(updatedSettings)).subscribe(() => {
-      this.rawInitialSettings = updatedSettings;
       this.notificationService.showSuccess('SETTINGS_SAVE');
     });
   }
