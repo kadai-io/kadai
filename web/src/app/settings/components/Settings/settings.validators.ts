@@ -16,55 +16,54 @@
  *
  */
 
-import { Settings, SettingTypes } from '../../models/settings';
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
-export const validateSettings = (settings: Settings): string[] => {
-  const invalidMembers = [];
+export function jsonValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value = control.value;
 
-  for (let group of settings.schema) {
-    for (let member of group.members) {
-      const value = settings[member.key];
-
-      if (member.type == SettingTypes.Text || member.type == SettingTypes.Interval) {
-        let compareWithMin;
-        let compareWithMax;
-        switch (member.type) {
-          case SettingTypes.Text:
-            compareWithMin = value.length;
-            compareWithMax = value.length;
-            break;
-          case SettingTypes.Interval:
-            compareWithMin = value[0];
-            compareWithMax = value[1];
-            break;
-        }
-
-        let isValid = true;
-        if ((member.min || member.min == 0) && member.max) {
-          isValid = compareWithMin >= member.min && compareWithMax <= member.max;
-        } else if (member.min || member.min == 0) {
-          isValid = compareWithMin >= member.min;
-        } else if (member.max) {
-          isValid = compareWithMax <= member.max;
-        }
-
-        if (!isValid) {
-          invalidMembers.push(member.key);
-        }
-
-        if (member.type == SettingTypes.Interval && compareWithMin > compareWithMax) {
-          invalidMembers.push(member.key);
-        }
-      }
-
-      if (member.type == SettingTypes.Json) {
-        try {
-          JSON.parse(value);
-        } catch {
-          invalidMembers.push(member.key);
-        }
-      }
+    if (typeof value !== 'string' || value.trim() === '') {
+      return { invalidJson: true };
     }
-  }
-  return invalidMembers;
-};
+
+    try {
+      JSON.parse(value);
+      return null;
+    } catch {
+      return { invalidJson: true };
+    }
+  };
+}
+
+export function intervalValidator(minBound?: number, maxBound?: number): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const lowerRaw = control.get('lower')?.value;
+    const upperRaw = control.get('upper')?.value;
+
+    const isLowerEmpty = lowerRaw === null || lowerRaw === undefined || lowerRaw === '';
+    const isUpperEmpty = upperRaw === null || upperRaw === undefined || upperRaw === '';
+
+    if (isLowerEmpty || isUpperEmpty) {
+      return { requiredBounds: true };
+    }
+
+    const lower = Number(lowerRaw);
+    const upper = Number(upperRaw);
+
+    const errors: ValidationErrors = {};
+
+    if (lower > upper) {
+      errors.invalidOrder = true;
+    }
+
+    if (minBound !== undefined && (lower < minBound || upper < minBound)) {
+      errors.belowMin = true;
+    }
+
+    if (maxBound !== undefined && (lower > maxBound || upper > maxBound)) {
+      errors.exceedsMax = true;
+    }
+
+    return Object.keys(errors).length > 0 ? errors : null;
+  };
+}
