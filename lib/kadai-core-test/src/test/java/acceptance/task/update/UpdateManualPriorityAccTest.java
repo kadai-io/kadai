@@ -29,6 +29,7 @@ import io.kadai.classification.api.models.ClassificationSummary;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.internal.jobs.JobRunner;
 import io.kadai.task.api.TaskService;
+import io.kadai.task.api.models.Attachment;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.Task;
 import io.kadai.testapi.KadaiInject;
@@ -136,6 +137,50 @@ class UpdateManualPriorityAccTest {
     Task result = taskService.updateTask(task);
 
     assertThat(result.getPriority()).isEqualTo(CLASSIFICATION_PRIORITY);
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_UpdatePriorityToNegativeValue_When_ClassificationPriorityChanges() throws Exception {
+    Classification classification =
+        defaultTestClassification().priority(1).buildAndStore(classificationService);
+    Task task =
+        TaskBuilder.newTask()
+            .classificationSummary(classification.asSummary())
+            .workbasketSummary(defaultWorkbasketSummary)
+            .primaryObjRef(defaultObjectReference)
+            .buildAndStore(taskService);
+
+    classification.setPriority(-10);
+    updateClassificationAndRunAssociatedJobs(classification);
+
+    assertThat(taskService.getTask(task.getId()).getPriority()).isEqualTo(-10);
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_UseHighestNegativePriority_When_ClassificationPriorityChanges() throws Exception {
+    Classification primaryClassification =
+        defaultTestClassification().priority(1).buildAndStore(classificationService);
+    Classification attachmentClassification =
+        defaultTestClassification()
+            .priority(-3)
+            .buildAndStore(classificationService);
+    Attachment attachment = taskService.newAttachment();
+    attachment.setClassificationSummary(attachmentClassification.asSummary());
+    attachment.setObjectReference(defaultObjectReference);
+    Task task =
+        TaskBuilder.newTask()
+            .classificationSummary(primaryClassification.asSummary())
+            .workbasketSummary(defaultWorkbasketSummary)
+            .primaryObjRef(defaultObjectReference)
+            .attachments(attachment)
+            .buildAndStore(taskService);
+
+    primaryClassification.setPriority(-10);
+    updateClassificationAndRunAssociatedJobs(primaryClassification);
+
+    assertThat(taskService.getTask(task.getId()).getPriority()).isEqualTo(-3);
   }
 
   @WithAccessId(user = "user-1-1")
