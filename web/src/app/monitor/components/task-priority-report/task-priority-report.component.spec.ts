@@ -15,13 +15,13 @@
  *
  */
 
-import { Component, input, Signal, signal } from '@angular/core';
+import { Signal, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatExpansionPanel } from '@angular/material/expansion';
 import { provideRouter, ActivatedRoute, Params } from '@angular/router';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TaskPriorityReportComponent } from './task-priority-report.component';
@@ -31,17 +31,22 @@ import { SettingMembers } from '../../../settings/components/Settings/expected-m
 import { ReportData } from '../../models/report-data';
 import { Settings } from 'app/settings/models/settings';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { CanvasComponent } from '../canvas/canvas.component';
+import { provideStore, State } from '@ngxs/store';
 
-@Component({
-  selector: 'kadai-monitor-canvas',
-  template: '',
-  standalone: true
+@State<Record<string, unknown>>({
+  name: 'settings',
+  defaults: {
+    settings: {
+      [SettingMembers.NameHighPriority]: 'High Priority',
+      [SettingMembers.NameMediumPriority]: 'Medium Priority',
+      [SettingMembers.NameLowPriority]: 'Low Priority',
+      [SettingMembers.ColorHighPriority]: '#FF0000',
+      [SettingMembers.ColorMediumPriority]: '#FFFF00',
+      [SettingMembers.ColorLowPriority]: '#00FF00'
+    }
+  }
 })
-class MockCanvasComponent {
-  id = input<string>();
-  row = input<unknown>();
-}
+class MockSettingsState {}
 
 const mockReportData: ReportData = {
   meta: {
@@ -52,10 +57,15 @@ const mockReportData: ReportData = {
     sumRowDesc: 'Total'
   },
   rows: [
+    // Depth 0 rows (workbasket level)
     { depth: 0, desc: ['TPK_VIP'], cells: [3, 0, 0], total: 3, display: true },
-    { depth: 0, desc: ['TPK_VIP_2'], cells: [0, 1, 0], total: 1, display: true }
+    { depth: 0, desc: ['TPK_VIP_2'], cells: [0, 1, 0], total: 1, display: true },
+    { depth: 0, desc: ['TPK_VIP_3'], cells: [3, 2, 1], total: 6, display: true },
+    // Depth 1 rows (classification level)
+    { depth: 1, desc: ['TPK_VIP', 'L1050'], cells: [2, 0, 0], total: 2, display: true },
+    { depth: 1, desc: ['TPK_VIP', 'L2000'], cells: [1, 0, 0], total: 1, display: true }
   ],
-  sumRow: [{ depth: 0, desc: ['Total'], cells: [3, 1, 0], total: 4, display: true }]
+  sumRow: [{ depth: 0, desc: ['Total'], cells: [6, 3, 1], total: 10, display: true }]
 };
 
 const mockSettings = {
@@ -114,6 +124,7 @@ describe('TaskPriorityReportComponent', () => {
       providers: [
         provideNoopAnimations(),
         provideRouter([]),
+        provideStore([MockSettingsState]),
         {
           provide: ActivatedRoute,
           useValue: {
@@ -123,12 +134,7 @@ describe('TaskPriorityReportComponent', () => {
         { provide: TaskPriorityReportFilterStateService, useValue: mockFilterStateService },
         { provide: TaskPriorityReportDataService, useValue: mockDataService }
       ]
-    })
-      .overrideComponent(TaskPriorityReportComponent, {
-        remove: { imports: [CanvasComponent] },
-        add: { imports: [MockCanvasComponent] }
-      })
-      .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TaskPriorityReportComponent);
     component = fixture.componentInstance;
@@ -143,8 +149,8 @@ describe('TaskPriorityReportComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('Signal Computations & Pure Helpers', () => {
-    it('should compute isDepthZero correctly when workbasketKey is undefined or defined', () => {
+  describe('Report Data Processing & Priority Distribution', () => {
+    it('should return true when workbasketKey is undefined and false when defined', () => {
       workbasketKeySignal.set(undefined);
       expect(component.isDepthZero()).toBe(true);
 
@@ -152,28 +158,28 @@ describe('TaskPriorityReportComponent', () => {
       expect(component.isDepthZero()).toBe(false);
     });
 
-    it('should convert number index to string via indexToString()', () => {
+    it('should convert number to string via indexToString()', () => {
       expect(component.indexToString(0)).toBe('0');
       expect(component.indexToString(5)).toBe('5');
     });
 
-    it('should compute colors from settings signals', () => {
+    it('should read high, medium, and low priority colors from settings', () => {
       expect(component.colorHigh()).toBe('#FF0000');
       expect(component.colorMedium()).toBe('#FFFF00');
       expect(component.colorLow()).toBe('#00FF00');
     });
 
-    it('should compute fallback color "inherit" when setting is missing', () => {
+    it('should fall back to "inherit" when color settings are missing', () => {
       settingsSignal.set({});
       expect(component.colorHigh()).toBe('inherit');
       expect(component.colorMedium()).toBe('inherit');
       expect(component.colorLow()).toBe('inherit');
     });
 
-    it('should build tableDataArray correctly based on reportData and priority names from settings', () => {
+    it('should build tableDataArray using reportData and priority names from settings', () => {
       const tableData = component.tableDataArray();
 
-      expect(tableData.length).toBe(2);
+      expect(tableData.length).toBe(5);
       expect(tableData[0]).toEqual([
         { priority: 'High Priority', number: 3 },
         { priority: 'Medium Priority', number: 0 },
@@ -182,14 +188,14 @@ describe('TaskPriorityReportComponent', () => {
       ]);
     });
 
-    it('should return empty tableDataArray when reportData or settings are missing', () => {
+    it('should return an empty tableDataArray when reportData is undefined', () => {
       reportDataSignal.set(undefined);
       expect(component.tableDataArray()).toEqual([]);
     });
   });
 
-  describe('Host Binding Styles', () => {
-    it('should set CSS variables on component host element', () => {
+  describe('Visual Styling & Dynamic Branding', () => {
+    it('should set CSS color variables on component host element', () => {
       const hostElement: HTMLElement = fixture.nativeElement;
 
       expect(hostElement.style.getPropertyValue('--color-high-priority')).toBe('#FF0000');
@@ -198,15 +204,15 @@ describe('TaskPriorityReportComponent', () => {
     });
   });
 
-  describe('User Interactions & Filter Actions', () => {
-    it('should delegate toggleFilter to filterState service onFilterChange', () => {
+  describe('Report Filtering & User Interaction', () => {
+    it('should call toggleFilter on filterStateService when onFilterChange is triggered', () => {
       component.onFilterChange(true, 'State READY');
 
       expect(mockFilterStateService.toggleFilter).toHaveBeenCalledWith('State READY', true);
       expect(component.activeFilters()).toContain('State READY');
     });
 
-    it('should update isPanelOpen when expansion panel emits opened/closed events', () => {
+    it('should toggle isPanelOpen on expansion panel (opened) and (closed) events', () => {
       const panelDebug = fixture.debugElement.query(By.directive(MatExpansionPanel));
       expect(panelDebug).toBeTruthy();
 
@@ -219,7 +225,7 @@ describe('TaskPriorityReportComponent', () => {
       expect(component.isPanelOpen).toBe(false);
     });
 
-    it('should call onFilterChange when mat-checkbox changes state', () => {
+    it('should trigger onFilterChange when mat-checkbox fires change event', () => {
       const checkboxDebug = fixture.debugElement.query(By.directive(MatCheckbox));
       expect(checkboxDebug).toBeTruthy();
 
@@ -230,14 +236,14 @@ describe('TaskPriorityReportComponent', () => {
     });
   });
 
-  describe('Template Rendering Branches', () => {
-    it('should render headline with report name and formatted date', () => {
+  describe('Report View Layout & Navigation States', () => {
+    it('should render headline with report name', () => {
       const headline = fixture.nativeElement.querySelector('.task-priority-report__headline');
       expect(headline).toBeTruthy();
       expect(headline.textContent).toContain('Test Report');
     });
 
-    it('should render depth-zero breadcrumb when isDepthZero is true', () => {
+    it('should render breadcrumb for workbaskets when workbasketKey is undefined', () => {
       workbasketKeySignal.set(undefined);
       fixture.detectChanges();
 
@@ -246,7 +252,7 @@ describe('TaskPriorityReportComponent', () => {
       expect(breadcrumb.querySelector('a')).toBeNull();
     });
 
-    it('should render depth-one breadcrumb with parent link when workbasketKey is set', () => {
+    it('should render breadcrumb link and workbasketKey when workbasketKey is set', () => {
       workbasketKeySignal.set('WBK_123');
       fixture.detectChanges();
 
@@ -267,7 +273,7 @@ describe('TaskPriorityReportComponent', () => {
       expect(fixture.debugElement.query(By.directive(MatExpansionPanel))).toBeNull();
     });
 
-    it('should display empty message when reportData has no rows', () => {
+    it('should display "Could not find any tasks" message when rows is empty', () => {
       reportDataSignal.set({ ...mockReportData, rows: [] });
       fixture.detectChanges();
 
@@ -276,12 +282,12 @@ describe('TaskPriorityReportComponent', () => {
       expect(emptyMsg.textContent).toContain('Could not find any tasks which fulfill the current filter criteria.');
     });
 
-    it('should render tables for each workbasket row', () => {
+    it('should render tables with priority and number of tasks', () => {
       const tables = fixture.nativeElement.querySelectorAll('table');
-      expect(tables.length).toBe(2);
+      expect(tables.length).toBe(5);
     });
 
-    it('should not render report container if reportData is undefined', () => {
+    it('should not show report when reportData is null or undefined', () => {
       reportDataSignal.set(undefined);
       fixture.detectChanges();
 
