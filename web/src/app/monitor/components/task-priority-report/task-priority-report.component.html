@@ -12,35 +12,32 @@
 ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 ~    See the License for the specific language governing permissions and
 ~    limitations under the License.
-~
-~
 -->
 
 @if (reportData(); as reportData) {
   <div class="task-priority-report">
     <!-- HEADER -->
-    <h4 class="task-priority-report__headline"> {{ reportData.meta.name }} ({{
-        reportData.meta.date | date: 'medium'
-      }})
+    <h4 class="task-priority-report__headline">
+      {{ reportData.meta.name }} ({{ reportData.meta.date | date: 'medium' }})
     </h4>
     <mat-divider class="task-priority-report__divider" />
     <div class="breadcrumb-filter-row">
       <nav class="breadcrumb">
         @if (isDepthZero()) {
           <span>
-      <mat-icon>list_alt</mat-icon>
-      <span>Workbaskets</span>
-    </span>
-        } @else {
-          <matbutton [routerLink]="['/kadai/monitor/tasks-priority']" class="breadcrumb-item">
             <mat-icon>list_alt</mat-icon>
             <span>Workbaskets</span>
-          </matbutton>
+          </span>
+        } @else {
+          <a [routerLink]="['/kadai/monitor/tasks-priority']" class="breadcrumb-item">
+            <mat-icon>list_alt</mat-icon>
+            <span>Workbaskets</span>
+          </a>
           <mat-icon>chevron_right</mat-icon>
           <span>
-      <mat-icon>folder_open</mat-icon>
-      <span>{{ workbasketKey() }}</span>
-    </span>
+            <mat-icon>folder_open</mat-icon>
+            <span>{{ filterState.workbasketKey() }}</span>
+          </span>
         }
       </nav>
       @if (filtersAreSpecified()) {
@@ -52,7 +49,7 @@
             <div class="task-priority-report__filters">
               @for (key of keys(); track key) {
                 <mat-checkbox
-                  (change)="emitFilter($event.checked, key)"
+                  (change)="onFilterChange($event.checked, key)"
                   [checked]="activeFilters().includes(key)">
                   {{ key }}
                 </mat-checkbox>
@@ -61,57 +58,51 @@
           </mat-expansion-panel>
         </mat-accordion>
       } @else {
-        <div>No filters defined.</div>
+        <div class="no-filters-label">No filters defined.</div>
       }
     </div>
-    @if (reportData.rows.length == 0) {
-      <div> Could not find any tasks which fulfill the current
-        filter criteria.
+
+    @if (reportData.rows.length === 0) {
+      <div class="task-priority-report__empty">
+        Could not find any tasks which fulfill the current filter criteria.
       </div>
     }
+
     <div class="task-priority-report__workbaskets">
       @for (row of reportData.rows; track row; let i = $index) {
-        <div
-          class="task-priority-report__workbasket">
-          <!-- WORKBASKET NAME -->
+        <div class="task-priority-report__workbasket">
           <div class="task-priority-report__workbasket-headline">
             <h6>
               @if (isDepthZero()) {
-                <a
-                  [routerLink]="['/kadai/monitor/tasks-priority', row.desc[0]]">{{ row.desc[0] }}</a>
+                <a [routerLink]="['/kadai/monitor/tasks-priority', row.desc[0]]">{{ row.desc[0] }}</a>
               } @else {
                 {{ row.desc[1] }}
               }
             </h6>
           </div>
+
           <!-- CHART -->
           <kadai-monitor-canvas [id]="indexToString(i)" [row]="row" />
+
           <!-- TABLE -->
-          <div>
+          <div class="task-priority-report__table-container">
             <table [dataSource]="tableDataArray()[i]" mat-table>
               <!-- Column: Priority -->
               <ng-container matColumnDef="priority">
-                <th *matHeaderCellDef mat-header-cell> Priority</th>
-                <td *matCellDef="let element" [class]="{
-           'task-priority-report__row--high': element.priority == nameHighPriority,
-           'task-priority-report__row--medium': element.priority == nameMediumPriority,
-           'task-priority-report__row--low': element.priority == nameLowPriority}" mat-cell>
+                <th *matHeaderCellDef mat-header-cell>Priority</th>
+                <td *matCellDef="let element; let rowIdx = index" [ngClass]="'priority-row-' + rowIdx" mat-cell>
                   {{ element.priority }}
                 </td>
               </ng-container>
               <!-- Column: Number of Tasks -->
               <ng-container matColumnDef="number">
-                <th *matHeaderCellDef mat-header-cell> Number of Tasks</th>
-                <td *matCellDef="let element" [class]="{
-           'task-priority-report__row--high': element.priority == nameHighPriority,
-           'task-priority-report__row--medium': element.priority == nameMediumPriority,
-           'task-priority-report__row--low': element.priority == nameLowPriority}" mat-cell>
+                <th *matHeaderCellDef mat-header-cell>Number of Tasks</th>
+                <td *matCellDef="let element; let rowIdx = index" [ngClass]="'priority-row-' + rowIdx" mat-cell>
                   {{ element.number }}
                 </td>
               </ng-container>
               <tr *matHeaderRowDef="columns" mat-header-row></tr>
-              <tr *matRowDef="let row; columns: columns;" mat-row>
-              </tr>
+              <tr *matRowDef="let row; columns: columns;" mat-row></tr>
             </table>
           </div>
         </div>
