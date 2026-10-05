@@ -67,7 +67,7 @@
     "sass": "1.105.0",
     "typescript": "6.0.3",
     "vite": "8.3.1",
-    "vitest": "5.0.2"
+    "vitest": "5.0.3"
   },
   "packageManager": "yarn@4.17.1"
 }
