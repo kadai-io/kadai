@@ -16,229 +16,142 @@
  *
  */
 
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { describe, expect, it } from 'vitest';
-import { validateSettings } from './settings.validators';
-import { Settings, SettingTypes } from '../../models/settings';
+import { intervalValidator, jsonValidator } from './settings.validators';
 
-describe('validateSettings', () => {
-  it('should return no invalid members for a Text type within bounds (min and max)', () => {
-    const settings: Settings = {
-      schema: [
-        {
-          displayName: 'Group',
-          members: [{ displayName: 'Label', key: 'myText', type: SettingTypes.Text, min: 2, max: 10 }]
-        }
-      ],
-      myText: 'hello'
-    };
-    const result = validateSettings(settings);
-    expect(result).toEqual([]);
+describe('Settings Validators', () => {
+  describe('Text Validators', () => {
+    it('should pass validation for Text within min and max bounds', () => {
+      const control = new FormControl('hello', [Validators.minLength(2), Validators.maxLength(10)]);
+      expect(control.errors).toBeNull();
+      expect(control.valid).toBe(true);
+    });
+
+    it('should pass validation for empty string when min is 0', () => {
+      const control = new FormControl('', [Validators.minLength(0), Validators.maxLength(10)]);
+      expect(control.errors).toBeNull();
+      expect(control.valid).toBe(true);
+    });
+
+    it.each([
+      { value: 'hi', min: 5, max: 20, errorKey: 'minlength', description: 'below min length' },
+      { value: 'toolong', min: 1, max: 3, errorKey: 'maxlength', description: 'exceeds max length' },
+      { value: 'ab', min: 5, max: undefined, errorKey: 'minlength', description: 'below min-only constraint' },
+      { value: 'waytoolong', min: undefined, max: 3, errorKey: 'maxlength', description: 'exceeds max-only constraint' }
+    ])('should mark Text as invalid when $description', ({ value, min, max, errorKey }) => {
+      const validators = [];
+      if (min !== undefined) validators.push(Validators.minLength(min));
+      if (max !== undefined) validators.push(Validators.maxLength(max));
+
+      const control = new FormControl(value, validators);
+      expect(control.errors?.[errorKey]).toBeDefined();
+      expect(control.valid).toBe(false);
+    });
   });
 
-  it('should mark a Text type as invalid when value length is below min', () => {
-    const settings: Settings = {
-      schema: [
+  describe('intervalValidator', () => {
+    it.each([
+      { lower: 10, upper: 80, min: 0, max: 100, description: 'valid interval within bounds' },
+      { lower: 0, upper: 100, min: 0, max: 100, description: 'bounds strictly equal minBound and maxBound' },
+      { lower: 50, upper: 50, min: 0, max: 100, description: 'lower equals upper bound' }
+    ])('should return null when $description', ({ lower, upper, min, max }) => {
+      const group = new FormGroup(
         {
-          displayName: 'Group',
-          members: [{ displayName: 'Label', key: 'myText', type: SettingTypes.Text, min: 5, max: 20 }]
-        }
-      ],
-      myText: 'hi'
-    };
-    const result = validateSettings(settings);
-    expect(result).toContain('myText');
-  });
-
-  it('should mark a Text type as invalid when value length exceeds max', () => {
-    const settings: Settings = {
-      schema: [
-        {
-          displayName: 'Group',
-          members: [{ displayName: 'Label', key: 'myText', type: SettingTypes.Text, min: 1, max: 3 }]
-        }
-      ],
-      myText: 'toolong'
-    };
-    const result = validateSettings(settings);
-    expect(result).toContain('myText');
-  });
-
-  it('should mark a Text type as invalid when value length is below min-only constraint', () => {
-    const settings: Settings = {
-      schema: [
-        {
-          displayName: 'Group',
-          members: [{ displayName: 'Label', key: 'myText', type: SettingTypes.Text, min: 5 }]
-        }
-      ],
-      myText: 'ab'
-    };
-    const result = validateSettings(settings);
-    expect(result).toContain('myText');
-  });
-
-  it('should mark a Text type as invalid when value length exceeds max-only constraint', () => {
-    const settings: Settings = {
-      schema: [
-        {
-          displayName: 'Group',
-          members: [{ displayName: 'Label', key: 'myText', type: SettingTypes.Text, max: 3 }]
-        }
-      ],
-      myText: 'waytoolong'
-    };
-    const result = validateSettings(settings);
-    expect(result).toContain('myText');
-  });
-
-  it('should return no invalid members for a Text type with no min/max constraints', () => {
-    const settings: Settings = {
-      schema: [
-        {
-          displayName: 'Group',
-          members: [{ displayName: 'Label', key: 'myText', type: SettingTypes.Text }]
-        }
-      ],
-      myText: 'anything goes'
-    };
-    const result = validateSettings(settings);
-    expect(result).toEqual([]);
-  });
-
-  it('should return no invalid members for a valid Interval type within bounds', () => {
-    const settings: Settings = {
-      schema: [
-        {
-          displayName: 'Group',
-          members: [{ displayName: 'Range', key: 'myInterval', type: SettingTypes.Interval, min: 0, max: 100 }]
-        }
-      ],
-      myInterval: [10, 80]
-    };
-    const result = validateSettings(settings);
-    expect(result).toEqual([]);
-  });
-
-  it('should mark an Interval type as invalid when lower bound is below min', () => {
-    const settings: Settings = {
-      schema: [
-        {
-          displayName: 'Group',
-          members: [{ displayName: 'Range', key: 'myInterval', type: SettingTypes.Interval, min: 5, max: 100 }]
-        }
-      ],
-      myInterval: [2, 80]
-    };
-    const result = validateSettings(settings);
-    expect(result).toContain('myInterval');
-  });
-
-  it('should mark an Interval type as invalid when upper bound exceeds max', () => {
-    const settings: Settings = {
-      schema: [
-        {
-          displayName: 'Group',
-          members: [{ displayName: 'Range', key: 'myInterval', type: SettingTypes.Interval, min: 0, max: 50 }]
-        }
-      ],
-      myInterval: [10, 80]
-    };
-    const result = validateSettings(settings);
-    expect(result).toContain('myInterval');
-  });
-
-  it('should mark an Interval type as invalid when value[0] > value[1]', () => {
-    const settings: Settings = {
-      schema: [
-        {
-          displayName: 'Group',
-          members: [{ displayName: 'Range', key: 'myInterval', type: SettingTypes.Interval }]
-        }
-      ],
-      myInterval: [90, 10]
-    };
-    const result = validateSettings(settings);
-    expect(result).toContain('myInterval');
-  });
-
-  it('should return no invalid members for a valid JSON string', () => {
-    const settings: Settings = {
-      schema: [
-        {
-          displayName: 'Group',
-          members: [{ displayName: 'Config', key: 'myJson', type: SettingTypes.Json }]
-        }
-      ],
-      myJson: '{"key": "value"}'
-    };
-    const result = validateSettings(settings);
-    expect(result).toEqual([]);
-  });
-
-  it('should mark a Json type as invalid for a malformed JSON string', () => {
-    const settings: Settings = {
-      schema: [
-        {
-          displayName: 'Group',
-          members: [{ displayName: 'Config', key: 'myJson', type: SettingTypes.Json }]
-        }
-      ],
-      myJson: '{not valid json'
-    };
-    const result = validateSettings(settings);
-    expect(result).toContain('myJson');
-  });
-
-  it('should return no invalid members when schema has no members with constraints', () => {
-    const settings: Settings = {
-      schema: [
-        {
-          displayName: 'Group',
-          members: [{ displayName: 'Color', key: 'myColor', type: SettingTypes.Color }]
-        }
-      ],
-      myColor: '#ff0000'
-    };
-    const result = validateSettings(settings);
-    expect(result).toEqual([]);
-  });
-
-  it('should handle multiple groups and multiple members', () => {
-    const settings: Settings = {
-      schema: [
-        {
-          displayName: 'Group A',
-          members: [
-            { displayName: 'Text A', key: 'textA', type: SettingTypes.Text, min: 1, max: 5 },
-            { displayName: 'Json A', key: 'jsonA', type: SettingTypes.Json }
-          ]
+          lower: new FormControl(lower),
+          upper: new FormControl(upper)
         },
+        { validators: [intervalValidator(min, max)] }
+      );
+
+      expect(group.errors).toBeNull();
+      expect(group.valid).toBe(true);
+    });
+
+    it.each([
+      { lower: 2, upper: 80, min: 5, max: 100, errorKey: 'belowMin', description: 'lower bound is below minBound' },
+      { lower: 10, upper: 80, min: 0, max: 50, errorKey: 'exceedsMax', description: 'upper bound exceeds maxBound' },
+      { lower: 90, upper: 10, min: undefined, max: undefined, errorKey: 'invalidOrder', description: 'lower > upper' }
+    ])('should mark interval as invalid when $description', ({ lower, upper, min, max, errorKey }) => {
+      const group = new FormGroup(
         {
-          displayName: 'Group B',
-          members: [{ displayName: 'Text B', key: 'textB', type: SettingTypes.Text, min: 1, max: 5 }]
-        }
-      ],
-      textA: 'ok',
-      jsonA: '{"valid": true}',
-      textB: 'this string is too long for the max constraint'
-    };
-    const result = validateSettings(settings);
-    expect(result).not.toContain('textA');
-    expect(result).not.toContain('jsonA');
-    expect(result).toContain('textB');
+          lower: new FormControl(lower),
+          upper: new FormControl(upper)
+        },
+        { validators: [intervalValidator(min, max)] }
+      );
+
+      expect(group.errors?.[errorKey]).toBe(true);
+      expect(group.valid).toBe(false);
+    });
+
+    it('should handle null or undefined control values gracefully without crashing', () => {
+      const group = new FormGroup(
+        {
+          lower: new FormControl(null),
+          upper: new FormControl(null)
+        },
+        { validators: [intervalValidator(0, 100)] }
+      );
+
+      expect(() => group.updateValueAndValidity()).not.toThrow();
+    });
+
+    it('should return requiredBounds error when lower or upper bound is missing/null', () => {
+      const validator = intervalValidator(0, 100);
+
+      const groupWithNullLower = new FormGroup({
+        lower: new FormControl(null),
+        upper: new FormControl(10)
+      });
+
+      const groupWithNullUpper = new FormGroup({
+        lower: new FormControl(5),
+        upper: new FormControl(null)
+      });
+
+      const groupWithBothNull = new FormGroup({
+        lower: new FormControl(null),
+        upper: new FormControl(null)
+      });
+
+      expect(validator(groupWithNullLower)).toEqual({ requiredBounds: true });
+      expect(validator(groupWithNullUpper)).toEqual({ requiredBounds: true });
+      expect(validator(groupWithBothNull)).toEqual({ requiredBounds: true });
+    });
+
+    it('should pass when both bounds are provided and within range', () => {
+      const validator = intervalValidator(0, 100);
+
+      const validGroup = new FormGroup({
+        lower: new FormControl(2),
+        upper: new FormControl(8)
+      });
+
+      expect(validator(validGroup)).toBeNull();
+    });
   });
 
-  it('should accept min of 0 as a valid minimum constraint', () => {
-    const settings: Settings = {
-      schema: [
-        {
-          displayName: 'Group',
-          members: [{ displayName: 'Text', key: 'myText', type: SettingTypes.Text, min: 0, max: 10 }]
-        }
-      ],
-      myText: ''
-    };
-    const result = validateSettings(settings);
-    expect(result).toEqual([]);
+  describe('jsonValidator', () => {
+    it.each([
+      { value: '{"key": "value"}', description: 'valid JSON object string' },
+      { value: '[1, 2, 3]', description: 'valid JSON array' },
+      { value: '123', description: 'primitive number string' }
+    ])('should return null for $description', ({ value }) => {
+      const control = new FormControl(value, [jsonValidator()]);
+      expect(control.errors).toBeNull();
+      expect(control.valid).toBe(true);
+    });
+
+    it.each([
+      { value: '', description: 'empty JSON string' },
+      { value: null, description: 'null value' },
+      { value: undefined, description: 'undefined value' },
+      { value: '{not valid json', description: 'malformed JSON string' }
+    ])('should return invalidJson error for $description', ({ value }) => {
+      const control = new FormControl(value, [jsonValidator()]);
+      expect(control.errors?.['invalidJson']).toBe(true);
+      expect(control.valid).toBe(false);
+    });
   });
 });
