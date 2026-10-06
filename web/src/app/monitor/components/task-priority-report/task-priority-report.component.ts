@@ -75,6 +75,7 @@ import { SettingMembers } from '../../../settings/components/Settings/expected-m
     MatCheckbox,
     NgClass
   ],
+  providers: [TaskPriorityReportDataService],
   host: {
     '[style.--color-high-priority]': 'colorHigh()',
     '[style.--color-medium-priority]': 'colorMedium()',

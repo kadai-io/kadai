@@ -40,19 +40,18 @@ export class TaskPriorityReportFilterStateService {
   readonly workbasketKey = signal<string | undefined>(undefined);
 
   readonly parsedFilterConfig = computed<{ config: FilterConfig; isValid: boolean }>(() => {
-    const rawSettings = this.settings() as Record<string, unknown> | undefined;
-    const rawFilter = rawSettings?.[SETTING_MEMBER_FILTER];
+    const rawFilter = this.settings()?.[SETTING_MEMBER_FILTER];
 
-    if (!rawFilter || typeof rawFilter !== 'string' || !rawFilter.trim()) {
+    if (typeof rawFilter !== 'string' || !rawFilter.trim()) {
       return { config: {}, isValid: false };
     }
 
-    try {
-      const parsed = JSON.parse(rawFilter) as FilterConfig;
+    const parsed = this.safeJsonParse(rawFilter);
+    if (this.isValidFilterConfig(parsed)) {
       return { config: parsed, isValid: true };
-    } catch {
-      return { config: {}, isValid: false };
     }
+
+    return { config: {}, isValid: false };
   });
 
   readonly filterKeys = computed(() => Object.keys(this.parsedFilterConfig().config));
@@ -68,7 +67,8 @@ export class TaskPriorityReportFilterStateService {
       if (!filterGroup) return;
 
       Object.entries(filterGroup).forEach(([field, values]) => {
-        query[field] = query[field] ? [...query[field], ...values] : [...values];
+        const existing = query[field] ?? [];
+        query[field] = Array.from(new Set([...existing, ...values]));
       });
     });
 
@@ -76,8 +76,33 @@ export class TaskPriorityReportFilterStateService {
   });
 
   toggleFilter(key: string, isEnabled: boolean): void {
-    const current = this.activeFilters();
-    const next = isEnabled ? [...current, key] : current.filter((k) => k !== key);
-    this.activeFilters.set(next);
+    this.activeFilters.update((filters) => {
+      if (isEnabled) {
+        return filters.includes(key) ? filters : [...filters, key];
+      }
+      return filters.filter((f) => f !== key);
+    });
+  }
+
+  private safeJsonParse(jsonString: string): unknown {
+    try {
+      return JSON.parse(jsonString);
+    } catch {
+      return null;
+    }
+  }
+
+  private isValidFilterConfig(value: unknown): value is FilterConfig {
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+      return false;
+    }
+
+    return Object.values(value).every(
+      (group) =>
+        typeof group === 'object' &&
+        group !== null &&
+        !Array.isArray(group) &&
+        Object.values(group).every((field) => Array.isArray(field) && field.every((item) => typeof item === 'string'))
+    );
   }
 }

@@ -17,7 +17,7 @@
 
 import { inject, Injectable } from '@angular/core';
 import { combineLatest, Observable, of } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, finalize, map, switchMap } from 'rxjs/operators';
 import { Store } from '@ngxs/store';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 
@@ -31,7 +31,7 @@ import { WorkbasketType } from '../../shared/models/workbasket-type';
 import { ReportData } from '../models/report-data';
 import { PriorityInterval } from '../models/priority-interval';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class TaskPriorityReportDataService {
   private readonly store = inject(Store);
   private readonly domainService = inject(DomainService);
@@ -45,7 +45,6 @@ export class TaskPriorityReportDataService {
     toObservable(this.filterState.workbasketKey),
     toObservable(this.filterState.activeQuery)
   ]).pipe(
-    tap(() => this.requestInProgressService.setRequestInProgress(true)),
     switchMap(([settings, domain, workbasketKey, query]) => {
       if (!settings) return of(undefined);
 
@@ -60,15 +59,17 @@ export class TaskPriorityReportDataService {
         ? this.monitorService.getTasksByPriorityReport([WorkbasketType.TOPIC], intervals, domain, query)
         : this.monitorService.getTasksByDetailedPriorityReport([WorkbasketType.TOPIC], intervals, domain, query);
 
+      this.requestInProgressService.beginRequest();
+
       return request$.pipe(
         map((reportData) => this.filterRows(reportData, isDepthZero, workbasketKey)),
         catchError((err) => {
           console.error('Failed to load Task Priority Report', err);
           return of(undefined);
-        })
+        }),
+        finalize(() => this.requestInProgressService.endRequest())
       );
-    }),
-    tap(() => this.requestInProgressService.setRequestInProgress(false))
+    })
   );
 
   readonly reportData = toSignal(this.reportData$);
