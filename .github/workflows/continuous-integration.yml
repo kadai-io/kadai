@@ -460,6 +460,12 @@ jobs:
             module: kadai-simplehistory-provider
             database: POSTGRES
           - java_version: 21
+            module: kadai-rest-spring
+            database: DB2
+          - java_version: 21
+            module: kadai-rest-spring
+            database: POSTGRES
+          - java_version: 21
             module: kadai-rest-spring-example-boot
             database: DB2
           - java_version: 21
@@ -530,6 +536,7 @@ jobs:
       - name: Test
         run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip -T 1C
         env:
+          # TestContainerExtension and the Spring test context initializer select this provider.
           DB: ${{ matrix.database }}
       - name: Eco CI Measurement of ${{ matrix.module }} (H2)
         if: matrix.database == 'H2' && matrix.java_version == 21
