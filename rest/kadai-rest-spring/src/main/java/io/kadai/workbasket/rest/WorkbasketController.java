@@ -187,6 +187,13 @@ public class WorkbasketController implements WorkbasketApi {
               + workbasketRepresentationModel.getWorkbasketId()
               + "')");
     }
+    if (workbasketRepresentationModel.wasCreatedProvided()
+        && workbasketRepresentationModel.getCreated() == null) {
+      Workbasket currentWorkbasket = workbasketService.getWorkbasket(workbasketId);
+      if (currentWorkbasket.getCreated() != null) {
+        throw new InvalidArgumentException("The Workbasket creation timestamp cannot be cleared.");
+      }
+    }
     Workbasket workbasket =
         workbasketRepresentationModelAssembler.toEntityModel(workbasketRepresentationModel);
     workbasket = workbasketService.updateWorkbasket(workbasket);

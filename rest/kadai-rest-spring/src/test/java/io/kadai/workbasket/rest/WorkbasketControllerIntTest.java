@@ -35,9 +35,13 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -45,9 +49,11 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.json.JsonMapper;
 
 /** Test WorkbasketController. */
 @KadaiSpringBootTest
@@ -55,11 +61,28 @@ class WorkbasketControllerIntTest {
 
   private final RestHelper restHelper;
   private final RestClient restClient;
+  private final JsonMapper jsonMapper;
+  private String createdWorkbasketId;
 
   @Autowired
-  WorkbasketControllerIntTest(RestHelper restHelper, RestClient restClient) {
+  WorkbasketControllerIntTest(
+      RestHelper restHelper, RestClient restClient, JsonMapper jsonMapper) {
     this.restHelper = restHelper;
     this.restClient = restClient;
+    this.jsonMapper = jsonMapper;
+  }
+
+  @AfterEach
+  void cleanUpCreatedWorkbasket() {
+    if (createdWorkbasketId != null) {
+      restClient
+          .delete()
+          .uri(restHelper.toUrl(RestEndpoints.URL_WORKBASKET_ID, createdWorkbasketId))
+          .headers(
+              headers -> headers.addAll(RestHelper.generateHeadersForUser("businessadmin")))
+          .retrieve()
+          .toBodilessEntity();
+    }
   }
 
   @Test
@@ -228,6 +251,222 @@ class WorkbasketControllerIntTest {
 
     assertThat(responseUpdate.getBody()).isNotNull();
     assertThat(responseUpdate.getBody().getName()).isEqualTo("new name");
+  }
+
+  @Test
+  void should_PreserveCallerSelectedWorkbasketIdAndGenerateTimestamps()
+      throws Exception {
+    String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET);
+    HttpHeaders headers = RestHelper.generateHeadersForUser("businessadmin");
+    String chosenId = "caller-" + UUID.randomUUID().toString().substring(0, 30);
+    WorkbasketRepresentationModel request =
+        newWorkbasketRepresentation("chosen-" + UUID.randomUUID());
+    request.setWorkbasketId(chosenId);
+
+    ResponseEntity<WorkbasketRepresentationModel> createResponse =
+        restClient
+            .post()
+            .uri(url)
+            .headers(httpHeaders -> httpHeaders.addAll(headers))
+            .body(request)
+            .retrieve()
+            .toEntity(WorkbasketRepresentationModel.class);
+    WorkbasketRepresentationModel created = createResponse.getBody();
+    if (created != null) {
+      createdWorkbasketId = created.getWorkbasketId();
+    }
+    assertThat(created).isNotNull();
+    assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    assertThat(created.getWorkbasketId()).isEqualTo(chosenId);
+    assertThat(created.getCreated()).isNotNull().isNotEqualTo(Instant.EPOCH);
+    assertThat(created.getModified()).isNotNull().isNotEqualTo(Instant.EPOCH);
+    assertThat(created.getName()).isEqualTo(request.getName());
+
+    WorkbasketRepresentationModel persisted = getWorkbasket(chosenId, headers);
+    assertThat(persisted.getWorkbasketId()).isEqualTo(chosenId);
+    assertThat(persisted.getCreated()).isEqualTo(created.getCreated());
+    assertThat(persisted.getModified()).isEqualTo(created.getModified());
+  }
+
+  @Test
+  void should_GenerateWorkbasketIdWhenOmitted() {
+    HttpHeaders headers = RestHelper.generateHeadersForUser("businessadmin");
+    WorkbasketRepresentationModel request =
+        newWorkbasketRepresentation("generated-" + UUID.randomUUID());
+
+    WorkbasketRepresentationModel created =
+        restClient
+            .post()
+            .uri(restHelper.toUrl(RestEndpoints.URL_WORKBASKET))
+            .headers(httpHeaders -> httpHeaders.addAll(headers))
+            .body(request)
+            .retrieve()
+            .toEntity(WorkbasketRepresentationModel.class)
+            .getBody();
+    assertThat(created).isNotNull();
+    createdWorkbasketId = created.getWorkbasketId();
+    assertThat(createdWorkbasketId).startsWith("WBI:");
+    assertThat(created.getCreated()).isNotNull().isNotEqualTo(Instant.EPOCH);
+    assertThat(created.getModified()).isNotNull().isNotEqualTo(Instant.EPOCH);
+
+    WorkbasketRepresentationModel persisted = getWorkbasket(createdWorkbasketId, headers);
+    assertThat(persisted.getWorkbasketId()).isEqualTo(createdWorkbasketId);
+    assertThat(persisted.getCreated()).isEqualTo(created.getCreated());
+    assertThat(persisted.getModified()).isEqualTo(created.getModified());
+  }
+
+  @Test
+  void should_PreserveCreatedWhenOmittedAndRejectChangedOrExplicitlyClearedCreated()
+      throws Exception {
+    HttpHeaders headers = RestHelper.generateHeadersForUser("businessadmin");
+    WorkbasketRepresentationModel createRequest =
+        newWorkbasketRepresentation("created-time-" + UUID.randomUUID());
+    WorkbasketRepresentationModel created =
+        restClient
+            .post()
+            .uri(restHelper.toUrl(RestEndpoints.URL_WORKBASKET))
+            .headers(httpHeaders -> httpHeaders.addAll(headers))
+            .body(createRequest)
+            .retrieve()
+            .toEntity(WorkbasketRepresentationModel.class)
+            .getBody();
+    if (created != null) {
+      createdWorkbasketId = created.getWorkbasketId();
+    }
+    assertThat(created).isNotNull();
+    String workbasketId = created.getWorkbasketId();
+    Instant originalCreated = created.getCreated();
+    Instant originalModified = created.getModified();
+    String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET_ID, workbasketId);
+
+    assertBadRequest(
+        () -> putWorkbasket(url, updateBody(created, originalCreated.plusSeconds(1)), headers));
+    WorkbasketRepresentationModel afterChangedCreated = getWorkbasket(workbasketId, headers);
+    assertThat(afterChangedCreated.getCreated()).isEqualTo(originalCreated);
+    assertThat(afterChangedCreated.getModified()).isEqualTo(originalModified);
+
+    assertBadRequest(
+        () -> putWorkbasket(url, updateBodyWithExplicitNullCreated(created), headers));
+    WorkbasketRepresentationModel afterClearCreated = getWorkbasket(workbasketId, headers);
+    assertThat(afterClearCreated.getCreated()).isEqualTo(originalCreated);
+    assertThat(afterClearCreated.getModified()).isEqualTo(originalModified);
+
+    created.setName("Updated name");
+    created.setDescription("Updated description");
+    created.setType(WorkbasketType.TOPIC);
+    created.setOwner("updated-owner");
+    created.setCustom1("updated custom value");
+    created.setOrgLevel1("updated organization");
+    created.setMarkedForDeletion(true);
+    ResponseEntity<WorkbasketRepresentationModel> omittedCreatedResponse =
+        putWorkbasket(url, updateBodyWithoutCreated(created), headers);
+    assertThat(omittedCreatedResponse.getBody()).isNotNull();
+    assertThat(omittedCreatedResponse.getBody().getCreated()).isEqualTo(originalCreated);
+    WorkbasketRepresentationModel persisted = getWorkbasket(workbasketId, headers);
+    assertThat(persisted.getCreated()).isEqualTo(originalCreated);
+    assertThat(persisted.getName()).isEqualTo("Updated name");
+    assertThat(persisted.getDescription()).isEqualTo("Updated description");
+    assertThat(persisted.getType()).isEqualTo(WorkbasketType.TOPIC);
+    assertThat(persisted.getOwner()).isEqualTo("updated-owner");
+    assertThat(persisted.getCustom1()).isEqualTo("updated custom value");
+    assertThat(persisted.getOrgLevel1()).isEqualTo("updated organization");
+    assertThat(persisted.getMarkedForDeletion()).isTrue();
+  }
+
+  @Test
+  void should_RejectChangesToWorkbasketKeyAndDomain() throws Exception {
+    HttpHeaders headers = RestHelper.generateHeadersForUser("businessadmin");
+    WorkbasketRepresentationModel created =
+        restClient
+            .post()
+            .uri(restHelper.toUrl(RestEndpoints.URL_WORKBASKET))
+            .headers(httpHeaders -> httpHeaders.addAll(headers))
+            .body(newWorkbasketRepresentation("immutable-" + UUID.randomUUID()))
+            .retrieve()
+            .toEntity(WorkbasketRepresentationModel.class)
+            .getBody();
+    assertThat(created).isNotNull();
+    createdWorkbasketId = created.getWorkbasketId();
+    String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET_ID, createdWorkbasketId);
+    String originalKey = created.getKey();
+    final String originalDomain = created.getDomain();
+
+    created.setKey("different-" + UUID.randomUUID());
+    assertNotFound(() -> putWorkbasket(url, updateBody(created, created.getCreated()), headers));
+    created.setKey(originalKey);
+
+    created.setDomain("DOMAIN_B");
+    assertNotFound(() -> putWorkbasket(url, updateBody(created, created.getCreated()), headers));
+
+    WorkbasketRepresentationModel persisted = getWorkbasket(createdWorkbasketId, headers);
+    assertThat(persisted.getKey()).isEqualTo(originalKey);
+    assertThat(persisted.getDomain()).isEqualTo(originalDomain);
+  }
+
+  @Test
+  void should_KeepAccessItemIdentityOnUpdateAndRejectUnknownIdWithoutReplacingCollection()
+      throws Exception {
+    HttpHeaders headers = RestHelper.generateHeadersForUser("businessadmin");
+    WorkbasketRepresentationModel createRequest =
+        newWorkbasketRepresentation("access-item-identity-" + UUID.randomUUID());
+    WorkbasketRepresentationModel created =
+        restClient
+            .post()
+            .uri(restHelper.toUrl(RestEndpoints.URL_WORKBASKET))
+            .headers(httpHeaders -> httpHeaders.addAll(headers))
+            .body(createRequest)
+            .retrieve()
+            .toEntity(WorkbasketRepresentationModel.class)
+            .getBody();
+    if (created != null) {
+      createdWorkbasketId = created.getWorkbasketId();
+    }
+    assertThat(created).isNotNull();
+    String workbasketId = created.getWorkbasketId();
+    String accessItemsUrl =
+        restHelper.toUrl(RestEndpoints.URL_WORKBASKET_ID_ACCESS_ITEMS, workbasketId);
+
+    WorkbasketAccessItemRepresentationModel newItem =
+        new WorkbasketAccessItemRepresentationModel();
+    newItem.setAccessId("rest-" + UUID.randomUUID());
+    newItem.setWorkbasketKey("caller-supplied-key");
+    WorkbasketAccessItemCollectionRepresentationModel firstResponse =
+        putAccessItems(accessItemsUrl, List.of(newItem), headers);
+    WorkbasketAccessItemRepresentationModel persistedItem =
+        firstResponse.getContent().iterator().next();
+    String accessItemId = persistedItem.getAccessItemId();
+    assertThat(accessItemId).isNotBlank();
+    assertThat(persistedItem.getWorkbasketId()).isEqualTo(workbasketId);
+    assertThat(persistedItem.getWorkbasketKey()).isEqualTo(created.getKey());
+
+    WorkbasketAccessItemRepresentationModel permissionUpdate =
+        new WorkbasketAccessItemRepresentationModel();
+    permissionUpdate.setAccessItemId(accessItemId);
+    permissionUpdate.setAccessId(persistedItem.getAccessId());
+    permissionUpdate.setWorkbasketId(workbasketId);
+    permissionUpdate.setWorkbasketKey("another-fake-key");
+    permissionUpdate.setPermRead(true);
+    permissionUpdate.setPermOpen(true);
+    WorkbasketAccessItemRepresentationModel updatedItem =
+        putAccessItems(accessItemsUrl, List.of(permissionUpdate), headers)
+            .getContent()
+            .iterator()
+            .next();
+    assertThat(updatedItem.getAccessItemId()).isEqualTo(accessItemId);
+    assertThat(updatedItem.isPermOpen()).isTrue();
+    assertThat(updatedItem.getWorkbasketKey()).isEqualTo(created.getKey());
+
+    WorkbasketAccessItemRepresentationModel unknownId =
+        new WorkbasketAccessItemRepresentationModel();
+    unknownId.setAccessItemId("unknown-" + UUID.randomUUID());
+    unknownId.setWorkbasketId(workbasketId);
+    unknownId.setAccessId(persistedItem.getAccessId());
+    assertBadRequest(() -> putAccessItems(accessItemsUrl, List.of(unknownId), headers));
+
+    WorkbasketAccessItemRepresentationModel stillPersisted =
+        getAccessItems(accessItemsUrl, headers).getContent().iterator().next();
+    assertThat(stillPersisted.getAccessItemId()).isEqualTo(accessItemId);
+    assertThat(stillPersisted.isPermOpen()).isTrue();
   }
 
   @Test
@@ -545,5 +784,120 @@ class WorkbasketControllerIntTest {
 
     String wbIdOfCreatedWb = responseCreate.getBody().getWorkbasketId();
     assertThat(wbIdOfCreatedWb).startsWith("WBI:");
+  }
+
+  private WorkbasketRepresentationModel newWorkbasketRepresentation(String key) {
+    WorkbasketRepresentationModel workbasket = new WorkbasketRepresentationModel();
+    workbasket.setKey(key);
+    workbasket.setDomain("DOMAIN_A");
+    workbasket.setType(WorkbasketType.GROUP);
+    workbasket.setName("Test Workbasket " + key);
+    workbasket.setDescription("REST owned identity test");
+    workbasket.setCustom1("custom value");
+    workbasket.setOrgLevel1("organization");
+    workbasket.setCreated(Instant.EPOCH);
+    workbasket.setModified(Instant.EPOCH);
+    return workbasket;
+  }
+
+  private WorkbasketRepresentationModel getWorkbasket(String workbasketId, HttpHeaders headers) {
+    return restClient
+        .get()
+        .uri(restHelper.toUrl(RestEndpoints.URL_WORKBASKET_ID, workbasketId))
+        .headers(httpHeaders -> httpHeaders.addAll(headers))
+        .retrieve()
+        .toEntity(WorkbasketRepresentationModel.class)
+        .getBody();
+  }
+
+  private String updateBody(WorkbasketRepresentationModel workbasket, Instant created)
+      throws Exception {
+    return updateBody(workbasket, true, created);
+  }
+
+  private String updateBody(
+      WorkbasketRepresentationModel workbasket, boolean includeCreated, Instant created)
+      throws Exception {
+    Map<String, Object> body = new HashMap<>();
+    body.put("workbasketId", workbasket.getWorkbasketId());
+    body.put("key", workbasket.getKey());
+    body.put("domain", workbasket.getDomain());
+    body.put("name", workbasket.getName());
+    body.put("type", workbasket.getType());
+    body.put("description", workbasket.getDescription());
+    body.put("owner", workbasket.getOwner());
+    body.put("custom1", workbasket.getCustom1());
+    body.put("orgLevel1", workbasket.getOrgLevel1());
+    body.put("markedForDeletion", workbasket.getMarkedForDeletion());
+    body.put("modified", workbasket.getModified());
+    if (includeCreated) {
+      body.put("created", created);
+    }
+    return jsonMapper.writeValueAsString(body);
+  }
+
+  private String updateBodyWithoutCreated(WorkbasketRepresentationModel workbasket)
+      throws Exception {
+    return updateBody(workbasket, false, null);
+  }
+
+  private String updateBodyWithExplicitNullCreated(WorkbasketRepresentationModel workbasket)
+      throws Exception {
+    String bodyWithoutCreated = updateBodyWithoutCreated(workbasket);
+    return bodyWithoutCreated.substring(0, bodyWithoutCreated.length() - 1)
+        + ",\"created\":null}";
+  }
+
+  private ResponseEntity<WorkbasketRepresentationModel> putWorkbasket(
+      String url, String body, HttpHeaders headers) {
+    return restClient
+        .put()
+        .uri(url)
+        .headers(httpHeaders -> httpHeaders.addAll(headers))
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(body)
+        .retrieve()
+        .toEntity(WorkbasketRepresentationModel.class);
+  }
+
+  private WorkbasketAccessItemCollectionRepresentationModel putAccessItems(
+      String url,
+      Collection<WorkbasketAccessItemRepresentationModel> content,
+      HttpHeaders headers) {
+    return restClient
+        .put()
+        .uri(url)
+        .headers(httpHeaders -> httpHeaders.addAll(headers))
+        .body(new WorkbasketAccessItemCollectionRepresentationModel(content))
+        .retrieve()
+        .toEntity(WorkbasketAccessItemCollectionRepresentationModel.class)
+        .getBody();
+  }
+
+  private WorkbasketAccessItemCollectionRepresentationModel getAccessItems(
+      String url, HttpHeaders headers) {
+    return restClient
+        .get()
+        .uri(url)
+        .headers(httpHeaders -> httpHeaders.addAll(headers))
+        .retrieve()
+        .toEntity(WorkbasketAccessItemCollectionRepresentationModel.class)
+        .getBody();
+  }
+
+  private void assertBadRequest(ThrowingCallable httpCall) {
+    assertThatThrownBy(httpCall)
+        .isInstanceOf(HttpStatusCodeException.class)
+        .extracting(HttpStatusCodeException.class::cast)
+        .extracting(HttpStatusCodeException::getStatusCode)
+        .isEqualTo(HttpStatus.BAD_REQUEST);
+  }
+
+  private void assertNotFound(ThrowingCallable httpCall) {
+    assertThatThrownBy(httpCall)
+        .isInstanceOf(HttpStatusCodeException.class)
+        .extracting(HttpStatusCodeException.class::cast)
+        .extracting(HttpStatusCodeException::getStatusCode)
+        .isEqualTo(HttpStatus.NOT_FOUND);
   }
 }
