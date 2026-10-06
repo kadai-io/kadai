@@ -254,8 +254,7 @@ class WorkbasketControllerIntTest {
   }
 
   @Test
-  void should_PreserveCallerSelectedWorkbasketIdAndGenerateTimestamps()
-      throws Exception {
+  void should_PreserveCallerSelectedWorkbasketIdAndGenerateTimestamps() {
     String url = restHelper.toUrl(RestEndpoints.URL_WORKBASKET);
     HttpHeaders headers = RestHelper.generateHeadersForUser("businessadmin");
     String chosenId = "caller-" + UUID.randomUUID().toString().substring(0, 30);
@@ -374,7 +373,7 @@ class WorkbasketControllerIntTest {
   }
 
   @Test
-  void should_RejectChangesToWorkbasketKeyAndDomain() throws Exception {
+  void should_RejectChangesToWorkbasketKeyAndDomain() {
     HttpHeaders headers = RestHelper.generateHeadersForUser("businessadmin");
     WorkbasketRepresentationModel created =
         restClient
@@ -404,8 +403,7 @@ class WorkbasketControllerIntTest {
   }
 
   @Test
-  void should_KeepAccessItemIdentityOnUpdateAndRejectUnknownIdWithoutReplacingCollection()
-      throws Exception {
+  void should_KeepAccessItemIdentityOnUpdateAndRejectUnknownIdWithoutReplacingCollection() {
     HttpHeaders headers = RestHelper.generateHeadersForUser("businessadmin");
     WorkbasketRepresentationModel createRequest =
         newWorkbasketRepresentation("access-item-identity-" + UUID.randomUUID());

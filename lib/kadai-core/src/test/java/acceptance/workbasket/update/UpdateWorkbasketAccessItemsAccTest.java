@@ -78,14 +78,14 @@ class UpdateWorkbasketAccessItemsAccTest extends AbstractAccTest {
     WorkbasketAccessItemImpl changedIdentity = copyWithId(initial);
     changedIdentity.setAccessId("different-" + UUID.randomUUID());
     changedIdentity.setPermission(WorkbasketPermission.OPEN, true);
+    String workbasketId = workbasket.getId();
+    List<WorkbasketAccessItem> changedItems = List.of(changedIdentity);
 
     assertThatThrownBy(
-            () ->
-                workbasketService.setWorkbasketAccessItems(
-                    workbasket.getId(), List.of(changedIdentity)))
+            () -> workbasketService.setWorkbasketAccessItems(workbasketId, changedItems))
         .isInstanceOf(InvalidArgumentException.class);
 
-    assertThat(workbasketService.getWorkbasketAccessItems(workbasket.getId()))
+    assertThat(workbasketService.getWorkbasketAccessItems(workbasketId))
         .containsExactly(initial);
   }
 
@@ -104,23 +104,22 @@ class UpdateWorkbasketAccessItemsAccTest extends AbstractAccTest {
     WorkbasketAccessItemImpl unknownItem =
         accessItem(workbasketService, target.getId(), "new-" + UUID.randomUUID());
     unknownItem.setId("unknown-access-item-id");
+    String targetId = target.getId();
+    List<WorkbasketAccessItem> itemsWithUnknownId = List.of(validUpdate, unknownItem);
 
     assertThatThrownBy(
-            () ->
-                workbasketService.setWorkbasketAccessItems(
-                    target.getId(), List.of(validUpdate, unknownItem)))
+            () -> workbasketService.setWorkbasketAccessItems(targetId, itemsWithUnknownId))
         .isInstanceOf(InvalidArgumentException.class);
 
     WorkbasketAccessItemImpl foreignItem = copyWithId(otherItem);
     foreignItem.setWorkbasketId(target.getId());
     foreignItem.setAccessId("foreign-" + UUID.randomUUID());
+    List<WorkbasketAccessItem> foreignItems = List.of(foreignItem);
     assertThatThrownBy(
-            () ->
-                workbasketService.setWorkbasketAccessItems(
-                    target.getId(), List.of(foreignItem)))
+            () -> workbasketService.setWorkbasketAccessItems(targetId, foreignItems))
         .isInstanceOf(InvalidArgumentException.class);
 
-    assertThat(workbasketService.getWorkbasketAccessItems(target.getId()))
+    assertThat(workbasketService.getWorkbasketAccessItems(targetId))
         .containsExactly(targetItem);
     assertThat(workbasketService.getWorkbasketAccessItems(other.getId()))
         .containsExactly(otherItem);
@@ -136,11 +135,11 @@ class UpdateWorkbasketAccessItemsAccTest extends AbstractAccTest {
     WorkbasketAccessItemImpl first = copyWithId(initial);
     WorkbasketAccessItemImpl repeated = copyWithId(initial);
     repeated.setAccessId("different-" + UUID.randomUUID());
+    String workbasketId = workbasket.getId();
+    List<WorkbasketAccessItem> repeatedItems = List.of(first, repeated);
 
     assertThatThrownBy(
-            () ->
-                workbasketService.setWorkbasketAccessItems(
-                    workbasket.getId(), List.of(first, repeated)))
+            () -> workbasketService.setWorkbasketAccessItems(workbasketId, repeatedItems))
         .isInstanceOf(InvalidArgumentException.class);
 
     WorkbasketAccessItemImpl uppercase =
@@ -149,13 +148,12 @@ class UpdateWorkbasketAccessItemsAccTest extends AbstractAccTest {
     uppercase.setAccessId(duplicateAccessId.toUpperCase());
     WorkbasketAccessItemImpl lowercase =
         accessItem(workbasketService, workbasket.getId(), duplicateAccessId.toLowerCase());
+    List<WorkbasketAccessItem> duplicateAccessItems = List.of(uppercase, lowercase);
 
     assertThatThrownBy(
-            () ->
-                workbasketService.setWorkbasketAccessItems(
-                    workbasket.getId(), List.of(uppercase, lowercase)))
+            () -> workbasketService.setWorkbasketAccessItems(workbasketId, duplicateAccessItems))
         .isInstanceOf(LogicalDuplicateInPayloadException.class);
-    assertThat(workbasketService.getWorkbasketAccessItems(workbasket.getId()))
+    assertThat(workbasketService.getWorkbasketAccessItems(workbasketId))
         .containsExactly(initial);
   }
 
@@ -182,16 +180,16 @@ class UpdateWorkbasketAccessItemsAccTest extends AbstractAccTest {
 
     WorkbasketAccessItemImpl contradictoryParent =
         accessItem(workbasketService, other.getId(), "contradictory-" + UUID.randomUUID());
+    String workbasketId = workbasket.getId();
+    List<WorkbasketAccessItem> contradictoryItems = List.of(contradictoryParent);
     assertThatThrownBy(
-            () ->
-                workbasketService.setWorkbasketAccessItems(
-                    workbasket.getId(), List.of(contradictoryParent)))
+            () -> workbasketService.setWorkbasketAccessItems(workbasketId, contradictoryItems))
         .isInstanceOf(InvalidArgumentException.class);
-    assertThat(workbasketService.getWorkbasketAccessItems(workbasket.getId()))
+    assertThat(workbasketService.getWorkbasketAccessItems(workbasketId))
         .containsExactly(persisted);
 
-    workbasketService.setWorkbasketAccessItems(workbasket.getId(), List.of());
-    assertThat(workbasketService.getWorkbasketAccessItems(workbasket.getId())).isEmpty();
+    workbasketService.setWorkbasketAccessItems(workbasketId, List.of());
+    assertThat(workbasketService.getWorkbasketAccessItems(workbasketId)).isEmpty();
   }
 
   private Workbasket createWorkbasket(WorkbasketService workbasketService)
