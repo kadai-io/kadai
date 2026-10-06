@@ -460,6 +460,15 @@ jobs:
             module: kadai-simplehistory-provider
             database: POSTGRES
           - java_version: 21
+            module: kadai-rest-spring
+            database: DB2
+          - java_version: 21
+            module: kadai-rest-spring
+            database: POSTGRES
+          - java_version: 21
+            module: kadai-rest-spring
+            database: H2
+          - java_version: 21
             module: kadai-rest-spring-example-boot
             database: DB2
           - java_version: 21
