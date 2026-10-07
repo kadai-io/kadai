@@ -15,7 +15,7 @@
  *
  */
 
-import { Injectable, signal, computed, WritableSignal } from '@angular/core';
+import { Injectable, signal, computed, WritableSignal, Component, input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { MatCheckbox } from '@angular/material/checkbox';
@@ -31,6 +31,18 @@ import { SettingMembers } from '../../../settings/components/Settings/expected-m
 import { ReportData } from '../../models/report-data';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideStore, State } from '@ngxs/store';
+import { ReportRow } from 'app/monitor/models/report-row';
+import { CanvasComponent } from '../canvas/canvas.component';
+
+@Component({
+  selector: 'kadai-monitor-canvas',
+  standalone: true,
+  template: '<div class="mock-canvas"></div>'
+})
+class MockCanvasComponent {
+  readonly id = input.required<string>();
+  readonly row = input.required<ReportRow>();
+}
 
 @State<Record<string, unknown>>({
   name: 'settings',
@@ -128,6 +140,14 @@ describe('TaskPriorityReportComponent', () => {
       ]
     })
       .overrideComponent(TaskPriorityReportComponent, {
+        remove: {
+          imports: [CanvasComponent]
+        },
+        add: {
+          imports: [MockCanvasComponent]
+        }
+      })
+      .overrideComponent(TaskPriorityReportComponent, {
         set: {
           providers: [{ provide: TaskPriorityReportDataService, useClass: MockTaskPriorityReportDataService }]
         }
@@ -197,7 +217,7 @@ describe('TaskPriorityReportComponent', () => {
     it('should build tableDataArray using reportData and priority names from settings', () => {
       const tableData = component.tableDataArray();
 
-      expect(tableData.length).toBe(5);
+      expect(tableData).toHaveLength(5);
       expect(tableData[0]).toEqual([
         { priority: 'High Priority', number: 3 },
         { priority: 'Medium Priority', number: 0 },
@@ -306,7 +326,7 @@ describe('TaskPriorityReportComponent', () => {
 
     it('should render tables with priority and number of tasks', () => {
       const tables = fixture.nativeElement.querySelectorAll('table');
-      expect(tables.length).toBe(5);
+      expect(tables).toHaveLength(5);
     });
 
     it('should not show report when reportData is null or undefined', () => {
