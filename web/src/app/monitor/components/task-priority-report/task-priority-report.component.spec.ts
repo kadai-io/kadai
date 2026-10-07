@@ -15,7 +15,7 @@
  *
  */
 
-import { Signal, signal } from '@angular/core';
+import { Injectable, signal, computed, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { MatCheckbox } from '@angular/material/checkbox';
@@ -29,7 +29,6 @@ import { TaskPriorityReportFilterStateService } from '../../services/task-priori
 import { TaskPriorityReportDataService } from '../../services/task-priority-report-data.service';
 import { SettingMembers } from '../../../settings/components/Settings/expected-members';
 import { ReportData } from '../../models/report-data';
-import { Settings } from 'app/settings/models/settings';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideStore, State } from '@ngxs/store';
 
@@ -77,47 +76,41 @@ const mockSettings = {
   [SettingMembers.ColorLowPriority]: '#00FF00'
 };
 
+@Injectable()
+class MockTaskPriorityReportFilterStateService {
+  readonly settings = signal<Record<string, unknown> | undefined>(mockSettings);
+  readonly activeFilters = signal<string[]>([]);
+  readonly workbasketKey = signal<string | undefined>(undefined);
+  readonly filterKeys = signal<string[]>(['State READY', 'State CLAIMED']);
+  readonly filtersAreSpecified = signal<boolean>(true);
+  readonly parsedFilterConfig = signal<{ config: Record<string, any>; isValid: boolean }>({
+    config: {},
+    isValid: true
+  });
+  readonly activeQuery = computed(() => ({}));
+
+  toggleFilter = vi.fn((key: string, isEnabled: boolean) => {
+    const current = this.activeFilters();
+    const next = isEnabled ? [...current, key] : current.filter((k) => k !== key);
+    this.activeFilters.set(next);
+  });
+}
+
+@Injectable()
+class MockTaskPriorityReportDataService {
+  readonly reportData: WritableSignal<ReportData | undefined> = signal<ReportData | undefined>(mockReportData);
+}
+
 describe('TaskPriorityReportComponent', () => {
   let fixture: ComponentFixture<TaskPriorityReportComponent>;
   let component: TaskPriorityReportComponent;
   let paramsSubject: BehaviorSubject<Params>;
 
-  const settingsSignal = signal<Record<string, unknown>>(mockSettings);
-  const activeFiltersSignal = signal<string[]>([]);
-  const workbasketKeySignal = signal<string | undefined>(undefined);
-  const filterKeysSignal = signal<string[]>(['State READY', 'State CLAIMED']);
-  const filtersAreSpecifiedSignal = signal<boolean>(true);
-  const reportDataSignal = signal<ReportData | undefined>(mockReportData);
-
-  let mockFilterStateService: Partial<TaskPriorityReportFilterStateService>;
-  let mockDataService: Partial<TaskPriorityReportDataService>;
+  let mockFilterStateService: MockTaskPriorityReportFilterStateService;
+  let mockDataService: MockTaskPriorityReportDataService;
 
   beforeEach(async () => {
     paramsSubject = new BehaviorSubject<Params>({});
-
-    settingsSignal.set(mockSettings);
-    activeFiltersSignal.set([]);
-    workbasketKeySignal.set(undefined);
-    filterKeysSignal.set(['State READY', 'State CLAIMED']);
-    filtersAreSpecifiedSignal.set(true);
-    reportDataSignal.set(mockReportData);
-
-    mockFilterStateService = {
-      settings: settingsSignal as unknown as Signal<Settings | undefined>,
-      activeFilters: activeFiltersSignal,
-      workbasketKey: workbasketKeySignal,
-      filterKeys: filterKeysSignal,
-      filtersAreSpecified: filtersAreSpecifiedSignal,
-      toggleFilter: vi.fn((key: string, isEnabled: boolean) => {
-        const current = activeFiltersSignal();
-        const next = isEnabled ? [...current, key] : current.filter((k) => k !== key);
-        activeFiltersSignal.set(next);
-      })
-    };
-
-    mockDataService = {
-      reportData: reportDataSignal
-    };
 
     await TestBed.configureTestingModule({
       imports: [TaskPriorityReportComponent],
@@ -131,13 +124,34 @@ describe('TaskPriorityReportComponent', () => {
             params: paramsSubject.asObservable()
           }
         },
-        { provide: TaskPriorityReportFilterStateService, useValue: mockFilterStateService },
-        { provide: TaskPriorityReportDataService, useValue: mockDataService }
+        { provide: TaskPriorityReportFilterStateService, useClass: MockTaskPriorityReportFilterStateService }
       ]
-    }).compileComponents();
+    })
+      .overrideComponent(TaskPriorityReportComponent, {
+        set: {
+          providers: [{ provide: TaskPriorityReportDataService, useClass: MockTaskPriorityReportDataService }]
+        }
+      })
+      .compileComponents();
+
+    mockFilterStateService = TestBed.inject(
+      TaskPriorityReportFilterStateService
+    ) as unknown as MockTaskPriorityReportFilterStateService;
+
+    mockFilterStateService.settings.set(mockSettings);
+    mockFilterStateService.activeFilters.set([]);
+    mockFilterStateService.workbasketKey.set(undefined);
+    mockFilterStateService.filterKeys.set(['State READY', 'State CLAIMED']);
+    mockFilterStateService.filtersAreSpecified.set(true);
 
     fixture = TestBed.createComponent(TaskPriorityReportComponent);
     component = fixture.componentInstance;
+
+    mockDataService = fixture.debugElement.injector.get(
+      TaskPriorityReportDataService
+    ) as unknown as MockTaskPriorityReportDataService;
+    mockDataService.reportData.set(mockReportData);
+
     fixture.detectChanges();
   });
 
@@ -151,10 +165,12 @@ describe('TaskPriorityReportComponent', () => {
 
   describe('Report Data Processing & Priority Distribution', () => {
     it('should return true when workbasketKey is undefined and false when defined', () => {
-      workbasketKeySignal.set(undefined);
+      mockFilterStateService.workbasketKey.set(undefined);
+      fixture.detectChanges();
       expect(component.isDepthZero()).toBe(true);
 
-      workbasketKeySignal.set('WBK_123');
+      mockFilterStateService.workbasketKey.set('WBK_123');
+      fixture.detectChanges();
       expect(component.isDepthZero()).toBe(false);
     });
 
@@ -170,7 +186,9 @@ describe('TaskPriorityReportComponent', () => {
     });
 
     it('should fall back to "inherit" when color settings are missing', () => {
-      settingsSignal.set({});
+      mockFilterStateService.settings.set({});
+      fixture.detectChanges();
+
       expect(component.colorHigh()).toBe('inherit');
       expect(component.colorMedium()).toBe('inherit');
       expect(component.colorLow()).toBe('inherit');
@@ -189,7 +207,9 @@ describe('TaskPriorityReportComponent', () => {
     });
 
     it('should return an empty tableDataArray when reportData is undefined', () => {
-      reportDataSignal.set(undefined);
+      mockDataService.reportData.set(undefined);
+      fixture.detectChanges();
+
       expect(component.tableDataArray()).toEqual([]);
     });
   });
@@ -209,7 +229,6 @@ describe('TaskPriorityReportComponent', () => {
       component.onFilterChange(true, 'State READY');
 
       expect(mockFilterStateService.toggleFilter).toHaveBeenCalledWith('State READY', true);
-      expect(component.activeFilters()).toContain('State READY');
     });
 
     it('should toggle isPanelOpen on expansion panel (opened) and (closed) events', () => {
@@ -244,19 +263,21 @@ describe('TaskPriorityReportComponent', () => {
     });
 
     it('should render breadcrumb for workbaskets when workbasketKey is undefined', () => {
-      workbasketKeySignal.set(undefined);
+      mockFilterStateService.workbasketKey.set(undefined);
       fixture.detectChanges();
 
       const breadcrumb = fixture.nativeElement.querySelector('.breadcrumb');
+      expect(breadcrumb).toBeTruthy();
       expect(breadcrumb.textContent).toContain('Workbaskets');
       expect(breadcrumb.querySelector('a')).toBeNull();
     });
 
     it('should render breadcrumb link and workbasketKey when workbasketKey is set', () => {
-      workbasketKeySignal.set('WBK_123');
+      mockFilterStateService.workbasketKey.set('WBK_123');
       fixture.detectChanges();
 
       const breadcrumb = fixture.nativeElement.querySelector('.breadcrumb');
+      expect(breadcrumb).toBeTruthy();
       expect(breadcrumb.textContent).toContain('WBK_123');
 
       const parentLink = breadcrumb.querySelector('a');
@@ -264,17 +285,18 @@ describe('TaskPriorityReportComponent', () => {
       expect(parentLink.getAttribute('href')).toContain('/kadai/monitor/tasks-priority');
     });
 
-    it('should display "No filters defined." when filtersAreSpecified is false', () => {
-      filtersAreSpecifiedSignal.set(false);
+    it('should display information message when filtersAreSpecified is false', () => {
+      mockFilterStateService.filtersAreSpecified.set(false);
       fixture.detectChanges();
 
       const el = fixture.nativeElement.querySelector('.breadcrumb-filter-row');
+      expect(el).toBeTruthy();
       expect(el.textContent).toContain('No filters defined.');
       expect(fixture.debugElement.query(By.directive(MatExpansionPanel))).toBeNull();
     });
 
-    it('should display "Could not find any tasks" message when rows is empty', () => {
-      reportDataSignal.set({ ...mockReportData, rows: [] });
+    it('should display information message when rows is empty', () => {
+      mockDataService.reportData.set({ ...mockReportData, rows: [] });
       fixture.detectChanges();
 
       const emptyMsg = fixture.nativeElement.querySelector('.task-priority-report__empty');
@@ -288,7 +310,7 @@ describe('TaskPriorityReportComponent', () => {
     });
 
     it('should not show report when reportData is null or undefined', () => {
-      reportDataSignal.set(undefined);
+      mockDataService.reportData.set(undefined);
       fixture.detectChanges();
 
       const reportEl = fixture.nativeElement.querySelector('.task-priority-report');

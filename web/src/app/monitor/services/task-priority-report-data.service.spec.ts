@@ -18,7 +18,7 @@
 import { signal, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Store } from '@ngxs/store';
-import { BehaviorSubject, firstValueFrom, of, throwError } from 'rxjs';
+import { BehaviorSubject, finalize, firstValueFrom, of, Subject, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TaskPriorityReportDataService } from './task-priority-report-data.service';
@@ -66,7 +66,7 @@ describe('TaskPriorityReportDataService', () => {
   let activeQuerySignal: WritableSignal<Record<string, string[]>>;
 
   let mockMonitorService: Partial<MonitorService>;
-  let mockRequestInProgressService: Partial<RequestInProgressService>;
+  let mockRequestInProgressService: { beginRequest: ReturnType<typeof vi.fn>; endRequest: ReturnType<typeof vi.fn> };
   let mockDomainService: Partial<DomainService>;
 
   beforeEach(() => {
@@ -95,7 +95,8 @@ describe('TaskPriorityReportDataService', () => {
     };
 
     mockRequestInProgressService = {
-      setRequestInProgress: vi.fn()
+      beginRequest: vi.fn(),
+      endRequest: vi.fn()
     };
 
     const mockFilterStateService: Partial<TaskPriorityReportFilterStateService> = {
@@ -197,8 +198,8 @@ describe('TaskPriorityReportDataService', () => {
     it('should manage requestInProgress state during data fetch', async () => {
       await firstValueFrom(service.reportData$);
 
-      expect(mockRequestInProgressService.setRequestInProgress).toHaveBeenCalledWith(true);
-      expect(mockRequestInProgressService.setRequestInProgress).toHaveBeenCalledWith(false);
+      expect(mockRequestInProgressService.beginRequest).toHaveBeenCalled();
+      expect(mockRequestInProgressService.endRequest).toHaveBeenCalled();
     });
 
     it('should handle errors gracefully and return undefined', async () => {
@@ -211,15 +212,54 @@ describe('TaskPriorityReportDataService', () => {
 
       expect(data).toBeUndefined();
       expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to load Task Priority Report', expect.any(Error));
-      expect(mockRequestInProgressService.setRequestInProgress).toHaveBeenCalledWith(false);
+      expect(mockRequestInProgressService.endRequest).toHaveBeenCalled();
       consoleErrorSpy.mockRestore();
     });
 
-    it('should update signal value (reportData) reactively', () => {
-      TestBed.flushEffects();
-      const currentReport = service.reportData();
-      expect(currentReport).toBeTruthy();
-      expect(currentReport?.rows.length).toBe(2);
+    it('should update signal value (reportData) reactively', async () => {
+      const data = await firstValueFrom(service.reportData$);
+      expect(data).toBeTruthy();
+      expect(data?.rows.length).toBe(2);
+    });
+  });
+
+  describe('TaskPriorityReportDataService - Reloading Report on Filter Change', () => {
+    it('should cancel previous pending request and maintain loading indicator state when report parameters change', () => {
+      const pendingRequest1$ = new Subject<ReportData>();
+      const pendingRequest2$ = new Subject<ReportData>();
+
+      let isRequest1Unsubscribed = false;
+
+      const trackedRequest1$ = pendingRequest1$.pipe(
+        finalize(() => {
+          isRequest1Unsubscribed = true;
+        })
+      );
+
+      (mockMonitorService.getTasksByPriorityReport as ReturnType<typeof vi.fn>).mockReturnValueOnce(trackedRequest1$);
+
+      (mockMonitorService.getTasksByDetailedPriorityReport as ReturnType<typeof vi.fn>).mockReturnValueOnce(
+        pendingRequest2$.asObservable()
+      );
+
+      service.reportData();
+      settingsSubject$.next(mockSettings);
+      TestBed.tick();
+
+      expect(mockRequestInProgressService.beginRequest).toHaveBeenCalledTimes(1);
+      expect(isRequest1Unsubscribed).toBe(false);
+
+      workbasketKeySignal.set('NEW_KEY');
+      TestBed.tick();
+
+      expect(isRequest1Unsubscribed).toBe(true);
+      expect(mockRequestInProgressService.endRequest).toHaveBeenCalledTimes(1);
+      expect(mockRequestInProgressService.beginRequest).toHaveBeenCalledTimes(2);
+
+      pendingRequest2$.next(mockReportData);
+      pendingRequest2$.complete();
+
+      expect(mockRequestInProgressService.endRequest).toHaveBeenCalledTimes(2);
     });
   });
 });

@@ -119,7 +119,7 @@ describe('TaskPriorityReportFilterStateService', () => {
     it('should not duplicate filter keys when enabling an already active filter', () => {
       service.toggleFilter('State READY', true);
       service.toggleFilter('State READY', true);
-      expect(service.activeFilters()).toEqual(['State READY', 'State READY']);
+      expect(service.activeFilters()).toEqual(['State READY']);
     });
 
     it('should remove a filter key when disabled', () => {
@@ -170,6 +170,26 @@ describe('TaskPriorityReportFilterStateService', () => {
       service.toggleFilter('UnknownFilter', true);
 
       expect(service.activeQuery()).toEqual({});
+    });
+
+    it('should deduplicate values when multiple active filters contain overlapping query values', () => {
+      const overlappingConfig = {
+        'Filter A': { state: ['READY', 'CLAIMED'] },
+        'Filter B': { state: ['READY', 'COMPLETED'] }
+      };
+
+      TestBed.tick();
+
+      settingsSubject$.next({
+        [SETTING_MEMBER_FILTER]: JSON.stringify(overlappingConfig)
+      });
+
+      service.toggleFilter('Filter A', true);
+      service.toggleFilter('Filter B', true);
+
+      expect(service.activeQuery()).toEqual({
+        state: ['READY', 'CLAIMED', 'COMPLETED']
+      });
     });
   });
 
