@@ -94,6 +94,7 @@ public class TaskQuerySqlProvider {
         + "</if> "
         + "<if test='selectAndClaim == true'> "
         + "FETCH FIRST ROW ONLY FOR UPDATE "
+        + "<if test=\"_databaseId == 'postgres'\">OF t </if>"
         + "</if>"
         + "<if test='lockResults and lockResults != 0'> "
         + "FETCH FIRST ${lockResults} ROWS ONLY FOR UPDATE "

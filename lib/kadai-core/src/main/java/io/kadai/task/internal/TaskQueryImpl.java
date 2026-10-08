@@ -88,6 +88,8 @@ public class TaskQueryImpl implements TaskQuery {
   private boolean addWorkbasketNameToSelectClauseForOrdering = false;
   private boolean joinWithUserInfo;
   private boolean joinWithCreatorUserInfo;
+  private boolean ownerUserInfoRequired;
+  private boolean creatorUserInfoRequired;
   private boolean groupByPor;
   private String groupBySor;
   private String[] taskId;
@@ -593,6 +595,7 @@ public class TaskQueryImpl implements TaskQuery {
   @Override
   public TaskQuery creatorLongNameIn(String... longNames) {
     joinWithCreatorUserInfo = true;
+    creatorUserInfoRequired = true;
     this.creatorLongNameIn = longNames;
     return this;
   }
@@ -600,6 +603,7 @@ public class TaskQueryImpl implements TaskQuery {
   @Override
   public TaskQuery creatorLongNameNotIn(String... longNames) {
     joinWithCreatorUserInfo = true;
+    creatorUserInfoRequired = true;
     this.creatorLongNameNotIn = longNames;
     return this;
   }
@@ -607,6 +611,7 @@ public class TaskQueryImpl implements TaskQuery {
   @Override
   public TaskQuery creatorLongNameLike(String... longNames) {
     joinWithCreatorUserInfo = true;
+    creatorUserInfoRequired = true;
     this.creatorLongNameLike = toLowerCopy(longNames);
     return this;
   }
@@ -614,6 +619,7 @@ public class TaskQueryImpl implements TaskQuery {
   @Override
   public TaskQuery creatorLongNameNotLike(String... longNames) {
     joinWithCreatorUserInfo = true;
+    creatorUserInfoRequired = true;
     this.creatorLongNameNotLike = toLowerCopy(longNames);
     return this;
   }
@@ -626,6 +632,7 @@ public class TaskQueryImpl implements TaskQuery {
   @Override
   public TaskQuery orderByCreatorLongName(SortDirection sortDirection) {
     joinWithCreatorUserInfo = true;
+    creatorUserInfoRequired = true;
     return (DB.DB2 == getDB()
             && kadaiEngine.getEngine().getConfiguration().isUseSpecificDb2Taskquery())
         ? addOrderCriteria("CREATOR_LONG_NAME", sortDirection)
@@ -973,6 +980,7 @@ public class TaskQueryImpl implements TaskQuery {
 
   public TaskQuery ownerLongNameIn(String... longNames) {
     joinWithUserInfo = true;
+    ownerUserInfoRequired = true;
     this.ownerLongNameIn = longNames;
     return this;
   }
@@ -980,6 +988,7 @@ public class TaskQueryImpl implements TaskQuery {
   @Override
   public TaskQuery ownerLongNameNotIn(String... longNames) {
     joinWithUserInfo = true;
+    ownerUserInfoRequired = true;
     this.ownerLongNameNotIn = longNames;
     return this;
   }
@@ -987,6 +996,7 @@ public class TaskQueryImpl implements TaskQuery {
   @Override
   public TaskQuery ownerLongNameLike(String... longNames) {
     joinWithUserInfo = true;
+    ownerUserInfoRequired = true;
     this.ownerLongNameLike = toLowerCopy(longNames);
     return this;
   }
@@ -994,6 +1004,7 @@ public class TaskQueryImpl implements TaskQuery {
   @Override
   public TaskQuery ownerLongNameNotLike(String... longNames) {
     joinWithUserInfo = true;
+    ownerUserInfoRequired = true;
     this.ownerLongNameNotLike = toLowerCopy(longNames);
     return this;
   }
@@ -2074,6 +2085,7 @@ public class TaskQueryImpl implements TaskQuery {
   @Override
   public TaskQuery orderByOwnerLongName(SortDirection sortDirection) {
     joinWithUserInfo = true;
+    ownerUserInfoRequired = true;
     return (DB.DB2 == getDB()
             && kadaiEngine.getEngine().getConfiguration().isUseSpecificDb2Taskquery())
         ? addOrderCriteria("OWNER_LONG_NAME", sortDirection)
@@ -2209,6 +2221,11 @@ public class TaskQueryImpl implements TaskQuery {
 
   public TaskQuery selectAndClaimEquals(boolean selectAndClaim) {
     this.selectAndClaim = selectAndClaim;
+    if (selectAndClaim) {
+      // Lock the task row without also locking user info added only for display.
+      joinWithUserInfo = ownerUserInfoRequired;
+      joinWithCreatorUserInfo = creatorUserInfoRequired;
+    }
     return this;
   }
 
