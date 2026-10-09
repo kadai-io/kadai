@@ -62,7 +62,7 @@ public class ClassificationChangedJob extends AbstractKadaiJob {
   public void execute() throws KadaiException {
     LOGGER.info("Running ClassificationChangedJob for classification ({})", classificationId);
     try {
-      TaskServiceImpl taskService = (TaskServiceImpl) kadaiEngineImpl.getTaskService();
+      TaskServiceImpl taskService = (TaskServiceImpl) kadaiEngine.getTaskService();
       List<String> affectedTaskIds =
           taskService.findTasksIdsAffectedByClassificationChange(classificationId);
       if (!affectedTaskIds.isEmpty()) {
@@ -80,7 +80,7 @@ public class ClassificationChangedJob extends AbstractKadaiJob {
   }
 
   private void scheduleTaskRefreshJobs(List<String> affectedTaskIds) {
-    int batchSize = kadaiEngineImpl.getConfiguration().getJobBatchSize();
+    int batchSize = kadaiEngine.getConfiguration().getJobBatchSize();
     Collection<List<String>> affectedTaskBatches =
         CollectionUtil.partitionBasedOnSize(affectedTaskIds, batchSize);
     if (LOGGER.isDebugEnabled()) {
@@ -101,7 +101,7 @@ public class ClassificationChangedJob extends AbstractKadaiJob {
         ScheduledJob job = new ScheduledJob();
         job.setType(TaskRefreshJob.class.getName());
         job.setArguments(args);
-        kadaiEngineImpl.getJobService().createJob(job);
+        kadaiEngine.getJobService().createJob(job);
       }
     }
   }
@@ -118,8 +118,8 @@ public class ClassificationChangedJob extends AbstractKadaiJob {
         + firstRun
         + ", runEvery="
         + runEvery
-        + ", kadaiEngineImpl="
-        + kadaiEngineImpl
+        + ", kadaiEngine="
+        + kadaiEngine
         + ", txProvider="
         + txProvider
         + ", scheduledJob="

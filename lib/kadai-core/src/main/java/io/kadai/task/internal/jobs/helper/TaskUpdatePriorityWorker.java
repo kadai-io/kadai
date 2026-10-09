@@ -22,7 +22,7 @@ import static java.util.Objects.nonNull;
 
 import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.KadaiEngine;
-import io.kadai.common.internal.KadaiEngineImpl;
+import io.kadai.common.internal.InternalKadaiEngineResolver;
 import io.kadai.spi.priority.internal.PriorityServiceManager;
 import io.kadai.task.api.TaskQueryColumnName;
 import io.kadai.task.api.TaskState;
@@ -39,9 +39,16 @@ public class TaskUpdatePriorityWorker {
   private final PriorityServiceManager priorityServiceManager;
 
   public TaskUpdatePriorityWorker(KadaiEngine kadaiEngine) {
+    this(
+        kadaiEngine,
+        InternalKadaiEngineResolver.resolve(kadaiEngine).getPriorityServiceManager());
+  }
+
+  public TaskUpdatePriorityWorker(
+      KadaiEngine kadaiEngine, PriorityServiceManager priorityServiceManager) {
     this.kadaiEngine = kadaiEngine;
     sqlConnectionRunner = new SqlConnectionRunner(kadaiEngine);
-    priorityServiceManager = ((KadaiEngineImpl) kadaiEngine).getPriorityServiceManager();
+    this.priorityServiceManager = priorityServiceManager;
   }
 
   public static IntPredicate hasDifferentPriority(TaskSummary taskSummary) {

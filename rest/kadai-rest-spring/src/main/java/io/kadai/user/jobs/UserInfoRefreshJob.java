@@ -120,7 +120,7 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
           postprocessorFailures++;
         }
       }
-      UserServiceImpl userService = (UserServiceImpl) kadaiEngineImpl.getUserService();
+      UserServiceImpl userService = (UserServiceImpl) kadaiEngine.getUserService();
       PreparedUserRefreshInput input = userService.prepareUserRefresh(processedUsers);
       UserRefreshResult result = synchronizeTransactionally(userService, input);
       LOGGER.info(
