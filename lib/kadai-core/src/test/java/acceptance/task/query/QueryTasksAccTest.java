@@ -296,9 +296,7 @@ class QueryTasksAccTest extends AbstractAccTest {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(call)
         .extracting(IllegalArgumentException::getMessage)
-        .isEqualTo(
-            "The params \"lockResultsEquals\" and \"joinWithUserInfo\"/"
-                + "\"joinWithCreatorUserInfo\" cannot be used together!");
+        .isEqualTo("Cannot lock task results when owner or creator user information is requested.");
   }
 
   @WithAccessId(user = "user-1-1")
