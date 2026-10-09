@@ -153,10 +153,10 @@ describe('TaskPriorityReportComponent', () => {
 
   describe('Report Data Processing & Priority Distribution', () => {
     it('should return true when workbasketKey is undefined and false when defined', () => {
-      workbasketKeySignal.set(undefined);
+      paramsSubject.next({});
       expect(component.isDepthZero()).toBe(true);
 
-      workbasketKeySignal.set('WBK_123');
+      paramsSubject.next({ workbasketKey: 'WBK_123' });
       expect(component.isDepthZero()).toBe(false);
     });
 
@@ -246,7 +246,7 @@ describe('TaskPriorityReportComponent', () => {
     });
 
     it('should render breadcrumb for workbaskets when workbasketKey is undefined', () => {
-      workbasketKeySignal.set(undefined);
+      paramsSubject.next({});
       fixture.detectChanges();
 
       const breadcrumb = fixture.nativeElement.querySelector('.breadcrumb');
@@ -255,7 +255,7 @@ describe('TaskPriorityReportComponent', () => {
     });
 
     it('should render breadcrumb link and workbasketKey when workbasketKey is set', () => {
-      workbasketKeySignal.set('WBK_123');
+      paramsSubject.next({ workbasketKey: 'WBK_123' });
       fixture.detectChanges();
 
       const breadcrumb = fixture.nativeElement.querySelector('.breadcrumb');
