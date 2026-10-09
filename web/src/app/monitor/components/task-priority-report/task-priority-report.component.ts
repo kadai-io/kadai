@@ -19,7 +19,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe, NgClass } from '@angular/common';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 import { MatDivider } from '@angular/material/divider';
 import {
@@ -75,7 +75,6 @@ import { SettingMembers } from '../../../settings/components/Settings/expected-m
     MatCheckbox,
     NgClass
   ],
-  providers: [TaskPriorityReportDataService],
   host: {
     '[style.--color-high-priority]': 'colorHigh()',
     '[style.--color-medium-priority]': 'colorMedium()',
@@ -90,7 +89,7 @@ export class TaskPriorityReportComponent {
   readonly columns: string[] = ['priority', 'number'];
   isPanelOpen = false;
 
-  readonly reportData = this.dataService.reportData;
+  readonly reportData = toSignal(this.dataService.reportData$);
   readonly keys = this.filterState.filterKeys;
   readonly filtersAreSpecified = this.filterState.filtersAreSpecified;
   readonly activeFilters = this.filterState.activeFilters;

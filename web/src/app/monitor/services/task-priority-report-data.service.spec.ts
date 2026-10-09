@@ -237,12 +237,11 @@ describe('TaskPriorityReportDataService', () => {
       );
 
       (mockMonitorService.getTasksByPriorityReport as ReturnType<typeof vi.fn>).mockReturnValueOnce(trackedRequest1$);
-
       (mockMonitorService.getTasksByDetailedPriorityReport as ReturnType<typeof vi.fn>).mockReturnValueOnce(
         pendingRequest2$.asObservable()
       );
 
-      service.reportData();
+      const subscription = service.reportData$.subscribe();
       settingsSubject$.next(mockSettings);
       TestBed.tick();
 
@@ -260,6 +259,7 @@ describe('TaskPriorityReportDataService', () => {
       pendingRequest2$.complete();
 
       expect(mockRequestInProgressService.endRequest).toHaveBeenCalledTimes(2);
+      subscription.unsubscribe();
     });
   });
 });

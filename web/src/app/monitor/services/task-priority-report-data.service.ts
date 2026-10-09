@@ -19,7 +19,7 @@ import { inject, Injectable } from '@angular/core';
 import { combineLatest, Observable, of } from 'rxjs';
 import { catchError, finalize, map, switchMap } from 'rxjs/operators';
 import { Store } from '@ngxs/store';
-import { toSignal, toObservable } from '@angular/core/rxjs-interop';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 import { SettingsSelectors } from '../../shared/store/settings-store/settings.selectors';
 import { DomainService } from '../../shared/services/domain/domain.service';
@@ -31,7 +31,7 @@ import { WorkbasketType } from '../../shared/models/workbasket-type';
 import { ReportData } from '../models/report-data';
 import { PriorityInterval } from '../models/priority-interval';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class TaskPriorityReportDataService {
   private readonly store = inject(Store);
   private readonly domainService = inject(DomainService);
@@ -71,8 +71,6 @@ export class TaskPriorityReportDataService {
       );
     })
   );
-
-  readonly reportData = toSignal(this.reportData$);
 
   private filterRows(reportData: ReportData, isDepthZero: boolean, workbasketKey?: string): ReportData {
     const depth = isDepthZero ? 0 : 1;
