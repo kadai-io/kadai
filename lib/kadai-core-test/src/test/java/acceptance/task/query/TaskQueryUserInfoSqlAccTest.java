@@ -101,7 +101,7 @@ class TaskQueryUserInfoSqlAccTest implements KadaiConfigurationModifier {
                     .orderByOwnerLongName(ASCENDING)
                     .count());
 
-    assertThat(sql).contains("user_info owner_info").doesNotContain("user_info creator_info");
+    assertThat(sql).doesNotContain("user_info creator_info");
     assertThat(countOccurrences(sql, "user_info owner_info")).isEqualTo(1);
   }
 
@@ -117,7 +117,7 @@ class TaskQueryUserInfoSqlAccTest implements KadaiConfigurationModifier {
                     .orderByCreatorLongName(ASCENDING)
                     .count());
 
-    assertThat(sql).contains("user_info creator_info").doesNotContain("user_info owner_info");
+    assertThat(sql).doesNotContain("user_info owner_info");
     assertThat(countOccurrences(sql, "user_info creator_info")).isEqualTo(1);
   }
 
