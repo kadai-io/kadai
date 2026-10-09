@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  *
+ *
  */
 
 import { Signal, signal } from '@angular/core';
@@ -179,7 +180,7 @@ describe('TaskPriorityReportComponent', () => {
     it('should build tableDataArray using reportData and priority names from settings', () => {
       const tableData = component.tableDataArray();
 
-      expect(tableData.length).toBe(5);
+      expect(tableData).toHaveLength(5);
       expect(tableData[0]).toEqual([
         { priority: 'High Priority', number: 3 },
         { priority: 'Medium Priority', number: 0 },
@@ -284,7 +285,7 @@ describe('TaskPriorityReportComponent', () => {
 
     it('should render tables with priority and number of tasks', () => {
       const tables = fixture.nativeElement.querySelectorAll('table');
-      expect(tables.length).toBe(5);
+      expect(tables).toHaveLength(5);
     });
 
     it('should not show report when reportData is null or undefined', () => {

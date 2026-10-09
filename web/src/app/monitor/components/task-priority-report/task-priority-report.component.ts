@@ -47,6 +47,7 @@ import { CanvasComponent } from '../canvas/canvas.component';
 import { TaskPriorityReportFilterStateService } from '../../services/task-priority-report-filter-state.service';
 import { TaskPriorityReportDataService } from '../../services/task-priority-report-data.service';
 import { SettingMembers } from '../../../settings/components/Settings/expected-members';
+import { ReportData } from 'app/monitor/models/report-data';
 
 @Component({
   selector: 'kadai-monitor-task-priority-report',
@@ -89,7 +90,7 @@ export class TaskPriorityReportComponent {
   readonly columns: string[] = ['priority', 'number'];
   isPanelOpen = false;
 
-  readonly reportData = toSignal(this.dataService.reportData$);
+  readonly reportData = toSignal<ReportData | undefined>(this.dataService.reportData$);
   readonly keys = this.filterState.filterKeys;
   readonly filtersAreSpecified = this.filterState.filtersAreSpecified;
   readonly activeFilters = this.filterState.activeFilters;
