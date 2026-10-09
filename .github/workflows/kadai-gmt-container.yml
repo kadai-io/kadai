@@ -85,3 +85,19 @@ jobs:
         run: |
           docker push "${IMAGE_NAME}:latest"
           docker push "${IMAGE_NAME}:sha-${GITHUB_SHA}"
+
+  bump-scenario-pin:
+    name: Bump pinned image in regular GMT scenario
+    needs: build-test-publish
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Open PR bumping the pinned image
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ci/bump_gmt_pin.sh qa/gmt/usage_scenario_standard.yml

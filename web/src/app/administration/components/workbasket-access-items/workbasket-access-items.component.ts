@@ -31,7 +31,7 @@ import {
   viewChildren
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { distinctUntilChanged, Observable, Subject } from 'rxjs';
+import { distinctUntilChanged, firstValueFrom, Observable, Subject } from 'rxjs';
 import {
   Actions,
   ofActionCompleted,
@@ -51,7 +51,6 @@ import {
 import { WorkbasketAccessItemsRepresentation } from 'app/shared/models/workbasket-access-items-representation';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { highlight } from 'app/shared/animations/validation.animation';
-import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
 import { AccessId } from 'app/shared/models/access-id';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { filter, map, startWith, takeUntil, tap } from 'rxjs/operators';
@@ -78,6 +77,11 @@ import { MatIcon } from '@angular/material/icon';
 import { ResizableWidthDirective } from '../../../shared/directives/resizable-width.directive';
 import { TypeAheadComponent } from '../../../shared/components/type-ahead/type-ahead.component';
 import { MatInput } from '@angular/material/input';
+import { getPermissionWarnings } from 'app/shared/validators/permission-dependency.validator';
+import { FormSubmitDirective } from 'app/shared/directives/form-submit.directive';
+import { FormFieldSubmitDirective } from 'app/shared/directives/form-field-submit.directive';
+import { accessIdExistsValidator } from 'app/shared/validators/access-id-exists.validator';
+import { AccessIdsService } from 'app/shared/services/access-ids/access-ids.service';
 
 @Component({
   selector: 'kadai-administration-workbasket-access-items',
@@ -92,11 +96,12 @@ import { MatInput } from '@angular/material/input';
     TypeAheadComponent,
     MatInput,
     AsyncPipe,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    FormSubmitDirective,
+    FormFieldSubmitDirective
   ]
 })
 export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterViewChecked {
-  formsValidatorService = inject(FormsValidatorService);
   workbasket = input<Workbasket>();
   expanded = input<boolean>();
   accessItemsValidityChanged = output<boolean>();
@@ -108,7 +113,6 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
   accessItemsRepresentation!: WorkbasketAccessItemsRepresentation;
   accessItemsClone = signal<WorkbasketAccessItems[]>([]);
   accessItemsResetClone: WorkbasketAccessItems[] = [];
-  toggleValidationAccessIdMap = new Map<number, boolean>();
   added = false;
   isNewAccessItemsFromStore = false;
   isAccessItemsTabSelected = false;
@@ -126,8 +130,10 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     accessItemsGroups: this.formBuilder.array<FormGroup>([])
   });
   private notificationsService = inject(NotificationService);
+  private accessIdService = inject(AccessIdsService);
   private store = inject(Store);
   private ngxsActions$ = inject(Actions);
+  isSubmitting = false;
 
   constructor() {
     effect(() => {
@@ -303,9 +309,10 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
   }
 
   setAccessItemsGroups(accessItems: WorkbasketAccessItems[]) {
-    const AccessItemsFormGroups = accessItems.map((accessItem) => this.formBuilder.group(accessItem));
-    AccessItemsFormGroups.forEach((accessItemGroup) => {
-      accessItemGroup.controls.accessId.setValidators(Validators.required);
+    const AccessItemsFormGroups = accessItems.map((accessItem) => {
+      const group = this.formBuilder.group(accessItem);
+      this.setupAccessIdValidators(group);
+      return group;
     });
     const AccessItemsFormArray = this.formBuilder.array(AccessItemsFormGroups);
     this.AccessItemsForm.setControl('accessItemsGroups', AccessItemsFormArray);
@@ -346,7 +353,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     workbasketAccessItems.workbasketId = this.workbasket()!.workbasketId!;
     workbasketAccessItems.permRead = true;
     const newForm = this.formBuilder.group(workbasketAccessItems);
-    newForm.controls.accessId.setValidators(Validators.required);
+    this.setupAccessIdValidators(newForm);
     this.accessItemsGroups.insert(0, newForm);
     this.accessItemsClone.update((accessItemsClone) => [workbasketAccessItems, ...accessItemsClone]);
     this.added = true;
@@ -354,7 +361,6 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
 
   clear() {
     this.store.dispatch(new OnButtonPressed(undefined));
-    this.formsValidatorService.formSubmitAttempt = false;
     this.AccessItemsForm.reset();
     this.setAccessItemsGroups(this.accessItemsResetClone);
     this.accessItemsClone.set(this.cloneAccessItems());
@@ -362,22 +368,25 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
   }
 
   async onSubmit(
-    accessItems: WorkbasketAccessItemWrite[] = this.snapshotAccessItems(),
+    accessItems?: WorkbasketAccessItemWrite[],
     accessItemsUrl: string | undefined = this.accessItemsRepresentation?._links?.self?.href
   ) {
-    this.formsValidatorService.formSubmitAttempt = true;
-
-    if (!accessItemsUrl) {
+    if (!accessItemsUrl || this.isSubmitting) {
       return;
     }
+    this.isSubmitting = true;
 
-    const shouldSaveWorkbasket = await this.formsValidatorService
-      .validateFormAccess(this.buildValidationForm(accessItems), this.toggleValidationAccessIdMap)
-      .then((isFormValid) => isFormValid)
-      .catch(() => false);
-
-    if (shouldSaveWorkbasket) {
-      this.onSave(accessItemsUrl, accessItems);
+    try {
+      let currentAccessItems = accessItems ?? this.snapshotAccessItems();
+      const isValid = await this.validateAccessItemsSnapshot(currentAccessItems);
+      if (!isValid) {
+        this.AccessItemsForm.markAllAsTouched();
+        this.notificationsService.showError('OWNER_NOT_VALID', { owner: 'access id' });
+        return;
+      }
+      this.onSave(accessItemsUrl, currentAccessItems);
+    } finally {
+      this.isSubmitting = false;
     }
   }
 
@@ -437,8 +446,33 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     return (this.accessItemsGroups.getRawValue() as WorkbasketAccessItems[]).map((accessItem) => ({ ...accessItem }));
   }
 
-  private buildValidationForm(accessItems: WorkbasketAccessItemWrite[]): FormArray {
-    return this.formBuilder.array(accessItems.map((accessItem) => this.formBuilder.group(accessItem)));
+  private setupAccessIdValidators(group: FormGroup): void {
+    const control = group.get('accessId');
+    if (control) {
+      control.setValidators(Validators.required);
+      control.setAsyncValidators(accessIdExistsValidator(this.accessIdService));
+      control.updateValueAndValidity();
+    }
+  }
+
+  private async validateAccessItemsSnapshot(accessItems: WorkbasketAccessItemWrite[]): Promise<boolean> {
+    const tempGroups = accessItems.map((item) => {
+      const group = this.formBuilder.group(item);
+      this.setupAccessIdValidators(group);
+      return group;
+    });
+
+    const tempFormArray = this.formBuilder.array(tempGroups);
+    tempGroups.forEach((group) => {
+      const warnings = getPermissionWarnings(group);
+      warnings.forEach((key) => this.notificationsService.showWarning(key));
+    });
+
+    tempFormArray.updateValueAndValidity();
+    if (tempFormArray.pending) {
+      await firstValueFrom(tempFormArray.statusChanges.pipe(filter((status) => status !== 'PENDING')));
+    }
+    return tempFormArray.valid;
   }
 
   getAccessItemCustomProperty(customNumber: number): `permCustom${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12}` {
@@ -449,16 +483,12 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     if (value.target.checked) {
       this.selectedRows.push(index);
     } else {
-      this.selectedRows = this.selectedRows.filter(function (number) {
-        return number != index;
-      });
+      this.selectedRows = this.selectedRows.filter((number) => number != index);
     }
   }
 
   deleteAccessItems() {
-    this.selectedRows.sort(function (a, b) {
-      return b - a;
-    });
+    this.selectedRows.sort((a, b) => b - a);
     this.selectedRows.forEach((element) => {
       this.accessItemsGroups.removeAt(element);
       this.accessItemsClone.update((accessItemsClone) => accessItemsClone.filter((_, index) => index !== element));

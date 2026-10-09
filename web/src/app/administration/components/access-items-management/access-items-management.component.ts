@@ -28,7 +28,6 @@ import {
   Validators
 } from '@angular/forms';
 import { Observable, Subject } from 'rxjs';
-import { FormsValidatorService } from 'app/shared/services/forms-validator/forms-validator.service';
 import { WorkbasketAccessItems } from 'app/shared/models/workbasket-access-items';
 import {
   Direction,
@@ -138,7 +137,6 @@ export class AccessItemsManagementComponent implements OnInit {
   permissions$: Observable<AccessId[]> = inject(Store).select(AccessItemsManagementSelector.permissions);
   destroy$ = new Subject<void>();
   private formBuilder = inject(FormBuilder);
-  private formsValidatorService = inject(FormsValidatorService);
   private notificationService = inject(NotificationService);
   private store = inject(Store);
   private requestInProgressService = inject(RequestInProgressService);
@@ -318,13 +316,6 @@ export class AccessItemsManagementComponent implements OnInit {
             this.searchForAccessItemsWorkbaskets();
           });
       }
-    );
-  }
-
-  isFieldValid(field: string, index: number): boolean {
-    return (
-      this.formsValidatorService.isFieldValid((this.accessItemsGroups as any)?.[index], field) ||
-      this.formsValidatorService.isFieldValid((this.accessItemsPermissions as any)?.[index], field)
     );
   }
 

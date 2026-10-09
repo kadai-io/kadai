@@ -71,4 +71,11 @@ class LdapGroupAndPermissionIdAttributeTest extends LdapForUseDnForGroupsDisable
   }
 
 
+  @Test
+  void should_ValidateConfiguredGroupAndPermissionIds() throws Exception {
+    assertThat(ldapClient.validateAccessId("MONITOR-USERS-ID")).isTrue();
+    assertThat(ldapClient.validateAccessId("monitor-users")).isFalse();
+    assertThat(ldapClient.validateAccessId("G03-PERMISSION-ID")).isTrue();
+    assertThat(ldapClient.validateAccessId("permission-name")).isFalse();
+  }
 }

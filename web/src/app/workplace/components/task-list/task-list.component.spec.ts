@@ -49,7 +49,7 @@ describe('TaskListComponent', () => {
   let fixture: ComponentFixture<TaskListComponent>;
   let router: Router;
 
-  const routes: Routes = [{ path: '*', component: DummyDetailComponent }];
+  const routes: Routes = [{ path: 'taskdetail/:id', component: DummyDetailComponent, outlet: 'detail' }];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -98,17 +98,24 @@ describe('TaskListComponent', () => {
     expect(options.length).toBe(2);
   });
 
-  it('selectTask should update selectedId', () => {
+  it('selectTask should update selectedId', async () => {
     fixture.detectChanges();
     component.selectTask('task-1');
     expect(component.selectedId()).toBe('task-1');
+    await fixture.whenStable();
   });
 
-  it('selectTask should navigate to task detail', () => {
+  it('selectTask should navigate to task detail', async () => {
     fixture.detectChanges();
     const navigateSpy = vi.spyOn(router, 'navigate');
     component.selectTask('task-1');
-    expect(navigateSpy).toHaveBeenCalled();
+
+    expect(navigateSpy).toHaveBeenCalledWith(
+      [{ outlets: { detail: 'taskdetail/task-1' } }],
+      expect.objectContaining({ queryParamsHandling: 'merge' })
+    );
+
+    await fixture.whenStable();
   });
 
   it('should mark selected task with selectedId', () => {
@@ -134,7 +141,7 @@ describe('TaskListComponent', () => {
     expect(ownerEl).toBeNull();
   });
 
-  it('should call selectTask when a list option is clicked', () => {
+  it('should call selectTask when a list option is clicked', async () => {
     fixture.componentRef.setInput('tasks', [mockTask]);
     fixture.detectChanges();
     const selectSpy = vi.spyOn(component, 'selectTask');
@@ -142,22 +149,25 @@ describe('TaskListComponent', () => {
     expect(listOption).toBeTruthy();
     listOption.click();
     expect(selectSpy).toHaveBeenCalledWith('task-1');
+    await fixture.whenStable();
   });
 
-  it('should update selectedId when a list option is clicked', () => {
+  it('should update selectedId when a list option is clicked', async () => {
     fixture.componentRef.setInput('tasks', [mockTask, mockTaskNoOwner]);
     fixture.detectChanges();
     const listOptions = fixture.nativeElement.querySelectorAll('mat-list-option');
     listOptions[0].click();
     expect(component.selectedId()).toBe('task-1');
+    await fixture.whenStable();
   });
 
-  it('should navigate when a list option is clicked', () => {
+  it('should navigate when a list option is clicked', async () => {
     fixture.componentRef.setInput('tasks', [mockTask]);
     fixture.detectChanges();
     const navigateSpy = vi.spyOn(router, 'navigate');
     const listOption = fixture.nativeElement.querySelector('mat-list-option');
     listOption.click();
     expect(navigateSpy).toHaveBeenCalled();
+    await fixture.whenStable();
   });
 });

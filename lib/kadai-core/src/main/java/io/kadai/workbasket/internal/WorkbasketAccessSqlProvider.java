@@ -19,7 +19,6 @@
 package io.kadai.workbasket.internal;
 
 import static io.kadai.common.internal.util.SqlProviderUtil.CLOSING_SCRIPT_TAG;
-import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_SCRIPT_TAG;
 
 import io.kadai.common.internal.util.Pair;
@@ -66,7 +65,6 @@ public class WorkbasketAccessSqlProvider {
         + "ID, "
         + commonSelectStatements()
         + "FROM WORKBASKET_ACCESS_LIST WHERE ID = #{id} "
-        + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -78,7 +76,6 @@ public class WorkbasketAccessSqlProvider {
         + "FROM WORKBASKET_ACCESS_LIST WBA "
         + "LEFT JOIN WORKBASKET WB ON WORKBASKET_ID = WB.ID "
         + "WHERE WORKBASKET_ID = #{id} "
-        + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -90,7 +87,6 @@ public class WorkbasketAccessSqlProvider {
         + "FROM WORKBASKET_ACCESS_LIST WBA "
         + "LEFT JOIN WORKBASKET WB ON WORKBASKET_ID = WB.ID "
         + "WHERE ACCESS_ID = #{id} "
-        + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -135,7 +131,6 @@ public class WorkbasketAccessSqlProvider {
         + "FROM WORKBASKET_ACCESS_LIST "
         + "WHERE WORKBASKET_ID = #{workbasketId} AND ACCESS_ID IN"
         + "(<foreach item='item' collection='accessIds' separator=',' >#{item}</foreach>) "
-        + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -159,7 +154,6 @@ public class WorkbasketAccessSqlProvider {
         + ")"
         + "AND ACCESS_ID IN"
         + "(<foreach item='item' collection='accessIds' separator=',' >#{item}</foreach>)"
-        + "<if test=\"_databaseId == 'db2'\">with UR</if>"
         + CLOSING_SCRIPT_TAG;
   }
 

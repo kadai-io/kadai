@@ -46,6 +46,15 @@ export class AccessIdsService {
     return this.httpClient.get<AccessId[]>(`${this.url}?search-for=${accessId}`);
   }
 
+  validateAccessId(accessId: string): Observable<boolean> {
+    if (!accessId) {
+      return of(false);
+    }
+    return this.httpClient.get<boolean>(`${this.url}/validation`, {
+      params: { 'access-id': accessId }
+    });
+  }
+
   getGroupsByAccessId(accessId: string): Observable<AccessId[]> {
     if (!accessId || accessId.length < 3) {
       return of([]);

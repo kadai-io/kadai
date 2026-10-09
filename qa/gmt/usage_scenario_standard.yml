@@ -1,0 +1,58 @@
+# Regular usage scenario for continuous performance + energy measurements.
+# TODO(#1922): This is currently a copy of the Blauer Engel certification scenario
+# (usage_scenario_blue_angel.yml) and will be adapted to its own scenario in the future.
+# Its app image is pinned like the certification scenario's, but bumped automatically by CI.
+
+name: KADAI - PostgreSQL - Standard Usage
+author: envite consulting GmbH
+description: Regular energy measurement of the standard KADAI workflow with hundred API users and pauses of four seconds between the individual activities. After a warm-up phase for JIT stabilization the standard workflow is measured -- create, edit, assign and complete tasks; search and open workbaskets; read, write and delete comments; retrieve the task status report.
+
+compose-file: !include compose.yml
+
+services:
+  app:
+    # Pinned per commit for reproducible measurements. CI bumps this automatically after
+    # publishing a new image (see .github/workflows/kadai-gmt-container.yml).
+    # Available tags: https://github.com/kadai-io/kadai/pkgs/container/kadai-gmt
+    image: ghcr.io/kadai-io/kadai-gmt:sha-60581cbd999455c5b2dcf70d159f404d8855fd9d
+  k6:
+    setup-commands:
+      - command: k6 run /tmp/repo/qa/gmt/k6/setup_tasks.js
+
+custom_metrics:
+  response_time_avg:
+    unit: us
+    regex: ^(\d+) http_req_duration_avg\s+([\d\.]+)
+  response_time_min:
+    unit: us
+    regex: ^(\d+) http_req_duration_min\s+([\d\.]+)
+  response_time_max:
+    unit: us
+    regex: ^(\d+) http_req_duration_max\s+([\d\.]+)
+  response_time_p95:
+    unit: us
+    regex: ^(\d+) http_req_duration_p95\s+([\d\.]+)
+  throughput:
+    unit: "reqs per s"
+    regex: ^(\d+) http_reqs_per_second\s+([\d\.]+)
+
+flow:
+  - name: Warm-up
+    container: k6
+    commands:
+      - type: console
+        command: k6 run -e TASK_POOL_OFFSET=0 /tmp/repo/qa/gmt/k6/blue_angel/1_warm_up.js
+  - name: Pause
+    container: k6
+    commands:
+      - type: console
+        command: k6 run --log-format=raw --log-output=stdout /tmp/repo/qa/gmt/k6/blue_angel/2_pause.js
+        log-stdout: true
+        read-notes-stdout: true
+  - name: Standard Usage Scenario
+    container: k6
+    commands:
+      - type: console
+        command: k6 run -e TASK_POOL_OFFSET=500 --log-format=raw --log-output=stdout /tmp/repo/qa/gmt/k6/blue_angel/3_standard_usage_scenario.js
+        log-stdout: true
+        read-notes-stdout: true

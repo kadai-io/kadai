@@ -6,6 +6,21 @@ description: Messung eines realistischen KADAI-Nutzungsszenarios mit hundert API
 
 compose-file: !include compose.yml
 
+services:
+  app:
+    # Frozen image for reproducible Blauer Engel certification measurements. Only change this manually.
+    # Available image tags: https://github.com/kadai-io/kadai/pkgs/container/kadai-gmt
+    # Pin the `sha-<commit>` tag of the build whose code should be certified.
+    image: ghcr.io/kadai-io/kadai-gmt:sha-1e149da421699fdc554aaebda671df262ca5713b
+  postgres:
+    # Frozen for reproducible Blauer Engel certification measurements. Only change this manually.
+    image: postgres:17.11
+  k6:
+    # Frozen for reproducible Blauer Engel certification measurements. Only change this manually.
+    image: grafana/k6:2.3.0
+    setup-commands:
+      - command: k6 run /tmp/repo/qa/gmt/k6/setup_tasks.js
+
 custom_metrics:
   response_time_avg:
     unit: us
@@ -28,7 +43,7 @@ flow:
     container: k6
     commands:
       - type: console
-        command: k6 run /tmp/repo/qa/gmt/k6/blue_angel/1_warm_up.js
+        command: k6 run -e TASK_POOL_OFFSET=0 /tmp/repo/qa/gmt/k6/blue_angel/1_warm_up.js
   - name: Pause
     container: k6
     commands:
@@ -40,6 +55,6 @@ flow:
     container: k6
     commands:
       - type: console
-        command: k6 run --log-format=raw --log-output=stdout /tmp/repo/qa/gmt/k6/blue_angel/3_standard_usage_scenario.js
+        command: k6 run -e TASK_POOL_OFFSET=500 --log-format=raw --log-output=stdout /tmp/repo/qa/gmt/k6/blue_angel/3_standard_usage_scenario.js
         log-stdout: true
         read-notes-stdout: true

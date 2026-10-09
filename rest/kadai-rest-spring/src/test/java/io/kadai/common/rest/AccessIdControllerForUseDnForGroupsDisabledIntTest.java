@@ -337,4 +337,29 @@ class AccessIdControllerForUseDnForGroupsDisabledIntTest {
         .extracting(HttpStatusCodeException::getStatusCode)
         .isEqualTo(HttpStatus.FORBIDDEN);
   }
+
+  @Test
+  void should_ValidateOnlyNonDnGroupIdsAndPermissions() {
+    List<Pair<String, Boolean>> validationCases =
+        List.of(
+            Pair.of("ksc-teamleads", true),
+            Pair.of("cn=ksc-teamleads,cn=groups,OU=Test,O=KADAI", false),
+            Pair.of("kadai:callcenter:ab:ab/a:callcenter", true));
+
+    for (Pair<String, Boolean> validationCase : validationCases) {
+      ResponseEntity<Boolean> response =
+          restClient
+              .get()
+              .uri(
+                  restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_VALIDATION)
+                      + "?access-id="
+                      + validationCase.getLeft())
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(Boolean.class);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody()).isEqualTo(validationCase.getRight());
+    }
+  }
 }

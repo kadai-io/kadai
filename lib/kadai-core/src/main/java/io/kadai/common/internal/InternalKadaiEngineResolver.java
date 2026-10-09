@@ -27,13 +27,13 @@ public final class InternalKadaiEngineResolver {
   private InternalKadaiEngineResolver() {}
 
   public static InternalKadaiEngine resolve(KadaiEngine kadaiEngine) {
-    if (kadaiEngine instanceof KadaiEngineImpl kadaiEngineImpl) {
-      return kadaiEngineImpl.getInternalKadaiEngine();
+    if (!(kadaiEngine instanceof KadaiEngineImpl kadaiEngineImpl)) {
+      throw new SystemException(
+          String.format(
+              "Unable to resolve InternalKadaiEngine from KadaiEngine implementation '%s'",
+              kadaiEngine == null ? "null" : kadaiEngine.getClass().getName()));
     }
 
-    throw new SystemException(
-        String.format(
-            "Unable to resolve InternalKadaiEngine from KadaiEngine implementation '%s'",
-            kadaiEngine == null ? "null" : kadaiEngine.getClass().getName()));
+    return kadaiEngineImpl.getInternalKadaiEngine();
   }
 }

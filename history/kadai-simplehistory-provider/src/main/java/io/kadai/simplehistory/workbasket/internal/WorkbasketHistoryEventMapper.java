@@ -48,7 +48,6 @@ public interface WorkbasketHistoryEventMapper {
           + "SELECT ID, WORKBASKET_ID, EVENT_TYPE, CREATED, USER_ID, PROXY_ACCESS_ID, DOMAIN, KEY, TYPE, OWNER,  "
           + "CUSTOM_1, CUSTOM_2, CUSTOM_3, CUSTOM_4, ORG_LEVEL_1, ORG_LEVEL_2, ORG_LEVEL_3, ORG_LEVEL_4, DETAILS "
           + "FROM WORKBASKET_HISTORY_EVENT WHERE ID = #{id} "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   @Result(property = "id", column = "ID")
   @Result(property = "workbasketId", column = "WORKBASKET_ID")

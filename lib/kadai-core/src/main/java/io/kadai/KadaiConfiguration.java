@@ -120,6 +120,7 @@ public class KadaiConfiguration {
   private final boolean taskCleanupJobEnabled;
   private final int taskCleanupJobBatchSize;
   private final Duration taskCleanupJobMinimumAge;
+  private final Map<String, Duration> taskCleanupJobMinimumAgeByDomain;
   private final boolean taskCleanupJobAllCompletedSameParentBusiness;
   private final Duration taskCleanupJobLockExpirationPeriod;
 
@@ -138,6 +139,7 @@ public class KadaiConfiguration {
   private final Duration taskUpdatePriorityJobLockExpirationPeriod;
 
   private final boolean userInfoRefreshJobEnabled;
+  private final int userRefreshJobBatchSize;
   private final Instant userRefreshJobFirstRun;
   private final Duration userRefreshJobRunEvery;
   private final Duration userRefreshJobLockExpirationPeriod;
@@ -214,6 +216,7 @@ public class KadaiConfiguration {
     this.taskCleanupJobEnabled = builder.taskCleanupJobEnabled;
     this.taskCleanupJobBatchSize = builder.taskCleanupJobBatchSize;
     this.taskCleanupJobMinimumAge = builder.taskCleanupJobMinimumAge;
+    this.taskCleanupJobMinimumAgeByDomain = Map.copyOf(builder.taskCleanupJobMinimumAgeByDomain);
     this.taskCleanupJobAllCompletedSameParentBusiness =
         builder.taskCleanupJobAllCompletedSameParentBusiness;
     this.taskCleanupJobLockExpirationPeriod = builder.taskCleanupJobLockExpirationPeriod;
@@ -234,6 +237,7 @@ public class KadaiConfiguration {
     this.taskUpdatePriorityJobLockExpirationPeriod =
         builder.taskUpdatePriorityJobLockExpirationPeriod;
     this.userInfoRefreshJobEnabled = builder.userInfoRefreshJobEnabled;
+    this.userRefreshJobBatchSize = builder.userRefreshJobBatchSize;
     this.userRefreshJobFirstRun = builder.userRefreshJobFirstRun;
     this.userRefreshJobRunEvery = builder.userRefreshJobRunEvery;
     this.userRefreshJobLockExpirationPeriod = builder.userRefreshJobLockExpirationPeriod;
@@ -380,6 +384,18 @@ public class KadaiConfiguration {
     return taskCleanupJobMinimumAge;
   }
 
+  public Map<String, Duration> getTaskCleanupJobMinimumAgeByDomain() {
+    return taskCleanupJobMinimumAgeByDomain;
+  }
+
+  public Duration getTaskCleanupJobMinimumAgeForDomain(String domain) {
+    if (domain == null || MASTER_DOMAIN.equals(domain)) {
+      return taskCleanupJobMinimumAge;
+    }
+    return taskCleanupJobMinimumAgeByDomain.getOrDefault(
+        domain.toUpperCase(), taskCleanupJobMinimumAge);
+  }
+
   public boolean isTaskCleanupJobAllCompletedSameParentBusiness() {
     return taskCleanupJobAllCompletedSameParentBusiness;
   }
@@ -438,6 +454,15 @@ public class KadaiConfiguration {
 
   public boolean isUserInfoRefreshJobEnabled() {
     return userInfoRefreshJobEnabled;
+  }
+
+  /**
+   * Maximum number of statements accumulated before the user-refresh JDBC writer is flushed.
+   *
+   * @return the JDBC flush size, not a transaction size
+   */
+  public int getUserRefreshJobBatchSize() {
+    return userRefreshJobBatchSize;
   }
 
   public Instant getUserRefreshJobFirstRun() {
@@ -523,6 +548,7 @@ public class KadaiConfiguration {
         taskCleanupJobEnabled,
         taskCleanupJobBatchSize,
         taskCleanupJobMinimumAge,
+        taskCleanupJobMinimumAgeByDomain,
         taskCleanupJobAllCompletedSameParentBusiness,
         taskCleanupJobLockExpirationPeriod,
         workbasketCleanupJobEnabled,
@@ -538,6 +564,7 @@ public class KadaiConfiguration {
         taskUpdatePriorityJobRunEvery,
         taskUpdatePriorityJobLockExpirationPeriod,
         userInfoRefreshJobEnabled,
+        userRefreshJobBatchSize,
         userRefreshJobFirstRun,
         userRefreshJobRunEvery,
         userRefreshJobLockExpirationPeriod,
@@ -584,6 +611,7 @@ public class KadaiConfiguration {
         && taskUpdatePriorityJobEnabled == other.taskUpdatePriorityJobEnabled
         && taskUpdatePriorityJobBatchSize == other.taskUpdatePriorityJobBatchSize
         && userInfoRefreshJobEnabled == other.userInfoRefreshJobEnabled
+        && userRefreshJobBatchSize == other.userRefreshJobBatchSize
         && addAdditionalUserInfo == other.addAdditionalUserInfo
         && useSpecificDb2Taskquery == other.useSpecificDb2Taskquery
         && Objects.equals(dataSource, other.dataSource)
@@ -601,6 +629,7 @@ public class KadaiConfiguration {
         && Objects.equals(jobRunEvery, other.jobRunEvery)
         && Objects.equals(jobLockExpirationPeriod, other.jobLockExpirationPeriod)
         && Objects.equals(taskCleanupJobMinimumAge, other.taskCleanupJobMinimumAge)
+        && Objects.equals(taskCleanupJobMinimumAgeByDomain, other.taskCleanupJobMinimumAgeByDomain)
         && Objects.equals(
             taskCleanupJobLockExpirationPeriod, other.taskCleanupJobLockExpirationPeriod)
         && Objects.equals(
@@ -691,6 +720,8 @@ public class KadaiConfiguration {
         + taskCleanupJobBatchSize
         + ", taskCleanupJobMinimumAge="
         + taskCleanupJobMinimumAge
+        + ", taskCleanupJobMinimumAgeByDomain="
+        + taskCleanupJobMinimumAgeByDomain
         + ", taskCleanupJobAllCompletedSameParentBusiness="
         + taskCleanupJobAllCompletedSameParentBusiness
         + ", taskCleanupJobLockExpirationPeriod="
@@ -721,6 +752,8 @@ public class KadaiConfiguration {
         + taskUpdatePriorityJobLockExpirationPeriod
         + ", userInfoRefreshJobEnabled="
         + userInfoRefreshJobEnabled
+        + ", userRefreshJobBatchSize="
+        + userRefreshJobBatchSize
         + ", userRefreshJobFirstRun="
         + userRefreshJobFirstRun
         + ", userRefreshJobRunEvery="
@@ -849,6 +882,9 @@ public class KadaiConfiguration {
     @KadaiProperty("kadai.jobs.cleanup.task.minimumAge")
     private Duration taskCleanupJobMinimumAge = Duration.ofDays(14);
 
+    @KadaiProperty("kadai.jobs.cleanup.task.minimumAgeByDomain")
+    private Map<String, Duration> taskCleanupJobMinimumAgeByDomain = new HashMap<>();
+
     @KadaiProperty("kadai.jobs.cleanup.task.allCompletedSameParentBusiness")
     private boolean taskCleanupJobAllCompletedSameParentBusiness = true;
 
@@ -893,6 +929,9 @@ public class KadaiConfiguration {
 
     @KadaiProperty("kadai.jobs.refresh.user.enable")
     private boolean userInfoRefreshJobEnabled = false;
+
+    @KadaiProperty("kadai.jobs.refresh.user.batchSize")
+    private int userRefreshJobBatchSize = 1_000;
 
     @KadaiProperty("kadai.jobs.refresh.user.firstRunAt")
     private Instant userRefreshJobFirstRun = Instant.parse("2023-01-01T23:00:00Z");
@@ -1010,6 +1049,7 @@ public class KadaiConfiguration {
       this.taskCleanupJobEnabled = conf.taskCleanupJobEnabled;
       this.taskCleanupJobBatchSize = conf.taskCleanupJobBatchSize;
       this.taskCleanupJobMinimumAge = conf.taskCleanupJobMinimumAge;
+      this.taskCleanupJobMinimumAgeByDomain = conf.taskCleanupJobMinimumAgeByDomain;
       this.taskCleanupJobAllCompletedSameParentBusiness =
           conf.taskCleanupJobAllCompletedSameParentBusiness;
       this.taskCleanupJobLockExpirationPeriod = conf.taskCleanupJobLockExpirationPeriod;
@@ -1029,6 +1069,7 @@ public class KadaiConfiguration {
       this.taskUpdatePriorityJobLockExpirationPeriod =
           conf.taskUpdatePriorityJobLockExpirationPeriod;
       this.userInfoRefreshJobEnabled = conf.userInfoRefreshJobEnabled;
+      this.userRefreshJobBatchSize = conf.userRefreshJobBatchSize;
       this.userRefreshJobFirstRun = conf.userRefreshJobFirstRun;
       this.userRefreshJobRunEvery = conf.userRefreshJobRunEvery;
       this.userRefreshJobLockExpirationPeriod = conf.userRefreshJobLockExpirationPeriod;
@@ -1251,6 +1292,12 @@ public class KadaiConfiguration {
       return this;
     }
 
+    public Builder taskCleanupJobMinimumAgeByDomain(
+        Map<String, Duration> taskCleanupJobMinimumAgeByDomain) {
+      this.taskCleanupJobMinimumAgeByDomain = taskCleanupJobMinimumAgeByDomain;
+      return this;
+    }
+
     public Builder taskCleanupJobAllCompletedSameParentBusiness(
         boolean taskCleanupJobAllCompletedSameParentBusiness) {
       this.taskCleanupJobAllCompletedSameParentBusiness =
@@ -1331,6 +1378,11 @@ public class KadaiConfiguration {
 
     public Builder userInfoRefreshJobEnabled(boolean userInfoRefreshJobEnabled) {
       this.userInfoRefreshJobEnabled = userInfoRefreshJobEnabled;
+      return this;
+    }
+
+    public Builder userRefreshJobBatchSize(int userRefreshJobBatchSize) {
+      this.userRefreshJobBatchSize = userRefreshJobBatchSize;
       return this;
     }
 
@@ -1429,6 +1481,7 @@ public class KadaiConfiguration {
 
     private void adjustConfiguration() {
       domains = domains.stream().map(String::toUpperCase).toList();
+      taskCleanupJobMinimumAgeByDomain = normalizeTaskCleanupMinimumAgeByDomain();
       classificationTypes = classificationTypes.stream().map(String::toUpperCase).toList();
       classificationCategoriesByType =
           classificationCategoriesByType.entrySet().stream()
@@ -1457,6 +1510,56 @@ public class KadaiConfiguration {
               .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
     }
 
+    private Map<String, Duration> normalizeTaskCleanupMinimumAgeByDomain() {
+      if (taskCleanupJobMinimumAgeByDomain == null) {
+        throw invalidTaskCleanupMinimumAgeByDomain("must not be null");
+      }
+
+      Map<String, Duration> normalizedOverrides = new LinkedHashMap<>();
+      for (Entry<String, Duration> entry : taskCleanupJobMinimumAgeByDomain.entrySet()) {
+        String domain = entry.getKey();
+        if (domain == null || domain.isBlank()) {
+          throw invalidTaskCleanupMinimumAgeByDomain("must not contain a null or blank domain");
+        }
+        String normalizedDomain = domain.toUpperCase();
+        if (normalizedOverrides.containsKey(normalizedDomain)) {
+          throw invalidTaskCleanupMinimumAgeByDomain(
+              "must not contain duplicate domains after normalization: " + normalizedDomain);
+        }
+        normalizedOverrides.put(normalizedDomain, entry.getValue());
+      }
+      return normalizedOverrides;
+    }
+
+    private void validateTaskCleanupMinimumAgeByDomain() {
+      for (Entry<String, Duration> entry : taskCleanupJobMinimumAgeByDomain.entrySet()) {
+        String domain = entry.getKey();
+        Duration duration = entry.getValue();
+        if (duration == null || duration.isNegative()) {
+          throw new InvalidArgumentException(
+              "Parameter taskCleanupJobMinimumAgeByDomain "
+                  + "(kadai.jobs.cleanup.task.minimumAgeByDomain."
+                  + domain
+                  + ") must not be null or negative");
+        }
+        if (!domains.contains(domain)) {
+          throw new InvalidArgumentException(
+              "Parameter taskCleanupJobMinimumAgeByDomain "
+                  + "(kadai.jobs.cleanup.task.minimumAgeByDomain."
+                  + domain
+                  + ") refers to unknown domain "
+                  + domain);
+        }
+      }
+    }
+
+    private InvalidArgumentException invalidTaskCleanupMinimumAgeByDomain(String detail) {
+      return new InvalidArgumentException(
+          "Parameter taskCleanupJobMinimumAgeByDomain "
+              + "(kadai.jobs.cleanup.task.minimumAgeByDomain) "
+              + detail);
+    }
+
     private void validateConfiguration() {
       if (jobBatchSize <= 0) {
         throw new InvalidArgumentException(
@@ -1465,6 +1568,11 @@ public class KadaiConfiguration {
       if (taskCleanupJobBatchSize <= 0) {
         throw new InvalidArgumentException(
             "Parameter taskCleanupJobBatchSize (kadai.jobs.cleanup.task.batchSize)"
+                + " must be a positive integer");
+      }
+      if (userRefreshJobBatchSize <= 0) {
+        throw new InvalidArgumentException(
+            "Parameter userRefreshJobBatchSize (kadai.jobs.refresh.user.batchSize)"
                 + " must be a positive integer");
       }
       if (maxNumberOfJobRetries <= 0) {
@@ -1487,6 +1595,7 @@ public class KadaiConfiguration {
             "Parameter taskCleanupJobMinimumAge "
                 + "(kadai.jobs.cleanup.task.minimumAge) must not be negative");
       }
+      validateTaskCleanupMinimumAgeByDomain();
       if (taskUpdatePriorityJobBatchSize <= 0) {
         throw new InvalidArgumentException(
             "Parameter taskUpdatePriorityJobBatchSize (kadai.jobs.priority.task.batchSize)"

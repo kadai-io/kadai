@@ -22,7 +22,7 @@
     <div
       [style.width]="expanded() ? 'calc(' + 100 + 'vw - 500px)' : 'calc(' + 100 + 'vw - 250px)'"
       class="workbasket-access-items">
-      <div class=" workbasket-access-items__buttons">
+      <div class="workbasket-access-items__buttons">
         <button (click)="addAccessItem()" class="workbasket-access-items__buttons-add-access"
                 mat-stroked-button
                 matTooltip="Add new access" type="button">
@@ -36,7 +36,7 @@
           <mat-icon aria-label="delete access" color="green-blue">delete</mat-icon>
         </button>
       </div>
-      <form [formGroup]="AccessItemsForm" class="workbasket-access-items__form">
+      <form [formGroup]="AccessItemsForm" class="workbasket-access-items__form" kadaiFormSubmit>
         <table class="workbasket-access-items__table" formArrayName="accessItemsGroups"
                id="table-access-items">
           <!-- TITLE ROW -->
@@ -90,8 +90,8 @@
                 <!-- ACCESS ID -->
                 @if ((accessItemsCustomization$ | async)?.accessId?.lookupField) {
                   <td
-                    [class]="{	'has-warning': (accessItemsClone()[index].accessId !== accessItem.value.accessId),
-                							'has-error': !accessItem.value.accessId || accessItemsGroups.controls[index].get('accessId')?.invalid }"
+                    [class.has-warning]="accessItemsClone()[index].accessId !== accessItem.value.accessId"
+                		[class.has-error]="accessItem.get('accessId')?.invalid && accessItem.get('accessId')?.touched"
                     class="workbasket-access-items__typeahead">
                     <kadai-shared-type-ahead
                       (accessIdEventEmitter)="accessItemSelected($event, index)"
@@ -103,14 +103,15 @@
                   </td>
                 } @else {
                   <td>
-                    <div [class]="{ 'has-warning': (accessItemsClone()[index].accessId !== accessItem.value.accessId),
-																  'has-error': !accessItem.value.accessId && formsValidatorService.formSubmitAttempt}">
+                    <div [class.has-warning]="accessItemsClone()[index].accessId !== accessItem.value.accessId"
+                         [class.has-error]="accessIdField.hasError">
                       <input #htmlInputElement
-                             [@validation]="toggleValidationAccessIdMap.get(index)"
+                             #accessIdField="kadaiFormField"
                              formControlName="accessId"
                              matInput
                              placeholder="{{accessItem.invalid ? '* Access id is required': ''}}"
-                             type="text">
+                             type="text"
+                             kadaiFormFieldSubmit>
                     </div>
                   </td>
                 }

@@ -82,6 +82,38 @@ describe('AccessIdsService', () => {
     });
   });
 
+  describe('validateAccessId', () => {
+    it('should return false without an HTTP request when accessId is null or empty', async () => {
+      expect(await firstValueFrom(service.validateAccessId(null as any))).toBe(false);
+      expect(await firstValueFrom(service.validateAccessId(''))).toBe(false);
+    });
+
+    it('should validate short and special-character IDs through a query parameter', () => {
+      service.validateAccessId('kadai:callcenter:ab:ab/a:callcenter').subscribe((result) => {
+        expect(result).toBe(true);
+      });
+
+      const req = httpMock.expectOne(
+        (request) =>
+          request.url === REST_URL + '/v1/access-ids/validation' &&
+          request.params.get('access-id') === 'kadai:callcenter:ab:ab/a:callcenter'
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush(true);
+    });
+
+    it('should return false when the backend reports an invalid Access ID', () => {
+      service.validateAccessId('ab').subscribe((result) => {
+        expect(result).toBe(false);
+      });
+
+      const req = httpMock.expectOne(
+        (request) => request.url === REST_URL + '/v1/access-ids/validation' && request.params.get('access-id') === 'ab'
+      );
+      req.flush(false);
+    });
+  });
+
   describe('getGroupsByAccessId', () => {
     it('should return empty array when accessId is null', async () => {
       const result = await firstValueFrom(service.getGroupsByAccessId(null as any));
