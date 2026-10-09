@@ -374,12 +374,14 @@ public class TaskQueryImpl implements TaskQuery {
 
   public boolean isJoinWithUserInfo() {
     return joinWithUserInfo
-        || (!selectAndClaim && kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo());
+        || (!selectAndClaim
+            && kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo());
   }
 
   public boolean isJoinWithCreatorUserInfo() {
     return joinWithCreatorUserInfo
-        || (!selectAndClaim && kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo());
+        || (!selectAndClaim
+            && kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo());
   }
 
   @Override
