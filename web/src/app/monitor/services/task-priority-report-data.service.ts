@@ -40,38 +40,48 @@ export class TaskPriorityReportDataService {
   private readonly requestInProgressService = inject(RequestInProgressService);
   private readonly filterState = inject(TaskPriorityReportFilterStateService);
 
-  readonly reportData$: Observable<ReportData | undefined> = combineLatest([
-    this.store.select(SettingsSelectors.getSettings),
-    this.domainService.getSelectedDomain(),
-    toObservable(this.filterState.workbasketKey),
-    toObservable(this.filterState.activeQuery)
-  ]).pipe(
-    switchMap(([settings, domain, workbasketKey, query]) => {
-      if (!settings) return of(undefined);
+  private readonly workbasketKey$ = toObservable(this.filterState.workbasketKey);
+  private readonly activeQuery$ = toObservable(this.filterState.activeQuery);
 
-      const intervals: PriorityInterval[] = [
-        settings[SettingMembers.IntervalHighPriority],
-        settings[SettingMembers.IntervalMediumPriority],
-        settings[SettingMembers.IntervalLowPriority]
-      ].map(([lowerBound, upperBound]) => ({ lowerBound, upperBound }));
+  getReportData$(overrideWorkbasketKey?: string): Observable<ReportData | undefined> {
+    const isKeyProvided = arguments.length > 0;
+    const keyStream$ = isKeyProvided ? of(overrideWorkbasketKey) : this.workbasketKey$;
 
-      const isDepthZero = workbasketKey === undefined;
-      const request$ = isDepthZero
-        ? this.monitorService.getTasksByPriorityReport([WorkbasketType.TOPIC], intervals, domain, query)
-        : this.monitorService.getTasksByDetailedPriorityReport([WorkbasketType.TOPIC], intervals, domain, query);
+    return combineLatest([
+      this.store.select(SettingsSelectors.getSettings),
+      this.domainService.getSelectedDomain(),
+      keyStream$,
+      this.activeQuery$
+    ]).pipe(
+      switchMap(([settings, domain, signalWorkbasketKey, query]) => {
+        if (!settings) return of(undefined);
 
-      this.requestInProgressService.beginRequest();
+        const workbasketKey = overrideWorkbasketKey ?? signalWorkbasketKey;
 
-      return request$.pipe(
-        map((reportData) => this.filterRows(reportData, isDepthZero, workbasketKey)),
-        catchError((err) => {
-          console.error('Failed to load Task Priority Report', err);
-          return of(undefined);
-        }),
-        finalize(() => this.requestInProgressService.endRequest())
-      );
-    })
-  );
+        const intervals: PriorityInterval[] = [
+          settings[SettingMembers.IntervalHighPriority],
+          settings[SettingMembers.IntervalMediumPriority],
+          settings[SettingMembers.IntervalLowPriority]
+        ].map(([lowerBound, upperBound]) => ({ lowerBound, upperBound }));
+
+        const isDepthZero = workbasketKey === undefined;
+        const request$ = isDepthZero
+          ? this.monitorService.getTasksByPriorityReport([WorkbasketType.TOPIC], intervals, domain, query)
+          : this.monitorService.getTasksByDetailedPriorityReport([WorkbasketType.TOPIC], intervals, domain, query);
+
+        this.requestInProgressService.beginRequest();
+
+        return request$.pipe(
+          map((reportData) => this.filterRows(reportData, isDepthZero, workbasketKey)),
+          catchError((err) => {
+            console.error('Failed to load Task Priority Report', err);
+            return of(undefined);
+          }),
+          finalize(() => this.requestInProgressService.endRequest())
+        );
+      })
+    );
+  }
 
   private filterRows(reportData: ReportData, isDepthZero: boolean, workbasketKey?: string): ReportData {
     const depth = isDepthZero ? 0 : 1;

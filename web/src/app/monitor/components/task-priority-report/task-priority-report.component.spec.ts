@@ -16,7 +16,7 @@
  *
  */
 
-import { Signal, signal } from '@angular/core';
+import { Injectable, Signal, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { MatCheckbox } from '@angular/material/checkbox';
@@ -47,6 +47,7 @@ import { provideStore, State } from '@ngxs/store';
     }
   }
 })
+@Injectable()
 class MockSettingsState {}
 
 const mockReportData: ReportData = {
@@ -117,7 +118,7 @@ describe('TaskPriorityReportComponent', () => {
     };
 
     mockDataService = {
-      reportData$: reportDataSubject$.asObservable()
+      getReportData$: vi.fn().mockReturnValue(reportDataSubject$.asObservable())
     };
 
     await TestBed.configureTestingModule({

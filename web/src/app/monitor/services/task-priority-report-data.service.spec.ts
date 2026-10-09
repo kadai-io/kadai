@@ -123,11 +123,11 @@ describe('TaskPriorityReportDataService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('Report Loading & Filtering Logic (reportData$ / reportData)', () => {
+  describe('Report Loading & Filtering Logic (getReportData$() / reportData)', () => {
     it('should emit undefined if settings are missing', async () => {
       settingsSubject$.next(undefined);
 
-      const data = await firstValueFrom(service.reportData$);
+      const data = await firstValueFrom(service.getReportData$());
 
       expect(data).toBeUndefined();
       expect(mockMonitorService.getTasksByPriorityReport).not.toHaveBeenCalled();
@@ -143,7 +143,7 @@ describe('TaskPriorityReportDataService', () => {
         { lowerBound: 0, upperBound: 49 }
       ];
 
-      const data = await firstValueFrom(service.reportData$);
+      const data = await firstValueFrom(service.getReportData$());
 
       expect(data).toBeTruthy();
       expect(data?.rows.length).toBe(2);
@@ -161,7 +161,7 @@ describe('TaskPriorityReportDataService', () => {
     it('should call getTasksByDetailedPriorityReport and filter rows by depth 1 and matching workbasketKey', async () => {
       workbasketKeySignal.set('WBK_A');
 
-      const data = await firstValueFrom(service.reportData$);
+      const data = await firstValueFrom(service.getReportData$());
 
       expect(data).toBeTruthy();
       expect(data?.rows.length).toBe(1);
@@ -186,7 +186,7 @@ describe('TaskPriorityReportDataService', () => {
       const activeQuery = { state: ['READY', 'CLAIMED'] };
       activeQuerySignal.set(activeQuery);
 
-      await firstValueFrom(service.reportData$);
+      await firstValueFrom(service.getReportData$());
 
       expect(mockMonitorService.getTasksByPriorityReport).toHaveBeenCalledWith(
         [WorkbasketType.TOPIC],
@@ -197,7 +197,7 @@ describe('TaskPriorityReportDataService', () => {
     });
 
     it('should manage requestInProgress state during data fetch', async () => {
-      await firstValueFrom(service.reportData$);
+      await firstValueFrom(service.getReportData$());
 
       expect(mockRequestInProgressService.beginRequest).toHaveBeenCalled();
       expect(mockRequestInProgressService.endRequest).toHaveBeenCalled();
@@ -209,7 +209,7 @@ describe('TaskPriorityReportDataService', () => {
         throwError(() => new Error('API Network Error'))
       );
 
-      const data = await firstValueFrom(service.reportData$);
+      const data = await firstValueFrom(service.getReportData$());
 
       expect(data).toBeUndefined();
       expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to load Task Priority Report', expect.any(Error));
@@ -218,7 +218,7 @@ describe('TaskPriorityReportDataService', () => {
     });
 
     it('should update signal value (reportData) reactively', async () => {
-      const data = await firstValueFrom(service.reportData$);
+      const data = await firstValueFrom(service.getReportData$());
       expect(data).toBeTruthy();
       expect(data?.rows.length).toBe(2);
     });
@@ -242,7 +242,7 @@ describe('TaskPriorityReportDataService', () => {
         pendingRequest2$.asObservable()
       );
 
-      const subscription = service.reportData$.subscribe();
+      const subscription = service.getReportData$().subscribe();
       settingsSubject$.next(mockSettings);
       TestBed.tick();
 
@@ -260,6 +260,30 @@ describe('TaskPriorityReportDataService', () => {
       pendingRequest2$.complete();
 
       expect(mockRequestInProgressService.endRequest).toHaveBeenCalledTimes(2);
+      subscription.unsubscribe();
+    });
+
+    it('should reload report with new domain when domainSubject$ emits a new value', () => {
+      const subscription = service.getReportData$().subscribe();
+      TestBed.tick();
+
+      expect(mockMonitorService.getTasksByPriorityReport).toHaveBeenCalledWith(
+        [WorkbasketType.TOPIC],
+        expect.any(Array),
+        'DOMAIN_A',
+        {}
+      );
+
+      domainSubject$.next('DOMAIN_B');
+      TestBed.tick();
+
+      expect(mockMonitorService.getTasksByPriorityReport).toHaveBeenCalledWith(
+        [WorkbasketType.TOPIC],
+        expect.any(Array),
+        'DOMAIN_B',
+        {}
+      );
+
       subscription.unsubscribe();
     });
   });

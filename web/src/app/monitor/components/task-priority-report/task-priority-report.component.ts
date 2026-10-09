@@ -19,7 +19,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe, NgClass } from '@angular/common';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { MatDivider } from '@angular/material/divider';
 import {
@@ -48,6 +48,7 @@ import { TaskPriorityReportFilterStateService } from '../../services/task-priori
 import { TaskPriorityReportDataService } from '../../services/task-priority-report-data.service';
 import { SettingMembers } from '../../../settings/components/Settings/expected-members';
 import { ReportData } from 'app/monitor/models/report-data';
+import { switchMap } from 'rxjs/internal/operators/switchMap';
 
 @Component({
   selector: 'kadai-monitor-task-priority-report',
@@ -90,7 +91,16 @@ export class TaskPriorityReportComponent {
   readonly columns: string[] = ['priority', 'number'];
   isPanelOpen = false;
 
-  readonly reportData = toSignal<ReportData | undefined>(this.dataService.reportData$);
+  readonly reportData = toSignal<ReportData | undefined>(
+    this.activatedRoute.params.pipe(
+      switchMap((params) => {
+        const key = params['workbasketKey'];
+        this.filterState.workbasketKey.set(key);
+        return this.dataService.getReportData$(key);
+      })
+    )
+  );
+
   readonly keys = this.filterState.filterKeys;
   readonly filtersAreSpecified = this.filterState.filtersAreSpecified;
   readonly activeFilters = this.filterState.activeFilters;
@@ -117,12 +127,6 @@ export class TaskPriorityReportComponent {
       { priority: 'Total', number: row.total }
     ]);
   });
-
-  constructor() {
-    this.activatedRoute.params.pipe(takeUntilDestroyed()).subscribe((params) => {
-      this.filterState.workbasketKey.set(params['workbasketKey']);
-    });
-  }
 
   onFilterChange(isEnabled: boolean, key: string): void {
     this.filterState.toggleFilter(key, isEnabled);
