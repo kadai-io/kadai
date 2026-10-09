@@ -2814,8 +2814,8 @@ public class TaskServiceImpl implements TaskService {
     ClassificationSummary newClassificationSummary = newTaskImpl.getClassificationSummary();
     if (newClassificationSummary == null
         || Objects.equals(oldClassificationSummary.getKey(), newClassificationSummary.getKey())) {
-      // A task update may only select a classification by key; its metadata is authoritative only
-      // when it comes from the persisted classification.
+      // A same-key update may carry incomplete or caller-modified metadata. Use the DB-loaded
+      // summary before calculating service level and priority.
       newTaskImpl.setClassificationSummary(oldClassificationSummary);
       return;
     }
