@@ -401,10 +401,6 @@ class UpdateTaskAccTest {
   @Test
   void should_RecalculateDueFromOldPlanned_When_ClassificationChangesWithoutDates()
       throws Exception {
-    ClassificationSummary newClassificationSummary =
-        defaultTestClassification()
-            .serviceLevel("P3D")
-            .buildAndStoreAsSummary(classificationService, "admin");
     Task task =
         TaskBuilder.newTask()
             .classificationSummary(defaultClassificationSummary)
@@ -415,6 +411,10 @@ class UpdateTaskAccTest {
     final Instant oldPlanned = task.getPlanned();
     final Instant oldDue = task.getDue();
 
+    ClassificationSummary newClassificationSummary =
+        defaultTestClassification()
+            .serviceLevel("P3D")
+            .buildAndStoreAsSummary(classificationService, "admin");
     task.setClassificationKey(newClassificationSummary.getKey());
     task.setPlanned(null);
     task.setDue(null);
