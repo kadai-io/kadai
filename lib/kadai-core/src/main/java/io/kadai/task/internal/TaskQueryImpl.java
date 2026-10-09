@@ -2254,8 +2254,7 @@ public class TaskQueryImpl implements TaskQuery {
         && lockResults != null
         && lockResults != 0) {
       throw new IllegalArgumentException(
-          "The params \"lockResultsEquals\" and \"joinWithUserInfo\"/\"joinWithCreatorUserInfo\""
-              + " cannot be used together!");
+          "Cannot lock task results when owner or creator user information is requested.");
     }
     if (withoutAttachment
         && (attachmentChannelIn != null
