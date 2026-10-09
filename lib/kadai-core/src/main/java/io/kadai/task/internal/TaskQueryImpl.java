@@ -370,9 +370,18 @@ public class TaskQueryImpl implements TaskQuery {
     this.filterByAccessIdIn = true;
     this.withoutAttachment = false;
     this.lockResults = 0;
-    this.joinWithUserInfo = kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo();
-    this.joinWithCreatorUserInfo =
-        kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo();
+  }
+
+  public boolean isJoinWithUserInfo() {
+    return joinWithUserInfo
+        || (!selectAndClaim
+            && kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo());
+  }
+
+  public boolean isJoinWithCreatorUserInfo() {
+    return joinWithCreatorUserInfo
+        || (!selectAndClaim
+            && kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo());
   }
 
   @Override
@@ -2263,7 +2272,9 @@ public class TaskQueryImpl implements TaskQuery {
       throw new IllegalArgumentException(
           "The params \"lockResultsEquals\" and \"selectAndClaim\"" + " cannot be used together!");
     }
-    if ((joinWithUserInfo || joinWithCreatorUserInfo) && lockResults != null && lockResults != 0) {
+    if ((isJoinWithUserInfo() || isJoinWithCreatorUserInfo())
+        && lockResults != null
+        && lockResults != 0) {
       throw new IllegalArgumentException(
           "The params \"lockResultsEquals\" and \"joinWithUserInfo\"/\"joinWithCreatorUserInfo\""
               + " cannot be used together!");
