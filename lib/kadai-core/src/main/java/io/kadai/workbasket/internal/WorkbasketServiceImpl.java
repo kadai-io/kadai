@@ -68,9 +68,11 @@ import io.kadai.workbasket.internal.models.WorkbasketSummaryImpl;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -231,6 +233,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
       }
 
       checkModifiedHasNotChanged(oldWorkbasket, workbasketImplToUpdate);
+      validateAndPreserveCreated(oldWorkbasket, workbasketImplToUpdate);
       workbasketImplToUpdate.setModified(Instant.now());
 
       if (workbasketImplToUpdate.getId() == null || workbasketImplToUpdate.getId().isEmpty()) {
@@ -517,18 +520,20 @@ public class WorkbasketServiceImpl implements WorkbasketService {
           NotAuthorizedOnWorkbasketException {
     kadaiEngine.getEngine().checkRoleMembership(KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
 
-    Set<WorkbasketAccessItemImpl> accessItems =
-        checkAccessItemsPreconditionsAndSetId(workbasketId, wbAccessItems);
-
     try {
       kadaiEngine.openConnection();
-      // this is necessary to verify that the requested workbasket exists.
-      getWorkbasket(workbasketId);
+      // This also verifies that the caller is authorized to update the parent Workbasket.
+      Workbasket parentWorkbasket = getWorkbasket(workbasketId);
 
+      // The existing identities are needed to distinguish updates to owned items from attempts to
+      // insert a caller-selected identity. Load them before validating the whole replacement.
+      List<WorkbasketAccessItemImpl> currentAccessItems =
+          workbasketAccessMapper.findByWorkbasketId(workbasketId);
+      List<WorkbasketAccessItemImpl> accessItems =
+          checkAccessItemsPreconditionsAndSetId(
+              workbasketId, parentWorkbasket.getKey(), wbAccessItems, currentAccessItems);
       final List<WorkbasketAccessItemImpl> originalAccessItems =
-          kadaiEngine.getEngine().isHistoryEnabled()
-              ? workbasketAccessMapper.findByWorkbasketId(workbasketId)
-              : new ArrayList<>();
+          kadaiEngine.getEngine().isHistoryEnabled() ? currentAccessItems : new ArrayList<>();
 
       // delete all current ones
       workbasketAccessMapper.deleteAllAccessItemsForWorkbasketId(workbasketId);
@@ -992,50 +997,91 @@ public class WorkbasketServiceImpl implements WorkbasketService {
     }
   }
 
-  private Set<WorkbasketAccessItemImpl> checkAccessItemsPreconditionsAndSetId(
-      String workbasketId, List<WorkbasketAccessItem> wbAccessItems)
+  private void validateAndPreserveCreated(
+      Workbasket oldWorkbasket, WorkbasketImpl workbasketImplToUpdate)
+      throws InvalidArgumentException {
+    Instant requestedCreated = workbasketImplToUpdate.getCreated();
+    if (requestedCreated != null && !requestedCreated.equals(oldWorkbasket.getCreated())) {
+      throw new InvalidArgumentException("The Workbasket creation timestamp cannot be changed.");
+    }
+    workbasketImplToUpdate.setCreated(oldWorkbasket.getCreated());
+  }
+
+  private List<WorkbasketAccessItemImpl> checkAccessItemsPreconditionsAndSetId(
+      String workbasketId,
+      String workbasketKey,
+      List<WorkbasketAccessItem> wbAccessItems,
+      List<WorkbasketAccessItemImpl> currentAccessItems)
       throws InvalidArgumentException, LogicalDuplicateInPayloadException {
+    if (wbAccessItems == null) {
+      throw new InvalidArgumentException("Workbasket access items must not be null.");
+    }
+
+    Map<String, WorkbasketAccessItemImpl> currentItemsById = new HashMap<>();
+    for (WorkbasketAccessItemImpl currentAccessItem : currentAccessItems) {
+      currentItemsById.put(currentAccessItem.getId(), currentAccessItem);
+    }
 
     Set<String> ids = new HashSet<>();
-    Set<WorkbasketAccessItemImpl> accessItems = new HashSet<>();
+    Set<String> accessIds = new HashSet<>();
+    List<WorkbasketAccessItemImpl> accessItems = new ArrayList<>();
 
     for (WorkbasketAccessItem workbasketAccessItem : wbAccessItems) {
-      if (workbasketAccessItem != null) {
-        WorkbasketAccessItemImpl wbAccessItemImpl = (WorkbasketAccessItemImpl) workbasketAccessItem;
-
-        if (wbAccessItemImpl.getWorkbasketId() == null) {
-          throw new InvalidArgumentException(
-              String.format(
-                  "Checking the preconditions of the current WorkbasketAccessItem failed "
-                      + "- WBID is NULL. WorkbasketAccessItem=%s",
-                  workbasketAccessItem));
-        } else if (!wbAccessItemImpl.getWorkbasketId().equals(workbasketId)) {
-          throw new InvalidArgumentException(
-              String.format(
-                  "Checking the preconditions of the current WorkbasketAccessItem failed "
-                      + "- the WBID does not match. Target-WBID=''%s'' WorkbasketAccessItem=%s",
-                  workbasketId, workbasketAccessItem));
-        }
-
-        String accessId = wbAccessItemImpl.getAccessId();
-        if (accessId == null || accessId.isBlank()) {
-          throw new InvalidArgumentException(
-              String.format(
-                  "Checking the preconditions of the current WorkbasketAccessItem failed "
-                      + "- accessId is null or empty. WorkbasketAccessItem=%s, accessId=%s",
-                  workbasketAccessItem, accessId));
-        }
-
-        if (wbAccessItemImpl.getId() == null || wbAccessItemImpl.getId().isEmpty()) {
-          wbAccessItemImpl.setId(
-              IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_AUTHORIZATION));
-        }
-        if (ids.contains(accessId)) {
-          throw new LogicalDuplicateInPayloadException(accessId);
-        }
-        ids.add(accessId);
-        accessItems.add(wbAccessItemImpl);
+      if (workbasketAccessItem == null) {
+        throw new InvalidArgumentException("Workbasket access items must not contain null items.");
       }
+
+      WorkbasketAccessItemImpl wbAccessItemImpl = (WorkbasketAccessItemImpl) workbasketAccessItem;
+      String suppliedWorkbasketId = wbAccessItemImpl.getWorkbasketId();
+      if (suppliedWorkbasketId == null || suppliedWorkbasketId.isEmpty()) {
+        wbAccessItemImpl.setWorkbasketId(workbasketId);
+      } else if (!suppliedWorkbasketId.equals(workbasketId)) {
+        throw new InvalidArgumentException(
+            String.format(
+                "The WorkbasketAccessItem Workbasket ID '%s' does not match target '%s'.",
+                suppliedWorkbasketId, workbasketId));
+      }
+
+      String accessId = wbAccessItemImpl.getAccessId();
+      if (accessId == null || accessId.isBlank()) {
+        throw new InvalidArgumentException(
+            String.format(
+                "Checking the preconditions of the current WorkbasketAccessItem failed "
+                    + "- accessId is null or empty. WorkbasketAccessItem=%s, accessId=%s",
+                workbasketAccessItem, accessId));
+      }
+      accessId = accessId.toLowerCase();
+      wbAccessItemImpl.setAccessId(accessId);
+      wbAccessItemImpl.setWorkbasketKey(workbasketKey);
+
+      if (!accessIds.add(accessId)) {
+        throw new LogicalDuplicateInPayloadException(accessId);
+      }
+
+      String accessItemId = wbAccessItemImpl.getId();
+      if (accessItemId == null || accessItemId.isEmpty()) {
+        wbAccessItemImpl.setId(
+            IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_AUTHORIZATION));
+      } else {
+        if (!ids.add(accessItemId)) {
+          throw new InvalidArgumentException(
+              String.format("WorkbasketAccessItem ID '%s' occurs more than once.", accessItemId));
+        }
+        WorkbasketAccessItemImpl currentItem = currentItemsById.get(accessItemId);
+        if (currentItem == null || !workbasketId.equals(currentItem.getWorkbasketId())) {
+          throw new InvalidArgumentException(
+              String.format(
+                  "WorkbasketAccessItem ID '%s' is not owned by Workbasket '%s'.",
+                  accessItemId, workbasketId));
+        }
+        if (!accessId.equals(currentItem.getAccessId().toLowerCase())) {
+          throw new InvalidArgumentException(
+              String.format(
+                  "WorkbasketAccessItem ID '%s' cannot be assigned to a different access ID.",
+                  accessItemId));
+        }
+      }
+      accessItems.add(wbAccessItemImpl);
     }
     return accessItems;
   }
