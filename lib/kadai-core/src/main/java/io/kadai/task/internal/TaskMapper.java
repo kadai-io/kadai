@@ -144,7 +144,7 @@ public interface TaskMapper {
           + "CUSTOM_ATTRIBUTES = #{customAttributes,jdbcType=CLOB,javaType=java.util.Map,typeHandler=io.kadai.common.internal.persistence.MapTypeHandler}, CUSTOM_1 = #{custom1}, CUSTOM_2 = #{custom2}, "
           + "CUSTOM_3 = #{custom3}, CUSTOM_4 = #{custom4}, CUSTOM_5 = #{custom5}, CUSTOM_6 = #{custom6}, CUSTOM_7 = #{custom7}, CUSTOM_8 = #{custom8}, "
           + "CUSTOM_9 = #{custom9}, CUSTOM_10 = #{custom10}, CUSTOM_11 = #{custom11}, CUSTOM_12 = #{custom12}, CUSTOM_13 = #{custom13}, CUSTOM_14 = #{custom14}, CUSTOM_15 = #{custom15}, CUSTOM_16 = #{custom16}, "
-          + "CUSTOM_INT_1 = #{customInt1}, CUSTOM_INT_2 = #{customInt2}, CUSTOM_INT_3 = #{customInt3}, CUSTOM_INT_4 = #{customInt4}, CUSTOM_INT_5 = #{customInt5}, CUSTOM_INT_6 = #{customInt6}, CUSTOM_INT_7 = #{customInt7}, CUSTOM_INT_8 = #{customInt8}, NUMBER_OF_COMMENTS = #{numberOfComments} "
+          + "CUSTOM_INT_1 = #{customInt1}, CUSTOM_INT_2 = #{customInt2}, CUSTOM_INT_3 = #{customInt3}, CUSTOM_INT_4 = #{customInt4}, CUSTOM_INT_5 = #{customInt5}, CUSTOM_INT_6 = #{customInt6}, CUSTOM_INT_7 = #{customInt7}, CUSTOM_INT_8 = #{customInt8} "
           + "WHERE ID = #{id}")
   void update(TaskImpl task);
 
