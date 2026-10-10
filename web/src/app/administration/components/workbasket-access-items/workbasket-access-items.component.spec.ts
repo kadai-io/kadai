@@ -20,7 +20,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketAccessItemsComponent } from './workbasket-access-items.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
-import { Observable } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import {
@@ -36,6 +36,8 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { AccessIdsService } from 'app/shared/services/access-ids/access-ids.service';
 
 describe('WorkbasketAccessItemsComponent', () => {
   let fixture: ComponentFixture<WorkbasketAccessItemsComponent>;
@@ -73,6 +75,7 @@ describe('WorkbasketAccessItemsComponent', () => {
 
   afterEach(async () => {
     fixture.componentRef.setInput('workbasket', { ...selectedWorkbasketMock });
+    vi.useRealTimers();
   });
 
   it('should create component', () => {
@@ -148,11 +151,10 @@ describe('WorkbasketAccessItemsComponent', () => {
   });
 
   it('should dispatch UpdateWorkbasketAccessItems action when save button is triggered', () => {
-    component.accessItemsRepresentation._links!.self.href = 'https://link.mock';
     const onSaveSpy = vi.spyOn(component, 'onSave');
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(UpdateWorkbasketAccessItems)).subscribe(() => (actionDispatched = true));
-    component.onSave();
+    component.onSave('https://link.mock', component.cloneAccessItems());
     expect(onSaveSpy).toHaveBeenCalled();
     expect(actionDispatched).toBe(true);
   });
@@ -202,14 +204,47 @@ describe('WorkbasketAccessItemsComponent', () => {
     expect(clone[0].accessId).toBe(original[0].accessId);
   });
 
-  it('should update workbasketId for all access items when setWorkbasketIdForCopy is called', () => {
+  it('should prepare copied access items for a new workbasket without changing the source items', () => {
     fixture.detectChanges();
     const newId = 'WBI:NEW-WORKBASKET-ID';
-    component.setWorkbasketIdForCopy(newId);
-    component.accessItemsGroups.value.forEach((item: any) => {
-      expect(item.workbasketId).toBe(newId);
-      expect('accessItemId' in item).toBe(false);
-    });
+    const sourceAccessItems = component.cloneAccessItems();
+    const originalSourceAccessItems = sourceAccessItems.map((item) => ({ ...item }));
+
+    const copiedAccessItems = component.prepareAccessItemsForNewWorkbasket(sourceAccessItems, newId);
+
+    expect(copiedAccessItems).toEqual(
+      sourceAccessItems.map((sourceAccessItem) => {
+        const expectedAccessItem = { ...sourceAccessItem, workbasketId: newId };
+        Reflect.deleteProperty(expectedAccessItem, 'accessItemId');
+        return expectedAccessItem;
+      })
+    );
+    expect(sourceAccessItems).toEqual(originalSourceAccessItems);
+  });
+
+  it('should save the snapshot that was validated, even if form changes during validation', async () => {
+    vi.useFakeTimers();
+    const accessIdsService = TestBed.inject(AccessIdsService);
+    const onSaveSpy = vi.spyOn(component, 'onSave');
+
+    const validationSubject = new Subject<boolean>();
+    vi.spyOn(accessIdsService, 'validateAccessId').mockReturnValue(validationSubject.asObservable());
+    fixture.detectChanges();
+
+    const submitPromise = component.onSubmit(undefined, 'https://link.mock');
+    component.accessItemsGroups.controls[0].get('accessId')?.setValue('USER_MODIFIED');
+    fixture.detectChanges();
+
+    validationSubject.next(true);
+    validationSubject.complete();
+
+    vi.advanceTimersByTime(500);
+    await submitPromise;
+
+    expect(onSaveSpy).toHaveBeenCalledWith('https://link.mock', [
+      expect.objectContaining({ accessId: 'user-b-0' }),
+      expect.objectContaining({ accessId: 'user-b-1' })
+    ]);
   });
 
   it('should add index to selectedRows when selectRow is called with checked true', () => {
@@ -234,14 +269,110 @@ describe('WorkbasketAccessItemsComponent', () => {
     expect(component.selectedRows).toEqual([]);
   });
 
-  it('should set formSubmitAttempt to true and call validateFormAccess, onSave when onSubmit is called', async () => {
-    fixture.detectChanges();
-    const validateSpy = vi.spyOn(component.formsValidatorService, 'validateFormAccess').mockResolvedValue(true);
+  it('should call onSave when the form is valid and submitted', async () => {
+    vi.useFakeTimers();
+    const accessIdsService = TestBed.inject(AccessIdsService);
     const onSaveSpy = vi.spyOn(component, 'onSave');
-    await component.onSubmit();
-    expect(component.formsValidatorService.formSubmitAttempt).toBe(true);
-    expect(validateSpy).toHaveBeenCalledWith(component.accessItemsGroups, component.toggleValidationAccessIdMap);
+
+    const validateSpy = vi.spyOn(accessIdsService, 'validateAccessId').mockReturnValue(of(true));
+    if (!validateSpy.mock) {
+      vi.spyOn(accessIdsService, 'searchForAccessId').mockReturnValue(of([{ accessId: 'user-b-1', name: 'User B 1' }]));
+    }
+
+    component.setAccessItemsGroups(component.accessItemsRepresentation.accessItems);
+    component.accessItemsGroups.controls.forEach((group) => {
+      group.get('accessId')?.updateValueAndValidity();
+    });
+
+    fixture.detectChanges();
+    vi.advanceTimersByTime(500);
+    await fixture.whenStable();
+
+    const submitPromise = component.onSubmit();
+    vi.advanceTimersByTime(500);
+    await submitPromise;
+
     expect(onSaveSpy).toHaveBeenCalled();
+  });
+
+  it('should not call onSave and show error notification when form is invalid', async () => {
+    vi.useFakeTimers();
+    const notificationService = TestBed.inject(NotificationService);
+    const accessIdsService = TestBed.inject(AccessIdsService);
+
+    const validateSpy = vi.spyOn(accessIdsService, 'validateAccessId').mockReturnValue(of(false));
+    if (!validateSpy.mock) {
+      vi.spyOn(accessIdsService, 'searchForAccessId').mockReturnValue(of([]));
+    }
+
+    fixture.detectChanges();
+    const onSaveSpy = vi.spyOn(component, 'onSave');
+    const notificationSpy = vi.spyOn(notificationService, 'showError');
+
+    component.accessItemsRepresentation = {
+      accessItems: [component.createWorkbasketAccessItems()],
+      _links: { self: { href: 'some-valid-url' } }
+    };
+    component.setAccessItemsGroups(component.accessItemsRepresentation.accessItems);
+
+    const accessIdControl = component.accessItemsGroups.controls[0].get('accessId');
+    accessIdControl?.setValue('invalid-user');
+    accessIdControl?.updateValueAndValidity();
+
+    fixture.detectChanges();
+    vi.advanceTimersByTime(500);
+    await fixture.whenStable();
+
+    const submitPromise = component.onSubmit();
+    vi.advanceTimersByTime(500);
+    await submitPromise;
+
+    expect(notificationSpy).toHaveBeenCalledWith('OWNER_NOT_VALID', { owner: 'access id' });
+    expect(onSaveSpy).not.toHaveBeenCalled();
+  });
+
+  it('should save copied access items when the target access items are submitted', async () => {
+    vi.useFakeTimers();
+    const accessIdsService = TestBed.inject(AccessIdsService);
+
+    const validateSpy = vi.spyOn(accessIdsService, 'validateAccessId').mockReturnValue(of(true));
+    if (!validateSpy.mock) {
+      vi.spyOn(accessIdsService, 'searchForAccessId').mockImplementation((query: any) =>
+        of([{ accessId: query, name: query }])
+      );
+    }
+
+    fixture.detectChanges();
+    vi.advanceTimersByTime(500);
+    await fixture.whenStable();
+
+    const sourceAccessItems = component.cloneAccessItems();
+    const targetWorkbasketId = 'WBI:TARGET-WORKBASKET-ID';
+    const targetAccessItemsUrl = 'https://link.mock/target/workbasketAccessItems';
+    const targetAccessItems = component.prepareAccessItemsForNewWorkbasket(sourceAccessItems, targetWorkbasketId);
+
+    let updateAction: UpdateWorkbasketAccessItems | undefined;
+    actions$.pipe(ofActionDispatched(UpdateWorkbasketAccessItems)).subscribe((action) => (updateAction = action));
+
+    const submitPromise = component.onSubmit(targetAccessItems, targetAccessItemsUrl);
+    vi.advanceTimersByTime(500);
+    await submitPromise;
+
+    expect(updateAction).toBeDefined();
+    expect(updateAction!.url).toBe(targetAccessItemsUrl);
+    expect(updateAction!.workbasketAccessItems).toHaveLength(sourceAccessItems.length);
+    expect(updateAction!.workbasketAccessItems.every((item) => item.workbasketId === targetWorkbasketId)).toBe(true);
+    expect(updateAction!.workbasketAccessItems.every((item) => !('accessItemId' in item))).toBe(true);
+    expect(updateAction!.workbasketAccessItems.map((item) => item.accessId)).toEqual(
+      sourceAccessItems.map((item) => item.accessId)
+    );
+    expect(updateAction!.workbasketAccessItems).toEqual(
+      sourceAccessItems.map((sourceAccessItem) => {
+        const expectedAccessItem = { ...sourceAccessItem, workbasketId: targetWorkbasketId };
+        Reflect.deleteProperty(expectedAccessItem, 'accessItemId');
+        return expectedAccessItem;
+      })
+    );
   });
 
   it('should set isNewAccessItemsFromStore and isAccessItemsTabSelected to false in ngAfterViewChecked when element exists', () => {
@@ -483,15 +614,6 @@ describe('WorkbasketAccessItemsComponent', () => {
     fixture.detectChanges();
     const textInput = debugElement.nativeElement.querySelector('input[formcontrolname="accessId"]');
     expect(textInput).toBeTruthy();
-  });
-
-  it('should show has-error class on accessId cell when accessId is empty and formSubmitAttempt is true', () => {
-    fixture.detectChanges();
-    component.formsValidatorService.formSubmitAttempt = true;
-    component.accessItemsGroups.controls[0].get('accessId')?.setValue('');
-    expect(component.formsValidatorService.formSubmitAttempt).toBe(true);
-    expect(component.accessItemsGroups.controls[0].get('accessId')?.value).toBe('');
-    expect(component.accessItemsGroups.controls[0].get('accessId')?.invalid).toBe(true);
   });
 
   it('should render visible custom field column headers in the table', async () => {

@@ -424,6 +424,7 @@ jobs:
           - kadai-test-api
           - kadai-spring
           - kadai-spring-example
+          - dmn-xlsx-converter
           - kadai-spi-routing-dmn-router
           - kadai-routing-rest
           - kadai-rest-spring

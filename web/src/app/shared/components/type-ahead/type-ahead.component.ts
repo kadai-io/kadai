@@ -18,10 +18,10 @@
 
 import { Component, effect, inject, input, OnDestroy, OnInit, output, signal, untracked } from '@angular/core';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
-import { debounceTime, distinctUntilChanged, Observable, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Observable, of, Subject, timer } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { AccessId } from '../../models/access-id';
-import { map, take, takeUntil } from 'rxjs/operators';
+import { catchError, map, switchMap, take, takeUntil } from 'rxjs/operators';
 import { Store } from '@ngxs/store';
 import { WorkbasketSelectors } from '../../store/workbasket-store/workbasket.selectors';
 import { ButtonAction } from '../../../administration/models/button-action';
@@ -107,14 +107,25 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
       });
 
     this.accessIdForm.controls['accessId'].valueChanges
-      .pipe(debounceTime(this.debounceTime), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe(() => {
-        const value = this.accessIdForm.controls['accessId'].value;
-        if (value === '') {
-          this.handleEmptyAccessId();
-          return;
-        }
-        this.searchForAccessId(value!);
+      .pipe(
+        distinctUntilChanged(),
+        switchMap((value) => {
+          if (!value) {
+            this.handleEmptyAccessId();
+            return of(null);
+          }
+
+          return timer(this.debounceTime).pipe(
+            switchMap(() => this.accessIdService.searchForAccessId(value)),
+            map((accessIds) => ({ value, accessIds })),
+            catchError(() => of(null))
+          );
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((result) => {
+        if (!result) return;
+        this.processAccessIdResult(result.value, result?.accessIds);
       });
   }
 
@@ -133,21 +144,23 @@ export class TypeAheadComponent implements OnInit, OnDestroy {
     this.accessIdService
       .searchForAccessId(value)
       .pipe(take(1))
-      .subscribe((accessIds) => {
-        this.filteredAccessIds.set(accessIds);
-        const accessId = accessIds.find((accessId) => accessId.accessId?.toLowerCase() === value.toLowerCase());
+      .subscribe((accessIds) => this.processAccessIdResult(value, accessIds));
+  }
 
-        if (typeof accessId !== 'undefined') {
-          this.name.set(accessId?.name ?? '');
-          this.isFormValid.emit(true);
-          this.accessIdEventEmitter.emit(accessId);
-        } else if (this.displayError()) {
-          this.isFormValid.emit(false);
-          this.accessIdEventEmitter.emit(this.emptyAccessId);
-          this.accessIdForm.controls['accessId'].setErrors({ incorrect: true });
-          this.accessIdForm.controls['accessId'].markAsTouched();
-        }
-      });
+  private processAccessIdResult(value: string, accessIds: AccessId[]) {
+    this.filteredAccessIds.set(accessIds);
+    const accessId = accessIds.find((item) => item.accessId?.toLowerCase() === value.toLowerCase());
+
+    if (typeof accessId !== 'undefined') {
+      this.name.set(accessId?.name ?? '');
+      this.isFormValid.emit(true);
+      this.accessIdEventEmitter.emit(accessId);
+    } else if (this.displayError()) {
+      this.isFormValid.emit(false);
+      this.accessIdEventEmitter.emit(this.emptyAccessId);
+      this.accessIdForm.controls['accessId'].setErrors({ incorrect: true });
+      this.accessIdForm.controls['accessId'].markAsTouched();
+    }
   }
 
   setAccessIdFromInput() {

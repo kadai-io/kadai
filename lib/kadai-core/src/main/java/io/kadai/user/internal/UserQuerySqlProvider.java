@@ -20,7 +20,7 @@ package io.kadai.user.internal;
 
 import static io.kadai.common.internal.util.SqlProviderUtil.CLOSING_SCRIPT_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.CLOSING_WHERE_TAG;
-import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR;
+import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR_FOR_COLUMN_QUERY;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_SCRIPT_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_WHERE_TAG;
 
@@ -48,7 +48,6 @@ public class UserQuerySqlProvider {
         + CLOSING_WHERE_TAG
         + "<if test='!orderBy.isEmpty()'>ORDER BY "
         + "<foreach item='item' collection='orderBy' separator=',' >${item}</foreach></if> "
-        + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -68,7 +67,6 @@ public class UserQuerySqlProvider {
         + "<if test='orgLevel4In != null'>AND ORG_LEVEL_4 IN"
         + "(<foreach item='item' collection='orgLevel4In' separator=',' >#{item}</foreach>)</if> "
         + CLOSING_WHERE_TAG
-        + DB2_WITH_UR
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -90,7 +88,7 @@ public class UserQuerySqlProvider {
         + CLOSING_WHERE_TAG
         + "<if test='!orderBy.isEmpty()'>ORDER BY "
         + "<foreach item='item' collection='orderBy' separator=',' >${item}</foreach></if> "
-        + DB2_WITH_UR
+        + DB2_WITH_UR_FOR_COLUMN_QUERY
         + CLOSING_SCRIPT_TAG;
   }
 }

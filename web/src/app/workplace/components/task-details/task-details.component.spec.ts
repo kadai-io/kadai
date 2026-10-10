@@ -40,7 +40,6 @@ import { TaskStatusDetailsComponent } from '../task-status-details/task-status-d
 import { TaskCustomFieldsComponent } from '../task-custom-fields/task-custom-fields.component';
 import { TaskAttributeValueComponent } from '../task-attribute-value/task-attribute-value.component';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
-import { FormsValidatorService } from '../../../shared/services/forms-validator/forms-validator.service';
 import { By } from '@angular/platform-browser';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
@@ -75,7 +74,7 @@ class StubTaskAttributeValueComponent {
 })
 class DummyDetailComponent {}
 
-const routes: Routes = [{ path: 'workplace/taskdetail/:id', component: DummyDetailComponent }];
+const routes: Routes = [{ path: 'task/:id', component: DummyDetailComponent, outlet: 'detail' }];
 
 describe('TaskDetailsComponent', () => {
   let component: TaskDetailsComponent;
@@ -129,6 +128,7 @@ describe('TaskDetailsComponent', () => {
     'READY',
     false,
     false,
+    false,
     1
   );
 
@@ -150,6 +150,8 @@ describe('TaskDetailsComponent', () => {
 
     requestInProgressServiceSpy = {
       setRequestInProgress: vi.fn(),
+      beginRequest: vi.fn(),
+      endRequest: vi.fn(),
       getRequestInProgress: vi.fn().mockReturnValue(of(false))
     };
 
@@ -217,7 +219,7 @@ describe('TaskDetailsComponent', () => {
   });
 
   it('should call getTask when route params change', () => {
-    expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalled();
+    expect(requestInProgressServiceSpy.beginRequest).toHaveBeenCalled();
   });
 
   it('should reset task when resetTask is called', () => {
@@ -311,18 +313,23 @@ describe('TaskDetailsComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should call deleteTaskConfirmation: delete task then navigate', () => {
+  it('should call deleteTaskConfirmation: delete task then navigate', async () => {
+    const navigateSpy = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     component.task.set(mockTask);
     component.currentId.set('task-id-1');
     component.deleteTaskConfirmation();
     expect(taskServiceSpy.deleteTask).toHaveBeenCalledWith(mockTask);
     expect(notificationServiceSpy.showSuccess).toHaveBeenCalledWith('TASK_DELETE', { taskName: mockTask.name });
+    expect(navigateSpy).toHaveBeenCalledWith(['kadai/workplace/tasks'], { queryParamsHandling: 'merge' });
+    await fixture.whenStable();
   });
 
-  it('should set task to undefined after deleteTaskConfirmation', () => {
+  it('should set task to undefined after deleteTaskConfirmation', async () => {
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     component.task.set(mockTask);
     component.deleteTaskConfirmation();
     expect(component.task()).toBeUndefined();
+    await fixture.whenStable();
   });
 
   it('should handle getTask for new-task correctly', () => {
@@ -346,32 +353,42 @@ describe('TaskDetailsComponent', () => {
     expect(notificationServiceSpy.showSuccess).toHaveBeenCalledWith('TASK_UPDATE', { taskName: mockTask.name });
   });
 
-  it('should call setRequestInProgress(false) when getTask returns an error', () => {
+  it('should end request tracking when getTask returns an error', () => {
     (taskServiceSpy.getTask as any).mockReturnValue(throwError(() => new Error('not found')));
     component.currentId.set('some-id');
     component.getTask();
-    expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalledWith(false);
+    expect(requestInProgressServiceSpy.endRequest).toHaveBeenCalled();
   });
 
-  it('should call setRequestInProgress(false) when updateTask returns an error', () => {
+  it('should end request tracking when updateTask returns an error', () => {
     (taskServiceSpy.updateTask as any).mockReturnValue(throwError(() => new Error('update failed')));
     component.currentId.set('task-id-1');
     component.task.set({ ...mockTask } as Task);
     component.onSave();
-    expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalledWith(false);
+    expect(requestInProgressServiceSpy.endRequest).toHaveBeenCalled();
   });
 
-  it('should call setRequestInProgress(false) when createTask returns an error', () => {
+  it('should end request tracking when createTask returns an error', () => {
     (taskServiceSpy.createTask as any).mockReturnValue(throwError(() => new Error('create failed')));
     component.currentId.set('new-task');
     component.task.set(new Task('', new ObjectReference(), mockWorkbasket as any));
     component.onSave();
-    expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalledWith(false);
+    expect(requestInProgressServiceSpy.endRequest).toHaveBeenCalled();
   });
 
-  it('should navigate when openTask is called', () => {
+  it('should navigate to the processing view when openTask is called', async () => {
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigate');
     component.currentId.set('task-id-1');
-    expect(() => component.openTask()).not.toThrow();
+
+    component.openTask();
+
+    expect(navigateSpy).toHaveBeenCalledWith(
+      [{ outlets: { detail: 'task/task-id-1' } }],
+      expect.objectContaining({ queryParamsHandling: 'merge' })
+    );
+
+    await fixture.whenStable();
   });
 
   it('should render task details when task is set and requestInProgress is false', () => {
@@ -517,6 +534,7 @@ describe('TaskDetailsComponent - DOM interaction', () => {
     'READY',
     false,
     false,
+    false,
     1
   );
 
@@ -538,6 +556,8 @@ describe('TaskDetailsComponent - DOM interaction', () => {
 
     requestInProgressServiceSpy = {
       setRequestInProgress: vi.fn(),
+      beginRequest: vi.fn(),
+      endRequest: vi.fn(),
       getRequestInProgress: vi.fn().mockReturnValue(of(false))
     };
 
@@ -641,15 +661,18 @@ describe('TaskDetailsComponent - DOM interaction', () => {
     expect(backSpy).toHaveBeenCalled();
   });
 
-  it('should call openTask when openTask method is invoked', () => {
+  it('should call openTask when openTask method is invoked', async () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
     component.task.set({ ...mockTask });
     component.requestInProgress.set(false);
-    component.currentId.set('task-id-1');
     fixture.detectChanges();
+    component.currentId.set('task-id-1');
     const openSpy = vi.spyOn(component, 'openTask');
     component.openTask();
+
+    await fixture.whenStable();
+
     expect(openSpy).toHaveBeenCalled();
   });
 
@@ -741,6 +764,8 @@ describe('TaskDetailsComponent - redirect when no workbasket and new-task', () =
 
     const requestInProgressServiceSpy: Partial<RequestInProgressService> = {
       setRequestInProgress: vi.fn(),
+      beginRequest: vi.fn(),
+      endRequest: vi.fn(),
       getRequestInProgress: vi.fn().mockReturnValue(of(false))
     };
 
@@ -848,6 +873,7 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
     'READY',
     false,
     false,
+    false,
     1
   );
 
@@ -882,20 +908,16 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
         },
         {
           provide: RequestInProgressService,
-          useValue: { setRequestInProgress: vi.fn(), getRequestInProgress: vi.fn().mockReturnValue(of(false)) }
+          useValue: {
+            setRequestInProgress: vi.fn(),
+            beginRequest: vi.fn(),
+            endRequest: vi.fn(),
+            getRequestInProgress: vi.fn().mockReturnValue(of(false))
+          }
         },
         {
           provide: ClassificationsService,
           useValue: { getClassifications: vi.fn().mockReturnValue(of({ classifications: [] })) }
-        },
-        {
-          provide: FormsValidatorService,
-          useValue: {
-            inputOverflowObservable: EMPTY,
-            validateInputOverflow: vi.fn(),
-            isFieldValid: vi.fn().mockReturnValue(true),
-            validateFormInformation: vi.fn().mockResolvedValue(true)
-          }
         },
         provideNoopAnimations()
       ]

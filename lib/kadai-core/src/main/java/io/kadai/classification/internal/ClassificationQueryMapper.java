@@ -18,6 +18,8 @@
 
 package io.kadai.classification.internal;
 
+import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR_FOR_COLUMN_QUERY;
+
 import io.kadai.classification.internal.models.ClassificationSummaryImpl;
 import java.util.List;
 import org.apache.ibatis.annotations.Result;
@@ -66,7 +68,6 @@ public interface ClassificationQueryMapper {
           + "<if test='custom8Like != null'>AND (<foreach item='item' collection='custom8Like' separator=' OR ' > LOWER(CUSTOM_8) LIKE #{item}</foreach>)</if> "
           + "</where>"
           + "<if test='!orderBy.isEmpty()'>ORDER BY <foreach item='item' collection='orderBy' separator=',' >${item}</foreach></if> "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   @Result(property = "id", column = "ID")
   @Result(property = "key", column = "KEY")
@@ -128,7 +129,6 @@ public interface ClassificationQueryMapper {
           + "<if test='custom8In != null'>AND CUSTOM_8 IN(<foreach item='item' collection='custom8In' separator=',' >#{item}</foreach>) </if> "
           + "<if test='custom8Like != null'>AND (<foreach item='item' collection='custom8Like' separator=' OR ' > CUSTOM_8 LIKE #{item}</foreach>)</if> "
           + "</where>"
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   Long countQueryClassifications(ClassificationQueryImpl classificationQuery);
 
@@ -172,7 +172,7 @@ public interface ClassificationQueryMapper {
           + "<if test='custom8Like != null'>AND (<foreach item='item' collection='custom8Like' separator=' OR ' > CUSTOM_8 LIKE #{item}</foreach>)</if> "
           + "</where>"
           + "<if test='!orderBy.isEmpty()'>ORDER BY <foreach item='item' collection='orderBy' separator=',' >${item}</foreach></if> "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
+          + DB2_WITH_UR_FOR_COLUMN_QUERY
           + "</script>")
   List<String> queryClassificationColumnValues(ClassificationQueryImpl classificationQuery);
 }

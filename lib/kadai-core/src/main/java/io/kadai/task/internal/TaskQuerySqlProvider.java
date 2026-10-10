@@ -20,7 +20,7 @@ package io.kadai.task.internal;
 
 import static io.kadai.common.internal.util.SqlProviderUtil.CLOSING_SCRIPT_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.CLOSING_WHERE_TAG;
-import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR;
+import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR_FOR_COLUMN_QUERY;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_SCRIPT_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_WHERE_TAG;
 import static io.kadai.common.internal.util.SqlProviderUtil.whereCustomIntStatements;
@@ -45,19 +45,16 @@ public class TaskQuerySqlProvider {
         + openOuterClauseForGroupByPorOrSor()
         + "SELECT <if test=\"useDistinctKeyword\">DISTINCT</if> "
         + commonSelectFields()
-        + "<if test='groupBySor != null'>, o.VALUE as SOR_VALUE </if>"
-        + "<if test=\"addAttachmentColumnsToSelectClauseForOrdering\">"
-        + ", a.CLASSIFICATION_ID as ACLASSIFICATION_ID, "
-        + "a.CLASSIFICATION_KEY as ACLASSIFICATION_KEY, a.CHANNEL as ACHANNEL, "
-        + "a.REF_VALUE as AREF_VALUE, a.RECEIVED as ARECEIVED"
-        + "</if>"
-        + "<if test=\"addClassificationNameToSelectClauseForOrdering\">, c.NAME as CNAME </if>"
-        + "<if test=\"addAttachmentClassificationNameToSelectClauseForOrdering\">, "
-        + "ac.NAME as ACNAME </if>"
-        + "<if test=\"addWorkbasketNameToSelectClauseForOrdering\">, w.NAME as WNAME </if>"
-        + "<if test=\"joinWithUserInfo\">, owner_info.LONG_NAME AS OWNER_LONG_NAME</if>"
-        + "<if test=\"joinWithCreatorUserInfo\">, "
-        + "creator_info.LONG_NAME AS CREATOR_LONG_NAME</if>"
+        + "<if test='groupBySor != null'>, o.VALUE as SOR_VALUE </if><if"
+        + " test=\"addAttachmentColumnsToSelectClauseForOrdering\">, a.CLASSIFICATION_ID as"
+        + " ACLASSIFICATION_ID, a.CLASSIFICATION_KEY as ACLASSIFICATION_KEY, a.CHANNEL as ACHANNEL,"
+        + " a.REF_VALUE as AREF_VALUE, a.RECEIVED as ARECEIVED</if><if"
+        + " test=\"addClassificationNameToSelectClauseForOrdering\">, c.NAME as CNAME </if><if"
+        + " test=\"addAttachmentClassificationNameToSelectClauseForOrdering\">, ac.NAME as ACNAME"
+        + " </if><if test=\"addWorkbasketNameToSelectClauseForOrdering\">, w.NAME as WNAME </if><if"
+        + " test=\"joinWithUserInfoForTaskSummary\">, owner_info.LONG_NAME AS"
+        + " OWNER_LONG_NAME</if><if test=\"joinWithCreatorUserInfoForTaskSummary\">,"
+        + " creator_info.LONG_NAME AS CREATOR_LONG_NAME</if>"
         + groupByPorIfActive()
         + groupBySorIfActive()
         + "FROM TASK t "
@@ -76,10 +73,10 @@ public class TaskQuerySqlProvider {
         + "<if test=\"joinWithWorkbaskets\">"
         + "LEFT JOIN WORKBASKET w ON t.WORKBASKET_ID = w.ID "
         + "</if>"
-        + "<if test=\"joinWithUserInfo\">"
+        + "<if test=\"joinWithUserInfoForTaskSummary\">"
         + "LEFT JOIN USER_INFO owner_info ON t.OWNER = owner_info.USER_ID "
         + "</if>"
-        + "<if test=\"joinWithCreatorUserInfo\">"
+        + "<if test=\"joinWithCreatorUserInfoForTaskSummary\">"
         + "LEFT JOIN USER_INFO creator_info ON t.CREATOR = creator_info.USER_ID "
         + "</if>"
         + OPENING_WHERE_TAG
@@ -106,7 +103,6 @@ public class TaskQuerySqlProvider {
         + "</if>"
         + "<if test=\"_databaseId == 'db2' and (selectAndClaim or lockResults != 0) \">WITH RS USE "
         + "AND KEEP UPDATE LOCKS </if>"
-        + "<if test=\"_databaseId == 'db2' and !selectAndClaim and lockResults==0 \">WITH UR </if>"
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -124,8 +120,8 @@ public class TaskQuerySqlProvider {
         + "<if test=\"addClassificationNameToSelectClauseForOrdering\">, c.NAME </if>"
         + "<if test=\"addAttachmentClassificationNameToSelectClauseForOrdering\">, ac.NAME </if>"
         + "<if test=\"addWorkbasketNameToSelectClauseForOrdering\">, w.NAME </if>"
-        + "<if test=\"joinWithUserInfo\">, owner_info.LONG_NAME </if>"
-        + "<if test=\"joinWithCreatorUserInfo\">, creator_info.LONG_NAME </if>"
+        + "<if test=\"joinWithUserInfoForTaskSummary\">, owner_info.LONG_NAME </if>"
+        + "<if test=\"joinWithCreatorUserInfoForTaskSummary\">, creator_info.LONG_NAME </if>"
         + "FROM TASK t "
         + "<if test=\"joinWithAttachments\">"
         + "LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID "
@@ -142,10 +138,10 @@ public class TaskQuerySqlProvider {
         + "<if test=\"joinWithWorkbaskets\">"
         + "LEFT JOIN WORKBASKET w ON t.WORKBASKET_ID = w.ID "
         + "</if>"
-        + "<if test=\"joinWithUserInfo\">"
+        + "<if test=\"joinWithUserInfoForTaskSummary\">"
         + "LEFT JOIN USER_INFO owner_info ON t.OWNER = owner_info.USER_ID "
         + "</if>"
-        + "<if test=\"joinWithCreatorUserInfo\">"
+        + "<if test=\"joinWithCreatorUserInfoForTaskSummary\">"
         + "LEFT JOIN USER_INFO creator_info ON t.CREATOR = creator_info.USER_ID "
         + "</if>"
         + OPENING_WHERE_TAG
@@ -179,7 +175,6 @@ public class TaskQuerySqlProvider {
         + "<if test='!orderByOuter.isEmpty()'>"
         + "ORDER BY <foreach item='item' collection='orderByOuter' separator=',' >${item}</foreach>"
         + "</if> "
-        + "with UR "
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -208,10 +203,10 @@ public class TaskQuerySqlProvider {
         + "<if test=\"joinWithAttachmentClassifications\">"
         + "LEFT JOIN CLASSIFICATION ac ON a.CLASSIFICATION_ID = ac.ID "
         + "</if>"
-        + "<if test=\"joinWithUserInfo\">"
+        + "<if test=\"joinWithUserInfoForCount\">"
         + "LEFT JOIN USER_INFO owner_info ON t.OWNER = owner_info.USER_ID "
         + "</if>"
-        + "<if test=\"joinWithCreatorUserInfo\">"
+        + "<if test=\"joinWithCreatorUserInfoForCount\">"
         + "LEFT JOIN USER_INFO creator_info ON t.CREATOR = creator_info.USER_ID "
         + "</if>"
         + OPENING_WHERE_TAG
@@ -241,10 +236,10 @@ public class TaskQuerySqlProvider {
         + "<if test=\"joinWithSecondaryObjectReferences\">"
         + "LEFT JOIN OBJECT_REFERENCE o ON t.ID = o.TASK_ID "
         + "</if>"
-        + "<if test=\"joinWithUserInfo\">"
+        + "<if test=\"joinWithUserInfoForCount\">"
         + "LEFT JOIN USER_INFO owner_info ON t.OWNER = owner_info.USER_ID "
         + "</if>"
-        + "<if test=\"joinWithCreatorUserInfo\">"
+        + "<if test=\"joinWithCreatorUserInfoForCount\">"
         + "LEFT JOIN USER_INFO creator_info ON t.CREATOR = creator_info.USER_ID "
         + "</if>"
         + OPENING_WHERE_TAG
@@ -265,7 +260,7 @@ public class TaskQuerySqlProvider {
         + "</if> "
         + ") "
         + "FROM X ) SELECT COUNT(*) "
-        + "FROM Y WHERE FLAG = 1 with UR"
+        + "FROM Y WHERE FLAG = 1 "
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -273,8 +268,6 @@ public class TaskQuerySqlProvider {
   public static String queryTaskColumnValues() {
     return OPENING_SCRIPT_TAG
         + "SELECT DISTINCT ${columnName} "
-        + "<if test=\"joinWithUserInfo\">, owner_info.LONG_NAME </if>"
-        + "<if test=\"joinWithCreatorUserInfo\">, creator_info.LONG_NAME </if>"
         + "FROM TASK t "
         + "<if test=\"joinWithAttachments\">"
         + "LEFT JOIN ATTACHMENT a ON t.ID = a.TASK_ID "
@@ -288,10 +281,10 @@ public class TaskQuerySqlProvider {
         + "<if test=\"joinWithSecondaryObjectReferences\">"
         + "LEFT JOIN OBJECT_REFERENCE o ON t.ID = o.TASK_ID "
         + "</if>"
-        + "<if test=\"joinWithUserInfo\">"
+        + "<if test=\"joinWithUserInfoForColumnValues\">"
         + "LEFT JOIN USER_INFO owner_info ON t.OWNER = owner_info.USER_ID "
         + "</if>"
-        + "<if test=\"joinWithCreatorUserInfo\">"
+        + "<if test=\"joinWithCreatorUserInfoForColumnValues\">"
         + "LEFT JOIN USER_INFO creator_info ON t.CREATOR = creator_info.USER_ID "
         + "</if>"
         + OPENING_WHERE_TAG
@@ -335,7 +328,7 @@ public class TaskQuerySqlProvider {
         + "</choose>"
         + "</foreach>"
         + "</if> "
-        + DB2_WITH_UR
+        + DB2_WITH_UR_FOR_COLUMN_QUERY
         + CLOSING_SCRIPT_TAG;
   }
 
@@ -365,8 +358,8 @@ public class TaskQuerySqlProvider {
         + ", ACLASSIFICATION_ID, ACLASSIFICATION_KEY, CHANNEL, REF_VALUE, ARECEIVED"
         + "</if>"
         + "<if test=\"addWorkbasketNameToSelectClauseForOrdering\">, WNAME</if>"
-        + "<if test=\"joinWithUserInfo\">, OWNER_LONG_NAME </if>"
-        + "<if test=\"joinWithCreatorUserInfo\">, CREATOR_LONG_NAME </if>";
+        + "<if test=\"joinWithUserInfoForTaskSummary\">, OWNER_LONG_NAME </if>"
+        + "<if test=\"joinWithCreatorUserInfoForTaskSummary\">, CREATOR_LONG_NAME </if>";
   }
 
   private static String checkForAuthorization() {
@@ -376,17 +369,20 @@ public class TaskQuerySqlProvider {
         + "<choose>"
         + "<when test=\"_databaseId == 'db2'\">"
         + "SELECT WORKBASKET_ID as WID, MAX(PERM_READ) as MAX_READ, "
-        + "MAX(PERM_READTASKS) as MAX_READTASKS "
+        + "MAX(PERM_READTASKS) as MAX_READTASKS, "
+        + "MAX(PERM_EDITTASKS) as MAX_EDITTASKS "
         + "</when>"
         + "<otherwise>"
         + "SELECT WORKBASKET_ID as WID, MAX(PERM_READ::int) as MAX_READ, "
-        + "MAX(PERM_READTASKS::int) as MAX_READTASKS "
+        + "MAX(PERM_READTASKS::int) as MAX_READTASKS, "
+        + "MAX(PERM_EDITTASKS::int) as MAX_EDITTASKS "
         + "</otherwise>"
         + "</choose>"
         + "FROM WORKBASKET_ACCESS_LIST s where ACCESS_ID IN "
         + "(<foreach item='item' collection='accessIdIn' separator=',' >#{item}</foreach>) "
         + "GROUP by WORKBASKET_ID) f "
-        + "WHERE MAX_READ = 1 AND MAX_READTASKS = 1) "
+        + "WHERE MAX_READ = 1 AND MAX_READTASKS = 1 "
+        + "<if test='selectAndClaim == true'>AND MAX_EDITTASKS = 1 </if>) "
         + "</if>";
   }
 
@@ -445,10 +441,10 @@ public class TaskQuerySqlProvider {
         + "<if test=\"joinWithWorkbaskets\">"
         + "LEFT JOIN WORKBASKET w ON t.WORKBASKET_ID = w.ID "
         + "</if>"
-        + "<if test=\"joinWithUserInfo\">"
+        + "<if test=\"joinWithUserInfoForGroupCount\">"
         + "LEFT JOIN USER_INFO owner_info ON t.OWNER = owner_info.USER_ID "
         + "</if>"
-        + "<if test=\"joinWithCreatorUserInfo\">"
+        + "<if test=\"joinWithCreatorUserInfoForGroupCount\">"
         + "LEFT JOIN USER_INFO creator_info ON t.CREATOR = creator_info.USER_ID "
         + "</if>"
         + OPENING_WHERE_TAG
@@ -480,10 +476,10 @@ public class TaskQuerySqlProvider {
         + "<if test=\"joinWithWorkbaskets\">"
         + "LEFT JOIN WORKBASKET w ON t.WORKBASKET_ID = w.ID "
         + "</if>"
-        + "<if test=\"joinWithUserInfo\">"
+        + "<if test=\"joinWithUserInfoForGroupCount\">"
         + "LEFT JOIN USER_INFO owner_info ON t.OWNER = owner_info.USER_ID "
         + "</if>"
-        + "<if test=\"joinWithCreatorUserInfo\">"
+        + "<if test=\"joinWithCreatorUserInfoForGroupCount\">"
         + "LEFT JOIN USER_INFO creator_info ON t.CREATOR = creator_info.USER_ID "
         + "</if>"
         + OPENING_WHERE_TAG

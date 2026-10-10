@@ -49,9 +49,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.ldap.NameNotFoundException;
+import org.springframework.ldap.control.PagedResultsControlExchangeDirContextProcessor;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.AbstractContextMapper;
+import org.springframework.ldap.core.support.SingleContextSource;
 import org.springframework.ldap.filter.AndFilter;
 import org.springframework.ldap.filter.EqualsFilter;
 import org.springframework.ldap.filter.NotPresentFilter;
@@ -67,6 +69,7 @@ public class LdapClient {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LdapClient.class);
   private static final String CN = "cn";
+  static final int COMPLETE_USER_SEARCH_PAGE_SIZE = 1_000;
 
   private final KadaiConfiguration kadaiConfiguration;
   private final Environment env;
@@ -166,15 +169,7 @@ public class LdapClient {
   }
 
   public List<User> searchUsersInUserRole() {
-
-    Set<String> userGroupsOrUser = kadaiConfiguration.getRoleMap().get(KadaiRole.USER);
-
-    final OrFilter userOrGroupFilter = new OrFilter();
-    userGroupsOrUser.forEach(
-        userOrGroup -> {
-          userOrGroupFilter.or(new EqualsFilter(getUserMemberOfGroupAttribute(), userOrGroup));
-          userOrGroupFilter.or(new EqualsFilter(getUserIdAttribute(), userOrGroup));
-        });
+    final OrFilter userOrGroupFilter = userRoleFilter();
 
     final List<User> users =
         ldapTemplate.search(
@@ -187,6 +182,112 @@ public class LdapClient {
     LOGGER.debug("exit from searchUsersInUserRole. Retrieved the following users: {}.", users);
 
     return users;
+  }
+
+  /**
+   * Reads the entire user-role result using LDAP paged-results controls. This method intentionally
+   * does not use the shared template's interactive count limit: a truncated result is unsafe for an
+   * authoritative user-refresh.
+   *
+   * @return the complete user snapshot
+   * @throws SystemException if LDAP paging is incomplete or cannot be read
+   */
+  public LdapUserSnapshot searchAllUsersInUserRole() {
+    isInitOrFail();
+    SearchControls controls = new SearchControls();
+    controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+    controls.setReturningAttributes(getLookUpUserInfoAttributesToReturn());
+    controls.setCountLimit(0);
+    try {
+      return SingleContextSource.doWithSingleContext(
+          ldapTemplate.getContextSource(),
+          operations -> {
+            PagedResultsControlExchangeDirContextProcessor processor =
+                new PagedResultsControlExchangeDirContextProcessor(
+                    COMPLETE_USER_SEARCH_PAGE_SIZE);
+            return collectCompleteUserSnapshot(
+                ignored -> {
+                    List<User> page =
+                        operations.search(
+                            getUserSearchBase(),
+                            userRoleFilter().encode(),
+                            controls,
+                            new UserInfoContextMapper(),
+                            processor);
+                    var response = processor.getExchange().getResponse();
+                    return new LdapUserPage(
+                        page,
+                        response != null,
+                        response == null || response.getCookie() == null
+                            ? new byte[0]
+                            : response.getCookie());
+                });
+          },
+          true,
+          false,
+          false);
+    } catch (SystemException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new SystemException("Could not obtain a complete LDAP user snapshot", e);
+    }
+  }
+
+  /**
+   * Collects all pages and refuses to treat an unverified response as authoritative.
+   *
+   * @param reader page reader
+   * @return complete snapshot
+   * @throws SystemException if paging metadata is incomplete, or reading a page fails
+   */
+  static LdapUserSnapshot collectCompleteUserSnapshot(LdapUserPageReader reader) {
+    Objects.requireNonNull(reader, "reader");
+    List<User> users = new ArrayList<>();
+    Set<String> seenCookies = new java.util.HashSet<>();
+    byte[] requestCookie = new byte[0];
+    int pageCount = 0;
+    while (true) {
+      LdapUserPage page;
+      try {
+        page = reader.read(Arrays.copyOf(requestCookie, requestCookie.length));
+      } catch (SystemException e) {
+        throw e;
+      } catch (RuntimeException e) {
+        throw new SystemException("Could not obtain a complete LDAP user snapshot", e);
+      }
+      if (page == null) {
+        throw new SystemException("LDAP paging returned a null page");
+      }
+      if (!page.responseControlPresent()) {
+        throw new SystemException(
+            "LDAP paging response control is missing; refusing an incomplete user snapshot");
+      }
+      if (page.nextCookie() == null) {
+        throw new SystemException("LDAP paging response contained a null cookie");
+      }
+      users.addAll(page.users());
+      pageCount++;
+      byte[] nextCookie = page.nextCookie();
+      if (nextCookie.length == 0) {
+        return new LdapUserSnapshot(users, pageCount, users.size());
+      }
+      String cookieKey = java.util.Base64.getEncoder().encodeToString(nextCookie);
+      if (!seenCookies.add(cookieKey)) {
+        throw new SystemException("LDAP paging returned a repeated non-terminal cookie");
+      }
+      requestCookie = nextCookie;
+    }
+  }
+
+  private OrFilter userRoleFilter() {
+    Set<String> userGroupsOrUser = kadaiConfiguration.getRoleMap().get(KadaiRole.USER);
+    final OrFilter userOrGroupFilter = new OrFilter();
+    userGroupsOrUser.forEach(
+        userOrGroup -> {
+          userOrGroupFilter.or(new EqualsFilter(getUserMemberOfGroupAttribute(), userOrGroup));
+          userOrGroupFilter.or(new EqualsFilter(getUserIdAttribute(), userOrGroup));
+        });
+    return userOrGroupFilter;
   }
 
   public List<AccessIdRepresentationModel> searchUsersByNameOrAccessId(final String name)
@@ -437,41 +538,83 @@ public class LdapClient {
   }
 
   /**
-   * Validates a given AccessId / name.
+   * Validates a given exact externally visible Access Id.
    *
-   * @param name lookup string for names or groups
-   * @return whether the given name is valid or not
-   * @throws InvalidNameException thrown if name is not a valid dn
+   * @param accessId the Access Id to validate
+   * @return whether the given Access Id is valid
+   * @throws InvalidNameException if the Access Id is a malformed distinguished name
    */
-  public boolean validateAccessId(final String name) throws InvalidNameException {
+  public boolean validateAccessId(final String accessId) throws InvalidNameException {
     isInitOrFail();
 
-    if (nameIsDn(name)) {
-
-      AccessIdRepresentationModel groupByDn = searchAccessIdByDn(name);
-
-      return groupByDn != null;
-
-    } else {
-
-      final AndFilter andFilter = new AndFilter();
-      andFilter.and(new EqualsFilter(getUserSearchFilterName(), getUserSearchFilterValue()));
-
-      final OrFilter orFilter = new OrFilter();
-      orFilter.or(new EqualsFilter(getUserIdAttribute(), name));
-
-      andFilter.and(orFilter);
-
-      final List<AccessIdRepresentationModel> accessIds =
-          ldapTemplate.search(
-              getUserSearchBase(),
-              andFilter.encode(),
-              SearchControls.SUBTREE_SCOPE,
-              getLookUpUserAttributesToReturn(),
-              new UserContextMapper());
-
-      return !accessIds.isEmpty();
+    if (accessId == null || accessId.isEmpty()) {
+      return false;
     }
+
+    return hasExactUserAccessId(accessId)
+        || (!useDnForGroups() && hasExactGroupAccessId(accessId))
+        || hasExactPermissionAccessId(accessId)
+        || (useDnForGroups() && nameIsDn(accessId) && hasExactGroupDn(accessId));
+  }
+
+  private boolean hasExactUserAccessId(String accessId) {
+    AndFilter filter = new AndFilter();
+    filter.and(new EqualsFilter(getUserSearchFilterName(), getUserSearchFilterValue()));
+    filter.and(new EqualsFilter(getUserIdAttribute(), accessId));
+    return hasExactAccessId(getUserSearchBase(), filter);
+  }
+
+  private boolean hasExactGroupAccessId(String accessId) {
+    AndFilter filter = new AndFilter();
+    filter.and(new EqualsFilter(getGroupSearchFilterName(), getGroupSearchFilterValue()));
+    filter.and(new EqualsFilter(getEffectiveGroupAccessIdAttribute(), accessId));
+    return hasExactAccessId(getGroupSearchBase(), getPermissionsNotPresentAndFilter(filter));
+  }
+
+  private boolean hasExactPermissionAccessId(String accessId) {
+    if (permissionsAreEmpty()) {
+      return false;
+    }
+
+    AndFilter filter = new AndFilter();
+    filter.and(
+        new EqualsFilter(getPermissionSearchFilterName(), getPermissionSearchFilterValue()));
+    filter.and(new PresentFilter(getPermissionNameAttribute()));
+    filter.and(new EqualsFilter(getEffectivePermissionAccessIdAttribute(), accessId));
+    return hasExactAccessId(getPermissionSearchBase(), filter);
+  }
+
+  private boolean hasExactGroupDn(String accessId) throws InvalidNameException {
+    try {
+      String nameWithoutBaseDn = getNameWithoutBaseDn(accessId).toLowerCase();
+      return ldapTemplate.lookup(
+          new LdapName(nameWithoutBaseDn),
+          getExactGroupDnAttributesToReturn(),
+          new ExactGroupDnContextMapper());
+    } catch (NameNotFoundException e) {
+      return false;
+    }
+  }
+
+  private boolean hasExactAccessId(String searchBase, AndFilter filter) {
+    SearchControls searchControls = new SearchControls();
+    searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+    searchControls.setCountLimit(1);
+    return !ldapTemplate
+        .search(searchBase, filter.encode(), searchControls, new DnStringContextMapper())
+        .isEmpty();
+  }
+
+  private String getEffectiveGroupAccessIdAttribute() {
+    return getGroupIdAttribute() != null && !getGroupIdAttribute().isEmpty()
+        ? getGroupIdAttribute()
+        : getGroupNameAttribute();
+  }
+
+  private String getEffectivePermissionAccessIdAttribute() {
+    return getPermissionIdAttribute() != null && !getPermissionIdAttribute().isEmpty()
+        ? getPermissionIdAttribute()
+        : getPermissionNameAttribute();
   }
 
   public String getUserSearchBase() {
@@ -666,6 +809,13 @@ public class LdapClient {
   String getNameWithoutBaseDn(String name) {
     // (?i) --> case insensitive replacement
     return name.replaceAll("(?i)" + Pattern.quote("," + getBaseDn()), "");
+  }
+
+  private String[] getExactGroupDnAttributesToReturn() {
+    if (permissionsAreEmpty()) {
+      return new String[] {getGroupSearchFilterName()};
+    }
+    return new String[] {getGroupSearchFilterName(), getPermissionNameAttribute()};
   }
 
   String[] getLookUpGroupAttributesToReturn() {
@@ -1038,6 +1188,24 @@ public class LdapClient {
       String lastName = context.getStringAttribute(getUserLastnameAttribute());
       accessId.setName(String.format("%s, %s", lastName, firstName));
       return accessId;
+    }
+  }
+
+  class ExactGroupDnContextMapper extends AbstractContextMapper<Boolean> {
+
+    @Override
+    public Boolean doMapFromContext(final DirContextOperations context) {
+      String[] groupFilterValues = context.getStringAttributes(getGroupSearchFilterName());
+      boolean matchesGroupFilter =
+          groupFilterValues != null
+              && Arrays.stream(groupFilterValues)
+                  .anyMatch(
+                      value ->
+                          value != null && value.equalsIgnoreCase(getGroupSearchFilterValue()));
+      boolean isPermission =
+          !permissionsAreEmpty()
+              && context.getStringAttribute(getPermissionNameAttribute()) != null;
+      return matchesGroupFilter && !isPermission;
     }
   }
 

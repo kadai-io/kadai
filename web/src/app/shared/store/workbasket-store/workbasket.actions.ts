@@ -19,7 +19,7 @@
 import { Workbasket } from '../../models/workbasket';
 import { Direction, Sorting, WorkbasketQuerySortParameter } from '../../models/sorting';
 import { ACTION } from '../../models/action';
-import { WorkbasketAccessItems } from '../../models/workbasket-access-items';
+import { WorkbasketAccessItemWrite } from '../../models/workbasket-access-items';
 import { WorkbasketComponent } from '../../../administration/models/workbasket-component';
 import { ButtonAction } from '../../../administration/models/button-action';
 import { QueryPagingParameter } from '../../models/query-paging-parameter';
@@ -118,7 +118,7 @@ export class UpdateWorkbasketAccessItems {
 
   constructor(
     public url: string,
-    public workbasketAccessItems: WorkbasketAccessItems[]
+    public workbasketAccessItems: WorkbasketAccessItemWrite[]
   ) {}
 }
 

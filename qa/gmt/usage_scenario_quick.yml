@@ -6,6 +6,13 @@ description: Quick usage scenario used for testing purposes
 
 compose-file: !include compose.yml
 
+services:
+  k6:
+    environment:
+      SEED_TASKS: "1000" # keep test/debug runs fast; the regular and certification scenarios seed 100000
+    setup-commands:
+      - command: k6 run /tmp/repo/qa/gmt/k6/setup_tasks.js
+
 custom_metrics:
   response_time_avg:
     unit: us

@@ -50,13 +50,14 @@ describe('TaskFilterComponent', () => {
     expect(component.filter()!['owner-like']).toEqual([]);
   });
 
-  it('clear() should set filter with empty priority, name-like, and owner-like arrays', () => {
+  it('clear() should set filter with empty priority, name-like, owner-like and is-reopened arrays', () => {
     component.filter.set({ priority: [1], 'name-like': ['test'], 'owner-like': ['user'] });
     component.clear();
 
     expect(component.filter()!.priority).toEqual([]);
     expect(component.filter()!['name-like']).toEqual([]);
     expect(component.filter()!['owner-like']).toEqual([]);
+    expect(component.filter()!['is-reopened']).toEqual([]);
   });
 
   it('should set filter.state to [READY] when setStatus is called with TaskState.READY', () => {
@@ -93,7 +94,7 @@ describe('TaskFilterComponent', () => {
   });
 
   it('should clear filter when ClearTaskFilter action is dispatched to store', () => {
-    component.filter.set({ priority: [1], 'name-like': ['test'], 'owner-like': ['user'] });
+    component.filter.set({ priority: [1], 'name-like': ['test'], 'owner-like': ['user'], 'is-reopened': [true] });
 
     store.dispatch(new ClearTaskFilter());
 
@@ -102,6 +103,43 @@ describe('TaskFilterComponent', () => {
     expect(component.filter()!.priority).toEqual([]);
     expect(component.filter()!['name-like']).toEqual([]);
     expect(component.filter()!['owner-like']).toEqual([]);
+    expect(component.filter()!['is-reopened']).toEqual([]);
+  });
+
+  it('should set filter["is-reopened"] to [true] and call updateState when value is true', () => {
+    const updateStateSpy = vi.spyOn(component, 'updateState');
+
+    component.setIsReopened(true);
+
+    expect(component.filter()!['is-reopened']).toEqual([true]);
+    expect(updateStateSpy).toHaveBeenCalled();
+  });
+
+  it('should set filter["is-reopened"] to [false] and call updateState when value is false', () => {
+    const updateStateSpy = vi.spyOn(component, 'updateState');
+
+    component.setIsReopened(false);
+
+    expect(component.filter()!['is-reopened']).toEqual([false]);
+    expect(updateStateSpy).toHaveBeenCalled();
+  });
+
+  it('should set filter["is-reopened"] to [] and call updateState when value is undefined', () => {
+    const updateStateSpy = vi.spyOn(component, 'updateState');
+    component.setIsReopened(true);
+
+    component.setIsReopened(undefined);
+
+    expect(component.filter()!['is-reopened']).toEqual([]);
+    expect(updateStateSpy).toHaveBeenCalled();
+  });
+
+  it('should dispatch SetTaskFilter when setIsReopened is called', () => {
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+
+    component.setIsReopened(true);
+
+    expect(dispatchSpy).toHaveBeenCalledWith(new SetTaskFilter(component.filter()!));
   });
 
   it('ngOnDestroy() should complete destroy$', () => {

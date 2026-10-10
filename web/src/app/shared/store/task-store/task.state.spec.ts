@@ -19,7 +19,7 @@
 import { TestBed } from '@angular/core/testing';
 import { NgxsModule, Store } from '@ngxs/store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { of, throwError } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 
 import { TaskWorkflowState } from './task.state';
 import { FilterState } from '../filter-store/filter.state';
@@ -31,6 +31,7 @@ import {
   DeleteTask,
   GetTask,
   LoadTasks,
+  ReopenTask,
   SelectTask,
   SelectWorkbasket,
   SetPage,
@@ -89,7 +90,8 @@ describe('TaskWorkflowState', () => {
       claimTask: vi.fn().mockReturnValue(of(mockTask)),
       completeTask: vi.fn().mockReturnValue(of(mockTask)),
       cancelClaimTask: vi.fn().mockReturnValue(of(mockTask)),
-      transferTask: vi.fn().mockReturnValue(of(mockTask))
+      transferTask: vi.fn().mockReturnValue(of(mockTask)),
+      reopenTask: vi.fn().mockReturnValue(of(mockTask))
     };
 
     notificationServiceMock = {
@@ -99,7 +101,9 @@ describe('TaskWorkflowState', () => {
     };
 
     requestInProgressServiceMock = {
-      setRequestInProgress: vi.fn()
+      setRequestInProgress: vi.fn(),
+      beginRequest: vi.fn(),
+      endRequest: vi.fn()
     };
 
     await TestBed.configureTestingModule({
@@ -141,8 +145,8 @@ describe('TaskWorkflowState', () => {
         initialTaskState.paging
       );
       expect(store.snapshot().task.tasks).toEqual([mockTask, mockTask2]);
-      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(true);
-      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+      expect(requestInProgressServiceMock.beginRequest).toHaveBeenCalled();
+      expect(requestInProgressServiceMock.endRequest).toHaveBeenCalled();
     });
 
     it('shows an information toast when the selected workbasket has no tasks', async () => {
@@ -181,7 +185,7 @@ describe('TaskWorkflowState', () => {
       });
 
       await expect(store.dispatch(new LoadTasks()).toPromise()).rejects.toThrow('boom');
-      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+      expect(requestInProgressServiceMock.endRequest).toHaveBeenCalled();
     });
   });
 
@@ -282,8 +286,9 @@ describe('TaskWorkflowState', () => {
 
       expect(taskServiceMock.getTask).toHaveBeenCalledWith('TKI:001');
       expect(store.snapshot().task.selectedTask).toEqual(mockTask);
-      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(true);
-      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+      expect(requestInProgressServiceMock.beginRequest).toHaveBeenCalled();
+      expect(requestInProgressServiceMock.endRequest).toHaveBeenCalled();
+      expect(requestInProgressServiceMock.setRequestInProgress).not.toHaveBeenCalled();
     });
 
     it('builds a blank task locally for id "new-task" without calling the API', async () => {
@@ -306,7 +311,7 @@ describe('TaskWorkflowState', () => {
       (taskServiceMock.getTask as ReturnType<typeof vi.fn>).mockReturnValue(throwError(() => new Error('boom')));
 
       await expect(store.dispatch(new GetTask('TKI:001')).toPromise()).rejects.toThrow('boom');
-      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+      expect(requestInProgressServiceMock.endRequest).toHaveBeenCalled();
     });
   });
 
@@ -322,15 +327,15 @@ describe('TaskWorkflowState', () => {
       expect(store.snapshot().task.selectedTask).toEqual(mockTask);
       expect(notificationServiceMock.showSuccess).toHaveBeenCalledWith('TASK_CREATE', { taskName: mockTask.name });
       expect(taskServiceMock.findTasksWithWorkbasket).toHaveBeenCalled();
-      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(true);
-      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+      expect(requestInProgressServiceMock.beginRequest).toHaveBeenCalled();
+      expect(requestInProgressServiceMock.endRequest).toHaveBeenCalled();
     });
 
     it('clears requestInProgress and rethrows on error', async () => {
       (taskServiceMock.createTask as ReturnType<typeof vi.fn>).mockReturnValue(throwError(() => new Error('boom')));
 
       await expect(store.dispatch(new CreateTask(mockTask)).toPromise()).rejects.toThrow('boom');
-      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+      expect(requestInProgressServiceMock.endRequest).toHaveBeenCalled();
     });
   });
 
@@ -346,15 +351,15 @@ describe('TaskWorkflowState', () => {
       expect(store.snapshot().task.selectedTask).toEqual(mockTask);
       expect(notificationServiceMock.showSuccess).toHaveBeenCalledWith('TASK_UPDATE', { taskName: mockTask.name });
       expect(taskServiceMock.findTasksWithWorkbasket).toHaveBeenCalled();
-      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(true);
-      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+      expect(requestInProgressServiceMock.beginRequest).toHaveBeenCalled();
+      expect(requestInProgressServiceMock.endRequest).toHaveBeenCalled();
     });
 
     it('clears requestInProgress and rethrows on error', async () => {
       (taskServiceMock.updateTask as ReturnType<typeof vi.fn>).mockReturnValue(throwError(() => new Error('boom')));
 
       await expect(store.dispatch(new UpdateTask(mockTask)).toPromise()).rejects.toThrow('boom');
-      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+      expect(requestInProgressServiceMock.endRequest).toHaveBeenCalled();
     });
   });
 
@@ -387,15 +392,15 @@ describe('TaskWorkflowState', () => {
       expect(store.snapshot().task.selectedTask).toEqual(mockTask);
       expect(notificationServiceMock.showSuccess).toHaveBeenCalledWith('TASK_CLAIM', { taskName: mockTask.name });
       expect(taskServiceMock.findTasksWithWorkbasket).toHaveBeenCalled();
-      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(true);
-      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+      expect(requestInProgressServiceMock.beginRequest).toHaveBeenCalled();
+      expect(requestInProgressServiceMock.endRequest).toHaveBeenCalled();
     });
 
     it('clears requestInProgress and rethrows on error', async () => {
       (taskServiceMock.claimTask as ReturnType<typeof vi.fn>).mockReturnValue(throwError(() => new Error('boom')));
 
       await expect(store.dispatch(new ClaimTask(mockTask.taskId)).toPromise()).rejects.toThrow('boom');
-      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+      expect(requestInProgressServiceMock.endRequest).toHaveBeenCalled();
     });
   });
 
@@ -418,7 +423,7 @@ describe('TaskWorkflowState', () => {
       (taskServiceMock.completeTask as ReturnType<typeof vi.fn>).mockReturnValue(throwError(() => new Error('boom')));
 
       await expect(store.dispatch(new CompleteTask(mockTask.taskId)).toPromise()).rejects.toThrow('boom');
-      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+      expect(requestInProgressServiceMock.endRequest).toHaveBeenCalled();
     });
   });
 
@@ -445,7 +450,7 @@ describe('TaskWorkflowState', () => {
       );
 
       await expect(store.dispatch(new CancelClaimTask(mockTask.taskId)).toPromise()).rejects.toThrow('boom');
-      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+      expect(requestInProgressServiceMock.endRequest).toHaveBeenCalled();
     });
   });
 
@@ -468,7 +473,36 @@ describe('TaskWorkflowState', () => {
       (taskServiceMock.transferTask as ReturnType<typeof vi.fn>).mockReturnValue(throwError(() => new Error('boom')));
 
       await expect(store.dispatch(new TransferTask(mockTask.taskId, 'wb-target')).toPromise()).rejects.toThrow('boom');
-      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+      expect(requestInProgressServiceMock.endRequest).toHaveBeenCalled();
+    });
+  });
+
+  describe('ReopenTask', () => {
+    it('reopens the task, selects it, shows a toast, and reloads the list', async () => {
+      store.reset({
+        ...store.snapshot(),
+        task: { ...initialTaskState, selectedWorkbasket: mockWorkbasket }
+      });
+
+      await firstValueFrom(store.dispatch(new ReopenTask(mockTask.taskId)));
+
+      expect(taskServiceMock.reopenTask).toHaveBeenCalledWith(mockTask.taskId);
+      expect(store.snapshot().task.selectedTask).toEqual(mockTask);
+      expect(notificationServiceMock.showSuccess).toHaveBeenCalledWith('TASK_REOPEN', {
+        taskName: mockTask.name
+      });
+      expect(taskServiceMock.findTasksWithWorkbasket).toHaveBeenCalled();
+      expect(requestInProgressServiceMock.beginRequest).toHaveBeenCalled();
+      expect(requestInProgressServiceMock.endRequest).toHaveBeenCalled();
+    });
+
+    it('clears requestInProgress and rethrows on error', async () => {
+      (taskServiceMock.reopenTask as ReturnType<typeof vi.fn>).mockReturnValue(
+        throwError(() => new Error('error happened'))
+      );
+
+      await expect(firstValueFrom(store.dispatch(new ReopenTask(mockTask.taskId)))).rejects.toThrow('error happened');
+      expect(requestInProgressServiceMock.endRequest).toHaveBeenCalled();
     });
   });
 });

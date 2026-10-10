@@ -47,6 +47,7 @@ export interface TaskQueryFilterParameter {
   'wildcard-search-fields'?: string[];
   'wildcard-search-value'?: string[];
   'external-id'?: string[];
+  'is-reopened'?: boolean[];
   'custom-1'?: string[];
   'custom-2'?: string[];
   'custom-3'?: string[];

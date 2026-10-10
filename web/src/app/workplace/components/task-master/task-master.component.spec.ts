@@ -96,6 +96,8 @@ describe('TaskMasterComponent', () => {
           provide: RequestInProgressService,
           useValue: {
             setRequestInProgress: vi.fn(),
+            beginRequest: vi.fn(),
+            endRequest: vi.fn(),
             getRequestInProgress: vi.fn().mockReturnValue(requestInProgressSubject.asObservable())
           }
         },
@@ -207,7 +209,12 @@ describe('TaskMasterComponent - HTML template without overrideComponent', () => 
         { provide: NotificationService, useValue: { showSuccess: vi.fn(), showInformation: vi.fn() } },
         {
           provide: RequestInProgressService,
-          useValue: { setRequestInProgress: vi.fn(), getRequestInProgress: vi.fn().mockReturnValue(of(false)) }
+          useValue: {
+            setRequestInProgress: vi.fn(),
+            beginRequest: vi.fn(),
+            endRequest: vi.fn(),
+            getRequestInProgress: vi.fn().mockReturnValue(of(false))
+          }
         },
         {
           provide: OrientationService,

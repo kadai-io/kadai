@@ -55,7 +55,7 @@ public class TaskRefreshJob extends AbstractKadaiJob {
   public void execute() throws KadaiException {
     LOGGER.info("Running TaskRefreshJob for {} tasks", affectedTaskIds.size());
     try {
-      TaskServiceImpl taskService = (TaskServiceImpl) kadaiEngineImpl.getTaskService();
+      TaskServiceImpl taskService = (TaskServiceImpl) kadaiEngine.getTaskService();
       taskService.refreshPriorityAndDueDatesOfTasksOnClassificationUpdate(
           affectedTaskIds, serviceLevelChanged, priorityChanged);
       LOGGER.info("TaskRefreshJob ended successfully.");
@@ -75,8 +75,8 @@ public class TaskRefreshJob extends AbstractKadaiJob {
         + firstRun
         + ", runEvery="
         + runEvery
-        + ", kadaiEngineImpl="
-        + kadaiEngineImpl
+        + ", kadaiEngine="
+        + kadaiEngine
         + ", txProvider="
         + txProvider
         + ", scheduledJob="

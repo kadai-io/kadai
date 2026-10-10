@@ -66,6 +66,7 @@ export const messageByErrorCode = {
       'Callback state {taskCallbackState} for Task with id {taskId} is invalid. Required callback states: {requiredCallbackStates}',
     TASK_INVALID_OWNER: 'Current user {currentUserId} is not the owner of the Task with id {taskId}',
     TASK_INVALID_STATE: 'Task with id {taskId} is in state {taskState}. Required state(s): {requiredTaskStates}.',
+    REOPEN_TASK_WITH_CALLBACK: "Task with id {taskId} can't be reopened because it has a callback registered.",
 
     USER_ALREADY_EXISTS: 'User with id {userId} cannot be created, because a User with that id does already exist',
     USER_NOT_FOUND: 'User with id {userId} cannot be found',
@@ -115,6 +116,7 @@ export const messageByErrorCode = {
     TASK_COMPLETE: 'Task with name {taskName} was completed',
     TASK_CANCEL_CLAIM: 'Claim of task with name {taskName} was cancelled',
     TASK_TRANSFER: 'Task with name {taskName} was transferred',
+    TASK_REOPEN: 'Task with name {taskName} was reopened',
 
     SETTINGS_SAVE: 'Settings were updated'
   },
@@ -150,6 +152,7 @@ export const messageByErrorCode = {
     WORKBASKET_DELETE: 'Delete Workbasket with key {workbasketKey}?',
     CLASSIFICATION_DELETE: 'Delete Classification with key {classificationKey}?',
     TASK_DELETE: 'Delete Task with id {taskId}?',
+    TASK_REOPEN: 'Reopen Task with id {taskId}?',
     ACCESS_ITEM_MANAGEMENT_REVOKE_ACCESS: 'Delete all access related to {accessId}?'
   }
 };

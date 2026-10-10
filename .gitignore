@@ -81,3 +81,6 @@ db.tar.gz
 /.sdkmanrc
 /CLAUDE.md
 /web/CLAUDE.md
+
+# Arch Unit
+/lib/kadai-core-test/archunit_store

@@ -18,6 +18,8 @@
 
 package io.kadai.workbasket.internal;
 
+import static io.kadai.common.internal.util.SqlProviderUtil.DB2_WITH_UR_FOR_COLUMN_QUERY;
+
 import io.kadai.workbasket.api.WorkbasketAccessItemQuery;
 import io.kadai.workbasket.internal.models.WorkbasketAccessItemImpl;
 import io.kadai.workbasket.internal.models.WorkbasketSummaryImpl;
@@ -123,7 +125,6 @@ public interface WorkbasketQueryMapper {
           + "</if>"
           + "</where>"
           + "<if test='!orderBy.isEmpty()'>ORDER BY <foreach item='orderItem' collection='orderBy' separator=',' >${orderItem}</foreach></if> "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   @Result(property = "id", column = "ID")
   @Result(property = "key", column = "KEY")
@@ -162,7 +163,6 @@ public interface WorkbasketQueryMapper {
           + "<if test='accessIdIn != null'>AND ACCESS_ID IN(<foreach item='item' collection='accessIdIn' separator=',' >#{item}</foreach>) </if> "
           + "</where>"
           + "<if test='!orderBy.isEmpty()'>ORDER BY <foreach item='orderItem' collection='orderBy' separator=',' >${orderItem}</foreach></if> "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   @Result(property = "id", column = "ID")
   @Result(property = "workbasketId", column = "WORKBASKET_ID")
@@ -283,7 +283,6 @@ public interface WorkbasketQueryMapper {
           + "</if>)"
           + "</if>"
           + "</where>"
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   Long countQueryWorkbaskets(WorkbasketQueryImpl workbasketQuery);
 
@@ -293,7 +292,6 @@ public interface WorkbasketQueryMapper {
           + "<if test='workbasketIdIn != null'>AND WORKBASKET_ID IN(<foreach item='item' collection='workbasketIdIn' separator=',' >#{item}</foreach>)</if> "
           + "<if test='accessIdIn != null'>AND ACCESS_ID IN(<foreach item='item' collection='accessIdIn' separator=',' >#{item}</foreach>) </if> "
           + "</where>"
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
           + "</script>")
   Long countQueryWorkbasketAccessItems(WorkbasketAccessItemQuery accessItem);
 
@@ -392,7 +390,7 @@ public interface WorkbasketQueryMapper {
           + "</if>"
           + "</where>"
           + "<if test='!orderBy.isEmpty()'>ORDER BY <foreach item='orderItem' collection='orderBy' separator=',' >${orderItem}</foreach></if> "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
+          + DB2_WITH_UR_FOR_COLUMN_QUERY
           + "</script>")
   List<String> queryWorkbasketColumnValues(WorkbasketQueryImpl workbasketQuery);
 
@@ -408,7 +406,7 @@ public interface WorkbasketQueryMapper {
           + "<if test='accessIdIn != null'>AND ACCESS_ID IN(<foreach item='item' collection='accessIdIn' separator=',' >#{item}</foreach>) </if> "
           + "</where>"
           + "<if test='!orderBy.isEmpty()'>ORDER BY <foreach item='orderItem' collection='orderBy' separator=',' >${orderItem}</foreach></if> "
-          + "<if test=\"_databaseId == 'db2'\">with UR </if> "
+          + DB2_WITH_UR_FOR_COLUMN_QUERY
           + "</script>")
   List<String> queryWorkbasketAccessItemColumnValues(WorkbasketAccessItemQuery accessItemQuery);
 }

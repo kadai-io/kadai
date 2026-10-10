@@ -23,15 +23,13 @@ python submit_software.py list-machines
 
 # Submit a one-off run
 python submit_software.py --token $GMT_TOKEN submit \
-   --name "KADAI REST Spring Example Application - Blauer Engel Szenario" \
+   --name "KADAI REST Application - Blauer Engel Szenario" \
    --repo-url "https://github.com/kadai-io/kadai" \
    --machine-id 14 \
    --schedule-mode one-off \
    --email $EMAIL_ADDRESS \
    --filename qa/gmt/usage_scenario_blue_angel.yml \
    --branch master
-
-
 ```
 
 The machine-id should correspond to the available "CO2 Benchmarking" machine.

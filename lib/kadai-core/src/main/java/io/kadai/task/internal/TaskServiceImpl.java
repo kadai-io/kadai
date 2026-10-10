@@ -325,12 +325,48 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
+  public Task requestReviewWithWorkbasketKeyAndDomain(
+      String taskId, String workbasketKey, String domain, String ownerId)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          WorkbasketNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
+    return requestReviewWithWorkbasketId(
+        taskId, workbasketService.getWorkbasket(workbasketKey, domain).getId(), ownerId);
+  }
+
+  @Override
   public Task forceRequestReview(String taskId)
       throws InvalidTaskStateException,
           TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException {
     return requestReview(taskId, null, null, true);
+  }
+
+  @Override
+  public Task forceRequestReviewWithWorkbasketId(String taskId, String workbasketId, String ownerId)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
+    if (workbasketId == null || workbasketId.isEmpty()) {
+      throw new InvalidArgumentException("WorkbasketId must not be null or empty");
+    }
+    return requestReview(taskId, workbasketId, ownerId, true);
+  }
+
+  @Override
+  public Task forceRequestReviewWithWorkbasketKeyAndDomain(
+      String taskId, String workbasketKey, String domain, String ownerId)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          WorkbasketNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
+    return forceRequestReviewWithWorkbasketId(
+        taskId, workbasketService.getWorkbasket(workbasketKey, domain).getId(), ownerId);
   }
 
   @Override
@@ -355,12 +391,49 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
+  public Task requestChangesWithWorkbasketKeyAndDomain(
+      String taskId, String workbasketKey, String domain, String ownerId)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          WorkbasketNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
+    return requestChangesWithWorkbasketId(
+        taskId, workbasketService.getWorkbasket(workbasketKey, domain).getId(), ownerId);
+  }
+
+  @Override
   public Task forceRequestChanges(String taskId)
       throws InvalidTaskStateException,
           TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException {
     return requestChanges(taskId, null, null, true);
+  }
+
+  @Override
+  public Task forceRequestChangesWithWorkbasketId(
+      String taskId, String workbasketId, String ownerId)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
+    if (workbasketId == null || workbasketId.isEmpty()) {
+      throw new InvalidArgumentException("WorkbasketId must not be null or empty");
+    }
+    return requestChanges(taskId, workbasketId, ownerId, true);
+  }
+
+  @Override
+  public Task forceRequestChangesWithWorkbasketKeyAndDomain(
+      String taskId, String workbasketKey, String domain, String ownerId)
+      throws InvalidTaskStateException,
+          TaskNotFoundException,
+          WorkbasketNotFoundException,
+          InvalidOwnerException,
+          NotAuthorizedOnWorkbasketException {
+    return forceRequestChangesWithWorkbasketId(
+        taskId, workbasketService.getWorkbasket(workbasketKey, domain).getId(), ownerId);
   }
 
   @Override
@@ -2812,16 +2885,18 @@ public class TaskServiceImpl implements TaskService {
       throws ClassificationNotFoundException {
     ClassificationSummary oldClassificationSummary = oldTaskImpl.getClassificationSummary();
     ClassificationSummary newClassificationSummary = newTaskImpl.getClassificationSummary();
-    if (newClassificationSummary == null) {
-      newClassificationSummary = oldClassificationSummary;
+    if (newClassificationSummary == null
+        || Objects.equals(oldClassificationSummary.getKey(), newClassificationSummary.getKey())) {
+      // A same-key update may carry incomplete or caller-modified metadata. Use the DB-loaded
+      // summary before calculating service level and priority.
+      newTaskImpl.setClassificationSummary(oldClassificationSummary);
+      return;
     }
-    if (!oldClassificationSummary.getKey().equals(newClassificationSummary.getKey())) {
-      Classification newClassification =
-          this.classificationService.getClassification(
-              newClassificationSummary.getKey(), newTaskImpl.getWorkbasketSummary().getDomain());
-      newClassificationSummary = newClassification.asSummary();
-      newTaskImpl.setClassificationSummary(newClassificationSummary);
-    }
+
+    Classification newClassification =
+        this.classificationService.getClassification(
+            newClassificationSummary.getKey(), newTaskImpl.getWorkbasketSummary().getDomain());
+    newTaskImpl.setClassificationSummary(newClassification.asSummary());
   }
 
   private void addOwnerAndCreatorLongNames(TaskSummaryImpl task) {

@@ -60,7 +60,12 @@ class PojoTest {
                           && !javaClass.getSimpleName().equals("TaskPatch")
                           && !javaClass.getSimpleName().equals("DomainFixtures")
                           && !javaClass.getSimpleName().equals("GenerationSummary")
-                          && !javaClass.getSimpleName().equals("TaskGenerationEnvironment"))
+                          && !javaClass.getSimpleName().equals("TaskGenerationEnvironment")
+                          && !javaClass.getSimpleName().equals("PreparedUserRefreshInput")
+                          && !javaClass.getSimpleName().equals("UserDatabaseSnapshot")
+                          && !javaClass.getSimpleName().equals("UserRefreshPlan")
+                          && !javaClass.getSimpleName().equals("UserRefreshResult")
+                          && !javaClass.getSimpleName().equals("UserRefreshState"))
               .map(JavaClass::reflect)
               .toList();
 

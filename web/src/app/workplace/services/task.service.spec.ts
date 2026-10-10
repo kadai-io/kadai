@@ -120,6 +120,21 @@ describe('TaskService', () => {
     });
   });
 
+  describe('reopenTask', () => {
+    it('should make a POST request to /tasks/{taskId}/reopen', () => {
+      const mockTask = new Task('task-789');
+
+      service.reopenTask('task-789').subscribe((task) => {
+        expect(task).toEqual(mockTask);
+      });
+
+      const req = httpMock.expectOne('http://test/v1/tasks/task-789/reopen');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toBe('');
+      req.flush(mockTask);
+    });
+  });
+
   describe('updateTask', () => {
     it('should make a PUT request to /tasks/{taskId}', () => {
       const task = new Task('task-update');

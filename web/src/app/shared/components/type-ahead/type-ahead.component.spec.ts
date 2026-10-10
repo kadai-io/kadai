@@ -20,7 +20,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { TypeAheadComponent } from './type-ahead.component';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
-import { of } from 'rxjs';
+import { delay, of, Subject } from 'rxjs';
 import { provideStore, Store } from '@ngxs/store';
 import { EngineConfigurationState } from '../../store/engine-configuration-store/engine-configuration.state';
 import { engineConfigurationMock } from '../../store/mock-data/mock-store';
@@ -163,6 +163,74 @@ describe('TypeAheadComponent with AccessId input', () => {
     fixture.detectChanges();
     const setAccessIdSpy = vi.spyOn(component, 'setAccessIdFromInput');
     expect(setAccessIdSpy).not.toHaveBeenCalled();
+  });
+
+  it('should call handleEmptyAccessId and not search when accessId value is cleared or empty', async () => {
+    const handleEmptyAccessIdSpy = vi.spyOn(component, 'handleEmptyAccessId');
+    const searchSpy = vi.spyOn(accessIdService, 'searchForAccessId');
+
+    component.accessIdForm.get('accessId')!.setValue('user-g-1');
+    fixture.detectChanges();
+
+    await vi.waitFor(() => {
+      expect(searchSpy).toHaveBeenCalledWith('user-g-1');
+    });
+
+    searchSpy.mockClear();
+    handleEmptyAccessIdSpy.mockClear();
+
+    component.accessIdForm.get('accessId')!.setValue('');
+    fixture.detectChanges();
+
+    await vi.waitFor(() => {
+      expect(handleEmptyAccessIdSpy).toHaveBeenCalled();
+      expect(searchSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  it('should ignore stale/older search requests if a new input was provided (prevent race condition)', async () => {
+    vi.useFakeTimers();
+
+    const requestA$ = new Subject<any>();
+    const requestB$ = new Subject<any>();
+
+    const searchSpy = vi
+      .spyOn(accessIdService, 'searchForAccessId')
+      .mockReset()
+      .mockReturnValueOnce(requestA$.asObservable())
+      .mockReturnValueOnce(requestB$.asObservable());
+
+    const inputEl: HTMLInputElement = fixture.nativeElement.querySelector('input');
+
+    inputEl.value = 'user-a';
+    inputEl.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    vi.advanceTimersByTime(component.debounceTime);
+    expect(searchSpy).toHaveBeenCalledTimes(1);
+    expect(searchSpy).toHaveBeenLastCalledWith('user-a');
+
+    inputEl.value = 'user-b';
+    inputEl.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    vi.advanceTimersByTime(component.debounceTime);
+    expect(searchSpy).toHaveBeenCalledTimes(2);
+    expect(searchSpy).toHaveBeenLastCalledWith('user-b');
+
+    requestB$.next([{ accessId: 'user-b', name: 'User B' }]);
+    requestB$.complete();
+    fixture.detectChanges();
+
+    expect(component.name()).toBe('User B');
+
+    requestA$.next([{ accessId: 'user-a', name: 'User A' }]);
+    requestA$.complete();
+    fixture.detectChanges();
+
+    expect(component.name()).toBe('User B');
+
+    vi.useRealTimers();
   });
 });
 

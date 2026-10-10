@@ -18,7 +18,7 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { Observable } from 'rxjs';
+import { finalize, Observable, Subject } from 'rxjs';
 import { RequestInProgressService } from './request-in-progress.service';
 
 describe('RequestInProgressService', () => {
@@ -36,6 +36,14 @@ describe('RequestInProgressService', () => {
   it('getRequestInProgress() should return an Observable', () => {
     const result = service.getRequestInProgress();
     expect(result).toBeInstanceOf(Observable);
+  });
+
+  it('should emit initial value (false) upon subscription', () => {
+    let emitted: boolean | undefined;
+    service.getRequestInProgress().subscribe((value) => {
+      emitted = value;
+    });
+    expect(emitted).toBe(false);
   });
 
   it('should emit true when setRequestInProgress(true) is called', () => {
@@ -64,14 +72,104 @@ describe('RequestInProgressService', () => {
     service.setRequestInProgress(true);
     service.setRequestInProgress(false);
     service.setRequestInProgress(true);
-    expect(emittedValues).toEqual([true, false, true]);
+    expect(emittedValues).toEqual([false, true, false, true]);
   });
 
-  it('multiple subscribers should all receive the emitted value', () => {
-    const values: boolean[] = [];
-    service.getRequestInProgress().subscribe((v) => values.push(v));
-    service.getRequestInProgress().subscribe((v) => values.push(v));
+  it('multiple subscribers should all receive current and emitted values', () => {
+    const values1: boolean[] = [];
+    const values2: boolean[] = [];
+
+    service.getRequestInProgress().subscribe((v) => values1.push(v));
     service.setRequestInProgress(true);
-    expect(values).toEqual([true, true]);
+    service.getRequestInProgress().subscribe((v) => values2.push(v));
+    service.setRequestInProgress(true);
+
+    expect(values1).toEqual([false, true]);
+    expect(values2).toEqual([true]);
+  });
+
+  describe('Direct Setter Semantics (setRequestInProgress)', () => {
+    it('should act as a plain setter overriding state when set to true/false', () => {
+      const emittedValues: boolean[] = [];
+      service.getRequestInProgress().subscribe((value) => emittedValues.push(value));
+
+      service.setRequestInProgress(true);
+      service.setRequestInProgress(true); // Повторный вызов из другого компонента
+      expect(emittedValues[emittedValues.length - 1]).toBe(true);
+
+      service.setRequestInProgress(false);
+      expect(emittedValues[emittedValues.length - 1]).toBe(false);
+    });
+
+    it('should maintain true state if direct setter is false but active requests remain', () => {
+      const emittedValues: boolean[] = [];
+      service.getRequestInProgress().subscribe((value) => emittedValues.push(value));
+
+      service.beginRequest();
+      service.setRequestInProgress(true);
+      service.setRequestInProgress(false); // Компонент сбросил флаг, но запрос еще идет
+
+      expect(emittedValues[emittedValues.length - 1]).toBe(true);
+
+      service.endRequest();
+      expect(emittedValues[emittedValues.length - 1]).toBe(false);
+    });
+  });
+
+  describe('Balanced Task Tracking (beginRequest / endRequest)', () => {
+    it('should remain true when one of multiple overlapping requests finishes', () => {
+      const emittedValues: boolean[] = [];
+      service.getRequestInProgress().subscribe((val) => emittedValues.push(val));
+
+      service.beginRequest();
+      expect(emittedValues[emittedValues.length - 1]).toBe(true);
+
+      service.beginRequest();
+      expect(emittedValues[emittedValues.length - 1]).toBe(true);
+
+      service.endRequest();
+      expect(emittedValues[emittedValues.length - 1]).toBe(true);
+
+      service.endRequest();
+      expect(emittedValues[emittedValues.length - 1]).toBe(false);
+    });
+
+    it('should not let active request count drop below zero', () => {
+      const emittedValues: boolean[] = [];
+      service.getRequestInProgress().subscribe((v) => emittedValues.push(v));
+
+      service.endRequest();
+      service.beginRequest();
+      service.endRequest();
+
+      expect(emittedValues).toEqual([false, true, false]);
+    });
+
+    it('should keep progress active when an overlapping request fails while another is still active', () => {
+      const emittedValues: boolean[] = [];
+      service.getRequestInProgress().subscribe((v) => emittedValues.push(v));
+
+      const requestA$ = new Subject<void>();
+      const requestB$ = new Subject<void>();
+
+      const track = <T>(source$: Subject<T>) => {
+        service.beginRequest();
+        return source$.pipe(finalize(() => service.endRequest()));
+      };
+
+      const subA = track(requestA$).subscribe({ error: () => {} });
+      const subB = track(requestB$).subscribe();
+
+      expect(emittedValues).toEqual([false, true]);
+      requestA$.error(new Error('HTTP Error 500'));
+      expect(emittedValues[emittedValues.length - 1]).toBe(true);
+
+      requestB$.next();
+      requestB$.complete();
+      expect(emittedValues[emittedValues.length - 1]).toBe(false);
+
+      subA.unsubscribe();
+      subB.unsubscribe();
+    });
   });
 });
