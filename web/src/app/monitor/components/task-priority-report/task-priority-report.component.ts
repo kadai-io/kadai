@@ -16,36 +16,25 @@
  *
  */
 
-import { AfterViewChecked, Component, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { ReportData } from '../../models/report-data';
-import { MonitorService } from '../../services/monitor.service';
-import { WorkbasketType } from '../../../shared/models/workbasket-type';
-import { Store } from '@ngxs/store';
-import { Observable, Subject } from 'rxjs';
-import { SettingsSelectors } from '../../../shared/store/settings-store/settings.selectors';
-import { Settings } from '../../../settings/models/settings';
-import { take, takeUntil } from 'rxjs/operators';
-import { SettingMembers } from '../../../settings/components/Settings/expected-members';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { Component, computed, inject } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { DatePipe, NgClass } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
+
 import { MatDivider } from '@angular/material/divider';
-import { CanvasComponent } from '../canvas/canvas.component';
 import {
-  MatCell,
-  MatCellDef,
+  MatTable,
   MatColumnDef,
   MatHeaderCell,
   MatHeaderCellDef,
-  MatHeaderRow,
+  MatCellDef,
+  MatCell,
   MatHeaderRowDef,
-  MatRow,
+  MatHeaderRow,
   MatRowDef,
-  MatTable
+  MatRow
 } from '@angular/material/table';
-import { DatePipe } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { DomainService } from '../../../shared/services/domain/domain.service';
 import {
   MatAccordion,
   MatExpansionPanel,
@@ -53,7 +42,13 @@ import {
   MatExpansionPanelTitle
 } from '@angular/material/expansion';
 import { MatCheckbox } from '@angular/material/checkbox';
+
+import { CanvasComponent } from '../canvas/canvas.component';
 import { TaskPriorityReportFilterStateService } from '../../services/task-priority-report-filter-state.service';
+import { TaskPriorityReportDataService } from '../../services/task-priority-report-data.service';
+import { SettingMembers } from '../../../settings/components/Settings/expected-members';
+import { ReportData } from 'app/monitor/models/report-data';
+import { switchMap } from 'rxjs/internal/operators/switchMap';
 
 @Component({
   selector: 'kadai-monitor-task-priority-report',
@@ -79,238 +74,65 @@ import { TaskPriorityReportFilterStateService } from '../../services/task-priori
     MatExpansionPanel,
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,
-    MatCheckbox
+    MatCheckbox,
+    NgClass
   ],
-  providers: [MonitorService]
+  host: {
+    '[style.--color-high-priority]': 'colorHigh()',
+    '[style.--color-medium-priority]': 'colorMedium()',
+    '[style.--color-low-priority]': 'colorLow()'
+  }
 })
-export class TaskPriorityReportComponent implements OnInit, AfterViewChecked, OnDestroy {
-  columns: string[] = ['priority', 'number'];
-  reportData = signal<ReportData | undefined>(undefined);
-  tableDataArray = signal<{ priority: string; number: number }[][]>([]);
-  colorShouldChange = true;
-  priority: { lowerBound: any; upperBound: any }[] = [];
-  nameHighPriority!: string;
-  nameMediumPriority!: string;
-  nameLowPriority!: string;
-  colorHighPriority!: string;
-  colorMediumPriority!: string;
-  colorLowPriority!: string;
-  destroy$ = new Subject<void>();
-  settings$: Observable<Settings> = inject(Store).select(SettingsSelectors.getSettings);
-  workbasketKey = signal<string | undefined>(undefined);
-  isPanelOpen = false;
-  filters!: {}[];
-  keys = signal<string[]>([]);
-  filtersAreSpecified = signal(false);
-  private readonly monitorService = inject(MonitorService);
-  private readonly requestInProgressService = inject(RequestInProgressService);
+export class TaskPriorityReportComponent {
   private readonly activatedRoute = inject(ActivatedRoute);
-  private readonly domainService = inject(DomainService);
-  private readonly filterState = inject(TaskPriorityReportFilterStateService);
+  readonly filterState = inject(TaskPriorityReportFilterStateService);
+  readonly dataService = inject(TaskPriorityReportDataService);
+
+  readonly columns: string[] = ['priority', 'number'];
+  isPanelOpen = false;
+
+  readonly reportData = toSignal<ReportData | undefined>(
+    this.activatedRoute.params.pipe(
+      switchMap((params) => {
+        const key = params['workbasketKey'];
+        this.filterState.workbasketKey.set(key);
+        return this.dataService.getReportData$(key);
+      })
+    )
+  );
+
+  readonly keys = this.filterState.filterKeys;
+  readonly filtersAreSpecified = this.filterState.filtersAreSpecified;
   readonly activeFilters = this.filterState.activeFilters;
-  private readonly domain = toSignal(this.domainService.getSelectedDomain(), {
-    initialValue: this.domainService.getSelectedDomainValue?.()
+
+  readonly isDepthZero = computed(() => this.filterState.workbasketKey() === undefined);
+
+  readonly colorHigh = computed(() => this.filterState.settings()?.[SettingMembers.ColorHighPriority] ?? 'inherit');
+  readonly colorMedium = computed(() => this.filterState.settings()?.[SettingMembers.ColorMediumPriority] ?? 'inherit');
+  readonly colorLow = computed(() => this.filterState.settings()?.[SettingMembers.ColorLowPriority] ?? 'inherit');
+
+  readonly tableDataArray = computed(() => {
+    const report = this.reportData();
+    const settings = this.filterState.settings();
+    if (!report || !settings) return [];
+
+    const nameHigh = settings[SettingMembers.NameHighPriority];
+    const nameMedium = settings[SettingMembers.NameMediumPriority];
+    const nameLow = settings[SettingMembers.NameLowPriority];
+
+    return report.rows.map((row) => [
+      { priority: nameHigh, number: row.cells[0] },
+      { priority: nameMedium, number: row.cells[1] },
+      { priority: nameLow, number: row.cells[2] },
+      { priority: 'Total', number: row.total }
+    ]);
   });
-  private readonly settings = toSignal(this.settings$, { initialValue: undefined as unknown as Settings });
-  private readonly currentFilter = this.filterState.currentFilter;
 
-  constructor() {
-    this.activatedRoute.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-      this.workbasketKey.set(params['workbasketKey']);
-    });
-
-    effect((onCleanup) => {
-      const settings = this.settings();
-      const domain = this.domain();
-      const filter = this.currentFilter();
-
-      this.requestInProgressService.setRequestInProgress(true);
-      this.setValuesFromSettings(settings);
-      // the order must be high, medium, low because the canvas component defines its labels in this order
-      this.priority = [
-        settings[SettingMembers.IntervalHighPriority],
-        settings[SettingMembers.IntervalMediumPriority],
-        settings[SettingMembers.IntervalLowPriority]
-      ].map((arr) => ({ lowerBound: arr[0], upperBound: arr[1] }));
-
-      const reportData = this.isDepthZero()
-        ? this.monitorService.getTasksByPriorityReport([WorkbasketType.TOPIC], this.priority, domain, filter)
-        : this.monitorService.getTasksByDetailedPriorityReport([WorkbasketType.TOPIC], this.priority, domain, filter);
-
-      const reportDataSubscription = reportData.subscribe({
-        next: (reportData) => {
-          this.colorShouldChange = true;
-          this.setValuesFromReportData(reportData);
-          this.requestInProgressService.setRequestInProgress(false);
-        },
-        error: (err) => {
-          console.error('Failed to load Task Priority Report', err);
-          this.requestInProgressService.setRequestInProgress(false);
-        }
-      });
-
-      onCleanup(() => reportDataSubscription.unsubscribe());
-    });
-  }
-
-  ngOnInit(): void {
-    this.settings$.pipe(takeUntil(this.destroy$)).subscribe((settings) => {
-      let filtersAreSpecified = !!settings?.['filter'] && settings['filter'] !== '';
-      if (filtersAreSpecified) {
-        try {
-          this.filters = JSON.parse(settings['filter']);
-          this.keys.set(Object.keys(this.filters as any));
-          this.rebuildActiveFiltersFromCurrentFilter();
-        } catch {
-          this.filters = [] as any;
-          this.keys.set([]);
-          filtersAreSpecified = false;
-        }
-      } else {
-        this.filters = [] as any;
-        this.keys.set([]);
-      }
-      this.filtersAreSpecified.set(filtersAreSpecified);
-    });
-  }
-
-  ngAfterViewChecked() {
-    if (this.colorShouldChange) {
-      const highPriorityElements = document.getElementsByClassName('task-priority-report__row--high');
-      if (highPriorityElements.length > 0) {
-        this.colorShouldChange = false;
-        this.changeColor();
-      }
-    }
-  }
-
-  setValuesFromSettings(settings: Settings) {
-    this.nameHighPriority = settings[SettingMembers.NameHighPriority];
-    this.nameMediumPriority = settings[SettingMembers.NameMediumPriority];
-    this.nameLowPriority = settings[SettingMembers.NameLowPriority];
-    this.colorHighPriority = settings[SettingMembers.ColorHighPriority];
-    this.colorMediumPriority = settings[SettingMembers.ColorMediumPriority];
-    this.colorLowPriority = settings[SettingMembers.ColorLowPriority];
-  }
-
-  setValuesFromReportData(reportData: ReportData) {
-    const depth = this.isDepthZero() ? 0 : 1;
-    const filteredReportData = {
-      meta: reportData.meta,
-      rows: reportData.rows
-        .filter((row) => row.depth === depth)
-        .filter((row) => this.isDepthZero() || row.desc[0] === this.workbasketKey()),
-      sumRow: reportData.sumRow
-    };
-    this.reportData.set(filteredReportData);
-
-    // the order must be high, medium, low because the canvas component defines its labels in this order
-    let indexHigh = 0;
-    let indexMedium = 1;
-    let indexLow = 2;
-
-    const tableDataArray: { priority: string; number: number }[][] = [];
-    filteredReportData.rows.forEach((row) => {
-      tableDataArray.push([
-        { priority: this.nameHighPriority, number: row.cells[indexHigh] },
-        { priority: this.nameMediumPriority, number: row.cells[indexMedium] },
-        { priority: this.nameLowPriority, number: row.cells[indexLow] },
-        { priority: 'Total', number: row.total }
-      ]);
-    });
-    this.tableDataArray.set(tableDataArray);
-  }
-
-  changeColor() {
-    const highPriorityElements = document.getElementsByClassName('task-priority-report__row--high');
-    const mediumPriorityElements = document.getElementsByClassName('task-priority-report__row--medium');
-    const lowPriorityElements = document.getElementsByClassName('task-priority-report__row--low');
-    this.applyColorOnClasses(highPriorityElements, this.colorHighPriority);
-    this.applyColorOnClasses(mediumPriorityElements, this.colorMediumPriority);
-    this.applyColorOnClasses(lowPriorityElements, this.colorLowPriority);
-  }
-
-  applyColorOnClasses(elements: HTMLCollectionOf<Element>, color: string) {
-    for (let i = 0; i < elements.length; i++) {
-      (<HTMLElement>elements[i]).style.color = color;
-    }
+  onFilterChange(isEnabled: boolean, key: string): void {
+    this.filterState.toggleFilter(key, isEnabled);
   }
 
   indexToString(i: number): string {
     return String(i);
-  }
-
-  applyFilter(filter: {}) {
-    this.currentFilter.set(filter);
-    this.requestInProgressService.setRequestInProgress(true);
-
-    if (this.isDepthZero()) {
-      this.monitorService
-        .getTasksByPriorityReport([WorkbasketType.TOPIC], this.priority, this.domain(), filter)
-        .pipe(take(1))
-        .subscribe((reportData) => {
-          this.setValuesFromReportData(reportData);
-          this.requestInProgressService.setRequestInProgress(false);
-        });
-    } else {
-      this.monitorService
-        .getTasksByDetailedPriorityReport([WorkbasketType.TOPIC], this.priority, this.domain(), filter)
-        .pipe(take(1))
-        .subscribe((reportData) => {
-          this.setValuesFromReportData(reportData);
-          this.requestInProgressService.setRequestInProgress(false);
-        });
-    }
-  }
-
-  emitFilter(isEnabled: boolean, key: string) {
-    const next = isEnabled ? [...this.activeFilters(), key] : this.activeFilters().filter((element) => element !== key);
-    this.activeFilters.set(next);
-    this.applyFilter(this.buildQuery());
-  }
-
-  buildQuery(): {} {
-    const filterQuery: any = {};
-    (this.activeFilters() || []).forEach((activeFilter) => {
-      const filter: any = (this.filters as any)[activeFilter];
-      if (!filter) return;
-      const keys = Object.keys(filter);
-      keys.forEach((k) => {
-        const newValue = filter[k];
-        filterQuery[k] = filterQuery[k] ? [...filterQuery[k], ...newValue] : newValue;
-      });
-    });
-    return filterQuery;
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  protected isDepthZero() {
-    return this.workbasketKey() === undefined;
-  }
-
-  private rebuildActiveFiltersFromCurrentFilter() {
-    const cfg: any = this.filters as any;
-    if (!cfg) {
-      this.activeFilters.set([]);
-      return;
-    }
-    const curr: any = this.currentFilter();
-    const next: string[] = [];
-    Object.keys(cfg).forEach((key) => {
-      const defs = cfg[key];
-      const allMatch = Object.keys(defs || {}).every((k) => {
-        const need: any[] = defs[k] || [];
-        const have: any[] = curr?.[k] || [];
-        return need.every((v) => have.includes(v));
-      });
-      if (allMatch) {
-        next.push(key);
-      }
-    });
-    this.activeFilters.set(next);
   }
 }
