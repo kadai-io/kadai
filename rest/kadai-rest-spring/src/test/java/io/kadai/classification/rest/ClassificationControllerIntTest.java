@@ -28,6 +28,8 @@ import io.kadai.classification.rest.models.ClassificationSummaryRepresentationMo
 import io.kadai.common.rest.RestEndpoints;
 import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
+import java.time.Instant;
+import java.util.UUID;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -521,5 +523,85 @@ class ClassificationControllerIntTest {
     ClassificationRepresentationModel updatedClassification = responseUpdate.getBody();
     assertThat(updatedClassification).isNotNull();
     assertThat(updatedClassification.getName()).isEqualTo("new name");
+  }
+
+  @Test
+  @DirtiesContext
+  void should_RejectIdentityChangesAndReturnCanonicalIdentity() {
+    ClassificationRepresentationModel newClassification =
+        new ClassificationRepresentationModel();
+    newClassification.setType("TASK");
+    newClassification.setCategory("MANUAL");
+    newClassification.setDomain("DOMAIN_A");
+    newClassification.setKey(UUID.randomUUID().toString().replace("-", ""));
+    newClassification.setName("identity test");
+    String collectionUrl = restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS);
+    ResponseEntity<ClassificationRepresentationModel> createdResponse =
+        restClient
+            .post()
+            .uri(collectionUrl)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .body(newClassification)
+            .retrieve()
+            .toEntity(ClassificationRepresentationModel.class);
+    ClassificationRepresentationModel original = createdResponse.getBody();
+    assertThat(original).isNotNull();
+    String classificationUrl =
+        restHelper.toUrl(RestEndpoints.URL_CLASSIFICATIONS_ID, original.getClassificationId());
+
+    String originalKey = original.getKey();
+    original.setKey(UUID.randomUUID().toString().replace("-", ""));
+    assertUpdateRejected(classificationUrl, original);
+    original.setKey(originalKey);
+
+    String originalDomain = original.getDomain();
+    original.setDomain("DOMAIN_B");
+    assertUpdateRejected(classificationUrl, original);
+    original.setDomain(originalDomain);
+
+    String originalType = original.getType();
+    original.setType("DOCUMENT");
+    assertUpdateRejected(classificationUrl, original);
+    original.setType(originalType);
+
+    Instant created = original.getCreated();
+    original.setCreated(created.minusSeconds(60));
+    original.setName("updated name");
+    ResponseEntity<ClassificationRepresentationModel> updatedResponse =
+        restClient
+            .put()
+            .uri(classificationUrl)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .body(original)
+            .retrieve()
+            .toEntity(ClassificationRepresentationModel.class);
+
+    ClassificationRepresentationModel updated = updatedResponse.getBody();
+    assertThat(updated).isNotNull();
+    assertThat(updated.getClassificationId()).isEqualTo(original.getClassificationId());
+    assertThat(updated.getKey()).isEqualTo(originalKey);
+    assertThat(updated.getDomain()).isEqualTo(originalDomain);
+    assertThat(updated.getType()).isEqualTo(originalType);
+    assertThat(updated.getCreated()).isEqualTo(created);
+    assertThat(updated.getName()).isEqualTo("updated name");
+  }
+
+  private void assertUpdateRejected(
+      String classificationUrl, ClassificationRepresentationModel classification) {
+    assertThatThrownBy(
+            () ->
+                restClient
+                    .put()
+                    .uri(classificationUrl)
+                    .headers(
+                        headers ->
+                            headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                    .body(classification)
+                    .retrieve()
+                    .toEntity(ClassificationRepresentationModel.class))
+        .isInstanceOf(HttpStatusCodeException.class)
+        .extracting(HttpStatusCodeException.class::cast)
+        .extracting(HttpStatusCodeException::getStatusCode)
+        .isEqualTo(HttpStatus.BAD_REQUEST);
   }
 }
