@@ -20,15 +20,7 @@ import { inject, Injectable, computed, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngxs/store';
 import { SettingsSelectors } from '../../shared/store/settings-store/settings.selectors';
-
-export interface FilterConfig {
-  [filterKey: string]: Record<string, string[]>;
-}
-
-export interface TableRowData {
-  priority: string;
-  number: number;
-}
+import { FilterConfig } from '../models/filter-config';
 
 export const SETTING_MEMBER_FILTER = 'filter';
 

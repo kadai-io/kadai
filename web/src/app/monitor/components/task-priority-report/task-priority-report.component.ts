@@ -48,7 +48,10 @@ import { TaskPriorityReportFilterStateService } from '../../services/task-priori
 import { TaskPriorityReportDataService } from '../../services/task-priority-report-data.service';
 import { SettingMembers } from '../../../settings/components/Settings/expected-members';
 import { ReportData } from 'app/monitor/models/report-data';
-import { switchMap } from 'rxjs/internal/operators/switchMap';
+import { switchMap } from 'rxjs/operators';
+import { ReportRow } from 'app/monitor/models/report-row';
+import { Settings } from 'app/settings/models/settings';
+import { TableRowData } from 'app/monitor/models/table-row-data';
 
 @Component({
   selector: 'kadai-monitor-task-priority-report',
@@ -116,16 +119,7 @@ export class TaskPriorityReportComponent {
     const settings = this.filterState.settings();
     if (!report || !settings) return [];
 
-    const nameHigh = settings[SettingMembers.NameHighPriority];
-    const nameMedium = settings[SettingMembers.NameMediumPriority];
-    const nameLow = settings[SettingMembers.NameLowPriority];
-
-    return report.rows.map((row) => [
-      { priority: nameHigh, number: row.cells[0] },
-      { priority: nameMedium, number: row.cells[1] },
-      { priority: nameLow, number: row.cells[2] },
-      { priority: 'Total', number: row.total }
-    ]);
+    return report.rows.map((row) => mapReportRowToTableRowData(row, settings));
   });
 
   onFilterChange(isEnabled: boolean, key: string): void {
@@ -135,4 +129,17 @@ export class TaskPriorityReportComponent {
   indexToString(i: number): string {
     return String(i);
   }
+}
+
+function mapReportRowToTableRowData(row: ReportRow, settings: Settings): TableRowData[] {
+  const nameHigh = settings[SettingMembers.NameHighPriority];
+  const nameMedium = settings[SettingMembers.NameMediumPriority];
+  const nameLow = settings[SettingMembers.NameLowPriority];
+
+  return [
+    { priority: nameHigh, number: row.cells[0] },
+    { priority: nameMedium, number: row.cells[1] },
+    { priority: nameLow, number: row.cells[2] },
+    { priority: 'Total', number: row.total }
+  ];
 }
