@@ -16,7 +16,6 @@
  *
  */
 
-
 package org.camunda.bpm.dmn.xlsx;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,7 +41,7 @@ public class XslxToDmnConversionTest {
       "if (exp1 % 2 == 0)\n" + "    {erg = 2;}\n" + "else\n" + "    {erg = 1;}\n" + "erg;";
 
   @Test
-  public void testSimpleConversion() {
+  public void testSimpleConversion() throws XlsxConversionException {
     XlsxConverter converter = new XlsxConverter();
     InputStream inputStream = TestHelper.getClassPathResource("test1.xlsx");
     DmnModelInstance dmnModelInstance = converter.convert(inputStream);
@@ -56,7 +55,7 @@ public class XslxToDmnConversionTest {
   }
 
   @Test
-  public void testConversionOfMixedNumberAndStringColumns() {
+  public void testConversionOfMixedNumberAndStringColumns() throws XlsxConversionException {
     XlsxConverter converter = new XlsxConverter();
     InputStream inputStream = TestHelper.getClassPathResource("test2.xlsx");
     DmnModelInstance dmnModelInstance = converter.convert(inputStream);
@@ -70,7 +69,7 @@ public class XslxToDmnConversionTest {
   }
 
   @Test
-  public void testConversionOfEmptyCells() {
+  public void testConversionOfEmptyCells() throws XlsxConversionException {
     XlsxConverter converter = new XlsxConverter();
     InputStream inputStream = TestHelper.getClassPathResource("test3.xlsx");
     DmnModelInstance dmnModelInstance = converter.convert(inputStream);
@@ -84,7 +83,7 @@ public class XslxToDmnConversionTest {
   }
 
   @Test
-  public void testDmnNamespace() {
+  public void testDmnNamespace() throws XlsxConversionException {
     XlsxConverter converter = new XlsxConverter();
     InputStream inputStream = TestHelper.getClassPathResource("test1.xlsx");
     DmnModelInstance dmnModelInstance = converter.convert(inputStream);
@@ -94,7 +93,7 @@ public class XslxToDmnConversionTest {
   }
 
   @Test
-  public void testConversionOfNullTitleOfParts() {
+  public void testConversionOfNullTitleOfParts() throws XlsxConversionException {
     XlsxConverter converter = new XlsxConverter();
     InputStream inputStream = TestHelper.getClassPathResource("test4.xlsx");
     DmnModelInstance dmnModelInstance = converter.convert(inputStream);
@@ -109,7 +108,7 @@ public class XslxToDmnConversionTest {
   }
 
   @Test
-  public void testConversionWithRanges() {
+  public void testConversionWithRanges() throws XlsxConversionException {
     XlsxConverter converter = new XlsxConverter();
     InputStream inputStream = TestHelper.getClassPathResource("test5.xlsx");
     DmnModelInstance dmnModelInstance = converter.convert(inputStream);
@@ -129,7 +128,7 @@ public class XslxToDmnConversionTest {
   }
 
   @Test
-  public void testConversionWithComplexHeaders() {
+  public void testConversionWithComplexHeaders() throws XlsxConversionException {
     XlsxConverter converter = new XlsxConverter();
     converter.setIoDetectionStrategy(new AdvancedSpreadsheetAdapter());
     InputStream inputStream = TestHelper.getClassPathResource("test6.xlsx");

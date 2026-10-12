@@ -71,6 +71,7 @@ public class TaskQueryImpl implements TaskQuery {
   private final TaskServiceImpl taskService;
   private final List<String> orderByOuter;
   private final List<String> orderByInner;
+  private final boolean addAdditionalUserInfo;
 
   private TaskQueryColumnName columnName;
   private String[] accessIdIn;
@@ -86,8 +87,8 @@ public class TaskQueryImpl implements TaskQuery {
   private boolean addClassificationNameToSelectClauseForOrdering = false;
   private boolean addAttachmentClassificationNameToSelectClauseForOrdering = false;
   private boolean addWorkbasketNameToSelectClauseForOrdering = false;
-  private boolean joinWithUserInfo;
-  private boolean joinWithCreatorUserInfo;
+  private boolean orderByOwnerLongName;
+  private boolean orderByCreatorLongName;
   private boolean groupByPor;
   private String groupBySor;
   private String[] taskId;
@@ -370,18 +371,8 @@ public class TaskQueryImpl implements TaskQuery {
     this.filterByAccessIdIn = true;
     this.withoutAttachment = false;
     this.lockResults = 0;
-  }
-
-  public boolean isJoinWithUserInfo() {
-    return joinWithUserInfo
-        || (!selectAndClaim
-            && kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo());
-  }
-
-  public boolean isJoinWithCreatorUserInfo() {
-    return joinWithCreatorUserInfo
-        || (!selectAndClaim
-            && kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo());
+    this.addAdditionalUserInfo =
+        kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo();
   }
 
   @Override
@@ -601,28 +592,24 @@ public class TaskQueryImpl implements TaskQuery {
 
   @Override
   public TaskQuery creatorLongNameIn(String... longNames) {
-    joinWithCreatorUserInfo = true;
     this.creatorLongNameIn = longNames;
     return this;
   }
 
   @Override
   public TaskQuery creatorLongNameNotIn(String... longNames) {
-    joinWithCreatorUserInfo = true;
     this.creatorLongNameNotIn = longNames;
     return this;
   }
 
   @Override
   public TaskQuery creatorLongNameLike(String... longNames) {
-    joinWithCreatorUserInfo = true;
     this.creatorLongNameLike = toLowerCopy(longNames);
     return this;
   }
 
   @Override
   public TaskQuery creatorLongNameNotLike(String... longNames) {
-    joinWithCreatorUserInfo = true;
     this.creatorLongNameNotLike = toLowerCopy(longNames);
     return this;
   }
@@ -634,7 +621,7 @@ public class TaskQueryImpl implements TaskQuery {
 
   @Override
   public TaskQuery orderByCreatorLongName(SortDirection sortDirection) {
-    joinWithCreatorUserInfo = true;
+    orderByCreatorLongName = true;
     return (DB.DB2 == getDB()
             && kadaiEngine.getEngine().getConfiguration().isUseSpecificDb2Taskquery())
         ? addOrderCriteria("CREATOR_LONG_NAME", sortDirection)
@@ -981,28 +968,24 @@ public class TaskQueryImpl implements TaskQuery {
   }
 
   public TaskQuery ownerLongNameIn(String... longNames) {
-    joinWithUserInfo = true;
     this.ownerLongNameIn = longNames;
     return this;
   }
 
   @Override
   public TaskQuery ownerLongNameNotIn(String... longNames) {
-    joinWithUserInfo = true;
     this.ownerLongNameNotIn = longNames;
     return this;
   }
 
   @Override
   public TaskQuery ownerLongNameLike(String... longNames) {
-    joinWithUserInfo = true;
     this.ownerLongNameLike = toLowerCopy(longNames);
     return this;
   }
 
   @Override
   public TaskQuery ownerLongNameNotLike(String... longNames) {
-    joinWithUserInfo = true;
     this.ownerLongNameNotLike = toLowerCopy(longNames);
     return this;
   }
@@ -2082,7 +2065,7 @@ public class TaskQueryImpl implements TaskQuery {
 
   @Override
   public TaskQuery orderByOwnerLongName(SortDirection sortDirection) {
-    joinWithUserInfo = true;
+    orderByOwnerLongName = true;
     return (DB.DB2 == getDB()
             && kadaiEngine.getEngine().getConfiguration().isUseSpecificDb2Taskquery())
         ? addOrderCriteria("OWNER_LONG_NAME", sortDirection)
@@ -2139,6 +2122,8 @@ public class TaskQueryImpl implements TaskQuery {
       this.columnName = columnName;
       this.orderByOuter.clear();
       this.orderByInner.clear();
+      this.orderByOwnerLongName = columnName == TaskQueryColumnName.OWNER_LONG_NAME;
+      this.orderByCreatorLongName = columnName == TaskQueryColumnName.CREATOR_LONG_NAME;
       this.addOrderCriteria(columnName.toString(), sortDirection);
       checkForIllegalParamCombinations();
       checkOpenReadAndReadTasksPermissionForSpecifiedWorkbaskets();
@@ -2158,13 +2143,6 @@ public class TaskQueryImpl implements TaskQuery {
 
       if (columnName.isObjectReferenceColumn()) {
         joinWithSecondaryObjectReferences = true;
-      }
-
-      if (columnName == TaskQueryColumnName.OWNER_LONG_NAME) {
-        joinWithUserInfo = true;
-      }
-      if (columnName == TaskQueryColumnName.CREATOR_LONG_NAME) {
-        joinWithCreatorUserInfo = true;
       }
 
       setupJoinAndOrderParameters();
@@ -2272,12 +2250,11 @@ public class TaskQueryImpl implements TaskQuery {
       throw new IllegalArgumentException(
           "The params \"lockResultsEquals\" and \"selectAndClaim\"" + " cannot be used together!");
     }
-    if ((isJoinWithUserInfo() || isJoinWithCreatorUserInfo())
+    if ((isJoinWithUserInfoForTaskSummary() || isJoinWithCreatorUserInfoForTaskSummary())
         && lockResults != null
         && lockResults != 0) {
       throw new IllegalArgumentException(
-          "The params \"lockResultsEquals\" and \"joinWithUserInfo\"/\"joinWithCreatorUserInfo\""
-              + " cannot be used together!");
+          "Cannot lock task results when owner or creator user information is requested.");
     }
     if (withoutAttachment
         && (attachmentChannelIn != null
@@ -2334,6 +2311,60 @@ public class TaskQueryImpl implements TaskQuery {
     if (joinWithAttachments || joinWithClassifications || joinWithSecondaryObjectReferences) {
       useDistinctKeyword = true;
     }
+  }
+
+  public boolean isJoinWithUserInfoForTaskSummary() {
+    return (addAdditionalUserInfo && !selectAndClaim)
+        || hasOwnerLongNameFilter()
+        || orderByOwnerLongName;
+  }
+
+  public boolean isJoinWithCreatorUserInfoForTaskSummary() {
+    return (addAdditionalUserInfo && !selectAndClaim)
+        || hasCreatorLongNameFilter()
+        || orderByCreatorLongName;
+  }
+
+  public boolean isJoinWithUserInfoForCount() {
+    return hasOwnerLongNameFilter() || (isGroupingActive() && orderByOwnerLongName);
+  }
+
+  public boolean isJoinWithCreatorUserInfoForCount() {
+    return hasCreatorLongNameFilter() || (isGroupingActive() && orderByCreatorLongName);
+  }
+
+  public boolean isJoinWithUserInfoForGroupCount() {
+    return hasOwnerLongNameFilter();
+  }
+
+  public boolean isJoinWithCreatorUserInfoForGroupCount() {
+    return hasCreatorLongNameFilter();
+  }
+
+  public boolean isJoinWithUserInfoForColumnValues() {
+    return columnName == TaskQueryColumnName.OWNER_LONG_NAME || hasOwnerLongNameFilter();
+  }
+
+  public boolean isJoinWithCreatorUserInfoForColumnValues() {
+    return columnName == TaskQueryColumnName.CREATOR_LONG_NAME || hasCreatorLongNameFilter();
+  }
+
+  private boolean hasOwnerLongNameFilter() {
+    return ownerLongNameIn != null
+        || ownerLongNameNotIn != null
+        || ownerLongNameLike != null
+        || ownerLongNameNotLike != null;
+  }
+
+  private boolean hasCreatorLongNameFilter() {
+    return creatorLongNameIn != null
+        || creatorLongNameNotIn != null
+        || creatorLongNameLike != null
+        || creatorLongNameNotLike != null;
+  }
+
+  private boolean isGroupingActive() {
+    return groupByPor || groupBySor != null;
   }
 
   private void setupAccessIds() {

@@ -309,6 +309,19 @@ class ArchitectureTest {
   }
 
   @Test
+  void jobClassesShouldNotDependOnKadaiEngineImpl() {
+    noClasses()
+        .that()
+        .resideInAnyPackage("io.kadai..jobs..")
+        .should()
+        .dependOnClassesThat(assignableTo(KadaiEngineImpl.class))
+        .because(
+            "jobs should depend on KadaiEngine and InternalKadaiEngine abstractions instead of "
+                + "the concrete engine implementation")
+        .check(importedClasses);
+  }
+
+  @Test
   //@Disabled("this has way too many false positives during development without refactoring")
   // Is that actually still the case? We'll see!
   void packagesShouldBeFreeOfCyclicDependencies() {

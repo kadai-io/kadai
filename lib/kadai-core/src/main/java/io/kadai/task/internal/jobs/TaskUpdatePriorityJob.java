@@ -56,7 +56,9 @@ public class TaskUpdatePriorityJob extends AbstractKadaiJob {
 
   @Override
   public void execute() {
-    TaskUpdatePriorityWorker worker = new TaskUpdatePriorityWorker(kadaiEngineImpl);
+    TaskUpdatePriorityWorker worker =
+        new TaskUpdatePriorityWorker(
+            kadaiEngine, getInternalKadaiEngine().getPriorityServiceManager());
     LOGGER.info("Running job to calculate all non finished task priorities");
     try {
       partitionBasedOnSize(worker.getAllRelevantTaskIds(), getBatchSize())
@@ -82,8 +84,8 @@ public class TaskUpdatePriorityJob extends AbstractKadaiJob {
         + firstRun
         + ", runEvery="
         + runEvery
-        + ", kadaiEngineImpl="
-        + kadaiEngineImpl
+        + ", kadaiEngine="
+        + kadaiEngine
         + ", txProvider="
         + txProvider
         + ", scheduledJob="

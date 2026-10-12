@@ -18,7 +18,9 @@
 
 package io.kadai;
 
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.assignableTo;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static java.util.function.Predicate.not;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -30,6 +32,7 @@ import com.tngtech.archunit.lang.ArchCondition;
 import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
+import io.kadai.common.internal.KadaiEngineImpl;
 import io.kadai.common.rest.QueryParameter;
 import java.lang.reflect.Modifier;
 import java.util.Optional;
@@ -103,6 +106,19 @@ class SpringArchitectureTest {
         .resideInAPackage("io.kadai..")
         .should()
         .beInterfaces()
+        .check(importedClasses);
+  }
+
+  @Test
+  void should_NotDependOnKadaiEngineImpl_When_ClassIsAUserJob() {
+    noClasses()
+        .that()
+        .resideInAnyPackage("io.kadai.user.jobs..")
+        .should()
+        .dependOnClassesThat(assignableTo(KadaiEngineImpl.class))
+        .because(
+            "REST-owned jobs should depend on KadaiEngine and InternalKadaiEngine abstractions "
+                + "instead of the concrete engine implementation")
         .check(importedClasses);
   }
 

@@ -26,13 +26,15 @@ import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
 import io.kadai.common.api.exceptions.SystemException;
-import io.kadai.common.internal.JobServiceImpl;
+import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.jobs.AbstractKadaiJob;
+import io.kadai.common.internal.jobs.JobLockGuard;
 import io.kadai.common.internal.jobs.JobTransactionPolicy;
 import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import io.kadai.common.internal.util.CheckedSupplier;
 import io.kadai.common.internal.util.CollectionUtil;
 import io.kadai.common.internal.util.LogSanitizer;
+import io.kadai.task.internal.TaskMapper;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -50,6 +52,7 @@ public class TaskCleanupJob extends AbstractKadaiJob {
   private final Map<String, Duration> minimumAgeByDomain;
   private final int batchSize;
   private final boolean allCompletedSameParentBusiness;
+  private final JobLockGuard lockGuard;
 
   public TaskCleanupJob(
       KadaiEngine kadaiEngine, KadaiTransactionProvider txProvider, ScheduledJob scheduledJob) {
@@ -59,6 +62,12 @@ public class TaskCleanupJob extends AbstractKadaiJob {
     batchSize = kadaiEngine.getConfiguration().getTaskCleanupJobBatchSize();
     allCompletedSameParentBusiness =
         kadaiEngine.getConfiguration().isTaskCleanupJobAllCompletedSameParentBusiness();
+    lockGuard =
+        JobLockGuard.forScheduledJob(
+            kadaiEngine,
+            scheduledJob,
+            kadaiEngine.getConfiguration().getTaskCleanupJobLockExpirationPeriod(),
+            "Task cleanup job");
   }
 
   public static Duration getLockExpirationPeriod(KadaiConfiguration kadaiConfiguration) {
@@ -126,31 +135,35 @@ public class TaskCleanupJob extends AbstractKadaiJob {
 
   private List<String> getTaskIdsEligibleForCleanup(
       Instant defaultCompletedBefore, Map<String, Instant> completedBeforeByDomain) {
-    return kadaiEngineImpl.executeInDatabaseConnection(
-        () ->
-            getTaskIdsEligibleForCleanup(
-                defaultCompletedBefore, completedBeforeByDomain, allCompletedSameParentBusiness));
+    InternalKadaiEngine internalKadaiEngine = getInternalKadaiEngine();
+    return internalKadaiEngine.executeInDatabaseConnection(
+        () -> {
+          TaskMapper taskMapper =
+              internalKadaiEngine.getSqlSession().getMapper(TaskMapper.class);
+          return getTaskIdsEligibleForCleanup(
+              taskMapper,
+              defaultCompletedBefore,
+              completedBeforeByDomain,
+              allCompletedSameParentBusiness);
+        });
   }
 
   private List<String> getTaskIdsEligibleForCleanup(
+      TaskMapper taskMapper,
       Instant defaultCompletedBefore,
       Map<String, Instant> completedBeforeByDomain,
       boolean requireAllCompletedSameParentBusiness) {
     if (completedBeforeByDomain.isEmpty()) {
       return requireAllCompletedSameParentBusiness
-          ? kadaiEngineImpl
-              .getTaskMapper()
-              .findTasksCompletedBeforeWithParentBusinessProcessConstraint(defaultCompletedBefore)
-          : kadaiEngineImpl.getTaskMapper().findTasksCompletedBefore(defaultCompletedBefore);
+          ? taskMapper.findTasksCompletedBeforeWithParentBusinessProcessConstraint(
+                  defaultCompletedBefore)
+          : taskMapper.findTasksCompletedBefore(defaultCompletedBefore);
     }
     return requireAllCompletedSameParentBusiness
-        ? kadaiEngineImpl
-            .getTaskMapper()
-            .findTasksCompletedBeforeByDomainWithParentBusinessProcessConstraint(
-                defaultCompletedBefore, completedBeforeByDomain)
-        : kadaiEngineImpl
-            .getTaskMapper()
-            .findTasksCompletedBeforeByDomain(defaultCompletedBefore, completedBeforeByDomain);
+        ? taskMapper.findTasksCompletedBeforeByDomainWithParentBusinessProcessConstraint(
+            defaultCompletedBefore, completedBeforeByDomain)
+        : taskMapper.findTasksCompletedBeforeByDomain(
+            defaultCompletedBefore, completedBeforeByDomain);
   }
 
   private List<String> getTaskIdsEligibleForCleanupTransactionally(
@@ -158,7 +171,7 @@ public class TaskCleanupJob extends AbstractKadaiJob {
     return KadaiTransactionProvider.executeInTransactionIfPossible(
         txProvider,
         () -> {
-          renewLock();
+          lockGuard.renewOrThrow();
           return getTaskIdsEligibleForCleanup(defaultCompletedBefore, completedBeforeByDomain);
         });
   }
@@ -170,7 +183,7 @@ public class TaskCleanupJob extends AbstractKadaiJob {
           CheckedSupplier.rethrowing(
               () -> {
                 int deletedTasks = deleteTasks(tasksToBeDeleted);
-                renewLock();
+                lockGuard.renewOrThrow();
                 return deletedTasks;
               }));
     } catch (Exception ex) {
@@ -179,26 +192,11 @@ public class TaskCleanupJob extends AbstractKadaiJob {
     }
   }
 
-  private void renewLock() {
-    if (scheduledJob == null) {
-      return;
-    }
-    boolean lockRenewed =
-        ((JobServiceImpl) kadaiEngineImpl.getJobService())
-            .renewLock(
-                scheduledJob,
-                kadaiEngineImpl.getConfiguration().getTaskCleanupJobLockExpirationPeriod());
-    if (!lockRenewed) {
-      throw new SystemException(
-          "Task cleanup job lock was lost. Stopping cleanup to avoid concurrent processing.");
-    }
-  }
-
   private int deleteTasks(List<String> tasksToBeDeleted)
       throws InvalidArgumentException, NotAuthorizedException {
 
     BulkOperationResults<String, KadaiException> results =
-        kadaiEngineImpl.getTaskService().deleteTasks(tasksToBeDeleted);
+        kadaiEngine.getTaskService().deleteTasks(tasksToBeDeleted);
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("{} tasks deleted.", tasksToBeDeleted.size() - results.getFailedIds().size());
     }
@@ -219,8 +217,8 @@ public class TaskCleanupJob extends AbstractKadaiJob {
         + firstRun
         + ", runEvery="
         + runEvery
-        + ", kadaiEngineImpl="
-        + kadaiEngineImpl
+        + ", kadaiEngine="
+        + kadaiEngine
         + ", txProvider="
         + txProvider
         + ", scheduledJob="

@@ -1,18 +1,19 @@
-This Module is a clone of Projekt Module
+This module is based on the
 [camunda-dmn-xlsx:xlsx-dmn-converter](https://github.com/camunda-community-hub/camunda-dmn-xlsx/tree/master/xlsx-dmn-converter)
+module and retains its Apache License 2.0 licensing.
 
-The original project is licensed under APACHE LICENSE Version 2.
+The Jakarta/Camunda 7.20 adaptation originated in
+[camunda-community-hub/camunda-dmn-xlsx#53](https://github.com/camunda-community-hub/camunda-dmn-xlsx/pull/53).
 
-All changes to the code are included in this PR: https://github.com/camunda-community-hub/camunda-dmn-xlsx/pull/53
+KADAI contains subsequent local maintenance changes to this vendored module.
 
-The changes were necessary so that there is a version compatible with jakarta-xml-bind and this version can be used with
-Camunda.
+The original Jakarta adaptation in upstream PR #53 upgraded docx4j to 11.4.9.
+KADAI's current dependency version is managed by the parent build.
 
-The main changes were:
+The current KADAI-specific behavior includes:
 
-* Upgrade of lib `org.docx4j:docx4j:6.0.1` to `org.docx4j:docx4j-JAXB-ReferenceImpl:11.4.9`
-* In class `org.camunda.bpm.dmn.xlsx.XlsxConverter` and `org.camunda.bpm.dmn.xlsx.XlsxWorksheetConverter` a new
-  parameter was introduced: `historyTimeToLive`
-    * because camunda-engine with version 7.20.X requires a timeToLive for history of decisions
-    * default timeToLive is 180 days
-    * the new parameter is set during execution of convert method to the created decisons
+* `XlsxConverter` converts exactly one worksheet per invocation. `worksheetIndex` is zero-based,
+  defaults to `0`, and an invalid index fails conversion.
+* `XlsxConverter#convert(InputStream)` declares the checked
+  `XlsxConversionException` when the document cannot be loaded or converted.
+* `historyTimeToLive` is applied to converted decisions. Its default is 180 days (`P180D`).

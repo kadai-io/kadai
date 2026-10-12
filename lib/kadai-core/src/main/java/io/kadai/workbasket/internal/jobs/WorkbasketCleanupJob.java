@@ -79,7 +79,7 @@ public class WorkbasketCleanupJob extends AbstractKadaiJob {
 
   private List<String> getWorkbasketsMarkedForDeletion() {
 
-    return kadaiEngineImpl
+    return kadaiEngine
         .getWorkbasketService()
         .createWorkbasketQuery()
         .markedForDeletion(true)
@@ -103,7 +103,7 @@ public class WorkbasketCleanupJob extends AbstractKadaiJob {
       throws InvalidArgumentException, NotAuthorizedException {
 
     BulkOperationResults<String, KadaiException> results =
-        kadaiEngineImpl.getWorkbasketService().deleteWorkbaskets(workbasketsToBeDeleted);
+        kadaiEngine.getWorkbasketService().deleteWorkbaskets(workbasketsToBeDeleted);
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug(
           "{} workbasket deleted.", workbasketsToBeDeleted.size() - results.getFailedIds().size());
