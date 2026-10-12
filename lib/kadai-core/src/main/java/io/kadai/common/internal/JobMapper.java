@@ -37,22 +37,23 @@ import org.apache.ibatis.annotations.Update;
 @SuppressWarnings("checkstyle:LineLength")
 public interface JobMapper {
 
-  @Insert(
+  @Select(
       OPENING_SCRIPT_TAG
-          + "INSERT INTO SCHEDULED_JOB (JOB_ID, PRIORITY, CREATED, DUE, STATE, LOCKED_BY, LOCK_EXPIRES, TYPE, RETRY_COUNT, ARGUMENTS) "
-          + "VALUES ("
           + "<choose>"
           + "<when test=\"_databaseId == 'db2'\">"
-          + "SCHEDULED_JOB_SEQ.NEXTVAL"
+          + "VALUES NEXT VALUE FOR SCHEDULED_JOB_SEQ"
           + "</when>"
           + "<otherwise>"
-          + "nextval('SCHEDULED_JOB_SEQ')"
+          + "SELECT nextval('SCHEDULED_JOB_SEQ')"
           + "</otherwise>"
           + "</choose>"
-          + ", #{job.priority}, #{job.created}, #{job.due}, #{job.state}, #{job.lockedBy}, #{job.lockExpires}, #{job.type}, #{job.retryCount}, #{job.arguments,javaType=java.util.Map,typeHandler=io.kadai.common.internal.persistence.MapTypeHandler} )"
           + CLOSING_SCRIPT_TAG)
-  @Result(property = "jobId", column = "JOB_ID")
-  Integer insertJob(@Param("job") ScheduledJob job);
+  Integer nextJobId();
+
+  @Insert(
+      "INSERT INTO SCHEDULED_JOB (JOB_ID, PRIORITY, CREATED, DUE, STATE, LOCKED_BY, LOCK_EXPIRES, TYPE, RETRY_COUNT, ARGUMENTS) "
+          + "VALUES (#{job.jobId}, #{job.priority}, #{job.created}, #{job.due}, #{job.state}, #{job.lockedBy}, #{job.lockExpires}, #{job.type}, #{job.retryCount}, #{job.arguments,javaType=java.util.Map,typeHandler=io.kadai.common.internal.persistence.MapTypeHandler} )")
+  void insertJob(@Param("job") ScheduledJob job);
 
   @Select(
       OPENING_SCRIPT_TAG

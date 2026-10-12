@@ -25,6 +25,7 @@ import io.kadai.common.api.KadaiRole;
 import io.kadai.common.api.exceptions.DuplicateUserRefreshIdException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.NotAuthorizedException;
+import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.InternalKadaiEngine;
 import io.kadai.common.internal.util.LogSanitizer;
 import io.kadai.user.api.UserQuery;
@@ -282,8 +283,8 @@ public class UserServiceImpl implements UserService {
   }
 
   /**
-   * Reconciles a prepared authoritative source using one engine connection. The caller supplies the
-   * outer transaction for scheduled execution; direct callers still get an engine connection scope.
+   * Reconciles a prepared authoritative source using one engine connection. Scheduled execution
+   * uses the caller's transaction; direct callers get a local transaction when auto-commit is on.
    *
    * @param input prepared authoritative source
    * @param batchSize configured JDBC batch flush size
@@ -316,17 +317,27 @@ public class UserServiceImpl implements UserService {
   private UserRefreshResult synchronizeUsersInConnection(
       PreparedUserRefreshInput input, int batchSize) {
     Connection connection = internalKadaiEngine.getConnection();
-    // makes direct execution rollback-safe without opening or committing another connection
     Savepoint savepoint = null;
+    boolean startedTransaction = false;
+    Throwable failure = null;
     try {
-      savepoint = connection.setSavepoint("KADAI_USER_REFRESH");
+      if (connection.getAutoCommit()) {
+        connection.setAutoCommit(false);
+        startedTransaction = true;
+      } else {
+        savepoint = connection.setSavepoint("KADAI_USER_REFRESH");
+      }
       UserDatabaseSnapshot current = loadUserDatabaseSnapshot();
       UserRefreshPlan plan = UserRefreshDiffCalculator.calculate(current, input.usersById());
       if (!plan.isEmpty()) {
         new UserRefreshBatchWriter(connection, batchSize).apply(plan);
         internalKadaiEngine.getSqlSession().clearCache();
       }
-      connection.releaseSavepoint(savepoint);
+      if (startedTransaction) {
+        connection.commit();
+      } else {
+        connection.releaseSavepoint(savepoint);
+      }
       return new UserRefreshResult(
           input.inputUsers(),
           input.acceptedUsers(),
@@ -342,22 +353,41 @@ public class UserServiceImpl implements UserService {
           plan.orphanGroupsToDelete().size(),
           plan.orphanPermissionsToDelete().size());
     } catch (RuntimeException | Error e) {
-      rollbackToSavepoint(connection, savepoint, e);
+      failure = e;
+      rollbackUserRefresh(connection, savepoint, startedTransaction, e);
       throw e;
     } catch (SQLException e) {
-      rollbackToSavepoint(connection, savepoint, e);
-      throw new io.kadai.common.api.exceptions.SystemException(
-          "Could not synchronize the LDAP user snapshot", e);
+      rollbackUserRefresh(connection, savepoint, startedTransaction, e);
+      SystemException wrapped =
+          new SystemException("Could not synchronize the LDAP user snapshot", e);
+      failure = wrapped;
+      throw wrapped;
+    } finally {
+      if (startedTransaction) {
+        try {
+          connection.setAutoCommit(true);
+        } catch (SQLException e) {
+          if (failure != null) {
+            failure.addSuppressed(e);
+          } else {
+            throw new SystemException("Could not restore auto-commit after user refresh", e);
+          }
+        }
+      }
     }
   }
 
-  private static void rollbackToSavepoint(
-      Connection connection, Savepoint savepoint, Throwable failure) {
-    if (savepoint == null) {
+  private static void rollbackUserRefresh(
+      Connection connection, Savepoint savepoint, boolean startedTransaction, Throwable failure) {
+    if (!startedTransaction && savepoint == null) {
       return;
     }
     try {
-      connection.rollback(savepoint);
+      if (startedTransaction) {
+        connection.rollback();
+      } else {
+        connection.rollback(savepoint);
+      }
     } catch (SQLException rollbackFailure) {
       failure.addSuppressed(rollbackFailure);
     }

@@ -164,7 +164,9 @@ class UserInfoRefreshJobSchedulerAccTest {
         prepared.setString(1, "another-owner");
         prepared.setInt(2, jobId);
         prepared.executeUpdate();
-        connection.commit();
+        if (!connection.getAutoCommit()) {
+          connection.commit();
+        }
       }
     }
   }
@@ -173,7 +175,9 @@ class UserInfoRefreshJobSchedulerAccTest {
     try (Connection connection = connection(); Statement statement = connection.createStatement()) {
       statement.executeUpdate(
           "DELETE FROM SCHEDULED_JOB WHERE TYPE = '" + UserInfoRefreshJob.class.getName() + "'");
-      connection.commit();
+      if (!connection.getAutoCommit()) {
+        connection.commit();
+      }
     }
   }
 
