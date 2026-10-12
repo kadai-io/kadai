@@ -65,12 +65,22 @@ public class TaskBuilder implements SummaryEntityBuilder<TaskSummary, Task, Task
   }
 
   public TaskBuilder claimed(Instant claimed) {
-    testTask.setClaimed(claimed);
+    testTask.setClaimedIgnoreFreeze(claimed);
+    if (claimed != null) {
+      testTask.freezeClaimed();
+    } else {
+      testTask.unfreezeClaimed();
+    }
     return this;
   }
 
   public TaskBuilder completed(Instant completed) {
-    testTask.setCompleted(completed);
+    testTask.setCompletedIgnoreFreeze(completed);
+    if (completed != null) {
+      testTask.freezeCompleted();
+    } else {
+      testTask.unfreezeCompleted();
+    }
     return this;
   }
 
@@ -201,7 +211,16 @@ public class TaskBuilder implements SummaryEntityBuilder<TaskSummary, Task, Task
   }
 
   public TaskBuilder numberOfComments(Integer numberOfComments) {
-    testTask.setNumberOfComments(numberOfComments);
+    if (numberOfComments != null) {
+      testTask.setNumberOfCommentsIgnoreFreeze(numberOfComments);
+      if (numberOfComments != 0) {
+        testTask.freezeNumberOfComments();
+      } else {
+        testTask.unfreezeNumberOfComments();
+      }
+    } else {
+      testTask.unfreezeNumberOfComments();
+    }
     return this;
   }
 

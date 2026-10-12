@@ -33,6 +33,7 @@ import io.kadai.common.rest.util.QueryParamsValidator;
 import io.kadai.task.api.TaskPatch;
 import io.kadai.task.api.TaskQuery;
 import io.kadai.task.api.TaskService;
+import io.kadai.task.api.TaskState;
 import io.kadai.task.api.exceptions.AttachmentPersistenceException;
 import io.kadai.task.api.exceptions.InvalidCallbackStateException;
 import io.kadai.task.api.exceptions.InvalidOwnerException;
@@ -124,6 +125,8 @@ public class TaskController implements TaskApi {
           AttachmentPersistenceException,
           ObjectReferencePersistenceException,
           NotAuthorizedOnWorkbasketException {
+
+    validateCreationMetadata(taskRepresentationModel);
 
     if (!taskRepresentationModel.getAttachments().stream()
         .filter(att -> Objects.nonNull(att.getTaskId()))
@@ -739,8 +742,22 @@ public class TaskController implements TaskApi {
     }
 
     Task task = taskRepresentationModelAssembler.toEntityModel(taskRepresentationModel);
-    task = taskService.updateTask(task);
-    return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
+    Task updatedTask = taskService.updateTask(task);
+    return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(updatedTask));
+  }
+
+  private void validateCreationMetadata(TaskRepresentationModel representationModel) {
+    if (representationModel.getClaimed() != null
+        || representationModel.getCompleted() != null
+        || representationModel.getNumberOfComments() != 0
+        || (representationModel.getState() != null
+            && representationModel.getState() != TaskState.READY)
+        || representationModel.isRead()
+        || representationModel.isTransferred()
+        || representationModel.isReopened()) {
+      throw new InvalidArgumentException(
+          "Server-owned task metadata cannot be set when creating a task");
+    }
   }
 
   @PatchMapping(path = RestEndpoints.URL_TASKS_BULK_UPDATE)
