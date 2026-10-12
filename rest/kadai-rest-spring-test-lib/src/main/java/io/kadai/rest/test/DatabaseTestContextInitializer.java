@@ -32,12 +32,18 @@ public class DatabaseTestContextInitializer
 
   @Override
   public void initialize(ConfigurableApplicationContext context) {
-    DB database = TestContainerExtension.EXECUTION_DATABASE;
+    configure(
+        context,
+        TestContainerExtension.EXECUTION_DATABASE,
+        (PooledDataSource) TestContainerExtension.DATA_SOURCE);
+  }
+
+  static void configure(
+      ConfigurableApplicationContext context, DB database, PooledDataSource dataSource) {
     if (database == DB.H2) {
       return;
     }
 
-    PooledDataSource dataSource = (PooledDataSource) TestContainerExtension.DATA_SOURCE;
     context
         .getEnvironment()
         .getPropertySources()

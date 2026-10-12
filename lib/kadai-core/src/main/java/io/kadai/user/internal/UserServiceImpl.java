@@ -319,7 +319,7 @@ public class UserServiceImpl implements UserService {
     Connection connection = internalKadaiEngine.getConnection();
     Savepoint savepoint = null;
     boolean startedTransaction = false;
-    Throwable failure = null;
+    UserRefreshResult result;
     try {
       if (connection.getAutoCommit()) {
         connection.setAutoCommit(false);
@@ -338,7 +338,7 @@ public class UserServiceImpl implements UserService {
       } else {
         connection.releaseSavepoint(savepoint);
       }
-      return new UserRefreshResult(
+      result = new UserRefreshResult(
           input.inputUsers(),
           input.acceptedUsers(),
           input.rejectedUsers(),
@@ -353,28 +353,18 @@ public class UserServiceImpl implements UserService {
           plan.orphanGroupsToDelete().size(),
           plan.orphanPermissionsToDelete().size());
     } catch (RuntimeException | Error e) {
-      failure = e;
       rollbackUserRefresh(connection, savepoint, startedTransaction, e);
+      restoreAutoCommit(connection, startedTransaction, e);
       throw e;
     } catch (SQLException e) {
       rollbackUserRefresh(connection, savepoint, startedTransaction, e);
       SystemException wrapped =
           new SystemException("Could not synchronize the LDAP user snapshot", e);
-      failure = wrapped;
+      restoreAutoCommit(connection, startedTransaction, wrapped);
       throw wrapped;
-    } finally {
-      if (startedTransaction) {
-        try {
-          connection.setAutoCommit(true);
-        } catch (SQLException e) {
-          if (failure != null) {
-            failure.addSuppressed(e);
-          } else {
-            throw new SystemException("Could not restore auto-commit after user refresh", e);
-          }
-        }
-      }
     }
+    restoreAutoCommit(connection, startedTransaction, null);
+    return result;
   }
 
   private static void rollbackUserRefresh(
@@ -390,6 +380,22 @@ public class UserServiceImpl implements UserService {
       }
     } catch (SQLException rollbackFailure) {
       failure.addSuppressed(rollbackFailure);
+    }
+  }
+
+  private static void restoreAutoCommit(
+      Connection connection, boolean startedTransaction, Throwable failure) {
+    if (!startedTransaction) {
+      return;
+    }
+    try {
+      connection.setAutoCommit(true);
+    } catch (SQLException e) {
+      if (failure != null) {
+        failure.addSuppressed(e);
+      } else {
+        throw new SystemException("Could not restore auto-commit after user refresh", e);
+      }
     }
   }
 
