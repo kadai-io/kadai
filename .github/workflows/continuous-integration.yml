@@ -23,7 +23,7 @@ env:
   ARTIFACTS_KADAI_WEB_NAME: kadai-web
   ARTIFACTS_KADAI_WEB_PATH: web/dist
   ARTIFACTS_JACOCO_REPORTS_NAME: jacoco-reports
-  ARTIFACTS_JACOCO_REPORTS_PATH: "**/jacoco.exec"
+  ARTIFACTS_JACOCO_REPORTS_PATH: "**/jacoco*.exec"
   ARTIFACTS_FRONTEND_COVERAGE_NAME: frontend-coverage
   ARTIFACTS_FRONTEND_COVERAGE_PATH: web/coverage
 
@@ -535,7 +535,7 @@ jobs:
         run: |
           ci/change_version.sh -m .
       - name: Test
-        run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip -T 1C
+        run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip -Djacoco.destFile=target/jacoco-${{matrix.database}}.exec -T 1C
         env:
           DB: ${{ matrix.database }}
       - name: Eco CI Measurement of ${{ matrix.module }} (H2)
@@ -554,10 +554,10 @@ jobs:
           pr-comment: false
         continue-on-error: true
       - name: Upload JaCoCo Report
-        if: matrix.database == 'H2' && matrix.java_version == 21
+        if: matrix.java_version == 21
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ env.ARTIFACTS_JACOCO_REPORTS_NAME }}-${{ matrix.module }}
+          name: ${{ env.ARTIFACTS_JACOCO_REPORTS_NAME }}-${{ matrix.module }}-${{ matrix.database }}
           path: ${{ env.ARTIFACTS_JACOCO_REPORTS_PATH }}
           if-no-files-found: ignore
       - name: Cancel workflow
