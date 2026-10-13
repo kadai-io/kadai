@@ -247,7 +247,7 @@ jobs:
       - name: Install Dependencies
         if: steps.web-cache.outputs.cache-hit != 'true'
         working-directory: web
-        run: yarn ci
+        run: yarn install --immutable
       - name: Cache maven dependencies (for web)
         id: maven-cache
         uses: actions/cache@v6
@@ -348,7 +348,7 @@ jobs:
       - name: Install Dependencies
         if: steps.web-cache.outputs.cache-hit != 'true'
         working-directory: web
-        run: yarn ci
+        run: yarn install --immutable
       - name: Cache maven dependencies
         id: maven-cache
         uses: actions/cache@v6
