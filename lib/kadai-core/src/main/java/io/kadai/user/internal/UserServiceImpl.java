@@ -40,7 +40,6 @@ import io.kadai.workbasket.api.WorkbasketQueryColumnName;
 import io.kadai.workbasket.api.WorkbasketService;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Savepoint;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -283,14 +282,15 @@ public class UserServiceImpl implements UserService {
   }
 
   /**
-   * Reconciles a prepared authoritative source using one engine connection. Scheduled execution
-   * uses the caller's transaction; direct callers get a local transaction when auto-commit is on.
+   * Reconciles a prepared authoritative source in the caller's transaction. The caller must commit
+   * on success and roll back on failure; this method does not manage the transaction.
    *
    * @param input prepared authoritative source
    * @param batchSize configured JDBC batch flush size
    * @return reconciliation counts
    * @throws NotAuthorizedException if the caller lacks the required role
    * @throws InvalidArgumentException if the batch size is invalid
+   * @throws IllegalStateException if the connection is in auto-commit mode
    */
   public UserRefreshResult synchronizeUsers(PreparedUserRefreshInput input, int batchSize)
       throws NotAuthorizedException {
@@ -317,86 +317,36 @@ public class UserServiceImpl implements UserService {
   private UserRefreshResult synchronizeUsersInConnection(
       PreparedUserRefreshInput input, int batchSize) {
     Connection connection = internalKadaiEngine.getConnection();
-    Savepoint savepoint = null;
-    boolean startedTransaction = false;
-    UserRefreshResult result;
     try {
       if (connection.getAutoCommit()) {
-        connection.setAutoCommit(false);
-        startedTransaction = true;
-      } else {
-        savepoint = connection.setSavepoint("KADAI_USER_REFRESH");
+        throw new IllegalStateException("User refresh requires a caller-managed transaction");
       }
-      UserDatabaseSnapshot current = loadUserDatabaseSnapshot();
-      UserRefreshPlan plan = UserRefreshDiffCalculator.calculate(current, input.usersById());
-      if (!plan.isEmpty()) {
+    } catch (SQLException e) {
+      throw new SystemException("Could not inspect the user refresh transaction", e);
+    }
+    UserDatabaseSnapshot current = loadUserDatabaseSnapshot();
+    UserRefreshPlan plan = UserRefreshDiffCalculator.calculate(current, input.usersById());
+    if (!plan.isEmpty()) {
+      try {
         new UserRefreshBatchWriter(connection, batchSize).apply(plan);
+      } finally {
         internalKadaiEngine.getSqlSession().clearCache();
       }
-      if (startedTransaction) {
-        connection.commit();
-      } else {
-        connection.releaseSavepoint(savepoint);
-      }
-      result = new UserRefreshResult(
-          input.inputUsers(),
-          input.acceptedUsers(),
-          input.rejectedUsers(),
-          plan.usersToInsert().size(),
-          plan.updatedUsers(),
-          plan.userIdsToDelete().size(),
-          plan.unchangedUsers(),
-          plan.groupsToInsert().size(),
-          plan.groupsToDelete().size(),
-          plan.permissionsToInsert().size(),
-          plan.permissionsToDelete().size(),
-          plan.orphanGroupsToDelete().size(),
-          plan.orphanPermissionsToDelete().size());
-    } catch (RuntimeException | Error e) {
-      rollbackUserRefresh(connection, savepoint, startedTransaction, e);
-      restoreAutoCommit(connection, startedTransaction, e);
-      throw e;
-    } catch (SQLException e) {
-      rollbackUserRefresh(connection, savepoint, startedTransaction, e);
-      SystemException wrapped =
-          new SystemException("Could not synchronize the LDAP user snapshot", e);
-      restoreAutoCommit(connection, startedTransaction, wrapped);
-      throw wrapped;
     }
-    restoreAutoCommit(connection, startedTransaction, null);
-    return result;
-  }
-
-  private static void rollbackUserRefresh(
-      Connection connection, Savepoint savepoint, boolean startedTransaction, Throwable failure) {
-    if (!startedTransaction && savepoint == null) {
-      return;
-    }
-    try {
-      if (startedTransaction) {
-        connection.rollback();
-      } else {
-        connection.rollback(savepoint);
-      }
-    } catch (SQLException rollbackFailure) {
-      failure.addSuppressed(rollbackFailure);
-    }
-  }
-
-  private static void restoreAutoCommit(
-      Connection connection, boolean startedTransaction, Throwable failure) {
-    if (!startedTransaction) {
-      return;
-    }
-    try {
-      connection.setAutoCommit(true);
-    } catch (SQLException e) {
-      if (failure != null) {
-        failure.addSuppressed(e);
-      } else {
-        throw new SystemException("Could not restore auto-commit after user refresh", e);
-      }
-    }
+    return new UserRefreshResult(
+        input.inputUsers(),
+        input.acceptedUsers(),
+        input.rejectedUsers(),
+        plan.usersToInsert().size(),
+        plan.updatedUsers(),
+        plan.userIdsToDelete().size(),
+        plan.unchangedUsers(),
+        plan.groupsToInsert().size(),
+        plan.groupsToDelete().size(),
+        plan.permissionsToInsert().size(),
+        plan.permissionsToDelete().size(),
+        plan.orphanGroupsToDelete().size(),
+        plan.orphanPermissionsToDelete().size());
   }
 
   private static UserRefreshState toRefreshState(User user) {
