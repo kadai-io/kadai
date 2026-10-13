@@ -16,21 +16,20 @@
     "format:html": "prettier --write \"**/*.{html,}\"",
     "e2e-dev": "cypress install && cypress run",
     "e2e-dev:open": "cypress install && cypress open",
-    "e2e-standalone": "cypress install && cypress run --config-file cypress.config.ts",
-    "ci": "yarn install --immutable"
+    "e2e-standalone": "cypress install && cypress run --config-file cypress.config.ts"
   },
   "private": true,
   "dependencies": {
     "@ali-hm/angular-tree-component": "22.0.7",
-    "@angular/animations": "22.2.1",
-    "@angular/cdk": "22.2.1",
-    "@angular/common": "22.2.1",
-    "@angular/core": "22.2.1",
-    "@angular/forms": "22.2.1",
-    "@angular/material": "22.2.1",
-    "@angular/platform-browser": "22.2.1",
-    "@angular/platform-browser-dynamic": "22.2.1",
-    "@angular/router": "22.2.1",
+    "@angular/animations": "22.2.2",
+    "@angular/cdk": "22.2.2",
+    "@angular/common": "22.2.2",
+    "@angular/core": "22.2.2",
+    "@angular/forms": "22.2.2",
+    "@angular/material": "22.2.2",
+    "@angular/platform-browser": "22.2.2",
+    "@angular/platform-browser-dynamic": "22.2.2",
+    "@angular/router": "22.2.2",
     "@ngneat/hot-toast": "7.0.0",
     "@ngneat/overview": "8.1.0",
     "@ngxs/router-plugin": "22.0.0",
@@ -44,10 +43,10 @@
     "tslib": "2.8.1"
   },
   "devDependencies": {
-    "@angular/build": "22.2.1",
-    "@angular/cli": "22.2.1",
-    "@angular/compiler": "22.2.1",
-    "@angular/compiler-cli": "22.2.1",
+    "@angular/build": "22.2.2",
+    "@angular/cli": "22.2.2",
+    "@angular/compiler": "22.2.2",
+    "@angular/compiler-cli": "22.2.2",
     "@ngxs/devtools-plugin": "22.0.0",
     "@types/file-saver-es": "2",
     "@types/jsdom": "30",
@@ -68,6 +67,9 @@
     "typescript": "6.0.3",
     "vite": "8.3.4",
     "vitest": "5.0.3"
+  },
+  "resolutions": {
+    "@jridgewell/sourcemap-codec": "1.6.0"
   },
   "packageManager": "yarn@4.17.1"
 }
