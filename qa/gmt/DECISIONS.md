@@ -24,7 +24,7 @@ Status: `accepted` | `proposed` | `superseded (by #N)`. Entries are append-only,
 - Status: accepted
 - Context: A pre-seeded database image starts with all data already resident/cached, which biases reads towards warm-cache behavior and makes the measurement unrealistic. It was also incompatible with the current schema version.
 - Decision: Start from an empty PostgreSQL 17 and generate data via `POST /kadai/api/v1/gmt/tasks`.
-- Consequences: More realistic measurement behavior and a schema-compatible setup; requires a generation step before the measured flow.
+- Consequences: More realistic measurement behavior and a schema-compatible setup; requires a generation step before the measured flow. (Rationale corrected 2026-10-13: this does not avoid warm-cache reads — the generated data is also fully cached; see "Measurement reads are served from a warm cache" below.)
 
 ## Seed via GMT `setup-commands` rather than a flow step
 - Date / related: 2026-09-30, #2259
@@ -74,3 +74,10 @@ Status: `accepted` | `proposed` | `superseded (by #N)`. Entries are append-only,
 - Context: The bump job used to push the one-line change directly to `master`, which is covered by the repository ruleset **Master protection** (PR + 1 approval) and rejected the push (`GH013`). The built-in GitHub Actions app cannot be added as a bypass actor, so a `GITHUB_TOKEN`-based workflow can never push to or merge into `master` under this ruleset.
 - Decision: The bump job opens (or updates) a pull request on a deterministic `chore/bump-gmt-pin-<sha>` branch; a KADAI team member approves and merges it. This mirrors the existing post-release snapshot-version bump flow (`update_version` / `ci/commitPoms.sh`).
 - Consequences: The pin lags until a team member merges the PR; eventual consistency is acceptable because the bump only fires when `kadai-gmt` changes. The ruleset stays fully intact and the change still goes through review and an audit trail. No new infrastructure (GitHub App, deploy key) is needed.
+
+## Measurement reads are served from a warm cache (corrects the rationale of "Generate test data at measurement time")
+- Date / related: 2026-10-13, #2318
+- Status: accepted
+- Context: The earlier decision "Generate test data at measurement time instead of using a pre-seeded database image" claimed that generating the data at measurement time avoids the warm-cache bias of a pre-seeded image. The measurement data shows this is not the case. In run `a4604939-aa5a-4a87-98c8-542a4fdd3f4d`, `kadai-postgres` reports `disk_io_read_cgroup_container = 0 B/s` in Warm-up, Pause and Standard Usage (system-wide `disk_io_read_procfs_system` is also 0). The 100000 generated tasks (~1 KB per task, ~100 MB for the heap and the eight `TASK` indexes) fit into `shared_buffers` (128 MB) plus the Linux page cache. Seeding in `[BOOT]`, the 30 s pause and the warm-up keep the working set resident, and the 2 GB container memory limit is never reached, so no page is evicted. Generating the data at measurement time therefore does not produce cold reads either; it only moves the warm-up from image-build time to the boot phase.
+- Decision: Document the current behaviour honestly: the scenario measures a warm-cache steady state, and ~0 B/s disk reads for `kadai-postgres` are expected, not a measurement defect. Whether we want a cold-cache / I/O-bound scenario instead is discussed in #2318.
+- Consequences: The rationale "more realistic measurement behavior" in the earlier entry is corrected — it refers to schema compatibility, not to cold-cache reads. Database disk-I/O energy is not exercised by the current setup.
