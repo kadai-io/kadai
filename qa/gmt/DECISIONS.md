@@ -75,6 +75,13 @@ Status: `accepted` | `proposed` | `superseded (by #N)`. Entries are append-only,
 - Decision: The bump job opens (or updates) a pull request on a deterministic `chore/bump-gmt-pin-<sha>` branch; a KADAI team member approves and merges it. This mirrors the existing post-release snapshot-version bump flow (`update_version` / `ci/commitPoms.sh`).
 - Consequences: The pin lags until a team member merges the PR; eventual consistency is acceptable because the bump only fires when `kadai-gmt` changes. The ruleset stays fully intact and the change still goes through review and an audit trail. No new infrastructure (GitHub App, deploy key) is needed.
 
+## Pin explicit container memory limits
+- Date / related: 2026-10-13, #2319
+- Status: accepted
+- Context: Without `mem_limit`, GMT auto-assigns each container's memory from the host's available RAM, so the limits are implicit and can differ between machines or runs.
+- Decision: Set explicit limits in `compose.yml`: `app` 2G, `postgres` 2G, `k6` 1G.
+- Consequences: Reproducible container limits independent of host auto-assignment. `app` and `postgres` keep the ~2 GB headroom the certification runs effectively had; `k6` only needs ~100 MB and is right-sized.
+
 ## Measurement reads are served from a warm cache (corrects the rationale of "Generate test data at measurement time")
 - Date / related: 2026-10-13, #2318
 - Status: accepted
