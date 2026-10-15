@@ -20,11 +20,15 @@ package io.kadai.testapi;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 
+import com.github.dockerjava.api.command.InspectContainerResponse;
 import io.kadai.common.internal.configuration.DB;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Optional;
 import javax.sql.DataSource;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
+import org.testcontainers.containers.Container;
+import org.testcontainers.containers.ContainerLaunchException;
 import org.testcontainers.containers.Db2Container;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -50,17 +54,10 @@ public class DockerContainerCreator {
   public static Optional<JdbcDatabaseContainer<?>> createDockerContainer(DB db) {
     switch (db) {
       case DB2:
-        try (Db2Container db2Container =
-            new Db2Container(
-                DockerImageName.parse("taskana/db2:11.5")
-                    .asCompatibleSubstituteFor("ibmcom/db2"))) {
+        try (Db2Container db2Container = createDb2Container()) {
 
           return Optional.of(
               db2Container
-                  .waitingFor(
-                      new LogMessageWaitStrategy()
-                          .withRegEx(".*DB2START processing was successful.*")
-                          .withStartupTimeout(Duration.of(60, SECONDS)))
                   .withUsername("db2inst1")
                   .withPassword("db2inst1-pwd")
                   .withDatabaseName("TSKDB"));
@@ -92,6 +89,41 @@ public class DockerContainerCreator {
       default:
         return Optional.empty();
     }
+  }
+
+  private static Db2Container createDb2Container() {
+    return new Db2Container(DockerImageName.parse("icr.io/db2_community/db2:12.1.0.0")) {
+      @Override
+      protected void configure() {
+        super.configure();
+        // The image's default database has 4 KB pages; the KADAI schema needs 32 KB pages.
+        addEnv("DBNAME", "");
+      }
+
+      @Override
+      protected void containerIsStarted(InspectContainerResponse containerInfo) {
+        super.containerIsStarted(containerInfo);
+        try {
+          Container.ExecResult result =
+              execInContainer(
+                  "su",
+                  "-",
+                  "db2inst1",
+                  "-c",
+                  "db2 create database TSKDB using codeset utf-8 territory en-us "
+                      + "collate using 'CLDRCOLL_LDE_AS_CX_EX_FX_HX_NX_S3' PAGESIZE 32 K");
+          if (result.getExitCode() != 0) {
+            throw new ContainerLaunchException(
+                "Could not create TSKDB: " + result.getStdout() + result.getStderr());
+          }
+        } catch (IOException e) {
+          throw new ContainerLaunchException("Could not create TSKDB", e);
+        } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
+          throw new ContainerLaunchException("Interrupted while creating TSKDB", e);
+        }
+      }
+    };
   }
 
   /**

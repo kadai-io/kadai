@@ -194,7 +194,7 @@ Supported Databases:
 
 * H2 (We test with 2.1.214*)
 * Postgres (We test with 17*)
-* DB2 (We test with 11.5.6*)
+* DB2 (We test with 12.1*)
 
 _* other versions of the named databases should work also, but haven't been tested_
 
