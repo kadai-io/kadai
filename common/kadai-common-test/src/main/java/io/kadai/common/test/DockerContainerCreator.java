@@ -50,7 +50,7 @@ public class DockerContainerCreator {
               db2Container
                   .withUsername("db2inst1")
                   .withPassword("db2inst1-pwd")
-                  .withDatabaseName("TSKDB"));
+                  .withDatabaseName("KADDB"));
         }
       }
       case POSTGRES -> {
@@ -101,17 +101,17 @@ public class DockerContainerCreator {
                   "-",
                   "db2inst1",
                   "-c",
-                  "db2 create database TSKDB using codeset utf-8 territory en-us "
+                  "db2 create database KADDB using codeset utf-8 territory en-us "
                       + "collate using 'CLDRCOLL_LDE_AS_CX_EX_FX_HX_NX_S3' PAGESIZE 32 K");
           if (result.getExitCode() != 0) {
             throw new ContainerLaunchException(
-                "Could not create TSKDB: " + result.getStdout() + result.getStderr());
+                "Could not create KADDB: " + result.getStdout() + result.getStderr());
           }
         } catch (IOException e) {
-          throw new ContainerLaunchException("Could not create TSKDB", e);
+          throw new ContainerLaunchException("Could not create KADDB", e);
         } catch (InterruptedException e) {
           Thread.currentThread().interrupt();
-          throw new ContainerLaunchException("Interrupted while creating TSKDB", e);
+          throw new ContainerLaunchException("Interrupted while creating KADDB", e);
         }
       }
     };

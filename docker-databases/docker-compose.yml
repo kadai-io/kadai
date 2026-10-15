@@ -13,7 +13,7 @@ services:
       - LICENSE=accept
       - DB2INSTANCE=db2inst1
       - DB2INST1_PASSWORD=db2inst1-pwd
-      - DBNAME=TSKDB
+      - DBNAME=KADDB
       - AUTOCONFIG=false
       - ARCHIVE_LOGS=false
     ports:
