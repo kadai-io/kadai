@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 env:
-  JAVA_VERSION: 21
+  JAVA_VERSION: 25
   NODE_VERSION: 24
 
   ARTIFACTS_CYPRESS_TESTS_NAME: cypress-tests
@@ -412,7 +412,7 @@ jobs:
     strategy:
       matrix:
         java_version:
-          - 21
+          - 25
         module:
           - kadai-common
           - kadai-common-security
@@ -436,69 +436,69 @@ jobs:
         database:
           - H2
         include:
-          - java_version: 21
+          - java_version: 25
             module: kadai-core
             database: POSTGRES
-          - java_version: 21
+          - java_version: 25
             module: kadai-core
             database: DB2
-          - java_version: 21
+          - java_version: 25
             module: kadai-core-test
             database: POSTGRES
-          - java_version: 21
+          - java_version: 25
             module: kadai-core-test
             database: DB2
-          - java_version: 21
+          - java_version: 25
             module: kadai-test-api
             database: POSTGRES
-          - java_version: 21
+          - java_version: 25
             module: kadai-test-api
             database: DB2
-          - java_version: 21
+          - java_version: 25
             module: kadai-simplehistory-provider
             database: DB2
-          - java_version: 21
+          - java_version: 25
             module: kadai-simplehistory-provider
             database: POSTGRES
-          - java_version: 21
+          - java_version: 25
             module: kadai-rest-spring-example-boot
             database: DB2
-          - java_version: 21
+          - java_version: 25
             module: kadai-rest-spring-example-boot
             database: POSTGRES
-          - java_version: 21
+          - java_version: 25
             module: kadai-rest-spring-example-boot
             database: H2
-          - java_version: 21
+          - java_version: 25
             module: kadai-gmt
             database: POSTGRES
-          - java_version: 25
+          - java_version: 27
             module: kadai-core
             database: H2
-          - java_version: 25
+          - java_version: 27
             module: kadai-core-test
             database: H2
-          - java_version: 25
+          - java_version: 27
             module: kadai-spring
             database: H2
-          - java_version: 25
+          - java_version: 27
             module: kadai-spring-example
             database: H2
-          - java_version: 25
+          - java_version: 27
             module: kadai-routing-rest
             database: H2
-          - java_version: 25
+          - java_version: 27
             module: kadai-rest-spring
             database: H2
-          - java_version: 25
+          - java_version: 27
             module: kadai-rest-spring-example-common
             database: H2
-          - java_version: 25
+          - java_version: 27
             module: kadai-simplehistory-rest-spring
             database: H2
     steps:
       - name: Start Eco CI Measurement
-        if: matrix.database == 'H2' && matrix.java_version == 21
+        if: matrix.database == 'H2' && matrix.java_version == 25
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
         with:
           task: start-measurement
@@ -533,14 +533,14 @@ jobs:
         env:
           DB: ${{ matrix.database }}
       - name: Eco CI Measurement of ${{ matrix.module }} (H2)
-        if: matrix.database == 'H2' && matrix.java_version == 21
+        if: matrix.database == 'H2' && matrix.java_version == 25
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
         with:
           task: get-measurement
           label: "test_backend: ${{ matrix.module }} (H2)"
         continue-on-error: true
       - name: Show Eco CI Results
-        if: matrix.database == 'H2' && matrix.java_version == 21
+        if: matrix.database == 'H2' && matrix.java_version == 25
         uses: green-coding-solutions/eco-ci-energy-estimation@v5
         with:
           task: display-results
@@ -548,7 +548,7 @@ jobs:
           pr-comment: false
         continue-on-error: true
       - name: Upload JaCoCo Report
-        if: matrix.database == 'H2' && matrix.java_version == 21
+        if: matrix.database == 'H2' && matrix.java_version == 25
         uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ARTIFACTS_JACOCO_REPORTS_NAME }}-${{ matrix.module }}

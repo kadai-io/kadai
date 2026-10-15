@@ -1,4 +1,4 @@
-FROM maven:3.9.9-eclipse-temurin-21 AS application-build
+FROM maven:3.9-eclipse-temurin-25-noble AS application-build
 
 WORKDIR /build
 
@@ -6,7 +6,7 @@ COPY . ./
 
 RUN ./mvnw -B -pl :kadai-gmt -am package -DskipTests -Djacoco.skip -T 1C
 
-FROM eclipse-temurin:21-jre-jammy
+FROM eclipse-temurin:25-jre-noble
 
 LABEL org.opencontainers.image.source="https://github.com/kadai-io/kadai"
 
