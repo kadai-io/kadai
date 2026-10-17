@@ -27,7 +27,6 @@ import io.kadai.common.api.ScheduledJob;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.internal.JobServiceImpl;
 import io.kadai.common.internal.jobs.JobRunner;
-import io.kadai.common.internal.jobs.PlainJavaTransactionProvider;
 import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import io.kadai.common.rest.ldap.LdapClient;
 import io.kadai.common.rest.ldap.LdapUserSnapshot;
@@ -61,6 +60,7 @@ class UserInfoRefreshJobSchedulerAccTest {
 
   @Autowired KadaiEngine kadaiEngine;
   @Autowired UserService userService;
+  @Autowired KadaiTransactionProvider transactionProvider;
   @MockitoSpyBean LdapClient ldapClient;
 
   private JobServiceImpl jobService;
@@ -91,7 +91,7 @@ class UserInfoRefreshJobSchedulerAccTest {
   void should_UseThreeTransactionsAndCreateOneSuccessor() throws Exception {
     doReturn(snapshot(user("scheduled-user"))).when(ldapClient).searchAllUsersInUserRole();
     createDueJob();
-    CountingProvider provider = new CountingProvider(delegate());
+    CountingProvider provider = new CountingProvider(transactionProvider);
 
     runJobs(provider);
 
@@ -107,7 +107,7 @@ class UserInfoRefreshJobSchedulerAccTest {
         .when(ldapClient)
         .searchAllUsersInUserRole();
     final ScheduledJob original = createDueJob();
-    CountingProvider provider = new CountingProvider(delegate());
+    CountingProvider provider = new CountingProvider(transactionProvider);
 
     runJobs(provider);
 
@@ -129,7 +129,7 @@ class UserInfoRefreshJobSchedulerAccTest {
             })
         .when(ldapClient)
         .searchAllUsersInUserRole();
-    CountingProvider provider = new CountingProvider(delegate());
+    CountingProvider provider = new CountingProvider(transactionProvider);
 
     runJobs(provider);
 
@@ -143,11 +143,6 @@ class UserInfoRefreshJobSchedulerAccTest {
     JobRunner runner = new JobRunner(kadaiEngine);
     runner.registerTransactionProvider(provider);
     runner.runJobs();
-  }
-
-  private KadaiTransactionProvider delegate() {
-    return new PlainJavaTransactionProvider(
-        kadaiEngine, kadaiEngine.getConfiguration().getDataSource());
   }
 
   private ScheduledJob createDueJob() {
@@ -164,7 +159,9 @@ class UserInfoRefreshJobSchedulerAccTest {
         prepared.setString(1, "another-owner");
         prepared.setInt(2, jobId);
         prepared.executeUpdate();
-        connection.commit();
+        if (!connection.getAutoCommit()) {
+          connection.commit();
+        }
       }
     }
   }
@@ -173,7 +170,9 @@ class UserInfoRefreshJobSchedulerAccTest {
     try (Connection connection = connection(); Statement statement = connection.createStatement()) {
       statement.executeUpdate(
           "DELETE FROM SCHEDULED_JOB WHERE TYPE = '" + UserInfoRefreshJob.class.getName() + "'");
-      connection.commit();
+      if (!connection.getAutoCommit()) {
+        connection.commit();
+      }
     }
   }
 

@@ -20,13 +20,20 @@ package io.kadai.user.jobs;
 
 import static io.kadai.common.internal.util.CheckedFunction.rethrowing;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.api.exceptions.SystemException;
+import io.kadai.common.internal.jobs.JobLockGuard;
+import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import io.kadai.common.rest.ldap.LdapClient;
 import io.kadai.common.rest.ldap.LdapUserSnapshot;
 import io.kadai.rest.test.KadaiSpringBootTest;
+import io.kadai.spi.user.internal.RefreshUserPostprocessorManager;
 import io.kadai.testapi.security.JaasExtension;
 import io.kadai.testapi.security.WithAccessId;
 import io.kadai.user.api.UserService;
@@ -54,6 +61,7 @@ class UserInfoRefreshJobIntTest {
   KadaiEngine kadaiEngine;
   UserService userService;
   @MockitoSpyBean LdapClient ldapClient;
+  @Autowired KadaiTransactionProvider transactionProvider;
 
   @Autowired
   public UserInfoRefreshJobIntTest(
@@ -83,7 +91,8 @@ class UserInfoRefreshJobIntTest {
   @Test
   @WithAccessId(user = "businessadmin")
   void should_RefreshUserInfo_When_UserInfoRefreshJobIsExecuted() throws Exception {
-    UserInfoRefreshJob userInfoRefreshJob = new UserInfoRefreshJob(kadaiEngine);
+    UserInfoRefreshJob userInfoRefreshJob =
+        new UserInfoRefreshJob(kadaiEngine, transactionProvider, null);
     userInfoRefreshJob.execute();
 
     try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
@@ -144,7 +153,8 @@ class UserInfoRefreshJobIntTest {
 
     try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
 
-      UserInfoRefreshJob userInfoRefreshJob = new UserInfoRefreshJob(kadaiEngine);
+      UserInfoRefreshJob userInfoRefreshJob =
+          new UserInfoRefreshJob(kadaiEngine, transactionProvider, null);
       userInfoRefreshJob.execute();
 
       try (Statement statement = connection.createStatement();
@@ -165,7 +175,7 @@ class UserInfoRefreshJobIntTest {
   @WithAccessId(user = "businessadmin")
   void should_RefreshUserInfoAndSkipErrorProneUsers_When_UserInfoRefreshJobIsExecuted()
       throws Exception {
-    new UserInfoRefreshJob(kadaiEngine).execute();
+    new UserInfoRefreshJob(kadaiEngine, transactionProvider, null).execute();
     List<User> sourceUsers;
     try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
       sourceUsers = getUsers(connection);
@@ -175,10 +185,57 @@ class UserInfoRefreshJobIntTest {
     when(ldapClient.searchAllUsersInUserRole())
         .thenReturn(new LdapUserSnapshot(sourceUsers, 1, sourceUsers.size()));
 
-    new UserInfoRefreshJob(kadaiEngine).execute();
+    new UserInfoRefreshJob(kadaiEngine, transactionProvider, null).execute();
 
     try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
       assertThat(getUsers(connection)).hasSize(sourceCount - 1);
+    }
+  }
+
+  @Test
+  @WithAccessId(user = "businessadmin")
+  void should_RollBackRefreshWhenFinalLockCheckFails() throws Exception {
+    new UserInfoRefreshJob(kadaiEngine, transactionProvider, null).execute();
+    List<User> before = readUsers();
+    assertThat(before).isNotEmpty();
+    when(ldapClient.searchAllUsersInUserRole()).thenReturn(new LdapUserSnapshot(List.of(), 1, 0));
+    JobLockGuard lockGuard = mock(JobLockGuard.class);
+    doNothing()
+        .doThrow(new SystemException("Refresh lock lost"))
+        .when(lockGuard)
+        .renewOrThrow();
+    UserInfoRefreshJob job =
+        new UserInfoRefreshJob(
+            kadaiEngine,
+            transactionProvider,
+            null,
+            ldapClient,
+            new RefreshUserPostprocessorManager(),
+            lockGuard);
+
+    assertThatThrownBy(job::execute).hasRootCauseMessage("Refresh lock lost");
+
+    assertThat(readUsers()).usingRecursiveComparison().ignoringCollectionOrder().isEqualTo(before);
+  }
+
+  @Test
+  @WithAccessId(user = "businessadmin")
+  void should_RejectSynchronizationWithoutTransaction() throws Exception {
+    new UserInfoRefreshJob(kadaiEngine, transactionProvider, null).execute();
+    List<User> before = readUsers();
+    UserServiceImpl service = (UserServiceImpl) userService;
+    var input = service.prepareUserRefresh(List.of());
+
+    assertThatThrownBy(() -> service.synchronizeUsers(input, 5))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("caller-managed transaction");
+
+    assertThat(readUsers()).usingRecursiveComparison().ignoringCollectionOrder().isEqualTo(before);
+  }
+
+  private List<User> readUsers() throws Exception {
+    try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
+      return getUsers(connection);
     }
   }
 
