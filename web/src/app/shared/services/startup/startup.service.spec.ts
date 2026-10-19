@@ -17,14 +17,21 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { of, throwError } from 'rxjs';
 import { StartupService } from './startup.service';
 import { KadaiEngineService } from '../kadai-engine/kadai-engine.service';
-import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
+import {
+  RUNTIME_CONFIG_DEFAULTS,
+  RUNTIME_CONFIG_URL,
+  RuntimeConfigService
+} from '../runtime-config/runtime-config.service';
 import { WindowRefService } from '../window/window.service';
 import { UserInfo } from '../../models/user-info';
+import { httpClientInterceptor, tokenInterceptor } from '../../interceptors/http-client.interceptor';
+import { NotificationService } from '../notifications/notification.service';
 
 describe('StartupService', () => {
   const loginUrl = 'http://host/kadai/login';
@@ -126,5 +133,70 @@ describe('StartupService', () => {
       await expect(startLoad().promise).resolves.toBe(true);
       expect(windowMock.nativeWindow.location.href).toBe('');
     });
+  });
+});
+
+describe('StartupService with the real HTTP interceptor chain', () => {
+  const restUrl = 'http://host/kadai/api';
+  const loginUrl = 'http://host/kadai/login';
+
+  let httpMock: HttpTestingController;
+  let windowMock: { nativeWindow: { location: { href: string } } };
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    windowMock = { nativeWindow: { location: { href: '' } } };
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withInterceptors([tokenInterceptor, httpClientInterceptor])),
+        provideHttpClientTesting(),
+        {
+          provide: RUNTIME_CONFIG_DEFAULTS,
+          useValue: { kadaiRestUrl: restUrl, kadaiLogoutUrl: '', kadaiLoginUrl: loginUrl }
+        },
+        { provide: NotificationService, useValue: { showError: vi.fn() } },
+        { provide: WindowRefService, useValue: windowMock }
+      ]
+    });
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+    consoleErrorSpy.mockRestore();
+  });
+
+  const startWithUserResponse = (body: string | object | null, status: number) => {
+    let settled = false;
+    TestBed.inject(StartupService)
+      .load()
+      .then(() => (settled = true));
+    return {
+      respond: async () => {
+        httpMock.expectOne(RUNTIME_CONFIG_URL).flush({});
+        await vi.waitFor(() =>
+          httpMock.expectOne(`${restUrl}/v1/current-user-info`).flush(body, { status, statusText: 'Error' })
+        );
+      },
+      isSettled: () => settled
+    };
+  };
+
+  it('should redirect to the login page on a 401 without response body', async () => {
+    const startup = startWithUserResponse(null, 401);
+    await startup.respond();
+
+    await vi.waitFor(() => expect(windowMock.nativeWindow.location.href).toBe(loginUrl));
+    expect(startup.isSettled()).toBe(false);
+  });
+
+  it('should start without a user session on a 500 without response body', async () => {
+    const startup = startWithUserResponse(null, 500);
+    await startup.respond();
+
+    await vi.waitFor(() => expect(startup.isSettled()).toBe(true));
+    expect(windowMock.nativeWindow.location.href).toBe('');
   });
 });
