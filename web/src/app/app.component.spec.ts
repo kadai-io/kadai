@@ -25,26 +25,35 @@ import { KadaiEngineService } from './shared/services/kadai-engine/kadai-engine.
 import { RequestInProgressService } from './shared/services/request-in-progress/request-in-progress.service';
 import { SelectedRouteService } from './shared/services/selected-route/selected-route';
 import { SidenavService } from './shared/services/sidenav/sidenav.service';
-import { of, Subject } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { OrientationService } from './shared/services/orientation/orientation.service';
 import { WindowRefService } from './shared/services/window/window.service';
 import { Router } from '@angular/router';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { RuntimeConfigService } from './shared/services/runtime-config/runtime-config.service';
+import { signal } from '@angular/core';
 
 describe('AppComponent', () => {
   let component: AppComponent;
   let fixture: ComponentFixture<AppComponent>;
   let httpController: HttpTestingController;
 
+  const currentUserInfoSignal = signal<any>(undefined);
+
   const kadaiEngineServiceMock = {
     getVersion: vi.fn().mockReturnValue(of({ version: '1.0.0' })),
-    logout: vi.fn().mockReturnValue(of(null)),
+    logout: vi.fn(),
     isHistoryProviderEnabled: vi.fn().mockReturnValue(of(false)),
     isCustomRoutingRulesEnabled: vi.fn().mockReturnValue(of(false)),
     hasRole: vi.fn().mockReturnValue(false),
-    getUserInformation: vi.fn().mockResolvedValue(undefined),
-    currentUserInfo: null
+    getUserInformation: vi.fn().mockReturnValue(of(undefined)),
+    currentUserInfo: currentUserInfoSignal.asReadonly()
+  };
+
+  const runtimeConfigServiceMock = {
+    kadaiRestUrl: 'http://test-rest',
+    kadaiLogoutUrl: 'http://test-logout'
   };
 
   const requestInProgressServiceMock = {
@@ -74,11 +83,14 @@ describe('AppComponent', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    kadaiEngineServiceMock.logout.mockReturnValue(of(undefined));
+    windowRefServiceMock.nativeWindow.location.href = '';
 
     await TestBed.configureTestingModule({
       imports: [AppComponent, RouterTestingModule],
       providers: [
         { provide: KadaiEngineService, useValue: kadaiEngineServiceMock },
+        { provide: RuntimeConfigService, useValue: runtimeConfigServiceMock },
         { provide: RequestInProgressService, useValue: requestInProgressServiceMock },
         { provide: SelectedRouteService, useValue: selectedRouteServiceMock },
         { provide: SidenavService, useValue: sidenavServiceMock },
@@ -148,9 +160,30 @@ describe('AppComponent', () => {
     expect(orientationServiceMock.onResize).toHaveBeenCalled();
   });
 
-  it('should call kadaiEngineService.logout when logout is called', () => {
-    component.logout();
-    expect(kadaiEngineServiceMock.logout).toHaveBeenCalled();
+  describe('logout', () => {
+    it('should redirect to the logout URL only after the logout request completed', async () => {
+      const logoutResponse = new Subject<void>();
+      kadaiEngineServiceMock.logout.mockReturnValue(logoutResponse);
+
+      const promise = component.logout();
+
+      expect(kadaiEngineServiceMock.logout).toHaveBeenCalled();
+      expect(windowRefServiceMock.nativeWindow.location.href).toBe('');
+
+      logoutResponse.next();
+      logoutResponse.complete();
+      await promise;
+
+      expect(windowRefServiceMock.nativeWindow.location.href).toBe('http://test-logout');
+    });
+
+    it('should redirect to the logout URL even when the logout observable errors', async () => {
+      kadaiEngineServiceMock.logout.mockReturnValue(throwError(() => new Error('logout failed')));
+
+      await expect(component.logout()).rejects.toThrow('logout failed');
+
+      expect(windowRefServiceMock.nativeWindow.location.href).toBe('http://test-logout');
+    });
   });
 
   it('should call selectedRouteService.selectRoute on NavigationEnd event', async () => {

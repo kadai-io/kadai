@@ -16,16 +16,16 @@
  *
  */
 
-import { Component, HostListener, inject, OnDestroy, OnInit, viewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal, viewChild } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
-import { Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { SidenavService } from './shared/services/sidenav/sidenav.service';
 import { RequestInProgressService } from './shared/services/request-in-progress/request-in-progress.service';
 import { OrientationService } from './shared/services/orientation/orientation.service';
 import { SelectedRouteService } from './shared/services/selected-route/selected-route';
 import { KadaiEngineService } from './shared/services/kadai-engine/kadai-engine.service';
 import { WindowRefService } from 'app/shared/services/window/window.service';
-import { environment } from 'environments/environment';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
 import { map, takeUntil } from 'rxjs/operators';
 import { MatIconButton } from '@angular/material/button';
@@ -51,18 +51,14 @@ import { toSignal } from '@angular/core/rxjs-interop';
     NavBarComponent,
     MatProgressBar,
     RouterOutlet
-  ]
+  ],
+  host: {
+    '(window:resize)': 'onResize()'
+  }
 })
 export class AppComponent implements OnInit, OnDestroy {
   requestInProgress = toSignal(inject(RequestInProgressService).getRequestInProgress(), { initialValue: false });
-  version = toSignal(
-    inject(KadaiEngineService)
-      .getVersion()
-      .pipe(map((r) => r.version)),
-    {
-      initialValue: undefined as unknown as string
-    }
-  );
+  version = signal<string>('');
   toggle: boolean = false;
   destroy$ = new Subject<void>();
   public sidenav = viewChild<MatSidenav>('sidenav');
@@ -71,9 +67,9 @@ export class AppComponent implements OnInit, OnDestroy {
   private sidenavService = inject(SidenavService);
   private kadaiEngineService = inject(KadaiEngineService);
   private selectedRouteService = inject(SelectedRouteService);
+  private runtimeConfigService = inject(RuntimeConfigService);
   private window = inject(WindowRefService);
 
-  @HostListener('window:resize')
   onResize() {
     this.orientationService.onResize();
   }
@@ -84,11 +80,25 @@ export class AppComponent implements OnInit, OnDestroy {
         this.selectedRouteService.selectRoute(event);
       }
     });
+
+    this.kadaiEngineService
+      .getVersion()
+      .pipe(
+        map((r) => r.version),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: (ver) => this.version.set(ver),
+        error: (err) => console.error('Failed to load version:', err)
+      });
   }
 
-  logout() {
-    this.kadaiEngineService.logout();
-    this.window.nativeWindow.location.href = environment.kadaiLogoutUrl;
+  async logout(): Promise<void> {
+    try {
+      await firstValueFrom(this.kadaiEngineService.logout());
+    } finally {
+      this.window.nativeWindow.location.href = this.runtimeConfigService.kadaiLogoutUrl;
+    }
   }
 
   toggleSidenav() {
