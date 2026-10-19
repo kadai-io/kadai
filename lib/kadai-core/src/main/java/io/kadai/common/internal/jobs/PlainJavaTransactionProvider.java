@@ -56,11 +56,15 @@ public class PlainJavaTransactionProvider implements KadaiTransactionProvider {
           connection.rollback();
         } catch (SQLException rollbackFailure) {
           failure.addSuppressed(rollbackFailure);
-          // Prevent session cleanup from committing a transaction whose rollback failed.
           try {
             connection.abort(Runnable::run);
           } catch (SQLException abortFailure) {
             failure.addSuppressed(abortFailure);
+            try {
+              connection.close();
+            } catch (SQLException closeFailure) {
+              failure.addSuppressed(closeFailure);
+            }
           }
         }
         throw failure;

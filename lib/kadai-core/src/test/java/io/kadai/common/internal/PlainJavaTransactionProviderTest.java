@@ -75,6 +75,57 @@ class PlainJavaTransactionProviderTest {
   }
 
   @Test
+  void should_CloseConnectionBeforeSessionCleanupWhenAbortFails() throws Exception {
+    IllegalStateException failure = new IllegalStateException("Refresh failed");
+    SQLException rollbackFailure = new SQLException("Rollback failed");
+    SQLException abortFailure = new SQLException("Abort failed");
+    doThrow(rollbackFailure).when(connection).rollback();
+    doThrow(abortFailure).when(connection).abort(any());
+
+    assertThatThrownBy(
+            () -> provider.executeInTransaction(() -> {
+              throw failure;
+            }))
+        .isSameAs(failure)
+        .hasSuppressedException(rollbackFailure)
+        .hasSuppressedException(abortFailure);
+
+    var order = inOrder(connection, kadaiEngine);
+    order.verify(connection).rollback();
+    order.verify(connection).abort(any());
+    order.verify(connection).close();
+    order.verify(kadaiEngine).closeConnection();
+    verify(connection, never()).commit();
+  }
+
+  @Test
+  void should_PreserveCloseFailureWhenRollbackAndAbortFail() throws Exception {
+    IllegalStateException failure = new IllegalStateException("Refresh failed");
+    SQLException rollbackFailure = new SQLException("Rollback failed");
+    SQLException abortFailure = new SQLException("Abort failed");
+    SQLException closeFailure = new SQLException("Close failed");
+    doThrow(rollbackFailure).when(connection).rollback();
+    doThrow(abortFailure).when(connection).abort(any());
+    doThrow(closeFailure).doNothing().when(connection).close();
+
+    assertThatThrownBy(
+            () -> provider.executeInTransaction(() -> {
+              throw failure;
+            }))
+        .isSameAs(failure)
+        .hasSuppressedException(rollbackFailure)
+        .hasSuppressedException(abortFailure)
+        .hasSuppressedException(closeFailure);
+
+    var order = inOrder(connection, kadaiEngine);
+    order.verify(connection).rollback();
+    order.verify(connection).abort(any());
+    order.verify(connection).close();
+    order.verify(kadaiEngine).closeConnection();
+    verify(connection, never()).commit();
+  }
+
+  @Test
   void should_RollBackAndPreserveCommitFailure() throws Exception {
     SQLException failure = new SQLException("Commit failed");
     doThrow(failure).when(connection).commit();
