@@ -161,7 +161,7 @@ export class AccessItemsManagementComponent implements OnInit {
     this.requestInProgressService.setRequestInProgress(false);
   }
 
-  onSelectAccessId(selected: AccessId) {
+  onSelectAccessId(selected: AccessId | null) {
     if (selected) {
       this.accessId = selected;
       if (this.accessIdPrevious !== selected.accessId) {

@@ -80,12 +80,11 @@
                                                 errorMessage="* Name is required" />
               <!-- OWNER -->
               @if (lookupField()) {
-                <kadai-shared-type-ahead (accessIdEventEmitter)="onSelectedOwner($event)"
-                                         (isFormValid)="isOwnerValid = $event"
+                <kadai-shared-type-ahead [(ngModel)]="workbasket()!.owner"
                                          [displayError]="true"
-                                         [entityId]="workbasket()!.workbasketId"
-                                         [savedAccessId]="workbasket()!.owner"
-                                         placeHolderMessage="Owner" />
+                                         kadaiAccessIdExists
+                                         name="workbasket.owner"
+                                         placeholder="Owner" />
               } @else {
                 <label for="wb-owner"></label>
                 <input #owner="ngModel" 

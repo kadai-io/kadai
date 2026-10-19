@@ -175,18 +175,18 @@ describe('WorkbasketAccessItemsComponent', () => {
     expect(emitSpy).toHaveBeenCalledWith(false);
   });
 
-  it('should set accessId and accessName on the form control for the given row when accessItemSelected is called', () => {
+  it('should set the accessName of the given row when accessItemSelected is called', () => {
     fixture.detectChanges();
+    const accessIdBefore = component.accessItemsGroups.controls[0].get('accessId')!.value;
     component.accessItemSelected({ accessId: 'user-1', name: 'User One' }, 0);
-    expect(component.accessItemsGroups.controls[0].get('accessId')!.value).toBe('user-1');
     expect(component.accessItemsGroups.controls[0].get('accessName')!.value).toBe('User One');
+    expect(component.accessItemsGroups.controls[0].get('accessId')!.value).toBe(accessIdBefore);
   });
 
-  it('should handle null accessItem gracefully in accessItemSelected', () => {
+  it('should clear the accessName of the given row when the selection is cleared', () => {
     fixture.detectChanges();
-    component.accessItemSelected(null as any, 0);
-    expect(component.accessItemsGroups.controls[0].get('accessId')!.value).toBeUndefined();
-    expect(component.accessItemsGroups.controls[0].get('accessName')!.value).toBeUndefined();
+    component.accessItemSelected(null, 0);
+    expect(component.accessItemsGroups.controls[0].get('accessName')!.value).toBe('');
   });
 
   it('should return an array copy of access items when cloneAccessItems is called', () => {

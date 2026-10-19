@@ -20,14 +20,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { of, Subject } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { provideStore, Store } from '@ngxs/store';
 
 import { TaskInformationComponent } from './task-information.component';
 import { Task } from '../../models/task';
 import { ObjectReference } from '../../models/object-reference';
 import { Classification } from '../../../shared/models/classification';
-import { AccessId } from '../../../shared/models/access-id';
+import { AccessIdsService } from '../../../shared/services/access-ids/access-ids.service';
+import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
 import { engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
@@ -62,8 +63,14 @@ describe('TaskInformationComponent', () => {
   let mockClassificationsService: {
     getClassifications: ReturnType<typeof vi.fn>;
   };
+  const accessIdsServiceMock = {
+    validateAccessId: vi.fn(),
+    searchForAccessId: vi.fn()
+  };
 
   beforeEach(async () => {
+    accessIdsServiceMock.validateAccessId.mockReturnValue(of(true));
+    accessIdsServiceMock.searchForAccessId.mockReturnValue(of([]));
     mockClassificationsService = {
       getClassifications: vi.fn().mockReturnValue(
         of({
@@ -79,7 +86,8 @@ describe('TaskInformationComponent', () => {
         provideNoopAnimations(),
 
         provideHttpClientTesting(),
-        { provide: ClassificationsService, useValue: mockClassificationsService }
+        { provide: ClassificationsService, useValue: mockClassificationsService },
+        { provide: AccessIdsService, useValue: accessIdsServiceMock }
       ]
     }).compileComponents();
 
@@ -157,29 +165,23 @@ describe('TaskInformationComponent', () => {
     });
   });
 
-  describe('onSelectedOwner()', () => {
-    it('should set task.owner to the accessId of the provided owner', () => {
-      const owner: AccessId = { accessId: 'user-99', name: 'Test User' };
+  describe('owner type-ahead', () => {
+    const ownerControl = () => component.taskForm()!.control.controls['task.owner'];
 
-      component.onSelectedOwner(owner);
+    it('should bind task.owner to the type-ahead form control', async () => {
+      await fixture.whenStable();
+      expect(ownerControl().value).toBe(component.task()!.owner);
 
+      ownerControl().setValue('user-99');
       expect(component.task()!.owner).toBe('user-99');
     });
 
-    it('should not update task.owner when owner is null', () => {
-      const originalOwner = component.task()!.owner;
+    it('should disable the owner when the task is not in state READY', async () => {
+      fixture.componentRef.setInput('task', { ...component.task()!, state: 'CLAIMED' });
+      fixture.detectChanges();
+      await fixture.whenStable();
 
-      component.onSelectedOwner(null as any);
-
-      expect(component.task()!.owner).toBe(originalOwner);
-    });
-
-    it('should not update task.owner when owner has no accessId', () => {
-      const originalOwner = component.task()!.owner;
-
-      component.onSelectedOwner({ name: 'No ID User' });
-
-      expect(component.task()!.owner).toBe(originalOwner);
+      expect(ownerControl().disabled).toBe(true);
     });
   });
 
@@ -261,7 +263,6 @@ describe('TaskInformationComponent', () => {
     it('should emit formValid(true) when form is valid, classification is set, and owner is valid', async () => {
       const emitSpy = vi.spyOn(component.formValid, 'emit');
 
-      component.isOwnerValid = true;
       fixture.componentRef.setInput('task', {
         ...component.task()!,
         classificationSummary: { classificationId: 'class-1', name: 'Class 1' }
@@ -295,7 +296,6 @@ describe('TaskInformationComponent', () => {
     it('should not emit formValid when classificationSummary is undefined', async () => {
       const emitSpy = vi.spyOn(component.formValid, 'emit');
 
-      component.isOwnerValid = true;
       fixture.componentRef.setInput('task', {
         ...component.task()!,
         classificationSummary: undefined
@@ -308,14 +308,17 @@ describe('TaskInformationComponent', () => {
       expect(emitSpy).not.toHaveBeenCalled();
     });
 
-    it('should not emit formValid when isOwnerValid is false', async () => {
+    it('should not emit formValid when the owner is not a valid access id', async () => {
       const emitSpy = vi.spyOn(component.formValid, 'emit');
 
-      component.isOwnerValid = false;
+      accessIdsServiceMock.validateAccessId.mockReturnValue(of(false));
       fixture.componentRef.setInput('task', {
         ...component.task()!,
+        owner: 'unknown-user',
         classificationSummary: { classificationId: 'class-1', name: 'Class 1' }
       });
+      fixture.detectChanges();
+      await fixture.whenStable();
 
       fixture.componentRef.setInput('saveToggleTriggered', true);
       fixture.detectChanges();
@@ -326,7 +329,6 @@ describe('TaskInformationComponent', () => {
 
     it('should handle repeated submission triggers correctly and keep emitting formValid state', async () => {
       const emitSpy = vi.spyOn(component.formValid, 'emit');
-      component.isOwnerValid = true;
 
       fixture.componentRef.setInput('task', {
         ...component.task()!,
@@ -348,22 +350,25 @@ describe('TaskInformationComponent', () => {
       expect(emitSpy).toHaveBeenLastCalledWith(true);
     });
 
-    it('should not emit formValid when type-ahead lookup signals an invalid state or lookup error', async () => {
+    it('should not emit formValid and show an error when the owner lookup fails', async () => {
       const emitSpy = vi.spyOn(component.formValid, 'emit');
+      const notificationSpy = vi.spyOn(TestBed.inject(NotificationService), 'showError');
 
-      const typeAheadDebug = fixture.debugElement.query(By.css('kadai-shared-type-ahead'));
-      expect(typeAheadDebug).toBeTruthy();
-
-      typeAheadDebug.triggerEventHandler('isFormValid', false);
+      accessIdsServiceMock.validateAccessId.mockReturnValue(throwError(() => new Error('lookup failed')));
+      fixture.componentRef.setInput('task', {
+        ...component.task()!,
+        owner: 'some-user',
+        classificationSummary: { classificationId: 'class-1', name: 'Class 1' }
+      });
       fixture.detectChanges();
-
-      expect(component.isOwnerValid).toBe(false);
+      await fixture.whenStable();
 
       fixture.componentRef.setInput('saveToggleTriggered', true);
       fixture.detectChanges();
       await fixture.whenStable();
 
       expect(emitSpy).not.toHaveBeenCalled();
+      expect(notificationSpy).toHaveBeenCalledWith('OWNER_NOT_VALID', { owner: 'access id' });
     });
   });
 
@@ -639,18 +644,9 @@ describe('TaskInformationComponent', () => {
       expect(spy).toHaveBeenCalledWith(component.classifications()[0]);
     });
 
-    it('should handle type-ahead outputs (accessIdEventEmitter and isFormValid) when lookupField is enabled', () => {
-      const typeAheadDebug = fixture.debugElement.query(By.css('kadai-shared-type-ahead'));
-      expect(typeAheadDebug).toBeTruthy();
-
-      const ownerSpy = vi.spyOn(component, 'onSelectedOwner');
-      const testOwner: AccessId = { accessId: 'new-owner-123' };
-
-      typeAheadDebug.triggerEventHandler('accessIdEventEmitter', testOwner);
-      expect(ownerSpy).toHaveBeenCalledWith(testOwner);
-
-      typeAheadDebug.triggerEventHandler('isFormValid', false);
-      expect(component.isOwnerValid).toBe(false);
+    it('should render the owner as type-ahead when lookupField is enabled', () => {
+      expect(fixture.debugElement.query(By.css('kadai-shared-type-ahead'))).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('#ts-owner')).toBeNull();
     });
   });
 });
