@@ -17,7 +17,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, input, model } from '@angular/core';
+import { Component, input, model, signal } from '@angular/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -224,7 +224,10 @@ describe('TaskMasterComponent - HTML template without overrideComponent', () => 
           provide: WorkbasketService,
           useValue: { getAllWorkBaskets: vi.fn().mockReturnValue(of({ workbaskets: [selectedWorkbasketMock] })) }
         },
-        { provide: KadaiEngineService, useValue: { currentUserInfo: new UserInfo('no-match-user', [], []) } },
+        {
+          provide: KadaiEngineService,
+          useValue: { currentUserInfo: signal(new UserInfo('no-match-user', [], [])).asReadonly() }
+        },
         { provide: Router, useValue: routerMock },
         { provide: ActivatedRoute, useValue: { queryParams: queryParams$.asObservable(), parent: {} } },
         provideNoopAnimations(),
