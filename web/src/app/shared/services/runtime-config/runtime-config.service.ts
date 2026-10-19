@@ -25,8 +25,7 @@ import { catchError, map } from 'rxjs/operators';
 export interface RuntimeConfig {
   kadaiRestUrl: string;
   kadaiLogoutUrl: string;
-  // Login page of the backend. Unauthenticated users are redirected here on startup.
-  // An empty string means "not configured": the application then starts without a user session.
+  // Empty string means "not configured": unauthenticated users are not redirected to a login page.
   kadaiLoginUrl: string;
 }
 
@@ -34,7 +33,6 @@ const RUNTIME_CONFIG_KEYS: ReadonlyArray<keyof RuntimeConfig> = ['kadaiRestUrl',
 
 export const RUNTIME_CONFIG_URL = 'environments/data-sources/environment-information.json';
 
-/** Build-time defaults. Runtime overrides are merged on top of them, the defaults themselves never change. */
 export const RUNTIME_CONFIG_DEFAULTS = new InjectionToken<Readonly<RuntimeConfig>>('RUNTIME_CONFIG_DEFAULTS', {
   providedIn: 'root',
   factory: () => ({
@@ -44,17 +42,6 @@ export const RUNTIME_CONFIG_DEFAULTS = new InjectionToken<Readonly<RuntimeConfig
   })
 });
 
-/**
- * Effective application configuration: build-time defaults merged with the runtime file
- * {@link RUNTIME_CONFIG_URL}, which allows changing the URLs of a deployed application without a rebuild.
- *
- * {@link load} never fails, the application always starts. Outcomes:
- * - file found and valid: its non-empty string properties override the defaults;
- * - file missing (404) or empty: the defaults are used (info log);
- * - file unreachable (network error) or responding with another error status: the defaults are used (error log);
- * - file is not valid JSON or not a JSON object: the defaults are used (error log);
- * - single property with a wrong type: this property keeps its default (error log), the others are applied.
- */
 @Injectable({
   providedIn: 'root'
 })

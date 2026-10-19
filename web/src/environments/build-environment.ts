@@ -16,8 +16,6 @@
  *
  */
 
-// Build-time defaults. They are frozen at runtime and must not be changed: runtime overrides from
-// `data-sources/environment-information.json` are merged by `RuntimeConfigService` instead.
 export interface BuildEnvironment {
   readonly production: boolean;
   readonly kadaiRestUrl: string;

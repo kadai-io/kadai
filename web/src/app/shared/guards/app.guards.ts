@@ -25,8 +25,6 @@ import { BusinessAdminRoles } from '../roles/business-admin.roles';
 import { MonitorRoles } from '../roles/monitor.roles';
 import { UserRoles } from '../roles/user.roles';
 
-// Grants access if the current user has one of the given roles, otherwise redirects to fallbackUrl.
-// Without a user session (loading the current user failed on startup) access is never granted.
 export const roleGuard =
   (roles: string[], fallbackUrl: string): CanActivateFn =>
   (): boolean | UrlTree =>

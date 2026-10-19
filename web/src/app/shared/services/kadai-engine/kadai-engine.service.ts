@@ -58,11 +58,6 @@ export class KadaiEngineService {
     return this.httpClient.get<Version>(`${this.runtimeConfigService.kadaiRestUrl}/v1/version`);
   }
 
-  /**
-   * Sends the logout request and clears the current user. Emits once and completes after the
-   * request succeeded, failed or did not answer within {@link LOGOUT_TIMEOUT_MS}; it never errors,
-   * so the caller can always redirect afterwards.
-   */
   logout(): Observable<void> {
     return this.httpClient.post(this.runtimeConfigService.kadaiLogoutUrl, {}, { responseType: 'text' }).pipe(
       timeout(LOGOUT_TIMEOUT_MS),

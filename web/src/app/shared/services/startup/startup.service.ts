@@ -31,16 +31,6 @@ export class StartupService {
   private runtimeConfigService = inject(RuntimeConfigService);
   private window = inject(WindowRefService);
 
-  /**
-   * Loads the runtime configuration and the current user.
-   *
-   * If loading the user fails:
-   * - authentication failure (401, or the request was redirected to the login page) with a
-   *   configured login URL: redirect to the login page and keep the bootstrap pending, so that no
-   *   route is rendered without a session while the browser navigates away;
-   * - any other error: start without a user session. The route guards then send the user to
-   *   the no-role page instead of leaving a blank page.
-   */
   async load(): Promise<void> {
     await this.runtimeConfigService.load();
     try {
