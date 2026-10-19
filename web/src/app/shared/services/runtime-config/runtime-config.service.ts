@@ -30,6 +30,8 @@ export interface RuntimeConfig {
 }
 
 const RUNTIME_CONFIG_KEYS: ReadonlyArray<keyof RuntimeConfig> = ['kadaiRestUrl', 'kadaiLogoutUrl', 'kadaiLoginUrl'];
+// For these keys an empty string is a meaningful override instead of "not set".
+const EMPTY_VALUE_KEYS: ReadonlyArray<keyof RuntimeConfig> = ['kadaiLoginUrl'];
 
 export const RUNTIME_CONFIG_URL = 'environments/data-sources/environment-information.json';
 
@@ -91,7 +93,7 @@ export function parseRuntimeConfig(raw: unknown): Partial<RuntimeConfig> {
   const config: Partial<RuntimeConfig> = {};
   for (const key of RUNTIME_CONFIG_KEYS) {
     const value = (raw as Record<string, unknown>)[key];
-    if (value === undefined || value === null || value === '') {
+    if (value === undefined || value === null || (value === '' && !EMPTY_VALUE_KEYS.includes(key))) {
       continue;
     }
     if (typeof value === 'string') {

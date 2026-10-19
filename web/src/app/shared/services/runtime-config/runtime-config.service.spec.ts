@@ -87,6 +87,13 @@ describe('RuntimeConfigService', () => {
     expect(service.config()).toEqual({ ...defaults, kadaiRestUrl: 'http://host/kadai/api' });
   });
 
+  it('should allow the runtime file to disable the login redirect with an empty kadaiLoginUrl', async () => {
+    await loadWith((req) => req.flush({ kadaiLoginUrl: '' }));
+
+    expect(service.kadaiLoginUrl).toBe('');
+    expect(service.config()).toEqual({ ...defaults, kadaiLoginUrl: '' });
+  });
+
   it('should not mutate the defaults', async () => {
     await loadWith((req) => req.flush({ kadaiRestUrl: 'http://host/kadai/api' }));
 
