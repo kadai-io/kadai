@@ -20,18 +20,19 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { SettingsService } from './settings-service';
-import { environment } from '../../../environments/environment';
 import { Settings } from '../models/settings';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 
 describe('SettingsService', () => {
   let service: SettingsService;
   let httpTesting: HttpTestingController;
 
-  const baseUrl = `${environment.kadaiRestUrl}/v1/config/custom-attributes`;
+  const BASE_URL = 'http://localhost:8080/kadai/api';
+  const SETTINGS_URL = `${BASE_URL}/v1/config/custom-attributes`;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClientTesting()]
+      providers: [{ provide: RuntimeConfigService, useValue: { kadaiRestUrl: BASE_URL } }, provideHttpClientTesting()]
     });
     service = TestBed.inject(SettingsService);
     httpTesting = TestBed.inject(HttpTestingController);
@@ -47,7 +48,7 @@ describe('SettingsService', () => {
 
   it('getSettings() should make a GET request to the correct URL', () => {
     service.getSettings().subscribe();
-    const req = httpTesting.expectOne(baseUrl);
+    const req = httpTesting.expectOne(SETTINGS_URL);
     expect(req.request.method).toBe('GET');
     req.flush({ customAttributes: {} });
   });
@@ -63,7 +64,7 @@ describe('SettingsService', () => {
       result = settings;
     });
 
-    const req = httpTesting.expectOne(baseUrl);
+    const req = httpTesting.expectOne(SETTINGS_URL);
     req.flush({ customAttributes: mockCustomAttributes });
 
     expect(result).toEqual(mockCustomAttributes);
@@ -73,7 +74,7 @@ describe('SettingsService', () => {
     const settings: Settings = { schema: [], theme: 'dark' };
     service.updateSettings(settings).subscribe();
 
-    const req = httpTesting.expectOne(baseUrl);
+    const req = httpTesting.expectOne(SETTINGS_URL);
     expect(req.request.method).toBe('PUT');
     req.flush(settings);
   });
@@ -82,7 +83,7 @@ describe('SettingsService', () => {
     const settings: Settings = { schema: [], language: 'de' };
     service.updateSettings(settings).subscribe();
 
-    const req = httpTesting.expectOne(baseUrl);
+    const req = httpTesting.expectOne(SETTINGS_URL);
     expect(req.request.body).toEqual({ customAttributes: settings });
     req.flush(settings);
   });

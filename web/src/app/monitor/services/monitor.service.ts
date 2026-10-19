@@ -18,12 +18,12 @@
 
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from 'environments/environment';
 import { Observable } from 'rxjs';
 import { ChartData } from 'app/monitor/models/chart-data';
 import { ReportData } from '../models/report-data';
 import { asUrlQueryString } from '../../shared/util/query-parameters-v2';
 import { TaskState } from '../../shared/models/task-state';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 
 const monitorUrl = '/v1/monitor';
 
@@ -31,6 +31,7 @@ const monitorUrl = '/v1/monitor';
   providedIn: 'root'
 })
 export class MonitorService {
+  private runtimeConfigService = inject(RuntimeConfigService);
   private httpClient = inject(HttpClient);
 
   getTaskStatusReport(): Observable<ReportData> {
@@ -38,7 +39,7 @@ export class MonitorService {
       states: [TaskState.READY, TaskState.CLAIMED, TaskState.COMPLETED]
     };
     return this.httpClient.get<ReportData>(
-      `${environment.kadaiRestUrl + monitorUrl}/task-status-report${asUrlQueryString(queryParams)}`
+      `${this.runtimeConfigService.kadaiRestUrl + monitorUrl}/task-status-report${asUrlQueryString(queryParams)}`
     );
   }
 
@@ -47,7 +48,7 @@ export class MonitorService {
       states: [TaskState.READY, TaskState.CLAIMED, TaskState.COMPLETED]
     };
     return this.httpClient.get<ReportData>(
-      `${environment.kadaiRestUrl + monitorUrl}/workbasket-report${asUrlQueryString(queryParams)}`
+      `${this.runtimeConfigService.kadaiRestUrl + monitorUrl}/workbasket-report${asUrlQueryString(queryParams)}`
     );
   }
 
@@ -57,16 +58,16 @@ export class MonitorService {
       states: [TaskState.READY, TaskState.CLAIMED, TaskState.COMPLETED]
     };
     return this.httpClient.get<ReportData>(
-      `${environment.kadaiRestUrl + monitorUrl}/workbasket-report${asUrlQueryString(queryParams)}`
+      `${this.runtimeConfigService.kadaiRestUrl + monitorUrl}/workbasket-report${asUrlQueryString(queryParams)}`
     );
   }
 
   getClassificationTasksReport(): Observable<ReportData> {
-    return this.httpClient.get<ReportData>(`${environment.kadaiRestUrl + monitorUrl}/classification-report`);
+    return this.httpClient.get<ReportData>(`${this.runtimeConfigService.kadaiRestUrl + monitorUrl}/classification-report`);
   }
 
   getDailyEntryExitReport(): Observable<ReportData> {
-    return this.httpClient.get<ReportData>(`${environment.kadaiRestUrl + monitorUrl}/timestamp-report`);
+    return this.httpClient.get<ReportData>(`${this.runtimeConfigService.kadaiRestUrl + monitorUrl}/timestamp-report`);
   }
 
   getChartData(source: ReportData): ChartData[] {
@@ -93,7 +94,7 @@ export class MonitorService {
     };
 
     return this.httpClient.get<ReportData>(
-      `${environment.kadaiRestUrl + monitorUrl}/workbasket-priority-report${asUrlQueryString(queryParams)}`
+      `${this.runtimeConfigService.kadaiRestUrl + monitorUrl}/workbasket-priority-report${asUrlQueryString(queryParams)}`
     );
   }
 
@@ -112,7 +113,7 @@ export class MonitorService {
     };
 
     return this.httpClient.get<ReportData>(
-      `${environment.kadaiRestUrl + monitorUrl}/detailed-workbasket-priority-report${asUrlQueryString(queryParams)}`
+      `${this.runtimeConfigService.kadaiRestUrl + monitorUrl}/detailed-workbasket-priority-report${asUrlQueryString(queryParams)}`
     );
   }
 }

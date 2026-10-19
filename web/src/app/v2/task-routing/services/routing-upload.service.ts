@@ -18,17 +18,17 @@
 
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { StartupService } from 'app/shared/services/startup/startup.service';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RoutingUploadService {
   private httpClient = inject(HttpClient);
-  private startupService = inject(StartupService);
+  private runtimeConfigService = inject(RuntimeConfigService);
 
   get url(): string {
-    return this.startupService.getKadaiRestUrl() + '/v1/routing-rules/default';
+    return this.runtimeConfigService.kadaiRestUrl + '/v1/routing-rules/default';
   }
 
   uploadRoutingRules(file: File) {
