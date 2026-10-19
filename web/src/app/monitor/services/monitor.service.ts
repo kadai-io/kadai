@@ -63,7 +63,9 @@ export class MonitorService {
   }
 
   getClassificationTasksReport(): Observable<ReportData> {
-    return this.httpClient.get<ReportData>(`${this.runtimeConfigService.kadaiRestUrl + monitorUrl}/classification-report`);
+    return this.httpClient.get<ReportData>(
+      `${this.runtimeConfigService.kadaiRestUrl + monitorUrl}/classification-report`
+    );
   }
 
   getDailyEntryExitReport(): Observable<ReportData> {

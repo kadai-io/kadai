@@ -41,7 +41,9 @@ export class ClassificationCategoriesService {
   private runtimeConfigService = inject(RuntimeConfigService);
 
   getClassificationCategoriesByType(): Observable<CategoriesResponse> {
-    return this.httpClient.get<CategoriesResponse>(`${this.runtimeConfigService.kadaiRestUrl}/v1/classifications-by-type`);
+    return this.httpClient.get<CategoriesResponse>(
+      `${this.runtimeConfigService.kadaiRestUrl}/v1/classifications-by-type`
+    );
   }
 
   getCustomisation(): Observable<Customisation> {
