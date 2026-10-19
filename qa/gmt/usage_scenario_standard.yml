@@ -14,7 +14,7 @@ services:
     # Pinned per commit for reproducible measurements. CI bumps this automatically after
     # publishing a new image (see .github/workflows/kadai-gmt-container.yml).
     # Available tags: https://github.com/kadai-io/kadai/pkgs/container/kadai-gmt
-    image: ghcr.io/kadai-io/kadai-gmt:sha-df75b687bf481123ce23c4d7ad88bc5a02b3ba06
+    image: ghcr.io/kadai-io/kadai-gmt:sha-08d1652e1f8732ef24e08e719e083017e4a39648
   k6:
     setup-commands:
       - command: k6 run /tmp/repo/qa/gmt/k6/setup_tasks.js
