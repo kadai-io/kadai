@@ -44,7 +44,7 @@ kadai/
 ## Technology Stack
 
 ### Backend
-- **Language:** Java 17+ (compiled with Java 25 in CI)
+- **Language:** Java 25+ (also tested with Java 27 in CI)
 - **Build tool:** Maven (use `./mvnw` wrapper)
 - **Framework:** Spring Boot 4.x
 - **Persistence:** MyBatis with SQL providers for H2, PostgreSQL, and DB2
