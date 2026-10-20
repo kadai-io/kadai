@@ -20,8 +20,8 @@ import { AfterContentInit, Component, computed, DestroyRef, inject, input, outpu
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ControlValueAccessor, FormControl, NgControl, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngxs/store';
-import { EMPTY, merge, Observable, of, Subject, timer } from 'rxjs';
-import { catchError, filter, map, switchMap } from 'rxjs/operators';
+import { merge, Observable, of, Subject, timer } from 'rxjs';
+import { catchError, filter, map, switchMap, takeUntil } from 'rxjs/operators';
 import { NgClass } from '@angular/common';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatTooltip, TooltipPosition } from '@angular/material/tooltip';
@@ -73,6 +73,22 @@ export class TypeAheadComponent implements ControlValueAccessor, AfterContentIni
   readonly filteredAccessIds = signal<AccessId[]>([]);
   readonly lookupResult = signal<LookupResult>({ status: 'empty' });
   readonly debounceMs = computed(() => this.debounceConfig() || DEFAULT_LOOKUP_DEBOUNCE_MS);
+  readonly hasError = computed(() => {
+    if (!this.displayError()) {
+      return false;
+    }
+    this.controlState();
+    const control = this.ngControl?.control;
+    if (control) {
+      return control.invalid && (control.touched || control.dirty);
+    }
+    const result = this.lookupResult();
+    return result.status === 'not-found' || result.status === 'failed';
+  });
+  readonly errorMessage = computed(() => {
+    this.controlState();
+    return this.ngControl?.control?.hasError('required') ? 'Access id is required' : 'Access id not valid';
+  });
   readonly errorStateMatcher: ErrorStateMatcher = { isErrorState: () => this.hasError() };
 
   private readonly ngControl = inject(NgControl, { self: true, optional: true });
@@ -98,13 +114,15 @@ export class TypeAheadComponent implements ControlValueAccessor, AfterContentIni
       this.ngControl.valueAccessor = this;
     }
 
-    const typed$ = merge(this.inputControl.valueChanges, this.written$.pipe(map(() => null))).pipe(
-      switchMap((value) => {
-        if (value === null) {
-          return EMPTY;
-        }
-        return value ? timer(this.debounceMs()).pipe(map(() => value)) : of(value);
-      })
+    const typed$ = this.inputControl.valueChanges.pipe(
+      switchMap((value) =>
+        value
+          ? timer(this.debounceMs()).pipe(
+              map(() => value),
+              takeUntil(this.written$)
+            )
+          : of(value)
+      )
     );
 
     merge(typed$, this.committed$)
@@ -163,24 +181,6 @@ export class TypeAheadComponent implements ControlValueAccessor, AfterContentIni
 
   onOptionSelected(event: MatAutocompleteSelectedEvent): void {
     this.committed$.next(event.option.value);
-  }
-
-  hasError(): boolean {
-    if (!this.displayError()) {
-      return false;
-    }
-    this.controlState();
-    const control = this.ngControl?.control;
-    if (control) {
-      return control.invalid && (control.touched || control.dirty);
-    }
-    const result = this.lookupResult();
-    return result.status === 'not-found' || result.status === 'failed';
-  }
-
-  errorMessage(): string {
-    this.controlState();
-    return this.ngControl?.control?.hasError('required') ? 'Access id is required' : 'Access id not valid';
   }
 
   private lookup(value: string): Observable<LookupResult> {
