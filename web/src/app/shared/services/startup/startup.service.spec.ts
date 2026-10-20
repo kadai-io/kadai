@@ -16,6 +16,7 @@
  *
  */
 
+import { DOCUMENT } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -124,6 +125,53 @@ describe('StartupService', () => {
 
       await vi.waitFor(() => expect(windowMock.nativeWindow.location.href).toBe(loginUrl));
       expect(isSettled()).toBe(false);
+    });
+
+    describe('with a custom login path', () => {
+      const appOrigin = () => new URL(TestBed.inject(DOCUMENT).baseURI).origin;
+      const redirectedTo = (url: string) => new HttpErrorResponse({ status: 200, url });
+
+      it.each([
+        ['an absolute login url', 'http://host/kadai/signin', 'http://host/kadai/signin'],
+        [
+          'an OAuth login url',
+          'http://host/oauth2/authorization/provider',
+          'http://host/oauth2/authorization/provider'
+        ],
+        ['a query string on the redirect', 'http://host/kadai/signin', 'http://host/kadai/signin?continue'],
+        ['a trailing slash on the redirect', 'http://host/kadai/signin', 'http://host/kadai/signin/']
+      ])(
+        'should redirect when the request was redirected to the configured login page (%s)',
+        async (_, configured, actual) => {
+          runtimeConfigServiceMock.kadaiLoginUrl = configured;
+          failUserInformation(redirectedTo(actual));
+
+          const { isSettled } = startLoad();
+
+          await vi.waitFor(() => expect(windowMock.nativeWindow.location.href).toBe(configured));
+          expect(isSettled()).toBe(false);
+        }
+      );
+
+      it('should resolve a relative login url against the application base url', async () => {
+        runtimeConfigServiceMock.kadaiLoginUrl = '/kadai/signin';
+        failUserInformation(redirectedTo(`${appOrigin()}/kadai/signin`));
+
+        startLoad();
+
+        await vi.waitFor(() => expect(windowMock.nativeWindow.location.href).toBe('/kadai/signin'));
+      });
+
+      it.each([
+        ['a different path', 'http://host/kadai/login'],
+        ['a different origin', 'http://other-host/kadai/signin']
+      ])('should not treat a redirect to %s as authentication failure', async (_, actual) => {
+        runtimeConfigServiceMock.kadaiLoginUrl = 'http://host/kadai/signin';
+        failUserInformation(redirectedTo(actual));
+
+        await expect(startLoad().promise).resolves.toBe(true);
+        expect(windowMock.nativeWindow.location.href).toBe('');
+      });
     });
 
     it('should start without a user session on 401 when no login url is configured', async () => {

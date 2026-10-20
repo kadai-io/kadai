@@ -18,7 +18,7 @@
 
 import { firstValueFrom } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { DOCUMENT, inject, Injectable } from '@angular/core';
 import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
 import { WindowRefService } from 'app/shared/services/window/window.service';
 import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
@@ -30,6 +30,7 @@ export class StartupService {
   private kadaiEngineService = inject(KadaiEngineService);
   private runtimeConfigService = inject(RuntimeConfigService);
   private window = inject(WindowRefService);
+  private document = inject(DOCUMENT);
 
   async load(): Promise<void> {
     await this.runtimeConfigService.load();
@@ -37,7 +38,7 @@ export class StartupService {
       await firstValueFrom(this.kadaiEngineService.getUserInformation());
     } catch (error) {
       const loginUrl = this.runtimeConfigService.kadaiLoginUrl;
-      if (isAuthenticationError(error) && loginUrl) {
+      if (loginUrl && isAuthenticationError(error, loginUrl, this.document.baseURI)) {
         this.window.nativeWindow.location.href = loginUrl;
         return new Promise<never>(() => {});
       }
@@ -48,10 +49,30 @@ export class StartupService {
 
 // Spring Security answers unauthenticated XHR requests either with 401 or with a redirect to the
 // login page, which the browser follows transparently. In the latter case the response URL
-// points to the login page and parsing its HTML as JSON fails.
-function isAuthenticationError(error: unknown): boolean {
+// points to the configured login page and parsing its HTML as JSON fails.
+function isAuthenticationError(error: unknown, loginUrl: string, baseUrl: string): boolean {
   if (!(error instanceof HttpErrorResponse)) {
     return false;
   }
-  return error.status === 401 || /\/login(?:[?#]|$)/.test(error.url ?? '');
+  return error.status === 401 || isSameEndpoint(error.url, loginUrl, baseUrl);
+}
+
+function isSameEndpoint(actualUrl: string | null, expectedUrl: string, baseUrl: string): boolean {
+  if (!actualUrl) {
+    return false;
+  }
+  try {
+    const actual = new URL(actualUrl, baseUrl);
+    const expected = new URL(expectedUrl, baseUrl);
+    return (
+      actual.origin === expected.origin &&
+      withoutTrailingSlash(actual.pathname) === withoutTrailingSlash(expected.pathname)
+    );
+  } catch {
+    return false;
+  }
+}
+
+function withoutTrailingSlash(path: string): string {
+  return path.length > 1 ? path.replace(/\/+$/, '') : path;
 }
