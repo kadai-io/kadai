@@ -133,14 +133,14 @@ describe('TypeAheadComponent', () => {
         expect(valueChanges).toHaveBeenCalledTimes(1);
       });
 
-      it('should clear the field when null is written', async () => {
+      it('should clear the field when null is written without emitting a selection', async () => {
         host.control.setValue('user-1-1');
         host.control.setValue(null);
         await settle();
 
         expect(input().value).toBe('');
         expect(typeAhead.name()).toBe('');
-        expect(host.selected.at(-1)).toBeNull();
+        expect(host.selected).toEqual([users[0]]);
       });
 
       it('should restore the previous value on reset (undo)', async () => {
@@ -169,7 +169,7 @@ describe('TypeAheadComponent', () => {
         expect(host.control.value).toBe('user-1-2');
         expect(searchForAccessId).toHaveBeenCalledTimes(1);
         expect(typeAhead.name()).toBe('Erika Musterfrau');
-        expect(host.selected).toEqual([users[1]]);
+        expect(host.selected).toEqual([null, users[1]]);
       });
 
       it('should debounce consecutive input into a single lookup', () => {
@@ -189,7 +189,7 @@ describe('TypeAheadComponent', () => {
         vi.advanceTimersByTime(DEBOUNCE_MS);
 
         expect(typeAhead.name()).toBe('Max Mustermann');
-        expect(host.selected).toEqual([users[0]]);
+        expect(host.selected).toEqual([null, users[0]]);
       });
 
       it('should offer the search results as autocomplete options', () => {
@@ -237,7 +237,7 @@ describe('TypeAheadComponent', () => {
           .triggerEventHandler('optionSelected', { option: { value: 'user-1-2' } } as MatAutocompleteSelectedEvent);
 
         expect(host.control.value).toBe('user-1-2');
-        expect(host.selected).toEqual([users[1]]);
+        expect(host.selected).toEqual([null, users[1]]);
       });
     });
 
@@ -257,7 +257,27 @@ describe('TypeAheadComponent', () => {
         fixture.detectChanges();
 
         expect(typeAhead.name()).toBe('Erika Musterfrau');
-        expect(host.selected).toEqual([users[1]]);
+        expect(host.selected).toEqual([null, users[1]]);
+      });
+
+      it('should ignore a response that arrives while the next input is still debounced', () => {
+        const first$ = new Subject<AccessId[]>();
+        searchForAccessId.mockReturnValueOnce(first$);
+
+        type('user-1-1');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+        type('user-1-2');
+        vi.advanceTimersByTime(DEBOUNCE_MS / 2);
+
+        first$.next([users[0]]);
+        fixture.detectChanges();
+
+        expect(typeAhead.name()).toBe('');
+        expect(host.selected).toEqual([null]);
+
+        vi.advanceTimersByTime(DEBOUNCE_MS / 2);
+        expect(typeAhead.name()).toBe('Erika Musterfrau');
+        expect(host.selected).toEqual([null, users[1]]);
       });
 
       it('should not let a pending debounced value overwrite a later external write', async () => {
@@ -300,6 +320,41 @@ describe('TypeAheadComponent', () => {
         type('');
 
         expect(host.selected).toEqual([]);
+      });
+    });
+
+    describe('selection', () => {
+      it('should invalidate the previous selection as soon as a new value is committed, before the lookup answers', () => {
+        host.control.setValue('user-1-1');
+        const pending$ = new Subject<AccessId[]>();
+        searchForAccessId.mockReturnValueOnce(pending$);
+
+        type('user-1-2');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+
+        expect(host.control.value).toBe('user-1-2');
+        expect(host.selected).toEqual([users[0], null]);
+        expect(typeAhead.name()).toBe('');
+
+        pending$.next([users[1]]);
+        expect(host.selected).toEqual([users[0], null, users[1]]);
+      });
+
+      it('should keep the parent data for a written value that is missing from the search results', () => {
+        host.control.setValue('ab');
+        fixture.detectChanges();
+
+        expect(searchForAccessId).toHaveBeenCalledWith('ab');
+        expect(typeAhead.lookupResult().status).toBe('not-found');
+        expect(host.selected).toEqual([]);
+      });
+
+      it('should invalidate the parent data when the user replaces a value that was never found', () => {
+        host.control.setValue('ab');
+        type('user-1-1');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+
+        expect(host.selected).toEqual([null, users[0]]);
       });
     });
 
@@ -422,7 +477,7 @@ describe('TypeAheadComponent', () => {
     it('should emit the selected access id', () => {
       typeAndSettle('user-1-1');
 
-      expect(fixture.componentInstance.selected).toEqual([users[0]]);
+      expect(fixture.componentInstance.selected).toEqual([null, users[0]]);
     });
 
     it('should display an error from the lookup result when no exact match is found', () => {

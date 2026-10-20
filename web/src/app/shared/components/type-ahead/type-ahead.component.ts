@@ -106,6 +106,8 @@ export class TypeAheadComponent implements ControlValueAccessor, AfterContentIni
   private readonly controlState = signal(0);
   private lastCommittedValue = '';
   private selection: AccessId | null = null;
+  // undefined: the parent holds its own data for the current value (initial state or after writeValue).
+  private lastEmitted: AccessId | null | undefined = undefined;
   private onChange: (value: string | null) => void = () => {};
   private onTouched: () => void = () => {};
 
@@ -133,12 +135,17 @@ export class TypeAheadComponent implements ControlValueAccessor, AfterContentIni
       .subscribe((value) => {
         this.lastCommittedValue = value;
         this.onChange(value || null);
+        // The name of the previous selection must never stay attached to a new value, even until the lookup answers.
+        if (this.selection?.accessId !== value) {
+          this.resetSelection();
+          this.emitSelection(null);
+        }
         this.lookup$.next(value);
       });
 
     this.lookup$
       .pipe(
-        switchMap((value) => this.lookup(value)),
+        switchMap((value) => this.lookup(value).pipe(takeUntil(this.inputControl.valueChanges))),
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe((result) => this.applyLookupResult(result));
@@ -155,6 +162,10 @@ export class TypeAheadComponent implements ControlValueAccessor, AfterContentIni
     this.written$.next();
     this.inputControl.setValue(accessId, { emitEvent: false });
     this.lastCommittedValue = accessId;
+    if (this.selection?.accessId !== accessId) {
+      this.resetSelection();
+      this.lastEmitted = undefined;
+    }
     this.lookup$.next(accessId);
   }
 
@@ -196,17 +207,32 @@ export class TypeAheadComponent implements ControlValueAccessor, AfterContentIni
     );
   }
 
+  // Only a found match changes the selection. A value missing from the search results may still be a valid
+  // access id (the search needs at least 3 characters and its results are capped), so it keeps the parent's data.
   private applyLookupResult(result: LookupResult): void {
     this.lookupResult.set(result);
     this.filteredAccessIds.set(result.status === 'found' || result.status === 'not-found' ? result.accessIds : []);
-    const selection = result.status === 'found' ? result.match : null;
-    this.name.set(selection?.name ?? '');
-    if (selection?.accessId === this.selection?.accessId) {
+    if (result.status !== 'found') {
       return;
     }
-    this.selection = selection;
-    if (selection || this.emitEmptySelection()) {
-      this.accessIdSelected.emit(selection);
+    this.name.set(result.match.name ?? '');
+    this.selection = result.match;
+    this.emitSelection(result.match);
+  }
+
+  private emitSelection(selection: AccessId | null): void {
+    if (!selection && !this.emitEmptySelection()) {
+      return;
     }
+    if (this.lastEmitted !== undefined && this.lastEmitted?.accessId === selection?.accessId) {
+      return;
+    }
+    this.lastEmitted = selection;
+    this.accessIdSelected.emit(selection);
+  }
+
+  private resetSelection(): void {
+    this.selection = null;
+    this.name.set('');
   }
 }

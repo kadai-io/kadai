@@ -19,6 +19,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketAccessItemsComponent } from './workbasket-access-items.component';
 import { DebugElement } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { Observable, of, Subject } from 'rxjs';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
@@ -38,6 +39,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import { AccessIdsService } from 'app/shared/services/access-ids/access-ids.service';
+import { TypeAheadComponent } from 'app/shared/components/type-ahead/type-ahead.component';
+import { AccessId } from 'app/shared/models/access-id';
 
 describe('WorkbasketAccessItemsComponent', () => {
   let fixture: ComponentFixture<WorkbasketAccessItemsComponent>;
@@ -671,5 +674,26 @@ describe('WorkbasketAccessItemsComponent', () => {
     fixture.detectChanges();
     const newRowCount = debugElement.nativeElement.querySelectorAll('tbody tr').length;
     expect(newRowCount).toBe(initialRowCount - 1);
+  });
+
+  it('should never save a new access id together with the previous access name while the lookup is pending', () => {
+    const accessIdsService = TestBed.inject(AccessIdsService);
+    const pendingSearch$ = new Subject<AccessId[]>();
+    vi.spyOn(accessIdsService, 'validateAccessId').mockReturnValue(of(true));
+    vi.spyOn(accessIdsService, 'searchForAccessId').mockReturnValue(pendingSearch$);
+    vi.useFakeTimers();
+    fixture.detectChanges();
+
+    const row = component.accessItemsGroups.controls[0];
+    const typeAhead: TypeAheadComponent = debugElement.queryAll(By.directive(TypeAheadComponent))[0].componentInstance;
+    typeAhead.inputControl.setValue('new-user');
+    vi.advanceTimersByTime(typeAhead.debounceMs());
+
+    expect(row.value.accessId).toBe('new-user');
+    expect(row.value.accessName).toBe('');
+
+    pendingSearch$.next([{ accessId: 'new-user', name: 'New User' }]);
+    expect(row.value.accessName).toBe('New User');
+    vi.useRealTimers();
   });
 });
