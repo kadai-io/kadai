@@ -16,47 +16,65 @@
  *
  */
 
-import { Directive, ElementRef, HostListener, inject, Renderer2 } from '@angular/core';
+import { Directive, ElementRef, inject, Renderer2 } from '@angular/core';
 
-@Directive({ selector: '[kadaiResizableWidth]' })
+@Directive({
+  selector: '[kadaiResizableWidth]',
+  host: {
+    '(mouseover)': 'onMouseover()',
+    '(mouseout)': 'onMouseout()',
+    '(mousedown)': 'onMousedown($event)',
+    '(document:mousemove)': 'onMousemove($event)',
+    '(document:mouseup)': 'onMouseup()'
+  }
+})
 export class ResizableWidthDirective {
   private renderer = inject(Renderer2);
   private el = inject(ElementRef);
 
   private startX: number | null = null;
 
-  @HostListener('mouseover')
   onMouseover() {
     this.renderer.setStyle(document.body, 'cursor', 'col-resize');
     this.renderer.setStyle(this.el.nativeElement, 'user-select', 'none');
   }
 
-  @HostListener('mouseout')
   onMouseout() {
     this.renderer.setStyle(document.body, 'cursor', '');
     this.renderer.setStyle(this.el.nativeElement, 'user-select', '');
   }
 
-  @HostListener('mousedown', ['$event'])
   onMousedown(event: MouseEvent) {
     this.startX = event.pageX;
   }
 
-  @HostListener('document:mousemove', ['$event'])
   onMousemove(event: MouseEvent) {
-    if (this.startX) {
+    if (this.startX !== null) {
+      const target = this.resizeTarget();
       const movementX = event.pageX - this.startX;
-      const newWidth = this.el.nativeElement.clientWidth + movementX;
+      const newWidth = target.clientWidth + movementX;
 
-      this.renderer.setStyle(this.el.nativeElement, 'min-width', `${newWidth}px`);
-      this.renderer.setStyle(this.el.nativeElement, 'width', `${newWidth}px`);
+      this.renderer.setStyle(target, 'min-width', `${newWidth}px`);
+      this.renderer.setStyle(target, 'width', `${newWidth}px`);
 
       this.startX = event.pageX;
     }
   }
 
-  @HostListener('document:mouseup')
   onMouseup() {
     this.startX = null;
+  }
+
+  // A table column is as wide as its widest cell, so all cells of a column resize the same header cell.
+  // Otherwise a cell widened in one row would keep the column from shrinking when dragged in another row.
+  private resizeTarget(): HTMLElement {
+    const host: HTMLElement = this.el.nativeElement;
+    if (host instanceof HTMLTableCellElement) {
+      const headerCell = host.closest('table')?.tHead?.rows[0]?.cells[host.cellIndex];
+      if (headerCell) {
+        return headerCell;
+      }
+    }
+    return host;
   }
 }

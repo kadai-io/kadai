@@ -102,3 +102,66 @@ describe('ResizableDirective', () => {
     expect(inputElement.style.width).toBe('');
   });
 });
+
+@Component({
+  imports: [ResizableWidthDirective],
+  template: `
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th id="header" kadaiResizableWidth>AccessID</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td></td>
+          <td id="first-row" kadaiResizableWidth></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td id="second-row" kadaiResizableWidth></td>
+        </tr>
+      </tbody>
+    </table>
+  `
+})
+class TableTestComponent {}
+
+describe('ResizableDirective in a table', () => {
+  let fixture: ComponentFixture<TableTestComponent>;
+  const cell = (id: string): HTMLElement => fixture.nativeElement.querySelector(`#${id}`);
+
+  const drag = (element: HTMLElement, from: number, to: number) => {
+    const mousedown = new MouseEvent('mousedown', { bubbles: true });
+    Object.defineProperty(mousedown, 'pageX', { value: from });
+    element.dispatchEvent(mousedown);
+    const mousemove = new MouseEvent('mousemove', { bubbles: true });
+    Object.defineProperty(mousemove, 'pageX', { value: to });
+    document.dispatchEvent(mousemove);
+    document.dispatchEvent(new MouseEvent('mouseup'));
+  };
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ imports: [TableTestComponent] });
+    fixture = TestBed.createComponent(TableTestComponent);
+    fixture.detectChanges();
+  });
+
+  it('should resize the column through its header cell when a body cell is dragged', () => {
+    drag(cell('first-row'), 100, 220);
+
+    expect(cell('header').style.width).toBe('120px');
+    expect(cell('header').style.minWidth).toBe('120px');
+    expect(cell('first-row').style.width).toBe('');
+  });
+
+  it('should let every row of the column resize the same width', () => {
+    drag(cell('first-row'), 100, 220);
+    drag(cell('second-row'), 0, 50);
+
+    expect(cell('header').style.width).toBe('50px');
+    expect(cell('first-row').style.width).toBe('');
+    expect(cell('second-row').style.width).toBe('');
+  });
+});

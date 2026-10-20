@@ -92,9 +92,11 @@
                   <td
                     [class.has-warning]="accessItemsClone()[index].accessId !== accessItem.value.accessId"
                 		[class.has-error]="accessItem.get('accessId')?.invalid && accessItem.get('accessId')?.touched"
-                    class="workbasket-access-items__typeahead">
+                    class="workbasket-access-items__typeahead"
+                    kadaiResizableWidth>
                     <kadai-shared-type-ahead
                       (accessIdEventEmitter)="accessItemSelected($event, index)"
+                      (mousedown)="$event.stopPropagation()"
                       [displayError]="true"
                       [isRequired]="true"
                       [savedAccessId]="accessItem"
@@ -102,8 +104,9 @@
                       placeHolderMessage="Access id"/>
                   </td>
                 } @else {
-                  <td>
-                    <div [class.has-warning]="accessItemsClone()[index].accessId !== accessItem.value.accessId"
+                  <td kadaiResizableWidth>
+                    <div (mousedown)="$event.stopPropagation()"
+                         [class.has-warning]="accessItemsClone()[index].accessId !== accessItem.value.accessId"
                          [class.has-error]="accessIdField.hasError">
                       <input #htmlInputElement
                              #accessIdField="kadaiFormField"
