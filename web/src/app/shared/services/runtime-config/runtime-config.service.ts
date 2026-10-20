@@ -48,8 +48,8 @@ export const RUNTIME_CONFIG_DEFAULTS = new InjectionToken<Readonly<RuntimeConfig
   providedIn: 'root'
 })
 export class RuntimeConfigService {
-  private readonly httpClient = inject(HttpClient);
-  private readonly defaults = inject(RUNTIME_CONFIG_DEFAULTS);
+  private httpClient = inject(HttpClient);
+  private defaults = inject(RUNTIME_CONFIG_DEFAULTS);
   private readonly _config = signal<Readonly<RuntimeConfig>>({ ...this.defaults });
 
   readonly config = this._config.asReadonly();
