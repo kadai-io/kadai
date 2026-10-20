@@ -16,9 +16,9 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit, signal, viewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, viewChild } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
-import { firstValueFrom, Subject } from 'rxjs';
+import { firstValueFrom, of, Subject } from 'rxjs';
 import { SidenavService } from './shared/services/sidenav/sidenav.service';
 import { RequestInProgressService } from './shared/services/request-in-progress/request-in-progress.service';
 import { OrientationService } from './shared/services/orientation/orientation.service';
@@ -27,7 +27,7 @@ import { KadaiEngineService } from './shared/services/kadai-engine/kadai-engine.
 import { WindowRefService } from 'app/shared/services/window/window.service';
 import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
-import { map, takeUntil } from 'rxjs/operators';
+import { catchError, map, takeUntil } from 'rxjs/operators';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { UserInformationComponent } from './shared/components/user-information/user-information.component';
@@ -58,7 +58,15 @@ import { toSignal } from '@angular/core/rxjs-interop';
 })
 export class AppComponent implements OnInit, OnDestroy {
   requestInProgress = toSignal(inject(RequestInProgressService).getRequestInProgress(), { initialValue: false });
-  version = signal<string>('');
+  version = toSignal(
+    inject(KadaiEngineService)
+      .getVersion()
+      .pipe(
+        map((r) => r.version),
+        catchError(() => of(''))
+      ),
+    { initialValue: '' }
+  );
   toggle: boolean = false;
   destroy$ = new Subject<void>();
   public sidenav = viewChild<MatSidenav>('sidenav');
@@ -80,17 +88,6 @@ export class AppComponent implements OnInit, OnDestroy {
         this.selectedRouteService.selectRoute(event);
       }
     });
-
-    this.kadaiEngineService
-      .getVersion()
-      .pipe(
-        map((r) => r.version),
-        takeUntil(this.destroy$)
-      )
-      .subscribe({
-        next: (ver) => this.version.set(ver),
-        error: (err) => console.error('Failed to load version:', err)
-      });
   }
 
   async logout(): Promise<void> {
