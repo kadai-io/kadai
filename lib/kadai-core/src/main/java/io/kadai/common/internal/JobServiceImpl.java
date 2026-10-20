@@ -46,8 +46,11 @@ public class JobServiceImpl implements JobService {
   @Override
   public ScheduledJob createJob(ScheduledJob job) {
     initializeDefaultJobProperties(job);
-    Integer id = kadaiEngineImpl.executeInDatabaseConnection(() -> jobMapper.insertJob(job));
-    job.setJobId(id);
+    kadaiEngineImpl.executeInDatabaseConnection(
+        () -> {
+          job.setJobId(jobMapper.nextJobId());
+          jobMapper.insertJob(job);
+        });
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Created job {}", job);
     }

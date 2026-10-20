@@ -80,7 +80,7 @@ class UserControllerIntTest {
 
   @Test
   void should_ReturnExistingUsers() {
-    String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?user-id=user-1-1&user-id=USER-1-2";
+    String url = restHelper.toUrl(RestEndpoints.URL_USERS) + "?user-id=user-1-1&user-id=user-1-2";
 
     ResponseEntity<UserCollectionRepresentationModel> responseEntity =
         restClient
@@ -155,7 +155,7 @@ class UserControllerIntTest {
   void should_ReturnExistingUsersAndCurrentUser() {
     String url =
         restHelper.toUrl(RestEndpoints.URL_USERS)
-            + "?user-id=user-1-1&user-id=USER-1-2&current-user";
+            + "?user-id=user-1-1&user-id=user-1-2&current-user";
 
     ResponseEntity<UserCollectionRepresentationModel> responseEntity =
         restClient

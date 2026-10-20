@@ -24,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.kadai.KadaiConfiguration;
 import io.kadai.classification.rest.models.ClassificationSummaryRepresentationModel;
 import io.kadai.common.internal.util.Pair;
 import io.kadai.common.rest.RestEndpoints;
@@ -49,7 +48,6 @@ import io.kadai.task.rest.routing.IntegrationTestTaskRouter;
 import io.kadai.workbasket.rest.models.WorkbasketSummaryRepresentationModel;
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -99,7 +97,6 @@ class TaskControllerIntTest {
 
   private final RestHelper restHelper;
   private final RestClient restClient;
-  @Autowired KadaiConfiguration kadaiConfiguration;
 
   @Autowired
   TaskControllerIntTest(RestHelper restHelper, RestClient restClient) {
@@ -1547,12 +1544,7 @@ class TaskControllerIntTest {
     }
 
     @Test
-    void should_GroupByPor() throws Exception {
-      Field useSpecificDb2Taskquery =
-          kadaiConfiguration.getClass().getDeclaredField("useSpecificDb2Taskquery");
-      useSpecificDb2Taskquery.setAccessible(true);
-      useSpecificDb2Taskquery.setBoolean(kadaiConfiguration, true);
-
+    void should_GroupByPor() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?group-by=POR_VALUE";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
           restClient
@@ -1571,17 +1563,10 @@ class TaskControllerIntTest {
                   .map(TaskSummaryRepresentationModel::getGroupByCount)
                   .toArray())
           .containsExactly(6);
-
-      useSpecificDb2Taskquery.setBoolean(kadaiConfiguration, false);
     }
 
     @Test
-    void should_GroupBySor() throws Exception {
-      Field useSpecificDb2Taskquery =
-          kadaiConfiguration.getClass().getDeclaredField("useSpecificDb2Taskquery");
-      useSpecificDb2Taskquery.setAccessible(true);
-      useSpecificDb2Taskquery.setBoolean(kadaiConfiguration, true);
-
+    void should_GroupBySor() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?group-by-sor=Type2";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
           restClient
@@ -1599,8 +1584,6 @@ class TaskControllerIntTest {
                   .map(TaskSummaryRepresentationModel::getGroupByCount)
                   .toArray())
           .containsExactly(2);
-
-      useSpecificDb2Taskquery.setBoolean(kadaiConfiguration, false);
     }
 
     @Test

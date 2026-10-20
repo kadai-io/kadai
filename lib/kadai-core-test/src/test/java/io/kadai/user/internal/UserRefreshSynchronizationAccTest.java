@@ -16,11 +16,14 @@
 
 package io.kadai.user.internal;
 
+import static io.kadai.common.internal.util.CheckedSupplier.rethrowing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.internal.jobs.PlainJavaTransactionProvider;
+import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import io.kadai.testapi.KadaiInject;
 import io.kadai.testapi.KadaiIntegrationTest;
 import io.kadai.testapi.security.WithAccessId;
@@ -49,11 +52,15 @@ class UserRefreshSynchronizationAccTest {
   @KadaiInject UserService userService;
 
   UserServiceImpl userServiceImpl;
+  KadaiTransactionProvider transactionProvider;
 
   @BeforeEach
   @WithAccessId(user = "businessadmin")
   void setUp() throws Exception {
     userServiceImpl = (UserServiceImpl) userService;
+    transactionProvider =
+        new PlainJavaTransactionProvider(
+            kadaiEngine, kadaiEngine.getConfiguration().getDataSource());
     userServiceImpl.deleteAllUsersGroupsPermissions();
     dropGuardTable();
   }
@@ -138,7 +145,7 @@ class UserRefreshSynchronizationAccTest {
 
   @Test
   @WithAccessId(user = "businessadmin")
-  void should_RollBackDirectSynchronizationAfterLateFailure() throws Exception {
+  void should_RollBackSynchronizationAfterLateFailure() throws Exception {
     create(user("a-change", "Old", "old", Set.of("g-old"), Set.of("p-old")));
     create(user("z-protected", "Protected", null, Set.of("g-protected"), Set.of()));
     createGuardReference("z-protected");
@@ -177,6 +184,30 @@ class UserRefreshSynchronizationAccTest {
 
   @Test
   @WithAccessId(user = "businessadmin")
+  void should_RollBackWhenCallerFailsAfterSynchronization() throws Exception {
+    create(user("existing", "Old", "old", Set.of("old-group"), Set.of("old-permission")));
+    Map<String, List<List<String>>> before = dumpTables();
+    KadaiEngine.ConnectionManagementMode previousMode = kadaiEngine.getConnectionManagementMode();
+    PreparedUserRefreshInput prepared =
+        userServiceImpl.prepareUserRefresh(
+            List.of(
+                user("replacement", "New", "new", Set.of("new-group"), Set.of("new-permission"))));
+
+    assertThatThrownBy(
+            () -> transactionProvider.executeInTransaction(
+                rethrowing(() -> {
+                  userServiceImpl.synchronizeUsers(prepared, BATCH_SIZE);
+                  throw new IllegalStateException("Caller failed after synchronization");
+                })))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessage("Caller failed after synchronization");
+
+    assertThat(dumpTables()).isEqualTo(before);
+    assertThat(kadaiEngine.getConnectionManagementMode()).isEqualTo(previousMode);
+  }
+
+  @Test
+  @WithAccessId(user = "businessadmin")
   void should_RejectInvalidBatchSizeBeforeWrites() {
     PreparedUserRefreshInput prepared = userServiceImpl.prepareUserRefresh(List.of());
 
@@ -191,7 +222,8 @@ class UserRefreshSynchronizationAccTest {
 
   private UserRefreshResult synchronize(List<User> users, int batchSize) throws Exception {
     PreparedUserRefreshInput prepared = userServiceImpl.prepareUserRefresh(users);
-    return userServiceImpl.synchronizeUsers(prepared, batchSize);
+    return transactionProvider.executeInTransaction(
+        rethrowing(() -> userServiceImpl.synchronizeUsers(prepared, batchSize)));
   }
 
   private void create(User user) throws Exception {

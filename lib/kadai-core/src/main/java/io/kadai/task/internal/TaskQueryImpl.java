@@ -2314,11 +2314,15 @@ public class TaskQueryImpl implements TaskQuery {
   }
 
   public boolean isJoinWithUserInfoForTaskSummary() {
-    return addAdditionalUserInfo || hasOwnerLongNameFilter() || orderByOwnerLongName;
+    return (addAdditionalUserInfo && !selectAndClaim)
+        || hasOwnerLongNameFilter()
+        || orderByOwnerLongName;
   }
 
   public boolean isJoinWithCreatorUserInfoForTaskSummary() {
-    return addAdditionalUserInfo || hasCreatorLongNameFilter() || orderByCreatorLongName;
+    return (addAdditionalUserInfo && !selectAndClaim)
+        || hasCreatorLongNameFilter()
+        || orderByCreatorLongName;
   }
 
   public boolean isJoinWithUserInfoForCount() {

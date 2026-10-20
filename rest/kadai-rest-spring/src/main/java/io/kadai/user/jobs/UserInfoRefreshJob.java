@@ -168,9 +168,11 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
 
   private UserRefreshResult synchronizeTransactionally(
       UserServiceImpl userService, PreparedUserRefreshInput input) {
-    return KadaiTransactionProvider.executeInTransactionIfPossible(
-        txProvider,
-          () -> {
+    if (txProvider == null) {
+      throw new IllegalStateException("User refresh requires a transaction provider");
+    }
+    return txProvider.executeInTransaction(
+        () -> {
           lockGuard.renewOrThrow();
           UserRefreshResult result;
           try {
@@ -182,5 +184,4 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
           return result;
         });
   }
-
 }
