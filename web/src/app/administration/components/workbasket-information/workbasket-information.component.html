@@ -82,6 +82,7 @@
               @if (lookupField()) {
                 <kadai-shared-type-ahead [(ngModel)]="workbasket()!.owner"
                                          [displayError]="true"
+                                         [required]="true"
                                          kadaiAccessIdExists
                                          name="workbasket.owner"
                                          placeholder="Owner" />

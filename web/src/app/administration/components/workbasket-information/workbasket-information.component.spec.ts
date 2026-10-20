@@ -199,6 +199,18 @@ describe('WorkbasketInformationComponent', () => {
     expect(component.workbasket()!.owner).toBe('user-test');
   });
 
+  it('should require an owner when the owner is looked up', async () => {
+    await fixture.whenStable();
+    const onSaveSpy = vi.spyOn(component, 'onSave');
+    const ownerControl = component.workbasketForm()!.form.controls['workbasket.owner'];
+
+    ownerControl.setValue('');
+    await component.onSubmit();
+
+    expect(ownerControl.hasError('required')).toBe(true);
+    expect(onSaveSpy).not.toHaveBeenCalled();
+  });
+
   it('should handle workbasket customization without owner config', () => {
     const engineConfigWithoutOwner = {
       ...engineConfigurationMock,
