@@ -16,8 +16,11 @@
  *
  */
 
-export const environment = {
+import { BuildEnvironment } from './build-environment';
+
+export const environment: BuildEnvironment = Object.freeze({
   production: true,
   kadaiRestUrl: '/kadai/api',
-  kadaiLogoutUrl: '/kadai/logout'
-};
+  kadaiLogoutUrl: '/kadai/logout',
+  kadaiLoginUrl: '/kadai/login'
+});

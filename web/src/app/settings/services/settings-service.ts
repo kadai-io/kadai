@@ -19,27 +19,28 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Settings } from '../models/settings';
-import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SettingsRepresentation } from '../models/settings-representation';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SettingsService {
   private httpClient = inject(HttpClient);
+  private runtimeConfigService = inject(RuntimeConfigService);
 
   // GET
   getSettings(): Observable<Settings> {
     return this.httpClient
-      .get<SettingsRepresentation>(`${environment.kadaiRestUrl}/v1/config/custom-attributes`)
+      .get<SettingsRepresentation>(`${this.runtimeConfigService.kadaiRestUrl}/v1/config/custom-attributes`)
       .pipe(map((b) => b.customAttributes));
   }
 
   // PUT
   updateSettings(settings: Settings) {
-    return this.httpClient.put<Settings>(`${environment.kadaiRestUrl}/v1/config/custom-attributes`, {
+    return this.httpClient.put<Settings>(`${this.runtimeConfigService.kadaiRestUrl}/v1/config/custom-attributes`, {
       customAttributes: settings
     });
   }

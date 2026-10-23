@@ -40,6 +40,7 @@ import { selectedWorkbasketMock } from '../../../shared/store/mock-data/mock-sto
 import { Task } from '../../models/task';
 import { ObjectReference } from '../../models/object-reference';
 import { Direction, TaskQuerySortParameter } from '../../../shared/models/sorting';
+import { signal } from '@angular/core';
 
 const mockWorkbasket = selectedWorkbasketMock;
 const mockTask = new Task('TKI:001', new ObjectReference(), mockWorkbasket);
@@ -51,7 +52,7 @@ describe('TaskListToolbarComponent', () => {
   let workbasketServiceMock: Partial<WorkbasketService>;
   let routerMock: Partial<Router>;
   let queryParams$: Subject<any>;
-  let kadaiEngineServiceMock: Partial<KadaiEngineService>;
+  let currentUserInfoSignal: ReturnType<typeof signal<UserInfo | undefined>>;
 
   beforeEach(async () => {
     workbasketServiceMock = {
@@ -64,8 +65,11 @@ describe('TaskListToolbarComponent', () => {
     };
 
     queryParams$ = new Subject();
+    currentUserInfoSignal = signal<UserInfo | undefined>(new UserInfo('no-match-user', [], []));
 
-    kadaiEngineServiceMock = { currentUserInfo: new UserInfo('no-match-user', [], []) };
+    const kadaiEngineServiceMock = {
+      currentUserInfo: currentUserInfoSignal.asReadonly()
+    };
 
     await TestBed.configureTestingModule({
       imports: [TaskListToolbarComponent],
@@ -91,7 +95,7 @@ describe('TaskListToolbarComponent', () => {
 
   describe('ngOnInit', () => {
     it('selects the workbasket matching the current user and dispatches SelectWorkbasket', () => {
-      TestBed.inject(KadaiEngineService).currentUserInfo = new UserInfo(mockWorkbasket.key ?? '', [], []);
+      currentUserInfoSignal.set(new UserInfo(mockWorkbasket.key ?? '', [], []));
 
       component.ngOnInit();
       queryParams$.next({});
@@ -137,7 +141,7 @@ describe('TaskListToolbarComponent', () => {
     it('skips a nameless workbasket and falls back to empty name/id for the matched user workbasket', () => {
       const namelessWorkbasket = { ...mockWorkbasket, name: undefined, workbasketId: undefined, key: 'no-name' };
       (workbasketServiceMock.getAllWorkBaskets as any).mockReturnValue(of({ workbaskets: [namelessWorkbasket] }));
-      TestBed.inject(KadaiEngineService).currentUserInfo = new UserInfo('no-name', [], []);
+      currentUserInfoSignal.set(new UserInfo('no-name', [], []));
 
       component.ngOnInit();
       queryParams$.next({});
@@ -172,7 +176,7 @@ describe('TaskListToolbarComponent', () => {
     });
 
     it('applies the previously selected workbasket name/id when returning to the workbaskets tab', () => {
-      TestBed.inject(KadaiEngineService).currentUserInfo = new UserInfo(mockWorkbasket.key ?? '', [], []);
+      currentUserInfoSignal.set(new UserInfo(mockWorkbasket.key ?? '', [], []));
       component.ngOnInit();
       queryParams$.next({});
 

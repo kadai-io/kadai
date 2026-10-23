@@ -16,58 +16,67 @@
  *
  */
 
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from 'environments/environment';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, map, tap, timeout } from 'rxjs/operators';
 import { UserInfo } from 'app/shared/models/user-info';
 import { Version } from 'app/shared/models/version';
-import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
+
+export const LOGOUT_TIMEOUT_MS = 3000;
 
 @Injectable({
   providedIn: 'root'
 })
 export class KadaiEngineService {
-  currentUserInfo!: UserInfo;
   private httpClient = inject(HttpClient);
+  private runtimeConfigService = inject(RuntimeConfigService);
 
-  getUserInformation(): Promise<any> {
-    return this.httpClient
-      .get<any>(`${environment.kadaiRestUrl}/v1/current-user-info`)
-      .pipe(
-        map((data) => {
-          this.currentUserInfo = data;
-        })
-      )
-      .toPromise();
+  private readonly _currentUserInfo = signal<UserInfo | undefined>(undefined);
+  readonly currentUserInfo = this._currentUserInfo.asReadonly();
+
+  getUserInformation(): Observable<UserInfo> {
+    return this.httpClient.get<UserInfo>(`${this.runtimeConfigService.kadaiRestUrl}/v1/current-user-info`).pipe(
+      tap((data) => this._currentUserInfo.set(data)),
+      catchError((error) => {
+        this._currentUserInfo.set(undefined);
+        return throwError(() => error);
+      })
+    );
   }
 
-  hasRole(roles2Find: string[]): boolean {
-    if (!this.currentUserInfo || this.currentUserInfo.roles.length < 1) {
+  hasRole(rolesToFind: string[]): boolean {
+    const user = this._currentUserInfo();
+    if (!user || !user.roles || user.roles.length === 0) {
       return false;
     }
-    return !!this.findRole(roles2Find);
+    return user.roles.some((role) => rolesToFind.includes(role));
   }
 
   getVersion(): Observable<Version> {
-    return this.httpClient.get<Version>(`${environment.kadaiRestUrl}/v1/version`);
+    return this.httpClient.get<Version>(`${this.runtimeConfigService.kadaiRestUrl}/v1/version`);
   }
 
-  logout(): Observable<string> {
-    return this.httpClient.post<string>(`${environment.kadaiLogoutUrl}`, '');
+  logout(): Observable<void> {
+    return this.httpClient.post(this.runtimeConfigService.kadaiLogoutUrl, {}, { responseType: 'text' }).pipe(
+      timeout(LOGOUT_TIMEOUT_MS),
+      map(() => undefined),
+      catchError((error) => {
+        console.warn('Logout request failed or timed out, proceeding with redirect:', error);
+        return of(undefined);
+      }),
+      tap(() => this._currentUserInfo.set(undefined))
+    );
   }
 
   isCustomRoutingRulesEnabled(): Observable<boolean> {
     return this.httpClient
-      .get<boolean>(`${environment.kadaiRestUrl}/v1/routing-rules/routing-rest-enabled`)
+      .get<boolean>(`${this.runtimeConfigService.kadaiRestUrl}/v1/routing-rules/routing-rest-enabled`)
       .pipe(catchError(() => of(false)));
   }
 
   isHistoryProviderEnabled(): Observable<boolean> {
-    return this.httpClient.get<boolean>(`${environment.kadaiRestUrl}/v1/history-provider-enabled`);
-  }
-
-  private findRole(roles2Find: string[]) {
-    return this.currentUserInfo.roles.find((role) => roles2Find.some((roleLookingFor) => role === roleLookingFor));
+    return this.httpClient.get<boolean>(`${this.runtimeConfigService.kadaiRestUrl}/v1/history-provider-enabled`);
   }
 }

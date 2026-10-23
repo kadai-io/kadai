@@ -16,70 +16,63 @@
  *
  */
 
-import { firstValueFrom, of } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
-import { environment } from 'app/../environments/environment';
-import { inject, Injectable, Injector } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { DOCUMENT, inject, Injectable } from '@angular/core';
 import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
-import { catchError, tap } from 'rxjs/operators';
 import { WindowRefService } from 'app/shared/services/window/window.service';
-
-interface EnvironmentConfig {
-  kadaiRestUrl?: string;
-  kadaiLogoutUrl?: string;
-}
+import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StartupService {
-  private httpClient = inject(HttpClient);
   private kadaiEngineService = inject(KadaiEngineService);
-  private injector = inject(Injector);
+  private runtimeConfigService = inject(RuntimeConfigService);
   private window = inject(WindowRefService);
+  private document = inject(DOCUMENT);
 
-  public get router(): Router {
-    return this.injector.get(Router);
+  async load(): Promise<void> {
+    await this.runtimeConfigService.load();
+    try {
+      await firstValueFrom(this.kadaiEngineService.getUserInformation());
+    } catch (error) {
+      const loginUrl = this.runtimeConfigService.kadaiLoginUrl;
+      if (loginUrl && isAuthenticationError(error, loginUrl, this.document.baseURI)) {
+        this.window.nativeWindow.location.href = loginUrl;
+        return new Promise<never>(() => {});
+      }
+      console.error('Failed to load current user, starting without a user session:', error);
+    }
   }
+}
 
-  load(): Promise<EnvironmentConfig> {
-    return this.loadEnvironment();
+// Spring Security answers unauthenticated XHR requests either with 401 or with a redirect to the
+// login page, which the browser follows transparently. In the latter case the response URL
+// points to the configured login page and parsing its HTML as JSON fails.
+function isAuthenticationError(error: unknown, loginUrl: string, baseUrl: string): boolean {
+  if (!(error instanceof HttpErrorResponse)) {
+    return false;
   }
+  return error.status === 401 || isSameEndpoint(error.url, loginUrl, baseUrl);
+}
 
-  getEnvironmentFilePromise() {
-    return firstValueFrom(
-      this.httpClient.get<EnvironmentConfig>('environments/data-sources/environment-information.json').pipe(
-        tap((config) => {
-          if (config?.kadaiRestUrl) {
-            environment.kadaiRestUrl = config.kadaiRestUrl;
-          }
-
-          if (config?.kadaiLogoutUrl) {
-            environment.kadaiLogoutUrl = config.kadaiLogoutUrl;
-          }
-        }),
-        catchError((error) => {
-          console.warn('Failed to load environment configuration:', error);
-          return of(null);
-        })
-      )
-    ).then(() => void 0);
+function isSameEndpoint(actualUrl: string | null, expectedUrl: string, baseUrl: string): boolean {
+  if (!actualUrl) {
+    return false;
   }
-
-  getKadaiRestUrl() {
-    return environment.kadaiRestUrl;
+  try {
+    const actual = new URL(actualUrl, baseUrl);
+    const expected = new URL(expectedUrl, baseUrl);
+    return (
+      actual.origin === expected.origin &&
+      withoutTrailingSlash(actual.pathname) === withoutTrailingSlash(expected.pathname)
+    );
+  } catch {
+    return false;
   }
+}
 
-  getKadaiLogoutUrl() {
-    return environment.kadaiLogoutUrl;
-  }
-
-  private loadEnvironment(): Promise<EnvironmentConfig> {
-    return this.getEnvironmentFilePromise()
-      .then(() => this.kadaiEngineService.getUserInformation())
-      .catch((error) => {
-        // this.window.nativeWindow.location.href = environment.kadaiRestUrl + '/login';
-      });
-  }
+function withoutTrailingSlash(path: string): string {
+  return path.length > 1 ? path.replace(/\/+$/, '') : path;
 }

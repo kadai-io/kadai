@@ -21,7 +21,7 @@ import { TaskHistoryEventResourceData } from 'app/shared/models/task-history-eve
 import { Sorting, TaskHistoryQuerySortParameter } from 'app/shared/models/sorting';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { StartupService } from '../../../shared/services/startup/startup.service';
+import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
 import { TaskHistoryQueryFilterParameter } from '../../../shared/models/task-history-query-filter-parameter';
 import { QueryPagingParameter } from '../../../shared/models/query-paging-parameter';
 import { asUrlQueryString } from '../../../shared/util/query-parameters-v2';
@@ -31,10 +31,10 @@ import { asUrlQueryString } from '../../../shared/util/query-parameters-v2';
 })
 export class TaskHistoryQueryService {
   private httpClient = inject(HttpClient);
-  private startupService = inject(StartupService);
+  private runtimeConfigService = inject(RuntimeConfigService);
 
   get url(): string {
-    return this.startupService.getKadaiRestUrl();
+    return this.runtimeConfigService.kadaiRestUrl;
   }
 
   getTaskHistoryEvents(

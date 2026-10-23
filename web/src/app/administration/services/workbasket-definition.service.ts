@@ -23,17 +23,17 @@ import { KadaiDate } from 'app/shared/util/kadai.date';
 import { BlobGenerator } from 'app/shared/util/blob-generator';
 import { take } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { StartupService } from '../../shared/services/startup/startup.service';
+import { RuntimeConfigService } from '../../shared/services/runtime-config/runtime-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WorkbasketDefinitionService {
   private httpClient = inject(HttpClient);
-  private startupService = inject(StartupService);
+  private runtimeConfigService = inject(RuntimeConfigService);
 
   get url(): string {
-    return this.startupService.getKadaiRestUrl() + '/v1/workbasket-definitions';
+    return this.runtimeConfigService.kadaiRestUrl + '/v1/workbasket-definitions';
   }
 
   // GET
