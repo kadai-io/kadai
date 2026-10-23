@@ -397,9 +397,8 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     });
   }
 
-  accessItemSelected(accessItem: AccessId, row: number) {
-    this.accessItemsGroups.controls[row].get('accessId')?.setValue(accessItem?.accessId);
-    this.accessItemsGroups.controls[row].get('accessName')?.setValue(accessItem?.name);
+  accessItemSelected(accessId: AccessId | null, row: number) {
+    this.accessItemsGroups.controls[row].get('accessName')?.setValue(accessId?.name ?? '');
   }
 
   checkAll(row: number, value: any) {

@@ -94,12 +94,13 @@
                 		[class.has-error]="accessItem.get('accessId')?.invalid && accessItem.get('accessId')?.touched"
                     class="workbasket-access-items__typeahead">
                     <kadai-shared-type-ahead
-                      (accessIdEventEmitter)="accessItemSelected($event, index)"
+                      (accessIdSelected)="accessItemSelected($event, index)"
                       [displayError]="true"
-                      [isRequired]="true"
-                      [savedAccessId]="accessItem"
+                      [required]="true"
+                      formControlName="accessId"
                       matTooltipPosition="right"
-                      placeHolderMessage="Access id"/>
+                      placeholder="Access id"
+                      size="compact"/>
                   </td>
                 } @else {
                   <td>

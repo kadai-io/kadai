@@ -16,262 +16,482 @@
  *
  */
 
+import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DebugElement } from '@angular/core';
-import { TypeAheadComponent } from './type-ahead.component';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { By } from '@angular/platform-browser';
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { Store } from '@ngxs/store';
+import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { DEFAULT_LOOKUP_DEBOUNCE_MS, TypeAheadComponent, TypeAheadSize } from './type-ahead.component';
 import { AccessIdsService } from '../../services/access-ids/access-ids.service';
-import { delay, of, Subject } from 'rxjs';
-import { provideStore, Store } from '@ngxs/store';
-import { EngineConfigurationState } from '../../store/engine-configuration-store/engine-configuration.state';
-import { engineConfigurationMock } from '../../store/mock-data/mock-store';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { AccessId } from '../../models/access-id';
+import { GlobalCustomisation } from '../../models/customisation';
 
-const accessIdService: Partial<AccessIdsService> = {
-  searchForAccessId: vi.fn().mockReturnValue(of([{ accessId: 'user-g-1', name: 'Gerda' }]))
-};
+const DEBOUNCE_MS = 500;
 
-describe('TypeAheadComponent with AccessId input', () => {
-  let fixture: ComponentFixture<TypeAheadComponent>;
-  let debugElement: DebugElement;
-  let component: TypeAheadComponent;
-  let store: Store;
-  let httpMock: HttpTestingController;
+@Component({
+  imports: [TypeAheadComponent, ReactiveFormsModule],
+  template: `
+    <kadai-shared-type-ahead
+      (accessIdSelected)="selected.push($event)"
+      [displayError]="displayError()"
+      [emitEmptySelection]="emitEmptySelection()"
+      [formControl]="control"
+      [required]="required()"
+      [size]="size()"
+      placeholder="Owner"
+    />
+  `
+})
+class ReactiveHostComponent {
+  control = new FormControl<string | null>(null);
+  displayError = signal(true);
+  emitEmptySelection = signal(true);
+  required = signal(false);
+  size = signal<TypeAheadSize>('regular');
+  selected: (AccessId | null)[] = [];
+}
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [TypeAheadComponent],
-      providers: [
-        provideStore([EngineConfigurationState]),
-        { provide: AccessIdsService, useValue: accessIdService },
+@Component({
+  imports: [TypeAheadComponent],
+  template: `<kadai-shared-type-ahead (accessIdSelected)="selected.push($event)" [displayError]="true" />`
+})
+class StandaloneHostComponent {
+  selected: (AccessId | null)[] = [];
+}
 
-        provideHttpClientTesting()
-      ]
-    }).compileComponents();
+describe('TypeAheadComponent', () => {
+  let searchForAccessId: ReturnType<typeof vi.fn>;
+  let globalCustomisation$: BehaviorSubject<GlobalCustomisation | undefined>;
 
-    httpMock = TestBed.inject(HttpTestingController);
-    store = TestBed.inject(Store);
-    store.reset({
-      engineConfiguration: engineConfigurationMock
-    });
-    fixture = TestBed.createComponent(TypeAheadComponent);
-    debugElement = fixture.debugElement;
-    component = fixture.componentInstance;
-    httpMock
-      .expectOne('environments/data-sources/kadai-customization.json')
-      .flush(engineConfigurationMock.customisation);
-    fixture.detectChanges();
-  });
+  const users: AccessId[] = [
+    { accessId: 'user-1-1', name: 'Max Mustermann' },
+    { accessId: 'user-1-2', name: 'Erika Musterfrau' }
+  ];
 
-  it('should create component', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should fetch name when typing in an access id', async () => {
-    const input = debugElement.nativeElement.querySelector('.type-ahead__input-field');
-    expect(input).toBeTruthy();
-    input.value = 'user-g-1';
-    input.dispatchEvent(new Event('input'));
-    component.accessIdForm.get('accessId')!.updateValueAndValidity({ emitEvent: true });
-
-    await vi.waitFor(() => {
-      fixture.detectChanges();
-      expect(component.name()).toBe('Gerda');
-    });
-  });
-
-  it('should emit false when an invalid access id is set', async () => {
-    const emitSpy = vi.spyOn(component.isFormValid, 'emit');
-    fixture.componentRef.setInput('displayError', true);
-    component.accessIdForm.get('accessId')!.setValue('invalid-user');
-    component.accessIdForm.get('accessId')!.updateValueAndValidity({ emitEvent: true });
-
-    await vi.waitFor(() => {
-      fixture.detectChanges();
-      expect(emitSpy).toHaveBeenCalledWith(false);
-    });
-  });
-
-  it('should emit true when a valid access id is set', async () => {
-    const emitSpy = vi.spyOn(component.isFormValid, 'emit');
-    component.accessIdForm.get('accessId')!.setValue('user-g-1');
-    component.accessIdForm.get('accessId')!.updateValueAndValidity({ emitEvent: true });
-
-    await vi.waitFor(() => {
-      fixture.detectChanges();
-      expect(emitSpy).toHaveBeenCalledWith(true);
-    });
-  });
-
-  it('should mark the accessId control as touched when invalid and displayError is true', async () => {
-    const control = component.accessIdForm.get('accessId');
-    const markAsTouchedSpy = vi.spyOn(control!, 'markAsTouched');
-    fixture.componentRef.setInput('displayError', true);
-
-    component.accessIdForm.get('accessId')?.setValue('invalid-user');
-    component.searchForAccessId('invalid-user');
-
-    await vi.waitFor(() => {
-      fixture.detectChanges();
-      expect(markAsTouchedSpy).toHaveBeenCalled();
-    });
-  });
-
-  it('should not emit accessIdEventEmitter when placeHolderMessage is "Search for AccessId"', () => {
-    const accessIdEmitSpy = vi.spyOn(component.accessIdEventEmitter, 'emit');
-    fixture.componentRef.setInput('placeHolderMessage', 'Search for AccessId');
-    component.handleEmptyAccessId();
-    expect(accessIdEmitSpy).not.toHaveBeenCalled();
-  });
-
-  it('should emit accessIdEventEmitter with emptyAccessId when placeHolderMessage is not "Search for AccessId"', () => {
-    const accessIdEmitSpy = vi.spyOn(component.accessIdEventEmitter, 'emit');
-    fixture.componentRef.setInput('placeHolderMessage', 'Some other message');
-    component.handleEmptyAccessId();
-    expect(accessIdEmitSpy).toHaveBeenCalledWith(component.emptyAccessId);
-  });
-
-  it('should set errors on accessId control and emit false when isRequired is true in handleEmptyAccessId', () => {
-    fixture.componentRef.setInput('isRequired', true);
-    const control = component.accessIdForm.get('accessId');
-    const setErrorsSpy = vi.spyOn(control!, 'setErrors');
-    const emitSpy = vi.spyOn(component.isFormValid, 'emit');
-    component.handleEmptyAccessId();
-    expect(setErrorsSpy).toHaveBeenCalledWith({ incorrect: true });
-    expect(emitSpy).toHaveBeenCalledWith(false);
-  });
-
-  it('should not set errors and emit true when isRequired is false in handleEmptyAccessId', () => {
-    fixture.componentRef.setInput('isRequired', false);
-    const control = component.accessIdForm.get('accessId');
-    const setErrorsSpy = vi.spyOn(control!, 'setErrors');
-    const emitSpy = vi.spyOn(component.isFormValid, 'emit');
-    component.handleEmptyAccessId();
-    expect(setErrorsSpy).not.toHaveBeenCalled();
-    expect(emitSpy).toHaveBeenCalledWith(true);
-  });
-
-  it('should call setAccessIdFromInput when entityId input changes', () => {
-    const setAccessIdSpy = vi.spyOn(component, 'setAccessIdFromInput');
-    fixture.componentRef.setInput('entityId', 'new-id');
-    fixture.detectChanges();
-    expect(setAccessIdSpy).toHaveBeenCalled();
-  });
-
-  it('should not call setAccessIdFromInput when entityId input does not change', () => {
-    fixture.componentRef.setInput('entityId', 'some-id');
-    fixture.detectChanges();
-    const setAccessIdSpy = vi.spyOn(component, 'setAccessIdFromInput');
-    expect(setAccessIdSpy).not.toHaveBeenCalled();
-  });
-
-  it('should call handleEmptyAccessId and not search when accessId value is cleared or empty', async () => {
-    const handleEmptyAccessIdSpy = vi.spyOn(component, 'handleEmptyAccessId');
-    const searchSpy = vi.spyOn(accessIdService, 'searchForAccessId');
-
-    component.accessIdForm.get('accessId')!.setValue('user-g-1');
-    fixture.detectChanges();
-
-    await vi.waitFor(() => {
-      expect(searchSpy).toHaveBeenCalledWith('user-g-1');
-    });
-
-    searchSpy.mockClear();
-    handleEmptyAccessIdSpy.mockClear();
-
-    component.accessIdForm.get('accessId')!.setValue('');
-    fixture.detectChanges();
-
-    await vi.waitFor(() => {
-      expect(handleEmptyAccessIdSpy).toHaveBeenCalled();
-      expect(searchSpy).not.toHaveBeenCalled();
-    });
-  });
-
-  it('should ignore stale/older search requests if a new input was provided (prevent race condition)', async () => {
+  beforeEach(() => {
     vi.useFakeTimers();
+    searchForAccessId = vi.fn((value: string) =>
+      of(users.filter((user) => user.accessId!.startsWith(value.toLowerCase())))
+    );
+    globalCustomisation$ = new BehaviorSubject<GlobalCustomisation | undefined>({
+      debounceTimeLookupField: DEBOUNCE_MS
+    } as GlobalCustomisation);
 
-    const requestA$ = new Subject<any>();
-    const requestB$ = new Subject<any>();
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: AccessIdsService, useValue: { searchForAccessId } },
+        { provide: Store, useValue: { select: () => globalCustomisation$ } }
+      ]
+    });
+  });
 
-    const searchSpy = vi
-      .spyOn(accessIdService, 'searchForAccessId')
-      .mockReset()
-      .mockReturnValueOnce(requestA$.asObservable())
-      .mockReturnValueOnce(requestB$.asObservable());
-
-    const inputEl: HTMLInputElement = fixture.nativeElement.querySelector('input');
-
-    inputEl.value = 'user-a';
-    inputEl.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-
-    vi.advanceTimersByTime(component.debounceTime);
-    expect(searchSpy).toHaveBeenCalledTimes(1);
-    expect(searchSpy).toHaveBeenLastCalledWith('user-a');
-
-    inputEl.value = 'user-b';
-    inputEl.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-
-    vi.advanceTimersByTime(component.debounceTime);
-    expect(searchSpy).toHaveBeenCalledTimes(2);
-    expect(searchSpy).toHaveBeenLastCalledWith('user-b');
-
-    requestB$.next([{ accessId: 'user-b', name: 'User B' }]);
-    requestB$.complete();
-    fixture.detectChanges();
-
-    expect(component.name()).toBe('User B');
-
-    requestA$.next([{ accessId: 'user-a', name: 'User A' }]);
-    requestA$.complete();
-    fixture.detectChanges();
-
-    expect(component.name()).toBe('User B');
-
+  afterEach(() => {
     vi.useRealTimers();
   });
-});
 
-describe('TypeAheadComponent without debounceTime configured', () => {
-  let fixture: ComponentFixture<TypeAheadComponent>;
-  let component: TypeAheadComponent;
-  let store: Store;
-  let httpMock: HttpTestingController;
+  describe('as a form control', () => {
+    let fixture: ComponentFixture<ReactiveHostComponent>;
+    let host: ReactiveHostComponent;
+    let typeAhead: TypeAheadComponent;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [TypeAheadComponent],
-      providers: [
-        provideStore([EngineConfigurationState]),
-        { provide: AccessIdsService, useValue: accessIdService },
-
-        provideHttpClientTesting()
-      ]
-    }).compileComponents();
-
-    httpMock = TestBed.inject(HttpTestingController);
-    store = TestBed.inject(Store);
-
-    const configWithoutDebounce = {
-      ...engineConfigurationMock,
-      customisation: {
-        ...engineConfigurationMock.customisation,
-        EN: {
-          ...engineConfigurationMock.customisation.EN,
-          global: {}
-        }
-      }
+    const input = (): HTMLInputElement => fixture.nativeElement.querySelector('input');
+    const type = (value: string) => {
+      input().value = value;
+      input().dispatchEvent(new Event('input'));
+      fixture.detectChanges();
     };
-    store.reset({ engineConfiguration: configWithoutDebounce });
-    fixture = TestBed.createComponent(TypeAheadComponent);
-    component = fixture.componentInstance;
-    httpMock.expectOne('environments/data-sources/kadai-customization.json').flush(configWithoutDebounce.customisation);
-    fixture.detectChanges();
+    const errorText = () => fixture.nativeElement.querySelector('mat-error')?.textContent?.trim();
+    // MatAutocompleteTrigger writes model values to the input element in a microtask.
+    const settle = async () => {
+      await Promise.resolve();
+      fixture.detectChanges();
+    };
+
+    beforeEach(() => {
+      fixture = TestBed.createComponent(ReactiveHostComponent);
+      host = fixture.componentInstance;
+      fixture.detectChanges();
+      typeAhead = fixture.debugElement.query(By.directive(TypeAheadComponent)).componentInstance;
+      searchForAccessId.mockClear();
+    });
+
+    describe('external writes', () => {
+      it('should show an externally written value and look up its name without updating the parent', async () => {
+        const valueChanges = vi.fn();
+        host.control.valueChanges.subscribe(valueChanges);
+
+        host.control.setValue('user-1-1');
+        await settle();
+
+        expect(input().value).toBe('user-1-1');
+        expect(searchForAccessId).toHaveBeenCalledWith('user-1-1');
+        expect(typeAhead.name()).toBe('Max Mustermann');
+        expect(host.selected).toEqual([users[0]]);
+        expect(valueChanges).toHaveBeenCalledTimes(1);
+      });
+
+      it('should clear the field when null is written without emitting a selection', async () => {
+        host.control.setValue('user-1-1');
+        host.control.setValue(null);
+        await settle();
+
+        expect(input().value).toBe('');
+        expect(typeAhead.name()).toBe('');
+        expect(host.selected).toEqual([users[0]]);
+      });
+
+      it('should restore the previous value on reset (undo)', async () => {
+        host.control.setValue('user-1-1');
+        type('user-1-2');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+        expect(typeAhead.name()).toBe('Erika Musterfrau');
+
+        host.control.reset('user-1-1');
+        await settle();
+
+        expect(input().value).toBe('user-1-1');
+        expect(typeAhead.name()).toBe('Max Mustermann');
+      });
+    });
+
+    describe('typing', () => {
+      it('should propagate the value and look it up only after the configured debounce time', () => {
+        type('user-1-2');
+
+        vi.advanceTimersByTime(DEBOUNCE_MS - 1);
+        expect(host.control.value).toBeNull();
+        expect(searchForAccessId).not.toHaveBeenCalled();
+
+        vi.advanceTimersByTime(1);
+        expect(host.control.value).toBe('user-1-2');
+        expect(searchForAccessId).toHaveBeenCalledTimes(1);
+        expect(typeAhead.name()).toBe('Erika Musterfrau');
+        expect(host.selected).toEqual([null, users[1]]);
+      });
+
+      it('should debounce consecutive input into a single lookup', () => {
+        type('user');
+        vi.advanceTimersByTime(DEBOUNCE_MS / 2);
+        type('user-1');
+        vi.advanceTimersByTime(DEBOUNCE_MS / 2);
+        type('user-1-1');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+
+        expect(searchForAccessId).toHaveBeenCalledTimes(1);
+        expect(searchForAccessId).toHaveBeenCalledWith('user-1-1');
+      });
+
+      it('should match access ids case-insensitively', () => {
+        type('USER-1-1');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+
+        expect(typeAhead.name()).toBe('Max Mustermann');
+        expect(host.selected).toEqual([null, users[0]]);
+      });
+
+      it('should offer the search results as autocomplete options', () => {
+        type('user-1');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+
+        expect(typeAhead.filteredAccessIds()).toEqual(users);
+        expect(typeAhead.name()).toBe('');
+      });
+
+      it('should use the default debounce time when none is configured', () => {
+        globalCustomisation$.next({} as GlobalCustomisation);
+        type('user-1-1');
+
+        vi.advanceTimersByTime(DEFAULT_LOOKUP_DEBOUNCE_MS - 1);
+        expect(searchForAccessId).not.toHaveBeenCalled();
+        vi.advanceTimersByTime(1);
+        expect(searchForAccessId).toHaveBeenCalledWith('user-1-1');
+      });
+
+      it('should apply a debounce configuration that arrives after creation', () => {
+        globalCustomisation$.next({ debounceTimeLookupField: 100 } as GlobalCustomisation);
+        type('user-1-1');
+
+        vi.advanceTimersByTime(100);
+        expect(searchForAccessId).toHaveBeenCalledWith('user-1-1');
+      });
+
+      it('should commit the value immediately on blur and mark the control as touched', () => {
+        type('user-1-1');
+        input().dispatchEvent(new Event('blur'));
+
+        expect(host.control.value).toBe('user-1-1');
+        expect(host.control.touched).toBe(true);
+        expect(searchForAccessId).toHaveBeenCalledTimes(1);
+
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+        expect(searchForAccessId).toHaveBeenCalledTimes(1);
+      });
+
+      it('should commit an autocomplete option immediately', () => {
+        typeAhead.inputControl.setValue('user-1-2');
+        fixture.debugElement
+          .query(By.css('mat-autocomplete'))
+          .triggerEventHandler('optionSelected', { option: { value: 'user-1-2' } } as MatAutocompleteSelectedEvent);
+
+        expect(host.control.value).toBe('user-1-2');
+        expect(host.selected).toEqual([null, users[1]]);
+      });
+    });
+
+    describe('stale responses', () => {
+      it('should ignore the response of an older lookup when the value changed', () => {
+        const first$ = new Subject<AccessId[]>();
+        const second$ = new Subject<AccessId[]>();
+        searchForAccessId.mockReturnValueOnce(first$).mockReturnValueOnce(second$);
+
+        type('user-1-1');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+        type('user-1-2');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+
+        second$.next([users[1]]);
+        first$.next([users[0]]);
+        fixture.detectChanges();
+
+        expect(typeAhead.name()).toBe('Erika Musterfrau');
+        expect(host.selected).toEqual([null, users[1]]);
+      });
+
+      it('should ignore a response that arrives while the next input is still debounced', () => {
+        const first$ = new Subject<AccessId[]>();
+        searchForAccessId.mockReturnValueOnce(first$);
+
+        type('user-1-1');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+        type('user-1-2');
+        vi.advanceTimersByTime(DEBOUNCE_MS / 2);
+
+        first$.next([users[0]]);
+        fixture.detectChanges();
+
+        expect(typeAhead.name()).toBe('');
+        expect(host.selected).toEqual([null]);
+
+        vi.advanceTimersByTime(DEBOUNCE_MS / 2);
+        expect(typeAhead.name()).toBe('Erika Musterfrau');
+        expect(host.selected).toEqual([null, users[1]]);
+      });
+
+      it('should not let a pending debounced value overwrite a later external write', async () => {
+        type('user-1-2');
+        host.control.setValue('user-1-1');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+        await settle();
+
+        expect(host.control.value).toBe('user-1-1');
+        expect(input().value).toBe('user-1-1');
+      });
+    });
+
+    describe('clearing', () => {
+      it('should propagate null immediately and emit an empty selection', async () => {
+        host.control.setValue('user-1-1');
+        await settle();
+        type('');
+
+        expect(host.control.value).toBeNull();
+        expect(typeAhead.name()).toBe('');
+        expect(host.selected.at(-1)).toBeNull();
+      });
+
+      it('should cancel a pending lookup when the field is cleared', () => {
+        type('user-1-1');
+        type('');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+
+        expect(searchForAccessId).not.toHaveBeenCalled();
+        expect(host.control.value).toBeNull();
+      });
+
+      it('should not emit an empty selection when emitEmptySelection is false', () => {
+        host.emitEmptySelection.set(false);
+        fixture.detectChanges();
+
+        type('unknown');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+        type('');
+
+        expect(host.selected).toEqual([]);
+      });
+    });
+
+    describe('selection', () => {
+      it('should invalidate the previous selection as soon as a new value is committed, before the lookup answers', () => {
+        host.control.setValue('user-1-1');
+        const pending$ = new Subject<AccessId[]>();
+        searchForAccessId.mockReturnValueOnce(pending$);
+
+        type('user-1-2');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+
+        expect(host.control.value).toBe('user-1-2');
+        expect(host.selected).toEqual([users[0], null]);
+        expect(typeAhead.name()).toBe('');
+
+        pending$.next([users[1]]);
+        expect(host.selected).toEqual([users[0], null, users[1]]);
+      });
+
+      it('should keep the parent data for a written value that is missing from the search results', () => {
+        host.control.setValue('ab');
+        fixture.detectChanges();
+
+        expect(searchForAccessId).toHaveBeenCalledWith('ab');
+        expect(typeAhead.lookupResult().status).toBe('not-found');
+        expect(host.selected).toEqual([]);
+      });
+
+      it('should invalidate the parent data when the user replaces a value that was never found', () => {
+        host.control.setValue('ab');
+        type('user-1-1');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+
+        expect(host.selected).toEqual([null, users[0]]);
+      });
+    });
+
+    describe('errors', () => {
+      it('should emit an empty selection once when a selected access id no longer matches', () => {
+        host.control.setValue('user-1-1');
+        type('unknown');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+        type('unknown-2');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+
+        expect(host.selected).toEqual([users[0], null]);
+        expect(typeAhead.lookupResult().status).toBe('not-found');
+      });
+
+      it('should not emit when the initial empty value is written', () => {
+        expect(host.selected).toEqual([]);
+      });
+
+      it('should handle a failed lookup and keep working afterwards', () => {
+        host.control.setValue('user-1-1');
+        searchForAccessId.mockReturnValueOnce(throwError(() => new Error('lookup failed')));
+
+        type('user-1-1x');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+        expect(typeAhead.lookupResult().status).toBe('failed');
+        expect(host.selected).toEqual([users[0], null]);
+
+        type('user-1-2');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+        expect(typeAhead.name()).toBe('Erika Musterfrau');
+      });
+
+      it('should display the validation error of the parent control once it is touched', () => {
+        host.control.setValidators(() => ({ invalidAccessId: true }));
+        host.control.setValue('unknown');
+        fixture.detectChanges();
+        expect(errorText()).toBeUndefined();
+
+        host.control.markAsTouched();
+        fixture.detectChanges();
+        expect(errorText()).toBe('Access id not valid');
+      });
+
+      it('should display a required error of the parent control', () => {
+        host.control.setValidators(Validators.required);
+        host.control.updateValueAndValidity();
+        host.control.markAsTouched();
+        fixture.detectChanges();
+
+        expect(errorText()).toBe('Access id is required');
+      });
+
+      it('should not display errors when displayError is false', () => {
+        host.displayError.set(false);
+        host.control.setValidators(Validators.required);
+        host.control.updateValueAndValidity();
+        host.control.markAsTouched();
+        fixture.detectChanges();
+
+        expect(errorText()).toBeUndefined();
+      });
+    });
+
+    describe('disabled state', () => {
+      it('should follow disable and enable of the parent control at runtime', () => {
+        host.control.disable();
+        fixture.detectChanges();
+        expect(input().disabled).toBe(true);
+
+        host.control.enable();
+        fixture.detectChanges();
+        expect(input().disabled).toBe(false);
+      });
+    });
+
+    describe('presentation', () => {
+      it('should select the layout through the size input', () => {
+        expect(fixture.nativeElement.querySelector('.type-ahead--large')).toBeTruthy();
+
+        host.size.set('compact');
+        fixture.detectChanges();
+        expect(fixture.nativeElement.querySelector('.type-ahead--small')).toBeTruthy();
+      });
+
+      it('should mark the input as required', () => {
+        host.required.set(true);
+        fixture.detectChanges();
+
+        expect(input().required).toBe(true);
+      });
+
+      it('should show the placeholder until a name is known', () => {
+        const label = () => fixture.nativeElement.querySelector('mat-label').textContent.trim();
+        expect(label()).toBe('Owner');
+
+        host.control.setValue('user-1-1');
+        fixture.detectChanges();
+        expect(label()).toBe('Max Mustermann');
+      });
+    });
   });
 
-  it('should keep default debounce time of 750 when debounceTimeLookupField is not configured', () => {
-    expect(component.debounceTime).toBe(750);
+  describe('without a form control', () => {
+    let fixture: ComponentFixture<StandaloneHostComponent>;
+    let typeAhead: TypeAheadComponent;
+
+    beforeEach(() => {
+      fixture = TestBed.createComponent(StandaloneHostComponent);
+      fixture.detectChanges();
+      typeAhead = fixture.debugElement.query(By.directive(TypeAheadComponent)).componentInstance;
+    });
+
+    const typeAndSettle = (value: string) => {
+      typeAhead.inputControl.setValue(value);
+      vi.advanceTimersByTime(DEBOUNCE_MS);
+      fixture.detectChanges();
+    };
+
+    it('should emit the selected access id', () => {
+      typeAndSettle('user-1-1');
+
+      expect(fixture.componentInstance.selected).toEqual([null, users[0]]);
+    });
+
+    it('should display an error from the lookup result when no exact match is found', () => {
+      typeAndSettle('unknown');
+
+      expect(typeAhead.hasError()).toBe(true);
+      expect(fixture.nativeElement.querySelector('mat-error').textContent.trim()).toBe('Access id not valid');
+    });
+
+    it('should display an error when the lookup failed', () => {
+      searchForAccessId.mockReturnValueOnce(throwError(() => new Error('lookup failed')) as Observable<AccessId[]>);
+      typeAndSettle('user-1-1');
+
+      expect(typeAhead.hasError()).toBe(true);
+    });
   });
 });

@@ -16,23 +16,31 @@
  *
  */
 
-import { Component, effect, inject, input, OnDestroy, OnInit, output, signal, untracked } from '@angular/core';
-import { AccessIdsService } from '../../services/access-ids/access-ids.service';
-import { debounceTime, distinctUntilChanged, Observable, of, Subject, timer } from 'rxjs';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { AccessId } from '../../models/access-id';
-import { catchError, map, switchMap, take, takeUntil } from 'rxjs/operators';
+import { AfterContentInit, Component, computed, DestroyRef, inject, input, output, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { ControlValueAccessor, FormControl, NgControl, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngxs/store';
-import { WorkbasketSelectors } from '../../store/workbasket-store/workbasket.selectors';
-import { ButtonAction } from '../../../administration/models/button-action';
-import { EngineConfigurationSelectors } from '../../store/engine-configuration-store/engine-configuration.selectors';
-import { GlobalCustomisation } from '../../models/customisation';
+import { merge, Observable, of, Subject, timer } from 'rxjs';
+import { catchError, filter, map, switchMap, takeUntil } from 'rxjs/operators';
 import { NgClass } from '@angular/common';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatTooltip, TooltipPosition } from '@angular/material/tooltip';
 import { MatInput } from '@angular/material/input';
-import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
-import { MatOption } from '@angular/material/core';
+import { MatAutocomplete, MatAutocompleteSelectedEvent, MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import { ErrorStateMatcher, MatOption } from '@angular/material/core';
+import { AccessIdsService } from '../../services/access-ids/access-ids.service';
+import { AccessId } from '../../models/access-id';
+import { EngineConfigurationSelectors } from '../../store/engine-configuration-store/engine-configuration.selectors';
+
+export const DEFAULT_LOOKUP_DEBOUNCE_MS = 750;
+
+export type TypeAheadSize = 'compact' | 'regular';
+
+type LookupResult =
+  | { status: 'empty' }
+  | { status: 'found'; accessIds: AccessId[]; match: AccessId }
+  | { status: 'not-found'; accessIds: AccessId[] }
+  | { status: 'failed' };
 
 @Component({
   selector: 'kadai-shared-type-ahead',
@@ -51,128 +59,180 @@ import { MatOption } from '@angular/material/core';
     MatOption
   ]
 })
-export class TypeAheadComponent implements OnInit, OnDestroy {
-  matTooltipPosition = input<TooltipPosition>('below');
-  savedAccessId = input<any>();
-  placeHolderMessage = input<string>();
-  entityId = input<any>();
-  isRequired = input(false);
-  isDisabled = input(false);
+export class TypeAheadComponent implements ControlValueAccessor, AfterContentInit {
+  placeholder = input('');
+  size = input<TypeAheadSize>('regular');
+  required = input(false);
   displayError = input(false);
-  accessIdEventEmitter = output<AccessId>();
-  isFormValid = output<boolean>();
-  globalCustomisation$: Observable<GlobalCustomisation | undefined> = inject(Store).select(
-    EngineConfigurationSelectors.globalCustomisation
-  );
-  buttonAction$: Observable<ButtonAction | undefined> = inject(Store).select(WorkbasketSelectors.buttonAction);
-  name = signal('');
-  lastSavedAccessId: string = '';
-  filteredAccessIds = signal<AccessId[]>([]);
-  debounceTime: number = 750;
-  destroy$ = new Subject<void>();
-  accessIdForm = new FormGroup({
-    accessId: new FormControl('')
+  emitEmptySelection = input(true);
+  matTooltipPosition = input<TooltipPosition>('below');
+  accessIdSelected = output<AccessId | null>();
+
+  readonly inputControl = new FormControl('', { nonNullable: true });
+  readonly name = signal('');
+  readonly filteredAccessIds = signal<AccessId[]>([]);
+  readonly lookupResult = signal<LookupResult>({ status: 'empty' });
+  readonly debounceMs = computed(() => this.debounceConfig() || DEFAULT_LOOKUP_DEBOUNCE_MS);
+  readonly hasError = computed(() => {
+    if (!this.displayError()) {
+      return false;
+    }
+    this.controlState();
+    const control = this.ngControl?.control;
+    if (control) {
+      return control.invalid && (control.touched || control.dirty);
+    }
+    const result = this.lookupResult();
+    return result.status === 'not-found' || result.status === 'failed';
   });
-  emptyAccessId: AccessId = { accessId: '', name: '' };
-  private accessIdService = inject(AccessIdsService);
+  readonly errorMessage = computed(() => {
+    this.controlState();
+    return this.ngControl?.control?.hasError('required') ? 'Access id is required' : 'Access id not valid';
+  });
+  readonly errorStateMatcher: ErrorStateMatcher = { isErrorState: () => this.hasError() };
+
+  private readonly ngControl = inject(NgControl, { self: true, optional: true });
+  private readonly accessIdsService = inject(AccessIdsService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly debounceConfig = toSignal(
+    inject(Store)
+      .select(EngineConfigurationSelectors.globalCustomisation)
+      .pipe(map((customisation) => customisation?.debounceTimeLookupField)),
+    { initialValue: undefined }
+  );
+  private readonly written$ = new Subject<void>();
+  private readonly committed$ = new Subject<string>();
+  private readonly lookup$ = new Subject<string>();
+  private readonly controlState = signal(0);
+  private lastCommittedValue = '';
+  private selection: AccessId | null = null;
+  // undefined: the parent holds its own data for the current value (initial state or after writeValue).
+  private lastEmitted: AccessId | null | undefined = undefined;
+  private onChange: (value: string | null) => void = () => {};
+  private onTouched: () => void = () => {};
 
   constructor() {
-    effect(() => {
-      this.entityId();
-      untracked(() => this.setAccessIdFromInput());
-    });
-  }
-
-  ngOnInit() {
-    if (this.isDisabled()) {
-      this.accessIdForm.controls['accessId'].disable();
+    if (this.ngControl) {
+      this.ngControl.valueAccessor = this;
     }
 
-    // currently needed because this component cannot obtain changes of the current workbasket from workbasket-information component
-    this.buttonAction$.pipe(takeUntil(this.destroy$)).subscribe((button) => {
-      if (button == ButtonAction.UNDO) {
-        this.accessIdForm.controls['accessId'].setValue(this.lastSavedAccessId);
-      }
-    });
-
-    this.globalCustomisation$
-      .pipe(
-        take(1),
-        map((customisation) => customisation?.debounceTimeLookupField)
+    const typed$ = this.inputControl.valueChanges.pipe(
+      switchMap((value) =>
+        value
+          ? timer(this.debounceMs()).pipe(
+              map(() => value),
+              takeUntil(this.written$)
+            )
+          : of(value)
       )
-      .subscribe((debounceTime) => {
-        if (!!debounceTime) {
-          this.debounceTime = debounceTime;
+    );
+
+    merge(typed$, this.committed$)
+      .pipe(
+        filter((value) => value !== this.lastCommittedValue),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((value) => {
+        this.lastCommittedValue = value;
+        this.onChange(value || null);
+        // The name of the previous selection must never stay attached to a new value, even until the lookup answers.
+        if (this.selection?.accessId !== value) {
+          this.resetSelection();
+          this.emitSelection(null);
         }
+        this.lookup$.next(value);
       });
 
-    this.accessIdForm.controls['accessId'].valueChanges
+    this.lookup$
       .pipe(
-        distinctUntilChanged(),
-        switchMap((value) => {
-          if (!value) {
-            this.handleEmptyAccessId();
-            return of(null);
-          }
-
-          return timer(this.debounceTime).pipe(
-            switchMap(() => this.accessIdService.searchForAccessId(value)),
-            map((accessIds) => ({ value, accessIds })),
-            catchError(() => of(null))
-          );
-        }),
-        takeUntil(this.destroy$)
+        switchMap((value) => this.lookup(value).pipe(takeUntil(this.inputControl.valueChanges))),
+        takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe((result) => {
-        if (!result) return;
-        this.processAccessIdResult(result.value, result?.accessIds);
-      });
+      .subscribe((result) => this.applyLookupResult(result));
   }
 
-  handleEmptyAccessId() {
+  ngAfterContentInit() {
+    this.ngControl?.control?.events
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.controlState.update((state) => state + 1));
+  }
+
+  writeValue(value: string | null): void {
+    const accessId = value ?? '';
+    this.written$.next();
+    this.inputControl.setValue(accessId, { emitEvent: false });
+    this.lastCommittedValue = accessId;
+    if (this.selection?.accessId !== accessId) {
+      this.resetSelection();
+      this.lastEmitted = undefined;
+    }
+    this.lookup$.next(accessId);
+  }
+
+  registerOnChange(fn: (value: string | null) => void): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.onTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    if (isDisabled) {
+      this.inputControl.disable({ emitEvent: false });
+    } else {
+      this.inputControl.enable({ emitEvent: false });
+    }
+  }
+
+  onBlur(): void {
+    this.committed$.next(this.inputControl.value);
+    this.onTouched();
+  }
+
+  onOptionSelected(event: MatAutocompleteSelectedEvent): void {
+    this.committed$.next(event.option.value);
+  }
+
+  private lookup(value: string): Observable<LookupResult> {
+    if (!value) {
+      return of({ status: 'empty' });
+    }
+    return this.accessIdsService.searchForAccessId(value).pipe(
+      map((accessIds): LookupResult => {
+        const match = accessIds.find((item) => item.accessId?.toLowerCase() === value.toLowerCase());
+        return match ? { status: 'found', accessIds, match } : { status: 'not-found', accessIds };
+      }),
+      catchError(() => of<LookupResult>({ status: 'failed' }))
+    );
+  }
+
+  // Only a found match changes the selection. A value missing from the search results may still be a valid
+  // access id (the search needs at least 3 characters and its results are capped), so it keeps the parent's data.
+  private applyLookupResult(result: LookupResult): void {
+    this.lookupResult.set(result);
+    this.filteredAccessIds.set(result.status === 'found' || result.status === 'not-found' ? result.accessIds : []);
+    if (result.status !== 'found') {
+      return;
+    }
+    this.name.set(result.match.name ?? '');
+    this.selection = result.match;
+    this.emitSelection(result.match);
+  }
+
+  private emitSelection(selection: AccessId | null): void {
+    if (!selection && !this.emitEmptySelection()) {
+      return;
+    }
+    if (this.lastEmitted !== undefined && this.lastEmitted?.accessId === selection?.accessId) {
+      return;
+    }
+    this.lastEmitted = selection;
+    this.accessIdSelected.emit(selection);
+  }
+
+  private resetSelection(): void {
+    this.selection = null;
     this.name.set('');
-    this.isFormValid.emit(!this.isRequired());
-    if (this.placeHolderMessage() !== 'Search for AccessId') {
-      this.accessIdEventEmitter.emit(this.emptyAccessId);
-    }
-    if (this.isRequired()) {
-      this.accessIdForm.controls['accessId'].setErrors({ incorrect: true });
-    }
-  }
-
-  searchForAccessId(value: string) {
-    this.accessIdService
-      .searchForAccessId(value)
-      .pipe(take(1))
-      .subscribe((accessIds) => this.processAccessIdResult(value, accessIds));
-  }
-
-  private processAccessIdResult(value: string, accessIds: AccessId[]) {
-    this.filteredAccessIds.set(accessIds);
-    const accessId = accessIds.find((item) => item.accessId?.toLowerCase() === value.toLowerCase());
-
-    if (typeof accessId !== 'undefined') {
-      this.name.set(accessId?.name ?? '');
-      this.isFormValid.emit(true);
-      this.accessIdEventEmitter.emit(accessId);
-    } else if (this.displayError()) {
-      this.isFormValid.emit(false);
-      this.accessIdEventEmitter.emit(this.emptyAccessId);
-      this.accessIdForm.controls['accessId'].setErrors({ incorrect: true });
-      this.accessIdForm.controls['accessId'].markAsTouched();
-    }
-  }
-
-  setAccessIdFromInput() {
-    const accessId = this.savedAccessId()?.value;
-    const access = accessId?.accessId || accessId?.accessId == '' ? accessId.accessId : this.savedAccessId() || '';
-    this.accessIdForm.controls['accessId'].setValue(access);
-    this.lastSavedAccessId = access;
-    this.name.set(accessId?.accessName || '');
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }
