@@ -20,13 +20,22 @@ import { Component, DebugElement, runInInjectionContext } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ResizableWidthDirective } from './resizable-width.directive';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 @Component({
   imports: [ResizableWidthDirective],
   template: ` <div kadaiResizableWidth></div>`
 })
 class TestComponent {}
+
+const documentListenerTypes = (spy: { mock: { calls: unknown[][] } }): string[] =>
+  spy.mock.calls.map((call) => call[0] as string).filter((type) => type === 'mousemove' || type === 'mouseup');
+
+const mousedownAt = (element: HTMLElement, pageX: number) => {
+  const mousedown = new MouseEvent('mousedown', { bubbles: true });
+  Object.defineProperty(mousedown, 'pageX', { value: pageX });
+  element.dispatchEvent(mousedown);
+};
 
 describe('ResizableDirective', () => {
   let fixture: ComponentFixture<TestComponent>;
@@ -42,6 +51,10 @@ describe('ResizableDirective', () => {
 
     inputDebug = fixture.debugElement.query(By.directive(ResizableWidthDirective));
     inputElement = inputDebug.nativeElement;
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('should create an instance', () => {
@@ -84,6 +97,34 @@ describe('ResizableDirective', () => {
     expect(inputElement.style.width).toBe(`${expectedWidth}px`);
   });
 
+  it('should not listen on the document before a drag starts', () => {
+    const addEventListener = vi.spyOn(document, 'addEventListener');
+
+    TestBed.createComponent(TestComponent).detectChanges();
+
+    expect(documentListenerTypes(addEventListener)).toEqual([]);
+  });
+
+  it('should listen on the document only while dragging', () => {
+    const addEventListener = vi.spyOn(document, 'addEventListener');
+    const removeEventListener = vi.spyOn(document, 'removeEventListener');
+
+    mousedownAt(inputElement, 100);
+    expect(documentListenerTypes(addEventListener)).toEqual(['mousemove', 'mouseup']);
+
+    document.dispatchEvent(new MouseEvent('mouseup'));
+    expect(documentListenerTypes(removeEventListener)).toEqual(['mousemove', 'mouseup']);
+  });
+
+  it('should stop listening on the document when the host is destroyed while dragging', () => {
+    const removeEventListener = vi.spyOn(document, 'removeEventListener');
+
+    mousedownAt(inputElement, 100);
+    fixture.destroy();
+
+    expect(documentListenerTypes(removeEventListener)).toEqual(['mousemove', 'mouseup']);
+  });
+
   it('should not resize element after mouseup', () => {
     const startPosition: number = 100;
     const endPosition: number = 200;
@@ -100,5 +141,66 @@ describe('ResizableDirective', () => {
 
     expect(inputElement.style.minWidth).toBe('');
     expect(inputElement.style.width).toBe('');
+  });
+});
+
+@Component({
+  imports: [ResizableWidthDirective],
+  template: `
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th id="header" kadaiResizableWidth>AccessID</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td></td>
+          <td id="first-row" kadaiResizableWidth></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td id="second-row" kadaiResizableWidth></td>
+        </tr>
+      </tbody>
+    </table>
+  `
+})
+class TableTestComponent {}
+
+describe('ResizableDirective in a table', () => {
+  let fixture: ComponentFixture<TableTestComponent>;
+  const cell = (id: string): HTMLElement => fixture.nativeElement.querySelector(`#${id}`);
+
+  const drag = (element: HTMLElement, from: number, to: number) => {
+    mousedownAt(element, from);
+    const mousemove = new MouseEvent('mousemove', { bubbles: true });
+    Object.defineProperty(mousemove, 'pageX', { value: to });
+    document.dispatchEvent(mousemove);
+    document.dispatchEvent(new MouseEvent('mouseup'));
+  };
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ imports: [TableTestComponent] });
+    fixture = TestBed.createComponent(TableTestComponent);
+    fixture.detectChanges();
+  });
+
+  it('should resize the column through its header cell when a body cell is dragged', () => {
+    drag(cell('first-row'), 100, 220);
+
+    expect(cell('header').style.width).toBe('120px');
+    expect(cell('header').style.minWidth).toBe('120px');
+    expect(cell('first-row').style.width).toBe('');
+  });
+
+  it('should let every row of the column resize the same width', () => {
+    drag(cell('first-row'), 100, 220);
+    drag(cell('second-row'), 0, 50);
+
+    expect(cell('header').style.width).toBe('50px');
+    expect(cell('first-row').style.width).toBe('');
+    expect(cell('second-row').style.width).toBe('');
   });
 });

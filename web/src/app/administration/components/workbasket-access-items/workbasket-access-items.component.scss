@@ -79,6 +79,14 @@
       border: 1px solid #dee2e6;
     }
 
+    & td[kadaiResizableWidth] {
+      padding-right: 6px;
+    }
+
+    & td[kadaiResizableWidth] > * {
+      cursor: auto;
+    }
+
     & tr:first-child > td {
       border-top: 2px solid #dddddd;
     }
