@@ -142,17 +142,17 @@ public class WorkbasketDefinitionController implements WorkbasketDefinitionApi {
     for (WorkbasketDefinitionRepresentationModel definition : definitions.getContent()) {
       Workbasket importedWb = workbasketAssembler.toEntityModel(definition.getWorkbasket());
       String newId;
-      WorkbasketImpl wbWithoutId = (WorkbasketImpl) removeId(importedWb);
+      WorkbasketImpl workbasketForImport = (WorkbasketImpl) prepareWorkbasketForImport(importedWb);
       if (systemIds.containsKey(logicalId(importedWb))) {
         Workbasket modifiedWb =
             workbasketService.getWorkbasket(importedWb.getKey(), importedWb.getDomain());
-        wbWithoutId.setModified(modifiedWb.getModified());
-        workbasketService.updateWorkbasket(wbWithoutId);
+        workbasketForImport.setModified(modifiedWb.getModified());
+        workbasketService.updateWorkbasket(workbasketForImport);
 
         newId = systemIds.get(logicalId(importedWb));
       } else {
         try {
-          newId = workbasketService.createWorkbasket(wbWithoutId).getId();
+          newId = workbasketService.createWorkbasket(workbasketForImport).getId();
         } catch (WorkbasketAlreadyExistException ignore) {
           // Cannot exist because we previously checked and then updated
           newId = null; // required to appease compilers non-initialized error
@@ -210,9 +210,12 @@ public class WorkbasketDefinitionController implements WorkbasketDefinitionApi {
     return ResponseEntity.noContent().build();
   }
 
-  private Workbasket removeId(Workbasket importedWb) {
+  private Workbasket prepareWorkbasketForImport(Workbasket importedWb) {
     WorkbasketRepresentationModel wbRes = workbasketAssembler.toModel(importedWb);
+    // Exported system IDs and creation timestamps are mapping metadata, not persistence inputs.
     wbRes.setWorkbasketId(null);
+    wbRes.setCreated(null);
+    wbRes.setModified(null);
     return workbasketAssembler.toEntityModel(wbRes);
   }
 
