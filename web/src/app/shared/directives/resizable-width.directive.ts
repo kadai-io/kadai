@@ -16,23 +16,29 @@
  *
  */
 
-import { Directive, ElementRef, inject, Renderer2 } from '@angular/core';
+import { DestroyRef, Directive, ElementRef, inject, Renderer2 } from '@angular/core';
 
 @Directive({
   selector: '[kadaiResizableWidth]',
   host: {
     '(mouseover)': 'onMouseover()',
     '(mouseout)': 'onMouseout()',
-    '(mousedown)': 'onMousedown($event)',
-    '(document:mousemove)': 'onMousemove($event)',
-    '(document:mouseup)': 'onMouseup()'
+    '(mousedown)': 'onMousedown($event)'
   }
 })
 export class ResizableWidthDirective {
   private renderer = inject(Renderer2);
   private el = inject(ElementRef);
+  private destroyRef = inject(DestroyRef);
 
-  private startX: number | null = null;
+  private startX = 0;
+  // Every cell of the column carries this directive, so permanent document listeners would run one
+  // handler per row on every mouse move on the page. They exist only for the duration of a drag.
+  private stopListening: (() => void) | null = null;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => this.stopResizing());
+  }
 
   onMouseover() {
     this.renderer.setStyle(document.body, 'cursor', 'col-resize');
@@ -46,23 +52,33 @@ export class ResizableWidthDirective {
 
   onMousedown(event: MouseEvent) {
     this.startX = event.pageX;
+    this.startResizing();
   }
 
-  onMousemove(event: MouseEvent) {
-    if (this.startX !== null) {
-      const target = this.resizeTarget();
-      const movementX = event.pageX - this.startX;
-      const newWidth = target.clientWidth + movementX;
-
-      this.renderer.setStyle(target, 'min-width', `${newWidth}px`);
-      this.renderer.setStyle(target, 'width', `${newWidth}px`);
-
-      this.startX = event.pageX;
-    }
+  private startResizing(): void {
+    this.stopResizing();
+    const stopMousemove = this.renderer.listen('document', 'mousemove', (event: MouseEvent) => this.resize(event));
+    const stopMouseup = this.renderer.listen('document', 'mouseup', () => this.stopResizing());
+    this.stopListening = () => {
+      stopMousemove();
+      stopMouseup();
+    };
   }
 
-  onMouseup() {
-    this.startX = null;
+  private stopResizing(): void {
+    this.stopListening?.();
+    this.stopListening = null;
+  }
+
+  private resize(event: MouseEvent): void {
+    const target = this.resizeTarget();
+    const movementX = event.pageX - this.startX;
+    const newWidth = target.clientWidth + movementX;
+
+    this.renderer.setStyle(target, 'min-width', `${newWidth}px`);
+    this.renderer.setStyle(target, 'width', `${newWidth}px`);
+
+    this.startX = event.pageX;
   }
 
   // A table column is as wide as its widest cell, so all cells of a column resize the same header cell.

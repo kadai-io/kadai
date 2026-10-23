@@ -20,13 +20,22 @@ import { Component, DebugElement, runInInjectionContext } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ResizableWidthDirective } from './resizable-width.directive';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 @Component({
   imports: [ResizableWidthDirective],
   template: ` <div kadaiResizableWidth></div>`
 })
 class TestComponent {}
+
+const documentListenerTypes = (spy: { mock: { calls: unknown[][] } }): string[] =>
+  spy.mock.calls.map((call) => call[0] as string).filter((type) => type === 'mousemove' || type === 'mouseup');
+
+const mousedownAt = (element: HTMLElement, pageX: number) => {
+  const mousedown = new MouseEvent('mousedown', { bubbles: true });
+  Object.defineProperty(mousedown, 'pageX', { value: pageX });
+  element.dispatchEvent(mousedown);
+};
 
 describe('ResizableDirective', () => {
   let fixture: ComponentFixture<TestComponent>;
@@ -42,6 +51,10 @@ describe('ResizableDirective', () => {
 
     inputDebug = fixture.debugElement.query(By.directive(ResizableWidthDirective));
     inputElement = inputDebug.nativeElement;
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('should create an instance', () => {
@@ -82,6 +95,34 @@ describe('ResizableDirective', () => {
     const expectedWidth = initialWidth + (endPosition - startPosition);
     expect(inputElement.style.minWidth).toBe(`${expectedWidth}px`);
     expect(inputElement.style.width).toBe(`${expectedWidth}px`);
+  });
+
+  it('should not listen on the document before a drag starts', () => {
+    const addEventListener = vi.spyOn(document, 'addEventListener');
+
+    TestBed.createComponent(TestComponent).detectChanges();
+
+    expect(documentListenerTypes(addEventListener)).toEqual([]);
+  });
+
+  it('should listen on the document only while dragging', () => {
+    const addEventListener = vi.spyOn(document, 'addEventListener');
+    const removeEventListener = vi.spyOn(document, 'removeEventListener');
+
+    mousedownAt(inputElement, 100);
+    expect(documentListenerTypes(addEventListener)).toEqual(['mousemove', 'mouseup']);
+
+    document.dispatchEvent(new MouseEvent('mouseup'));
+    expect(documentListenerTypes(removeEventListener)).toEqual(['mousemove', 'mouseup']);
+  });
+
+  it('should stop listening on the document when the host is destroyed while dragging', () => {
+    const removeEventListener = vi.spyOn(document, 'removeEventListener');
+
+    mousedownAt(inputElement, 100);
+    fixture.destroy();
+
+    expect(documentListenerTypes(removeEventListener)).toEqual(['mousemove', 'mouseup']);
   });
 
   it('should not resize element after mouseup', () => {
@@ -133,9 +174,7 @@ describe('ResizableDirective in a table', () => {
   const cell = (id: string): HTMLElement => fixture.nativeElement.querySelector(`#${id}`);
 
   const drag = (element: HTMLElement, from: number, to: number) => {
-    const mousedown = new MouseEvent('mousedown', { bubbles: true });
-    Object.defineProperty(mousedown, 'pageX', { value: from });
-    element.dispatchEvent(mousedown);
+    mousedownAt(element, from);
     const mousemove = new MouseEvent('mousemove', { bubbles: true });
     Object.defineProperty(mousemove, 'pageX', { value: to });
     document.dispatchEvent(mousemove);
