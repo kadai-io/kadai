@@ -79,12 +79,9 @@
       border: 1px solid #dee2e6;
     }
 
-    & td[kadaiResizableWidth] {
+    & td[kadaiResizableWidth],
+    & th[kadaiResizableWidth] {
       padding-right: 6px;
-    }
-
-    & td[kadaiResizableWidth] > * {
-      cursor: auto;
     }
 
     & tr:first-child > td {

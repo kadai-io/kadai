@@ -28,14 +28,29 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 })
 class TestComponent {}
 
-const documentListenerTypes = (spy: { mock: { calls: unknown[][] } }): string[] =>
-  spy.mock.calls.map((call) => call[0] as string).filter((type) => type === 'mousemove' || type === 'mouseup');
+const DRAG_EVENT_TYPES = ['mousemove', 'mouseup'];
+
+type ListenerCall = [type: string, ...rest: unknown[]];
+
+const dragEventTypes = (calls: ListenerCall[]): string[] =>
+  calls.map(([type]) => type).filter((type) => DRAG_EVENT_TYPES.includes(type));
+
+const stubRightEdge = (element: HTMLElement, right: number) =>
+  vi.spyOn(element, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, right, 0));
 
 const mousedownAt = (element: HTMLElement, pageX: number) => {
-  const mousedown = new MouseEvent('mousedown', { bubbles: true });
+  const mousedown = new MouseEvent('mousedown', { clientX: pageX });
   Object.defineProperty(mousedown, 'pageX', { value: pageX });
   element.dispatchEvent(mousedown);
 };
+
+const mousedownOnHandle = (element: HTMLElement, pageX: number) => {
+  stubRightEdge(element, pageX);
+  mousedownAt(element, pageX);
+};
+
+const mousemoveAt = (element: HTMLElement, clientX: number) =>
+  element.dispatchEvent(new MouseEvent('mousemove', { clientX }));
 
 describe('ResizableDirective', () => {
   let fixture: ComponentFixture<TestComponent>;
@@ -65,30 +80,46 @@ describe('ResizableDirective', () => {
     expect(directive).toBeTruthy();
   });
 
-  it('should handle mouseover', () => {
-    inputElement.dispatchEvent(new MouseEvent('mouseover'));
+  it('should show the resize cursor near the right edge only', () => {
+    stubRightEdge(inputElement, 200);
 
+    mousemoveAt(inputElement, 197);
     expect(document.body.style.cursor).toBe('col-resize');
     expect(inputElement.style.userSelect).toBe('none');
+
+    mousemoveAt(inputElement, 150);
+    expect(document.body.style.cursor).toBe('');
+    expect(inputElement.style.userSelect).toBe('');
   });
 
-  it('should handle mouseout', () => {
-    inputElement.dispatchEvent(new MouseEvent('mouseout'));
+  it('should clear the resize cursor when the pointer leaves the element', () => {
+    stubRightEdge(inputElement, 200);
+    mousemoveAt(inputElement, 197);
+
+    inputElement.dispatchEvent(new MouseEvent('mouseleave'));
 
     expect(document.body.style.cursor).toBe('');
     expect(inputElement.style.userSelect).toBe('');
+  });
+
+  it('should keep the resize cursor while dragging outside the element', () => {
+    mousedownOnHandle(inputElement, 200);
+
+    inputElement.dispatchEvent(new MouseEvent('mouseleave'));
+    expect(document.body.style.cursor).toBe('col-resize');
+
+    document.dispatchEvent(new MouseEvent('mouseup'));
+    expect(document.body.style.cursor).toBe('');
   });
 
   it('should resize element after mousedown and mousemove', () => {
     const startPosition: number = 100;
     const endPosition: number = 200;
 
-    const mousedownEvent = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
-    Object.defineProperty(mousedownEvent, 'pageX', { value: startPosition });
-    inputElement.dispatchEvent(mousedownEvent);
+    mousedownOnHandle(inputElement, startPosition);
 
     const initialWidth = inputElement.clientWidth;
-    const mousemoveEvent = new MouseEvent('mousemove', { bubbles: true, cancelable: true });
+    const mousemoveEvent = new MouseEvent('mousemove', { bubbles: true });
     Object.defineProperty(mousemoveEvent, 'pageX', { value: endPosition });
     inputElement.dispatchEvent(mousemoveEvent);
 
@@ -97,32 +128,50 @@ describe('ResizableDirective', () => {
     expect(inputElement.style.width).toBe(`${expectedWidth}px`);
   });
 
+  it('should start a drag on the right edge of the element', () => {
+    const addEventListener = vi.spyOn(document, 'addEventListener');
+
+    mousedownOnHandle(inputElement, 200);
+
+    expect(dragEventTypes(addEventListener.mock.calls)).toEqual(['mousemove', 'mouseup']);
+  });
+
+  it('should not start a drag away from the right edge of the element', () => {
+    const addEventListener = vi.spyOn(document, 'addEventListener');
+    stubRightEdge(inputElement, 200);
+
+    mousedownAt(inputElement, 150);
+
+    expect(dragEventTypes(addEventListener.mock.calls)).toEqual([]);
+    expect(inputElement.style.width).toBe('');
+  });
+
   it('should not listen on the document before a drag starts', () => {
     const addEventListener = vi.spyOn(document, 'addEventListener');
 
     TestBed.createComponent(TestComponent).detectChanges();
 
-    expect(documentListenerTypes(addEventListener)).toEqual([]);
+    expect(dragEventTypes(addEventListener.mock.calls)).toEqual([]);
   });
 
   it('should listen on the document only while dragging', () => {
     const addEventListener = vi.spyOn(document, 'addEventListener');
     const removeEventListener = vi.spyOn(document, 'removeEventListener');
 
-    mousedownAt(inputElement, 100);
-    expect(documentListenerTypes(addEventListener)).toEqual(['mousemove', 'mouseup']);
+    mousedownOnHandle(inputElement, 100);
+    expect(dragEventTypes(addEventListener.mock.calls)).toEqual(['mousemove', 'mouseup']);
 
     document.dispatchEvent(new MouseEvent('mouseup'));
-    expect(documentListenerTypes(removeEventListener)).toEqual(['mousemove', 'mouseup']);
+    expect(dragEventTypes(removeEventListener.mock.calls)).toEqual(['mousemove', 'mouseup']);
   });
 
   it('should stop listening on the document when the host is destroyed while dragging', () => {
     const removeEventListener = vi.spyOn(document, 'removeEventListener');
 
-    mousedownAt(inputElement, 100);
+    mousedownOnHandle(inputElement, 100);
     fixture.destroy();
 
-    expect(documentListenerTypes(removeEventListener)).toEqual(['mousemove', 'mouseup']);
+    expect(dragEventTypes(removeEventListener.mock.calls)).toEqual(['mousemove', 'mouseup']);
   });
 
   it('should not resize element after mouseup', () => {
@@ -174,7 +223,7 @@ describe('ResizableDirective in a table', () => {
   const cell = (id: string): HTMLElement => fixture.nativeElement.querySelector(`#${id}`);
 
   const drag = (element: HTMLElement, from: number, to: number) => {
-    mousedownAt(element, from);
+    mousedownOnHandle(element, from);
     const mousemove = new MouseEvent('mousemove', { bubbles: true });
     Object.defineProperty(mousemove, 'pageX', { value: to });
     document.dispatchEvent(mousemove);
@@ -185,6 +234,10 @@ describe('ResizableDirective in a table', () => {
     TestBed.configureTestingModule({ imports: [TableTestComponent] });
     fixture = TestBed.createComponent(TableTestComponent);
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('should resize the column through its header cell when a body cell is dragged', () => {

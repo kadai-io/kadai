@@ -96,7 +96,6 @@
                     kadaiResizableWidth>
                     <kadai-shared-type-ahead
                       (accessIdEventEmitter)="accessItemSelected($event, index)"
-                      (mousedown)="$event.stopPropagation()"
                       [displayError]="true"
                       [isRequired]="true"
                       [savedAccessId]="accessItem"
@@ -105,8 +104,7 @@
                   </td>
                 } @else {
                   <td kadaiResizableWidth>
-                    <div (mousedown)="$event.stopPropagation()"
-                         [class.has-warning]="accessItemsClone()[index].accessId !== accessItem.value.accessId"
+                    <div [class.has-warning]="accessItemsClone()[index].accessId !== accessItem.value.accessId"
                          [class.has-error]="accessIdField.hasError">
                       <input #htmlInputElement
                              #accessIdField="kadaiFormField"

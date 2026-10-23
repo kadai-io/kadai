@@ -18,11 +18,14 @@
 
 import { DestroyRef, Directive, ElementRef, inject, Renderer2 } from '@angular/core';
 
+// Resizable cells reserve this much padding on their right, so the handle never covers content.
+export const RESIZE_HANDLE_WIDTH_PX = 6;
+
 @Directive({
   selector: '[kadaiResizableWidth]',
   host: {
-    '(mouseover)': 'onMouseover()',
-    '(mouseout)': 'onMouseout()',
+    '(mousemove)': 'onMousemove($event)',
+    '(mouseleave)': 'onMouseleave()',
     '(mousedown)': 'onMousedown($event)'
   }
 })
@@ -32,31 +35,57 @@ export class ResizableWidthDirective {
   private destroyRef = inject(DestroyRef);
 
   private startX = 0;
-  // Every cell of the column carries this directive, so permanent document listeners would run one
-  // handler per row on every mouse move on the page. They exist only for the duration of a drag.
+  private handleCursorShown = false;
+  // Attached only while dragging: a permanent listener per row would run on every mouse move.
   private stopListening: (() => void) | null = null;
 
   constructor() {
     this.destroyRef.onDestroy(() => this.stopResizing());
   }
 
-  onMouseover() {
-    this.renderer.setStyle(document.body, 'cursor', 'col-resize');
-    this.renderer.setStyle(this.el.nativeElement, 'user-select', 'none');
+  onMousemove(event: MouseEvent) {
+    if (!this.isResizing()) {
+      this.showHandleCursor(this.isOverHandle(event));
+    }
   }
 
-  onMouseout() {
-    this.renderer.setStyle(document.body, 'cursor', '');
-    this.renderer.setStyle(this.el.nativeElement, 'user-select', '');
+  onMouseleave() {
+    if (!this.isResizing()) {
+      this.showHandleCursor(false);
+    }
   }
 
   onMousedown(event: MouseEvent) {
+    if (!this.isOverHandle(event)) {
+      return;
+    }
     this.startX = event.pageX;
+    this.showHandleCursor(true);
     this.startResizing();
   }
 
+  private isOverHandle(event: MouseEvent): boolean {
+    const distanceFromRightEdge = this.el.nativeElement.getBoundingClientRect().right - event.clientX;
+    return distanceFromRightEdge >= 0 && distanceFromRightEdge <= RESIZE_HANDLE_WIDTH_PX;
+  }
+
+  private showHandleCursor(show: boolean): void {
+    if (show === this.handleCursorShown) {
+      return;
+    }
+    this.handleCursorShown = show;
+    this.renderer.setStyle(document.body, 'cursor', show ? 'col-resize' : '');
+    this.renderer.setStyle(this.el.nativeElement, 'user-select', show ? 'none' : '');
+  }
+
+  private isResizing(): boolean {
+    return this.stopListening !== null;
+  }
+
   private startResizing(): void {
-    this.stopResizing();
+    if (this.isResizing()) {
+      return;
+    }
     const stopMousemove = this.renderer.listen('document', 'mousemove', (event: MouseEvent) => this.resize(event));
     const stopMouseup = this.renderer.listen('document', 'mouseup', () => this.stopResizing());
     this.stopListening = () => {
@@ -68,6 +97,7 @@ export class ResizableWidthDirective {
   private stopResizing(): void {
     this.stopListening?.();
     this.stopListening = null;
+    this.showHandleCursor(false);
   }
 
   private resize(event: MouseEvent): void {
@@ -81,8 +111,7 @@ export class ResizableWidthDirective {
     this.startX = event.pageX;
   }
 
-  // A table column is as wide as its widest cell, so all cells of a column resize the same header cell.
-  // Otherwise a cell widened in one row would keep the column from shrinking when dragged in another row.
+  // All cells resize the column's header cell, or one row's width would block the column from shrinking.
   private resizeTarget(): HTMLElement {
     const host: HTMLElement = this.el.nativeElement;
     if (host instanceof HTMLTableCellElement) {
