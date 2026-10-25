@@ -39,10 +39,43 @@
       <artifactId>kadai-rest-spring-example-common</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <!-- TaskTestDataController persists the measurement data set through TaskTestDataGenerator,
+        which ships in kadai-test-api. Without that module there is no way to seed tasks, so the
+        dependency itself is legitimate and part of the application. kadai-test-api is a test
+        library though and declares its tooling (JUnit, Mockito, Testcontainers incl. docker-java
+        and JNA, DB2 driver) in compile scope. Without the exclusions below those artifacts land on
+        the production classpath: they add roughly a third of the image size, are never executed,
+        and bring a Docker client and test framework into the runtime for no reason. Excluding them
+        here keeps the fix local to the app that repackages itself into an executable jar; narrowing
+        the scopes inside kadai-test-api would change a published test module for all consumers and
+        is not this application's decision to make. That scope problem is tracked in #2359; once it
+        is fixed there, the exclusions can be dropped again. -->
     <dependency>
       <groupId>io.kadai</groupId>
       <artifactId>kadai-test-api</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.junit.jupiter</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.junit.platform</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.mockito</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.testcontainers</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.ibm.db2</groupId>
+          <artifactId>jcc</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.springdoc</groupId>
