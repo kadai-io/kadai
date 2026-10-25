@@ -203,51 +203,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>${version.maven.resources}</version>
-        <executions>
-          <execution>
-            <id>copy-kadai-core-docs</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>
-                ${project.build.outputDirectory}/static/docs/java/kadai-core
-              </outputDirectory>
-              <resources>
-                <resource>
-                  <directory>
-                    ../../lib/kadai-core/target/reports/apidocs
-                  </directory>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-          <execution>
-            <id>copy-kadai-spring-docs</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>
-                ${project.build.outputDirectory}/static/docs/java/kadai-spring
-              </outputDirectory>
-              <resources>
-                <resource>
-                  <directory>
-                    ../../lib/kadai-spring/target/reports/apidocs
-                  </directory>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
 
