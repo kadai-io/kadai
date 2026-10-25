@@ -19,6 +19,7 @@ services:
       LOGGING_LEVEL_IO_KADAI: INFO
       GENERATESAMPLEDATA: false
       KADAI_SCHEMA_NAME: kadai
+      JAVA_OPTS: "-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError"
     healthcheck:
       test: "curl --fail --silent http://localhost:8080/kadai/actuator/health"
       start_period: "30s"
