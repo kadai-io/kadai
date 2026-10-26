@@ -39,7 +39,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <version.mybatis>3.5.19</version.mybatis>
+    <version.mybatis>3.6.0</version.mybatis>
     <version.json>20260814</version.json>
 
     <!-- build dependencies -->
