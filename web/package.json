@@ -22,11 +22,11 @@
   "dependencies": {
     "@ali-hm/angular-tree-component": "22.0.7",
     "@angular/animations": "22.2.3",
-    "@angular/cdk": "22.2.3",
+    "@angular/cdk": "22.2.4",
     "@angular/common": "22.2.3",
     "@angular/core": "22.2.3",
     "@angular/forms": "22.2.3",
-    "@angular/material": "22.2.3",
+    "@angular/material": "22.2.4",
     "@angular/platform-browser": "22.2.3",
     "@angular/platform-browser-dynamic": "22.2.3",
     "@angular/router": "22.2.3",
@@ -43,8 +43,8 @@
     "tslib": "2.8.1"
   },
   "devDependencies": {
-    "@angular/build": "22.2.3",
-    "@angular/cli": "22.2.3",
+    "@angular/build": "22.2.4",
+    "@angular/cli": "22.2.4",
     "@angular/compiler": "22.2.3",
     "@angular/compiler-cli": "22.2.3",
     "@ngxs/devtools-plugin": "22.0.0",
