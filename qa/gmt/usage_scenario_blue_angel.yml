@@ -8,10 +8,13 @@ compose-file: !include compose.yml
 
 services:
   app:
-    # Frozen image for reproducible Blauer Engel certification measurements. Only change this manually.
+    # Pinned manually for reproducible Blauer Engel certification measurements. Only change this manually.
     # Available image tags: https://github.com/kadai-io/kadai/pkgs/container/kadai-gmt
-    # Pin the `sha-<commit>` tag of the build whose code should be certified.
-    image: ghcr.io/kadai-io/kadai-gmt:sha-1e149da421699fdc554aaebda671df262ca5713b
+    # The pin is the `sha-<commit>` tag of the measured code, or a tag named after a dedicated
+    # certification branch when that code is not on master.
+    #
+    # Measurement KADAI v12.1.0: branch `blauer-engel/v12.1.0` = v12.1.0 + #2360 + #2379.
+    image: ghcr.io/kadai-io/kadai-gmt:blauer-engel-v12.1.0
   postgres:
     # Frozen for reproducible Blauer Engel certification measurements. Only change this manually.
     image: postgres:17.11
