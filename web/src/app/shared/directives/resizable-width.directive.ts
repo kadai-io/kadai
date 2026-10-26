@@ -18,72 +18,58 @@
 
 import { DestroyRef, Directive, ElementRef, inject, Renderer2 } from '@angular/core';
 
-// Resizable cells reserve this much padding on their right, so the handle never covers content.
 export const RESIZE_HANDLE_WIDTH_PX = 6;
 
+const RESIZABLE_CELL = '[kadaiResizableWidth]';
+
 @Directive({
-  selector: '[kadaiResizableWidth]',
+  selector: 'table[kadaiResizableWidth]',
   host: {
-    '(mousemove)': 'onMousemove($event)',
-    '(mouseleave)': 'onMouseleave()',
     '(mousedown)': 'onMousedown($event)'
   }
 })
 export class ResizableWidthDirective {
   private renderer = inject(Renderer2);
-  private el = inject(ElementRef);
+  private table: ElementRef<HTMLTableElement> = inject(ElementRef);
   private destroyRef = inject(DestroyRef);
 
   private startX = 0;
-  private handleCursorShown = false;
-  // Attached only while dragging: a permanent listener per row would run on every mouse move.
+  private target: HTMLElement | null = null;
   private stopListening: (() => void) | null = null;
 
   constructor() {
     this.destroyRef.onDestroy(() => this.stopResizing());
   }
 
-  onMousemove(event: MouseEvent) {
-    if (!this.isResizing()) {
-      this.showHandleCursor(this.isOverHandle(event));
-    }
-  }
-
-  onMouseleave() {
-    if (!this.isResizing()) {
-      this.showHandleCursor(false);
-    }
-  }
-
   onMousedown(event: MouseEvent) {
-    if (!this.isOverHandle(event)) {
+    const cell = this.handleCellAt(event);
+    if (!cell) {
       return;
     }
+    this.target = this.headerCellOf(cell);
     this.startX = event.pageX;
-    this.showHandleCursor(true);
+    this.renderer.setStyle(document.body, 'user-select', 'none');
     this.startResizing();
   }
 
-  private isOverHandle(event: MouseEvent): boolean {
-    const distanceFromRightEdge = this.el.nativeElement.getBoundingClientRect().right - event.clientX;
-    return distanceFromRightEdge >= 0 && distanceFromRightEdge <= RESIZE_HANDLE_WIDTH_PX;
-  }
-
-  private showHandleCursor(show: boolean): void {
-    if (show === this.handleCursorShown) {
-      return;
+  private handleCellAt(event: MouseEvent): HTMLTableCellElement | null {
+    if (!(event.target instanceof HTMLElement)) {
+      return null;
     }
-    this.handleCursorShown = show;
-    this.renderer.setStyle(document.body, 'cursor', show ? 'col-resize' : '');
-    this.renderer.setStyle(this.el.nativeElement, 'user-select', show ? 'none' : '');
+    const cell = event.target.closest(RESIZABLE_CELL);
+    if (!(cell instanceof HTMLTableCellElement) || !this.table.nativeElement.contains(cell)) {
+      return null;
+    }
+    const distanceFromRightEdge = cell.getBoundingClientRect().right - event.clientX;
+    return distanceFromRightEdge >= 0 && distanceFromRightEdge <= RESIZE_HANDLE_WIDTH_PX ? cell : null;
   }
 
-  private isResizing(): boolean {
-    return this.stopListening !== null;
+  private headerCellOf(cell: HTMLTableCellElement): HTMLElement {
+    return this.table.nativeElement.tHead?.rows[0]?.cells[cell.cellIndex] ?? cell;
   }
 
   private startResizing(): void {
-    if (this.isResizing()) {
+    if (this.stopListening) {
       return;
     }
     const stopMousemove = this.renderer.listen('document', 'mousemove', (event: MouseEvent) => this.resize(event));
@@ -97,29 +83,20 @@ export class ResizableWidthDirective {
   private stopResizing(): void {
     this.stopListening?.();
     this.stopListening = null;
-    this.showHandleCursor(false);
+    this.target = null;
+    this.renderer.setStyle(document.body, 'user-select', '');
   }
 
   private resize(event: MouseEvent): void {
-    const target = this.resizeTarget();
+    if (!this.target) {
+      return;
+    }
     const movementX = event.pageX - this.startX;
-    const newWidth = target.clientWidth + movementX;
+    const newWidth = this.target.clientWidth + movementX;
 
-    this.renderer.setStyle(target, 'min-width', `${newWidth}px`);
-    this.renderer.setStyle(target, 'width', `${newWidth}px`);
+    this.renderer.setStyle(this.target, 'min-width', `${newWidth}px`);
+    this.renderer.setStyle(this.target, 'width', `${newWidth}px`);
 
     this.startX = event.pageX;
-  }
-
-  // All cells resize the column's header cell, or one row's width would block the column from shrinking.
-  private resizeTarget(): HTMLElement {
-    const host: HTMLElement = this.el.nativeElement;
-    if (host instanceof HTMLTableCellElement) {
-      const headerCell = host.closest('table')?.tHead?.rows[0]?.cells[host.cellIndex];
-      if (headerCell) {
-        return headerCell;
-      }
-    }
-    return host;
   }
 }
