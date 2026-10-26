@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.web.server.LocalManagementPort;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
@@ -67,6 +68,7 @@ class TaskTestDataEndpointIntTest {
   static final PostgreSQLContainer<?> POSTGRESQL = new PostgreSQLContainer<>("postgres:17");
 
   @LocalServerPort private int port;
+  @LocalManagementPort private int managementPort;
 
   @Autowired private KadaiEngine kadaiEngine;
   @Autowired private TaskService taskService;
@@ -81,6 +83,9 @@ class TaskTestDataEndpointIntTest {
     registry.add("spring.datasource.driverClassName", POSTGRESQL::getDriverClassName);
     registry.add("kadai.schemaName", () -> "kadai");
     registry.add("management.health.ldap.enabled", () -> false);
+    // Pick a free port for the management server instead of the configured 9000, which may be in
+    // use on the build machine.
+    registry.add("management.server.port", () -> 0);
   }
 
   @Test
@@ -89,7 +94,7 @@ class TaskTestDataEndpointIntTest {
     ResponseEntity<Map<String, Object>> healthResponse =
         restClient
             .get()
-            .uri(url("/actuator/health"))
+            .uri(managementUrl("/actuator/health"))
             .retrieve()
             .toEntity(new ParameterizedTypeReference<>() {});
 
@@ -126,6 +131,10 @@ class TaskTestDataEndpointIntTest {
 
   private String url(String path) {
     return "http://localhost:" + port + "/kadai" + path;
+  }
+
+  private String managementUrl(String path) {
+    return "http://localhost:" + managementPort + path;
   }
 
   private static String basicAuthentication(String user, String password) {
