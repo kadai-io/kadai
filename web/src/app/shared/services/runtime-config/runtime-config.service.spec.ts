@@ -22,6 +22,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   parseRuntimeConfig,
   RUNTIME_CONFIG_DEFAULTS,
+  RUNTIME_CONFIG_TIMEOUT_MS,
   RUNTIME_CONFIG_URL,
   RuntimeConfig,
   RuntimeConfigService
@@ -52,6 +53,7 @@ describe('RuntimeConfigService', () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     httpMock.verify();
     consoleSpies.forEach((spy) => spy.mockRestore());
   });
@@ -141,6 +143,22 @@ describe('RuntimeConfigService', () => {
     expect(service.config()).toEqual(defaults);
     expect(console.error).toHaveBeenCalledWith(
       'Runtime configuration file is not valid JSON, using build-time defaults:',
+      expect.anything()
+    );
+  });
+
+  it('should use the defaults and log an error when the runtime file never responds', async () => {
+    vi.useFakeTimers();
+    const promise = service.load();
+    const request = httpMock.expectOne(RUNTIME_CONFIG_URL);
+
+    await vi.advanceTimersByTimeAsync(RUNTIME_CONFIG_TIMEOUT_MS);
+    await promise;
+
+    expect(service.config()).toEqual(defaults);
+    expect(request.cancelled).toBe(true);
+    expect(console.error).toHaveBeenCalledWith(
+      'Runtime configuration file is not responding, using build-time defaults:',
       expect.anything()
     );
   });

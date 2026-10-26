@@ -20,7 +20,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { firstValueFrom } from 'rxjs';
-import { KadaiEngineService, LOGOUT_TIMEOUT_MS } from './kadai-engine.service';
+import { KadaiEngineService, LOGOUT_TIMEOUT_MS, USER_INFO_TIMEOUT_MS } from './kadai-engine.service';
 import { RUNTIME_CONFIG_DEFAULTS } from '../runtime-config/runtime-config.service';
 import { UserInfo } from '../../models/user-info';
 
@@ -72,6 +72,19 @@ describe('KadaiEngineService', () => {
 
       await expect(promise).resolves.toEqual(user);
       expect(service.currentUserInfo()).toEqual(user);
+    });
+
+    it('should fail and clear the current user when the request times out', async () => {
+      await loadUser(new UserInfo('admin', [], ['ADMIN']));
+      vi.useFakeTimers();
+      const promise = firstValueFrom(service.getUserInformation());
+      const req = httpMock.expectOne(`${restUrl}/v1/current-user-info`);
+
+      vi.advanceTimersByTime(USER_INFO_TIMEOUT_MS);
+
+      await expect(promise).rejects.toThrow();
+      expect(req.cancelled).toBe(true);
+      expect(service.currentUserInfo()).toBeUndefined();
     });
 
     it('should clear currentUserInfo and rethrow when the request fails', async () => {

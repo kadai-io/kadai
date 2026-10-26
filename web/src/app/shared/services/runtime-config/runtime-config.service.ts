@@ -19,13 +19,12 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable, InjectionToken, signal } from '@angular/core';
 import { environment } from 'environments/environment';
-import { firstValueFrom, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { firstValueFrom, of, TimeoutError } from 'rxjs';
+import { catchError, map, timeout } from 'rxjs/operators';
 
 export interface RuntimeConfig {
   kadaiRestUrl: string;
   kadaiLogoutUrl: string;
-  // Empty string means "not configured": unauthenticated users are not redirected to a login page.
   kadaiLoginUrl: string;
 }
 
@@ -34,7 +33,7 @@ const RUNTIME_CONFIG_KEYS: ReadonlyArray<keyof RuntimeConfig> = ['kadaiRestUrl',
 const EMPTY_VALUE_KEYS: ReadonlyArray<keyof RuntimeConfig> = ['kadaiLoginUrl'];
 
 export const RUNTIME_CONFIG_URL = 'environments/data-sources/environment-information.json';
-
+export const RUNTIME_CONFIG_TIMEOUT_MS = 5000;
 export const RUNTIME_CONFIG_DEFAULTS = new InjectionToken<Readonly<RuntimeConfig>>('RUNTIME_CONFIG_DEFAULTS', {
   providedIn: 'root',
   factory: () => ({
@@ -69,6 +68,7 @@ export class RuntimeConfigService {
   async load(): Promise<void> {
     const overrides = await firstValueFrom(
       this.httpClient.get<unknown>(RUNTIME_CONFIG_URL).pipe(
+        timeout(RUNTIME_CONFIG_TIMEOUT_MS),
         map((raw) => parseRuntimeConfig(raw)),
         catchError((error) => {
           logLoadError(error);
@@ -106,6 +106,10 @@ export function parseRuntimeConfig(raw: unknown): Partial<RuntimeConfig> {
 }
 
 function logLoadError(error: unknown): void {
+  if (error instanceof TimeoutError) {
+    console.error('Runtime configuration file is not responding, using build-time defaults:', error);
+    return;
+  }
   if (error instanceof HttpErrorResponse) {
     if (error.status === 404) {
       console.info('Runtime configuration file not found, using build-time defaults.');

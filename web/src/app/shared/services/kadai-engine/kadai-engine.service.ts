@@ -25,6 +25,9 @@ import { Version } from 'app/shared/models/version';
 import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 
 export const LOGOUT_TIMEOUT_MS = 3000;
+// Bounds the startup request for the current user so that an unresponsive backend cannot keep the
+// application initializer - and with it the whole UI - pending forever.
+export const USER_INFO_TIMEOUT_MS = 10000;
 
 @Injectable({
   providedIn: 'root'
@@ -36,8 +39,13 @@ export class KadaiEngineService {
   private readonly _currentUserInfo = signal<UserInfo | undefined>(undefined);
   readonly currentUserInfo = this._currentUserInfo.asReadonly();
 
+  get currentUserInfoUrl(): string {
+    return `${this.runtimeConfigService.kadaiRestUrl}/v1/current-user-info`;
+  }
+
   getUserInformation(): Observable<UserInfo> {
-    return this.httpClient.get<UserInfo>(`${this.runtimeConfigService.kadaiRestUrl}/v1/current-user-info`).pipe(
+    return this.httpClient.get<UserInfo>(this.currentUserInfoUrl).pipe(
+      timeout(USER_INFO_TIMEOUT_MS),
       tap((data) => this._currentUserInfo.set(data)),
       catchError((error) => {
         this._currentUserInfo.set(undefined);

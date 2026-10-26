@@ -34,11 +34,12 @@ export class StartupService {
 
   async load(): Promise<void> {
     await this.runtimeConfigService.load();
+    const userInfoUrl = this.kadaiEngineService.currentUserInfoUrl;
     try {
       await firstValueFrom(this.kadaiEngineService.getUserInformation());
     } catch (error) {
       const loginUrl = this.runtimeConfigService.kadaiLoginUrl;
-      if (loginUrl && isAuthenticationError(error, loginUrl, this.document.baseURI)) {
+      if (loginUrl && isAuthenticationError(error, userInfoUrl, this.document.baseURI)) {
         this.window.nativeWindow.location.href = loginUrl;
         return new Promise<never>(() => {});
       }
@@ -47,26 +48,33 @@ export class StartupService {
   }
 }
 
-// Spring Security answers unauthenticated XHR requests either with 401 or with a redirect to the
-// login page, which the browser follows transparently. In the latter case the response URL
-// points to the configured login page and parsing its HTML as JSON fails.
-function isAuthenticationError(error: unknown, loginUrl: string, baseUrl: string): boolean {
+// Unauthenticated requests come back either as 401 or as a login redirect the browser followed, so
+// a successful status from another URL means no session; from the endpoint itself it is a server bug.
+function isAuthenticationError(error: unknown, requestUrl: string, baseUrl: string): boolean {
   if (!(error instanceof HttpErrorResponse)) {
     return false;
   }
-  return error.status === 401 || isSameEndpoint(error.url, loginUrl, baseUrl);
+  if (error.status === 401) {
+    return true;
+  }
+  return isSuccessful(error.status) && wasRedirected(error.url, requestUrl, baseUrl);
 }
 
-function isSameEndpoint(actualUrl: string | null, expectedUrl: string, baseUrl: string): boolean {
-  if (!actualUrl) {
+function isSuccessful(status: number): boolean {
+  return status >= 200 && status < 300;
+}
+
+// A response URL that is unknown or unparsable gives no evidence of a redirect.
+function wasRedirected(responseUrl: string | null, requestUrl: string, baseUrl: string): boolean {
+  if (!responseUrl) {
     return false;
   }
   try {
-    const actual = new URL(actualUrl, baseUrl);
-    const expected = new URL(expectedUrl, baseUrl);
+    const response = new URL(responseUrl, baseUrl);
+    const request = new URL(requestUrl, baseUrl);
     return (
-      actual.origin === expected.origin &&
-      withoutTrailingSlash(actual.pathname) === withoutTrailingSlash(expected.pathname)
+      response.origin !== request.origin ||
+      withoutTrailingSlash(response.pathname) !== withoutTrailingSlash(request.pathname)
     );
   } catch {
     return false;

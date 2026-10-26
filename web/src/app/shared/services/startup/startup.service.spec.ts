@@ -23,7 +23,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { of, throwError } from 'rxjs';
 import { StartupService } from './startup.service';
-import { KadaiEngineService } from '../kadai-engine/kadai-engine.service';
+import { KadaiEngineService, USER_INFO_TIMEOUT_MS } from '../kadai-engine/kadai-engine.service';
 import {
   RUNTIME_CONFIG_DEFAULTS,
   RUNTIME_CONFIG_URL,
@@ -36,16 +36,20 @@ import { NotificationService } from '../notifications/notification.service';
 
 describe('StartupService', () => {
   const loginUrl = 'http://host/kadai/login';
+  const userInfoUrl = 'http://host/kadai/api/v1/current-user-info';
 
   let service: StartupService;
   let runtimeConfigServiceMock: { load: ReturnType<typeof vi.fn>; kadaiLoginUrl: string };
-  let kadaiEngineServiceMock: { getUserInformation: ReturnType<typeof vi.fn> };
+  let kadaiEngineServiceMock: { getUserInformation: ReturnType<typeof vi.fn>; currentUserInfoUrl: string };
   let windowMock: { nativeWindow: { location: { href: string } } };
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     runtimeConfigServiceMock = { load: vi.fn().mockResolvedValue(undefined), kadaiLoginUrl: loginUrl };
-    kadaiEngineServiceMock = { getUserInformation: vi.fn().mockReturnValue(of(new UserInfo('user'))) };
+    kadaiEngineServiceMock = {
+      getUserInformation: vi.fn().mockReturnValue(of(new UserInfo('user'))),
+      currentUserInfoUrl: userInfoUrl
+    };
     windowMock = { nativeWindow: { location: { href: '' } } };
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -110,7 +114,7 @@ describe('StartupService', () => {
     });
 
     it('should redirect to the login page and keep bootstrap pending on 401', async () => {
-      failUserInformation(new HttpErrorResponse({ status: 401, url: 'http://host/kadai/api/v1/current-user-info' }));
+      failUserInformation(new HttpErrorResponse({ status: 401, url: userInfoUrl }));
 
       const { isSettled } = startLoad();
 
@@ -118,56 +122,66 @@ describe('StartupService', () => {
       expect(isSettled()).toBe(false);
     });
 
-    it('should redirect to the login page when the request was redirected to the login page', async () => {
-      failUserInformation(new HttpErrorResponse({ status: 200, url: 'http://host/kadai/login' }));
+    it.each([
+      ['an unreachable or cross-origin blocked response', new HttpErrorResponse({ status: 0 })],
+      ['a forbidden response', new HttpErrorResponse({ status: 403, url: userInfoUrl })]
+    ])('should start without a user session on %s', async (_, error) => {
+      failUserInformation(error);
 
-      const { isSettled } = startLoad();
-
-      await vi.waitFor(() => expect(windowMock.nativeWindow.location.href).toBe(loginUrl));
-      expect(isSettled()).toBe(false);
+      await expect(startLoad().promise).resolves.toBe(true);
+      expect(windowMock.nativeWindow.location.href).toBe('');
     });
 
-    describe('with a custom login path', () => {
-      const appOrigin = () => new URL(TestBed.inject(DOCUMENT).baseURI).origin;
+    describe('when the request was redirected', () => {
       const redirectedTo = (url: string) => new HttpErrorResponse({ status: 200, url });
 
       it.each([
-        ['an absolute login url', 'http://host/kadai/signin', 'http://host/kadai/signin'],
-        [
-          'an OAuth login url',
-          'http://host/oauth2/authorization/provider',
-          'http://host/oauth2/authorization/provider'
-        ],
-        ['a query string on the redirect', 'http://host/kadai/signin', 'http://host/kadai/signin?continue'],
-        ['a trailing slash on the redirect', 'http://host/kadai/signin', 'http://host/kadai/signin/']
-      ])(
-        'should redirect when the request was redirected to the configured login page (%s)',
-        async (_, configured, actual) => {
-          runtimeConfigServiceMock.kadaiLoginUrl = configured;
-          failUserInformation(redirectedTo(actual));
+        ['the configured login page', loginUrl],
+        ['a login page with a query string', `${loginUrl}?continue`],
+        ['a login page with a trailing slash', `${loginUrl}/`],
+        ['an SSO entry point on another path', 'http://host/oauth2/authorization/provider']
+      ])('should redirect to the configured login page when the response came from %s', async (_, responseUrl) => {
+        failUserInformation(redirectedTo(responseUrl));
 
-          const { isSettled } = startLoad();
+        const { isSettled } = startLoad();
 
-          await vi.waitFor(() => expect(windowMock.nativeWindow.location.href).toBe(configured));
-          expect(isSettled()).toBe(false);
-        }
-      );
+        await vi.waitFor(() => expect(windowMock.nativeWindow.location.href).toBe(loginUrl));
+        expect(isSettled()).toBe(false);
+      });
 
-      it('should resolve a relative login url against the application base url', async () => {
+      it('should redirect to a login page configured as a relative url', async () => {
         runtimeConfigServiceMock.kadaiLoginUrl = '/kadai/signin';
-        failUserInformation(redirectedTo(`${appOrigin()}/kadai/signin`));
+        failUserInformation(redirectedTo('http://host/oauth2/authorization/provider'));
 
         startLoad();
 
         await vi.waitFor(() => expect(windowMock.nativeWindow.location.href).toBe('/kadai/signin'));
       });
+    });
 
+    describe('when the response came from the requested endpoint', () => {
       it.each([
-        ['a different path', 'http://host/kadai/login'],
-        ['a different origin', 'http://other-host/kadai/signin']
-      ])('should not treat a redirect to %s as authentication failure', async (_, actual) => {
-        runtimeConfigServiceMock.kadaiLoginUrl = 'http://host/kadai/signin';
-        failUserInformation(redirectedTo(actual));
+        ['as requested', userInfoUrl],
+        ['with a trailing slash', `${userInfoUrl}/`],
+        ['with a query string', `${userInfoUrl}?lang=en`]
+      ])('should start without a user session when it cannot be parsed (%s)', async (_, responseUrl) => {
+        failUserInformation(new HttpErrorResponse({ status: 200, url: responseUrl }));
+
+        await expect(startLoad().promise).resolves.toBe(true);
+        expect(windowMock.nativeWindow.location.href).toBe('');
+      });
+
+      it('should resolve a relative endpoint url against the application base url', async () => {
+        const appOrigin = new URL(TestBed.inject(DOCUMENT).baseURI).origin;
+        kadaiEngineServiceMock.currentUserInfoUrl = '/kadai/api/v1/current-user-info';
+        failUserInformation(new HttpErrorResponse({ status: 200, url: `${appOrigin}/kadai/api/v1/current-user-info` }));
+
+        await expect(startLoad().promise).resolves.toBe(true);
+        expect(windowMock.nativeWindow.location.href).toBe('');
+      });
+
+      it('should start without a user session when the response url is unknown', async () => {
+        failUserInformation(new HttpErrorResponse({ status: 200 }));
 
         await expect(startLoad().promise).resolves.toBe(true);
         expect(windowMock.nativeWindow.location.href).toBe('');
@@ -212,6 +226,7 @@ describe('StartupService with the real HTTP interceptor chain', () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     httpMock.verify();
     consoleErrorSpy.mockRestore();
   });
@@ -245,6 +260,23 @@ describe('StartupService with the real HTTP interceptor chain', () => {
     await startup.respond();
 
     await vi.waitFor(() => expect(startup.isSettled()).toBe(true));
+    expect(windowMock.nativeWindow.location.href).toBe('');
+  });
+
+  it('should finish bootstrap without a user session when the current user request never responds', async () => {
+    vi.useFakeTimers();
+    let settled = false;
+    TestBed.inject(StartupService)
+      .load()
+      .then(() => (settled = true));
+
+    httpMock.expectOne(RUNTIME_CONFIG_URL).flush({});
+    await vi.advanceTimersByTimeAsync(0);
+    const request = httpMock.expectOne(`${restUrl}/v1/current-user-info`);
+    await vi.advanceTimersByTimeAsync(USER_INFO_TIMEOUT_MS);
+
+    expect(settled).toBe(true);
+    expect(request.cancelled).toBe(true);
     expect(windowMock.nativeWindow.location.href).toBe('');
   });
 });
