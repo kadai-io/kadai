@@ -55,7 +55,12 @@ public class TaskTestDataController {
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public GenerationSummary createTasks(@Valid @RequestBody TaskGenerationRequest request) {
-    return TaskTestDataGenerator.from(kadaiEngine).persist(request.taskCount(), BATCH_SIZE);
+    return generate(kadaiEngine, request.taskCount());
+  }
+
+  // Shared by the endpoint and the --generate-tasks mode of GmtApplication.
+  static GenerationSummary generate(KadaiEngine kadaiEngine, long taskCount) {
+    return TaskTestDataGenerator.from(kadaiEngine).persist(taskCount, BATCH_SIZE);
   }
 
   /**
