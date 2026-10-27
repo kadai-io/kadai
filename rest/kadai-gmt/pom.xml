@@ -17,6 +17,9 @@
 
   <properties>
     <sonar.tests/>
+    <!-- Spring Boot bootstrap glue: main() starts the context and ends in System.exit(0), so only
+        a forked JVM could cover it. Its argument parsing is unit tested in GmtApplicationArgTest. -->
+    <sonar.coverage.exclusions>**/GmtApplication.java</sonar.coverage.exclusions>
   </properties>
 
   <dependencies>
