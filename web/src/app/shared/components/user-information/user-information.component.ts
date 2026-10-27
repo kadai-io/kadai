@@ -16,9 +16,8 @@
  *
  */
 
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
-import { UserInfo } from 'app/shared/models/user-info';
 import { expandDown } from '../../animations/expand.animation';
 import { SvgIconComponent } from 'angular-svg-icon';
 import { MatButton } from '@angular/material/button';
@@ -30,20 +29,18 @@ import { MatButton } from '@angular/material/button';
   animations: [expandDown],
   imports: [SvgIconComponent, MatButton]
 })
-export class UserInformationComponent implements OnInit {
-  userInformation?: UserInfo;
-  roles = '';
-  showRoles = false;
+export class UserInformationComponent {
   private kadaiEngineService = inject(KadaiEngineService);
 
-  ngOnInit() {
-    this.userInformation = this.kadaiEngineService.currentUserInfo;
-    if (this.userInformation) {
-      this.roles = `[${this.userInformation.roles.join(',')}]`;
-    }
-  }
+  readonly userInformation = this.kadaiEngineService.currentUserInfo;
+  readonly roles = computed(() => {
+    const user = this.userInformation();
+    return user?.roles ? `[${user.roles.join(',')}]` : '';
+  });
 
-  toggleRoles() {
+  showRoles = false;
+
+  toggleRoles(): void {
     this.showRoles = !this.showRoles;
   }
 }

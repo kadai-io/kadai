@@ -121,7 +121,9 @@ export class TaskListToolbarComponent implements OnInit {
         this.filteredWorkbasketNames.set([...this.workbasketNames]);
 
         // get workbasket of current user
-        const user = this.kadaiEngineService.currentUserInfo;
+        const user = this.kadaiEngineService.currentUserInfo();
+        if (!user) return;
+
         const filteredWorkbasketsByUser = (this.workbaskets() ?? []).filter(
           (workbasket) => workbasket.key == user.userId || workbasket.key == user.userId.toUpperCase()
         );

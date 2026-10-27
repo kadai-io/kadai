@@ -16,7 +16,7 @@
  *
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { UserInfo } from 'app/shared/models/user-info';
 import { Version } from '../../models/version';
@@ -25,26 +25,26 @@ import { Version } from '../../models/version';
   providedIn: 'root'
 })
 export class KadaiEngineServiceMock {
-  currentUserInfo!: UserInfo;
-
-  constructor() {
-    this.getUserInformation();
-  }
+  private readonly _currentUserInfo = signal<UserInfo | undefined>(new UserInfo('userid', [''], ['admin']));
+  readonly currentUserInfo = this._currentUserInfo.asReadonly();
 
   // GET
-  getUserInformation(): Promise<any> {
-    this.currentUserInfo = new UserInfo('userid', [''], ['admin']);
-    return of(undefined).toPromise();
+  getUserInformation(): Observable<UserInfo> {
+    const userInfo = new UserInfo('userid', [''], ['admin']);
+    this._currentUserInfo.set(userInfo);
+    return of(userInfo);
   }
 
-  hasRole(roles2Find: Array<string>): boolean {
-    if (!this.currentUserInfo || this.currentUserInfo.roles.length < 1) {
+  setCurrentUserInfo(userInfo: UserInfo | undefined): void {
+    this._currentUserInfo.set(userInfo);
+  }
+
+  hasRole(rolesToFind: Array<string>): boolean {
+    const user = this._currentUserInfo();
+    if (!user || user.roles.length === 0) {
       return false;
     }
-    if (this.findRole(roles2Find)) {
-      return true;
-    }
-    return false;
+    return user.roles.some((role) => rolesToFind.includes(role));
   }
 
   getVersion(): Observable<Version> {
@@ -54,9 +54,5 @@ export class KadaiEngineServiceMock {
 
   isHistoryProviderEnabled(): Observable<boolean> {
     return of(true);
-  }
-
-  private findRole(roles2Find: Array<string>) {
-    return this.currentUserInfo.roles.find((role) => roles2Find.some((roleLookingFor) => role === roleLookingFor));
   }
 }

@@ -21,7 +21,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, ReplaySubject } from 'rxjs';
 import { RequestInProgressService } from '../request-in-progress/request-in-progress.service';
 import { SelectedRouteService } from '../selected-route/selected-route';
-import { StartupService } from '../startup/startup.service';
+import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
 
 @Injectable({
   providedIn: 'root'
@@ -30,7 +30,7 @@ export class DomainService {
   private httpClient = inject(HttpClient);
   private requestInProgressService = inject(RequestInProgressService);
   private selectedRouteService = inject(SelectedRouteService);
-  private startupService = inject(StartupService);
+  private runtimeConfigService = inject(RuntimeConfigService);
 
   private domainRestValue: Array<string> = new Array<string>();
   private domainValue: Array<string> = new Array<string>();
@@ -53,10 +53,8 @@ export class DomainService {
       }
     });
   }
-
-  // url loads rest url value from startUpService which is a http call to ensure url it is always loaded from environment-information.json
   get url(): string {
-    return this.startupService.getKadaiRestUrl() + '/v1/domains';
+    return this.runtimeConfigService.kadaiRestUrl + '/v1/domains';
   }
 
   // GET

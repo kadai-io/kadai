@@ -25,7 +25,7 @@ import { Classification } from 'app/shared/models/classification';
 import { ClassificationPagingList } from 'app/shared/models/classification-paging-list';
 import { DomainService } from 'app/shared/services/domain/domain.service';
 import { ClassificationQuerySortParameter, Sorting } from 'app/shared/models/sorting';
-import { StartupService } from '../startup/startup.service';
+import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
 import { asUrlQueryString } from '../../util/query-parameters-v2';
 import { ClassificationQueryFilterParameter } from '../../models/classification-query-filter-parameter';
 import { QueryPagingParameter } from '../../models/query-paging-parameter';
@@ -36,10 +36,10 @@ import { QueryPagingParameter } from '../../models/query-paging-parameter';
 export class ClassificationsService {
   private httpClient = inject(HttpClient);
   private domainService = inject(DomainService);
-  private startupService = inject(StartupService);
+  private runtimeConfigService = inject(RuntimeConfigService);
 
   get url(): string {
-    return this.startupService.getKadaiRestUrl() + '/v1/classifications';
+    return this.runtimeConfigService.kadaiRestUrl + '/v1/classifications';
   }
 
   // GET

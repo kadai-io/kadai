@@ -20,7 +20,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TaskHistoryQueryService } from './task-history-query.service';
-import { StartupService } from '../../../shared/services/startup/startup.service';
+import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
 import { Direction, Sorting, TaskHistoryQuerySortParameter } from '../../../shared/models/sorting';
 import { QueryPagingParameter } from '../../../shared/models/query-paging-parameter';
 import { TaskHistoryEventResourceData } from '../../../shared/models/task-history-event-resource';
@@ -34,10 +34,7 @@ describe('TaskHistoryQueryService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        provideHttpClientTesting(),
-        { provide: StartupService, useValue: { getKadaiRestUrl: () => REST_URL } }
-      ]
+      providers: [provideHttpClientTesting(), { provide: RuntimeConfigService, useValue: { kadaiRestUrl: REST_URL } }]
     });
     service = TestBed.inject(TaskHistoryQueryService);
     httpTesting = TestBed.inject(HttpTestingController);
