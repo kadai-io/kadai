@@ -104,3 +104,11 @@ Status: `accepted` | `proposed` | `superseded (by #N)`. Entries are append-only,
 - Decision: Exclude the test tooling from `kadai-test-api` in `rest/kadai-gmt/pom.xml` and drop both javadoc copy executions.
 - Rationale: The fix stays local to the app that repackages itself into an executable jar. Narrowing the scopes inside `kadai-test-api` would change a published test module for all of its consumers and is tracked separately in #2359; once that is resolved, the exclusions can be dropped again.
 - Consequences: The image loses about a third of its size and carries neither a test framework nor a Docker client; the measured workload is unchanged. As above, this only takes effect with a newly built and re-pinned image.
+
+## Build certification images from a dedicated branch, tagged after the branch
+- Date / related: 2026-10-26, #2358, #2378
+- Status: accepted
+- Context: The certification of KADAI v12.1.0 has to measure the released code plus two fixes (#2360 aligns the GMT app configuration, #2379 checks the health endpoint on the management port) without the unrelated commits that landed on `master` after the release (dependency bumps, snapshot version, pin bumps). The measured subject is a container image, so a pinned `sha-<commit>` of `master` cannot express that state.
+- Decision: The certification image is built from a branch cut from the release tag with only those commits cherry-picked (`blauer-engel/<version>`), and pinned with a tag derived from the branch name (`blauer-engel-v12.1.0`) instead of a `sha-<commit>` tag. The workflow builds images for `blue-angel`-style certification branches as well, but publishes `latest` and opens the regular pin bump PR only for the default branch.
+- Rationale: A branch-derived tag lets the pinned tag and the measured commit be the same commit — with a `sha-<commit>` pin the tag always points at the parent of the commit that contains the pin. Keeping `latest` and the automatic bump master-only keeps the regular measurements and the quick scenario unchanged.
+- Consequences: The image tag is only as immutable as its branch, so a new measurement needs its own branch and tag. The registry digest is recorded in the certification document, which is the actual guarantee of what was measured. Certification branches are kept as permanent git tags so the measured code stays retrievable.
