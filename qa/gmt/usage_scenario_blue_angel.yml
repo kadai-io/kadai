@@ -10,16 +10,16 @@ services:
   app:
     # Frozen image for reproducible Blauer Engel certification measurements. Only change this manually.
     # Available image tags: https://github.com/kadai-io/kadai/pkgs/container/kadai-gmt
-    # Pin the `sha-<commit>` tag of the build whose code should be certified.
-    image: ghcr.io/kadai-io/kadai-gmt:sha-494ff7f166c9abf34e33b4d73af476998af05fa8 # KADAI version v12.1.0
+    # Pin the `sha-<commit>` tag of the build whose code should be certified, or the tag of the
+    # certification branch image when that code is not on the released tag.
+    # KADAI v12.1.0 + #2360 + #2379 + #2387: branch `blauer-engel/v12.1.0-r2`.
+    image: ghcr.io/kadai-io/kadai-gmt:blauer-engel-v12.1.0-r2
   postgres:
     # Frozen for reproducible Blauer Engel certification measurements. Only change this manually.
     image: postgres:17.11
   k6:
     # Frozen for reproducible Blauer Engel certification measurements. Only change this manually.
     image: grafana/k6:2.3.0
-    setup-commands:
-      - command: k6 run /tmp/repo/qa/gmt/k6/setup_tasks.js
 
 custom_metrics:
   response_time_avg:
