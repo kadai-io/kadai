@@ -95,12 +95,14 @@
                     class="workbasket-access-items__typeahead"
                     kadaiResizableWidth>
                     <kadai-shared-type-ahead
-                      (accessIdEventEmitter)="accessItemSelected($event, index)"
+                      (accessIdSelected)="accessItemSelected($event, index)"
                       [displayError]="true"
-                      [isRequired]="true"
-                      [savedAccessId]="accessItem"
+                      [required]="true"
+                      [savedName]="accessItem.value.accessName"
+                      formControlName="accessId"
                       matTooltipPosition="right"
-                      placeHolderMessage="Access id"/>
+                      placeholder="Access id"
+                      size="compact"/>
                   </td>
                 } @else {
                   <td kadaiResizableWidth>

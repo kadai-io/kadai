@@ -53,7 +53,7 @@ import { RequestInProgressService } from 'app/shared/services/request-in-progres
 import { highlight } from 'app/shared/animations/validation.animation';
 import { AccessId } from 'app/shared/models/access-id';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
-import { filter, map, startWith, takeUntil, tap } from 'rxjs/operators';
+import { filter, map, startWith, takeUntil, tap, timeout } from 'rxjs/operators';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import {
   AccessItemsCustomisation,
@@ -82,6 +82,8 @@ import { FormSubmitDirective } from 'app/shared/directives/form-submit.directive
 import { FormFieldSubmitDirective } from 'app/shared/directives/form-field-submit.directive';
 import { accessIdExistsValidator } from 'app/shared/validators/access-id-exists.validator';
 import { AccessIdsService } from 'app/shared/services/access-ids/access-ids.service';
+
+export const ACCESS_NAME_LOOKUP_TIMEOUT_MS = 3000;
 
 @Component({
   selector: 'kadai-administration-workbasket-access-items',
@@ -377,14 +379,14 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     this.isSubmitting = true;
 
     try {
-      let currentAccessItems = accessItems ?? this.snapshotAccessItems();
+      const currentAccessItems = accessItems ?? this.snapshotAccessItems();
       const isValid = await this.validateAccessItemsSnapshot(currentAccessItems);
       if (!isValid) {
         this.AccessItemsForm.markAllAsTouched();
         this.notificationsService.showError('OWNER_NOT_VALID', { owner: 'access id' });
         return;
       }
-      this.onSave(accessItemsUrl, currentAccessItems);
+      this.onSave(accessItemsUrl, await this.withAccessNames(currentAccessItems));
     } finally {
       this.isSubmitting = false;
     }
@@ -397,9 +399,8 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     });
   }
 
-  accessItemSelected(accessItem: AccessId, row: number) {
-    this.accessItemsGroups.controls[row].get('accessId')?.setValue(accessItem?.accessId);
-    this.accessItemsGroups.controls[row].get('accessName')?.setValue(accessItem?.name);
+  accessItemSelected(accessId: AccessId | null, row: number) {
+    this.accessItemsGroups.controls[row].get('accessName')?.setValue(accessId?.name ?? '');
   }
 
   checkAll(row: number, value: any) {
@@ -444,6 +445,27 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
 
   private snapshotAccessItems(): WorkbasketAccessItems[] {
     return (this.accessItemsGroups.getRawValue() as WorkbasketAccessItems[]).map((accessItem) => ({ ...accessItem }));
+  }
+
+  private async withAccessNames<T extends { accessId: string; accessName: string }>(accessItems: T[]): Promise<T[]> {
+    return Promise.all(
+      accessItems.map(async (accessItem) =>
+        accessItem.accessId && !accessItem.accessName
+          ? { ...accessItem, accessName: await this.lookupAccessName(accessItem.accessId) }
+          : accessItem
+      )
+    );
+  }
+
+  private async lookupAccessName(accessId: string): Promise<string> {
+    try {
+      const accessIds = await firstValueFrom(
+        this.accessIdService.searchForAccessId(accessId).pipe(timeout(ACCESS_NAME_LOOKUP_TIMEOUT_MS))
+      );
+      return accessIds.find((item) => item.accessId?.toLowerCase() === accessId.toLowerCase())?.name ?? '';
+    } catch {
+      return '';
+    }
   }
 
   private setupAccessIdValidators(group: FormGroup): void {

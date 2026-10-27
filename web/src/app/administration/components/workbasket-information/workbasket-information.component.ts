@@ -44,7 +44,6 @@ import {
 } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
 import { ButtonAction } from '../../models/button-action';
-import { AccessId } from '../../../shared/models/access-id';
 import { cloneDeep } from 'lodash-es';
 import { trimForm } from '../../../shared/util/form-trimmer';
 import { AsyncPipe } from '@angular/common';
@@ -98,7 +97,6 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
   workbasketForm = viewChild<NgForm>('WorkbasketForm');
   workbasketClone!: Workbasket;
   allTypes!: Map<WorkbasketType, string>;
-  isOwnerValid: boolean = true;
   readonly lengthError = 'You have reached the maximum length for this field';
   customFields$!: Observable<CustomField[]>;
   destroy$ = new Subject<void>();
@@ -182,11 +180,9 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
       const ownerControl = form.form.controls['workbasket.owner'];
       const isOwnerInvalid = ownerControl?.hasError('invalidAccessId') || ownerControl?.hasError('accessIdLookupError');
 
-      const isOwnerValidCombined = this.lookupField() ? this.isOwnerValid : !isOwnerInvalid;
-
-      if (form.valid && isOwnerValidCombined) {
+      if (form.valid) {
         this.onSave();
-      } else if (isOwnerInvalid || (this.lookupField() && !this.isOwnerValid)) {
+      } else if (isOwnerInvalid) {
         form.control.markAllAsTouched();
         this.notificationService.showError('OWNER_NOT_VALID', { owner: 'owner' });
       } else {
@@ -267,12 +263,6 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
     this.store.dispatch(new MarkWorkbasketForDeletion(wb._links.self.href)).subscribe(() => {
       this.afterRequest();
     });
-  }
-
-  onSelectedOwner(owner: AccessId) {
-    const wb = this.workbasket();
-    if (!wb) return;
-    wb.owner = owner.accessId;
   }
 
   get ownerErrorMessage(): string {
