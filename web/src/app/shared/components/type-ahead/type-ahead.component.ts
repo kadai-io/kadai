@@ -126,7 +126,7 @@ export class TypeAheadComponent implements ControlValueAccessor, AfterContentIni
         value
           ? timer(this.debounceMs()).pipe(
               map(() => value),
-              takeUntil(this.written$)
+              takeUntil(merge(this.written$, this.committed$))
             )
           : of(value)
       )

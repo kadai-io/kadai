@@ -232,6 +232,22 @@ describe('TypeAheadComponent', () => {
         expect(searchForAccessId).toHaveBeenCalledTimes(1);
       });
 
+      it('should not look up twice when the response is still pending on blur', () => {
+        const pending$ = new Subject<AccessId[]>();
+        searchForAccessId.mockReturnValueOnce(pending$);
+
+        type('user-1-1');
+        input().dispatchEvent(new Event('blur'));
+        expect(searchForAccessId).toHaveBeenCalledTimes(1);
+
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+        expect(searchForAccessId).toHaveBeenCalledTimes(1);
+
+        pending$.next([users[0]]);
+        expect(typeAhead.name()).toBe('Max Mustermann');
+        expect(host.selected).toEqual([null, users[0]]);
+      });
+
       it('should commit an autocomplete option immediately', () => {
         typeAhead.inputControl.setValue('user-1-2');
         fixture.debugElement
