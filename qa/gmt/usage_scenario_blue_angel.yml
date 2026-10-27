@@ -11,7 +11,7 @@ services:
     # Frozen image for reproducible Blauer Engel certification measurements. Only change this manually.
     # Available image tags: https://github.com/kadai-io/kadai/pkgs/container/kadai-gmt
     # Pin the `sha-<commit>` tag of the build whose code should be certified.
-    image: ghcr.io/kadai-io/kadai-gmt:sha-494ff7f166c9abf34e33b4d73af476998af05fa8 # KADAI version v12.1.0
+    image: ghcr.io/kadai-io/kadai-gmt:sha-07d6b08d21c55838886ef24b49c7dc3e0c461d7b # KADAI version v12.1.0
   postgres:
     # Frozen for reproducible Blauer Engel certification measurements. Only change this manually.
     image: postgres:17.11
