@@ -19,7 +19,7 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ResizableWidthDirective } from './resizable-width.directive';
+import { RESIZE_HANDLE_WIDTH_PX, ResizableWidthDirective } from './resizable-width.directive';
 
 const DRAG_EVENT_TYPES = ['mousemove', 'mouseup'];
 
@@ -30,6 +30,9 @@ const dragEventTypes = (calls: ListenerCall[]): string[] =>
 
 const stubRightEdge = (element: HTMLElement, right: number) =>
   vi.spyOn(element, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, right, 0));
+
+const stubClientWidth = (element: HTMLElement) =>
+  vi.spyOn(element, 'clientWidth', 'get').mockImplementation(() => parseFloat(element.style.width) || 0);
 
 const mousedownAt = (element: HTMLElement, pageX: number) => {
   const mousedown = new MouseEvent('mousedown', { bubbles: true, clientX: pageX });
@@ -91,24 +94,35 @@ describe('ResizableWidthDirective', () => {
   });
 
   it('should resize the column through its header cell when a body cell is dragged', () => {
+    stubClientWidth(cell('header'));
+    cell('header').style.width = '80px';
+
     dragFrom('first-row', 100, 220);
 
-    expect(cell('header').style.width).toBe('120px');
-    expect(cell('header').style.minWidth).toBe('120px');
+    expect(cell('header').style.width).toBe('200px');
+    expect(cell('header').style.minWidth).toBe('200px');
     expect(cell('first-row').style.width).toBe('');
   });
 
   it('should resize the column when its header cell is dragged', () => {
+    stubClientWidth(cell('header'));
+    cell('header').style.width = '80px';
+
     dragFrom('header', 100, 220);
 
-    expect(cell('header').style.width).toBe('120px');
+    expect(cell('header').style.width).toBe('200px');
   });
 
-  it('should let every row of the column resize the same width', () => {
+  it('should let every row of the column widen the same column', () => {
+    stubClientWidth(cell('header'));
+
     dragFrom('first-row', 100, 220);
+    expect(cell('header').style.width).toBe('120px');
+
     dragFrom('second-row', 0, 50);
 
-    expect(cell('header').style.width).toBe('50px');
+    expect(cell('header').style.width).toBe('170px');
+    expect(cell('header').style.minWidth).toBe('170px');
     expect(cell('second-row').style.width).toBe('');
   });
 
@@ -120,6 +134,24 @@ describe('ResizableWidthDirective', () => {
 
     expect(dragEventTypes(addEventListener.mock.calls)).toEqual([]);
     expect(cell('header').style.width).toBe('');
+  });
+
+  it('should start a drag at the handle width', () => {
+    const addEventListener = vi.spyOn(document, 'addEventListener');
+    stubRightEdge(cell('first-row'), 200);
+
+    mousedownAt(cell('first-row'), 200 - RESIZE_HANDLE_WIDTH_PX);
+
+    expect(dragEventTypes(addEventListener.mock.calls)).toEqual(['mousemove', 'mouseup']);
+  });
+
+  it('should not start a drag just outside the handle width', () => {
+    const addEventListener = vi.spyOn(document, 'addEventListener');
+    stubRightEdge(cell('first-row'), 200);
+
+    mousedownAt(cell('first-row'), 200 - RESIZE_HANDLE_WIDTH_PX - 1);
+
+    expect(dragEventTypes(addEventListener.mock.calls)).toEqual([]);
   });
 
   it('should ignore a mousedown outside a resizable cell', () => {
