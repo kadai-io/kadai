@@ -17,7 +17,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { WorkbasketAccessItemsComponent } from './workbasket-access-items.component';
+import { ACCESS_NAME_LOOKUP_TIMEOUT_MS, WorkbasketAccessItemsComponent } from './workbasket-access-items.component';
 import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
@@ -694,6 +694,56 @@ describe('WorkbasketAccessItemsComponent', () => {
 
     pendingSearch$.next([{ accessId: 'new-user', name: 'New User' }]);
     expect(row.value.accessName).toBe('New User');
+    vi.useRealTimers();
+  });
+
+  const submitRowWithPendingLookup = (search$: Subject<AccessId[]>) => {
+    const accessIdsService = TestBed.inject(AccessIdsService);
+    vi.spyOn(accessIdsService, 'validateAccessId').mockReturnValue(of(true));
+    vi.spyOn(accessIdsService, 'searchForAccessId').mockReturnValue(search$);
+
+    fixture.detectChanges();
+
+    component.accessItemsRepresentation = {
+      accessItems: [component.createWorkbasketAccessItems()],
+      _links: { self: { href: 'some-valid-url' } }
+    };
+    component.setAccessItemsGroups(component.accessItemsRepresentation.accessItems);
+
+    const row = component.accessItemsGroups.controls[0];
+    row.get('accessId')?.setValue('new-user');
+    vi.advanceTimersByTime(500);
+
+    let updateAction: UpdateWorkbasketAccessItems | undefined;
+    actions$.pipe(ofActionDispatched(UpdateWorkbasketAccessItems)).subscribe((action) => (updateAction = action));
+
+    return { row, promise: component.onSubmit(), savedAccessItems: () => updateAction?.workbasketAccessItems };
+  };
+
+  it('should resolve the access name of a new access id before dispatching the save', async () => {
+    vi.useFakeTimers();
+    const pendingSearch$ = new Subject<AccessId[]>();
+
+    const submit = submitRowWithPendingLookup(pendingSearch$);
+    expect(submit.row.value.accessName).toBe('');
+
+    await vi.advanceTimersByTimeAsync(500);
+    pendingSearch$.next([{ accessId: 'new-user', name: 'New User' }]);
+    await submit.promise;
+
+    expect(submit.savedAccessItems()?.[0].accessName).toBe('New User');
+    vi.useRealTimers();
+  });
+
+  it('should save a new access id without a name when its lookup does not answer', async () => {
+    vi.useFakeTimers();
+
+    const submit = submitRowWithPendingLookup(new Subject<AccessId[]>());
+    await vi.advanceTimersByTimeAsync(ACCESS_NAME_LOOKUP_TIMEOUT_MS);
+    await submit.promise;
+
+    expect(submit.savedAccessItems()?.[0].accessId).toBe('new-user');
+    expect(submit.savedAccessItems()?.[0].accessName).toBe('');
     vi.useRealTimers();
   });
 });
