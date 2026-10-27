@@ -40,6 +40,7 @@ const DEBOUNCE_MS = 500;
       [emitEmptySelection]="emitEmptySelection()"
       [formControl]="control"
       [required]="required()"
+      [savedName]="savedName()"
       [size]="size()"
       placeholder="Owner"
     />
@@ -50,6 +51,7 @@ class ReactiveHostComponent {
   displayError = signal(true);
   emitEmptySelection = signal(true);
   required = signal(false);
+  savedName = signal('');
   size = signal<TypeAheadSize>('regular');
   selected: (AccessId | null)[] = [];
 }
@@ -196,7 +198,7 @@ describe('TypeAheadComponent', () => {
         type('user-1');
         vi.advanceTimersByTime(DEBOUNCE_MS);
 
-        expect(typeAhead.filteredAccessIds()).toEqual(users);
+        expect(typeAhead.suggestedAccessIds()).toEqual(users);
         expect(typeAhead.name()).toBe('');
       });
 
@@ -280,6 +282,23 @@ describe('TypeAheadComponent', () => {
         expect(host.selected).toEqual([null, users[1]]);
       });
 
+      it('should look up again when the input returns to the committed value', () => {
+        const cancelled$ = new Subject<AccessId[]>();
+        searchForAccessId.mockReturnValueOnce(cancelled$);
+
+        type('user-1-1');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+        expect(searchForAccessId).toHaveBeenCalledTimes(1);
+
+        type('user-1-1x');
+        type('user-1-1');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+
+        expect(searchForAccessId).toHaveBeenCalledTimes(2);
+        expect(typeAhead.name()).toBe('Max Mustermann');
+        expect(host.selected).toEqual([null, users[0]]);
+      });
+
       it('should not let a pending debounced value overwrite a later external write', async () => {
         type('user-1-2');
         host.control.setValue('user-1-1');
@@ -347,6 +366,24 @@ describe('TypeAheadComponent', () => {
         expect(searchForAccessId).toHaveBeenCalledWith('ab');
         expect(typeAhead.lookupResult().status).toBe('not-found');
         expect(host.selected).toEqual([]);
+      });
+
+      it('should display the saved name of a written value that is missing from the search results', () => {
+        host.savedName.set('Team');
+        host.control.setValue('ab');
+        fixture.detectChanges();
+
+        expect(typeAhead.lookupResult().status).toBe('not-found');
+        expect(typeAhead.name()).toBe('Team');
+      });
+
+      it('should drop the saved name once the user replaces the written value', () => {
+        host.savedName.set('Team');
+        host.control.setValue('ab');
+        type('ac');
+        vi.advanceTimersByTime(DEBOUNCE_MS);
+
+        expect(typeAhead.name()).toBe('');
       });
 
       it('should invalidate the parent data when the user replaces a value that was never found', () => {

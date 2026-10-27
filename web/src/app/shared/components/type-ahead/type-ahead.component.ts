@@ -21,7 +21,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ControlValueAccessor, FormControl, NgControl, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngxs/store';
 import { merge, Observable, of, Subject, timer } from 'rxjs';
-import { catchError, filter, map, switchMap, takeUntil } from 'rxjs/operators';
+import { catchError, map, switchMap, takeUntil } from 'rxjs/operators';
 import { NgClass } from '@angular/common';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatTooltip, TooltipPosition } from '@angular/material/tooltip';
@@ -61,6 +61,7 @@ type LookupResult =
 })
 export class TypeAheadComponent implements ControlValueAccessor, AfterContentInit {
   placeholder = input('');
+  savedName = input('');
   size = input<TypeAheadSize>('regular');
   required = input(false);
   displayError = input(false);
@@ -69,8 +70,8 @@ export class TypeAheadComponent implements ControlValueAccessor, AfterContentIni
   accessIdSelected = output<AccessId | null>();
 
   readonly inputControl = new FormControl('', { nonNullable: true });
-  readonly name = signal('');
-  readonly filteredAccessIds = signal<AccessId[]>([]);
+  readonly name = computed(() => this.foundName() || (this.showsWrittenValue() ? this.savedName() : ''));
+  readonly suggestedAccessIds = signal<AccessId[]>([]);
   readonly lookupResult = signal<LookupResult>({ status: 'empty' });
   readonly debounceMs = computed(() => this.debounceConfig() || DEFAULT_LOOKUP_DEBOUNCE_MS);
   readonly hasError = computed(() => {
@@ -100,11 +101,15 @@ export class TypeAheadComponent implements ControlValueAccessor, AfterContentIni
       .pipe(map((customisation) => customisation?.debounceTimeLookupField)),
     { initialValue: undefined }
   );
+  private readonly foundName = signal('');
+  private readonly showsWrittenValue = signal(false);
   private readonly written$ = new Subject<void>();
   private readonly committed$ = new Subject<string>();
   private readonly lookup$ = new Subject<string>();
   private readonly controlState = signal(0);
   private lastCommittedValue = '';
+  private lastLookedUpValue: string | undefined = undefined;
+  private writtenValue = '';
   private selection: AccessId | null = null;
   // undefined: the parent holds its own data for the current value (initial state or after writeValue).
   private lastEmitted: AccessId | null | undefined = undefined;
@@ -128,27 +133,39 @@ export class TypeAheadComponent implements ControlValueAccessor, AfterContentIni
     );
 
     merge(typed$, this.committed$)
-      .pipe(
-        filter((value) => value !== this.lastCommittedValue),
-        takeUntilDestroyed(this.destroyRef)
-      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((value) => {
-        this.lastCommittedValue = value;
-        this.onChange(value || null);
-        // The name of the previous selection must never stay attached to a new value, even until the lookup answers.
-        if (this.selection?.accessId !== value) {
-          this.resetSelection();
-          this.emitSelection(null);
+        const isNewValue = value !== this.lastCommittedValue;
+        if (isNewValue) {
+          this.lastCommittedValue = value;
+          this.showsWrittenValue.set(value === this.writtenValue);
+          this.onChange(value || null);
+          // The name of the previous selection must never stay attached to a new value, even until the lookup answers.
+          if (this.selection?.accessId !== value) {
+            this.resetSelection();
+            this.emitSelection(null);
+          }
         }
-        this.lookup$.next(value);
+        // A cancelled lookup never advances lastLookedUpValue, so returning to the committed value looks it up again.
+        if (isNewValue || value !== this.lastLookedUpValue) {
+          this.lookup$.next(value);
+        }
       });
 
     this.lookup$
       .pipe(
-        switchMap((value) => this.lookup(value).pipe(takeUntil(this.inputControl.valueChanges))),
+        switchMap((value) =>
+          this.lookup(value).pipe(
+            map((result) => ({ value, result })),
+            takeUntil(this.inputControl.valueChanges)
+          )
+        ),
         takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe((result) => this.applyLookupResult(result));
+      .subscribe(({ value, result }) => {
+        this.lastLookedUpValue = value;
+        this.applyLookupResult(result);
+      });
   }
 
   ngAfterContentInit() {
@@ -162,6 +179,8 @@ export class TypeAheadComponent implements ControlValueAccessor, AfterContentIni
     this.written$.next();
     this.inputControl.setValue(accessId, { emitEvent: false });
     this.lastCommittedValue = accessId;
+    this.writtenValue = accessId;
+    this.showsWrittenValue.set(!!accessId);
     if (this.selection?.accessId !== accessId) {
       this.resetSelection();
       this.lastEmitted = undefined;
@@ -211,11 +230,11 @@ export class TypeAheadComponent implements ControlValueAccessor, AfterContentIni
   // access id (the search needs at least 3 characters and its results are capped), so it keeps the parent's data.
   private applyLookupResult(result: LookupResult): void {
     this.lookupResult.set(result);
-    this.filteredAccessIds.set(result.status === 'found' || result.status === 'not-found' ? result.accessIds : []);
+    this.suggestedAccessIds.set(result.status === 'found' || result.status === 'not-found' ? result.accessIds : []);
     if (result.status !== 'found') {
       return;
     }
-    this.name.set(result.match.name ?? '');
+    this.foundName.set(result.match.name ?? '');
     this.selection = result.match;
     this.emitSelection(result.match);
   }
@@ -233,6 +252,6 @@ export class TypeAheadComponent implements ControlValueAccessor, AfterContentIni
 
   private resetSelection(): void {
     this.selection = null;
-    this.name.set('');
+    this.foundName.set('');
   }
 }

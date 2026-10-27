@@ -41,7 +41,7 @@
     }
     <!-- AUTOCOMPLETE LIST -->
     <mat-autocomplete #auto (optionSelected)="onOptionSelected($event)">
-      @for (accessId of filteredAccessIds(); track accessId.accessId) {
+      @for (accessId of suggestedAccessIds(); track accessId.accessId) {
         <mat-option [value]="accessId.accessId"
                     class="type-ahead__form-options"
                     matTooltip="{{accessId.accessId}} {{accessId.name}}"

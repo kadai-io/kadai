@@ -97,6 +97,7 @@
                       (accessIdSelected)="accessItemSelected($event, index)"
                       [displayError]="true"
                       [required]="true"
+                      [savedName]="accessItem.value.accessName"
                       formControlName="accessId"
                       matTooltipPosition="right"
                       placeholder="Access id"
