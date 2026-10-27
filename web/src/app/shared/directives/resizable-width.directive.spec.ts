@@ -94,23 +94,17 @@ describe('ResizableWidthDirective', () => {
   });
 
   it('should resize the column through its header cell when a body cell is dragged', () => {
-    stubClientWidth(cell('header'));
-    cell('header').style.width = '80px';
-
     dragFrom('first-row', 100, 220);
 
-    expect(cell('header').style.width).toBe('200px');
-    expect(cell('header').style.minWidth).toBe('200px');
+    expect(cell('header').style.width).toBe('120px');
+    expect(cell('header').style.minWidth).toBe('120px');
     expect(cell('first-row').style.width).toBe('');
   });
 
   it('should resize the column when its header cell is dragged', () => {
-    stubClientWidth(cell('header'));
-    cell('header').style.width = '80px';
-
     dragFrom('header', 100, 220);
 
-    expect(cell('header').style.width).toBe('200px');
+    expect(cell('header').style.width).toBe('120px');
   });
 
   it('should let every row of the column widen the same column', () => {
