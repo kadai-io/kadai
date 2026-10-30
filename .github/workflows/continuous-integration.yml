@@ -111,12 +111,12 @@ jobs:
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Check maven cache
-        # A from-scratch build fills ~290 MB; anything well above that is stale content.
+        # A from-scratch build fills ~330 MB; anything well above that is stale content.
         # The KADAI jars are uploaded as an artifact instead of being cached.
         run: |
           size=$(du -sm ~/.m2/repository 2>/dev/null | cut -f1)
           echo "Restored maven cache: ${size:-0} MB"
-          if [ "${size:-0}" -gt 400 ]; then
+          if [ "${size:-0}" -gt 500 ]; then
             echo "::warning::Maven cache is ${size} MB; purge it by bumping CACHE_MAVEN_NAME and CACHE_MAVEN_FOR_WEB_NAME, then delete the old entries with 'gh cache delete'"
           fi
           if [ -n "$(ls -A ~/.m2/repository/io/kadai 2>/dev/null)" ]; then
