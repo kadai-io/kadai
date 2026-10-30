@@ -1,6 +1,11 @@
 name: CI
 on:
   workflow_dispatch:
+    inputs:
+      full_run:
+        description: "Ignore the changed-path filters and run the whole pipeline (for workflow-only changes)"
+        type: boolean
+        default: false
   push:
     branches:
       - master
@@ -28,10 +33,16 @@ env:
   ARTIFACTS_FRONTEND_COVERAGE_PATH: web/coverage
 
   CACHE_WEB_NAME: web
-  # IMPORTANT: this cannot start with CACHE_MAVEN_NAME's value
-  # because the 'compile_backend' job would otherwise use this as a fallback cache.
-  CACHE_MAVEN_FOR_WEB_NAME: mvn-for-web
-  CACHE_MAVEN_NAME: maven
+  # Cache key prefixes. No name may start with another name's value, because
+  # 'restore-keys' is a prefix match: 'compile_backend' would otherwise fall back
+  # to the web-only cache and re-download all backend dependencies on every run.
+  # Bump the -vN suffix to purge. An entry is immutable, and restore-keys restores
+  # the newest matching entry and saves it again plus the delta, so outdated
+  # artifacts accumulate and every run pays for them. Purge when 'Check maven
+  # cache' in 'compile_backend' warns about the size (then delete the orphaned
+  # entries with `gh cache delete`).
+  CACHE_MAVEN_FOR_WEB_NAME: mvn-for-web-v2
+  CACHE_MAVEN_NAME: maven-v2
   CACHE_SONAR_NAME: sonar
 
 jobs:
@@ -44,7 +55,7 @@ jobs:
       frontend_changed: ${{ steps.filter.outputs.frontend }} 
       code_changed: ${{ steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' }}  
       # Master coverage must contain the complete test suite, independent of the changed paths.
-      run_all_tests: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+      run_all_tests: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/master') || inputs.full_run == true }}
     steps:
       - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
@@ -95,10 +106,22 @@ jobs:
         uses: actions/cache@v6
         with:
           path: |
-            ~/.m2
+            ~/.m2/repository
             !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
+      - name: Check maven cache
+        # A from-scratch build fills ~330 MB; anything well above that is stale content.
+        # The KADAI jars are uploaded as an artifact instead of being cached.
+        run: |
+          size=$(du -sm ~/.m2/repository 2>/dev/null | cut -f1)
+          echo "Restored maven cache: ${size:-0} MB"
+          if [ "${size:-0}" -gt 500 ]; then
+            echo "::warning::Maven cache is ${size} MB; purge it by bumping CACHE_MAVEN_NAME and CACHE_MAVEN_FOR_WEB_NAME, then delete the old entries with 'gh cache delete'"
+          fi
+          if [ -n "$(ls -A ~/.m2/repository/io/kadai 2>/dev/null)" ]; then
+            echo "::warning::~/.m2/repository/io/kadai is part of the maven cache; the '!~/.m2/repository/io/kadai' exclusion no longer works"
+          fi
       - name: Change versions to match tag
         run: ci/change_version.sh -m .
       - name: Compile & build
@@ -168,7 +191,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: |
-            ~/.m2
+            ~/.m2/repository
             !~/.m2/repository/io/kadai
           key: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}
@@ -253,7 +276,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: |
-            ~/.m2
+            ~/.m2/repository
             !~/.m2/repository/io/kadai
           key: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}
@@ -354,9 +377,10 @@ jobs:
         uses: actions/cache@v6
         with:
           path: |
-            ~/.m2
+            ~/.m2/repository
             !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download kadai artifacts
         uses: actions/download-artifact@v8
         with:
@@ -522,7 +546,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: |
-            ~/.m2
+            ~/.m2/repository
             !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
@@ -658,7 +682,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: |
-            ~/.m2
+            ~/.m2/repository
             !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
@@ -820,7 +844,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: |
-            ~/.m2
+            ~/.m2/repository
             !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
@@ -909,7 +933,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: |
-            ~/.m2
+            ~/.m2/repository
             !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
