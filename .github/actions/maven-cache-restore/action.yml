@@ -1,0 +1,25 @@
+name: Restore the Maven cache
+description: Restore ~/.m2/repository without the KADAI jars, which travel as the kadai-jars artifact
+inputs:
+  key:
+    description: Cache key
+    required: true
+  restore-keys:
+    description: Prefix-matched fallback keys
+    required: false
+outputs:
+  cache-hit:
+    description: "'true' only when the primary key matched exactly"
+    value: ${{ steps.restore.outputs.cache-hit }}
+  cache-primary-key:
+    description: Key the restore resolved, to be passed to the save action
+    value: ${{ steps.restore.outputs.cache-primary-key }}
+runs:
+  using: composite
+  steps:
+    - id: restore
+      uses: actions/cache/restore@v6
+      with:
+        path: ~/.m2/repository
+        key: ${{ inputs.key }}
+        restore-keys: ${{ inputs.restore-keys }}
