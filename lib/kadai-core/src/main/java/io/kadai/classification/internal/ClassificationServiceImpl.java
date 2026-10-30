@@ -263,16 +263,22 @@ public class ClassificationServiceImpl implements ClassificationService {
     ClassificationImpl classificationImpl;
     try {
       kadaiEngine.openConnection();
-      if (classification.getKey().equals(classification.getParentKey())) {
-        throw new InvalidArgumentException(
-            String.format(
-                "The Classification '%s' has the same key and parent key",
-                classification.getName()));
-      }
-
       classificationImpl = (ClassificationImpl) classification;
       Classification oldClassification =
           this.getExistingClassificationAndVerifyTimestampHasNotChanged(classificationImpl);
+      classificationImpl.setId(oldClassification.getId());
+      classificationImpl.setKey(oldClassification.getKey());
+      classificationImpl.setDomain(oldClassification.getDomain());
+      classificationImpl.setType(oldClassification.getType());
+      classificationImpl.setCreated(oldClassification.getCreated());
+
+      if (Objects.equals(classificationImpl.getKey(), classificationImpl.getParentKey())) {
+        throw new InvalidArgumentException(
+            String.format(
+                "The Classification '%s' has the same key and parent key",
+                classificationImpl.getName()));
+      }
+
       classificationImpl.setModified(Instant.now());
       this.initDefaultClassificationValues(classificationImpl);
 
@@ -303,7 +309,7 @@ public class ClassificationServiceImpl implements ClassificationService {
             "Method updateClassification() updated the classification {}.",
             LogSanitizer.stripLineBreakingChars(classificationImpl));
       }
-      return classification;
+      return classificationImpl;
     } finally {
       kadaiEngine.returnConnection();
     }
@@ -524,20 +530,39 @@ public class ClassificationServiceImpl implements ClassificationService {
   }
 
   /**
-   * Check if current object is based on the newest (by modified).
+   * Load the exact update target and check if the current object is based on its newest version.
    *
    * @param classificationImpl the classification
    * @return the old classification
    * @throws ConcurrencyException if the classification has been modified by some other process;
    *     that's the case if the given modified timestamp differs from the one in the database
    * @throws ClassificationNotFoundException if the given classification does not exist
+   * @throws InvalidArgumentException if no ID is provided or an immutable identity field changed
    */
   private Classification getExistingClassificationAndVerifyTimestampHasNotChanged(
       ClassificationImpl classificationImpl)
-      throws ConcurrencyException, ClassificationNotFoundException {
-    Classification oldClassification =
-        this.getClassification(classificationImpl.getKey(), classificationImpl.getDomain());
-    if (!oldClassification.getModified().equals(classificationImpl.getModified())) {
+      throws ConcurrencyException, ClassificationNotFoundException, InvalidArgumentException {
+    String classificationId = classificationImpl.getId();
+    if (classificationId == null || classificationId.isEmpty()) {
+      throw new InvalidArgumentException("ClassificationId must not be null or empty for update.");
+    }
+
+    Classification oldClassification = classificationMapper.findById(classificationId);
+    if (oldClassification == null) {
+      throw new ClassificationNotFoundException(classificationId);
+    }
+
+    if (!Objects.equals(oldClassification.getKey(), classificationImpl.getKey())) {
+      throw new InvalidArgumentException("The key of a Classification is immutable.");
+    }
+    if (!Objects.equals(oldClassification.getDomain(), classificationImpl.getDomain())) {
+      throw new InvalidArgumentException("The domain of a Classification is immutable.");
+    }
+    if (!Objects.equals(oldClassification.getType(), classificationImpl.getType())) {
+      throw new InvalidArgumentException("The type of a Classification is immutable.");
+    }
+
+    if (!Objects.equals(oldClassification.getModified(), classificationImpl.getModified())) {
       throw new ConcurrencyException(classificationImpl.getId());
     }
     return oldClassification;
