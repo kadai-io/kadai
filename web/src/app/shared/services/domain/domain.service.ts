@@ -23,6 +23,8 @@ import { RequestInProgressService } from '../request-in-progress/request-in-prog
 import { SelectedRouteService } from '../selected-route/selected-route';
 import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
 
+export const SELECTED_DOMAIN_STORAGE_KEY = 'kadai.selectedDomain';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -34,7 +36,8 @@ export class DomainService {
 
   private domainRestValue: Array<string> = new Array<string>();
   private domainValue: Array<string> = new Array<string>();
-  private domainSelectedValue!: string;
+  private domainSelectedValue: string | undefined;
+  private readonly storedDomain = readStoredDomain();
   private domainSelected = new ReplaySubject<string>(1);
   private dataObs$ = new ReplaySubject<Array<string>>(1);
   private hasMasterDomain = false;
@@ -65,9 +68,7 @@ export class DomainService {
           this.domainRestValue = domains;
           this.domainValue = domains;
           this.dataObs$.next(this.hasMasterDomain ? this.addEmptyDomain(domains) : domains);
-          if (!this.domainSelectedValue && this.domainValue.length > 0) {
-            this.selectDomain(this.domainValue[0]);
-          }
+          this.selectOfferedDomain(domains);
         },
         (error) => {
           this.dataObs$.error(error);
@@ -94,7 +95,7 @@ export class DomainService {
     this.requestInProgressService.setRequestInProgress(false);
   }
 
-  getSelectedDomainValue() {
+  getSelectedDomainValue(): string | undefined {
     return this.domainSelectedValue;
   }
 
@@ -111,8 +112,22 @@ export class DomainService {
     }
   }
 
+  // The master domain is the empty string, so an absent selection has to be undefined rather than falsy:
+  // treating '' as "nothing selected" made every reload of the domain list drop it for the first domain.
+  private selectOfferedDomain(domains: Array<string>): void {
+    if (domains.length === 0) {
+      return;
+    }
+    const current = this.domainSelectedValue ?? this.storedDomain;
+    const offered = current !== undefined && domains.includes(current) ? current : domains[0];
+    if (offered !== this.domainSelectedValue) {
+      this.selectDomain(offered);
+    }
+  }
+
   private selectDomain(value: string) {
     this.domainSelectedValue = value;
+    storeDomain(value);
     this.domainSelected.next(value);
   }
 
@@ -120,5 +135,21 @@ export class DomainService {
     this.domainValue = Object.assign([], domains);
     this.domainValue.push('');
     return this.domainValue;
+  }
+}
+
+function readStoredDomain(): string | undefined {
+  try {
+    return sessionStorage.getItem(SELECTED_DOMAIN_STORAGE_KEY) ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function storeDomain(value: string): void {
+  try {
+    sessionStorage.setItem(SELECTED_DOMAIN_STORAGE_KEY, value);
+  } catch {
+    // Storage can be unavailable; the selection then only lives as long as the page.
   }
 }
