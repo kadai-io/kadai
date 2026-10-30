@@ -26,6 +26,7 @@ import static io.kadai.testapi.builder.TaskBuilder.newTask;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
 
 import io.kadai.classification.api.ClassificationCustomField;
 import io.kadai.classification.api.ClassificationService;
@@ -145,6 +146,22 @@ class UpdateClassificationAccTest {
     return classificationService.createClassification(classification);
   }
 
+  private Classification createMasterClassificationWithDistinctTimestamp(Classification reference)
+      throws Exception {
+    Instant referenceModified =
+        classificationService.getClassification(reference.getId()).getModified();
+    return await()
+        .pollInSameThread()
+        .atMost(Duration.ofSeconds(5))
+        .pollInterval(Duration.ofMillis(25))
+        .until(
+            () -> {
+              Classification candidate = createMasterClassification();
+              return classificationService.getClassification(candidate.getId());
+            },
+            candidate -> !referenceModified.equals(candidate.getModified()));
+  }
+
   private String newClassificationKey() {
     return UUID.randomUUID().toString().replace("-", "");
   }
@@ -208,8 +225,7 @@ class UpdateClassificationAccTest {
   void should_RejectUpdate_When_KeyLookupAndIdReferToDifferentClassifications()
       throws Exception {
     Classification target = createMasterClassification();
-    Thread.sleep(10);
-    Classification versionSource = createMasterClassification();
+    Classification versionSource = createMasterClassificationWithDistinctTimestamp(target);
     assertThat(target.getModified()).isNotEqualTo(versionSource.getModified());
 
     Classification update =
@@ -241,8 +257,7 @@ class UpdateClassificationAccTest {
   @Test
   void should_RejectTimestampFromAnotherClassification() throws Exception {
     Classification target = createMasterClassification();
-    Thread.sleep(10);
-    Classification other = createMasterClassification();
+    Classification other = createMasterClassificationWithDistinctTimestamp(target);
     assertThat(target.getModified()).isNotEqualTo(other.getModified());
 
     Classification update = classificationService.getClassification(target.getId());
