@@ -20,7 +20,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { DomainService } from './domain.service';
+import { DomainService, SELECTED_DOMAIN_STORAGE_KEY } from './domain.service';
 import { SelectedRouteService } from '../selected-route/selected-route';
 import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
 import { RequestInProgressService } from '../request-in-progress/request-in-progress.service';
@@ -36,6 +36,7 @@ describe('DomainService', () => {
   let mockRequestInProgressService: { setRequestInProgress: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
+    sessionStorage.clear();
     selectedRouteSubject = new Subject<string>();
 
     const mockSelectedRouteService = {
@@ -132,6 +133,107 @@ describe('DomainService', () => {
       service.getDomains(true).subscribe();
       const req2 = httpTesting.expectOne(DOMAINS_URL);
       req2.flush(['DOMAIN_A', 'DOMAIN_B']);
+    });
+
+    it('should keep the master domain when the domain list is loaded again', () => {
+      const domains = ['DOMAIN_A', 'DOMAIN_B', ''];
+      const selected: string[] = [];
+      service.getSelectedDomain().subscribe((domain) => selected.push(domain));
+
+      service.getDomains().subscribe();
+      httpTesting.expectOne(DOMAINS_URL).flush(domains);
+      service.switchDomain('');
+
+      service.getDomains(true).subscribe();
+      httpTesting.expectOne(DOMAINS_URL).flush(domains);
+
+      expect(service.getSelectedDomainValue()).toBe('');
+      expect(selected).toEqual(['DOMAIN_A', '']);
+    });
+
+    it('should not emit again when the selected domain is still offered', () => {
+      const domains = ['DOMAIN_A', 'DOMAIN_B'];
+      const selected: string[] = [];
+      service.getSelectedDomain().subscribe((domain) => selected.push(domain));
+
+      service.getDomains().subscribe();
+      httpTesting.expectOne(DOMAINS_URL).flush(domains);
+      service.switchDomain('DOMAIN_B');
+
+      service.getDomains(true).subscribe();
+      httpTesting.expectOne(DOMAINS_URL).flush(domains);
+
+      expect(selected).toEqual(['DOMAIN_A', 'DOMAIN_B']);
+    });
+
+    it('should keep the selected domain when the domain request fails', () => {
+      const ignoreError = { error: () => undefined };
+      const selected: string[] = [];
+      service.getSelectedDomain().subscribe((domain) => selected.push(domain));
+
+      service.getDomains().subscribe(ignoreError);
+      httpTesting.expectOne(DOMAINS_URL).flush(['DOMAIN_A', 'DOMAIN_B']);
+      service.switchDomain('DOMAIN_B');
+
+      service.getDomains(true).subscribe(ignoreError);
+      httpTesting.expectOne(DOMAINS_URL).error(new ProgressEvent('failed'));
+
+      expect(service.getSelectedDomainValue()).toBe('DOMAIN_B');
+      expect(selected).toEqual(['DOMAIN_A', 'DOMAIN_B']);
+    });
+  });
+
+  describe('persistence across a reload', () => {
+    const reloadService = () => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          DomainService,
+          provideHttpClientTesting(),
+          provideRouter([]),
+          { provide: SelectedRouteService, useValue: { getSelectedRoute: () => selectedRouteSubject.asObservable() } },
+          { provide: RuntimeConfigService, useValue: { kadaiRestUrl: REST_URL } },
+          { provide: RequestInProgressService, useValue: mockRequestInProgressService }
+        ]
+      });
+      service = TestBed.inject(DomainService);
+      httpTesting = TestBed.inject(HttpTestingController);
+    };
+
+    it('should store the selected domain', () => {
+      service.getDomains().subscribe();
+      httpTesting.expectOne(DOMAINS_URL).flush(['DOMAIN_A', 'DOMAIN_B']);
+      service.switchDomain('DOMAIN_B');
+
+      expect(sessionStorage.getItem(SELECTED_DOMAIN_STORAGE_KEY)).toBe('DOMAIN_B');
+    });
+
+    it.each([
+      ['a regular domain', 'DOMAIN_B'],
+      ['the master domain', '']
+    ])('should restore %s instead of falling back to the first one', (_, stored) => {
+      sessionStorage.setItem(SELECTED_DOMAIN_STORAGE_KEY, stored);
+      reloadService();
+      let selectedDomain: string | undefined;
+      service.getSelectedDomain().subscribe((domain) => (selectedDomain = domain));
+
+      service.getDomains().subscribe();
+      httpTesting.expectOne(DOMAINS_URL).flush(['DOMAIN_A', 'DOMAIN_B', '']);
+
+      expect(selectedDomain).toBe(stored);
+      expect(service.getSelectedDomainValue()).toBe(stored);
+    });
+
+    it('should fall back to the first domain when the stored one is no longer offered', () => {
+      sessionStorage.setItem(SELECTED_DOMAIN_STORAGE_KEY, 'DOMAIN_GONE');
+      reloadService();
+      let selectedDomain: string | undefined;
+      service.getSelectedDomain().subscribe((domain) => (selectedDomain = domain));
+
+      service.getDomains().subscribe();
+      httpTesting.expectOne(DOMAINS_URL).flush(['DOMAIN_A', 'DOMAIN_B']);
+
+      expect(selectedDomain).toBe('DOMAIN_A');
     });
   });
 
