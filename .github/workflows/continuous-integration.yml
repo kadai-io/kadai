@@ -1,6 +1,11 @@
 name: CI
 on:
   workflow_dispatch:
+    inputs:
+      full_run:
+        description: "Ignore the changed-path filters and run the whole pipeline (for workflow-only changes)"
+        type: boolean
+        default: false
   push:
     branches:
       - master
@@ -50,7 +55,7 @@ jobs:
       frontend_changed: ${{ steps.filter.outputs.frontend }} 
       code_changed: ${{ steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' }}  
       # Master coverage must contain the complete test suite, independent of the changed paths.
-      run_all_tests: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+      run_all_tests: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/master') || inputs.full_run == true }}
     steps:
       - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
