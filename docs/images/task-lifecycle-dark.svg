@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="552" viewBox="0 0 900 552" role="img" aria-labelledby="title desc">
+  <title id="title">KADAI task lifecycle</title>
+  <desc id="desc">A task is created in READY, claimed into CLAIMED, can be sent to review (READY_FOR_REVIEW, IN_REVIEW), and ends in COMPLETED or CANCELLED (which can be reopened) or TERMINATED (final).</desc>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif; fill: #f0f6fc; }
+    .mono { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; }
+    .t { fill: #f0f6fc; }
+    .m { fill: #9198a1; }
+    .cap { font-size: 11px; font-weight: 700; letter-spacing: 1.4px; fill: #9198a1; }
+    .lbl { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; fill: #9198a1; }
+    .lbl-mint { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; fill: #84c8b4; font-weight: 600; }
+    .lbl-rose { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; fill: #ff7b72; }
+    .lbl-amber { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; fill: #d29922; }
+    .card { fill: #151b23; stroke: #3d444d; stroke-width: 1.2; }
+    .card-dashed { fill: #151b23; stroke: #656c76; stroke-width: 1.2; stroke-dasharray: 5 4; }
+    .zone { fill: #0f151c; stroke: #3d444d; stroke-width: 1.2; }
+    .zone-dashed { fill: none; stroke: #3d444d; stroke-width: 1.2; stroke-dasharray: 6 5; }
+    .zone-mint { fill: #11261f; stroke: #3f8f78; stroke-width: 1.2; }
+    .mint { fill: #11261f; stroke: #3f8f78; stroke-width: 1.4; }
+    .mint-solid { fill: #84c8b4; }
+    .blue { fill: #0f1f33; stroke: #1f6feb; stroke-width: 1.4; }
+    .green { fill: #0f2a19; stroke: #238636; stroke-width: 1.4; }
+    .amber { fill: #2b2111; stroke: #9e6a03; stroke-width: 1.4; }
+    .rose { fill: #2f1517; stroke: #da3633; stroke-width: 1.4; }
+    .t-mint { fill: #84c8b4; }
+    .t-blue { fill: #58a6ff; }
+    .t-green { fill: #3fb950; }
+    .t-amber { fill: #d29922; }
+    .t-rose { fill: #ff7b72; }
+    .f-text { fill: #f0f6fc; }
+    .f-muted { fill: #9198a1; }
+    .f-line { fill: #656c76; }
+    .f-mint { fill: #6cbfa6; }
+    .f-green { fill: #238636; }
+    .f-amber { fill: #9e6a03; }
+    .f-rose { fill: #da3633; }
+    .f-blue { fill: #1f6feb; }
+    .e { fill: none; stroke: #656c76; stroke-width: 1.5; }
+    .e-dash { fill: none; stroke: #656c76; stroke-width: 1.5; stroke-dasharray: 4 4; }
+    .e-mint { fill: none; stroke: #6cbfa6; stroke-width: 2.2; }
+    .e-rose { fill: none; stroke: #da3633; stroke-width: 1.6; }
+    .e-amber { fill: none; stroke: #9e6a03; stroke-width: 1.6; }
+    .e-green { fill: none; stroke: #238636; stroke-width: 1.8; }
+    .on-mint { fill: #0d1117; }
+    .logo-mint { fill: #84c8b4; }
+    .logo-bar { fill: #f0f6fc; }
+  </style>
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-line"/></marker>
+    <marker id="ah-mint" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-mint"/></marker>
+    <marker id="ah-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-rose"/></marker>
+    <marker id="ah-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-amber"/></marker>
+    <marker id="ah-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-green"/></marker>
+  </defs>
+<rect x="16" y="16" width="868" height="322" rx="16" class="zone"/>
+<text x="36" y="44" class="cap">ACTIVE STATES</text>
+<text x="36" y="120" class="cap">WORK</text>
+<text x="36" y="260" class="cap">REVIEW</text>
+<circle cx="122" cy="115" r="8" class="f-text"/>
+<path d="M132 115 H226" class="e-mint" marker-end="url(#ah-mint)"/>
+<text x="178" y="104" text-anchor="middle" class="lbl-mint">create()</text>
+<rect x="230.0" y="92" width="150" height="46" rx="10" class="card"/><text x="305" y="120" text-anchor="middle" class="mono t" style="font-size:14px;font-weight:600">READY</text>
+<rect x="590.0" y="92" width="150" height="46" rx="10" class="card"/><text x="665" y="120" text-anchor="middle" class="mono t" style="font-size:14px;font-weight:600">CLAIMED</text>
+<rect x="570.0" y="232" width="190" height="46" rx="10" class="card"/><text x="665" y="260" text-anchor="middle" class="mono t" style="font-size:14px;font-weight:600">READY_FOR_REVIEW</text>
+<rect x="230.0" y="232" width="150" height="46" rx="10" class="card"/><text x="305" y="260" text-anchor="middle" class="mono t" style="font-size:14px;font-weight:600">IN_REVIEW</text>
+<path d="M381 105 H586" class="e-mint" marker-end="url(#ah-mint)"/>
+<text x="484" y="96" text-anchor="middle" class="lbl-mint">claim()</text>
+<path d="M589 126 H384" class="e" marker-end="url(#ah)"/>
+<text x="484" y="146" text-anchor="middle" class="lbl">cancelClaim() · transfer()</text>
+<path d="M665 139 V228" class="e" marker-end="url(#ah)"/>
+<text x="677" y="189" class="lbl">requestReview()</text>
+<path d="M305 231 V142" class="e" marker-end="url(#ah)"/>
+<text x="293" y="189" text-anchor="end" class="lbl">requestChanges()</text>
+<path d="M569 245 H384" class="e" marker-end="url(#ah)"/>
+<text x="474" y="236" text-anchor="middle" class="lbl">claim()</text>
+<path d="M381 266 H566" class="e" marker-end="url(#ah)"/>
+<text x="474" y="286" text-anchor="middle" class="lbl">cancelClaim() · transfer()</text>
+<rect x="16" y="398" width="240" height="138" rx="16" class="zone"/>
+<text x="36" y="520" class="cap">FINAL END STATE</text>
+<rect x="296" y="398" width="500" height="138" rx="16" class="zone"/>
+<text x="316" y="520" class="cap">NON-FINAL END STATES</text>
+<rect x="56.0" y="437" width="160" height="46" rx="10" class="rose"/><text x="136" y="465" text-anchor="middle" class="mono t-rose" style="font-size:14px;font-weight:600">TERMINATED</text>
+<rect x="351.0" y="437" width="170" height="46" rx="10" class="green"/><text x="436" y="465" text-anchor="middle" class="mono t-green" style="font-size:14px;font-weight:600">COMPLETED</text>
+<rect x="571.0" y="437" width="170" height="46" rx="10" class="amber"/><text x="656" y="465" text-anchor="middle" class="mono t-amber" style="font-size:14px;font-weight:600">CANCELLED</text>
+<path d="M136 338 V433" class="e-rose" marker-end="url(#ah-rose)"/>
+<text x="148" y="376" class="lbl-rose">terminate()</text>
+<path d="M436 338 V433" class="e-mint" marker-end="url(#ah-mint)"/>
+<text x="448" y="368" class="lbl-mint">complete()</text>
+<text x="448" y="385" class="lbl-mint">forceComplete()</text>
+<path d="M656 338 V433" class="e-amber" marker-end="url(#ah-amber)"/>
+<text x="668" y="376" class="lbl-amber">cancel()</text>
+<path d="M796 460 H846 V115 H744" class="e-dash" marker-end="url(#ah)"/>
+<text x="795" y="106" text-anchor="middle" class="lbl">reopen()</text>
+</svg>
