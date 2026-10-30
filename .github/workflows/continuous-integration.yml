@@ -55,7 +55,9 @@ jobs:
       frontend_changed: ${{ steps.filter.outputs.frontend }} 
       code_changed: ${{ steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' }}  
       # Master coverage must contain the complete test suite, independent of the changed paths.
-      run_all_tests: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/master') || inputs.full_run == true }}
+      # Docs-only master pushes change no code, so they need no tests (and no coverage analysis).
+      # Use workflow_dispatch with full_run to force a full run for such a change.
+      run_all_tests: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/master' && (steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true')) || inputs.full_run == true }}
     steps:
       - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
