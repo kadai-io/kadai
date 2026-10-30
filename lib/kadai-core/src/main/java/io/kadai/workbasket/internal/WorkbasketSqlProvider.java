@@ -24,6 +24,7 @@ import static io.kadai.common.internal.util.SqlProviderUtil.OPENING_SCRIPT_TAG;
 import io.kadai.common.internal.util.Pair;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class WorkbasketSqlProvider {
@@ -52,6 +53,8 @@ public class WorkbasketSqlProvider {
           Pair.of("CUSTOM_6", "#{workbasket.custom6}"),
           Pair.of("CUSTOM_7", "#{workbasket.custom7}"),
           Pair.of("CUSTOM_8", "#{workbasket.custom8}"));
+
+  private static final Set<String> IMMUTABLE_COLUMNS = Set.of("ID", "KEY", "DOMAIN", "CREATED");
 
   private WorkbasketSqlProvider() {}
 
@@ -117,14 +120,14 @@ public class WorkbasketSqlProvider {
   public static String update() {
     return "UPDATE WORKBASKET "
         + "SET "
-        + updateSetStatement(false)
+        + updateSetStatement()
         + " WHERE id = #{workbasket.id}";
   }
 
   public static String updateByKeyAndDomain() {
     return "UPDATE WORKBASKET "
         + "SET "
-        + updateSetStatement(true)
+        + updateSetStatement()
         + " WHERE KEY = #{workbasket.key} AND DOMAIN = #{workbasket.domain}";
   }
 
@@ -132,20 +135,9 @@ public class WorkbasketSqlProvider {
     return "DELETE FROM WORKBASKET where id = #{id}";
   }
 
-  private static String updateSetStatement(boolean byKeyAndDomain) {
+  private static String updateSetStatement() {
     return COLUMNS.stream()
-        .filter(
-            col -> {
-              if (byKeyAndDomain) {
-                String name = col.getLeft();
-                return !(name.contains("ID")
-                    || name.contains("KEY")
-                    || name.contains("DOMAIN")
-                    || name.contains("CREATED"));
-              } else {
-                return true;
-              }
-            })
+        .filter(col -> !IMMUTABLE_COLUMNS.contains(col.getLeft()))
         .map(col -> col.getLeft() + " = " + col.getRight())
         .collect(Collectors.joining(", "));
   }

@@ -26,7 +26,10 @@ import org.springframework.hateoas.RepresentationModel;
 public class WorkbasketSummaryRepresentationModel
     extends RepresentationModel<WorkbasketSummaryRepresentationModel> {
 
-  @Schema(name = "workbasketId", description = "Unique Id.")
+  @Schema(
+      name = "workbasketId",
+      description =
+          "Unique ID. On create, a supplied ID is used; if omitted, the server generates one.")
   protected String workbasketId;
 
   @Schema(name = "key", description = "the professional key for the workbasket.")
