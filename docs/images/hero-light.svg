@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="240" viewBox="0 0 900 240" role="img" aria-labelledby="title desc">
+  <title id="title">KADAI</title>
+  <desc id="desc">KADAI logo – the open source task management library</desc>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif; fill: #1f2328; }
+    .mono { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; }
+    .t { fill: #1f2328; }
+    .m { fill: #59636e; }
+    .cap { font-size: 11px; font-weight: 700; letter-spacing: 1.4px; fill: #59636e; }
+    .lbl { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; fill: #59636e; }
+    .lbl-mint { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; fill: #116149; font-weight: 600; }
+    .lbl-rose { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; fill: #cf222e; }
+    .lbl-amber { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; fill: #9a6700; }
+    .card { fill: #ffffff; stroke: #d1d9e0; stroke-width: 1.2; }
+    .card-dashed { fill: #ffffff; stroke: #8c959f; stroke-width: 1.2; stroke-dasharray: 5 4; }
+    .zone { fill: #f6f8fa; stroke: #d1d9e0; stroke-width: 1.2; }
+    .zone-dashed { fill: none; stroke: #d1d9e0; stroke-width: 1.2; stroke-dasharray: 6 5; }
+    .zone-mint { fill: #e6f5f0; stroke: #84c8b4; stroke-width: 1.2; }
+    .mint { fill: #e6f5f0; stroke: #84c8b4; stroke-width: 1.4; }
+    .mint-solid { fill: #84c8b4; }
+    .blue { fill: #ddf4ff; stroke: #80ccff; stroke-width: 1.4; }
+    .green { fill: #dafbe1; stroke: #4ac26b; stroke-width: 1.4; }
+    .amber { fill: #fff8c5; stroke: #d4a72c; stroke-width: 1.4; }
+    .rose { fill: #ffebe9; stroke: #ff8182; stroke-width: 1.4; }
+    .t-mint { fill: #116149; }
+    .t-blue { fill: #0969da; }
+    .t-green { fill: #1a7f37; }
+    .t-amber { fill: #9a6700; }
+    .t-rose { fill: #cf222e; }
+    .f-text { fill: #1f2328; }
+    .f-muted { fill: #59636e; }
+    .f-line { fill: #8c959f; }
+    .f-mint { fill: #2f9c7e; }
+    .f-green { fill: #4ac26b; }
+    .f-amber { fill: #d4a72c; }
+    .f-rose { fill: #ff8182; }
+    .f-blue { fill: #80ccff; }
+    .e { fill: none; stroke: #8c959f; stroke-width: 1.5; }
+    .e-dash { fill: none; stroke: #8c959f; stroke-width: 1.5; stroke-dasharray: 4 4; }
+    .e-mint { fill: none; stroke: #2f9c7e; stroke-width: 2.2; }
+    .e-rose { fill: none; stroke: #ff8182; stroke-width: 1.6; }
+    .e-amber { fill: none; stroke: #d4a72c; stroke-width: 1.6; }
+    .e-green { fill: none; stroke: #4ac26b; stroke-width: 1.8; }
+    .on-mint { fill: #0d1117; }
+    .logo-mint { fill: #84c8b4; }
+    .logo-bar { fill: #1f1f1f; }
+
+    @keyframes bar { from { opacity: 0; transform: translateX(160px); } to { opacity: 1; transform: none; } }
+    @keyframes pop { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
+    @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    .a-bar { animation: bar .7s cubic-bezier(.2,.7,.2,1) both; }
+    .a-bar0 { animation-delay: .05s; } .a-bar1 { animation-delay: .12s; } .a-bar2 { animation-delay: .19s; }
+    .a-bar3 { animation-delay: .26s; } .a-bar4 { animation-delay: .33s; } .a-bar5 { animation-delay: .40s; }
+    .a-bar6 { animation-delay: .47s; }
+    .a-mint { animation: pop .8s cubic-bezier(.2,.7,.2,1) both; }
+    .a-mint1 { animation-delay: .2s; }
+    .a-word { animation: rise .7s .35s ease-out both; }
+    .a-tag { animation: rise .7s .6s ease-out both; }
+    @media (prefers-reduced-motion: reduce) { .a-bar, .a-mint, .a-word, .a-tag { animation: none; } }
+  </style>
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-line"/></marker>
+    <marker id="ah-mint" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-mint"/></marker>
+    <marker id="ah-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-rose"/></marker>
+    <marker id="ah-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-amber"/></marker>
+    <marker id="ah-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-green"/></marker>
+  </defs>
+<g transform="translate(150 45.0) scale(0.17923)"><path class="logo-mint a-mint a-mint0" d="m28.33,432.59h8.25c7.63,0,14.9-3.24,20.01-8.9l162.68-180.47c4.46-4.95,6.93-11.38,6.93-18.04V27.94c0-14.88-12.06-26.94-26.94-26.94H28.33C13.45,1,1.38,13.06,1.38,27.94v377.7c0,14.88,12.06,26.94,26.94,26.94Z"/><path class="logo-mint a-mint a-mint1" d="m478.41,500.19c-10.47-11.34-28.3-11.58-39.08-.54l-111.94,114.72c-9.95,10.2-10.24,26.38-.66,36.93l158.88,174.93c5.11,5.62,12.35,8.83,19.95,8.83h220.54c23.49,0,35.73-27.97,19.8-45.22l-267.48-289.64Z"/><path class="logo-bar a-bar a-bar0" d="m764.88,56.23l4.2-4.58c4.56-4.97,7.09-11.47,7.09-18.22v-5.49c0-14.88-12.06-26.94-26.94-26.94h-219.77c-7.6,0-14.85,3.21-19.96,8.84l-42.07,46.39h297.45Z"/><polygon class="logo-bar a-bar a-bar1" points="425.46 102.5 346.7 189.33 642.75 189.33 722.43 102.5 425.46 102.5"/><polygon class="logo-bar a-bar a-bar2" points="304.74 235.6 225.98 322.43 520.61 322.43 600.29 235.6 304.74 235.6"/><polygon class="logo-bar a-bar a-bar3" points="184.01 368.7 105.25 455.53 398.47 455.53 478.15 368.7 184.01 368.7"/><path class="logo-bar a-bar a-bar4" d="m63.29,501.8l-53.06,58.5c-4.5,4.96-6.99,11.41-6.99,18.1v10.23h273.1l79.68-86.83H63.29Z"/><polygon class="logo-bar a-bar a-bar5" points="154.2 721.74 233.88 634.9 3.24 634.9 3.24 721.74 154.2 721.74"/><path class="logo-bar a-bar a-bar6" d="m3.24,768.01v40.11c0,14.88,12.06,26.94,26.94,26.94h8.19c7.55,0,14.75-3.17,19.85-8.73l53.52-58.32H3.24Z"/></g>
+<text x="327.63891842806447" y="136" class="t a-word" style="font-size:96px;font-weight:800" letter-spacing="6">KADAI</text>
+<text x="331.63891842806447" y="176" class="m a-tag" style="font-size:21px;font-weight:500">The open source task management library</text>
+</svg>

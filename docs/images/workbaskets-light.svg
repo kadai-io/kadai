@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="404" viewBox="0 0 900 404" role="img" aria-labelledby="title desc">
+  <title id="title">KADAI workbaskets</title>
+  <desc id="desc">Topic, group and personal workbaskets connected by distribution targets; a task is distributed from a topic workbasket to a team, then to a person, then transferred to a colleague.</desc>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif; fill: #1f2328; }
+    .mono { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; }
+    .t { fill: #1f2328; }
+    .m { fill: #59636e; }
+    .cap { font-size: 11px; font-weight: 700; letter-spacing: 1.4px; fill: #59636e; }
+    .lbl { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; fill: #59636e; }
+    .lbl-mint { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; fill: #116149; font-weight: 600; }
+    .lbl-rose { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; fill: #cf222e; }
+    .lbl-amber { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; fill: #9a6700; }
+    .card { fill: #ffffff; stroke: #d1d9e0; stroke-width: 1.2; }
+    .card-dashed { fill: #ffffff; stroke: #8c959f; stroke-width: 1.2; stroke-dasharray: 5 4; }
+    .zone { fill: #f6f8fa; stroke: #d1d9e0; stroke-width: 1.2; }
+    .zone-dashed { fill: none; stroke: #d1d9e0; stroke-width: 1.2; stroke-dasharray: 6 5; }
+    .zone-mint { fill: #e6f5f0; stroke: #84c8b4; stroke-width: 1.2; }
+    .mint { fill: #e6f5f0; stroke: #84c8b4; stroke-width: 1.4; }
+    .mint-solid { fill: #84c8b4; }
+    .blue { fill: #ddf4ff; stroke: #80ccff; stroke-width: 1.4; }
+    .green { fill: #dafbe1; stroke: #4ac26b; stroke-width: 1.4; }
+    .amber { fill: #fff8c5; stroke: #d4a72c; stroke-width: 1.4; }
+    .rose { fill: #ffebe9; stroke: #ff8182; stroke-width: 1.4; }
+    .t-mint { fill: #116149; }
+    .t-blue { fill: #0969da; }
+    .t-green { fill: #1a7f37; }
+    .t-amber { fill: #9a6700; }
+    .t-rose { fill: #cf222e; }
+    .f-text { fill: #1f2328; }
+    .f-muted { fill: #59636e; }
+    .f-line { fill: #8c959f; }
+    .f-mint { fill: #2f9c7e; }
+    .f-green { fill: #4ac26b; }
+    .f-amber { fill: #d4a72c; }
+    .f-rose { fill: #ff8182; }
+    .f-blue { fill: #80ccff; }
+    .e { fill: none; stroke: #8c959f; stroke-width: 1.5; }
+    .e-dash { fill: none; stroke: #8c959f; stroke-width: 1.5; stroke-dasharray: 4 4; }
+    .e-mint { fill: none; stroke: #2f9c7e; stroke-width: 2.2; }
+    .e-rose { fill: none; stroke: #ff8182; stroke-width: 1.6; }
+    .e-amber { fill: none; stroke: #d4a72c; stroke-width: 1.6; }
+    .e-green { fill: none; stroke: #4ac26b; stroke-width: 1.8; }
+    .on-mint { fill: #0d1117; }
+    .logo-mint { fill: #84c8b4; }
+    .logo-bar { fill: #1f1f1f; }
+  </style>
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-line"/></marker>
+    <marker id="ah-mint" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-mint"/></marker>
+    <marker id="ah-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-rose"/></marker>
+    <marker id="ah-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-amber"/></marker>
+    <marker id="ah-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-green"/></marker>
+  </defs>
+<g transform="translate(0 -48)">
+<text x="28" y="90" class="cap">TOPIC</text>
+<text x="28" y="108" class="m" style="font-size:12px">a subject or product</text>
+<text x="28" y="220" class="cap">GROUP / TEAM</text>
+<text x="28" y="238" class="m" style="font-size:12px">shared by a team</text>
+<text x="28" y="350" class="cap">PERSONAL</text>
+<text x="28" y="368" class="m" style="font-size:12px">one per user</text>
+<path d="M589 118 L715 194" class="e-dash" marker-end="url(#ah)"/>
+<path d="M347 248 L300 324" class="e-dash" marker-end="url(#ah)"/>
+<path d="M712 248 L665 324" class="e-dash" marker-end="url(#ah)"/>
+<path d="M762 248 L810 324" class="e-dash" marker-end="url(#ah)"/>
+<path d="M521 118 L394 194" class="e-mint" marker-end="url(#ah-mint)"/>
+<text x="452" y="150" text-anchor="end" class="lbl-mint">distribute</text>
+<path d="M397 248 L445 324" class="e-mint" marker-end="url(#ah-mint)"/>
+<text x="428" y="288" class="lbl-mint">distribute</text>
+<path d="M520 352 H588" class="e-mint" marker-end="url(#ah-mint)"/>
+<text x="555" y="340" text-anchor="middle" class="lbl-mint">transfer</text>
+<rect x="290" y="80" width="64" height="24" rx="6" class="mint"/><text x="322" y="97" text-anchor="middle" class="t-mint" style="font-size:12px;font-weight:700">Task</text>
+<path d="M356 92 H476" class="e-mint" marker-end="url(#ah-mint)"/>
+<rect x="480.0" y="66" width="150" height="52" rx="12" class="mint"/><g transform="translate(496.0 81) scale(1.0)"><path class="f-mint" d="M5 0h18a3 3 0 0 1 2.7 1.7L28 7v12a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3V7l2.3-5.3A3 3 0 0 1 5 0ZM3.2 8.5v10.3h21.6V8.5h-5.6a5.2 5.2 0 0 1-10.4 0Z"/></g><text x="536.0" y="97" class="t" style="font-size:14px;font-weight:600">Complaints</text>
+<rect x="297.0" y="196" width="150" height="52" rx="12" class="card"/><g transform="translate(313.0 211) scale(1.0)"><path class="f-mint" d="M5 0h18a3 3 0 0 1 2.7 1.7L28 7v12a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3V7l2.3-5.3A3 3 0 0 1 5 0ZM3.2 8.5v10.3h21.6V8.5h-5.6a5.2 5.2 0 0 1-10.4 0Z"/></g><text x="353.0" y="227" class="t" style="font-size:14px;font-weight:600">Team North</text>
+<rect x="662.0" y="196" width="150" height="52" rx="12" class="card"/><g transform="translate(678.0 211) scale(1.0)"><path class="f-mint" d="M5 0h18a3 3 0 0 1 2.7 1.7L28 7v12a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3V7l2.3-5.3A3 3 0 0 1 5 0ZM3.2 8.5v10.3h21.6V8.5h-5.6a5.2 5.2 0 0 1-10.4 0Z"/></g><text x="718.0" y="227" class="t" style="font-size:14px;font-weight:600">Team South</text>
+<rect x="225.0" y="326" width="130" height="52" rx="12" class="card"/><g transform="translate(241.0 341) scale(1.0)"><path class="f-mint" d="M5 0h18a3 3 0 0 1 2.7 1.7L28 7v12a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3V7l2.3-5.3A3 3 0 0 1 5 0ZM3.2 8.5v10.3h21.6V8.5h-5.6a5.2 5.2 0 0 1-10.4 0Z"/></g><text x="281.0" y="357" class="t" style="font-size:14px;font-weight:600">Anna</text>
+<rect x="390.0" y="326" width="130" height="52" rx="12" class="card"/><g transform="translate(406.0 341) scale(1.0)"><path class="f-mint" d="M5 0h18a3 3 0 0 1 2.7 1.7L28 7v12a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3V7l2.3-5.3A3 3 0 0 1 5 0ZM3.2 8.5v10.3h21.6V8.5h-5.6a5.2 5.2 0 0 1-10.4 0Z"/></g><text x="446.0" y="357" class="t" style="font-size:14px;font-weight:600">Ben</text>
+<rect x="590.0" y="326" width="130" height="52" rx="12" class="card"/><g transform="translate(606.0 341) scale(1.0)"><path class="f-mint" d="M5 0h18a3 3 0 0 1 2.7 1.7L28 7v12a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3V7l2.3-5.3A3 3 0 0 1 5 0ZM3.2 8.5v10.3h21.6V8.5h-5.6a5.2 5.2 0 0 1-10.4 0Z"/></g><text x="646.0" y="357" class="t" style="font-size:14px;font-weight:600">Chris</text>
+<rect x="755.0" y="326" width="130" height="52" rx="12" class="card"/><g transform="translate(771.0 341) scale(1.0)"><path class="f-mint" d="M5 0h18a3 3 0 0 1 2.7 1.7L28 7v12a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3V7l2.3-5.3A3 3 0 0 1 5 0ZM3.2 8.5v10.3h21.6V8.5h-5.6a5.2 5.2 0 0 1-10.4 0Z"/></g><text x="811.0" y="357" class="t" style="font-size:14px;font-weight:600">Dana</text>
+<line x1="330" y1="424" x2="370" y2="424" class="e-dash"/>
+<text x="380" y="428" class="m" style="font-size:12px">distribution target</text>
+<line x1="530" y1="424" x2="570" y2="424" class="e-mint"/>
+<text x="580" y="428" class="m" style="font-size:12px">the way of one task</text>
+</g>
+</svg>

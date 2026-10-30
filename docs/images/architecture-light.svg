@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="540" viewBox="0 0 900 540" role="img" aria-labelledby="title desc">
+  <title id="title">KADAI architecture</title>
+  <desc id="desc">KADAI Web (Workplace, Admin, Monitor) talks to the REST API, which uses the KADAI Java library with its SPI plugins on top of an H2, PostgreSQL or Db2 database. Custom clients use the REST API or the library; an adapter connects Camunda and other systems.</desc>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif; fill: #1f2328; }
+    .mono { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; }
+    .t { fill: #1f2328; }
+    .m { fill: #59636e; }
+    .cap { font-size: 11px; font-weight: 700; letter-spacing: 1.4px; fill: #59636e; }
+    .lbl { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; fill: #59636e; }
+    .lbl-mint { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; fill: #116149; font-weight: 600; }
+    .lbl-rose { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; fill: #cf222e; }
+    .lbl-amber { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; fill: #9a6700; }
+    .card { fill: #ffffff; stroke: #d1d9e0; stroke-width: 1.2; }
+    .card-dashed { fill: #ffffff; stroke: #8c959f; stroke-width: 1.2; stroke-dasharray: 5 4; }
+    .zone { fill: #f6f8fa; stroke: #d1d9e0; stroke-width: 1.2; }
+    .zone-dashed { fill: none; stroke: #d1d9e0; stroke-width: 1.2; stroke-dasharray: 6 5; }
+    .zone-mint { fill: #e6f5f0; stroke: #84c8b4; stroke-width: 1.2; }
+    .mint { fill: #e6f5f0; stroke: #84c8b4; stroke-width: 1.4; }
+    .mint-solid { fill: #84c8b4; }
+    .blue { fill: #ddf4ff; stroke: #80ccff; stroke-width: 1.4; }
+    .green { fill: #dafbe1; stroke: #4ac26b; stroke-width: 1.4; }
+    .amber { fill: #fff8c5; stroke: #d4a72c; stroke-width: 1.4; }
+    .rose { fill: #ffebe9; stroke: #ff8182; stroke-width: 1.4; }
+    .t-mint { fill: #116149; }
+    .t-blue { fill: #0969da; }
+    .t-green { fill: #1a7f37; }
+    .t-amber { fill: #9a6700; }
+    .t-rose { fill: #cf222e; }
+    .f-text { fill: #1f2328; }
+    .f-muted { fill: #59636e; }
+    .f-line { fill: #8c959f; }
+    .f-mint { fill: #2f9c7e; }
+    .f-green { fill: #4ac26b; }
+    .f-amber { fill: #d4a72c; }
+    .f-rose { fill: #ff8182; }
+    .f-blue { fill: #80ccff; }
+    .e { fill: none; stroke: #8c959f; stroke-width: 1.5; }
+    .e-dash { fill: none; stroke: #8c959f; stroke-width: 1.5; stroke-dasharray: 4 4; }
+    .e-mint { fill: none; stroke: #2f9c7e; stroke-width: 2.2; }
+    .e-rose { fill: none; stroke: #ff8182; stroke-width: 1.6; }
+    .e-amber { fill: none; stroke: #d4a72c; stroke-width: 1.6; }
+    .e-green { fill: none; stroke: #4ac26b; stroke-width: 1.8; }
+    .on-mint { fill: #0d1117; }
+    .logo-mint { fill: #84c8b4; }
+    .logo-bar { fill: #1f1f1f; }
+  </style>
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-line"/></marker>
+    <marker id="ah-mint" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-mint"/></marker>
+    <marker id="ah-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-rose"/></marker>
+    <marker id="ah-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-amber"/></marker>
+    <marker id="ah-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-green"/></marker>
+  </defs>
+<rect x="250" y="20" width="400" height="112" rx="16" class="zone"/>
+<text x="270" y="46" class="cap">KADAI WEB</text><text x="352" y="46" class="m" style="font-size:12px">Angular</text>
+<rect x="270" y="62" width="110" height="50" rx="10" class="blue"/><text x="325" y="92" text-anchor="middle" class="t" style="font-size:14px;font-weight:600">Workplace</text>
+<rect x="395" y="62" width="110" height="50" rx="10" class="blue"/><text x="450" y="92" text-anchor="middle" class="t" style="font-size:14px;font-weight:600">Admin</text>
+<rect x="520" y="62" width="110" height="50" rx="10" class="blue"/><text x="575" y="92" text-anchor="middle" class="t" style="font-size:14px;font-weight:600">Monitor</text>
+<rect x="700" y="40" width="22" height="16" rx="4" class="mint"/><text x="732" y="53" class="m" style="font-size:12px">KADAI</text>
+<rect x="700" y="68" width="22" height="16" rx="4" class="blue"/><text x="732" y="81" class="m" style="font-size:12px">KADAI Web (frontend)</text>
+<rect x="700" y="96" width="22" height="16" rx="4" class="card-dashed"/><text x="732" y="109" class="m" style="font-size:12px">your code / external</text>
+<path d="M450 132 V186" class="e" marker-end="url(#ah)"/>
+<rect x="350" y="188" width="200" height="52" rx="12" class="mint"/>
+<text x="450" y="211" text-anchor="middle" class="t" style="font-size:15px;font-weight:700">REST API</text>
+<text x="450" y="229" text-anchor="middle" class="m" style="font-size:12px">Spring · HATEOAS</text>
+<path d="M450 240 V274" class="e" marker-end="url(#ah)"/>
+<rect x="290" y="276" width="320" height="112" rx="14" class="mint"/>
+<text x="450" y="304" text-anchor="middle" class="t" style="font-size:17px;font-weight:800">KADAI Lib</text>
+<text x="450" y="323" text-anchor="middle" class="m" style="font-size:12px">Java task management engine</text>
+<rect x="312" y="340" width="84" height="30" rx="8" class="card"/><text x="354" y="360" text-anchor="middle" class="t" style="font-size:12px;font-weight:600">History</text>
+<rect x="408" y="340" width="84" height="30" rx="8" class="card"/><text x="450" y="360" text-anchor="middle" class="t" style="font-size:12px;font-weight:600">DMN routing</text>
+<rect x="504" y="340" width="84" height="30" rx="8" class="card"/><text x="546" y="360" text-anchor="middle" class="t" style="font-size:12px;font-weight:600">Your SPIs</text>
+<path d="M450 388 V424" class="e" marker-end="url(#ah)"/>
+<path class="mint" d="M366 436 v62 a84 13 0 0 0 168 0 v-62"/>
+<ellipse cx="450" cy="436" rx="84" ry="13" class="mint"/>
+<text x="450" y="470" text-anchor="middle" class="t" style="font-size:15px;font-weight:700">Database</text>
+<text x="450" y="488" text-anchor="middle" class="m" style="font-size:12px">H2 · PostgreSQL · Db2</text>
+<rect x="20" y="176" width="216" height="210" rx="16" class="zone-dashed"/>
+<text x="38" y="202" class="cap">YOUR APPLICATIONS</text>
+<rect x="38" y="220" width="180" height="50" rx="10" class="card-dashed"/><text x="128" y="250" text-anchor="middle" class="t" style="font-size:13px;font-weight:600">Custom Spring client</text>
+<rect x="38" y="300" width="180" height="50" rx="10" class="card-dashed"/><text x="128" y="330" text-anchor="middle" class="t" style="font-size:13px;font-weight:600">Custom Java EE client</text>
+<path d="M236 214 H346" class="e" marker-end="url(#ah)"/>
+<path d="M236 332 H286" class="e" marker-end="url(#ah)"/>
+<rect x="680" y="288" width="196" height="52" rx="12" class="mint"/><text x="778" y="312" text-anchor="middle" class="t" style="font-size:15px;font-weight:700">Adapter</text><text x="778" y="330" text-anchor="middle" class="m" style="font-size:12px">connects external systems</text>
+<path d="M612 314 H676" class="e" marker-end="url(#ah)" marker-start="url(#ah)"/>
+<rect x="668" y="430" width="100" height="46" rx="10" class="card-dashed"/><text x="718" y="458" text-anchor="middle" class="t" style="font-size:13px;font-weight:600">Camunda</text>
+<rect x="784" y="430" width="100" height="46" rx="10" class="card-dashed"/><text x="834" y="458" text-anchor="middle" class="t" style="font-size:12px;font-weight:600">Other systems</text>
+<path d="M718 344 V426" class="e" marker-end="url(#ah)" marker-start="url(#ah)"/>
+<path d="M834 344 V426" class="e" marker-end="url(#ah)" marker-start="url(#ah)"/>
+</svg>
