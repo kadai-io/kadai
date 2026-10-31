@@ -559,7 +559,8 @@ jobs:
         run: |
           ci/change_version.sh -m .
       - name: Test
-        run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip -Djacoco.destFile=target/jacoco-${{matrix.database}}.exec -T 1C
+        # The javadoc and sources jars are built by compile_backend and only published by release_artifacts.
+        run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip -Dmaven.javadoc.skip -Dmaven.source.skip -Djacoco.destFile=target/jacoco-${{matrix.database}}.exec -T 1C
         env:
           DB: ${{ matrix.database }}
       - name: Eco CI Measurement of ${{ matrix.module }} (H2)
