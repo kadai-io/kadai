@@ -17,6 +17,8 @@
  */
 
 import { Component, computed, inject, OnDestroy, OnInit, signal, viewChild } from '@angular/core';
+import { Router } from '@angular/router';
+import { CLASSIFICATIONS_ROUTE } from '../../../shared/util/administration-routes';
 import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 
@@ -30,7 +32,7 @@ import { ImportExportService } from 'app/administration/services/import-export.s
 import { map, take, takeUntil } from 'rxjs/operators';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
-import { AsyncPipe, Location } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import {
   ClassificationCategoryImages,
@@ -117,11 +119,11 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   classificationForm = viewChild<NgForm>('ClassificationForm');
   toggleValidationMap = new Map<string, boolean>();
   destroy$ = new Subject<void>();
-  private location = inject(Location);
   private requestInProgressService = inject(RequestInProgressService);
   private notificationsService = inject(NotificationService);
   private importExportService = inject(ImportExportService);
   private store = inject(Store);
+  private router = inject(Router);
 
   ngOnInit() {
     this.customFields$ = this.store.select(EngineConfigurationSelectors.classificationsCustomisation).pipe(
@@ -214,10 +216,9 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
             this.notificationsService.showSuccess('CLASSIFICATION_CREATE', {
               classificationKey: classification.key
             });
-            this.location.go(
-              this.location
-                .path()
-                .replace(/(classifications).*/g, `classifications/(detail:${classification.classificationId})`)
+            void this.router.navigate(
+              [CLASSIFICATIONS_ROUTE, { outlets: { detail: [classification.classificationId] } }],
+              { queryParamsHandling: 'merge' }
             );
           });
           this.afterRequest();
@@ -262,7 +263,9 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
         });
         this.afterRequest();
       });
-    this.location.go(this.location.path().replace(/(classifications).*/g, 'classifications'));
+    void this.router.navigate([CLASSIFICATIONS_ROUTE, { outlets: { detail: null } }], {
+      queryParamsHandling: 'merge'
+    });
   }
 
   ngOnDestroy(): void {

@@ -17,6 +17,8 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
+import { CLASSIFICATIONS_ROUTE } from '../../../shared/util/administration-routes';
 import { Component, DebugElement, input } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { DomainState } from '../../../shared/store/domain-store/domain.state';
@@ -94,13 +96,16 @@ describe('ClassificationListComponent', () => {
     expect(debugElement.nativeElement.querySelector('kadai-administration-import-export')).toBeTruthy();
   });
 
-  it('should call CreateClassification when add-classification button is clicked', async () => {
+  it('should navigate to the new classification url when the add button is clicked', () => {
     const button = debugElement.nativeElement.querySelector('.classification-list__add-button');
     expect(button).toBeTruthy();
-    let actionDispatched = false;
-    actions$.pipe(ofActionDispatched(CreateClassification)).subscribe(() => (actionDispatched = true));
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
     button.click();
-    expect(actionDispatched).toBe(true);
+
+    expect(navigate).toHaveBeenCalledWith([CLASSIFICATIONS_ROUTE, { outlets: { detail: ['new-classification'] } }], {
+      queryParamsHandling: 'merge'
+    });
   });
 
   it('should display classification-types-selector component', () => {

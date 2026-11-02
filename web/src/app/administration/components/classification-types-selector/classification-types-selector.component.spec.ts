@@ -17,6 +17,8 @@
  */
 
 import { ClassificationTypesSelectorComponent } from './classification-types-selector.component';
+import { Router } from '@angular/router';
+import { CLASSIFICATIONS_ROUTE } from '../../../shared/util/administration-routes';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { Location } from '@angular/common';
@@ -93,15 +95,16 @@ describe('ClassificationTypesSelectorComponent', () => {
     expect(options[1].nativeElement.textContent.trim()).toBe('DOCUMENT');
   });
 
-  it('should dispatch SetSelectedClassificationType and update location when select is called', () => {
+  it('should dispatch SetSelectedClassificationType and close the detail when select is called', () => {
     const storeSpy = vi.spyOn(store, 'dispatch');
-    const location = TestBed.inject(Location);
-    const locationSpy = vi.spyOn(location, 'go');
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
 
     component.select('TASK');
 
     expect(storeSpy).toHaveBeenCalled();
-    expect(locationSpy).toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalledWith([CLASSIFICATIONS_ROUTE, { outlets: { detail: null } }], {
+      queryParamsHandling: 'merge'
+    });
   });
 
   it('should call select() with the correct classification type when a mat-option is clicked', () => {
@@ -136,8 +139,7 @@ describe('ClassificationTypesSelectorComponent', () => {
 
   it('should dispatch store action and navigate when mat-option is clicked via DOM', () => {
     const storeSpy = vi.spyOn(store, 'dispatch');
-    const location = TestBed.inject(Location);
-    const locationSpy = vi.spyOn(location, 'go');
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
 
     const dropdownButton = debugElement.nativeElement.querySelector('.types-selector__selected-type');
     dropdownButton.click();
@@ -148,7 +150,7 @@ describe('ClassificationTypesSelectorComponent', () => {
     fixture.detectChanges();
 
     expect(storeSpy).toHaveBeenCalled();
-    expect(locationSpy).toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalled();
   });
 
   it('should render one mat-option for each classification type from the store', () => {

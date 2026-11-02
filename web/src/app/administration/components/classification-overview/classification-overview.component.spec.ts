@@ -50,7 +50,7 @@ describe('ClassificationOverviewComponent', () => {
   beforeEach(async () => {
     mockActivatedRoute = {
       firstChild: {
-        params: of(routeParamsMock)
+        snapshot: { params: routeParamsMock }
       }
     };
 
@@ -112,26 +112,46 @@ describe('ClassificationOverviewComponent', () => {
     expect(component.routerParams).toEqual(routeParamsMock);
   });
 
-  it('should dispatch SelectClassification action when routerParams id exists', async () => {
-    mockActivatedRoute.firstChild.params = of(routeParamsMock);
+  it('should dispatch SelectClassification when the route carries a classification id', () => {
+    mockActivatedRoute.firstChild.snapshot = { params: { id: 'CLI:01' } };
+    store.reset({ ...store.snapshot(), classification: classificationStateMock });
     let isActionDispatched = false;
     actions$.pipe(ofActionDispatched(SelectClassification)).subscribe(() => (isActionDispatched = true));
+
     component.ngOnInit();
+
     expect(isActionDispatched).toBe(true);
   });
 
-  it('should dispatch CreateClassification action when routerParams id contains new-classification', async () => {
+  it('should dispatch CreateClassification when the route carries new-classification', () => {
+    mockActivatedRoute.firstChild.snapshot = { params: { id: 'new-classification' } };
+    store.reset({ ...store.snapshot(), classification: classificationStateMock });
     let isActionDispatched = false;
     actions$.pipe(ofActionDispatched(CreateClassification)).subscribe(() => (isActionDispatched = true));
+
     component.ngOnInit();
+
     expect(isActionDispatched).toBe(true);
   });
 
-  it('should dispatch DeselectClassification action when routerParams id does not exist', () => {
-    mockActivatedRoute.firstChild.params = of({});
+  it('should not select a classification for the new-classification url', () => {
+    mockActivatedRoute.firstChild.snapshot = { params: { id: 'new-classification' } };
+    store.reset({ ...store.snapshot(), classification: classificationStateMock });
+    let isActionDispatched = false;
+    actions$.pipe(ofActionDispatched(SelectClassification)).subscribe(() => (isActionDispatched = true));
+
+    component.ngOnInit();
+
+    expect(isActionDispatched).toBe(false);
+  });
+
+  it('should dispatch DeselectClassification when the route carries no id', () => {
+    mockActivatedRoute.firstChild.snapshot = { params: {} };
     let isActionDispatched = false;
     actions$.pipe(ofActionDispatched(DeselectClassification)).subscribe(() => (isActionDispatched = true));
+
     component.ngOnInit();
+
     expect(isActionDispatched).toBe(true);
   });
 
@@ -140,10 +160,11 @@ describe('ClassificationOverviewComponent', () => {
       ...store.snapshot(),
       classification: { ...classificationStateMock, selectedClassification: undefined }
     });
-    mockActivatedRoute.firstChild.params = of({ id: 'ID01' });
+    mockActivatedRoute.firstChild.snapshot = { params: { id: 'ID01' } };
     const setSpy = vi.spyOn(component.showDetail, 'set');
+
     component.ngOnInit();
-    expect(setSpy).toHaveBeenCalledTimes(1);
-    expect(setSpy).toHaveBeenCalledWith(false);
+
+    expect(setSpy).toHaveBeenNthCalledWith(1, false);
   });
 });

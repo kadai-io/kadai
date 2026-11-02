@@ -17,6 +17,8 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
+import { CLASSIFICATIONS_ROUTE } from '../../../shared/util/administration-routes';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { KadaiTreeComponent } from './tree.component';
 import { provideStore, Store } from '@ngxs/store';
@@ -168,24 +170,28 @@ describe('KadaiTreeComponent', () => {
     expect(completeSpy).toHaveBeenCalled();
   });
 
-  it('should call store.dispatch and location.go on onActivate', () => {
-    const dispatchSpy = vi.spyOn(store, 'dispatch').mockReturnValue(of(undefined as any));
-    locationMock.path.mockReturnValue('/kadai/administration/classifications');
+  it('should navigate to the classification detail on onActivate', () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     const mockTreeNode = { node: { data: { classificationId: 'CLF:01' } } };
+
     component.onActivate(mockTreeNode);
+
     expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(true);
-    expect(dispatchSpy).toHaveBeenCalled();
-    expect(locationMock.go).toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalledWith([CLASSIFICATIONS_ROUTE, { outlets: { detail: ['CLF:01'] } }], {
+      queryParamsHandling: 'merge'
+    });
     expect(component.selectNodeId()).toBe('CLF:01');
   });
 
-  it('should dispatch deselect and go to classifications on onDeactivate with empty activeNodes', () => {
-    const dispatchSpy = vi.spyOn(store, 'dispatch').mockReturnValue(of(undefined as any));
-    locationMock.path.mockReturnValue('/kadai/administration/classifications');
+  it('should navigate back to the list on onDeactivate with empty activeNodes', () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     const mockEvent = { treeModel: { activeNodes: [] } };
+
     component.onDeactivate(mockEvent);
-    expect(dispatchSpy).toHaveBeenCalled();
-    expect(locationMock.go).toHaveBeenCalled();
+
+    expect(navigate).toHaveBeenCalledWith([CLASSIFICATIONS_ROUTE, { outlets: { detail: null } }], {
+      queryParamsHandling: 'merge'
+    });
   });
 
   it('should not dispatch on onDeactivate when activeNodes has items', () => {

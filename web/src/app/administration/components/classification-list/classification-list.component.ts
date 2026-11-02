@@ -17,6 +17,8 @@
  */
 
 import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { CLASSIFICATIONS_ROUTE } from '../../../shared/util/administration-routes';
+import { Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { Actions, ofActionCompleted, ofActionDispatched, Store } from '@ngxs/store';
@@ -26,7 +28,7 @@ import { ImportExportService } from 'app/administration/services/import-export.s
 import { KadaiType } from 'app/shared/models/kadai-type';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
-import { AsyncPipe, Location } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { ClassificationCategoryImages } from '../../../shared/models/customisation';
 
 import {
@@ -86,10 +88,10 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
   );
   destroy$ = new Subject<void>();
   classifications = signal<ClassificationSummary[]>([]);
-  private location = inject(Location);
   private importExportService = inject(ImportExportService);
   private requestInProgressService = inject(RequestInProgressService);
   private store = inject(Store);
+  private router = inject(Router);
   private ngxsActions$ = inject(Actions);
 
   constructor() {
@@ -145,8 +147,9 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
   }
 
   addClassification() {
-    this.store.dispatch(new CreateClassification(this.store.selectSnapshot(DomainSelectors.selectedDomain)));
-    this.location.go(this.location.path().replace(/(classifications).*/g, 'classifications/new-classification'));
+    void this.router.navigate([CLASSIFICATIONS_ROUTE, { outlets: { detail: ['new-classification'] } }], {
+      queryParamsHandling: 'merge'
+    });
   }
 
   getCategoryIcon(category: string): Observable<Pair<string, string>> {
