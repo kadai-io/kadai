@@ -17,17 +17,18 @@
  */
 
 import { inject } from '@angular/core';
-import { Routes } from '@angular/router';
+import { CanActivateFn, Routes } from '@angular/router';
 
 import { catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { Store } from '@ngxs/store';
 import { FetchDomains } from '../shared/store/domain-store/domain.actions';
+import { DOMAIN_QUERY_PARAM } from '../shared/store/domain-store/domain.state';
 
-const domainGuard = () => {
+const domainGuard: CanActivateFn = (route) => {
   const store = inject(Store);
 
-  return store.dispatch(new FetchDomains()).pipe(
+  return store.dispatch(new FetchDomains(false, route.queryParams[DOMAIN_QUERY_PARAM])).pipe(
     map(() => true),
     catchError(() => {
       return of(false);

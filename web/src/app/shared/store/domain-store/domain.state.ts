@@ -24,7 +24,7 @@ import { take, tap } from 'rxjs/operators';
 import { RuntimeConfigService } from '../../services/runtime-config/runtime-config.service';
 import { FetchDomains, SelectDomain } from './domain.actions';
 
-export const SELECTED_DOMAIN_STORAGE_KEY = 'kadai.selectedDomain';
+export const DOMAIN_QUERY_PARAM = 'domain';
 
 export interface DomainStateModel {
   domains: Array<string>;
@@ -59,7 +59,7 @@ export class DomainState {
       take(1),
       tap((domains) => {
         ctx.patchState({ domains });
-        this.selectOfferedDomain(ctx, domains);
+        this.selectOfferedDomain(ctx, domains, action.preferredDomain);
       })
     );
   }
@@ -67,34 +67,21 @@ export class DomainState {
   @Action(SelectDomain)
   selectDomain(ctx: StateContext<DomainStateModel>, action: SelectDomain): Observable<null> {
     ctx.patchState({ selectedDomain: action.domain });
-    storeDomain(action.domain);
     return of(null);
   }
 
   // The master domain is the empty string, so an absent selection has to be undefined rather than falsy:
   // treating '' as "nothing selected" made every reload of the domain list drop it for the first domain.
-  private selectOfferedDomain(ctx: StateContext<DomainStateModel>, domains: Array<string>): void {
+  private selectOfferedDomain(
+    ctx: StateContext<DomainStateModel>,
+    domains: Array<string>,
+    preferredDomain?: string
+  ): void {
     const { selectedDomain } = ctx.getState();
-    const current = selectedDomain ?? readStoredDomain();
+    const current = selectedDomain ?? preferredDomain;
     const offered = current !== undefined && domains.includes(current) ? current : domains[0];
     if (offered !== undefined && offered !== selectedDomain) {
       ctx.dispatch(new SelectDomain(offered));
     }
-  }
-}
-
-function readStoredDomain(): string | undefined {
-  try {
-    return sessionStorage.getItem(SELECTED_DOMAIN_STORAGE_KEY) ?? undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-function storeDomain(value: string): void {
-  try {
-    sessionStorage.setItem(SELECTED_DOMAIN_STORAGE_KEY, value);
-  } catch {
-    // Storage can be unavailable; the selection then only lives as long as the page.
   }
 }

@@ -17,12 +17,13 @@
  */
 
 import { Component, inject, OnInit } from '@angular/core';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterLink, RouterOutlet } from '@angular/router';
 import { MatTabLink, MatTabNav, MatTabNavPanel } from '@angular/material/tabs';
 import { Store } from '@ngxs/store';
 import { DomainSelectors } from '../../../shared/store/domain-store/domain.selectors';
-import { FetchDomains, SelectDomain } from '../../../shared/store/domain-store/domain.actions';
+import { FetchDomains } from '../../../shared/store/domain-store/domain.actions';
+import { DOMAIN_QUERY_PARAM } from '../../../shared/store/domain-store/domain.state';
 import { MatFormField } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -47,6 +48,7 @@ import { MatOption } from '@angular/material/core';
 export class MonitorComponent implements OnInit {
   selectedTab = '';
   private readonly store = inject(Store);
+  private router = inject(Router);
   domains = this.store.selectSignal(DomainSelectors.domains);
   selectedDomain = this.store.selectSignal(DomainSelectors.selectedDomain);
 
@@ -56,6 +58,9 @@ export class MonitorComponent implements OnInit {
   }
 
   switchDomain(domain: string) {
-    this.store.dispatch(new SelectDomain(domain));
+    void this.router.navigate([], {
+      queryParams: { [DOMAIN_QUERY_PARAM]: domain },
+      queryParamsHandling: 'merge'
+    });
   }
 }

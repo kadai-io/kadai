@@ -21,7 +21,8 @@ import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Subject } from 'rxjs';
 import { Store } from '@ngxs/store';
 import { DomainSelectors } from '../../../shared/store/domain-store/domain.selectors';
-import { FetchDomains, SelectDomain } from '../../../shared/store/domain-store/domain.actions';
+import { FetchDomains } from '../../../shared/store/domain-store/domain.actions';
+import { DOMAIN_QUERY_PARAM } from '../../../shared/store/domain-store/domain.state';
 import { takeUntil } from 'rxjs/operators';
 import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
 import { MatTabLink, MatTabNav, MatTabNavPanel } from '@angular/material/tabs';
@@ -92,7 +93,12 @@ export class AdministrationOverviewComponent {
       });
   }
 
+  // The selected domain lives in the url, so a reload and a shared link keep it. The query parameter is
+  // the single input for SelectDomain, which is why switching only navigates.
   switchDomain(domain: string) {
-    this.store.dispatch(new SelectDomain(domain));
+    void this.router.navigate([], {
+      queryParams: { [DOMAIN_QUERY_PARAM]: domain },
+      queryParamsHandling: 'merge'
+    });
   }
 }

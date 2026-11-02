@@ -19,7 +19,10 @@
 export class FetchDomains {
   static readonly type = '[Domain] Fetch domains';
 
-  constructor(public forceRefresh = false) {}
+  constructor(
+    public forceRefresh = false,
+    public preferredDomain?: string
+  ) {}
 }
 
 export class SelectDomain {

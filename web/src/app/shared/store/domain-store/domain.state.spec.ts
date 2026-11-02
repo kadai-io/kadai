@@ -20,7 +20,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideStore, Store } from '@ngxs/store';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { DomainState, SELECTED_DOMAIN_STORAGE_KEY } from './domain.state';
+import { DomainState } from './domain.state';
 import { DomainSelectors } from './domain.selectors';
 import { FetchDomains, SelectDomain } from './domain.actions';
 import { RuntimeConfigService } from '../../services/runtime-config/runtime-config.service';
@@ -48,7 +48,6 @@ describe('DomainState', () => {
   const domains = () => store.selectSnapshot(DomainSelectors.domains);
 
   beforeEach(() => {
-    sessionStorage.clear();
     configureTestingModule();
   });
 
@@ -63,7 +62,7 @@ describe('DomainState', () => {
     expect(domains()).toEqual(['DOMAIN_A', 'DOMAIN_B']);
   });
 
-  it('should select the first domain when nothing is selected yet', () => {
+  it('should select the first domain when the url names none', () => {
     store.dispatch(new FetchDomains()).subscribe();
     httpTesting.expectOne(DOMAINS_URL).flush(['DOMAIN_A', 'DOMAIN_B']);
 
@@ -111,46 +110,38 @@ describe('DomainState', () => {
     expect(selectedDomain()).toBe('DOMAIN_B');
   });
 
-  describe('persistence across a reload', () => {
-    const reloadStore = () => {
-      TestBed.resetTestingModule();
-      configureTestingModule();
-    };
-
-    it('should store the selected domain', () => {
-      store.dispatch(new SelectDomain('DOMAIN_B')).subscribe();
-
-      expect(sessionStorage.getItem(SELECTED_DOMAIN_STORAGE_KEY)).toBe('DOMAIN_B');
-    });
-
-    it.each([
-      ['a regular domain', 'DOMAIN_B'],
-      ['the master domain', '']
-    ])('should restore %s instead of falling back to the first one', (_, stored) => {
-      sessionStorage.setItem(SELECTED_DOMAIN_STORAGE_KEY, stored);
-      reloadStore();
-
-      store.dispatch(new FetchDomains()).subscribe();
-      httpTesting.expectOne(DOMAINS_URL).flush(['DOMAIN_A', 'DOMAIN_B', '']);
-
-      expect(selectedDomain()).toBe(stored);
-    });
-
-    it('should fall back to the first domain when the stored one is no longer offered', () => {
-      sessionStorage.setItem(SELECTED_DOMAIN_STORAGE_KEY, 'DOMAIN_GONE');
-      reloadStore();
-
-      store.dispatch(new FetchDomains()).subscribe();
-      httpTesting.expectOne(DOMAINS_URL).flush(['DOMAIN_A', 'DOMAIN_B']);
-
-      expect(selectedDomain()).toBe('DOMAIN_A');
-    });
-  });
-
   it('should not select anything when no domain is offered', () => {
     store.dispatch(new FetchDomains()).subscribe();
     httpTesting.expectOne(DOMAINS_URL).flush([]);
 
     expect(selectedDomain()).toBeUndefined();
+  });
+
+  describe('the domain the caller asks for', () => {
+    it.each([
+      ['a regular domain', 'DOMAIN_B'],
+      ['the master domain', '']
+    ])('should prefer %s over the first of the list', (_, preferred) => {
+      store.dispatch(new FetchDomains(false, preferred)).subscribe();
+      httpTesting.expectOne(DOMAINS_URL).flush(['DOMAIN_A', 'DOMAIN_B', '']);
+
+      expect(selectedDomain()).toBe(preferred);
+    });
+
+    it('should fall back to the first domain when the asked one is not offered', () => {
+      store.dispatch(new FetchDomains(false, 'DOMAIN_GONE')).subscribe();
+      httpTesting.expectOne(DOMAINS_URL).flush(['DOMAIN_A', 'DOMAIN_B']);
+
+      expect(selectedDomain()).toBe('DOMAIN_A');
+    });
+
+    it('should not override a domain that is already selected', () => {
+      store.dispatch(new SelectDomain('DOMAIN_B')).subscribe();
+
+      store.dispatch(new FetchDomains(false, 'DOMAIN_A')).subscribe();
+      httpTesting.expectOne(DOMAINS_URL).flush(['DOMAIN_A', 'DOMAIN_B']);
+
+      expect(selectedDomain()).toBe('DOMAIN_B');
+    });
   });
 });

@@ -21,7 +21,7 @@ import { DebugElement } from '@angular/core';
 import { MonitorComponent } from './monitor.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideStore, Store } from '@ngxs/store';
@@ -62,9 +62,15 @@ describe('MonitorComponent', () => {
     expect(component.selectedDomain()).toBe('DOMAIN_A');
   });
 
-  it('should select the domain in the store when switchDomain is called', () => {
+  it('should put the domain into the url when switchDomain is called', () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
     component.switchDomain('DOMAIN_B');
-    expect(component.selectedDomain()).toBe('DOMAIN_B');
+
+    expect(navigate).toHaveBeenCalledWith([], {
+      queryParams: { domain: 'DOMAIN_B' },
+      queryParamsHandling: 'merge'
+    });
   });
 
   it('should set selectedTab to tasks-priority on init', () => {
@@ -134,14 +140,26 @@ describe('MonitorComponent', () => {
     expect(component.selectedTab).toBe('timestamp');
   });
 
-  it('should select a non-empty domain when a mat-option is clicked', () => {
+  it('should put a non-empty domain into the url when a mat-option is clicked', () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
     component.switchDomain('DOMAIN_A');
-    expect(component.selectedDomain()).toBe('DOMAIN_A');
+
+    expect(navigate).toHaveBeenCalledWith([], {
+      queryParams: { domain: 'DOMAIN_A' },
+      queryParamsHandling: 'merge'
+    });
   });
 
-  it('should select the master domain when the empty domain is chosen', () => {
+  it('should put the master domain into the url as an empty value', () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
     component.switchDomain('');
-    expect(component.selectedDomain()).toBe('');
+
+    expect(navigate).toHaveBeenCalledWith([], {
+      queryParams: { domain: '' },
+      queryParamsHandling: 'merge'
+    });
   });
 
   it('should display MASTER DOMAIN label for empty string domain in @for loop', () => {

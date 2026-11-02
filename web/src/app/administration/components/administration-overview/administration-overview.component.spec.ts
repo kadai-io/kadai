@@ -20,7 +20,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AdministrationOverviewComponent } from './administration-overview.component';
 import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
 import { of } from 'rxjs';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideStore, Store } from '@ngxs/store';
@@ -92,9 +92,15 @@ describe('AdministrationOverviewComponent', () => {
     expect(component.routingAccess()).toBe(false);
   });
 
-  it('should select the domain in the store when switchDomain is invoked', () => {
+  it('should put the domain into the url when switchDomain is invoked', () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
     component.switchDomain('domain b');
-    expect(store.selectSnapshot(DomainSelectors.selectedDomain)).toBe('domain b');
+
+    expect(navigate).toHaveBeenCalledWith([], {
+      queryParams: { domain: 'domain b' },
+      queryParamsHandling: 'merge'
+    });
   });
 
   it('should set routingAccess to true when routing rules enabled', async () => {
@@ -172,10 +178,16 @@ describe('AdministrationOverviewComponent', () => {
     expect(component.selectedTab()).toBe('task-routing');
   });
 
-  it('should select the domain in the store when a mat-option is clicked', () => {
+  it('should put the domain into the url when a mat-option is clicked', () => {
     component.domains.set(['domain a', 'domain b']);
     fixture.detectChanges();
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
     component.switchDomain('domain b');
-    expect(store.selectSnapshot(DomainSelectors.selectedDomain)).toBe('domain b');
+
+    expect(navigate).toHaveBeenCalledWith([], {
+      queryParams: { domain: 'domain b' },
+      queryParamsHandling: 'merge'
+    });
   });
 });
