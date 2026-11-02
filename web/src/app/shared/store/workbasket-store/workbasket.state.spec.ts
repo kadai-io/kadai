@@ -48,7 +48,9 @@ import {
 import { WorkbasketService } from '../../services/workbasket/workbasket.service';
 import { NotificationService } from '../../services/notifications/notification.service';
 import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
-import { DomainService } from '../../services/domain/domain.service';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { DomainState } from '../domain-store/domain.state';
+import { RuntimeConfigService } from '../../services/runtime-config/runtime-config.service';
 import { ACTION } from '../../models/action';
 import { WorkbasketComponent } from '../../../administration/models/workbasket-component';
 import { Side } from '../../../administration/models/workbasket-distribution-enums';
@@ -99,7 +101,6 @@ describe('WorkbasketState', () => {
   let workbasketServiceMock: Partial<WorkbasketService>;
   let notificationServiceMock: Partial<NotificationService>;
   let requestInProgressServiceMock: Partial<RequestInProgressService>;
-  let domainServiceMock: Partial<DomainService>;
   let locationMock: Partial<Location>;
 
   beforeEach(async () => {
@@ -125,24 +126,19 @@ describe('WorkbasketState', () => {
       setRequestInProgress: vi.fn()
     };
 
-    domainServiceMock = {
-      getSelectedDomain: vi.fn().mockReturnValue(of('DOMAIN_A')),
-      getSelectedDomainValue: vi.fn().mockReturnValue('DOMAIN_A'),
-      domainChangedComplete: vi.fn()
-    };
-
     locationMock = {
       path: vi.fn().mockReturnValue('/workbaskets/(detail:WBI:001)?tab=information'),
       go: vi.fn()
     };
 
     await TestBed.configureTestingModule({
-      imports: [NgxsModule.forRoot([WorkbasketState, FilterState])],
+      imports: [NgxsModule.forRoot([WorkbasketState, FilterState, DomainState])],
       providers: [
+        provideHttpClientTesting(),
         { provide: WorkbasketService, useValue: workbasketServiceMock },
         { provide: NotificationService, useValue: notificationServiceMock },
         { provide: RequestInProgressService, useValue: requestInProgressServiceMock },
-        { provide: DomainService, useValue: domainServiceMock },
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
         { provide: Location, useValue: locationMock },
         {
           provide: ActivatedRoute,
@@ -157,6 +153,7 @@ describe('WorkbasketState', () => {
 
     store.reset({
       ...store.snapshot(),
+      domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' },
       workbasket: { ...initialWorkbasketState }
     });
   });
@@ -735,21 +732,17 @@ describe('WorkbasketState', () => {
 
       notificationServiceMock = { showSuccess: vi.fn(), showError: vi.fn() };
       requestInProgressServiceMock = { setRequestInProgress: vi.fn() };
-      domainServiceMock = {
-        getSelectedDomain: vi.fn().mockReturnValue(of('DOMAIN_A')),
-        getSelectedDomainValue: vi.fn().mockReturnValue('DOMAIN_A'),
-        domainChangedComplete: vi.fn()
-      };
       locationMock = { path: vi.fn().mockReturnValue('/foo'), go: vi.fn() };
 
       TestBed.resetTestingModule();
       await TestBed.configureTestingModule({
-        imports: [NgxsModule.forRoot([WorkbasketState, FilterState])],
+        imports: [NgxsModule.forRoot([WorkbasketState, FilterState, DomainState])],
         providers: [
+          provideHttpClientTesting(),
           { provide: WorkbasketService, useValue: workbasketServiceMock },
           { provide: NotificationService, useValue: notificationServiceMock },
           { provide: RequestInProgressService, useValue: requestInProgressServiceMock },
-          { provide: DomainService, useValue: domainServiceMock },
+          { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
           { provide: Location, useValue: locationMock },
           {
             provide: ActivatedRoute,
@@ -759,7 +752,11 @@ describe('WorkbasketState', () => {
       }).compileComponents();
 
       store = TestBed.inject(Store);
-      store.reset({ ...store.snapshot(), workbasket: { ...initialWorkbasketState } });
+      store.reset({
+        ...store.snapshot(),
+        domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' },
+        workbasket: { ...initialWorkbasketState }
+      });
     });
 
     it('should select INFORMATION tab when params.tab is "information"', () => {

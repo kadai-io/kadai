@@ -38,7 +38,10 @@ import {
 
 import { ClassificationCategoriesService } from '../../services/classification-categories/classification-categories.service';
 import { ClassificationsService } from '../../services/classifications/classifications.service';
-import { DomainService } from '../../services/domain/domain.service';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { DomainState } from '../domain-store/domain.state';
+import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
+import { RuntimeConfigService } from '../../services/runtime-config/runtime-config.service';
 import { ClassificationSelectors } from './classification.selectors';
 
 const mockClassificationTypes = {
@@ -78,7 +81,7 @@ describe('ClassificationState', () => {
   let store: Store;
   let categoriesServiceMock: Partial<ClassificationCategoriesService>;
   let classificationsServiceMock: Partial<ClassificationsService>;
-  let domainServiceMock: Partial<DomainService>;
+  let requestInProgressServiceMock: { setRequestInProgress: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     categoriesServiceMock = {
@@ -93,18 +96,18 @@ describe('ClassificationState', () => {
       deleteClassification: vi.fn().mockReturnValue(of(null))
     };
 
-    domainServiceMock = {
-      getSelectedDomain: vi.fn().mockReturnValue(of('DOMAIN_A')),
-      getSelectedDomainValue: vi.fn().mockReturnValue('DOMAIN_A'),
-      domainChangedComplete: vi.fn()
+    requestInProgressServiceMock = {
+      setRequestInProgress: vi.fn()
     };
 
     await TestBed.configureTestingModule({
-      imports: [NgxsModule.forRoot([ClassificationState])],
+      imports: [NgxsModule.forRoot([ClassificationState, DomainState])],
       providers: [
+        provideHttpClientTesting(),
         { provide: ClassificationCategoriesService, useValue: categoriesServiceMock },
         { provide: ClassificationsService, useValue: classificationsServiceMock },
-        { provide: DomainService, useValue: domainServiceMock }
+        { provide: RequestInProgressService, useValue: requestInProgressServiceMock },
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } }
       ]
     }).compileComponents();
 
@@ -112,7 +115,8 @@ describe('ClassificationState', () => {
 
     store.reset({
       ...store.snapshot(),
-      classification: { ...initialClassificationState }
+      classification: { ...initialClassificationState },
+      domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' }
     });
   });
 
@@ -260,11 +264,10 @@ describe('ClassificationState', () => {
   });
 
   describe('GetClassifications', () => {
-    it('should call getSelectedDomain from DomainService', async () => {
+    it('should query the classifications of the selected domain', async () => {
       await store.dispatch(new GetClassifications()).toPromise();
 
-      expect(domainServiceMock.getSelectedDomain).toHaveBeenCalled();
-      expect(domainServiceMock.domainChangedComplete).toHaveBeenCalled();
+      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
       expect(classificationsServiceMock.getClassifications).toHaveBeenCalledWith(
         { domain: ['DOMAIN_A'], type: ['TASK'] },
         { 'sort-by': 'KEY', order: 'ASCENDING' }

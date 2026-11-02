@@ -24,6 +24,8 @@ import { firstValueFrom, Observable, of } from 'rxjs';
 import { ACTION } from '../../../shared/models/action';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { DomainService } from '../../../shared/services/domain/domain.service';
+import { DomainState } from '../../../shared/store/domain-store/domain.state';
+import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
 import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {
@@ -84,7 +86,8 @@ describe('WorkbasketDetailsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [WorkbasketDetailsComponent],
       providers: [
-        provideStore([WorkbasketState, EngineConfigurationState]),
+        provideStore([WorkbasketState, EngineConfigurationState, DomainState]),
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
         provideRouter([]),
         provideNoopAnimations(),
         {
@@ -100,6 +103,7 @@ describe('WorkbasketDetailsComponent', () => {
     store = TestBed.inject(Store);
     store.reset({
       ...store.snapshot(),
+      domain: { domains: ['A'], selectedDomain: 'A' },
       workbasket: workbasketReadStateMock,
       engineConfiguration: engineConfigurationMock
     });

@@ -26,8 +26,10 @@ import { WorkbasketAccessItemsRepresentation } from 'app/shared/models/workbaske
 import { WorkbasketDistributionTargets } from 'app/shared/models/workbasket-distribution-targets';
 import { Sorting, WorkbasketQuerySortParameter } from 'app/shared/models/sorting';
 
-import { DomainService } from 'app/shared/services/domain/domain.service';
-import { catchError, mergeMap, tap } from 'rxjs/operators';
+import { Store } from '@ngxs/store';
+import { catchError, filter, mergeMap, tap } from 'rxjs/operators';
+import { DomainSelectors } from '../../store/domain-store/domain.selectors';
+import { RequestInProgressService } from '../request-in-progress/request-in-progress.service';
 import { WorkbasketRepresentation } from '../../models/workbasket-representation';
 import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-filter-parameter';
 import { QueryPagingParameter } from '../../models/query-paging-parameter';
@@ -42,7 +44,8 @@ export class WorkbasketService {
   public workBasketSaved = new Subject<number>();
   public workbasketActionToolbarExpanded = new Subject<boolean>();
   private httpClient = inject(HttpClient);
-  private domainService = inject(DomainService);
+  private store = inject(Store);
+  private requestInProgressService = inject(RequestInProgressService);
   private runtimeConfigService = inject(RuntimeConfigService);
   private workbasketSummaryRef: Observable<WorkbasketSummaryRepresentation> = new Observable();
 
@@ -58,8 +61,9 @@ export class WorkbasketService {
       return this.workbasketSummaryRef;
     }
 
-    return this.domainService.getSelectedDomain().pipe(
-      mergeMap((domain) => {
+    return this.store.select(DomainSelectors.selectedDomain).pipe(
+      filter((domain): domain is string => domain !== undefined),
+      mergeMap(() => {
         this.workbasketSummaryRef = this.httpClient.get<WorkbasketSummaryRepresentation>(
           `${this.runtimeConfigService.kadaiRestUrl}/v1/workbaskets${asUrlQueryString({
             ...filterParameter,
@@ -70,7 +74,7 @@ export class WorkbasketService {
         return this.workbasketSummaryRef;
       }),
       tap(() => {
-        this.domainService.domainChangedComplete();
+        this.requestInProgressService.setRequestInProgress(false);
       })
     );
   }

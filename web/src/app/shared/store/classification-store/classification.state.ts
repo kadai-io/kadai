@@ -16,9 +16,9 @@
  *
  */
 
-import { Action, NgxsAfterBootstrap, State, StateContext } from '@ngxs/store';
+import { Action, NgxsAfterBootstrap, State, StateContext, Store } from '@ngxs/store';
 import { EMPTY, Observable, of } from 'rxjs';
-import { mergeMap, take, tap } from 'rxjs/operators';
+import { filter, mergeMap, take, tap } from 'rxjs/operators';
 import { KadaiDate } from 'app/shared/util/kadai.date';
 import {
   CategoriesResponse,
@@ -38,7 +38,8 @@ import {
   UpdateClassification
 } from './classification.actions';
 import { ClassificationsService } from '../../services/classifications/classifications.service';
-import { DomainService } from '../../services/domain/domain.service';
+import { DomainSelectors } from '../domain-store/domain.selectors';
+import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
 import { Classification } from '../../models/classification';
 import { ClassificationSummary } from '../../models/classification-summary';
 import { ClassificationQueryFilterParameter } from '../../models/classification-query-filter-parameter';
@@ -56,7 +57,8 @@ class InitializeStore {
 export class ClassificationState implements NgxsAfterBootstrap {
   private categoryService = inject(ClassificationCategoriesService);
   private classificationsService = inject(ClassificationsService);
-  private domainService = inject(DomainService);
+  private store = inject(Store);
+  private requestInProgressService = inject(RequestInProgressService);
 
   @Action(InitializeStore)
   initializeStore(ctx: StateContext<ClassificationStateModel>): Observable<any> {
@@ -116,10 +118,11 @@ export class ClassificationState implements NgxsAfterBootstrap {
   @Action(GetClassifications)
   getClassifications(ctx: StateContext<ClassificationStateModel>): Observable<any> {
     const { selectedClassificationType } = ctx.getState();
-    return this.domainService.getSelectedDomain().pipe(
+    return this.store.select(DomainSelectors.selectedDomain).pipe(
+      filter((domain): domain is string => domain !== undefined),
       take(1),
       mergeMap((domain) => {
-        const filter: ClassificationQueryFilterParameter = {
+        const classificationFilter: ClassificationQueryFilterParameter = {
           domain: [domain],
           type: [selectedClassificationType]
         };
@@ -127,12 +130,12 @@ export class ClassificationState implements NgxsAfterBootstrap {
           'sort-by': ClassificationQuerySortParameter.KEY,
           order: Direction.ASC
         };
-        return this.classificationsService.getClassifications(filter, sort).pipe(
+        return this.classificationsService.getClassifications(classificationFilter, sort).pipe(
           take(1),
           tap((list) => ctx.patchState({ classifications: list.classifications }))
         );
       }),
-      tap(() => this.domainService.domainChangedComplete())
+      tap(() => this.requestInProgressService.setRequestInProgress(false))
     );
   }
 
@@ -212,7 +215,7 @@ export class ClassificationState implements NgxsAfterBootstrap {
       category: state.classificationTypes[state.selectedClassificationType][0],
       created: date,
       modified: date,
-      domain: this.domainService.getSelectedDomainValue()
+      domain: this.store.selectSnapshot(DomainSelectors.selectedDomain)
     };
     if (state.selectedClassification) {
       initialClassification.parentId = state.selectedClassification.classificationId;
