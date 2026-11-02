@@ -20,6 +20,7 @@ import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { Store } from '@ngxs/store';
+import { DomainSelectors } from '../../../shared/store/domain-store/domain.selectors';
 import { takeUntil } from 'rxjs/operators';
 import { ClassificationSelectors } from '../../../shared/store/classification-store/classification.selectors';
 import {
@@ -56,14 +57,17 @@ export class ClassificationOverviewComponent implements OnInit, OnDestroy {
         this.routerParams = params;
 
         if (this.routerParams.id) {
-          this.store
-            .dispatch(new SelectClassification(this.routerParams.id))
-            .subscribe(() => this.store.dispatch(new GetClassifications()));
+          this.store.dispatch(new SelectClassification(this.routerParams.id)).subscribe(() => {
+            const domain = this.store.selectSnapshot(DomainSelectors.selectedDomain);
+            if (domain !== undefined) {
+              this.store.dispatch(new GetClassifications(domain));
+            }
+          });
         } else {
           this.store.dispatch(new DeselectClassification());
         }
         if (this.routerParams.id && this.routerParams.id.indexOf('new-classification') !== -1) {
-          this.store.dispatch(new CreateClassification());
+          this.store.dispatch(new CreateClassification(this.store.selectSnapshot(DomainSelectors.selectedDomain)));
         }
       });
     }

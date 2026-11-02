@@ -208,7 +208,7 @@ describe('ClassificationState', () => {
 
   describe('CreateClassification', () => {
     it('should set selectedClassification as a new empty classification', async () => {
-      await store.dispatch(new CreateClassification()).toPromise();
+      await store.dispatch(new CreateClassification('DOMAIN_A')).toPromise();
 
       const state = store.snapshot().classification;
       expect(state.selectedClassification).toBeDefined();
@@ -265,7 +265,7 @@ describe('ClassificationState', () => {
 
   describe('GetClassifications', () => {
     it('should query the classifications of the selected domain', async () => {
-      await store.dispatch(new GetClassifications()).toPromise();
+      await store.dispatch(new GetClassifications('DOMAIN_A')).toPromise();
 
       expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
       expect(classificationsServiceMock.getClassifications).toHaveBeenCalledWith(
@@ -282,7 +282,7 @@ describe('ClassificationState', () => {
         classification: { ...initialClassificationState, selectedClassificationType: 'DOCUMENT' }
       });
 
-      await store.dispatch(new GetClassifications()).toPromise();
+      await store.dispatch(new GetClassifications('DOMAIN_A')).toPromise();
 
       expect(classificationsServiceMock.getClassifications).toHaveBeenCalledWith(
         { domain: ['DOMAIN_A'], type: ['DOCUMENT'] },

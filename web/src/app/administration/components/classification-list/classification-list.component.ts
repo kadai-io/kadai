@@ -114,7 +114,7 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
       });
 
     this.classificationTypeSelected$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.store.dispatch(new GetClassifications());
+      this.refreshClassifications();
       this.selectedCategory.set('');
     });
 
@@ -122,19 +122,30 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
       .getImportingFinished()
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        this.store.dispatch(new GetClassifications());
+        this.refreshClassifications();
       });
 
     this.store
       .select(DomainSelectors.selectedDomain)
       .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.store.dispatch(new GetClassifications());
+      .subscribe((domain) => {
+        if (domain !== undefined) {
+          this.store.dispatch(new GetClassifications(domain));
+        }
       });
   }
 
+  // Dispatched from triggers that can fire before the domains are loaded; the subscription above
+  // covers that case as soon as a domain arrives, so skipping here cannot lose a refresh.
+  private refreshClassifications(): void {
+    const domain = this.store.selectSnapshot(DomainSelectors.selectedDomain);
+    if (domain !== undefined) {
+      this.store.dispatch(new GetClassifications(domain));
+    }
+  }
+
   addClassification() {
-    this.store.dispatch(new CreateClassification());
+    this.store.dispatch(new CreateClassification(this.store.selectSnapshot(DomainSelectors.selectedDomain)));
     this.location.go(this.location.path().replace(/(classifications).*/g, 'classifications/new-classification'));
   }
 

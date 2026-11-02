@@ -18,6 +18,7 @@
 
 import { Component, ElementRef, inject, OnInit, signal, viewChild } from '@angular/core';
 import { Store } from '@ngxs/store';
+import { DomainSelectors } from '../../../shared/store/domain-store/domain.selectors';
 import { Observable, Subject } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { take, takeUntil } from 'rxjs/operators';
@@ -67,7 +68,7 @@ export class WorkbasketOverviewComponent implements OnInit {
         if (this.routerParams.id) {
           this.showDetail.set(true);
           if (this.routerParams.id === 'new-workbasket') {
-            this.store.dispatch(new CreateWorkbasket());
+            this.store.dispatch(new CreateWorkbasket(this.store.selectSnapshot(DomainSelectors.selectedDomain)));
           } else {
             this.store.dispatch(new SelectWorkbasket(this.routerParams.id));
           }

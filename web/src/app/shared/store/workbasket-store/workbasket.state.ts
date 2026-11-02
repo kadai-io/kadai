@@ -17,7 +17,7 @@
  */
 
 import { Action, NgxsAfterBootstrap, State, StateContext, Store } from '@ngxs/store';
-import { catchError, concatMap, filter, take, tap } from 'rxjs/operators';
+import { catchError, concatMap, take, tap } from 'rxjs/operators';
 import { EMPTY, Observable, of, throwError } from 'rxjs';
 import { Location } from '@angular/common';
 import { WorkbasketService } from '../../services/workbasket/workbasket.service';
@@ -54,7 +54,6 @@ import { ActivatedRoute } from '@angular/router';
 import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
 import { WorkbasketType } from '../../models/workbasket-type';
 import { KadaiDate } from '../../util/kadai.date';
-import { DomainSelectors } from '../domain-store/domain.selectors';
 import { ClearWorkbasketFilter } from '../filter-store/filter.actions';
 import { inject, Injectable } from '@angular/core';
 import { WorkbasketQueryPagingParameter } from '../../models/workbasket-query-paging-parameter';
@@ -75,7 +74,6 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   private workbasketService = inject(WorkbasketService);
   private location = inject(Location);
   private notificationService = inject(NotificationService);
-  private store = inject(Store);
   private route = inject(ActivatedRoute);
   private requestInProgressService = inject(RequestInProgressService);
 
@@ -253,10 +251,8 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   }
 
   @Action(CreateWorkbasket)
-  createWorkbasket(ctx: StateContext<WorkbasketStateModel>): Observable<any> {
-    return this.store.select(DomainSelectors.selectedDomain).pipe(
-      filter((domain): domain is string => domain !== undefined),
-      take(1),
+  createWorkbasket(ctx: StateContext<WorkbasketStateModel>, action: CreateWorkbasket): Observable<any> {
+    return of(action.domain).pipe(
       tap((domain) => {
         this.location.go(this.location.path().replace(/(workbaskets).*/g, 'workbaskets/(detail:new-workbasket)'));
 

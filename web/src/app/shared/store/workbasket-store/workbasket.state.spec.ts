@@ -284,7 +284,7 @@ describe('WorkbasketState', () => {
 
   describe('CreateWorkbasket', () => {
     it('should set action to CREATE', async () => {
-      await store.dispatch(new CreateWorkbasket()).toPromise();
+      await store.dispatch(new CreateWorkbasket('DOMAIN_A')).toPromise();
 
       const state = store.snapshot().workbasket;
       expect(state.action).toBe(ACTION.CREATE);
@@ -301,7 +301,7 @@ describe('WorkbasketState', () => {
         workbasket: { ...initialWorkbasketState, selectedComponent: WorkbasketComponent.ACCESS_ITEMS }
       });
 
-      await store.dispatch(new CreateWorkbasket()).toPromise();
+      await store.dispatch(new CreateWorkbasket('DOMAIN_A')).toPromise();
 
       const state = store.snapshot().workbasket;
       expect(state.selectedComponent).toBe(WorkbasketComponent.INFORMATION);
@@ -869,7 +869,7 @@ describe('WorkbasketState', () => {
       });
       (workbasketServiceMock.getWorkBasketsSummary as ReturnType<typeof vi.fn>).mockClear();
 
-      await store.dispatch(new CreateWorkbasket()).toPromise();
+      await store.dispatch(new CreateWorkbasket('DOMAIN_A')).toPromise();
 
       expect(workbasketServiceMock.getWorkBasketsSummary).toHaveBeenCalled();
     });

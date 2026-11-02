@@ -22,6 +22,7 @@ import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
 import { KadaiType } from 'app/shared/models/kadai-type';
 import { expandDown } from 'app/shared/animations/expand.animation';
 import { Store } from '@ngxs/store';
+import { DomainSelectors } from '../../../shared/store/domain-store/domain.selectors';
 import { ACTION } from '../../../shared/models/action';
 import { CreateWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
@@ -60,7 +61,7 @@ export class WorkbasketListToolbarComponent {
 
   addWorkbasket() {
     if (this.action() !== ACTION.CREATE) {
-      this.store.dispatch(new CreateWorkbasket());
+      this.store.dispatch(new CreateWorkbasket(this.store.selectSnapshot(DomainSelectors.selectedDomain)));
     }
   }
 

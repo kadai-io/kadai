@@ -116,7 +116,7 @@ describe('WorkbasketDetailsComponent', () => {
   });
 
   it('should render new workbasket when action is CREATE', async () => {
-    await firstValueFrom(store.dispatch(new CreateWorkbasket()).pipe(take(1)));
+    await firstValueFrom(store.dispatch(new CreateWorkbasket('DOMAIN_A')).pipe(take(1)));
     const state = await firstValueFrom(component.selectedWorkbasketAndComponentAndAction$.pipe(take(1)));
 
     expect(state.selectedWorkbasket.workbasketId).toBeUndefined();
@@ -146,7 +146,7 @@ describe('WorkbasketDetailsComponent', () => {
 
   it('should select information tab when action is CREATE', async () => {
     component.selectComponent(1);
-    await firstValueFrom(store.dispatch(new CreateWorkbasket()).pipe(take(1)));
+    await firstValueFrom(store.dispatch(new CreateWorkbasket('DOMAIN_A')).pipe(take(1)));
     const tab = await firstValueFrom(component.selectedTab$.pipe(take(1)));
 
     expect(tab).toEqual(0);
@@ -309,7 +309,7 @@ describe('WorkbasketDetailsComponent', () => {
   });
 
   it('save button should be disabled when action is CREATE and areAllAccessItemsValid is false', () => {
-    store.dispatch(new CreateWorkbasket());
+    store.dispatch(new CreateWorkbasket('DOMAIN_A'));
     component.areAllAccessItemsValid = false;
     fixture.detectChanges();
     const saveButton = debugElement.nativeElement.querySelector('.workbasket-details__save-button');
