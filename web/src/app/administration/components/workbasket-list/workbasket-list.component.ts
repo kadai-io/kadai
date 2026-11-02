@@ -37,6 +37,8 @@ import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/work
 import { Workbasket } from '../../../shared/models/workbasket';
 import { MatListOption, MatSelectionList } from '@angular/material/list';
 import { DomainSelectors } from '../../../shared/store/domain-store/domain.selectors';
+import { Router } from '@angular/router';
+import { WORKBASKETS_ROUTE } from '../../../shared/util/administration-routes';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { WorkbasketQueryFilterParameter } from '../../../shared/models/workbasket-query-filter-parameter';
 import { QueryPagingParameter } from '../../../shared/models/query-paging-parameter';
@@ -90,6 +92,7 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
   toolbarElement = viewChild<ElementRef>('wbToolbar');
   private store = inject(Store);
+  private router = inject(Router);
   private workbasketService = inject(WorkbasketService);
   private orientationService = inject(OrientationService);
   private importExportService = inject(ImportExportService);
@@ -105,6 +108,9 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
       this.requestInProgressService.setRequestInProgress(false);
       this.requestInProgressLocal.set(false);
     });
+    this.ngxsActions$
+      .pipe(ofActionCompleted(SelectWorkbasket, DeselectWorkbasket), takeUntil(this.destroy$))
+      .subscribe(() => this.requestInProgressService.setRequestInProgress(false));
   }
 
   ngOnInit() {
@@ -168,17 +174,11 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
 
   selectWorkbasket(id: string) {
     this.requestInProgressService.setRequestInProgress(true);
-    if (this.selectedId() === id) {
-      this.store
-        .dispatch(new DeselectWorkbasket())
-        .pipe(takeUntil(this.destroy$))
-        .subscribe(() => this.requestInProgressService.setRequestInProgress(false));
-    } else {
-      this.store
-        .dispatch(new SelectWorkbasket(id))
-        .pipe(takeUntil(this.destroy$))
-        .subscribe(() => this.requestInProgressService.setRequestInProgress(false));
-    }
+    const detail = this.selectedId() === id ? null : [id];
+    void this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail } }], {
+      queryParams: { tab: null },
+      queryParamsHandling: 'merge'
+    });
   }
 
   performSorting(sort: Sorting<WorkbasketQuerySortParameter>) {

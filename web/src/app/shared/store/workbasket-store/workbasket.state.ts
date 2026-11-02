@@ -43,7 +43,6 @@ import {
 } from './workbasket.actions';
 import { WorkbasketSummaryRepresentation } from '../../models/workbasket-summary-representation';
 import { ACTION } from '../../models/action';
-import { WORKBASKETS_ROUTE } from '../../util/administration-routes';
 import { NotificationService } from '../../services/notifications/notification.service';
 import { WorkbasketAccessItemsRepresentation } from '../../models/workbasket-access-items-representation';
 import { WorkbasketDistributionTargets } from '../../models/workbasket-distribution-targets';
@@ -72,7 +71,6 @@ class InitializeStore {
 })
 export class WorkbasketState implements NgxsAfterBootstrap {
   private workbasketService = inject(WorkbasketService);
-  private router = inject(Router);
   private notificationService = inject(NotificationService);
   private route = inject(ActivatedRoute);
   private requestInProgressService = inject(RequestInProgressService);
@@ -128,19 +126,6 @@ export class WorkbasketState implements NgxsAfterBootstrap {
 
   @Action(SelectWorkbasket)
   selectWorkbasket(ctx: StateContext<WorkbasketStateModel>, action: SelectWorkbasket): Observable<any> {
-    let selectedComponent;
-    switch (ctx.getState().selectedComponent) {
-      case WorkbasketComponent.INFORMATION:
-        selectedComponent = 'information';
-        break;
-      case WorkbasketComponent.ACCESS_ITEMS:
-        selectedComponent = 'access-items';
-        break;
-      case WorkbasketComponent.DISTRIBUTION_TARGETS:
-        selectedComponent = 'distribution-targets';
-        break;
-    }
-
     const id = action.workbasketId;
     if (typeof id !== 'undefined') {
       return this.workbasketService.getWorkBasket(id).pipe(
@@ -157,8 +142,6 @@ export class WorkbasketState implements NgxsAfterBootstrap {
             ctx.dispatch(new GetWorkbasketAccessItems(links.accessItems.href));
           }
 
-          this.navigateToDetail(id, selectedComponent);
-
           ctx.dispatch(new ClearWorkbasketFilter('selectedDistributionTargets'));
           ctx.dispatch(new ClearWorkbasketFilter('availableDistributionTargets'));
           ctx.dispatch(new FetchWorkbasketDistributionTargets(true));
@@ -171,7 +154,6 @@ export class WorkbasketState implements NgxsAfterBootstrap {
 
   @Action(DeselectWorkbasket)
   deselectWorkbasket(ctx: StateContext<WorkbasketStateModel>): Observable<any> {
-    this.navigateToList();
     ctx.patchState({
       selectedWorkbasket: undefined,
       action: ACTION.READ
@@ -214,8 +196,6 @@ export class WorkbasketState implements NgxsAfterBootstrap {
       take(1),
       tap((workbasketUpdated) => {
         this.notificationService.showSuccess('WORKBASKET_CREATE', { workbasketKey: workbasketUpdated.key });
-
-        this.navigateToList();
       }),
       concatMap((workbasketUpdated) =>
         workbasketUpdated.workbasketId ? ctx.dispatch(new SelectWorkbasket(workbasketUpdated.workbasketId)) : EMPTY
@@ -225,7 +205,6 @@ export class WorkbasketState implements NgxsAfterBootstrap {
 
   @Action(CopyWorkbasket)
   copyWorkbasket(ctx: StateContext<WorkbasketStateModel>): Observable<any> {
-    this.navigateToNewWorkbasket();
     ctx.dispatch(new OnButtonPressed(undefined));
 
     const workbasket = { ...ctx.getState().selectedWorkbasket };
@@ -247,8 +226,6 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   createWorkbasket(ctx: StateContext<WorkbasketStateModel>, action: CreateWorkbasket): Observable<any> {
     return of(action.domain).pipe(
       tap((domain) => {
-        this.navigateToNewWorkbasket();
-
         if (ctx.getState().availableDistributionTargets.workbaskets.length === 0) {
           ctx.dispatch(new FetchAvailableDistributionTargets(true));
         }
@@ -530,29 +507,6 @@ export class WorkbasketState implements NgxsAfterBootstrap {
 
   ngxsAfterBootstrap(ctx: StateContext<WorkbasketStateModel>): void {
     ctx.dispatch(new InitializeStore());
-  }
-
-  // The url used to be rewritten with a regular expression, which dropped every query parameter that
-  // followed the replaced segment; merging through the router keeps the ones that still apply.
-  private navigateToList(): void {
-    void this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: null } }], {
-      queryParams: { tab: null },
-      queryParamsHandling: 'merge'
-    });
-  }
-
-  private navigateToDetail(workbasketId: string, tab?: string): void {
-    void this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: [workbasketId] } }], {
-      queryParams: tab === undefined ? {} : { tab },
-      queryParamsHandling: 'merge'
-    });
-  }
-
-  private navigateToNewWorkbasket(): void {
-    void this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: ['new-workbasket'] } }], {
-      queryParams: { tab: null },
-      queryParamsHandling: 'merge'
-    });
   }
 }
 

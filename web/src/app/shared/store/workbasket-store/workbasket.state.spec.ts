@@ -49,7 +49,6 @@ import { WorkbasketService } from '../../services/workbasket/workbasket.service'
 import { NotificationService } from '../../services/notifications/notification.service';
 import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { WORKBASKETS_ROUTE } from '../../util/administration-routes';
 import { DomainState } from '../domain-store/domain.state';
 import { RuntimeConfigService } from '../../services/runtime-config/runtime-config.service';
 import { ACTION } from '../../models/action';
@@ -211,10 +210,7 @@ describe('WorkbasketState', () => {
       const state = store.snapshot().workbasket;
       expect(state.selectedWorkbasket).toBeUndefined();
       expect(state.action).toBe(ACTION.READ);
-      expect(routerMock.navigate).toHaveBeenCalledWith([WORKBASKETS_ROUTE, { outlets: { detail: null } }], {
-        queryParams: { tab: null },
-        queryParamsHandling: 'merge'
-      });
+      expect(routerMock.navigate).not.toHaveBeenCalled();
     });
   });
 
@@ -829,7 +825,7 @@ describe('WorkbasketState', () => {
       expect(state.selectedWorkbasket).toEqual(newWorkbasket);
     });
 
-    it('should set path to access-items when state.selectedComponent is ACCESS_ITEMS', async () => {
+    it('should select the workbasket without touching the url when the tab is access-items', async () => {
       store.reset({
         ...store.snapshot(),
         workbasket: { ...initialWorkbasketState, selectedComponent: WorkbasketComponent.ACCESS_ITEMS }
@@ -839,13 +835,11 @@ describe('WorkbasketState', () => {
 
       await store.dispatch(new SelectWorkbasket('WBI:AI')).toPromise();
 
-      expect(routerMock.navigate).toHaveBeenCalledWith([WORKBASKETS_ROUTE, { outlets: { detail: ['WBI:AI'] } }], {
-        queryParams: { tab: 'access-items' },
-        queryParamsHandling: 'merge'
-      });
+      expect(store.snapshot().workbasket.selectedWorkbasket).toEqual(newWorkbasket);
+      expect(routerMock.navigate).not.toHaveBeenCalled();
     });
 
-    it('should set path to distribution-targets when state.selectedComponent is DISTRIBUTION_TARGETS', async () => {
+    it('should select the workbasket without touching the url when the tab is distribution-targets', async () => {
       store.reset({
         ...store.snapshot(),
         workbasket: { ...initialWorkbasketState, selectedComponent: WorkbasketComponent.DISTRIBUTION_TARGETS }
@@ -855,10 +849,8 @@ describe('WorkbasketState', () => {
 
       await store.dispatch(new SelectWorkbasket('WBI:DT')).toPromise();
 
-      expect(routerMock.navigate).toHaveBeenCalledWith([WORKBASKETS_ROUTE, { outlets: { detail: ['WBI:DT'] } }], {
-        queryParams: { tab: 'distribution-targets' },
-        queryParamsHandling: 'merge'
-      });
+      expect(store.snapshot().workbasket.selectedWorkbasket).toEqual(newWorkbasket);
+      expect(routerMock.navigate).not.toHaveBeenCalled();
     });
   });
 

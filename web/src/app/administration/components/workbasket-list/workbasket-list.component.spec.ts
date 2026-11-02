@@ -31,7 +31,8 @@ import { Direction, Sorting, WorkbasketQuerySortParameter } from '../../../share
 import { selectedWorkbasketMock } from '../../../shared/store/mock-data/mock-store';
 import { WorkbasketQueryFilterParameter } from '../../../shared/models/workbasket-query-filter-parameter';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
+import { WORKBASKETS_ROUTE } from '../../../shared/util/administration-routes';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ImportExportService } from '../../services/import-export.service';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
@@ -84,24 +85,30 @@ describe('WorkbasketListComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should dispatch SelectWorkbasket when selecting a workbasket', async () => {
+  it('should navigate to the detail when selecting a workbasket', () => {
     component.selectedId.set(undefined);
     fixture.detectChanges();
-    let actionDispatched = false;
-    actions$.pipe(ofActionDispatched(SelectWorkbasket)).subscribe(() => (actionDispatched = true));
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
     component.selectWorkbasket('WBI:000000000000000000000000000000000902');
-    expect(actionDispatched).toBe(true);
+
+    expect(navigate).toHaveBeenCalledWith(
+      [WORKBASKETS_ROUTE, { outlets: { detail: ['WBI:000000000000000000000000000000000902'] } }],
+      { queryParams: { tab: null }, queryParamsHandling: 'merge' }
+    );
   });
 
-  it('should dispatch DeselectWorkbasket when selecting a workbasket again', async () => {
+  it('should navigate back to the list when selecting the open workbasket again', () => {
     component.selectedId.set('123');
     fixture.detectChanges();
-    let actionDispatched = false;
-    actions$.pipe(ofActionDispatched(DeselectWorkbasket)).subscribe(() => (actionDispatched = true));
-    const mockId = '123';
-    component.selectWorkbasket(mockId);
-    expect(actionDispatched).toBe(true);
-    expect(component.selectedId()).toEqual(undefined);
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
+    component.selectWorkbasket('123');
+
+    expect(navigate).toHaveBeenCalledWith([WORKBASKETS_ROUTE, { outlets: { detail: null } }], {
+      queryParams: { tab: null },
+      queryParamsHandling: 'merge'
+    });
   });
 
   it('should set sort value when performSorting is called', () => {

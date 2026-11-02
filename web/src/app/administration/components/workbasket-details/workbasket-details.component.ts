@@ -18,6 +18,7 @@
 
 import { Component, inject, input, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { WORKBASKETS_ROUTE } from '../../../shared/util/administration-routes';
 import { WORKBASKET_COMPONENT_TABS, WorkbasketComponent } from '../../models/workbasket-component';
 import { Observable, Subject } from 'rxjs';
 import { Workbasket } from 'app/shared/models/workbasket';
@@ -170,6 +171,10 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
   onCopy() {
     this.store.dispatch(new OnButtonPressed(ButtonAction.COPY));
     this.store.dispatch(new CopyWorkbasket(this.workbasket()));
+    void this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: ['new-workbasket'] } }], {
+      queryParams: { tab: null },
+      queryParamsHandling: 'merge'
+    });
   }
 
   onRemoveAsDistributionTarget() {

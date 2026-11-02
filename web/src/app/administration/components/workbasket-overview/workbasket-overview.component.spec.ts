@@ -38,9 +38,7 @@ import { provideAngularSvgIcon } from 'angular-svg-icon';
 const mockActivatedRoute = {
   url: of([{ path: 'foobar' }]),
   firstChild: {
-    params: of({
-      id: 'new-workbasket'
-    })
+    snapshot: { params: { id: 'new-workbasket' } }
   }
 };
 
@@ -206,7 +204,7 @@ describe('WorkbasketOverviewComponent', () => {
 const mockActivatedRouteAlternativeId = {
   url: of([{ path: 'foobar' }]),
   firstChild: {
-    params: of({ id: '101' })
+    snapshot: { params: { id: '101' } }
   }
 };
 
