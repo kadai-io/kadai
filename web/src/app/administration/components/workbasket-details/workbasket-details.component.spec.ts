@@ -44,7 +44,8 @@ import {
 } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { take } from 'rxjs/operators';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
+import { WorkbasketComponent } from '../../models/workbasket-component';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { ButtonAction } from '../../models/button-action';
@@ -226,13 +227,16 @@ describe('WorkbasketDetailsComponent', () => {
     expect(deselectDispatched).toBe(true);
   });
 
-  it('should dispatch SelectComponent when selectComponent is called', () => {
-    let dispatched = false;
-    actions$.pipe(ofActionDispatched(SelectComponent)).subscribe((index) => {
-      dispatched = true;
+  it('should put the selected tab into the query string and keep the other parameters', () => {
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    component.selectComponent(WorkbasketComponent.DISTRIBUTION_TARGETS);
+
+    expect(navigate).toHaveBeenCalledWith([], {
+      queryParams: { tab: 'distribution-targets' },
+      queryParamsHandling: 'merge'
     });
-    component.selectComponent(2);
-    expect(dispatched).toBe(true);
   });
 
   it('should complete destroy$ on ngOnDestroy', () => {

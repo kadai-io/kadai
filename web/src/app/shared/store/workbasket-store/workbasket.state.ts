@@ -19,7 +19,6 @@
 import { Action, NgxsAfterBootstrap, State, StateContext, Store } from '@ngxs/store';
 import { catchError, concatMap, take, tap } from 'rxjs/operators';
 import { EMPTY, Observable, of, throwError } from 'rxjs';
-import { Location } from '@angular/common';
 import { WorkbasketService } from '../../services/workbasket/workbasket.service';
 import { Workbasket } from '../../models/workbasket';
 import {
@@ -44,13 +43,14 @@ import {
 } from './workbasket.actions';
 import { WorkbasketSummaryRepresentation } from '../../models/workbasket-summary-representation';
 import { ACTION } from '../../models/action';
+import { WORKBASKETS_ROUTE } from '../../util/administration-routes';
 import { NotificationService } from '../../services/notifications/notification.service';
 import { WorkbasketAccessItemsRepresentation } from '../../models/workbasket-access-items-representation';
 import { WorkbasketDistributionTargets } from '../../models/workbasket-distribution-targets';
 import { WorkbasketSummary } from '../../models/workbasket-summary';
 import { WorkbasketComponent } from '../../../administration/models/workbasket-component';
 import { ButtonAction } from '../../../administration/models/button-action';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
 import { WorkbasketType } from '../../models/workbasket-type';
 import { KadaiDate } from '../../util/kadai.date';
@@ -72,7 +72,7 @@ class InitializeStore {
 })
 export class WorkbasketState implements NgxsAfterBootstrap {
   private workbasketService = inject(WorkbasketService);
-  private location = inject(Location);
+  private router = inject(Router);
   private notificationService = inject(NotificationService);
   private route = inject(ActivatedRoute);
   private requestInProgressService = inject(RequestInProgressService);
@@ -157,11 +157,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
             ctx.dispatch(new GetWorkbasketAccessItems(links.accessItems.href));
           }
 
-          this.location.go(
-            this.location
-              .path()
-              .replace(/(workbaskets).*/g, `workbaskets/(detail:${action.workbasketId})?tab=${selectedComponent}`)
-          );
+          this.navigateToDetail(id, selectedComponent);
 
           ctx.dispatch(new ClearWorkbasketFilter('selectedDistributionTargets'));
           ctx.dispatch(new ClearWorkbasketFilter('availableDistributionTargets'));
@@ -175,7 +171,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
 
   @Action(DeselectWorkbasket)
   deselectWorkbasket(ctx: StateContext<WorkbasketStateModel>): Observable<any> {
-    this.location.go(this.location.path().replace(/(workbaskets).*/g, 'workbaskets'));
+    this.navigateToList();
     ctx.patchState({
       selectedWorkbasket: undefined,
       action: ACTION.READ
@@ -194,15 +190,12 @@ export class WorkbasketState implements NgxsAfterBootstrap {
     switch (action.component) {
       case WorkbasketComponent.INFORMATION:
         ctx.patchState({ selectedComponent: WorkbasketComponent.INFORMATION });
-        this.location.go(this.location.path().replace(/(tab).*/g, 'tab=information'));
         break;
       case WorkbasketComponent.ACCESS_ITEMS:
         ctx.patchState({ selectedComponent: WorkbasketComponent.ACCESS_ITEMS });
-        this.location.go(this.location.path().replace(/(tab).*/g, 'tab=access-items'));
         break;
       case WorkbasketComponent.DISTRIBUTION_TARGETS:
         ctx.patchState({ selectedComponent: WorkbasketComponent.DISTRIBUTION_TARGETS });
-        this.location.go(this.location.path().replace(/(tab).*/g, 'tab=distribution-targets'));
         break;
     }
     return of(null);
@@ -222,7 +215,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
       tap((workbasketUpdated) => {
         this.notificationService.showSuccess('WORKBASKET_CREATE', { workbasketKey: workbasketUpdated.key });
 
-        this.location.go(this.location.path().replace(/(workbaskets).*/g, 'workbaskets'));
+        this.navigateToList();
       }),
       concatMap((workbasketUpdated) =>
         workbasketUpdated.workbasketId ? ctx.dispatch(new SelectWorkbasket(workbasketUpdated.workbasketId)) : EMPTY
@@ -232,7 +225,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
 
   @Action(CopyWorkbasket)
   copyWorkbasket(ctx: StateContext<WorkbasketStateModel>): Observable<any> {
-    this.location.go(this.location.path().replace(/(workbaskets).*/g, 'workbaskets/(detail:new-workbasket)'));
+    this.navigateToNewWorkbasket();
     ctx.dispatch(new OnButtonPressed(undefined));
 
     const workbasket = { ...ctx.getState().selectedWorkbasket };
@@ -254,7 +247,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   createWorkbasket(ctx: StateContext<WorkbasketStateModel>, action: CreateWorkbasket): Observable<any> {
     return of(action.domain).pipe(
       tap((domain) => {
-        this.location.go(this.location.path().replace(/(workbaskets).*/g, 'workbaskets/(detail:new-workbasket)'));
+        this.navigateToNewWorkbasket();
 
         if (ctx.getState().availableDistributionTargets.workbaskets.length === 0) {
           ctx.dispatch(new FetchAvailableDistributionTargets(true));
@@ -537,6 +530,29 @@ export class WorkbasketState implements NgxsAfterBootstrap {
 
   ngxsAfterBootstrap(ctx: StateContext<WorkbasketStateModel>): void {
     ctx.dispatch(new InitializeStore());
+  }
+
+  // The url used to be rewritten with a regular expression, which dropped every query parameter that
+  // followed the replaced segment; merging through the router keeps the ones that still apply.
+  private navigateToList(): void {
+    void this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: null } }], {
+      queryParams: { tab: null },
+      queryParamsHandling: 'merge'
+    });
+  }
+
+  private navigateToDetail(workbasketId: string, tab?: string): void {
+    void this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: [workbasketId] } }], {
+      queryParams: tab === undefined ? {} : { tab },
+      queryParamsHandling: 'merge'
+    });
+  }
+
+  private navigateToNewWorkbasket(): void {
+    void this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: ['new-workbasket'] } }], {
+      queryParams: { tab: null },
+      queryParamsHandling: 'merge'
+    });
   }
 }
 

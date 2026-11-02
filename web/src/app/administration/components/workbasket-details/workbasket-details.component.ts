@@ -17,6 +17,8 @@
  */
 
 import { Component, inject, input, OnDestroy, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { WORKBASKET_COMPONENT_TABS, WorkbasketComponent } from '../../models/workbasket-component';
 import { Observable, Subject } from 'rxjs';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { ACTION } from 'app/shared/models/action';
@@ -82,6 +84,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
   areAllAccessItemsValid = true;
   protected readonly ACTION = ACTION;
   private store = inject(Store);
+  private router = inject(Router);
   private ngxsActions$ = inject(Actions);
 
   ngOnInit(): void {
@@ -143,8 +146,13 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
     });
   }
 
+  // The selected tab lives in the url: navigating here makes the query parameter drive SelectComponent,
+  // so a reload or a shared link opens the same tab.
   selectComponent(index: number) {
-    this.store.dispatch(new SelectComponent(index));
+    void this.router.navigate([], {
+      queryParams: { tab: WORKBASKET_COMPONENT_TABS[index as WorkbasketComponent] },
+      queryParamsHandling: 'merge'
+    });
   }
 
   onSubmit() {

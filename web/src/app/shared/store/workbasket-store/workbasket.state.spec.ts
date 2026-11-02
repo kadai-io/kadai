@@ -49,6 +49,7 @@ import { WorkbasketService } from '../../services/workbasket/workbasket.service'
 import { NotificationService } from '../../services/notifications/notification.service';
 import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { WORKBASKETS_ROUTE } from '../../util/administration-routes';
 import { DomainState } from '../domain-store/domain.state';
 import { RuntimeConfigService } from '../../services/runtime-config/runtime-config.service';
 import { ACTION } from '../../models/action';
@@ -59,7 +60,7 @@ import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-fi
 import { Direction, WorkbasketQuerySortParameter } from '../../models/sorting';
 import { QueryPagingParameter } from '../../models/query-paging-parameter';
 import { selectedWorkbasketMock, workbasketAccessItemsMock } from '../mock-data/mock-store';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 const mockWorkbasket = selectedWorkbasketMock;
 
@@ -102,6 +103,7 @@ describe('WorkbasketState', () => {
   let notificationServiceMock: Partial<NotificationService>;
   let requestInProgressServiceMock: Partial<RequestInProgressService>;
   let locationMock: Partial<Location>;
+  let routerMock: { navigate: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     workbasketServiceMock = {
@@ -126,6 +128,7 @@ describe('WorkbasketState', () => {
       setRequestInProgress: vi.fn()
     };
 
+    routerMock = { navigate: vi.fn().mockResolvedValue(true) };
     locationMock = {
       path: vi.fn().mockReturnValue('/workbaskets/(detail:WBI:001)?tab=information'),
       go: vi.fn()
@@ -140,6 +143,7 @@ describe('WorkbasketState', () => {
         { provide: RequestInProgressService, useValue: requestInProgressServiceMock },
         { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
         { provide: Location, useValue: locationMock },
+        { provide: Router, useValue: routerMock },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -207,7 +211,10 @@ describe('WorkbasketState', () => {
       const state = store.snapshot().workbasket;
       expect(state.selectedWorkbasket).toBeUndefined();
       expect(state.action).toBe(ACTION.READ);
-      expect(locationMock.go).toHaveBeenCalled();
+      expect(routerMock.navigate).toHaveBeenCalledWith([WORKBASKETS_ROUTE, { outlets: { detail: null } }], {
+        queryParams: { tab: null },
+        queryParamsHandling: 'merge'
+      });
     });
   });
 
@@ -263,10 +270,10 @@ describe('WorkbasketState', () => {
       expect(state.selectedComponent).toBe(WorkbasketComponent.DISTRIBUTION_TARGETS);
     });
 
-    it('should update location when selecting INFORMATION component', async () => {
+    it('should leave the url alone when selecting a component', async () => {
       await store.dispatch(new SelectComponent(WorkbasketComponent.INFORMATION)).toPromise();
 
-      expect(locationMock.go).toHaveBeenCalled();
+      expect(routerMock.navigate).not.toHaveBeenCalled();
     });
   });
 
@@ -732,6 +739,7 @@ describe('WorkbasketState', () => {
 
       notificationServiceMock = { showSuccess: vi.fn(), showError: vi.fn() };
       requestInProgressServiceMock = { setRequestInProgress: vi.fn() };
+      routerMock = { navigate: vi.fn().mockResolvedValue(true) };
       locationMock = { path: vi.fn().mockReturnValue('/foo'), go: vi.fn() };
 
       TestBed.resetTestingModule();
@@ -744,6 +752,8 @@ describe('WorkbasketState', () => {
           { provide: RequestInProgressService, useValue: requestInProgressServiceMock },
           { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
           { provide: Location, useValue: locationMock },
+          { provide: Router, useValue: routerMock },
+          { provide: Router, useValue: routerMock },
           {
             provide: ActivatedRoute,
             useValue: { queryParams: paramsSubject.asObservable() }
@@ -829,7 +839,10 @@ describe('WorkbasketState', () => {
 
       await store.dispatch(new SelectWorkbasket('WBI:AI')).toPromise();
 
-      expect(locationMock.go).toHaveBeenCalled();
+      expect(routerMock.navigate).toHaveBeenCalledWith([WORKBASKETS_ROUTE, { outlets: { detail: ['WBI:AI'] } }], {
+        queryParams: { tab: 'access-items' },
+        queryParamsHandling: 'merge'
+      });
     });
 
     it('should set path to distribution-targets when state.selectedComponent is DISTRIBUTION_TARGETS', async () => {
@@ -842,7 +855,10 @@ describe('WorkbasketState', () => {
 
       await store.dispatch(new SelectWorkbasket('WBI:DT')).toPromise();
 
-      expect(locationMock.go).toHaveBeenCalled();
+      expect(routerMock.navigate).toHaveBeenCalledWith([WORKBASKETS_ROUTE, { outlets: { detail: ['WBI:DT'] } }], {
+        queryParams: { tab: 'distribution-targets' },
+        queryParamsHandling: 'merge'
+      });
     });
   });
 
