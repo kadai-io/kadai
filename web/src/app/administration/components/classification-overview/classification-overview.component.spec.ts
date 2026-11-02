@@ -19,6 +19,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
+import { DomainState } from '../../../shared/store/domain-store/domain.state';
+import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
 import { ClassificationOverviewComponent } from './classification-overview.component';
 import { ActivatedRoute } from '@angular/router';
@@ -55,7 +57,8 @@ describe('ClassificationOverviewComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ClassificationOverviewComponent],
       providers: [
-        provideStore([ClassificationState, EngineConfigurationState]),
+        provideStore([ClassificationState, EngineConfigurationState, DomainState]),
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
 
         provideHttpClientTesting(),
         provideNoopAnimations(),
@@ -71,6 +74,7 @@ describe('ClassificationOverviewComponent', () => {
     debugElement = fixture.debugElement;
     component = fixture.debugElement.componentInstance;
     store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' } });
     actions$ = TestBed.inject(Actions);
     store.reset({
       ...store.snapshot(),

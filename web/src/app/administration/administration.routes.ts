@@ -21,12 +21,13 @@ import { Routes } from '@angular/router';
 
 import { catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { DomainService } from '../shared/services/domain/domain.service';
+import { Store } from '@ngxs/store';
+import { FetchDomains } from '../shared/store/domain-store/domain.actions';
 
 const domainGuard = () => {
-  const domainService = inject(DomainService);
+  const store = inject(Store);
 
-  return domainService.getDomains().pipe(
+  return store.dispatch(new FetchDomains()).pipe(
     map(() => true),
     catchError(() => {
       return of(false);

@@ -24,7 +24,7 @@ import { highlight } from 'app/shared/animations/validation.animation';
 
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 
-import { DomainService } from 'app/shared/services/domain/domain.service';
+import { DomainSelectors } from 'app/shared/store/domain-store/domain.selectors';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ImportExportService } from 'app/administration/services/import-export.service';
 import { map, take, takeUntil } from 'rxjs/operators';
@@ -119,7 +119,6 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
   private location = inject(Location);
   private requestInProgressService = inject(RequestInProgressService);
-  private domainService = inject(DomainService);
   private notificationsService = inject(NotificationService);
   private importExportService = inject(ImportExportService);
   private store = inject(Store);
@@ -197,7 +196,7 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   }
 
   masterDomainSelected(): boolean {
-    return this.domainService.getSelectedDomainValue() === '';
+    return this.store.selectSnapshot(DomainSelectors.selectedDomain) === '';
   }
 
   getClassificationCustom(customNumber: number): `custom${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8}` {

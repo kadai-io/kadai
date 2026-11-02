@@ -23,7 +23,6 @@ import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { firstValueFrom, Observable, of } from 'rxjs';
 import { ACTION } from '../../../shared/models/action';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
-import { DomainService } from '../../../shared/services/domain/domain.service';
 import { DomainState } from '../../../shared/store/domain-store/domain.state';
 import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
 import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
@@ -49,12 +48,6 @@ import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { ButtonAction } from '../../models/button-action';
-
-const domainServiceSpy: Partial<DomainService> = {
-  getSelectedDomain: vi.fn().mockReturnValue(of('A')),
-  getSelectedDomainValue: vi.fn().mockReturnValue('A'),
-  getDomains: vi.fn().mockReturnValue(of(['A']))
-};
 
 const workbasketServiceMock: Partial<WorkbasketService> = {
   getWorkBasket: vi.fn().mockReturnValue(of(selectedWorkbasketMock)),
@@ -90,10 +83,6 @@ describe('WorkbasketDetailsComponent', () => {
         { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
         provideRouter([]),
         provideNoopAnimations(),
-        {
-          provide: DomainService,
-          useValue: domainServiceSpy
-        },
         { provide: WorkbasketService, useValue: workbasketServiceMock },
         provideHttpClientTesting(),
         provideAngularSvgIcon()

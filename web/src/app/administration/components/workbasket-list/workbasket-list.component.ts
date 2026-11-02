@@ -27,7 +27,7 @@ import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.ser
 import { OrientationService } from 'app/shared/services/orientation/orientation.service';
 import { ImportExportService } from 'app/administration/services/import-export.service';
 import { Actions, ofActionCompleted, ofActionDispatched, Store } from '@ngxs/store';
-import { delay, takeUntil, tap } from 'rxjs/operators';
+import { delay, filter, takeUntil, tap } from 'rxjs/operators';
 import {
   DeselectWorkbasket,
   GetWorkbasketsSummary,
@@ -36,7 +36,7 @@ import {
 import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
 import { Workbasket } from '../../../shared/models/workbasket';
 import { MatListOption, MatSelectionList } from '@angular/material/list';
-import { DomainService } from '../../../shared/services/domain/domain.service';
+import { DomainSelectors } from '../../../shared/store/domain-store/domain.selectors';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { WorkbasketQueryFilterParameter } from '../../../shared/models/workbasket-query-filter-parameter';
 import { QueryPagingParameter } from '../../../shared/models/query-paging-parameter';
@@ -93,7 +93,6 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   private workbasketService = inject(WorkbasketService);
   private orientationService = inject(OrientationService);
   private importExportService = inject(ImportExportService);
-  private domainService = inject(DomainService);
   private requestInProgressService = inject(RequestInProgressService);
   private ngxsActions$ = inject(Actions);
 
@@ -139,9 +138,12 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
         this.refreshWorkbasketList();
       });
 
-    this.domainService
-      .getSelectedDomain()
-      .pipe(takeUntil(this.destroy$))
+    this.store
+      .select(DomainSelectors.selectedDomain)
+      .pipe(
+        filter((domain): domain is string => domain !== undefined),
+        takeUntil(this.destroy$)
+      )
       .subscribe((domain) => {
         this.filterBy.domain = [domain];
         this.performRequest();

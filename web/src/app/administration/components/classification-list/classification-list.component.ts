@@ -33,7 +33,7 @@ import {
   CreateClassification,
   GetClassifications
 } from '../../../shared/store/classification-store/classification.actions';
-import { DomainService } from '../../../shared/services/domain/domain.service';
+import { DomainSelectors } from '../../../shared/store/domain-store/domain.selectors';
 import { ClassificationSummary } from '../../../shared/models/classification-summary';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { Pair } from '../../../shared/models/pair';
@@ -88,7 +88,6 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
   classifications = signal<ClassificationSummary[]>([]);
   private location = inject(Location);
   private importExportService = inject(ImportExportService);
-  private domainService = inject(DomainService);
   private requestInProgressService = inject(RequestInProgressService);
   private store = inject(Store);
   private ngxsActions$ = inject(Actions);
@@ -126,12 +125,11 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
         this.store.dispatch(new GetClassifications());
       });
 
-    // needed, so that the list updates, when domain gets changed (could be placed anywhere and should be removed, when domain is in store)
-    this.domainService
-      .getSelectedDomain()
+    this.store
+      .select(DomainSelectors.selectedDomain)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((domain) => {
-        this.store.dispatch(GetClassifications);
+      .subscribe(() => {
+        this.store.dispatch(new GetClassifications());
       });
   }
 

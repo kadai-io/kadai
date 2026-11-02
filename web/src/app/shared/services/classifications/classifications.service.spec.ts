@@ -22,7 +22,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { of } from 'rxjs';
 import { ClassificationsService } from './classifications.service';
 import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
-import { DomainService } from '../domain/domain.service';
 import { Classification } from '../../models/classification';
 
 describe('ClassificationsService', () => {
@@ -44,8 +43,7 @@ describe('ClassificationsService', () => {
         ClassificationsService,
 
         provideHttpClientTesting(),
-        { provide: RuntimeConfigService, useValue: runtimeConfigServiceMock },
-        { provide: DomainService, useValue: mockDomainService }
+        { provide: RuntimeConfigService, useValue: runtimeConfigServiceMock }
       ]
     });
 

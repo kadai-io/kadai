@@ -20,13 +20,14 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketListComponent } from './workbasket-list.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
+import { DomainState } from '../../../shared/store/domain-store/domain.state';
+import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
 import { By } from '@angular/platform-browser';
 import { Observable, of } from 'rxjs';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
 import { DeselectWorkbasket, SelectWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { Direction, Sorting, WorkbasketQuerySortParameter } from '../../../shared/models/sorting';
-import { DomainService } from '../../../shared/services/domain/domain.service';
 import { selectedWorkbasketMock } from '../../../shared/store/mock-data/mock-store';
 import { WorkbasketQueryFilterParameter } from '../../../shared/models/workbasket-query-filter-parameter';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
@@ -46,12 +47,6 @@ const workbasketServiceMock: Partial<WorkbasketService> = {
   getWorkBasketsDistributionTargets: vi.fn().mockReturnValue(of({ distributionTargets: [] }))
 };
 
-const domainServiceSpy: Partial<DomainService> = {
-  getSelectedDomainValue: vi.fn().mockReturnValue('A'),
-  getSelectedDomain: vi.fn().mockReturnValue(of('A')),
-  getDomains: vi.fn().mockReturnValue(of(['A', 'B']))
-};
-
 describe('WorkbasketListComponent', () => {
   let fixture: ComponentFixture<WorkbasketListComponent>;
   let debugElement: DebugElement;
@@ -63,7 +58,8 @@ describe('WorkbasketListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [WorkbasketListComponent],
       providers: [
-        provideStore([WorkbasketState, FilterState]),
+        provideStore([WorkbasketState, FilterState, DomainState]),
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
         provideRouter([]),
 
         provideHttpClientTesting(),
@@ -71,10 +67,6 @@ describe('WorkbasketListComponent', () => {
         {
           provide: WorkbasketService,
           useValue: workbasketServiceMock
-        },
-        {
-          provide: DomainService,
-          useValue: domainServiceSpy
         }
       ]
     }).compileComponents();
@@ -83,6 +75,7 @@ describe('WorkbasketListComponent', () => {
     debugElement = fixture.debugElement;
     component = fixture.componentInstance;
     store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' } });
     actions$ = TestBed.inject(Actions);
     fixture.detectChanges();
   });

@@ -20,6 +20,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketOverviewComponent } from './workbasket-overview.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionCompleted, ofActionDispatched, provideStore, Store } from '@ngxs/store';
+import { DomainState } from '../../../shared/store/domain-store/domain.state';
+import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
 import { Observable, of } from 'rxjs';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -53,7 +55,8 @@ describe('WorkbasketOverviewComponent', () => {
     await TestBed.configureTestingModule({
       imports: [WorkbasketOverviewComponent],
       providers: [
-        provideStore([WorkbasketState, FilterState, EngineConfigurationState]),
+        provideStore([WorkbasketState, FilterState, EngineConfigurationState, DomainState]),
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
         provideNoopAnimations(),
         {
           provide: ActivatedRoute,
@@ -69,6 +72,7 @@ describe('WorkbasketOverviewComponent', () => {
     debugElement = fixture.debugElement;
     component = fixture.debugElement.componentInstance;
     store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' } });
     store.reset({
       ...store.snapshot(),
       engineConfiguration: engineConfigurationMock
@@ -216,7 +220,8 @@ describe('WorkbasketOverviewComponent Alternative Params ID', () => {
     await TestBed.configureTestingModule({
       imports: [WorkbasketOverviewComponent],
       providers: [
-        provideStore([WorkbasketState, FilterState]),
+        provideStore([WorkbasketState, FilterState, DomainState]),
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
         { provide: ActivatedRoute, useValue: mockActivatedRouteAlternativeId },
 
         provideHttpClientTesting(),
@@ -226,6 +231,7 @@ describe('WorkbasketOverviewComponent Alternative Params ID', () => {
     fixture = TestBed.createComponent(WorkbasketOverviewComponent);
     component = fixture.debugElement.componentInstance;
     store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' } });
     actions$ = TestBed.inject(Actions);
     fixture.detectChanges();
   });

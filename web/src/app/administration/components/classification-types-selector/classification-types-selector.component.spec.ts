@@ -25,7 +25,6 @@ import { provideStore, Store } from '@ngxs/store';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
 import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
-import { DomainService } from '../../../shared/services/domain/domain.service';
 import { classificationStateMock } from '../../../shared/store/mock-data/mock-store';
 import { By } from '@angular/platform-browser';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -53,8 +52,7 @@ describe('ClassificationTypesSelectorComponent', () => {
         {
           provide: ClassificationCategoriesService,
           useValue: classificationCategoriesServiceSpy
-        },
-        { provide: DomainService, useValue: domainServiceSpy }
+        }
       ]
     }).compileComponents();
 

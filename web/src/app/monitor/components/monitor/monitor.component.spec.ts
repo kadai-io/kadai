@@ -24,19 +24,16 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { provideStore, Store } from '@ngxs/store';
+import { DomainState } from '../../../shared/store/domain-store/domain.state';
+import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
 import { of } from 'rxjs';
-import { DomainService } from '../../../shared/services/domain/domain.service';
-
-const domainServiceMock = {
-  getDomains: vi.fn().mockReturnValue(of(['DOMAIN_A', 'DOMAIN_B'])),
-  getSelectedDomain: vi.fn().mockReturnValue(of('DOMAIN_A')),
-  switchDomain: vi.fn()
-};
 
 describe('MonitorComponent', () => {
   let component: MonitorComponent;
   let fixture: ComponentFixture<MonitorComponent>;
   let debugElement: DebugElement;
+  let store: Store;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -44,12 +41,15 @@ describe('MonitorComponent', () => {
       providers: [
         provideRouter([{ path: '**', children: [] }]),
         provideHttpClientTesting(),
-        { provide: DomainService, useValue: domainServiceMock }
+        provideStore([DomainState]),
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } }
       ]
     }).compileComponents();
   });
 
   beforeEach(() => {
+    store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' } });
     fixture = TestBed.createComponent(MonitorComponent);
     debugElement = fixture.debugElement;
     component = fixture.debugElement.componentInstance;
@@ -62,9 +62,9 @@ describe('MonitorComponent', () => {
     expect(component.selectedDomain()).toBe('DOMAIN_A');
   });
 
-  it('should call domainService.switchDomain when switchDomain is called', () => {
+  it('should select the domain in the store when switchDomain is called', () => {
     component.switchDomain('DOMAIN_B');
-    expect(domainServiceMock.switchDomain).toHaveBeenCalledWith('DOMAIN_B');
+    expect(component.selectedDomain()).toBe('DOMAIN_B');
   });
 
   it('should set selectedTab to tasks-priority on init', () => {
@@ -134,20 +134,18 @@ describe('MonitorComponent', () => {
     expect(component.selectedTab).toBe('timestamp');
   });
 
-  it('should call switchDomain with domain when mat-option is clicked for non-empty domain', () => {
-    domainServiceMock.switchDomain.mockClear();
+  it('should select a non-empty domain when a mat-option is clicked', () => {
     component.switchDomain('DOMAIN_A');
-    expect(domainServiceMock.switchDomain).toHaveBeenCalledWith('DOMAIN_A');
+    expect(component.selectedDomain()).toBe('DOMAIN_A');
   });
 
-  it('should call switchDomain with empty string to cover falsy domain branch in template', () => {
-    domainServiceMock.switchDomain.mockClear();
+  it('should select the master domain when the empty domain is chosen', () => {
     component.switchDomain('');
-    expect(domainServiceMock.switchDomain).toHaveBeenCalledWith('');
+    expect(component.selectedDomain()).toBe('');
   });
 
   it('should display MASTER DOMAIN label for empty string domain in @for loop', () => {
-    domainServiceMock.getDomains.mockReturnValue(of(['', 'DOMAIN_A']));
+    store.reset({ ...store.snapshot(), domain: { domains: ['', 'DOMAIN_A'], selectedDomain: '' } });
     fixture = TestBed.createComponent(MonitorComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

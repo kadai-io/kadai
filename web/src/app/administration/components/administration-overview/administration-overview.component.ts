@@ -19,7 +19,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Subject } from 'rxjs';
-import { DomainService } from '../../../shared/services/domain/domain.service';
+import { Store } from '@ngxs/store';
+import { DomainSelectors } from '../../../shared/store/domain-store/domain.selectors';
+import { FetchDomains, SelectDomain } from '../../../shared/store/domain-store/domain.actions';
 import { takeUntil } from 'rxjs/operators';
 import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
 import { MatTabLink, MatTabNav, MatTabNavPanel } from '@angular/material/tabs';
@@ -51,7 +53,7 @@ export class AdministrationOverviewComponent {
   destroy$ = new Subject<void>();
   routingAccess = signal(false);
   private router = inject(Router);
-  private domainService = inject(DomainService);
+  private store = inject(Store);
   private kadaiEngineService = inject(KadaiEngineService);
 
   constructor() {
@@ -73,22 +75,24 @@ export class AdministrationOverviewComponent {
         this.routingAccess.set(value);
       });
 
-    this.domainService
-      .getDomains()
+    this.store.dispatch(new FetchDomains());
+
+    this.store
+      .select(DomainSelectors.domains)
       .pipe(takeUntil(this.destroy$))
       .subscribe((domains) => {
         this.domains.set(domains);
       });
 
-    this.domainService
-      .getSelectedDomain()
+    this.store
+      .select(DomainSelectors.selectedDomain)
       .pipe(takeUntil(this.destroy$))
       .subscribe((domain) => {
-        this.selectedDomain.set(domain);
+        this.selectedDomain.set(domain ?? '');
       });
   }
 
   switchDomain(domain: string) {
-    this.domainService.switchDomain(domain);
+    this.store.dispatch(new SelectDomain(domain));
   }
 }

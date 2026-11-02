@@ -18,18 +18,15 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AdministrationOverviewComponent } from './administration-overview.component';
-import { DomainService } from '../../../shared/services/domain/domain.service';
 import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
 import { of } from 'rxjs';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-
-const domainServiceSpy: Partial<DomainService> = {
-  getDomains: vi.fn().mockReturnValue(of(['domain a', 'domain b'])),
-  getSelectedDomain: vi.fn().mockReturnValue(of('domain a')),
-  switchDomain: vi.fn()
-};
+import { provideStore, Store } from '@ngxs/store';
+import { DomainState } from '../../../shared/store/domain-store/domain.state';
+import { DomainSelectors } from '../../../shared/store/domain-store/domain.selectors';
+import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
 
 const kadaiEngineServiceSpy = {
   isCustomRoutingRulesEnabled: vi.fn().mockReturnValue(of(false))
@@ -38,21 +35,28 @@ const kadaiEngineServiceSpy = {
 describe('AdministrationOverviewComponent', () => {
   let component: AdministrationOverviewComponent;
   let fixture: ComponentFixture<AdministrationOverviewComponent>;
+  let store: Store;
 
   beforeEach(async () => {
     vi.clearAllMocks();
     await TestBed.configureTestingModule({
       imports: [AdministrationOverviewComponent],
       providers: [
-        { provide: DomainService, useValue: domainServiceSpy },
         { provide: KadaiEngineService, useValue: kadaiEngineServiceSpy },
         provideHttpClientTesting(),
+        provideStore([DomainState]),
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
         provideRouter([{ path: '**', children: [] }])
       ]
     }).compileComponents();
   });
 
   beforeEach(() => {
+    store = TestBed.inject(Store);
+    store.reset({
+      ...store.snapshot(),
+      domain: { domains: ['domain a', 'domain b'], selectedDomain: 'domain a' }
+    });
     fixture = TestBed.createComponent(AdministrationOverviewComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -75,13 +79,11 @@ describe('AdministrationOverviewComponent', () => {
     expect(domainElem.textContent).toMatch('domain a');
   });
 
-  it('should call getDomains on init and populate domains', () => {
-    expect(domainServiceSpy.getDomains).toHaveBeenCalled();
+  it('should populate the domains from the store', () => {
     expect(component.domains()).toEqual(['domain a', 'domain b']);
   });
 
-  it('should call getSelectedDomain on init and set selectedDomain', () => {
-    expect(domainServiceSpy.getSelectedDomain).toHaveBeenCalled();
+  it('should take the selected domain from the store', () => {
     expect(component.selectedDomain()).toBe('domain a');
   });
 
@@ -90,9 +92,9 @@ describe('AdministrationOverviewComponent', () => {
     expect(component.routingAccess()).toBe(false);
   });
 
-  it('should call switchDomain when switchDomain is invoked', () => {
+  it('should select the domain in the store when switchDomain is invoked', () => {
     component.switchDomain('domain b');
-    expect(domainServiceSpy.switchDomain).toHaveBeenCalledWith('domain b');
+    expect(store.selectSnapshot(DomainSelectors.selectedDomain)).toBe('domain b');
   });
 
   it('should set routingAccess to true when routing rules enabled', async () => {
@@ -170,10 +172,10 @@ describe('AdministrationOverviewComponent', () => {
     expect(component.selectedTab()).toBe('task-routing');
   });
 
-  it('should call switchDomain when a mat-option is clicked', () => {
+  it('should select the domain in the store when a mat-option is clicked', () => {
     component.domains.set(['domain a', 'domain b']);
     fixture.detectChanges();
     component.switchDomain('domain b');
-    expect(domainServiceSpy.switchDomain).toHaveBeenCalledWith('domain b');
+    expect(store.selectSnapshot(DomainSelectors.selectedDomain)).toBe('domain b');
   });
 });
