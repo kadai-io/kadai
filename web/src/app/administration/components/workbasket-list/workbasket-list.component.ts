@@ -39,6 +39,7 @@ import { MatListOption, MatSelectionList } from '@angular/material/list';
 import { DomainSelectors } from '../../../shared/store/domain-store/domain.selectors';
 import { Router } from '@angular/router';
 import { WORKBASKETS_ROUTE } from '../../../shared/util/administration-routes';
+import { WORKBASKET_COMPONENT_TABS, WorkbasketComponent } from '../../models/workbasket-component';
 import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
 import { WorkbasketQueryFilterParameter } from '../../../shared/models/workbasket-query-filter-parameter';
 import { QueryPagingParameter } from '../../../shared/models/query-paging-parameter';
@@ -174,9 +175,11 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
 
   selectWorkbasket(id: string) {
     this.requestInProgressService.setRequestInProgress(true);
-    const detail = this.selectedId() === id ? null : [id];
-    void this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail } }], {
-      queryParams: { tab: null },
+    const isOpen = this.selectedId() === id;
+    const component =
+      this.store.selectSnapshot(WorkbasketSelectors.selectedComponent) ?? WorkbasketComponent.INFORMATION;
+    void this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: isOpen ? null : [id] } }], {
+      queryParams: { tab: isOpen ? null : WORKBASKET_COMPONENT_TABS[component] },
       queryParamsHandling: 'merge'
     });
   }

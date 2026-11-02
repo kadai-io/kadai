@@ -94,7 +94,7 @@ describe('WorkbasketListComponent', () => {
 
     expect(navigate).toHaveBeenCalledWith(
       [WORKBASKETS_ROUTE, { outlets: { detail: ['WBI:000000000000000000000000000000000902'] } }],
-      { queryParams: { tab: null }, queryParamsHandling: 'merge' }
+      { queryParams: { tab: 'information' }, queryParamsHandling: 'merge' }
     );
   });
 
