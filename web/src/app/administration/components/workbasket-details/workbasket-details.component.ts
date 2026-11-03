@@ -150,7 +150,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
   // The selected tab lives in the url: navigating here makes the query parameter drive SelectComponent,
   // so a reload or a shared link opens the same tab.
   selectComponent(index: number) {
-    void this.router.navigate([], {
+    this.router.navigate([], {
       queryParams: { tab: WORKBASKET_COMPONENT_TABS[index as WorkbasketComponent] },
       queryParamsHandling: 'merge'
     });
@@ -171,7 +171,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
   onCopy() {
     this.store.dispatch(new OnButtonPressed(ButtonAction.COPY));
     this.store.dispatch(new CopyWorkbasket(this.workbasket()));
-    void this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: ['new-workbasket'] } }], {
+    this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: ['new-workbasket'] } }], {
       queryParams: { tab: null },
       queryParamsHandling: 'merge'
     });

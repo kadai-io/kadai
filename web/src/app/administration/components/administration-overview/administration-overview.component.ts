@@ -96,7 +96,7 @@ export class AdministrationOverviewComponent {
   // The selected domain lives in the url, so a reload and a shared link keep it. The query parameter is
   // the single input for SelectDomain, which is why switching only navigates.
   switchDomain(domain: string) {
-    void this.router.navigate([], {
+    this.router.navigate([], {
       queryParams: { [DOMAIN_QUERY_PARAM]: domain },
       queryParamsHandling: 'merge'
     });

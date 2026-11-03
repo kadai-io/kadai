@@ -249,7 +249,7 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
     this.store.dispatch(new SaveNewWorkbasket(wb)).subscribe(() => {
       const created = this.store.selectSnapshot(WorkbasketSelectors.selectedWorkbasket);
       if (created?.workbasketId) {
-        void this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: [created.workbasketId] } }], {
+        this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: [created.workbasketId] } }], {
           queryParams: { tab: null },
           queryParamsHandling: 'merge'
         });
@@ -271,7 +271,7 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
     const wb = this.workbasket();
     if (!wb?._links) return;
     this.store.dispatch(new MarkWorkbasketForDeletion(wb._links.self.href)).subscribe(() => {
-      void this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: null } }], {
+      this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: null } }], {
         queryParams: { tab: null },
         queryParamsHandling: 'merge'
       });

@@ -63,7 +63,7 @@ export class WorkbasketListToolbarComponent {
 
   addWorkbasket() {
     if (this.action() !== ACTION.CREATE) {
-      void this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: ['new-workbasket'] } }], {
+      this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: ['new-workbasket'] } }], {
         queryParams: { tab: null },
         queryParamsHandling: 'merge'
       });

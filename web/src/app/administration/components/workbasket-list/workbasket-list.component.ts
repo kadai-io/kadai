@@ -178,7 +178,7 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
     const isOpen = this.selectedId() === id;
     const component =
       this.store.selectSnapshot(WorkbasketSelectors.selectedComponent) ?? WorkbasketComponent.INFORMATION;
-    void this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: isOpen ? null : [id] } }], {
+    this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: isOpen ? null : [id] } }], {
       queryParams: { tab: isOpen ? null : WORKBASKET_COMPONENT_TABS[component] },
       queryParamsHandling: 'merge'
     });

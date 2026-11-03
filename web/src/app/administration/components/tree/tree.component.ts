@@ -193,14 +193,14 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
     const id = treeNode.node.data.classificationId;
     this.selectNodeId.set(id);
     this.requestInProgressService.setRequestInProgress(true);
-    void this.router.navigate([CLASSIFICATIONS_ROUTE, { outlets: { detail: [id] } }], {
+    this.router.navigate([CLASSIFICATIONS_ROUTE, { outlets: { detail: [id] } }], {
       queryParamsHandling: 'merge'
     });
   }
 
   onDeactivate(event: any) {
     if (!event.treeModel.activeNodes.length) {
-      void this.router.navigate([CLASSIFICATIONS_ROUTE, { outlets: { detail: null } }], {
+      this.router.navigate([CLASSIFICATIONS_ROUTE, { outlets: { detail: null } }], {
         queryParamsHandling: 'merge'
       });
     }

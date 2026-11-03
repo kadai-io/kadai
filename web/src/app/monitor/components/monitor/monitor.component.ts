@@ -58,7 +58,7 @@ export class MonitorComponent implements OnInit {
   }
 
   switchDomain(domain: string) {
-    void this.router.navigate([], {
+    this.router.navigate([], {
       queryParams: { [DOMAIN_QUERY_PARAM]: domain },
       queryParamsHandling: 'merge'
     });

@@ -216,10 +216,9 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
             this.notificationsService.showSuccess('CLASSIFICATION_CREATE', {
               classificationKey: classification.key
             });
-            void this.router.navigate(
-              [CLASSIFICATIONS_ROUTE, { outlets: { detail: [classification.classificationId] } }],
-              { queryParamsHandling: 'merge' }
-            );
+            this.router.navigate([CLASSIFICATIONS_ROUTE, { outlets: { detail: [classification.classificationId] } }], {
+              queryParamsHandling: 'merge'
+            });
           });
           this.afterRequest();
         });
@@ -263,7 +262,7 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
         });
         this.afterRequest();
       });
-    void this.router.navigate([CLASSIFICATIONS_ROUTE, { outlets: { detail: null } }], {
+    this.router.navigate([CLASSIFICATIONS_ROUTE, { outlets: { detail: null } }], {
       queryParamsHandling: 'merge'
     });
   }

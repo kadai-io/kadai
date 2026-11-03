@@ -147,7 +147,7 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
   }
 
   addClassification() {
-    void this.router.navigate([CLASSIFICATIONS_ROUTE, { outlets: { detail: ['new-classification'] } }], {
+    this.router.navigate([CLASSIFICATIONS_ROUTE, { outlets: { detail: ['new-classification'] } }], {
       queryParamsHandling: 'merge'
     });
   }

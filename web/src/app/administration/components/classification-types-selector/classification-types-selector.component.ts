@@ -45,7 +45,7 @@ export class ClassificationTypesSelectorComponent {
 
   select(value: string): void {
     this.store.dispatch(new SetSelectedClassificationType(value));
-    void this.router.navigate([CLASSIFICATIONS_ROUTE, { outlets: { detail: null } }], {
+    this.router.navigate([CLASSIFICATIONS_ROUTE, { outlets: { detail: null } }], {
       queryParamsHandling: 'merge'
     });
   }
