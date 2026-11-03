@@ -92,16 +92,14 @@ class LdapClientPagingIntTest {
     assertThat(first).isNotSameAs(second);
     assertThat(first.users()).isNotSameAs(second.users()).isEqualTo(second.users());
     List<User> firstUsers = first.users();
-    assertThatThrownBy(firstUsers::clear)
-        .isInstanceOf(UnsupportedOperationException.class);
+    assertThatThrownBy(firstUsers::clear).isInstanceOf(UnsupportedOperationException.class);
   }
 
   private Set<String> createUsers(String prefix, int count) {
     List<String> ids = new ArrayList<>();
     for (int index = 0; index < count; index++) {
       String id = prefix + String.format("%04d", index);
-      final Name dn =
-          LdapNameBuilder.newInstance().add("cn", "users").add("uid", id).build();
+      final Name dn = LdapNameBuilder.newInstance().add("cn", "users").add("uid", id).build();
       final BasicAttributes attributes = new BasicAttributes(true);
       BasicAttribute objectClass = new BasicAttribute("objectclass");
       objectClass.add("top");

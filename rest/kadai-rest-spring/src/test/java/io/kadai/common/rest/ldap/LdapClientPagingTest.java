@@ -46,25 +46,24 @@ class LdapClientPagingTest {
     List<byte[]> requests = new ArrayList<>();
 
     LdapUserSnapshot snapshot =
-        LdapClient.collectCompleteUserSnapshot(
-            request -> {
-              requests.add(request);
-              return pages.removeFirst();
-            });
+        LdapClient.collectCompleteUserSnapshot(request -> {
+          requests.add(request);
+          return pages.removeFirst();
+        });
 
     assertThat(snapshot.users()).extracting(User::getId).containsExactly("a", "b", "c");
     assertThat(snapshot.pageCount()).isEqualTo(3);
     assertThat(snapshot.resultCount()).isEqualTo(3);
-    assertThat(requests).extracting(bytes -> new String(bytes, StandardCharsets.UTF_8))
+    assertThat(requests)
+        .extracting(bytes -> new String(bytes, StandardCharsets.UTF_8))
         .containsExactly("", "first", "second");
   }
 
   @Test
   void should_FailClosedWithoutResponseControl() {
-    assertThatThrownBy(
-            () ->
-                LdapClient.collectCompleteUserSnapshot(
-                    ignored -> new LdapUserPage(List.of(user("partial")), false, new byte[0])))
+    assertThatThrownBy(() ->
+            LdapClient.collectCompleteUserSnapshot(
+                ignored -> new LdapUserPage(List.of(user("partial")), false, new byte[0])))
         .isInstanceOf(SystemException.class)
         .hasMessageContaining("response control");
   }
@@ -74,13 +73,11 @@ class LdapClientPagingTest {
     byte[] repeated = "same".getBytes(StandardCharsets.UTF_8);
     AtomicInteger calls = new AtomicInteger();
 
-    assertThatThrownBy(
-            () ->
-                LdapClient.collectCompleteUserSnapshot(
-                    ignored -> {
-                      calls.incrementAndGet();
-                      return new LdapUserPage(List.of(user("a")), true, repeated);
-                    }))
+    assertThatThrownBy(() ->
+            LdapClient.collectCompleteUserSnapshot(ignored -> {
+              calls.incrementAndGet();
+              return new LdapUserPage(List.of(user("a")), true, repeated);
+            }))
         .isInstanceOf(SystemException.class)
         .hasMessageContaining("repeated")
         .hasMessageContaining("cookie");
@@ -92,18 +89,14 @@ class LdapClientPagingTest {
     RuntimeException failure = new RuntimeException("page failed");
     AtomicInteger calls = new AtomicInteger();
 
-    assertThatThrownBy(
-            () ->
-                LdapClient.collectCompleteUserSnapshot(
-                    ignored -> {
-                      if (calls.getAndIncrement() == 0) {
-                        return new LdapUserPage(
-                            List.of(user("a")),
-                            true,
-                            "next".getBytes(StandardCharsets.UTF_8));
-                      }
-                      throw failure;
-                    }))
+    assertThatThrownBy(() ->
+            LdapClient.collectCompleteUserSnapshot(ignored -> {
+              if (calls.getAndIncrement() == 0) {
+                return new LdapUserPage(
+                    List.of(user("a")), true, "next".getBytes(StandardCharsets.UTF_8));
+              }
+              throw failure;
+            }))
         .isInstanceOf(SystemException.class)
         .hasCause(failure)
         .hasMessageContaining("complete LDAP user snapshot");
@@ -124,8 +117,7 @@ class LdapClientPagingTest {
         LdapClient.collectCompleteUserSnapshot(
             ignored -> new LdapUserPage(page.users(), true, new byte[0]));
     List<User> snapshotUsers = snapshot.users();
-    assertThatThrownBy(snapshotUsers::clear)
-        .isInstanceOf(UnsupportedOperationException.class);
+    assertThatThrownBy(snapshotUsers::clear).isInstanceOf(UnsupportedOperationException.class);
   }
 
   @Test

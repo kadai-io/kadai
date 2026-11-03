@@ -86,13 +86,12 @@ class ActuatorIntTest {
 
   @Test
   void should_Return404_When_HealthStatusSubEndpointIsCalledWithoutAuthentication() {
-    assertThatThrownBy(
-            () ->
-                restClient
-                    .get()
-                    .uri(restHelper.toUrl(ACTUATOR_HEALTH + "/db"))
-                    .retrieve()
-                    .toEntity(String.class))
+    assertThatThrownBy(() ->
+            restClient
+                .get()
+                .uri(restHelper.toUrl(ACTUATOR_HEALTH + "/db"))
+                .retrieve()
+                .toEntity(String.class))
         .isInstanceOf(HttpClientErrorException.NotFound.class);
   }
 
@@ -113,13 +112,8 @@ class ActuatorIntTest {
 
   @Test
   void should_Return401_When_InfoEndpointIsCalledWithoutAuthentication() {
-    assertThatThrownBy(
-            () ->
-                restClient
-                    .get()
-                    .uri(restHelper.toUrl(ACTUATOR_INFO))
-                    .retrieve()
-                    .toEntity(String.class))
+    assertThatThrownBy(() ->
+            restClient.get().uri(restHelper.toUrl(ACTUATOR_INFO)).retrieve().toEntity(String.class))
         .isInstanceOf(HttpClientErrorException.Unauthorized.class);
   }
 
@@ -141,13 +135,8 @@ class ActuatorIntTest {
 
   @Test
   void should_Return401_When_ActuatorRootIsCalledWithoutAuthentication() {
-    assertThatThrownBy(
-            () ->
-                restClient
-                    .get()
-                    .uri(restHelper.toUrl("/actuator"))
-                    .retrieve()
-                    .toEntity(String.class))
+    assertThatThrownBy(() ->
+            restClient.get().uri(restHelper.toUrl("/actuator")).retrieve().toEntity(String.class))
         .isInstanceOf(HttpClientErrorException.Unauthorized.class);
   }
 }

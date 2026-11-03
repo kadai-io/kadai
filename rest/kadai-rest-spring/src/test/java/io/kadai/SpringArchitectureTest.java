@@ -128,22 +128,19 @@ class SpringArchitectureTest {
       public void check(JavaClass javaClass, ConditionEvents events) {
         javaClass.getAllFields().stream()
             .filter(
-                not(
-                    field ->
-                        field.reflect().isSynthetic()
-                            || Modifier.isStatic(field.reflect().getModifiers())))
-            .filter(
-                field ->
-                    Stream.of(JsonProperty.class, JsonIgnore.class)
-                        .map(field::tryGetAnnotationOfType)
-                        .noneMatch(Optional::isPresent))
-            .map(
-                field ->
-                    SimpleConditionEvent.violated(
-                        javaClass,
-                        String.format(
-                            "Field '%s' in class '%s' is not annotated with a json annotation",
-                            field, javaClass)))
+                not(field ->
+                    field.reflect().isSynthetic()
+                        || Modifier.isStatic(field.reflect().getModifiers())))
+            .filter(field ->
+                Stream.of(JsonProperty.class, JsonIgnore.class)
+                    .map(field::tryGetAnnotationOfType)
+                    .noneMatch(Optional::isPresent))
+            .map(field ->
+                SimpleConditionEvent.violated(
+                    javaClass,
+                    String.format(
+                        "Field '%s' in class '%s' is not annotated with a json annotation",
+                        field, javaClass)))
             .forEach(events::add);
       }
     };

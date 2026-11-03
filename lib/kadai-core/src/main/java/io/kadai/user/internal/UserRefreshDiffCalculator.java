@@ -53,12 +53,13 @@ final class UserRefreshDiffCalculator {
       UserRefreshState existing = current.usersById().get(desired.id());
       if (existing == null) {
         usersToInsert.add(desired);
-        desired.groups()
+        desired
+            .groups()
             .forEach(group -> groupsToInsert.add(new UserAccessIdRow(desired.id(), group)));
-        desired.permissions()
-            .forEach(
-                permission ->
-                    permissionsToInsert.add(new UserAccessIdRow(desired.id(), permission)));
+        desired
+            .permissions()
+            .forEach(permission ->
+                permissionsToInsert.add(new UserAccessIdRow(desired.id(), permission)));
         continue;
       }
 
@@ -82,8 +83,11 @@ final class UserRefreshDiffCalculator {
       removedPermissions.forEach(
           permission -> permissionsToDelete.add(new UserAccessIdRow(desired.id(), permission)));
 
-      if (scalarChanged || !addedGroups.isEmpty() || !removedGroups.isEmpty()
-          || !addedPermissions.isEmpty() || !removedPermissions.isEmpty()) {
+      if (scalarChanged
+          || !addedGroups.isEmpty()
+          || !removedGroups.isEmpty()
+          || !addedPermissions.isEmpty()
+          || !removedPermissions.isEmpty()) {
         updatedUsers++;
       } else {
         unchangedUsers++;
@@ -93,12 +97,13 @@ final class UserRefreshDiffCalculator {
     for (UserRefreshState existing : current.usersById().values()) {
       if (!desiredById.containsKey(existing.id())) {
         userIdsToDelete.add(existing.id());
-        existing.groups()
+        existing
+            .groups()
             .forEach(group -> groupsToDelete.add(new UserAccessIdRow(existing.id(), group)));
-        existing.permissions()
-            .forEach(
-                permission ->
-                    permissionsToDelete.add(new UserAccessIdRow(existing.id(), permission)));
+        existing
+            .permissions()
+            .forEach(permission ->
+                permissionsToDelete.add(new UserAccessIdRow(existing.id(), permission)));
       }
     }
 

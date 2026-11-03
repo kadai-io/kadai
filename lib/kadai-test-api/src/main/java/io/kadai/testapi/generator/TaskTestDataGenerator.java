@@ -221,12 +221,11 @@ public final class TaskTestDataGenerator {
     Objects.requireNonNull(kadaiEngine, "kadaiEngine must not be null");
     try {
       TaskGenerationEnvironment environment =
-          kadaiEngine.runAsAdmin(
-              () ->
-                  resolveEnvironment(
-                      kadaiEngine.getConfiguration(),
-                      kadaiEngine.getClassificationService(),
-                      kadaiEngine.getWorkbasketService()));
+          kadaiEngine.runAsAdmin(() ->
+              resolveEnvironment(
+                  kadaiEngine.getConfiguration(),
+                  kadaiEngine.getClassificationService(),
+                  kadaiEngine.getWorkbasketService()));
       return new TaskTestDataGenerator(
           environment,
           Clock.systemUTC(),
@@ -265,21 +264,19 @@ public final class TaskTestDataGenerator {
           new ArrayList<>(
               loadCompatibleClassifications(
                   classificationService, domains, taskClassificationType, taskCategories));
-      classifications.forEach(
-          classification ->
-              existingClassificationKeysByDomain
-                  .computeIfAbsent(classification.getDomain(), ignore -> new LinkedHashSet<>())
-                  .add(classification.getKey().toLowerCase(Locale.ROOT)));
+      classifications.forEach(classification ->
+          existingClassificationKeysByDomain
+              .computeIfAbsent(classification.getDomain(), ignore -> new LinkedHashSet<>())
+              .add(classification.getKey().toLowerCase(Locale.ROOT)));
 
       for (String domain : domains) {
         for (String category : taskCategories) {
           long compatibleCount =
               classifications.stream()
                   .filter(classification -> domain.equals(classification.getDomain()))
-                  .filter(
-                      classification ->
-                          classification.getCategory() != null
-                              && classification.getCategory().equalsIgnoreCase(category))
+                  .filter(classification ->
+                      classification.getCategory() != null
+                          && classification.getCategory().equalsIgnoreCase(category))
                   .count();
           for (int i = (int) compatibleCount; i < GENERATED_CLASSIFICATIONS_PER_CATEGORY; i++) {
             classifications.add(
@@ -297,11 +294,10 @@ public final class TaskTestDataGenerator {
       Map<String, Set<String>> existingWorkbasketKeysByDomain = new HashMap<>();
       List<WorkbasketSummary> workbaskets =
           new ArrayList<>(loadCompatibleWorkbaskets(workbasketService, domains));
-      workbaskets.forEach(
-          workbasket ->
-              existingWorkbasketKeysByDomain
-                  .computeIfAbsent(workbasket.getDomain(), ignore -> new LinkedHashSet<>())
-                  .add(workbasket.getKey().toLowerCase(Locale.ROOT)));
+      workbaskets.forEach(workbasket ->
+          existingWorkbasketKeysByDomain
+              .computeIfAbsent(workbasket.getDomain(), ignore -> new LinkedHashSet<>())
+              .add(workbasket.getKey().toLowerCase(Locale.ROOT)));
 
       List<String> candidateUsers = extractCandidateUsers(configuration, workbaskets);
 
@@ -996,10 +992,8 @@ public final class TaskTestDataGenerator {
     for (String domain : environment.domains()) {
       List<ClassificationSummary> classifications =
           environment.classifications().stream()
-              .filter(
-                  classification ->
-                      domain.equals(classification.getDomain())
-                          || classification.getDomain().isBlank())
+              .filter(classification ->
+                  domain.equals(classification.getDomain()) || classification.getDomain().isBlank())
               .collect(Collectors.toCollection(ArrayList::new));
       if (classifications.isEmpty()) {
         throw new IllegalArgumentException(
@@ -1048,11 +1042,8 @@ public final class TaskTestDataGenerator {
         .filter(type -> !type.isEmpty())
         .filter(type -> type.equalsIgnoreCase("TASK"))
         .findFirst()
-        .or(
-            () ->
-                configuration.getClassificationTypes().stream()
-                    .filter(Objects::nonNull)
-                    .findFirst())
+        .or(() ->
+            configuration.getClassificationTypes().stream().filter(Objects::nonNull).findFirst())
         .orElse("TASK");
   }
 
@@ -1084,12 +1075,10 @@ public final class TaskTestDataGenerator {
     query.domainIn(domains.toArray(String[]::new));
     List<ClassificationSummary> classifications = query.list();
     return classifications.stream()
-        .filter(
-            classification ->
-                classification.getCategory() != null
-                    && taskCategories.stream()
-                        .anyMatch(
-                            category -> category.equalsIgnoreCase(classification.getCategory())))
+        .filter(classification ->
+            classification.getCategory() != null
+                && taskCategories.stream()
+                    .anyMatch(category -> category.equalsIgnoreCase(classification.getCategory())))
         .toList();
   }
 

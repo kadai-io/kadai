@@ -25,7 +25,7 @@ import java.util.Objects;
 import org.springframework.hateoas.RepresentationModel;
 
 public class TasksCommentBatchRepresentationModel
-        extends RepresentationModel<TasksCommentBatchRepresentationModel> {
+    extends RepresentationModel<TasksCommentBatchRepresentationModel> {
 
   /** List of Task IDs. The comment will be added to each task in this list. */
   @JsonProperty("taskIds")
@@ -36,9 +36,7 @@ public class TasksCommentBatchRepresentationModel
   private final String textField;
 
   @ConstructorProperties({"taskIds", "textField"})
-  public TasksCommentBatchRepresentationModel(
-          List<String> taskIds,
-          String textField) {
+  public TasksCommentBatchRepresentationModel(List<String> taskIds, String textField) {
     this.taskIds = taskIds;
     this.textField = textField;
   }
@@ -63,8 +61,7 @@ public class TasksCommentBatchRepresentationModel
       return false;
     }
     TasksCommentBatchRepresentationModel other = (TasksCommentBatchRepresentationModel) obj;
-    return Objects.equals(taskIds, other.taskIds)
-            && Objects.equals(textField, other.textField);
+    return Objects.equals(taskIds, other.taskIds) && Objects.equals(textField, other.textField);
   }
 
   @Override

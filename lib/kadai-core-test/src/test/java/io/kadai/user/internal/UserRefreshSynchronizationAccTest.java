@@ -107,12 +107,10 @@ class UserRefreshSynchronizationAccTest {
 
     UserRefreshResult first =
         synchronize(
-            List.of(
-                user("data-user", "Same", null, Set.of("group"), Set.of("permission"))));
+            List.of(user("data-user", "Same", null, Set.of("group"), Set.of("permission"))));
     UserRefreshResult second =
         synchronize(
-            List.of(
-                user("data-user", "Same", null, Set.of("group"), Set.of("permission"))));
+            List.of(user("data-user", "Same", null, Set.of("group"), Set.of("permission"))));
 
     assertThat(first.updatedUsers()).isEqualTo(1);
     assertThat(second.updatedUsers()).isZero();
@@ -156,8 +154,7 @@ class UserRefreshSynchronizationAccTest {
             user("a-change", "New", "new", Set.of("g-new"), Set.of("p-new")),
             user("b-insert", "Inserted", null, Set.of("g"), Set.of("p")));
 
-    assertThatThrownBy(() -> synchronize(refreshedUsers))
-        .isInstanceOf(RuntimeException.class);
+    assertThatThrownBy(() -> synchronize(refreshedUsers)).isInstanceOf(RuntimeException.class);
 
     assertThat(dumpTables()).isEqualTo(before);
     assertThat(userIds()).doesNotContain("b-insert");
@@ -169,8 +166,13 @@ class UserRefreshSynchronizationAccTest {
   void should_FlushManyBatchesWithoutSplittingTheTransaction() throws Exception {
     List<User> users =
         IntStream.range(0, 11)
-            .mapToObj(index -> user("batch-" + index, "Batch", null,
-                Set.of("group-" + index), Set.of("permission-" + index)))
+            .mapToObj(index ->
+                user(
+                    "batch-" + index,
+                    "Batch",
+                    null,
+                    Set.of("group-" + index),
+                    Set.of("permission-" + index)))
             .map(User.class::cast)
             .toList();
 
@@ -193,8 +195,8 @@ class UserRefreshSynchronizationAccTest {
             List.of(
                 user("replacement", "New", "new", Set.of("new-group"), Set.of("new-permission"))));
 
-    assertThatThrownBy(
-            () -> transactionProvider.executeInTransaction(
+    assertThatThrownBy(() ->
+            transactionProvider.executeInTransaction(
                 rethrowing(() -> {
                   userServiceImpl.synchronizeUsers(prepared, BATCH_SIZE);
                   throw new IllegalStateException("Caller failed after synchronization");
@@ -277,7 +279,8 @@ class UserRefreshSynchronizationAccTest {
   }
 
   private void createGuardReference(String userId) throws Exception {
-    try (Connection connection = connection(); Statement statement = connection.createStatement()) {
+    try (Connection connection = connection();
+        Statement statement = connection.createStatement()) {
       statement.execute(
           "CREATE TABLE USER_REFRESH_TEST_REFERENCE (USER_ID VARCHAR(32) NOT NULL, "
               + "CONSTRAINT USER_REFRESH_TEST_REFERENCE_USER FOREIGN KEY (USER_ID) "
@@ -293,7 +296,8 @@ class UserRefreshSynchronizationAccTest {
   }
 
   private void dropGuardTable() throws Exception {
-    try (Connection connection = connection(); Statement statement = connection.createStatement()) {
+    try (Connection connection = connection();
+        Statement statement = connection.createStatement()) {
       try {
         statement.execute("DROP TABLE USER_REFRESH_TEST_REFERENCE");
       } catch (java.sql.SQLException ignored) {
@@ -308,8 +312,10 @@ class UserRefreshSynchronizationAccTest {
         "GROUP_INFO",
             dump("SELECT USER_ID, GROUP_ID FROM GROUP_INFO ORDER BY USER_ID, GROUP_ID", 2),
         "PERMISSION_INFO",
-            dump("SELECT USER_ID, PERMISSION_ID FROM PERMISSION_INFO "
-                + "ORDER BY USER_ID, PERMISSION_ID", 2));
+            dump(
+                "SELECT USER_ID, PERMISSION_ID FROM PERMISSION_INFO "
+                    + "ORDER BY USER_ID, PERMISSION_ID",
+                2));
   }
 
   private List<List<String>> dump(String sql, int columns) throws Exception {
@@ -329,8 +335,7 @@ class UserRefreshSynchronizationAccTest {
   }
 
   private Connection connection() throws Exception {
-    Connection connection =
-        kadaiEngine.getConfiguration().getDataSource().getConnection();
+    Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection();
     connection.setSchema(kadaiEngine.getConfiguration().getSchemaName());
     return connection;
   }

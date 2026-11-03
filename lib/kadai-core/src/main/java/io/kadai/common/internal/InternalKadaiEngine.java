@@ -73,11 +73,10 @@ public interface InternalKadaiEngine {
    */
   @SuppressWarnings("checkstyle:JavadocMethod")
   default void executeInDatabaseConnection(Runnable runnable) {
-    executeInDatabaseConnection(
-        () -> {
-          runnable.run();
-          return null;
-        });
+    executeInDatabaseConnection(() -> {
+      runnable.run();
+      return null;
+    });
   }
 
   /**

@@ -70,8 +70,7 @@ class QueryTasksByRoleAccTest extends AbstractAccTest {
             default ->
                 throw new SystemException(
                     String.format(
-                        "Invalid User: '%s'",
-                        kadaiEngine.getCurrentUserContext().getUserId()));
+                        "Invalid User: '%s'", kadaiEngine.getCurrentUserContext().getUserId()));
           };
 
       assertThat(results).hasSize(expectedSize);

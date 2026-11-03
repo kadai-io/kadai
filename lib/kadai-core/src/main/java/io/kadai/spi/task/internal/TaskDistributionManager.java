@@ -60,10 +60,9 @@ public final class TaskDistributionManager {
     return taskDistributionProviderList.stream()
         .filter(provider -> provider.getClass().getSimpleName().equals(name))
         .findFirst()
-        .orElseThrow(
-            () ->
-                new InvalidArgumentException(
-                    String.format("The distribution strategy '%s' does not exist.", name)));
+        .orElseThrow(() ->
+            new InvalidArgumentException(
+                String.format("The distribution strategy '%s' does not exist.", name)));
   }
 
   public Map<String, List<String>> distributeTasks(

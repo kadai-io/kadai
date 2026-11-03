@@ -1020,19 +1020,18 @@ public class TaskQueryFilterCustomFields implements QueryParameter<TaskQuery, Vo
             Pair.of(CUSTOM_14, of(custom14In, custom14NotIn, custom14Like, custom14NotLike)),
             Pair.of(CUSTOM_15, of(custom15In, custom15NotIn, custom15Like, custom15NotLike)),
             Pair.of(CUSTOM_16, of(custom16In, custom16NotIn, custom16Like, custom16NotLike)))
-        .forEach(
-            pair -> {
-              Optional.ofNullable(pair.getRight().getFirst())
-                  .ifPresent(l -> query.customAttributeIn(pair.getLeft(), l));
-              Optional.ofNullable(pair.getRight().getSecond())
-                  .ifPresent(l -> query.customAttributeNotIn(pair.getLeft(), l));
-              Optional.ofNullable(pair.getRight().getThird())
-                  .map(this::wrapElementsInLikeStatement)
-                  .ifPresent(l -> query.customAttributeLike(pair.getLeft(), l));
-              Optional.ofNullable(pair.getRight().getFourth())
-                  .map(this::wrapElementsInLikeStatement)
-                  .ifPresent(l -> query.customAttributeNotLike(pair.getLeft(), l));
-            });
+        .forEach(pair -> {
+          Optional.ofNullable(pair.getRight().getFirst())
+              .ifPresent(l -> query.customAttributeIn(pair.getLeft(), l));
+          Optional.ofNullable(pair.getRight().getSecond())
+              .ifPresent(l -> query.customAttributeNotIn(pair.getLeft(), l));
+          Optional.ofNullable(pair.getRight().getThird())
+              .map(this::wrapElementsInLikeStatement)
+              .ifPresent(l -> query.customAttributeLike(pair.getLeft(), l));
+          Optional.ofNullable(pair.getRight().getFourth())
+              .map(this::wrapElementsInLikeStatement)
+              .ifPresent(l -> query.customAttributeNotLike(pair.getLeft(), l));
+        });
     return null;
   }
 }

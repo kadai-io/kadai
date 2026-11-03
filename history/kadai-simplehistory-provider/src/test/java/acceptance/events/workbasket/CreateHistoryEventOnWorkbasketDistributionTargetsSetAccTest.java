@@ -42,47 +42,46 @@ class CreateHistoryEventOnWorkbasketDistributionTargetsSetAccTest extends Abstra
       should_CreateWorkbasketDistributionTargetsUpdatedHistoryEvent_When_DistributionTargetsAreSet()
           throws Exception {
     kadaiEngine.runAsAdmin(
-        CheckedRunnable.rethrowing(
-            () -> {
-              final String sourceWorkbasketId = "WBI:100000000000000000000000000000000004";
+        CheckedRunnable.rethrowing(() -> {
+          final String sourceWorkbasketId = "WBI:100000000000000000000000000000000004";
 
-              List<String> targetWorkbaskets =
-                  List.of(
-                      "WBI:100000000000000000000000000000000002",
-                      "WBI:100000000000000000000000000000000003");
+          List<String> targetWorkbaskets =
+              List.of(
+                  "WBI:100000000000000000000000000000000002",
+                  "WBI:100000000000000000000000000000000003");
 
-              List<WorkbasketHistoryEvent> events =
-                  historyService
-                      .createWorkbasketHistoryQuery()
-                      .workbasketIdIn(sourceWorkbasketId)
-                      .list();
+          List<WorkbasketHistoryEvent> events =
+              historyService
+                  .createWorkbasketHistoryQuery()
+                  .workbasketIdIn(sourceWorkbasketId)
+                  .list();
 
-              assertThat(events).isEmpty();
+          assertThat(events).isEmpty();
 
-              workbasketService.setDistributionTargets(
-                  "WBI:100000000000000000000000000000000004", targetWorkbaskets);
+          workbasketService.setDistributionTargets(
+              "WBI:100000000000000000000000000000000004", targetWorkbaskets);
 
-              events =
-                  historyService
-                      .createWorkbasketHistoryQuery()
-                      .workbasketIdIn(sourceWorkbasketId)
-                      .list();
+          events =
+              historyService
+                  .createWorkbasketHistoryQuery()
+                  .workbasketIdIn(sourceWorkbasketId)
+                  .list();
 
-              assertThat(events).hasSize(1);
+          assertThat(events).hasSize(1);
 
-              String eventType = events.get(0).getEventType();
-              String details =
-                  workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
+          String eventType = events.get(0).getEventType();
+          String details =
+              workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
 
-              assertThat(eventType)
-                  .isEqualTo(WorkbasketHistoryEventType.DISTRIBUTION_TARGETS_UPDATED.getName());
-              assertThat(details)
-                  .contains(
-                      "\"newValue\":[\"WBI:100000000000000000000000000000000002\","
-                          + "\"WBI:100000000000000000000000000000000003\"");
-              assertThat(events.get(0).getUserId()).isEqualTo("user-3-5");
-              assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
-            }),
+          assertThat(eventType)
+              .isEqualTo(WorkbasketHistoryEventType.DISTRIBUTION_TARGETS_UPDATED.getName());
+          assertThat(details)
+              .contains(
+                  "\"newValue\":[\"WBI:100000000000000000000000000000000002\","
+                      + "\"WBI:100000000000000000000000000000000003\"");
+          assertThat(events.get(0).getUserId()).isEqualTo("user-3-5");
+          assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
+        }),
         "user-3-5");
   }
 }

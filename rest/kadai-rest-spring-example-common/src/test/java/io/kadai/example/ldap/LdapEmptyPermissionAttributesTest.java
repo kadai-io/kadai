@@ -59,8 +59,8 @@ class LdapEmptyPermissionAttributesTest {
         ldapClient.searchUsersAndGroupsAndPermissions("lead");
     assertThat(usersGroupsPermissions)
         .extracting(AccessIdRepresentationModel::getAccessId)
-        .containsExactlyInAnyOrder("teamlead-1", "teamlead-2",
-            "cn=ksc-teamleads,cn=groups,ou=test,o=kadai");
+        .containsExactlyInAnyOrder(
+            "teamlead-1", "teamlead-2", "cn=ksc-teamleads,cn=groups,ou=test,o=kadai");
   }
 
   @Test
@@ -108,5 +108,4 @@ class LdapEmptyPermissionAttributesTest {
     assertThat(user11.getOrgLevel3()).isNull();
     assertThat(user11.getOrgLevel4()).isNull();
   }
-
 }

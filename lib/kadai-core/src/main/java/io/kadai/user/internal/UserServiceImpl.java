@@ -106,12 +106,11 @@ public class UserServiceImpl implements UserService {
         userIds.stream().map(String::toLowerCase).collect(Collectors.toSet());
 
     List<UserImpl> users =
-        internalKadaiEngine.executeInDatabaseConnection(
-            () -> {
-              List<UserImpl> foundUsers = userMapper.findByIds(finalUserIds);
-              enrichUsers(foundUsers);
-              return foundUsers;
-            });
+        internalKadaiEngine.executeInDatabaseConnection(() -> {
+          List<UserImpl> foundUsers = userMapper.findByIds(finalUserIds);
+          enrichUsers(foundUsers);
+          return foundUsers;
+        });
 
     return users.stream().map(User.class::cast).toList();
   }
@@ -141,11 +140,10 @@ public class UserServiceImpl implements UserService {
     standardUpdateActions(getUser(userToUpdate.getId()), userToUpdate);
 
     internalKadaiEngine.executeInDatabaseConnection(() -> userMapper.update(userToUpdate));
-    internalKadaiEngine.executeInDatabaseConnection(
-        () -> {
-          userMapper.deleteGroups(userToUpdate.getId());
-          userMapper.deletePermissions(userToUpdate.getId());
-        });
+    internalKadaiEngine.executeInDatabaseConnection(() -> {
+      userMapper.deleteGroups(userToUpdate.getId());
+      userMapper.deletePermissions(userToUpdate.getId());
+    });
     if (userToUpdate.getGroups() != null && !userToUpdate.getGroups().isEmpty()) {
       internalKadaiEngine.executeInDatabaseConnection(() -> userMapper.insertGroups(userToUpdate));
     }
@@ -173,12 +171,11 @@ public class UserServiceImpl implements UserService {
     User user = getUser(id);
     String userId = user.getId();
 
-    internalKadaiEngine.executeInDatabaseConnection(
-        () -> {
-          userMapper.delete(userId);
-          userMapper.deleteGroups(userId);
-          userMapper.deletePermissions(userId);
-        });
+    internalKadaiEngine.executeInDatabaseConnection(() -> {
+      userMapper.delete(userId);
+      userMapper.deleteGroups(userId);
+      userMapper.deletePermissions(userId);
+    });
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Method deleteUser() deleted User with id '{}'.", userId);
     }
@@ -191,12 +188,11 @@ public class UserServiceImpl implements UserService {
 
   public void deleteAllUsersGroupsPermissions() throws NotAuthorizedException {
     internalKadaiEngine.getEngine().checkRoleMembership(KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
-    internalKadaiEngine.executeInDatabaseConnection(
-        () -> {
-          userMapper.deleteAll();
-          userMapper.deleteAllGroups();
-          userMapper.deleteAllPermissions();
-        });
+    internalKadaiEngine.executeInDatabaseConnection(() -> {
+      userMapper.deleteAll();
+      userMapper.deleteAllGroups();
+      userMapper.deleteAllPermissions();
+    });
   }
 
   void enrichUsers(List<UserImpl> users) {
@@ -213,9 +209,7 @@ public class UserServiceImpl implements UserService {
     boolean resolveDomains =
         minimalWorkbasketPermissions != null && !minimalWorkbasketPermissions.isEmpty();
 
-    for (int fromIndex = 0;
-        fromIndex < userIds.size();
-        fromIndex += USER_ENRICHMENT_BATCH_SIZE) {
+    for (int fromIndex = 0; fromIndex < userIds.size(); fromIndex += USER_ENRICHMENT_BATCH_SIZE) {
       int toIndex = Math.min(fromIndex + USER_ENRICHMENT_BATCH_SIZE, userIds.size());
       Set<String> batchUserIds = new HashSet<>(userIds.subList(fromIndex, toIndex));
 
@@ -233,8 +227,7 @@ public class UserServiceImpl implements UserService {
       user.setGroups(
           new HashSet<>(groupsByUserId.getOrDefault(user.getId(), Collections.emptySet())));
       user.setPermissions(
-          new HashSet<>(
-              permissionsByUserId.getOrDefault(user.getId(), Collections.emptySet())));
+          new HashSet<>(permissionsByUserId.getOrDefault(user.getId(), Collections.emptySet())));
       user.setDomains(
           new HashSet<>(domainsByUserId.getOrDefault(user.getId(), Collections.emptySet())));
     }
@@ -370,22 +363,23 @@ public class UserServiceImpl implements UserService {
     }
     Set<String> groups = normalize(user.getGroups());
     Set<String> permissions = normalize(user.getPermissions());
-    UserRefreshState state = new UserRefreshState(
-        id,
-        user.getFirstName(),
-        user.getLastName(),
-        fullName,
-        longName,
-        user.getEmail(),
-        user.getPhone(),
-        user.getMobilePhone(),
-        user.getOrgLevel1(),
-        user.getOrgLevel2(),
-        user.getOrgLevel3(),
-        user.getOrgLevel4(),
-        user.getData(),
-        groups,
-        permissions);
+    UserRefreshState state =
+        new UserRefreshState(
+            id,
+            user.getFirstName(),
+            user.getLastName(),
+            fullName,
+            longName,
+            user.getEmail(),
+            user.getPhone(),
+            user.getMobilePhone(),
+            user.getOrgLevel1(),
+            user.getOrgLevel2(),
+            user.getOrgLevel3(),
+            user.getOrgLevel4(),
+            user.getData(),
+            groups,
+            permissions);
     validatePersistedLengths(state);
     return state;
   }
@@ -438,14 +432,12 @@ public class UserServiceImpl implements UserService {
           internalKadaiEngine
               .getEngine()
               .runAsAdmin(
-                  wrapping(
-                      () ->
-                          workbasketService
-                              .createWorkbasketQuery()
-                              .accessIdsHavePermissions(
-                                  minimalWorkbasketPermissions, accessIds.toArray(String[]::new))
-                              .listValues(
-                                  WorkbasketQueryColumnName.DOMAIN, SortDirection.ASCENDING))));
+                  wrapping(() ->
+                      workbasketService
+                          .createWorkbasketQuery()
+                          .accessIdsHavePermissions(
+                              minimalWorkbasketPermissions, accessIds.toArray(String[]::new))
+                          .listValues(WorkbasketQueryColumnName.DOMAIN, SortDirection.ASCENDING))));
     }
     return Collections.emptySet();
   }
@@ -511,5 +503,4 @@ public class UserServiceImpl implements UserService {
     newUser.setPermissions(
         newUser.getPermissions().stream().map((String::toLowerCase)).collect(Collectors.toSet()));
   }
-
 }

@@ -43,48 +43,47 @@ class CreateHistoryEventOnWorkbasketAccessItemsSetAccTest extends AbstractAccTes
   void should_CreateWorkbasketAccessItemsUpdatedHistoryEvent_When_AccessItemsAreSet()
       throws Exception {
     kadaiEngine.runAsAdmin(
-        CheckedRunnable.rethrowing(
-            () -> {
-              final String workbasketId = "WBI:100000000000000000000000000000000004";
-              final String accessId1 = "peter";
-              final String accessId2 = "claudia";
-              final String accessId3 = "sven";
+        CheckedRunnable.rethrowing(() -> {
+          final String workbasketId = "WBI:100000000000000000000000000000000004";
+          final String accessId1 = "peter";
+          final String accessId2 = "claudia";
+          final String accessId3 = "sven";
 
-              List<WorkbasketHistoryEvent> events =
-                  historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
+          List<WorkbasketHistoryEvent> events =
+              historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
 
-              assertThat(events).isEmpty();
+          assertThat(events).isEmpty();
 
-              List<WorkbasketAccessItem> newItems = new ArrayList<>();
+          List<WorkbasketAccessItem> newItems = new ArrayList<>();
 
-              WorkbasketAccessItem newWorkbasketAccessItem =
-                  workbasketService.newWorkbasketAccessItem(workbasketId, accessId1);
-              WorkbasketAccessItem newWorkbasketAccessItem2 =
-                  workbasketService.newWorkbasketAccessItem(workbasketId, accessId2);
-              WorkbasketAccessItem newWorkbasketAccessItem3 =
-                  workbasketService.newWorkbasketAccessItem(workbasketId, accessId3);
+          WorkbasketAccessItem newWorkbasketAccessItem =
+              workbasketService.newWorkbasketAccessItem(workbasketId, accessId1);
+          WorkbasketAccessItem newWorkbasketAccessItem2 =
+              workbasketService.newWorkbasketAccessItem(workbasketId, accessId2);
+          WorkbasketAccessItem newWorkbasketAccessItem3 =
+              workbasketService.newWorkbasketAccessItem(workbasketId, accessId3);
 
-              newItems.add(newWorkbasketAccessItem);
-              newItems.add(newWorkbasketAccessItem2);
-              newItems.add(newWorkbasketAccessItem3);
+          newItems.add(newWorkbasketAccessItem);
+          newItems.add(newWorkbasketAccessItem2);
+          newItems.add(newWorkbasketAccessItem3);
 
-              workbasketService.setWorkbasketAccessItems(workbasketId, newItems);
+          workbasketService.setWorkbasketAccessItems(workbasketId, newItems);
 
-              events =
-                  historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
+          events =
+              historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
 
-              assertThat(events).hasSize(1);
+          assertThat(events).hasSize(1);
 
-              String eventType = events.get(0).getEventType();
-              String details =
-                  workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
+          String eventType = events.get(0).getEventType();
+          String details =
+              workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
 
-              assertThat(eventType)
-                  .isEqualTo(WorkbasketHistoryEventType.ACCESS_ITEMS_UPDATED.getName());
-              assertThat(details).contains("peter");
-              assertThat(events.get(0).getUserId()).isEqualTo("user-8-8");
-              assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
-            }),
+          assertThat(eventType)
+              .isEqualTo(WorkbasketHistoryEventType.ACCESS_ITEMS_UPDATED.getName());
+          assertThat(details).contains("peter");
+          assertThat(events.get(0).getUserId()).isEqualTo("user-8-8");
+          assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
+        }),
         "user-8-8");
   }
 }

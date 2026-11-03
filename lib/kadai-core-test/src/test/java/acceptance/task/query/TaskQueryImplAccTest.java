@@ -199,24 +199,23 @@ class TaskQueryImplAccTest {
 
         Consumer<TaskService> consumer =
             taskService ->
-                internalKadaiEngine.executeInDatabaseConnection(
-                    () -> {
-                      List<TaskSummary> results =
-                          taskService
-                              .createTaskQuery()
-                              .workbasketIdIn(wb1.getId())
-                              .stateIn(TaskState.READY)
-                              .lockResultsEquals(LOCK_RESULTS_EQUALS)
-                              .list();
-                      listedTasks.addAll(results);
-                      for (TaskSummary task : results) {
-                        try {
-                          taskService.claim(task.getId());
-                        } catch (Exception e) {
-                          throw new SystemException(e.getMessage());
-                        }
-                      }
-                    });
+                internalKadaiEngine.executeInDatabaseConnection(() -> {
+                  List<TaskSummary> results =
+                      taskService
+                          .createTaskQuery()
+                          .workbasketIdIn(wb1.getId())
+                          .stateIn(TaskState.READY)
+                          .lockResultsEquals(LOCK_RESULTS_EQUALS)
+                          .list();
+                  listedTasks.addAll(results);
+                  for (TaskSummary task : results) {
+                    try {
+                      taskService.claim(task.getId());
+                    } catch (Exception e) {
+                      throw new SystemException(e.getMessage());
+                    }
+                  }
+                });
 
         Callable<Void> action =
             () -> {

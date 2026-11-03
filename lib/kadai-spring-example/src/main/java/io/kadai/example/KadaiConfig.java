@@ -41,7 +41,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /** Class to set /load configuration for Kadai Library. */
 @Configuration
-@EnableTransactionManagement()
+@EnableTransactionManagement
 public class KadaiConfig {
 
   @Value("${kadai.schemaName:KADAI}")

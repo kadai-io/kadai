@@ -28,7 +28,6 @@ import java.util.List;
 public class QuerySortParameter<Q extends BaseQuery<?, ?>, S extends QuerySortBy<Q>>
     implements QueryParameter<Q, Void> {
 
-
   @Parameter(
       name = "sort-by",
       description =

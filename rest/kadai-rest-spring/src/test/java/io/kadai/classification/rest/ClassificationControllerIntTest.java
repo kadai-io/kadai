@@ -528,8 +528,7 @@ class ClassificationControllerIntTest {
   @Test
   @DirtiesContext
   void should_RejectIdentityChangesAndReturnCanonicalIdentity() {
-    ClassificationRepresentationModel newClassification =
-        new ClassificationRepresentationModel();
+    ClassificationRepresentationModel newClassification = new ClassificationRepresentationModel();
     newClassification.setType("TASK");
     newClassification.setCategory("MANUAL");
     newClassification.setDomain("DOMAIN_A");
@@ -588,17 +587,14 @@ class ClassificationControllerIntTest {
 
   private void assertUpdateRejected(
       String classificationUrl, ClassificationRepresentationModel classification) {
-    assertThatThrownBy(
-            () ->
-                restClient
-                    .put()
-                    .uri(classificationUrl)
-                    .headers(
-                        headers ->
-                            headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
-                    .body(classification)
-                    .retrieve()
-                    .toEntity(ClassificationRepresentationModel.class))
+    assertThatThrownBy(() ->
+            restClient
+                .put()
+                .uri(classificationUrl)
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                .body(classification)
+                .retrieve()
+                .toEntity(ClassificationRepresentationModel.class))
         .isInstanceOf(HttpStatusCodeException.class)
         .extracting(HttpStatusCodeException.class::cast)
         .extracting(HttpStatusCodeException::getStatusCode)

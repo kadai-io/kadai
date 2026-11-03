@@ -39,9 +39,7 @@ public class TaskUpdatePriorityWorker {
   private final PriorityServiceManager priorityServiceManager;
 
   public TaskUpdatePriorityWorker(KadaiEngine kadaiEngine) {
-    this(
-        kadaiEngine,
-        InternalKadaiEngineResolver.resolve(kadaiEngine).getPriorityServiceManager());
+    this(kadaiEngine, InternalKadaiEngineResolver.resolve(kadaiEngine).getPriorityServiceManager());
   }
 
   public TaskUpdatePriorityWorker(
@@ -57,27 +55,26 @@ public class TaskUpdatePriorityWorker {
 
   public List<String> executeBatch(List<String> taskIds) {
     List<String> updatedTaskIds = new ArrayList<>();
-    sqlConnectionRunner.runWithConnection(
-        connection -> {
-          TaskUpdatePriorityBatchStatement taskUpdateBatch =
-              new TaskUpdatePriorityBatchStatement(connection);
+    sqlConnectionRunner.runWithConnection(connection -> {
+      TaskUpdatePriorityBatchStatement taskUpdateBatch =
+          new TaskUpdatePriorityBatchStatement(connection);
 
-          List<TaskSummary> list = getTaskSummariesByIds(taskIds);
-          for (TaskSummary taskSummary : list) {
-            OptionalInt calculatedPriority = getCalculatedPriority(taskSummary);
-            if (calculatedPriority.isPresent()) {
-              final String taskId = taskSummary.getId();
-              updatedTaskIds.add(taskId);
-              taskUpdateBatch.addPriorityUpdate(taskId, calculatedPriority.getAsInt());
-            }
-          }
-          taskUpdateBatch.executeBatch();
+      List<TaskSummary> list = getTaskSummariesByIds(taskIds);
+      for (TaskSummary taskSummary : list) {
+        OptionalInt calculatedPriority = getCalculatedPriority(taskSummary);
+        if (calculatedPriority.isPresent()) {
+          final String taskId = taskSummary.getId();
+          updatedTaskIds.add(taskId);
+          taskUpdateBatch.addPriorityUpdate(taskId, calculatedPriority.getAsInt());
+        }
+      }
+      taskUpdateBatch.executeBatch();
 
-          // don't forget to save changes
-          if (!connection.getAutoCommit()) {
-            connection.commit();
-          }
-        });
+      // don't forget to save changes
+      if (!connection.getAutoCommit()) {
+        connection.commit();
+      }
+    });
 
     return updatedTaskIds;
   }

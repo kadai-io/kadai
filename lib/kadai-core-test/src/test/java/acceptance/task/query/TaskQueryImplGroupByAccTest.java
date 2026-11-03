@@ -53,8 +53,7 @@ import org.junit.jupiter.api.Test;
 class TaskQueryImplGroupByAccTest implements KadaiConfigurationModifier {
   @KadaiInject TaskService taskService;
   @KadaiInject WorkbasketService workbasketService;
-  @KadaiInject
-  CurrentUserContext currentUserContext;
+  @KadaiInject CurrentUserContext currentUserContext;
   @KadaiInject ClassificationService classificationService;
   @KadaiInject UserService userService;
 

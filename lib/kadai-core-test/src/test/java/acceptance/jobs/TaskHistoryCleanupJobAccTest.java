@@ -351,15 +351,14 @@ class TaskHistoryCleanupJobAccTest {
                         Pair.of(taskId1, TaskHistoryEventType.CREATED),
                         Pair.of(taskId1, TaskHistoryEventType.COMPLETED),
                         Pair.of(taskId2, TaskHistoryEventType.CREATED))
-                    .map(
-                        pair ->
-                            createTaskHistoryEvent(
-                                pair.getLeft(),
-                                pair.getRight().getName(),
-                                "someUserId",
-                                "someDetails",
-                                Instant.now().minus(20, ChronoUnit.DAYS),
-                                parentBusinessId))
+                    .map(pair ->
+                        createTaskHistoryEvent(
+                            pair.getLeft(),
+                            pair.getRight().getName(),
+                            "someUserId",
+                            "someDetails",
+                            Instant.now().minus(20, ChronoUnit.DAYS),
+                            parentBusinessId))
                     .toList();
             historyService.deleteTaskHistoryEventsByTaskIds(List.of(taskId1, taskId2));
             events.forEach(x -> x.setCreated(Instant.now().minus(20, ChronoUnit.DAYS)));

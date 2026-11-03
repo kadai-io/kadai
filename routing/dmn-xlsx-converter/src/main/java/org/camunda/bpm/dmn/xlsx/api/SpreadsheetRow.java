@@ -16,7 +16,6 @@
  *
  */
 
-
 package org.camunda.bpm.dmn.xlsx.api;
 
 import java.util.Collection;

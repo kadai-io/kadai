@@ -60,8 +60,7 @@ class UserNPlusOneAccTest extends AbstractAccTest {
     Field sessionManagerField = KadaiEngineImpl.class.getDeclaredField("sessionManager");
     sessionManagerField.setAccessible(true);
 
-    SqlSessionManager sqlSessionManager =
-        (SqlSessionManager) sessionManagerField.get(kadaiEngine);
+    SqlSessionManager sqlSessionManager = (SqlSessionManager) sessionManagerField.get(kadaiEngine);
     sqlSessionManager.getConfiguration().addInterceptor(queryCounter);
   }
 
@@ -92,9 +91,7 @@ class UserNPlusOneAccTest extends AbstractAccTest {
     QueryStats oneUserStats = queryCounter.snapshot();
 
     queryCounter.reset();
-    kadaiEngine
-        .getUserService()
-        .getUsers(new LinkedHashSet<>(userIds.subList(0, 10)));
+    kadaiEngine.getUserService().getUsers(new LinkedHashSet<>(userIds.subList(0, 10)));
     QueryStats tenUserStats = queryCounter.snapshot();
 
     assertThat(tenUserStats.count())
@@ -102,8 +99,7 @@ class UserNPlusOneAccTest extends AbstractAccTest {
             "Query count must not grow with the number of users.%n"
                 + "1 user: %s%n"
                 + "10 users: %s",
-            oneUserStats,
-            tenUserStats)
+            oneUserStats, tenUserStats)
         .isEqualTo(oneUserStats.count())
         .isLessThanOrEqualTo(4);
     assertThat(tenUserStats.statementIds())
@@ -138,8 +134,7 @@ class UserNPlusOneAccTest extends AbstractAccTest {
             "Query count must not grow with the number of users.%n"
                 + "1 user: %s%n"
                 + "10 users: %s",
-            oneUserStats,
-            tenUserStats)
+            oneUserStats, tenUserStats)
         .isEqualTo(oneUserStats.count())
         .isLessThanOrEqualTo(4);
     assertThat(tenUserStats.statementIds())

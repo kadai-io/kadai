@@ -119,13 +119,11 @@ public class UserQueryImpl implements UserQuery {
   @Override
   public List<UserSummary> list() {
     UserServiceImpl userService = (UserServiceImpl) kadaiEngine.getEngine().getUserService();
-    return kadaiEngine.executeInDatabaseConnection(
-        () -> {
-          List<UserImpl> users =
-              kadaiEngine.getSqlSession().selectList(LINK_TO_USER_MAPPER, this);
-          userService.enrichUsers(users);
-          return users.stream().map(UserSummary.class::cast).toList();
-        });
+    return kadaiEngine.executeInDatabaseConnection(() -> {
+      List<UserImpl> users = kadaiEngine.getSqlSession().selectList(LINK_TO_USER_MAPPER, this);
+      userService.enrichUsers(users);
+      return users.stream().map(UserSummary.class::cast).toList();
+    });
   }
 
   @Override

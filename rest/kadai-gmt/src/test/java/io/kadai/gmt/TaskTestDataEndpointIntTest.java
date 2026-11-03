@@ -121,12 +121,11 @@ class TaskTestDataEndpointIntTest {
   }
 
   private TestDataCounts retrieveTestDataCounts() {
-    return kadaiEngine.runAsAdmin(
-        () ->
-            new TestDataCounts(
-                taskService.createTaskQuery().count(),
-                workbasketService.createWorkbasketQuery().count(),
-                classificationService.createClassificationQuery().count()));
+    return kadaiEngine.runAsAdmin(() ->
+        new TestDataCounts(
+            taskService.createTaskQuery().count(),
+            workbasketService.createWorkbasketQuery().count(),
+            classificationService.createClassificationQuery().count()));
   }
 
   private String url(String path) {

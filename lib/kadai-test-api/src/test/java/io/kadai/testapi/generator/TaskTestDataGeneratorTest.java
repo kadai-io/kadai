@@ -85,36 +85,32 @@ class TaskTestDataGeneratorTest {
 
     assertThat(tasks)
         .hasSize(250)
-        .allSatisfy(
-            task -> {
-              assertThat(environment.domains()).contains(task.getDomain());
-              assertThat(task.getWorkbasketSummary()).isNotNull();
-              assertThat(task.getClassificationSummary()).isNotNull();
-              assertThat(task.getWorkbasketSummary().getDomain()).isEqualTo(task.getDomain());
-              assertThat(task.getClassificationSummary().getDomain()).isEqualTo(task.getDomain());
-              assertThat(environment.taskCategories())
-                  .anyMatch(
-                      category ->
-                          category.equalsIgnoreCase(task.getClassificationSummary().getCategory()));
-              assertThat(task.getPrimaryObjRef()).isNotNull();
-              assertThat(task.getPrimaryObjRef().getCompany()).isNotBlank();
-              assertThat(task.getPrimaryObjRef().getType()).isNotBlank();
-              assertThat(task.getPrimaryObjRef().getValue()).matches("\\d{8}");
-              assertThat(task.getCreated()).isNotNull();
-              assertThat(task.getModified()).isNotNull();
-              assertThat(task.getModified()).isAfterOrEqualTo(task.getCreated());
-              assertThat(task.getPlanned()).isNotNull();
-              assertThat(task.getDue()).isAfter(task.getPlanned());
-              assertThat(task.getExternalId()).startsWith("ETI:");
-              assertThat(task.getBusinessProcessId()).startsWith("BPI:");
-              assertThat(task.getParentBusinessProcessId()).startsWith("PBPI:");
-              assertThat(task.getCustomField(io.kadai.task.api.TaskCustomField.CUSTOM_1))
-                  .isNotBlank();
-              assertThat(task.getCustomField(io.kadai.task.api.TaskCustomField.CUSTOM_2))
-                  .isNotBlank();
-              assertThat(task.getCustomField(io.kadai.task.api.TaskCustomField.CUSTOM_14))
-                  .isEqualTo("abc");
-            });
+        .allSatisfy(task -> {
+          assertThat(environment.domains()).contains(task.getDomain());
+          assertThat(task.getWorkbasketSummary()).isNotNull();
+          assertThat(task.getClassificationSummary()).isNotNull();
+          assertThat(task.getWorkbasketSummary().getDomain()).isEqualTo(task.getDomain());
+          assertThat(task.getClassificationSummary().getDomain()).isEqualTo(task.getDomain());
+          assertThat(environment.taskCategories())
+              .anyMatch(category ->
+                  category.equalsIgnoreCase(task.getClassificationSummary().getCategory()));
+          assertThat(task.getPrimaryObjRef()).isNotNull();
+          assertThat(task.getPrimaryObjRef().getCompany()).isNotBlank();
+          assertThat(task.getPrimaryObjRef().getType()).isNotBlank();
+          assertThat(task.getPrimaryObjRef().getValue()).matches("\\d{8}");
+          assertThat(task.getCreated()).isNotNull();
+          assertThat(task.getModified()).isNotNull();
+          assertThat(task.getModified()).isAfterOrEqualTo(task.getCreated());
+          assertThat(task.getPlanned()).isNotNull();
+          assertThat(task.getDue()).isAfter(task.getPlanned());
+          assertThat(task.getExternalId()).startsWith("ETI:");
+          assertThat(task.getBusinessProcessId()).startsWith("BPI:");
+          assertThat(task.getParentBusinessProcessId()).startsWith("PBPI:");
+          assertThat(task.getCustomField(io.kadai.task.api.TaskCustomField.CUSTOM_1)).isNotBlank();
+          assertThat(task.getCustomField(io.kadai.task.api.TaskCustomField.CUSTOM_2)).isNotBlank();
+          assertThat(task.getCustomField(io.kadai.task.api.TaskCustomField.CUSTOM_14))
+              .isEqualTo("abc");
+        });
 
     assertThat(tasks.stream().map(Task::getState).collect(Collectors.toSet()))
         .contains(TaskState.READY, TaskState.CLAIMED, TaskState.COMPLETED);
@@ -201,22 +197,20 @@ class TaskTestDataGeneratorTest {
 
     AtomicInteger classificationCounter = new AtomicInteger();
     when(classificationService.newClassification(anyString(), anyString(), anyString()))
-        .thenAnswer(
-            invocation -> {
-              ClassificationImpl classification = new ClassificationImpl();
-              classification.setKey(invocation.getArgument(0));
-              classification.setDomain(invocation.getArgument(1));
-              classification.setType(invocation.getArgument(2));
-              return classification;
-            });
+        .thenAnswer(invocation -> {
+          ClassificationImpl classification = new ClassificationImpl();
+          classification.setKey(invocation.getArgument(0));
+          classification.setDomain(invocation.getArgument(1));
+          classification.setType(invocation.getArgument(2));
+          return classification;
+        });
     when(classificationService.createClassification(any(Classification.class)))
-        .thenAnswer(
-            invocation -> {
-              Classification classification = invocation.getArgument(0);
-              ((ClassificationImpl) classification)
-                  .setId("CLI:GEN:" + classificationCounter.incrementAndGet());
-              return classification;
-            });
+        .thenAnswer(invocation -> {
+          Classification classification = invocation.getArgument(0);
+          ((ClassificationImpl) classification)
+              .setId("CLI:GEN:" + classificationCounter.incrementAndGet());
+          return classification;
+        });
 
     WorkbasketService workbasketService = Mockito.mock(WorkbasketService.class);
     WorkbasketQuery workbasketQuery = Mockito.mock(WorkbasketQuery.class);
@@ -226,20 +220,18 @@ class TaskTestDataGeneratorTest {
 
     AtomicInteger workbasketCounter = new AtomicInteger();
     when(workbasketService.newWorkbasket(anyString(), anyString()))
-        .thenAnswer(
-            invocation -> {
-              WorkbasketImpl workbasket = new WorkbasketImpl();
-              workbasket.setKey(invocation.getArgument(0));
-              workbasket.setDomain(invocation.getArgument(1));
-              return workbasket;
-            });
+        .thenAnswer(invocation -> {
+          WorkbasketImpl workbasket = new WorkbasketImpl();
+          workbasket.setKey(invocation.getArgument(0));
+          workbasket.setDomain(invocation.getArgument(1));
+          return workbasket;
+        });
     when(workbasketService.createWorkbasket(any(Workbasket.class)))
-        .thenAnswer(
-            invocation -> {
-              Workbasket workbasket = invocation.getArgument(0);
-              ((WorkbasketImpl) workbasket).setId("WBI:GEN:" + workbasketCounter.incrementAndGet());
-              return workbasket;
-            });
+        .thenAnswer(invocation -> {
+          Workbasket workbasket = invocation.getArgument(0);
+          ((WorkbasketImpl) workbasket).setId("WBI:GEN:" + workbasketCounter.incrementAndGet());
+          return workbasket;
+        });
 
     TaskGenerationEnvironment environment =
         TaskTestDataGenerator.resolveEnvironment(
@@ -262,16 +254,15 @@ class TaskTestDataGeneratorTest {
         .isInstanceOf(IllegalArgumentException.class);
     assertThatThrownBy(() -> generator.generate(1, 1, null))
         .isInstanceOf(NullPointerException.class);
-    assertThatThrownBy(
-            () ->
-                new TaskTestDataGenerator(
-                    new TaskGenerationEnvironment(
-                        List.of("DOMAIN_A"),
-                        List.of("admin"),
-                        "TASK",
-                        List.of("EXTERNAL"),
-                        List.of(),
-                        List.of())))
+    assertThatThrownBy(() ->
+            new TaskTestDataGenerator(
+                new TaskGenerationEnvironment(
+                    List.of("DOMAIN_A"),
+                    List.of("admin"),
+                    "TASK",
+                    List.of("EXTERNAL"),
+                    List.of(),
+                    List.of())))
         .isInstanceOf(IllegalArgumentException.class);
   }
 

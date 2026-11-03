@@ -452,7 +452,7 @@ public interface TaskApi {
         @ApiResponse(
             responseCode = "404",
             description = "if no Task is found",
-            content = {@Content(schema = @Schema())}),
+            content = {@Content(schema = @Schema)}),
         @ApiResponse(
             responseCode = "400",
             description = "TASK_INVALID_OWNER",
@@ -638,11 +638,11 @@ public interface TaskApi {
                           @Schema(
                               example =
                                   """
-        {
-          "workbasketId": "WBI:000000000000000000000000000000000001",
-          "ownerId": "user-1-1"
-        }
-      """))),
+                                    {
+                                      "workbasketId": "WBI:000000000000000000000000000000000001",
+                                      "ownerId": "user-1-1"
+                                    }
+                                  """))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -804,11 +804,11 @@ public interface TaskApi {
                           @Schema(
                               example =
                                   """
-        {
-          "workbasketId": "WBI:000000000000000000000000000000000001",
-          "ownerId": "user-1-1"
-        }
-      """))),
+                                    {
+                                      "workbasketId": "WBI:000000000000000000000000000000000001",
+                                      "ownerId": "user-1-1"
+                                    }
+                                  """))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -963,11 +963,11 @@ public interface TaskApi {
                           @Schema(
                               example =
                                   """
-        {
-          "workbasketId": "WBI:000000000000000000000000000000000001",
-          "ownerId": "user-1-1"
-        }
-      """))),
+                                    {
+                                      "workbasketId": "WBI:000000000000000000000000000000000001",
+                                      "ownerId": "user-1-1"
+                                    }
+                                  """))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -1129,11 +1129,11 @@ public interface TaskApi {
                           @Schema(
                               example =
                                   """
-        {
-          "workbasketId": "WBI:000000000000000000000000000000000001",
-          "ownerId": "user-1-1"
-        }
-      """))),
+                                    {
+                                      "workbasketId": "WBI:000000000000000000000000000000000001",
+                                      "ownerId": "user-1-1"
+                                    }
+                                  """))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -1340,13 +1340,13 @@ public interface TaskApi {
                           @ExampleObject(
                               value =
                                   """
-                          {
-                            "taskIds": [
-                              "TKI:000000000000000000000000000000000003",
-                              "TKI:000000000000000000000000000000000002"
-                            ]
-                          }
-                          """))),
+                                  {
+                                    "taskIds": [
+                                      "TKI:000000000000000000000000000000000003",
+                                      "TKI:000000000000000000000000000000000002"
+                                    ]
+                                  }
+                                  """))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -1444,13 +1444,13 @@ public interface TaskApi {
                           @ExampleObject(
                               value =
                                   """
-                              {
-                                "taskIds": [
-                                  "TKI:000000000000000000000000000000000003",
-                                  "TKI:000000000000000000000000000000000002"
-                                ]
-                              }
-                              """))),
+                                  {
+                                    "taskIds": [
+                                      "TKI:000000000000000000000000000000000003",
+                                      "TKI:000000000000000000000000000000000002"
+                                    ]
+                                  }
+                                  """))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -1611,13 +1611,13 @@ public interface TaskApi {
                           @ExampleObject(
                               value =
                                   """
-                              {
-                                "taskIds": [
-                                  "TKI:000000000000000000000000000000000003",
-                                  "TKI:000000000000000000000000000000000002"
-                                ]
-                              }
-                              """))),
+                                  {
+                                    "taskIds": [
+                                      "TKI:000000000000000000000000000000000003",
+                                      "TKI:000000000000000000000000000000000002"
+                                    ]
+                                  }
+                                  """))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -1679,11 +1679,11 @@ public interface TaskApi {
                           @ExampleObject(
                               value =
                                   """
-                  {
-                    "owner": "user-1-1",
-                    "setTransferFlag": false
-                  }
-              """))),
+                                      {
+                                        "owner": "user-1-1",
+                                        "setTransferFlag": false
+                                      }
+                                  """))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -1868,13 +1868,13 @@ public interface TaskApi {
                           @ExampleObject(
                               value =
                                   """
-                          {
-                            "owner": "user-1-1",
-                            "setTransferFlag": true,
-                            "taskIds": ["TKI:000000000000000000000000000000000001", \
-                            "TKI:000000000000000000000000000000000002"]
-                          }
-                      """))),
+                                      {
+                                        "owner": "user-1-1",
+                                        "setTransferFlag": true,
+                                        "taskIds": ["TKI:000000000000000000000000000000000001", \
+                                        "TKI:000000000000000000000000000000000002"]
+                                      }
+                                  """))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -2013,11 +2013,11 @@ public interface TaskApi {
                           @ExampleObject(
                               value =
                                   """
-                          {
-                            "taskIds": ["TKI:000000000000000000000000000000000001", \
-                            "TKI:000000000000000000000000000000000002"]
-                          }
-                      """))),
+                                      {
+                                        "taskIds": ["TKI:000000000000000000000000000000000001", \
+                                        "TKI:000000000000000000000000000000000002"]
+                                      }
+                                  """))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -2153,18 +2153,18 @@ public interface TaskApi {
       summary = "Distribute Tasks to Destination Workbaskets",
       description =
           """
-        This endpoint distributes tasks to one or more destination workbaskets based on the
-        provided distribution strategy and additional information.
+            This endpoint distributes tasks to one or more destination workbaskets based on the
+            provided distribution strategy and additional information.
 
-        - If destination workbasket IDs are provided, tasks will be distributed to those specific
-          workbaskets.
-        - If a distribution strategy name is provided, the specified strategy will determine how
-          tasks are allocated.
-        - Additional information can be passed to further customize the distribution logic.
+            - If destination workbasket IDs are provided, tasks will be distributed to those specific
+              workbaskets.
+            - If a distribution strategy name is provided, the specified strategy will determine how
+              tasks are allocated.
+            - Additional information can be passed to further customize the distribution logic.
 
-        Tasks that cannot be distributed (e.g., due to errors) will remain in their original
-        workbaskets.
-      """,
+            Tasks that cannot be distributed (e.g., due to errors) will remain in their original
+            workbaskets.
+          """,
       requestBody =
           @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description =
@@ -2177,15 +2177,15 @@ public interface TaskApi {
                           @ExampleObject(
                               value =
                                   """
-                        {
-                          "taskIds": ["TKI:abcdef1234567890abcdef1234567890"],
-                          "destinationWorkbasketIds": [
-                              "WBI:abcdef1234567890abcdef1234567890",
-                              "WBI:1234567890abcdef1234567890abcdef"
-                          ],
-                          "distributionStrategyName": "CustomDistributionStrategy"
-                          }
-      """))),
+                                                    {
+                                                      "taskIds": ["TKI:abcdef1234567890abcdef1234567890"],
+                                                      "destinationWorkbasketIds": [
+                                                          "WBI:abcdef1234567890abcdef1234567890",
+                                                          "WBI:1234567890abcdef1234567890abcdef"
+                                                      ],
+                                                      "distributionStrategyName": "CustomDistributionStrategy"
+                                                      }
+                                  """))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -2272,94 +2272,95 @@ public interface TaskApi {
                           @ExampleObject(
                               value =
                                   """
-                          {
-                            "taskId": \
-                          "TKI:000000000000000000000000000000000003",
-                            "externalId": \
-                          "ETI:000000000000000000000000000000000003",
-                            "created": "2018-02-01T12:00:00.000Z",
-                            "modified": "2018-02-01T12:00:00.000Z",
-                            "planned": "2024-05-27T15:27:56.595Z",
-                            "received": "2024-05-29T15:27:56.595Z",
-                            "due": "2024-05-29T15:27:56.595Z",
-                            "name": "Widerruf",
-                            "creator": "creator_user_id",
-                            "description": "new description",
-                            "priority": 2,
-                            "manualPriority": -1,
-                            "state": "READY",
-                            "classificationSummary": {
-                              "classificationId": \
-                          "CLI:100000000000000000000000000000000003",
-                              "key": "L1050",
-                              "applicationEntryPoint": "",
-                              "category": "EXTERNAL",
-                              "domain": "DOMAIN_A",
-                              "name": "Widerruf",
-                              "parentId": "",
-                              "parentKey": "",
-                              "priority": 1,
-                              "serviceLevel": "P13D",
-                              "type": "TASK",
-                              "custom1": "VNR,RVNR,KOLVNR",
-                              "custom2": "",
-                              "custom3": "",
-                              "custom4": "",
-                              "custom5": "",
-                              "custom6": "",
-                              "custom7": "",
-                              "custom8": ""
-                            },
-                            "workbasketSummary": {
-                              "workbasketId": \
-                          "WBI:100000000000000000000000000000000001",
-                              "key": "GPK_KSC",
-                              "name": "Gruppenpostkorb KSC",
-                              "domain": "DOMAIN_A",
-                              "type": "GROUP",
-                              "description": "Gruppenpostkorb KSC",
-                              "owner": "teamlead-1",
-                              "custom1": "ABCQVW",
-                              "custom2": "",
-                              "custom3": "xyz4",
-                              "custom4": "",
-                              "custom5": "",
-                              "custom6": "",
-                              "custom7": "",
-                              "custom8": "",
-                              "orgLevel1": "",
-                              "orgLevel2": "",
-                              "orgLevel3": "",
-                              "orgLevel4": "",
-                              "markedForDeletion": false
-                            },
-                            "businessProcessId": "PI_0000000000003",
-                            "parentBusinessProcessId": \
-                          "DOC_0000000000000000003",
-                            "primaryObjRef": {
-                              "company": "00",
-                              "system": "PASystem",
-                              "systemInstance": "00",
-                              "type": "VNR",
-                              "value": "11223344"
-                            },
-                            "custom1": "efg",
-                            "custom14": "abc",
-                            "customInt1": 1,
-                            "customInt2": 2,
-                            "customInt3": 3,
-                            "customInt4": 4,
-                            "customInt5": 5,
-                            "customInt6": 6,
-                            "customInt7": 7,
-                            "customInt8": 8,
-                            "secondaryObjectReferences": [],
-                            "customAttributes": [],
-                            "callbackInfo": [],
-                            "attachments": [],
-                            "read": false,
-                            "transferred": false
-                          }"""))),
+                                  {
+                                    "taskId": \
+                                  "TKI:000000000000000000000000000000000003",
+                                    "externalId": \
+                                  "ETI:000000000000000000000000000000000003",
+                                    "created": "2018-02-01T12:00:00.000Z",
+                                    "modified": "2018-02-01T12:00:00.000Z",
+                                    "planned": "2024-05-27T15:27:56.595Z",
+                                    "received": "2024-05-29T15:27:56.595Z",
+                                    "due": "2024-05-29T15:27:56.595Z",
+                                    "name": "Widerruf",
+                                    "creator": "creator_user_id",
+                                    "description": "new description",
+                                    "priority": 2,
+                                    "manualPriority": -1,
+                                    "state": "READY",
+                                    "classificationSummary": {
+                                      "classificationId": \
+                                  "CLI:100000000000000000000000000000000003",
+                                      "key": "L1050",
+                                      "applicationEntryPoint": "",
+                                      "category": "EXTERNAL",
+                                      "domain": "DOMAIN_A",
+                                      "name": "Widerruf",
+                                      "parentId": "",
+                                      "parentKey": "",
+                                      "priority": 1,
+                                      "serviceLevel": "P13D",
+                                      "type": "TASK",
+                                      "custom1": "VNR,RVNR,KOLVNR",
+                                      "custom2": "",
+                                      "custom3": "",
+                                      "custom4": "",
+                                      "custom5": "",
+                                      "custom6": "",
+                                      "custom7": "",
+                                      "custom8": ""
+                                    },
+                                    "workbasketSummary": {
+                                      "workbasketId": \
+                                  "WBI:100000000000000000000000000000000001",
+                                      "key": "GPK_KSC",
+                                      "name": "Gruppenpostkorb KSC",
+                                      "domain": "DOMAIN_A",
+                                      "type": "GROUP",
+                                      "description": "Gruppenpostkorb KSC",
+                                      "owner": "teamlead-1",
+                                      "custom1": "ABCQVW",
+                                      "custom2": "",
+                                      "custom3": "xyz4",
+                                      "custom4": "",
+                                      "custom5": "",
+                                      "custom6": "",
+                                      "custom7": "",
+                                      "custom8": "",
+                                      "orgLevel1": "",
+                                      "orgLevel2": "",
+                                      "orgLevel3": "",
+                                      "orgLevel4": "",
+                                      "markedForDeletion": false
+                                    },
+                                    "businessProcessId": "PI_0000000000003",
+                                    "parentBusinessProcessId": \
+                                  "DOC_0000000000000000003",
+                                    "primaryObjRef": {
+                                      "company": "00",
+                                      "system": "PASystem",
+                                      "systemInstance": "00",
+                                      "type": "VNR",
+                                      "value": "11223344"
+                                    },
+                                    "custom1": "efg",
+                                    "custom14": "abc",
+                                    "customInt1": 1,
+                                    "customInt2": 2,
+                                    "customInt3": 3,
+                                    "customInt4": 4,
+                                    "customInt5": 5,
+                                    "customInt6": 6,
+                                    "customInt7": 7,
+                                    "customInt8": 8,
+                                    "secondaryObjectReferences": [],
+                                    "customAttributes": [],
+                                    "callbackInfo": [],
+                                    "attachments": [],
+                                    "read": false,
+                                    "transferred": false
+                                  }\
+                                  """))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -2666,7 +2667,7 @@ public interface TaskApi {
             example = "TKI:000000000000000000000000000000000039")
       },
       responses = {
-        @ApiResponse(responseCode = "204", content = @Content(schema = @Schema())),
+        @ApiResponse(responseCode = "204", content = @Content(schema = @Schema)),
         @ApiResponse(
             responseCode = "400",
             description = "TASK_INVALID_CALLBACK_STATE, TASK_INVALID_STATE",
@@ -2731,7 +2732,7 @@ public interface TaskApi {
             required = true)
       },
       responses = {
-        @ApiResponse(responseCode = "204", content = @Content(schema = @Schema())),
+        @ApiResponse(responseCode = "204", content = @Content(schema = @Schema)),
         @ApiResponse(
             responseCode = "400",
             description = "TASK_INVALID_CALLBACK_STATE, TASK_INVALID_STATE",

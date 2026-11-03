@@ -200,10 +200,7 @@ class UserInfoRefreshJobIntTest {
     assertThat(before).isNotEmpty();
     when(ldapClient.searchAllUsersInUserRole()).thenReturn(new LdapUserSnapshot(List.of(), 1, 0));
     JobLockGuard lockGuard = mock(JobLockGuard.class);
-    doNothing()
-        .doThrow(new SystemException("Refresh lock lost"))
-        .when(lockGuard)
-        .renewOrThrow();
+    doNothing().doThrow(new SystemException("Refresh lock lost")).when(lockGuard).renewOrThrow();
     UserInfoRefreshJob job =
         new UserInfoRefreshJob(
             kadaiEngine,
@@ -257,10 +254,8 @@ class UserInfoRefreshJobIntTest {
   private List<String> getGroupInfo(Connection connection, String userId) throws Exception {
     List<String> groupIds = new ArrayList<>();
     try (PreparedStatement ps =
-            connection.prepareStatement(
-                "SELECT group_id FROM "
-                    + connection.getSchema()
-                    + ".group_info WHERE user_id = ?")) {
+        connection.prepareStatement(
+            "SELECT group_id FROM " + connection.getSchema() + ".group_info WHERE user_id = ?")) {
       ps.setString(1, userId);
       try (ResultSet rs = ps.executeQuery()) {
         while (rs.next()) {
@@ -274,10 +269,10 @@ class UserInfoRefreshJobIntTest {
   private List<String> getPermissionInfo(Connection connection, String userId) throws Exception {
     List<String> permissionIds = new ArrayList<>();
     try (PreparedStatement ps =
-            connection.prepareStatement(
-                "SELECT permission_id FROM "
-                    + connection.getSchema()
-                    + ".permission_info WHERE user_id = ?")) {
+        connection.prepareStatement(
+            "SELECT permission_id FROM "
+                + connection.getSchema()
+                + ".permission_info WHERE user_id = ?")) {
       ps.setString(1, userId);
       try (ResultSet rs = ps.executeQuery()) {
         while (rs.next()) {

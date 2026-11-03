@@ -27,23 +27,23 @@ import java.lang.annotation.Target;
  * Annotation allowing to inject Kadai components in Test-Classes.
  *
  * <p>This annotation requires the surrounding class to be extended with the JUnit-Extension
- * {@linkplain
- * io.kadai.testapi.extensions.KadaiDependencyInjectionExtension KadaiDependencyInjectionExtension}.
+ * {@linkplain io.kadai.testapi.extensions.KadaiDependencyInjectionExtension
+ * KadaiDependencyInjectionExtension}.
  *
  * <p>Usage may look like:
- * <pre>
- *   {@code
- *     @ExtendWith(KadaiDependencyInjectionExtension.class)
- *     class MyTestClass {
- *       @KadaiInject InternalKadaiEngine internalKadaiEngine;
  *
- *       @Test
- *       void myTest() {
- *         internalKadaiEngine.foo(...);
- *       }
- *     }
+ * <pre>{@code
+ * @ExtendWith(KadaiDependencyInjectionExtension.class)
+ * class MyTestClass {
+ *   @KadaiInject InternalKadaiEngine internalKadaiEngine;
+ *
+ *   @Test
+ *   void myTest() {
+ *     internalKadaiEngine.foo(...);
  *   }
- * </pre>
+ * }
+ *
+ * }</pre>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

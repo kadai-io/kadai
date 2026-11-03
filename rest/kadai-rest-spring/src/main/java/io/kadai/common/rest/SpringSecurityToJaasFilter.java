@@ -49,11 +49,10 @@ public class SpringSecurityToJaasFilter extends GenericFilterBean {
         LOGGER.debug("Authentication found in Spring security context: {}", authentication);
       }
       obtainSubject()
-          .ifPresent(
-              subject -> {
-                initializeUserPrincipalFromAuthentication(authentication.get(), subject);
-                initializeGroupPrincipalsFromAuthentication(authentication.get(), subject);
-              });
+          .ifPresent(subject -> {
+            initializeUserPrincipalFromAuthentication(authentication.get(), subject);
+            initializeGroupPrincipalsFromAuthentication(authentication.get(), subject);
+          });
     } else {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug(
@@ -117,9 +116,8 @@ public class SpringSecurityToJaasFilter extends GenericFilterBean {
 
     authentication
         .getAuthorities()
-        .forEach(
-            grantedAuthority ->
-                subject.getPrincipals().add(new GroupPrincipal(grantedAuthority.getAuthority())));
+        .forEach(grantedAuthority ->
+            subject.getPrincipals().add(new GroupPrincipal(grantedAuthority.getAuthority())));
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("{}", subject.getPublicCredentials(GroupPrincipal.class));

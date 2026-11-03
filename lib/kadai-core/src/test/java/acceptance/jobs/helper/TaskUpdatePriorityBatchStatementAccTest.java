@@ -49,16 +49,15 @@ class TaskUpdatePriorityBatchStatementAccTest extends AbstractAccTest {
     final int priorityUpdate = 25;
 
     // when
-    runner.runWithConnection(
-        connection -> {
-          final TaskUpdatePriorityBatchStatement batchStatement =
-              new TaskUpdatePriorityBatchStatement(connection);
-          batchStatement.addPriorityUpdate(taskId, priorityUpdate);
-          batchStatement.executeBatch();
-          if (!connection.getAutoCommit()) {
-            connection.commit();
-          }
-        });
+    runner.runWithConnection(connection -> {
+      final TaskUpdatePriorityBatchStatement batchStatement =
+          new TaskUpdatePriorityBatchStatement(connection);
+      batchStatement.addPriorityUpdate(taskId, priorityUpdate);
+      batchStatement.executeBatch();
+      if (!connection.getAutoCommit()) {
+        connection.commit();
+      }
+    });
 
     // then
     final Task actual = kadaiEngine.getTaskService().getTask(taskId);

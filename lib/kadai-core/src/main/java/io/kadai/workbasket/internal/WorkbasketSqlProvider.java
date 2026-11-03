@@ -98,9 +98,7 @@ public class WorkbasketSqlProvider {
   }
 
   public static String findAll() {
-    return OPENING_SCRIPT_TAG
-        + "SELECT * FROM WORKBASKET ORDER BY ID "
-        + CLOSING_SCRIPT_TAG;
+    return OPENING_SCRIPT_TAG + "SELECT * FROM WORKBASKET ORDER BY ID " + CLOSING_SCRIPT_TAG;
   }
 
   public static String insert() {
@@ -134,18 +132,17 @@ public class WorkbasketSqlProvider {
 
   private static String updateSetStatement(boolean byKeyAndDomain) {
     return COLUMNS.stream()
-        .filter(
-            col -> {
-              if (byKeyAndDomain) {
-                String name = col.getLeft();
-                return !(name.contains("ID")
-                    || name.contains("KEY")
-                    || name.contains("DOMAIN")
-                    || name.contains("CREATED"));
-              } else {
-                return true;
-              }
-            })
+        .filter(col -> {
+          if (byKeyAndDomain) {
+            String name = col.getLeft();
+            return !(name.contains("ID")
+                || name.contains("KEY")
+                || name.contains("DOMAIN")
+                || name.contains("CREATED"));
+          } else {
+            return true;
+          }
+        })
         .map(col -> col.getLeft() + " = " + col.getRight())
         .collect(Collectors.joining(", "));
   }

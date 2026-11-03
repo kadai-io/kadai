@@ -41,40 +41,38 @@ class CreateHistoryEventOnWorkbasketDistributionTargetAddedAccTest extends Abstr
   void should_CreateWorkbasketDistributionTargetAddedHistoryEvent_When_DistributionTargetIsAdded()
       throws Exception {
     kadaiEngine.runAsAdmin(
-        CheckedRunnable.rethrowing(
-            () -> {
-              final String sourceWorkbasketId = "WBI:100000000000000000000000000000000004";
-              final String targetWorkbasketId = "WBI:100000000000000000000000000000000001";
+        CheckedRunnable.rethrowing(() -> {
+          final String sourceWorkbasketId = "WBI:100000000000000000000000000000000004";
+          final String targetWorkbasketId = "WBI:100000000000000000000000000000000001";
 
-              List<WorkbasketHistoryEvent> events =
-                  historyService
-                      .createWorkbasketHistoryQuery()
-                      .workbasketIdIn(sourceWorkbasketId)
-                      .list();
+          List<WorkbasketHistoryEvent> events =
+              historyService
+                  .createWorkbasketHistoryQuery()
+                  .workbasketIdIn(sourceWorkbasketId)
+                  .list();
 
-              assertThat(events).isEmpty();
+          assertThat(events).isEmpty();
 
-              workbasketService.addDistributionTarget(sourceWorkbasketId, targetWorkbasketId);
+          workbasketService.addDistributionTarget(sourceWorkbasketId, targetWorkbasketId);
 
-              events =
-                  historyService
-                      .createWorkbasketHistoryQuery()
-                      .workbasketIdIn(sourceWorkbasketId)
-                      .list();
+          events =
+              historyService
+                  .createWorkbasketHistoryQuery()
+                  .workbasketIdIn(sourceWorkbasketId)
+                  .list();
 
-              assertThat(events).hasSize(1);
+          assertThat(events).hasSize(1);
 
-              String eventType = events.get(0).getEventType();
-              String details =
-                  workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
+          String eventType = events.get(0).getEventType();
+          String details =
+              workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
 
-              assertThat(eventType)
-                  .isEqualTo(WorkbasketHistoryEventType.DISTRIBUTION_TARGET_ADDED.getName());
-              assertThat(details)
-                  .contains("\"newValue\":\"WBI:100000000000000000000000000000000001\"");
-              assertThat(events.get(0).getUserId()).isEqualTo("user-4-1");
-              assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
-            }),
+          assertThat(eventType)
+              .isEqualTo(WorkbasketHistoryEventType.DISTRIBUTION_TARGET_ADDED.getName());
+          assertThat(details).contains("\"newValue\":\"WBI:100000000000000000000000000000000001\"");
+          assertThat(events.get(0).getUserId()).isEqualTo("user-4-1");
+          assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
+        }),
         "user-4-1");
   }
 }

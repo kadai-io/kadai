@@ -32,15 +32,13 @@ class UserSqlProviderTest {
     assertThat(UserMapperSqlProvider.findById()).doesNotContainIgnoringCase("with ur");
     assertThat(UserMapperSqlProvider.findByIds()).doesNotContainIgnoringCase("with ur");
     assertThat(UserMapperSqlProvider.findGroupsById()).doesNotContainIgnoringCase("with ur");
-    assertThat(UserMapperSqlProvider.findPermissionsById())
-        .doesNotContainIgnoringCase("with ur");
+    assertThat(UserMapperSqlProvider.findPermissionsById()).doesNotContainIgnoringCase("with ur");
     assertThat(UserQuerySqlProvider.queryUsers()).doesNotContainIgnoringCase("with ur");
     assertThat(UserQuerySqlProvider.countQueryUsers()).doesNotContainIgnoringCase("with ur");
   }
 
   @Test
   void should_UseUncommittedReadOnly_For_ColumnValueDiscovery() {
-    assertThat(UserQuerySqlProvider.queryUserColumnValues())
-        .contains(DB2_WITH_UR_FOR_COLUMN_QUERY);
+    assertThat(UserQuerySqlProvider.queryUserColumnValues()).contains(DB2_WITH_UR_FOR_COLUMN_QUERY);
   }
 }
