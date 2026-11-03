@@ -104,7 +104,6 @@ export class WorkbasketOverviewComponent implements OnInit {
     }
   }
 
-
   toggleWidth() {
     if (this.workbasketList()?.nativeElement.offsetWidth === 250) {
       this.expanded = true;

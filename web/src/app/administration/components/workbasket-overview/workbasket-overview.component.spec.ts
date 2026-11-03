@@ -113,7 +113,6 @@ describe('WorkbasketOverviewComponent', () => {
     expect(isActionDispatched).toBe(true);
   });
 
-
   it('should display details when params id exists', () => {
     expect(component.routerParams.id).toMatch('new-workbasket');
     expect(component.showDetail()).toBe(true);
