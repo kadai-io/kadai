@@ -56,11 +56,16 @@ import { SvgIconComponent } from 'angular-svg-icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { toSignal } from '@angular/core/rxjs-interop';
 
+// The virtual scroll places nodes by arithmetic rather than by measuring, so a row that does not match
+// this height shifts the last entries out of the rendered window. The stylesheet reads the same value.
+export const TREE_NODE_HEIGHT_PX = 32;
+
 @Component({
   selector: 'kadai-administration-tree',
   templateUrl: './tree.component.html',
   styleUrls: ['./tree.component.scss'],
-  imports: [TreeModule, SvgIconComponent, MatTooltip]
+  imports: [TreeModule, SvgIconComponent, MatTooltip],
+  host: { '[style.--tree-node-height]': 'nodeHeight' }
 })
 export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDestroy {
   treeNodes = signal<TreeNodeModel[] | undefined>(undefined);
@@ -68,6 +73,7 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
     requireSync: true
   });
   emptyTreeNodes = signal(false);
+  nodeHeight = `${TREE_NODE_HEIGHT_PX}px`;
   filter = signal('');
   category = signal('');
   selectNodeId = signal<string | undefined>(undefined);
@@ -91,6 +97,7 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
       }
     },
     useVirtualScroll: true,
+    nodeHeight: TREE_NODE_HEIGHT_PX,
     scrollOnActivate: false,
     levelPadding: 20,
     allowDrag: true,
