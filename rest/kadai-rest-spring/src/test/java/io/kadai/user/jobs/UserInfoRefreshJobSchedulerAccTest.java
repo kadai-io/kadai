@@ -112,7 +112,8 @@ class UserInfoRefreshJobSchedulerAccTest {
     runJobs(provider);
 
     assertThat(provider.invocations()).isEqualTo(1);
-    assertThat(scheduledJobs()).extracting(ScheduledJob::getJobId)
+    assertThat(scheduledJobs())
+        .extracting(ScheduledJob::getJobId)
         .containsExactly(original.getJobId());
     assertThat(userIds()).isEmpty();
   }
@@ -135,7 +136,8 @@ class UserInfoRefreshJobSchedulerAccTest {
 
     assertThat(provider.invocations()).isEqualTo(2);
     assertThat(userService.getUser("existing").getFirstName()).isEqualTo("First");
-    assertThat(scheduledJobs()).extracting(ScheduledJob::getJobId)
+    assertThat(scheduledJobs())
+        .extracting(ScheduledJob::getJobId)
         .containsExactly(original.getJobId());
   }
 
@@ -153,9 +155,10 @@ class UserInfoRefreshJobSchedulerAccTest {
   }
 
   private void stealJob(int jobId) throws Exception {
-    try (Connection connection = connection(); Statement statement = connection.createStatement()) {
-      try (var prepared = connection.prepareStatement(
-          "UPDATE SCHEDULED_JOB SET LOCKED_BY = ? WHERE JOB_ID = ?")) {
+    try (Connection connection = connection();
+        Statement statement = connection.createStatement()) {
+      try (var prepared =
+          connection.prepareStatement("UPDATE SCHEDULED_JOB SET LOCKED_BY = ? WHERE JOB_ID = ?")) {
         prepared.setString(1, "another-owner");
         prepared.setInt(2, jobId);
         prepared.executeUpdate();
@@ -167,7 +170,8 @@ class UserInfoRefreshJobSchedulerAccTest {
   }
 
   private void clearScheduledRefreshJobs() throws Exception {
-    try (Connection connection = connection(); Statement statement = connection.createStatement()) {
+    try (Connection connection = connection();
+        Statement statement = connection.createStatement()) {
       statement.executeUpdate(
           "DELETE FROM SCHEDULED_JOB WHERE TYPE = '" + UserInfoRefreshJob.class.getName() + "'");
       if (!connection.getAutoCommit()) {
@@ -208,8 +212,7 @@ class UserInfoRefreshJobSchedulerAccTest {
   }
 
   private Connection connection() throws Exception {
-    Connection connection =
-        kadaiEngine.getConfiguration().getDataSource().getConnection();
+    Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection();
     connection.setSchema(kadaiEngine.getConfiguration().getSchemaName());
     return connection;
   }
@@ -248,5 +251,4 @@ class UserInfoRefreshJobSchedulerAccTest {
       return invocations.get();
     }
   }
-
 }

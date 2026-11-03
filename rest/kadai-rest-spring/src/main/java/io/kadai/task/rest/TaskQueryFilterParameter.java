@@ -2647,18 +2647,12 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
     Optional.ofNullable(workbasketIdNotIn).ifPresent(query::workbasketIdNotIn);
 
     Optional.ofNullable(workbasketKeyIn)
-        .map(
-            keys ->
-                Arrays.stream(keys)
-                    .map(key -> new KeyDomain(key, domain))
-                    .toArray(KeyDomain[]::new))
+        .map(keys ->
+            Arrays.stream(keys).map(key -> new KeyDomain(key, domain)).toArray(KeyDomain[]::new))
         .ifPresent(query::workbasketKeyDomainIn);
     Optional.ofNullable(workbasketKeyNotIn)
-        .map(
-            keys ->
-                Arrays.stream(keys)
-                    .map(key -> new KeyDomain(key, domain))
-                    .toArray(KeyDomain[]::new))
+        .map(keys ->
+            Arrays.stream(keys).map(key -> new KeyDomain(key, domain)).toArray(KeyDomain[]::new))
         .ifPresent(query::workbasketKeyDomainNotIn);
 
     Optional.ofNullable(businessProcessIdIn).ifPresent(query::businessProcessIdIn);
@@ -2861,15 +2855,15 @@ public class TaskQueryFilterParameter implements QueryParameter<TaskQuery, Void>
     }
   }
 
-  private static void queryWithinInterval(Function<TimeInterval, TaskQuery> queryFunction,
-      Instant from, Instant until) {
+  private static void queryWithinInterval(
+      Function<TimeInterval, TaskQuery> queryFunction, Instant from, Instant until) {
     if (from != null || until != null) {
       queryFunction.apply(new TimeInterval(from, until));
     }
   }
 
-  private static void queryWithinInterval(Function<IntInterval, TaskQuery> queryFunction,
-      Integer from, Integer until) {
+  private static void queryWithinInterval(
+      Function<IntInterval, TaskQuery> queryFunction, Integer from, Integer until) {
     if (from != null || until != null) {
       queryFunction.apply(new IntInterval(from, until));
     }

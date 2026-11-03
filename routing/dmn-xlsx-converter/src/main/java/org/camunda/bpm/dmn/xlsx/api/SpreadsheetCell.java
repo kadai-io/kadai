@@ -16,7 +16,6 @@
  *
  */
 
-
 package org.camunda.bpm.dmn.xlsx.api;
 
 import org.xlsx4j.sml.Cell;

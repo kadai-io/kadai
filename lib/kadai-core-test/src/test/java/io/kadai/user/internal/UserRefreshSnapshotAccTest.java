@@ -55,8 +55,9 @@ class UserRefreshSnapshotAccTest {
   @Test
   @WithAccessId(user = "businessadmin")
   void should_LoadFlatMembershipRowsWithTheirExplicitColumnValues() throws Exception {
-    userService.createUser(user("snapshot-user", Set.of("group-a", "group-b"),
-        Set.of("permission-a", "permission-b")));
+    userService.createUser(
+        user(
+            "snapshot-user", Set.of("group-a", "group-b"), Set.of("permission-a", "permission-b")));
 
     UserDatabaseSnapshot snapshot = userServiceImpl.loadUserDatabaseSnapshot();
 
@@ -120,8 +121,7 @@ class UserRefreshSnapshotAccTest {
   }
 
   private Connection connection() throws Exception {
-    Connection connection =
-        kadaiEngine.getConfiguration().getDataSource().getConnection();
+    Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection();
     connection.setSchema(kadaiEngine.getConfiguration().getSchemaName());
     return connection;
   }

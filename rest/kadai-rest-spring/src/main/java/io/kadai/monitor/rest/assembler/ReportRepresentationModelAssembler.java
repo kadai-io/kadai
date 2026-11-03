@@ -103,9 +103,9 @@ public class ReportRepresentationModelAssembler {
     ReportRepresentationModel resource = toReportResource(report);
     resource.add(
         linkTo(
-            methodOn(MonitorController.class)
-                .computeDetailedWorkbasketPriorityReport(
-                    filterParameter, workbasketTypes, columnHeaders))
+                methodOn(MonitorController.class)
+                    .computeDetailedWorkbasketPriorityReport(
+                        filterParameter, workbasketTypes, columnHeaders))
             .withSelfRel());
     return resource;
   }

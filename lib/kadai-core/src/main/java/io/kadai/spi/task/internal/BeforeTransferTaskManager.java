@@ -57,8 +57,7 @@ public class BeforeTransferTaskManager {
   public void checkTransferAllowed(Task task, Workbasket destinationWorkbasket)
       throws TransferCheckException {
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug(
-          "Sending Task to BeforeTransferTaskProvider service providers: {}", task);
+      LOGGER.debug("Sending Task to BeforeTransferTaskProvider service providers: {}", task);
     }
     for (BeforeTransferTaskProvider serviceProvider : beforeTransferTaskProviders) {
       try {
@@ -74,4 +73,3 @@ public class BeforeTransferTaskManager {
     }
   }
 }
-

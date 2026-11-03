@@ -68,8 +68,7 @@ public class TaskTestDataController {
    *
    * @param taskCount number of tasks to create
    */
-  public record TaskGenerationRequest(
-      @JsonProperty("taskCount") @NotNull @Min(0) Long taskCount) {
+  public record TaskGenerationRequest(@JsonProperty("taskCount") @NotNull @Min(0) Long taskCount) {
 
     @JsonCreator
     public TaskGenerationRequest {}

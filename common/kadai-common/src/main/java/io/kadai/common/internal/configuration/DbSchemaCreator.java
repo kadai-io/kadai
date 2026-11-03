@@ -125,10 +125,9 @@ public class DbSchemaCreator {
   /**
    * Retrieves the maximum version from the KADAI_SCHEMA_VERSION table.
    *
-   * <p>This method executes a SQL query to fetch all version entries from the
-   * KADAI_SCHEMA_VERSION table, converts them to ComparableVersion objects, and
-   * determines the maximum version. If no versions are found, an IllegalStateException
-   * is thrown.
+   * <p>This method executes a SQL query to fetch all version entries from the KADAI_SCHEMA_VERSION
+   * table, converts them to ComparableVersion objects, and determines the maximum version. If no
+   * versions are found, an IllegalStateException is thrown.
    *
    * @param runner the SqlRunner instance used to execute the query
    * @return the maximum version as a ComparableVersion object

@@ -83,8 +83,7 @@ public class TaskCleanupJob extends AbstractKadaiJob {
   public void execute() {
     Instant cleanupRunTime = Instant.now();
     Instant defaultCompletedBefore = cleanupRunTime.minus(defaultMinimumAge);
-    Map<String, Instant> completedBeforeByDomain =
-        calculateCompletedBeforeByDomain(cleanupRunTime);
+    Map<String, Instant> completedBeforeByDomain = calculateCompletedBeforeByDomain(cleanupRunTime);
     long jobStartedAt = System.nanoTime();
     LOGGER.info(
         "Running task cleanup with default minimum age {} and {} domain override(s).",
@@ -126,26 +125,22 @@ public class TaskCleanupJob extends AbstractKadaiJob {
     Map<String, Instant> completedBeforeByDomain = new LinkedHashMap<>();
     minimumAgeByDomain.entrySet().stream()
         .sorted(Map.Entry.comparingByKey())
-        .forEach(
-            entry ->
-                completedBeforeByDomain.put(
-                    entry.getKey(), cleanupRunTime.minus(entry.getValue())));
+        .forEach(entry ->
+            completedBeforeByDomain.put(entry.getKey(), cleanupRunTime.minus(entry.getValue())));
     return completedBeforeByDomain;
   }
 
   private List<String> getTaskIdsEligibleForCleanup(
       Instant defaultCompletedBefore, Map<String, Instant> completedBeforeByDomain) {
     InternalKadaiEngine internalKadaiEngine = getInternalKadaiEngine();
-    return internalKadaiEngine.executeInDatabaseConnection(
-        () -> {
-          TaskMapper taskMapper =
-              internalKadaiEngine.getSqlSession().getMapper(TaskMapper.class);
-          return getTaskIdsEligibleForCleanup(
-              taskMapper,
-              defaultCompletedBefore,
-              completedBeforeByDomain,
-              allCompletedSameParentBusiness);
-        });
+    return internalKadaiEngine.executeInDatabaseConnection(() -> {
+      TaskMapper taskMapper = internalKadaiEngine.getSqlSession().getMapper(TaskMapper.class);
+      return getTaskIdsEligibleForCleanup(
+          taskMapper,
+          defaultCompletedBefore,
+          completedBeforeByDomain,
+          allCompletedSameParentBusiness);
+    });
   }
 
   private List<String> getTaskIdsEligibleForCleanup(
@@ -156,7 +151,7 @@ public class TaskCleanupJob extends AbstractKadaiJob {
     if (completedBeforeByDomain.isEmpty()) {
       return requireAllCompletedSameParentBusiness
           ? taskMapper.findTasksCompletedBeforeWithParentBusinessProcessConstraint(
-                  defaultCompletedBefore)
+              defaultCompletedBefore)
           : taskMapper.findTasksCompletedBefore(defaultCompletedBefore);
     }
     return requireAllCompletedSameParentBusiness
@@ -180,12 +175,11 @@ public class TaskCleanupJob extends AbstractKadaiJob {
     try {
       return KadaiTransactionProvider.executeInTransactionIfPossible(
           txProvider,
-          CheckedSupplier.rethrowing(
-              () -> {
-                int deletedTasks = deleteTasks(tasksToBeDeleted);
-                lockGuard.renewOrThrow();
-                return deletedTasks;
-              }));
+          CheckedSupplier.rethrowing(() -> {
+            int deletedTasks = deleteTasks(tasksToBeDeleted);
+            lockGuard.renewOrThrow();
+            return deletedTasks;
+          }));
     } catch (Exception ex) {
       LOGGER.warn("Could not delete tasks.", ex);
       return 0;

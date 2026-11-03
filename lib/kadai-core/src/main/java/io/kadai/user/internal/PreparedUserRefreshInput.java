@@ -21,10 +21,7 @@ import java.util.Objects;
 
 /** Validated authoritative source for one refresh generation. */
 public record PreparedUserRefreshInput(
-    Map<String, UserRefreshState> usersById,
-    int inputUsers,
-    int acceptedUsers,
-    int rejectedUsers) {
+    Map<String, UserRefreshState> usersById, int inputUsers, int acceptedUsers, int rejectedUsers) {
 
   public PreparedUserRefreshInput {
     usersById = Map.copyOf(Objects.requireNonNull(usersById, "usersById"));

@@ -148,12 +148,10 @@ public class DmnConverterService {
 
     WorkbasketService workbasketService = kadaiEngine.getWorkbasketService();
 
-    return kadaiEngine.runAsAdmin(
-        () ->
-            workbasketService.createWorkbasketQuery().list().stream()
-                .map(
-                    workbasketSummary ->
-                        new KeyDomain(workbasketSummary.getKey(), workbasketSummary.getDomain()))
-                .collect(Collectors.toSet()));
+    return kadaiEngine.runAsAdmin(() ->
+        workbasketService.createWorkbasketQuery().list().stream()
+            .map(workbasketSummary ->
+                new KeyDomain(workbasketSummary.getKey(), workbasketSummary.getDomain()))
+            .collect(Collectors.toSet()));
   }
 }

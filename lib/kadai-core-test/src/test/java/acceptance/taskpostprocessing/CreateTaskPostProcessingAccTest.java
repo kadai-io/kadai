@@ -40,8 +40,8 @@ import org.junit.jupiter.api.Test;
 /** Acceptance test for "task post-processing" scenario. */
 @KadaiIntegrationTest
 @WithServiceProvider(
-        serviceProviderInterface = CreateTaskPostprocessor.class,
-        serviceProviders = TestCreateTaskPostProcessorProvider.class)
+    serviceProviderInterface = CreateTaskPostprocessor.class,
+    serviceProviders = TestCreateTaskPostProcessorProvider.class)
 class CreateTaskPostProcessingAccTest {
 
   @KadaiInject TaskService taskService;
@@ -52,21 +52,21 @@ class CreateTaskPostProcessingAccTest {
   @WithAccessId(user = "businessadmin")
   @BeforeAll
   void setup(ClassificationService classificationService, WorkbasketService workbasketService)
-          throws Exception {
+      throws Exception {
     classificationSummary =
-            DefaultTestEntities.defaultTestClassification()
-                    .buildAndStoreAsSummary(classificationService);
+        DefaultTestEntities.defaultTestClassification()
+            .buildAndStoreAsSummary(classificationService);
 
     workbasketSummary =
-            DefaultTestEntities.defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
+        DefaultTestEntities.defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
 
     WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
-            .accessId("user-1-1")
-            .workbasketId(workbasketSummary.getId())
-            .permission(WorkbasketPermission.READ)
-            .permission(WorkbasketPermission.OPEN)
-            .permission(WorkbasketPermission.APPEND)
-            .buildAndStore(workbasketService);
+        .accessId("user-1-1")
+        .workbasketId(workbasketSummary.getId())
+        .permission(WorkbasketPermission.READ)
+        .permission(WorkbasketPermission.OPEN)
+        .permission(WorkbasketPermission.APPEND)
+        .buildAndStore(workbasketService);
   }
 
   @WithAccessId(user = "user-1-1")

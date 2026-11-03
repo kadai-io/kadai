@@ -270,30 +270,27 @@ class LdapClientTest {
     setUpEnvMock();
     cut.init();
 
-    when(ldapTemplate.lookup(
-        any(LdapName.class),
-        any(),
-        any(LdapClient.DnContextMapper.class)
-    )).thenReturn(new AccessIdRepresentationModel("uid", "user-1-1"));
+    when(ldapTemplate.lookup(any(LdapName.class), any(), any(LdapClient.DnContextMapper.class)))
+        .thenReturn(new AccessIdRepresentationModel("uid", "user-1-1"));
 
     final List<AccessIdRepresentationModel> expectedGroupAccessIds =
         List.of(new AccessIdRepresentationModel("cn", "developersgroup"));
 
     when(ldapTemplate.search(
-        anyString(),
-        anyString(),
-        anyInt(),
-        any(String[].class),
-        any(LdapClient.GroupContextMapper.class)
-    )).thenReturn(expectedGroupAccessIds);
+            anyString(),
+            anyString(),
+            anyInt(),
+            any(String[].class),
+            any(LdapClient.GroupContextMapper.class)))
+        .thenReturn(expectedGroupAccessIds);
 
-    final List<String> actualGroupAccessIds = cut.searchAccessIdsForGroupsByDn(
-        List.of("uid=user-1-1,cn=developersgroup,ou=groups,o=kadaitest"));
+    final List<String> actualGroupAccessIds =
+        cut.searchAccessIdsForGroupsByDn(
+            List.of("uid=user-1-1,cn=developersgroup,ou=groups,o=kadaitest"));
 
-    assertThat(actualGroupAccessIds).containsExactlyInAnyOrderElementsOf(
-        expectedGroupAccessIds.stream()
-            .map(AccessIdRepresentationModel::getAccessId)
-            .toList());
+    assertThat(actualGroupAccessIds)
+        .containsExactlyInAnyOrderElementsOf(
+            expectedGroupAccessIds.stream().map(AccessIdRepresentationModel::getAccessId).toList());
   }
 
   @Test
@@ -323,11 +320,8 @@ class LdapClientTest {
     setUpEnvMock();
     cut.init();
 
-    when(ldapTemplate.lookup(
-        any(LdapName.class),
-        any(),
-        any(LdapClient.DnContextMapper.class)
-    )).thenReturn(new AccessIdRepresentationModel("uid", "user-1-1"));
+    when(ldapTemplate.lookup(any(LdapName.class), any(), any(LdapClient.DnContextMapper.class)))
+        .thenReturn(new AccessIdRepresentationModel("uid", "user-1-1"));
 
     final List<AccessIdRepresentationModel> expectedPermissionAccessIds =
         List.of(
@@ -335,12 +329,12 @@ class LdapClientTest {
                 "permission", "Kadai:CallCenter:AB:AB/A:CallCenter-vip"));
 
     when(ldapTemplate.search(
-        anyString(),
-        anyString(),
-        anyInt(),
-        any(String[].class),
-        any(LdapClient.PermissionContextMapper.class)
-    )).thenReturn(expectedPermissionAccessIds);
+            anyString(),
+            anyString(),
+            anyInt(),
+            any(String[].class),
+            any(LdapClient.PermissionContextMapper.class)))
+        .thenReturn(expectedPermissionAccessIds);
 
     final List<String> actualPermissionAccessIds =
         cut.searchAccessIdsForPermissionsByDn(
@@ -348,10 +342,11 @@ class LdapClientTest {
                 "uid=user-1-1,permission=Kadai:CallCenter:AB:AB/A:CallCenter-vip,"
                     + "cn=Developers:Permission,cn=groups,o=kadaitest"));
 
-    assertThat(actualPermissionAccessIds).containsExactlyInAnyOrderElementsOf(
-        expectedPermissionAccessIds.stream()
-            .map(AccessIdRepresentationModel::getAccessId)
-            .toList());
+    assertThat(actualPermissionAccessIds)
+        .containsExactlyInAnyOrderElementsOf(
+            expectedPermissionAccessIds.stream()
+                .map(AccessIdRepresentationModel::getAccessId)
+                .toList());
   }
 
   @Test
@@ -372,8 +367,7 @@ class LdapClientTest {
 
     when(cut.searchAccessIdByDn(anyString())).thenThrow(InvalidNameException.class);
 
-    final ThrowingCallable call =
-        () -> cut.searchAccessIdsForPermissionsByDn(List.of("some-dn"));
+    final ThrowingCallable call = () -> cut.searchAccessIdsForPermissionsByDn(List.of("some-dn"));
 
     assertThatThrownBy(call).isInstanceOf(InvalidNameException.class);
   }
@@ -396,16 +390,14 @@ class LdapClientTest {
         .search(
             eq("ou=people"),
             eq("(&(objectclass=person)(uid=ab))"),
-            argThat(
-                controls ->
-                    controls.getSearchScope() == SearchControls.SUBTREE_SCOPE
-                        && controls.getCountLimit() == 1),
+            argThat(controls ->
+                controls.getSearchScope() == SearchControls.SUBTREE_SCOPE
+                    && controls.getCountLimit() == 1),
             any(LdapClient.DnStringContextMapper.class));
   }
 
   @Test
-  void should_UseConfiguredExternalGroupAndPermissionIdAttributesForValidation()
-      throws Exception {
+  void should_UseConfiguredExternalGroupAndPermissionIdAttributesForValidation() throws Exception {
     setUpEnvMock();
     when(environment.getProperty("kadai.ldap.groupIdAttribute")).thenReturn("gid");
     when(environment.getProperty("kadai.ldap.permissionIdAttribute")).thenReturn("pid");
@@ -416,14 +408,13 @@ class LdapClientTest {
             anyString(),
             any(SearchControls.class),
             any(LdapClient.DnStringContextMapper.class)))
-        .thenAnswer(
-            invocation -> {
-              String filter = invocation.getArgument(1);
-              return filter.contains("(gid=monitor-users-id)")
-                      || filter.contains("(pid=g03-permission-id)")
-                  ? List.of("cn=matching-entry,ou=groups,o=KadaiTest")
-                  : Collections.emptyList();
-            });
+        .thenAnswer(invocation -> {
+          String filter = invocation.getArgument(1);
+          return filter.contains("(gid=monitor-users-id)")
+                  || filter.contains("(pid=g03-permission-id)")
+              ? List.of("cn=matching-entry,ou=groups,o=KadaiTest")
+              : Collections.emptyList();
+        });
 
     assertThat(cut.validateAccessId("monitor-users-id")).isTrue();
     assertThat(cut.validateAccessId("monitor-users")).isFalse();
@@ -510,8 +501,7 @@ class LdapClientTest {
               {"kadai.ldap.userPermissionsAttribute", "permission"},
               {"kadai.ldap.useDnForGroups", "false"},
             })
-        .forEach(
-            strings ->
-                lenient().when(this.environment.getProperty(strings[0])).thenReturn(strings[1]));
+        .forEach(strings ->
+            lenient().when(this.environment.getProperty(strings[0])).thenReturn(strings[1]));
   }
 }

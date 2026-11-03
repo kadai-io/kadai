@@ -57,22 +57,19 @@ public final class KadaiEventBus {
     this.kadaiEngine = kadaiEngine;
     final List<KadaiEventConsumer> rawConsumers = SpiLoader.load(KadaiEventConsumer.class);
     this.enabled = !rawConsumers.isEmpty();
-    rawConsumers.forEach(
-        consumer -> {
-          consumer.initialize(kadaiEngine);
-          LOGGER.info("Registered provided KadaiEvent-Consumer: {}", consumer.getClass().getName());
-        });
+    rawConsumers.forEach(consumer -> {
+      consumer.initialize(kadaiEngine);
+      LOGGER.info("Registered provided KadaiEvent-Consumer: {}", consumer.getClass().getName());
+    });
     this.consumers =
         rawConsumers.stream().collect(groupingBy(KadaiEventConsumer::reify)).entrySet().stream()
-            .map(
-                e ->
-                    new SimpleEntry<
-                        Class<? extends KadaiEvent>,
-                        List<KadaiEventConsumer<? extends KadaiEvent>>>(
-                        (Class<? extends KadaiEvent>) e.getKey(),
-                        e.getValue().stream()
-                            .map(c -> (KadaiEventConsumer<? extends KadaiEvent>) c)
-                            .collect(toList())))
+            .map(e ->
+                new SimpleEntry<
+                    Class<? extends KadaiEvent>, List<KadaiEventConsumer<? extends KadaiEvent>>>(
+                    (Class<? extends KadaiEvent>) e.getKey(),
+                    e.getValue().stream()
+                        .map(c -> (KadaiEventConsumer<? extends KadaiEvent>) c)
+                        .collect(toList())))
             .collect(toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
     if (consumers.isEmpty()) {
       LOGGER.info("No provided KadaiEvent-Consumers found. Running without History.");
@@ -92,20 +89,17 @@ public final class KadaiEventBus {
     event.setProxyAccessId(kadaiEngine.getCurrentUserContext().getProxyAccessId());
 
     getConsumers((Class<T>) event.getClass())
-        .forEach(
-            consumer -> {
-              try {
-                consumer.consume(event);
-                if (LOGGER.isDebugEnabled()) {
-                  LOGGER.debug(
-                      "Forwarded event '{}' to consumer '{}'",
-                      event,
-                      consumer.getClass().getName());
-                }
-              } catch (RuntimeException e) {
-                LOGGER.error("Consumer '{}' failed", consumer.getClass().getName(), e);
-              }
-            });
+        .forEach(consumer -> {
+          try {
+            consumer.consume(event);
+            if (LOGGER.isDebugEnabled()) {
+              LOGGER.debug(
+                  "Forwarded event '{}' to consumer '{}'", event, consumer.getClass().getName());
+            }
+          } catch (RuntimeException e) {
+            LOGGER.error("Consumer '{}' failed", consumer.getClass().getName(), e);
+          }
+        });
   }
 
   /**
@@ -118,52 +112,46 @@ public final class KadaiEventBus {
   public <T extends KadaiEvent> void dispatchAll(Collection<T> events) {
     List<KadaiEventConsumer<?>> consumersInDispatchOrder = new ArrayList<>();
     Map<KadaiEventConsumer<?>, List<KadaiEvent>> eventsByConsumer = new IdentityHashMap<>();
-    events.forEach(
-        event -> {
-          event.setUserId(kadaiEngine.getCurrentUserContext().getUserId());
-          event.setProxyAccessId(kadaiEngine.getCurrentUserContext().getProxyAccessId());
+    events.forEach(event -> {
+      event.setUserId(kadaiEngine.getCurrentUserContext().getUserId());
+      event.setProxyAccessId(kadaiEngine.getCurrentUserContext().getProxyAccessId());
 
-          getConsumers((Class<T>) event.getClass())
-              .forEach(
-                  consumer -> {
-                    if (!eventsByConsumer.containsKey(consumer)) {
-                      consumersInDispatchOrder.add(consumer);
-                      eventsByConsumer.put(consumer, new ArrayList<>());
-                    }
-                    eventsByConsumer.get(consumer).add(event);
-                  });
-        });
-
-    consumersInDispatchOrder.forEach(
-        consumer -> {
-          List<KadaiEvent> eventsForConsumer = eventsByConsumer.get(consumer);
-          if (consumer instanceof BatchKadaiEventConsumer<?> batchConsumer) {
-            try {
-              consumeAll(batchConsumer, eventsForConsumer);
-              LOGGER.info(
-                  "Forwarded {} events to consumer '{}'",
-                  eventsForConsumer.size(),
-                  consumer.getClass().getName());
-            } catch (RuntimeException e) {
-              LOGGER.error("Consumer '{}' failed", consumer.getClass().getName(), e);
+      getConsumers((Class<T>) event.getClass())
+          .forEach(consumer -> {
+            if (!eventsByConsumer.containsKey(consumer)) {
+              consumersInDispatchOrder.add(consumer);
+              eventsByConsumer.put(consumer, new ArrayList<>());
             }
-          } else {
-            eventsForConsumer.forEach(
-                event -> {
-                  try {
-                    consume(consumer, event);
-                    if (LOGGER.isDebugEnabled()) {
-                      LOGGER.debug(
-                          "Forwarded event '{}' to consumer '{}'",
-                          event,
-                          consumer.getClass().getName());
-                    }
-                  } catch (RuntimeException e) {
-                    LOGGER.error("Consumer '{}' failed", consumer.getClass().getName(), e);
-                  }
-                });
+            eventsByConsumer.get(consumer).add(event);
+          });
+    });
+
+    consumersInDispatchOrder.forEach(consumer -> {
+      List<KadaiEvent> eventsForConsumer = eventsByConsumer.get(consumer);
+      if (consumer instanceof BatchKadaiEventConsumer<?> batchConsumer) {
+        try {
+          consumeAll(batchConsumer, eventsForConsumer);
+          LOGGER.info(
+              "Forwarded {} events to consumer '{}'",
+              eventsForConsumer.size(),
+              consumer.getClass().getName());
+        } catch (RuntimeException e) {
+          LOGGER.error("Consumer '{}' failed", consumer.getClass().getName(), e);
+        }
+      } else {
+        eventsForConsumer.forEach(event -> {
+          try {
+            consume(consumer, event);
+            if (LOGGER.isDebugEnabled()) {
+              LOGGER.debug(
+                  "Forwarded event '{}' to consumer '{}'", event, consumer.getClass().getName());
+            }
+          } catch (RuntimeException e) {
+            LOGGER.error("Consumer '{}' failed", consumer.getClass().getName(), e);
           }
         });
+      }
+    });
   }
 
   /**

@@ -32,16 +32,16 @@ import java.lang.annotation.Target;
  * JUnit-Extension {@link JaasExtension}.
  *
  * <p>Usage may look like:
- * <pre>
- *   {@code
- *     @ExtendWith(JaasExtension.class)
- *     class MyTestClass {
- *       @Test
- *       @WithAccessId(user = "foo")
- *       void myTest() {}
- *     }
- *   }
- * </pre>
+ *
+ * <pre>{@code
+ * @ExtendWith(JaasExtension.class)
+ * class MyTestClass {
+ *   @Test
+ *   @WithAccessId(user = "foo")
+ *   void myTest() {}
+ * }
+ *
+ * }</pre>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR})

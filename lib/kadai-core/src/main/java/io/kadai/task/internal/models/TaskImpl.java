@@ -51,10 +51,8 @@ public class TaskImpl extends TaskSummaryImpl implements Task {
     this.customAttributes = new HashMap<>(copyFrom.customAttributes);
     this.callbackInfo = new HashMap<>(copyFrom.callbackInfo);
     this.callbackState = copyFrom.callbackState;
-    this.attachments = copyFrom.attachments
-            .stream()
-            .map(Attachment::copy)
-            .collect(Collectors.toList());
+    this.attachments =
+        copyFrom.attachments.stream().map(Attachment::copy).collect(Collectors.toList());
     this.groupByCount = copyFrom.groupByCount;
   }
 

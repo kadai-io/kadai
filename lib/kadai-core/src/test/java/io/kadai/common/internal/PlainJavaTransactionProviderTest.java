@@ -60,8 +60,8 @@ class PlainJavaTransactionProviderTest {
     SQLException rollbackFailure = new SQLException("Rollback failed");
     doThrow(rollbackFailure).when(connection).rollback();
 
-    assertThatThrownBy(
-            () -> provider.executeInTransaction(() -> {
+    assertThatThrownBy(() ->
+            provider.executeInTransaction(() -> {
               throw failure;
             }))
         .isSameAs(failure)
@@ -82,8 +82,8 @@ class PlainJavaTransactionProviderTest {
     doThrow(rollbackFailure).when(connection).rollback();
     doThrow(abortFailure).when(connection).abort(any());
 
-    assertThatThrownBy(
-            () -> provider.executeInTransaction(() -> {
+    assertThatThrownBy(() ->
+            provider.executeInTransaction(() -> {
               throw failure;
             }))
         .isSameAs(failure)
@@ -108,8 +108,8 @@ class PlainJavaTransactionProviderTest {
     doThrow(abortFailure).when(connection).abort(any());
     doThrow(closeFailure).doNothing().when(connection).close();
 
-    assertThatThrownBy(
-            () -> provider.executeInTransaction(() -> {
+    assertThatThrownBy(() ->
+            provider.executeInTransaction(() -> {
               throw failure;
             }))
         .isSameAs(failure)

@@ -81,8 +81,7 @@ class UpdateClassificationAccTest {
   @KadaiInject TaskService taskService;
   @KadaiInject WorkbasketService workbasketService;
   @KadaiInject WorkingTimeCalculator workingTimeCalculator;
-  @KadaiInject
-  CurrentUserContext currentUserContext;
+  @KadaiInject CurrentUserContext currentUserContext;
 
   private String createTaskWithExistingClassification(ClassificationSummary classificationSummary)
       throws Exception {
@@ -222,8 +221,7 @@ class UpdateClassificationAccTest {
 
   @WithAccessId(user = "businessadmin")
   @Test
-  void should_RejectUpdate_When_KeyLookupAndIdReferToDifferentClassifications()
-      throws Exception {
+  void should_RejectUpdate_When_KeyLookupAndIdReferToDifferentClassifications() throws Exception {
     Classification target = createMasterClassification();
     Classification versionSource = createMasterClassificationWithDistinctTimestamp(target);
     assertThat(target.getModified()).isNotEqualTo(versionSource.getModified());

@@ -229,32 +229,30 @@ public class TaskDistributor {
   private BulkOperationResults<String, KadaiException> transferTasks(
       Map<String, List<String>> newTaskDistribution, Map<String, Boolean> taskTransferFlags) {
     BulkOperationResults<String, KadaiException> operationResults = new BulkOperationResults<>();
-    newTaskDistribution.forEach(
-        (newDestinationWorkbasketId, taskIdsForDestination) -> {
-          Map<Boolean, List<String>> partitionedTaskIds =
-              taskIdsForDestination.stream()
-                  .collect(Collectors.partitioningBy(taskTransferFlags::get));
+    newTaskDistribution.forEach((newDestinationWorkbasketId, taskIdsForDestination) -> {
+      Map<Boolean, List<String>> partitionedTaskIds =
+          taskIdsForDestination.stream().collect(Collectors.partitioningBy(taskTransferFlags::get));
 
-          List<String> transferredTaskIds = partitionedTaskIds.getOrDefault(true, List.of());
-          List<String> notTransferredTaskIds = partitionedTaskIds.getOrDefault(false, List.of());
+      List<String> transferredTaskIds = partitionedTaskIds.getOrDefault(true, List.of());
+      List<String> notTransferredTaskIds = partitionedTaskIds.getOrDefault(false, List.of());
 
-          try {
-            if (!transferredTaskIds.isEmpty()) {
-              BulkOperationResults<String, KadaiException> transferResults =
-                  taskService.transferTasksWithOwner(
-                      newDestinationWorkbasketId, transferredTaskIds, null, true);
-              transferResults.getErrorMap().forEach(operationResults::addError);
-            }
-            if (!notTransferredTaskIds.isEmpty()) {
-              BulkOperationResults<String, KadaiException> transferResults =
-                  taskService.transferTasksWithOwner(
-                      newDestinationWorkbasketId, notTransferredTaskIds, null, false);
-              transferResults.getErrorMap().forEach(operationResults::addError);
-            }
-          } catch (NotAuthorizedOnWorkbasketException | WorkbasketNotFoundException e) {
-            taskIdsForDestination.forEach(taskId -> operationResults.addError(taskId, e));
-          }
-        });
+      try {
+        if (!transferredTaskIds.isEmpty()) {
+          BulkOperationResults<String, KadaiException> transferResults =
+              taskService.transferTasksWithOwner(
+                  newDestinationWorkbasketId, transferredTaskIds, null, true);
+          transferResults.getErrorMap().forEach(operationResults::addError);
+        }
+        if (!notTransferredTaskIds.isEmpty()) {
+          BulkOperationResults<String, KadaiException> transferResults =
+              taskService.transferTasksWithOwner(
+                  newDestinationWorkbasketId, notTransferredTaskIds, null, false);
+          transferResults.getErrorMap().forEach(operationResults::addError);
+        }
+      } catch (NotAuthorizedOnWorkbasketException | WorkbasketNotFoundException e) {
+        taskIdsForDestination.forEach(taskId -> operationResults.addError(taskId, e));
+      }
+    });
     return operationResults;
   }
 

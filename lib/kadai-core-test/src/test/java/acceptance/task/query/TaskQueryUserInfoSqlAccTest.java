@@ -93,13 +93,8 @@ class TaskQueryUserInfoSqlAccTest implements KadaiConfigurationModifier {
   @Test
   void should_JoinOwnerUserInfo_When_GroupedCountOrdersByOwnerLongName() {
     String sql =
-        captureSql(
-            () ->
-                taskService
-                    .createTaskQuery()
-                    .groupByPor()
-                    .orderByOwnerLongName(ASCENDING)
-                    .count());
+        captureSql(() ->
+            taskService.createTaskQuery().groupByPor().orderByOwnerLongName(ASCENDING).count());
 
     assertThat(sql).doesNotContain("user_info creator_info");
     assertThat(countOccurrences(sql, "user_info owner_info")).isEqualTo(1);
@@ -109,13 +104,12 @@ class TaskQueryUserInfoSqlAccTest implements KadaiConfigurationModifier {
   @Test
   void should_JoinCreatorUserInfo_When_GroupedCountOrdersByCreatorLongName() {
     String sql =
-        captureSql(
-            () ->
-                taskService
-                    .createTaskQuery()
-                    .groupBySor("SecondType")
-                    .orderByCreatorLongName(ASCENDING)
-                    .count());
+        captureSql(() ->
+            taskService
+                .createTaskQuery()
+                .groupBySor("SecondType")
+                .orderByCreatorLongName(ASCENDING)
+                .count());
 
     assertThat(sql).doesNotContain("user_info owner_info");
     assertThat(countOccurrences(sql, "user_info creator_info")).isEqualTo(1);
@@ -125,14 +119,13 @@ class TaskQueryUserInfoSqlAccTest implements KadaiConfigurationModifier {
   @Test
   void should_JoinRequiredUserInfo_When_GroupedCountMixesFilterAndLongNameOrdering() {
     String sql =
-        captureSql(
-            () ->
-                taskService
-                    .createTaskQuery()
-                    .groupByPor()
-                    .ownerLongNameLike("%user-1-1%")
-                    .orderByCreatorLongName(ASCENDING)
-                    .count());
+        captureSql(() ->
+            taskService
+                .createTaskQuery()
+                .groupByPor()
+                .ownerLongNameLike("%user-1-1%")
+                .orderByCreatorLongName(ASCENDING)
+                .count());
 
     assertThat(countOccurrences(sql, "user_info owner_info")).isEqualTo(2);
     assertThat(countOccurrences(sql, "user_info creator_info")).isEqualTo(1);
@@ -146,13 +139,12 @@ class TaskQueryUserInfoSqlAccTest implements KadaiConfigurationModifier {
     String creatorSql =
         captureSql(() -> taskService.createTaskQuery().creatorLongNameLike("%user-1-1%").count());
     String bothSql =
-        captureSql(
-            () ->
-                taskService
-                    .createTaskQuery()
-                    .ownerLongNameLike("%user-1-1%")
-                    .creatorLongNameLike("%user-1-1%")
-                    .count());
+        captureSql(() ->
+            taskService
+                .createTaskQuery()
+                .ownerLongNameLike("%user-1-1%")
+                .creatorLongNameLike("%user-1-1%")
+                .count());
 
     assertThat(ownerSql).contains("user_info owner_info").doesNotContain("user_info creator_info");
     assertThat(creatorSql)
@@ -168,31 +160,27 @@ class TaskQueryUserInfoSqlAccTest implements KadaiConfigurationModifier {
         captureSql(
             () -> taskService.createTaskQuery().listValues(TaskQueryColumnName.NAME, ASCENDING));
     String ownerSql =
-        captureSql(
-            () ->
-                taskService
-                    .createTaskQuery()
-                    .listValues(TaskQueryColumnName.OWNER_LONG_NAME, ASCENDING));
+        captureSql(() ->
+            taskService
+                .createTaskQuery()
+                .listValues(TaskQueryColumnName.OWNER_LONG_NAME, ASCENDING));
     String creatorSql =
-        captureSql(
-            () ->
-                taskService
-                    .createTaskQuery()
-                    .listValues(TaskQueryColumnName.CREATOR_LONG_NAME, ASCENDING));
+        captureSql(() ->
+            taskService
+                .createTaskQuery()
+                .listValues(TaskQueryColumnName.CREATOR_LONG_NAME, ASCENDING));
     String filteredSql =
-        captureSql(
-            () ->
-                taskService
-                    .createTaskQuery()
-                    .creatorLongNameLike("%user-1-1%")
-                    .listValues(TaskQueryColumnName.NAME, ASCENDING));
+        captureSql(() ->
+            taskService
+                .createTaskQuery()
+                .creatorLongNameLike("%user-1-1%")
+                .listValues(TaskQueryColumnName.NAME, ASCENDING));
     String selectedAndFilteredSql =
-        captureSql(
-            () ->
-                taskService
-                    .createTaskQuery()
-                    .creatorLongNameLike("%user-1-1%")
-                    .listValues(TaskQueryColumnName.OWNER_LONG_NAME, ASCENDING));
+        captureSql(() ->
+            taskService
+                .createTaskQuery()
+                .creatorLongNameLike("%user-1-1%")
+                .listValues(TaskQueryColumnName.OWNER_LONG_NAME, ASCENDING));
 
     assertThat(nameSql).doesNotContain("user_info owner_info", "user_info creator_info");
     assertThat(ownerSql).contains("user_info owner_info").doesNotContain("user_info creator_info");
@@ -209,11 +197,10 @@ class TaskQueryUserInfoSqlAccTest implements KadaiConfigurationModifier {
   @Test
   void should_ProjectOnlyRequestedValue_When_ListingOwnerLongNames() {
     String sql =
-        captureSql(
-            () ->
-                taskService
-                    .createTaskQuery()
-                    .listValues(TaskQueryColumnName.OWNER_LONG_NAME, ASCENDING));
+        captureSql(() ->
+            taskService
+                .createTaskQuery()
+                .listValues(TaskQueryColumnName.OWNER_LONG_NAME, ASCENDING));
 
     String selectClause = sql.substring(0, sql.indexOf("from task"));
     assertThat(selectClause).isEqualTo("select distinct owner_info.long_name ");
@@ -255,13 +242,8 @@ class TaskQueryUserInfoSqlAccTest implements KadaiConfigurationModifier {
   @Test
   void should_NotLeakGroupedSummaryOrderingIntoGroupCount() {
     String sql =
-        captureSql(
-            () ->
-                taskService
-                    .createTaskQuery()
-                    .groupByPor()
-                    .orderByOwnerLongName(ASCENDING)
-                    .list());
+        captureSql(() ->
+            taskService.createTaskQuery().groupByPor().orderByOwnerLongName(ASCENDING).list());
 
     assertThat(countOccurrences(sql, "user_info owner_info")).isEqualTo(1);
     assertThat(sql).doesNotContain("user_info creator_info");
@@ -270,8 +252,7 @@ class TaskQueryUserInfoSqlAccTest implements KadaiConfigurationModifier {
   @WithAccessId(user = "admin")
   @Test
   void should_NotRetainLongNameOrdering_When_ReplacingWithScalarValues() {
-    TaskQuery query =
-        taskService.createTaskQuery().groupByPor().orderByOwnerLongName(ASCENDING);
+    TaskQuery query = taskService.createTaskQuery().groupByPor().orderByOwnerLongName(ASCENDING);
 
     query.listValues(TaskQueryColumnName.NAME, ASCENDING);
     String countSql = captureSql(query::count);
@@ -405,11 +386,10 @@ class TaskQueryUserInfoSqlAccTest implements KadaiConfigurationModifier {
     @Test
     void should_NotJoinUserInfoOrProjectLongNames_When_EnrichmentIsEnabledForScalarValues() {
       String sql =
-          captureSql(
-              () ->
-                  configuredTaskService
-                      .createTaskQuery()
-                      .listValues(TaskQueryColumnName.NAME, ASCENDING));
+          captureSql(() ->
+              configuredTaskService
+                  .createTaskQuery()
+                  .listValues(TaskQueryColumnName.NAME, ASCENDING));
 
       assertThat(sql).doesNotContain("user_info owner_info", "user_info creator_info");
       assertThat(sql.substring(0, sql.indexOf("from task"))).isEqualTo("select distinct t.name ");

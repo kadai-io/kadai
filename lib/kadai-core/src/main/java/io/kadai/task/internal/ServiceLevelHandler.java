@@ -149,8 +149,7 @@ class ServiceLevelHandler {
     }
 
     DurationPrioHolder durationPrioHolder = determineTaskPrioDurationAndSetPriority(newTaskImpl);
-    return updatePlannedDueOnTaskUpdate(
-        newTaskImpl, oldTaskImpl, durationPrioHolder.duration());
+    return updatePlannedDueOnTaskUpdate(newTaskImpl, oldTaskImpl, durationPrioHolder.duration());
   }
 
   private DurationPrioHolder determineTaskPrioDurationAndSetPriority(TaskImpl task) {
@@ -187,7 +186,8 @@ class ServiceLevelHandler {
     String serviceLevel =
         Objects.requireNonNull(
             classificationSummary.getServiceLevel(),
-            "ServiceLevelHandler requires a service level for the " + classificationSource
+            "ServiceLevelHandler requires a service level for the "
+                + classificationSource
                 + " classification");
     if (serviceLevel.isEmpty()) {
       throw new IllegalStateException(
@@ -197,8 +197,7 @@ class ServiceLevelHandler {
     }
   }
 
-  private void preserveScheduleWhenNoDatesWereProvided(
-      TaskImpl newTaskImpl, TaskImpl oldTaskImpl) {
+  private void preserveScheduleWhenNoDatesWereProvided(TaskImpl newTaskImpl, TaskImpl oldTaskImpl) {
     if (newTaskImpl.getPlanned() != null || newTaskImpl.getDue() != null) {
       return;
     }
@@ -222,13 +221,12 @@ class ServiceLevelHandler {
         getPriorityToTasksIdsMap(existingTasks, attachments, allInvolvedClassifications);
     TaskImpl referenceTask = new TaskImpl();
     referenceTask.setModified(Instant.now());
-    priorityToTaskIdsMap.forEach(
-        (prio, taskIdList) -> {
-          referenceTask.setPriority(prio);
-          if (!taskIdList.isEmpty()) {
-            taskMapper.updatePriorityOfTasks(taskIdList, referenceTask);
-          }
-        });
+    priorityToTaskIdsMap.forEach((prio, taskIdList) -> {
+      referenceTask.setPriority(prio);
+      if (!taskIdList.isEmpty()) {
+        taskMapper.updatePriorityOfTasks(taskIdList, referenceTask);
+      }
+    });
   }
 
   private Map<Integer, List<String>> getPriorityToTasksIdsMap(
@@ -245,12 +243,11 @@ class ServiceLevelHandler {
         getTaskIdToClassificationsMap(existingTasks, attachments);
     List<TaskIdPriority> taskIdPriorities =
         existingTasks.stream()
-            .map(
-                t ->
-                    new TaskIdPriority(
-                        t.getTaskId(),
-                        determinePriorityForATask(
-                            t, classificationIdToPriorityMap, taskIdToClassificationIdsMap)))
+            .map(t ->
+                new TaskIdPriority(
+                    t.getTaskId(),
+                    determinePriorityForATask(
+                        t, classificationIdToPriorityMap, taskIdToClassificationIdsMap)))
             .toList();
     return taskIdPriorities.stream()
         .collect(
@@ -452,10 +449,9 @@ class ServiceLevelHandler {
   private BulkLog updateDuePropertyOfAffectedTasks(
       Map<InstantDurationHolder, List<TaskDuration>> tasksPerPlannedAndDuration) {
     BulkLog bulkLog = new BulkLog();
-    tasksPerPlannedAndDuration.forEach(
-        (instDurHld, taskDurationList) ->
-            bulkLog.addAllErrors(
-                updateDuePropertyOfTasksWithIdenticalDueDate(instDurHld, taskDurationList)));
+    tasksPerPlannedAndDuration.forEach((instDurHld, taskDurationList) ->
+        bulkLog.addAllErrors(
+            updateDuePropertyOfTasksWithIdenticalDueDate(instDurHld, taskDurationList)));
     return bulkLog;
   }
 
@@ -482,14 +478,13 @@ class ServiceLevelHandler {
     referenceTask.setPlanned(planned);
     referenceTask.setModified(Instant.now());
 
-    taskIdsByDueDuration.forEach(
-        (duration, taskIds) -> {
-          referenceTask.setDue(calculateDue(planned, duration));
-          Pair<List<MinimalTaskSummary>, BulkLog> existingAndAuthorizedTasks =
-              taskServiceImpl.getMinimalTaskSummaries(taskIds);
-          bulkLog.addAllErrors(existingAndAuthorizedTasks.getRight());
-          taskMapper.updateTaskDueDates(existingAndAuthorizedTasks.getLeft(), referenceTask);
-        });
+    taskIdsByDueDuration.forEach((duration, taskIds) -> {
+      referenceTask.setDue(calculateDue(planned, duration));
+      Pair<List<MinimalTaskSummary>, BulkLog> existingAndAuthorizedTasks =
+          taskServiceImpl.getMinimalTaskSummaries(taskIds);
+      bulkLog.addAllErrors(existingAndAuthorizedTasks.getRight());
+      taskMapper.updateTaskDueDates(existingAndAuthorizedTasks.getLeft(), referenceTask);
+    });
 
     return bulkLog;
   }
@@ -709,8 +704,7 @@ class ServiceLevelHandler {
 
   static class BulkLog extends BulkOperationResults<String, KadaiException> {}
 
-  record DurationPrioHolder(Duration duration, int priority) {
-  }
+  record DurationPrioHolder(Duration duration, int priority) {}
 
   private static final class TaskDuration {
 

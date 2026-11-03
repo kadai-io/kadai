@@ -93,8 +93,8 @@ public final class TaskRoutingManager {
   }
 
   /**
-   * Determines a {@linkplain RoutingTarget} for a given {@linkplain Task}.
-   * Algorithm: see {@linkplain TaskRoutingManager#determineWorkbasketId(Task)}.
+   * Determines a {@linkplain RoutingTarget} for a given {@linkplain Task}. Algorithm: see
+   * {@linkplain TaskRoutingManager#determineWorkbasketId(Task)}.
    *
    * @param task the {@linkplain Task} for which a {@linkplain RoutingTarget} is to be determined
    * @return the {@linkplain RoutingTarget} for the creation of the {@linkplain Task}

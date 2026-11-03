@@ -47,9 +47,8 @@ public class RefreshUserPostprocessorManager {
     LOGGER.debug("Sending user to RefreshUserPostprocessor providers: {}", userToProcess);
 
     refreshUserPostprocessors.forEach(
-        CheckedConsumer.wrapping(
-            refreshUserPostprocessor ->
-                refreshUserPostprocessor.processUserAfterRefresh(userToProcess)));
+        CheckedConsumer.wrapping(refreshUserPostprocessor ->
+            refreshUserPostprocessor.processUserAfterRefresh(userToProcess)));
     return userToProcess;
   }
 

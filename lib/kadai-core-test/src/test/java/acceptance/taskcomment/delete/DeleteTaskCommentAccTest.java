@@ -118,34 +118,32 @@ class DeleteTaskCommentAccTest {
     NotAuthorizedOnTaskCommentException e =
         catchThrowableOfType(NotAuthorizedOnTaskCommentException.class, call);
     assertThat(e.getTaskCommentId()).isEqualTo(comment1.getId());
-    assertThat(e.getCurrentUserId())
-        .isEqualTo(kadaiEngine.getCurrentUserContext().getUserId());
+    assertThat(e.getCurrentUserId()).isEqualTo(kadaiEngine.getCurrentUserContext().getUserId());
 
     List<TaskComment> taskCommentsAfterDeletion = taskService.getTaskComments(task1.getId());
     assertThat(taskCommentsAfterDeletion).hasSize(1);
 
-    kadaiEngine.runAsAdmin(
-        () -> {
-          try {
-            taskService.deleteTaskComment(comment1.getId());
-          } catch (TaskCommentNotFoundException ex) {
-            throw new SystemException("Cannot find task comment with id " + ex.getTaskCommentId());
-          } catch (TaskNotFoundException ex) {
-            throw new SystemException("Cannot find task comment with id " + ex.getTaskId());
-          } catch (NotAuthorizedOnTaskCommentException ex) {
-            throw new SystemException(
-                "User "
-                    + ex.getCurrentUserId()
-                    + " not authorized on task comment "
-                    + ex.getTaskCommentId());
-          } catch (NotAuthorizedOnWorkbasketException ex) {
-            throw new SystemException(
-                "User "
-                    + ex.getCurrentUserId()
-                    + " not authorized on workbasket "
-                    + ex.getWorkbasketId());
-          }
-        });
+    kadaiEngine.runAsAdmin(() -> {
+      try {
+        taskService.deleteTaskComment(comment1.getId());
+      } catch (TaskCommentNotFoundException ex) {
+        throw new SystemException("Cannot find task comment with id " + ex.getTaskCommentId());
+      } catch (TaskNotFoundException ex) {
+        throw new SystemException("Cannot find task comment with id " + ex.getTaskId());
+      } catch (NotAuthorizedOnTaskCommentException ex) {
+        throw new SystemException(
+            "User "
+                + ex.getCurrentUserId()
+                + " not authorized on task comment "
+                + ex.getTaskCommentId());
+      } catch (NotAuthorizedOnWorkbasketException ex) {
+        throw new SystemException(
+            "User "
+                + ex.getCurrentUserId()
+                + " not authorized on workbasket "
+                + ex.getWorkbasketId());
+      }
+    });
     List<TaskComment> taskCommentsAfterDeletionWithAdmin =
         taskService.getTaskComments(task1.getId());
     assertThat(taskCommentsAfterDeletionWithAdmin).isEmpty();

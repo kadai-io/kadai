@@ -155,17 +155,15 @@ public class ClassificationServiceImpl implements ClassificationService {
 
       try {
         this.classificationMapper.deleteClassification(classificationId);
-        eventPublisher.publishing(
-            () -> {
-              String details =
-                  ObjectAttributeChangeDetector.determineChangesInAttributes(
-                      classification, newClassification("", MASTER_DOMAIN, ""));
-              return new ClassificationDeletedEvent(
-                  IdGenerator.generateWithPrefix(
-                      IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
-                  classification,
-                  details);
-            });
+        eventPublisher.publishing(() -> {
+          String details =
+              ObjectAttributeChangeDetector.determineChangesInAttributes(
+                  classification, newClassification("", MASTER_DOMAIN, ""));
+          return new ClassificationDeletedEvent(
+              IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
+              classification,
+              details);
+        });
       } catch (PersistenceException e) {
         if (isReferentialIntegrityConstraintViolation(e)) {
           throw new ClassificationInUseException(classification, e);
@@ -225,17 +223,16 @@ public class ClassificationServiceImpl implements ClassificationService {
 
       classificationMapper.insert(classificationImpl);
 
-      eventPublisher.publishing(
-          () -> {
-            String details =
-                ObjectAttributeChangeDetector.determineChangesInAttributes(
-                    newClassification("", MASTER_DOMAIN, ""), classificationImpl);
+      eventPublisher.publishing(() -> {
+        String details =
+            ObjectAttributeChangeDetector.determineChangesInAttributes(
+                newClassification("", MASTER_DOMAIN, ""), classificationImpl);
 
-            return new ClassificationCreatedEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
-                classificationImpl,
-                details);
-          });
+        return new ClassificationCreatedEvent(
+            IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
+            classificationImpl,
+            details);
+      });
 
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug(
@@ -293,17 +290,16 @@ public class ClassificationServiceImpl implements ClassificationService {
         this.createJobIfPriorityOrServiceLevelHasChanged(oldClassification, classificationImpl);
       }
 
-      eventPublisher.publishing(
-          () -> {
-            String details =
-                ObjectAttributeChangeDetector.determineChangesInAttributes(
-                    oldClassification, classificationImpl);
+      eventPublisher.publishing(() -> {
+        String details =
+            ObjectAttributeChangeDetector.determineChangesInAttributes(
+                oldClassification, classificationImpl);
 
-            return new ClassificationUpdatedEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
-                classificationImpl,
-                details);
-          });
+        return new ClassificationUpdatedEvent(
+            IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_CLASSIFICATION_HISTORY_EVENT),
+            classificationImpl,
+            details);
+      });
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug(
             "Method updateClassification() updated the classification {}.",

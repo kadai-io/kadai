@@ -108,7 +108,7 @@ public interface WorkbasketAccessItemApi {
       responses = {
         @ApiResponse(
             responseCode = "204",
-            content = {@Content(schema = @Schema())}),
+            content = {@Content(schema = @Schema)}),
         @ApiResponse(
             responseCode = "403",
             description = "NOT_AUTHORIZED",

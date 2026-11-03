@@ -18,7 +18,6 @@
 
 package io.kadai.user.rest;
 
-
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -54,7 +53,7 @@ import org.springframework.web.client.RestClient;
 /** Tests the endpoints of the UserController. */
 @KadaiSpringBootTest
 class UserControllerIntTest {
-  
+
   private final RestHelper restHelper;
   private final RestClient restClient;
 
@@ -220,18 +219,17 @@ class UserControllerIntTest {
     responseEntity
         .getBody()
         .getContent()
-        .forEach(
-            user -> {
-              if (level == 1) {
-                assertThat(user.getOrgLevel1()).isEqualTo(orgLevel);
-              } else if (level == 2) {
-                assertThat(user.getOrgLevel2()).isEqualTo(orgLevel);
-              } else if (level == 3) {
-                assertThat(user.getOrgLevel3()).isEqualTo(orgLevel);
-              } else if (level == 4) {
-                assertThat(user.getOrgLevel4()).isEqualTo(orgLevel);
-              }
-            });
+        .forEach(user -> {
+          if (level == 1) {
+            assertThat(user.getOrgLevel1()).isEqualTo(orgLevel);
+          } else if (level == 2) {
+            assertThat(user.getOrgLevel2()).isEqualTo(orgLevel);
+          } else if (level == 3) {
+            assertThat(user.getOrgLevel3()).isEqualTo(orgLevel);
+          } else if (level == 4) {
+            assertThat(user.getOrgLevel4()).isEqualTo(orgLevel);
+          }
+        });
   }
 
   @ParameterizedTest
@@ -280,18 +278,17 @@ class UserControllerIntTest {
     responseEntity
         .getBody()
         .getContent()
-        .forEach(
-            user -> {
-              if (level == 1) {
-                assertThat(user.getOrgLevel1()).isEqualTo(orgLevel1);
-              } else if (level == 2) {
-                assertThat(user.getOrgLevel2()).isEqualTo(orgLevel1);
-              } else if (level == 3) {
-                assertThat(user.getOrgLevel3()).isEqualTo(orgLevel1);
-              } else if (level == 4) {
-                assertThat(user.getOrgLevel4()).isEqualTo(orgLevel1);
-              }
-            });
+        .forEach(user -> {
+          if (level == 1) {
+            assertThat(user.getOrgLevel1()).isEqualTo(orgLevel1);
+          } else if (level == 2) {
+            assertThat(user.getOrgLevel2()).isEqualTo(orgLevel1);
+          } else if (level == 3) {
+            assertThat(user.getOrgLevel3()).isEqualTo(orgLevel1);
+          } else if (level == 4) {
+            assertThat(user.getOrgLevel4()).isEqualTo(orgLevel1);
+          }
+        });
   }
 
   @ParameterizedTest
@@ -376,18 +373,17 @@ class UserControllerIntTest {
     responseEntity.getBody().getContent().stream()
         .filter(user -> !user.getUserId().equals("user-1-1"))
         .filter(user -> !user.getUserId().equals("user-2-1"))
-        .forEach(
-            user -> {
-              if (level == 1) {
-                assertThat(user.getOrgLevel1()).isEqualTo(orgLevel);
-              } else if (level == 2) {
-                assertThat(user.getOrgLevel2()).isEqualTo(orgLevel);
-              } else if (level == 3) {
-                assertThat(user.getOrgLevel3()).isEqualTo(orgLevel);
-              } else if (level == 4) {
-                assertThat(user.getOrgLevel4()).isEqualTo(orgLevel);
-              }
-            });
+        .forEach(user -> {
+          if (level == 1) {
+            assertThat(user.getOrgLevel1()).isEqualTo(orgLevel);
+          } else if (level == 2) {
+            assertThat(user.getOrgLevel2()).isEqualTo(orgLevel);
+          } else if (level == 3) {
+            assertThat(user.getOrgLevel3()).isEqualTo(orgLevel);
+          } else if (level == 4) {
+            assertThat(user.getOrgLevel4()).isEqualTo(orgLevel);
+          }
+        });
   }
 
   @ParameterizedTest
@@ -414,18 +410,17 @@ class UserControllerIntTest {
                 user -> user.getUserId().equals("teamlead-1"), "user with id teamlead-1"));
     responseEntity.getBody().getContent().stream()
         .filter(user -> !user.getUserId().equals("teamlead-1"))
-        .forEach(
-            user -> {
-              if (level == 1) {
-                assertThat(user.getOrgLevel1()).isEqualTo(orgLevel);
-              } else if (level == 2) {
-                assertThat(user.getOrgLevel2()).isEqualTo(orgLevel);
-              } else if (level == 3) {
-                assertThat(user.getOrgLevel3()).isEqualTo(orgLevel);
-              } else if (level == 4) {
-                assertThat(user.getOrgLevel4()).isEqualTo(orgLevel);
-              }
-            });
+        .forEach(user -> {
+          if (level == 1) {
+            assertThat(user.getOrgLevel1()).isEqualTo(orgLevel);
+          } else if (level == 2) {
+            assertThat(user.getOrgLevel2()).isEqualTo(orgLevel);
+          } else if (level == 3) {
+            assertThat(user.getOrgLevel3()).isEqualTo(orgLevel);
+          } else if (level == 4) {
+            assertThat(user.getOrgLevel4()).isEqualTo(orgLevel);
+          }
+        });
   }
 
   @ParameterizedTest
@@ -460,18 +455,17 @@ class UserControllerIntTest {
         .hasSize(3);
     users.stream()
         .filter(user -> !user.getUserId().equals("teamlead-1"))
-        .forEach(
-            user -> {
-              if (level == 1) {
-                assertThat(user.getOrgLevel1()).isEqualTo(orgLevel);
-              } else if (level == 2) {
-                assertThat(user.getOrgLevel2()).isEqualTo(orgLevel);
-              } else if (level == 3) {
-                assertThat(user.getOrgLevel3()).isEqualTo(orgLevel);
-              } else if (level == 4) {
-                assertThat(user.getOrgLevel4()).isEqualTo(orgLevel);
-              }
-            });
+        .forEach(user -> {
+          if (level == 1) {
+            assertThat(user.getOrgLevel1()).isEqualTo(orgLevel);
+          } else if (level == 2) {
+            assertThat(user.getOrgLevel2()).isEqualTo(orgLevel);
+          } else if (level == 3) {
+            assertThat(user.getOrgLevel3()).isEqualTo(orgLevel);
+          } else if (level == 4) {
+            assertThat(user.getOrgLevel4()).isEqualTo(orgLevel);
+          }
+        });
   }
 
   @ParameterizedTest

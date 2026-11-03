@@ -77,10 +77,7 @@ class QueryTasksWithSortingAccTest extends AbstractAccTest {
         assertThat(results).hasSizeGreaterThan(2);
 
         List<String> idsDesc =
-            results.stream()
-                .map(TaskSummary::getId)
-                .sorted(Comparator.reverseOrder())
-                .toList();
+            results.stream().map(TaskSummary::getId).sorted(Comparator.reverseOrder()).toList();
 
         for (int i = 0; i < results.size(); i++) {
           assertThat(results.get(i).getId()).isEqualTo(idsDesc.get(i));
@@ -96,8 +93,7 @@ class QueryTasksWithSortingAccTest extends AbstractAccTest {
         // test is only valid with at least 2 results
         assertThat(results).hasSizeGreaterThan(2);
 
-        List<String> idsAsc =
-            results.stream().map(TaskSummary::getId).sorted().toList();
+        List<String> idsAsc = results.stream().map(TaskSummary::getId).sorted().toList();
 
         for (int i = 0; i < results.size(); i++) {
           assertThat(results.get(i).getId()).isEqualTo(idsAsc.get(i));
@@ -205,10 +201,10 @@ class QueryTasksWithSortingAccTest extends AbstractAccTest {
           if (previousSummary != null) {
             assertThat(
                     taskSummary
-                            .getPrimaryObjRef()
-                            .getSystem()
-                            .compareToIgnoreCase(previousSummary.getPrimaryObjRef().getSystem())
-                        ).isNotPositive();
+                        .getPrimaryObjRef()
+                        .getSystem()
+                        .compareToIgnoreCase(previousSummary.getPrimaryObjRef().getSystem()))
+                .isNotPositive();
           }
           previousSummary = taskSummary;
         }
@@ -239,11 +235,10 @@ class QueryTasksWithSortingAccTest extends AbstractAccTest {
           if (previousSummary != null) {
             assertThat(
                     taskSummary
-                            .getPrimaryObjRef()
-                            .getSystemInstance()
-                            .compareToIgnoreCase(
-                                previousSummary.getPrimaryObjRef().getSystemInstance())
-                        )
+                        .getPrimaryObjRef()
+                        .getSystemInstance()
+                        .compareToIgnoreCase(
+                            previousSummary.getPrimaryObjRef().getSystemInstance()))
                 .isNotPositive();
           }
           previousSummary = taskSummary;
@@ -305,10 +300,9 @@ class QueryTasksWithSortingAccTest extends AbstractAccTest {
           if (previousSummary != null) {
             assertThat(
                     taskSummary
-                            .getWorkbasketSummary()
-                            .getKey()
-                            .compareToIgnoreCase(previousSummary.getWorkbasketSummary().getKey())
-                        )
+                        .getWorkbasketSummary()
+                        .getKey()
+                        .compareToIgnoreCase(previousSummary.getWorkbasketSummary().getKey()))
                 .isNotNegative();
           }
           previousSummary = taskSummary;
@@ -339,9 +333,8 @@ class QueryTasksWithSortingAccTest extends AbstractAccTest {
           if (previousSummary != null) {
             assertThat(
                     taskSummary
-                            .getBusinessProcessId()
-                            .compareToIgnoreCase(previousSummary.getBusinessProcessId())
-                        )
+                        .getBusinessProcessId()
+                        .compareToIgnoreCase(previousSummary.getBusinessProcessId()))
                 .isNotNegative();
           }
           previousSummary = taskSummary;

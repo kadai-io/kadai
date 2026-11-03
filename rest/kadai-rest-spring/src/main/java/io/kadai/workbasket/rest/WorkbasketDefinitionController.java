@@ -164,10 +164,9 @@ public class WorkbasketDefinitionController implements WorkbasketDefinitionApi {
       // simply delete all existing accessItems and create new ones.
       boolean authenticated =
           definition.getAuthorizations().stream()
-              .anyMatch(
-                  access ->
-                      (access.getWorkbasketId().equals(importedWb.getId()))
-                          && (access.getWorkbasketKey().equals(importedWb.getKey())));
+              .anyMatch(access ->
+                  (access.getWorkbasketId().equals(importedWb.getId()))
+                      && (access.getWorkbasketKey().equals(importedWb.getKey())));
       if (!authenticated && !definition.getAuthorizations().isEmpty()) {
         throw new InvalidArgumentException(
             "The given Authentications for Workbasket "

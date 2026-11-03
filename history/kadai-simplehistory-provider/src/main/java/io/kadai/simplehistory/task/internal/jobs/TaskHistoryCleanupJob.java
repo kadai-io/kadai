@@ -89,10 +89,9 @@ public class TaskHistoryCleanupJob extends AbstractKadaiJob {
       if (allCompletedSameParentBusiness) {
         taskIdsToDeleteHistoryEventsFor =
             historyEventCandidatesToClean.stream()
-                .filter(
-                    event ->
-                        event.getParentBusinessProcessId() == null
-                            || event.getParentBusinessProcessId().isEmpty())
+                .filter(event ->
+                    event.getParentBusinessProcessId() == null
+                        || event.getParentBusinessProcessId().isEmpty())
                 .map(TaskHistoryEvent::getTaskId)
                 .collect(Collectors.toSet());
         historyEventCandidatesToClean.removeIf(

@@ -60,9 +60,8 @@ public class TestConfiguration {
   @Bean
   JsonMapperBuilderCustomizer customizer(ObjectProvider<HypermediaMappingInformation> hypermedia) {
     return builder -> {
-      hypermedia.ifAvailable(
-          hypermediaMappingInformation ->
-              hypermediaMappingInformation.configureJsonMapper(builder));
+      hypermedia.ifAvailable(hypermediaMappingInformation ->
+          hypermediaMappingInformation.configureJsonMapper(builder));
       builder
           .deactivateDefaultTyping()
           .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)

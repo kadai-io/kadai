@@ -631,8 +631,7 @@ class ClassificationQueryFilteringAccTest {
             .domainIn("")
             .listValues(NAME, null);
     List<String> columnNameAllList =
-        Stream.concat(columnNameList.stream(), columnNameMasterList.stream())
-            .toList();
+        Stream.concat(columnNameList.stream(), columnNameMasterList.stream()).toList();
 
     assertThat(columnNameAllList).containsOnly("Classification Name");
   }
@@ -659,8 +658,7 @@ class ClassificationQueryFilteringAccTest {
             .domainIn("")
             .listValues(TYPE, null);
     List<String> columnTypeAllList =
-        Stream.concat(columnTypeList.stream(), columnTypeMasterList.stream())
-            .toList();
+        Stream.concat(columnTypeList.stream(), columnTypeMasterList.stream()).toList();
 
     assertThat(columnTypeAllList).containsOnly("DOCUMENT");
   }
@@ -725,16 +723,14 @@ class ClassificationQueryFilteringAccTest {
             .customAttributeIn(CUSTOM_1, testIdentifier)
             .listValues(CREATED, null);
     List<String> columnCreatedAllList =
-        Stream.concat(columnCreatedList.stream(), columnCreatedMasterList.stream())
-            .toList();
+        Stream.concat(columnCreatedList.stream(), columnCreatedMasterList.stream()).toList();
 
     assertThat(columnCreatedAllList)
         .isNotEmpty()
-        .allSatisfy(
-            c ->
-                assertThat(now)
-                    .isBefore(
-                        LocalDateTime.parse(c, dateTimeFormatterBuilder.toFormatter())
-                            .toInstant(ZoneOffset.UTC)));
+        .allSatisfy(c ->
+            assertThat(now)
+                .isBefore(
+                    LocalDateTime.parse(c, dateTimeFormatterBuilder.toFormatter())
+                        .toInstant(ZoneOffset.UTC)));
   }
 }

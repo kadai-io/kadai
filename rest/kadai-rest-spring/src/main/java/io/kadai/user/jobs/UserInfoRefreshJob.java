@@ -171,17 +171,16 @@ public class UserInfoRefreshJob extends AbstractKadaiJob {
     if (txProvider == null) {
       throw new IllegalStateException("User refresh requires a transaction provider");
     }
-    return txProvider.executeInTransaction(
-        () -> {
-          lockGuard.renewOrThrow();
-          UserRefreshResult result;
-          try {
-            result = userService.synchronizeUsers(input, batchSize);
-          } catch (Exception e) {
-            throw new SystemException("Could not synchronize LDAP user snapshot", e);
-          }
-          lockGuard.renewOrThrow();
-          return result;
-        });
+    return txProvider.executeInTransaction(() -> {
+      lockGuard.renewOrThrow();
+      UserRefreshResult result;
+      try {
+        result = userService.synchronizeUsers(input, batchSize);
+      } catch (Exception e) {
+        throw new SystemException("Could not synchronize LDAP user snapshot", e);
+      }
+      lockGuard.renewOrThrow();
+      return result;
+    });
   }
 }

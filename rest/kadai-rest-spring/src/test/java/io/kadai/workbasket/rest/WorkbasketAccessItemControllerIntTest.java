@@ -207,9 +207,8 @@ class WorkbasketAccessItemControllerIntTest {
                   restClient
                       .delete()
                       .uri(url)
-                      .headers(
-                          headers ->
-                              headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                      .headers(headers ->
+                          headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                       .retrieve()
                       .toEntity(Void.class);
           assertThatThrownBy(httpCall)

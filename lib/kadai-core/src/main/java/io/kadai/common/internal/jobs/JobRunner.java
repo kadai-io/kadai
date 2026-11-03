@@ -53,24 +53,23 @@ public class JobRunner {
   }
 
   private void runJob(ScheduledJob scheduledJob) {
-    kadaiEngine.runAsAdmin(
-        () -> {
-          try {
-            AbstractKadaiJob job =
-                (AbstractKadaiJob)
-                    AbstractKadaiJob.createFromScheduledJob(kadaiEngine, txProvider, scheduledJob);
-            if (job.getTransactionPolicy() == JobTransactionPolicy.WHOLE_JOB) {
-              KadaiTransactionProvider.executeInTransactionIfPossible(
-                  txProvider, () -> executeAndFinalize(job, scheduledJob));
-            } else {
-              executeJob(job);
-              KadaiTransactionProvider.executeInTransactionIfPossible(
-                  txProvider, () -> finalizeScheduledJob(job, scheduledJob));
-            }
-          } catch (Exception e) {
-            LOGGER.error("Error running job: {} ", scheduledJob.getType(), e);
-          }
-        });
+    kadaiEngine.runAsAdmin(() -> {
+      try {
+        AbstractKadaiJob job =
+            (AbstractKadaiJob)
+                AbstractKadaiJob.createFromScheduledJob(kadaiEngine, txProvider, scheduledJob);
+        if (job.getTransactionPolicy() == JobTransactionPolicy.WHOLE_JOB) {
+          KadaiTransactionProvider.executeInTransactionIfPossible(
+              txProvider, () -> executeAndFinalize(job, scheduledJob));
+        } else {
+          executeJob(job);
+          KadaiTransactionProvider.executeInTransactionIfPossible(
+              txProvider, () -> finalizeScheduledJob(job, scheduledJob));
+        }
+      } catch (Exception e) {
+        LOGGER.error("Error running job: {} ", scheduledJob.getType(), e);
+      }
+    });
   }
 
   private void executeAndFinalize(AbstractKadaiJob job, ScheduledJob scheduledJob) {
