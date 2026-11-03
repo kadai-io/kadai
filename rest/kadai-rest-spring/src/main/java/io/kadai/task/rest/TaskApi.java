@@ -2149,6 +2149,8 @@ public interface TaskApi {
    * @throws TaskNotFoundException if specific tasks referenced in the operation cannot be found.
    * @throws InvalidArgumentException if no task IDs are provided.
    */
+  // google-java-format 2.0.0 indents the OpenAPI text blocks past the 100-character limit.
+  @SuppressWarnings("checkstyle:LineLength")
   @Operation(
       summary = "Distribute Tasks to Destination Workbaskets",
       description =
