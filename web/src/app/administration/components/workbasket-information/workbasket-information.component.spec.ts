@@ -76,7 +76,7 @@ describe('WorkbasketInformationComponent', () => {
       imports: [WorkbasketInformationComponent],
       providers: [
         provideStore([EngineConfigurationState, WorkbasketState]),
-        provideRouter([]),
+        provideRouter([{ path: '**', children: [] }]),
         { provide: WorkbasketService, useValue: workbasketServiceMock },
         { provide: AccessIdsService, useValue: accessIdsServiceMock },
 

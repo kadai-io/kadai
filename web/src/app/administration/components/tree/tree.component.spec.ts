@@ -17,7 +17,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { CLASSIFICATIONS_ROUTE } from '../../../shared/util/administration-routes';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { KadaiTreeComponent } from './tree.component';
@@ -33,7 +33,6 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { of } from 'rxjs';
 import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
-import { Location } from '@angular/common';
 import { By } from '@angular/platform-browser';
 
 const classificationsServiceMock = {
@@ -54,11 +53,6 @@ const requestInProgressServiceMock = {
   getRequestInProgress: vi.fn().mockReturnValue(of(false))
 };
 
-const locationMock = {
-  path: vi.fn().mockReturnValue('/kadai/administration/classifications'),
-  go: vi.fn()
-};
-
 const classificationCategoriesServiceSpy: Partial<ClassificationCategoriesService> = {
   getCustomisation: vi.fn().mockReturnValue(of(engineConfigurationMock.customisation))
 };
@@ -75,6 +69,7 @@ describe('KadaiTreeComponent', () => {
     await TestBed.configureTestingModule({
       imports: [KadaiTreeComponent],
       providers: [
+        provideRouter([{ path: '**', children: [] }]),
         provideStore([ClassificationState, EngineConfigurationState]),
         provideHttpClientTesting(),
         provideAngularSvgIcon(),
@@ -82,7 +77,6 @@ describe('KadaiTreeComponent', () => {
         { provide: ClassificationTreeService, useValue: classificationTreeServiceMock },
         { provide: NotificationService, useValue: notificationServiceMock },
         { provide: RequestInProgressService, useValue: requestInProgressServiceMock },
-        { provide: Location, useValue: locationMock },
         { provide: ClassificationCategoriesService, useValue: classificationCategoriesServiceSpy }
       ]
     }).compileComponents();

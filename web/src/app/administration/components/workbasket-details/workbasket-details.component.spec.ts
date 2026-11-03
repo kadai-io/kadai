@@ -82,7 +82,7 @@ describe('WorkbasketDetailsComponent', () => {
       providers: [
         provideStore([WorkbasketState, EngineConfigurationState, DomainState]),
         { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
-        provideRouter([]),
+        provideRouter([{ path: '**', children: [] }]),
         provideNoopAnimations(),
         { provide: WorkbasketService, useValue: workbasketServiceMock },
         provideHttpClientTesting(),

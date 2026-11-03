@@ -17,13 +17,13 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DebugElement } from '@angular/core';
+import { DebugElement, Component } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { DomainState } from '../../../shared/store/domain-store/domain.state';
 import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
 import { ClassificationOverviewComponent } from './classification-overview.component';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router, provideRouter } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import {
   CreateClassification,
@@ -38,6 +38,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const routeParamsMock = { id: 'new-classification' };
+
+@Component({ template: '' })
+class BlankRouteComponent {}
 
 describe('ClassificationOverviewComponent', () => {
   let fixture: ComponentFixture<ClassificationOverviewComponent>;
@@ -58,6 +61,7 @@ describe('ClassificationOverviewComponent', () => {
       imports: [ClassificationOverviewComponent],
       providers: [
         provideStore([ClassificationState, EngineConfigurationState, DomainState]),
+        provideRouter([{ path: '**', component: BlankRouteComponent }]),
         { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
 
         provideHttpClientTesting(),
@@ -143,6 +147,17 @@ describe('ClassificationOverviewComponent', () => {
     component.ngOnInit();
 
     expect(isActionDispatched).toBe(false);
+  });
+
+  it('should read the route again after each navigation', async () => {
+    mockActivatedRoute.firstChild.snapshot = { params: { id: 'CLI:99' } };
+    store.reset({ ...store.snapshot(), classification: classificationStateMock });
+    let isActionDispatched = false;
+    actions$.pipe(ofActionDispatched(SelectClassification)).subscribe(() => (isActionDispatched = true));
+
+    await TestBed.inject(Router).navigateByUrl('/kadai/administration/classifications');
+
+    expect(isActionDispatched).toBe(true);
   });
 
   it('should dispatch DeselectClassification when the route carries no id', () => {

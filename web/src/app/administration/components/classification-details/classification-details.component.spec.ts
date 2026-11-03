@@ -17,6 +17,7 @@
  */
 
 import { DebugElement } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
 import { EMPTY, firstValueFrom, Observable, of } from 'rxjs';
 import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
@@ -71,6 +72,7 @@ describe('ClassificationDetailsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ClassificationDetailsComponent],
       providers: [
+        provideRouter([{ path: '**', children: [] }]),
         provideStore([ClassificationState, EngineConfigurationState, DomainState]),
         { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
         provideHttpClientTesting(),

@@ -17,7 +17,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { CLASSIFICATIONS_ROUTE } from '../../../shared/util/administration-routes';
 import { Component, DebugElement, input } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
@@ -63,6 +63,7 @@ describe('ClassificationListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ClassificationListComponent],
       providers: [
+        provideRouter([{ path: '**', children: [] }]),
         provideStore([ClassificationState, EngineConfigurationState, DomainState]),
         { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
 
@@ -382,6 +383,7 @@ describe('ClassificationListComponent — HTML template coverage without overrid
     await TestBed.configureTestingModule({
       imports: [ClassificationListComponent],
       providers: [
+        provideRouter([{ path: '**', children: [] }]),
         provideStore([ClassificationState, EngineConfigurationState, DomainState]),
         { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
         provideHttpClientTesting(),

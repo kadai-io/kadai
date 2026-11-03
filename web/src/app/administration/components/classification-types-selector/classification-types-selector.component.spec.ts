@@ -17,7 +17,7 @@
  */
 
 import { ClassificationTypesSelectorComponent } from './classification-types-selector.component';
-import { Router } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { CLASSIFICATIONS_ROUTE } from '../../../shared/util/administration-routes';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
@@ -45,6 +45,7 @@ describe('ClassificationTypesSelectorComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ClassificationTypesSelectorComponent],
       providers: [
+        provideRouter([{ path: '**', children: [] }]),
         provideLocationMocks(),
         provideStore([ClassificationState]),
         {

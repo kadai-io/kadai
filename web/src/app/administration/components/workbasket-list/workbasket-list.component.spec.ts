@@ -61,7 +61,7 @@ describe('WorkbasketListComponent', () => {
       providers: [
         provideStore([WorkbasketState, FilterState, DomainState]),
         { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
-        provideRouter([]),
+        provideRouter([{ path: '**', children: [] }]),
 
         provideHttpClientTesting(),
         provideAngularSvgIcon(),

@@ -22,10 +22,10 @@ import { DebugElement } from '@angular/core';
 import { Actions, ofActionCompleted, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { DomainState } from '../../../shared/store/domain-store/domain.state';
 import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
-import { Observable, of } from 'rxjs';
+import { Observable, of, firstValueFrom } from 'rxjs';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 import { CreateWorkbasket, SelectWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { take } from 'rxjs/operators';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
@@ -53,6 +53,7 @@ describe('WorkbasketOverviewComponent', () => {
     await TestBed.configureTestingModule({
       imports: [WorkbasketOverviewComponent],
       providers: [
+        provideRouter([{ path: '**', children: [] }]),
         provideStore([WorkbasketState, FilterState, EngineConfigurationState, DomainState]),
         { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
         provideNoopAnimations(),
@@ -70,7 +71,14 @@ describe('WorkbasketOverviewComponent', () => {
     debugElement = fixture.debugElement;
     component = fixture.debugElement.componentInstance;
     store = TestBed.inject(Store);
-    store.reset({ ...store.snapshot(), domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' } });
+    store.reset({
+      ...store.snapshot(),
+      domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' },
+      workbasket: {
+        ...store.snapshot().workbasket,
+        availableDistributionTargets: { workbaskets: [], _links: {} }
+      }
+    });
     store.reset({
       ...store.snapshot(),
       engineConfiguration: engineConfigurationMock
@@ -87,13 +95,10 @@ describe('WorkbasketOverviewComponent', () => {
     expect(debugElement.nativeElement.querySelector('kadai-administration-workbasket-list')).toBeTruthy();
   });
 
-  it('should display details when params id exists', async () => {
-    actions$.pipe(ofActionCompleted(CreateWorkbasket), take(1)).subscribe(() => {
-      expect(component.routerParams.id).toMatch('new-workbasket');
-      expect(component.showDetail).toBeTruthy();
-      expect(debugElement.nativeElement.querySelector('kadai-administration-workbasket-details')).toBeTruthy();
-    });
-    component.ngOnInit();
+  it('should display details when params id exists', () => {
+    expect(component.routerParams.id).toMatch('new-workbasket');
+    expect(component.showDetail()).toBe(true);
+    expect(debugElement.nativeElement.querySelector('kadai-administration-workbasket-details')).toBeTruthy();
   });
 
   it('should not display workbasket-details', () => {
@@ -218,6 +223,7 @@ describe('WorkbasketOverviewComponent Alternative Params ID', () => {
     await TestBed.configureTestingModule({
       imports: [WorkbasketOverviewComponent],
       providers: [
+        provideRouter([{ path: '**', children: [] }]),
         provideStore([WorkbasketState, FilterState, DomainState]),
         { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
         { provide: ActivatedRoute, useValue: mockActivatedRouteAlternativeId },
@@ -229,7 +235,14 @@ describe('WorkbasketOverviewComponent Alternative Params ID', () => {
     fixture = TestBed.createComponent(WorkbasketOverviewComponent);
     component = fixture.debugElement.componentInstance;
     store = TestBed.inject(Store);
-    store.reset({ ...store.snapshot(), domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' } });
+    store.reset({
+      ...store.snapshot(),
+      domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' },
+      workbasket: {
+        ...store.snapshot().workbasket,
+        availableDistributionTargets: { workbaskets: [], _links: {} }
+      }
+    });
     actions$ = TestBed.inject(Actions);
     fixture.detectChanges();
   });
