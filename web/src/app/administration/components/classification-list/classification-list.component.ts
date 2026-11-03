@@ -137,8 +137,6 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
       });
   }
 
-  // Dispatched from triggers that can fire before the domains are loaded; the subscription above
-  // covers that case as soon as a domain arrives, so skipping here cannot lose a refresh.
   private refreshClassifications(): void {
     const domain = this.store.selectSnapshot(DomainSelectors.selectedDomain);
     if (domain !== undefined) {

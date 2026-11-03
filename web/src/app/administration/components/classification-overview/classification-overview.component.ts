@@ -66,9 +66,6 @@ export class ClassificationOverviewComponent implements OnInit, OnDestroy {
     });
   }
 
-  // route.firstChild is a snapshot, so reading it once in ngOnInit missed every detail opened later and
-  // the url could not drive the selection. Re-reading it per navigation makes the url the single input,
-  // and the guards keep a navigation that merely catches up with the store from dispatching again.
   private applyDetailRoute(): void {
     const id = this.route.firstChild?.snapshot.params['id'];
     this.routerParams = { id };

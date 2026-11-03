@@ -95,8 +95,6 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     });
 
-    // The selected domain lives in the url. Reading it here, once for the whole app, is what makes a
-    // reload, a shared link and the browser history arrive at the same domain the user had.
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       const domain = params[DOMAIN_QUERY_PARAM];
       if (domain !== undefined && domain !== this.store.selectSnapshot(DomainSelectors.selectedDomain)) {
