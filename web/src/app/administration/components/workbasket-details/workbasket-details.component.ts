@@ -37,7 +37,6 @@ import {
   UpdateWorkbasketDistributionTargets
 } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { ButtonAction } from '../../models/button-action';
-import { cloneDeep } from 'lodash-es';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
@@ -89,7 +88,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
       WorkbasketSelectors.selectedWorkbasketAndComponentAndAction
     );
     if (workbasketAndComponentAndAction?.selectedWorkbasket) {
-      this.workbasket.set(cloneDeep(workbasketAndComponentAndAction.selectedWorkbasket));
+      this.workbasket.set(structuredClone(workbasketAndComponentAndAction.selectedWorkbasket));
     }
     if (workbasketAndComponentAndAction?.action) {
       this.action.set(workbasketAndComponentAndAction.action);
@@ -111,7 +110,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
       const isAnotherId = this.workbasket()?.workbasketId !== selectedWorkbasket?.workbasketId;
       const isCreation = action !== this.action() && action === ACTION.CREATE;
       if ((isAnotherId || isCreation) && selectedWorkbasket) {
-        this.workbasket.set(cloneDeep(selectedWorkbasket));
+        this.workbasket.set(structuredClone(selectedWorkbasket));
       }
 
       this.action.set(action);

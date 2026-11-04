@@ -44,7 +44,6 @@ import {
 } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
 import { ButtonAction } from '../../models/button-action';
-import { cloneDeep } from 'lodash-es';
 import { trimForm } from '../../../shared/util/form-trimmer';
 import { AsyncPipe } from '@angular/common';
 import { MatDivider } from '@angular/material/divider';
@@ -225,7 +224,7 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
       if (!workbasket._links) return;
       this.store.dispatch(new UpdateWorkbasket(workbasket._links.self.href, workbasket)).subscribe(() => {
         this.requestInProgressService.setRequestInProgress(false);
-        this.workbasketClone = cloneDeep(workbasket);
+        this.workbasketClone = structuredClone(workbasket);
       });
     }
   }

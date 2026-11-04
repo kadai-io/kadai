@@ -17,7 +17,6 @@
  */
 
 import { AfterViewInit, ChangeDetectorRef, Component, inject, input, OnInit, signal, viewChild } from '@angular/core';
-import { isEqual } from 'lodash-es';
 import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
 import { expandDown } from 'app/shared/animations/expand.animation';
 import { MatListOption, MatSelectionList } from '@angular/material/list';
@@ -93,6 +92,7 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
   private changeDetector = inject(ChangeDetectorRef);
   private store = inject(Store);
   private destroy$ = new Subject<void>();
+  // compared via JSON.stringify: FilterState always builds these with the same key order
   private filterParam!: WorkbasketQueryFilterParameter;
   private allSelectedDiff = 0;
 
@@ -101,7 +101,7 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
     if (this.side() === Side.AVAILABLE) {
       this.availableDistributionTargets$.pipe(takeUntil(this.destroy$)).subscribe((wbs) => this.assignWbs(wbs));
       this.availableDistributionTargetsFilter$.pipe(takeUntil(this.destroy$)).subscribe((filter) => {
-        if (typeof this.filterParam === 'undefined' || isEqual(this.filterParam, filter)) {
+        if (typeof this.filterParam === 'undefined' || JSON.stringify(this.filterParam) === JSON.stringify(filter)) {
           this.filterParam = filter;
           return;
         }
@@ -114,7 +114,7 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
     } else {
       this.workbasketDistributionTargets$.pipe(takeUntil(this.destroy$)).subscribe((wbs) => this.assignWbs(wbs));
       this.selectedDistributionTargetsFilter$.pipe(takeUntil(this.destroy$)).subscribe((filter) => {
-        if (typeof this.filterParam === 'undefined' || isEqual(this.filterParam, filter)) {
+        if (typeof this.filterParam === 'undefined' || JSON.stringify(this.filterParam) === JSON.stringify(filter)) {
           this.filterParam = filter;
           return;
         }

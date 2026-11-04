@@ -59,7 +59,6 @@ import { ClearWorkbasketFilter } from '../filter-store/filter.actions';
 import { inject, Injectable } from '@angular/core';
 import { WorkbasketQueryPagingParameter } from '../../models/workbasket-query-paging-parameter';
 import { Side } from '../../../administration/models/workbasket-distribution-enums';
-import { cloneDeep } from 'lodash-es';
 
 class InitializeStore {
   static readonly type = '[Workbasket] Initializing state';
@@ -458,7 +457,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
             wbt.distributionTargets = idArrayNoDupe.map((id) => completeArray.find((wb) => wb.workbasketId === id)!);
           }
           const distributionTargetSet = new Set(wbt.distributionTargets.map((wb) => wb.workbasketId));
-          let availableTargets = cloneDeep(ctx.getState().availableDistributionTargets);
+          let availableTargets = structuredClone(ctx.getState().availableDistributionTargets);
           availableTargets.workbaskets = availableTargets.workbaskets.filter((wb) => {
             return !distributionTargetSet.has(wb.workbasketId);
           });
@@ -515,8 +514,8 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   transferDistributionTargets(ctx: StateContext<WorkbasketStateModel>, action: TransferDistributionTargets): void {
     let { availableDistributionTargets, workbasketDistributionTargets } = ctx.getState();
     const workbasketSummarySet = new Set(action.workbasketSummaries.map((wb) => wb.workbasketId));
-    availableDistributionTargets = cloneDeep(availableDistributionTargets);
-    workbasketDistributionTargets = cloneDeep(workbasketDistributionTargets);
+    availableDistributionTargets = structuredClone(availableDistributionTargets);
+    workbasketDistributionTargets = structuredClone(workbasketDistributionTargets);
     if (action.targetSide === Side.AVAILABLE) {
       workbasketDistributionTargets.distributionTargets = workbasketDistributionTargets.distributionTargets.filter(
         (wb) => !workbasketSummarySet.has(wb.workbasketId)
