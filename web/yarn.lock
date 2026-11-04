@@ -2532,13 +2532,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/file-saver-es@npm:2":
-  version: 2.0.3
-  resolution: "@types/file-saver-es@npm:2.0.3"
-  checksum: 10c0/b90c32f98cfa9320e14119845b6fada47d1399f96f5a32999835de271e5a74398988378ca5c7a0b7d1e6fccfb1007b913fc3173ba574070136648e08b3c945d6
-  languageName: node
-  linkType: hard
-
 "@types/gensync@npm:^1.0.5":
   version: 1.0.5
   resolution: "@types/gensync@npm:1.0.5"
@@ -4557,13 +4550,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"file-saver-es@npm:2.0.5":
-  version: 2.0.5
-  resolution: "file-saver-es@npm:2.0.5"
-  checksum: 10c0/ba72dc6d37cdc8d2951882bf37b8e5956fa6b1d218d4f7d74615be33ee651a81bcf3f5980b0a6d9c9c8094ed92aba5f2396554df953b20b1d77e7af9e920fd3e
-  languageName: node
-  linkType: hard
-
 "find-up@npm:^5.0.0":
   version: 5.0.0
   resolution: "find-up@npm:5.0.0"
@@ -5549,7 +5535,6 @@ __metadata:
     "@ngxs/devtools-plugin": "npm:22.0.0"
     "@ngxs/router-plugin": "npm:22.0.0"
     "@ngxs/store": "npm:22.0.0"
-    "@types/file-saver-es": "npm:2"
     "@types/jsdom": "npm:30"
     "@types/lodash-es": "npm:4"
     "@types/node": "npm:26.6.6"
@@ -5563,7 +5548,6 @@ __metadata:
     eslint-config-prettier: "npm:10.1.8"
     eslint-plugin-import: "npm:2.32.0"
     eslint-plugin-prettier: "npm:5.5.7"
-    file-saver-es: "npm:2.0.5"
     globals: "npm:17.14.0"
     jsdom: "npm:30.1.3"
     lodash-es: "npm:4.18.1"

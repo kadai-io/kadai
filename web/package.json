@@ -36,7 +36,6 @@
     "@ngxs/store": "22.0.0",
     "angular-svg-icon": "19.1.1",
     "chart.js": "4.6.1",
-    "file-saver-es": "2.0.5",
     "lodash-es": "4.18.1",
     "ng2-charts": "11.0.0",
     "rxjs": "7.8.2",
@@ -48,7 +47,6 @@
     "@angular/compiler": "22.2.4",
     "@angular/compiler-cli": "22.2.4",
     "@ngxs/devtools-plugin": "22.0.0",
-    "@types/file-saver-es": "2",
     "@types/jsdom": "30",
     "@types/lodash-es": "4",
     "@types/node": "26.6.6",
@@ -71,5 +69,5 @@
   "resolutions": {
     "@jridgewell/sourcemap-codec": "1.6.0"
   },
-  "packageManager": "yarn@4.17.1"
+  "packageManager": "yarn@4.18.1"
 }
