@@ -41,6 +41,12 @@ env:
   # artifacts accumulate and every run pays for them. Purge when 'Check maven
   # cache' in 'compile_backend' warns about the size (then delete the orphaned
   # entries with `gh cache delete`).
+  # Not from this file: 'Automatic Dependency Submission', a workflow GitHub
+  # manages outside the repository, caches ~/.m2/repository under its own
+  # 'Linux-jdk21-temurin-maven-*' keys, one entry per branch and none on master,
+  # where writing caches is denied. That cache is switched off with the
+  # repository variable GH_DEPENDENCY_SUBMISSION_SKIP_CACHE; the submission
+  # still runs and still feeds the dependency graph.
   CACHE_MAVEN_FOR_WEB_NAME: mvn-for-web-v2
   CACHE_MAVEN_NAME: maven-v2
   CACHE_SONAR_NAME: sonar
