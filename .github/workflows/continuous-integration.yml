@@ -126,6 +126,7 @@ jobs:
             echo "::warning::Maven cache is ${size} MB, above the 500 MB purge threshold"
             echo "Purge by deleting every entry under the maven cache names while no run is building:"
             echo "  gh cache list --repo ${GITHUB_REPOSITORY} --key Linux-${CACHE_MAVEN_NAME}"
+            echo "  gh cache list --repo ${GITHUB_REPOSITORY} --key Linux-${CACHE_MAVEN_FOR_WEB_NAME}"
             echo "  gh cache delete <id> --repo ${GITHUB_REPOSITORY}"
           fi
           if [ -n "$(ls -A ~/.m2/repository/io/kadai 2>/dev/null)" ]; then
@@ -161,7 +162,7 @@ jobs:
           path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
           if-no-files-found: error
       - name: Save maven cache
-        if: ${{ !cancelled() && steps.cache.outputs.cache-hit != 'true' }}
+        if: ${{ success() && steps.cache.outputs.cache-hit != 'true' }}
         uses: ./.github/actions/maven-cache-save
         with:
           key: ${{ steps.cache.outputs.cache-primary-key }}
@@ -247,7 +248,7 @@ jobs:
           path: ${{ env.ARTIFACTS_KADAI_WEB_PATH }}
           if-no-files-found: error
       - name: Save maven cache
-        if: ${{ !cancelled() && steps.maven-cache.outputs.cache-hit != 'true' }}
+        if: ${{ success() && steps.maven-cache.outputs.cache-hit != 'true' }}
         uses: ./.github/actions/maven-cache-save
         with:
           key: ${{ steps.maven-cache.outputs.cache-primary-key }}
@@ -335,7 +336,7 @@ jobs:
           pr-comment: false
         continue-on-error: true
       - name: Save maven cache
-        if: ${{ !cancelled() && steps.maven-cache.outputs.cache-hit != 'true' }}
+        if: ${{ success() && steps.maven-cache.outputs.cache-hit != 'true' }}
         uses: ./.github/actions/maven-cache-save
         with:
           key: ${{ steps.maven-cache.outputs.cache-primary-key }}
@@ -441,7 +442,7 @@ jobs:
           name: ${{ env.ARTIFACTS_CYPRESS_TESTS_NAME }}
           path: ${{ env.ARTIFACTS_CYPRESS_TESTS_PATH }}
       - name: Save maven cache
-        if: ${{ !cancelled() && steps.maven-cache.outputs.cache-hit != 'true' }}
+        if: ${{ success() && steps.maven-cache.outputs.cache-hit != 'true' }}
         uses: ./.github/actions/maven-cache-save
         with:
           key: ${{ steps.maven-cache.outputs.cache-primary-key }}
@@ -605,7 +606,7 @@ jobs:
           path: ${{ env.ARTIFACTS_JACOCO_REPORTS_PATH }}
           if-no-files-found: ignore
       - name: Save maven cache
-        if: ${{ !cancelled() && steps.maven-cache.outputs.cache-hit != 'true' }}
+        if: ${{ success() && steps.maven-cache.outputs.cache-hit != 'true' }}
         uses: ./.github/actions/maven-cache-save
         with:
           key: ${{ steps.maven-cache.outputs.cache-primary-key }}
@@ -815,7 +816,7 @@ jobs:
           pr-comment: false
         continue-on-error: true
       - name: Save maven cache
-        if: ${{ !cancelled() && steps.maven-cache.outputs.cache-hit != 'true' }}
+        if: ${{ success() && steps.maven-cache.outputs.cache-hit != 'true' }}
         uses: ./.github/actions/maven-cache-save
         with:
           key: ${{ steps.maven-cache.outputs.cache-primary-key }}
@@ -908,7 +909,7 @@ jobs:
       - name: Smoke test documentation
         run: ci/verify_docs_alive.sh
       - name: Save maven cache
-        if: ${{ !cancelled() && steps.maven-cache.outputs.cache-hit != 'true' }}
+        if: ${{ success() && steps.maven-cache.outputs.cache-hit != 'true' }}
         uses: ./.github/actions/maven-cache-save
         with:
           key: ${{ steps.maven-cache.outputs.cache-primary-key }}
@@ -1012,7 +1013,7 @@ jobs:
           pr-comment: false
         continue-on-error: true
       - name: Save maven cache
-        if: ${{ !cancelled() && steps.maven-cache.outputs.cache-hit != 'true' }}
+        if: ${{ success() && steps.maven-cache.outputs.cache-hit != 'true' }}
         uses: ./.github/actions/maven-cache-save
         with:
           key: ${{ steps.maven-cache.outputs.cache-primary-key }}
