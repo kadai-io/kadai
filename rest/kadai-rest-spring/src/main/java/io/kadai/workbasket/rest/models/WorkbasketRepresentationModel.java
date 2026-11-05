@@ -18,7 +18,6 @@
 
 package io.kadai.workbasket.rest.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 
@@ -31,9 +30,6 @@ public class WorkbasketRepresentationModel extends WorkbasketSummaryRepresentati
           "The creation timestamp of the workbasket in the system. The format is ISO-8601.")
   private Instant created;
 
-  @JsonIgnore
-  private boolean createdProvided;
-
   @Schema(
       name = "modified",
       description = "The timestamp of the last modification. The format is ISO-8601.")
@@ -45,11 +41,6 @@ public class WorkbasketRepresentationModel extends WorkbasketSummaryRepresentati
 
   public void setCreated(Instant created) {
     this.created = created;
-    this.createdProvided = true;
-  }
-
-  public boolean wasCreatedProvided() {
-    return createdProvided;
   }
 
   public Instant getModified() {

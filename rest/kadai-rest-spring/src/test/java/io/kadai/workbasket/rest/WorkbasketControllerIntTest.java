@@ -315,7 +315,7 @@ class WorkbasketControllerIntTest {
   }
 
   @Test
-  void should_PreserveCreatedWhenOmittedAndRejectChangedOrExplicitlyClearedCreated()
+  void should_PreserveCreatedWhenOmittedAndRejectChangedCreated()
       throws Exception {
     HttpHeaders headers = RestHelper.generateHeadersForUser("businessadmin");
     WorkbasketRepresentationModel createRequest =
@@ -343,12 +343,6 @@ class WorkbasketControllerIntTest {
     WorkbasketRepresentationModel afterChangedCreated = getWorkbasket(workbasketId, headers);
     assertThat(afterChangedCreated.getCreated()).isEqualTo(originalCreated);
     assertThat(afterChangedCreated.getModified()).isEqualTo(originalModified);
-
-    assertBadRequest(
-        () -> putWorkbasket(url, updateBodyWithExplicitNullCreated(created), headers));
-    WorkbasketRepresentationModel afterClearCreated = getWorkbasket(workbasketId, headers);
-    assertThat(afterClearCreated.getCreated()).isEqualTo(originalCreated);
-    assertThat(afterClearCreated.getModified()).isEqualTo(originalModified);
 
     created.setName("Updated name");
     created.setDescription("Updated description");
@@ -837,13 +831,6 @@ class WorkbasketControllerIntTest {
   private String updateBodyWithoutCreated(WorkbasketRepresentationModel workbasket)
       throws Exception {
     return updateBody(workbasket, false, null);
-  }
-
-  private String updateBodyWithExplicitNullCreated(WorkbasketRepresentationModel workbasket)
-      throws Exception {
-    String bodyWithoutCreated = updateBodyWithoutCreated(workbasket);
-    return bodyWithoutCreated.substring(0, bodyWithoutCreated.length() - 1)
-        + ",\"created\":null}";
   }
 
   private ResponseEntity<WorkbasketRepresentationModel> putWorkbasket(
