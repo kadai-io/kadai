@@ -22,16 +22,16 @@ import { TaskQuerySortParameter } from 'app/shared/models/sorting';
 import { OrientationService } from 'app/shared/services/orientation/orientation.service';
 import { Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import { TaskListToolbarComponent } from '../task-list-toolbar/task-list-toolbar.component';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { TaskListToolbarComponent } from 'app/workplace/components/task-list-toolbar/task-list-toolbar.component';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 
-import { TaskListComponent } from '../task-list/task-list.component';
-import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
+import { TaskListComponent } from 'app/workplace/components/task-list/task-list.component';
+import { PaginationComponent } from 'app/shared/components/pagination/pagination.component';
 import { Store } from '@ngxs/store';
-import { TaskSelectors } from '../../../shared/store/task-store/task.selectors';
-import { SetPage, SetPageSize } from '../../../shared/store/task-store/task.actions';
-import { WorkplaceSelectors } from '../../../shared/store/workplace-store/workplace.selectors';
-import { CalculateNumberOfCards } from '../../../shared/store/workplace-store/workplace.actions';
+import { TaskSelectors } from 'app/shared/store/task-store/task.selectors';
+import { SetPage, SetPageSize } from 'app/shared/store/task-store/task.actions';
+import { WorkplaceSelectors } from 'app/shared/store/workplace-store/workplace.selectors';
+import { CalculateNumberOfCards } from 'app/shared/store/workplace-store/workplace.actions';
 
 @Component({
   selector: 'kadai-task-master',

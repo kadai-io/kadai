@@ -17,10 +17,10 @@
  */
 
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { ReportData } from '../../models/report-data';
-import { MonitorService } from '../../services/monitor.service';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { ReportTableComponent } from '../report-table/report-table.component';
+import { ReportData } from 'app/monitor/models/report-data';
+import { MonitorService } from 'app/monitor/services/monitor.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
+import { ReportTableComponent } from 'app/monitor/components/report-table/report-table.component';
 import { DatePipe } from '@angular/common';
 
 @Component({

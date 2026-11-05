@@ -22,7 +22,7 @@ import { WorkbasketDefinitionService } from 'app/administration/services/workbas
 import { DomainService } from 'app/shared/services/domain/domain.service';
 import { KadaiType } from 'app/shared/models/kadai-type';
 import { ImportExportService } from 'app/administration/services/import-export.service';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import { Observable, Subject } from 'rxjs';
 import { HotToastService } from '@ngneat/hot-toast';
 import { takeUntil } from 'rxjs/operators';

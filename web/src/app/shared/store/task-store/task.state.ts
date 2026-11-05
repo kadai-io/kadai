@@ -20,18 +20,18 @@ import { Action, State, StateContext, Store } from '@ngxs/store';
 import { finalize, take, tap } from 'rxjs/operators';
 import { defer, Observable, of } from 'rxjs';
 import { inject, Injectable } from '@angular/core';
-import { TaskService } from '../../../workplace/services/task.service';
-import { Task } from '../../../workplace/models/task';
-import { ObjectReference } from '../../../workplace/models/object-reference';
-import { SearchType } from '../../../workplace/models/search';
-import { Workbasket } from '../../models/workbasket';
-import { Page } from '../../models/page';
-import { Direction, Sorting, TaskQuerySortParameter } from '../../models/sorting';
-import { QueryPagingParameter } from '../../models/query-paging-parameter';
-import { TaskQueryFilterParameter } from '../../models/task-query-filter-parameter';
-import { NotificationService } from '../../services/notifications/notification.service';
-import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
-import { FilterSelectors } from '../filter-store/filter.selectors';
+import { TaskService } from 'app/workplace/services/task.service';
+import { Task } from 'app/workplace/models/task';
+import { ObjectReference } from 'app/workplace/models/object-reference';
+import { SearchType } from 'app/workplace/models/search';
+import { Workbasket } from 'app/shared/models/workbasket';
+import { Page } from 'app/shared/models/page';
+import { Direction, Sorting, TaskQuerySortParameter } from 'app/shared/models/sorting';
+import { QueryPagingParameter } from 'app/shared/models/query-paging-parameter';
+import { TaskQueryFilterParameter } from 'app/shared/models/task-query-filter-parameter';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
+import { FilterSelectors } from 'app/shared/store/filter-store/filter.selectors';
 import {
   CancelClaimTask,
   ClaimTask,

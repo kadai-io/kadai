@@ -19,9 +19,8 @@
 import { DebugElement } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { IconTypeComponent } from './icon-type.component';
-import { WorkbasketType } from '../../../shared/models/workbasket-type';
+import { WorkbasketType } from 'app/shared/models/workbasket-type';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('IconTypeComponent', () => {
@@ -32,7 +31,7 @@ describe('IconTypeComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [IconTypeComponent],
-      providers: [provideAngularSvgIcon(), provideHttpClientTesting()]
+      providers: [provideHttpClientTesting()]
     }).compileComponents();
 
     fixture = TestBed.createComponent(IconTypeComponent);

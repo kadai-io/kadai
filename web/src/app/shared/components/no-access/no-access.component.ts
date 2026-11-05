@@ -18,12 +18,12 @@
 
 import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.service';
-import { MonitorRoles } from '../../roles/monitor.roles';
-import { UserRoles } from '../../roles/user.roles';
-import { BusinessAdminRoles } from '../../roles/business-admin.roles';
+import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
+import { MonitorRoles } from 'app/shared/roles/monitor.roles';
+import { UserRoles } from 'app/shared/roles/user.roles';
+import { BusinessAdminRoles } from 'app/shared/roles/business-admin.roles';
 
-import { SvgIconComponent } from 'angular-svg-icon';
+import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.component';
 
 @Component({
   selector: 'kadai-shared-no-access',

@@ -25,7 +25,7 @@ import { takeUntil } from 'rxjs/operators';
 import {
   WorkbasketAndComponentAndAction,
   WorkbasketSelectors
-} from '../../../shared/store/workbasket-store/workbasket.selectors';
+} from 'app/shared/store/workbasket-store/workbasket.selectors';
 import { AsyncPipe } from '@angular/common';
 import {
   CopyWorkbasket,
@@ -35,17 +35,17 @@ import {
   SelectComponent,
   UpdateWorkbasket,
   UpdateWorkbasketDistributionTargets
-} from '../../../shared/store/workbasket-store/workbasket.actions';
-import { ButtonAction } from '../../models/button-action';
+} from 'app/shared/store/workbasket-store/workbasket.actions';
+import { ButtonAction } from 'app/administration/models/button-action';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatTab, MatTabContent, MatTabGroup } from '@angular/material/tabs';
-import { WorkbasketInformationComponent } from '../workbasket-information/workbasket-information.component';
-import { WorkbasketAccessItemsComponent } from '../workbasket-access-items/workbasket-access-items.component';
-import { WorkbasketDistributionTargetsComponent } from '../workbasket-distribution-targets/workbasket-distribution-targets.component';
+import { WorkbasketInformationComponent } from 'app/administration/components/workbasket-information/workbasket-information.component';
+import { WorkbasketAccessItemsComponent } from 'app/administration/components/workbasket-access-items/workbasket-access-items.component';
+import { WorkbasketDistributionTargetsComponent } from 'app/administration/components/workbasket-distribution-targets/workbasket-distribution-targets.component';
 
 @Component({
   selector: 'kadai-administration-workbasket-details',

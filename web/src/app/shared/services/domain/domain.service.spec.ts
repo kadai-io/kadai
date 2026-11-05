@@ -21,9 +21,9 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideRouter } from '@angular/router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DomainService } from './domain.service';
-import { SelectedRouteService } from '../selected-route/selected-route';
-import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
-import { RequestInProgressService } from '../request-in-progress/request-in-progress.service';
+import { SelectedRouteService } from 'app/shared/services/selected-route/selected-route';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { Subject } from 'rxjs';
 
 const REST_URL = 'http://localhost:8080/kadai';

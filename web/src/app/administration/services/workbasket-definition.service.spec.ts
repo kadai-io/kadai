@@ -20,8 +20,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { WorkbasketDefinitionService } from './workbasket-definition.service';
-import { RuntimeConfigService } from '../../shared/services/runtime-config/runtime-config.service';
-import { BlobGenerator } from '../../shared/util/blob-generator';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
+import { BlobGenerator } from 'app/shared/util/blob-generator';
 
 const REST_URL = 'http://localhost:8080/kadai';
 const BASE_URL = `${REST_URL}/v1/workbasket-definitions`;

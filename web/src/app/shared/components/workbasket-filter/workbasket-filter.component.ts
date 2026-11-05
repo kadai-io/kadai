@@ -17,11 +17,11 @@
  */
 
 import { Component, effect, inject, input, signal, untracked } from '@angular/core';
-import { ALL_TYPES, WorkbasketType } from '../../models/workbasket-type';
-import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-filter-parameter';
+import { ALL_TYPES, WorkbasketType } from 'app/shared/models/workbasket-type';
+import { WorkbasketQueryFilterParameter } from 'app/shared/models/workbasket-query-filter-parameter';
 import { Store } from '@ngxs/store';
-import { ClearWorkbasketFilter, SetWorkbasketFilter } from '../../store/filter-store/filter.actions';
-import { FilterSelectors } from '../../store/filter-store/filter.selectors';
+import { ClearWorkbasketFilter, SetWorkbasketFilter } from 'app/shared/store/filter-store/filter.actions';
+import { FilterSelectors } from 'app/shared/store/filter-store/filter.selectors';
 
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -30,8 +30,8 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { IconTypeComponent } from '../../../administration/components/type-icon/icon-type.component';
-import { MapValuesPipe } from '../../pipes/map-values.pipe';
+import { IconTypeComponent } from 'app/administration/components/type-icon/icon-type.component';
+import { MapValuesPipe } from 'app/shared/pipes/map-values.pipe';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 type NormalizedWorkbasketFilter = Required<

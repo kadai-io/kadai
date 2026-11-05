@@ -19,9 +19,9 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, ReplaySubject } from 'rxjs';
-import { RequestInProgressService } from '../request-in-progress/request-in-progress.service';
-import { SelectedRouteService } from '../selected-route/selected-route';
-import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
+import { SelectedRouteService } from 'app/shared/services/selected-route/selected-route';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 
 @Injectable({
   providedIn: 'root'

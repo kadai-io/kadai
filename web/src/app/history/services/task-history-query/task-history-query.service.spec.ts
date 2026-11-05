@@ -20,10 +20,10 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TaskHistoryQueryService } from './task-history-query.service';
-import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
-import { Direction, Sorting, TaskHistoryQuerySortParameter } from '../../../shared/models/sorting';
-import { QueryPagingParameter } from '../../../shared/models/query-paging-parameter';
-import { TaskHistoryEventResourceData } from '../../../shared/models/task-history-event-resource';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
+import { Direction, Sorting, TaskHistoryQuerySortParameter } from 'app/shared/models/sorting';
+import { QueryPagingParameter } from 'app/shared/models/query-paging-parameter';
+import { TaskHistoryEventResourceData } from 'app/shared/models/task-history-event-resource';
 
 const REST_URL = 'http://localhost:8080/kadai';
 const HISTORY_URL = `${REST_URL}/v1/task-history-event`;

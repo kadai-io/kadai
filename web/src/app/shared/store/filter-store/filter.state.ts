@@ -19,9 +19,9 @@
 import { Action, NgxsOnInit, State, StateContext } from '@ngxs/store';
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-filter-parameter';
+import { WorkbasketQueryFilterParameter } from 'app/shared/models/workbasket-query-filter-parameter';
 import { ClearTaskFilter, ClearWorkbasketFilter, SetTaskFilter, SetWorkbasketFilter } from './filter.actions';
-import { TaskQueryFilterParameter } from '../../models/task-query-filter-parameter';
+import { TaskQueryFilterParameter } from 'app/shared/models/task-query-filter-parameter';
 
 const emptyWorkbasketFilter: WorkbasketQueryFilterParameter = {
   'description-like': [],

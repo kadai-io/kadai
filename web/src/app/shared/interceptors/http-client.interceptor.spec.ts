@@ -27,8 +27,8 @@ import {
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { httpClientInterceptor, tokenInterceptor } from './http-client.interceptor';
-import { NotificationService } from '../services/notifications/notification.service';
-import { RequestInProgressService } from '../services/request-in-progress/request-in-progress.service';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 
 describe('httpClientInterceptor', () => {
   const url = 'http://host/kadai/api/v1/tasks';

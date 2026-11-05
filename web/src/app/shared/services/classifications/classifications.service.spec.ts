@@ -21,9 +21,9 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { of } from 'rxjs';
 import { ClassificationsService } from './classifications.service';
-import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
-import { DomainService } from '../domain/domain.service';
-import { Classification } from '../../models/classification';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
+import { DomainService } from 'app/shared/services/domain/domain.service';
+import { Classification } from 'app/shared/models/classification';
 
 describe('ClassificationsService', () => {
   let service: ClassificationsService;

@@ -19,8 +19,8 @@
 import { inject, Injectable, computed, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngxs/store';
-import { SettingsSelectors } from '../../shared/store/settings-store/settings.selectors';
-import { FilterConfig } from '../models/filter-config';
+import { SettingsSelectors } from 'app/shared/store/settings-store/settings.selectors';
+import { FilterConfig } from 'app/monitor/models/filter-config';
 
 export const SETTING_MEMBER_FILTER = 'filter';
 

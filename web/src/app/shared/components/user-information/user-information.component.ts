@@ -18,8 +18,8 @@
 
 import { Component, computed, inject } from '@angular/core';
 import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
-import { expandDown } from '../../animations/expand.animation';
-import { SvgIconComponent } from 'angular-svg-icon';
+import { expandDown } from 'app/shared/animations/expand.animation';
+import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.component';
 import { MatButton } from '@angular/material/button';
 
 @Component({

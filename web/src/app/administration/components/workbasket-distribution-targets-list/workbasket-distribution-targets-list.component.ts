@@ -21,28 +21,28 @@ import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
 import { expandDown } from 'app/shared/animations/expand.animation';
 import { MatListOption, MatSelectionList } from '@angular/material/list';
 import { CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
-import { Side } from '../../models/workbasket-distribution-enums';
+import { Side } from 'app/administration/models/workbasket-distribution-enums';
 import { Store } from '@ngxs/store';
-import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
+import { WorkbasketSelectors } from 'app/shared/store/workbasket-store/workbasket.selectors';
 import { filter, map, pairwise, take, takeUntil, throttleTime } from 'rxjs/operators';
 import {
   FetchAvailableDistributionTargets,
   FetchWorkbasketDistributionTargets,
   TransferDistributionTargets
-} from '../../../shared/store/workbasket-store/workbasket.actions';
+} from 'app/shared/store/workbasket-store/workbasket.actions';
 import { Observable, Subject } from 'rxjs';
-import { WorkbasketQueryFilterParameter } from '../../../shared/models/workbasket-query-filter-parameter';
-import { FilterSelectors } from '../../../shared/store/filter-store/filter.selectors';
-import { WorkbasketDistributionTarget } from '../../../shared/models/workbasket-distribution-target';
+import { WorkbasketQueryFilterParameter } from 'app/shared/models/workbasket-query-filter-parameter';
+import { FilterSelectors } from 'app/shared/store/filter-store/filter.selectors';
+import { WorkbasketDistributionTarget } from 'app/shared/models/workbasket-distribution-target';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 
 import { MatIcon } from '@angular/material/icon';
-import { WorkbasketFilterComponent } from '../../../shared/components/workbasket-filter/workbasket-filter.component';
-import { IconTypeComponent } from '../type-icon/icon-type.component';
+import { WorkbasketFilterComponent } from 'app/shared/components/workbasket-filter/workbasket-filter.component';
+import { IconTypeComponent } from 'app/administration/components/type-icon/icon-type.component';
 import { MatDivider } from '@angular/material/divider';
-import { OrderBy } from '../../../shared/pipes/order-by.pipe';
+import { OrderBy } from 'app/shared/pipes/order-by.pipe';
 
 @Component({
   selector: 'kadai-administration-workbasket-distribution-targets-list',

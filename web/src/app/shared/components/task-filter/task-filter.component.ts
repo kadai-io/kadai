@@ -17,10 +17,10 @@
  */
 
 import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { ALL_STATES, TaskState } from '../../models/task-state';
-import { TaskQueryFilterParameter } from '../../models/task-query-filter-parameter';
+import { ALL_STATES, TaskState } from 'app/shared/models/task-state';
+import { TaskQueryFilterParameter } from 'app/shared/models/task-query-filter-parameter';
 import { Actions, ofActionCompleted, Store } from '@ngxs/store';
-import { ClearTaskFilter, SetTaskFilter } from '../../store/filter-store/filter.actions';
+import { ClearTaskFilter, SetTaskFilter } from 'app/shared/store/filter-store/filter.actions';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
@@ -30,7 +30,7 @@ import { FormsModule } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
 
 import { MatOption } from '@angular/material/core';
-import { MapValuesPipe } from '../../pipes/map-values.pipe';
+import { MapValuesPipe } from 'app/shared/pipes/map-values.pipe';
 import { SetPage } from 'app/shared/store/task-store/task.actions';
 
 @Component({

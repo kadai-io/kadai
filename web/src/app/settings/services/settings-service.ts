@@ -18,10 +18,10 @@
 
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Settings } from '../models/settings';
+import { Settings } from 'app/settings/models/settings';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { SettingsRepresentation } from '../models/settings-representation';
+import { SettingsRepresentation } from 'app/settings/models/settings-representation';
 import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 
 @Injectable({
