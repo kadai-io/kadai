@@ -25,20 +25,8 @@ import {
 } from '@angular/core';
 import { environment } from 'environments/environment';
 import { StartupService } from 'app/shared/services/startup/startup.service';
-import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
-import { NotificationService } from './app/shared/services/notifications/notification.service';
-import {
-  HttpErrorResponse,
-  HttpHandlerFn,
-  HttpHeaders,
-  HttpInterceptorFn,
-  HttpRequest,
-  HttpXsrfTokenExtractor,
-  provideHttpClient,
-  withInterceptors,
-  withXhr,
-  withXsrfConfiguration
-} from '@angular/common/http';
+import { httpClientInterceptor, tokenInterceptor } from 'app/shared/interceptors/http-client.interceptor';
+import { provideHttpClient, withInterceptors, withXhr, withXsrfConfiguration } from '@angular/common/http';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appRoutes } from './app/app.routes';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
@@ -49,7 +37,6 @@ import { AppComponent } from './app/app.component';
 import { registerLocaleData } from '@angular/common';
 import localeDe from '@angular/common/locales/de';
 import { provideRouter, withHashLocation } from '@angular/router';
-import { tap } from 'rxjs/operators';
 import { provideHotToastConfig } from '@ngneat/hot-toast';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { EngineConfigurationState } from './app/shared/store/engine-configuration-store/engine-configuration.state';
@@ -67,54 +54,6 @@ registerLocaleData(localeDe);
 if (environment.production) {
   enableProdMode();
 }
-
-export const tokenInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
-  let request = req;
-  if (!environment.production) {
-    request = req.clone({ headers: req.headers.set('Authorization', 'Basic YWRtaW46YWRtaW4=') });
-  }
-  return next(request);
-};
-
-export const httpClientInterceptor: HttpInterceptorFn = (request: HttpRequest<unknown>, next: HttpHandlerFn) => {
-  const tokenExtractor = inject(HttpXsrfTokenExtractor);
-  const notificationService = inject(NotificationService);
-  const requestInProgressService = inject(RequestInProgressService);
-
-  let req = request.clone();
-  if (req.headers.get('Content-Type') === 'multipart/form-data') {
-    const headers = new HttpHeaders();
-    req = req.clone({ headers });
-  } else {
-    req = req.clone({ setHeaders: { 'Content-Type': 'application/hal+json' } });
-  }
-  let token = tokenExtractor.getToken();
-  if (token !== null) {
-    req = req.clone({ setHeaders: { 'X-XSRF-TOKEN': token } });
-  }
-  if (!environment.production) {
-    req = req.clone({ headers: req.headers.set('Authorization', 'Basic YWRtaW46YWRtaW4=') });
-  }
-  return next(req).pipe(
-    tap(
-      () => {},
-      (error) => {
-        requestInProgressService.setRequestInProgress(false);
-
-        if (
-          error.status !== 404 &&
-          (!(error instanceof HttpErrorResponse) || (error.url ?? '').indexOf('environment-information.json') === -1)
-        ) {
-          const { key, messageVariables } = error.error.error || {
-            key: 'FALLBACK',
-            messageVariables: {}
-          };
-          notificationService.showError(key, messageVariables);
-        }
-      }
-    )
-  );
-};
 
 bootstrapApplication(AppComponent, {
   providers: [

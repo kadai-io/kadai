@@ -309,7 +309,20 @@ class ArchitectureTest {
   }
 
   @Test
-  //@Disabled("this has way too many false positives during development without refactoring")
+  void jobClassesShouldNotDependOnKadaiEngineImpl() {
+    noClasses()
+        .that()
+        .resideInAnyPackage("io.kadai..jobs..")
+        .should()
+        .dependOnClassesThat(assignableTo(KadaiEngineImpl.class))
+        .because(
+            "jobs should depend on KadaiEngine and InternalKadaiEngine abstractions instead of "
+                + "the concrete engine implementation")
+        .check(importedClasses);
+  }
+
+  @Test
+  // @Disabled("this has way too many false positives during development without refactoring")
   // Is that actually still the case? We'll see!
   void packagesShouldBeFreeOfCyclicDependencies() {
     // Frozen, so it can be improved over time:
@@ -318,7 +331,7 @@ class ArchitectureTest {
   }
 
   @Test
-  //@Disabled("this has way too many false positives during development without refactoring")
+  // @Disabled("this has way too many false positives during development without refactoring")
   // Is that actually still the case? We'll see!
   void classesShouldBeFreeOfCyclicDependencies() {
     SliceAssignment everySingleClass =
@@ -606,9 +619,8 @@ class ArchitectureTest {
       private boolean isKadaiIntegrationTest(JavaClass input) {
         Optional<JavaClass> enclosingClass = input.getEnclosingClass();
         return enclosingClass
-            .map(
-                javaClass ->
-                    input.isAnnotatedWith(Nested.class) && isKadaiIntegrationTest(javaClass))
+            .map(javaClass ->
+                input.isAnnotatedWith(Nested.class) && isKadaiIntegrationTest(javaClass))
             .orElseGet(() -> input.isAnnotatedWith(KadaiIntegrationTest.class));
       }
     };
@@ -624,7 +636,7 @@ class ArchitectureTest {
         for (JavaField field : item.getAllFields()) {
           if (!field.reflect().isSynthetic()
               && !(field.getModifiers().isEmpty()
-              || field.getModifiers().equals(modifiersForConstants))) {
+                  || field.getModifiers().equals(modifiersForConstants))) {
             events.add(
                 SimpleConditionEvent.violated(
                     item,
@@ -640,49 +652,44 @@ class ArchitectureTest {
 
   private static ArchCondition<JavaClass> notUseCurrentTimestampSqlFunction() throws Exception {
     Function<JavaMethod, List<String>> getSqlStringsFromMethod =
-        rethrowing(
-            method -> {
-              List<String> values = new ArrayList<>();
+        rethrowing(method -> {
+          List<String> values = new ArrayList<>();
 
-              final List<Select> select =
-                  AnnotationSupport.findRepeatableAnnotations(method.reflect(), Select.class);
-              final List<Update> update =
-                  AnnotationSupport.findRepeatableAnnotations(method.reflect(), Update.class);
-              final List<Insert> insert =
-                  AnnotationSupport.findRepeatableAnnotations(method.reflect(), Insert.class);
-              final List<Delete> delete =
-                  AnnotationSupport.findRepeatableAnnotations(method.reflect(), Delete.class);
-              select.stream().map(Select::value).map(Arrays::asList).forEach(values::addAll);
-              update.stream().map(Update::value).map(Arrays::asList).forEach(values::addAll);
-              insert.stream().map(Insert::value).map(Arrays::asList).forEach(values::addAll);
-              delete.stream().map(Delete::value).map(Arrays::asList).forEach(values::addAll);
+          final List<Select> select =
+              AnnotationSupport.findRepeatableAnnotations(method.reflect(), Select.class);
+          final List<Update> update =
+              AnnotationSupport.findRepeatableAnnotations(method.reflect(), Update.class);
+          final List<Insert> insert =
+              AnnotationSupport.findRepeatableAnnotations(method.reflect(), Insert.class);
+          final List<Delete> delete =
+              AnnotationSupport.findRepeatableAnnotations(method.reflect(), Delete.class);
+          select.stream().map(Select::value).map(Arrays::asList).forEach(values::addAll);
+          update.stream().map(Update::value).map(Arrays::asList).forEach(values::addAll);
+          insert.stream().map(Insert::value).map(Arrays::asList).forEach(values::addAll);
+          delete.stream().map(Delete::value).map(Arrays::asList).forEach(values::addAll);
 
-              final List<SelectProvider> selectProviders =
-                  AnnotationSupport.findRepeatableAnnotations(
-                      method.reflect(), SelectProvider.class);
-              final List<UpdateProvider> updateProviders =
-                  AnnotationSupport.findRepeatableAnnotations(
-                      method.reflect(), UpdateProvider.class);
-              final List<InsertProvider> insertProviders =
-                  AnnotationSupport.findRepeatableAnnotations(
-                      method.reflect(), InsertProvider.class);
-              final List<DeleteProvider> deleteProviders =
-                  AnnotationSupport.findRepeatableAnnotations(
-                      method.reflect(), DeleteProvider.class);
-              selectProviders.stream()
-                  .map(rethrowing(a -> executeStaticProviderMethod(a.type(), a.method())))
-                  .forEach(values::add);
-              updateProviders.stream()
-                  .map(rethrowing(a -> executeStaticProviderMethod(a.type(), a.method())))
-                  .forEach(values::add);
-              insertProviders.stream()
-                  .map(rethrowing(a -> executeStaticProviderMethod(a.type(), a.method())))
-                  .forEach(values::add);
-              deleteProviders.stream()
-                  .map(rethrowing(a -> executeStaticProviderMethod(a.type(), a.method())))
-                  .forEach(values::add);
-              return values;
-            });
+          final List<SelectProvider> selectProviders =
+              AnnotationSupport.findRepeatableAnnotations(method.reflect(), SelectProvider.class);
+          final List<UpdateProvider> updateProviders =
+              AnnotationSupport.findRepeatableAnnotations(method.reflect(), UpdateProvider.class);
+          final List<InsertProvider> insertProviders =
+              AnnotationSupport.findRepeatableAnnotations(method.reflect(), InsertProvider.class);
+          final List<DeleteProvider> deleteProviders =
+              AnnotationSupport.findRepeatableAnnotations(method.reflect(), DeleteProvider.class);
+          selectProviders.stream()
+              .map(rethrowing(a -> executeStaticProviderMethod(a.type(), a.method())))
+              .forEach(values::add);
+          updateProviders.stream()
+              .map(rethrowing(a -> executeStaticProviderMethod(a.type(), a.method())))
+              .forEach(values::add);
+          insertProviders.stream()
+              .map(rethrowing(a -> executeStaticProviderMethod(a.type(), a.method())))
+              .forEach(values::add);
+          deleteProviders.stream()
+              .map(rethrowing(a -> executeStaticProviderMethod(a.type(), a.method())))
+              .forEach(values::add);
+          return values;
+        });
 
     return new ArchCondition<>("not use the SQL function 'CURRENT_TIMESTAMP'") {
       @Override

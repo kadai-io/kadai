@@ -18,25 +18,24 @@
 
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { environment } from 'environments/environment';
 import { AccessId } from 'app/shared/models/access-id';
 import { Observable, of } from 'rxjs';
 import { WorkbasketAccessItemsRepresentation } from 'app/shared/models/workbasket-access-items-representation';
 import { Sorting, WorkbasketAccessItemQuerySortParameter } from 'app/shared/models/sorting';
-import { StartupService } from '../startup/startup.service';
 import { WorkbasketAccessItemQueryFilterParameter } from '../../models/workbasket-access-item-query-filter-parameter';
 import { QueryPagingParameter } from '../../models/query-paging-parameter';
 import { asUrlQueryString } from '../../util/query-parameters-v2';
+import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AccessIdsService {
   private httpClient = inject(HttpClient);
-  private startupService = inject(StartupService);
+  private runtimeConfigService = inject(RuntimeConfigService);
 
   get url(): string {
-    return this.startupService.getKadaiRestUrl() + '/v1/access-ids';
+    return this.runtimeConfigService.kadaiRestUrl + '/v1/access-ids';
   }
 
   searchForAccessId(accessId: string): Observable<AccessId[]> {
@@ -76,7 +75,7 @@ export class AccessIdsService {
   ): Observable<WorkbasketAccessItemsRepresentation> {
     return this.httpClient.get<WorkbasketAccessItemsRepresentation>(
       encodeURI(
-        `${environment.kadaiRestUrl}/v1/workbasket-access-items${asUrlQueryString({
+        `${this.runtimeConfigService.kadaiRestUrl}/v1/workbasket-access-items${asUrlQueryString({
           ...filterParameter,
           ...sortParameter,
           ...pagingParameter
@@ -87,7 +86,7 @@ export class AccessIdsService {
 
   removeAccessItemsPermissions(accessId: string) {
     return this.httpClient.delete<WorkbasketAccessItemsRepresentation>(
-      `${environment.kadaiRestUrl}/v1/workbasket-access-items?access-id=${accessId}`
+      `${this.runtimeConfigService.kadaiRestUrl}/v1/workbasket-access-items?access-id=${accessId}`
     );
   }
 }

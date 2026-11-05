@@ -75,10 +75,9 @@ class UpdateWorkbasketAuthorizationsAccTest extends AbstractAccTest {
     WorkbasketAccessItem workbasketAccessItem =
         workbasketService.newWorkbasketAccessItem("WBI:1337gibtEsNicht007", "newAccessIdForUpdate");
 
-    assertThatThrownBy(
-            () ->
-                workbasketService.setWorkbasketAccessItems(
-                    "WBI:1337gibtEsNicht007", List.of(workbasketAccessItem)))
+    assertThatThrownBy(() ->
+            workbasketService.setWorkbasketAccessItems(
+                "WBI:1337gibtEsNicht007", List.of(workbasketAccessItem)))
         .isInstanceOf(WorkbasketNotFoundException.class);
   }
 

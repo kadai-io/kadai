@@ -4,31 +4,45 @@ services:
 
   app:
     container_name: kadai-example-app
-    image: registry.gitlab.com/envite-consulting/sustainable-software-architecture/kadai/kadai-example-spring-boot:kadai-10.1.0
+    mem_limit: 2G
+    # Default image for test/debug runs.
+    # The standard and certification scenarios override this with a pinned sha tag
+    # (see usage_scenario_standard.yml and usage_scenario_blue_angel.yml).
+    image: ghcr.io/kadai-io/kadai-gmt:latest
     ports:
       - "8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
+    # Generates the test data in a short-lived child JVM so that the measured app never runs the
+    # generator; its heap, JIT code and class metadata die with that JVM (see DECISIONS.md).
+    entrypoint: ["/bin/sh", "-c"]
+    # One list element: GMT shlex-splits a plain string command, which would break the script.
+    command:
+      - |
+        set -e
+        if [ "${GENERATE_TASKS:-0}" != "0" ]; then
+          java -Xmx1g -jar /app/kadai-gmt.jar --generate-tasks="${GENERATE_TASKS}"
+        fi
+        exec java $JAVA_OPTS -jar /app/kadai-gmt.jar
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://kadai-postgres:5432/postgres
       LOGGING_LEVEL_IO_KADAI: INFO
       GENERATESAMPLEDATA: false
-      THC_PATH: /actuator/health
-      THC_PORT: 9000 # management port
+      KADAI_SCHEMA_NAME: kadai
+      JAVA_OPTS: "-XX:+UseG1GC -XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError"
+      GENERATE_TASKS: "100000" # tasks generated before the app starts; override per scenario
     healthcheck:
-      test: "/workspace/health-check"
-      start_period: "30s"
+      test: "curl --fail --silent http://localhost:9000/actuator/health"
+      start_period: "240s" # test-data generation in the child JVM + app startup
       start_interval: "1s"
       interval: "24h" # only the start is relevant for us
       timeout: "1s"
 
   postgres:
     container_name: kadai-postgres
-    # image: postgres:14.7 # original postgres container image
-    image: registry.gitlab.com/envite-consulting/sustainable-software-architecture/kadai/kadai-databases:postgres-14.7-100k-tasks
-    # image: registry.gitlab.com/envite-consulting/sustainable-software-architecture/kadai/kadai-databases:postgres-14.7-300k-tasks-schema-10.0.0 # 300 k tasks
-    # build: postgres_14 # with German localization
+    mem_limit: 2G
+    image: postgres:17.11
     restart: always
     shm_size: 128mb # default: 64 MB
     ports:
@@ -46,7 +60,8 @@ services:
 
   k6:
     container_name: k6
-    image: grafana/k6:1.1.0
+    mem_limit: 1G
+    image: grafana/k6:2.3.0
     depends_on:
       app:
         condition: service_healthy # wait until the service is ready before starting with the flow

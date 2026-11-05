@@ -18,24 +18,24 @@
 
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { TaskService } from './task.service';
-import { StartupService } from '../../shared/services/startup/startup.service';
+import { RuntimeConfigService } from '../../shared/services/runtime-config/runtime-config.service';
 import { Task } from '../models/task';
 
 describe('TaskService', () => {
   let service: TaskService;
   let httpMock: HttpTestingController;
 
-  const mockStartupService = {
-    getKadaiRestUrl: vi.fn().mockReturnValue('http://test'),
-    getKadaiLogoutUrl: vi.fn().mockReturnValue(''),
-    router: {}
-  };
+  const runtimeConfigServiceMock = { kadaiRestUrl: 'http://test' };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [TaskService, provideHttpClientTesting(), { provide: StartupService, useValue: mockStartupService }]
+      providers: [
+        TaskService,
+        provideHttpClientTesting(),
+        { provide: RuntimeConfigService, useValue: runtimeConfigServiceMock }
+      ]
     });
 
     service = TestBed.inject(TaskService);

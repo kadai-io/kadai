@@ -20,6 +20,8 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { KadaiEngineServiceMock } from './kadai-engine.mock.service';
 import { Version } from '../../models/version';
+import { UserInfo } from '../../models/user-info';
+import { firstValueFrom } from 'rxjs';
 
 describe('KadaiEngineServiceMock', () => {
   let service: KadaiEngineServiceMock;
@@ -38,18 +40,17 @@ describe('KadaiEngineServiceMock', () => {
 
   describe('getUserInformation()', () => {
     it('should set currentUserInfo with userId "userid"', async () => {
-      await service.getUserInformation();
+      await firstValueFrom(service.getUserInformation());
 
-      expect(service.currentUserInfo).toBeDefined();
-      expect(service.currentUserInfo.userId).toBe('userid');
-      expect(service.currentUserInfo.roles).toContain('admin');
+      expect(service.currentUserInfo()).toBeDefined();
+      expect(service.currentUserInfo()?.userId).toBe('userid');
+      expect(service.currentUserInfo()?.roles).toContain('admin');
     });
 
-    it('should return a Promise that resolves', async () => {
-      const result = service.getUserInformation();
+    it('should emit the current user information', async () => {
+      const result = await firstValueFrom(service.getUserInformation());
 
-      expect(result).toBeInstanceOf(Promise);
-      await expect(result).resolves.toBeUndefined();
+      expect(result.userId).toBe('userid');
     });
   });
 
@@ -71,7 +72,7 @@ describe('KadaiEngineServiceMock', () => {
     });
 
     it('should return false when currentUserInfo has no roles', () => {
-      service.currentUserInfo.roles = [];
+      service.setCurrentUserInfo(new UserInfo('userid', [], []));
 
       expect(service.hasRole(['admin'])).toBe(false);
     });

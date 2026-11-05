@@ -29,8 +29,12 @@ import org.springframework.test.context.TestPropertySource;
 
 /** Test Ldap attachment. */
 @KadaiSpringBootTest
-@TestPropertySource(properties = {"kadai.ldap.useDnForGroups=false",
-    "kadai.ldap.groupIdAttribute=gid", "kadai.ldap.permissionIdAttribute=pid"})
+@TestPropertySource(
+    properties = {
+      "kadai.ldap.useDnForGroups=false",
+      "kadai.ldap.groupIdAttribute=gid",
+      "kadai.ldap.permissionIdAttribute=pid"
+    })
 @ActiveProfiles({"emptySearchRoots"})
 class LdapGroupAndPermissionIdAttributeTest extends LdapForUseDnForGroupsDisabledTest {
 
@@ -53,8 +57,8 @@ class LdapGroupAndPermissionIdAttributeTest extends LdapForUseDnForGroupsDisable
   @Test
   void should_ReturnGroupWithMatchingAccessId_When_SearchingUsersGroupsAndPermissions()
       throws Exception {
-    List<AccessIdRepresentationModel> accessIds = ldapClient.searchUsersAndGroupsAndPermissions(
-        "monitor-users-id");
+    List<AccessIdRepresentationModel> accessIds =
+        ldapClient.searchUsersAndGroupsAndPermissions("monitor-users-id");
     assertThat(accessIds)
         .extracting(AccessIdRepresentationModel::getAccessId)
         .containsExactlyInAnyOrder("monitor-users-id");
@@ -63,13 +67,12 @@ class LdapGroupAndPermissionIdAttributeTest extends LdapForUseDnForGroupsDisable
   @Test
   void should_ReturnPermissionWithMatchingAccessId_When_SearchingUsersGroupsAndPermissions()
       throws Exception {
-    List<AccessIdRepresentationModel> accessIds = ldapClient.searchUsersAndGroupsAndPermissions(
-        "g03-permission-id");
+    List<AccessIdRepresentationModel> accessIds =
+        ldapClient.searchUsersAndGroupsAndPermissions("g03-permission-id");
     assertThat(accessIds)
         .extracting(AccessIdRepresentationModel::getAccessId)
         .containsExactlyInAnyOrder("g03-permission-id");
   }
-
 
   @Test
   void should_ValidateConfiguredGroupAndPermissionIds() throws Exception {

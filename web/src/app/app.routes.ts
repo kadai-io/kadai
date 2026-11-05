@@ -16,27 +16,8 @@
  *
  */
 
-import { inject } from '@angular/core';
-import { Router, Routes, UrlTree } from '@angular/router';
-
-import { UserRoles } from './shared/roles/user.roles';
-
-import { KadaiEngineService } from './shared/services/kadai-engine/kadai-engine.service';
-import { MonitorRoles } from './shared/roles/monitor.roles';
-import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
-import { BusinessAdminRoles } from './shared/roles/business-admin.roles';
-
-const businessAdminGuard = (): boolean | UrlTree => {
-  const kadaiEngineService = inject(KadaiEngineService);
-  const router = inject(Router);
-
-  if (kadaiEngineService.hasRole(Object.values(BusinessAdminRoles))) {
-    return true;
-  }
-
-  return router.parseUrl('/kadai/workplace');
-};
+import { Routes } from '@angular/router';
+import { businessAdminGuard, historyProviderGuard, monitorGuard, userGuard } from './shared/guards/app.guards';
 
 export const appRoutes: Routes = [
   {
@@ -49,56 +30,17 @@ export const appRoutes: Routes = [
           import('./administration/administration.routes').then((administration) => administration.routes)
       },
       {
-        canActivate: [
-          (): boolean | UrlTree => {
-            const kadaiEngineService = inject(KadaiEngineService);
-            const router = inject(Router);
-
-            if (kadaiEngineService.hasRole(Object.values(MonitorRoles))) {
-              return true;
-            }
-
-            return router.parseUrl('/kadai/workplace');
-          }
-        ],
+        canActivate: [monitorGuard],
         path: 'monitor',
         loadChildren: () => import('./monitor/monitor.routes').then((monitor) => monitor.routes)
       },
       {
-        canActivate: [
-          (): boolean | UrlTree => {
-            const kadaiEngineService = inject(KadaiEngineService);
-            const router = inject(Router);
-
-            if (kadaiEngineService.hasRole(Object.values(UserRoles))) {
-              return true;
-            }
-
-            return router.parseUrl('/kadai/no-role');
-          }
-        ],
+        canActivate: [userGuard],
         path: 'workplace',
         loadChildren: () => import('./workplace/workplace.routes').then((workplace) => workplace.routes)
       },
       {
-        canActivate: [
-          (): Observable<boolean | UrlTree> => {
-            const kadaiEngineService = inject(KadaiEngineService);
-            const router = inject(Router);
-
-            return kadaiEngineService.isHistoryProviderEnabled().pipe(
-              map((value) => {
-                if (value) {
-                  return value;
-                }
-                return router.parseUrl('/kadai/workplace');
-              }),
-              catchError(() => {
-                return of(router.parseUrl('/kadai/workplace'));
-              })
-            );
-          }
-        ],
+        canActivate: [historyProviderGuard],
         path: 'history',
         loadChildren: () => import('./history/history.routes').then((history) => history.routes)
       },

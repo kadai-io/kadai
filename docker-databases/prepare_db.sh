@@ -18,7 +18,7 @@ export TOP_PID=$$
 #H   If no database was provided all databases are stopped.
 #H
 #H database:
-#H   - DB2 | DB2_11_5
+#H   - DB2 | DB2_12_1
 #H   - POSTGRES | POSTGRES_17
 # Arguments:
 #   $1: exit code
@@ -33,8 +33,8 @@ function helpAndExit() {
 function mapDBToDockerComposeServiceName() {
   [[ -z "$1" || "$1" == "H2" ]] && return
   case "$1" in
-    DB2|DB2_11_5)
-      echo "kadai-db2_11-5"
+    DB2|DB2_12_1)
+      echo "kadai-db2_12-1"
       ;;
     POSTGRES|POSTGRES_17)
       echo "kadai-postgres_17"
@@ -51,7 +51,7 @@ function main() {
   case "$1" in
   H2)
     ;;
-  DB2|DB2_11_5)
+  DB2|DB2_12_1)
     docker compose -f $scriptDir/docker-compose.yml up -d "$(mapDBToDockerComposeServiceName "$1")"
     ;;
   POSTGRES|POSTGRES_17)

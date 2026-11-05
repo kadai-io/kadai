@@ -20,7 +20,7 @@ import { TestBed } from '@angular/core/testing';
 import { AccessIdsService } from './access-ids.service';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { StartupService } from '../startup/startup.service';
+import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
 import { firstValueFrom } from 'rxjs';
 
 const REST_URL = 'http://localhost:8080/kadai';
@@ -34,7 +34,7 @@ describe('AccessIdsService', () => {
       providers: [
         AccessIdsService,
         provideHttpClientTesting(),
-        { provide: StartupService, useValue: { getKadaiRestUrl: () => REST_URL } }
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: REST_URL } }
       ]
     });
     service = TestBed.inject(AccessIdsService);

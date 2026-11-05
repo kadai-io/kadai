@@ -19,10 +19,10 @@
 import { HttpClient } from '@angular/common/http';
 
 import { inject, Injectable } from '@angular/core';
-import { environment } from 'environments/environment';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Customisation } from '../../models/customisation';
+import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
 
 const customisationUrl = 'environments/data-sources/kadai-customization.json';
 
@@ -38,9 +38,12 @@ export interface CategoriesResponse {
 })
 export class ClassificationCategoriesService {
   private httpClient = inject(HttpClient);
+  private runtimeConfigService = inject(RuntimeConfigService);
 
   getClassificationCategoriesByType(): Observable<CategoriesResponse> {
-    return this.httpClient.get<CategoriesResponse>(`${environment.kadaiRestUrl}/v1/classifications-by-type`);
+    return this.httpClient.get<CategoriesResponse>(
+      `${this.runtimeConfigService.kadaiRestUrl}/v1/classifications-by-type`
+    );
   }
 
   getCustomisation(): Observable<Customisation> {

@@ -90,10 +90,7 @@ public class XlsxWorksheetConverter {
 
     setHitPolicy(decisionTable);
     convertInputsOutputs(dmnModel, decisionTable);
-    convertRules(
-        dmnModel,
-        spreadsheetAdapter.determineRuleRows(worksheetContext),
-        serializedRules);
+    convertRules(dmnModel, spreadsheetAdapter.determineRuleRows(worksheetContext), serializedRules);
 
     return dmnModel;
   }
@@ -176,18 +173,14 @@ public class XlsxWorksheetConverter {
   }
 
   protected void convertRules(
-      DmnModelInstance dmnModel,
-      List<SpreadsheetRow> rulesRows,
-      StringBuilder serializedRules) {
+      DmnModelInstance dmnModel, List<SpreadsheetRow> rulesRows, StringBuilder serializedRules) {
     for (SpreadsheetRow rule : rulesRows) {
       convertRule(dmnModel, rule, serializedRules);
     }
   }
 
   protected void convertRule(
-      DmnModelInstance dmnModel,
-      SpreadsheetRow ruleRow,
-      StringBuilder serializedRules) {
+      DmnModelInstance dmnModel, SpreadsheetRow ruleRow, StringBuilder serializedRules) {
     Rule rule = generateElement(dmnModel, Rule.class, "excelRow" + ruleRow.getRaw().getR());
 
     IndexedDmnColumns dmnColumns = dmnConversionContext.getIndexedDmnColumns();

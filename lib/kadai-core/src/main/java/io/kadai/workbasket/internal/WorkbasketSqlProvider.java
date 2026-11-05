@@ -101,9 +101,7 @@ public class WorkbasketSqlProvider {
   }
 
   public static String findAll() {
-    return OPENING_SCRIPT_TAG
-        + "SELECT * FROM WORKBASKET ORDER BY ID "
-        + CLOSING_SCRIPT_TAG;
+    return OPENING_SCRIPT_TAG + "SELECT * FROM WORKBASKET ORDER BY ID " + CLOSING_SCRIPT_TAG;
   }
 
   public static String insert() {

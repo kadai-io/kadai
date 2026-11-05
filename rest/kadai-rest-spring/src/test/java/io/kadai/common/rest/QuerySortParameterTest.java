@@ -105,13 +105,11 @@ class QuerySortParameterTest {
     SortDirection sortDirection = SortDirection.ASCENDING;
     List<MockSortBy> sortBy1 = List.of(sortBy, sortBy);
     List<SortDirection> sortDirection1 = List.of(sortDirection);
-    assertThatThrownBy(
-            () -> new QuerySortParameter<>(sortBy1, sortDirection1))
+    assertThatThrownBy(() -> new QuerySortParameter<>(sortBy1, sortDirection1))
         .isInstanceOf(InvalidArgumentException.class);
     List<MockSortBy> sortBy2 = List.of(sortBy);
     List<SortDirection> sortDirection2 = List.of(sortDirection, sortDirection);
-    assertThatThrownBy(
-            () -> new QuerySortParameter<>(sortBy2, sortDirection2))
+    assertThatThrownBy(() -> new QuerySortParameter<>(sortBy2, sortDirection2))
         .isInstanceOf(InvalidArgumentException.class);
   }
 

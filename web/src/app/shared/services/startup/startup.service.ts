@@ -16,70 +16,71 @@
  *
  */
 
-import { firstValueFrom, of } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
-import { environment } from 'app/../environments/environment';
-import { inject, Injectable, Injector } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { DOCUMENT, inject, Injectable } from '@angular/core';
 import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
-import { catchError, tap } from 'rxjs/operators';
 import { WindowRefService } from 'app/shared/services/window/window.service';
-
-interface EnvironmentConfig {
-  kadaiRestUrl?: string;
-  kadaiLogoutUrl?: string;
-}
+import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StartupService {
-  private httpClient = inject(HttpClient);
   private kadaiEngineService = inject(KadaiEngineService);
-  private injector = inject(Injector);
+  private runtimeConfigService = inject(RuntimeConfigService);
   private window = inject(WindowRefService);
+  private document = inject(DOCUMENT);
 
-  public get router(): Router {
-    return this.injector.get(Router);
+  async load(): Promise<void> {
+    await this.runtimeConfigService.load();
+    const userInfoUrl = this.kadaiEngineService.currentUserInfoUrl;
+    try {
+      await firstValueFrom(this.kadaiEngineService.getUserInformation());
+    } catch (error) {
+      const loginUrl = this.runtimeConfigService.kadaiLoginUrl;
+      if (loginUrl && isAuthenticationError(error, userInfoUrl, this.document.baseURI)) {
+        this.window.nativeWindow.location.href = loginUrl;
+        return new Promise<never>(() => {});
+      }
+      console.error('Failed to load current user, starting without a user session:', error);
+    }
   }
+}
 
-  load(): Promise<EnvironmentConfig> {
-    return this.loadEnvironment();
+// Unauthenticated requests come back either as 401 or as a login redirect the browser followed, so
+// a successful status from another URL means no session; from the endpoint itself it is a server bug.
+function isAuthenticationError(error: unknown, requestUrl: string, baseUrl: string): boolean {
+  if (!(error instanceof HttpErrorResponse)) {
+    return false;
   }
-
-  getEnvironmentFilePromise() {
-    return firstValueFrom(
-      this.httpClient.get<EnvironmentConfig>('environments/data-sources/environment-information.json').pipe(
-        tap((config) => {
-          if (config?.kadaiRestUrl) {
-            environment.kadaiRestUrl = config.kadaiRestUrl;
-          }
-
-          if (config?.kadaiLogoutUrl) {
-            environment.kadaiLogoutUrl = config.kadaiLogoutUrl;
-          }
-        }),
-        catchError((error) => {
-          console.warn('Failed to load environment configuration:', error);
-          return of(null);
-        })
-      )
-    ).then(() => void 0);
+  if (error.status === 401) {
+    return true;
   }
+  return isSuccessful(error.status) && wasRedirected(error.url, requestUrl, baseUrl);
+}
 
-  getKadaiRestUrl() {
-    return environment.kadaiRestUrl;
-  }
+function isSuccessful(status: number): boolean {
+  return status >= 200 && status < 300;
+}
 
-  getKadaiLogoutUrl() {
-    return environment.kadaiLogoutUrl;
+// A response URL that is unknown or unparsable gives no evidence of a redirect.
+function wasRedirected(responseUrl: string | null, requestUrl: string, baseUrl: string): boolean {
+  if (!responseUrl) {
+    return false;
   }
+  try {
+    const response = new URL(responseUrl, baseUrl);
+    const request = new URL(requestUrl, baseUrl);
+    return (
+      response.origin !== request.origin ||
+      withoutTrailingSlash(response.pathname) !== withoutTrailingSlash(request.pathname)
+    );
+  } catch {
+    return false;
+  }
+}
 
-  private loadEnvironment(): Promise<EnvironmentConfig> {
-    return this.getEnvironmentFilePromise()
-      .then(() => this.kadaiEngineService.getUserInformation())
-      .catch((error) => {
-        // this.window.nativeWindow.location.href = environment.kadaiRestUrl + '/login';
-      });
-  }
+function withoutTrailingSlash(path: string): string {
+  return path.length > 1 ? path.replace(/\/+$/, '') : path;
 }

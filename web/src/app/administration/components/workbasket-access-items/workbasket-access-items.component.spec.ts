@@ -17,8 +17,9 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { WorkbasketAccessItemsComponent } from './workbasket-access-items.component';
+import { ACCESS_NAME_LOOKUP_TIMEOUT_MS, WorkbasketAccessItemsComponent } from './workbasket-access-items.component';
 import { DebugElement } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { Observable, of, Subject } from 'rxjs';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
@@ -38,6 +39,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import { AccessIdsService } from 'app/shared/services/access-ids/access-ids.service';
+import { TypeAheadComponent } from 'app/shared/components/type-ahead/type-ahead.component';
+import { AccessId } from 'app/shared/models/access-id';
 
 describe('WorkbasketAccessItemsComponent', () => {
   let fixture: ComponentFixture<WorkbasketAccessItemsComponent>;
@@ -175,18 +178,18 @@ describe('WorkbasketAccessItemsComponent', () => {
     expect(emitSpy).toHaveBeenCalledWith(false);
   });
 
-  it('should set accessId and accessName on the form control for the given row when accessItemSelected is called', () => {
+  it('should set the accessName of the given row when accessItemSelected is called', () => {
     fixture.detectChanges();
+    const accessIdBefore = component.accessItemsGroups.controls[0].get('accessId')!.value;
     component.accessItemSelected({ accessId: 'user-1', name: 'User One' }, 0);
-    expect(component.accessItemsGroups.controls[0].get('accessId')!.value).toBe('user-1');
     expect(component.accessItemsGroups.controls[0].get('accessName')!.value).toBe('User One');
+    expect(component.accessItemsGroups.controls[0].get('accessId')!.value).toBe(accessIdBefore);
   });
 
-  it('should handle null accessItem gracefully in accessItemSelected', () => {
+  it('should clear the accessName of the given row when the selection is cleared', () => {
     fixture.detectChanges();
-    component.accessItemSelected(null as any, 0);
-    expect(component.accessItemsGroups.controls[0].get('accessId')!.value).toBeUndefined();
-    expect(component.accessItemsGroups.controls[0].get('accessName')!.value).toBeUndefined();
+    component.accessItemSelected(null, 0);
+    expect(component.accessItemsGroups.controls[0].get('accessName')!.value).toBe('');
   });
 
   it('should return an array copy of access items when cloneAccessItems is called', () => {
@@ -671,5 +674,76 @@ describe('WorkbasketAccessItemsComponent', () => {
     fixture.detectChanges();
     const newRowCount = debugElement.nativeElement.querySelectorAll('tbody tr').length;
     expect(newRowCount).toBe(initialRowCount - 1);
+  });
+
+  it('should never save a new access id together with the previous access name while the lookup is pending', () => {
+    const accessIdsService = TestBed.inject(AccessIdsService);
+    const pendingSearch$ = new Subject<AccessId[]>();
+    vi.spyOn(accessIdsService, 'validateAccessId').mockReturnValue(of(true));
+    vi.spyOn(accessIdsService, 'searchForAccessId').mockReturnValue(pendingSearch$);
+    vi.useFakeTimers();
+    fixture.detectChanges();
+
+    const row = component.accessItemsGroups.controls[0];
+    const typeAhead: TypeAheadComponent = debugElement.queryAll(By.directive(TypeAheadComponent))[0].componentInstance;
+    typeAhead.inputControl.setValue('new-user');
+    vi.advanceTimersByTime(typeAhead.debounceMs());
+
+    expect(row.value.accessId).toBe('new-user');
+    expect(row.value.accessName).toBe('');
+
+    pendingSearch$.next([{ accessId: 'new-user', name: 'New User' }]);
+    expect(row.value.accessName).toBe('New User');
+    vi.useRealTimers();
+  });
+
+  const submitRowWithPendingLookup = (search$: Subject<AccessId[]>) => {
+    const accessIdsService = TestBed.inject(AccessIdsService);
+    vi.spyOn(accessIdsService, 'validateAccessId').mockReturnValue(of(true));
+    vi.spyOn(accessIdsService, 'searchForAccessId').mockReturnValue(search$);
+
+    fixture.detectChanges();
+
+    component.accessItemsRepresentation = {
+      accessItems: [component.createWorkbasketAccessItems()],
+      _links: { self: { href: 'some-valid-url' } }
+    };
+    component.setAccessItemsGroups(component.accessItemsRepresentation.accessItems);
+
+    const row = component.accessItemsGroups.controls[0];
+    row.get('accessId')?.setValue('new-user');
+    vi.advanceTimersByTime(500);
+
+    let updateAction: UpdateWorkbasketAccessItems | undefined;
+    actions$.pipe(ofActionDispatched(UpdateWorkbasketAccessItems)).subscribe((action) => (updateAction = action));
+
+    return { row, promise: component.onSubmit(), savedAccessItems: () => updateAction?.workbasketAccessItems };
+  };
+
+  it('should resolve the access name of a new access id before dispatching the save', async () => {
+    vi.useFakeTimers();
+    const pendingSearch$ = new Subject<AccessId[]>();
+
+    const submit = submitRowWithPendingLookup(pendingSearch$);
+    expect(submit.row.value.accessName).toBe('');
+
+    await vi.advanceTimersByTimeAsync(500);
+    pendingSearch$.next([{ accessId: 'new-user', name: 'New User' }]);
+    await submit.promise;
+
+    expect(submit.savedAccessItems()?.[0].accessName).toBe('New User');
+    vi.useRealTimers();
+  });
+
+  it('should save a new access id without a name when its lookup does not answer', async () => {
+    vi.useFakeTimers();
+
+    const submit = submitRowWithPendingLookup(new Subject<AccessId[]>());
+    await vi.advanceTimersByTimeAsync(ACCESS_NAME_LOOKUP_TIMEOUT_MS);
+    await submit.promise;
+
+    expect(submit.savedAccessItems()?.[0].accessId).toBe('new-user');
+    expect(submit.savedAccessItems()?.[0].accessName).toBe('');
+    vi.useRealTimers();
   });
 });

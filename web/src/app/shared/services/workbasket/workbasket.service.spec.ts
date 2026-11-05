@@ -19,14 +19,14 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { WorkbasketService } from './workbasket.service';
 import { DomainService } from '../domain/domain.service';
-import { environment } from 'environments/environment';
 import { Workbasket } from '../../models/workbasket';
 import { WorkbasketAccessItems } from '../../models/workbasket-access-items';
 import { WorkbasketAccessItemsRepresentation } from '../../models/workbasket-access-items-representation';
 import { Direction, WorkbasketQuerySortParameter } from '../../models/sorting';
+import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
 
 describe('WorkbasketService', () => {
   let service: WorkbasketService;
@@ -38,14 +38,13 @@ describe('WorkbasketService', () => {
   };
 
   beforeEach(() => {
-    environment.kadaiRestUrl = 'http://test';
     vi.clearAllMocks();
     mockDomainService.getSelectedDomain.mockReturnValue(of('DOMAIN_A'));
 
     TestBed.configureTestingModule({
       providers: [
         WorkbasketService,
-
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://test' } },
         provideHttpClientTesting(),
         { provide: DomainService, useValue: mockDomainService }
       ]
@@ -410,7 +409,6 @@ describe('WorkbasketService', () => {
       const workbasket: Workbasket = { workbasketId: 'wb-tostring-err', name: 'ToString Error WB' };
       let errorReceived: any;
 
-      const { throwError } = require('rxjs');
       const httpClient = (service as any).httpClient;
       vi.spyOn(httpClient, 'put').mockReturnValueOnce(throwError(() => ({ toString: () => 'plain error string' })));
 
@@ -429,7 +427,6 @@ describe('WorkbasketService', () => {
         status: 422,
         statusText: 'Unprocessable Entity'
       });
-      const { throwError } = require('rxjs');
       vi.spyOn(httpClient, 'put').mockReturnValueOnce(throwError(() => mockResponse));
 
       service.updateWorkbasket(url, workbasket).subscribe({ error: (err) => (errorReceived = err) });

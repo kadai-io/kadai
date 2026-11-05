@@ -16,148 +16,193 @@
  *
  */
 
-import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { TaskPriorityReportFilterStateService } from './task-priority-report-filter-state.service';
+import { Store } from '@ngxs/store';
+import { BehaviorSubject } from 'rxjs';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import {
+  SETTING_MEMBER_FILTER,
+  TaskPriorityReportFilterStateService
+} from './task-priority-report-filter-state.service';
+import { SettingsSelectors } from '../../shared/store/settings-store/settings.selectors';
 
 describe('TaskPriorityReportFilterStateService', () => {
   let service: TaskPriorityReportFilterStateService;
+  let settingsSubject$: BehaviorSubject<Record<string, unknown> | undefined>;
+
+  const validFilterConfig = {
+    'State READY': { state: ['READY'] },
+    'State CLAIMED': { state: ['CLAIMED'], priority: ['HIGH'] }
+  };
 
   beforeEach(() => {
+    settingsSubject$ = new BehaviorSubject<Record<string, unknown> | undefined>(undefined);
+
+    const mockStore = {
+      select: vi.fn().mockImplementation((selector) => {
+        if (selector === SettingsSelectors.getSettings) {
+          return settingsSubject$.asObservable();
+        }
+        return new BehaviorSubject(undefined).asObservable();
+      })
+    };
+
     TestBed.configureTestingModule({
-      providers: [TaskPriorityReportFilterStateService]
+      providers: [TaskPriorityReportFilterStateService, { provide: Store, useValue: mockStore }]
     });
+
     service = TestBed.inject(TaskPriorityReportFilterStateService);
   });
 
-  it('should be created', () => {
+  it('should be created with initial default state', () => {
     expect(service).toBeTruthy();
-    expect(service.currentFilter()).toEqual({});
     expect(service.activeFilters()).toEqual([]);
+    expect(service.workbasketKey()).toBeUndefined();
+    expect(service.filterKeys()).toEqual([]);
+    expect(service.filtersAreSpecified()).toBe(false);
+    expect(service.activeQuery()).toEqual({});
   });
 
-  it('should update currentFilter when .set() is called', () => {
-    const newFilter = { priority: 'HIGH', domain: 'TEST' };
-    service.currentFilter.set(newFilter);
-    expect(service.currentFilter()).toEqual(newFilter);
+  describe('parsedFilterConfig & Filter Specs Validation', () => {
+    it('should return isValid: false when settings are undefined or filter setting is missing', () => {
+      settingsSubject$.next(undefined);
+      expect(service.parsedFilterConfig()).toEqual({ config: {}, isValid: false });
+      expect(service.filtersAreSpecified()).toBe(false);
+
+      settingsSubject$.next({});
+      expect(service.parsedFilterConfig()).toEqual({ config: {}, isValid: false });
+      expect(service.filtersAreSpecified()).toBe(false);
+    });
+
+    it('should return isValid: false when filter setting is empty or whitespace-only string', () => {
+      settingsSubject$.next({ [SETTING_MEMBER_FILTER]: '   ' });
+      expect(service.parsedFilterConfig()).toEqual({ config: {}, isValid: false });
+      expect(service.filtersAreSpecified()).toBe(false);
+    });
+
+    it('should handle invalid JSON in filter setting gracefully without crashing', () => {
+      settingsSubject$.next({ [SETTING_MEMBER_FILTER]: '{ invalid json }' });
+      expect(service.parsedFilterConfig()).toEqual({ config: {}, isValid: false });
+      expect(service.filtersAreSpecified()).toBe(false);
+    });
+
+    it('should parse valid JSON filter config and update filterKeys and filtersAreSpecified', () => {
+      settingsSubject$.next({
+        [SETTING_MEMBER_FILTER]: JSON.stringify(validFilterConfig)
+      });
+
+      expect(service.parsedFilterConfig()).toEqual({
+        config: validFilterConfig,
+        isValid: true
+      });
+      expect(service.filterKeys()).toEqual(['State READY', 'State CLAIMED']);
+      expect(service.filtersAreSpecified()).toBe(true);
+    });
+
+    it('should return filtersAreSpecified as false when parsed JSON is an empty object', () => {
+      settingsSubject$.next({
+        [SETTING_MEMBER_FILTER]: JSON.stringify({})
+      });
+
+      expect(service.parsedFilterConfig()).toEqual({ config: {}, isValid: true });
+      expect(service.filterKeys()).toEqual([]);
+      expect(service.filtersAreSpecified()).toBe(false);
+    });
   });
 
-  it('should update activeFilters when .set() is called with a list of filter names', () => {
-    const filters = ['priority', 'domain', 'state'];
-    service.activeFilters.set(filters);
-    expect(service.activeFilters()).toEqual(filters);
+  describe('toggleFilter() & activeFilters', () => {
+    it('should add a filter key when enabled', () => {
+      service.toggleFilter('State READY', true);
+      expect(service.activeFilters()).toEqual(['State READY']);
+    });
+
+    it('should not duplicate filter keys when enabling an already active filter', () => {
+      service.toggleFilter('State READY', true);
+      service.toggleFilter('State READY', true);
+      expect(service.activeFilters()).toEqual(['State READY']);
+    });
+
+    it('should remove a filter key when disabled', () => {
+      service.activeFilters.set(['State READY', 'State CLAIMED']);
+
+      service.toggleFilter('State READY', false);
+      expect(service.activeFilters()).toEqual(['State CLAIMED']);
+    });
+
+    it('should handle disabling a filter that is not currently active gracefully', () => {
+      service.activeFilters.set(['State READY']);
+
+      service.toggleFilter('NonExistingFilter', false);
+      expect(service.activeFilters()).toEqual(['State READY']);
+    });
   });
 
-  it('should reflect an empty object after resetting currentFilter', () => {
-    service.currentFilter.set({ someFilter: 'value' });
-    service.currentFilter.set({});
-    expect(service.currentFilter()).toEqual({});
+  describe('activeQuery Computation', () => {
+    beforeEach(() => {
+      settingsSubject$.next({
+        [SETTING_MEMBER_FILTER]: JSON.stringify(validFilterConfig)
+      });
+    });
+
+    it('should return empty activeQuery when no filters are active', () => {
+      expect(service.activeQuery()).toEqual({});
+    });
+
+    it('should compute query for a single active filter', () => {
+      service.toggleFilter('State READY', true);
+
+      expect(service.activeQuery()).toEqual({
+        state: ['READY']
+      });
+    });
+
+    it('should merge multiple active filters into combined query arrays', () => {
+      service.toggleFilter('State READY', true);
+      service.toggleFilter('State CLAIMED', true);
+
+      expect(service.activeQuery()).toEqual({
+        state: ['READY', 'CLAIMED'],
+        priority: ['HIGH']
+      });
+    });
+
+    it('should ignore active filter keys that do not exist in filter config', () => {
+      service.toggleFilter('UnknownFilter', true);
+
+      expect(service.activeQuery()).toEqual({});
+    });
+
+    it('should deduplicate values when multiple active filters contain overlapping query values', () => {
+      const overlappingConfig = {
+        'Filter A': { state: ['READY', 'CLAIMED'] },
+        'Filter B': { state: ['READY', 'COMPLETED'] }
+      };
+
+      TestBed.tick();
+
+      settingsSubject$.next({
+        [SETTING_MEMBER_FILTER]: JSON.stringify(overlappingConfig)
+      });
+
+      service.toggleFilter('Filter A', true);
+      service.toggleFilter('Filter B', true);
+
+      expect(service.activeQuery()).toEqual({
+        state: ['READY', 'CLAIMED', 'COMPLETED']
+      });
+    });
   });
 
-  it('should reflect an empty array after resetting activeFilters', () => {
-    service.activeFilters.set(['filter1', 'filter2']);
-    service.activeFilters.set([]);
-    expect(service.activeFilters()).toEqual([]);
-  });
+  describe('workbasketKey WritableSignal', () => {
+    it('should allow setting and updating workbasketKey', () => {
+      expect(service.workbasketKey()).toBeUndefined();
 
-  it('currentFilter and activeFilters should be independent signals', () => {
-    service.currentFilter.set({ x: 1 });
-    expect(service.activeFilters()).toEqual([]);
+      service.workbasketKey.set('WBK_123');
+      expect(service.workbasketKey()).toBe('WBK_123');
 
-    service.activeFilters.set(['x']);
-    expect(service.currentFilter()).toEqual({ x: 1 });
-  });
-
-  it('should update currentFilter using .update()', () => {
-    service.currentFilter.set({ priority: 'LOW' });
-    service.currentFilter.update((prev) => ({ ...prev, domain: 'DOMAIN_A' }));
-    expect(service.currentFilter()).toEqual({ priority: 'LOW', domain: 'DOMAIN_A' });
-  });
-
-  it('should update activeFilters using .update()', () => {
-    service.activeFilters.set(['priority']);
-    service.activeFilters.update((prev) => [...prev, 'domain']);
-    expect(service.activeFilters()).toEqual(['priority', 'domain']);
-  });
-
-  it('should remove a filter from activeFilters using .update()', () => {
-    service.activeFilters.set(['priority', 'domain', 'state']);
-    service.activeFilters.update((prev) => prev.filter((f) => f !== 'domain'));
-    expect(service.activeFilters()).toEqual(['priority', 'state']);
-  });
-
-  it('should overwrite all fields in currentFilter using .update()', () => {
-    service.currentFilter.set({ priority: 'LOW', domain: 'DOMAIN_A' });
-    service.currentFilter.update(() => ({ priority: 'HIGH' }));
-    expect(service.currentFilter()).toEqual({ priority: 'HIGH' });
-  });
-
-  it('should handle update on empty activeFilters gracefully', () => {
-    service.activeFilters.update((prev) => [...prev, 'newFilter']);
-    expect(service.activeFilters()).toEqual(['newFilter']);
-  });
-
-  it('should handle update on empty currentFilter gracefully', () => {
-    service.currentFilter.update((prev) => ({ ...prev, extra: 'value' }));
-    expect(service.currentFilter()).toEqual({ extra: 'value' });
-  });
-
-  it('should inject the same service instance (singleton) when injected twice', () => {
-    const service2 = TestBed.inject(TaskPriorityReportFilterStateService);
-    expect(service2).toBe(service);
-  });
-
-  it('should keep currentFilter state across multiple reads', () => {
-    service.currentFilter.set({ a: 1, b: 2 });
-    expect(service.currentFilter()).toEqual({ a: 1, b: 2 });
-    expect(service.currentFilter()).toEqual({ a: 1, b: 2 });
-  });
-
-  it('should keep activeFilters state across multiple reads', () => {
-    service.activeFilters.set(['x', 'y', 'z']);
-    expect(service.activeFilters()).toEqual(['x', 'y', 'z']);
-    expect(service.activeFilters()).toEqual(['x', 'y', 'z']);
-  });
-
-  it('should support setting complex objects in currentFilter', () => {
-    const complexFilter = {
-      state: ['READY', 'CLAIMED'],
-      priority: [1, 2, 3],
-      nested: { key: 'value' }
-    };
-    service.currentFilter.set(complexFilter);
-    expect(service.currentFilter()).toEqual(complexFilter);
-  });
-
-  it('should allow setting currentFilter to null and back to valid object', () => {
-    service.currentFilter.set(null as any);
-    expect(service.currentFilter()).toBeNull();
-    service.currentFilter.set({ restored: true });
-    expect(service.currentFilter()).toEqual({ restored: true });
-  });
-
-  it('should allow setting activeFilters to null and back to valid array', () => {
-    service.activeFilters.set(null as any);
-    expect(service.activeFilters()).toBeNull();
-    service.activeFilters.set(['restored']);
-    expect(service.activeFilters()).toEqual(['restored']);
-  });
-
-  it('should handle update() with function that returns null for currentFilter', () => {
-    service.currentFilter.set({ priority: 'LOW' });
-    service.currentFilter.update(() => null as any);
-    expect(service.currentFilter()).toBeNull();
-  });
-
-  it('should handle update() with function that returns empty array for activeFilters', () => {
-    service.activeFilters.set(['filter1', 'filter2', 'filter3']);
-    service.activeFilters.update(() => []);
-    expect(service.activeFilters()).toEqual([]);
-  });
-
-  it('should preserve reference equality for same signal value', () => {
-    const val = { key: 'same' };
-    service.currentFilter.set(val);
-    expect(service.currentFilter()).toEqual({ key: 'same' });
+      service.workbasketKey.set(undefined);
+      expect(service.workbasketKey()).toBeUndefined();
+    });
   });
 });

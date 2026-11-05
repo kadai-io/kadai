@@ -171,15 +171,14 @@ public class WorkbasketAccessSqlProvider {
 
   private static String getMaximumPermissionStatement(boolean isNotDb2) {
     return PERMISSIONS.stream()
-        .map(
-            perm -> {
-              String temp = "MAX(" + perm.getLeft();
-              if (isNotDb2) {
-                temp += "::int";
-              }
-              temp += ") AS " + perm.getLeft();
-              return temp;
-            })
+        .map(perm -> {
+          String temp = "MAX(" + perm.getLeft();
+          if (isNotDb2) {
+            temp += "::int";
+          }
+          temp += ") AS " + perm.getLeft();
+          return temp;
+        })
         .collect(Collectors.joining(", ", "", " "));
   }
 

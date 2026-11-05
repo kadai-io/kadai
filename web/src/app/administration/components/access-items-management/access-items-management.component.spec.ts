@@ -962,11 +962,11 @@ describe('AccessItemsManagementComponent — with groups AND permissions populat
     expect(app.accessItemsForm).toBeTruthy();
   });
 
-  it('should trigger onSelectAccessId when accessIdEventEmitter fires in template', () => {
+  it('should trigger onSelectAccessId when accessIdSelected fires in template', () => {
     const onSelectSpy = vi.spyOn(app, 'onSelectAccessId');
     const typeAhead = debugElement.query(By.css('kadai-shared-type-ahead'));
     expect(typeAhead).toBeTruthy();
-    typeAhead.triggerEventHandler('accessIdEventEmitter', { accessId: 'new-id', name: 'New User' });
+    typeAhead.triggerEventHandler('accessIdSelected', { accessId: 'new-id', name: 'New User' });
     expect(onSelectSpy).toHaveBeenCalledWith({ accessId: 'new-id', name: 'New User' });
   });
 
@@ -1097,13 +1097,13 @@ describe('AccessItemsManagementComponent — HTML template coverage without over
     expect(app.accessItemsForm).toBeFalsy();
   });
 
-  it('should trigger accessIdEventEmitter listener (covers listener function)', () => {
+  it('should trigger accessIdSelected listener (covers listener function)', () => {
     fixture.detectChanges();
     httpController.match(() => true).forEach((req) => req.flush(''));
     const onSelectSpy = vi.spyOn(app, 'onSelectAccessId');
     const typeAhead = debugElement.query(By.css('kadai-shared-type-ahead'));
     if (typeAhead) {
-      typeAhead.triggerEventHandler('accessIdEventEmitter', { accessId: 'cov-user', name: 'Cov User' });
+      typeAhead.triggerEventHandler('accessIdSelected', { accessId: 'cov-user', name: 'Cov User' });
       expect(onSelectSpy).toHaveBeenCalledWith({ accessId: 'cov-user', name: 'Cov User' });
     } else {
       app.onSelectAccessId({ accessId: 'cov-user', name: 'Cov User' });

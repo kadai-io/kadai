@@ -22,7 +22,7 @@ import static java.util.Objects.nonNull;
 
 import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.KadaiEngine;
-import io.kadai.common.internal.KadaiEngineImpl;
+import io.kadai.common.internal.InternalKadaiEngineResolver;
 import io.kadai.spi.priority.internal.PriorityServiceManager;
 import io.kadai.task.api.TaskQueryColumnName;
 import io.kadai.task.api.TaskState;
@@ -39,9 +39,14 @@ public class TaskUpdatePriorityWorker {
   private final PriorityServiceManager priorityServiceManager;
 
   public TaskUpdatePriorityWorker(KadaiEngine kadaiEngine) {
+    this(kadaiEngine, InternalKadaiEngineResolver.resolve(kadaiEngine).getPriorityServiceManager());
+  }
+
+  public TaskUpdatePriorityWorker(
+      KadaiEngine kadaiEngine, PriorityServiceManager priorityServiceManager) {
     this.kadaiEngine = kadaiEngine;
     sqlConnectionRunner = new SqlConnectionRunner(kadaiEngine);
-    priorityServiceManager = ((KadaiEngineImpl) kadaiEngine).getPriorityServiceManager();
+    this.priorityServiceManager = priorityServiceManager;
   }
 
   public static IntPredicate hasDifferentPriority(TaskSummary taskSummary) {
@@ -50,27 +55,26 @@ public class TaskUpdatePriorityWorker {
 
   public List<String> executeBatch(List<String> taskIds) {
     List<String> updatedTaskIds = new ArrayList<>();
-    sqlConnectionRunner.runWithConnection(
-        connection -> {
-          TaskUpdatePriorityBatchStatement taskUpdateBatch =
-              new TaskUpdatePriorityBatchStatement(connection);
+    sqlConnectionRunner.runWithConnection(connection -> {
+      TaskUpdatePriorityBatchStatement taskUpdateBatch =
+          new TaskUpdatePriorityBatchStatement(connection);
 
-          List<TaskSummary> list = getTaskSummariesByIds(taskIds);
-          for (TaskSummary taskSummary : list) {
-            OptionalInt calculatedPriority = getCalculatedPriority(taskSummary);
-            if (calculatedPriority.isPresent()) {
-              final String taskId = taskSummary.getId();
-              updatedTaskIds.add(taskId);
-              taskUpdateBatch.addPriorityUpdate(taskId, calculatedPriority.getAsInt());
-            }
-          }
-          taskUpdateBatch.executeBatch();
+      List<TaskSummary> list = getTaskSummariesByIds(taskIds);
+      for (TaskSummary taskSummary : list) {
+        OptionalInt calculatedPriority = getCalculatedPriority(taskSummary);
+        if (calculatedPriority.isPresent()) {
+          final String taskId = taskSummary.getId();
+          updatedTaskIds.add(taskId);
+          taskUpdateBatch.addPriorityUpdate(taskId, calculatedPriority.getAsInt());
+        }
+      }
+      taskUpdateBatch.executeBatch();
 
-          // don't forget to save changes
-          if (!connection.getAutoCommit()) {
-            connection.commit();
-          }
-        });
+      // don't forget to save changes
+      if (!connection.getAutoCommit()) {
+        connection.commit();
+      }
+    });
 
     return updatedTaskIds;
   }

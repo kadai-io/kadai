@@ -79,6 +79,23 @@
       border: 1px solid #dee2e6;
     }
 
+    & td[kadaiResizableWidth],
+    & th[kadaiResizableWidth] {
+      position: relative;
+      padding-right: 6px;
+    }
+
+    & td[kadaiResizableWidth]::before,
+    & th[kadaiResizableWidth]::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 6px;
+      cursor: col-resize;
+    }
+
     & tr:first-child > td {
       border-top: 2px solid #dddddd;
     }

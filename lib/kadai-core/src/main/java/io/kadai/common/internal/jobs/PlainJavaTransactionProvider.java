@@ -21,7 +21,7 @@ package io.kadai.common.internal.jobs;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.KadaiEngine.ConnectionManagementMode;
 import io.kadai.common.api.exceptions.SystemException;
-import io.kadai.common.internal.KadaiEngineImpl;
+import io.kadai.common.internal.InternalKadaiEngineResolver;
 import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -42,7 +42,7 @@ public class PlainJavaTransactionProvider implements KadaiTransactionProvider {
 
   @Override
   public <T> T executeInTransaction(Supplier<T> supplier) {
-    if (((KadaiEngineImpl) kadaiEngine).getConnection() != null) {
+    if (InternalKadaiEngineResolver.resolve(kadaiEngine).isConnectionSet()) {
       return supplier.get();
     }
     try (Connection connection = dataSource.getConnection()) {
@@ -51,6 +51,23 @@ public class PlainJavaTransactionProvider implements KadaiTransactionProvider {
         final T t = supplier.get();
         connection.commit();
         return t;
+      } catch (SQLException | RuntimeException | Error failure) {
+        try {
+          connection.rollback();
+        } catch (SQLException rollbackFailure) {
+          failure.addSuppressed(rollbackFailure);
+          try {
+            connection.abort(Runnable::run);
+          } catch (SQLException abortFailure) {
+            failure.addSuppressed(abortFailure);
+            try {
+              connection.close();
+            } catch (SQLException closeFailure) {
+              failure.addSuppressed(closeFailure);
+            }
+          }
+        }
+        throw failure;
       } finally {
         kadaiEngine.closeConnection();
       }

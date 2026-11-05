@@ -41,6 +41,11 @@
     background-color: colors.$aquamarine;
     color: white;
     margin: 4px;
+
+    &:disabled,
+    &[disabled] {
+      opacity: 0.5;
+    }
   }
 
   &__button--secondary {

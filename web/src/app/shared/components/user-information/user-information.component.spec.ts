@@ -66,4 +66,18 @@ describe('UserInformationComponent', () => {
     button.click();
     expect(component.showRoles).toBe(true);
   });
+
+  it('should render user id and roles of the current user', () => {
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Logged as: userid');
+    expect(component.roles()).toBe('[admin]');
+  });
+
+  it('should not render user info when no user is logged in', () => {
+    (TestBed.inject(KadaiEngineService) as unknown as KadaiEngineServiceMock).setCurrentUserInfo(undefined);
+    fixture.detectChanges();
+
+    expect(debugElement.query(By.css('.user-info'))).toBeNull();
+    expect(component.roles()).toBe('');
+  });
 });

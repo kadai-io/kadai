@@ -81,7 +81,7 @@ public interface ClassificationDefinitionApi {
       responses = {
         @ApiResponse(
             responseCode = "204",
-            content = {@Content(schema = @Schema())}),
+            content = {@Content(schema = @Schema)}),
         @ApiResponse(
             responseCode = "400",
             description =

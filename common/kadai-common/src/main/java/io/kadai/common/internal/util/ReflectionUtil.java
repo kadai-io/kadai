@@ -77,11 +77,10 @@ public class ReflectionUtil {
         .filter(f -> f.getName().startsWith("this"))
         .findFirst()
         .map(
-            CheckedFunction.rethrowing(
-                field -> {
-                  field.setAccessible(true);
-                  return field.get(instance);
-                }))
+            CheckedFunction.rethrowing(field -> {
+              field.setAccessible(true);
+              return field.get(instance);
+            }))
         .orElse(null);
   }
 }

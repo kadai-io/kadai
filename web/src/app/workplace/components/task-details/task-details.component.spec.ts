@@ -74,7 +74,7 @@ class StubTaskAttributeValueComponent {
 })
 class DummyDetailComponent {}
 
-const routes: Routes = [{ path: 'workplace/taskdetail/:id', component: DummyDetailComponent }];
+const routes: Routes = [{ path: 'task/:id', component: DummyDetailComponent, outlet: 'detail' }];
 
 describe('TaskDetailsComponent', () => {
   let component: TaskDetailsComponent;
@@ -313,18 +313,23 @@ describe('TaskDetailsComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should call deleteTaskConfirmation: delete task then navigate', () => {
+  it('should call deleteTaskConfirmation: delete task then navigate', async () => {
+    const navigateSpy = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     component.task.set(mockTask);
     component.currentId.set('task-id-1');
     component.deleteTaskConfirmation();
     expect(taskServiceSpy.deleteTask).toHaveBeenCalledWith(mockTask);
     expect(notificationServiceSpy.showSuccess).toHaveBeenCalledWith('TASK_DELETE', { taskName: mockTask.name });
+    expect(navigateSpy).toHaveBeenCalledWith(['kadai/workplace/tasks'], { queryParamsHandling: 'merge' });
+    await fixture.whenStable();
   });
 
-  it('should set task to undefined after deleteTaskConfirmation', () => {
+  it('should set task to undefined after deleteTaskConfirmation', async () => {
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     component.task.set(mockTask);
     component.deleteTaskConfirmation();
     expect(component.task()).toBeUndefined();
+    await fixture.whenStable();
   });
 
   it('should handle getTask for new-task correctly', () => {
@@ -371,9 +376,19 @@ describe('TaskDetailsComponent', () => {
     expect(requestInProgressServiceSpy.endRequest).toHaveBeenCalled();
   });
 
-  it('should navigate when openTask is called', () => {
+  it('should navigate to the processing view when openTask is called', async () => {
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigate');
     component.currentId.set('task-id-1');
-    expect(() => component.openTask()).not.toThrow();
+
+    component.openTask();
+
+    expect(navigateSpy).toHaveBeenCalledWith(
+      [{ outlets: { detail: 'task/task-id-1' } }],
+      expect.objectContaining({ queryParamsHandling: 'merge' })
+    );
+
+    await fixture.whenStable();
   });
 
   it('should render task details when task is set and requestInProgress is false', () => {
@@ -646,15 +661,18 @@ describe('TaskDetailsComponent - DOM interaction', () => {
     expect(backSpy).toHaveBeenCalled();
   });
 
-  it('should call openTask when openTask method is invoked', () => {
+  it('should call openTask when openTask method is invoked', async () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
     component.task.set({ ...mockTask });
     component.requestInProgress.set(false);
-    component.currentId.set('task-id-1');
     fixture.detectChanges();
+    component.currentId.set('task-id-1');
     const openSpy = vi.spyOn(component, 'openTask');
     component.openTask();
+
+    await fixture.whenStable();
+
     expect(openSpy).toHaveBeenCalled();
   });
 

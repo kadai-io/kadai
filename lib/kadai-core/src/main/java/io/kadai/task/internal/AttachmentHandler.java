@@ -126,13 +126,11 @@ public class AttachmentHandler {
       final Map<String, Attachment> oldAttachmentMap =
           oldAttachments.stream()
               .collect(Collectors.toMap(AttachmentSummary::getId, Function.identity()));
-      newAttachments.forEach(
-          a -> {
-            if (oldAttachmentMap.containsKey(a.getId())
-                && !a.equals(oldAttachmentMap.get(a.getId()))) {
-              attachmentMapper.update((AttachmentImpl) a);
-            }
-          });
+      newAttachments.forEach(a -> {
+        if (oldAttachmentMap.containsKey(a.getId()) && !a.equals(oldAttachmentMap.get(a.getId()))) {
+          attachmentMapper.update((AttachmentImpl) a);
+        }
+      });
     }
   }
 
@@ -141,24 +139,22 @@ public class AttachmentHandler {
     final List<Attachment> newAttachments = newTaskImpl.getAttachments();
     List<String> newAttachmentIds = new ArrayList<>();
     if (newAttachments != null && !newAttachments.isEmpty()) {
-      newAttachmentIds =
-          newAttachments.stream().map(Attachment::getId).toList();
+      newAttachmentIds = newAttachments.stream().map(Attachment::getId).toList();
     }
     List<Attachment> oldAttachments = oldTaskImpl.getAttachments();
     if (oldAttachments != null && !oldAttachments.isEmpty()) {
       final List<String> newAttIds = newAttachmentIds;
-      oldAttachments.forEach(
-          a -> {
-            if (!newAttIds.contains(a.getId())) {
-              attachmentMapper.delete(a.getId());
-              if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug(
-                    "TaskService.updateTask() for TaskId={} DELETED an Attachment={}.",
-                    newTaskImpl.getId(),
-                    a);
-              }
-            }
-          });
+      oldAttachments.forEach(a -> {
+        if (!newAttIds.contains(a.getId())) {
+          attachmentMapper.delete(a.getId());
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(
+                "TaskService.updateTask() for TaskId={} DELETED an Attachment={}.",
+                newTaskImpl.getId(),
+                a);
+          }
+        }
+      });
     }
   }
 

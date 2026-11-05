@@ -16,7 +16,6 @@
  *
  */
 
-
 package org.camunda.bpm.dmn.xlsx.elements;
 
 import java.util.regex.Matcher;

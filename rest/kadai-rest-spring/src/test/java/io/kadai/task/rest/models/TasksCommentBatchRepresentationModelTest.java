@@ -34,9 +34,7 @@ class TasksCommentBatchRepresentationModelTest {
     var a = new TasksCommentBatchRepresentationModel(List.of("T1", "T2"), "comment");
     var b = new TasksCommentBatchRepresentationModel(List.of("T1", "T2"), "comment");
 
-    assertThat(a)
-        .isEqualTo(b)
-        .hasSameHashCodeAs(b);
+    assertThat(a).isEqualTo(b).hasSameHashCodeAs(b);
   }
 
   @Test
@@ -45,15 +43,13 @@ class TasksCommentBatchRepresentationModelTest {
     var diffIds = new TasksCommentBatchRepresentationModel(List.of("T3"), "comment");
     var diffText = new TasksCommentBatchRepresentationModel(List.of("T1", "T2"), "different");
 
-    assertThat(base)
-        .isNotEqualTo(diffIds)
-        .isNotEqualTo(diffText);
+    assertThat(base).isNotEqualTo(diffIds).isNotEqualTo(diffText);
   }
 
   @Test
   void should_ReturnTrue_when_SameInstanceCompared() {
-    TasksCommentBatchRepresentationModel model = new TasksCommentBatchRepresentationModel(
-            List.of("T1"), "comment");
+    TasksCommentBatchRepresentationModel model =
+        new TasksCommentBatchRepresentationModel(List.of("T1"), "comment");
 
     TasksCommentBatchRepresentationModel sameInstanceRef1 = model;
     TasksCommentBatchRepresentationModel sameInstanceRef2 = model;
@@ -67,9 +63,6 @@ class TasksCommentBatchRepresentationModelTest {
     var withOtherLink = new TasksCommentBatchRepresentationModel(List.of("T1"), "comment");
     withOtherLink.add(Link.of("http://diff"));
 
-    assertThat(model)
-            .isNotEqualTo(null)
-            .isNotEqualTo(new Object())
-            .isNotEqualTo(withOtherLink);
+    assertThat(model).isNotEqualTo(null).isNotEqualTo(new Object()).isNotEqualTo(withOtherLink);
   }
 }

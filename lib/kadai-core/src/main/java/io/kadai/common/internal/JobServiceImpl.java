@@ -46,8 +46,10 @@ public class JobServiceImpl implements JobService {
   @Override
   public ScheduledJob createJob(ScheduledJob job) {
     initializeDefaultJobProperties(job);
-    Integer id = kadaiEngineImpl.executeInDatabaseConnection(() -> jobMapper.insertJob(job));
-    job.setJobId(id);
+    kadaiEngineImpl.executeInDatabaseConnection(() -> {
+      job.setJobId(jobMapper.nextJobId());
+      jobMapper.insertJob(job);
+    });
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Created job {}", job);
     }
@@ -80,7 +82,7 @@ public class JobServiceImpl implements JobService {
               jobClass, KadaiConfiguration.class));
     } catch (InvocationTargetException | IllegalAccessException e) {
       throw new SystemException(
-              "Caught Exception while invoking method 'getLockExpirationPeriod' by reflection");
+          "Caught Exception while invoking method 'getLockExpirationPeriod' by reflection");
     }
 
     job.setRetryCount(job.getRetryCount() - 1);

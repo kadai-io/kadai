@@ -49,17 +49,18 @@ import org.slf4j.LoggerFactory;
 public class TaskHistoryCleanupJob extends AbstractKadaiJob {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(TaskHistoryCleanupJob.class);
-  private final boolean allCompletedSameParentBusiness =
-      kadaiEngineImpl.getConfiguration().isSimpleHistoryCleanupJobAllCompletedSameParentBusiness();
-  private final Duration minimumAge =
-      kadaiEngineImpl.getConfiguration().getSimpleHistoryCleanupJobMinimumAge();
-  private final int batchSize =
-      kadaiEngineImpl.getConfiguration().getSimpleHistoryCleanupJobBatchSize();
-  private TaskHistoryServiceImpl taskHistoryService = null;
+  private final boolean allCompletedSameParentBusiness;
+  private final Duration minimumAge;
+  private final int batchSize;
+  private final TaskHistoryServiceImpl taskHistoryService;
 
   public TaskHistoryCleanupJob(
       KadaiEngine kadaiEngine, KadaiTransactionProvider txProvider, ScheduledJob scheduledJob) {
     super(kadaiEngine, txProvider, scheduledJob, true);
+    allCompletedSameParentBusiness =
+        kadaiEngine.getConfiguration().isSimpleHistoryCleanupJobAllCompletedSameParentBusiness();
+    minimumAge = kadaiEngine.getConfiguration().getSimpleHistoryCleanupJobMinimumAge();
+    batchSize = kadaiEngine.getConfiguration().getSimpleHistoryCleanupJobBatchSize();
     taskHistoryService = new TaskHistoryServiceImpl();
     taskHistoryService.initialize(kadaiEngine);
   }
@@ -88,10 +89,9 @@ public class TaskHistoryCleanupJob extends AbstractKadaiJob {
       if (allCompletedSameParentBusiness) {
         taskIdsToDeleteHistoryEventsFor =
             historyEventCandidatesToClean.stream()
-                .filter(
-                    event ->
-                        event.getParentBusinessProcessId() == null
-                            || event.getParentBusinessProcessId().isEmpty())
+                .filter(event ->
+                    event.getParentBusinessProcessId() == null
+                        || event.getParentBusinessProcessId().isEmpty())
                 .map(TaskHistoryEvent::getTaskId)
                 .collect(Collectors.toSet());
         historyEventCandidatesToClean.removeIf(

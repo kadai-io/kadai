@@ -20,18 +20,20 @@ import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { MonitorService } from './monitor.service';
-import { environment } from 'environments/environment';
 import { ReportData } from '../models/report-data';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 
 describe('MonitorService', () => {
   let service: MonitorService;
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
-    environment.kadaiRestUrl = 'http://test';
-
     TestBed.configureTestingModule({
-      providers: [MonitorService, provideHttpClientTesting()]
+      providers: [
+        MonitorService,
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai/api' } },
+        provideHttpClientTesting()
+      ]
     });
 
     service = TestBed.inject(MonitorService);

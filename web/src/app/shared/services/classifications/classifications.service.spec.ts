@@ -21,7 +21,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { of } from 'rxjs';
 import { ClassificationsService } from './classifications.service';
-import { StartupService } from '../startup/startup.service';
+import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
 import { DomainService } from '../domain/domain.service';
 import { Classification } from '../../models/classification';
 
@@ -29,10 +29,7 @@ describe('ClassificationsService', () => {
   let service: ClassificationsService;
   let httpMock: HttpTestingController;
 
-  const mockStartupService = {
-    getKadaiRestUrl: vi.fn().mockReturnValue('http://test'),
-    getKadaiLogoutUrl: vi.fn().mockReturnValue('')
-  };
+  const runtimeConfigServiceMock = { kadaiRestUrl: 'http://test' };
 
   const mockDomainService = {
     getSelectedDomain: vi.fn().mockReturnValue(of('DOMAIN_A')),
@@ -41,14 +38,13 @@ describe('ClassificationsService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockStartupService.getKadaiRestUrl.mockReturnValue('http://test');
 
     TestBed.configureTestingModule({
       providers: [
         ClassificationsService,
 
         provideHttpClientTesting(),
-        { provide: StartupService, useValue: mockStartupService },
+        { provide: RuntimeConfigService, useValue: runtimeConfigServiceMock },
         { provide: DomainService, useValue: mockDomainService }
       ]
     });
@@ -66,7 +62,7 @@ describe('ClassificationsService', () => {
   });
 
   describe('url getter', () => {
-    it('should return base URL from startupService plus /v1/classifications', () => {
+    it('should return base URL from the runtime configuration plus /v1/classifications', () => {
       expect(service.url).toBe('http://test/v1/classifications');
     });
   });

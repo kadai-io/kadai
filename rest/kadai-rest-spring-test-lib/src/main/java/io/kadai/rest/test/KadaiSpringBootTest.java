@@ -26,6 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
 /** Use this annotation to test with a spring context and a standardized configuration. */
 @Target(ElementType.TYPE)
@@ -34,6 +35,7 @@ import org.springframework.test.context.ActiveProfiles;
 // Otherwise the LDAP server is not shut down correctly and will not come up again. (socket busy)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @ActiveProfiles({"test"})
+@ContextConfiguration(initializers = DatabaseTestContextInitializer.class)
 @SpringBootTest(
     classes = TestConfiguration.class,
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

@@ -24,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.kadai.KadaiConfiguration;
 import io.kadai.classification.rest.models.ClassificationSummaryRepresentationModel;
 import io.kadai.common.internal.util.Pair;
 import io.kadai.common.rest.RestEndpoints;
@@ -49,7 +48,6 @@ import io.kadai.task.rest.routing.IntegrationTestTaskRouter;
 import io.kadai.workbasket.rest.models.WorkbasketSummaryRepresentationModel;
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -99,7 +97,6 @@ class TaskControllerIntTest {
 
   private final RestHelper restHelper;
   private final RestClient restClient;
-  @Autowired KadaiConfiguration kadaiConfiguration;
 
   @Autowired
   TaskControllerIntTest(RestHelper restHelper, RestClient restClient) {
@@ -451,9 +448,8 @@ class TaskControllerIntTest {
                     restClient
                         .get()
                         .uri(url)
-                        .headers(
-                            headers ->
-                                headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                        .headers(headers ->
+                            headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                         .retrieve()
                         .toEntity(TaskSummaryPagedRepresentationModel.class);
 
@@ -490,9 +486,8 @@ class TaskControllerIntTest {
                     restClient
                         .get()
                         .uri(url)
-                        .headers(
-                            headers ->
-                                headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                        .headers(headers ->
+                            headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                         .retrieve()
                         .toEntity(TaskSummaryPagedRepresentationModel.class);
 
@@ -501,8 +496,9 @@ class TaskControllerIntTest {
                 .hasMessageContaining(
                     String.format(
                         """
-                            Each interval in 'custom-int-%s-within' \
-                            shouldn't consist of two 'null' values""",
+                        Each interval in 'custom-int-%s-within' \
+                        shouldn't consist of two 'null' values\
+                        """,
                         i))
                 .extracting(HttpStatusCodeException.class::cast)
                 .extracting(HttpStatusCodeException::getStatusCode)
@@ -1105,9 +1101,8 @@ class TaskControllerIntTest {
                     restClient
                         .post()
                         .uri(url)
-                        .headers(
-                            headers ->
-                                headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                        .headers(headers ->
+                            headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                         .body(taskRepresentationModel)
                         .retrieve()
                         .toEntity(TaskRepresentationModel.class);
@@ -1547,12 +1542,7 @@ class TaskControllerIntTest {
     }
 
     @Test
-    void should_GroupByPor() throws Exception {
-      Field useSpecificDb2Taskquery =
-          kadaiConfiguration.getClass().getDeclaredField("useSpecificDb2Taskquery");
-      useSpecificDb2Taskquery.setAccessible(true);
-      useSpecificDb2Taskquery.setBoolean(kadaiConfiguration, true);
-
+    void should_GroupByPor() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?group-by=POR_VALUE";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
           restClient
@@ -1571,17 +1561,10 @@ class TaskControllerIntTest {
                   .map(TaskSummaryRepresentationModel::getGroupByCount)
                   .toArray())
           .containsExactly(6);
-
-      useSpecificDb2Taskquery.setBoolean(kadaiConfiguration, false);
     }
 
     @Test
-    void should_GroupBySor() throws Exception {
-      Field useSpecificDb2Taskquery =
-          kadaiConfiguration.getClass().getDeclaredField("useSpecificDb2Taskquery");
-      useSpecificDb2Taskquery.setAccessible(true);
-      useSpecificDb2Taskquery.setBoolean(kadaiConfiguration, true);
-
+    void should_GroupBySor() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?group-by-sor=Type2";
       ResponseEntity<TaskSummaryPagedRepresentationModel> response =
           restClient
@@ -1599,8 +1582,6 @@ class TaskControllerIntTest {
                   .map(TaskSummaryRepresentationModel::getGroupByCount)
                   .toArray())
           .containsExactly(2);
-
-      useSpecificDb2Taskquery.setBoolean(kadaiConfiguration, false);
     }
 
     @Test
@@ -1771,15 +1752,13 @@ class TaskControllerIntTest {
     void should_ThrowException_When_WithoutAttachmentsIsSetToFalse() {
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?without-attachment=false";
 
-      assertThatThrownBy(
-              () ->
-                  restClient
-                      .get()
-                      .uri(url)
-                      .headers(
-                          headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
-                      .retrieve()
-                      .toEntity(TaskSummaryPagedRepresentationModel.class))
+      assertThatThrownBy(() ->
+              restClient
+                  .get()
+                  .uri(url)
+                  .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+                  .retrieve()
+                  .toEntity(TaskSummaryPagedRepresentationModel.class))
           .isInstanceOf(HttpStatusCodeException.class)
           .hasMessageContaining(
               "provided value of the property 'without-attachment' must be 'true'");
@@ -2600,9 +2579,8 @@ class TaskControllerIntTest {
                     restClient
                         .get()
                         .uri(url)
-                        .headers(
-                            headers ->
-                                headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                        .headers(headers ->
+                            headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                         .retrieve()
                         .toEntity(TaskIdPagedRepresentationModel.class);
 
@@ -2639,9 +2617,8 @@ class TaskControllerIntTest {
                     restClient
                         .get()
                         .uri(url)
-                        .headers(
-                            headers ->
-                                headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                        .headers(headers ->
+                            headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
                         .retrieve()
                         .toEntity(TaskIdPagedRepresentationModel.class);
 
@@ -2650,8 +2627,9 @@ class TaskControllerIntTest {
                 .hasMessageContaining(
                     String.format(
                         """
-                            Each interval in 'custom-int-%s-within' \
-                            shouldn't consist of two 'null' values""",
+                        Each interval in 'custom-int-%s-within' \
+                        shouldn't consist of two 'null' values\
+                        """,
                         i))
                 .extracting(HttpStatusCodeException.class::cast)
                 .extracting(HttpStatusCodeException::getStatusCode)
@@ -3805,22 +3783,20 @@ class TaskControllerIntTest {
       assertThat(updatedTask.getSecondaryObjectReferences()).isNotNull();
       assertThat(updatedTask.getSecondaryObjectReferences()).hasSizeGreaterThanOrEqualTo(2);
       assertThat(updatedTask.getSecondaryObjectReferences())
-          .anySatisfy(
-              sor -> {
-                assertThat(sor.getCompany()).isEqualTo("SecondaryCompany0");
-                assertThat(sor.getSystem()).isEqualTo("SecondarySystem0");
-                assertThat(sor.getSystemInstance()).isEqualTo("SecondaryInstance0");
-                assertThat(sor.getType()).isEqualTo("SecondaryType0");
-                assertThat(sor.getValue()).isEqualTo("00000000");
-              })
-          .anySatisfy(
-              sor -> {
-                assertThat(sor.getCompany()).isEqualTo("SecondaryCompany1");
-                assertThat(sor.getSystem()).isEqualTo("SecondarySystem1");
-                assertThat(sor.getSystemInstance()).isEqualTo("SecondaryInstance1");
-                assertThat(sor.getType()).isEqualTo("SecondaryType1");
-                assertThat(sor.getValue()).isEqualTo("00000001");
-              });
+          .anySatisfy(sor -> {
+            assertThat(sor.getCompany()).isEqualTo("SecondaryCompany0");
+            assertThat(sor.getSystem()).isEqualTo("SecondarySystem0");
+            assertThat(sor.getSystemInstance()).isEqualTo("SecondaryInstance0");
+            assertThat(sor.getType()).isEqualTo("SecondaryType0");
+            assertThat(sor.getValue()).isEqualTo("00000000");
+          })
+          .anySatisfy(sor -> {
+            assertThat(sor.getCompany()).isEqualTo("SecondaryCompany1");
+            assertThat(sor.getSystem()).isEqualTo("SecondarySystem1");
+            assertThat(sor.getSystemInstance()).isEqualTo("SecondaryInstance1");
+            assertThat(sor.getType()).isEqualTo("SecondaryType1");
+            assertThat(sor.getValue()).isEqualTo("00000001");
+          });
 
       // Verify primary object reference was updated
       assertThat(updatedTask.getPrimaryObjRef()).isNotNull();
@@ -3833,30 +3809,26 @@ class TaskControllerIntTest {
       // Verify custom attributes mapped
       assertThat(updatedTask.getCustomAttributes()).isNotNull();
       assertThat(updatedTask.getCustomAttributes())
-          .anySatisfy(
-              attr -> {
-                assertThat(attr.getKey()).isEqualTo("bulk-attr-key1");
-                assertThat(attr.getValue()).isEqualTo("bulk-attr-value1");
-              })
-          .anySatisfy(
-              attr -> {
-                assertThat(attr.getKey()).isEqualTo("bulk-attr-key2");
-                assertThat(attr.getValue()).isEqualTo("bulk-attr-value2");
-              });
+          .anySatisfy(attr -> {
+            assertThat(attr.getKey()).isEqualTo("bulk-attr-key1");
+            assertThat(attr.getValue()).isEqualTo("bulk-attr-value1");
+          })
+          .anySatisfy(attr -> {
+            assertThat(attr.getKey()).isEqualTo("bulk-attr-key2");
+            assertThat(attr.getValue()).isEqualTo("bulk-attr-value2");
+          });
 
       // Verify callback info mapped
       assertThat(updatedTask.getCallbackInfo()).isNotNull();
       assertThat(updatedTask.getCallbackInfo())
-          .anySatisfy(
-              info -> {
-                assertThat(info.getKey()).isEqualTo("bulk-callback-key1");
-                assertThat(info.getValue()).isEqualTo("bulk-callback-value1");
-              })
-          .anySatisfy(
-              info -> {
-                assertThat(info.getKey()).isEqualTo("bulk-callback-key2");
-                assertThat(info.getValue()).isEqualTo("bulk-callback-value2");
-              });
+          .anySatisfy(info -> {
+            assertThat(info.getKey()).isEqualTo("bulk-callback-key1");
+            assertThat(info.getValue()).isEqualTo("bulk-callback-value1");
+          })
+          .anySatisfy(info -> {
+            assertThat(info.getKey()).isEqualTo("bulk-callback-key2");
+            assertThat(info.getValue()).isEqualTo("bulk-callback-value2");
+          });
     }
 
     @Test
@@ -4679,16 +4651,14 @@ class TaskControllerIntTest {
       String url =
           restHelper.toUrl(RestEndpoints.URL_DISTRIBUTE.replace("{workbasketId}", "dummyId"));
 
-      assertThatThrownBy(
-              () ->
-                  restClient
-                      .post()
-                      .uri(url)
-                      .headers(
-                          headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
-                      .body(requestBody)
-                      .retrieve()
-                      .toEntity(TaskRepresentationModel.class))
+      assertThatThrownBy(() ->
+              restClient
+                  .post()
+                  .uri(url)
+                  .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+                  .body(requestBody)
+                  .retrieve()
+                  .toEntity(TaskRepresentationModel.class))
           .isInstanceOf(NotFound.class)
           .hasMessageContaining("Workbasket with id 'dummyId' was not found.");
     }
@@ -4845,31 +4815,27 @@ class TaskControllerIntTest {
           restHelper.toUrl(
               RestEndpoints.URL_DISTRIBUTE, "WBI:100000000000000000000000000000000006");
 
-      assertThatThrownBy(
-              () ->
-                  restClient
-                      .post()
-                      .uri(url)
-                      .headers(
-                          headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
-                      .body(requestBody)
-                      .retrieve()
-                      .toEntity(BulkOperationResultsRepresentationModel.class))
+      assertThatThrownBy(() ->
+              restClient
+                  .post()
+                  .uri(url)
+                  .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+                  .body(requestBody)
+                  .retrieve()
+                  .toEntity(BulkOperationResultsRepresentationModel.class))
           .isInstanceOf(HttpClientErrorException.class)
           .extracting(HttpClientErrorException.class::cast)
           .extracting(HttpClientErrorException::getStatusCode)
           .isEqualTo(HttpStatus.BAD_REQUEST);
 
-      assertThatThrownBy(
-              () ->
-                  restClient
-                      .post()
-                      .uri(url)
-                      .headers(
-                          headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
-                      .body(requestBody)
-                      .retrieve()
-                      .toEntity(BulkOperationResultsRepresentationModel.class))
+      assertThatThrownBy(() ->
+              restClient
+                  .post()
+                  .uri(url)
+                  .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+                  .body(requestBody)
+                  .retrieve()
+                  .toEntity(BulkOperationResultsRepresentationModel.class))
           .isInstanceOf(HttpClientErrorException.class)
           .hasMessageContaining("The distribution strategy 'ROUND_ROBIN' does not exist.");
     }

@@ -20,7 +20,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { WorkbasketDefinitionService } from './workbasket-definition.service';
-import { StartupService } from '../../shared/services/startup/startup.service';
+import { RuntimeConfigService } from '../../shared/services/runtime-config/runtime-config.service';
 import { BlobGenerator } from '../../shared/util/blob-generator';
 
 const REST_URL = 'http://localhost:8080/kadai';
@@ -33,10 +33,7 @@ describe('WorkbasketDefinitionService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        provideHttpClientTesting(),
-        { provide: StartupService, useValue: { getKadaiRestUrl: () => REST_URL } }
-      ]
+      providers: [provideHttpClientTesting(), { provide: RuntimeConfigService, useValue: { kadaiRestUrl: REST_URL } }]
     });
     service = TestBed.inject(WorkbasketDefinitionService);
     httpTesting = TestBed.inject(HttpTestingController);

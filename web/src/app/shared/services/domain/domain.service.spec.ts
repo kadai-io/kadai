@@ -22,7 +22,7 @@ import { provideRouter } from '@angular/router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DomainService } from './domain.service';
 import { SelectedRouteService } from '../selected-route/selected-route';
-import { StartupService } from '../startup/startup.service';
+import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
 import { RequestInProgressService } from '../request-in-progress/request-in-progress.service';
 import { Subject } from 'rxjs';
 
@@ -46,9 +46,7 @@ describe('DomainService', () => {
       setRequestInProgress: vi.fn()
     };
 
-    const mockStartupService = {
-      getKadaiRestUrl: () => REST_URL
-    };
+    const runtimeConfigServiceMock = { kadaiRestUrl: REST_URL };
 
     TestBed.configureTestingModule({
       providers: [
@@ -56,7 +54,7 @@ describe('DomainService', () => {
         provideHttpClientTesting(),
         provideRouter([]),
         { provide: SelectedRouteService, useValue: mockSelectedRouteService },
-        { provide: StartupService, useValue: mockStartupService },
+        { provide: RuntimeConfigService, useValue: runtimeConfigServiceMock },
         { provide: RequestInProgressService, useValue: mockRequestInProgressService }
       ]
     });
