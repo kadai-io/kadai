@@ -126,8 +126,14 @@ describe('AppComponent', () => {
     vi.restoreAllMocks();
   });
 
-  it('should select the domain the url asks for', () => {
+  const offerDomains = (domains: string[]) => {
     const store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), domain: { domains, selectedDomain: undefined } });
+    return store;
+  };
+
+  it('should select the domain the url asks for', () => {
+    const store = offerDomains(['DOMAIN_A', 'DOMAIN_B']);
 
     queryParams$.next({ domain: 'DOMAIN_B' });
 
@@ -135,11 +141,19 @@ describe('AppComponent', () => {
   });
 
   it('should select the master domain when the url carries an empty domain', () => {
-    const store = TestBed.inject(Store);
+    const store = offerDomains(['DOMAIN_A', '']);
 
     queryParams$.next({ domain: '' });
 
     expect(store.selectSnapshot(DomainSelectors.selectedDomain)).toBe('');
+  });
+
+  it('should ignore a domain the backend does not offer', () => {
+    const store = offerDomains(['DOMAIN_A']);
+
+    queryParams$.next({ domain: 'DOMAIN_GONE' });
+
+    expect(store.selectSnapshot(DomainSelectors.selectedDomain)).toBeUndefined();
   });
 
   it('should create', () => {

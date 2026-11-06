@@ -96,11 +96,30 @@ export class AppComponent implements OnInit, OnDestroy {
     });
 
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-      const domain = params[DOMAIN_QUERY_PARAM];
-      if (domain !== undefined && domain !== this.store.selectSnapshot(DomainSelectors.selectedDomain)) {
-        this.store.dispatch(new SelectDomain(domain));
+      const fromUrl = params[DOMAIN_QUERY_PARAM];
+      const offered = this.store.selectSnapshot(DomainSelectors.domains);
+      if (fromUrl === undefined || !offered.includes(fromUrl)) {
+        return;
+      }
+      if (fromUrl !== this.store.selectSnapshot(DomainSelectors.selectedDomain)) {
+        this.store.dispatch(new SelectDomain(fromUrl));
       }
     });
+
+    // A url naming a domain that is not offered is corrected rather than obeyed, and the correction
+    // replaces the entry so that going back does not walk through domains the user never chose.
+    this.store
+      .select(DomainSelectors.selectedDomain)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((domain) => {
+        if (domain !== undefined && this.route.snapshot.queryParams[DOMAIN_QUERY_PARAM] !== domain) {
+          this.router.navigate([], {
+            queryParams: { [DOMAIN_QUERY_PARAM]: domain },
+            queryParamsHandling: 'merge',
+            replaceUrl: true
+          });
+        }
+      });
   }
 
   async logout(): Promise<void> {
