@@ -14,7 +14,7 @@ services:
     # Pinned per commit for reproducible measurements. CI bumps this automatically after
     # publishing a new image (see .github/workflows/kadai-gmt-container.yml).
     # Available tags: https://github.com/kadai-io/kadai/pkgs/container/kadai-gmt
-    image: ghcr.io/kadai-io/kadai-gmt:sha-103812055e3bd9705a1f3403f8f461a4b32a32fd
+    image: ghcr.io/kadai-io/kadai-gmt:sha-0baa6df8a83529f796ed1e59c538eb7412614d60
 
 custom_metrics:
   response_time_avg:
