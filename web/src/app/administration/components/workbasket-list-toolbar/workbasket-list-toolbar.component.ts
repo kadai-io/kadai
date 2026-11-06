@@ -24,6 +24,7 @@ import { expandDown } from 'app/shared/animations/expand.animation';
 import { Store } from '@ngxs/store';
 import { Router } from '@angular/router';
 import { WORKBASKETS_ROUTE } from '../../../shared/util/administration-routes';
+import { DomainSelectors } from '../../../shared/store/domain-store/domain.selectors';
 import { ACTION } from '../../../shared/models/action';
 import { CreateWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
@@ -62,12 +63,17 @@ export class WorkbasketListToolbarComponent {
   }
 
   addWorkbasket() {
-    if (this.action() !== ACTION.CREATE) {
-      this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: ['new-workbasket'] } }], {
-        queryParams: { tab: null },
-        queryParamsHandling: 'merge'
-      });
+    if (this.action() === ACTION.CREATE) {
+      return;
     }
+    if (this.action() === ACTION.COPY) {
+      this.store.dispatch(new CreateWorkbasket(this.store.selectSnapshot(DomainSelectors.selectedDomain)));
+      return;
+    }
+    this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: ['new-workbasket'] } }], {
+      queryParams: { tab: null },
+      queryParamsHandling: 'merge'
+    });
   }
 
   onClickFilter() {

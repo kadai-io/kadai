@@ -17,6 +17,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { WORKBASKETS_ROUTE } from '../../../shared/util/administration-routes';
 import { WorkbasketDetailsComponent } from './workbasket-details.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
@@ -213,18 +214,20 @@ describe('WorkbasketDetailsComponent', () => {
     expect(dispatched).toBe(true);
   });
 
-  it('should dispatch OnButtonPressed CLOSE and DeselectWorkbasket when onClose is called', () => {
+  it('should navigate away from the detail when onClose is called', () => {
     let closeDispatched = false;
-    let deselectDispatched = false;
     actions$.pipe(ofActionDispatched(OnButtonPressed)).subscribe((action) => {
       if (action.button === ButtonAction.CLOSE) closeDispatched = true;
     });
-    actions$.pipe(ofActionDispatched(DeselectWorkbasket)).subscribe(() => {
-      deselectDispatched = true;
-    });
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
     component.onClose();
+
     expect(closeDispatched).toBe(true);
-    expect(deselectDispatched).toBe(true);
+    expect(navigate).toHaveBeenCalledWith([WORKBASKETS_ROUTE, { outlets: { detail: null } }], {
+      queryParams: { tab: null },
+      queryParamsHandling: 'merge'
+    });
   });
 
   it('should put the selected tab into the query string and keep the other parameters', () => {

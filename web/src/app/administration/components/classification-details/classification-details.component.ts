@@ -173,11 +173,16 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
       this.notificationsService.showError('CLASSIFICATION_COPY_NOT_CREATED');
     } else {
       this.store.dispatch(new CopyClassification());
+      this.router.navigate([CLASSIFICATIONS_ROUTE, { outlets: { detail: ['new-classification'] } }], {
+        queryParamsHandling: 'merge'
+      });
     }
   }
 
   onCloseClassification() {
-    this.store.dispatch(new DeselectClassification());
+    this.router.navigate([CLASSIFICATIONS_ROUTE, { outlets: { detail: null } }], {
+      queryParamsHandling: 'merge'
+    });
   }
 
   getCategoryIcon(category?: string): Observable<Pair<string, string>> {

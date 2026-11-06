@@ -185,7 +185,10 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
 
   onClose() {
     this.store.dispatch(new OnButtonPressed(ButtonAction.CLOSE));
-    this.store.dispatch(new DeselectWorkbasket());
+    this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: null } }], {
+      queryParams: { tab: null },
+      queryParamsHandling: 'merge'
+    });
   }
 
   ngOnDestroy(): void {

@@ -69,7 +69,7 @@ describe('WorkbasketListToolbarComponent', () => {
   });
 
   it('should navigate to the new workbasket url when addWorkbasket is called', () => {
-    store.reset({ ...store.snapshot(), workbasket: { ...store.snapshot().workbasket, action: ACTION.COPY } });
+    store.reset({ ...store.snapshot(), workbasket: { ...store.snapshot().workbasket, action: ACTION.READ } });
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
 
     component.addWorkbasket();
@@ -78,6 +78,16 @@ describe('WorkbasketListToolbarComponent', () => {
       queryParams: { tab: null },
       queryParamsHandling: 'merge'
     });
+  });
+
+  it('should start a fresh workbasket while a copy is open, where the url cannot change', () => {
+    store.reset({ ...store.snapshot(), workbasket: { ...store.snapshot().workbasket, action: ACTION.COPY } });
+    let actionDispatched = false;
+    actions$.pipe(ofActionDispatched(CreateWorkbasket)).subscribe(() => (actionDispatched = true));
+
+    component.addWorkbasket();
+
+    expect(actionDispatched).toBe(true);
   });
 
   it('should not dispatch action in addWorkbasket when action is CREATE', async () => {
