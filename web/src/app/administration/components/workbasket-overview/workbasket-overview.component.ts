@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, ElementRef, inject, OnInit, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, signal, viewChild, OnDestroy } from '@angular/core';
 import { Store } from '@ngxs/store';
 import { DomainSelectors } from '../../../shared/store/domain-store/domain.selectors';
 import { Observable, Subject } from 'rxjs';
@@ -43,7 +43,7 @@ import { SvgIconComponent } from 'angular-svg-icon';
   styleUrls: ['./workbasket-overview.component.scss'],
   imports: [WorkbasketListComponent, MatIcon, WorkbasketDetailsComponent, SvgIconComponent]
 })
-export class WorkbasketOverviewComponent implements OnInit {
+export class WorkbasketOverviewComponent implements OnInit, OnDestroy {
   showDetail = signal(false);
   selectedWorkbasketAndAction$: Observable<WorkbasketAndAction> = inject(Store).select(
     WorkbasketSelectors.selectedWorkbasketAndAction
@@ -102,6 +102,11 @@ export class WorkbasketOverviewComponent implements OnInit {
     if (this.store.selectSnapshot(WorkbasketSelectors.selectedWorkbasket)?.workbasketId !== id) {
       this.store.dispatch(new SelectWorkbasket(id));
     }
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   toggleWidth() {
