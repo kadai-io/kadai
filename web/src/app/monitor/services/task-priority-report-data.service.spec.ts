@@ -24,14 +24,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TaskPriorityReportDataService } from './task-priority-report-data.service';
 import { TaskPriorityReportFilterStateService } from './task-priority-report-filter-state.service';
-import { SettingsSelectors } from '../../shared/store/settings-store/settings.selectors';
-import { DomainService } from '../../shared/services/domain/domain.service';
-import { MonitorService } from '../services/monitor.service';
-import { RequestInProgressService } from '../../shared/services/request-in-progress/request-in-progress.service';
-import { SettingMembers } from '../../settings/components/Settings/expected-members';
-import { WorkbasketType } from '../../shared/models/workbasket-type';
-import { ReportData } from '../models/report-data';
-import { Settings } from '../../settings/models/settings';
+import { SettingsSelectors } from 'app/shared/store/settings-store/settings.selectors';
+import { DomainService } from 'app/shared/services/domain/domain.service';
+import { MonitorService } from 'app/monitor/services/monitor.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
+import { SettingMembers } from 'app/settings/components/Settings/expected-members';
+import { WorkbasketType } from 'app/shared/models/workbasket-type';
+import { ReportData } from 'app/monitor/models/report-data';
+import { Settings } from 'app/settings/models/settings';
 
 const mockSettings: Settings = {
   schema: [],

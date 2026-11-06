@@ -20,9 +20,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { NavBarComponent } from './nav-bar.component';
 import { By } from '@angular/platform-browser';
-import { SidenavService } from '../../services/sidenav/sidenav.service';
+import { SidenavService } from 'app/shared/services/sidenav/sidenav.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('NavBarComponent', () => {
@@ -38,12 +37,7 @@ describe('NavBarComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [NavBarComponent],
-      providers: [
-        provideAngularSvgIcon(),
-
-        provideHttpClientTesting(),
-        { provide: SidenavService, useValue: SidenavServiceSpy }
-      ]
+      providers: [provideHttpClientTesting(), { provide: SidenavService, useValue: SidenavServiceSpy }]
     }).compileComponents();
   });
 

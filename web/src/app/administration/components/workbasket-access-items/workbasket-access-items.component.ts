@@ -54,28 +54,23 @@ import { highlight } from 'app/shared/animations/validation.animation';
 import { AccessId } from 'app/shared/models/access-id';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { filter, map, startWith, takeUntil, tap, timeout } from 'rxjs/operators';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import {
-  AccessItemsCustomisation,
-  CustomField,
-  CustomFields,
-  getCustomFields
-} from '../../../shared/models/customisation';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { AccessItemsCustomisation, CustomField, CustomFields, getCustomFields } from 'app/shared/models/customisation';
 import {
   GetWorkbasketAccessItems,
   OnButtonPressed,
   SaveNewWorkbasket,
   UpdateWorkbasket,
   UpdateWorkbasketAccessItems
-} from '../../../shared/store/workbasket-store/workbasket.actions';
-import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
-import { ButtonAction } from '../../models/button-action';
+} from 'app/shared/store/workbasket-store/workbasket.actions';
+import { WorkbasketSelectors } from 'app/shared/store/workbasket-store/workbasket.selectors';
+import { ButtonAction } from 'app/administration/models/button-action';
 import { AsyncPipe } from '@angular/common';
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import { ResizableWidthDirective } from '../../../shared/directives/resizable-width.directive';
-import { TypeAheadComponent } from '../../../shared/components/type-ahead/type-ahead.component';
+import { ResizableWidthDirective } from 'app/shared/directives/resizable-width.directive';
+import { TypeAheadComponent } from 'app/shared/components/type-ahead/type-ahead.component';
 import { MatInput } from '@angular/material/input';
 import { getPermissionWarnings } from 'app/shared/validators/permission-dependency.validator';
 import { FormSubmitDirective } from 'app/shared/directives/form-submit.directive';

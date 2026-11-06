@@ -21,8 +21,8 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { firstValueFrom } from 'rxjs';
 import { KadaiEngineService, LOGOUT_TIMEOUT_MS, USER_INFO_TIMEOUT_MS } from './kadai-engine.service';
-import { RUNTIME_CONFIG_DEFAULTS } from '../runtime-config/runtime-config.service';
-import { UserInfo } from '../../models/user-info';
+import { RUNTIME_CONFIG_DEFAULTS } from 'app/shared/services/runtime-config/runtime-config.service';
+import { UserInfo } from 'app/shared/models/user-info';
 
 describe('KadaiEngineService', () => {
   const restUrl = 'http://test';

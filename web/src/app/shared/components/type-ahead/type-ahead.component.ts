@@ -28,9 +28,9 @@ import { MatTooltip, TooltipPosition } from '@angular/material/tooltip';
 import { MatInput } from '@angular/material/input';
 import { MatAutocomplete, MatAutocompleteSelectedEvent, MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { ErrorStateMatcher, MatOption } from '@angular/material/core';
-import { AccessIdsService } from '../../services/access-ids/access-ids.service';
-import { AccessId } from '../../models/access-id';
-import { EngineConfigurationSelectors } from '../../store/engine-configuration-store/engine-configuration.selectors';
+import { AccessIdsService } from 'app/shared/services/access-ids/access-ids.service';
+import { AccessId } from 'app/shared/models/access-id';
+import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 
 export const DEFAULT_LOOKUP_DEBOUNCE_MS = 750;
 

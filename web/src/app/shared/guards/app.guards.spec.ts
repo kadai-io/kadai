@@ -21,12 +21,12 @@ import { CanActivateFn, provideRouter, Router, UrlTree } from '@angular/router';
 import { firstValueFrom, Observable, of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { businessAdminGuard, historyProviderGuard, monitorGuard, userGuard } from './app.guards';
-import { KadaiEngineService } from '../services/kadai-engine/kadai-engine.service';
-import { KadaiEngineServiceMock } from '../services/kadai-engine/kadai-engine.mock.service';
-import { UserInfo } from '../models/user-info';
-import { BusinessAdminRoles } from '../roles/business-admin.roles';
-import { MonitorRoles } from '../roles/monitor.roles';
-import { UserRoles } from '../roles/user.roles';
+import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
+import { KadaiEngineServiceMock } from 'app/shared/services/kadai-engine/kadai-engine.mock.service';
+import { UserInfo } from 'app/shared/models/user-info';
+import { BusinessAdminRoles } from 'app/shared/roles/business-admin.roles';
+import { MonitorRoles } from 'app/shared/roles/monitor.roles';
+import { UserRoles } from 'app/shared/roles/user.roles';
 
 describe('app guards', () => {
   let session: KadaiEngineServiceMock;

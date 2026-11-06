@@ -22,17 +22,17 @@ import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { Observable, of, Subject } from 'rxjs';
-import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
-import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
+import { WorkbasketState } from 'app/shared/store/workbasket-store/workbasket.state';
+import { EngineConfigurationState } from 'app/shared/store/engine-configuration-store/engine-configuration.state';
 import {
   engineConfigurationMock,
   selectedWorkbasketMock,
   workbasketAccessItemsMock
-} from '../../../shared/store/mock-data/mock-store';
+} from 'app/shared/store/mock-data/mock-store';
 import {
   GetWorkbasketAccessItems,
   UpdateWorkbasketAccessItems
-} from '../../../shared/store/workbasket-store/workbasket.actions';
+} from 'app/shared/store/workbasket-store/workbasket.actions';
 import { provideRouter } from '@angular/router';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

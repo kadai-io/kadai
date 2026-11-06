@@ -22,10 +22,10 @@ import { AccessId } from 'app/shared/models/access-id';
 import { Observable, of } from 'rxjs';
 import { WorkbasketAccessItemsRepresentation } from 'app/shared/models/workbasket-access-items-representation';
 import { Sorting, WorkbasketAccessItemQuerySortParameter } from 'app/shared/models/sorting';
-import { WorkbasketAccessItemQueryFilterParameter } from '../../models/workbasket-access-item-query-filter-parameter';
-import { QueryPagingParameter } from '../../models/query-paging-parameter';
-import { asUrlQueryString } from '../../util/query-parameters-v2';
-import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
+import { WorkbasketAccessItemQueryFilterParameter } from 'app/shared/models/workbasket-access-item-query-filter-parameter';
+import { QueryPagingParameter } from 'app/shared/models/query-paging-parameter';
+import { asUrlQueryString } from 'app/shared/util/query-parameters-v2';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 
 @Injectable({
   providedIn: 'root'

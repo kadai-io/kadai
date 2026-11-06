@@ -25,7 +25,7 @@ import { takeUntil } from 'rxjs/operators';
 import {
   WorkbasketAndComponentAndAction,
   WorkbasketSelectors
-} from '../../../shared/store/workbasket-store/workbasket.selectors';
+} from 'app/shared/store/workbasket-store/workbasket.selectors';
 import { AsyncPipe } from '@angular/common';
 import {
   CopyWorkbasket,
@@ -35,18 +35,17 @@ import {
   SelectComponent,
   UpdateWorkbasket,
   UpdateWorkbasketDistributionTargets
-} from '../../../shared/store/workbasket-store/workbasket.actions';
-import { ButtonAction } from '../../models/button-action';
-import { cloneDeep } from 'lodash-es';
+} from 'app/shared/store/workbasket-store/workbasket.actions';
+import { ButtonAction } from 'app/administration/models/button-action';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatTab, MatTabContent, MatTabGroup } from '@angular/material/tabs';
-import { WorkbasketInformationComponent } from '../workbasket-information/workbasket-information.component';
-import { WorkbasketAccessItemsComponent } from '../workbasket-access-items/workbasket-access-items.component';
-import { WorkbasketDistributionTargetsComponent } from '../workbasket-distribution-targets/workbasket-distribution-targets.component';
+import { WorkbasketInformationComponent } from 'app/administration/components/workbasket-information/workbasket-information.component';
+import { WorkbasketAccessItemsComponent } from 'app/administration/components/workbasket-access-items/workbasket-access-items.component';
+import { WorkbasketDistributionTargetsComponent } from 'app/administration/components/workbasket-distribution-targets/workbasket-distribution-targets.component';
 
 @Component({
   selector: 'kadai-administration-workbasket-details',
@@ -89,7 +88,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
       WorkbasketSelectors.selectedWorkbasketAndComponentAndAction
     );
     if (workbasketAndComponentAndAction?.selectedWorkbasket) {
-      this.workbasket.set(cloneDeep(workbasketAndComponentAndAction.selectedWorkbasket));
+      this.workbasket.set(structuredClone(workbasketAndComponentAndAction.selectedWorkbasket));
     }
     if (workbasketAndComponentAndAction?.action) {
       this.action.set(workbasketAndComponentAndAction.action);
@@ -111,7 +110,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
       const isAnotherId = this.workbasket()?.workbasketId !== selectedWorkbasket?.workbasketId;
       const isCreation = action !== this.action() && action === ACTION.CREATE;
       if ((isAnotherId || isCreation) && selectedWorkbasket) {
-        this.workbasket.set(cloneDeep(selectedWorkbasket));
+        this.workbasket.set(structuredClone(selectedWorkbasket));
       }
 
       this.action.set(action);

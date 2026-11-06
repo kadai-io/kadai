@@ -21,7 +21,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { DOCUMENT, inject, Injectable } from '@angular/core';
 import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
 import { WindowRefService } from 'app/shared/services/window/window.service';
-import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 
 @Injectable({
   providedIn: 'root'

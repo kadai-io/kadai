@@ -26,7 +26,6 @@ import { RequestInProgressService } from './shared/services/request-in-progress/
 import { SelectedRouteService } from './shared/services/selected-route/selected-route';
 import { SidenavService } from './shared/services/sidenav/sidenav.service';
 import { of, Subject, throwError } from 'rxjs';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { OrientationService } from './shared/services/orientation/orientation.service';
 import { WindowRefService } from './shared/services/window/window.service';
 import { Router } from '@angular/router';
@@ -96,7 +95,6 @@ describe('AppComponent', () => {
         { provide: SidenavService, useValue: sidenavServiceMock },
         { provide: OrientationService, useValue: orientationServiceMock },
         { provide: WindowRefService, useValue: windowRefServiceMock },
-        provideAngularSvgIcon(),
         provideNoopAnimations(),
         provideHttpClientTesting()
       ]

@@ -21,8 +21,8 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Customisation } from '../../models/customisation';
-import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
+import { Customisation } from 'app/shared/models/customisation';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 
 const customisationUrl = 'environments/data-sources/kadai-customization.json';
 

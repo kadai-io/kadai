@@ -23,15 +23,15 @@ import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.ser
 import { Sorting, TASK_SORT_PARAMETER_NAMING, TaskQuerySortParameter } from 'app/shared/models/sorting';
 import { expandDown } from 'app/shared/animations/expand.animation';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TaskQueryFilterParameter } from '../../../shared/models/task-query-filter-parameter';
+import { TaskQueryFilterParameter } from 'app/shared/models/task-query-filter-parameter';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
+import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
 import { Actions, ofActionCompleted, Store } from '@ngxs/store';
-import { ClearTaskFilter, SetTaskFilter } from '../../../shared/store/filter-store/filter.actions';
-import { WorkplaceSelectors } from '../../../shared/store/workplace-store/workplace.selectors';
-import { SetFilterExpansion } from '../../../shared/store/workplace-store/workplace.actions';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { ClearTaskFilter, SetTaskFilter } from 'app/shared/store/filter-store/filter.actions';
+import { WorkplaceSelectors } from 'app/shared/store/workplace-store/workplace.selectors';
+import { SetFilterExpansion } from 'app/shared/store/workplace-store/workplace.actions';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -42,17 +42,17 @@ import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { MatOption } from '@angular/material/core';
-import { TaskFilterComponent } from '../../../shared/components/task-filter/task-filter.component';
-import { SortComponent } from '../../../shared/components/sort/sort.component';
-import { SearchType } from '../../models/search';
-import { TaskSelectors } from '../../../shared/store/task-store/task.selectors';
+import { TaskFilterComponent } from 'app/shared/components/task-filter/task-filter.component';
+import { SortComponent } from 'app/shared/components/sort/sort.component';
+import { SearchType } from 'app/workplace/models/search';
+import { TaskSelectors } from 'app/shared/store/task-store/task.selectors';
 import {
   SelectTask,
   SelectWorkbasket,
   SetPage,
   SetSearchType,
   SetSort
-} from '../../../shared/store/task-store/task.actions';
+} from 'app/shared/store/task-store/task.actions';
 
 @Component({
   selector: 'kadai-task-list-toolbar',

@@ -23,7 +23,7 @@ import { KadaiDate } from 'app/shared/util/kadai.date';
 import { BlobGenerator } from 'app/shared/util/blob-generator';
 import { take } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { RuntimeConfigService } from '../../shared/services/runtime-config/runtime-config.service';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 
 @Injectable({
   providedIn: 'root'

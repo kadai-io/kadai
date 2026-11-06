@@ -16,14 +16,15 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
+import { SvgIconRegistryService } from 'app/shared/components/svg-icon/svg-icon-registry.service';
 import { provideRouter, Router, Routes } from '@angular/router';
 import { Component } from '@angular/core';
 import { TaskListComponent } from './task-list.component';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { Task } from '../../models/task';
-import { ObjectReference } from '../../models/object-reference';
+import { Task } from 'app/workplace/models/task';
+import { ObjectReference } from 'app/workplace/models/object-reference';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 @Component({
@@ -54,7 +55,12 @@ describe('TaskListComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TaskListComponent],
-      providers: [provideHttpClientTesting(), provideAngularSvgIcon(), provideRouter(routes), provideNoopAnimations()]
+      providers: [
+        { provide: SvgIconRegistryService, useValue: { loadSvg: () => of(null) } },
+        provideHttpClientTesting(),
+        provideRouter(routes),
+        provideNoopAnimations()
+      ]
     }).compileComponents();
 
     router = TestBed.inject(Router);

@@ -28,11 +28,11 @@ import {
   RemoveAccessItemsPermissions,
   SelectAccessId
 } from './access-items-management.actions';
-import { AccessIdsService } from '../../services/access-ids/access-ids.service';
-import { NotificationService } from '../../services/notifications/notification.service';
-import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
-import { AccessId } from '../../models/access-id';
-import { WorkbasketAccessItemsRepresentation } from '../../models/workbasket-access-items-representation';
+import { AccessIdsService } from 'app/shared/services/access-ids/access-ids.service';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
+import { AccessId } from 'app/shared/models/access-id';
+import { WorkbasketAccessItemsRepresentation } from 'app/shared/models/workbasket-access-items-representation';
 
 describe('AccessItemsManagementState', () => {
   let store: Store;

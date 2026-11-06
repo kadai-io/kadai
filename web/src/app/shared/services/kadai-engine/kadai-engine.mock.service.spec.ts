@@ -19,8 +19,8 @@
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { KadaiEngineServiceMock } from './kadai-engine.mock.service';
-import { Version } from '../../models/version';
-import { UserInfo } from '../../models/user-info';
+import { Version } from 'app/shared/models/version';
+import { UserInfo } from 'app/shared/models/user-info';
 import { firstValueFrom } from 'rxjs';
 
 describe('KadaiEngineServiceMock', () => {

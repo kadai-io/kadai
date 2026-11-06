@@ -29,7 +29,6 @@ import { httpClientInterceptor, tokenInterceptor } from 'app/shared/interceptors
 import { provideHttpClient, withInterceptors, withXhr, withXsrfConfiguration } from '@angular/common/http';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appRoutes } from './app/app.routes';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { provideStore } from '@ngxs/store';
 import { withNgxsReduxDevtoolsPlugin } from '@ngxs/devtools-plugin';
 import { withNgxsRouterPlugin } from '@ngxs/router-plugin';
@@ -76,7 +75,6 @@ bootstrapApplication(AppComponent, {
     }),
     withNgxsRouterPlugin(),
     provideZonelessChangeDetection(),
-    provideAngularSvgIcon(),
     provideAppInitializer(() => {
       const startupService = inject(StartupService);
       return startupService.load();

@@ -20,12 +20,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { UserInformationComponent } from './user-information.component';
 import { By } from '@angular/platform-browser';
-import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.service';
-import { KadaiEngineServiceMock } from '../../services/kadai-engine/kadai-engine.mock.service';
+import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
+import { KadaiEngineServiceMock } from 'app/shared/services/kadai-engine/kadai-engine.mock.service';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 describe('UserInformationComponent', () => {
   let component: UserInformationComponent;
@@ -41,8 +40,7 @@ describe('UserInformationComponent', () => {
           useClass: KadaiEngineServiceMock
         },
         provideAnimationsAsync(),
-        provideHttpClientTesting(),
-        provideAngularSvgIcon()
+        provideHttpClientTesting()
       ]
     }).compileComponents();
   });

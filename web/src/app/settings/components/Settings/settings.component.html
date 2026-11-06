@@ -20,17 +20,17 @@
 
   <!-- BUTTONS -->
   <div class="settings__buttons">
-    <button (click)="onSave()" 
-            [disabled]="settingsForm?.invalid ?? true"
-            class="settings__button--primary" 
+    <button (click)="onSave()"
+            [disabled]="settingsForm.invalid"
+            class="settings__button--primary"
             mat-button
             matTooltip="Save settings">
       Save
       <mat-icon class="md-20">save</mat-icon>
     </button>
 
-    <button (click)="onReset()" 
-            class="settings__button--secondary" 
+    <button (click)="onReset()"
+            class="settings__button--secondary"
             mat-stroked-button
             matTooltip="Revert changes">
       Undo changes
@@ -47,7 +47,7 @@
               <h4 class="settings__domain-name"> {{ group.displayName }} </h4>
               @for (member of group.members; track member) {
                 <div>
-                  
+
                   <!-- STRING -->
                   @if (member.type == settingTypes.Text) {
                     <div class="settings__grid">
@@ -81,20 +81,20 @@
                   @if (member.type == settingTypes.Interval) {
                     <div [formGroupName]="member.key" class="settings__grid">
                       <div class="settings__text">{{ member.displayName }}</div>
-                      
+
                       <mat-form-field appearance="outline">
                         <mat-label>Lower boundary</mat-label>
-                        <input formControlName="lower" 
-                               matInput 
-                               placeholder="Lower boundary" 
+                        <input formControlName="lower"
+                               matInput
+                               placeholder="Lower boundary"
                                type="number">
                       </mat-form-field>
 
                       <mat-form-field appearance="outline">
                         <mat-label>Upper boundary</mat-label>
-                        <input formControlName="upper" 
-                               matInput 
-                               placeholder="Upper boundary" 
+                        <input formControlName="upper"
+                               matInput
+                               placeholder="Upper boundary"
                                type="number">
                       </mat-form-field>
 
@@ -130,9 +130,9 @@
                         {{ member.displayName }}
                       </label>
                       <input [id]="member.key"
-                             [formControlName]="member.key" 
-                             class="settings__colors--input" 
-                             matInput 
+                             [formControlName]="member.key"
+                             class="settings__colors--input"
+                             matInput
                              type="color">
                     </div>
                   }
@@ -143,7 +143,7 @@
                       <div class="settings__text">{{ member.displayName }}</div>
                       <mat-form-field appearance="outline" class="settings__grid--two-columns">
                         <mat-label>{{ member.displayName }}</mat-label>
-                        <textarea [formControlName]="member.key" 
+                        <textarea [formControlName]="member.key"
                                   cdkAutosizeMaxRows="10"
                                   cdkAutosizeMinRows="1"
                                   cdkTextareaAutosize

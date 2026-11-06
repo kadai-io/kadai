@@ -41,18 +41,18 @@ import { EngineConfigurationSelectors } from 'app/shared/store/engine-configurat
 
 import { Location } from '@angular/common';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
-import { Classification } from '../../../shared/models/classification';
-import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
-import { ClassificationSelectors } from '../../../shared/store/classification-store/classification.selectors';
+import { Classification } from 'app/shared/models/classification';
+import { ClassificationsService } from 'app/shared/services/classifications/classifications.service';
+import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
 import {
   DeselectClassification,
   SelectClassification,
   UpdateClassification
-} from '../../../shared/store/classification-store/classification.actions';
-import { ClassificationTreeService } from '../../services/classification-tree.service';
-import { Pair } from '../../../shared/models/pair';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { SvgIconComponent } from 'angular-svg-icon';
+} from 'app/shared/store/classification-store/classification.actions';
+import { ClassificationTreeService } from 'app/administration/services/classification-tree.service';
+import { Pair } from 'app/shared/models/pair';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
+import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { toSignal } from '@angular/core/rxjs-interop';
 

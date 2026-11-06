@@ -25,9 +25,9 @@ import { Store } from '@ngxs/store';
 import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_LOOKUP_DEBOUNCE_MS, TypeAheadComponent, TypeAheadSize } from './type-ahead.component';
-import { AccessIdsService } from '../../services/access-ids/access-ids.service';
-import { AccessId } from '../../models/access-id';
-import { GlobalCustomisation } from '../../models/customisation';
+import { AccessIdsService } from 'app/shared/services/access-ids/access-ids.service';
+import { AccessId } from 'app/shared/models/access-id';
+import { GlobalCustomisation } from 'app/shared/models/customisation';
 
 const DEBOUNCE_MS = 500;
 

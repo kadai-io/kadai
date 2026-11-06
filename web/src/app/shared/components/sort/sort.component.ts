@@ -23,7 +23,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
 
-import { MapValuesPipe } from '../../pipes/map-values.pipe';
+import { MapValuesPipe } from 'app/shared/pipes/map-values.pipe';
 
 @Component({
   selector: 'kadai-shared-sort',
