@@ -460,14 +460,6 @@ describe('ClassificationDetailsComponent', () => {
     expect(validChangedSpy).toHaveBeenCalled();
   });
 
-  it('should complete destroy$ on ngOnDestroy', () => {
-    const nextSpy = vi.spyOn(component.destroy$, 'next');
-    const completeSpy = vi.spyOn(component.destroy$, 'complete');
-    component.ngOnDestroy();
-    expect(nextSpy).toHaveBeenCalled();
-    expect(completeSpy).toHaveBeenCalled();
-  });
-
   it('should not display any error divs when limit is not exceeded for any field', () => {
     fixture.detectChanges();
 

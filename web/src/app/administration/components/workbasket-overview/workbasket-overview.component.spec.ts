@@ -30,7 +30,7 @@ import { FilterState } from 'app/shared/store/filter-store/filter.state';
 import { EngineConfigurationState } from 'app/shared/store/engine-configuration-store/engine-configuration.state';
 import { engineConfigurationMock } from 'app/shared/store/mock-data/mock-store';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockActivatedRoute = {
   url: of([{ path: 'foobar' }]),
@@ -194,6 +194,17 @@ describe('WorkbasketOverviewComponent', () => {
     });
     component.ngOnInit();
     expect(component).toBeTruthy();
+  });
+
+  it('should toggle width via Enter and Space on the toggle button', () => {
+    const toggleSpy = vi.spyOn(component, 'toggleWidth').mockImplementation(() => {});
+    const toggleButton: HTMLElement = debugElement.nativeElement.querySelector(
+      '.workbasket-overview__toggle-view-button'
+    );
+    expect(toggleButton.getAttribute('role')).toBe('button');
+    toggleButton.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    toggleButton.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+    expect(toggleSpy).toHaveBeenCalledTimes(2);
   });
 });
 

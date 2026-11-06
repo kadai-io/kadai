@@ -48,6 +48,10 @@
 
               @if (idx <= currentExpHeaders()) {
                 <div (click)="toggleFold(i)"
+                     (keydown.enter)="toggleFold(i)"
+                     (keydown.space)="$event.preventDefault(); toggleFold(i)"
+                     [attr.role]="reportData().meta.rowDesc.length - 1 > row.depth ? 'button' : null"
+                     [attr.tabindex]="reportData().meta.rowDesc.length - 1 > row.depth ? 0 : null"
                      [class]="{'table-cell--border-right': currentExpHeaders() === idx,
                          'table-cell--bold': row.depth === 0 && currentExpHeaders() > 0,
                          'table-cell--clickable': reportData().meta.rowDesc.length - 1 > row.depth}"
@@ -90,6 +94,10 @@
 
               @if (idx <= currentExpHeaders()) {
                 <div (click)="toggleFold(i, true)"
+                     (keydown.enter)="toggleFold(i, true)"
+                     (keydown.space)="$event.preventDefault(); toggleFold(i, true)"
+                     [attr.role]="reportData().meta.rowDesc.length - 1 > row.depth ? 'button' : null"
+                     [attr.tabindex]="reportData().meta.rowDesc.length - 1 > row.depth ? 0 : null"
                      [class]="{'table-cell--border-right': currentExpHeaders() === idx,
                          'table-cell--clickable': reportData().meta.rowDesc.length - 1 > row.depth}"
                      class="table-cell table-cell--bold table-cell--justify">

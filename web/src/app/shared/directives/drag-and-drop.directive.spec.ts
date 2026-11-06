@@ -61,7 +61,7 @@ describe('DragAndDropDirective', () => {
         preventDefault: vi.fn(),
         stopPropagation: vi.fn()
       };
-      directive.onDragOver(mockEvent);
+      directive.onDragOver(mockEvent as unknown as DragEvent);
       expect(mockEvent.preventDefault).toHaveBeenCalled();
       expect(mockEvent.stopPropagation).toHaveBeenCalled();
       expect(directive.fileOver).toBe(true);
@@ -73,7 +73,7 @@ describe('DragAndDropDirective', () => {
         preventDefault: vi.fn(),
         stopPropagation: vi.fn()
       };
-      directive.onDragLeave(mockEvent);
+      directive.onDragLeave(mockEvent as unknown as DragEvent);
       expect(mockEvent.preventDefault).toHaveBeenCalled();
       expect(mockEvent.stopPropagation).toHaveBeenCalled();
       expect(directive.fileOver).toBe(false);
@@ -87,7 +87,7 @@ describe('DragAndDropDirective', () => {
         dataTransfer: { files: mockFiles }
       };
       const emitSpy = vi.spyOn(directive.onFileDropped, 'emit');
-      directive.ondrop(mockEvent);
+      directive.ondrop(mockEvent as unknown as DragEvent);
       expect(mockEvent.preventDefault).toHaveBeenCalled();
       expect(mockEvent.stopPropagation).toHaveBeenCalled();
       expect(directive.fileOver).toBe(false);
@@ -101,7 +101,7 @@ describe('DragAndDropDirective', () => {
         dataTransfer: { files: { length: 0 } }
       };
       const emitSpy = vi.spyOn(directive.onFileDropped, 'emit');
-      directive.ondrop(mockEvent);
+      directive.ondrop(mockEvent as unknown as DragEvent);
       expect(emitSpy).not.toHaveBeenCalled();
     });
 
@@ -113,7 +113,7 @@ describe('DragAndDropDirective', () => {
         stopPropagation: vi.fn(),
         dataTransfer: { files: mockFiles }
       };
-      directive.ondrop(mockEvent);
+      directive.ondrop(mockEvent as unknown as DragEvent);
       fixture.detectChanges();
       expect(host.droppedFiles).toEqual(mockFiles);
     });

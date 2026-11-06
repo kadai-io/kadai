@@ -20,8 +20,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PaginationComponent } from './pagination.component';
 import { DebugElement } from '@angular/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { MatAutocomplete, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { By } from '@angular/platform-browser';
 import { Subject } from 'rxjs';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { PageEvent } from '@angular/material/paginator';
 
 describe('PaginationComponent', () => {
   let fixture: ComponentFixture<PaginationComponent>;
@@ -39,11 +42,6 @@ describe('PaginationComponent', () => {
     component = fixture.componentInstance;
     fixture.componentRef.setInput('page', { totalPages: 10, number: 1 });
     fixture.detectChanges();
-
-    component.pageNumbers = [];
-    for (let i = 1; i <= component.page()!.totalPages!; i++) {
-      component.pageNumbers.push(i);
-    }
   });
 
   it('should create component', () => {
@@ -57,48 +55,47 @@ describe('PaginationComponent', () => {
 
   it('should suggest all pages when input of filter() is out of range', () => {
     component.filter(11);
-    expect(component.filteredPages).toEqual(component.pageNumbers.map(String));
+    expect(component.filteredPages).toEqual(component.pageNumbers().map(String));
     component.filter(-1);
-    expect(component.filteredPages).toEqual(component.pageNumbers.map(String));
+    expect(component.filteredPages).toEqual(component.pageNumbers().map(String));
   });
 
   it('should suggest all pages when input of filter() is not a number', () => {
     component.filter('abc');
-    expect(component.filteredPages).toEqual(component.pageNumbers.map(String));
+    expect(component.filteredPages).toEqual(component.pageNumbers().map(String));
     component.filter('');
-    expect(component.filteredPages).toEqual(component.pageNumbers.map(String));
+    expect(component.filteredPages).toEqual(component.pageNumbers().map(String));
   });
 
   it('changeToPage should increment pageSelected when going forward', () => {
-    component.pageSelected = 2;
-    component.changeToPage({ pageIndex: 2, previousPageIndex: 1 });
-    expect(component.pageSelected).toBe(3);
+    component.pageSelected.set(2);
+    component.changeToPage({ pageIndex: 2, previousPageIndex: 1 } as PageEvent);
+    expect(component.pageSelected()).toBe(3);
   });
 
   it('changeToPage should decrement pageSelected when going backward', () => {
-    component.pageSelected = 3;
-    component.changeToPage({ pageIndex: 1, previousPageIndex: 2 });
-    expect(component.pageSelected).toBe(2);
+    component.pageSelected.set(3);
+    component.changeToPage({ pageIndex: 1, previousPageIndex: 2 } as PageEvent);
+    expect(component.pageSelected()).toBe(2);
   });
 
   it('changeToPage should emit the new page (1-indexed)', () => {
     const emitSpy = vi.spyOn(component.changePage, 'emit');
-    component.changeToPage({ pageIndex: 4, previousPageIndex: 3 });
+    component.changeToPage({ pageIndex: 4, previousPageIndex: 3 } as PageEvent);
     expect(emitSpy).toHaveBeenCalledWith(5);
   });
 
   it('goToPage should set paginator pageIndex and emit page', () => {
     const emitSpy = vi.spyOn(component.changePage, 'emit');
     component.goToPage(5);
-    expect(component.pageSelected).toBe(5);
+    expect(component.pageSelected()).toBe(5);
     expect(emitSpy).toHaveBeenCalledWith(5);
   });
 
-  it('updateGoto should populate pageNumbers based on page.totalPages', () => {
+  it('pageNumbers should derive pageNumbers based on page.totalPages', () => {
     fixture.componentRef.setInput('page', { totalPages: 3, number: 1 });
     fixture.detectChanges();
-    component.updateGoto();
-    expect(component.pageNumbers).toEqual([1, 2, 3]);
+    expect(component.pageNumbers()).toEqual([1, 2, 3]);
   });
 
   it('changeLabel getRangeLabel should return "loading..." when length is 0', () => {
@@ -126,19 +123,19 @@ describe('PaginationComponent', () => {
   it('hasItems should be false when numberOfItems is 0', () => {
     fixture.componentRef.setInput('numberOfItems', 0);
     fixture.detectChanges();
-    expect(component.hasItems).toBe(false);
+    expect(component.hasItems()).toBe(false);
   });
 
   it('hasItems should be true when numberOfItems > 0', () => {
     fixture.componentRef.setInput('numberOfItems', 5);
     fixture.detectChanges();
-    expect(component.hasItems).toBe(true);
+    expect(component.hasItems()).toBe(true);
   });
 
-  it('effect should update pageSelected from page.number', () => {
+  it('pageSelected should follow from page.number', () => {
     fixture.componentRef.setInput('page', { number: 3, totalPages: 10 });
     fixture.detectChanges();
-    expect(component.pageSelected).toBe(3);
+    expect(component.pageSelected()).toBe(3);
   });
 
   it('should not render go-to page section when expanded is false', () => {
@@ -170,21 +167,19 @@ describe('PaginationComponent', () => {
     fixture.componentRef.setInput('expanded', true);
     fixture.componentRef.setInput('page', { totalPages: 5, number: 1 });
     fixture.detectChanges();
-    component.updateGoto();
     fixture.detectChanges();
     const filterSpy = vi.spyOn(component, 'filter');
     const input = fixture.nativeElement.querySelector('#inputTypeAhead') as HTMLInputElement;
     expect(input).toBeTruthy();
     input.dispatchEvent(new Event('focus'));
     fixture.detectChanges();
-    expect(filterSpy).toHaveBeenCalledWith(component.pageSelected);
+    expect(filterSpy).toHaveBeenCalledWith(component.pageSelected());
   });
 
   it('should call filter via ngModelChange when input value changes', () => {
     fixture.componentRef.setInput('expanded', true);
     fixture.componentRef.setInput('page', { totalPages: 5, number: 1 });
     fixture.detectChanges();
-    component.updateGoto();
     fixture.detectChanges();
     const filterSpy = vi.spyOn(component, 'filter');
     const input = fixture.nativeElement.querySelector('#inputTypeAhead') as HTMLInputElement;
@@ -204,13 +199,12 @@ describe('PaginationComponent', () => {
     expect(changeToPageSpy).toHaveBeenCalledWith(expect.objectContaining({ pageIndex: 1, previousPageIndex: 0 }));
   });
 
-  it('should populate pageNumbers with all pages when updateGoto is called', () => {
+  it('should populate pageNumbers with all pages from page.totalPages', () => {
     fixture.componentRef.setInput('expanded', true);
     fixture.componentRef.setInput('page', { totalPages: 3, number: 1 });
     fixture.detectChanges();
-    component.updateGoto();
-    expect(component.pageNumbers).toHaveLength(3);
-    expect(component.pageNumbers).toEqual([1, 2, 3]);
+    expect(component.pageNumbers()).toHaveLength(3);
+    expect(component.pageNumbers()).toEqual([1, 2, 3]);
     fixture.detectChanges();
     const input = fixture.nativeElement.querySelector('#inputTypeAhead');
     expect(input).toBeTruthy();
@@ -220,12 +214,20 @@ describe('PaginationComponent', () => {
     fixture.componentRef.setInput('expanded', true);
     fixture.componentRef.setInput('page', { totalPages: 5, number: 1 });
     fixture.detectChanges();
-    component.updateGoto();
     fixture.detectChanges();
-    component.filteredPages = component.pageNumbers.map(String);
+    component.filteredPages = component.pageNumbers().map(String);
     const goToPageSpy = vi.spyOn(component, 'goToPage');
     component.goToPage(3);
     expect(goToPageSpy).toHaveBeenCalledWith(3);
-    expect(component.pageSelected).toBe(3);
+    expect(component.pageSelected()).toBe(3);
+  });
+
+  it('should go to the page chosen from the autocomplete', () => {
+    fixture.componentRef.setInput('expanded', true);
+    fixture.detectChanges();
+    const goToPageSpy = vi.spyOn(component, 'goToPage');
+    const autocomplete = debugElement.query(By.directive(MatAutocomplete)).componentInstance as MatAutocomplete;
+    autocomplete.optionSelected.emit({ option: { value: 4 } } as MatAutocompleteSelectedEvent);
+    expect(goToPageSpy).toHaveBeenCalledWith(4);
   });
 });

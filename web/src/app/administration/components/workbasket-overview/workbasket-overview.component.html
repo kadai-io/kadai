@@ -23,7 +23,10 @@
   </div>
 
   <div class="vertical-right-divider">
-    <span #toggleButton (click)="toggleWidth()" class="workbasket-overview__toggle-view-button">
+    <span #toggleButton (click)="toggleWidth()" (keydown.enter)="toggleWidth()"
+          (keydown.space)="$event.preventDefault(); toggleWidth()" [attr.aria-expanded]="expanded"
+          aria-label="Toggle workbasket list width" class="workbasket-overview__toggle-view-button"
+          role="button" tabindex="0">
       @if (expanded) {
         <mat-icon
           class="vertical-right-divider__mat-icon md-36">chevron_left</mat-icon>

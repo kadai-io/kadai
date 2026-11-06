@@ -21,7 +21,6 @@ class TestComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [ReactiveFormsModule, FormFieldSubmitDirective],
   template: `
     <input id="standalone-input" [formControl]="control" kadaiFormFieldSubmit #fieldDirective="kadaiFormField" />

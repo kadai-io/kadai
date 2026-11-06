@@ -24,8 +24,8 @@ export interface IWindowService extends Window {
   __custom_global_stuff: string;
 }
 
-function getWindow(): any {
-  return window;
+function getWindow(): IWindowService {
+  return window as unknown as IWindowService;
 }
 
 @Injectable({

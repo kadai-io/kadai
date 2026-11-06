@@ -28,25 +28,24 @@ import { StartupService } from 'app/shared/services/startup/startup.service';
 import { httpClientInterceptor, tokenInterceptor } from 'app/shared/interceptors/http-client.interceptor';
 import { provideHttpClient, withInterceptors, withXhr, withXsrfConfiguration } from '@angular/common/http';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { appRoutes } from './app/app.routes';
+import { appRoutes } from 'app/app.routes';
 import { provideStore } from '@ngxs/store';
 import { withNgxsReduxDevtoolsPlugin } from '@ngxs/devtools-plugin';
 import { withNgxsRouterPlugin } from '@ngxs/router-plugin';
-import { AppComponent } from './app/app.component';
+import { AppComponent } from 'app/app.component';
 import { registerLocaleData } from '@angular/common';
 import localeDe from '@angular/common/locales/de';
 import { provideRouter, withHashLocation } from '@angular/router';
 import { provideHotToastConfig } from '@ngneat/hot-toast';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
-import { EngineConfigurationState } from './app/shared/store/engine-configuration-store/engine-configuration.state';
-import { ClassificationState } from './app/shared/store/classification-store/classification.state';
-import { WorkbasketState } from './app/shared/store/workbasket-store/workbasket.state';
-import { AccessItemsManagementState } from './app/shared/store/access-items-management-store/access-items-management.state';
-import { FilterState } from './app/shared/store/filter-store/filter.state';
-import { WorkplaceState } from './app/shared/store/workplace-store/workplace.state';
-import { SettingsState } from './app/shared/store/settings-store/settings.state';
-import { TaskWorkflowState } from './app/shared/store/task-store/task.state';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { EngineConfigurationState } from 'app/shared/store/engine-configuration-store/engine-configuration.state';
+import { ClassificationState } from 'app/shared/store/classification-store/classification.state';
+import { WorkbasketState } from 'app/shared/store/workbasket-store/workbasket.state';
+import { AccessItemsManagementState } from 'app/shared/store/access-items-management-store/access-items-management.state';
+import { FilterState } from 'app/shared/store/filter-store/filter.state';
+import { WorkplaceState } from 'app/shared/store/workplace-store/workplace.state';
+import { SettingsState } from 'app/shared/store/settings-store/settings.state';
+import { TaskWorkflowState } from 'app/shared/store/task-store/task.state';
 
 registerLocaleData(localeDe);
 
@@ -97,7 +96,6 @@ bootstrapApplication(AppComponent, {
         'max-width': '520px'
       }
     }),
-    provideCharts(withDefaultRegisterables()),
-    provideAnimationsAsync()
+    provideCharts(withDefaultRegisterables())
   ]
 }).then((err) => console.error(err));

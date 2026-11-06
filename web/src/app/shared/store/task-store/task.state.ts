@@ -90,7 +90,7 @@ export class TaskWorkflowState {
   }
 
   @Action(LoadTasks)
-  loadTasks(ctx: StateContext<TaskWorkflowStateModel>): Observable<any> {
+  loadTasks(ctx: StateContext<TaskWorkflowStateModel>): Observable<unknown> {
     const state = ctx.getState();
 
     if (state.selectedSearchType === SearchType.byWorkbasket && !state.selectedWorkbasket) {
@@ -129,7 +129,7 @@ export class TaskWorkflowState {
   }
 
   @Action(SelectWorkbasket)
-  selectWorkbasket(ctx: StateContext<TaskWorkflowStateModel>, action: SelectWorkbasket): Observable<any> {
+  selectWorkbasket(ctx: StateContext<TaskWorkflowStateModel>, action: SelectWorkbasket): Observable<unknown> {
     ctx.patchState({ selectedWorkbasket: action.workbasket });
     if (ctx.getState().selectedSearchType === SearchType.byWorkbasket) {
       ctx.dispatch(new LoadTasks());
@@ -138,40 +138,40 @@ export class TaskWorkflowState {
   }
 
   @Action(SetSearchType)
-  setSearchType(ctx: StateContext<TaskWorkflowStateModel>, action: SetSearchType): Observable<any> {
+  setSearchType(ctx: StateContext<TaskWorkflowStateModel>, action: SetSearchType): Observable<unknown> {
     ctx.patchState({ selectedSearchType: action.searchType, tasks: [] });
     return of(null);
   }
 
   @Action(SetSort)
-  setSort(ctx: StateContext<TaskWorkflowStateModel>, action: SetSort): Observable<any> {
+  setSort(ctx: StateContext<TaskWorkflowStateModel>, action: SetSort): Observable<unknown> {
     ctx.patchState({ sort: action.sort });
     ctx.dispatch(new LoadTasks());
     return of(null);
   }
 
   @Action(SetPage)
-  setPage(ctx: StateContext<TaskWorkflowStateModel>, action: SetPage): Observable<any> {
+  setPage(ctx: StateContext<TaskWorkflowStateModel>, action: SetPage): Observable<unknown> {
     ctx.patchState({ paging: { ...ctx.getState().paging, page: action.page } });
     ctx.dispatch(new LoadTasks());
     return of(null);
   }
 
   @Action(SetPageSize)
-  setPageSize(ctx: StateContext<TaskWorkflowStateModel>, action: SetPageSize): Observable<any> {
+  setPageSize(ctx: StateContext<TaskWorkflowStateModel>, action: SetPageSize): Observable<unknown> {
     ctx.patchState({ paging: { ...ctx.getState().paging, 'page-size': action.pageSize } });
     ctx.dispatch(new LoadTasks());
     return of(null);
   }
 
   @Action(SelectTask)
-  selectTask(ctx: StateContext<TaskWorkflowStateModel>, action: SelectTask): Observable<any> {
+  selectTask(ctx: StateContext<TaskWorkflowStateModel>, action: SelectTask): Observable<unknown> {
     ctx.patchState({ selectedTask: action.task, activeTaskId: action.task?.taskId });
     return of(null);
   }
 
   @Action(GetTask)
-  getTask(ctx: StateContext<TaskWorkflowStateModel>, action: GetTask): Observable<any> {
+  getTask(ctx: StateContext<TaskWorkflowStateModel>, action: GetTask): Observable<unknown> {
     if (action.taskId === 'new-task') {
       this.requestInProgressService.setRequestInProgress(true);
       const newTask = new Task('', new ObjectReference(), ctx.getState().selectedWorkbasket);
@@ -193,7 +193,7 @@ export class TaskWorkflowState {
   }
 
   @Action(CreateTask)
-  createTask(ctx: StateContext<TaskWorkflowStateModel>, action: CreateTask): Observable<any> {
+  createTask(ctx: StateContext<TaskWorkflowStateModel>, action: CreateTask): Observable<unknown> {
     return this.withRequestInProgress(this.taskService.createTask(action.task)).pipe(
       tap((task) => {
         ctx.patchState({ selectedTask: task, activeTaskId: task.taskId });
@@ -204,7 +204,7 @@ export class TaskWorkflowState {
   }
 
   @Action(UpdateTask)
-  updateTask(ctx: StateContext<TaskWorkflowStateModel>, action: UpdateTask): Observable<any> {
+  updateTask(ctx: StateContext<TaskWorkflowStateModel>, action: UpdateTask): Observable<unknown> {
     const taskId = action.task.taskId;
     ctx.patchState({ activeTaskId: taskId });
 
@@ -220,7 +220,7 @@ export class TaskWorkflowState {
   }
 
   @Action(DeleteTask)
-  deleteTask(ctx: StateContext<TaskWorkflowStateModel>, action: DeleteTask): Observable<any> {
+  deleteTask(ctx: StateContext<TaskWorkflowStateModel>, action: DeleteTask): Observable<unknown> {
     return this.withRequestInProgress(this.taskService.deleteTask(action.task)).pipe(
       tap(() => {
         this.notificationService.showSuccess('TASK_DELETE', { taskName: action.task.name });
@@ -231,7 +231,7 @@ export class TaskWorkflowState {
   }
 
   @Action(ClaimTask)
-  claimTask(ctx: StateContext<TaskWorkflowStateModel>, action: ClaimTask): Observable<any> {
+  claimTask(ctx: StateContext<TaskWorkflowStateModel>, action: ClaimTask): Observable<unknown> {
     ctx.patchState({ activeTaskId: action.taskId });
 
     return this.withRequestInProgress(this.taskService.claimTask(action.taskId)).pipe(
@@ -246,7 +246,7 @@ export class TaskWorkflowState {
   }
 
   @Action(CompleteTask)
-  completeTask(ctx: StateContext<TaskWorkflowStateModel>, action: CompleteTask): Observable<any> {
+  completeTask(ctx: StateContext<TaskWorkflowStateModel>, action: CompleteTask): Observable<unknown> {
     ctx.patchState({ activeTaskId: action.taskId });
 
     return this.withRequestInProgress(this.taskService.completeTask(action.taskId)).pipe(
@@ -261,7 +261,7 @@ export class TaskWorkflowState {
   }
 
   @Action(CancelClaimTask)
-  cancelClaimTask(ctx: StateContext<TaskWorkflowStateModel>, action: CancelClaimTask): Observable<any> {
+  cancelClaimTask(ctx: StateContext<TaskWorkflowStateModel>, action: CancelClaimTask): Observable<unknown> {
     ctx.patchState({ activeTaskId: action.taskId });
 
     return this.withRequestInProgress(this.taskService.cancelClaimTask(action.taskId)).pipe(
@@ -276,7 +276,7 @@ export class TaskWorkflowState {
   }
 
   @Action(TransferTask)
-  transferTask(ctx: StateContext<TaskWorkflowStateModel>, action: TransferTask): Observable<any> {
+  transferTask(ctx: StateContext<TaskWorkflowStateModel>, action: TransferTask): Observable<unknown> {
     ctx.patchState({ activeTaskId: action.taskId });
 
     return this.withRequestInProgress(this.taskService.transferTask(action.taskId, action.workbasketId)).pipe(
@@ -291,7 +291,7 @@ export class TaskWorkflowState {
   }
 
   @Action(ReopenTask)
-  reopenTask(ctx: StateContext<TaskWorkflowStateModel>, action: ReopenTask): Observable<any> {
+  reopenTask(ctx: StateContext<TaskWorkflowStateModel>, action: ReopenTask): Observable<unknown> {
     ctx.patchState({ activeTaskId: action.taskId });
 
     return this.withRequestInProgress(this.taskService.reopenTask(action.taskId)).pipe(

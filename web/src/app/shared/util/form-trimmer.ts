@@ -30,11 +30,12 @@ export function trimForm(form: NgForm | undefined) {
   });
 }
 
-export function trimObject(object: { [key: string]: any }) {
-  Object.keys(object).forEach((controlName) => {
-    let prop = object[controlName];
+export function trimObject(object: object) {
+  const record = object as Record<string, unknown>;
+  Object.keys(record).forEach((controlName) => {
+    const prop = record[controlName];
     if (typeof prop === 'string') {
-      object[controlName] = prop.trim();
+      record[controlName] = prop.trim();
     } else if (typeof prop === 'object' && prop !== null) {
       trimObject(prop);
     }

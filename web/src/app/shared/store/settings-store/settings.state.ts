@@ -48,7 +48,7 @@ export class SettingsState implements NgxsAfterBootstrap {
       });
   }
 
-  ngxsAfterBootstrap(ctx?: StateContext<any>): void {
+  ngxsAfterBootstrap(ctx?: StateContext<unknown>): void {
     ctx?.dispatch(new RetrieveSettings());
   }
 

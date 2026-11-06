@@ -16,7 +16,8 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
   FormBuilder,
@@ -26,8 +27,7 @@ import {
   ValidatorFn,
   Validators
 } from '@angular/forms';
-import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { Store } from '@ngxs/store';
 import { Settings, SettingTypes } from 'app/settings/models/settings';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
@@ -60,13 +60,13 @@ import { SettingsMember } from 'app/settings/models/settings-member';
     CdkTextareaAutosize
   ]
 })
-export class SettingsComponent implements OnInit, OnDestroy {
+export class SettingsComponent implements OnInit {
   settingTypes = SettingTypes;
   settings = signal<Settings | undefined>(undefined);
   settingsForm!: FormGroup;
 
   private rawInitialSettings?: Settings;
-  private destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
 
   settings$: Observable<Settings> = inject(Store).select(SettingsSelectors.getSettings);
   private store = inject(Store);
@@ -75,7 +75,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   private requestInProgressService = inject(RequestInProgressService);
 
   ngOnInit() {
-    this.settings$.pipe(takeUntil(this.destroy$)).subscribe((settings) => {
+    this.settings$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((settings) => {
       this.requestInProgressService.setRequestInProgress(false);
       if (settings) {
         this.rawInitialSettings = settings;
@@ -100,7 +100,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
     this.settingsForm = this.fb.group(groupControls);
   }
 
-  private createControlForMember(member: SettingsMember, value: any): AbstractControl | null {
+  private createControlForMember(member: SettingsMember, value: unknown): AbstractControl | null {
     switch (member.type) {
       case SettingTypes.Text:
         return this.createTextControl(member, value);
@@ -119,7 +119,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
     }
   }
 
-  private createTextControl(member: SettingsMember, value: any): FormControl {
+  private createTextControl(member: SettingsMember, value: unknown): FormControl {
     const validators: ValidatorFn[] = [];
     if (member.min !== undefined) {
       validators.push(Validators.minLength(member.min));
@@ -134,7 +134,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
     return this.fb.control(value ?? '', validators);
   }
 
-  private createIntervalGroup(member: SettingsMember, value: any): FormGroup {
+  private createIntervalGroup(member: SettingsMember, value: unknown): FormGroup {
     const [lower, upper] = Array.isArray(value) ? value : [0, 0];
 
     return this.fb.group(
@@ -173,8 +173,8 @@ export class SettingsComponent implements OnInit, OnDestroy {
     this.settingsForm.reset(resetValues);
   }
 
-  private extractFormValues(formValue: Record<string, any>): Record<string, any> {
-    const updatedValue: Record<string, any> = {};
+  private extractFormValues(formValue: Record<string, unknown>): Record<string, unknown> {
+    const updatedValue: Record<string, unknown> = {};
 
     Object.keys(formValue).forEach((key) => {
       const val = formValue[key];
@@ -188,11 +188,11 @@ export class SettingsComponent implements OnInit, OnDestroy {
     return updatedValue;
   }
 
-  private mapSettingsToFormValues(settings: Settings): Record<string, any> {
-    const resetValues: Record<string, any> = {};
+  private mapSettingsToFormValues(settings: Settings): Record<string, unknown> {
+    const resetValues: Record<string, unknown> = {};
 
     settings.schema?.forEach((group) => {
-      group.members?.forEach((member: any) => {
+      group.members?.forEach((member) => {
         const rawVal = settings[member.key];
         if (member.type === SettingTypes.Interval && Array.isArray(rawVal)) {
           resetValues[member.key] = { lower: rawVal[0], upper: rawVal[1] };
@@ -203,10 +203,5 @@ export class SettingsComponent implements OnInit, OnDestroy {
     });
 
     return resetValues;
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

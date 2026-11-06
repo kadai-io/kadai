@@ -17,21 +17,22 @@
  */
 
 import {
+  afterRenderEffect,
   AfterViewChecked,
   Component,
+  DestroyRef,
   effect,
   ElementRef,
   inject,
   input,
-  OnDestroy,
   OnInit,
   output,
   signal,
   untracked,
   viewChildren
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { distinctUntilChanged, firstValueFrom, Observable, Subject } from 'rxjs';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { distinctUntilChanged, firstValueFrom, Observable } from 'rxjs';
 import {
   Actions,
   ofActionCompleted,
@@ -50,10 +51,9 @@ import {
 } from 'app/shared/models/workbasket-access-items';
 import { WorkbasketAccessItemsRepresentation } from 'app/shared/models/workbasket-access-items-representation';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
-import { highlight } from 'app/shared/animations/validation.animation';
 import { AccessId } from 'app/shared/models/access-id';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
-import { filter, map, startWith, takeUntil, tap, timeout } from 'rxjs/operators';
+import { filter, map, startWith, tap, timeout } from 'rxjs/operators';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import { AccessItemsCustomisation, CustomField, CustomFields, getCustomFields } from 'app/shared/models/customisation';
 import {
@@ -83,7 +83,6 @@ export const ACCESS_NAME_LOOKUP_TIMEOUT_MS = 3000;
 @Component({
   selector: 'kadai-administration-workbasket-access-items',
   templateUrl: './workbasket-access-items.component.html',
-  animations: [highlight],
   styleUrls: ['./workbasket-access-items.component.scss'],
   imports: [
     MatButton,
@@ -98,7 +97,7 @@ export const ACCESS_NAME_LOOKUP_TIMEOUT_MS = 3000;
     FormFieldSubmitDirective
   ]
 })
-export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterViewChecked {
+export class WorkbasketAccessItemsComponent implements OnInit, AfterViewChecked {
   workbasket = input<Workbasket>();
   expanded = input<boolean>();
   accessItemsValidityChanged = output<boolean>();
@@ -113,7 +112,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
   added = false;
   isNewAccessItemsFromStore = false;
   isAccessItemsTabSelected = false;
-  destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
   private pendingNewWorkbasketAccessItems?: WorkbasketAccessItems[];
   accessItemsCustomization$: Observable<AccessItemsCustomisation | undefined> = inject(Store).select(
     EngineConfigurationSelectors.accessItemsCustomisation
@@ -143,13 +142,11 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
       });
     });
 
-    effect(() => {
+    afterRenderEffect(() => {
       const inputs = this.inputs();
-      untracked(() => {
-        if (inputs.length > 0 && this.added) {
-          inputs[inputs.length - 1].nativeElement.focus();
-        }
-      });
+      if (inputs.length > 0 && untracked(() => this.added)) {
+        inputs[inputs.length - 1].nativeElement.focus();
+      }
     });
 
     effect(() => {
@@ -179,7 +176,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
               startWith(null),
               map(() => this.AccessItemsForm.get('accessItemsGroups')?.valid ?? false),
               distinctUntilChanged(),
-              takeUntil(this.destroy$)
+              takeUntilDestroyed(this.destroyRef)
             )
             .subscribe((isValid) => {
               this.accessItemsValidityChanged.emit(isValid);
@@ -225,16 +222,16 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     );
 
     // saving workbasket access items when workbasket already exists
-    this.ngxsActions$.pipe(ofActionCompleted(UpdateWorkbasket), takeUntil(this.destroy$)).subscribe(() => {
+    this.ngxsActions$.pipe(ofActionCompleted(UpdateWorkbasket), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.onSubmit();
     });
 
-    this.ngxsActions$.pipe(ofActionDispatched(SaveNewWorkbasket), takeUntil(this.destroy$)).subscribe(() => {
+    this.ngxsActions$.pipe(ofActionDispatched(SaveNewWorkbasket), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.pendingNewWorkbasketAccessItems = this.snapshotAccessItems();
     });
 
     // saving workbasket access items when workbasket was copied or created
-    this.ngxsActions$.pipe(ofActionSuccessful(SaveNewWorkbasket), takeUntil(this.destroy$)).subscribe(() => {
+    this.ngxsActions$.pipe(ofActionSuccessful(SaveNewWorkbasket), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       const sourceAccessItems = this.pendingNewWorkbasketAccessItems ?? [];
       this.pendingNewWorkbasketAccessItems = undefined;
 
@@ -249,12 +246,12 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
       void this.onSubmit(this.prepareAccessItemsForNewWorkbasket(sourceAccessItems, workbasketId), accessItemsUrl);
     });
 
-    this.ngxsActions$.pipe(ofActionErrored(SaveNewWorkbasket), takeUntil(this.destroy$)).subscribe(() => {
+    this.ngxsActions$.pipe(ofActionErrored(SaveNewWorkbasket), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.pendingNewWorkbasketAccessItems = undefined;
     });
 
     this.buttonAction$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .pipe(filter((buttonAction) => typeof buttonAction !== 'undefined'))
       .subscribe((button) => {
         switch (button) {
@@ -272,7 +269,7 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
       if (document.getElementById(`checkbox-0-00`)) {
         let row = 0;
         this.accessItemsGroups.controls.forEach(() => {
-          const value = { currentTarget: { checked: true } };
+          const value = { currentTarget: { checked: true } } as unknown as Event;
           this.setSelectAllCheckbox(row, value);
           row = row + 1;
         });
@@ -292,12 +289,14 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     }
   }
 
-  sortAccessItems(accessItems: WorkbasketAccessItems[], sortBy: string): WorkbasketAccessItems[] {
+  sortAccessItems(accessItems: WorkbasketAccessItems[], sortBy: keyof WorkbasketAccessItems): WorkbasketAccessItems[] {
     return accessItems.sort((a, b) => {
-      if ((a as any)[sortBy] < (b as any)[sortBy]) {
+      const valueA = String(a[sortBy] ?? '');
+      const valueB = String(b[sortBy] ?? '');
+      if (valueA < valueB) {
         return -1;
       }
-      if ((a as any)[sortBy] > (b as any)[sortBy]) {
+      if (valueA > valueB) {
         return 1;
       }
 
@@ -398,18 +397,18 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     this.accessItemsGroups.controls[row].get('accessName')?.setValue(accessId?.name ?? '');
   }
 
-  checkAll(row: number, value: any) {
-    const checkAll = value.target.checked;
+  checkAll(row: number, value: Event) {
+    const checkAll = (value.target as HTMLInputElement).checked;
     const accessItem = this.accessItemsGroups.controls[row];
     this.keysOfVisibleFields.forEach((key) => {
       accessItem.get(key)?.setValue(checkAll);
     });
   }
 
-  setSelectAllCheckbox(row: number, value: any) {
+  setSelectAllCheckbox(row: number, value: Event) {
     let areAllCheckboxesSelected = false;
 
-    if (value.currentTarget.checked) {
+    if ((value.currentTarget as HTMLInputElement).checked) {
       areAllCheckboxesSelected = true;
       const accessItem = this.accessItemsGroups.controls[row].value;
 
@@ -496,8 +495,8 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
     return `permCustom${customNumber}` as `permCustom${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12}`;
   }
 
-  selectRow(value: any, index: number) {
-    if (value.target.checked) {
+  selectRow(value: Event, index: number) {
+    if ((value.target as HTMLInputElement).checked) {
       this.selectedRows.push(index);
     } else {
       this.selectedRows = this.selectedRows.filter((number) => number != index);
@@ -511,10 +510,5 @@ export class WorkbasketAccessItemsComponent implements OnInit, OnDestroy, AfterV
       this.accessItemsClone.update((accessItemsClone) => accessItemsClone.filter((_, index) => index !== element));
     });
     this.selectedRows = [];
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

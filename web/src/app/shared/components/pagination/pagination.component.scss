@@ -33,6 +33,14 @@
     &--collapsed {
       width: 100%;
       text-align: center;
+
+      ::ng-deep .mat-mdc-paginator-container {
+        justify-content: center;
+      }
+
+      ::ng-deep .mat-mdc-paginator-range-label {
+        display: none;
+      }
     }
   }
 

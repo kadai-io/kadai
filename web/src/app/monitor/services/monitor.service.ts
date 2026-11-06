@@ -24,6 +24,7 @@ import { ReportData } from 'app/monitor/models/report-data';
 import { asUrlQueryString } from 'app/shared/util/query-parameters-v2';
 import { TaskState } from 'app/shared/models/task-state';
 import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
+import { PriorityInterval } from 'app/monitor/models/priority-interval';
 
 const monitorUrl = '/v1/monitor';
 
@@ -83,7 +84,7 @@ export class MonitorService {
 
   getTasksByPriorityReport(
     type: string[],
-    priority: any[],
+    priority: PriorityInterval[],
     domain: string,
     customFilters: {} = {}
   ): Observable<ReportData> {
@@ -102,7 +103,7 @@ export class MonitorService {
 
   getTasksByDetailedPriorityReport(
     type: string[],
-    priority: any[],
+    priority: PriorityInterval[],
     domain: string,
     customFilters: {} = {}
   ): Observable<ReportData> {

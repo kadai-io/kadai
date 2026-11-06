@@ -40,7 +40,7 @@ export class Task {
     public creator?: string,
     public description?: string,
     public note?: string,
-    public state?: any,
+    public state?: string,
     public read?: boolean,
     public transferred?: boolean,
     public reopened?: boolean,

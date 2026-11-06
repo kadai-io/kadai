@@ -16,8 +16,8 @@
  *
  */
 
-import { Component, effect, inject, input, model, OnDestroy, OnInit, untracked, viewChild } from '@angular/core';
-import { firstValueFrom, Observable, Subject } from 'rxjs';
+import { Component, effect, inject, input, model, OnInit, untracked, viewChild, DestroyRef } from '@angular/core';
+import { firstValueFrom, Observable } from 'rxjs';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Store } from '@ngxs/store';
 import { ACTION } from 'app/shared/models/action';
@@ -26,7 +26,7 @@ import { WorkbasketType } from 'app/shared/models/workbasket-type';
 import { KadaiDate } from 'app/shared/util/kadai.date';
 import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
-import { filter, map, takeUntil } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import { CustomField, CustomFields, getCustomFields, WorkbasketsCustomisation } from 'app/shared/models/customisation';
@@ -52,7 +52,7 @@ import { MatOption } from '@angular/material/core';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MapValuesPipe } from 'app/shared/pipes/map-values.pipe';
 import { RemoveNoneTypePipe } from 'app/shared/pipes/remove-empty-type.pipe';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { OverflowFeedbackDirective } from 'app/shared/directives/overflow-feedback.directive';
 import { FormFieldSubmitDirective } from 'app/shared/directives/form-field-submit.directive';
 import { FormSubmitDirective } from 'app/shared/directives/form-submit.directive';
@@ -85,7 +85,7 @@ import { AccessIdExistsValidatorDirective } from 'app/shared/directives/access-i
     AccessIdExistsValidatorDirective
   ]
 })
-export class WorkbasketInformationComponent implements OnInit, OnDestroy {
+export class WorkbasketInformationComponent implements OnInit {
   workbasket = model<Workbasket>();
   action = input<ACTION>();
   workbasketForm = viewChild<NgForm>('WorkbasketForm');
@@ -93,7 +93,7 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
   allTypes!: Map<WorkbasketType, string>;
   readonly lengthError = 'You have reached the maximum length for this field';
   customFields$!: Observable<CustomField[]>;
-  destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
   private store = inject(Store);
   workbasketsCustomisation$: Observable<WorkbasketsCustomisation | undefined> = this.store.select(
     EngineConfigurationSelectors.workbasketsCustomisation
@@ -129,7 +129,7 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
       getCustomFields(customFieldCount)
     );
     this.buttonAction$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .pipe(filter((buttonAction) => typeof buttonAction !== 'undefined'))
       .subscribe((button) => {
         switch (button) {
@@ -276,10 +276,5 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
 
   getWorkbasketCustomProperty(custom: number): `custom${1 | 2 | 3 | 4}` {
     return `custom${custom}` as `custom${1 | 2 | 3 | 4}`;
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, effect, inject, input, signal, untracked } from '@angular/core';
+import { Component, inject, input, linkedSignal } from '@angular/core';
 import { ALL_TYPES, WorkbasketType } from 'app/shared/models/workbasket-type';
 import { WorkbasketQueryFilterParameter } from 'app/shared/models/workbasket-query-filter-parameter';
 import { Store } from '@ngxs/store';
@@ -61,13 +61,6 @@ export class WorkbasketFilterComponent {
   allTypes: Map<WorkbasketType, string> = ALL_TYPES;
   component = input<string>();
   isExpanded = input<boolean>();
-  filter = signal<NormalizedWorkbasketFilter>({
-    'description-like': [],
-    'key-like': [],
-    'name-like': [],
-    'owner-like': [],
-    type: []
-  });
   private availableFilter = toSignal(inject(Store).select(FilterSelectors.getAvailableDistributionTargetsFilter), {
     requireSync: true
   });
@@ -79,33 +72,18 @@ export class WorkbasketFilterComponent {
   });
   private store = inject(Store);
 
-  constructor() {
-    effect(() => {
+  filter = linkedSignal<WorkbasketQueryFilterParameter | undefined, NormalizedWorkbasketFilter>({
+    source: () => {
       const comp = this.component();
-      let f: WorkbasketQueryFilterParameter;
-      if (comp === 'availableDistributionTargets') {
-        f = this.availableFilter();
-      } else if (comp === 'selectedDistributionTargets') {
-        f = this.selectedFilter();
-      } else {
-        f = this.workbasketListFilter();
-      }
-      untracked(() => {
-        if (f) {
-          this.setFilter(f);
-        }
-      });
-    });
-  }
+      if (comp === 'availableDistributionTargets') return this.availableFilter();
+      if (comp === 'selectedDistributionTargets') return this.selectedFilter();
+      return this.workbasketListFilter();
+    },
+    computation: (f, previous) => (f ? normalizeFilter(f) : (previous?.value ?? normalizeFilter({})))
+  });
 
   setFilter(filter: WorkbasketQueryFilterParameter) {
-    this.filter.set({
-      'description-like': [...(filter['description-like'] ?? [])],
-      'key-like': [...(filter['key-like'] ?? [])],
-      'name-like': [...(filter['name-like'] ?? [])],
-      'owner-like': [...(filter['owner-like'] ?? [])],
-      type: [...(filter['type'] ?? [])]
-    });
+    this.filter.set(normalizeFilter(filter));
   }
 
   clear() {
@@ -119,4 +97,14 @@ export class WorkbasketFilterComponent {
   search() {
     this.store.dispatch(new SetWorkbasketFilter(this.filter(), this.component()!));
   }
+}
+
+function normalizeFilter(filter: WorkbasketQueryFilterParameter): NormalizedWorkbasketFilter {
+  return {
+    'description-like': [...(filter['description-like'] ?? [])],
+    'key-like': [...(filter['key-like'] ?? [])],
+    'name-like': [...(filter['name-like'] ?? [])],
+    'owner-like': [...(filter['owner-like'] ?? [])],
+    type: [...(filter['type'] ?? [])]
+  };
 }

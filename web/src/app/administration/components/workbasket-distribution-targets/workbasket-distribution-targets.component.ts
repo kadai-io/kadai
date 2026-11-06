@@ -16,13 +16,14 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin, Observable, Subject } from 'rxjs';
 
 import { Workbasket } from 'app/shared/models/workbasket';
 import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
 import { Store } from '@ngxs/store';
-import { filter, take, takeUntil } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import {
   FetchAvailableDistributionTargets,
@@ -34,7 +35,6 @@ import { ButtonAction } from 'app/administration/models/button-action';
 import { Side } from 'app/administration/models/workbasket-distribution-enums';
 import { ClearWorkbasketFilter } from 'app/shared/store/filter-store/filter.actions';
 import { MatToolbar } from '@angular/material/toolbar';
-import { NgClass } from '@angular/common';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { WorkbasketDistributionTargetsListComponent } from 'app/administration/components/workbasket-distribution-targets-list/workbasket-distribution-targets-list.component';
@@ -43,7 +43,7 @@ import { WorkbasketDistributionTargetsListComponent } from 'app/administration/c
   selector: 'kadai-administration-workbasket-distribution-targets',
   templateUrl: './workbasket-distribution-targets.component.html',
   styleUrls: ['./workbasket-distribution-targets.component.scss'],
-  imports: [MatToolbar, MatButton, MatIcon, NgClass, WorkbasketDistributionTargetsListComponent]
+  imports: [MatToolbar, MatButton, MatIcon, WorkbasketDistributionTargetsListComponent]
 })
 export class WorkbasketDistributionTargetsComponent implements OnInit, OnDestroy {
   sideEnum = Side;
@@ -52,7 +52,7 @@ export class WorkbasketDistributionTargetsComponent implements OnInit, OnDestroy
   transferDistributionTargetObservable = new Subject<Side>();
   buttonAction$: Observable<ButtonAction | undefined> = inject(Store).select(WorkbasketSelectors.buttonAction);
   selectedWorkbasket$: Observable<Workbasket> = inject(Store).select(WorkbasketSelectors.selectedWorkbasket);
-  destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
   private notificationsService = inject(NotificationService);
   private store = inject(Store);
   private selectedWorkbasket?: WorkbasketSummary;
@@ -62,7 +62,7 @@ export class WorkbasketDistributionTargetsComponent implements OnInit, OnDestroy
    * would be ideal to completely redo whole components using drag and drop angular components and clearer logics
    */
   ngOnInit() {
-    this.selectedWorkbasket$.pipe(takeUntil(this.destroy$)).subscribe((wb) => {
+    this.selectedWorkbasket$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((wb) => {
       if (wb !== undefined && wb.workbasketId !== this.selectedWorkbasket?.workbasketId) {
         if (this.selectedWorkbasket?.workbasketId) {
           this.store.dispatch(new FetchWorkbasketDistributionTargets(true));
@@ -73,7 +73,7 @@ export class WorkbasketDistributionTargetsComponent implements OnInit, OnDestroy
     });
 
     this.buttonAction$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .pipe(filter((buttonAction) => typeof buttonAction !== 'undefined'))
       .subscribe((button) => {
         switch (button) {
@@ -116,7 +116,5 @@ export class WorkbasketDistributionTargetsComponent implements OnInit, OnDestroy
 
   ngOnDestroy() {
     this.transferDistributionTargetObservable.complete();
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

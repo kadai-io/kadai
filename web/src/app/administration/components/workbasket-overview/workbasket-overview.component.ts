@@ -16,11 +16,12 @@
  *
  */
 
-import { Component, ElementRef, inject, OnInit, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, signal, viewChild, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Store } from '@ngxs/store';
-import { Observable, Subject } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
-import { take, takeUntil } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { ActivatedRoute, Params } from '@angular/router';
+import { take } from 'rxjs/operators';
 import { WorkbasketAndAction, WorkbasketSelectors } from 'app/shared/store/workbasket-store/workbasket.selectors';
 
 import { CreateWorkbasket, SelectWorkbasket } from 'app/shared/store/workbasket-store/workbasket.actions';
@@ -43,8 +44,8 @@ export class WorkbasketOverviewComponent implements OnInit {
     WorkbasketSelectors.selectedWorkbasketAndAction
   );
   selectedWorkbasket$: Observable<Workbasket> = inject(Store).select(WorkbasketSelectors.selectedWorkbasket);
-  destroy$ = new Subject<void>();
-  routerParams: any;
+  private destroyRef = inject(DestroyRef);
+  routerParams: Params = {};
   expanded = true;
   workbasketList = viewChild<ElementRef>('workbasketList');
   toggleButton = viewChild<ElementRef>('toggleButton');
@@ -52,7 +53,7 @@ export class WorkbasketOverviewComponent implements OnInit {
   private store = inject(Store);
 
   ngOnInit() {
-    this.route.url.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+    this.route.url.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       if (params[0].path === 'workbaskets') {
         this.selectedWorkbasket$.pipe(take(1)).subscribe((workbasket) => {
           if (typeof workbasket.workbasketId !== 'undefined') {
@@ -62,7 +63,7 @@ export class WorkbasketOverviewComponent implements OnInit {
       }
     });
     if (this.route.firstChild) {
-      this.route.firstChild.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      this.route.firstChild.params.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
         this.routerParams = params;
         if (this.routerParams.id) {
           this.showDetail.set(true);
@@ -74,7 +75,7 @@ export class WorkbasketOverviewComponent implements OnInit {
         }
       });
     }
-    this.selectedWorkbasketAndAction$.pipe(takeUntil(this.destroy$)).subscribe((state) => {
+    this.selectedWorkbasketAndAction$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((state) => {
       this.showDetail.set(!!state.selectedWorkbasket || state.action === 1);
     });
   }

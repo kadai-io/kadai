@@ -20,22 +20,28 @@ import {
   AfterViewChecked,
   AfterViewInit,
   Component,
-  effect,
+  DestroyRef,
   ElementRef,
-  HostListener,
   inject,
   input,
-  OnDestroy,
+  linkedSignal,
   output,
   signal,
-  untracked,
   viewChild
 } from '@angular/core';
 import { TreeNodeModel } from 'app/administration/models/tree-node';
 
-import { ITreeOptions, KEYS, TREE_ACTIONS, TreeComponent, TreeModule } from '@ali-hm/angular-tree-component';
-import { combineLatest, firstValueFrom, Observable, Subject } from 'rxjs';
-import { filter, map, takeUntil } from 'rxjs/operators';
+import {
+  ITreeOptions,
+  KEYS,
+  TREE_ACTIONS,
+  TreeComponent,
+  TreeModel,
+  TreeModule,
+  TreeNode
+} from '@ali-hm/angular-tree-component';
+import { combineLatest, firstValueFrom, Observable } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 import { Store } from '@ngxs/store';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 
@@ -54,15 +60,16 @@ import { Pair } from 'app/shared/models/pair';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.component';
 import { MatTooltip } from '@angular/material/tooltip';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'kadai-administration-tree',
   templateUrl: './tree.component.html',
   styleUrls: ['./tree.component.scss'],
-  imports: [TreeModule, SvgIconComponent, MatTooltip]
+  imports: [TreeModule, SvgIconComponent, MatTooltip],
+  host: { '(document:click)': 'onDocumentClick($event)' }
 })
-export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDestroy {
+export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked {
   treeNodes = signal<TreeNodeModel[] | undefined>(undefined);
   categoryIcons = toSignal(inject(Store).select(EngineConfigurationSelectors.selectCategoryIcons), {
     requireSync: true
@@ -70,7 +77,6 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
   emptyTreeNodes = signal(false);
   filter = signal('');
   category = signal('');
-  selectNodeId = signal<string | undefined>(undefined);
   filterText = input<string>();
   filterIcon = input('');
   switchKadaiSpinnerEmit = output<boolean>();
@@ -105,23 +111,14 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
   private requestInProgressService = inject(RequestInProgressService);
   private tree = viewChild.required<TreeComponent>('tree');
   _selectNodeIdInput = input<string>(undefined, { alias: 'selectNodeId' });
+  selectNodeId = linkedSignal<string | undefined>(() => this._selectNodeIdInput());
 
   private filterTextOld?: string;
   private filterIconOld = '';
   private treeModelNodesOld?: TreeNodeModel[];
-  private destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
 
-  constructor() {
-    effect(() => {
-      const id = this._selectNodeIdInput();
-      untracked(() => {
-        this.selectNodeId.set(id);
-      });
-    });
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: any) {
+  onDocumentClick(event: MouseEvent) {
     if (this.checkValidElements(event) && this.tree().treeModel.getActiveNode()) {
       this.deselectActiveNode();
     }
@@ -134,7 +131,7 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
     );
 
     combineLatest([this.selectedClassificationId$, computedTreeNodes$])
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(([selectedClassificationId, treeNodes]) => {
         this.treeNodes.set(treeNodes);
         this.selectNodeId.set(typeof selectedClassificationId !== 'undefined' ? selectedClassificationId : undefined);
@@ -148,7 +145,7 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
         }
       });
 
-    this.classificationTypeSelected$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+    this.classificationTypeSelected$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       if (this.tree().treeModel.getActiveNode()) {
         this.deselectActiveNode();
       }
@@ -188,7 +185,7 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
     }
   }
 
-  onActivate(treeNode: any) {
+  onActivate(treeNode: { node: TreeNode }) {
     const id = treeNode.node.data.classificationId;
     this.selectNodeId.set(id);
     this.requestInProgressService.setRequestInProgress(true);
@@ -196,26 +193,26 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
     this.location.go(this.location.path().replace(/(classifications).*/g, `classifications/(detail:${id})`));
   }
 
-  onDeactivate(event: any) {
+  onDeactivate(event: { treeModel: TreeModel }) {
     if (!event.treeModel.activeNodes.length) {
       this.store.dispatch(new DeselectClassification());
       this.location.go(this.location.path().replace(/(classifications).*/g, 'classifications'));
     }
   }
 
-  async onMoveNode($event: any) {
+  async onMoveNode($event: { node: TreeNodeModel; to: { parent: TreeNodeModel } }) {
     this.switchKadaiSpinner(true);
-    const classification = await this.getClassification($event.node.classificationId);
+    const classification = await this.getClassification($event.node.classificationId!);
     classification.parentId = $event.to.parent.classificationId;
     classification.parentKey = $event.to.parent.key;
     this.collapseParentNodeIfItIsTheLastChild($event.node);
     this.updateClassification(classification);
   }
 
-  async onDrop($event: any) {
-    if ($event.event.target.tagName === 'TREE-VIEWPORT') {
+  async onDrop($event: { event: DragEvent; element: { data: TreeNodeModel } }) {
+    if (($event.event.target as HTMLElement | null)?.tagName === 'TREE-VIEWPORT') {
       this.switchKadaiSpinner(true);
-      const classification = await this.getClassification($event.element.data.classificationId);
+      const classification = await this.getClassification($event.element.data.classificationId!);
       this.collapseParentNodeIfItIsTheLastChild($event.element.data);
       classification.parentId = '';
       classification.parentKey = '';
@@ -233,19 +230,14 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
     this.switchKadaiSpinnerEmit.emit(active);
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  private checkNameAndKey(node: any, text: string): boolean {
+  private checkNameAndKey(node: TreeNode, text: string): boolean {
     return (
       node.data.name.toUpperCase().includes(text.toUpperCase()) ||
       node.data.key.toUpperCase().includes(text.toUpperCase())
     );
   }
 
-  private checkIcon(node: any, iconText: string): boolean {
+  private checkIcon(node: TreeNode, iconText: string): boolean {
     return node.data.category.toUpperCase() === iconText.toUpperCase() || iconText === '';
   }
 
@@ -272,7 +264,7 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
   private filterNodes(filterText: string, category: string) {
     const isFiltering = !!filterText || !!category;
     this.tree().treeModel.filterNodes(
-      (node: any) => this.checkNameAndKey(node, filterText) && this.checkIcon(node, category),
+      (node: TreeNode) => this.checkNameAndKey(node, filterText) && this.checkIcon(node, category),
       isFiltering
     );
     this.filter.set(filterText);
@@ -287,10 +279,11 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
     }
   }
 
-  private checkValidElements(event: any): boolean {
+  private checkValidElements(event: MouseEvent): boolean {
+    const target = event.target as HTMLElement;
     return (
-      (this.elementRef.nativeElement.contains(event.target) || this.elementRef.nativeElement === event.target) &&
-      (event.target.localName === 'tree-viewport' || event.target.localName === 'kadai-tree')
+      (this.elementRef.nativeElement.contains(target) || this.elementRef.nativeElement === target) &&
+      (target.localName === 'tree-viewport' || target.localName === 'kadai-tree')
     );
   }
 
@@ -305,10 +298,11 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
     });
   }
 
-  private collapseParentNodeIfItIsTheLastChild(node: any) {
-    if (node.parentId.length > 0 && this.getNode(node.parentId) && this.getNode(node.parentId).children.length < 2) {
+  private collapseParentNodeIfItIsTheLastChild(node: TreeNodeModel) {
+    const parent = node.parentId ? this.getNode(node.parentId) : undefined;
+    if (parent && parent.children.length < 2) {
       this.tree().treeModel.update();
-      this.getNode(node.parentId).collapse();
+      parent.collapse();
     }
   }
 }

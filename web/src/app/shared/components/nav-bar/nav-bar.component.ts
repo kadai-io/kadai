@@ -16,12 +16,10 @@
  *
  */
 
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SelectedRouteService } from 'app/shared/services/selected-route/selected-route';
-import { Subject } from 'rxjs';
-import { expandRight } from 'app/shared/animations/expand.animation';
 import { SidenavService } from 'app/shared/services/sidenav/sidenav.service';
-import { takeUntil } from 'rxjs/operators';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -31,7 +29,6 @@ import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.compon
   selector: 'kadai-shared-nav-bar',
   templateUrl: './nav-bar.component.html',
   styleUrls: ['./nav-bar.component.scss'],
-  animations: [expandRight],
   imports: [MatToolbar, MatIconButton, MatIcon, SvgIconComponent]
 })
 export class NavBarComponent implements OnInit {
@@ -43,14 +40,14 @@ export class NavBarComponent implements OnInit {
   titleSettings = 'Settings';
   toggle: boolean = false;
   title = signal('');
-  destroy$ = new Subject();
+  private destroyRef = inject(DestroyRef);
   private selectedRouteService = inject(SelectedRouteService);
   private sidenavService = inject(SidenavService);
 
   ngOnInit() {
     this.selectedRouteService
       .getSelectedRoute()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((value: string) => {
         this.selectedRoute = value;
         this.setTitle(value);

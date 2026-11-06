@@ -22,7 +22,6 @@ import { ControlValueAccessor, FormControl, NgControl, ReactiveFormsModule } fro
 import { Store } from '@ngxs/store';
 import { merge, Observable, of, Subject, timer } from 'rxjs';
 import { catchError, map, switchMap, takeUntil } from 'rxjs/operators';
-import { NgClass } from '@angular/common';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatTooltip, TooltipPosition } from '@angular/material/tooltip';
 import { MatInput } from '@angular/material/input';
@@ -48,7 +47,6 @@ type LookupResult =
   styleUrls: ['./type-ahead.component.scss'],
   imports: [
     ReactiveFormsModule,
-    NgClass,
     MatFormField,
     MatLabel,
     MatTooltip,

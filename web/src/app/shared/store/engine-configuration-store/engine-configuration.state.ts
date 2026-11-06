@@ -35,7 +35,7 @@ export class EngineConfigurationState implements NgxsOnInit {
   private categoryService = inject(ClassificationCategoriesService);
 
   @Action(InitializeStore)
-  initializeStore(ctx: StateContext<EngineConfigurationStateModel>): Observable<any> {
+  initializeStore(ctx: StateContext<EngineConfigurationStateModel>): Observable<unknown> {
     return this.categoryService.getCustomisation().pipe(
       tap((customisation) =>
         ctx.setState({

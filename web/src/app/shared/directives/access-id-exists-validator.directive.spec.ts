@@ -7,7 +7,6 @@ import { AccessIdsService } from 'app/shared/services/access-ids/access-ids.serv
 import { AccessIdExistsValidatorDirective } from './access-id-exists-validator.directive';
 
 @Component({
-  standalone: true,
   imports: [ReactiveFormsModule, AccessIdExistsValidatorDirective],
   template: `<input [formControl]="control" kadaiAccessIdExists />`
 })

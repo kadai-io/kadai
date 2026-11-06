@@ -16,12 +16,12 @@
  *
  */
 
-import { Component, inject, input, OnDestroy, OnInit, signal } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Component, inject, input, OnInit, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { ACTION } from 'app/shared/models/action';
 import { Actions, ofActionSuccessful, Store } from '@ngxs/store';
-import { takeUntil } from 'rxjs/operators';
 import {
   WorkbasketAndComponentAndAction,
   WorkbasketSelectors
@@ -68,7 +68,7 @@ import { WorkbasketDistributionTargetsComponent } from 'app/administration/compo
     AsyncPipe
   ]
 })
-export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
+export class WorkbasketDetailsComponent implements OnInit {
   workbasket = signal<Workbasket>({} as Workbasket);
   action = signal<ACTION>(ACTION.READ);
   selectedTab$: Observable<number> = inject(Store).select(WorkbasketSelectors.selectedComponent);
@@ -77,7 +77,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
     WorkbasketSelectors.selectedWorkbasketAndComponentAndAction
   );
   expanded = input<boolean>();
-  destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
   areAllAccessItemsValid = true;
   protected readonly ACTION = ACTION;
   private store = inject(Store);
@@ -103,7 +103,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
         a) workbasket with another ID is selected (includes copying)
         b) empty workbasket is created
       */
-    this.selectedWorkbasketAndComponentAndAction$.pipe(takeUntil(this.destroy$)).subscribe((object) => {
+    this.selectedWorkbasketAndComponentAndAction$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((object) => {
       const selectedWorkbasket = object.selectedWorkbasket;
       const action = object.action;
 
@@ -117,10 +117,10 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
     });
 
     // c) saving the workbasket
-    this.ngxsActions$.pipe(ofActionSuccessful(UpdateWorkbasket), takeUntil(this.destroy$)).subscribe(() => {
+    this.ngxsActions$.pipe(ofActionSuccessful(UpdateWorkbasket), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.store
         .dispatch(new UpdateWorkbasketDistributionTargets())
-        .pipe(takeUntil(this.destroy$))
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => {
           const workbasket = this.store.selectSnapshot(WorkbasketSelectors.selectedWorkbasket);
           if (workbasket) {
@@ -129,10 +129,10 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
         });
     });
 
-    this.ngxsActions$.pipe(ofActionSuccessful(SaveNewWorkbasket), takeUntil(this.destroy$)).subscribe(() => {
+    this.ngxsActions$.pipe(ofActionSuccessful(SaveNewWorkbasket), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.store
         .dispatch(new UpdateWorkbasketDistributionTargets())
-        .pipe(takeUntil(this.destroy$))
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => {
           const workbasket = this.store.selectSnapshot(WorkbasketSelectors.selectedWorkbasket);
           if (workbasket) {
@@ -174,10 +174,5 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
   onClose() {
     this.store.dispatch(new OnButtonPressed(ButtonAction.CLOSE));
     this.store.dispatch(new DeselectWorkbasket());
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

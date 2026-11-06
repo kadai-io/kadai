@@ -16,16 +16,16 @@
  *
  */
 
-import { Component, inject, input, OnDestroy, OnInit, viewChild } from '@angular/core';
+import { Component, DestroyRef, ElementRef, inject, input, OnInit, viewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ClassificationDefinitionService } from 'app/administration/services/classification-definition.service';
 import { WorkbasketDefinitionService } from 'app/administration/services/workbasket-definition.service';
 import { DomainService } from 'app/shared/services/domain/domain.service';
 import { KadaiType } from 'app/shared/models/kadai-type';
 import { ImportExportService } from 'app/administration/services/import-export.service';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { HotToastService } from '@ngneat/hot-toast';
-import { takeUntil } from 'rxjs/operators';
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
@@ -44,12 +44,12 @@ import { AsyncPipe } from '@angular/common';
   styleUrls: ['./import-export.component.scss'],
   imports: [MatButton, MatTooltip, MatIcon, FormsModule, MatMenuTrigger, MatMenu, MatMenuItem, AsyncPipe]
 })
-export class ImportExportComponent implements OnInit, OnDestroy {
+export class ImportExportComponent implements OnInit {
   currentSelection = input<KadaiType>();
   parentComponent = input<string>();
-  selectedFileInput = viewChild<any>('selectedFile');
+  selectedFileInput = viewChild<ElementRef<HTMLInputElement>>('selectedFile');
   domains$!: Observable<string[]>;
-  destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
   private domainService = inject(DomainService);
   private workbasketDefinitionService = inject(WorkbasketDefinitionService);
   private classificationDefinitionService = inject(ClassificationDefinitionService);
@@ -70,13 +70,13 @@ export class ImportExportComponent implements OnInit, OnDestroy {
   }
 
   uploadFile() {
-    const file = this.selectedFileInput()!.nativeElement.files[0];
+    const file = this.selectedFileInput()!.nativeElement.files![0];
     if (this.checkFormatFile(file)) {
       if (this.currentSelection() === KadaiType.WORKBASKETS) {
         this.workbasketDefinitionService
           .importWorkbasket(file)
           .pipe(
-            takeUntil(this.destroy$),
+            takeUntilDestroyed(this.destroyRef),
             this.hotToastService.observe({
               loading: 'Uploading...',
               success: 'File successfully uploaded',
@@ -92,7 +92,7 @@ export class ImportExportComponent implements OnInit, OnDestroy {
         this.classificationDefinitionService
           .importClassification(file)
           .pipe(
-            takeUntil(this.destroy$),
+            takeUntilDestroyed(this.destroyRef),
             this.hotToastService.observe({
               loading: 'Uploading...',
               success: 'File successfully uploaded',
@@ -109,18 +109,13 @@ export class ImportExportComponent implements OnInit, OnDestroy {
     this.resetProgress();
   }
 
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  private checkFormatFile(file: any): boolean {
-    const ending = file.name.match(/\.([^.]+)$/)[1];
+  private checkFormatFile(file: File): boolean {
+    const ending = file.name.match(/\.([^.]+)$/)?.[1];
     let check = false;
     if (ending === 'json') {
       check = true;
     } else {
-      file.value = '';
+      this.selectedFileInput()!.nativeElement.value = '';
       this.notificationService.showError('IMPORT_EXPORT_UPLOAD_FILE_FORMAT');
     }
     return check;

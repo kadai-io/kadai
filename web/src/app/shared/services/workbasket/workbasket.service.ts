@@ -18,7 +18,7 @@
 
 import { Observable, Subject, throwError as observableThrowError } from 'rxjs';
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { WorkbasketAccessItems, WorkbasketAccessItemWrite } from 'app/shared/models/workbasket-access-items';
 import { WorkbasketSummaryRepresentation } from 'app/shared/models/workbasket-summary-representation';
@@ -98,8 +98,8 @@ export class WorkbasketService {
   }
 
   // delete
-  markWorkbasketForDeletion(url: string): Observable<any> {
-    return this.httpClient.delete<any>(url, { observe: 'response' });
+  markWorkbasketForDeletion(url: string): Observable<HttpResponse<unknown>> {
+    return this.httpClient.delete<unknown>(url, { observe: 'response' });
   }
 
   // GET
@@ -184,14 +184,16 @@ export class WorkbasketService {
 
   // #region private
 
-  private handleError(error: Response | any) {
+  private handleError(error: unknown) {
     let errMsg: string;
     if (error instanceof Response) {
       const body = error.json() || '';
       const err = JSON.stringify(body);
       errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
+    } else if (error instanceof Error || (typeof error === 'object' && error !== null && 'message' in error)) {
+      errMsg = String((error as { message: unknown }).message);
     } else {
-      errMsg = error.message ? error.message : error.toString();
+      errMsg = String(error);
     }
     return observableThrowError(errMsg);
   }

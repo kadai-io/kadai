@@ -44,7 +44,7 @@ import { By } from '@angular/platform-browser';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
-@Component({ selector: 'kadai-task-information', template: '', standalone: true })
+@Component({ selector: 'kadai-task-information', template: '' })
 class StubTaskInformationComponent {
   task = input<any>();
   saveToggleTriggered = input<any>();
@@ -52,17 +52,17 @@ class StubTaskInformationComponent {
   taskChange = output<any>();
 }
 
-@Component({ selector: 'kadai-task-status-details', template: '', standalone: true })
+@Component({ selector: 'kadai-task-status-details', template: '' })
 class StubTaskStatusDetailsComponent {
   task = input<any>();
 }
 
-@Component({ selector: 'kadai-task-custom-fields', template: '', standalone: true })
+@Component({ selector: 'kadai-task-custom-fields', template: '' })
 class StubTaskCustomFieldsComponent {
   task = input<any>();
 }
 
-@Component({ selector: 'kadai-task-attribute-value', template: '', standalone: true })
+@Component({ selector: 'kadai-task-attribute-value', template: '' })
 class StubTaskAttributeValueComponent {
   attributes = input<any>();
   callbackInfo = input<any>();
@@ -298,14 +298,6 @@ describe('TaskDetailsComponent', () => {
     component.task.set(mockTask);
     component.backClicked();
     expect(store.snapshot().task.selectedTask).toBeUndefined();
-  });
-
-  it('should complete destroy$ on ngOnDestroy', () => {
-    const destroySpy = vi.spyOn(component.destroy$, 'next');
-    const completeSpy = vi.spyOn(component.destroy$, 'complete');
-    component.ngOnDestroy();
-    expect(destroySpy).toHaveBeenCalled();
-    expect(completeSpy).toHaveBeenCalled();
   });
 
   it('should unsubscribe subscriptions on ngOnDestroy', () => {

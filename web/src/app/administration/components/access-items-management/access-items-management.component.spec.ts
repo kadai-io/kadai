@@ -35,8 +35,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 @Component({
   selector: 'svg-icon',
-  template: '',
-  standalone: true
+  template: ''
 })
 class MockSvgIconComponent {
   src = input<string>();
@@ -359,14 +358,6 @@ describe('AccessItemsManagementComponent', () => {
   it('should not throw when clearFilter is called with no accessItemsForm', () => {
     app.accessItemsForm = null;
     expect(() => app.clearFilter()).not.toThrow();
-  });
-
-  it('should complete destroy$ on ngOnDestroy', () => {
-    const nextSpy = vi.spyOn(app.destroy$, 'next');
-    const completeSpy = vi.spyOn(app.destroy$, 'complete');
-    app.ngOnDestroy();
-    expect(nextSpy).toHaveBeenCalled();
-    expect(completeSpy).toHaveBeenCalled();
   });
 
   it('should call removeFocus without throwing', () => {

@@ -240,14 +240,6 @@ describe('WorkbasketDetailsComponent', () => {
     expect(dispatched).toBe(true);
   });
 
-  it('should complete destroy$ on ngOnDestroy', () => {
-    const nextSpy = vi.spyOn(component.destroy$, 'next');
-    const completeSpy = vi.spyOn(component.destroy$, 'complete');
-    component.ngOnDestroy();
-    expect(nextSpy).toHaveBeenCalled();
-    expect(completeSpy).toHaveBeenCalled();
-  });
-
   it('should update workbasket after UpdateWorkbasket action succeeds', async () => {
     await store
       .dispatch(new UpdateWorkbasket(selectedWorkbasketMock._links!.self.href, selectedWorkbasketMock))

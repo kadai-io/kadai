@@ -20,7 +20,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({ name: 'mapValues' })
 export class MapValuesPipe implements PipeTransform {
-  transform<T, V>(value: Map<T, V>, args?: any[]): { key: T; value: V }[] {
+  transform<T, V>(value: Map<T, V>, args?: unknown[]): { key: T; value: V }[] {
     const returnArray: { key: T; value: V }[] = [];
 
     if (!value) {

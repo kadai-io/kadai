@@ -16,18 +16,16 @@
  *
  */
 
-import { Component, computed, inject, OnDestroy, OnInit, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, viewChild, DestroyRef } from '@angular/core';
 import { Store } from '@ngxs/store';
-import { Observable, Subject } from 'rxjs';
-
-import { highlight } from 'app/shared/animations/validation.animation';
+import { Observable } from 'rxjs';
 
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 
 import { DomainService } from 'app/shared/services/domain/domain.service';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ImportExportService } from 'app/administration/services/import-export.service';
-import { map, take, takeUntil } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
 import { AsyncPipe, Location } from '@angular/common';
@@ -65,7 +63,7 @@ import { FieldErrorDisplayComponent } from 'app/shared/components/field-error-di
 import { MatSelect, MatSelectTrigger } from '@angular/material/select';
 import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.component';
 import { MatOption } from '@angular/material/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { OverflowFeedbackDirective } from 'app/shared/directives/overflow-feedback.directive';
 import { FormSubmitDirective } from 'app/shared/directives/form-submit.directive';
 import { FormFieldSubmitDirective } from 'app/shared/directives/form-field-submit.directive';
@@ -73,7 +71,6 @@ import { FormFieldSubmitDirective } from 'app/shared/directives/form-field-submi
 @Component({
   selector: 'kadai-administration-classification-details',
   templateUrl: './classification-details.component.html',
-  animations: [highlight],
   styleUrls: ['./classification-details.component.scss'],
   imports: [
     MatToolbar,
@@ -100,7 +97,7 @@ import { FormFieldSubmitDirective } from 'app/shared/directives/form-field-submi
     FormFieldSubmitDirective
   ]
 })
-export class ClassificationDetailsComponent implements OnInit, OnDestroy {
+export class ClassificationDetailsComponent implements OnInit {
   classification = signal<Classification | undefined>(undefined);
   isCreatingNewClassification = computed(() => typeof this.classification()?.classificationId === 'undefined');
   categories$: Observable<string[]> = inject(Store).select(ClassificationSelectors.selectCategories);
@@ -116,7 +113,7 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
   requestInProgress = toSignal(inject(RequestInProgressService).getRequestInProgress(), { initialValue: false });
   classificationForm = viewChild<NgForm>('ClassificationForm');
   toggleValidationMap = new Map<string, boolean>();
-  destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
   private location = inject(Location);
   private requestInProgressService = inject(RequestInProgressService);
   private domainService = inject(DomainService);
@@ -130,13 +127,13 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
       getCustomFields(customFieldCount)
     );
 
-    this.selectedClassification$.pipe(takeUntil(this.destroy$)).subscribe((classification) => {
+    this.selectedClassification$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((classification) => {
       this.classification.set({ ...classification });
     });
 
     this.importExportService
       .getImportingFinished()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.store.dispatch(new SelectClassification(this.classification()!.classificationId!));
       });
@@ -264,11 +261,6 @@ export class ClassificationDetailsComponent implements OnInit, OnDestroy {
         this.afterRequest();
       });
     this.location.go(this.location.path().replace(/(classifications).*/g, 'classifications'));
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   private afterRequest() {

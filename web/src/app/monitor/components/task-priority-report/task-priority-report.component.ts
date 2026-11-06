@@ -18,7 +18,7 @@
 
 import { Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { DatePipe, NgClass } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { MatDivider } from '@angular/material/divider';
@@ -77,8 +77,7 @@ import { TableRowData } from 'app/monitor/models/table-row-data';
     MatExpansionPanel,
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,
-    MatCheckbox,
-    NgClass
+    MatCheckbox
   ],
   host: {
     '[style.--color-high-priority]': 'colorHigh()',
@@ -132,9 +131,9 @@ export class TaskPriorityReportComponent {
 }
 
 function mapReportRowToTableRowData(row: ReportRow, settings: Settings): TableRowData[] {
-  const nameHigh = settings[SettingMembers.NameHighPriority];
-  const nameMedium = settings[SettingMembers.NameMediumPriority];
-  const nameLow = settings[SettingMembers.NameLowPriority];
+  const nameHigh = settings[SettingMembers.NameHighPriority] as string;
+  const nameMedium = settings[SettingMembers.NameMediumPriority] as string;
+  const nameLow = settings[SettingMembers.NameLowPriority] as string;
 
   return [
     { priority: nameHigh, number: row.cells[0] },

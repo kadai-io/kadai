@@ -35,6 +35,7 @@ import { engineConfigurationMock } from 'app/shared/store/mock-data/mock-store';
 import { By } from '@angular/platform-browser';
 import { OverflowFeedbackDirective } from 'app/shared/directives/overflow-feedback.directive';
 import { FormFieldSubmitDirective } from 'app/shared/directives/form-field-submit.directive';
+import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 
 const mockPrimaryObjRef = new ObjectReference(undefined, 'Company A', 'System A', 'Instance A', 'TypeA', 'Value A');
 
@@ -126,21 +127,21 @@ describe('TaskInformationComponent', () => {
   describe('updateDate()', () => {
     it('should update task.due with the ISO string of the new date', () => {
       const newDate = new Date('2026-03-10T12:00:00Z');
-      component.updateDate({ value: newDate });
+      component.updateDate({ value: newDate } as unknown as MatDatepickerInputEvent<Date>);
 
       expect(component.task()!.due).toBe(newDate.toISOString());
     });
 
     it('should not update task.due when the event value is null', () => {
       const originalDue = component.task()!.due;
-      component.updateDate({ value: null });
+      component.updateDate({ value: null } as unknown as MatDatepickerInputEvent<Date>);
 
       expect(component.task()!.due).toBe(originalDue);
     });
 
     it('should not update task.due when the event value is undefined', () => {
       const originalDue = component.task()!.due;
-      component.updateDate({ value: undefined });
+      component.updateDate({ value: undefined } as unknown as MatDatepickerInputEvent<Date>);
 
       expect(component.task()!.due).toBe(originalDue);
     });
@@ -185,17 +186,7 @@ describe('TaskInformationComponent', () => {
     });
   });
 
-  describe('ngOnDestroy()', () => {
-    it('should call next and complete on destroy$', () => {
-      const nextSpy = vi.spyOn(component['destroy$'], 'next');
-      const completeSpy = vi.spyOn(component['destroy$'], 'complete');
-
-      component.ngOnDestroy();
-
-      expect(nextSpy).toHaveBeenCalled();
-      expect(completeSpy).toHaveBeenCalled();
-    });
-
+  describe('on destroy', () => {
     it('should stop updating classifications after destroy', () => {
       const classificationSubject = new Subject<any>();
       mockClassificationsService.getClassifications.mockReturnValue(classificationSubject.asObservable());
@@ -207,7 +198,7 @@ describe('TaskInformationComponent', () => {
 
       const classificationsBefore = newComponent.classifications();
 
-      newComponent.ngOnDestroy();
+      newFixture.destroy();
 
       classificationSubject.next({ classifications: [{ classificationId: 'new-class' }] });
 
@@ -348,6 +339,29 @@ describe('TaskInformationComponent', () => {
 
       expect(emitSpy).toHaveBeenCalledTimes(2);
       expect(emitSpy).toHaveBeenLastCalledWith(true);
+    });
+
+    it('should wait for a pending owner lookup before emitting formValid', async () => {
+      const emitSpy = vi.spyOn(component.formValid, 'emit');
+      const lookup$ = new Subject<boolean>();
+      accessIdsServiceMock.validateAccessId.mockReturnValue(lookup$.asObservable());
+      fixture.componentRef.setInput('task', {
+        ...component.task()!,
+        owner: 'some-user',
+        classificationSummary: { classificationId: 'class-1', name: 'Class 1' }
+      });
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      fixture.componentRef.setInput('saveToggleTriggered', true);
+      fixture.detectChanges();
+      expect(emitSpy).not.toHaveBeenCalled();
+
+      lookup$.next(true);
+      lookup$.complete();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(emitSpy).toHaveBeenCalledWith(true);
     });
 
     it('should not emit formValid and show an error when the owner lookup fails', async () => {

@@ -22,6 +22,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { MonitorService } from './monitor.service';
 import { ReportData } from 'app/monitor/models/report-data';
 import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
+import { PriorityInterval } from 'app/monitor/models/priority-interval';
 
 describe('MonitorService', () => {
   let service: MonitorService;
@@ -162,7 +163,7 @@ describe('MonitorService', () => {
 
   describe('getTasksByPriorityReport', () => {
     it('should make a GET request to workbasket-priority-report', () => {
-      service.getTasksByPriorityReport(['PERSONAL'], [1, 2], 'DOMAIN_A').subscribe();
+      service.getTasksByPriorityReport(['PERSONAL'], [1, 2] as unknown as PriorityInterval[], 'DOMAIN_A').subscribe();
 
       const req = httpMock.expectOne((r) => r.url.includes('workbasket-priority-report'));
       expect(req.request.method).toBe('GET');
@@ -171,7 +172,7 @@ describe('MonitorService', () => {
     });
 
     it('should include workbasket-type, domain, state, and columnHeader params', () => {
-      service.getTasksByPriorityReport(['GROUP'], [5, 10], 'DOMAIN_B').subscribe();
+      service.getTasksByPriorityReport(['GROUP'], [5, 10] as unknown as PriorityInterval[], 'DOMAIN_B').subscribe();
 
       const req = httpMock.expectOne((r) => r.url.includes('workbasket-priority-report'));
       expect(req.request.urlWithParams).toContain('workbasket-type=GROUP');
@@ -181,7 +182,9 @@ describe('MonitorService', () => {
     });
 
     it('should merge custom filters into query params', () => {
-      service.getTasksByPriorityReport(['PERSONAL'], [1], 'DOMAIN_A', { custom: 'value' }).subscribe();
+      service
+        .getTasksByPriorityReport(['PERSONAL'], [1] as unknown as PriorityInterval[], 'DOMAIN_A', { custom: 'value' })
+        .subscribe();
 
       const req = httpMock.expectOne((r) => r.url.includes('workbasket-priority-report'));
       expect(req.request.urlWithParams).toContain('custom=value');
@@ -191,7 +194,9 @@ describe('MonitorService', () => {
 
   describe('getTasksByDetailedPriorityReport', () => {
     it('should make a GET request to detailed-workbasket-priority-report', () => {
-      service.getTasksByDetailedPriorityReport(['PERSONAL'], [1, 2], 'DOMAIN_A').subscribe();
+      service
+        .getTasksByDetailedPriorityReport(['PERSONAL'], [1, 2] as unknown as PriorityInterval[], 'DOMAIN_A')
+        .subscribe();
 
       const req = httpMock.expectOne((r) => r.url.includes('detailed-workbasket-priority-report'));
       expect(req.request.method).toBe('GET');
@@ -200,7 +205,7 @@ describe('MonitorService', () => {
     });
 
     it('should include required query params', () => {
-      service.getTasksByDetailedPriorityReport(['GROUP'], [3], 'DOMAIN_C').subscribe();
+      service.getTasksByDetailedPriorityReport(['GROUP'], [3] as unknown as PriorityInterval[], 'DOMAIN_C').subscribe();
 
       const req = httpMock.expectOne((r) => r.url.includes('detailed-workbasket-priority-report'));
       expect(req.request.urlWithParams).toContain('workbasket-type=GROUP');
@@ -210,7 +215,11 @@ describe('MonitorService', () => {
     });
 
     it('should merge custom filters into query params', () => {
-      service.getTasksByDetailedPriorityReport(['PERSONAL'], [1], 'DOMAIN_A', { filter: 'xyz' }).subscribe();
+      service
+        .getTasksByDetailedPriorityReport(['PERSONAL'], [1] as unknown as PriorityInterval[], 'DOMAIN_A', {
+          filter: 'xyz'
+        })
+        .subscribe();
 
       const req = httpMock.expectOne((r) => r.url.includes('detailed-workbasket-priority-report'));
       expect(req.request.urlWithParams).toContain('filter=xyz');

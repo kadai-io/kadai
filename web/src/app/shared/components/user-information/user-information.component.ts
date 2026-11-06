@@ -18,7 +18,6 @@
 
 import { Component, computed, inject } from '@angular/core';
 import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
-import { expandDown } from 'app/shared/animations/expand.animation';
 import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.component';
 import { MatButton } from '@angular/material/button';
 
@@ -26,7 +25,6 @@ import { MatButton } from '@angular/material/button';
   selector: 'kadai-shared-user-information',
   templateUrl: './user-information.component.html',
   styleUrls: ['./user-information.component.scss'],
-  animations: [expandDown],
   imports: [SvgIconComponent, MatButton]
 })
 export class UserInformationComponent {

@@ -17,12 +17,10 @@
  */
 
 import { Component, input } from '@angular/core';
-import { highlight } from 'app/shared/animations/validation.animation';
 
 @Component({
   selector: 'kadai-shared-field-error-display',
   templateUrl: './field-error-display.component.html',
-  animations: [highlight],
   styleUrls: ['./field-error-display.component.scss'],
   imports: []
 })

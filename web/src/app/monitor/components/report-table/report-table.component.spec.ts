@@ -17,7 +17,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ReportTableComponent } from './report-table.component';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ReportData } from 'app/monitor/models/report-data';
@@ -442,5 +442,36 @@ describe('ReportTableComponent', () => {
       expect(footerIcons.length).toBeGreaterThan(0);
       expect(footerIcons[0].textContent.trim()).toBe('expand_more');
     });
+  });
+
+  it('should toggle folds via Enter and Space on foldable body and sum row cells', () => {
+    component.reportData.set({
+      meta: { header: ['H1'], rowDesc: ['Desc1', 'Desc2'], sumRowDesc: 'Total', name: 'report', date: '2024' },
+      rows: [
+        { desc: ['parent'], cells: [1], total: 1, depth: 0, display: true },
+        { desc: ['child'], cells: [2], total: 2, depth: 1, display: true }
+      ],
+      sumRow: [
+        { desc: ['Total'], cells: [3], total: 3, depth: 0, display: true },
+        { desc: ['SubTotal'], cells: [1], total: 1, depth: 1, display: true }
+      ]
+    });
+    component.currentExpHeaders.set(1);
+    fixture.detectChanges();
+    const toggleSpy = vi.spyOn(component, 'toggleFold').mockImplementation(() => {});
+    const bodyCell: HTMLElement = fixture.nativeElement.querySelector('.table-body .table-cell--justify');
+    const sumCell: HTMLElement = fixture.nativeElement.querySelector('.table-footer .table-cell--justify');
+
+    expect(bodyCell.getAttribute('role')).toBe('button');
+    expect(bodyCell.getAttribute('tabindex')).toBe('0');
+    bodyCell.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    bodyCell.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+    sumCell.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    sumCell.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+
+    expect(toggleSpy).toHaveBeenNthCalledWith(1, 0);
+    expect(toggleSpy).toHaveBeenNthCalledWith(2, 0);
+    expect(toggleSpy).toHaveBeenNthCalledWith(3, 0, true);
+    expect(toggleSpy).toHaveBeenNthCalledWith(4, 0, true);
   });
 });

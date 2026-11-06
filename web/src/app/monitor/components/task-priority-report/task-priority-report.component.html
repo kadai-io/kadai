@@ -92,14 +92,14 @@
               <!-- Column: Priority -->
               <ng-container matColumnDef="priority">
                 <th *matHeaderCellDef mat-header-cell>Priority</th>
-                <td *matCellDef="let element; let rowIdx = index" [ngClass]="'priority-row-' + rowIdx" mat-cell>
+                <td *matCellDef="let element; let rowIdx = index" [class]="'priority-row-' + rowIdx" mat-cell>
                   {{ element.priority }}
                 </td>
               </ng-container>
               <!-- Column: Number of Tasks -->
               <ng-container matColumnDef="number">
                 <th *matHeaderCellDef mat-header-cell>Number of Tasks</th>
-                <td *matCellDef="let element; let rowIdx = index" [ngClass]="'priority-row-' + rowIdx" mat-cell>
+                <td *matCellDef="let element; let rowIdx = index" [class]="'priority-row-' + rowIdx" mat-cell>
                   {{ element.number }}
                 </td>
               </ng-container>

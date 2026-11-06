@@ -16,16 +16,15 @@
  *
  */
 
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { Component, inject, input, OnInit, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Task } from 'app/workplace/models/task';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
 import { Sorting, TASK_SORT_PARAMETER_NAMING, TaskQuerySortParameter } from 'app/shared/models/sorting';
-import { expandDown } from 'app/shared/animations/expand.animation';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TaskQueryFilterParameter } from 'app/shared/models/task-query-filter-parameter';
-import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
 import { Actions, ofActionCompleted, Store } from '@ngxs/store';
 import { ClearTaskFilter, SetTaskFilter } from 'app/shared/store/filter-store/filter.actions';
@@ -56,7 +55,6 @@ import {
 
 @Component({
   selector: 'kadai-task-list-toolbar',
-  animations: [expandDown],
   templateUrl: './task-list-toolbar.component.html',
   styleUrls: ['./task-list-toolbar.component.scss'],
   imports: [
@@ -94,7 +92,7 @@ export class TaskListToolbarComponent implements OnInit {
   activeTab = signal(0);
   filterInput = signal('');
   isFilterExpanded$: Observable<boolean> = inject(Store).select(WorkplaceSelectors.getFilterExpansion);
-  destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
   private kadaiEngineService = inject(KadaiEngineService);
   private workbasketService = inject(WorkbasketService);
   private router = inject(Router);
@@ -104,13 +102,13 @@ export class TaskListToolbarComponent implements OnInit {
   private requestInProgressService = inject(RequestInProgressService);
 
   ngOnInit() {
-    this.ngxsActions$.pipe(ofActionCompleted(ClearTaskFilter), takeUntil(this.destroy$)).subscribe(() => {
+    this.ngxsActions$.pipe(ofActionCompleted(ClearTaskFilter), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.filterInput.set('');
     });
 
     this.workbasketService
       .getAllWorkBaskets()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((workbaskets) => {
         this.workbaskets.set(workbaskets.workbaskets);
         this.workbaskets()?.forEach((workbasket) => {
@@ -140,7 +138,7 @@ export class TaskListToolbarComponent implements OnInit {
 
     this.store
       .select(TaskSelectors.getSelectedTask)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((task) => {
         if (typeof task !== 'undefined') {
           const workbasketSummary = task.workbasketSummary;
@@ -185,8 +183,8 @@ export class TaskListToolbarComponent implements OnInit {
     this.store.dispatch(new SetFilterExpansion());
   }
 
-  onTabChange(search: any) {
-    const tab = search.target.innerText;
+  onTabChange(search: MouseEvent) {
+    const tab = (search.target as HTMLElement).innerText;
     this.requestInProgressService.setRequestInProgress(true);
     if (tab === 'Workbaskets') {
       this.router.navigate(['kadai/workplace'], { queryParams: { component: 'workbaskets' } });
@@ -260,10 +258,5 @@ export class TaskListToolbarComponent implements OnInit {
     this.store.dispatch(new SetSearchType(type));
     this.searchBasket();
     this.onClearFilter();
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

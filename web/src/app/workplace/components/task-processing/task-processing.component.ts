@@ -16,8 +16,8 @@
  *
  */
 
-import { Component, computed, inject, isSignal, OnDestroy, OnInit, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, computed, inject, isSignal, OnDestroy, OnInit, signal, DestroyRef } from '@angular/core';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Task } from 'app/workplace/models/task';
 import { Workbasket } from 'app/shared/models/workbasket';
@@ -31,11 +31,9 @@ import {
   map,
   Observable,
   of,
-  Subject,
   Subscription,
   switchMap,
-  take,
-  takeUntil
+  take
 } from 'rxjs';
 import { ClassificationsService } from 'app/shared/services/classifications/classifications.service';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
@@ -87,7 +85,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
     const state = this.task()?.state;
     return !!state && state !== 'COMPLETED' && state !== 'CANCELLED' && state !== 'TERMINATED';
   });
-  destroy$ = new Subject();
+  private destroyRef = inject(DestroyRef);
 
   ngOnInit() {
     this.routeSubscription = this.route.params
@@ -104,7 +102,7 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
             })
           );
         }),
-        takeUntil(this.destroy$)
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe(({ task, classification }) => {
         this.address = this.extractUrl(classification.applicationEntryPoint!) || `${this.address}?q=${task.name}`;
@@ -195,19 +193,19 @@ export class TaskProcessingComponent implements OnInit, OnDestroy {
     let extractedUrl = url;
     extractedExpressions.forEach((expression) => {
       const parameter = expression.substring(2, expression.length - 1);
-      let objectValue: any = me;
+      let objectValue: unknown = me;
       parameter.split('.').forEach((property) => {
         objectValue = this.getReflectiveProperty(objectValue, property);
         if (isSignal(objectValue)) {
           objectValue = objectValue();
         }
       });
-      extractedUrl = extractedUrl.replace(expression, objectValue);
+      extractedUrl = extractedUrl.replace(expression, String(objectValue));
     });
     return extractedUrl;
   }
 
-  private getReflectiveProperty(scope: any, property: string) {
-    return Reflect.get(scope, property);
+  private getReflectiveProperty(scope: unknown, property: string): unknown {
+    return Reflect.get(scope as object, property);
   }
 }

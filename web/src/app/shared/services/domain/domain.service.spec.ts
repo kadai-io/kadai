@@ -135,6 +135,72 @@ describe('DomainService', () => {
     });
   });
 
+  describe('getDomains() error handling and sharing', () => {
+    it('should share one in-flight request between concurrent callers', () => {
+      const first: string[][] = [];
+      const second: string[][] = [];
+      service.getDomains().subscribe((d) => first.push(d));
+      service.getDomains().subscribe((d) => second.push(d));
+
+      httpTesting.expectOne(DOMAINS_URL).flush(['DOMAIN_A']);
+
+      expect(first).toEqual([['DOMAIN_A']]);
+      expect(second).toEqual([['DOMAIN_A']]);
+    });
+
+    it('should pass a failed request to its caller', () => {
+      let error: unknown;
+      service.getDomains().subscribe({ error: (e) => (error = e) });
+
+      httpTesting.expectOne(DOMAINS_URL).flush('boom', { status: 500, statusText: 'Server Error' });
+
+      expect(error).toBeDefined();
+    });
+
+    it('should retry on the next call after a failed request', () => {
+      service.getDomains().subscribe({ error: () => {} });
+      httpTesting.expectOne(DOMAINS_URL).flush('boom', { status: 500, statusText: 'Server Error' });
+
+      let emitted: string[] | undefined;
+      service.getDomains().subscribe((d) => (emitted = d));
+      httpTesting.expectOne(DOMAINS_URL).flush(['DOMAIN_A']);
+
+      expect(emitted).toEqual(['DOMAIN_A']);
+    });
+
+    it('should keep existing subscribers alive when a forced refresh fails', () => {
+      const emitted: string[][] = [];
+      let completedOrErrored = false;
+      service.getDomains().subscribe({
+        next: (d) => emitted.push(d),
+        error: () => (completedOrErrored = true),
+        complete: () => (completedOrErrored = true)
+      });
+      httpTesting.expectOne(DOMAINS_URL).flush(['DOMAIN_A']);
+
+      service.getDomains(true).subscribe({ error: () => {} });
+      httpTesting.expectOne(DOMAINS_URL).flush('boom', { status: 500, statusText: 'Server Error' });
+
+      service.addMasterDomain();
+
+      expect(completedOrErrored).toBe(false);
+      expect(emitted[emitted.length - 1]).toEqual(['DOMAIN_A', '']);
+    });
+
+    it('should not fetch until someone subscribes', () => {
+      service.getDomains();
+      httpTesting.expectNone(DOMAINS_URL);
+    });
+  });
+
+  describe('route subscription cleanup', () => {
+    it('should unsubscribe from the selected route when the injector is destroyed', () => {
+      expect(selectedRouteSubject.observed).toBe(true);
+      TestBed.resetTestingModule();
+      expect(selectedRouteSubject.observed).toBe(false);
+    });
+  });
+
   describe('getSelectedDomain()', () => {
     it('should return an Observable', () => {
       const result = service.getSelectedDomain();

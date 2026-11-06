@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, ElementRef, inject, input, OnDestroy, OnInit, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, inject, input, OnInit, signal, viewChild, DestroyRef } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 
 import { WorkbasketSummaryRepresentation } from 'app/shared/models/workbasket-summary-representation';
@@ -27,7 +27,7 @@ import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.ser
 import { OrientationService } from 'app/shared/services/orientation/orientation.service';
 import { ImportExportService } from 'app/administration/services/import-export.service';
 import { Actions, ofActionCompleted, ofActionDispatched, Store } from '@ngxs/store';
-import { delay, takeUntil, tap } from 'rxjs/operators';
+import { delay, tap } from 'rxjs/operators';
 import {
   DeselectWorkbasket,
   GetWorkbasketsSummary,
@@ -46,7 +46,7 @@ import { AsyncPipe } from '@angular/common';
 import { IconTypeComponent } from 'app/administration/components/type-icon/icon-type.component';
 import { MatDivider } from '@angular/material/divider';
 import { PaginationComponent } from 'app/shared/components/pagination/pagination.component';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'kadai-administration-workbasket-list',
@@ -62,7 +62,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
     AsyncPipe
   ]
 })
-export class WorkbasketListComponent implements OnInit, OnDestroy {
+export class WorkbasketListComponent implements OnInit {
   expanded = input(false);
   selectedId = signal<string | undefined>(undefined);
   type = 'workbaskets';
@@ -87,7 +87,7 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   getWorkbasketListFilter$: Observable<WorkbasketQueryFilterParameter> = inject(Store).select(
     FilterSelectors.getWorkbasketListFilter
   );
-  destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
   toolbarElement = viewChild<ElementRef>('wbToolbar');
   private store = inject(Store);
   private workbasketService = inject(WorkbasketService);
@@ -98,19 +98,23 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   private ngxsActions$ = inject(Actions);
 
   constructor() {
-    this.ngxsActions$.pipe(ofActionDispatched(GetWorkbasketsSummary), takeUntil(this.destroy$)).subscribe(() => {
-      this.requestInProgressService.setRequestInProgress(true);
-      this.requestInProgressLocal.set(true);
-    });
-    this.ngxsActions$.pipe(ofActionCompleted(GetWorkbasketsSummary), takeUntil(this.destroy$)).subscribe(() => {
-      this.requestInProgressService.setRequestInProgress(false);
-      this.requestInProgressLocal.set(false);
-    });
+    this.ngxsActions$
+      .pipe(ofActionDispatched(GetWorkbasketsSummary), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.requestInProgressService.setRequestInProgress(true);
+        this.requestInProgressLocal.set(true);
+      });
+    this.ngxsActions$
+      .pipe(ofActionCompleted(GetWorkbasketsSummary), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.requestInProgressService.setRequestInProgress(false);
+        this.requestInProgressLocal.set(false);
+      });
   }
 
   ngOnInit() {
     this.requestInProgressService.setRequestInProgress(true);
-    this.selectedWorkbasket$.pipe(takeUntil(this.destroy$)).subscribe((selectedWorkbasket) => {
+    this.selectedWorkbasket$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((selectedWorkbasket) => {
       if (typeof selectedWorkbasket !== 'undefined') {
         this.selectedId.set(selectedWorkbasket.workbasketId);
       } else {
@@ -120,28 +124,28 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
 
     this.workbasketService
       .workbasketSavedTriggered()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.performRequest();
       });
 
     this.orientationService
       .getOrientation()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.refreshWorkbasketList();
       });
 
     this.importExportService
       .getImportingFinished()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.refreshWorkbasketList();
       });
 
     this.domainService
       .getSelectedDomain()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((domain) => {
         this.filterBy.domain = [domain];
         this.performRequest();
@@ -150,16 +154,16 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
     this.workbasketService
       .getWorkbasketActionToolbarExpansion()
       .pipe(
-        takeUntil(this.destroy$),
+        takeUntilDestroyed(this.destroyRef),
         tap(() => this.requestInProgressService.setRequestInProgress(true)),
         delay(1),
-        takeUntil(this.destroy$)
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe(() => {
         this.refreshWorkbasketList();
       });
 
-    this.getWorkbasketListFilter$.pipe(takeUntil(this.destroy$)).subscribe((filter) => {
+    this.getWorkbasketListFilter$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((filter) => {
       this.performFilter(filter);
     });
   }
@@ -169,12 +173,12 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
     if (this.selectedId() === id) {
       this.store
         .dispatch(new DeselectWorkbasket())
-        .pipe(takeUntil(this.destroy$))
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => this.requestInProgressService.setRequestInProgress(false));
     } else {
       this.store
         .dispatch(new SelectWorkbasket(id))
-        .pipe(takeUntil(this.destroy$))
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => this.requestInProgressService.setRequestInProgress(false));
     }
   }
@@ -209,14 +213,9 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   performRequest() {
     this.store
       .dispatch(new GetWorkbasketsSummary(true, this.filterBy, this.sort, this.pageParameter))
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.requestInProgressService.setRequestInProgress(false);
       });
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

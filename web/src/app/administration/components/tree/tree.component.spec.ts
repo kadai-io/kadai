@@ -158,19 +158,11 @@ describe('KadaiTreeComponent', () => {
     expect(emitSpy).toHaveBeenCalledWith(true);
   });
 
-  it('should complete destroy$ on ngOnDestroy', () => {
-    const nextSpy = vi.spyOn((component as any).destroy$, 'next');
-    const completeSpy = vi.spyOn((component as any).destroy$, 'complete');
-    component.ngOnDestroy();
-    expect(nextSpy).toHaveBeenCalled();
-    expect(completeSpy).toHaveBeenCalled();
-  });
-
   it('should call store.dispatch and location.go on onActivate', () => {
     const dispatchSpy = vi.spyOn(store, 'dispatch').mockReturnValue(of(undefined as any));
     locationMock.path.mockReturnValue('/kadai/administration/classifications');
     const mockTreeNode = { node: { data: { classificationId: 'CLF:01' } } };
-    component.onActivate(mockTreeNode);
+    component.onActivate(mockTreeNode as never);
     expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(true);
     expect(dispatchSpy).toHaveBeenCalled();
     expect(locationMock.go).toHaveBeenCalled();
@@ -181,7 +173,7 @@ describe('KadaiTreeComponent', () => {
     const dispatchSpy = vi.spyOn(store, 'dispatch').mockReturnValue(of(undefined as any));
     locationMock.path.mockReturnValue('/kadai/administration/classifications');
     const mockEvent = { treeModel: { activeNodes: [] } };
-    component.onDeactivate(mockEvent);
+    component.onDeactivate(mockEvent as never);
     expect(dispatchSpy).toHaveBeenCalled();
     expect(locationMock.go).toHaveBeenCalled();
   });
@@ -189,7 +181,7 @@ describe('KadaiTreeComponent', () => {
   it('should not dispatch on onDeactivate when activeNodes has items', () => {
     const dispatchSpy = vi.spyOn(store, 'dispatch').mockReturnValue(of(undefined as any));
     const mockEvent = { treeModel: { activeNodes: [{ id: 'CLF:01' }] } };
-    component.onDeactivate(mockEvent);
+    component.onDeactivate(mockEvent as never);
     expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
@@ -203,7 +195,7 @@ describe('KadaiTreeComponent', () => {
   it('onDocumentClick should do nothing when element is not in valid area', () => {
     const div = document.createElement('div');
     const event = { target: div };
-    expect(() => component.onDocumentClick(event)).not.toThrow();
+    expect(() => component.onDocumentClick(event as unknown as MouseEvent)).not.toThrow();
   });
 
   it('onMoveNode should call getClassification and updateClassification', async () => {
@@ -213,7 +205,7 @@ describe('KadaiTreeComponent', () => {
       node: { classificationId: 'CLF:01', parentId: '' },
       to: { parent: { classificationId: 'CLF:02', key: 'KEY02' } }
     };
-    await component.onMoveNode(mockEvent);
+    await component.onMoveNode(mockEvent as never);
     expect(emitSpy).toHaveBeenCalledWith(true);
     expect(classificationsServiceMock.getClassification).toHaveBeenCalledWith('CLF:01');
     expect(dispatchSpy).toHaveBeenCalled();
@@ -226,7 +218,7 @@ describe('KadaiTreeComponent', () => {
       event: { target: { tagName: 'TREE-VIEWPORT' } },
       element: { data: { classificationId: 'CLF:01', parentId: '' } }
     };
-    await component.onDrop(mockEvent);
+    await component.onDrop(mockEvent as never);
     expect(emitSpy).toHaveBeenCalledWith(true);
     expect(classificationsServiceMock.getClassification).toHaveBeenCalledWith('CLF:01');
     expect(dispatchSpy).toHaveBeenCalled();
@@ -239,7 +231,7 @@ describe('KadaiTreeComponent', () => {
       event: { target: { tagName: 'DIV' } },
       element: { data: { classificationId: 'CLF:01', parentId: '' } }
     };
-    await component.onDrop(mockEvent);
+    await component.onDrop(mockEvent as never);
     expect(emitSpy).not.toHaveBeenCalled();
     expect(dispatchSpy).not.toHaveBeenCalled();
   });
@@ -252,7 +244,7 @@ describe('KadaiTreeComponent', () => {
       node: { classificationId: 'CLF:01', parentId: 'CLF:PARENT' },
       to: { parent: { classificationId: 'CLF:02', key: 'KEY02' } }
     };
-    await component.onMoveNode(mockEvent);
+    await component.onMoveNode(mockEvent as never);
     expect(dispatchSpy).toHaveBeenCalled();
   });
 
@@ -322,7 +314,7 @@ describe('KadaiTreeComponent', () => {
   it('onDeactivate should not dispatch when activeNodes is non-empty', () => {
     const dispatchSpy = vi.spyOn(store, 'dispatch').mockReturnValue(of(undefined as any));
     const mockEvent = { treeModel: { activeNodes: [{ id: 'CLF:01' }, { id: 'CLF:02' }] } };
-    component.onDeactivate(mockEvent);
+    component.onDeactivate(mockEvent as never);
     expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
@@ -349,7 +341,7 @@ describe('KadaiTreeComponent', () => {
   it('onDocumentClick should not throw when event target is valid tree element', () => {
     const fakeTarget = document.createElement('tree-viewport');
     const event = { target: fakeTarget };
-    expect(() => component.onDocumentClick(event)).not.toThrow();
+    expect(() => component.onDocumentClick(event as unknown as MouseEvent)).not.toThrow();
   });
 
   it('switchKadaiSpinner should emit both true and false values', () => {
@@ -641,7 +633,7 @@ describe('KadaiTreeComponent', () => {
       node: { classificationId: 'CLF:SOLO_CHILD', parentId: 'CLF:SOLO_PARENT' },
       to: { parent: { classificationId: 'CLF:ELSEWHERE', key: 'ELSEWHERE' } }
     };
-    await localComponent.onMoveNode(mockEvent);
+    await localComponent.onMoveNode(mockEvent as never);
     localFixture.destroy();
   });
 
@@ -667,7 +659,7 @@ describe('KadaiTreeComponent', () => {
       node: { classificationId: 'CLF:01', parentId: '' },
       to: { parent: { classificationId: '', key: '' } }
     };
-    await component.onMoveNode(mockEvent);
+    await component.onMoveNode(mockEvent as never);
     expect(dispatchSpy).toHaveBeenCalled();
   });
 
@@ -679,7 +671,7 @@ describe('KadaiTreeComponent', () => {
       node: { classificationId: 'CLF:03', parentId: 'CLF:UNKNOWN_PARENT' },
       to: { parent: { classificationId: 'CLF:04', key: 'KEY04' } }
     };
-    await component.onMoveNode(mockEvent);
+    await component.onMoveNode(mockEvent as never);
     expect(dispatchSpy).toHaveBeenCalled();
   });
 
@@ -747,7 +739,7 @@ describe('KadaiTreeComponent', () => {
     const treeViewport = document.createElement('tree-viewport');
     nativeEl.appendChild(treeViewport);
     const event = { target: treeViewport };
-    expect(() => component.onDocumentClick(event)).not.toThrow();
+    expect(() => component.onDocumentClick(event as unknown as MouseEvent)).not.toThrow();
     nativeEl.removeChild(treeViewport);
   });
 
@@ -756,7 +748,7 @@ describe('KadaiTreeComponent', () => {
     const kadaiTree = document.createElement('kadai-tree');
     nativeEl.appendChild(kadaiTree);
     const event = { target: kadaiTree };
-    expect(() => component.onDocumentClick(event)).not.toThrow();
+    expect(() => component.onDocumentClick(event as unknown as MouseEvent)).not.toThrow();
     nativeEl.removeChild(kadaiTree);
   });
 
@@ -809,7 +801,7 @@ describe('KadaiTreeComponent', () => {
       node: { classificationId: 'CLF:CHILD1', parentId: 'CLF:PARENT' },
       to: { parent: { classificationId: 'CLF:ELSEWHERE', key: 'ELSEWHERE' } }
     };
-    await expect(localComponent.onMoveNode(mockEvent)).resolves.not.toThrow();
+    await expect(localComponent.onMoveNode(mockEvent as never)).resolves.not.toThrow();
     localFixture.destroy();
   });
 

@@ -228,14 +228,6 @@ describe('WorkbasketListComponent', () => {
     expect(iconEl).toBeNull();
   });
 
-  it('should call ngOnDestroy and complete destroy$', () => {
-    const nextSpy = vi.spyOn(component.destroy$, 'next');
-    const completeSpy = vi.spyOn(component.destroy$, 'complete');
-    component.ngOnDestroy();
-    expect(nextSpy).toHaveBeenCalled();
-    expect(completeSpy).toHaveBeenCalled();
-  });
-
   it('should call performRequest when performSorting is called', () => {
     const performRequestSpy = vi.spyOn(component, 'performRequest').mockImplementation(() => {});
     const sort = { 'sort-by': 'NAME' as any, order: 'ASC' as any };

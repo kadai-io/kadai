@@ -37,8 +37,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 @Component({
   selector: 'svg-icon',
-  template: '',
-  standalone: true
+  template: ''
 })
 class MockSvgIconComponent {
   src = input<string>();
@@ -176,14 +175,6 @@ describe('ClassificationListComponent', () => {
   it('should call requestInProgressService.setRequestInProgress(false) when setRequestInProgress is called with false', () => {
     component.setRequestInProgress(false);
     expect(requestInProgressServiceSpy.setRequestInProgress).toHaveBeenCalledWith(false);
-  });
-
-  it('should complete destroy$ on ngOnDestroy', () => {
-    const nextSpy = vi.spyOn(component.destroy$, 'next');
-    const completeSpy = vi.spyOn(component.destroy$, 'complete');
-    component.ngOnDestroy();
-    expect(nextSpy).toHaveBeenCalled();
-    expect(completeSpy).toHaveBeenCalled();
   });
 
   it('should trigger setRequestInProgress(true) when GetClassifications action is dispatched', () => {

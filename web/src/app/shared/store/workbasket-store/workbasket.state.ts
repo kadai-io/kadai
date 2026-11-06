@@ -79,7 +79,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   private requestInProgressService = inject(RequestInProgressService);
 
   @Action(InitializeStore)
-  initializeStore(ctx: StateContext<WorkbasketStateModel>): Observable<any> {
+  initializeStore(ctx: StateContext<WorkbasketStateModel>): Observable<unknown> {
     // read the selected tab from the route
     this.route.queryParams.pipe(take(2)).subscribe((params) => {
       let tabName: string = params.tab;
@@ -113,7 +113,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   }
 
   @Action(GetWorkbasketsSummary)
-  getWorkbasketsSummary(ctx: StateContext<WorkbasketStateModel>, action: GetWorkbasketsSummary): Observable<any> {
+  getWorkbasketsSummary(ctx: StateContext<WorkbasketStateModel>, action: GetWorkbasketsSummary): Observable<unknown> {
     ctx.patchState({
       paginatedWorkbasketsSummary: undefined
     });
@@ -128,7 +128,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   }
 
   @Action(SelectWorkbasket)
-  selectWorkbasket(ctx: StateContext<WorkbasketStateModel>, action: SelectWorkbasket): Observable<any> {
+  selectWorkbasket(ctx: StateContext<WorkbasketStateModel>, action: SelectWorkbasket): Observable<unknown> {
     let selectedComponent;
     switch (ctx.getState().selectedComponent) {
       case WorkbasketComponent.INFORMATION:
@@ -175,7 +175,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   }
 
   @Action(DeselectWorkbasket)
-  deselectWorkbasket(ctx: StateContext<WorkbasketStateModel>): Observable<any> {
+  deselectWorkbasket(ctx: StateContext<WorkbasketStateModel>): Observable<unknown> {
     this.location.go(this.location.path().replace(/(workbaskets).*/g, 'workbaskets'));
     ctx.patchState({
       selectedWorkbasket: undefined,
@@ -185,13 +185,13 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   }
 
   @Action(SetActiveAction)
-  setActiveAction(ctx: StateContext<WorkbasketStateModel>, action: SetActiveAction): Observable<any> {
+  setActiveAction(ctx: StateContext<WorkbasketStateModel>, action: SetActiveAction): Observable<unknown> {
     ctx.patchState({ action: action.action });
     return of(null);
   }
 
   @Action(SelectComponent)
-  selectComponent(ctx: StateContext<WorkbasketStateModel>, action: SelectComponent): Observable<any> {
+  selectComponent(ctx: StateContext<WorkbasketStateModel>, action: SelectComponent): Observable<unknown> {
     switch (action.component) {
       case WorkbasketComponent.INFORMATION:
         ctx.patchState({ selectedComponent: WorkbasketComponent.INFORMATION });
@@ -210,13 +210,13 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   }
 
   @Action(OnButtonPressed)
-  doWorkbasketDetailsAction(ctx: StateContext<WorkbasketStateModel>, action: OnButtonPressed): Observable<any> {
+  doWorkbasketDetailsAction(ctx: StateContext<WorkbasketStateModel>, action: OnButtonPressed): Observable<unknown> {
     ctx.patchState({ button: action.button });
     return of(null);
   }
 
   @Action(SaveNewWorkbasket)
-  saveNewWorkbasket(ctx: StateContext<WorkbasketStateModel>, action: SaveNewWorkbasket): Observable<any> {
+  saveNewWorkbasket(ctx: StateContext<WorkbasketStateModel>, action: SaveNewWorkbasket): Observable<unknown> {
     ctx.dispatch(new OnButtonPressed(undefined));
     return this.workbasketService.createWorkbasket(action.workbasket).pipe(
       take(1),
@@ -232,7 +232,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   }
 
   @Action(CopyWorkbasket)
-  copyWorkbasket(ctx: StateContext<WorkbasketStateModel>): Observable<any> {
+  copyWorkbasket(ctx: StateContext<WorkbasketStateModel>): Observable<unknown> {
     this.location.go(this.location.path().replace(/(workbaskets).*/g, 'workbaskets/(detail:new-workbasket)'));
     ctx.dispatch(new OnButtonPressed(undefined));
 
@@ -252,7 +252,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   }
 
   @Action(CreateWorkbasket)
-  createWorkbasket(ctx: StateContext<WorkbasketStateModel>): Observable<any> {
+  createWorkbasket(ctx: StateContext<WorkbasketStateModel>): Observable<unknown> {
     return this.domainService.getSelectedDomain().pipe(
       take(1),
       tap((domain) => {
@@ -295,7 +295,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   }
 
   @Action(UpdateWorkbasket)
-  updateWorkbasket(ctx: StateContext<WorkbasketStateModel>, action: UpdateWorkbasket): Observable<any> {
+  updateWorkbasket(ctx: StateContext<WorkbasketStateModel>, action: UpdateWorkbasket): Observable<unknown> {
     ctx.dispatch(new OnButtonPressed(undefined));
     return this.workbasketService.updateWorkbasket(action.url, action.workbasket).pipe(
       take(1),
@@ -316,7 +316,10 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   }
 
   @Action(RemoveDistributionTarget)
-  removeDistributionTarget(ctx: StateContext<WorkbasketStateModel>, action: RemoveDistributionTarget): Observable<any> {
+  removeDistributionTarget(
+    ctx: StateContext<WorkbasketStateModel>,
+    action: RemoveDistributionTarget
+  ): Observable<unknown> {
     ctx.dispatch(new OnButtonPressed(undefined));
     return this.workbasketService.removeDistributionTarget(action.url).pipe(
       take(1),
@@ -329,7 +332,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   }
 
   @Action(MarkWorkbasketForDeletion)
-  deleteWorkbasket(ctx: StateContext<WorkbasketStateModel>, action: MarkWorkbasketForDeletion): Observable<any> {
+  deleteWorkbasket(ctx: StateContext<WorkbasketStateModel>, action: MarkWorkbasketForDeletion): Observable<unknown> {
     ctx.dispatch(new OnButtonPressed(undefined));
     return this.workbasketService.markWorkbasketForDeletion(action.url).pipe(
       take(1),
@@ -346,7 +349,10 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   }
 
   @Action(GetWorkbasketAccessItems)
-  getWorkbasketAccessItems(ctx: StateContext<WorkbasketStateModel>, action: GetWorkbasketAccessItems): Observable<any> {
+  getWorkbasketAccessItems(
+    ctx: StateContext<WorkbasketStateModel>,
+    action: GetWorkbasketAccessItems
+  ): Observable<unknown> {
     return this.workbasketService.getWorkBasketAccessItems(action.url).pipe(
       take(1),
       tap((workbasketAccessItemsRepresentation) => {
@@ -361,7 +367,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   updateWorkbasketAccessItems(
     ctx: StateContext<WorkbasketStateModel>,
     action: UpdateWorkbasketAccessItems
-  ): Observable<any> {
+  ): Observable<unknown> {
     ctx.dispatch(new OnButtonPressed(undefined));
     return this.workbasketService
       .updateWorkBasketAccessItem(action.url, { accessItems: action.workbasketAccessItems })
@@ -380,7 +386,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   }
 
   @Action(UpdateWorkbasketDistributionTargets)
-  updateWorkbasketDistributionTargets(ctx: StateContext<WorkbasketStateModel>): Observable<any> {
+  updateWorkbasketDistributionTargets(ctx: StateContext<WorkbasketStateModel>): Observable<unknown> {
     this.requestInProgressService.setRequestInProgress(true);
     const links = ctx.getState().selectedWorkbasket._links;
     if (!links) return EMPTY;
@@ -436,7 +442,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   fetchWorkbasketDistributionTargets(
     ctx: StateContext<WorkbasketStateModel>,
     action: FetchWorkbasketDistributionTargets
-  ): Observable<any> {
+  ): Observable<unknown> {
     const { selectedWorkbasket, distributionTargetsPage, workbasketDistributionTargets } = ctx.getState();
     const { filterParameter, sortParameter, refetchAll } = action;
     const nextDistributionTargetsPage = refetchAll ? 1 : distributionTargetsPage + 1;
@@ -474,7 +480,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   fetchAvailableDistributionTargets(
     ctx: StateContext<WorkbasketStateModel>,
     action: FetchAvailableDistributionTargets
-  ): Observable<any> {
+  ): Observable<unknown> {
     const { availableDistributionTargetsPage, availableDistributionTargets } = ctx.getState();
     const { filterParameter, sortParameter, refetchAll } = action;
     const nextAvailableDistributionTargetsPage = refetchAll ? 1 : availableDistributionTargetsPage + 1;

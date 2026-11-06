@@ -16,7 +16,8 @@
  *
  */
 
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Store } from '@ngxs/store';
 import {
   FormArray,
@@ -27,7 +28,7 @@ import {
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { customFieldCount, WorkbasketAccessItems } from 'app/shared/models/workbasket-access-items';
 import {
   Direction,
@@ -36,7 +37,7 @@ import {
   WorkbasketAccessItemQuerySortParameter
 } from 'app/shared/models/sorting';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
-import { map, takeUntil } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { AccessId } from 'app/shared/models/access-id';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import { AccessItemsCustomisation, CustomField, CustomFields, getCustomFields } from 'app/shared/models/customisation';
@@ -73,6 +74,10 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { AccessItemsManagementStateModel } from 'app/shared/store/access-items-management-store/access-items-management.state';
+
+// NGXS dispatch emits the resulting state snapshot here
+type DispatchedAccessItemsState = { accessItemsManagement?: Partial<AccessItemsManagementStateModel> } | undefined;
 
 @Component({
   selector: 'kadai-administration-access-items-management',
@@ -129,7 +134,7 @@ export class AccessItemsManagementComponent implements OnInit {
   groups$: Observable<AccessId[]> = inject(Store).select(AccessItemsManagementSelector.groups);
   customFields$!: Observable<CustomField[]>;
   permissions$: Observable<AccessId[]> = inject(Store).select(AccessItemsManagementSelector.permissions);
-  destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
   private formBuilder = inject(FormBuilder);
   private notificationService = inject(NotificationService);
   private store = inject(Store);
@@ -144,11 +149,11 @@ export class AccessItemsManagementComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.groups$.pipe(takeUntil(this.destroy$)).subscribe((groups) => {
+    this.groups$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((groups) => {
       this.groups.set(groups || []);
     });
 
-    this.permissions$.pipe(takeUntil(this.destroy$)).subscribe((permissions) => {
+    this.permissions$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((permissions) => {
       this.permissions.set(permissions || []);
     });
 
@@ -165,13 +170,13 @@ export class AccessItemsManagementComponent implements OnInit {
         if (accessId) {
           this.store
             .dispatch(new GetGroupsByAccessId(accessId))
-            .pipe(takeUntil(this.destroy$))
+            .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe(() => {
               this.searchForAccessItemsWorkbaskets();
             });
           this.store
             .dispatch(new GetPermissionsByAccessId(accessId))
-            .pipe(takeUntil(this.destroy$))
+            .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe(() => {
               this.searchForAccessItemsWorkbaskets();
             });
@@ -194,8 +199,9 @@ export class AccessItemsManagementComponent implements OnInit {
       };
       this.store
         .dispatch(new GetAccessItems(filterParameter, this.sortModel))
-        .pipe(takeUntil(this.destroy$))
-        .subscribe((state: any) => {
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((result: unknown) => {
+          const state = result as DispatchedAccessItemsState;
           this.setAccessItemsGroups(
             state?.accessItemsManagement?.accessItemsResource
               ? state.accessItemsManagement.accessItemsResource.accessItems
@@ -210,8 +216,9 @@ export class AccessItemsManagementComponent implements OnInit {
       };
       this.store
         .dispatch(new GetAccessItems(filterParameter, this.sortModel))
-        .pipe(takeUntil(this.destroy$))
-        .subscribe((state: any) => {
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((result: unknown) => {
+          const state = result as DispatchedAccessItemsState;
           this.setAccessItemsPermissions(
             state?.accessItemsManagement?.accessItemsResource
               ? state.accessItemsManagement.accessItemsResource.accessItems
@@ -305,7 +312,7 @@ export class AccessItemsManagementComponent implements OnInit {
         if (!this.accessId?.accessId) return;
         this.store
           .dispatch(new RemoveAccessItemsPermissions(this.accessId.accessId))
-          .pipe(takeUntil(this.destroy$))
+          .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe(() => {
             this.searchForAccessItemsWorkbaskets();
           });
@@ -332,10 +339,5 @@ export class AccessItemsManagementComponent implements OnInit {
       });
       this.searchForAccessItemsWorkbaskets();
     }
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

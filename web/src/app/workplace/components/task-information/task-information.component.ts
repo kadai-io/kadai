@@ -22,15 +22,16 @@ import {
   inject,
   input,
   model,
-  OnDestroy,
   OnInit,
   output,
   signal,
   untracked,
-  viewChild
+  viewChild,
+  DestroyRef
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Task } from 'app/workplace/models/task';
-import { FormsModule, NgForm } from '@angular/forms';
+import { FormGroup, FormsModule, NgForm } from '@angular/forms';
 import { Observable, Subject } from 'rxjs';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { ClassificationsService } from 'app/shared/services/classifications/classifications.service';
@@ -49,6 +50,7 @@ import { MatNativeDateModule, MatOption } from '@angular/material/core';
 import {
   MatDatepicker,
   MatDatepickerInput,
+  MatDatepickerInputEvent,
   MatDatepickerModule,
   MatDatepickerToggle
 } from '@angular/material/datepicker';
@@ -87,7 +89,7 @@ import { NotificationService } from 'app/shared/services/notifications/notificat
     AccessIdExistsValidatorDirective
   ]
 })
-export class TaskInformationComponent implements OnInit, OnDestroy {
+export class TaskInformationComponent implements OnInit {
   task = model<Task>();
   saveToggleTriggered = input<boolean>();
   formValid = output<boolean>();
@@ -102,7 +104,7 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
   private classificationService = inject(ClassificationsService);
   private notificationService = inject(NotificationService);
   private cancelPendingWait$ = new Subject<void>();
-  private destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
 
   constructor() {
     effect(() => {
@@ -117,7 +119,7 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
     this.getClassificationByDomain();
   }
 
-  updateDate($event: any) {
+  updateDate($event: MatDatepickerInputEvent<Date>) {
     const newDate = $event.value;
     if (typeof newDate !== 'undefined' && newDate !== null) {
       const newDateISOString = newDate.toISOString();
@@ -135,11 +137,6 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
   changedClassification(itemSelected: Classification) {
     this.task()!.classificationSummary = itemSelected;
     this.isClassificationEmpty = false;
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   private validate() {
@@ -162,7 +159,7 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
           filter((status) => status !== 'PENDING'),
           take(1),
           takeUntil(this.cancelPendingWait$),
-          takeUntil(this.destroy$)
+          takeUntilDestroyed(this.destroyRef)
         )
         .subscribe(() => {
           this.checkAndEmitValidity(formGroup);
@@ -172,7 +169,7 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
     }
   }
 
-  private checkAndEmitValidity(formGroup: any) {
+  private checkAndEmitValidity(formGroup: FormGroup) {
     const ownerControl = formGroup.controls['task.owner'];
 
     if (formGroup.valid && !this.isClassificationEmpty) {
@@ -189,7 +186,7 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
     this.requestInProgress.set(true);
     this.classificationService
       .getClassifications({ domain: [this.task()!.workbasketSummary!.domain!] })
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((classificationPagingList) => {
         this.classifications.set(classificationPagingList.classifications);
         this.requestInProgress.set(false);

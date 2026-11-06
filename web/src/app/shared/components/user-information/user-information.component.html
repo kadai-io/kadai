@@ -24,12 +24,14 @@
 @if (userInformation(); as user) {
   <div class="user-info">
     <span>Logged as: {{ user.userId }}</span>
-    <button (click)="toggleRoles();" aria-controls="roles" aria-expanded="true"
+    <button (click)="toggleRoles();" [attr.aria-expanded]="showRoles" aria-controls="roles"
             class="user-info__button" mat-button>
       <span>Roles</span>
     </button>
   </div>
-  <div [@toggleDown]="showRoles" class="roles">
-    <span><i>{{ roles() }}</i></span>
-  </div>
+  @if (showRoles) {
+    <div animate.enter="roles--enter" animate.leave="roles--leave" class="roles" id="roles">
+      <span><i>{{ roles() }}</i></span>
+    </div>
+  }
 }

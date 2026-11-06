@@ -39,10 +39,11 @@ export class TaskService {
   }
 
   private static convertTasksDatesToGMT(task: Task): Task {
-    const timeAttributes = ['created', 'claimed', 'completed', 'modified', 'planned', 'due'];
+    const timeAttributes = ['created', 'claimed', 'completed', 'modified', 'planned', 'due'] as const;
     timeAttributes.forEach((attributeName) => {
-      if ((task as any)[attributeName]) {
-        (task as any)[attributeName] = new Date((task as any)[attributeName]).toISOString();
+      const value = task[attributeName];
+      if (value) {
+        task[attributeName] = new Date(value).toISOString();
       }
     });
     return task;

@@ -51,7 +51,7 @@ const emptyTaskFilter: TaskQueryFilterParameter = {
 export class FilterState implements NgxsOnInit {
   @Action(SetWorkbasketFilter)
   setWorkbasketFilter(ctx: StateContext<FilterStateModel>, action: SetWorkbasketFilter): Observable<null> {
-    const currentState = (ctx.getState() as any)[action.component];
+    const currentState = ctx.getState()[action.component as keyof FilterStateModel] as WorkbasketQueryFilterParameter;
     const param = action.parameters;
     const filter: WorkbasketQueryFilterParameter = {
       'description-like': param['description-like'] ? [...param['description-like']] : currentState['description-like'],
@@ -82,10 +82,11 @@ export class FilterState implements NgxsOnInit {
   @Action(SetTaskFilter)
   setTaskFilter(ctx: StateContext<FilterStateModel>, action: SetTaskFilter): Observable<null> {
     const param = action.parameters;
-    let filter: any = { ...ctx.getState().tasks };
+    // every task filter field is an array; the state model just declares them optional
+    const filter = { ...ctx.getState().tasks } as Record<string, unknown[]>;
 
     Object.keys(param).forEach((key) => {
-      filter[key] = [...(param as any)[key]];
+      filter[key] = [...(param as Record<string, unknown[]>)[key]];
     });
 
     const isWildcardSearch =
@@ -105,7 +106,7 @@ export class FilterState implements NgxsOnInit {
 
     ctx.setState({
       ...ctx.getState(),
-      tasks: filter
+      tasks: filter as TaskQueryFilterParameter
     });
 
     return of(null);

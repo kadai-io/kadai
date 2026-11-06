@@ -47,7 +47,7 @@ export class AccessItemsManagementState implements NgxsAfterBootstrap {
   private requestInProgressService = inject(RequestInProgressService);
 
   @Action(SelectAccessId)
-  selectAccessId(ctx: StateContext<AccessItemsManagementStateModel>, action: SelectAccessId): Observable<any> {
+  selectAccessId(ctx: StateContext<AccessItemsManagementStateModel>, action: SelectAccessId): Observable<unknown> {
     const selectedAccessId = action.accessIdDefinition;
     ctx.patchState({
       selectedAccessId
@@ -59,7 +59,7 @@ export class AccessItemsManagementState implements NgxsAfterBootstrap {
   getGroupsByAccessId(
     ctx: StateContext<AccessItemsManagementStateModel>,
     action: GetGroupsByAccessId
-  ): Observable<any> {
+  ): Observable<unknown> {
     return this.accessIdsService.getGroupsByAccessId(action.accessId).pipe(
       take(1),
       tap(
@@ -79,7 +79,7 @@ export class AccessItemsManagementState implements NgxsAfterBootstrap {
   getPermissionsByAccessId(
     ctx: StateContext<AccessItemsManagementStateModel>,
     action: GetPermissionsByAccessId
-  ): Observable<any> {
+  ): Observable<unknown> {
     return this.accessIdsService.getPermissionsByAccessId(action.accessId).pipe(
       take(1),
       tap(
@@ -96,7 +96,7 @@ export class AccessItemsManagementState implements NgxsAfterBootstrap {
   }
 
   @Action(GetAccessItems)
-  getAccessItems(ctx: StateContext<AccessItemsManagementStateModel>, action: GetAccessItems): Observable<any> {
+  getAccessItems(ctx: StateContext<AccessItemsManagementStateModel>, action: GetAccessItems): Observable<unknown> {
     this.requestInProgressService.setRequestInProgress(true);
     return this.accessIdsService
       .getAccessItems(action.filterParameter, action.sortParameter, action.pagingParameter)
@@ -120,7 +120,7 @@ export class AccessItemsManagementState implements NgxsAfterBootstrap {
   removeAccessItemsPermissions(
     ctx: StateContext<AccessItemsManagementStateModel>,
     action: RemoveAccessItemsPermissions
-  ): Observable<any> {
+  ): Observable<unknown> {
     this.requestInProgressService.setRequestInProgress(true);
     return this.accessIdsService.removeAccessItemsPermissions(action.accessId).pipe(
       take(1),
@@ -138,7 +138,7 @@ export class AccessItemsManagementState implements NgxsAfterBootstrap {
     );
   }
 
-  ngxsAfterBootstrap(ctx?: StateContext<any>): void {
+  ngxsAfterBootstrap(ctx?: StateContext<unknown>): void {
     ctx?.dispatch(new InitializeStore());
   }
 }

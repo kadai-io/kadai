@@ -252,13 +252,13 @@ describe('WorkbasketAccessItemsComponent', () => {
 
   it('should add index to selectedRows when selectRow is called with checked true', () => {
     component.selectedRows = [];
-    component.selectRow({ target: { checked: true } }, 0);
+    component.selectRow({ target: { checked: true } } as unknown as Event, 0);
     expect(component.selectedRows).toContain(0);
   });
 
   it('should remove index from selectedRows when selectRow is called with checked false', () => {
     component.selectedRows = [0, 1];
-    component.selectRow({ target: { checked: false } }, 0);
+    component.selectRow({ target: { checked: false } } as unknown as Event, 0);
     expect(component.selectedRows).not.toContain(0);
     expect(component.selectedRows).toContain(1);
   });
@@ -432,7 +432,7 @@ describe('WorkbasketAccessItemsComponent', () => {
     const checkbox = document.getElementById('checkbox-0-00') as HTMLInputElement;
     if (checkbox) {
       checkbox.checked = true;
-      component.setSelectAllCheckbox(0, { currentTarget: { checked: false } });
+      component.setSelectAllCheckbox(0, { currentTarget: { checked: false } } as unknown as Event);
       expect(checkbox.checked).toBe(false);
     }
   });
@@ -443,7 +443,7 @@ describe('WorkbasketAccessItemsComponent', () => {
     component.keysOfVisibleFields.forEach((key) => {
       accessItem.get(key)?.setValue(true);
     });
-    component.setSelectAllCheckbox(0, { currentTarget: { checked: true } });
+    component.setSelectAllCheckbox(0, { currentTarget: { checked: true } } as unknown as Event);
     const checkbox = document.getElementById('checkbox-0-00') as HTMLInputElement;
     if (checkbox) {
       expect(checkbox.checked).toBe(true);
@@ -456,19 +456,11 @@ describe('WorkbasketAccessItemsComponent', () => {
     component.keysOfVisibleFields.forEach((key) => {
       accessItem.get(key)?.setValue(false);
     });
-    component.setSelectAllCheckbox(0, { currentTarget: { checked: true } });
+    component.setSelectAllCheckbox(0, { currentTarget: { checked: true } } as unknown as Event);
     const checkbox = document.getElementById('checkbox-0-00') as HTMLInputElement;
     if (checkbox) {
       expect(checkbox.checked).toBe(false);
     }
-  });
-
-  it('should complete destroy$ on ngOnDestroy', () => {
-    const nextSpy = vi.spyOn(component.destroy$, 'next');
-    const completeSpy = vi.spyOn(component.destroy$, 'complete');
-    component.ngOnDestroy();
-    expect(nextSpy).toHaveBeenCalled();
-    expect(completeSpy).toHaveBeenCalled();
   });
 
   it('should render the access items table when workbasket is set', () => {

@@ -16,7 +16,8 @@
  *
  */
 
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationStart, Router, RouterEvent, RouterOutlet } from '@angular/router';
 import { MasterAndDetailService } from 'app/shared/services/master-and-detail/master-and-detail.service';
 
@@ -32,6 +33,7 @@ export class MasterAndDetailComponent implements OnInit {
   showDetail = signal(false);
   currentRoute = signal('');
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
   private masterAndDetailService = inject(MasterAndDetailService);
   private classifications = 'classifications';
   private workbaskets = 'workbaskets';
@@ -41,7 +43,7 @@ export class MasterAndDetailComponent implements OnInit {
   ngOnInit(): void {
     this.showDetail.set(this.showDetails());
     this.masterAndDetailService.setShowDetail(this.showDetail());
-    this.router.events.subscribe((event) => {
+    this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
       if (event instanceof NavigationStart) {
         this.showDetail.set(this.showDetails(event));
         this.masterAndDetailService.setShowDetail(this.showDetail());

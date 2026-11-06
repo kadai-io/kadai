@@ -46,18 +46,18 @@ import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.ser
 import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
 import { UserInfo } from 'app/shared/models/user-info';
 
-@Component({ selector: 'kadai-task-list-toolbar', template: '', standalone: true })
+@Component({ selector: 'kadai-task-list-toolbar', template: '' })
 class StubTaskListToolbarComponent {
   taskDefaultSortBy = input<any>();
 }
 
-@Component({ selector: 'kadai-task-list', template: '', standalone: true })
+@Component({ selector: 'kadai-task-list', template: '' })
 class StubTaskListComponent {
   tasks = input<any>();
   selectedId = model<string>();
 }
 
-@Component({ selector: 'kadai-shared-pagination', template: '', standalone: true })
+@Component({ selector: 'kadai-shared-pagination', template: '' })
 class StubPaginationComponent {
   numberOfItems = input<any>();
   page = input<any>();

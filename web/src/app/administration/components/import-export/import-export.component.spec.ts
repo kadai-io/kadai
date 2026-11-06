@@ -180,14 +180,6 @@ describe('ImportExportComponent', () => {
     expect(nativeElement.value).toBe('');
   });
 
-  it('should complete destroy$ on ngOnDestroy', () => {
-    const nextSpy = vi.spyOn(app.destroy$, 'next');
-    const completeSpy = vi.spyOn(app.destroy$, 'complete');
-    app.ngOnDestroy();
-    expect(nextSpy).toHaveBeenCalled();
-    expect(completeSpy).toHaveBeenCalled();
-  });
-
   it('should export the workbaskets', () => {
     fixture.componentRef.setInput('currentSelection', KadaiType.WORKBASKETS);
     app.export('A');

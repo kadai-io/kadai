@@ -20,7 +20,6 @@ import { Component, inject, input, output } from '@angular/core';
 import { Sorting, WORKBASKET_SORT_PARAMETER_NAMING, WorkbasketQuerySortParameter } from 'app/shared/models/sorting';
 import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
 import { KadaiType } from 'app/shared/models/kadai-type';
-import { expandDown } from 'app/shared/animations/expand.animation';
 import { Store } from '@ngxs/store';
 import { ACTION } from 'app/shared/models/action';
 import { CreateWorkbasket } from 'app/shared/store/workbasket-store/workbasket.actions';
@@ -37,7 +36,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'kadai-administration-workbasket-list-toolbar',
-  animations: [expandDown],
   templateUrl: './workbasket-list-toolbar.component.html',
   styleUrls: ['./workbasket-list-toolbar.component.scss'],
   imports: [MatButton, MatTooltip, MatIcon, ImportExportComponent, SortComponent, WorkbasketFilterComponent]

@@ -16,21 +16,31 @@
  *
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, inject, input, OnInit, signal, viewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  input,
+  OnInit,
+  signal,
+  viewChild,
+  DestroyRef
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
-import { expandDown } from 'app/shared/animations/expand.animation';
 import { MatListOption, MatSelectionList } from '@angular/material/list';
 import { CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { Side } from 'app/administration/models/workbasket-distribution-enums';
 import { Store } from '@ngxs/store';
 import { WorkbasketSelectors } from 'app/shared/store/workbasket-store/workbasket.selectors';
-import { filter, map, pairwise, take, takeUntil, throttleTime } from 'rxjs/operators';
+import { filter, map, pairwise, take, throttleTime } from 'rxjs/operators';
 import {
   FetchAvailableDistributionTargets,
   FetchWorkbasketDistributionTargets,
   TransferDistributionTargets
 } from 'app/shared/store/workbasket-store/workbasket.actions';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { WorkbasketQueryFilterParameter } from 'app/shared/models/workbasket-query-filter-parameter';
 import { FilterSelectors } from 'app/shared/store/filter-store/filter.selectors';
 import { WorkbasketDistributionTarget } from 'app/shared/models/workbasket-distribution-target';
@@ -48,7 +58,6 @@ import { OrderBy } from 'app/shared/pipes/order-by.pipe';
   selector: 'kadai-administration-workbasket-distribution-targets-list',
   templateUrl: './workbasket-distribution-targets-list.component.html',
   styleUrls: ['./workbasket-distribution-targets-list.component.scss'],
-  animations: [expandDown],
   imports: [
     MatToolbar,
     MatTooltip,
@@ -69,7 +78,7 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
   side = input<Side>();
   header = input<string>();
   allSelected!: boolean;
-  component = input<any>();
+  component = input<string>();
   transferDistributionTargetObservable = input<Observable<Side>>();
   workbasketDistributionTargets$: Observable<WorkbasketSummary[]> = inject(Store).select(
     WorkbasketSelectors.workbasketDistributionTargets
@@ -91,7 +100,7 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
   requestInProgress = signal(0);
   private changeDetector = inject(ChangeDetectorRef);
   private store = inject(Store);
-  private destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
   // compared via JSON.stringify: FilterState always builds these with the same key order
   private filterParam!: WorkbasketQueryFilterParameter;
   private allSelectedDiff = 0;
@@ -99,8 +108,10 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
   ngOnInit(): void {
     this.requestInProgress.set(2);
     if (this.side() === Side.AVAILABLE) {
-      this.availableDistributionTargets$.pipe(takeUntil(this.destroy$)).subscribe((wbs) => this.assignWbs(wbs));
-      this.availableDistributionTargetsFilter$.pipe(takeUntil(this.destroy$)).subscribe((filter) => {
+      this.availableDistributionTargets$
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((wbs) => this.assignWbs(wbs));
+      this.availableDistributionTargetsFilter$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((filter) => {
         if (typeof this.filterParam === 'undefined' || JSON.stringify(this.filterParam) === JSON.stringify(filter)) {
           this.filterParam = filter;
           return;
@@ -112,8 +123,10 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
         this.changeDetector.markForCheck();
       });
     } else {
-      this.workbasketDistributionTargets$.pipe(takeUntil(this.destroy$)).subscribe((wbs) => this.assignWbs(wbs));
-      this.selectedDistributionTargetsFilter$.pipe(takeUntil(this.destroy$)).subscribe((filter) => {
+      this.workbasketDistributionTargets$
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((wbs) => this.assignWbs(wbs));
+      this.selectedDistributionTargetsFilter$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((filter) => {
         if (typeof this.filterParam === 'undefined' || JSON.stringify(this.filterParam) === JSON.stringify(filter)) {
           this.filterParam = filter;
           return;
@@ -158,7 +171,7 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
   }
 
   transferDistributionTargets(targetSide: Side) {
-    let selectedWBs = this.distributionTargets().filter((item: any) => item.selected === true);
+    let selectedWBs = this.distributionTargets().filter((item) => item.selected === true);
     this.distributionTargets().forEach((wb) => (wb.selected = false));
     this.store
       .dispatch(new TransferDistributionTargets(targetSide, selectedWBs))
@@ -194,7 +207,9 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
   private applyFilter() {
     function filterExact(target: WorkbasketDistributionTarget, filterStrings: string[] | undefined, attribute: string) {
       if (!!filterStrings && filterStrings?.length !== 0) {
-        return filterStrings.map((str) => str.toLowerCase()).includes((target as any)[attribute].toLowerCase());
+        return filterStrings
+          .map((str) => str.toLowerCase())
+          .includes(String((target as Record<string, unknown>)[attribute] ?? '').toLowerCase());
       }
       return true;
     }
@@ -203,7 +218,11 @@ export class WorkbasketDistributionTargetsListComponent implements OnInit, After
       if (!!filterStrings && filterStrings?.length !== 0) {
         let ret = true;
         filterStrings.forEach((filterElement) => {
-          ret = ret && (target as any)[attribute].toLowerCase().includes(filterElement.toLowerCase());
+          ret =
+            ret &&
+            String((target as Record<string, unknown>)[attribute] ?? '')
+              .toLowerCase()
+              .includes(filterElement.toLowerCase());
         });
         return ret;
       }

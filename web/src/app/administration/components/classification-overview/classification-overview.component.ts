@@ -16,11 +16,11 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Observable, Subject } from 'rxjs';
+import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Params } from '@angular/router';
+import { Observable } from 'rxjs';
 import { Store } from '@ngxs/store';
-import { takeUntil } from 'rxjs/operators';
 import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
 import {
   CreateClassification,
@@ -40,19 +40,19 @@ import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.compon
   styleUrls: ['./classification-overview.component.scss'],
   imports: [ClassificationListComponent, ClassificationDetailsComponent, SvgIconComponent]
 })
-export class ClassificationOverviewComponent implements OnInit, OnDestroy {
+export class ClassificationOverviewComponent implements OnInit {
   showDetail = signal(false);
   selectedClassification$: Observable<Classification> = inject(Store).select(
     ClassificationSelectors.selectedClassification
   );
-  routerParams: any;
+  routerParams: Params = {};
   private route = inject(ActivatedRoute);
   private store = inject(Store);
-  private destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
 
   ngOnInit() {
     if (this.route.firstChild) {
-      this.route.firstChild.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      this.route.firstChild.params.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
         this.routerParams = params;
 
         if (this.routerParams.id) {
@@ -68,13 +68,8 @@ export class ClassificationOverviewComponent implements OnInit, OnDestroy {
       });
     }
 
-    this.selectedClassification$.pipe(takeUntil(this.destroy$)).subscribe((selectedClassification) => {
+    this.selectedClassification$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((selectedClassification) => {
       this.showDetail.set(!!selectedClassification);
     });
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

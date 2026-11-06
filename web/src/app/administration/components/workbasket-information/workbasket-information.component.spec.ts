@@ -238,14 +238,6 @@ describe('WorkbasketInformationComponent', () => {
   //   expect(component).toBeTruthy();
   // });
 
-  it('should complete destroy$ on ngOnDestroy', () => {
-    const nextSpy = vi.spyOn(component.destroy$, 'next');
-    const completeSpy = vi.spyOn(component.destroy$, 'complete');
-    component.ngOnDestroy();
-    expect(nextSpy).toHaveBeenCalled();
-    expect(completeSpy).toHaveBeenCalled();
-  });
-
   it('should set requestInProgress to true when beforeRequest is called', () => {
     const requestInProgressService = TestBed.inject(RequestInProgressService);
     const setRequestSpy = vi.spyOn(requestInProgressService, 'setRequestInProgress');

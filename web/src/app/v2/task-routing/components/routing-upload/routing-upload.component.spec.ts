@@ -189,4 +189,13 @@ describe('RoutingUploadComponent', () => {
     expect(span.textContent).toContain('routing-rules.xlsx');
     localFixture.destroy();
   });
+
+  it('should open the file chooser via Enter and Space on the upload area', () => {
+    const fileInput = fixture.nativeElement.querySelector('input[type="file"]');
+    const clickSpy = vi.spyOn(fileInput, 'click').mockImplementation(() => {});
+    const uploadArea: HTMLElement = fixture.nativeElement.querySelector('.routing-upload__upload-area');
+    uploadArea.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    uploadArea.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+    expect(clickSpy).toHaveBeenCalledTimes(2);
+  });
 });

@@ -16,11 +16,10 @@
  *
  */
 
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReportData } from 'app/monitor/models/report-data';
 import { MonitorService } from 'app/monitor/services/monitor.service';
-import { takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { ReportTableComponent } from 'app/monitor/components/report-table/report-table.component';
@@ -44,13 +43,13 @@ export class TaskReportComponent implements OnInit {
   reportData = signal<ReportData | undefined>(undefined);
   private monitorService = inject(MonitorService);
   private requestInProgressService = inject(RequestInProgressService);
-  private destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
 
   ngOnInit() {
     this.requestInProgressService.setRequestInProgress(true);
     this.monitorService
       .getTaskStatusReport()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((report) => {
         this.pieChartData.labels = report.meta.header;
         this.pieChartData.datasets.push({ data: report.sumRow[0].cells });

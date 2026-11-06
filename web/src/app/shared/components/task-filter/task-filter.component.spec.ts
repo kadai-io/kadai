@@ -142,16 +142,6 @@ describe('TaskFilterComponent', () => {
     expect(dispatchSpy).toHaveBeenCalledWith(new SetTaskFilter(component.filter()!));
   });
 
-  it('ngOnDestroy() should complete destroy$', () => {
-    const completeSpy = vi.spyOn(component.destroy$, 'complete');
-    const nextSpy = vi.spyOn(component.destroy$, 'next');
-
-    component.ngOnDestroy();
-
-    expect(nextSpy).toHaveBeenCalled();
-    expect(completeSpy).toHaveBeenCalled();
-  });
-
   it('should render template with state filter options', () => {
     fixture.detectChanges();
     const matSelect = fixture.nativeElement.querySelector('mat-select');

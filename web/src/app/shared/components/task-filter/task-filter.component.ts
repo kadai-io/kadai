@@ -16,13 +16,12 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ALL_STATES, TaskState } from 'app/shared/models/task-state';
 import { TaskQueryFilterParameter } from 'app/shared/models/task-query-filter-parameter';
 import { Actions, ofActionCompleted, Store } from '@ngxs/store';
 import { ClearTaskFilter, SetTaskFilter } from 'app/shared/store/filter-store/filter.actions';
-import { takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatInput } from '@angular/material/input';
@@ -39,16 +38,16 @@ import { SetPage } from 'app/shared/store/task-store/task.actions';
   styleUrls: ['./task-filter.component.scss'],
   imports: [MatFormField, MatTooltip, MatLabel, MatInput, FormsModule, MatSelect, MatOption, MapValuesPipe]
 })
-export class TaskFilterComponent implements OnInit, OnDestroy {
+export class TaskFilterComponent implements OnInit {
   filter = signal<TaskQueryFilterParameter | null>(null);
-  destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
   allStates: Map<TaskState, string> = ALL_STATES;
   private store = inject(Store);
   private ngxsActions$ = inject(Actions);
 
   ngOnInit() {
     this.clear();
-    this.ngxsActions$.pipe(ofActionCompleted(ClearTaskFilter), takeUntil(this.destroy$)).subscribe(() => {
+    this.ngxsActions$.pipe(ofActionCompleted(ClearTaskFilter), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.clear();
     });
   }
@@ -87,10 +86,5 @@ export class TaskFilterComponent implements OnInit, OnDestroy {
       'owner-like': [],
       'is-reopened': []
     });
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

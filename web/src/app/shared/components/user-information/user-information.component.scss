@@ -112,3 +112,29 @@ button.transparent {
 :host ::ng-deep .user-info > .mat-mdc-button {
   color: white;
 }
+
+.roles--enter {
+  animation: roles-expand 300ms ease-in;
+}
+
+.roles--leave {
+  animation: roles-expand 300ms ease-out reverse;
+}
+
+@keyframes roles-expand {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 200px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roles--enter,
+  .roles--leave {
+    animation: none;
+  }
+}

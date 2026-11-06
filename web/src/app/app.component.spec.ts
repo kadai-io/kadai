@@ -133,16 +133,6 @@ describe('AppComponent', () => {
     expect(kadaiEngineServiceMock.getVersion).toHaveBeenCalled();
   });
 
-  it('should complete destroy$ on ngOnDestroy', () => {
-    const nextSpy = vi.spyOn(component.destroy$, 'next');
-    const completeSpy = vi.spyOn(component.destroy$, 'complete');
-
-    component.ngOnDestroy();
-
-    expect(nextSpy).toHaveBeenCalled();
-    expect(completeSpy).toHaveBeenCalled();
-  });
-
   it('should set version from getVersion response', () => {
     expect(component.version()).toBe('1.0.0');
   });

@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, effect, input, signal, untracked } from '@angular/core';
+import { Component, computed, input, linkedSignal, signal } from '@angular/core';
 import { ReportData } from 'app/monitor/models/report-data';
 import { ReportRow } from 'app/monitor/models/report-row';
 import { MatButton } from '@angular/material/button';
@@ -29,50 +29,14 @@ import { MatButton } from '@angular/material/button';
 })
 export class ReportTableComponent {
   reportDataInput = input<ReportData>(undefined, { alias: 'reportData' });
-  reportData = signal<ReportData>(undefined as any);
-  fullReportData!: ReportData;
-  fullRowsData = signal<ReportRow[][]>(undefined as any);
+  private rowChunks = computed(() => chunkRows(this.reportDataInput()?.rows));
+  reportData = linkedSignal<ReportData>(() => {
+    const data = this.reportDataInput();
+    // undefined until the parent provides data; the template guards with @if
+    return (data && { ...data, rows: this.rowChunks()?.[0] ?? data.rows }) as ReportData;
+  });
+  fullRowsData = linkedSignal<ReportRow[][]>(() => this.rowChunks()?.slice(1) as ReportRow[][]);
   currentExpHeaders = signal(0);
-
-  constructor() {
-    effect(() => {
-      const data = this.reportDataInput();
-      untracked(() => {
-        if (data) {
-          this.processReportData(data);
-        }
-      });
-    });
-  }
-
-  private processReportData(data: ReportData) {
-    this.fullReportData = { ...data };
-    this.reportData.set({ ...data });
-    const computed = this.fullReportData.rows?.reduce((resultArray: ReportRow[][], item, index) => {
-      const itemsPerChunk = 20;
-      if (this.fullReportData.rows.length > itemsPerChunk) {
-        const chunkIndex = Math.floor(index / itemsPerChunk);
-
-        if (!resultArray[chunkIndex]) {
-          resultArray[chunkIndex] = [];
-        }
-
-        resultArray[chunkIndex].push(item);
-      } else {
-        return [this.fullReportData.rows];
-      }
-      return resultArray;
-    }, []);
-    this.fullRowsData.set(computed);
-    if (this.fullRowsData()) {
-      this.reportData.update((reportData) => ({ ...reportData, rows: this.fullRowsData()![0] }));
-      this.fullRowsData.update((fullRowsData) => {
-        const rowsData = [...fullRowsData];
-        rowsData.splice(0, 1);
-        return rowsData;
-      });
-    }
-  }
 
   showMoreRows() {
     if (this.hasMoreRows()) {
@@ -125,4 +89,15 @@ export class ReportTableComponent {
     const rows = sumRow ? reportData.sumRow : reportData.rows;
     return rows[index + 1] ? !rows[index + 1].display : false;
   }
+}
+
+const ROWS_PER_CHUNK = 20;
+
+function chunkRows(rows: ReportRow[] | undefined): ReportRow[][] | undefined {
+  if (!rows) return undefined;
+  const chunks: ReportRow[][] = [];
+  for (let i = 0; i < rows.length; i += ROWS_PER_CHUNK) {
+    chunks.push(rows.slice(i, i + ROWS_PER_CHUNK));
+  }
+  return chunks;
 }

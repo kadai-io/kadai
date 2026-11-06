@@ -17,8 +17,10 @@
  */
 
 import { inject, Injectable } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
-import { Observable, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, combineLatest, concat, Observable, ReplaySubject, throwError } from 'rxjs';
+import { catchError, distinctUntilChanged, filter, ignoreElements, map, shareReplay, tap } from 'rxjs/operators';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { SelectedRouteService } from 'app/shared/services/selected-route/selected-route';
 import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
@@ -32,51 +34,63 @@ export class DomainService {
   private selectedRouteService = inject(SelectedRouteService);
   private runtimeConfigService = inject(RuntimeConfigService);
 
-  private domainRestValue: Array<string> = new Array<string>();
-  private domainValue: Array<string> = new Array<string>();
   private domainSelectedValue!: string;
   private domainSelected = new ReplaySubject<string>(1);
-  private dataObs$ = new ReplaySubject<Array<string>>(1);
-  private hasMasterDomain = false;
+  private restDomains$ = new BehaviorSubject<string[] | undefined>(undefined);
+  private hasMasterDomain$ = new BehaviorSubject(false);
+  // never errors: a failed request only reaches the caller that triggered it
+  private domains$: Observable<string[]> = combineLatest([
+    this.restDomains$.pipe(filter((domains): domains is string[] => domains !== undefined)),
+    this.hasMasterDomain$.pipe(distinctUntilChanged())
+  ]).pipe(
+    map(([domains, hasMasterDomain]) =>
+      hasMasterDomain && domains.some((domain) => domain !== '') ? [...domains, ''] : domains
+    )
+  );
+  private request$?: Observable<string[]>;
 
   constructor() {
-    this.selectedRouteService.getSelectedRoute().subscribe((value: string) => {
-      if (value.indexOf('workbaskets') === 0) {
-        this.hasMasterDomain = false;
-        this.removeMasterDomain();
-        if (this.domainSelectedValue === '') {
-          this.selectDomain(this.domainValue[0]);
+    this.selectedRouteService
+      .getSelectedRoute()
+      .pipe(takeUntilDestroyed())
+      .subscribe((value: string) => {
+        if (value.indexOf('workbaskets') === 0) {
+          this.removeMasterDomain();
+          const firstDomain = this.restDomains$.value?.[0];
+          if (this.domainSelectedValue === '' && firstDomain !== undefined) {
+            this.selectDomain(firstDomain);
+          }
+        } else if (value.indexOf('classifications') === 0) {
+          this.addMasterDomain();
         }
-      } else if (value.indexOf('classifications') === 0) {
-        this.hasMasterDomain = true;
-        this.addMasterDomain();
-      }
-    });
+      });
   }
+
   get url(): string {
     return this.runtimeConfigService.kadaiRestUrl + '/v1/domains';
   }
 
   // GET
   getDomains(forceRefresh = false): Observable<string[]> {
-    if (!this.dataObs$.observers.length || forceRefresh) {
-      this.httpClient.get<string[]>(this.url).subscribe(
-        (domains) => {
-          this.domainRestValue = domains;
-          this.domainValue = domains;
-          this.dataObs$.next(this.hasMasterDomain ? this.addEmptyDomain(domains) : domains);
-          if (!this.domainSelectedValue && this.domainValue.length > 0) {
-            this.selectDomain(this.domainValue[0]);
+    if (forceRefresh || !this.request$) {
+      const request$: Observable<string[]> = this.httpClient.get<string[]>(this.url).pipe(
+        tap((domains) => {
+          this.restDomains$.next(domains);
+          if (!this.domainSelectedValue && domains.length > 0) {
+            this.selectDomain(domains[0]);
           }
-        },
-        (error) => {
-          this.dataObs$.error(error);
-          this.dataObs$ = new ReplaySubject(1);
-        }
+        }),
+        catchError((error) => {
+          if (this.request$ === request$) {
+            this.request$ = undefined; // let the next caller retry
+          }
+          return throwError(() => error);
+        }),
+        shareReplay(1)
       );
+      this.request$ = request$;
     }
-
-    return this.dataObs$;
+    return concat(this.request$.pipe(ignoreElements()), this.domains$);
   }
 
   getSelectedDomain(): Observable<string> {
@@ -88,8 +102,8 @@ export class DomainService {
   }
 
   /*
-    This function should be called after getSelectedDomain inner subscriptions have been finished
-   */
+  called when all inner subscriptions of getSelectedDomain have finished
+  */
   domainChangedComplete() {
     this.requestInProgressService.setRequestInProgress(false);
   }
@@ -99,26 +113,15 @@ export class DomainService {
   }
 
   addMasterDomain() {
-    if (this.domainValue.some((domain) => domain !== '')) {
-      this.dataObs$.next(this.addEmptyDomain(this.domainRestValue));
-    }
+    this.hasMasterDomain$.next(true);
   }
 
   removeMasterDomain() {
-    if (this.domainValue.some((domain) => domain === '')) {
-      this.domainValue = this.domainRestValue;
-      this.dataObs$.next(this.domainValue);
-    }
+    this.hasMasterDomain$.next(false);
   }
 
   private selectDomain(value: string) {
     this.domainSelectedValue = value;
     this.domainSelected.next(value);
-  }
-
-  private addEmptyDomain(domains: Array<string>): Array<string> {
-    this.domainValue = Object.assign([], domains);
-    this.domainValue.push('');
-    return this.domainValue;
   }
 }

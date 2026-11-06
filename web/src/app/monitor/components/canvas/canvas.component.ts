@@ -16,14 +16,14 @@
  *
  */
 
-import { AfterViewInit, Component, inject, input, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, inject, input, OnDestroy, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ArcElement, Chart, DoughnutController, Legend, Title, Tooltip } from 'chart.js';
 import { ReportRow } from 'app/monitor/models/report-row';
 import { Store } from '@ngxs/store';
 import { SettingsSelectors } from 'app/shared/store/settings-store/settings.selectors';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Settings } from 'app/settings/models/settings';
-import { takeUntil } from 'rxjs/operators';
 import { SettingMembers } from 'app/settings/components/Settings/expected-members';
 
 @Component({
@@ -37,7 +37,7 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
 
   labels!: string[];
   colors!: string[];
-  destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
 
   settings$: Observable<Settings> = inject(Store).select(SettingsSelectors.getSettings);
 
@@ -46,21 +46,21 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.settings$.pipe(takeUntil(this.destroy$)).subscribe((settings) => {
+    this.settings$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((settings) => {
       this.setValuesFromSettings(settings);
     });
   }
 
   setValuesFromSettings(settings: Settings) {
     this.labels = [
-      settings[SettingMembers.NameHighPriority],
-      settings[SettingMembers.NameMediumPriority],
-      settings[SettingMembers.NameLowPriority]
+      settings[SettingMembers.NameHighPriority] as string,
+      settings[SettingMembers.NameMediumPriority] as string,
+      settings[SettingMembers.NameLowPriority] as string
     ];
     this.colors = [
-      settings[SettingMembers.ColorHighPriority],
-      settings[SettingMembers.ColorMediumPriority],
-      settings[SettingMembers.ColorLowPriority]
+      settings[SettingMembers.ColorHighPriority] as string,
+      settings[SettingMembers.ColorMediumPriority] as string,
+      settings[SettingMembers.ColorLowPriority] as string
     ];
   }
 
@@ -108,7 +108,5 @@ export class CanvasComponent implements OnInit, AfterViewInit, OnDestroy {
     if (element) {
       element.outerHTML = '';
     }
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

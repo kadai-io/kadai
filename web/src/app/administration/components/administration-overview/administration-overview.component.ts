@@ -16,11 +16,10 @@
  *
  */
 
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
-import { Subject } from 'rxjs';
 import { DomainService } from 'app/shared/services/domain/domain.service';
-import { takeUntil } from 'rxjs/operators';
 import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
 import { MatTabLink, MatTabNav, MatTabNavPanel } from '@angular/material/tabs';
 import { MatFormField } from '@angular/material/form-field';
@@ -48,7 +47,7 @@ export class AdministrationOverviewComponent {
   selectedTab = signal('');
   domains = signal<string[]>([]);
   selectedDomain = signal('');
-  destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
   routingAccess = signal(false);
   private router = inject(Router);
   private domainService = inject(DomainService);
@@ -57,7 +56,7 @@ export class AdministrationOverviewComponent {
   constructor() {
     const router = this.router;
 
-    router.events.pipe(takeUntil(this.destroy$)).subscribe((e) => {
+    router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
       const urlPaths = this.router.url.split('/');
       if (this.router.url.includes('detail')) {
         this.selectedTab.set(urlPaths[urlPaths.length - 2]);
@@ -68,21 +67,21 @@ export class AdministrationOverviewComponent {
 
     this.kadaiEngineService
       .isCustomRoutingRulesEnabled()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((value) => {
         this.routingAccess.set(value);
       });
 
     this.domainService
       .getDomains()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((domains) => {
         this.domains.set(domains);
       });
 
     this.domainService
       .getSelectedDomain()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((domain) => {
         this.selectedDomain.set(domain);
       });

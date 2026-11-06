@@ -35,7 +35,7 @@ import { DatePipe } from '@angular/common';
 })
 export class ClassificationReportComponent implements OnInit {
   reportData = signal<ReportData | undefined>(undefined);
-  lineChartLabels = signal<Array<any>>([]);
+  lineChartLabels = signal<string[]>([]);
   lineChartLegend = true;
   lineChartType: ChartType = 'line';
   lineChartData = signal<Array<ChartData>>([]);

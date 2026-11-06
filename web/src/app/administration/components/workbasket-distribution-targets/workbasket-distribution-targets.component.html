@@ -108,14 +108,14 @@
 
 
   <div
-    [ngClass]="sideBySide ? 'distribution-targets-list__lists--side' : 'distribution-targets-list__lists--single'"
+    [class]="sideBySide ? 'distribution-targets-list__lists--side' : 'distribution-targets-list__lists--single'"
     class="distribution-targets-list__lists">
 
     <!-- DISTRIBUTION TABLE-->
     @if (displayingDistributionTargetsPicker) {
       <kadai-administration-workbasket-distribution-targets-list
         [component]="'availableDistributionTargets'"
-        [ngClass]="sideBySide ? 'distribution-targets-list__lists--left-side' : ''"
+        [class]="sideBySide ? 'distribution-targets-list__lists--left-side' : ''"
         [side]="sideEnum.AVAILABLE"
         [transferDistributionTargetObservable]="transferDistributionTargetObservable"
         header="Available distribution targets"

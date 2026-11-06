@@ -21,7 +21,7 @@ import { GroupSetting } from './group-setting';
 export interface Settings {
   schema: GroupSetting[];
 
-  [setting: string]: any;
+  [setting: string]: unknown;
 }
 
 export enum SettingTypes {

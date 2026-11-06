@@ -16,7 +16,7 @@
 ~
 -->
 
-<div #pagination class="pagination">
+<div class="pagination">
   <mat-paginator (page)="changeToPage($event)" [class]="
                  {'pagination__mat-paginator--expanded': expanded(),
                  'pagination__mat-paginator--collapsed': !expanded() }"
@@ -27,9 +27,9 @@
     <div class="pagination__go-to">
       <div class="pagination__go-to-label">Page:</div>
       <mat-form-field>
-        <input (click)="onSelectText()" (focus)="filter(pageSelected)"
-               (ngModelChange)="filter(pageSelected)"
-               [(ngModel)]="pageSelected" [matAutocomplete]="auto"
+        <input (click)="onSelectText()" (focus)="filter(pageSelected())"
+               (ngModelChange)="pageSelected.set($event); filter($event)"
+               [ngModel]="pageSelected()" [matAutocomplete]="auto"
                id="inputTypeAhead"
                matInput name="accessId" type="text" />
         <mat-autocomplete #auto="matAutocomplete" (optionSelected)="goToPage($event.option.value)"

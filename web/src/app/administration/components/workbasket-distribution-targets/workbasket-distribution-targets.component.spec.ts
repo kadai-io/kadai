@@ -163,14 +163,10 @@ describe('WorkbasketDistributionTargetsComponent', () => {
     expect(notificationServiceSpy.showSuccess).toHaveBeenCalledWith('WORKBASKET_DISTRIBUTION_TARGET_RESTORE');
   });
 
-  it('should complete destroy$ and transferDistributionTargetObservable on ngOnDestroy', () => {
-    const destroySpy = vi.spyOn(component.destroy$, 'next');
-    const destroyCompleteSpy = vi.spyOn(component.destroy$, 'complete');
+  it('should complete transferDistributionTargetObservable on ngOnDestroy', () => {
     const transferCompleteSpy = vi.spyOn(component.transferDistributionTargetObservable, 'complete');
     component.ngOnDestroy();
     expect(transferCompleteSpy).toHaveBeenCalled();
-    expect(destroySpy).toHaveBeenCalled();
-    expect(destroyCompleteSpy).toHaveBeenCalled();
   });
 
   it('should call onClear when buttonAction$ emits UNDO action', () => {

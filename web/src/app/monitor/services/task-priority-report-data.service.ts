@@ -62,7 +62,10 @@ export class TaskPriorityReportDataService {
           settings[SettingMembers.IntervalHighPriority],
           settings[SettingMembers.IntervalMediumPriority],
           settings[SettingMembers.IntervalLowPriority]
-        ].map(([lowerBound, upperBound]) => ({ lowerBound, upperBound }));
+        ].map((interval) => {
+          const [lowerBound, upperBound] = interval as [number, number];
+          return { lowerBound, upperBound };
+        });
 
         const isDepthZero = workbasketKey === undefined;
         const request$ = isDepthZero

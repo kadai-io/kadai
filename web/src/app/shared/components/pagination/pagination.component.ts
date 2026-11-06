@@ -19,19 +19,19 @@
 import {
   AfterViewInit,
   Component,
-  effect,
-  ElementRef,
+  computed,
+  DestroyRef,
+  inject,
   input,
-  OnDestroy,
+  linkedSignal,
   OnInit,
   output,
-  untracked,
   viewChild
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Page } from 'app/shared/models/page';
-import { MatPaginator } from '@angular/material/paginator';
-import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { Observable } from 'rxjs';
 import { MatFormField } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
@@ -44,7 +44,7 @@ import { MatOption } from '@angular/material/core';
   styleUrls: ['./pagination.component.scss'],
   imports: [MatPaginator, MatFormField, MatInput, FormsModule, MatAutocompleteTrigger, MatAutocomplete, MatOption]
 })
-export class PaginationComponent implements OnInit, AfterViewInit, OnDestroy {
+export class PaginationComponent implements OnInit, AfterViewInit {
   page = input<Page>();
   type = input<String>();
   numberOfItems = input<number>();
@@ -53,48 +53,17 @@ export class PaginationComponent implements OnInit, AfterViewInit, OnDestroy {
   changePage = output<number>();
 
   paginator = viewChild<MatPaginator>(MatPaginator);
-  paginationWrapper = viewChild<ElementRef>('pagination');
 
-  destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
 
-  hasItems = true;
-  pageSelected = 1;
-  pageNumbers: number[] = [];
+  hasItems = computed(() => (this.numberOfItems() ?? 0) > 0);
+  pageSelected = linkedSignal(() => this.page()?.number ?? 1);
+  pageNumbers = computed(() => Array.from({ length: this.page()?.totalPages ?? 0 }, (_, i) => i + 1));
   filteredPages: string[] = [];
-
-  constructor() {
-    effect(() => {
-      const expanded = this.expanded();
-      const paginationWrapper = this.paginationWrapper();
-      const rangeLabel = paginationWrapper?.nativeElement?.querySelector('.mat-mdc-paginator-range-label');
-      const container = paginationWrapper?.nativeElement?.querySelector('.mat-mdc-paginator-container');
-      if (rangeLabel && container) {
-        if (!expanded) {
-          container.style.justifyContent = 'center';
-          rangeLabel.style.display = 'none';
-        } else {
-          container.style.justifyContent = 'flex-end';
-          rangeLabel.style.display = 'block';
-        }
-      }
-    });
-
-    effect(() => {
-      const page = this.page();
-      const numberOfItems = this.numberOfItems();
-      untracked(() => {
-        this.hasItems = (numberOfItems ?? 0) > 0;
-        if (page) {
-          this.pageSelected = page.number ?? 1;
-          this.updateGoto();
-        }
-      });
-    });
-  }
 
   ngOnInit() {
     const resetPaging = this.resetPaging();
-    if (resetPaging) resetPaging.pipe(takeUntil(this.destroy$)).subscribe(() => this.goToPage(1));
+    if (resetPaging) resetPaging.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.goToPage(1));
   }
 
   ngAfterViewInit() {
@@ -115,35 +84,24 @@ export class PaginationComponent implements OnInit, AfterViewInit, OnDestroy {
         return `${start} - ${end} of ${length}`;
       }
     };
-    this.pageSelected = 1;
+    this.pageSelected.set(1);
   }
 
-  changeToPage(event: any) {
+  changeToPage(event: PageEvent) {
     let currentPageIndex = event.pageIndex;
-    if (currentPageIndex > event.previousPageIndex) {
-      this.pageSelected += 1;
-    } else {
-      this.pageSelected -= 1;
-    }
+    this.pageSelected.update((page) => (currentPageIndex > (event.previousPageIndex ?? 0) ? page + 1 : page - 1));
     this.changePage.emit(currentPageIndex + 1);
-  }
-
-  updateGoto() {
-    this.pageNumbers = [];
-    for (let i = 1; i <= (this.page()?.totalPages ?? 0); i++) {
-      this.pageNumbers.push(i);
-    }
   }
 
   goToPage(page: number) {
     const paginator = this.paginator();
     if (paginator) paginator.pageIndex = page - 1;
-    this.pageSelected = page;
+    this.pageSelected.set(page);
     this.changePage.emit(page);
   }
 
-  filter(filterValue: any) {
-    const pageNumbers = this.pageNumbers.map(String);
+  filter(filterValue: string | number) {
+    const pageNumbers = this.pageNumbers().map(String);
     this.filteredPages = pageNumbers.filter((value) => value.includes(filterValue.toString()));
     if (this.filteredPages.length === 0) {
       this.filteredPages = pageNumbers;
@@ -154,10 +112,5 @@ export class PaginationComponent implements OnInit, AfterViewInit, OnDestroy {
     const input = document.getElementById('inputTypeAhead') as HTMLInputElement;
     input.focus();
     input.select();
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

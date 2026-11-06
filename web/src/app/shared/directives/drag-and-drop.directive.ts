@@ -16,31 +16,39 @@
  *
  */
 
-import { Directive, HostBinding, HostListener, output } from '@angular/core';
+import { Directive, output } from '@angular/core';
 
-@Directive({ selector: '[kadaiDragAndDrop]' })
+@Directive({
+  selector: '[kadaiDragAndDrop]',
+  host: {
+    '[class.fileover]': 'fileOver',
+    '(dragover)': 'onDragOver($event)',
+    '(dragleave)': 'onDragLeave($event)',
+    '(drop)': 'ondrop($event)'
+  }
+})
 export class DragAndDropDirective {
   onFileDropped = output<FileList>();
-  @HostBinding('class.fileover') fileOver!: boolean;
+  fileOver = false;
 
-  @HostListener('dragover', ['$event']) onDragOver(evt: any) {
+  onDragOver(evt: DragEvent) {
     evt.preventDefault();
     evt.stopPropagation();
     this.fileOver = true;
   }
 
-  @HostListener('dragleave', ['$event']) public onDragLeave(evt: any) {
+  onDragLeave(evt: DragEvent) {
     evt.preventDefault();
     evt.stopPropagation();
     this.fileOver = false;
   }
 
-  @HostListener('drop', ['$event']) public ondrop(evt: any) {
+  ondrop(evt: DragEvent) {
     evt.preventDefault();
     evt.stopPropagation();
     this.fileOver = false;
-    let files = evt.dataTransfer.files;
-    if (files.length > 0) {
+    const files = evt.dataTransfer?.files;
+    if (files && files.length > 0) {
       this.onFileDropped.emit(files);
     }
   }

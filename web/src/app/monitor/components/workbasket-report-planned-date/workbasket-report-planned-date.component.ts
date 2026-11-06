@@ -37,7 +37,7 @@ import { BaseChartDirective } from 'ng2-charts';
 export class WorkbasketReportPlannedDateComponent implements OnInit {
   metaInformation = output<MetaInfoData>();
   reportData = signal<ReportData | undefined>(undefined);
-  lineChartLabels = signal<Array<any>>([]);
+  lineChartLabels = signal<string[]>([]);
   lineChartLegend = true;
   lineChartType: ChartType = 'line';
   lineChartData = signal<Array<ChartData>>([]);

@@ -59,7 +59,7 @@ export class ClassificationState implements NgxsAfterBootstrap {
   private domainService = inject(DomainService);
 
   @Action(InitializeStore)
-  initializeStore(ctx: StateContext<ClassificationStateModel>): Observable<any> {
+  initializeStore(ctx: StateContext<ClassificationStateModel>): Observable<unknown> {
     return this.categoryService.getClassificationCategoriesByType().pipe(
       take(1),
       tap((classificationTypes) => {
@@ -114,7 +114,7 @@ export class ClassificationState implements NgxsAfterBootstrap {
   }
 
   @Action(GetClassifications)
-  getClassifications(ctx: StateContext<ClassificationStateModel>): Observable<any> {
+  getClassifications(ctx: StateContext<ClassificationStateModel>): Observable<unknown> {
     const { selectedClassificationType } = ctx.getState();
     return this.domainService.getSelectedDomain().pipe(
       take(1),
@@ -154,7 +154,10 @@ export class ClassificationState implements NgxsAfterBootstrap {
   }
 
   @Action(SaveModifiedClassification)
-  saveClassification(ctx: StateContext<ClassificationStateModel>, action: SaveModifiedClassification): Observable<any> {
+  saveClassification(
+    ctx: StateContext<ClassificationStateModel>,
+    action: SaveModifiedClassification
+  ): Observable<unknown> {
     return this.classificationsService.putClassification(action.classification).pipe(
       take(1),
       tap((savedClassification) =>
@@ -170,7 +173,7 @@ export class ClassificationState implements NgxsAfterBootstrap {
   restoreSelectedClassification(
     ctx: StateContext<ClassificationStateModel>,
     action: RestoreSelectedClassification
-  ): Observable<any> {
+  ): Observable<unknown> {
     const state = ctx.getState();
 
     // check whether the classification already exists
@@ -238,7 +241,7 @@ export class ClassificationState implements NgxsAfterBootstrap {
   }
 
   @Action(RemoveSelectedClassification)
-  removeSelectedClassification(ctx: StateContext<ClassificationStateModel>): Observable<any> {
+  removeSelectedClassification(ctx: StateContext<ClassificationStateModel>): Observable<unknown> {
     const sel = ctx.getState().selectedClassification;
     if (!sel?.classificationId) return EMPTY;
     const classificationId = sel.classificationId;
@@ -255,7 +258,7 @@ export class ClassificationState implements NgxsAfterBootstrap {
   updateClassification(
     ctx: StateContext<ClassificationStateModel>,
     action: SaveModifiedClassification
-  ): Observable<any> {
+  ): Observable<unknown> {
     return this.classificationsService.putClassification(action.classification).pipe(
       take(1),
       tap((classification) => {

@@ -16,9 +16,9 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { Subject, Subscription } from 'rxjs';
+import { Component, inject, OnDestroy, OnInit, signal, DestroyRef } from '@angular/core';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { Task } from 'app/workplace/models/task';
@@ -27,7 +27,6 @@ import { KadaiDate } from 'app/shared/util/kadai.date';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { MasterAndDetailService } from 'app/shared/services/master-and-detail/master-and-detail.service';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
-import { takeUntil } from 'rxjs/operators';
 import { trimObject } from 'app/shared/util/form-trimmer';
 
 import { MatButton } from '@angular/material/button';
@@ -73,7 +72,7 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   currentId = signal<string>('');
   showDetail = false;
   toggleFormValidation = false;
-  destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private requestInProgressService = inject(RequestInProgressService);
@@ -86,7 +85,7 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.store
       .select(TaskSelectors.getSelectedTask)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((task) => {
         this.task.set(task);
         if (task) {
@@ -109,7 +108,7 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
 
     this.requestInProgressService
       .getRequestInProgress()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((value) => {
         this.requestInProgress.set(value);
       });
@@ -178,9 +177,6 @@ export class TaskDetailsComponent implements OnInit, OnDestroy {
     if (this.deleteTaskSubscription) {
       this.deleteTaskSubscription.unsubscribe();
     }
-
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   onSave() {

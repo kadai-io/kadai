@@ -78,4 +78,17 @@ describe('UserInformationComponent', () => {
     expect(debugElement.query(By.css('.user-info'))).toBeNull();
     expect(component.roles()).toBe('');
   });
+
+  it('should only render the roles panel and set aria-expanded when roles are shown', () => {
+    fixture.detectChanges();
+    const button: HTMLElement = debugElement.query(By.css('.user-info__button')).nativeElement;
+    expect(debugElement.query(By.css('#roles'))).toBeNull();
+    expect(button.getAttribute('aria-expanded')).toBe('false');
+
+    button.click();
+    fixture.detectChanges();
+
+    expect(debugElement.query(By.css('#roles')).nativeElement.textContent).toContain('[admin]');
+    expect(button.getAttribute('aria-expanded')).toBe('true');
+  });
 });

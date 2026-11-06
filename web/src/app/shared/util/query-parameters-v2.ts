@@ -21,7 +21,7 @@ export function asUrlQueryString(params: Object): string {
 
   for (const [key, value] of Object.entries(params)) {
     if (value) {
-      let values: any[] = value instanceof Array ? value : [value];
+      const values: unknown[] = value instanceof Array ? value : [value];
       values
         .filter((v) => v !== undefined)
         .forEach((v) => (query += (query ? '&' : '?') + `${key}=${convertValue(v)}`));
@@ -30,7 +30,7 @@ export function asUrlQueryString(params: Object): string {
   return query;
 }
 
-function convertValue(value: any) {
+function convertValue(value: unknown) {
   if (value instanceof Object) {
     return encodeURIComponent(JSON.stringify(value));
   }

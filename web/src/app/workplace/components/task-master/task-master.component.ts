@@ -16,12 +16,11 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TaskQuerySortParameter } from 'app/shared/models/sorting';
 import { OrientationService } from 'app/shared/services/orientation/orientation.service';
-import { Subject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { TaskListToolbarComponent } from 'app/workplace/components/task-list-toolbar/task-list-toolbar.component';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 
@@ -39,10 +38,10 @@ import { CalculateNumberOfCards } from 'app/shared/store/workplace-store/workpla
   styleUrls: ['./task-master.component.scss'],
   imports: [TaskListToolbarComponent, TaskListComponent, PaginationComponent]
 })
-export class TaskMasterComponent implements OnInit, OnDestroy {
+export class TaskMasterComponent implements OnInit {
   type = 'tasks';
   taskDefaultSortBy: TaskQuerySortParameter = TaskQuerySortParameter.PRIORITY;
-  destroy$ = new Subject();
+  private destroyRef = inject(DestroyRef);
   private store = inject(Store);
   private orientationService = inject(OrientationService);
   private requestInProgressService = inject(RequestInProgressService);
@@ -54,13 +53,13 @@ export class TaskMasterComponent implements OnInit, OnDestroy {
   private cards$ = this.store.select(WorkplaceSelectors.getNumberOfCards);
 
   ngOnInit() {
-    this.cards$.pipe(takeUntil(this.destroy$)).subscribe((cards) => {
+    this.cards$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((cards) => {
       this.store.dispatch(new SetPageSize(cards));
     });
 
     this.orientationService
       .getOrientation()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.store.dispatch(new CalculateNumberOfCards());
       });
@@ -68,10 +67,5 @@ export class TaskMasterComponent implements OnInit, OnDestroy {
 
   changePage(page: number) {
     this.store.dispatch(new SetPage(page));
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next(null);
-    this.destroy$.complete();
   }
 }

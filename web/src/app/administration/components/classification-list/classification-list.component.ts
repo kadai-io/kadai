@@ -16,9 +16,10 @@
  *
  */
 
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Actions, ofActionCompleted, ofActionDispatched, Store } from '@ngxs/store';
 
 import { ImportExportService } from 'app/administration/services/import-export.service';
@@ -68,7 +69,7 @@ import { KadaiTreeComponent } from 'app/administration/components/tree/tree.comp
     AsyncPipe
   ]
 })
-export class ClassificationListComponent implements OnInit, OnDestroy {
+export class ClassificationListComponent implements OnInit {
   kadaiType = KadaiType;
   requestInProgress = signal(true);
   inputValue = '';
@@ -81,7 +82,7 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
   categoryIcons$: Observable<ClassificationCategoryImages> = inject(Store).select(
     EngineConfigurationSelectors.selectCategoryIcons
   );
-  destroy$ = new Subject<void>();
+  private destroyRef = inject(DestroyRef);
   classifications = signal<ClassificationSummary[]>([]);
   private location = inject(Location);
   private importExportService = inject(ImportExportService);
@@ -91,34 +92,36 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
   private ngxsActions$ = inject(Actions);
 
   constructor() {
-    this.ngxsActions$.pipe(ofActionDispatched(GetClassifications), takeUntil(this.destroy$)).subscribe(() => {
-      this.requestInProgressService.setRequestInProgress(true);
-    });
-    this.ngxsActions$.pipe(ofActionCompleted(GetClassifications), takeUntil(this.destroy$)).subscribe(() => {
+    this.ngxsActions$
+      .pipe(ofActionDispatched(GetClassifications), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.requestInProgressService.setRequestInProgress(true);
+      });
+    this.ngxsActions$.pipe(ofActionCompleted(GetClassifications), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.requestInProgressService.setRequestInProgress(false);
     });
   }
 
   ngOnInit() {
-    this.classifications$.pipe(takeUntil(this.destroy$)).subscribe((classifications) => {
+    this.classifications$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((classifications) => {
       this.classifications.set(classifications ?? []);
     });
 
     this.requestInProgressService
       .getRequestInProgress()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((value) => {
         this.requestInProgress.set(value);
       });
 
-    this.classificationTypeSelected$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+    this.classificationTypeSelected$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.store.dispatch(new GetClassifications());
       this.selectedCategory.set('');
     });
 
     this.importExportService
       .getImportingFinished()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.store.dispatch(new GetClassifications());
       });
@@ -126,7 +129,7 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
     // needed, so that the list updates, when domain gets changed (could be placed anywhere and should be removed, when domain is in store)
     this.domainService
       .getSelectedDomain()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((domain) => {
         this.store.dispatch(GetClassifications);
       });
@@ -156,10 +159,5 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
 
   setRequestInProgress(value: boolean) {
     this.requestInProgressService.setRequestInProgress(value);
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }
