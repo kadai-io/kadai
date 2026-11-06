@@ -26,12 +26,14 @@ import io.kadai.common.rest.RestEndpoints;
 import io.kadai.rest.test.KadaiSpringBootTest;
 import io.kadai.rest.test.RestHelper;
 import io.kadai.sampledata.SampleDataGenerator;
+import io.kadai.workbasket.rest.models.WorkbasketAccessItemRepresentationModel;
 import io.kadai.workbasket.rest.models.WorkbasketDefinitionCollectionRepresentationModel;
 import io.kadai.workbasket.rest.models.WorkbasketDefinitionRepresentationModel;
 import io.kadai.workbasket.rest.models.WorkbasketRepresentationModel;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,6 +41,7 @@ import java.util.List;
 import java.util.Set;
 import javax.sql.DataSource;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +67,7 @@ class WorkbasketDefinitionControllerIntTest {
   private final RestHelper restHelper;
   private final RestClient restClient;
   private final DataSource dataSource;
+  private String createdWorkbasketId;
 
   @Value("${kadai.schemaName:KADAI}")
   String schemaName;
@@ -81,6 +85,19 @@ class WorkbasketDefinitionControllerIntTest {
   void resetDb() {
     SampleDataGenerator sampleDataGenerator = new SampleDataGenerator(dataSource, schemaName);
     sampleDataGenerator.generateSampleData();
+  }
+
+  @AfterEach
+  void cleanUpCreatedWorkbasket() {
+    if (createdWorkbasketId != null) {
+      restClient
+          .delete()
+          .uri(restHelper.toUrl(RestEndpoints.URL_WORKBASKET_ID, createdWorkbasketId))
+          .headers(
+              headers -> headers.addAll(RestHelper.generateHeadersForUser("businessadmin")))
+          .retrieve()
+          .toBodilessEntity();
+    }
   }
 
   @Test
@@ -141,6 +158,92 @@ class WorkbasketDefinitionControllerIntTest {
     assertThat(wbList).isNotNull();
     for (WorkbasketDefinitionRepresentationModel w : wbList.getContent()) {
       expectStatusWhenExecutingImportRequestOfWorkbaskets(HttpStatus.NO_CONTENT, w);
+    }
+  }
+
+  @Test
+  void should_PreserveCreatedForExistingImport() throws Exception {
+    WorkbasketDefinitionCollectionRepresentationModel export =
+        executeExportRequestForDomain("DOMAIN_A").getBody();
+    assertThat(export).isNotNull();
+    WorkbasketDefinitionRepresentationModel definition =
+        export.getContent().stream()
+            .filter(candidate -> !candidate.getAuthorizations().isEmpty())
+            .findFirst()
+            .orElseThrow();
+    String existingId = definition.getWorkbasket().getWorkbasketId();
+    Instant existingCreated = definition.getWorkbasket().getCreated();
+
+    expectStatusWhenExecutingImportRequestOfWorkbaskets(HttpStatus.NO_CONTENT, definition);
+
+    WorkbasketDefinitionRepresentationModel existingAfterImport =
+        executeExportRequestForDomain("DOMAIN_A").getBody().getContent().stream()
+            .filter(
+                candidate ->
+                    candidate.getWorkbasket().getWorkbasketId().equals(existingId))
+            .findFirst()
+            .orElseThrow();
+    assertThat(existingAfterImport.getWorkbasket().getCreated()).isEqualTo(existingCreated);
+
+    definition.getWorkbasket().setCreated(Instant.EPOCH);
+    expectStatusWhenExecutingImportRequestOfWorkbaskets(HttpStatus.NO_CONTENT, definition);
+    WorkbasketDefinitionRepresentationModel existingAfterExternalTimestampImport =
+        executeExportRequestForDomain("DOMAIN_A").getBody().getContent().stream()
+            .filter(
+                candidate ->
+                    candidate.getWorkbasket().getWorkbasketId().equals(existingId))
+            .findFirst()
+            .orElseThrow();
+    assertThat(existingAfterExternalTimestampImport.getWorkbasket().getCreated())
+        .isEqualTo(existingCreated);
+  }
+
+  @Test
+  void should_GenerateNewIdentityAndRemapRelationsForNewImport() throws Exception {
+    WorkbasketDefinitionCollectionRepresentationModel export =
+        executeExportRequestForDomain("DOMAIN_A").getBody();
+    assertThat(export).isNotNull();
+    WorkbasketDefinitionRepresentationModel definition =
+        export.getContent().stream()
+            .filter(candidate -> !candidate.getAuthorizations().isEmpty())
+            .findFirst()
+            .orElseThrow();
+    final String existingId = definition.getWorkbasket().getWorkbasketId();
+    Set<String> exportedAccessItemIds = new HashSet<>();
+    definition.getAuthorizations().stream()
+        .map(WorkbasketAccessItemRepresentationModel::getAccessItemId)
+        .forEach(exportedAccessItemIds::add);
+
+    String importedOldId = "WBI:" + java.util.UUID.randomUUID();
+    String newKey = "imported-workbasket-" + java.util.UUID.randomUUID();
+    changeWorkbasketIdOrKey(definition, importedOldId, newKey);
+    definition.getWorkbasket().setCreated(Instant.EPOCH);
+    definition.setDistributionTargets(Set.of(existingId));
+    expectStatusWhenExecutingImportRequestOfWorkbaskets(HttpStatus.NO_CONTENT, definition);
+
+    WorkbasketDefinitionRepresentationModel newAfterImport =
+        executeExportRequestForDomain("DOMAIN_A").getBody().getContent().stream()
+            .filter(candidate -> candidate.getWorkbasket().getKey().equals(newKey))
+            .findFirst()
+            .orElseThrow();
+    createdWorkbasketId = newAfterImport.getWorkbasket().getWorkbasketId();
+    assertThat(newAfterImport.getWorkbasket().getWorkbasketId())
+        .isNotEqualTo(importedOldId)
+        .isNotEqualTo(existingId);
+    assertThat(newAfterImport.getWorkbasket().getCreated())
+        .isNotNull()
+        .isNotEqualTo(Instant.EPOCH);
+    assertThat(newAfterImport.getWorkbasket().getModified())
+        .isNotNull()
+        .isNotEqualTo(Instant.EPOCH);
+    assertThat(newAfterImport.getDistributionTargets()).containsExactly(existingId);
+    assertThat(newAfterImport.getAuthorizations())
+        .hasSameSizeAs(definition.getAuthorizations());
+    for (WorkbasketAccessItemRepresentationModel authorization :
+        newAfterImport.getAuthorizations()) {
+      assertThat(exportedAccessItemIds).doesNotContain(authorization.getAccessItemId());
+      assertThat(authorization.getWorkbasketId()).isEqualTo(createdWorkbasketId);
+      assertThat(authorization.getWorkbasketKey()).isEqualTo(newKey);
     }
   }
 
