@@ -79,6 +79,22 @@ describe('AdministrationOverviewComponent', () => {
     expect(domainElem.textContent).toMatch('domain a');
   });
 
+  it('should offer the master domain on the classifications tab', () => {
+    component.domains.set(['domain a', '']);
+    component.selectedTab.set('classifications');
+    fixture.detectChanges();
+
+    expect(component.offeredDomains()).toEqual(['domain a', '']);
+  });
+
+  it('should hide the master domain outside the classifications tab', () => {
+    component.domains.set(['domain a', '']);
+    component.selectedTab.set('workbaskets');
+    fixture.detectChanges();
+
+    expect(component.offeredDomains()).toEqual(['domain a']);
+  });
+
   it('should populate the domains from the store', () => {
     expect(component.domains()).toEqual(['domain a', 'domain b']);
   });

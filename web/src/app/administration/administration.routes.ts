@@ -17,19 +17,35 @@
  */
 
 import { inject } from '@angular/core';
-import { CanActivateFn, Routes } from '@angular/router';
+import { CanActivateFn, Routes, Router } from '@angular/router';
 
 import { catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { Store } from '@ngxs/store';
 import { FetchDomains } from '../shared/store/domain-store/domain.actions';
-import { DOMAIN_QUERY_PARAM } from '../shared/store/domain-store/domain.state';
+import { DOMAIN_QUERY_PARAM, MASTER_DOMAIN } from '../shared/store/domain-store/domain.state';
+import { DomainSelectors } from '../shared/store/domain-store/domain.selectors';
 
-const domainGuard: CanActivateFn = (route) => {
+const domainGuard: CanActivateFn = (route, state) => {
   const store = inject(Store);
+  const router = inject(Router);
 
   return store.dispatch(new FetchDomains(false, route.queryParams[DOMAIN_QUERY_PARAM])).pipe(
-    map(() => true),
+    map(() => {
+      if (state.url.includes('classifications')) {
+        return true;
+      }
+      if (store.selectSnapshot(DomainSelectors.selectedDomain) !== MASTER_DOMAIN) {
+        return true;
+      }
+      const realDomain = store.selectSnapshot(DomainSelectors.domains).find((domain) => domain !== MASTER_DOMAIN);
+      if (realDomain === undefined) {
+        return true;
+      }
+      const target = router.parseUrl(state.url);
+      target.queryParams = { ...target.queryParams, [DOMAIN_QUERY_PARAM]: realDomain };
+      return target;
+    }),
     catchError(() => {
       return of(false);
     })

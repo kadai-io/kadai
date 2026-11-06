@@ -25,6 +25,7 @@ import { RuntimeConfigService } from '../../services/runtime-config/runtime-conf
 import { FetchDomains, SelectDomain } from './domain.actions';
 
 export const DOMAIN_QUERY_PARAM = 'domain';
+export const MASTER_DOMAIN = '';
 
 export interface DomainStateModel {
   domains: Array<string>;

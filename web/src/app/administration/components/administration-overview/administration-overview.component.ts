@@ -16,13 +16,13 @@
  *
  */
 
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Subject } from 'rxjs';
 import { Store } from '@ngxs/store';
 import { DomainSelectors } from '../../../shared/store/domain-store/domain.selectors';
 import { FetchDomains } from '../../../shared/store/domain-store/domain.actions';
-import { DOMAIN_QUERY_PARAM } from '../../../shared/store/domain-store/domain.state';
+import { DOMAIN_QUERY_PARAM, MASTER_DOMAIN } from '../../../shared/store/domain-store/domain.state';
 import { takeUntil } from 'rxjs/operators';
 import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
 import { MatTabLink, MatTabNav, MatTabNavPanel } from '@angular/material/tabs';
@@ -50,6 +50,11 @@ import { MatOption } from '@angular/material/core';
 export class AdministrationOverviewComponent {
   selectedTab = signal('');
   domains = signal<string[]>([]);
+  offeredDomains = computed(() =>
+    this.selectedTab() === 'classifications'
+      ? this.domains()
+      : this.domains().filter((domain) => domain !== MASTER_DOMAIN)
+  );
   selectedDomain = signal('');
   destroy$ = new Subject<void>();
   routingAccess = signal(false);
@@ -61,8 +66,9 @@ export class AdministrationOverviewComponent {
     const router = this.router;
 
     router.events.pipe(takeUntil(this.destroy$)).subscribe((e) => {
-      const urlPaths = this.router.url.split('/');
-      if (this.router.url.includes('detail')) {
+      const path = this.router.url.split('?')[0];
+      const urlPaths = path.split('/');
+      if (path.includes('detail')) {
         this.selectedTab.set(urlPaths[urlPaths.length - 2]);
       } else {
         this.selectedTab.set(urlPaths[urlPaths.length - 1]);
