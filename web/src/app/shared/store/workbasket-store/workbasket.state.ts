@@ -78,7 +78,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   @Action(InitializeStore)
   initializeStore(ctx: StateContext<WorkbasketStateModel>): Observable<any> {
     // read the selected tab from the route
-    this.route.queryParams.pipe(take(2)).subscribe((params) => {
+    this.route.queryParams.subscribe((params) => {
       let tabName: string = params.tab;
       let tab: number;
 
