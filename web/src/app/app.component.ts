@@ -17,7 +17,11 @@
  */
 
 import { Component, inject, OnDestroy, OnInit, viewChild } from '@angular/core';
-import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { Store } from '@ngxs/store';
+import { DomainSelectors } from './shared/store/domain-store/domain.selectors';
+import { SelectDomain } from './shared/store/domain-store/domain.actions';
+import { DOMAIN_QUERY_PARAM } from './shared/store/domain-store/domain.state';
 import { firstValueFrom, of, Subject } from 'rxjs';
 import { SidenavService } from './shared/services/sidenav/sidenav.service';
 import { RequestInProgressService } from './shared/services/request-in-progress/request-in-progress.service';
@@ -71,6 +75,8 @@ export class AppComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
   public sidenav = viewChild<MatSidenav>('sidenav');
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private store = inject(Store);
   private orientationService = inject(OrientationService);
   private sidenavService = inject(SidenavService);
   private kadaiEngineService = inject(KadaiEngineService);
@@ -86,6 +92,13 @@ export class AppComponent implements OnInit, OnDestroy {
     this.router.events.pipe(takeUntil(this.destroy$)).subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.selectedRouteService.selectRoute(event);
+      }
+    });
+
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      const domain = params[DOMAIN_QUERY_PARAM];
+      if (domain !== undefined && domain !== this.store.selectSnapshot(DomainSelectors.selectedDomain)) {
+        this.store.dispatch(new SelectDomain(domain));
       }
     });
   }

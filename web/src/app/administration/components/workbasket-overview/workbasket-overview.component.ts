@@ -18,12 +18,18 @@
 
 import { Component, ElementRef, inject, OnInit, signal, viewChild } from '@angular/core';
 import { Store } from '@ngxs/store';
+import { DomainSelectors } from '../../../shared/store/domain-store/domain.selectors';
 import { Observable, Subject } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
-import { take, takeUntil } from 'rxjs/operators';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { filter, take, takeUntil } from 'rxjs/operators';
+import { ACTION } from '../../../shared/models/action';
 import { WorkbasketAndAction, WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
 
-import { CreateWorkbasket, SelectWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
+import {
+  CreateWorkbasket,
+  DeselectWorkbasket,
+  SelectWorkbasket
+} from '../../../shared/store/workbasket-store/workbasket.actions';
 import { Workbasket } from '../../../shared/models/workbasket';
 import { WorkbasketListComponent } from '../workbasket-list/workbasket-list.component';
 
@@ -49,6 +55,7 @@ export class WorkbasketOverviewComponent implements OnInit {
   workbasketList = viewChild<ElementRef>('workbasketList');
   toggleButton = viewChild<ElementRef>('toggleButton');
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private store = inject(Store);
 
   ngOnInit() {
@@ -61,22 +68,40 @@ export class WorkbasketOverviewComponent implements OnInit {
         });
       }
     });
-    if (this.route.firstChild) {
-      this.route.firstChild.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-        this.routerParams = params;
-        if (this.routerParams.id) {
-          this.showDetail.set(true);
-          if (this.routerParams.id === 'new-workbasket') {
-            this.store.dispatch(new CreateWorkbasket());
-          } else {
-            this.store.dispatch(new SelectWorkbasket(this.routerParams.id));
-          }
-        }
-      });
-    }
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => this.applyDetailRoute());
+    this.applyDetailRoute();
     this.selectedWorkbasketAndAction$.pipe(takeUntil(this.destroy$)).subscribe((state) => {
       this.showDetail.set(!!state.selectedWorkbasket || state.action === 1);
     });
+  }
+
+  private applyDetailRoute(): void {
+    const id = this.route.firstChild?.snapshot.params['id'];
+    this.routerParams = { id };
+
+    if (!id) {
+      this.store.dispatch(new DeselectWorkbasket());
+      return;
+    }
+
+    this.showDetail.set(true);
+
+    if (id === 'new-workbasket') {
+      const activeAction = this.store.selectSnapshot(WorkbasketSelectors.workbasketActiveAction);
+      if (activeAction !== ACTION.CREATE && activeAction !== ACTION.COPY) {
+        this.store.dispatch(new CreateWorkbasket(this.store.selectSnapshot(DomainSelectors.selectedDomain)));
+      }
+      return;
+    }
+
+    if (this.store.selectSnapshot(WorkbasketSelectors.selectedWorkbasket)?.workbasketId !== id) {
+      this.store.dispatch(new SelectWorkbasket(id));
+    }
   }
 
   toggleWidth() {

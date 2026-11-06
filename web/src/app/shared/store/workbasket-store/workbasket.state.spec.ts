@@ -48,7 +48,9 @@ import {
 import { WorkbasketService } from '../../services/workbasket/workbasket.service';
 import { NotificationService } from '../../services/notifications/notification.service';
 import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
-import { DomainService } from '../../services/domain/domain.service';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { DomainState } from '../domain-store/domain.state';
+import { RuntimeConfigService } from '../../services/runtime-config/runtime-config.service';
 import { ACTION } from '../../models/action';
 import { WorkbasketComponent } from '../../../administration/models/workbasket-component';
 import { Side } from '../../../administration/models/workbasket-distribution-enums';
@@ -57,7 +59,7 @@ import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-fi
 import { Direction, WorkbasketQuerySortParameter } from '../../models/sorting';
 import { QueryPagingParameter } from '../../models/query-paging-parameter';
 import { selectedWorkbasketMock, workbasketAccessItemsMock } from '../mock-data/mock-store';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 const mockWorkbasket = selectedWorkbasketMock;
 
@@ -99,8 +101,8 @@ describe('WorkbasketState', () => {
   let workbasketServiceMock: Partial<WorkbasketService>;
   let notificationServiceMock: Partial<NotificationService>;
   let requestInProgressServiceMock: Partial<RequestInProgressService>;
-  let domainServiceMock: Partial<DomainService>;
   let locationMock: Partial<Location>;
+  let routerMock: { navigate: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     workbasketServiceMock = {
@@ -125,25 +127,22 @@ describe('WorkbasketState', () => {
       setRequestInProgress: vi.fn()
     };
 
-    domainServiceMock = {
-      getSelectedDomain: vi.fn().mockReturnValue(of('DOMAIN_A')),
-      getSelectedDomainValue: vi.fn().mockReturnValue('DOMAIN_A'),
-      domainChangedComplete: vi.fn()
-    };
-
+    routerMock = { navigate: vi.fn().mockResolvedValue(true) };
     locationMock = {
       path: vi.fn().mockReturnValue('/workbaskets/(detail:WBI:001)?tab=information'),
       go: vi.fn()
     };
 
     await TestBed.configureTestingModule({
-      imports: [NgxsModule.forRoot([WorkbasketState, FilterState])],
+      imports: [NgxsModule.forRoot([WorkbasketState, FilterState, DomainState])],
       providers: [
+        provideHttpClientTesting(),
         { provide: WorkbasketService, useValue: workbasketServiceMock },
         { provide: NotificationService, useValue: notificationServiceMock },
         { provide: RequestInProgressService, useValue: requestInProgressServiceMock },
-        { provide: DomainService, useValue: domainServiceMock },
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
         { provide: Location, useValue: locationMock },
+        { provide: Router, useValue: routerMock },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -157,6 +156,7 @@ describe('WorkbasketState', () => {
 
     store.reset({
       ...store.snapshot(),
+      domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' },
       workbasket: { ...initialWorkbasketState }
     });
   });
@@ -210,7 +210,7 @@ describe('WorkbasketState', () => {
       const state = store.snapshot().workbasket;
       expect(state.selectedWorkbasket).toBeUndefined();
       expect(state.action).toBe(ACTION.READ);
-      expect(locationMock.go).toHaveBeenCalled();
+      expect(routerMock.navigate).not.toHaveBeenCalled();
     });
   });
 
@@ -266,10 +266,10 @@ describe('WorkbasketState', () => {
       expect(state.selectedComponent).toBe(WorkbasketComponent.DISTRIBUTION_TARGETS);
     });
 
-    it('should update location when selecting INFORMATION component', async () => {
+    it('should leave the url alone when selecting a component', async () => {
       await store.dispatch(new SelectComponent(WorkbasketComponent.INFORMATION)).toPromise();
 
-      expect(locationMock.go).toHaveBeenCalled();
+      expect(routerMock.navigate).not.toHaveBeenCalled();
     });
   });
 
@@ -287,7 +287,7 @@ describe('WorkbasketState', () => {
 
   describe('CreateWorkbasket', () => {
     it('should set action to CREATE', async () => {
-      await store.dispatch(new CreateWorkbasket()).toPromise();
+      await store.dispatch(new CreateWorkbasket('DOMAIN_A')).toPromise();
 
       const state = store.snapshot().workbasket;
       expect(state.action).toBe(ACTION.CREATE);
@@ -304,7 +304,7 @@ describe('WorkbasketState', () => {
         workbasket: { ...initialWorkbasketState, selectedComponent: WorkbasketComponent.ACCESS_ITEMS }
       });
 
-      await store.dispatch(new CreateWorkbasket()).toPromise();
+      await store.dispatch(new CreateWorkbasket('DOMAIN_A')).toPromise();
 
       const state = store.snapshot().workbasket;
       expect(state.selectedComponent).toBe(WorkbasketComponent.INFORMATION);
@@ -735,22 +735,21 @@ describe('WorkbasketState', () => {
 
       notificationServiceMock = { showSuccess: vi.fn(), showError: vi.fn() };
       requestInProgressServiceMock = { setRequestInProgress: vi.fn() };
-      domainServiceMock = {
-        getSelectedDomain: vi.fn().mockReturnValue(of('DOMAIN_A')),
-        getSelectedDomainValue: vi.fn().mockReturnValue('DOMAIN_A'),
-        domainChangedComplete: vi.fn()
-      };
+      routerMock = { navigate: vi.fn().mockResolvedValue(true) };
       locationMock = { path: vi.fn().mockReturnValue('/foo'), go: vi.fn() };
 
       TestBed.resetTestingModule();
       await TestBed.configureTestingModule({
-        imports: [NgxsModule.forRoot([WorkbasketState, FilterState])],
+        imports: [NgxsModule.forRoot([WorkbasketState, FilterState, DomainState])],
         providers: [
+          provideHttpClientTesting(),
           { provide: WorkbasketService, useValue: workbasketServiceMock },
           { provide: NotificationService, useValue: notificationServiceMock },
           { provide: RequestInProgressService, useValue: requestInProgressServiceMock },
-          { provide: DomainService, useValue: domainServiceMock },
+          { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
           { provide: Location, useValue: locationMock },
+          { provide: Router, useValue: routerMock },
+          { provide: Router, useValue: routerMock },
           {
             provide: ActivatedRoute,
             useValue: { queryParams: paramsSubject.asObservable() }
@@ -759,7 +758,11 @@ describe('WorkbasketState', () => {
       }).compileComponents();
 
       store = TestBed.inject(Store);
-      store.reset({ ...store.snapshot(), workbasket: { ...initialWorkbasketState } });
+      store.reset({
+        ...store.snapshot(),
+        domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' },
+        workbasket: { ...initialWorkbasketState }
+      });
     });
 
     it('should select INFORMATION tab when params.tab is "information"', () => {
@@ -822,7 +825,7 @@ describe('WorkbasketState', () => {
       expect(state.selectedWorkbasket).toEqual(newWorkbasket);
     });
 
-    it('should set path to access-items when state.selectedComponent is ACCESS_ITEMS', async () => {
+    it('should select the workbasket without touching the url when the tab is access-items', async () => {
       store.reset({
         ...store.snapshot(),
         workbasket: { ...initialWorkbasketState, selectedComponent: WorkbasketComponent.ACCESS_ITEMS }
@@ -832,10 +835,11 @@ describe('WorkbasketState', () => {
 
       await store.dispatch(new SelectWorkbasket('WBI:AI')).toPromise();
 
-      expect(locationMock.go).toHaveBeenCalled();
+      expect(store.snapshot().workbasket.selectedWorkbasket).toEqual(newWorkbasket);
+      expect(routerMock.navigate).not.toHaveBeenCalled();
     });
 
-    it('should set path to distribution-targets when state.selectedComponent is DISTRIBUTION_TARGETS', async () => {
+    it('should select the workbasket without touching the url when the tab is distribution-targets', async () => {
       store.reset({
         ...store.snapshot(),
         workbasket: { ...initialWorkbasketState, selectedComponent: WorkbasketComponent.DISTRIBUTION_TARGETS }
@@ -845,7 +849,8 @@ describe('WorkbasketState', () => {
 
       await store.dispatch(new SelectWorkbasket('WBI:DT')).toPromise();
 
-      expect(locationMock.go).toHaveBeenCalled();
+      expect(store.snapshot().workbasket.selectedWorkbasket).toEqual(newWorkbasket);
+      expect(routerMock.navigate).not.toHaveBeenCalled();
     });
   });
 
@@ -872,7 +877,7 @@ describe('WorkbasketState', () => {
       });
       (workbasketServiceMock.getWorkBasketsSummary as ReturnType<typeof vi.fn>).mockClear();
 
-      await store.dispatch(new CreateWorkbasket()).toPromise();
+      await store.dispatch(new CreateWorkbasket('DOMAIN_A')).toPromise();
 
       expect(workbasketServiceMock.getWorkBasketsSummary).toHaveBeenCalled();
     });

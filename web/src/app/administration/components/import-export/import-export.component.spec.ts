@@ -19,8 +19,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { DebugElement, NO_ERRORS_SCHEMA } from '@angular/core';
+import { provideStore, Store } from '@ngxs/store';
+import { DomainState } from '../../../shared/store/domain-store/domain.state';
+import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
 import { ImportExportComponent } from './import-export.component';
-import { DomainService } from '../../../shared/services/domain/domain.service';
 import { WorkbasketDefinitionService } from '../../services/workbasket-definition.service';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
 import { ImportExportService } from '../../services/import-export.service';
@@ -37,13 +39,8 @@ import { WindowRefService } from '../../../shared/services/window/window.service
 describe('ImportExportComponent', () => {
   let fixture: ComponentFixture<ImportExportComponent>;
   let debugElement: DebugElement;
+  let store: Store;
   let app: ImportExportComponent;
-
-  const domainServiceSpy = {
-    getSelectedDomainValue: vi.fn().mockReturnValue('A'),
-    getSelectedDomain: vi.fn().mockReturnValue(of('A')),
-    getDomains: vi.fn().mockReturnValue(of(['A', 'B']))
-  } as Partial<DomainService>;
 
   const httpSpy = {
     get: vi.fn().mockReturnValue(of([])),
@@ -81,19 +78,23 @@ describe('ImportExportComponent', () => {
       imports: [ImportExportComponent],
       declarations: [],
       providers: [
+        provideStore([DomainState]),
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
         StartupService,
         KadaiEngineService,
         WindowRefService,
         { provide: WorkbasketDefinitionService, useValue: workbasketDefinitionServiceSpy },
         { provide: ClassificationDefinitionService, useValue: classificationDefinitionServiceSpy },
         { provide: ImportExportService, useValue: importExportServiceSpy },
-        { provide: DomainService, useValue: domainServiceSpy },
         { provide: NotificationService, useValue: notificationServiceSpy },
         { provide: HttpClient, useValue: httpSpy },
         { provide: HotToastService, useValue: hotToastServiceSpy }
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
+
+    store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), domain: { domains: ['A', 'B'], selectedDomain: 'A' } });
 
     fixture = TestBed.createComponent(ImportExportComponent);
     debugElement = fixture.debugElement;
@@ -104,7 +105,6 @@ describe('ImportExportComponent', () => {
 
   it('should create component', () => {
     expect(app).toBeTruthy();
-    expect(domainServiceSpy.getDomains).toHaveBeenCalled();
     expect(app.domains$).toBeDefined();
   });
 
@@ -266,7 +266,7 @@ describe('ImportExportComponent', () => {
     });
 
     it('should display "Master" label for domain empty string in @for loop', async () => {
-      (domainServiceSpy.getDomains as ReturnType<typeof vi.fn>).mockReturnValue(of(['', 'B']));
+      store.reset({ ...store.snapshot(), domain: { domains: ['', 'B'], selectedDomain: 'B' } });
       const newFixture = TestBed.createComponent(ImportExportComponent);
       const newApp = newFixture.componentInstance;
       newFixture.componentRef.setInput('currentSelection', KadaiType.WORKBASKETS);

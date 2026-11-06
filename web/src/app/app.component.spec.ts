@@ -17,6 +17,11 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute, Router } from '@angular/router';
+import { provideStore, Store } from '@ngxs/store';
+import { DomainState } from './shared/store/domain-store/domain.state';
+import { DomainSelectors } from './shared/store/domain-store/domain.selectors';
+import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AppComponent } from './app.component';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -25,11 +30,9 @@ import { KadaiEngineService } from './shared/services/kadai-engine/kadai-engine.
 import { RequestInProgressService } from './shared/services/request-in-progress/request-in-progress.service';
 import { SelectedRouteService } from './shared/services/selected-route/selected-route';
 import { SidenavService } from './shared/services/sidenav/sidenav.service';
-import { of, Subject, throwError } from 'rxjs';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { OrientationService } from './shared/services/orientation/orientation.service';
 import { WindowRefService } from './shared/services/window/window.service';
-import { Router } from '@angular/router';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { RuntimeConfigService } from './shared/services/runtime-config/runtime-config.service';
 import { signal } from '@angular/core';
@@ -81,7 +84,11 @@ describe('AppComponent', () => {
     nativeWindow: { location: { href: '' } }
   };
 
+  let queryParams$: BehaviorSubject<Record<string, string>>;
+
   beforeEach(async () => {
+    queryParams$ = new BehaviorSubject<Record<string, string>>({});
+
     vi.clearAllMocks();
     kadaiEngineServiceMock.logout.mockReturnValue(of(undefined));
     windowRefServiceMock.nativeWindow.location.href = '';
@@ -98,7 +105,12 @@ describe('AppComponent', () => {
         { provide: WindowRefService, useValue: windowRefServiceMock },
         provideAngularSvgIcon(),
         provideNoopAnimations(),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        provideStore([DomainState]),
+        {
+          provide: ActivatedRoute,
+          useValue: { queryParams: queryParams$.asObservable(), snapshot: { queryParams: {} } }
+        }
       ]
     }).compileComponents();
 
@@ -112,6 +124,22 @@ describe('AppComponent', () => {
   afterEach(() => {
     httpController.match(() => true).forEach((req) => req.flush(''));
     vi.restoreAllMocks();
+  });
+
+  it('should select the domain the url asks for', () => {
+    const store = TestBed.inject(Store);
+
+    queryParams$.next({ domain: 'DOMAIN_B' });
+
+    expect(store.selectSnapshot(DomainSelectors.selectedDomain)).toBe('DOMAIN_B');
+  });
+
+  it('should select the master domain when the url carries an empty domain', () => {
+    const store = TestBed.inject(Store);
+
+    queryParams$.next({ domain: '' });
+
+    expect(store.selectSnapshot(DomainSelectors.selectedDomain)).toBe('');
   });
 
   it('should create', () => {

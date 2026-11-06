@@ -23,7 +23,8 @@ import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { firstValueFrom, Observable, of } from 'rxjs';
 import { ACTION } from '../../../shared/models/action';
 import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
-import { DomainService } from '../../../shared/services/domain/domain.service';
+import { DomainState } from '../../../shared/store/domain-store/domain.state';
+import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
 import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {
@@ -43,16 +44,11 @@ import {
 } from '../../../shared/store/workbasket-store/workbasket.actions';
 import { take } from 'rxjs/operators';
 import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
+import { WorkbasketComponent } from '../../models/workbasket-component';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { ButtonAction } from '../../models/button-action';
-
-const domainServiceSpy: Partial<DomainService> = {
-  getSelectedDomain: vi.fn().mockReturnValue(of('A')),
-  getSelectedDomainValue: vi.fn().mockReturnValue('A'),
-  getDomains: vi.fn().mockReturnValue(of(['A']))
-};
 
 const workbasketServiceMock: Partial<WorkbasketService> = {
   getWorkBasket: vi.fn().mockReturnValue(of(selectedWorkbasketMock)),
@@ -84,13 +80,10 @@ describe('WorkbasketDetailsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [WorkbasketDetailsComponent],
       providers: [
-        provideStore([WorkbasketState, EngineConfigurationState]),
-        provideRouter([]),
+        provideStore([WorkbasketState, EngineConfigurationState, DomainState]),
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
+        provideRouter([{ path: '**', children: [] }]),
         provideNoopAnimations(),
-        {
-          provide: DomainService,
-          useValue: domainServiceSpy
-        },
         { provide: WorkbasketService, useValue: workbasketServiceMock },
         provideHttpClientTesting(),
         provideAngularSvgIcon()
@@ -100,6 +93,7 @@ describe('WorkbasketDetailsComponent', () => {
     store = TestBed.inject(Store);
     store.reset({
       ...store.snapshot(),
+      domain: { domains: ['A'], selectedDomain: 'A' },
       workbasket: workbasketReadStateMock,
       engineConfiguration: engineConfigurationMock
     });
@@ -123,7 +117,7 @@ describe('WorkbasketDetailsComponent', () => {
   });
 
   it('should render new workbasket when action is CREATE', async () => {
-    await firstValueFrom(store.dispatch(new CreateWorkbasket()).pipe(take(1)));
+    await firstValueFrom(store.dispatch(new CreateWorkbasket('DOMAIN_A')).pipe(take(1)));
     const state = await firstValueFrom(component.selectedWorkbasketAndComponentAndAction$.pipe(take(1)));
 
     expect(state.selectedWorkbasket.workbasketId).toBeUndefined();
@@ -153,7 +147,7 @@ describe('WorkbasketDetailsComponent', () => {
 
   it('should select information tab when action is CREATE', async () => {
     component.selectComponent(1);
-    await firstValueFrom(store.dispatch(new CreateWorkbasket()).pipe(take(1)));
+    await firstValueFrom(store.dispatch(new CreateWorkbasket('DOMAIN_A')).pipe(take(1)));
     const tab = await firstValueFrom(component.selectedTab$.pipe(take(1)));
 
     expect(tab).toEqual(0);
@@ -233,13 +227,16 @@ describe('WorkbasketDetailsComponent', () => {
     expect(deselectDispatched).toBe(true);
   });
 
-  it('should dispatch SelectComponent when selectComponent is called', () => {
-    let dispatched = false;
-    actions$.pipe(ofActionDispatched(SelectComponent)).subscribe((index) => {
-      dispatched = true;
+  it('should put the selected tab into the query string and keep the other parameters', () => {
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    component.selectComponent(WorkbasketComponent.DISTRIBUTION_TARGETS);
+
+    expect(navigate).toHaveBeenCalledWith([], {
+      queryParams: { tab: 'distribution-targets' },
+      queryParamsHandling: 'merge'
     });
-    component.selectComponent(2);
-    expect(dispatched).toBe(true);
   });
 
   it('should complete destroy$ on ngOnDestroy', () => {
@@ -316,7 +313,7 @@ describe('WorkbasketDetailsComponent', () => {
   });
 
   it('save button should be disabled when action is CREATE and areAllAccessItemsValid is false', () => {
-    store.dispatch(new CreateWorkbasket());
+    store.dispatch(new CreateWorkbasket('DOMAIN_A'));
     component.areAllAccessItemsValid = false;
     fixture.detectChanges();
     const saveButton = debugElement.nativeElement.querySelector('.workbasket-details__save-button');

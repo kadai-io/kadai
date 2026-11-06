@@ -17,6 +17,8 @@
  */
 
 import { Component, effect, inject, input, model, OnDestroy, OnInit, untracked, viewChild } from '@angular/core';
+import { WORKBASKETS_ROUTE } from '../../../shared/util/administration-routes';
+import { Router } from '@angular/router';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Store } from '@ngxs/store';
@@ -101,6 +103,7 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
   customFields$!: Observable<CustomField[]>;
   destroy$ = new Subject<void>();
   private store = inject(Store);
+  private router = inject(Router);
   workbasketsCustomisation$: Observable<WorkbasketsCustomisation | undefined> = this.store.select(
     EngineConfigurationSelectors.workbasketsCustomisation
   );
@@ -244,6 +247,13 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
     const wb = this.workbasket();
     if (!wb) return;
     this.store.dispatch(new SaveNewWorkbasket(wb)).subscribe(() => {
+      const created = this.store.selectSnapshot(WorkbasketSelectors.selectedWorkbasket);
+      if (created?.workbasketId) {
+        this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: [created.workbasketId] } }], {
+          queryParams: { tab: null },
+          queryParamsHandling: 'merge'
+        });
+      }
       this.afterRequest();
     });
   }
@@ -261,6 +271,10 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
     const wb = this.workbasket();
     if (!wb?._links) return;
     this.store.dispatch(new MarkWorkbasketForDeletion(wb._links.self.href)).subscribe(() => {
+      this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: null } }], {
+        queryParams: { tab: null },
+        queryParamsHandling: 'merge'
+      });
       this.afterRequest();
     });
   }

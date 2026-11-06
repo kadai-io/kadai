@@ -17,11 +17,13 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DebugElement } from '@angular/core';
+import { DebugElement, Component } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
+import { DomainState } from '../../../shared/store/domain-store/domain.state';
+import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
 import { ClassificationOverviewComponent } from './classification-overview.component';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router, provideRouter } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import {
   CreateClassification,
@@ -37,6 +39,9 @@ import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const routeParamsMock = { id: 'new-classification' };
 
+@Component({ template: '' })
+class BlankRouteComponent {}
+
 describe('ClassificationOverviewComponent', () => {
   let fixture: ComponentFixture<ClassificationOverviewComponent>;
   let debugElement: DebugElement;
@@ -48,14 +53,16 @@ describe('ClassificationOverviewComponent', () => {
   beforeEach(async () => {
     mockActivatedRoute = {
       firstChild: {
-        params: of(routeParamsMock)
+        snapshot: { params: routeParamsMock }
       }
     };
 
     await TestBed.configureTestingModule({
       imports: [ClassificationOverviewComponent],
       providers: [
-        provideStore([ClassificationState, EngineConfigurationState]),
+        provideStore([ClassificationState, EngineConfigurationState, DomainState]),
+        provideRouter([{ path: '**', component: BlankRouteComponent }]),
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
 
         provideHttpClientTesting(),
         provideNoopAnimations(),
@@ -71,6 +78,7 @@ describe('ClassificationOverviewComponent', () => {
     debugElement = fixture.debugElement;
     component = fixture.debugElement.componentInstance;
     store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' } });
     actions$ = TestBed.inject(Actions);
     store.reset({
       ...store.snapshot(),
@@ -108,26 +116,57 @@ describe('ClassificationOverviewComponent', () => {
     expect(component.routerParams).toEqual(routeParamsMock);
   });
 
-  it('should dispatch SelectClassification action when routerParams id exists', async () => {
-    mockActivatedRoute.firstChild.params = of(routeParamsMock);
+  it('should dispatch SelectClassification when the route carries a classification id', () => {
+    mockActivatedRoute.firstChild.snapshot = { params: { id: 'CLI:01' } };
+    store.reset({ ...store.snapshot(), classification: classificationStateMock });
     let isActionDispatched = false;
     actions$.pipe(ofActionDispatched(SelectClassification)).subscribe(() => (isActionDispatched = true));
+
     component.ngOnInit();
+
     expect(isActionDispatched).toBe(true);
   });
 
-  it('should dispatch CreateClassification action when routerParams id contains new-classification', async () => {
+  it('should dispatch CreateClassification when the route carries new-classification', () => {
+    mockActivatedRoute.firstChild.snapshot = { params: { id: 'new-classification' } };
+    store.reset({ ...store.snapshot(), classification: classificationStateMock });
     let isActionDispatched = false;
     actions$.pipe(ofActionDispatched(CreateClassification)).subscribe(() => (isActionDispatched = true));
+
     component.ngOnInit();
+
     expect(isActionDispatched).toBe(true);
   });
 
-  it('should dispatch DeselectClassification action when routerParams id does not exist', () => {
-    mockActivatedRoute.firstChild.params = of({});
+  it('should not select a classification for the new-classification url', () => {
+    mockActivatedRoute.firstChild.snapshot = { params: { id: 'new-classification' } };
+    store.reset({ ...store.snapshot(), classification: classificationStateMock });
+    let isActionDispatched = false;
+    actions$.pipe(ofActionDispatched(SelectClassification)).subscribe(() => (isActionDispatched = true));
+
+    component.ngOnInit();
+
+    expect(isActionDispatched).toBe(false);
+  });
+
+  it('should read the route again after each navigation', async () => {
+    mockActivatedRoute.firstChild.snapshot = { params: { id: 'CLI:99' } };
+    store.reset({ ...store.snapshot(), classification: classificationStateMock });
+    let isActionDispatched = false;
+    actions$.pipe(ofActionDispatched(SelectClassification)).subscribe(() => (isActionDispatched = true));
+
+    await TestBed.inject(Router).navigateByUrl('/kadai/administration/classifications');
+
+    expect(isActionDispatched).toBe(true);
+  });
+
+  it('should dispatch DeselectClassification when the route carries no id', () => {
+    mockActivatedRoute.firstChild.snapshot = { params: {} };
     let isActionDispatched = false;
     actions$.pipe(ofActionDispatched(DeselectClassification)).subscribe(() => (isActionDispatched = true));
+
     component.ngOnInit();
+
     expect(isActionDispatched).toBe(true);
   });
 
@@ -136,10 +175,11 @@ describe('ClassificationOverviewComponent', () => {
       ...store.snapshot(),
       classification: { ...classificationStateMock, selectedClassification: undefined }
     });
-    mockActivatedRoute.firstChild.params = of({ id: 'ID01' });
+    mockActivatedRoute.firstChild.snapshot = { params: { id: 'ID01' } };
     const setSpy = vi.spyOn(component.showDetail, 'set');
+
     component.ngOnInit();
-    expect(setSpy).toHaveBeenCalledTimes(1);
-    expect(setSpy).toHaveBeenCalledWith(false);
+
+    expect(setSpy).toHaveBeenNthCalledWith(1, false);
   });
 });

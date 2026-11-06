@@ -51,6 +51,8 @@ export class DeselectWorkbasket {
 
 export class CreateWorkbasket {
   static readonly type = '[Workbasket] Create new workbasket';
+
+  constructor(public domain: string | undefined) {}
 }
 
 export class SetActiveAction {

@@ -19,7 +19,9 @@
 import { Component, inject, input, OnDestroy, OnInit, viewChild } from '@angular/core';
 import { ClassificationDefinitionService } from 'app/administration/services/classification-definition.service';
 import { WorkbasketDefinitionService } from 'app/administration/services/workbasket-definition.service';
-import { DomainService } from 'app/shared/services/domain/domain.service';
+import { Store } from '@ngxs/store';
+import { DomainSelectors } from 'app/shared/store/domain-store/domain.selectors';
+import { FetchDomains } from 'app/shared/store/domain-store/domain.actions';
 import { KadaiType } from 'app/shared/models/kadai-type';
 import { ImportExportService } from 'app/administration/services/import-export.service';
 import { NotificationService } from '../../../shared/services/notifications/notification.service';
@@ -50,7 +52,7 @@ export class ImportExportComponent implements OnInit, OnDestroy {
   selectedFileInput = viewChild<any>('selectedFile');
   domains$!: Observable<string[]>;
   destroy$ = new Subject<void>();
-  private domainService = inject(DomainService);
+  private store = inject(Store);
   private workbasketDefinitionService = inject(WorkbasketDefinitionService);
   private classificationDefinitionService = inject(ClassificationDefinitionService);
   private notificationService = inject(NotificationService);
@@ -58,7 +60,8 @@ export class ImportExportComponent implements OnInit, OnDestroy {
   private hotToastService = inject(HotToastService);
 
   ngOnInit() {
-    this.domains$ = this.domainService.getDomains();
+    this.store.dispatch(new FetchDomains());
+    this.domains$ = this.store.select(DomainSelectors.domains);
   }
 
   export(domain = '') {

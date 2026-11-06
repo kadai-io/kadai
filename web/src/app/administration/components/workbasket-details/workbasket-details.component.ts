@@ -17,6 +17,9 @@
  */
 
 import { Component, inject, input, OnDestroy, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { WORKBASKETS_ROUTE } from '../../../shared/util/administration-routes';
+import { WORKBASKET_COMPONENT_TABS, WorkbasketComponent } from '../../models/workbasket-component';
 import { Observable, Subject } from 'rxjs';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { ACTION } from 'app/shared/models/action';
@@ -82,6 +85,7 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
   areAllAccessItemsValid = true;
   protected readonly ACTION = ACTION;
   private store = inject(Store);
+  private router = inject(Router);
   private ngxsActions$ = inject(Actions);
 
   ngOnInit(): void {
@@ -144,7 +148,10 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
   }
 
   selectComponent(index: number) {
-    this.store.dispatch(new SelectComponent(index));
+    this.router.navigate([], {
+      queryParams: { tab: WORKBASKET_COMPONENT_TABS[index as WorkbasketComponent] },
+      queryParamsHandling: 'merge'
+    });
   }
 
   onSubmit() {
@@ -162,6 +169,10 @@ export class WorkbasketDetailsComponent implements OnInit, OnDestroy {
   onCopy() {
     this.store.dispatch(new OnButtonPressed(ButtonAction.COPY));
     this.store.dispatch(new CopyWorkbasket(this.workbasket()));
+    this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: ['new-workbasket'] } }], {
+      queryParams: { tab: null },
+      queryParamsHandling: 'merge'
+    });
   }
 
   onRemoveAsDistributionTarget() {

@@ -16,6 +16,8 @@
  *
  */
 
+import { CLASSIFICATIONS_ROUTE } from '../../../shared/util/administration-routes';
+import { Router } from '@angular/router';
 import {
   AfterViewChecked,
   AfterViewInit,
@@ -39,7 +41,6 @@ import { filter, map, takeUntil } from 'rxjs/operators';
 import { Store } from '@ngxs/store';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 
-import { Location } from '@angular/common';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import { Classification } from '../../../shared/models/classification';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
@@ -98,11 +99,11 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
   };
   private elementRef = inject(ElementRef);
   private classificationsService = inject(ClassificationsService);
-  private location = inject(Location);
   private store = inject(Store);
   private notificationsService = inject(NotificationService);
   private classificationTreeService = inject(ClassificationTreeService);
   private requestInProgressService = inject(RequestInProgressService);
+  private router = inject(Router);
   private tree = viewChild.required<TreeComponent>('tree');
   _selectNodeIdInput = input<string>(undefined, { alias: 'selectNodeId' });
 
@@ -192,14 +193,16 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
     const id = treeNode.node.data.classificationId;
     this.selectNodeId.set(id);
     this.requestInProgressService.setRequestInProgress(true);
-    this.store.dispatch(new SelectClassification(id));
-    this.location.go(this.location.path().replace(/(classifications).*/g, `classifications/(detail:${id})`));
+    this.router.navigate([CLASSIFICATIONS_ROUTE, { outlets: { detail: [id] } }], {
+      queryParamsHandling: 'merge'
+    });
   }
 
   onDeactivate(event: any) {
     if (!event.treeModel.activeNodes.length) {
-      this.store.dispatch(new DeselectClassification());
-      this.location.go(this.location.path().replace(/(classifications).*/g, 'classifications'));
+      this.router.navigate([CLASSIFICATIONS_ROUTE, { outlets: { detail: null } }], {
+        queryParamsHandling: 'merge'
+      });
     }
   }
 

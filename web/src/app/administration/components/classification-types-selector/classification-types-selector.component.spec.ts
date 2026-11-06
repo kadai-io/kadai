@@ -17,6 +17,8 @@
  */
 
 import { ClassificationTypesSelectorComponent } from './classification-types-selector.component';
+import { Router, provideRouter } from '@angular/router';
+import { CLASSIFICATIONS_ROUTE } from '../../../shared/util/administration-routes';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { Location } from '@angular/common';
@@ -25,7 +27,6 @@ import { provideStore, Store } from '@ngxs/store';
 import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
 import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
 import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
-import { DomainService } from '../../../shared/services/domain/domain.service';
 import { classificationStateMock } from '../../../shared/store/mock-data/mock-store';
 import { By } from '@angular/platform-browser';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -44,6 +45,7 @@ describe('ClassificationTypesSelectorComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ClassificationTypesSelectorComponent],
       providers: [
+        provideRouter([{ path: '**', children: [] }]),
         provideLocationMocks(),
         provideStore([ClassificationState]),
         {
@@ -53,8 +55,7 @@ describe('ClassificationTypesSelectorComponent', () => {
         {
           provide: ClassificationCategoriesService,
           useValue: classificationCategoriesServiceSpy
-        },
-        { provide: DomainService, useValue: domainServiceSpy }
+        }
       ]
     }).compileComponents();
 
@@ -95,15 +96,16 @@ describe('ClassificationTypesSelectorComponent', () => {
     expect(options[1].nativeElement.textContent.trim()).toBe('DOCUMENT');
   });
 
-  it('should dispatch SetSelectedClassificationType and update location when select is called', () => {
+  it('should dispatch SetSelectedClassificationType and close the detail when select is called', () => {
     const storeSpy = vi.spyOn(store, 'dispatch');
-    const location = TestBed.inject(Location);
-    const locationSpy = vi.spyOn(location, 'go');
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
 
     component.select('TASK');
 
     expect(storeSpy).toHaveBeenCalled();
-    expect(locationSpy).toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalledWith([CLASSIFICATIONS_ROUTE, { outlets: { detail: null } }], {
+      queryParamsHandling: 'merge'
+    });
   });
 
   it('should call select() with the correct classification type when a mat-option is clicked', () => {
@@ -138,8 +140,7 @@ describe('ClassificationTypesSelectorComponent', () => {
 
   it('should dispatch store action and navigate when mat-option is clicked via DOM', () => {
     const storeSpy = vi.spyOn(store, 'dispatch');
-    const location = TestBed.inject(Location);
-    const locationSpy = vi.spyOn(location, 'go');
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
 
     const dropdownButton = debugElement.nativeElement.querySelector('.types-selector__selected-type');
     dropdownButton.click();
@@ -150,7 +151,7 @@ describe('ClassificationTypesSelectorComponent', () => {
     fixture.detectChanges();
 
     expect(storeSpy).toHaveBeenCalled();
-    expect(locationSpy).toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalled();
   });
 
   it('should render one mat-option for each classification type from the store', () => {
