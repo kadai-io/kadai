@@ -16,7 +16,7 @@
  *
  */
 
-import { Action, NgxsAfterBootstrap, State, StateContext, Store } from '@ngxs/store';
+import { Action, NgxsAfterBootstrap, State, StateContext } from '@ngxs/store';
 import { EMPTY, Observable, of } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
 import { KadaiDate } from 'app/shared/util/kadai.date';
@@ -37,21 +37,12 @@ import {
   SetSelectedClassificationType,
   UpdateClassification
 } from './classification.actions';
-<<<<<<< HEAD
-import { ClassificationsService } from '../../services/classifications/classifications.service';
-import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
-import { Classification } from '../../models/classification';
-import { ClassificationSummary } from '../../models/classification-summary';
-import { ClassificationQueryFilterParameter } from '../../models/classification-query-filter-parameter';
-import { ClassificationQuerySortParameter, Direction, Sorting } from '../../models/sorting';
-=======
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { ClassificationsService } from 'app/shared/services/classifications/classifications.service';
-import { DomainService } from 'app/shared/services/domain/domain.service';
 import { Classification } from 'app/shared/models/classification';
 import { ClassificationSummary } from 'app/shared/models/classification-summary';
 import { ClassificationQueryFilterParameter } from 'app/shared/models/classification-query-filter-parameter';
 import { ClassificationQuerySortParameter, Direction, Sorting } from 'app/shared/models/sorting';
->>>>>>> f865f5da6bf8948afb01b104ea178fdf075bcd13
 import { inject, Injectable } from '@angular/core';
 
 class InitializeStore {

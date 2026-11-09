@@ -43,9 +43,10 @@ import {
 import { take } from 'rxjs/operators';
 import { EngineConfigurationState } from 'app/shared/store/engine-configuration-store/engine-configuration.state';
 import { provideRouter, Router } from '@angular/router';
-import { WorkbasketComponent } from 'app/models/workbasket-component';
+import { WorkbasketComponent } from 'app/administration/models/workbasket-component';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ButtonAction } from 'app/administration/models/button-action';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 
 const workbasketServiceMock: Partial<WorkbasketService> = {
   getWorkBasket: vi.fn().mockReturnValue(of(selectedWorkbasketMock)),

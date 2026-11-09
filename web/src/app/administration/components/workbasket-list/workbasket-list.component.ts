@@ -39,7 +39,7 @@ import { MatListOption, MatSelectionList } from '@angular/material/list';
 import { DomainSelectors } from 'app/shared/store/domain-store/domain.selectors';
 import { Router } from '@angular/router';
 import { WORKBASKETS_ROUTE } from 'app/shared/util/administration-routes';
-import { WORKBASKET_COMPONENT_TABS, WorkbasketComponent } from 'app/w/workbasket-component';
+import { WORKBASKET_COMPONENT_TABS, WorkbasketComponent } from 'app/administration/models/workbasket-component';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { WorkbasketQueryFilterParameter } from 'app/shared/models/workbasket-query-filter-parameter';
 import { QueryPagingParameter } from 'app/shared/models/query-paging-parameter';

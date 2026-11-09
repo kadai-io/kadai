@@ -23,7 +23,7 @@ import { DomainState } from 'app/shared/store/domain-store/domain.state';
 import { ClassificationState } from 'app/shared/store/classification-store/classification.state';
 import { ClassificationOverviewComponent } from './classification-overview.component';
 import { ActivatedRoute, Router, provideRouter } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import {
   CreateClassification,
   DeselectClassification,

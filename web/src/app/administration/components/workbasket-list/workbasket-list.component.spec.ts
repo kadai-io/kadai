@@ -19,8 +19,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketListComponent } from './workbasket-list.component';
 import { DebugElement } from '@angular/core';
-import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
-import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
+import { Actions, provideStore, Store } from '@ngxs/store';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 import { By } from '@angular/platform-browser';
 import { Observable, of } from 'rxjs';
 import { WorkbasketState } from 'app/shared/store/workbasket-store/workbasket.state';

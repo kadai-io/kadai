@@ -32,10 +32,8 @@ import {
 import { AsyncPipe } from '@angular/common';
 import {
   CopyWorkbasket,
-  DeselectWorkbasket,
   OnButtonPressed,
   SaveNewWorkbasket,
-  SelectComponent,
   UpdateWorkbasket,
   UpdateWorkbasketDistributionTargets
 } from 'app/shared/store/workbasket-store/workbasket.actions';

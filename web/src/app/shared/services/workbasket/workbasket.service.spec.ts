@@ -19,25 +19,16 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { of, throwError } from 'rxjs';
+import { throwError } from 'rxjs';
 import { WorkbasketService } from './workbasket.service';
-<<<<<<< HEAD
 import { provideStore, Store } from '@ngxs/store';
-import { DomainState } from '../../store/domain-store/domain.state';
-import { RequestInProgressService } from '../request-in-progress/request-in-progress.service';
-import { Workbasket } from '../../models/workbasket';
-import { WorkbasketAccessItems } from '../../models/workbasket-access-items';
-import { WorkbasketAccessItemsRepresentation } from '../../models/workbasket-access-items-representation';
-import { Direction, WorkbasketQuerySortParameter } from '../../models/sorting';
-import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
-=======
-import { DomainService } from 'app/shared/services/domain/domain.service';
+import { DomainState } from 'app/shared/store/domain-store/domain.state';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { WorkbasketAccessItems } from 'app/shared/models/workbasket-access-items';
 import { WorkbasketAccessItemsRepresentation } from 'app/shared/models/workbasket-access-items-representation';
 import { Direction, WorkbasketQuerySortParameter } from 'app/shared/models/sorting';
 import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
->>>>>>> f865f5da6bf8948afb01b104ea178fdf075bcd13
+import { RequestInProgressService } from '../request-in-progress/request-in-progress.service';
 
 describe('WorkbasketService', () => {
   let service: WorkbasketService;
