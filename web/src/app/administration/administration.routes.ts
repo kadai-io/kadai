@@ -35,7 +35,8 @@ const domainGuard: CanActivateFn = (route, state) => {
       if (state.url.includes('classifications')) {
         return true;
       }
-      if (store.selectSnapshot(DomainSelectors.selectedDomain) !== MASTER_DOMAIN) {
+      const requested = route.queryParams[DOMAIN_QUERY_PARAM] ?? store.selectSnapshot(DomainSelectors.selectedDomain);
+      if (requested !== MASTER_DOMAIN) {
         return true;
       }
       const realDomain = store.selectSnapshot(DomainSelectors.domains).find((domain) => domain !== MASTER_DOMAIN);
