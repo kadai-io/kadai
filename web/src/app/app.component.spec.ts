@@ -107,7 +107,14 @@ describe('AppComponent', () => {
         provideStore([DomainState]),
         {
           provide: ActivatedRoute,
-          useValue: { queryParams: queryParams$.asObservable(), snapshot: { queryParams: {} } }
+          useValue: {
+            queryParams: queryParams$.asObservable(),
+            snapshot: {
+              get queryParams() {
+                return queryParams$.value;
+              }
+            }
+          }
         }
       ]
     }).compileComponents();
@@ -152,6 +159,34 @@ describe('AppComponent', () => {
     queryParams$.next({ domain: 'DOMAIN_GONE' });
 
     expect(store.selectSnapshot(DomainSelectors.selectedDomain)).toBeUndefined();
+  });
+
+  it('should rewrite the url when it carries a domain the backend does not offer', () => {
+    const store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), domain: { domains: ['DOMAIN_A'], selectedDomain: 'DOMAIN_A' } });
+    const router = TestBed.inject(Router);
+    vi.spyOn(router, 'getCurrentNavigation').mockReturnValue(null);
+    const navigate = vi.spyOn(router, 'navigate');
+
+    queryParams$.next({ domain: 'DOMAIN_GONE' });
+
+    expect(navigate).toHaveBeenCalledWith([], {
+      queryParams: { domain: 'DOMAIN_A' },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  });
+
+  it('should not touch the url while a navigation is in flight', () => {
+    const store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), domain: { domains: ['DOMAIN_A'], selectedDomain: 'DOMAIN_A' } });
+    const router = TestBed.inject(Router);
+    vi.spyOn(router, 'getCurrentNavigation').mockReturnValue({} as any);
+    const navigate = vi.spyOn(router, 'navigate');
+
+    queryParams$.next({ domain: 'DOMAIN_GONE' });
+
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   it('should create', () => {

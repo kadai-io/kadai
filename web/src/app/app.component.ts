@@ -31,7 +31,7 @@ import { KadaiEngineService } from './shared/services/kadai-engine/kadai-engine.
 import { WindowRefService } from 'app/shared/services/window/window.service';
 import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
-import { catchError, map, takeUntil } from 'rxjs/operators';
+import { catchError, filter, map, takeUntil } from 'rxjs/operators';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { UserInformationComponent } from './shared/components/user-information/user-information.component';
@@ -95,29 +95,44 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-      const fromUrl = params[DOMAIN_QUERY_PARAM];
-      const offered = this.store.selectSnapshot(DomainSelectors.domains);
-      if (fromUrl === undefined || !offered.includes(fromUrl)) {
-        return;
-      }
-      if (fromUrl !== this.store.selectSnapshot(DomainSelectors.selectedDomain)) {
-        this.store.dispatch(new SelectDomain(fromUrl));
-      }
-    });
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(() => this.syncDomainWithUrl());
 
     this.store
       .select(DomainSelectors.selectedDomain)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((domain) => {
-        if (domain !== undefined && this.route.snapshot.queryParams[DOMAIN_QUERY_PARAM] !== domain) {
-          this.router.navigate([], {
-            queryParams: { [DOMAIN_QUERY_PARAM]: domain },
-            queryParamsHandling: 'merge',
-            replaceUrl: true
-          });
-        }
+      .subscribe(() => this.syncDomainWithUrl());
+
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => this.syncDomainWithUrl());
+  }
+
+  private syncDomainWithUrl(): void {
+    if (this.router.getCurrentNavigation() !== null) {
+      return;
+    }
+
+    const fromUrl = this.route.snapshot.queryParams[DOMAIN_QUERY_PARAM];
+    const offered = this.store.selectSnapshot(DomainSelectors.domains);
+    const selected = this.store.selectSnapshot(DomainSelectors.selectedDomain);
+
+    if (fromUrl !== undefined && offered.includes(fromUrl)) {
+      if (fromUrl !== selected) {
+        this.store.dispatch(new SelectDomain(fromUrl));
+      }
+      return;
+    }
+
+    if (selected !== undefined && fromUrl !== selected) {
+      this.router.navigate([], {
+        queryParams: { [DOMAIN_QUERY_PARAM]: selected },
+        queryParamsHandling: 'merge',
+        replaceUrl: true
       });
+    }
   }
 
   async logout(): Promise<void> {
