@@ -490,7 +490,7 @@ describe('WorkbasketAccessItemsComponent', () => {
     fixture.detectChanges();
     const container = debugElement.nativeElement.querySelector('.workbasket-access-items');
     expect(container).toBeTruthy();
-    expect(container.style.width).toContain('calc(100vw - 500px)');
+    expect(['calc(100vw - 500px)', 'calc(-500px + 100vw)']).toContain(container.style.width);
   });
 
   it('should apply collapsed width style when expanded is false', () => {
@@ -498,7 +498,7 @@ describe('WorkbasketAccessItemsComponent', () => {
     fixture.detectChanges();
     const container = debugElement.nativeElement.querySelector('.workbasket-access-items');
     expect(container).toBeTruthy();
-    expect(container.style.width).toContain('calc(100vw - 250px)');
+    expect(['calc(100vw - 250px)', 'calc(-250px + 100vw)']).toContain(container.style.width);
   });
 
   it('should call deleteAccessItems when delete button is clicked', () => {
