@@ -106,8 +106,6 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     });
 
-    // A url naming a domain that is not offered is corrected rather than obeyed, and the correction
-    // replaces the entry so that going back does not walk through domains the user never chose.
     this.store
       .select(DomainSelectors.selectedDomain)
       .pipe(takeUntil(this.destroy$))

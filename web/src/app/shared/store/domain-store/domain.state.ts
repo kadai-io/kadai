@@ -71,8 +71,6 @@ export class DomainState {
     return of(null);
   }
 
-  // The master domain is the empty string, so an absent selection has to be undefined rather than falsy:
-  // treating '' as "nothing selected" made every reload of the domain list drop it for the first domain.
   private selectOfferedDomain(
     ctx: StateContext<DomainStateModel>,
     domains: Array<string>,
