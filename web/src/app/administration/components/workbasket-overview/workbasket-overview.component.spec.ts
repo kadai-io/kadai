@@ -31,7 +31,6 @@ import { EngineConfigurationState } from 'app/shared/store/engine-configuration-
 import { engineConfigurationMock } from 'app/shared/store/mock-data/mock-store';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 @Component({ template: '' })
