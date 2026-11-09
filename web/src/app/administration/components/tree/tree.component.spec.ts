@@ -20,17 +20,16 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { KadaiTreeComponent, TREE_NODE_HEIGHT_PX } from './tree.component';
 import { provideStore, Store } from '@ngxs/store';
-import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
-import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
-import { classificationStateMock, engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
-import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
-import { ClassificationTreeService } from '../../services/classification-tree.service';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { ClassificationState } from 'app/shared/store/classification-store/classification.state';
+import { EngineConfigurationState } from 'app/shared/store/engine-configuration-store/engine-configuration.state';
+import { classificationStateMock, engineConfigurationMock } from 'app/shared/store/mock-data/mock-store';
+import { ClassificationsService } from 'app/shared/services/classifications/classifications.service';
+import { ClassificationTreeService } from 'app/administration/services/classification-tree.service';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { of } from 'rxjs';
-import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
+import { ClassificationCategoriesService } from 'app/shared/services/classification-categories/classification-categories.service';
 import { Location } from '@angular/common';
 import { By } from '@angular/platform-browser';
 
@@ -75,7 +74,6 @@ describe('KadaiTreeComponent', () => {
       providers: [
         provideStore([ClassificationState, EngineConfigurationState]),
         provideHttpClientTesting(),
-        provideAngularSvgIcon(),
         { provide: ClassificationsService, useValue: classificationsServiceMock },
         { provide: ClassificationTreeService, useValue: classificationTreeServiceMock },
         { provide: NotificationService, useValue: notificationServiceMock },

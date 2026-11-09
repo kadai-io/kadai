@@ -22,9 +22,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { of } from 'rxjs';
 import { SettingsState } from './settings.state';
 import { RetrieveSettings, SetSettings } from './settings.actions';
-import { SettingsService } from '../../../settings/services/settings-service';
-import { NotificationService } from '../../services/notifications/notification.service';
-import { Settings } from '../../../settings/models/settings';
+import { SettingsService } from 'app/settings/services/settings-service';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { Settings } from 'app/settings/models/settings';
 
 describe('SettingsState', () => {
   let store: Store;

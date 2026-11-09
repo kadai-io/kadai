@@ -28,11 +28,11 @@ import { Sorting, WorkbasketQuerySortParameter } from 'app/shared/models/sorting
 
 import { DomainService } from 'app/shared/services/domain/domain.service';
 import { catchError, mergeMap, tap } from 'rxjs/operators';
-import { WorkbasketRepresentation } from '../../models/workbasket-representation';
-import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-filter-parameter';
-import { QueryPagingParameter } from '../../models/query-paging-parameter';
-import { asUrlQueryString } from '../../util/query-parameters-v2';
-import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
+import { WorkbasketRepresentation } from 'app/shared/models/workbasket-representation';
+import { WorkbasketQueryFilterParameter } from 'app/shared/models/workbasket-query-filter-parameter';
+import { QueryPagingParameter } from 'app/shared/models/query-paging-parameter';
+import { asUrlQueryString } from 'app/shared/util/query-parameters-v2';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 
 @Injectable({
   providedIn: 'root'

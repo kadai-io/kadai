@@ -20,7 +20,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { SettingsService } from './settings-service';
-import { Settings } from '../models/settings';
+import { Settings } from 'app/settings/models/settings';
 import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 
 describe('SettingsService', () => {

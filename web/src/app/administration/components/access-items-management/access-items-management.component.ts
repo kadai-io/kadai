@@ -28,7 +28,7 @@ import {
   Validators
 } from '@angular/forms';
 import { Observable, Subject } from 'rxjs';
-import { WorkbasketAccessItems } from 'app/shared/models/workbasket-access-items';
+import { customFieldCount, WorkbasketAccessItems } from 'app/shared/models/workbasket-access-items';
 import {
   Direction,
   Sorting,
@@ -37,28 +37,22 @@ import {
 } from 'app/shared/models/sorting';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { map, takeUntil } from 'rxjs/operators';
-import { AccessId } from '../../../shared/models/access-id';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import {
-  AccessItemsCustomisation,
-  CustomField,
-  CustomFields,
-  getCustomFields
-} from '../../../shared/models/customisation';
-import { customFieldCount } from '../../../shared/models/workbasket-access-items';
+import { AccessId } from 'app/shared/models/access-id';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { AccessItemsCustomisation, CustomField, CustomFields, getCustomFields } from 'app/shared/models/customisation';
 import {
   GetAccessItems,
   GetGroupsByAccessId,
   GetPermissionsByAccessId,
   RemoveAccessItemsPermissions
-} from '../../../shared/store/access-items-management-store/access-items-management.actions';
-import { AccessItemsManagementSelector } from '../../../shared/store/access-items-management-store/access-items-management.selector';
+} from 'app/shared/store/access-items-management-store/access-items-management.actions';
+import { AccessItemsManagementSelector } from 'app/shared/store/access-items-management-store/access-items-management.selector';
 import { MatDialog } from '@angular/material/dialog';
-import { WorkbasketAccessItemQueryFilterParameter } from '../../../shared/models/workbasket-access-item-query-filter-parameter';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { TypeAheadComponent } from '../../../shared/components/type-ahead/type-ahead.component';
+import { WorkbasketAccessItemQueryFilterParameter } from 'app/shared/models/workbasket-access-item-query-filter-parameter';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
+import { TypeAheadComponent } from 'app/shared/components/type-ahead/type-ahead.component';
 import { AsyncPipe } from '@angular/common';
-import { SvgIconComponent } from 'angular-svg-icon';
+import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.component';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import {
   MatCell,
@@ -72,7 +66,7 @@ import {
   MatRowDef,
   MatTable
 } from '@angular/material/table';
-import { SortComponent } from '../../../shared/components/sort/sort.component';
+import { SortComponent } from 'app/shared/components/sort/sort.component';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatTooltip } from '@angular/material/tooltip';

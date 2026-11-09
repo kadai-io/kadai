@@ -43,10 +43,10 @@ import {
 } from '@angular/material/expansion';
 import { MatCheckbox } from '@angular/material/checkbox';
 
-import { CanvasComponent } from '../canvas/canvas.component';
-import { TaskPriorityReportFilterStateService } from '../../services/task-priority-report-filter-state.service';
-import { TaskPriorityReportDataService } from '../../services/task-priority-report-data.service';
-import { SettingMembers } from '../../../settings/components/Settings/expected-members';
+import { CanvasComponent } from 'app/monitor/components/canvas/canvas.component';
+import { TaskPriorityReportFilterStateService } from 'app/monitor/services/task-priority-report-filter-state.service';
+import { TaskPriorityReportDataService } from 'app/monitor/services/task-priority-report-data.service';
+import { SettingMembers } from 'app/settings/components/Settings/expected-members';
 import { ReportData } from 'app/monitor/models/report-data';
 import { switchMap } from 'rxjs/operators';
 import { ReportRow } from 'app/monitor/models/report-row';

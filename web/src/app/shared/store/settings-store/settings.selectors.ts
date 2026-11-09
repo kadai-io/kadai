@@ -18,7 +18,7 @@
 
 import { Selector } from '@ngxs/store';
 import { SettingsState, SettingsStateModel } from './settings.state';
-import { Settings } from '../../../settings/models/settings';
+import { Settings } from 'app/settings/models/settings';
 
 export class SettingsSelectors {
   @Selector([SettingsState])

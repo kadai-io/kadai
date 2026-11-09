@@ -21,17 +21,16 @@ import { WorkbasketOverviewComponent } from './workbasket-overview.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionCompleted, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { Observable, of } from 'rxjs';
-import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
+import { WorkbasketState } from 'app/shared/store/workbasket-store/workbasket.state';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
-import { CreateWorkbasket, SelectWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
+import { CreateWorkbasket, SelectWorkbasket } from 'app/shared/store/workbasket-store/workbasket.actions';
 import { take } from 'rxjs/operators';
-import { FilterState } from '../../../shared/store/filter-store/filter.state';
-import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
-import { engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
+import { FilterState } from 'app/shared/store/filter-store/filter.state';
+import { EngineConfigurationState } from 'app/shared/store/engine-configuration-store/engine-configuration.state';
+import { engineConfigurationMock } from 'app/shared/store/mock-data/mock-store';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const mockActivatedRoute = {
   url: of([{ path: 'foobar' }]),
@@ -60,8 +59,7 @@ describe('WorkbasketOverviewComponent', () => {
           useValue: mockActivatedRoute
         },
 
-        provideHttpClientTesting(),
-        provideAngularSvgIcon()
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 
@@ -219,8 +217,7 @@ describe('WorkbasketOverviewComponent Alternative Params ID', () => {
         provideStore([WorkbasketState, FilterState]),
         { provide: ActivatedRoute, useValue: mockActivatedRouteAlternativeId },
 
-        provideHttpClientTesting(),
-        provideAngularSvgIcon()
+        provideHttpClientTesting()
       ]
     }).compileComponents();
     fixture = TestBed.createComponent(WorkbasketOverviewComponent);

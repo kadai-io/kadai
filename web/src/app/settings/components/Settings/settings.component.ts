@@ -29,11 +29,11 @@ import {
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Store } from '@ngxs/store';
-import { Settings, SettingTypes } from '../../models/settings';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { SetSettings } from '../../../shared/store/settings-store/settings.actions';
-import { SettingsSelectors } from '../../../shared/store/settings-store/settings.selectors';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { Settings, SettingTypes } from 'app/settings/models/settings';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { SetSettings } from 'app/shared/store/settings-store/settings.actions';
+import { SettingsSelectors } from 'app/shared/store/settings-store/settings.selectors';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { intervalValidator, jsonValidator } from './settings.validators';
 
 import { MatButton } from '@angular/material/button';

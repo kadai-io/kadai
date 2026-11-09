@@ -21,7 +21,7 @@ import { Routes } from '@angular/router';
 
 import { catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { DomainService } from '../shared/services/domain/domain.service';
+import { DomainService } from 'app/shared/services/domain/domain.service';
 
 const domainGuard = () => {
   const domainService = inject(DomainService);

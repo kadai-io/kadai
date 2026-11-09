@@ -22,17 +22,17 @@ import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
 import { KadaiType } from 'app/shared/models/kadai-type';
 import { expandDown } from 'app/shared/animations/expand.animation';
 import { Store } from '@ngxs/store';
-import { ACTION } from '../../../shared/models/action';
-import { CreateWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
-import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
-import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
+import { ACTION } from 'app/shared/models/action';
+import { CreateWorkbasket } from 'app/shared/store/workbasket-store/workbasket.actions';
+import { WorkbasketSelectors } from 'app/shared/store/workbasket-store/workbasket.selectors';
+import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 
-import { ImportExportComponent } from '../import-export/import-export.component';
-import { SortComponent } from '../../../shared/components/sort/sort.component';
-import { WorkbasketFilterComponent } from '../../../shared/components/workbasket-filter/workbasket-filter.component';
+import { ImportExportComponent } from 'app/administration/components/import-export/import-export.component';
+import { SortComponent } from 'app/shared/components/sort/sort.component';
+import { WorkbasketFilterComponent } from 'app/shared/components/workbasket-filter/workbasket-filter.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({

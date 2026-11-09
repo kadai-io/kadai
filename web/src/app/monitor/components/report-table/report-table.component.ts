@@ -18,7 +18,7 @@
 
 import { Component, effect, input, signal, untracked } from '@angular/core';
 import { ReportData } from 'app/monitor/models/report-data';
-import { ReportRow } from '../../models/report-row';
+import { ReportRow } from 'app/monitor/models/report-row';
 import { MatButton } from '@angular/material/button';
 
 @Component({

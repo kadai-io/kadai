@@ -20,19 +20,19 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { DebugElement, NO_ERRORS_SCHEMA } from '@angular/core';
 import { ImportExportComponent } from './import-export.component';
-import { DomainService } from '../../../shared/services/domain/domain.service';
-import { WorkbasketDefinitionService } from '../../services/workbasket-definition.service';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { ImportExportService } from '../../services/import-export.service';
+import { DomainService } from 'app/shared/services/domain/domain.service';
+import { WorkbasketDefinitionService } from 'app/administration/services/workbasket-definition.service';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { ImportExportService } from 'app/administration/services/import-export.service';
 import { of } from 'rxjs';
-import { ClassificationDefinitionService } from '../../services/classification-definition.service';
-import { KadaiType } from '../../../shared/models/kadai-type';
+import { ClassificationDefinitionService } from 'app/administration/services/classification-definition.service';
+import { KadaiType } from 'app/shared/models/kadai-type';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { HttpClient } from '@angular/common/http';
 import { HotToastService } from '@ngneat/hot-toast';
-import { StartupService } from '../../../shared/services/startup/startup.service';
-import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
-import { WindowRefService } from '../../../shared/services/window/window.service';
+import { StartupService } from 'app/shared/services/startup/startup.service';
+import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
+import { WindowRefService } from 'app/shared/services/window/window.service';
 
 describe('ImportExportComponent', () => {
   let fixture: ComponentFixture<ImportExportComponent>;

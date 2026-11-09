@@ -25,7 +25,7 @@ import {
   SETTING_MEMBER_FILTER,
   TaskPriorityReportFilterStateService
 } from './task-priority-report-filter-state.service';
-import { SettingsSelectors } from '../../shared/store/settings-store/settings.selectors';
+import { SettingsSelectors } from 'app/shared/store/settings-store/settings.selectors';
 
 describe('TaskPriorityReportFilterStateService', () => {
   let service: TaskPriorityReportFilterStateService;

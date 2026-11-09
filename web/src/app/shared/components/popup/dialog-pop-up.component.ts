@@ -18,8 +18,8 @@
 
 import { Component, inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent } from '@angular/material/dialog';
-import { ObtainMessageService } from '../../services/obtain-message/obtain-message.service';
-import { messageTypes } from '../../services/obtain-message/message-types';
+import { ObtainMessageService } from 'app/shared/services/obtain-message/obtain-message.service';
+import { messageTypes } from 'app/shared/services/obtain-message/message-types';
 import { MatButton } from '@angular/material/button';
 
 @Component({

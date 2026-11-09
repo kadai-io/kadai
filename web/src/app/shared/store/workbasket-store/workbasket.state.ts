@@ -20,8 +20,8 @@ import { Action, NgxsAfterBootstrap, State, StateContext } from '@ngxs/store';
 import { catchError, concatMap, take, tap } from 'rxjs/operators';
 import { EMPTY, Observable, of, throwError } from 'rxjs';
 import { Location } from '@angular/common';
-import { WorkbasketService } from '../../services/workbasket/workbasket.service';
-import { Workbasket } from '../../models/workbasket';
+import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
+import { Workbasket } from 'app/shared/models/workbasket';
 import {
   CopyWorkbasket,
   CreateWorkbasket,
@@ -42,24 +42,23 @@ import {
   UpdateWorkbasketAccessItems,
   UpdateWorkbasketDistributionTargets
 } from './workbasket.actions';
-import { WorkbasketSummaryRepresentation } from '../../models/workbasket-summary-representation';
-import { ACTION } from '../../models/action';
-import { NotificationService } from '../../services/notifications/notification.service';
-import { WorkbasketAccessItemsRepresentation } from '../../models/workbasket-access-items-representation';
-import { WorkbasketDistributionTargets } from '../../models/workbasket-distribution-targets';
-import { WorkbasketSummary } from '../../models/workbasket-summary';
-import { WorkbasketComponent } from '../../../administration/models/workbasket-component';
-import { ButtonAction } from '../../../administration/models/button-action';
+import { WorkbasketSummaryRepresentation } from 'app/shared/models/workbasket-summary-representation';
+import { ACTION } from 'app/shared/models/action';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { WorkbasketAccessItemsRepresentation } from 'app/shared/models/workbasket-access-items-representation';
+import { WorkbasketDistributionTargets } from 'app/shared/models/workbasket-distribution-targets';
+import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
+import { WorkbasketComponent } from 'app/administration/models/workbasket-component';
+import { ButtonAction } from 'app/administration/models/button-action';
 import { ActivatedRoute } from '@angular/router';
-import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
-import { WorkbasketType } from '../../models/workbasket-type';
-import { KadaiDate } from '../../util/kadai.date';
-import { DomainService } from '../../services/domain/domain.service';
-import { ClearWorkbasketFilter } from '../filter-store/filter.actions';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
+import { WorkbasketType } from 'app/shared/models/workbasket-type';
+import { KadaiDate } from 'app/shared/util/kadai.date';
+import { DomainService } from 'app/shared/services/domain/domain.service';
+import { ClearWorkbasketFilter } from 'app/shared/store/filter-store/filter.actions';
 import { inject, Injectable } from '@angular/core';
-import { WorkbasketQueryPagingParameter } from '../../models/workbasket-query-paging-parameter';
-import { Side } from '../../../administration/models/workbasket-distribution-enums';
-import { cloneDeep } from 'lodash-es';
+import { WorkbasketQueryPagingParameter } from 'app/shared/models/workbasket-query-paging-parameter';
+import { Side } from 'app/administration/models/workbasket-distribution-enums';
 
 class InitializeStore {
   static readonly type = '[Workbasket] Initializing state';
@@ -458,7 +457,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
             wbt.distributionTargets = idArrayNoDupe.map((id) => completeArray.find((wb) => wb.workbasketId === id)!);
           }
           const distributionTargetSet = new Set(wbt.distributionTargets.map((wb) => wb.workbasketId));
-          let availableTargets = cloneDeep(ctx.getState().availableDistributionTargets);
+          let availableTargets = structuredClone(ctx.getState().availableDistributionTargets);
           availableTargets.workbaskets = availableTargets.workbaskets.filter((wb) => {
             return !distributionTargetSet.has(wb.workbasketId);
           });
@@ -515,8 +514,8 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   transferDistributionTargets(ctx: StateContext<WorkbasketStateModel>, action: TransferDistributionTargets): void {
     let { availableDistributionTargets, workbasketDistributionTargets } = ctx.getState();
     const workbasketSummarySet = new Set(action.workbasketSummaries.map((wb) => wb.workbasketId));
-    availableDistributionTargets = cloneDeep(availableDistributionTargets);
-    workbasketDistributionTargets = cloneDeep(workbasketDistributionTargets);
+    availableDistributionTargets = structuredClone(availableDistributionTargets);
+    workbasketDistributionTargets = structuredClone(workbasketDistributionTargets);
     if (action.targetSide === Side.AVAILABLE) {
       workbasketDistributionTargets.distributionTargets = workbasketDistributionTargets.distributionTargets.filter(
         (wb) => !workbasketSummarySet.has(wb.workbasketId)

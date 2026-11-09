@@ -20,12 +20,12 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { SelectedRouteService } from 'app/shared/services/selected-route/selected-route';
 import { Subject } from 'rxjs';
 import { expandRight } from 'app/shared/animations/expand.animation';
-import { SidenavService } from '../../services/sidenav/sidenav.service';
+import { SidenavService } from 'app/shared/services/sidenav/sidenav.service';
 import { takeUntil } from 'rxjs/operators';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { SvgIconComponent } from 'angular-svg-icon';
+import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.component';
 
 @Component({
   selector: 'kadai-shared-nav-bar',

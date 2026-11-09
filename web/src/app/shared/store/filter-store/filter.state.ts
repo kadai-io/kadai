@@ -19,10 +19,9 @@
 import { Action, NgxsOnInit, State, StateContext } from '@ngxs/store';
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-filter-parameter';
+import { WorkbasketQueryFilterParameter } from 'app/shared/models/workbasket-query-filter-parameter';
 import { ClearTaskFilter, ClearWorkbasketFilter, SetTaskFilter, SetWorkbasketFilter } from './filter.actions';
-import { TaskQueryFilterParameter } from '../../models/task-query-filter-parameter';
-import { isEqual } from 'lodash-es';
+import { TaskQueryFilterParameter } from 'app/shared/models/task-query-filter-parameter';
 
 const emptyWorkbasketFilter: WorkbasketQueryFilterParameter = {
   'description-like': [],
@@ -90,7 +89,8 @@ export class FilterState implements NgxsOnInit {
     });
 
     const isWildcardSearch =
-      filter['wildcard-search-value'].length !== 0 && !isEqual(filter['wildcard-search-value'], ['']);
+      filter['wildcard-search-value'].length !== 0 &&
+      !(filter['wildcard-search-value'].length === 1 && filter['wildcard-search-value'][0] === '');
     filter['wildcard-search-fields'] = isWildcardSearch ? this.initWildcardFields() : [];
 
     // Delete wildcard search field 'NAME' if 'name-like' exists

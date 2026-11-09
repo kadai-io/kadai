@@ -17,7 +17,7 @@
  */
 
 import { Page } from 'app/shared/models/page';
-import { Links } from '../../shared/models/links';
+import { Links } from 'app/shared/models/links';
 import { Task } from './task';
 
 export class TaskResource {

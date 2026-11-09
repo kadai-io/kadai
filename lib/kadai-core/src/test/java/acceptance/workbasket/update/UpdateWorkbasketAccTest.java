@@ -81,6 +81,30 @@ class UpdateWorkbasketAccTest extends AbstractAccTest {
 
   @WithAccessId(user = "businessadmin")
   @Test
+  void should_RejectChangedCreationTime_AndPreserveItWhenOmitted() throws Exception {
+    WorkbasketService workbasketService = kadaiEngine.getWorkbasketService();
+    Workbasket original = workbasketService.getWorkbasket("GPK_KSC", "DOMAIN_A");
+
+    WorkbasketImpl changedCreationTime =
+        (WorkbasketImpl) workbasketService.getWorkbasket(original.getId());
+    changedCreationTime.setCreated(original.getCreated().plus(1, ChronoUnit.SECONDS));
+
+    assertThatThrownBy(() -> workbasketService.updateWorkbasket(changedCreationTime))
+        .isInstanceOf(InvalidArgumentException.class);
+    assertThat(workbasketService.getWorkbasket(original.getId()).getCreated())
+        .isEqualTo(original.getCreated());
+
+    WorkbasketImpl omittedCreationTime =
+        (WorkbasketImpl) workbasketService.getWorkbasket(original.getId());
+    omittedCreationTime.setCreated(null);
+    workbasketService.updateWorkbasket(omittedCreationTime);
+
+    assertThat(workbasketService.getWorkbasket(original.getId()).getCreated())
+        .isEqualTo(original.getCreated());
+  }
+
+  @WithAccessId(user = "businessadmin")
+  @Test
   void should_ThrowException_When_UpdatingWorkbasketWithInvalidName() throws Exception {
     WorkbasketService workbasketService = kadaiEngine.getWorkbasketService();
 

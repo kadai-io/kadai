@@ -21,16 +21,16 @@ import { By } from '@angular/platform-browser';
 import { AccessItemsManagementComponent } from './access-items-management.component';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { Component, DebugElement, input } from '@angular/core';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
-import { AccessItemsManagementState } from '../../../shared/store/access-items-management-store/access-items-management.state';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { EngineConfigurationState } from 'app/shared/store/engine-configuration-store/engine-configuration.state';
+import { AccessItemsManagementState } from 'app/shared/store/access-items-management-store/access-items-management.state';
 import { Observable, of } from 'rxjs';
-import { GetAccessItems } from '../../../shared/store/access-items-management-store/access-items-management.actions';
-import { Direction, Sorting, WorkbasketAccessItemQuerySortParameter } from '../../../shared/models/sorting';
-import { engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
+import { GetAccessItems } from 'app/shared/store/access-items-management-store/access-items-management.actions';
+import { Direction, Sorting, WorkbasketAccessItemQuerySortParameter } from 'app/shared/models/sorting';
+import { engineConfigurationMock } from 'app/shared/store/mock-data/mock-store';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { provideAngularSvgIcon, SvgIconComponent } from 'angular-svg-icon';
+import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.component';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 @Component({
@@ -83,7 +83,6 @@ describe('AccessItemsManagementComponent', () => {
         provideStore([EngineConfigurationState, AccessItemsManagementState]),
 
         provideHttpClientTesting(),
-        provideAngularSvgIcon(),
         provideNoopAnimations()
       ]
     })
@@ -685,7 +684,6 @@ describe('AccessItemsManagementComponent — with accessItemsForm pre-set before
         provideStore([EngineConfigurationState, AccessItemsManagementState]),
 
         provideHttpClientTesting(),
-        provideAngularSvgIcon(),
         provideNoopAnimations()
       ]
     })
@@ -789,7 +787,6 @@ describe('AccessItemsManagementComponent — with groups and permissions populat
         provideStore([EngineConfigurationState, AccessItemsManagementState]),
 
         provideHttpClientTesting(),
-        provideAngularSvgIcon(),
         provideNoopAnimations()
       ]
     })
@@ -893,7 +890,6 @@ describe('AccessItemsManagementComponent — with groups AND permissions populat
         provideStore([EngineConfigurationState, AccessItemsManagementState]),
 
         provideHttpClientTesting(),
-        provideAngularSvgIcon(),
         provideNoopAnimations()
       ]
     })
@@ -1069,7 +1065,6 @@ describe('AccessItemsManagementComponent — HTML template coverage without over
       providers: [
         provideStore([EngineConfigurationState, AccessItemsManagementState]),
         provideHttpClientTesting(),
-        provideAngularSvgIcon(),
         provideNoopAnimations()
       ]
     }).compileComponents();

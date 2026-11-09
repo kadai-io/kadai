@@ -22,17 +22,17 @@ import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { Observable, of, Subject } from 'rxjs';
-import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
-import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
+import { WorkbasketState } from 'app/shared/store/workbasket-store/workbasket.state';
+import { EngineConfigurationState } from 'app/shared/store/engine-configuration-store/engine-configuration.state';
 import {
   engineConfigurationMock,
   selectedWorkbasketMock,
   workbasketAccessItemsMock
-} from '../../../shared/store/mock-data/mock-store';
+} from 'app/shared/store/mock-data/mock-store';
 import {
   GetWorkbasketAccessItems,
   UpdateWorkbasketAccessItems
-} from '../../../shared/store/workbasket-store/workbasket.actions';
+} from 'app/shared/store/workbasket-store/workbasket.actions';
 import { provideRouter } from '@angular/router';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -490,7 +490,7 @@ describe('WorkbasketAccessItemsComponent', () => {
     fixture.detectChanges();
     const container = debugElement.nativeElement.querySelector('.workbasket-access-items');
     expect(container).toBeTruthy();
-    expect(container.style.width).toContain('calc(100vw - 500px)');
+    expect(['calc(100vw - 500px)', 'calc(-500px + 100vw)']).toContain(container.style.width);
   });
 
   it('should apply collapsed width style when expanded is false', () => {
@@ -498,7 +498,7 @@ describe('WorkbasketAccessItemsComponent', () => {
     fixture.detectChanges();
     const container = debugElement.nativeElement.querySelector('.workbasket-access-items');
     expect(container).toBeTruthy();
-    expect(container.style.width).toContain('calc(100vw - 250px)');
+    expect(['calc(100vw - 250px)', 'calc(-250px + 100vw)']).toContain(container.style.width);
   });
 
   it('should call deleteAccessItems when delete button is clicked', () => {
