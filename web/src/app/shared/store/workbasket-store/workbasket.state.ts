@@ -17,7 +17,7 @@
  */
 
 import { Action, NgxsAfterBootstrap, State, StateContext } from '@ngxs/store';
-import { catchError, concatMap, take, tap } from 'rxjs/operators';
+import { catchError, concatMap, distinctUntilChanged, map, take, tap } from 'rxjs/operators';
 import { EMPTY, Observable, of, throwError } from 'rxjs';
 import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
 import { Workbasket } from 'app/shared/models/workbasket';
@@ -77,34 +77,38 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   @Action(InitializeStore)
   initializeStore(ctx: StateContext<WorkbasketStateModel>): Observable<any> {
     // read the selected tab from the route
-    this.route.queryParams.subscribe((params) => {
-      let tabName: string = params.tab;
-      let tab: number;
+    this.route.queryParams
+      .pipe(
+        map((params) => params.tab),
+        distinctUntilChanged()
+      )
+      .subscribe((tabName: string) => {
+        let tab: number;
 
-      switch (tabName) {
-        case 'information':
-          tab = WorkbasketComponent.INFORMATION;
-          break;
-        case 'access-items':
-          tab = WorkbasketComponent.ACCESS_ITEMS;
-          break;
-        case 'distribution-targets':
-          tab = WorkbasketComponent.DISTRIBUTION_TARGETS;
-          break;
-        default:
-          tab = WorkbasketComponent.INFORMATION;
-      }
+        switch (tabName) {
+          case 'information':
+            tab = WorkbasketComponent.INFORMATION;
+            break;
+          case 'access-items':
+            tab = WorkbasketComponent.ACCESS_ITEMS;
+            break;
+          case 'distribution-targets':
+            tab = WorkbasketComponent.DISTRIBUTION_TARGETS;
+            break;
+          default:
+            tab = WorkbasketComponent.INFORMATION;
+        }
 
-      ctx.patchState({
-        badgeMessage: '',
-        availableDistributionTargetsPage: 0,
-        distributionTargetsPage: 0,
-        workbasketDistributionTargets: { distributionTargets: [], _links: {} },
-        availableDistributionTargets: { workbaskets: [], _links: {} }
+        ctx.patchState({
+          badgeMessage: '',
+          availableDistributionTargetsPage: 0,
+          distributionTargetsPage: 0,
+          workbasketDistributionTargets: { distributionTargets: [], _links: {} },
+          availableDistributionTargets: { workbaskets: [], _links: {} }
+        });
+
+        ctx.dispatch(new SelectComponent(tab));
       });
-
-      ctx.dispatch(new SelectComponent(tab));
-    });
     return of(null);
   }
 
