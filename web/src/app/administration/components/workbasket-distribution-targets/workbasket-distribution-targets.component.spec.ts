@@ -24,14 +24,8 @@ import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.ser
 import { Actions, provideStore, Store } from '@ngxs/store';
 import { WorkbasketState } from 'app/shared/store/workbasket-store/workbasket.state';
 import { ActivatedRoute } from '@angular/router';
-<<<<<<< HEAD
-import { engineConfigurationMock, workbasketReadStateMock } from '../../../shared/store/mock-data/mock-store';
-import { FilterState } from '../../../shared/store/filter-store/filter.state';
-=======
 import { engineConfigurationMock, workbasketReadStateMock } from 'app/shared/store/mock-data/mock-store';
-import { DomainService } from 'app/shared/services/domain/domain.service';
 import { FilterState } from 'app/shared/store/filter-store/filter.state';
->>>>>>> f865f5da6bf8948afb01b104ea178fdf075bcd13
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';

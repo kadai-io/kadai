@@ -45,27 +45,12 @@ import {
   UpdateWorkbasketDistributionTargets
 } from './workbasket.actions';
 
-<<<<<<< HEAD
-import { WorkbasketService } from '../../services/workbasket/workbasket.service';
-import { NotificationService } from '../../services/notifications/notification.service';
-import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { DomainState } from '../domain-store/domain.state';
-import { RuntimeConfigService } from '../../services/runtime-config/runtime-config.service';
-import { ACTION } from '../../models/action';
-import { WorkbasketComponent } from '../../../administration/models/workbasket-component';
-import { Side } from '../../../administration/models/workbasket-distribution-enums';
-import { ButtonAction } from '../../../administration/models/button-action';
-import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-filter-parameter';
-import { Direction, WorkbasketQuerySortParameter } from '../../models/sorting';
-import { QueryPagingParameter } from '../../models/query-paging-parameter';
-import { selectedWorkbasketMock, workbasketAccessItemsMock } from '../mock-data/mock-store';
-import { ActivatedRoute, Router } from '@angular/router';
-=======
 import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
-import { DomainService } from 'app/shared/services/domain/domain.service';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { DomainState } from 'app/shared/store/domain-store/domain.state';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 import { ACTION } from 'app/shared/models/action';
 import { WorkbasketComponent } from 'app/administration/models/workbasket-component';
 import { Side } from 'app/administration/models/workbasket-distribution-enums';
@@ -74,8 +59,7 @@ import { WorkbasketQueryFilterParameter } from 'app/shared/models/workbasket-que
 import { Direction, WorkbasketQuerySortParameter } from 'app/shared/models/sorting';
 import { QueryPagingParameter } from 'app/shared/models/query-paging-parameter';
 import { selectedWorkbasketMock, workbasketAccessItemsMock } from 'app/shared/store/mock-data/mock-store';
-import { ActivatedRoute } from '@angular/router';
->>>>>>> f865f5da6bf8948afb01b104ea178fdf075bcd13
+import { ActivatedRoute, Router } from '@angular/router';
 
 const mockWorkbasket = selectedWorkbasketMock;
 

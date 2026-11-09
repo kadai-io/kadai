@@ -21,25 +21,14 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { of } from 'rxjs';
 import { ClassificationsService } from './classifications.service';
-<<<<<<< HEAD
-import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
-import { Classification } from '../../models/classification';
-=======
 import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
-import { DomainService } from 'app/shared/services/domain/domain.service';
 import { Classification } from 'app/shared/models/classification';
->>>>>>> f865f5da6bf8948afb01b104ea178fdf075bcd13
 
 describe('ClassificationsService', () => {
   let service: ClassificationsService;
   let httpMock: HttpTestingController;
 
   const runtimeConfigServiceMock = { kadaiRestUrl: 'http://test' };
-
-  const mockDomainService = {
-    getSelectedDomain: vi.fn().mockReturnValue(of('DOMAIN_A')),
-    domainChangedComplete: vi.fn()
-  };
 
   beforeEach(() => {
     vi.clearAllMocks();

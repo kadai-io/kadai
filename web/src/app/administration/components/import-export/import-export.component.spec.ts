@@ -23,16 +23,9 @@ import { provideStore, Store } from '@ngxs/store';
 import { DomainState } from '../../../shared/store/domain-store/domain.state';
 import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
 import { ImportExportComponent } from './import-export.component';
-<<<<<<< HEAD
-import { WorkbasketDefinitionService } from '../../services/workbasket-definition.service';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { ImportExportService } from '../../services/import-export.service';
-=======
-import { DomainService } from 'app/shared/services/domain/domain.service';
 import { WorkbasketDefinitionService } from 'app/administration/services/workbasket-definition.service';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import { ImportExportService } from 'app/administration/services/import-export.service';
->>>>>>> f865f5da6bf8948afb01b104ea178fdf075bcd13
 import { of } from 'rxjs';
 import { ClassificationDefinitionService } from 'app/administration/services/classification-definition.service';
 import { KadaiType } from 'app/shared/models/kadai-type';
